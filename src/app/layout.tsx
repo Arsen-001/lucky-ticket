@@ -1,24 +1,24 @@
 import type { ReactNode } from "react";
 import { StoreProvider } from "./StoreProvider";
 import "@/app/globals.css";
-import { Glory } from "next/font/google";
 import { NextIntlClientProvider } from "next-intl";
-
-const glory = Glory({
-  subsets: ["latin"],
-  variable: "--font-main",
-});
+import { gilroy } from "@/fonts/index.fonts";
+import { getLocale } from "next-intl/server";
 
 interface Props {
   readonly children: ReactNode;
 }
 
-export default function RootLayout({ children }: Props) {
+export default async function RootLayout({ children }: Props) {
+  const locale = await getLocale();
+
   return (
     <StoreProvider>
-      <html lang="en">
-        <body className={`${glory.className} bg-background text-white`}>
-          <NextIntlClientProvider>{children}</NextIntlClientProvider>
+      <html lang={locale}>
+        <body className={`${gilroy.className} bg-background text-white`}>
+          <div id="scroll-container">
+            <NextIntlClientProvider>{children}</NextIntlClientProvider>
+          </div>
         </body>
       </html>
     </StoreProvider>

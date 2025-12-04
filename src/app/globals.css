@@ -26,10 +26,31 @@
 
 }
 
-.bg-purple-gradient {
-    background: linear-gradient(-120deg, var(--color-gradient-blue), var(--color-gradient-purple));
-}
+@layer base {
+    html {
+        overflow: hidden;
+        width: 100%;
+    }
+    body {
+        position: fixed;
+        top: 0; left: 0; right: 0; bottom: 0;
+        height: 100%;
+        overflow-y: scroll;
+        -webkit-overflow-scrolling: touch; /* iOS smooth scrolling */
+    }
 
-.bg-pink-gradient {
-    background: linear-gradient(120deg, var(--color-gradient-darkpink), var(--color-gradient-lightpink));
+    #scroll-container {
+        height: 100%;
+        overflow-y: auto;
+        -webkit-overflow-scrolling: touch;
+    }
+}
+@layer utilities {
+    .bg-pink-gradient{
+        background: linear-gradient(120deg, var(--color-gradient-darkpink), var(--color-gradient-lightpink));
+    }
+
+    .bg-purple-gradient {
+        background: linear-gradient(-120deg, var(--color-gradient-blue), var(--color-gradient-purple));
+    }
 }
