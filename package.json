@@ -6,17 +6,25 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "eslint",
-    "format": "npx prettier . --write"
+    "lint": "eslint .",
+    "format": "npx prettier . --write",
+    "clean": "rm -rf .next ",
+    "type-check": "tsc --noEmit",
+    "prepare": "husky"
   },
   "dependencies": {
+    "@hookform/resolvers": "^5.2.2",
     "@reduxjs/toolkit": "^2.11.0",
     "lucide-react": "^0.555.0",
     "next": "16.0.5",
     "next-intl": "^4.5.8",
     "react": "19.2.0",
     "react-dom": "19.2.0",
-    "react-redux": "^9.2.0"
+    "react-hook-form": "^7.68.0",
+    "react-phone-number-input": "^3.4.14",
+    "react-redux": "^9.2.0",
+    "tailwind-merge": "^3.4.0",
+    "yup": "^1.7.1"
   },
   "devDependencies": {
     "@tailwindcss/postcss": "^4",
@@ -27,8 +35,19 @@
     "baseline-browser-mapping": "^2.9.0",
     "eslint": "^9",
     "eslint-config-next": "16.0.5",
+    "husky": "^9.1.6",
+    "lint-staged": "^15.2.10",
     "prettier": "3.7.3",
     "tailwindcss": "^4",
     "typescript": "^5"
+  },
+  "lint-staged": {
+    "*.{js,jsx,ts,tsx}": [
+      "eslint --max-warnings=0 --fix",
+      "prettier -w"
+    ],
+    "*.{json,css,md}": [
+      "prettier -w"
+    ]
   }
 }

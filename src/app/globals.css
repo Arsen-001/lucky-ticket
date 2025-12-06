@@ -1,56 +1,98 @@
-@import "tailwindcss";
+@import 'tailwindcss';
 
 @theme {
-    --color-orange:rgba(180, 83, 9, 1);
-    --color-pink:rgba(198, 113, 189, 1);
-    --color-gold:rgba(248, 189, 62, 1);
-    --color-electric-purple:rgba(116, 61, 245, 1);
+  --color-orange: rgba(180, 83, 9, 1);
+  --color-pink: rgba(198, 113, 189, 1);
+  --color-gold: rgba(248, 189, 62, 1);
+  --color-electric-purple: rgba(116, 61, 245, 1);
 
-    --color-gradient-blue: rgba(21, 31, 53, 1);
-    --color-gradient-purple: rgba(51, 34, 71, 1);
-    --color-gradient-darkpink:rgba(102, 23, 83, 1) ;
-    --color-gradient-lightpink:rgba(163, 33, 131, 1) ;
+  --color-gradient-blue: rgba(21, 31, 53, 1);
+  --color-gradient-purple: rgba(51, 34, 71, 1);
+  --color-gradient-darkpink: rgba(102, 23, 83, 1);
+  --color-gradient-lightpink: rgba(163, 33, 131, 1);
 
-    --color-pink-secondary:rgba(126, 89, 127, 1);
-    --color-gray-secondary:rgba(92, 99, 112, 1);
-    --color-white-secondary:rgba(212, 201, 201, 1);
-    --color-purple-secondary:rgba(114, 103, 164, 1);
+  --color-pink-secondary: rgba(126, 89, 127, 1);
+  --color-gray-secondary: rgba(92, 99, 112, 1);
+  --color-white-secondary: rgba(212, 201, 201, 1);
+  --color-purple-secondary: rgba(114, 103, 164, 1);
 
-    --color-success: rgba(4, 120, 87, 1);
-    --color-error: rgba(126, 40, 40, 1);
+  --color-success: rgba(4, 120, 87, 1);
+  --color-error: rgba(126, 40, 40, 1);
+  --color-disabled: rgba(122, 122, 122, 1);
 
-    --color-background: rgba(27, 25, 42, 1);
-    --color-header:rgba(22, 31, 53, 1);
-    --color-navbar:rgba(22, 31, 53, 1);
-    --color-back-button-background:rgba(60, 34, 76, 1)
-
+  --color-background: rgba(27, 25, 42, 1);
+  --color-header: rgba(22, 31, 53, 1);
+  --color-navbar: rgba(22, 31, 53, 1);
+  --color-back-button-background: rgba(60, 34, 76, 1);
 }
 
 @layer base {
-    html {
-        overflow: hidden;
-        width: 100%;
-    }
-    body {
-        position: fixed;
-        top: 0; left: 0; right: 0; bottom: 0;
-        height: 100%;
-        overflow-y: scroll;
-        -webkit-overflow-scrolling: touch; /* iOS smooth scrolling */
-    }
+  * {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+  }
+  html {
+    overflow: hidden;
+    width: 100%;
+  }
+  body {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    height: 100%;
+    overflow-y: scroll;
+    -webkit-overflow-scrolling: touch; /* iOS smooth scrolling */
+  }
 
-    #scroll-container {
-        height: 100%;
-        overflow-y: auto;
-        -webkit-overflow-scrolling: touch;
-    }
+  input:-webkit-autofill,
+  input:-webkit-autofill:hover,
+  input:-webkit-autofill:focus,
+  input:-webkit-autofill:active {
+    /* Remove autofill yellow/blue background */
+    box-shadow: 0 0 0 1000px transparent inset !important;
+    -webkit-box-shadow: 0 0 0 1000px transparent inset !important;
+    background-color: transparent !important;
+    background-clip: text !important;
+
+    /* FORCE text color */
+    -webkit-text-fill-color: var(--color-white-secondary) !important;
+    color: var(--color-white-secondary) !important;
+
+    /* Required on modern Chrome, otherwise autofill overrides color */
+    caret-color: var(--color-white-secondary) !important;
+
+    /* Prevent Chrome from animating background */
+    transition: background-color 9999s ease-in-out 0s;
+  }
+
+  #scroll-container {
+    height: 100%;
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+  }
 }
-@layer utilities {
-    .bg-pink-gradient{
-        background: linear-gradient(120deg, var(--color-gradient-darkpink), var(--color-gradient-lightpink));
-    }
 
-    .bg-purple-gradient {
-        background: linear-gradient(-120deg, var(--color-gradient-blue), var(--color-gradient-purple));
-    }
+@utility bg-pink-gradient {
+  background: linear-gradient(
+    to right,
+    var(--color-gradient-darkpink),
+    var(--color-gradient-lightpink)
+  );
+}
+
+@utility bg-purple-gradient {
+  background: linear-gradient(
+    to right,
+    var(--color-gradient-purple),
+    var(--color-gradient-blue)
+  );
+}
+
+@utility phone-number-input {
+  input {
+    @apply bg-transparent outline-none w-full font-semibold;
+  }
 }

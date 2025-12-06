@@ -1,10 +1,10 @@
-import { useAppTranslations } from "@/hooks/useAppTranslations";
+import { useAppTranslations } from '@/hooks/useAppTranslations';
 
 export default function HomePage() {
   const t = useAppTranslations();
   return (
     <div className="text-3xl">
-      <p>{t("hello world")}</p>
+      <p>{t('hello world')}</p>
       Lorem ipsum dolor sit amet, consectetur adipisicing elit. Alias
       consectetur consequuntur debitis ipsa minus modi molestiae officiis
       possimus! Accusantium at cumque cupiditate, delectus dicta dignissimos
