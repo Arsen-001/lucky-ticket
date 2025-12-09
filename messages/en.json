@@ -41,5 +41,12 @@
   "code is required": "Code is required",
   "code must be 6 digits": "Code must be 6 digits",
   "didn’t receive a code?": "Didn’t receive a code?",
-  "resend": "Resend"
+  "resend": "Resend",
+  "verified": "Verified",
+  "prime": "Prime",
+  "leaderboard": "Leaderboard",
+  "tournaments": "Tournaments",
+  "home": "Home",
+  "boosts": "Boosts",
+  "tasks": "Tasks"
 }

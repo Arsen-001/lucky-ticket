@@ -1,2 +1,5 @@
-export const projectName = 'Lucky Ticket';
-export const minPasswordLength = 6;
+export const GlobalConstants = {
+  projectName: 'Lucky Ticket',
+  minPasswordLength: 8,
+  coinName: 'LTC',
+};

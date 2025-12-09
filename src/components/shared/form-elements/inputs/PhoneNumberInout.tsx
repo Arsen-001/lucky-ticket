@@ -14,7 +14,6 @@ export const PhoneNumberInput = ({
   suffix,
   name,
   numberInputProps,
-  ref,
   ...rest
 }: PhoneNumberInputProps) => {
   return (

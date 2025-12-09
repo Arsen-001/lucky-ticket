@@ -1,0 +1,28 @@
+@theme {
+  --color-orange: rgba(180, 83, 9, 1);
+  --color-pink: rgba(198, 113, 189, 1);
+  --color-gold: rgba(248, 189, 62, 1);
+  --color-electric-purple: rgba(116, 61, 245, 1);
+  --color-electric-pink: rgba(222, 0, 155, 1);
+
+  --color-gradient-blue: rgba(21, 31, 53, 1);
+  --color-gradient-purple: rgba(51, 34, 71, 1);
+  --color-gradient-darkpink: rgba(102, 23, 83, 1);
+  --color-gradient-lightpink: rgba(163, 33, 131, 1);
+
+  --color-pink-secondary: rgba(126, 89, 127, 1);
+  --color-gray-secondary: rgba(92, 99, 112, 1);
+  --color-white-secondary: rgba(212, 201, 201, 1);
+  --color-purple-secondary: rgba(114, 103, 164, 1);
+
+  --color-success: rgba(4, 120, 87, 1);
+  --color-error: rgba(126, 40, 40, 1);
+  --color-disabled: rgba(122, 122, 122, 1);
+
+  --color-background: rgba(27, 25, 42, 1);
+  --color-background-overlay: rgba(29, 29, 52, 1);
+  --color-header: rgba(22, 31, 53, 1);
+  --color-tab-bar: rgba(22, 31, 53, 1);
+  --color-back-button-background: rgba(60, 34, 76, 1);
+  --color-fade: rgb(15, 15, 30, 0.8);
+}

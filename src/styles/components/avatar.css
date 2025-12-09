@@ -1,0 +1,5 @@
+@import 'tailwindcss';
+
+@utility avatar-shadow {
+  box-shadow: 0 1px 10px #de009b;
+}

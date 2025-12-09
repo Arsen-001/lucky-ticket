@@ -1,0 +1,39 @@
+@utility scrollbar-hidden {
+  &::-webkit-scrollbar {
+    display: none;
+  }
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+@utility bg-pink-gradient {
+  background: linear-gradient(
+    to right,
+    var(--color-gradient-darkpink),
+    var(--color-gradient-lightpink)
+  );
+}
+
+@utility bg-purple-gradient {
+  background: linear-gradient(
+    to right,
+    var(--color-gradient-purple),
+    var(--color-gradient-blue)
+  );
+}
+
+@utility phone-number-input {
+  input {
+    @apply bg-transparent outline-none w-full font-semibold;
+  }
+}
+@utility flex-center {
+  @apply flex items-center justify-center;
+}
+
+@utility focus-outline {
+  @apply focus-visible:outline-none focus-visible:ring-1;
+  input {
+    @apply focus-visible:ring-white focus-within:ring-1 focus-within:ring-white;
+  }
+}

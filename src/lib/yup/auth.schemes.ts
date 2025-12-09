@@ -1,6 +1,6 @@
 import type { Dictionary } from '@/types/types/project.types';
 import * as yup from 'yup';
-import { minPasswordLength } from '@/constants/global.constants';
+import { GlobalConstants } from '@/constants/global.constants';
 
 export const getLoginSchema = (t: Dictionary) => {
   return yup.object({
@@ -13,7 +13,12 @@ export const getLoginSchema = (t: Dictionary) => {
     password: yup
       .string()
       .required(t('password is required'))
-      .min(6, t('confirm password required', { num: minPasswordLength })),
+      .min(
+        6,
+        t('confirm password required', {
+          num: GlobalConstants.minPasswordLength,
+        })
+      ),
   });
 };
 
@@ -31,7 +36,10 @@ export const getRegisterSchema = (t: Dictionary) =>
     password: yup
       .string()
       .required(t('password required'))
-      .min(6, t('min length is {num}', { num: minPasswordLength })),
+      .min(
+        6,
+        t('min length is {num}', { num: GlobalConstants.minPasswordLength })
+      ),
     confirmPassword: yup
       .string()
       .oneOf([yup.ref('password')], t('passwords must match'))
@@ -48,7 +56,10 @@ export const getResetPasswordSchema = (t: Dictionary) =>
     password: yup
       .string()
       .required(t('password is required'))
-      .min(8, t('min length is {num}', { num: minPasswordLength })),
+      .min(
+        8,
+        t('min length is {num}', { num: GlobalConstants.minPasswordLength })
+      ),
     confirmPassword: yup
       .string()
       .oneOf([yup.ref('password')], t('passwords must match'))

@@ -1,5 +1,5 @@
-import googleIcon from '#/public/assets/icons/google.png';
+import avatar from '#/public/assets/images/avatar.png';
 
 export const images = {
-  googleIcon,
+  avatar,
 } as const;

@@ -19,6 +19,7 @@ export function Form({
   errorMessage,
   noStyle,
 }: FormProps) {
+  const { handleSubmit } = form;
   return (
     <FormProvider {...form}>
       {!noStyle && (
@@ -33,7 +34,12 @@ export function Form({
           {errorMessage || ' '}
         </p>
       )}
-      <form onSubmit={onSubmit} noValidate autoComplete="on" spellCheck={false}>
+      <form
+        onSubmit={handleSubmit(onSubmit)}
+        noValidate
+        autoComplete="on"
+        spellCheck={false}
+      >
         {children}
       </form>
     </FormProvider>

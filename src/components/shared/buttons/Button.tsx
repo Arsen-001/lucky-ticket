@@ -1,12 +1,17 @@
-import type { ButtonHTMLAttributes } from 'react';
+import type { ButtonHTMLAttributes, Ref } from 'react';
 import { twMerge } from 'tailwind-merge';
 import { Loader2 } from 'lucide-react';
 
-export type ButtonVariants = 'primary' | 'secondary' | 'transparent';
+export type ButtonVariants =
+  | 'primary'
+  | 'secondary'
+  | 'transparent'
+  | 'purpleGradient';
 
 export interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
   variant?: ButtonVariants;
   loading?: boolean;
+  ref?: Ref<HTMLButtonElement>;
 }
 
 export function Button({
@@ -22,6 +27,7 @@ export function Button({
     primary: 'bg-pink-gradient',
     secondary: 'bg-gradient-purple',
     transparent: 'bg-transparent',
+    purpleGradient: 'bg-purple-gradient',
   };
 
   return (
@@ -34,10 +40,8 @@ export function Button({
           
           active:scale-99
           
-          focus-visible:outline-none 
-          focus-visible:ring-1 
-          focus-visible:ring-white
-
+          focus-outline
+          
           disabled:opacity-50
           disabled:cursor-not-allowed
           disabled:active:scale-100

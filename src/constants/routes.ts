@@ -1,5 +1,9 @@
 export const routes = {
   home: '/',
+  leaderboard: '/leaderboard',
+  tournaments: '/tournaments',
+  boosts: '/boosts',
+  tasks: '/tasks',
 
   //(auth) routes
   login: '/login',

@@ -30,14 +30,14 @@ export function Input({
     <div
       ref={containerRef}
       className={twMerge(
-        'flex items-center gap-2 bg-background/40 text-sm p-4 rounded-lg w-full focus-within:ring-1 focus-within:ring-white',
+        'flex items-center gap-2 bg-background/40 text-sm p-4 rounded-lg w-full focus-outline',
         className
       )}
     >
       {prefix && (
         <span
           onClick={focusInput}
-          className={twMerge('flex-shrink-0', classNames?.prefix)}
+          className={twMerge('shrink-0', classNames?.prefix)}
         >
           {prefix}
         </span>
@@ -55,7 +55,7 @@ export function Input({
       {suffix && (
         <span
           onClick={focusInput}
-          className={twMerge('flex-shrink-0', classNames?.suffix)}
+          className={twMerge('shrink-0', classNames?.suffix)}
         >
           {suffix}
         </span>

@@ -28,7 +28,6 @@ export function RegisterForm() {
   const {
     formState: { isSubmitting },
     clearErrors,
-    handleSubmit,
   } = form;
 
   async function onSubmit(values: RegisterFormValues) {
@@ -39,7 +38,7 @@ export function RegisterForm() {
   }
 
   return (
-    <Form form={form} onSubmit={handleSubmit(onSubmit)}>
+    <Form form={form} onSubmit={onSubmit}>
       <div className="flex flex-col w-full ">
         <FormItem name="email">
           <Input

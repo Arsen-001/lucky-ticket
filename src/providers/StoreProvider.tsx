@@ -1,16 +1,12 @@
 'use client';
-import type { AppStore } from '@/lib/rtk/features/store';
-import { makeStore } from '@/lib/rtk/features/store';
+import type { AppStore } from '@/lib/rtk/store';
+import { makeStore } from '@/lib/rtk/store';
 import { setupListeners } from '@reduxjs/toolkit/query';
-import type { ReactNode } from 'react';
 import { useEffect, useRef } from 'react';
 import { Provider } from 'react-redux';
+import type { ChildrenProps } from '@/types/interfaces/component.interfcaes';
 
-interface Props {
-  readonly children: ReactNode;
-}
-
-export const StoreProvider = ({ children }: Props) => {
+export const StoreProvider = ({ children }: ChildrenProps) => {
   const storeRef = useRef<AppStore | null>(null);
 
   if (!storeRef?.current) {

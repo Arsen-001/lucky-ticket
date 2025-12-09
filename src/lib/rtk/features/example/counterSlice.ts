@@ -1,5 +1,5 @@
-import { createAppSlice } from '@/lib/rtk/features/createAppSlice';
-import type { AppThunk } from '@/lib/rtk/features/store';
+import { createAppSlice } from '@/lib/rtk/createAppSlice';
+import type { AppThunk } from '@/lib/rtk/store';
 import type { PayloadAction } from '@reduxjs/toolkit';
 import { fetchCount } from './counterAPI';
 
@@ -81,7 +81,7 @@ export const { selectCount, selectStatus } = counterSlice.selectors;
 export const incrementIfOdd =
   (amount: number): AppThunk =>
   (dispatch, getState) => {
-    const currentValue = selectCount(getState());
+    const currentValue = selectCount(getState() as any);
 
     if (currentValue % 2 === 1 || currentValue % 2 === -1) {
       dispatch(incrementByAmount(amount));

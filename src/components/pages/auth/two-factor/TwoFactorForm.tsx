@@ -24,7 +24,6 @@ export function TwoFactorForm() {
   const {
     formState: { isSubmitting },
     clearErrors,
-    handleSubmit,
   } = form;
 
   async function onSubmit(values: TwoFactorValues) {
@@ -35,7 +34,7 @@ export function TwoFactorForm() {
   }
 
   return (
-    <Form form={form} onSubmit={handleSubmit(onSubmit)}>
+    <Form form={form} onSubmit={onSubmit}>
       <div className="flex flex-col w-full">
         <FormItem name="code">
           <Input

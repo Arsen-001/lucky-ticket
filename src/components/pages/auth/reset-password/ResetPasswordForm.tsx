@@ -25,7 +25,6 @@ export function ResetPasswordForm() {
   const {
     formState: { isSubmitting },
     clearErrors,
-    handleSubmit,
   } = form;
 
   async function onSubmit(values: ResetPasswordValues) {
@@ -36,7 +35,7 @@ export function ResetPasswordForm() {
   }
 
   return (
-    <Form form={form} onSubmit={handleSubmit(onSubmit)}>
+    <Form form={form} onSubmit={onSubmit}>
       <div className="flex flex-col w-full">
         <FormItem name="password">
           <PasswordInput

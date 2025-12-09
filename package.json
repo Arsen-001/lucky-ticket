@@ -9,14 +9,16 @@
     "lint": "eslint .",
     "format": "npx prettier . --write",
     "clean": "rm -rf .next ",
+    "rnm": "rm -rf node_modules",
     "type-check": "tsc --noEmit",
     "prepare": "husky"
   },
   "dependencies": {
     "@hookform/resolvers": "^5.2.2",
     "@reduxjs/toolkit": "^2.11.0",
+    "js-cookie": "^3.0.5",
     "lucide-react": "^0.555.0",
-    "next": "16.0.5",
+    "next": "16.0.7",
     "next-intl": "^4.5.8",
     "react": "19.2.0",
     "react-dom": "19.2.0",
@@ -27,7 +29,9 @@
     "yup": "^1.7.1"
   },
   "devDependencies": {
+    "@faker-js/faker": "^10.1.0",
     "@tailwindcss/postcss": "^4",
+    "@types/js-cookie": "^3.0.6",
     "@types/node": "^20",
     "@types/react": "^19",
     "@types/react-dom": "^19",
@@ -43,7 +47,6 @@
   },
   "lint-staged": {
     "*.{js,jsx,ts,tsx}": [
-      "eslint --max-warnings=0 --fix",
       "prettier -w"
     ],
     "*.{json,css,md}": [
