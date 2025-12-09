@@ -2,6 +2,6 @@
 
 @utility tab-bar-transition {
   transition:
-    max-width 500ms ease-in-out,
-    margin-left 500ms ease-in-out;
+    max-width 400ms,
+    margin-left 400ms;
 }

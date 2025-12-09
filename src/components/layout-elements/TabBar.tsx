@@ -15,6 +15,12 @@ import {
 import { useRouter } from 'next/navigation';
 import { useLocation } from '@/hooks/useLocation';
 
+export type Tab = {
+  route: Route;
+  icon: ReactNode;
+  name: string;
+};
+
 export function TabBar({ className }: ClassNameProps) {
   const t = useAppTranslations();
 
@@ -23,7 +29,7 @@ export function TabBar({ className }: ClassNameProps) {
 
   const [activeTab, setActiveTab] = useState<string>(location.getPathPart(1));
 
-  const tabs: { route: Route; icon: ReactNode; name: string }[] = [
+  const tabs: Tab[] = [
     {
       route: routes.leaderboard,
       icon: <ChartNoAxesColumnIncreasing />,
