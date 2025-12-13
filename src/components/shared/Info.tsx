@@ -1,12 +1,14 @@
 import { cloneElement, type ReactElement, type ReactNode } from 'react';
 import { twMerge } from 'tailwind-merge';
 
+export type InfoVariants = 'transparent' | 'purple-gradient' | 'pink-gradient';
 export interface InfoProps {
   icon?: ReactElement<SVGAElement>;
   title?: ReactNode;
   description?: ReactNode;
   extra?: ReactNode;
   className?: string;
+  variant?: InfoVariants;
   classNames?: {
     iconContainer?: string;
     icon?: string;
@@ -15,11 +17,25 @@ export interface InfoProps {
   };
 }
 
-export function Info({ icon, title, description, extra, className, classNames }: InfoProps) {
+export function Info({
+  icon,
+  variant = 'transparent',
+  title,
+  description,
+  extra,
+  className,
+  classNames,
+}: InfoProps) {
+  const variantClasses: Record<InfoVariants, string> = {
+    'pink-gradient': 'bg-pink-gradient',
+    'purple-gradient': 'bg-purple-gradient',
+    transparent: 'bg-transparent',
+  };
   return (
     <div
       className={twMerge(
         'flex-1 flex-center flex-col w-full h-full max-h-full p-5 rounded-lg overflow-x-hidden overflow-y-auto',
+        variantClasses[variant],
         className
       )}
     >

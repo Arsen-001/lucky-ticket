@@ -4,21 +4,8 @@ import { GlobalConstants } from '@/constants/global.constants';
 
 export const getLoginSchema = (t: Dictionary) => {
   return yup.object({
-    email: yup
-      .string()
-      .required(t('email or username is required'))
-      .trim()
-      .min(3, t('too short'))
-      .max(255, t('too long')),
-    password: yup
-      .string()
-      .required(t('password is required'))
-      .min(
-        6,
-        t('confirm password required', {
-          num: GlobalConstants.minPasswordLength,
-        })
-      ),
+    email: yup.string().required(t('email or username is required')),
+    password: yup.string().required(t('password is required')),
   });
 };
 

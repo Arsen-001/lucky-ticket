@@ -1,0 +1,22 @@
+.loader {
+  width: fit-content;
+  font-size: 40px;
+  font-weight: bold;
+  text-transform: uppercase;
+  color: transparent;
+  -webkit-text-stroke: 1px var(--color-gradient-purple);
+  background: linear-gradient(
+      90deg,
+      transparent 33%,
+      var(--color-gradient-darkpink) 50%,
+      var(--color-gradient-lightpink) 67%,
+      transparent 0
+    )
+    0/300% 100% no-repeat text;
+  animation: l2 2s linear infinite;
+}
+@keyframes l2 {
+  0% {
+    background-position: 100%;
+  }
+}

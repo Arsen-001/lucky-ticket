@@ -22,7 +22,7 @@ export const ClientPortal = ({
     if (!container) return;
     ref.current = container;
     setMounted(true);
-    document.body.style.overflow = 'hidden';
+    // document.body.style.overflow = 'hidden';
   }, [selector]);
 
   if (!mounted || !show || !ref?.current) {

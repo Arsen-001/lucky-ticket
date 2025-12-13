@@ -12,10 +12,10 @@ export default async function RootLayout({ children }: ChildrenProps) {
     <StoreProvider>
       <html lang={locale}>
         <body className={gilroy.className}>
-          <NextIntlClientProvider>
-            {children}
-            <div id="portal-root" />
-          </NextIntlClientProvider>
+          <div id="scroll-container">
+            <NextIntlClientProvider>{children}</NextIntlClientProvider>
+          </div>
+          <div id="portal-root" />
         </body>
       </html>
     </StoreProvider>

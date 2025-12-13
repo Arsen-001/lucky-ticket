@@ -24,9 +24,6 @@
 
 @utility focus-outline {
   @apply focus-visible:outline-none focus-visible:ring-1;
-  input {
-    @apply focus-visible:ring-white focus-within:ring-1 focus-within:ring-white;
-  }
 }
 
 @utility purple-gradient-outlined {

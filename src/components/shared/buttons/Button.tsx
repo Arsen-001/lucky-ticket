@@ -19,7 +19,7 @@ export function Button({
   type = 'button',
   ...rest
 }: ButtonProps) {
-  const classes: Record<ButtonVariants, string> = {
+  const variantClasses: Record<ButtonVariants, string> = {
     primary: 'bg-pink-gradient',
     secondary: 'bg-gradient-purple',
     transparent: 'bg-transparent',
@@ -30,7 +30,7 @@ export function Button({
     <button
       disabled={disabled || loading}
       className={twMerge(
-        classes[variant],
+        variantClasses[variant],
         ` text-white font-semibold py-3.5 px-6 rounded-lg
           transition-all duration-100 transform
           

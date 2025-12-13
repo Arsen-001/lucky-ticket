@@ -6,37 +6,22 @@
     font-weight: 400;
     @apply select-none;
   }
-
   html {
-    height: 100svh;
-    overflow-y: auto;
-    overflow-x: hidden;
-    -webkit-overflow-scrolling: touch; /* iOS smooth scrolling */
-    @apply bg-background text-white  scrollbar-hidden;
+    width: 100%;
+    @apply bg-background text-white;
   }
-
   body {
+    position: fixed;
+    inset: 0;
     height: 100%;
+    overflow-y: scroll;
+    -webkit-overflow-scrolling: touch; /* iOS smooth scrolling */
   }
 
-  input:-webkit-autofill,
-  input:-webkit-autofill:hover,
-  input:-webkit-autofill:focus,
-  input:-webkit-autofill:active {
-    /* Remove autofill yellow/blue background */
-    box-shadow: 0 0 0 1000px transparent inset !important;
-    -webkit-box-shadow: 0 0 0 1000px transparent inset !important;
-    background-color: transparent !important;
-    background-clip: text !important;
-
-    /* FORCE text color */
-    -webkit-text-fill-color: var(--color-white-secondary) !important;
-    color: var(--color-white-secondary) !important;
-
-    /* Required on modern Chrome, otherwise autofill overrides color */
-    caret-color: var(--color-white-secondary) !important;
-
-    /* Prevent Chrome from animating background */
-    transition: background-color 9999s ease-in-out 0s;
+  #scroll-container {
+    height: 100%;
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+    @apply scrollbar-hidden;
   }
 }

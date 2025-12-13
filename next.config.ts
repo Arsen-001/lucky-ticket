@@ -9,6 +9,7 @@ const nextConfig: NextConfig = {
     remotePatterns: [],
   },
   devIndicators: false,
+  experimental: { globalNotFound: true },
 };
 
 const withNextIntl = createNextIntlPlugin();
