@@ -32,16 +32,7 @@ export function Divider({
   const defaultClassNames = 'border-white-secondary border-t';
 
   if (vertical) {
-    return (
-      <div
-        className={twMerge(
-          defaultClassNames,
-          'h-full mx-2',
-          lineStyle,
-          className
-        )}
-      />
-    );
+    return <div className={twMerge(defaultClassNames, 'h-full mx-2', lineStyle, className)} />;
   }
   if (!children) {
     return <div className={twMerge(defaultClassNames, 'my-2', className)} />;
@@ -59,9 +50,7 @@ export function Divider({
       />
 
       {children && (
-        <span className={twMerge('text-sm text-gray-500', classNames?.title)}>
-          {children}
-        </span>
+        <span className={twMerge('text-sm text-gray-500', classNames?.title)}>{children}</span>
       )}
 
       <div

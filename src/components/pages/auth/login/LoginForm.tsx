@@ -44,11 +44,7 @@ export function LoginForm() {
     <Form form={form} onSubmit={onSubmit}>
       <div className="flex flex-col w-full">
         <FormItem name="email">
-          <Input
-            prefix={<Mail />}
-            placeholder={t('email or username')}
-            autoComplete="username"
-          />
+          <Input prefix={<Mail />} placeholder={t('email or username')} autoComplete="username" />
         </FormItem>
 
         <FormItem name="password">

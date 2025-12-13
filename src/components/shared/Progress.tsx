@@ -11,12 +11,7 @@ export interface ProgressProps {
   };
 }
 
-export function Progress({
-  className,
-  classNames,
-  percentage,
-  children,
-}: ProgressProps) {
+export function Progress({ className, classNames, percentage, children }: ProgressProps) {
   return (
     <div
       className={twMerge(
@@ -33,10 +28,7 @@ export function Progress({
       ></div>
       {children && (
         <div
-          className={twMerge(
-            'text-xs text-white leading-none relative z-1',
-            classNames?.children
-          )}
+          className={twMerge('text-xs text-white leading-none relative z-1', classNames?.children)}
         >
           {children}
         </div>

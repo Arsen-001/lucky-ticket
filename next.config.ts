@@ -8,6 +8,7 @@ const nextConfig: NextConfig = {
     //TODO: Add remote image patterns (aws and so on.)
     remotePatterns: [],
   },
+  devIndicators: false,
 };
 
 const withNextIntl = createNextIntlPlugin();

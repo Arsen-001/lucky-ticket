@@ -19,8 +19,7 @@ export default getRequestConfig(async (): Promise<LocaleConfig> => {
       locale: cookieLocale,
     };
   } catch {
-    const messages = (await import(`#/messages/${DEFAULT_LOCALE}.json`))
-      .default;
+    const messages = (await import(`#/messages/${DEFAULT_LOCALE}.json`)).default;
     return {
       messages,
       locale: DEFAULT_LOCALE,

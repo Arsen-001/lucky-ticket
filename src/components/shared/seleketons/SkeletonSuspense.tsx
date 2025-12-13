@@ -1,15 +1,11 @@
 import type { ReactNode } from 'react';
 
 export interface SkeletonWrapperProps {
-  loading: boolean;
+  loading: boolean | undefined;
   children: ReactNode;
   skeleton: ReactNode;
 }
 
-export function SkeletonSuspense({
-  loading,
-  children,
-  skeleton,
-}: SkeletonWrapperProps) {
+export function SkeletonSuspense({ loading, children, skeleton }: SkeletonWrapperProps) {
   return loading ? skeleton : children;
 }

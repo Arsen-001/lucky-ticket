@@ -1,4 +1,4 @@
-import type { Dictionary } from '@/types/types/project.types';
+import type { Dictionary } from '@/types/types/i18n.types';
 import * as yup from 'yup';
 import { GlobalConstants } from '@/constants/global.constants';
 
@@ -25,21 +25,12 @@ export const getLoginSchema = (t: Dictionary) => {
 export const getRegisterSchema = (t: Dictionary) =>
   yup.object({
     email: yup.string().required(t('email required')).email(t('invalid email')),
-    username: yup
-      .string()
-      .required(t('username required'))
-      .min(3, t('too short')),
-    phone: yup
-      .string()
-      .required(t('phone number required'))
-      .min(6, t('invalid phone number')),
+    username: yup.string().required(t('username required')).min(3, t('too short')),
+    phone: yup.string().required(t('phone number required')).min(6, t('invalid phone number')),
     password: yup
       .string()
       .required(t('password required'))
-      .min(
-        6,
-        t('min length is {num}', { num: GlobalConstants.minPasswordLength })
-      ),
+      .min(6, t('min length is {num}', { num: GlobalConstants.minPasswordLength })),
     confirmPassword: yup
       .string()
       .oneOf([yup.ref('password')], t('passwords must match'))
@@ -56,10 +47,7 @@ export const getResetPasswordSchema = (t: Dictionary) =>
     password: yup
       .string()
       .required(t('password is required'))
-      .min(
-        8,
-        t('min length is {num}', { num: GlobalConstants.minPasswordLength })
-      ),
+      .min(8, t('min length is {num}', { num: GlobalConstants.minPasswordLength })),
     confirmPassword: yup
       .string()
       .oneOf([yup.ref('password')], t('passwords must match'))

@@ -2,7 +2,7 @@
 import Image, { type ImageProps } from 'next/image';
 import { twMerge } from 'tailwind-merge';
 import { useGetMeQuery } from '@/api/me.api';
-import { Skeleton } from '@/components/shared/Skeleton';
+import { Skeleton } from '@/components/shared/seleketons/Skeleton';
 import '@/styles/components/avatar.css';
 
 export interface AvatarProps extends Omit<ImageProps, 'src' | 'alt'> {
@@ -10,12 +10,7 @@ export interface AvatarProps extends Omit<ImageProps, 'src' | 'alt'> {
   size?: number;
 }
 
-export function Avatar({
-  className,
-  size = 54,
-  shadow = false,
-  ...rest
-}: AvatarProps) {
+export function Avatar({ className, size = 54, shadow = false, ...rest }: AvatarProps) {
   const { data: me, isLoading } = useGetMeQuery();
 
   const containerClassNames = twMerge(

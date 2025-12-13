@@ -12,13 +12,7 @@ export interface BadgeProps {
   };
 }
 
-export function Badge({
-  className,
-  text,
-  classNames,
-  hideText,
-  icon: Icon,
-}: BadgeProps) {
+export function Badge({ className, text, classNames, hideText, icon: Icon }: BadgeProps) {
   return (
     <div
       className={twMerge(
@@ -26,13 +20,9 @@ export function Badge({
         className
       )}
     >
-      {Icon && (
-        <Icon className={twMerge('text-inherit w-4 h-4', classNames?.icon)} />
-      )}
+      {Icon && <Icon className={twMerge('text-inherit w-4 h-4', classNames?.icon)} />}
       {text && !hideText && (
-        <span className={twMerge('text-inherit text-xs', classNames?.text)}>
-          {text}
-        </span>
+        <span className={twMerge('text-inherit text-xs', classNames?.text)}>{text}</span>
       )}
     </div>
   );

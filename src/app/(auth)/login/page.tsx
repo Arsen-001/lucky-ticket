@@ -11,17 +11,12 @@ export default async function LoginPage() {
     <div className="text-white-secondary flex flex-col justify-between h-full">
       <div>
         <h1 className="text-center text-2xl mt-6 text-white">{t('sign in')}</h1>
-        <p className="text-center text-lg mt-2 px-10">
-          {t('sign in description')}
-        </p>
+        <p className="text-center text-lg mt-2 px-10">{t('sign in description')}</p>
         <div className="flex flex-col w-full mt-8">
           <LoginForm />
 
           <div className="flex justify-end text-pink underline mt-5 mb-6">
-            <AuthLink
-              className="text-white-secondary"
-              href={routes.forgotPassword}
-            >
+            <AuthLink className="text-white-secondary" href={routes.forgotPassword}>
               {t('forgot password')}
             </AuthLink>
           </div>
@@ -31,8 +26,7 @@ export default async function LoginPage() {
         </div>
       </div>
       <p className="text-center text-sm">
-        {t('dont have an account yet')}{' '}
-        <AuthLink href={'/register'}>{t('sign up')}</AuthLink>
+        {t('dont have an account yet')} <AuthLink href={'/register'}>{t('sign up')}</AuthLink>
       </p>
     </div>
   );

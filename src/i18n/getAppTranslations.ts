@@ -1,9 +1,7 @@
 import { getTranslations } from 'next-intl/server';
-import type { Dictionary } from '@/types/types/project.types';
+import type { Dictionary } from '@/types/types/i18n.types';
 
-export async function getAppTranslations(
-  namespace?: string
-): Promise<Dictionary> {
+export async function getAppTranslations(namespace?: string): Promise<Dictionary> {
   const dictionary = await getTranslations(namespace);
   return dictionary as Dictionary;
 }

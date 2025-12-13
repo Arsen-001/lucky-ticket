@@ -2,11 +2,7 @@ import type { ButtonHTMLAttributes, Ref } from 'react';
 import { twMerge } from 'tailwind-merge';
 import { Loader2 } from 'lucide-react';
 
-export type ButtonVariants =
-  | 'primary'
-  | 'secondary'
-  | 'transparent'
-  | 'purpleGradient';
+export type ButtonVariants = 'primary' | 'secondary' | 'transparent' | 'purpleGradient';
 
 export interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
   variant?: ButtonVariants;
@@ -45,11 +41,10 @@ export function Button({
           disabled:opacity-50
           disabled:cursor-not-allowed
           disabled:active:scale-100
-          disabled:hover:none`,
+          disabled:hover:none
+          hover:cursor-pointer`,
         className,
-        loading
-          ? 'disabled:opacity-80 relative flex items-center justify-center gap-2'
-          : '',
+        loading ? 'disabled:opacity-80 relative flex items-center justify-center gap-2' : '',
         !loading && disabled ? 'disabled:bg-disabled' : ''
       )}
       type={type}

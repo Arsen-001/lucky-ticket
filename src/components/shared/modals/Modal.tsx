@@ -22,12 +22,7 @@ interface ModalProps {
   portalContainer?: HTMLElement;
 }
 
-export const Modal = ({
-  open,
-  onClose,
-  children,
-  closeOnOverlayClick = true,
-}: ModalProps) => {
+export const Modal = ({ open, onClose, children, closeOnOverlayClick = true }: ModalProps) => {
   const ANIMATION_MS = 200;
 
   // Overlay click
@@ -40,6 +35,7 @@ export const Modal = ({
   return (
     <ClientPortal>
       <div
+        aria-hidden={open ? 'true' : 'false'}
         style={{ transitionDuration: `${ANIMATION_MS}ms` }}
         className={twMerge(
           'fixed inset-0 flex items-center justify-center z-100 transition-all backdrop-blur-[1px] p-7.5',
@@ -47,18 +43,12 @@ export const Modal = ({
         )}
       >
         {/* Overlay */}
-        <div
-          className="absolute inset-0 bg-fade"
-          onClick={handleOverlayClick}
-        />
+        <div className="absolute inset-0 bg-fade" onClick={handleOverlayClick} />
 
         {/* Modal */}
         <div
           style={{ transitionDuration: `${ANIMATION_MS}ms` }}
-          className={twMerge(
-            'relative transition-all transform',
-            open ? 'scale-100' : 'scale-80'
-          )}
+          className={twMerge('relative transition-all transform', open ? 'scale-100' : 'scale-80')}
         >
           {children}
         </div>

@@ -9,13 +9,9 @@ export default async function ForgotPasswordPage() {
   return (
     <div className="text-white-secondary flex flex-col justify-between h-full">
       <div>
-        <h1 className="text-center text-2xl mt-6 text-white">
-          {t('reset password')}
-        </h1>
+        <h1 className="text-center text-2xl mt-6 text-white">{t('reset password')}</h1>
 
-        <p className="text-center text-lg mt-2 px-10">
-          {t('reset password description')}
-        </p>
+        <p className="text-center text-lg mt-2 px-10">{t('reset password description')}</p>
 
         <div className="flex flex-col w-full mt-8">
           <ForgotPasswordForm />
@@ -29,8 +25,7 @@ export default async function ForgotPasswordPage() {
       </div>
 
       <p className="text-center text-sm">
-        {t('dont have an account yet')}{' '}
-        <AuthLink href={routes.register}>{t('sign up')}</AuthLink>
+        {t('dont have an account yet')} <AuthLink href={routes.register}>{t('sign up')}</AuthLink>
       </p>
     </div>
   );

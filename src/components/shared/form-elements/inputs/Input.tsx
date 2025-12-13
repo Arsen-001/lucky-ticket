@@ -1,10 +1,7 @@
 import { type InputHTMLAttributes, type ReactNode, useRef } from 'react';
 import { twMerge } from 'tailwind-merge';
 
-export interface InputProps extends Omit<
-  InputHTMLAttributes<HTMLInputElement>,
-  'prefix'
-> {
+export interface InputProps extends Omit<InputHTMLAttributes<HTMLInputElement>, 'prefix'> {
   prefix?: ReactNode;
   suffix?: ReactNode;
   classNames?: {
@@ -14,13 +11,7 @@ export interface InputProps extends Omit<
   };
 }
 
-export function Input({
-  className,
-  classNames,
-  prefix,
-  suffix,
-  ...rest
-}: InputProps) {
+export function Input({ className, classNames, prefix, suffix, ...rest }: InputProps) {
   const containerRef = useRef<HTMLDivElement>(null);
 
   const focusInput = () => {
@@ -35,28 +26,19 @@ export function Input({
       )}
     >
       {prefix && (
-        <span
-          onClick={focusInput}
-          className={twMerge('shrink-0', classNames?.prefix)}
-        >
+        <span onClick={focusInput} className={twMerge('shrink-0', classNames?.prefix)}>
           {prefix}
         </span>
       )}
 
       <input
-        className={twMerge(
-          'bg-transparent outline-none w-full font-semibold',
-          classNames?.input
-        )}
+        className={twMerge('bg-transparent outline-none w-full font-semibold', classNames?.input)}
         id={rest?.name}
         {...rest}
       />
 
       {suffix && (
-        <span
-          onClick={focusInput}
-          className={twMerge('shrink-0', classNames?.suffix)}
-        >
+        <span onClick={focusInput} className={twMerge('shrink-0', classNames?.suffix)}>
           {suffix}
         </span>
       )}

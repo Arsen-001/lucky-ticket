@@ -39,11 +39,7 @@ export function ForgotPasswordForm() {
     <Form form={form} onSubmit={onSubmit}>
       <div className="flex flex-col w-full">
         <FormItem name="email">
-          <Input
-            prefix={<Mail />}
-            placeholder={t('email')}
-            autoComplete="email"
-          />
+          <Input prefix={<Mail />} placeholder={t('email')} autoComplete="email" />
         </FormItem>
 
         <Button type="submit" loading={isSubmitting} aria-busy={isSubmitting}>

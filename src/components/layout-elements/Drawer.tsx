@@ -13,10 +13,13 @@ import {
   ShoppingBag,
   User,
   Users,
+  X,
 } from 'lucide-react';
 import { type ReactNode } from 'react';
 import { Link } from '@/components/shared/links/Link';
 import { useAppTranslations } from '@/hooks/useAppTranslations';
+import { Avatar } from '@/components/shared/Avatar';
+import { Button } from '@/components/shared/buttons/Button';
 
 export interface DrawerItem {
   route: Route;
@@ -70,19 +73,20 @@ export function Drawer() {
       title: t('languages'),
       icon: <Globe />,
     },
-  ];
+  ] as const;
 
   const handleDrawerClose = () => {
     dispatch(closeDrawer());
   };
+
+  const tabIndex = open ? 100 : -1;
   return (
     <ClientPortal>
       <div
-        className={twMerge(
-          'fixed inset-0 z-60',
-          !open && 'pointer-events-none'
-        )}
+        aria-hidden={open ? 'true' : 'false'}
+        className={twMerge('fixed inset-0 z-60', !open && 'pointer-events-none')}
       >
+        {/*Overlay*/}
         <div
           className={twMerge(
             'absolute inset-0 transition-opacity duration-300 bg-fade',
@@ -90,18 +94,36 @@ export function Drawer() {
           )}
           onClick={handleDrawerClose}
         />
+
+        {/*Drawer*/}
         <div
           className={twMerge(
-            'fixed top-0 bottom-0 right-0 px-6 pt-30 pb-7.5 w-[50vw] flex flex-col gap-5 bg-background-overlay transition-all duration-300 rounded-l-4xl z-1]',
+            'fixed top-0 bottom-0 right-0 px-6 pt-30 pb-7.5 w-[50vw] bg-background-overlay transition-all duration-300 rounded-l-4xl z-1]',
             open ? 'right-0' : '-right-[50vw]'
           )}
         >
-          {drawerItems.map(({ route, title, icon }) => (
-            <Link className="flex items-center gap-2" key={route} href={route}>
-              <span>{icon}</span>
-              <span className="font-normal">{title}</span>
-            </Link>
-          ))}
+          <Button
+            tabIndex={tabIndex}
+            onClick={handleDrawerClose}
+            variant="transparent"
+            className="absolute p-1 top-5 right-5"
+          >
+            <X />
+          </Button>
+          <Avatar shadow />
+          <div className="flex flex-col  mt-20">
+            {drawerItems.map(({ route, title, icon }) => (
+              <Link
+                tabIndex={tabIndex}
+                className="flex items-center gap-2 py-2.5"
+                key={route}
+                href={route}
+              >
+                <span>{icon}</span>
+                <span className="font-normal">{title}</span>
+              </Link>
+            ))}
+          </div>
         </div>
       </div>
     </ClientPortal>

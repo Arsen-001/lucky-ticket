@@ -9,9 +9,7 @@ export default async function TwoFactorPage() {
   return (
     <div className="text-white-secondary flex flex-col justify-between h-full">
       <div>
-        <h1 className="text-center text-2xl mt-6 text-white">
-          {t('two factor authentication')}
-        </h1>
+        <h1 className="text-center text-2xl mt-6 text-white">{t('two factor authentication')}</h1>
 
         <p className="text-center text-lg mt-2 px-10">
           {t('enter the code from your authenticator app')}

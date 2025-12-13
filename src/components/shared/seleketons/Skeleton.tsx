@@ -1,14 +1,8 @@
 import React, { type HTMLAttributes } from 'react';
-import '@/styles/components/skeleton.css';
 import { twMerge } from 'tailwind-merge';
+import '@/styles/components/skeleton.css';
 
-type Variant =
-  | 'text'
-  | 'line'
-  | 'title'
-  | 'round'
-  | 'card'
-  | 'rounded-rectangle';
+type Variant = 'text' | 'line' | 'title' | 'round' | 'card' | 'rounded-rectangle';
 type TextSize =
   | 'xs'
   | 'sm'
@@ -64,7 +58,7 @@ export const Skeleton: React.FC<SkeletonProps> = ({
     <div
       className={twMerge(
         'h-2.25',
-        'skeleton',
+        'skeleton w-full',
         variantClass,
         heightBasedOnTextSize,
         className

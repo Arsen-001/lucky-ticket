@@ -5,13 +5,7 @@ import { type ReactNode, useState } from 'react';
 import { TabBarItem } from '@/components/layout-elements/TabBarItem';
 import { type Route, routes } from '@/constants/routes';
 import { useAppTranslations } from '@/hooks/useAppTranslations';
-import {
-  ChartNoAxesColumnIncreasing,
-  FileText,
-  House,
-  Trophy,
-  Zap,
-} from 'lucide-react';
+import { ChartNoAxesColumnIncreasing, FileText, House, Trophy, Zap } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { useLocation } from '@/hooks/useLocation';
 
@@ -63,10 +57,7 @@ export function TabBar({ className }: ClassNameProps) {
   };
   return (
     <div
-      className={twMerge(
-        'bg-tab-bar px-5 py-4 flex justify-between items-center gap-2',
-        className
-      )}
+      className={twMerge('bg-tab-bar px-5 py-4 flex justify-between items-center gap-2', className)}
     >
       {tabs.map(({ route, icon, name }) => (
         <TabBarItem

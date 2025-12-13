@@ -12,13 +12,7 @@ export interface FormProps<T extends FieldValues = any> {
   noStyle?: boolean;
 }
 
-export function Form({
-  form,
-  onSubmit,
-  children,
-  errorMessage,
-  noStyle,
-}: FormProps) {
+export function Form({ form, onSubmit, children, errorMessage, noStyle }: FormProps) {
   const { handleSubmit } = form;
   return (
     <FormProvider {...form}>
@@ -34,12 +28,7 @@ export function Form({
           {errorMessage || ' '}
         </p>
       )}
-      <form
-        onSubmit={handleSubmit(onSubmit)}
-        noValidate
-        autoComplete="on"
-        spellCheck={false}
-      >
+      <form onSubmit={handleSubmit(onSubmit)} noValidate autoComplete="on" spellCheck={false}>
         {children}
       </form>
     </FormProvider>

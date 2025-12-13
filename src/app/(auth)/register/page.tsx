@@ -13,9 +13,7 @@ export default async function RegisterPage() {
       <div>
         <h1 className="text-center text-2xl mt-6 text-white">{t('sign up')}</h1>
 
-        <p className="text-center text-lg mt-2 px-10">
-          {t('sign up description')}
-        </p>
+        <p className="text-center text-lg mt-2 px-10">{t('sign up description')}</p>
 
         <div className="flex flex-col w-full mt-8">
           <RegisterForm />
@@ -26,8 +24,7 @@ export default async function RegisterPage() {
       </div>
 
       <p className="text-center text-sm">
-        {t('already have an account')}{' '}
-        <AuthLink href={routes.login}>{t('sign in')}</AuthLink>
+        {t('already have an account')} <AuthLink href={routes.login}>{t('sign in')}</AuthLink>
       </p>
     </div>
   );

@@ -1,12 +1,6 @@
 'use client';
 
-import {
-  type ComponentProps,
-  type ReactNode,
-  useEffect,
-  useRef,
-  useState,
-} from 'react';
+import { type ComponentProps, type ReactNode, useEffect, useRef, useState } from 'react';
 import { ChevronDown } from 'lucide-react';
 import { twMerge } from 'tailwind-merge';
 import { Button } from '@/components/shared/buttons/Button';
@@ -16,10 +10,7 @@ export interface SelectOption {
   value: string;
 }
 
-export interface SelectProps extends Omit<
-  ComponentProps<'select'>,
-  'value' | 'onChange'
-> {
+export interface SelectProps extends Omit<ComponentProps<'select'>, 'value' | 'onChange'> {
   options: SelectOption[];
   value?: string;
   onChange?: (value: string) => void;
@@ -51,10 +42,7 @@ export function Select({
   // Close dropdown when clicking outside
   useEffect(() => {
     function handleClickOutside(event: MouseEvent) {
-      if (
-        selectRef.current &&
-        !selectRef.current.contains(event.target as Node)
-      ) {
+      if (selectRef.current && !selectRef.current.contains(event.target as Node)) {
         setIsOpen(false);
         setFocusedIndex(null);
       }
@@ -91,14 +79,10 @@ export function Select({
   const handleOptionKeyDown = (e: React.KeyboardEvent, index: number) => {
     if (e.key === 'ArrowDown') {
       e.preventDefault();
-      setFocusedIndex(prev =>
-        prev === null || prev >= options.length - 1 ? 0 : prev + 1
-      );
+      setFocusedIndex(prev => (prev === null || prev >= options.length - 1 ? 0 : prev + 1));
     } else if (e.key === 'ArrowUp') {
       e.preventDefault();
-      setFocusedIndex(prev =>
-        prev === null || prev <= 0 ? options.length - 1 : prev - 1
-      );
+      setFocusedIndex(prev => (prev === null || prev <= 0 ? options.length - 1 : prev - 1));
     } else if (e.key === 'Enter' || e.key === ' ') {
       e.preventDefault();
       handleSelect(options[index].value);
@@ -112,17 +96,13 @@ export function Select({
 
   useEffect(() => {
     if (focusedIndex !== null && isOpen) {
-      const optionEl =
-        selectRef.current?.querySelectorAll<HTMLLIElement>('li')[focusedIndex];
+      const optionEl = selectRef.current?.querySelectorAll<HTMLLIElement>('li')[focusedIndex];
       optionEl?.focus();
     }
   }, [focusedIndex, isOpen]);
 
   return (
-    <div
-      className={twMerge('relative inline-block text-left', className)}
-      ref={selectRef}
-    >
+    <div className={twMerge('relative inline-block text-left', className)} ref={selectRef}>
       {/* Select button */}
       <Button
         ref={buttonRef}
@@ -142,9 +122,7 @@ export function Select({
         disabled={rest.disabled}
       >
         <span className="truncate">
-          {selectedOption
-            ? selectedOption.label || selectedOption.value
-            : placeholder}
+          {selectedOption ? selectedOption.label || selectedOption.value : placeholder}
         </span>
         <ChevronDown
           className={`-mr-1 ml-2 h-4.5 w-4.5 transition-transform duration-200 ${isOpen ? 'rotate-180' : 'rotate-0'}`}

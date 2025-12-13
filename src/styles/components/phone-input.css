@@ -1,0 +1,6 @@
+@import 'tailwindcss';
+@utility phone-number-input {
+  input {
+    @apply bg-transparent outline-none w-full font-semibold;
+  }
+}

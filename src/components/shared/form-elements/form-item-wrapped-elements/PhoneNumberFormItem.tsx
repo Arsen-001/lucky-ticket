@@ -1,7 +1,7 @@
 import {
   PhoneNumberInput,
   type PhoneNumberInputProps,
-} from '@/components/shared/form-elements/inputs/PhoneNumberInout';
+} from '@/components/shared/form-elements/inputs/PhoneNumberInput';
 import type { FormItemProps } from '@/components/shared/form-elements/FormItem';
 import { useFormContext } from 'react-hook-form';
 import { twMerge } from 'tailwind-merge';

@@ -3,6 +3,7 @@ import 'react-phone-number-input/style.css';
 import { twMerge } from 'tailwind-merge';
 import { type ComponentProps } from 'react';
 import type { InputProps } from '@/components/shared/form-elements/inputs/Input';
+import '@/styles/components/phone-input.css';
 
 export type PhoneNumberInputProps = ComponentProps<typeof PhoneInput> &
   Pick<InputProps, 'prefix' | 'suffix'>;
@@ -23,11 +24,7 @@ export const PhoneNumberInput = ({
         className
       )}
     >
-      {prefix && (
-        <span className={twMerge('flex-shrink-0', classNames?.prefix)}>
-          {prefix}
-        </span>
-      )}
+      {prefix && <span className={twMerge('shrink-0', classNames?.prefix)}>{prefix}</span>}
 
       <PhoneInput
         defaultCountry="US"
@@ -44,11 +41,7 @@ export const PhoneNumberInput = ({
         }}
       />
 
-      {suffix && (
-        <span className={twMerge('flex-shrink-0', classNames?.suffix)}>
-          {suffix}
-        </span>
-      )}
+      {suffix && <span className={twMerge('shrink-0', classNames?.suffix)}>{suffix}</span>}
     </div>
   );
 };

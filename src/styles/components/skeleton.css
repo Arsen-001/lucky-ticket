@@ -1,33 +1,25 @@
 @import 'tailwindcss';
 
-@keyframes blink {
-  50% {
-    opacity: 0.3;
-  }
-}
-
-/* Base skeleton utility */
-@utility skeleton {
+.skeleton {
   animation: blink 1.8s ease-in-out infinite;
   @apply relative overflow-hidden bg-gray-600/70;
 }
 
-/* Variants (text, avatar, line, card) — tweak heights/sizes if needed */
-@utility skeleton-text {
+.skeleton-text {
   @apply h-4 rounded-sm;
 }
-@utility skeleton-line {
+.skeleton-line {
   @apply h-3 rounded-sm;
 }
-@utility skeleton-title {
+.skeleton-title {
   @apply h-6 rounded-sm;
 }
-@utility skeleton-round {
+.skeleton-round {
   @apply w-12 h-12 aspect-square rounded-full;
 }
-@utility skeleton-card {
+.skeleton-card {
   @apply h-40 rounded-lg;
 }
-@utility skeleton-rounded-rectangle {
+.skeleton-rounded-rectangle {
   @apply h-4 rounded-full;
 }

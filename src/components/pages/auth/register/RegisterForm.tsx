@@ -41,19 +41,11 @@ export function RegisterForm() {
     <Form form={form} onSubmit={onSubmit}>
       <div className="flex flex-col w-full ">
         <FormItem name="email">
-          <Input
-            prefix={<Mail />}
-            placeholder={t('email')}
-            autoComplete="email"
-          />
+          <Input prefix={<Mail />} placeholder={t('email')} autoComplete="email" />
         </FormItem>
 
         <FormItem name="username">
-          <Input
-            prefix={<User />}
-            placeholder={t('username')}
-            autoComplete="username"
-          />
+          <Input prefix={<User />} placeholder={t('username')} autoComplete="username" />
         </FormItem>
 
         <PhoneNumberFormItem

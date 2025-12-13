@@ -4,10 +4,7 @@ import Image from 'next/image';
 import { useAppTranslations } from '@/hooks/useAppTranslations';
 import { icons } from '@/constants/icons';
 
-export interface GoogleSignInButtonProps extends Omit<
-  ButtonProps,
-  'children'
-> {}
+export interface GoogleSignInButtonProps extends Omit<ButtonProps, 'children'> {}
 
 export function GoogleSignInButton({ ...rest }: GoogleSignInButtonProps) {
   const t = useAppTranslations();

@@ -1,7 +1,5 @@
-@import 'tailwindcss';
-
-@utility tab-bar-transition {
+.tab-bar-transition {
   transition:
-    max-width 400ms,
+    max-width 450ms,
     margin-left 400ms;
 }

@@ -18,10 +18,29 @@ import { type MockData, mockData } from '@/mock/index.mock';
 export const mockBaseQuery =
   <TMockMap extends Record<string, any>>(
     mockMap: TMockMap
-  ): BaseQueryFn<{ url: keyof TMockMap }, unknown, unknown> =>
+  ): BaseQueryFn<{ url: string }, unknown, unknown> =>
   async ({ url }) => {
-    const value = mockMap[url];
-    await new Promise(res => setTimeout(res, 300)); // simulate delay
+    function resolveMockValue() {
+      const parts = url.split('/').filter(Boolean);
+      const key = parts[0];
+      parts.shift();
+
+      if (parts.length === 1) {
+        return mockMap[parts[key]];
+      }
+
+      let current = mockMap[key];
+
+      for (const segment of parts) {
+        if (current == null) return undefined;
+        current = current.find(item => item.id === segment);
+      }
+
+      return current;
+    }
+
+    const value = resolveMockValue();
+    await new Promise(res => setTimeout(res, 2000)); // simulate delay
 
     if (value === undefined) {
       return { error: { status: 404, data: `No mock for "${String(url)}"` } };
