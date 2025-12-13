@@ -20,7 +20,7 @@ export function TabBarItem({ active, onClick, name, icon }: TabBarItemProps) {
       <span
         className={twMerge(
           'max-w-0 overflow-hidden',
-          active && 'ml-2 max-w-[25vw] tab-bar-transition'
+          active && 'ml-2 max-w-[25vw] tab-bar-transition font-semibold'
         )}
       >
         {name}

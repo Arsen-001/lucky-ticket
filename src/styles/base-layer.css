@@ -6,26 +6,17 @@
     font-weight: 400;
     @apply select-none;
   }
+
   html {
-    overflow: hidden;
-    width: 100%;
-  }
-  body {
-    position: fixed;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    height: 100%;
-    overflow-y: scroll;
+    height: 100svh;
+    overflow-y: auto;
+    overflow-x: hidden;
     -webkit-overflow-scrolling: touch; /* iOS smooth scrolling */
+    @apply bg-background text-white  scrollbar-hidden;
   }
 
-  #scroll-container {
+  body {
     height: 100%;
-    overflow-y: auto;
-    -webkit-overflow-scrolling: touch;
-    @apply scrollbar-hidden;
   }
 
   input:-webkit-autofill,
