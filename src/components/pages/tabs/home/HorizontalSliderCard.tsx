@@ -58,7 +58,7 @@ export function HorizontalSliderCard({
   return (
     <div
       className={twMerge(
-        'pl-5 pr-2 py-3 w-72 bg-purple-gradient purple-gradient-outlined rounded-lg relative',
+        'pl-5 pr-2 py-3 w-72 bg-purple-gradient card-outlined rounded-lg relative',
         className,
         disabled && 'filter grayscale-50 cursor-not-allowed'
       )}
@@ -82,7 +82,7 @@ export function HorizontalSliderCard({
 
       <Medal
         className={twMerge(
-          'absolute h-28.5 w-auto right-15 transform translate-x-1/2 -translate-y-26 transition opacity-80',
+          'absolute h-28.5 w-auto right-15 transform translate-x-1/2 -translate-y-26 transition opacity-80 drop-shadow-3xl',
           loading && 'animation-blink'
         )}
         loading={loading}

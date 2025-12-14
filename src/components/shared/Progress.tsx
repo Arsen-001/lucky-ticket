@@ -22,13 +22,16 @@ export function Progress({ className, classNames, percentage, children }: Progre
       <div
         style={{ width: `${percentage}%` }}
         className={twMerge(
-          'h-full absolute left-0 top-0 bottom-0 bg-pink-gradient',
+          'h-full absolute left-0 top-0 bottom-0 bg-pink-gradient transition-all duration-250',
           classNames?.bar
         )}
       ></div>
       {children && (
         <div
-          className={twMerge('text-xs text-white leading-none relative z-1', classNames?.children)}
+          className={twMerge(
+            'text-xs text-white leading-none relative z-1 w-fit',
+            classNames?.children
+          )}
         >
           {children}
         </div>

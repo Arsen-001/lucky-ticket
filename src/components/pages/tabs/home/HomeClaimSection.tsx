@@ -3,6 +3,7 @@ import { PartnersComingSoon } from '@/components/pages/tabs/home/PartnersComingS
 import { getAppTranslations } from '@/i18n/getAppTranslations';
 import type { ClassNameProps } from '@/types/interfaces/component.interfcaes';
 import { twMerge } from 'tailwind-merge';
+import { HomeTicketsList } from '@/components/pages/tabs/home/HomeTicketsList';
 
 export async function HomeClaimSection({ className }: ClassNameProps) {
   const t = await getAppTranslations();
@@ -11,19 +12,33 @@ export async function HomeClaimSection({ className }: ClassNameProps) {
     {
       key: 'main',
       title: t('main'),
+      children: (
+        <div className="flex-available overflow-y-auto scrollbar-hidden py-2.5">
+          <HomeTicketsList />
+        </div>
+      ),
     },
     {
       key: 'partners',
       title: t('partners'),
-      children: <PartnersComingSoon />,
+      children: (
+        <div className=" flex-1 flex-col-stretch pb-5 pt-2.5">
+          <PartnersComingSoon />
+        </div>
+      ),
     },
-  ];
+  ] as const;
 
   return (
-    <div className={twMerge('h-full flex-col-stretch p-5', className)}>
+    <div className={twMerge('h-full flex-col-stretch', className)}>
       <Tabs
-        defaultActiveKey={tabs[1].key}
-        classNames={{ tab: 'w-30', children: 'flex-1 flex-col-stretch' }}
+        defaultActiveKey={tabs[0].key}
+        classNames={{
+          tab: 'w-30',
+
+          children: 'flex-1 flex-col-stretch px-5 mt-3 inset-container-background',
+        }}
+        className="mt-5"
         items={tabs}
       />
     </div>

@@ -1,11 +1,10 @@
-import { getAppTranslations } from '@/i18n/getAppTranslations';
 import '@/styles/components/loading.css';
+import { GlobalConstants } from '@/constants/global.constants';
 
-export default async function Loading() {
-  const t = await getAppTranslations();
+export default function Loading() {
   return (
     <div className="h-full flex-center">
-      <div className="loader">{t('loading')}</div>
+      <div className="loader">{GlobalConstants.projectName}</div>
     </div>
   );
 }

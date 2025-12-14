@@ -28,7 +28,7 @@ export function Medal({
   height,
   nextLoading = 'eager',
   loading,
-  duration = 1800,
+  duration = 3000,
   ...rest
 }: MedalProps) {
   const values = Object.values(medalSources);

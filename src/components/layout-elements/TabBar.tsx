@@ -1,7 +1,7 @@
 'use client';
 import { twMerge } from 'tailwind-merge';
 import type { ClassNameProps } from '@/types/interfaces/component.interfcaes';
-import { type ReactNode, useState } from 'react';
+import { type ReactNode } from 'react';
 import { TabBarItem } from '@/components/layout-elements/TabBarItem';
 import { type Route, routes } from '@/constants/routes';
 import { useAppTranslations } from '@/hooks/useAppTranslations';
@@ -21,7 +21,7 @@ export function TabBar({ className }: ClassNameProps) {
   const location = useLocation();
   const router = useRouter();
 
-  const [activeTab, setActiveTab] = useState<string>(location.getPathPart(1));
+  const activePath = location.getPathPart(1);
 
   const tabs: Tab[] = [
     {
@@ -52,7 +52,6 @@ export function TabBar({ className }: ClassNameProps) {
   ] as const;
 
   const handleTabClick = (route: string) => {
-    setActiveTab(route);
     router.push(route);
   };
   return (
@@ -65,7 +64,7 @@ export function TabBar({ className }: ClassNameProps) {
           icon={icon}
           name={name}
           onClick={() => handleTabClick(route)}
-          active={activeTab === route}
+          active={activePath === route}
         />
       ))}
     </div>

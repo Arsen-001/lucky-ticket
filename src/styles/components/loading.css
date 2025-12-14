@@ -2,9 +2,8 @@
   width: fit-content;
   font-size: 40px;
   font-weight: bold;
-  text-transform: uppercase;
   color: transparent;
-  -webkit-text-stroke: 1px var(--color-gradient-purple);
+  -webkit-text-stroke: 1px var(--color-gradient-darkpink);
   background: linear-gradient(
       90deg,
       transparent 33%,
@@ -13,9 +12,9 @@
       transparent 0
     )
     0/300% 100% no-repeat text;
-  animation: l2 2s linear infinite;
+  animation: fill 1.6s linear infinite;
 }
-@keyframes l2 {
+@keyframes fill {
   0% {
     background-position: 100%;
   }

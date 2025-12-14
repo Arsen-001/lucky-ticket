@@ -24,4 +24,10 @@
     -webkit-overflow-scrolling: touch;
     @apply scrollbar-hidden;
   }
+
+  @keyframes blink {
+    50% {
+      opacity: 0.3;
+    }
+  }
 }

@@ -5,21 +5,21 @@
   @apply relative overflow-hidden bg-gray-600/70;
 }
 
-.skeleton-text {
+@utility skeleton-text {
   @apply h-4 rounded-sm;
 }
-.skeleton-line {
+@utility skeleton-line {
   @apply h-3 rounded-sm;
 }
-.skeleton-title {
+@utility skeleton-title {
   @apply h-6 rounded-sm;
 }
-.skeleton-round {
+@utility skeleton-round {
   @apply w-12 h-12 aspect-square rounded-full;
 }
-.skeleton-card {
+@utility skeleton-card {
   @apply h-40 rounded-lg;
 }
-.skeleton-rounded-rectangle {
+@utility skeleton-rounded-rectangle {
   @apply h-4 rounded-full;
 }

@@ -13,7 +13,9 @@ export default async function RootLayout({ children }: ChildrenProps) {
       <html lang={locale}>
         <body className={gilroy.className}>
           <div id="scroll-container">
-            <NextIntlClientProvider>{children}</NextIntlClientProvider>
+            <NextIntlClientProvider>
+              <div className="max-w-140 m-auto h-full overflow-hidden">{children}</div>
+            </NextIntlClientProvider>
           </div>
           <div id="portal-root" />
         </body>

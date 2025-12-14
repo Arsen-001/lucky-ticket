@@ -56,6 +56,8 @@ export const Skeleton: React.FC<SkeletonProps> = ({
 
   return (
     <div
+      {...rest}
+      aria-hidden
       className={twMerge(
         'h-2.25',
         'skeleton w-full',
@@ -63,8 +65,6 @@ export const Skeleton: React.FC<SkeletonProps> = ({
         heightBasedOnTextSize,
         className
       )}
-      aria-hidden
-      {...rest}
     />
   );
 };

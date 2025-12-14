@@ -26,7 +26,7 @@
   @apply focus-visible:outline-none focus-visible:ring-1;
 }
 
-@utility purple-gradient-outlined {
+@utility card-outlined {
   position: relative;
   z-index: 1;
 
@@ -63,8 +63,31 @@
   @apply flex flex-col items-stretch;
 }
 
-@keyframes blink {
-  50% {
-    opacity: 0.3;
+@utility flex-available {
+  flex: 1 1 0;
+}
+
+@utility inset-container-* {
+  position: relative;
+  overflow-y: auto;
+  &::before,
+  &::after {
+    content: '';
+    position: absolute;
+    left: 0;
+    right: 0;
+    height: 10px;
+    pointer-events: none;
+    z-index: 1;
+  }
+
+  &::before {
+    top: 0;
+    background: linear-gradient(to bottom, --value(--color-*, [color]), rgba(0, 0, 0, 0));
+  }
+
+  &::after {
+    bottom: 0;
+    background: linear-gradient(to top, --value(--color-*, [color]), rgba(0, 0, 0, 0));
   }
 }

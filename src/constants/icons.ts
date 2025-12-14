@@ -22,6 +22,8 @@ import silverTrophy from '#/public/assets/icons/silver-trophy.webp';
 
 import google from '#/public/assets/icons/google.png';
 
+import lock from '#/public/assets/icons/lock.webp';
+
 export const icons = {
   boostUp,
   bronzeMedal,
@@ -46,4 +48,6 @@ export const icons = {
   silverTrophy,
 
   google,
+
+  lock,
 } as const;

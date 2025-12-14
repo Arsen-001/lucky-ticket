@@ -5,17 +5,19 @@ import { ChevronLeft, ChevronRight } from 'lucide-react';
 import { twMerge } from 'tailwind-merge';
 import { Button } from '@/components/shared/buttons/Button';
 
+export type TabClassName = string | ((tabKey: string) => string);
+
 export interface TabsProps {
   items: { key: string; title: string; children?: ReactNode }[];
   defaultActiveKey?: string;
   onTabChange?: (key: string) => void;
-  className?: string;
+  className?: TabClassName;
   classNames?: {
-    container?: string;
-    tab?: string;
-    indicator?: string;
-    scrollButtons?: string;
-    children?: string;
+    container?: TabClassName;
+    tab?: TabClassName;
+    indicator?: TabClassName;
+    scrollButtons?: TabClassName;
+    children?: TabClassName;
   };
 }
 
@@ -97,9 +99,17 @@ export function Tabs({ items, defaultActiveKey, onTabChange, className, classNam
     checkScroll();
   };
 
+  const getClassName = (className?: TabClassName) => {
+    if (!className) return '';
+    if (typeof className === 'function') {
+      return className(activeKey);
+    }
+    return className;
+  };
+
   const buttonClassName = twMerge(
     'p-1 absolute z-20 flex items-center justify-center rounded-full text-white shadow-lg',
-    classNames?.scrollButtons
+    getClassName(classNames?.scrollButtons)
   );
   const currentChildren = items.find(item => item.key === activeKey)?.children;
 
@@ -108,7 +118,7 @@ export function Tabs({ items, defaultActiveKey, onTabChange, className, classNam
       <div
         className={twMerge(
           'relative flex w-full max-w-full items-center justify-center overflow-hidden px-1',
-          className
+          getClassName(className)
         )}
       >
         {/* Left scroll button */}
@@ -127,7 +137,7 @@ export function Tabs({ items, defaultActiveKey, onTabChange, className, classNam
           ref={tabsContainerRef}
           className={twMerge(
             'scrollbar-hidden relative flex max-w-full items-center overflow-x-auto overflow-y-hidden rounded-full bg-gradient-purple scroll-smooth',
-            classNames?.container
+            getClassName(classNames?.container)
           )}
           onScroll={checkScroll}
           role="tablist"
@@ -136,7 +146,7 @@ export function Tabs({ items, defaultActiveKey, onTabChange, className, classNam
           <div
             className={twMerge(
               'absolute z-1 rounded-full bg-pink-gradient transition-[transform,width] duration-300 ease-in-out pointer-events-none',
-              classNames?.indicator
+              getClassName(classNames?.indicator)
             )}
             style={{
               transform: `translateX(${indicatorStyle.left}px)`,
@@ -166,7 +176,7 @@ export function Tabs({ items, defaultActiveKey, onTabChange, className, classNam
                 hover:text-white/90 w-auto
               `,
                 activeKey === item.key ? 'text-white' : '',
-                classNames?.tab
+                getClassName(classNames?.tab)
               )}
             >
               {item.title}
@@ -186,7 +196,7 @@ export function Tabs({ items, defaultActiveKey, onTabChange, className, classNam
         )}
       </div>
       {currentChildren && (
-        <div className={twMerge('mt-5', classNames?.children)}>{currentChildren}</div>
+        <div className={twMerge('mt-5', getClassName(classNames?.children))}>{currentChildren}</div>
       )}
     </>
   );
