@@ -91,3 +91,38 @@
     background: linear-gradient(to top, --value(--color-*, [color]), rgba(0, 0, 0, 0));
   }
 }
+
+@utility shine-* {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  &::before,
+  &::after {
+    content: '';
+    position: absolute;
+    z-index: 0;
+
+    width: --value([length]);
+    aspect-ratio: 1 / 1;
+    border-radius: 50%;
+    transform-origin: center;
+
+    -webkit-mask-image: radial-gradient(rgba(0, 0, 0, 0.5) 10%, transparent 65%);
+    mask-image: radial-gradient(rgba(0, 0, 0, 0.5) 0%, transparent 65%);
+  }
+
+  &::after {
+    background:
+      radial-gradient(grey, transparent 27%, transparent calc(50% + 3px) 100%),
+      radial-gradient(rgba(255, 255, 255, 0.5), transparent 70%),
+      repeating-conic-gradient(
+        from 0deg,
+        rgba(255, 255, 255, 0.5) 0deg 16deg,
+        transparent 16deg 26deg
+      );
+
+    animation: rotate 90s linear infinite;
+  }
+}

@@ -3,25 +3,24 @@ import 'swiper/css';
 import 'swiper/css/effect-coverflow';
 import 'swiper/css/virtual';
 
-import { EffectCoverflow, Virtual } from 'swiper/modules';
+import { EffectCoverflow } from 'swiper/modules';
 
 import { Swiper, SwiperSlide } from 'swiper/react';
 
-import { useGetTournamentsQuery } from '@/api/tournaments.api';
+import { useGetTopTournamentsQuery } from '@/api/tournaments.api';
 import { HorizontalSliderCard } from '@/components/pages/tabs/home/HorizontalSliderCard';
 import type { ClassNameProps } from '@/types/interfaces/component.interfcaes';
 import { twMerge } from 'tailwind-merge';
 
 export function HorizontalSlider({ className }: ClassNameProps) {
-  const { data: tournamentsData, isLoading } = useGetTournamentsQuery();
+  const { data: tournamentsData, isLoading } = useGetTopTournamentsQuery();
 
   const tournaments =
     isLoading || !tournamentsData?.length ? new Array(20).fill(0) : tournamentsData;
   return (
     <Swiper
       className={twMerge('w-full', className)}
-      modules={[Virtual, EffectCoverflow]}
-      virtual
+      modules={[EffectCoverflow]}
       effect={'coverflow'}
       centeredSlides
       grabCursor
@@ -43,7 +42,7 @@ export function HorizontalSlider({ className }: ClassNameProps) {
     >
       {tournaments?.map(({ id, ...rest }, index) => {
         return (
-          <SwiperSlide className="overflow-visible pt-10" virtualIndex={index} key={id || index}>
+          <SwiperSlide className="overflow-visible pt-10" key={id || index}>
             <HorizontalSliderCard loading={isLoading} {...rest} />
           </SwiperSlide>
         );

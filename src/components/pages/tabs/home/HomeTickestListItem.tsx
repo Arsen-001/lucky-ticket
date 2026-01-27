@@ -85,8 +85,8 @@ export function HomeTickestListItem({
             </div>
           </div>
           <Progress
-            className="h-3"
-            classNames={{ children: 'absolute bottom-0 h-full right-3' }}
+            className="h-3 flex items-center"
+            classNames={{ children: 'absolute bottom-0 h-full right-3 pt-px' }}
             percentage={percentage}
           >
             {autocollectFinishCountDown.leftTimeText}

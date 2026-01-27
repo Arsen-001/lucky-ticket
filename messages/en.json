@@ -84,5 +84,10 @@
   "ticket": "ticket",
   "hour": "hour",
   "minute": "minute",
-  "second": "second"
+  "second": "second",
+  "guaranteed pool": "Guaranteed Pool",
+  "start": "Start",
+  "join": "Join",
+  "participated": "Participated",
+  "add": "Add"
 }

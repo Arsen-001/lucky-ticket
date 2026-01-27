@@ -9,3 +9,8 @@ export interface Tournament {
   type: TournamentType;
   guaranteedPool: number;
 }
+
+export interface PersonalTournament extends Tournament {
+  participated: boolean;
+  participatedTicketsCount?: number;
+}

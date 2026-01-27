@@ -1,11 +1,12 @@
-import type { Tournament } from '@/types/interfaces/tournaments.interfaces';
+import type { PersonalTournament, Tournament } from '@/types/interfaces/tournaments.interfaces';
 import { getRandomNumber } from '@/utils/number.utils';
 import { getRandomUpcomingDate } from '@/utils/date.utils';
 
 const getNum = () => getRandomNumber(1, 1000);
+const getTicketsCount = () => getRandomNumber(1, 20);
 const getStartTime = () => getRandomUpcomingDate(60, 10000);
 
-export const tournaments: Tournament[] = [
+export const topTournaments: Tournament[] = [
   {
     id: '123e4567-e89b-12d3-a456-426655440000',
     name: 'Golden Tournament',
@@ -62,4 +63,89 @@ export const tournaments: Tournament[] = [
   },
 ];
 
-export const tournamentsMock = { tournaments };
+export const tournaments: PersonalTournament[] = [
+  {
+    id: '123e4567-e89b-12d3-a456-426655440006',
+    name: 'Golden Clash',
+    startTime: getStartTime(),
+    teamSize: getNum(),
+    prizePool: getNum(),
+    type: 'gold',
+    guaranteedPool: getNum(),
+    participated: true,
+    participatedTicketsCount: getTicketsCount(),
+  },
+  {
+    id: '123e4567-e89b-12d3-a456-426655440007',
+    name: 'Silver Solo Cup',
+    startTime: getStartTime(),
+    teamSize: getNum(),
+    prizePool: getNum(),
+    type: 'silver',
+    guaranteedPool: getNum(),
+    participated: false,
+  },
+  {
+    id: '123e4567-e89b-12d3-a456-42665544000a',
+    name: 'Diamond Blitz',
+    startTime: getStartTime(),
+    teamSize: getNum(),
+    prizePool: getNum(),
+    type: 'diamond',
+    guaranteedPool: getNum(),
+    participated: false,
+  },
+  {
+    id: '123e4567-e89b-12d3-a456-42665544000b',
+    name: 'Everyday Sprint',
+    startTime: getStartTime(),
+    teamSize: getNum(),
+    prizePool: getNum(),
+    type: 'bronze',
+    guaranteedPool: getNum(),
+    participated: false,
+  },
+  {
+    id: '123e4567-e89b-12d3-a456-42665544000c',
+    name: 'Golden Marathon',
+    startTime: getStartTime(),
+    teamSize: getNum(),
+    prizePool: getNum(),
+    type: 'gold',
+    guaranteedPool: getNum(),
+    participated: false,
+  },
+  {
+    id: '123e4567-e89b-12d3-a456-42665544000d',
+    name: 'Silver Showdown',
+    startTime: getStartTime(),
+    teamSize: getNum(),
+    prizePool: getNum(),
+    type: 'silver',
+    guaranteedPool: getNum(),
+    participated: true,
+    participatedTicketsCount: getTicketsCount(),
+  },
+  {
+    id: '123e4567-e89b-12d3-a456-426655440008',
+    name: 'Bronze Rush',
+    startTime: getStartTime(),
+    teamSize: getNum(),
+    prizePool: getNum(),
+    type: 'bronze',
+    guaranteedPool: getNum(),
+    participated: false,
+  },
+  {
+    id: '123e4567-e89b-12d3-a456-426655440009',
+    name: 'Platinum Peaks',
+    startTime: getStartTime(),
+    teamSize: getNum(),
+    prizePool: getNum(),
+    type: 'platinum',
+    guaranteedPool: getNum(),
+    participated: false,
+  },
+];
+
+export const tournamentsMock = { topTournaments, tournaments };
