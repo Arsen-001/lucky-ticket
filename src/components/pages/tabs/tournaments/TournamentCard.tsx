@@ -11,6 +11,8 @@ import { twMerge } from 'tailwind-merge';
 import { Ticket } from 'lucide-react';
 import { Skeleton } from '@/components/shared/seleketons/Skeleton';
 import { SkeletonSuspense } from '@/components/shared/seleketons/SkeletonSuspense';
+import { Link } from '@/components/shared/links/Link';
+import { routes } from '@/constants/routes';
 
 export interface TournamentCardProps extends Tournament {
   loading?: boolean;
@@ -19,6 +21,7 @@ export interface TournamentCardProps extends Tournament {
 }
 
 export function TournamentCard({
+  id,
   type,
   startTime,
   name,
@@ -98,15 +101,17 @@ export function TournamentCard({
           skeleton={<Skeleton variant="rounded-rectangle" className="h-7" />}
         >
           <GoldenText className="text-xs ml-1">{leftLabel}</GoldenText>
-          <Button
-            disabled={loading}
-            className={twMerge(
-              'text-xs rounded-full py-1.5 px-4.5',
-              hasParticipated ? 'bg-success' : null
-            )}
-          >
-            {t(hasParticipated ? 'add' : 'join')}
-          </Button>
+          <Link href={routes.tournaments.tournamentById(id)}>
+            <Button
+              disabled={loading}
+              className={twMerge(
+                'text-xs rounded-full py-1.5 px-4.5',
+                hasParticipated ? 'bg-success' : null
+              )}
+            >
+              {t(hasParticipated ? 'add' : 'join')}
+            </Button>
+          </Link>
         </SkeletonSuspense>
       </div>
     </div>

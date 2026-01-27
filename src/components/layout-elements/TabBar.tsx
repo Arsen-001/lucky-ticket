@@ -30,7 +30,7 @@ export function TabBar({ className }: ClassNameProps) {
       name: t('leaderboard'),
     },
     {
-      route: routes.tournaments,
+      route: routes.tournaments.index,
       icon: <Trophy />,
       name: t('tournaments'),
     },

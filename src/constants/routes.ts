@@ -2,7 +2,12 @@ export const routes = {
   // tab routes
   home: '/',
   leaderboard: '/leaderboard',
-  tournaments: '/tournaments',
+  tournaments: {
+    index: '/tournaments',
+    tournamentById: function (tournamentId: string): `/tournaments/${string}` {
+      return (this.index + `/${tournamentId}`) as `/tournaments/${string}`;
+    },
+  },
   boosts: '/boosts',
   tasks: '/tasks',
 
@@ -22,11 +27,12 @@ export const routes = {
   helpCenter: '/help-center',
   settings: '/settings',
   languages: '/languages',
-
-  // dynamic route
-  tournamentById: (tournamentId: string) => `/tournaments/${tournamentId}`,
 } as const;
 
-type RouteValue<T> = T extends (...args: string[]) => infer R ? R : T;
+type RouteValue<T> = T extends (...args: any[]) => infer R
+  ? R
+  : T extends object
+    ? RouteValue<T[keyof T]>
+    : T;
 
-export type Route = RouteValue<(typeof routes)[keyof typeof routes]>;
+export type Route = RouteValue<typeof routes>;
