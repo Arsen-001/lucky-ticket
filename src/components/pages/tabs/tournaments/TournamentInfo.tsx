@@ -3,7 +3,7 @@
 import { useGetTournamentByIdQuery } from '@/api/tournaments.api';
 import { Medal } from '@/components/shared/icons/Medal';
 import type { HTMLAttributes } from 'react';
-import { useState } from 'react';
+import React, { useState } from 'react';
 import { useAppTranslations } from '@/hooks/useAppTranslations';
 import { GlobalConstants } from '@/constants/global.constants';
 import dayjs from 'dayjs';
@@ -13,6 +13,7 @@ import { GoldenText } from '@/components/shared/typography/GoldenText';
 import { twMerge } from 'tailwind-merge';
 import { Button } from '@/components/shared/buttons/Button';
 import { TournamentBetModal } from './TournamentBetModal';
+import { Ticket } from 'lucide-react';
 
 interface TournamentDetailsProps extends HTMLAttributes<HTMLDivElement> {
   id: string;
@@ -26,7 +27,7 @@ export function TournamentInfo({ id, className, ...rest }: TournamentDetailsProp
   const handleOpenModal = () => setIsModalOpen(true);
   const handleCloseModal = () => setIsModalOpen(false);
 
-  const info = [
+  const info: { label: string; value: React.ReactNode }[] = [
     {
       label: t('prize pool'),
       value: data ? `${data.prizePool} ${GlobalConstants.coinName}` : '',
@@ -43,6 +44,19 @@ export function TournamentInfo({ id, className, ...rest }: TournamentDetailsProp
       label: t('team size'),
       value: data?.teamSize ?? '',
     },
+    ...(data?.participated
+      ? [
+          {
+            label: t('participated tickets'),
+            value: (
+              <span className="inline-flex items-center gap-1 leading-none">
+                <span>{data.participatedTicketsCount ?? 0}</span>
+                <Ticket className="w-4 h-4" />
+              </span>
+            ),
+          },
+        ]
+      : []),
   ];
 
   return (
@@ -52,7 +66,7 @@ export function TournamentInfo({ id, className, ...rest }: TournamentDetailsProp
         <div className="flex-1 max-w-60 flex flex-col gap-px">
           {info.map(({ label, value }) => (
             <div key={label} className="flex justify-between items-center gap-5 text-sm">
-              <span className="text-pink-secondary font-medium whitespace-nowrap">{label}</span>
+              <span className="text-pink-secondary font-medium ">{label}</span>
               <SkeletonSuspense
                 loading={isLoading}
                 skeleton={
@@ -85,7 +99,11 @@ export function TournamentInfo({ id, className, ...rest }: TournamentDetailsProp
         </div>
       </div>
 
-      <TournamentBetModal open={isModalOpen} onClose={handleCloseModal} />
+      <TournamentBetModal
+        open={isModalOpen}
+        onClose={handleCloseModal}
+        participatedTicketsCount={data?.participatedTicketsCount}
+      />
     </div>
   );
 }
