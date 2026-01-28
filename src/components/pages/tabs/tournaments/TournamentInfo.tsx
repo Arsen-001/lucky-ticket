@@ -3,6 +3,7 @@
 import { useGetTournamentByIdQuery } from '@/api/tournaments.api';
 import { Medal } from '@/components/shared/icons/Medal';
 import type { HTMLAttributes } from 'react';
+import { useState } from 'react';
 import { useAppTranslations } from '@/hooks/useAppTranslations';
 import { GlobalConstants } from '@/constants/global.constants';
 import dayjs from 'dayjs';
@@ -11,6 +12,7 @@ import { Skeleton } from '@/components/shared/seleketons/Skeleton';
 import { GoldenText } from '@/components/shared/typography/GoldenText';
 import { twMerge } from 'tailwind-merge';
 import { Button } from '@/components/shared/buttons/Button';
+import { TournamentBetModal } from './TournamentBetModal';
 
 interface TournamentDetailsProps extends HTMLAttributes<HTMLDivElement> {
   id: string;
@@ -19,6 +21,10 @@ interface TournamentDetailsProps extends HTMLAttributes<HTMLDivElement> {
 export function TournamentInfo({ id, className, ...rest }: TournamentDetailsProps) {
   const { data, isLoading } = useGetTournamentByIdQuery(id);
   const t = useAppTranslations();
+  const [isModalOpen, setIsModalOpen] = useState(false);
+
+  const handleOpenModal = () => setIsModalOpen(true);
+  const handleCloseModal = () => setIsModalOpen(false);
 
   const info = [
     {
@@ -68,13 +74,18 @@ export function TournamentInfo({ id, className, ...rest }: TournamentDetailsProp
               loading={isLoading}
               skeleton={<Skeleton variant="card" className="h-8" />}
             >
-              <Button className={twMerge('py-1 px-6 w-full', data?.participated && 'bg-success')}>
+              <Button
+                className={twMerge('py-1 px-6 w-full', data?.participated && 'bg-success')}
+                onClick={handleOpenModal}
+              >
                 {t(data?.participated ? 'add' : 'join')}
               </Button>
             </SkeletonSuspense>
           </div>
         </div>
       </div>
+
+      <TournamentBetModal open={isModalOpen} onClose={handleCloseModal} />
     </div>
   );
 }
