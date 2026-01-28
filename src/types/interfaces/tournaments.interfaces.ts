@@ -8,9 +8,21 @@ export interface Tournament {
   prizePool: number;
   type: TournamentType;
   guaranteedPool: number;
+  places?: TournamentPlacesResponse;
 }
 
 export interface PersonalTournament extends Tournament {
   participated: boolean;
   participatedTicketsCount?: number;
+}
+
+export interface TournamentPlace {
+  from: number;
+  to?: number;
+  percentage: number;
+}
+
+export interface TournamentPlacesResponse {
+  places: TournamentPlace[];
+  guaranteed: TournamentPlace[];
 }

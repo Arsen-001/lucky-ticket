@@ -1,10 +1,34 @@
-import type { PersonalTournament, Tournament } from '@/types/interfaces/tournaments.interfaces';
+import type {
+  PersonalTournament,
+  Tournament,
+  TournamentPlacesResponse,
+} from '@/types/interfaces/tournaments.interfaces';
 import { getRandomNumber } from '@/utils/number.utils';
 import { getRandomUpcomingDate } from '@/utils/date.utils';
 
 const getNum = () => getRandomNumber(1, 1000);
 const getTicketsCount = () => getRandomNumber(1, 20);
 const getStartTime = () => getRandomUpcomingDate(60, 10000);
+
+const getMockPlacements = (): TournamentPlacesResponse => ({
+  places: [
+    { from: 1, percentage: 25 },
+    { from: 2, percentage: 18 },
+    { from: 3, percentage: 15 },
+    { from: 4, to: 5, percentage: 12 },
+    { from: 6, to: 10, percentage: 10 },
+    { from: 11, to: 20, percentage: 8 },
+    { from: 21, to: 50, percentage: 5 },
+    { from: 51, to: 100, percentage: 3 },
+    { from: 101, to: 200, percentage: 2 },
+    { from: 201, to: 500, percentage: 2 },
+  ],
+  guaranteed: [
+    { from: 1, percentage: 50 },
+    { from: 2, percentage: 30 },
+    { from: 3, percentage: 20 },
+  ],
+});
 
 export const topTournaments: Tournament[] = [
   {
@@ -15,6 +39,7 @@ export const topTournaments: Tournament[] = [
     prizePool: getNum(),
     type: 'gold',
     guaranteedPool: getNum(),
+    places: getMockPlacements(),
   },
   {
     id: '123e4567-e89b-12d3-a456-426655440001',
@@ -24,6 +49,7 @@ export const topTournaments: Tournament[] = [
     prizePool: getNum(),
     type: 'silver',
     guaranteedPool: getNum(),
+    places: getMockPlacements(),
   },
   {
     id: '123e4567-e89b-12d3-a456-426655440002',
@@ -33,6 +59,7 @@ export const topTournaments: Tournament[] = [
     prizePool: getNum(),
     type: 'bronze',
     guaranteedPool: getNum(),
+    places: getMockPlacements(),
   },
   {
     id: '123e4567-e89b-12d3-a456-426655440003',
@@ -42,6 +69,7 @@ export const topTournaments: Tournament[] = [
     prizePool: getNum(),
     type: 'bronze',
     guaranteedPool: getNum(),
+    places: getMockPlacements(),
   },
   {
     id: '123e4567-e89b-12d3-a456-426655440004',
@@ -51,6 +79,7 @@ export const topTournaments: Tournament[] = [
     prizePool: getNum(),
     type: 'platinum',
     guaranteedPool: getNum(),
+    places: getMockPlacements(),
   },
   {
     id: '123e4567-e89b-12d3-a456-426655440005',
@@ -60,6 +89,7 @@ export const topTournaments: Tournament[] = [
     prizePool: getNum(),
     type: 'diamond',
     guaranteedPool: getNum(),
+    places: getMockPlacements(),
   },
 ];
 
@@ -72,6 +102,7 @@ export const tournaments: PersonalTournament[] = [
     prizePool: getNum(),
     type: 'gold',
     guaranteedPool: getNum(),
+    places: getMockPlacements(),
     participated: true,
     participatedTicketsCount: getTicketsCount(),
   },
@@ -83,6 +114,7 @@ export const tournaments: PersonalTournament[] = [
     prizePool: getNum(),
     type: 'silver',
     guaranteedPool: getNum(),
+    places: getMockPlacements(),
     participated: false,
   },
   {
@@ -93,6 +125,7 @@ export const tournaments: PersonalTournament[] = [
     prizePool: getNum(),
     type: 'diamond',
     guaranteedPool: getNum(),
+    places: getMockPlacements(),
     participated: false,
   },
   {
@@ -103,6 +136,7 @@ export const tournaments: PersonalTournament[] = [
     prizePool: getNum(),
     type: 'bronze',
     guaranteedPool: getNum(),
+    places: getMockPlacements(),
     participated: false,
   },
   {
@@ -113,6 +147,7 @@ export const tournaments: PersonalTournament[] = [
     prizePool: getNum(),
     type: 'gold',
     guaranteedPool: getNum(),
+    places: getMockPlacements(),
     participated: false,
   },
   {
@@ -123,6 +158,7 @@ export const tournaments: PersonalTournament[] = [
     prizePool: getNum(),
     type: 'silver',
     guaranteedPool: getNum(),
+    places: getMockPlacements(),
     participated: true,
     participatedTicketsCount: getTicketsCount(),
   },
@@ -134,6 +170,7 @@ export const tournaments: PersonalTournament[] = [
     prizePool: getNum(),
     type: 'bronze',
     guaranteedPool: getNum(),
+    places: getMockPlacements(),
     participated: false,
   },
   {
@@ -144,6 +181,7 @@ export const tournaments: PersonalTournament[] = [
     prizePool: getNum(),
     type: 'platinum',
     guaranteedPool: getNum(),
+    places: getMockPlacements(),
     participated: false,
   },
 ];

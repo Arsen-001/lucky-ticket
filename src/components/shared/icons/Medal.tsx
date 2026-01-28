@@ -8,7 +8,7 @@ import { twMerge } from 'tailwind-merge';
 export type MedalType = 'bronze' | 'silver' | 'gold' | 'diamond' | 'platinum';
 
 export interface MedalProps extends Omit<ImageProps, 'src' | 'alt' | 'loading'> {
-  type: MedalType;
+  type?: MedalType;
   loading?: boolean;
   nextLoading?: ImageProps['loading'];
   duration?: number;
@@ -21,6 +21,10 @@ const medalSources = {
   diamond: icons.diamondMedal,
   platinum: icons.platinumMedal,
 };
+
+const BASE_WIDTH = 135;
+const BASE_HEIGHT = 130;
+const ASPECT_RATIO = BASE_WIDTH / BASE_HEIGHT;
 
 export function Medal({
   type,
@@ -51,19 +55,37 @@ export function Medal({
     return () => clearInterval(interval);
   }, [loading, duration, valuesLength]);
 
+  if (!type && !loading) return null;
+
+  const numWidth = typeof width === 'number' ? width : parseFloat(width as string);
+  const numHeight = typeof height === 'number' ? height : parseFloat(height as string);
+
+  const finalWidth = !isNaN(numWidth)
+    ? numWidth
+    : !isNaN(numHeight)
+      ? Math.round(numHeight * ASPECT_RATIO)
+      : BASE_WIDTH;
+
+  const finalHeight = !isNaN(numHeight)
+    ? numHeight
+    : !isNaN(numWidth)
+      ? Math.round(numWidth / ASPECT_RATIO)
+      : BASE_HEIGHT;
+
   return (
     <Image
       {...rest}
-      src={loading ? values[ticketTypeIndex] : medalSources[type]}
-      width={width}
-      height={height}
+      src={loading ? values[ticketTypeIndex] : medalSources[type as MedalType]}
+      width={finalWidth}
+      height={finalHeight}
       alt={`${type}-medal`}
       loading={nextLoading}
       style={{
-        width,
-        height,
         objectFit: 'contain',
         ...rest.style,
+        width,
+        height: width ? 'auto' : height,
+        aspectRatio: `${BASE_WIDTH} / ${BASE_HEIGHT}`,
       }}
       className={twMerge(rest.className, loading && 'animation-blink')}
     />

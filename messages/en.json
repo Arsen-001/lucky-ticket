@@ -90,5 +90,13 @@
   "join": "Join",
   "participated": "Participated",
   "add": "Add",
-  "tournament details": "Tournament Details"
+  "tournament details": "Tournament Details",
+  "id": "ID",
+  "places": "Places",
+  "{percent} of the total prize pool": "{percent}% of the total prize pool",
+  "1st": "1st",
+  "2nd": "2nd",
+  "3rd": "3rd",
+  "place": "Place",
+  "prize": "Prize"
 }

@@ -81,15 +81,17 @@ export function TournamentCard({
       >
         <h5 className="text-center text-sm font-semibold mt-1.5">{name}</h5>
       </SkeletonSuspense>
-      <div className="mt-2 flex flex-col gap-0.5">
+      <div className="mt-2 flex flex-col gap-px">
         {info.map(({ label, value }) => (
-          <div key={label} className="flex justify-between text-xs">
+          <div key={label} className="flex justify-between text-xs gap-1">
             <span className="text-pink-secondary">{label}</span>
             <SkeletonSuspense
               loading={loading}
-              skeleton={<Skeleton variant="text" textSize="xs" className="w-12" />}
+              skeleton={
+                <Skeleton variant="text" textSize="xs" className="flex-1 min-w-6 max-w-2/3" />
+              }
             >
-              <GoldenText className="text-right">{value}</GoldenText>
+              <GoldenText className="text-right font-semibold">{value}</GoldenText>
             </SkeletonSuspense>
           </div>
         ))}
@@ -100,7 +102,9 @@ export function TournamentCard({
           loading={loading}
           skeleton={<Skeleton variant="rounded-rectangle" className="h-7" />}
         >
-          <GoldenText className="text-xs ml-1">{leftLabel}</GoldenText>
+          <div className="flex-1 flex justify-center">
+            <GoldenText className="text-xs font-semibold">{leftLabel}</GoldenText>
+          </div>
           <Link href={routes.tournaments.tournamentById(id)}>
             <Button
               disabled={loading}

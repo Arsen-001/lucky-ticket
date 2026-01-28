@@ -1,6 +1,18 @@
 import meMock from '@/mock/me.mock';
 import { tournamentsMock } from '@/mock/tournaments.mock';
 import { ticketsMock } from '@/mock/tickets.mock';
+import type { FetchArgs } from '@reduxjs/toolkit/query';
+
+/**
+ * Type for functional mock handlers.
+ * Allows dynamic data generation based on request arguments.
+ */
+export type MockHandler<T = any> = (args: FetchArgs) => T | Promise<T>;
+
+/**
+ * Union type for mock values, allowing either static data or a functional handler.
+ */
+export type MockValue<T = any> = T | MockHandler<T> | { data: T } | { error: any };
 
 export const mockData = {
   ...meMock,
