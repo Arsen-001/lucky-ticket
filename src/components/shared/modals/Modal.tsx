@@ -1,6 +1,6 @@
 'use client';
 
-import { ReactNode } from 'react';
+import { ReactNode, useEffect } from 'react';
 import { twMerge } from 'tailwind-merge';
 import { ClientPortal } from '@/components/shared/ClientPortal';
 
@@ -13,17 +13,24 @@ interface ModalProps {
   portalContainer?: HTMLElement;
 }
 
-interface ModalProps {
-  open: boolean;
-  onClose?: () => void;
-  children: ReactNode;
-  destroyOnClose?: boolean;
-  closeOnOverlayClick?: boolean;
-  portalContainer?: HTMLElement;
-}
-
 export const Modal = ({ open, onClose, children, closeOnOverlayClick = true }: ModalProps) => {
   const ANIMATION_MS = 200;
+
+  useEffect(() => {
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.key === 'Escape' && open && onClose) {
+        onClose();
+      }
+    };
+
+    if (open) {
+      window.addEventListener('keydown', handleKeyDown);
+    }
+
+    return () => {
+      window.removeEventListener('keydown', handleKeyDown);
+    };
+  }, [open, onClose]);
 
   // Overlay click
   const handleOverlayClick = () => {

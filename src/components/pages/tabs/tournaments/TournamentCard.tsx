@@ -39,7 +39,7 @@ export function TournamentCard({
   const leftLabel = hasParticipated ? (
     <span className="inline-flex items-center gap-1.5 leading-none align-middle">
       <Ticket className="w-4 h-4" />
-      <span className="leading-none h-2.5">{ticketCount}</span>
+      <span className="leading-none h-2.5 font-semibold">{ticketCount}</span>
     </span>
   ) : (
     leftTime

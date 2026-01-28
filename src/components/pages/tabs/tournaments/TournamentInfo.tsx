@@ -62,8 +62,13 @@ export function TournamentInfo({ id, className, ...rest }: TournamentDetailsProp
   return (
     <div className={twMerge('max-w-full overflow-hidden', className)}>
       <div {...rest} className={'flex justify-between items-center gap-5'}>
-        <Medal type={data?.type} loading={isLoading} height={130} />
-        <div className="flex-1 max-w-60 flex flex-col gap-px">
+        <Medal
+          className="drop-shadow-xl drop-shadow-black/30"
+          type={data?.type}
+          loading={isLoading}
+          height={130}
+        />
+        <div className="flex-1 max-w-60 flex flex-col gap-px p-1">
           {info.map(({ label, value }) => (
             <div key={label} className="flex justify-between items-center gap-5 text-sm">
               <span className="text-pink-secondary font-medium ">{label}</span>
