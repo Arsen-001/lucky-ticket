@@ -12,8 +12,8 @@ export function TournamentPlacements({ id }: { id: string }) {
   const t = useAppTranslations();
 
   const trophies = [
-    { type: 'silver', place: t('1st') },
-    { type: 'gold', place: t('2nd') },
+    { type: 'silver', place: t('2nd') },
+    { type: 'gold', place: t('1st') },
     { type: 'bronze', place: t('3rd') },
   ] as const;
 

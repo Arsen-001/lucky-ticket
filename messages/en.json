@@ -98,5 +98,7 @@
   "2nd": "2nd",
   "3rd": "3rd",
   "place": "Place",
-  "prize": "Prize"
+  "prize": "Prize",
+  "bet": "Bet",
+  "max bet": "Max Bet"
 }
