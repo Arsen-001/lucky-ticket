@@ -12,7 +12,7 @@ import { GoldenText } from '@/components/shared/typography/GoldenText';
 import Image from 'next/image';
 import { icons } from '@/constants/icons';
 import { Skeleton } from '@/components/shared/seleketons/Skeleton';
-import { getTicketPerTimeUnit } from '@/utils/units.utils';
+import { getTicketPerTimeUnit } from '@/utils/global/units.utils';
 
 export type HomeTickestListItemProps = TicketDataType & ClassNameProps & { loading?: boolean };
 

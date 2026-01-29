@@ -55,7 +55,10 @@ export const Modal = ({ open, onClose, children, closeOnOverlayClick = true }: M
         {/* Modal */}
         <div
           style={{ transitionDuration: `${ANIMATION_MS}ms` }}
-          className={twMerge('relative transition-all transform', open ? 'scale-100' : 'scale-80')}
+          className={twMerge(
+            'w-full relative transition-all transform',
+            open ? 'scale-100' : 'scale-80'
+          )}
         >
           {children}
         </div>

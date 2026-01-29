@@ -6,7 +6,7 @@ import {
   getLeftTimestamp,
   getTimeText,
   pad,
-} from '@/utils/date.utils';
+} from '@/utils/global/date.utils';
 import { useAppTranslations } from '@/hooks/useAppTranslations';
 import type { Duration } from '@/types/interfaces/date.interfaces';
 

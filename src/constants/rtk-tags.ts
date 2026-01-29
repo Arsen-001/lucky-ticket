@@ -4,4 +4,5 @@ export const rtkTags = {
   tournamentById: ':TournamentById',
   tickets: 'Tickets',
   ticketsById: ':TicketsById',
+  tasks: 'Tasks',
 } as const;

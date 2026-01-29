@@ -1,5 +1,5 @@
-import { getRandomUpcomingDate } from '@/utils/date.utils';
-import { getRandomNumber } from '@/utils/number.utils';
+import { getRandomUpcomingDate } from '@/utils/global/date.utils';
+import { getRandomNumber } from '@/utils/global/number.utils';
 import type { Ticket } from '@/types/types/ticket.types';
 
 const getClaimDate = () => getRandomUpcomingDate(1, 180);

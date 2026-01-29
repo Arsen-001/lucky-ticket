@@ -3,8 +3,8 @@ import type {
   Tournament,
   TournamentPlacesResponse,
 } from '@/types/interfaces/tournaments.interfaces';
-import { getRandomNumber } from '@/utils/number.utils';
-import { getRandomUpcomingDate } from '@/utils/date.utils';
+import { getRandomNumber } from '@/utils/global/number.utils';
+import { getRandomUpcomingDate } from '@/utils/global/date.utils';
 
 const getNum = () => getRandomNumber(1, 1000);
 const getTicketsCount = () => getRandomNumber(1, 20);

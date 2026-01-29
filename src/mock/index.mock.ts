@@ -2,6 +2,7 @@ import meMock from '@/mock/me.mock';
 import { tournamentsMock } from '@/mock/tournaments.mock';
 import { ticketsMock } from '@/mock/tickets.mock';
 import type { FetchArgs } from '@reduxjs/toolkit/query';
+import { tasksMock } from '@/mock/tasks.mock';
 
 /**
  * Type for functional mock handlers.
@@ -18,6 +19,7 @@ export const mockData = {
   ...meMock,
   ...tournamentsMock,
   ...ticketsMock,
+  ...tasksMock,
 } as const;
 
 export type MockData = typeof mockData;

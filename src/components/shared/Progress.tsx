@@ -29,7 +29,7 @@ export function Progress({ className, classNames, percentage, children }: Progre
       {children && (
         <div
           className={twMerge(
-            'text-xs text-white leading-none relative z-1 w-fit',
+            'text-xs text-white leading-none relative z-1 w-fit top-1/2 -translate-y-1/2',
             classNames?.children
           )}
         >

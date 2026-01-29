@@ -26,5 +26,10 @@
   --color-back-button-background: rgba(60, 34, 76, 1);
   --color-fade: rgb(15, 15, 30, 0.8);
 
+  --color-tiktok: rgba(0, 0, 0, 1);
+  --color-instagram: rgba(219, 39, 119, 1);
+  --color-facebook: rgba(37, 99, 235, 1);
+  --color-telegram: rgba(8, 145, 178, 1);
+
   --drop-shadow-3xl: 0 20px 12px rgba(0, 0, 0, 0.3);
 }

@@ -43,9 +43,9 @@ export function Button({
           disabled:active:scale-100
           disabled:hover:none
           hover:cursor-pointer`,
-        className,
         loading ? 'disabled:opacity-80 relative flex items-center justify-center gap-2' : '',
-        !loading && disabled ? 'disabled:bg-disabled' : ''
+        !loading && disabled ? 'disabled:bg-disabled' : '',
+        className
       )}
       type={type}
       {...rest}

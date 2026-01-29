@@ -50,8 +50,14 @@ export function TournamentBetModal({
     }
   };
 
+  const handleClose = () => {
+    onClose();
+    setIsEditing(false);
+    setBetCount(1);
+  };
+
   return (
-    <Modal open={open} onClose={onClose}>
+    <Modal open={open} onClose={handleClose}>
       <div className="bg-purple-gradient rounded-3xl p-6 min-w-80 flex flex-col gap-2">
         {participatedTicketsCount !== undefined && participatedTicketsCount > 0 && (
           <div className="flex gap-2 items-center px-2 py-1 text-sm">
@@ -91,10 +97,10 @@ export function TournamentBetModal({
         </div>
 
         <div className="flex-center gap-2">
-          <Button variant="secondary" className="py-1 rounded-full text-sm" onClick={setMaxBet}>
+          <Button variant="secondary" className="py-2 rounded-full text-sm" onClick={setMaxBet}>
             {t('max bet')}
           </Button>
-          <Button className="py-1 rounded-full text-sm" onClick={onClose}>
+          <Button className="py-2 rounded-full text-sm" onClick={handleClose}>
             {t('bet')}
           </Button>
         </div>

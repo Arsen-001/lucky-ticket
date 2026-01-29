@@ -1,7 +1,7 @@
 // utils/getCountdown.ts
 import dayjs from 'dayjs';
 import duration from 'dayjs/plugin/duration';
-import { getRandomNumber } from '@/utils/number.utils';
+import { getRandomNumber } from '@/utils/global/number.utils';
 import type { Duration } from '@/types/interfaces/date.interfaces';
 
 dayjs.extend(duration);

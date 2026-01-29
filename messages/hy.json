@@ -1,5 +1,15 @@
 {
   "hello world": "Barlus Bratva",
   "participated": "Մասնակցել եք",
-  "tournament details": "Մրցաշարի մանրամասներ"
+  "tournament details": "Մրցաշարի մանրամասներ",
+  "premium bonus": "Պրեմիում Բոնուս",
+  "rewards bonus": "+{percent}% ձեր բոլոր պարգևներին!",
+  "daily": "Օրական",
+  "weekly": "Շաբաթական",
+  "monthly": "Ամսական",
+  "share on": "Կիսվել",
+  "reward": "Պարգև",
+  "share": "Կիսվել",
+  "complete": "Ավարտել",
+  "reward claimed": "Պարգևը ստացված է"
 }

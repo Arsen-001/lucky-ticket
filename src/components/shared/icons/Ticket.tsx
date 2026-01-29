@@ -2,7 +2,7 @@
 import { icons } from '@/constants/icons';
 import Image, { type ImageProps } from 'next/image';
 import { useEffect, useState } from 'react';
-import { getRandomNumber } from '@/utils/number.utils';
+import { getRandomNumber } from '@/utils/global/number.utils';
 import { twMerge } from 'tailwind-merge';
 
 export type TicketType = 'bronze' | 'silver' | 'gold' | 'diamond' | 'platinum';

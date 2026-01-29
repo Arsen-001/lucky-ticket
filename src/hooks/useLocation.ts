@@ -1,5 +1,5 @@
 import { usePathname } from 'next/navigation';
-import { matchDynamic, startsWithDynamic } from '@/utils/pathname.utils';
+import { matchDynamic, startsWithDynamic } from '@/utils/global/pathname.utils';
 
 export function useLocation() {
   const pathname = usePathname();
