@@ -1,6 +1,5 @@
 import { LeaderboardList } from '@/components/pages/tabs/leaderboard/LeaderboardList';
 import { LeaderboardTop3 } from '@/components/pages/tabs/leaderboard/LeaderboardTop';
-import { LeaderboardMyPlace } from '@/components/pages/tabs/leaderboard/LeaderboardMyPlace';
 
 export default function LeaderboardPage() {
   return (
@@ -9,7 +8,6 @@ export default function LeaderboardPage() {
         <LeaderboardTop3 className="mt-5" />
         <LeaderboardList className=" flex-1" />
       </div>
-      <LeaderboardMyPlace />
     </div>
   );
 }

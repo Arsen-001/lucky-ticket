@@ -17,6 +17,7 @@ interface Props {
   loading?: boolean;
   isVerified?: boolean;
   isPrime?: boolean;
+  outline?: boolean;
 }
 
 export const LeaderboardListItem = ({
@@ -29,6 +30,7 @@ export const LeaderboardListItem = ({
   loading,
   isVerified,
   isPrime,
+  outline,
 }: Props) => {
   const isPositive = rankChange > 0;
   const isNegative = rankChange < 0;
@@ -36,7 +38,8 @@ export const LeaderboardListItem = ({
   return (
     <div
       className={twMerge(
-        'flex items-center gap-1 p-3 bg-background-overlay/50 rounded-2xl border border-white/5',
+        'flex items-center gap-1 p-3 bg-background-overlay/50 rounded-2xl border-2 border-white/5',
+        outline && 'border-gray-400',
         className
       )}
     >
@@ -62,8 +65,8 @@ export const LeaderboardListItem = ({
             loading={loading}
             skeleton={<Skeleton variant="text" textSize="sm" className="w-20" />}
           >
-            <div className="flex items-center  gap-1 min-w-0">
-              <div className="font-semibold truncate h-4.5">{username}</div>
+            <div className="flex items-start  gap-1 min-w-0">
+              <div className="font-semibold truncate ">{username}</div>
               <div className="flex items-center gap-px">
                 {isVerified && (
                   <VerifiedBadge

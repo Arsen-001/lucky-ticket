@@ -3,7 +3,7 @@ import { TaskCard } from './TaskCard';
 import { Progress } from '@/components/shared/Progress';
 import { Skeleton } from '@/components/shared/seleketons/Skeleton';
 import { TaskCategoryType } from '@/types/enums/tasks.enums';
-import { useAppTranslations } from '@hooks/useAppTranslations';
+import { useAppTranslations } from '@/hooks/useAppTranslations';
 
 interface TaskListProps {
   tasks: Task[];

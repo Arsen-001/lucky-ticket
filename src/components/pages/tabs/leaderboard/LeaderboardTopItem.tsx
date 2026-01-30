@@ -1,7 +1,7 @@
 import { Trophy } from 'lucide-react';
 import Image from 'next/image';
 import { twMerge } from 'tailwind-merge';
-import { icons } from '@icons';
+import { icons } from '@/constants/icons';
 import { SkeletonSuspense } from '@/components/shared/seleketons/SkeletonSuspense';
 import { Skeleton } from '@/components/shared/seleketons/Skeleton';
 
@@ -11,9 +11,10 @@ interface Props {
   image: string;
   place: number;
   loading?: boolean;
+  outline?: boolean;
 }
 
-export const LeaderboardTopItem = ({ name, points, image, place, loading }: Props) => {
+export const LeaderboardTopItem = ({ name, points, image, place, loading, outline }: Props) => {
   const isFirst = place === 1;
 
   return (
@@ -22,7 +23,8 @@ export const LeaderboardTopItem = ({ name, points, image, place, loading }: Prop
         'relative w-25.5 mt-5.25 p-2 flex-col-stretch rounded-t-full',
         isFirst
           ? ' gap-8 h-50 bg-[linear-gradient(to_bottom,theme(colors.gradient-darkpink)_0%,theme(colors.gradient-darkpink)_70%,transparent_100%)]'
-          : ' gap-5 h-43 bg-[linear-gradient(to_bottom,theme(colors.gradient-darkpink)_0%,theme(colors.gradient-darkpink)_35%,transparent_100%)]'
+          : ' gap-5 h-43 bg-[linear-gradient(to_bottom,theme(colors.gradient-darkpink)_0%,theme(colors.gradient-darkpink)_45%,transparent_100%)]',
+        outline && 'border-2 border-b-0 border-gray-400 bg-primary/10'
       )}
     >
       {isFirst && (
@@ -51,12 +53,12 @@ export const LeaderboardTopItem = ({ name, points, image, place, loading }: Prop
           </div>
         )}
       </div>
-      <div className="overflow-hidden flex flex-col items-center gap-1">
+      <div className="overflow-hidden flex flex-col items-center gap-px">
         <SkeletonSuspense
           loading={loading}
           skeleton={<Skeleton variant="text" textSize="sm" className="w-16" />}
         >
-          <div className="font-semibold text-sm text-center truncate w-full">{name}</div>
+          <div className="font-semibold  text-center truncate w-full">{name}</div>
         </SkeletonSuspense>
         <SkeletonSuspense
           loading={loading}
