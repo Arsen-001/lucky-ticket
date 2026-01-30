@@ -1,6 +1,6 @@
 'use client';
 
-import { PageHeader } from '@/components/shared/PageHeader';
+import { PageHeader } from '@/components/layout-elements/PageHeader';
 import { useGetTournamentByIdQuery } from '@/api/tournaments.api';
 import { SkeletonSuspense } from '@/components/shared/seleketons/SkeletonSuspense';
 import { Skeleton } from '@/components/shared/seleketons/Skeleton';
@@ -10,7 +10,7 @@ interface TournamentDetailsHeaderProps extends HTMLAttributes<HTMLDivElement> {
   id: string;
 }
 
-export function TournamentDetailsHeader({ id, ...props }: TournamentDetailsHeaderProps) {
+export function TournamentDetailsTitle({ id, ...props }: TournamentDetailsHeaderProps) {
   const { data, isLoading } = useGetTournamentByIdQuery(id);
 
   return (
