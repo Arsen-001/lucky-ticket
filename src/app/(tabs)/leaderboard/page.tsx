@@ -3,11 +3,9 @@ import { LeaderboardTop3 } from '@/components/pages/tabs/leaderboard/Leaderboard
 
 export default function LeaderboardPage() {
   return (
-    <div className="h-full overflow-hidden inset-container-background flex flex-col">
-      <div className="flex-1 overflow-auto scrollbar-hidden flex-col-stretch">
-        <LeaderboardTop3 className="mt-5" />
-        <LeaderboardList className=" flex-1" />
-      </div>
-    </div>
+    <>
+      <LeaderboardTop3 className="mt-5" />
+      <LeaderboardList className=" flex-1" />
+    </>
   );
 }

@@ -11,14 +11,10 @@ export default function TournamentPage() {
     isLoading || !tournamentsData?.length ? placeholderTournaments : tournamentsData;
 
   return (
-    <div className="h-full overflow-hidden inset-container-background">
-      <div className="h-full overflow-auto p-5 scrollbar-hidden">
-        <div className="grid grid-cols-2 gap-x-3 gap-y-4">
-          {tournaments?.map((tournament, index) => (
-            <TournamentCard key={tournament.id || index} loading={isLoading} {...tournament} />
-          ))}
-        </div>
-      </div>
+    <div className="p-5 grid grid-cols-2 gap-x-3 gap-y-4">
+      {tournaments?.map((tournament, index) => (
+        <TournamentCard key={tournament.id || index} loading={isLoading} {...tournament} />
+      ))}
     </div>
   );
 }
