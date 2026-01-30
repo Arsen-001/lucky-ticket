@@ -116,10 +116,8 @@ export const LeaderboardListItem = ({
             loading={loading}
             skeleton={<Skeleton variant="text" textSize="sm" className="w-12" />}
           >
-            <>
-              <Trophy className="stroke-2" size={16} />
-              <span className="font-semibold text-lg h-6.25">{points}</span>
-            </>
+            <Trophy className="stroke-2" size={15} />
+            <span className="font-semibold h-5.25">{points}</span>
           </SkeletonSuspense>
         </div>
       </div>
