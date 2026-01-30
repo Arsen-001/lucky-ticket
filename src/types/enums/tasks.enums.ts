@@ -4,3 +4,9 @@ export enum TaskType {
   VISIT = 'visit',
   SHARE = 'share',
 }
+
+export enum TaskCategoryType {
+  DAILY = 'daily',
+  WEEKLY = 'weekly',
+  MONTHLY = 'monthly',
+}

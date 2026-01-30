@@ -122,5 +122,8 @@
   "telegram": "Telegram",
   "share on {place}": "Share on {place}",
   "share task description": "Choose a platform to share. After sharing, the task will be marked completed and you’ll be able to claim the reward.",
+  "daily progress": "Daily Progress",
+  "weekly progress": "Weekly Progress",
+  "monthly progress": "Monthly Progress",
   "progress": "Progress"
 }

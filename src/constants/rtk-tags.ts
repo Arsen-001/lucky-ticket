@@ -5,4 +5,5 @@ export const rtkTags = {
   tickets: 'Tickets',
   ticketsById: ':TicketsById',
   tasks: 'Tasks',
+  leaderboard: 'Leaderboard',
 } as const;

@@ -1,4 +1,4 @@
-import { TaskType } from '@/types/enums/tasks.enums';
+import { TaskCategoryType, TaskType } from '@/types/enums/tasks.enums';
 
 export interface Task {
   id: string;
@@ -17,8 +17,6 @@ export interface TaskCategory {
   progress: number;
 }
 
-export interface TasksResponse {
-  daily: TaskCategory;
-  weekly: TaskCategory;
-  monthly: TaskCategory;
-}
+export type TasksResponse = {
+  [key in TaskCategoryType]: TaskCategory;
+};

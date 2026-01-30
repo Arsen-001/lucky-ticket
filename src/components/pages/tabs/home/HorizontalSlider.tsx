@@ -43,7 +43,7 @@ export function HorizontalSlider({ className }: ClassNameProps) {
       {tournaments?.map(({ id, ...rest }, index) => {
         return (
           <SwiperSlide className="overflow-visible pt-10" key={id || index}>
-            <HorizontalSliderCard loading={isLoading} {...rest} />
+            <HorizontalSliderCard id={id} loading={isLoading} {...rest} />
           </SwiperSlide>
         );
       })}

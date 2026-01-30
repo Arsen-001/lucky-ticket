@@ -30,69 +30,6 @@ const getMockPlacements = (): TournamentPlacesResponse => ({
   ],
 });
 
-export const topTournaments: Tournament[] = [
-  {
-    id: '123e4567-e89b-12d3-a456-426655440000',
-    name: 'Golden Tournament',
-    startTime: getStartTime(),
-    teamSize: getNum(),
-    prizePool: getNum(),
-    type: 'gold',
-    guaranteedPool: getNum(),
-    places: getMockPlacements(),
-  },
-  {
-    id: '123e4567-e89b-12d3-a456-426655440001',
-    name: 'Silver Tournament',
-    startTime: getStartTime(),
-    teamSize: getNum(),
-    prizePool: getNum(),
-    type: 'silver',
-    guaranteedPool: getNum(),
-    places: getMockPlacements(),
-  },
-  {
-    id: '123e4567-e89b-12d3-a456-426655440002',
-    name: 'Bronze Tournament',
-    startTime: getStartTime(),
-    teamSize: getNum(),
-    prizePool: getNum(),
-    type: 'bronze',
-    guaranteedPool: getNum(),
-    places: getMockPlacements(),
-  },
-  {
-    id: '123e4567-e89b-12d3-a456-426655440003',
-    name: 'Everyday Tournament',
-    startTime: getStartTime(),
-    teamSize: getNum(),
-    prizePool: getNum(),
-    type: 'bronze',
-    guaranteedPool: getNum(),
-    places: getMockPlacements(),
-  },
-  {
-    id: '123e4567-e89b-12d3-a456-426655440004',
-    name: 'Platinum Tournament',
-    startTime: getStartTime(),
-    teamSize: getNum(),
-    prizePool: getNum(),
-    type: 'platinum',
-    guaranteedPool: getNum(),
-    places: getMockPlacements(),
-  },
-  {
-    id: '123e4567-e89b-12d3-a456-426655440005',
-    name: 'Diamond Tournament',
-    startTime: getStartTime(),
-    teamSize: getNum(),
-    prizePool: getNum(),
-    type: 'diamond',
-    guaranteedPool: getNum(),
-    places: getMockPlacements(),
-  },
-];
-
 export const tournaments: PersonalTournament[] = [
   {
     id: '123e4567-e89b-12d3-a456-426655440006',
@@ -185,5 +122,9 @@ export const tournaments: PersonalTournament[] = [
     participated: false,
   },
 ];
+
+export const topTournaments: Tournament[] = tournaments.filter(
+  tournament => !tournament.participated
+);
 
 export const tournamentsMock = { topTournaments, tournaments };

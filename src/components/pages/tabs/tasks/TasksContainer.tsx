@@ -4,7 +4,7 @@ import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { Tabs } from '@/components/shared/Tabs';
 import { Task } from '@/types/interfaces/tasks.interfaces';
-import { TaskType } from '@/types/enums/tasks.enums';
+import { TaskCategoryType, TaskType } from '@/types/enums/tasks.enums';
 import { useGetTasksQuery } from '@/api/tasks.api';
 import { TaskList } from './TaskList';
 import { TaskModal } from './TaskModal';
@@ -59,6 +59,7 @@ export function TasksContainer() {
         <TaskList
           tasks={tasks?.daily.items || []}
           progress={tasks?.daily.progress || 0}
+          category={TaskCategoryType.DAILY}
           isLoading={isLoading}
           onAction={handleTaskAction}
           onClick={handleTaskClick}
@@ -72,6 +73,7 @@ export function TasksContainer() {
         <TaskList
           tasks={tasks?.weekly.items || []}
           progress={tasks?.weekly.progress || 0}
+          category={TaskCategoryType.WEEKLY}
           isLoading={isLoading}
           onAction={handleTaskAction}
           onClick={handleTaskClick}
@@ -85,6 +87,7 @@ export function TasksContainer() {
         <TaskList
           tasks={tasks?.monthly.items || []}
           progress={tasks?.monthly.progress || 0}
+          category={TaskCategoryType.MONTHLY}
           isLoading={isLoading}
           onAction={handleTaskAction}
           onClick={handleTaskClick}

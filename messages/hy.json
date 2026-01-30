@@ -11,5 +11,9 @@
   "reward": "Պարգև",
   "share": "Կիսվել",
   "complete": "Ավարտել",
-  "reward claimed": "Պարգևը ստացված է"
+  "reward claimed": "Պարգևը ստացված է",
+  "daily progress": "Օրական առաջընթաց",
+  "weekly progress": "Շաբաթական առաջընթաց",
+  "monthly progress": "Ամսական առաջընթաց",
+  "progress": "Առաջընթաց"
 }

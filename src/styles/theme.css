@@ -1,7 +1,17 @@
 @theme {
+  --color-gold: rgba(248, 189, 62, 1);
+  --color-gold-light: rgba(255, 212, 120, 1);
+  --color-gold-dark: rgba(190, 135, 35, 1);
+  --color-bronze: rgba(128, 78, 30, 1);
+  --color-bronze-light: rgba(186, 120, 48, 1);
+  --color-bronze-dark: rgba(83, 46, 29, 1);
+  --color-silver: rgba(198, 203, 212, 1);
+  --color-silver-light: rgba(230, 234, 240, 1);
+  --color-silver-dark: rgba(140, 145, 155, 1);
+
   --color-orange: rgba(180, 83, 9, 1);
   --color-pink: rgba(198, 113, 189, 1);
-  --color-gold: rgba(248, 189, 62, 1);
+  --color-teal: rgba(79, 138, 130, 1);
   --color-electric-purple: rgba(116, 61, 245, 1);
   --color-electric-pink: rgba(222, 0, 155, 1);
 

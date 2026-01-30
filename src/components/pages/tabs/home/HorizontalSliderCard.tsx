@@ -8,6 +8,7 @@ import { twMerge } from 'tailwind-merge';
 import { Button } from '@/components/shared/buttons/Button';
 import { SkeletonSuspense } from '@/components/shared/seleketons/SkeletonSuspense';
 import { Skeleton } from '@/components/shared/seleketons/Skeleton';
+import { useRouter } from 'next/navigation';
 
 interface Info {
   label: string;
@@ -15,6 +16,7 @@ interface Info {
 }
 
 export interface VerticalSliderCardProps {
+  id: string;
   type: MedalType;
   name: string;
   startTime: string;
@@ -27,6 +29,7 @@ export interface VerticalSliderCardProps {
 }
 
 export function HorizontalSliderCard({
+  id,
   type,
   startTime,
   name,
@@ -38,7 +41,12 @@ export function HorizontalSliderCard({
   disabled,
 }: VerticalSliderCardProps) {
   const t = useAppTranslations();
+  const router = useRouter();
   const { leftTime, expired } = useCountDown(startTime);
+
+  const handleNavigate = () => {
+    router.push(`/tournaments/${id}`);
+  };
 
   const info: Info[] = [
     {
@@ -105,7 +113,11 @@ export function HorizontalSliderCard({
         ))}
       </div>
 
-      <Button disabled={loading || expired} className="mt-2 text-sm py-2 px-4 w-45">
+      <Button
+        disabled={loading || expired}
+        onClick={handleNavigate}
+        className="mt-2 text-sm py-2 px-4 w-45"
+      >
         {t('play')}
       </Button>
     </div>

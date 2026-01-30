@@ -1,5 +1,5 @@
-import { TaskType } from '@/types/enums/tasks.enums';
-import { Task } from '@/types/interfaces/tasks.interfaces';
+import { TaskCategoryType, TaskType } from '@/types/enums/tasks.enums';
+import { Task, type TasksResponse } from '@/types/interfaces/tasks.interfaces';
 import { tournamentsMock } from '@/mock/tournaments.mock';
 
 const DAILY_TASKS: Task[] = [
@@ -157,17 +157,17 @@ const calculateProgress = (tasks: Task[]) => {
   return Math.round((completedTasks / tasks.length) * 100);
 };
 
-export const tasksMock = {
+export const tasksMock: { tasks: TasksResponse } = {
   tasks: {
-    daily: {
+    [TaskCategoryType.DAILY]: {
       items: DAILY_TASKS,
       progress: calculateProgress(DAILY_TASKS),
     },
-    weekly: {
+    [TaskCategoryType.WEEKLY]: {
       items: WEEKLY_TASKS,
       progress: calculateProgress(WEEKLY_TASKS),
     },
-    monthly: {
+    [TaskCategoryType.MONTHLY]: {
       items: MONTHLY_TASKS,
       progress: calculateProgress(MONTHLY_TASKS),
     },

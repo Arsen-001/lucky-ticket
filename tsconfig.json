@@ -23,7 +23,18 @@
     ],
     "paths": {
       "@/*": ["./src/*"],
-      "#/*": ["./*"]
+      "#/*": ["./*"],
+      "@icons": ["./src/constants/icons.ts"],
+      "@images": ["./public/assets/images/*"],
+      "@components": ["./src/components/*"],
+      "@utils/*": ["./src/utils/*"],
+      "@hooks/*": ["./src/hooks/*"],
+      "@services/*": ["./src/services/*"],
+      "@types/*": ["./src/types/*"],
+      "@constants/*": ["./src/constants/*"],
+      "@api/*": ["./src/api/*"],
+      "@assets/*": ["./public/assets/*"],
+      "@routes": ["./src/constants/routes.ts"]
     }
   },
   "include": [
