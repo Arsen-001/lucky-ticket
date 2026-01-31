@@ -79,7 +79,7 @@ export function TournamentCard({
       <div className="h-20 bg-white/8 rounded-lg flex items-center justify-center">
         <div className={participated ? 'shine-[130px]' : undefined}>
           <Medal
-            className="transform -translate-y-1 z-1"
+            className="transform -translate-y-1 z-1 drop-shadow-xl drop-shadow-black/30"
             height={86}
             type={type}
             loading={loading}

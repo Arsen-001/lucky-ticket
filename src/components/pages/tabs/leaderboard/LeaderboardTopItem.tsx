@@ -50,7 +50,7 @@ export const LeaderboardTopItem = ({
       {isFirst && (
         <Image
           className={twMerge(
-            'absolute -z-2 -top-5 left-1/2 -translate-x-1/2',
+            'h-auto absolute -z-2 -top-5 left-1/2 -translate-x-1/2',
             loading && 'animation-blink'
           )}
           src={icons.crown}

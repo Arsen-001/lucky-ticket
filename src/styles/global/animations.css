@@ -12,7 +12,7 @@
 
   @keyframes slide-in-bottom {
     from {
-      transform: translateY(10px);
+      transform: translateY(30px);
       opacity: 0;
     }
     to {
@@ -40,6 +40,6 @@
   }
 
   --animate-fade-in: fade-in 0.3s ease-out both;
-  --animate-slide-in-bottom: slide-in-bottom 0.3s ease-out both;
+  --animate-slide-in-bottom: slide-in-bottom 0.4s ease-out both;
   --animate-fill: fill 1.6s linear infinite;
 }

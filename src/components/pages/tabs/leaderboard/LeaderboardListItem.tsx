@@ -61,7 +61,13 @@ export const LeaderboardListItem = ({
             loading={loading}
             skeleton={<Skeleton variant="round" className="w-full h-full" />}
           >
-            <Image src={avatar} alt={username} fill className="rounded-full object-cover" />
+            <Image
+              src={avatar}
+              alt={username}
+              fill
+              sizes="100%"
+              className="rounded-full object-cover"
+            />
           </SkeletonSuspense>
         </div>
         <div className="flex-1 flex-col-stretch gap-px min-w-0">

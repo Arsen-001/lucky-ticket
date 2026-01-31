@@ -9,8 +9,10 @@ export type TabClassName = string | ((tabKey: string) => string);
 
 export interface TabsProps {
   items: { key: string; title: string; children?: ReactNode }[];
+  activeKey?: string;
   defaultActiveKey?: string;
   onTabChange?: (key: string) => void;
+  hideMountAnimation?: boolean;
   className?: TabClassName;
   classNames?: {
     container?: TabClassName;
@@ -21,8 +23,18 @@ export interface TabsProps {
   };
 }
 
-export function Tabs({ items, defaultActiveKey, onTabChange, className, classNames }: TabsProps) {
-  const [activeKey, setActiveKey] = useState(defaultActiveKey || items[0]?.key);
+export function Tabs({
+  items,
+  activeKey: propActiveKey,
+  defaultActiveKey,
+  onTabChange,
+  hideMountAnimation,
+  className,
+  classNames,
+}: TabsProps) {
+  const [internalActiveKey, setInternalActiveKey] = useState(defaultActiveKey || items[0]?.key);
+  const activeKey = propActiveKey !== undefined ? propActiveKey : internalActiveKey;
+
   const [indicatorStyle, setIndicatorStyle] = useState({ left: 0, width: 0, height: 0 });
   const [showLeftScroll, setShowLeftScroll] = useState(false);
   const [showRightScroll, setShowRightScroll] = useState(false);
@@ -67,7 +79,9 @@ export function Tabs({ items, defaultActiveKey, onTabChange, className, classNam
   }, [activeKey, items]);
 
   const handleTabClick = (key: string) => {
-    setActiveKey(key);
+    if (propActiveKey === undefined) {
+      setInternalActiveKey(key);
+    }
     onTabChange?.(key);
     centerActiveTab(key);
   };
@@ -136,7 +150,8 @@ export function Tabs({ items, defaultActiveKey, onTabChange, className, classNam
         <div
           ref={tabsContainerRef}
           className={twMerge(
-            'scrollbar-hidden relative flex max-w-full items-center overflow-x-auto overflow-y-hidden rounded-full bg-gradient-purple scroll-smooth animate-fade-in',
+            'scrollbar-hidden relative flex max-w-full items-center overflow-x-auto overflow-y-hidden rounded-full bg-gradient-purple scroll-smooth',
+            !hideMountAnimation && 'animate-fade-in',
             getClassName(classNames?.container)
           )}
           onScroll={checkScroll}
@@ -176,8 +191,9 @@ export function Tabs({ items, defaultActiveKey, onTabChange, className, classNam
                 relative z-2 whitespace-nowrap rounded-full
                 px-4 py-1.5 m-0.5 text-sm font-semibold
                 text-white-secondary transition-colors
-                hover:text-white/90 w-auto animate-slide-in-bottom
+                hover:text-white/90 w-auto
               `,
+                !hideMountAnimation && 'animate-slide-in-bottom',
                 activeKey === item.key ? 'text-white' : '',
                 getClassName(classNames?.tab)
               )}
@@ -199,10 +215,7 @@ export function Tabs({ items, defaultActiveKey, onTabChange, className, classNam
         )}
       </div>
       {currentChildren && (
-        <div
-          key={activeKey}
-          className={twMerge('mt-5 animate-slide-in-bottom', getClassName(classNames?.children))}
-        >
+        <div key={activeKey} className={twMerge('mt-5', getClassName(classNames?.children))}>
           {currentChildren}
         </div>
       )}

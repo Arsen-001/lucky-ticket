@@ -42,7 +42,7 @@ export const Modal = ({ open, onClose, children, closeOnOverlayClick = true }: M
   return (
     <ClientPortal>
       <div
-        aria-hidden={open ? 'true' : 'false'}
+        aria-hidden={open ? 'false' : 'true'}
         style={{ transitionDuration: `${ANIMATION_MS}ms` }}
         className={twMerge(
           'fixed inset-0 flex items-center justify-center z-100 transition-all backdrop-blur-[1px] p-7.5',

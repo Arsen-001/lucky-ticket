@@ -90,12 +90,11 @@ export function HorizontalSliderCard({
 
       <Medal
         className={twMerge(
-          'absolute h-28.5 w-auto right-15 transform translate-x-1/2 -translate-y-26 transition opacity-80 drop-shadow-3xl',
+          'absolute right-15 transform translate-x-1/2 -translate-y-26 transition opacity-80 drop-shadow-3xl',
           loading && 'animation-blink'
         )}
         loading={loading}
         type={type}
-        width={100}
         height={100}
       />
 
