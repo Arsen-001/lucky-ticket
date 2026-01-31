@@ -130,3 +130,20 @@
     animation: rotate 90s linear infinite;
   }
 }
+
+@utility loader {
+  width: fit-content;
+  font-size: 40px;
+  font-weight: bold;
+  color: transparent;
+  -webkit-text-stroke: 1px var(--color-gradient-darkpink);
+  background: linear-gradient(
+      90deg,
+      transparent 33%,
+      var(--color-gradient-darkpink) 50%,
+      var(--color-gradient-lightpink) 67%,
+      transparent 0
+    )
+    0/300% 100% no-repeat text;
+  @apply animate-fill;
+}

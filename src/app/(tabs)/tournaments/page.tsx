@@ -13,7 +13,13 @@ export default function TournamentPage() {
   return (
     <div className="p-5 grid grid-cols-2 gap-x-3 gap-y-4">
       {tournaments?.map((tournament, index) => (
-        <TournamentCard key={tournament.id || index} loading={isLoading} {...tournament} />
+        <TournamentCard
+          key={index}
+          loading={isLoading}
+          {...tournament}
+          className="animate-slide-in-bottom"
+          style={{ animationDelay: `${index * 50}ms` }}
+        />
       ))}
     </div>
   );

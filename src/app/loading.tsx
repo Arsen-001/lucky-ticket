@@ -1,10 +1,9 @@
-import '@/styles/components/loading.css';
-import { GlobalConstants } from '@/constants/global.constants';
+import ProjectNameLoader from '@/components/shared/loaders/ProjectNameLoader';
 
 export default function Loading() {
   return (
     <div className="h-full flex-center">
-      <div className="loader">{GlobalConstants.projectName}</div>
+      <ProjectNameLoader />
     </div>
   );
 }

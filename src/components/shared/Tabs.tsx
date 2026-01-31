@@ -136,7 +136,7 @@ export function Tabs({ items, defaultActiveKey, onTabChange, className, classNam
         <div
           ref={tabsContainerRef}
           className={twMerge(
-            'scrollbar-hidden relative flex max-w-full items-center overflow-x-auto overflow-y-hidden rounded-full bg-gradient-purple scroll-smooth',
+            'scrollbar-hidden relative flex max-w-full items-center overflow-x-auto overflow-y-hidden rounded-full bg-gradient-purple scroll-smooth animate-fade-in',
             getClassName(classNames?.container)
           )}
           onScroll={checkScroll}
@@ -156,7 +156,7 @@ export function Tabs({ items, defaultActiveKey, onTabChange, className, classNam
           />
 
           {/* Tabs */}
-          {items.map(item => (
+          {items.map((item, index) => (
             <Button
               variant="transparent"
               key={item.key}
@@ -168,12 +168,15 @@ export function Tabs({ items, defaultActiveKey, onTabChange, className, classNam
               role="tab"
               aria-selected={activeKey === item.key}
               aria-controls={`tab-panel-${item.key}`}
+              style={{
+                animationDelay: `${index * 100}ms`,
+              }}
               className={twMerge(
                 `
                 relative z-2 whitespace-nowrap rounded-full
                 px-4 py-1.5 m-0.5 text-sm font-semibold
                 text-white-secondary transition-colors
-                hover:text-white/90 w-auto
+                hover:text-white/90 w-auto animate-slide-in-bottom
               `,
                 activeKey === item.key ? 'text-white' : '',
                 getClassName(classNames?.tab)
@@ -196,7 +199,12 @@ export function Tabs({ items, defaultActiveKey, onTabChange, className, classNam
         )}
       </div>
       {currentChildren && (
-        <div className={twMerge('mt-5', getClassName(classNames?.children))}>{currentChildren}</div>
+        <div
+          key={activeKey}
+          className={twMerge('mt-5 animate-slide-in-bottom', getClassName(classNames?.children))}
+        >
+          {currentChildren}
+        </div>
       )}
     </>
   );

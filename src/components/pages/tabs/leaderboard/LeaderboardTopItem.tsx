@@ -4,6 +4,7 @@ import { twMerge } from 'tailwind-merge';
 import { icons } from '@/constants/icons';
 import { SkeletonSuspense } from '@/components/shared/seleketons/SkeletonSuspense';
 import { Skeleton } from '@/components/shared/seleketons/Skeleton';
+import type { CSSProperties } from 'react';
 
 interface Props {
   name: string;
@@ -12,25 +13,44 @@ interface Props {
   place: number;
   loading?: boolean;
   outline?: boolean;
+  className?: string;
+  style?: CSSProperties;
 }
 
-export const LeaderboardTopItem = ({ name, points, image, place, loading, outline }: Props) => {
+export const LeaderboardTopItem = ({
+  name,
+  points,
+  image,
+  place,
+  loading,
+  outline,
+  className,
+  style,
+}: Props) => {
   const isFirst = place === 1;
 
   return (
     <div
+      style={style}
       className={twMerge(
         'relative w-25.5 mt-5.25 p-2 flex-col-stretch rounded-t-full',
-        isFirst
-          ? ' gap-8 h-50 bg-[linear-gradient(to_bottom,theme(colors.gradient-darkpink)_0%,theme(colors.gradient-darkpink)_70%,transparent_100%)]'
-          : ' gap-5 h-43 bg-[linear-gradient(to_bottom,theme(colors.gradient-darkpink)_0%,theme(colors.gradient-darkpink)_45%,transparent_100%)]',
-        outline && 'border-2 border-b-0 border-gray-400 bg-primary/10'
+        isFirst ? ' gap-8 h-50' : ' gap-5 h-43',
+        className
       )}
     >
+      <div
+        className={twMerge(
+          'absolute inset-0 rounded-t-full -z-1',
+          isFirst
+            ? 'bg-[linear-gradient(to_bottom,theme(colors.gradient-darkpink)_0%,theme(colors.gradient-darkpink)_70%,transparent_100%)]'
+            : 'bg-[linear-gradient(to_bottom,theme(colors.gradient-darkpink)_0%,theme(colors.gradient-darkpink)_45%,transparent_100%)]',
+          outline && 'border-2 border-b-0 border-gray-400 bg-primary/10'
+        )}
+      />
       {isFirst && (
         <Image
           className={twMerge(
-            'absolute -z-1 -top-5 left-1/2 -translate-x-1/2',
+            'absolute -z-2 -top-5 left-1/2 -translate-x-1/2',
             loading && 'animation-blink'
           )}
           src={icons.crown}

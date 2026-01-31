@@ -4,8 +4,12 @@ import { getAppTranslations } from '@/i18n/getAppTranslations';
 import type { ClassNameProps } from '@/types/interfaces/component.interfcaes';
 import { twMerge } from 'tailwind-merge';
 import { HomeTicketsList } from '@/components/pages/tabs/home/HomeTicketsList';
+import type { CSSProperties } from 'react';
 
-export async function HomeClaimSection({ className }: ClassNameProps) {
+export async function HomeClaimSection({
+  className,
+  style,
+}: ClassNameProps & { style?: CSSProperties }) {
   const t = await getAppTranslations();
 
   const tabs: TabsProps['items'] = [
@@ -30,7 +34,7 @@ export async function HomeClaimSection({ className }: ClassNameProps) {
   ] as const;
 
   return (
-    <div className={twMerge('h-full flex-col-stretch', className)}>
+    <div style={style} className={twMerge('h-full flex-col-stretch', className)}>
       <Tabs
         defaultActiveKey={tabs[0].key}
         classNames={{

@@ -1,0 +1,6 @@
+@import 'tailwindcss';
+@import './global/utilities.css';
+@import './global/theme.css';
+@import './global/animations.css';
+@import './global/base-layer.css';
+@import './global/nullify.css';

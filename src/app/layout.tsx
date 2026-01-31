@@ -1,9 +1,9 @@
 import { StoreProvider } from '@/providers/StoreProvider';
-import '@/styles/globals.css';
 import { NextIntlClientProvider } from 'next-intl';
 import { gilroy } from '@/fonts/index.fonts';
 import { getLocale } from 'next-intl/server';
 import type { ChildrenProps } from '@/types/interfaces/component.interfcaes';
+import '@/styles/index.css';
 
 export default async function RootLayout({ children }: ChildrenProps) {
   const locale = await getLocale();

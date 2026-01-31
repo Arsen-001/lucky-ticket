@@ -19,12 +19,14 @@ export const LeaderboardTop3 = ({ className, ...props }: HTMLAttributes<HTMLDivE
       {orderedTopThree.map((entry, index) => (
         <LeaderboardTopItem
           loading={isLoading}
-          key={entry.username || index}
+          key={index}
           name={entry.username}
           points={entry.points}
           image={entry.avatar}
           place={entry.place || index}
           outline={myPlace && entry.place === myPlace.place}
+          className="animate-slide-in-bottom"
+          style={{ animationDelay: `${index * 100}ms` }}
         />
       ))}
     </div>

@@ -1,6 +1,7 @@
 import Image from 'next/image';
 import { ArrowDown, ArrowUp, Minus, Trophy } from 'lucide-react';
 import { twMerge } from 'tailwind-merge';
+import type { CSSProperties } from 'react';
 
 import { SkeletonSuspense } from '@/components/shared/seleketons/SkeletonSuspense';
 import { Skeleton } from '@/components/shared/seleketons/Skeleton';
@@ -14,6 +15,7 @@ interface Props {
   points: number;
   rankChange: number;
   className?: string;
+  style?: CSSProperties;
   loading?: boolean;
   isVerified?: boolean;
   isPrime?: boolean;
@@ -27,6 +29,7 @@ export const LeaderboardListItem = ({
   points,
   rankChange,
   className,
+  style,
   loading,
   isVerified,
   isPrime,
@@ -37,6 +40,7 @@ export const LeaderboardListItem = ({
 
   return (
     <div
+      style={style}
       className={twMerge(
         'flex items-center gap-1 p-3 bg-background-overlay/50 rounded-2xl border-2 border-white/5',
         outline && 'border-gray-400',
@@ -86,40 +90,40 @@ export const LeaderboardListItem = ({
             </div>
           </SkeletonSuspense>
           <div className="flex items-center gap-1 text-xs text-gray-400">
-            <SkeletonSuspense
-              loading={loading}
-              skeleton={<Skeleton variant="text" textSize="sm" className="w-8" />}
-            >
-              <>
-                {isPositive ? (
-                  <div className="flex items-center  text-success">
-                    <ArrowUp size={14} className="stroke-3 mr-0.5" />
-                    <span className="h-4 font-semibold text-sm">{rankChange}</span>
-                  </div>
-                ) : isNegative ? (
-                  <div className="flex items-center  text-error">
-                    <ArrowDown size={14} className="stroke-3 mr-0.5" />
-                    <span className="h-4 font-semibold text-sm"> {Math.abs(rankChange)}</span>
-                  </div>
-                ) : (
-                  <div className="flex items-center  text-gray-secondary">
-                    <Minus size={14} className="stroke-3 mr-0.5" />
-                    <span className="h-4 font-semibold text-sm">0</span>
-                  </div>
-                )}
-              </>
-            </SkeletonSuspense>
+            <div className="flex items-center gap-1.5 text-gold">
+              <SkeletonSuspense
+                loading={loading}
+                skeleton={<Skeleton variant="text" textSize="sm" className="w-12" />}
+              >
+                <Trophy className="stroke-2" size={14} />
+                <span className="font-semibold text-sm h-4.25">{points}</span>
+              </SkeletonSuspense>
+            </div>
           </div>
         </div>
-        <div className="flex items-center gap-1.5 text-gold">
-          <SkeletonSuspense
-            loading={loading}
-            skeleton={<Skeleton variant="text" textSize="sm" className="w-12" />}
-          >
-            <Trophy className="stroke-2" size={15} />
-            <span className="font-semibold h-5.25">{points}</span>
-          </SkeletonSuspense>
-        </div>
+        <SkeletonSuspense
+          loading={loading}
+          skeleton={<Skeleton variant="text" textSize="sm" className="w-8" />}
+        >
+          <>
+            {isPositive ? (
+              <div className="flex items-center  text-success">
+                <ArrowUp size={14} className="stroke-3 mr-0.5" />
+                <span className="h-4.5 font-semibold text-sm">{rankChange}</span>
+              </div>
+            ) : isNegative ? (
+              <div className="flex items-center  text-error">
+                <ArrowDown size={14} className="stroke-3 mr-0.5" />
+                <span className="h-4.5 font-semibold text-sm"> {Math.abs(rankChange)}</span>
+              </div>
+            ) : (
+              <div className="flex items-center  text-gray-secondary">
+                <Minus size={14} className="stroke-3 mr-0.5" />
+                <span className="h-4.5 font-semibold text-sm">0</span>
+              </div>
+            )}
+          </>
+        </SkeletonSuspense>
       </div>
     </div>
   );

@@ -1,5 +1,6 @@
 'use client';
 
+import type { CSSProperties } from 'react';
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { Tabs } from '@/components/shared/Tabs';
@@ -11,8 +12,15 @@ import { TaskModal } from './TaskModal';
 import { ShareModal } from './ShareModal';
 import { useAppTranslations } from '@/hooks/useAppTranslations';
 import { routes } from '@/constants/routes';
+import { twMerge } from 'tailwind-merge';
 
-export function TasksContainer() {
+export function TasksContainer({
+  className,
+  style,
+}: {
+  className?: string;
+  style?: CSSProperties;
+}) {
   const t = useAppTranslations();
   const router = useRouter();
   const { data: tasks, isLoading } = useGetTasksQuery();
@@ -97,7 +105,7 @@ export function TasksContainer() {
   ];
 
   return (
-    <div className="bg-purple-gradient rounded-2xl p-5 mt-5">
+    <div style={style} className={twMerge('bg-purple-gradient rounded-2xl p-5 mt-5', className)}>
       <Tabs items={tabItems} />
 
       <TaskModal

@@ -56,15 +56,22 @@ export function TabBar({ className }: ClassNameProps) {
   };
   return (
     <div
-      className={twMerge('bg-tab-bar px-5 py-4 flex justify-between items-center gap-2', className)}
+      className={twMerge(
+        'bg-tab-bar px-5 py-4 flex justify-between items-center gap-2 animate-fade-in',
+        className
+      )}
     >
-      {tabs.map(({ route, icon, name }) => (
+      {tabs.map(({ route, icon, name }, index) => (
         <TabBarItem
           key={route}
           icon={icon}
           name={name}
           onClick={() => handleTabClick(route)}
           active={activePath === route}
+          className="animate-slide-in-bottom"
+          style={{
+            animationDelay: `${index * 100}ms`,
+          }}
         />
       ))}
     </div>

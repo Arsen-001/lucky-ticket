@@ -11,8 +11,9 @@ import { useGetTopTournamentsQuery } from '@/api/tournaments.api';
 import { HorizontalSliderCard } from '@/components/pages/tabs/home/HorizontalSliderCard';
 import type { ClassNameProps } from '@/types/interfaces/component.interfcaes';
 import { twMerge } from 'tailwind-merge';
+import type { CSSProperties } from 'react';
 
-export function HorizontalSlider({ className }: ClassNameProps) {
+export function HorizontalSlider({ className, style }: ClassNameProps & { style?: CSSProperties }) {
   const { data: tournamentsData, isLoading } = useGetTopTournamentsQuery();
 
   const tournaments =
@@ -20,6 +21,7 @@ export function HorizontalSlider({ className }: ClassNameProps) {
   return (
     <Swiper
       className={twMerge('w-full', className)}
+      style={style}
       modules={[EffectCoverflow]}
       effect={'coverflow'}
       centeredSlides

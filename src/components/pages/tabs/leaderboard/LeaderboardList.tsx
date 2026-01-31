@@ -26,7 +26,7 @@ export const LeaderboardList = ({ className, ...props }: HTMLAttributes<HTMLDivE
             className={
               isMyPlace(entry.place) ? 'sticky w-full bottom-3 mt-auto backdrop-blur-lg' : undefined
             }
-            key={entry.username || index}
+            key={index}
           >
             <LeaderboardListItem
               loading={isLoading}
@@ -38,6 +38,8 @@ export const LeaderboardList = ({ className, ...props }: HTMLAttributes<HTMLDivE
               isVerified={entry.isVerified}
               isPrime={entry.isPrime}
               outline={isMyPlace(entry.place)}
+              className="animate-slide-in-bottom"
+              style={{ animationDelay: `${index * 50}ms` }}
             />
           </div>
         ))}
@@ -57,6 +59,8 @@ export const LeaderboardList = ({ className, ...props }: HTMLAttributes<HTMLDivE
                 isVerified={myPlace.isVerified}
                 isPrime={myPlace.isPrime}
                 outline
+                className="animate-slide-in-bottom"
+                style={{ animationDelay: '300ms' }}
               />
             </div>
           </>

@@ -13,11 +13,14 @@ import { Skeleton } from '@/components/shared/seleketons/Skeleton';
 import { SkeletonSuspense } from '@/components/shared/seleketons/SkeletonSuspense';
 import { Link } from '@/components/shared/links/Link';
 import { routes } from '@/constants/routes';
+import type { CSSProperties } from 'react';
 
 export interface TournamentCardProps extends Tournament {
   loading?: boolean;
   participated?: boolean;
   participatedTicketsCount?: number;
+  className?: string;
+  style?: CSSProperties;
 }
 
 export function TournamentCard({
@@ -31,6 +34,8 @@ export function TournamentCard({
   loading,
   participated = false,
   participatedTicketsCount,
+  className,
+  style,
 }: TournamentCardProps) {
   const t = useAppTranslations();
   const hasParticipated = participated;
@@ -64,7 +69,13 @@ export function TournamentCard({
     },
   ];
   return (
-    <div className="w-full px-4 pt-1.5 pb-2.5 bg-purple-gradient card-outlined rounded-xl overflow-visible">
+    <div
+      style={style}
+      className={twMerge(
+        'w-full px-4 pt-1.5 pb-2.5 bg-purple-gradient card-outlined rounded-xl overflow-visible',
+        className
+      )}
+    >
       <div className="h-20 bg-white/8 rounded-lg flex items-center justify-center">
         <div className={participated ? 'shine-[130px]' : undefined}>
           <Medal
