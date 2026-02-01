@@ -131,5 +131,7 @@
   "no results found": "No results found",
   "no results description": "We could not find anything matching your request.",
   "accept": "Accept",
-  "deny": "Deny"
+  "deny": "Deny",
+  "english": "English",
+  "armenian": "Armenian"
 }

@@ -35,7 +35,7 @@ export function TournamentPlacements({ id }: { id: string }) {
 
       <Tabs
         className="mt-6"
-        classNames={{ tab: 'py-1 w-30 truncate' }}
+        classNames={{ tab: 'py-1 min-w-30 truncate' }}
         items={[
           {
             key: 'places',

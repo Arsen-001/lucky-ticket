@@ -6,9 +6,9 @@ import { Button } from '@/components/shared/buttons/Button';
 import { CheckCircle2 } from 'lucide-react';
 import { useAppTranslations } from '@/hooks/useAppTranslations';
 import { twMerge } from 'tailwind-merge';
-import { getTaskIcon } from '@/utils/pages/tasks.utils';
 import { SkeletonSuspense } from '@/components/shared/seleketons/SkeletonSuspense';
 import { Skeleton } from '@/components/shared/seleketons/Skeleton';
+import { TaskIcon } from '@/components/pages/tabs/tasks/TaskIcon';
 
 interface TaskCardProps {
   task: Task;
@@ -73,7 +73,7 @@ export function TaskCard({ task, loading, onAction, onClick }: TaskCardProps) {
                 onAction(task);
               }}
             >
-              {getTaskIcon(task.type)}
+              <TaskIcon size={14} type={task.type} />
               <span className="h-4.25 font-semibold">{buttonTextObj[task.type]}</span>
             </Button>
           </SkeletonSuspense>

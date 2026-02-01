@@ -9,6 +9,7 @@ import { Button } from '@/components/shared/buttons/Button';
 import { SkeletonSuspense } from '@/components/shared/seleketons/SkeletonSuspense';
 import { Skeleton } from '@/components/shared/seleketons/Skeleton';
 import { useRouter } from 'next/navigation';
+import { GlobalConstants } from '@/constants/global.constants';
 
 interface Info {
   label: string;
@@ -51,7 +52,7 @@ export function HorizontalSliderCard({
   const info: Info[] = [
     {
       label: t('prize pool'),
-      value: prizePool + '$',
+      value: prizePool + GlobalConstants.coinName,
     },
     {
       label: t('team size'),
@@ -59,7 +60,7 @@ export function HorizontalSliderCard({
     },
     {
       label: t('guaranteed'),
-      value: guaranteedPool + '$',
+      value: guaranteedPool + GlobalConstants.coinName,
     },
   ];
 
@@ -101,7 +102,7 @@ export function HorizontalSliderCard({
       <div className="flex justify-evenly gap-2 mt-2 text-xs">
         {info.map(({ label, value }) => (
           <div key={label} className="flex-center flex-col max-w-1/3">
-            <span className="text-pink-secondary">{label}</span>
+            <span className="text-pink-secondary truncate w-full">{label}</span>
             <SkeletonSuspense
               loading={loading}
               skeleton={<Skeleton variant="line" textSize="xs" />}

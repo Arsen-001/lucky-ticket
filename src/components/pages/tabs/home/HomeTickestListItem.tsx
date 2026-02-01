@@ -27,7 +27,7 @@ export function HomeTickestListItem({
   const claimCountDown = useCountDown(rest?.claimDate);
   const autocollectFinishCountDown = useCountDown(rest?.autocollectFinishDate);
 
-  const titleIdBytype: Record<TicketType, MessageIds> = {
+  const titleIdByType: Record<TicketType, MessageIds> = {
     bronze: 'bronze',
     silver: 'silver',
     gold: 'golden',
@@ -44,17 +44,23 @@ export function HomeTickestListItem({
   if (loading) {
     return (
       <div
-        className={twMerge('bg-purple-gradient rounded-lg flex items-center gap-2 p-2', className)}
+        className={twMerge(
+          'bg-purple-gradient rounded-lg flex items-center gap-2 p-2 overflow-hidden',
+          className
+        )}
       >
         <Ticket loading {...ticketImageProps} />
         <div className="flex flex-col flex-1 gap-2">
-          <Skeleton className="w-30" variant={'line'} textSize="sm" />
-          <div className="flex flex-col gap-0.5">
-            <Skeleton variant={'line'} className="h-3 " />
+          <div className="flex flex-col-stretch gap-1 overflow-hidden">
+            <Skeleton className="w-20" variant={'line'} textSize="sm" />
+            <div className="flex gap-x-1.5 gap-y-px flex-wrap">
+              <Skeleton variant={'line'} className="h-4 w-18 " />
+              <Skeleton variant={'line'} className="h-4 w-24 " />
+            </div>
             <Skeleton variant={'line'} className="h-3 " />
           </div>
         </div>
-        <Skeleton variant="card" className="h-10 w-20" />
+        <Skeleton variant="card" className="h-8 w-22.5" />
       </div>
     );
   }
@@ -65,20 +71,23 @@ export function HomeTickestListItem({
     const percentage = autocollectFinishCountDown.getPassedPercentage(rest.maxTime);
     return (
       <div
-        className={twMerge('bg-purple-gradient rounded-lg flex items-center gap-2 p-2', className)}
+        className={twMerge(
+          'bg-purple-gradient rounded-lg flex items-center gap-2 p-2 overflow-hidden',
+          className
+        )}
       >
         <Ticket {...ticketImageProps} />
-        <div className="flex flex-col flex-1 gap-1">
-          <span className="text-sm font-semibold">{t(titleIdBytype[ticketType])}</span>
-          <div className="flex gap-1.5 gap-y-0 text-xs text-pink-secondary whitespace-nowrap flex-wrap">
-            <div className="flex-center gap-0.5">
-              <span className="w-full truncate">{t('speed')}:</span>
+        <div className="flex flex-col flex-1 gap-1 overflow-hidden">
+          <span className="text-sm font-semibold">{t(titleIdByType[ticketType])}</span>
+          <div className="flex gap-1.5 gap-y-px text-xs text-pink-secondary whitespace-nowrap flex-wrap">
+            <div className="flex-center gap-0.5 overflow-hidden">
+              <span className="flex-1 truncate">{t('speed')}:</span>
               <GoldenText>
                 {rest?.speed} {speedUnit}
               </GoldenText>
             </div>
-            <div className="flex-center gap-0.5">
-              <span className="w-full truncate">{t('max time')}:</span>
+            <div className="flex-center gap-0.5 overflow-hidden">
+              <span className="flex-1 truncate">{t('max time')}:</span>
               <GoldenText>
                 {rest?.maxTime?.hours} {t('hour')[0]} {rest?.maxTime?.minutes} {t('minute')[0]}
               </GoldenText>
@@ -108,14 +117,14 @@ export function HomeTickestListItem({
   return (
     <div
       className={twMerge(
-        'bg-purple-gradient rounded-lg flex items-center gap-2 p-2 max-w-full',
+        'bg-purple-gradient rounded-lg flex items-center gap-2 p-2 max-w-full overflow-hidden',
         className
       )}
     >
       <Ticket {...ticketImageProps} />
-      <div className="flex flex-col flex-[1_1_0] gap-1 whitespace-nowrap">
-        <div className="text-sm text-white font-semibold">{t(titleIdBytype[ticketType])}</div>
-        <div className="w-full text-pink-secondary text-xs gap-px">
+      <div className="flex flex-col flex-[1_1_0] gap-1 whitespace-nowrap overflow-hidden">
+        <div className="text-sm text-white font-semibold">{t(titleIdByType[ticketType])}</div>
+        <div className="w-full text-pink-secondary text-xs gap-px overflow-hidden">
           {rest.requirements?.map(({ type, requirementType, totalCount, actualCount }) => {
             const variableName = {
               join: 'tournamentName',

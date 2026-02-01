@@ -9,7 +9,7 @@ export default function HomePage() {
         style={{ animationDelay: '0ms' }}
       />
       <HomeClaimSection
-        className="flex-1 animate-slide-in-bottom"
+        className="h-full animate-slide-in-bottom"
         style={{ animationDelay: '100ms' }}
       />
     </div>

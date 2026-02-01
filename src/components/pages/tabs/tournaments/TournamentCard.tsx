@@ -69,66 +69,68 @@ export function TournamentCard({
     },
   ];
   return (
-    <div
-      style={style}
-      className={twMerge(
-        'w-full px-4 pt-1.5 pb-2.5 bg-purple-gradient card-outlined rounded-xl overflow-visible',
-        className
-      )}
-    >
-      <div className="h-20 bg-white/8 rounded-lg flex items-center justify-center">
-        <div className={participated ? 'shine-[130px]' : undefined}>
-          <Medal
-            className="transform -translate-y-1 z-1 drop-shadow-xl drop-shadow-black/30"
-            height={86}
-            type={type}
-            loading={loading}
-          />
-        </div>
-      </div>
-      <SkeletonSuspense
-        loading={loading}
-        skeleton={<Skeleton variant="line" textSize="sm" className="w-32 mx-auto mt-1.5" />}
+    <Link href={routes.tournaments.getById(id)}>
+      <div
+        style={style}
+        className={twMerge(
+          'w-full px-4 pt-1.5 pb-2.5 bg-purple-gradient card-outlined rounded-xl overflow-visible',
+          className
+        )}
       >
-        <h5 className="text-center text-sm font-semibold mt-1.5">{name}</h5>
-      </SkeletonSuspense>
-      <div className="mt-2 flex flex-col gap-px">
-        {info.map(({ label, value }) => (
-          <div key={label} className="flex justify-between text-xs gap-1">
-            <span className="text-pink-secondary">{label}</span>
-            <SkeletonSuspense
+        <div className="h-20 bg-white/8 rounded-lg flex items-center justify-center">
+          <div className={participated ? 'shine-[130px]' : undefined}>
+            <Medal
+              className="transform -translate-y-1 z-1 drop-shadow-xl drop-shadow-black/30"
+              height={86}
+              type={type}
               loading={loading}
-              skeleton={
-                <Skeleton variant="line" textSize="xs" className="flex-1 min-w-6 max-w-2/3" />
-              }
-            >
-              <GoldenText className="text-right font-semibold">{value}</GoldenText>
-            </SkeletonSuspense>
+            />
           </div>
-        ))}
-      </div>
-
-      <div className={'flex items-center justify-between bg-gradient-purple rounded-full mt-2'}>
+        </div>
         <SkeletonSuspense
           loading={loading}
-          skeleton={<Skeleton variant="rounded-rectangle" className="h-7" />}
+          skeleton={<Skeleton variant="line" textSize="sm" className="w-32 mx-auto mt-1.5" />}
         >
-          <div className="flex-1 flex justify-center">
-            <GoldenText className="text-xs font-semibold">{leftLabel}</GoldenText>
-          </div>
-          <Link href={routes.tournaments.getById(id)}>
+          <h5 className="text-center text-sm font-semibold mt-1.5">{name}</h5>
+        </SkeletonSuspense>
+        <div className="mt-2 flex flex-col gap-px">
+          {info.map(({ label, value }) => (
+            <div key={label} className="flex justify-between text-xs gap-1">
+              <span className="text-pink-secondary">{label}</span>
+              <SkeletonSuspense
+                loading={loading}
+                skeleton={
+                  <Skeleton variant="line" textSize="xs" className="flex-1 min-w-6 max-w-2/3" />
+                }
+              >
+                <GoldenText className="text-right font-semibold">{value}</GoldenText>
+              </SkeletonSuspense>
+            </div>
+          ))}
+        </div>
+
+        <div
+          className={'flex items-center gap-1 justify-between bg-gradient-purple rounded-full mt-2'}
+        >
+          <SkeletonSuspense
+            loading={loading}
+            skeleton={<Skeleton variant="rounded-rectangle" className="h-7" />}
+          >
+            <div className="flex-1 flex justify-center">
+              <GoldenText className="text-xs font-semibold">{leftLabel}</GoldenText>
+            </div>
             <Button
               disabled={loading}
               className={twMerge(
-                'text-xs rounded-full py-1.5 px-4.5',
+                'max-w-full w-fit text-xs rounded-full py-1.5 px-4.5 truncate',
                 hasParticipated ? 'bg-success' : null
               )}
             >
               {t(hasParticipated ? 'add' : 'join')}
             </Button>
-          </Link>
-        </SkeletonSuspense>
+          </SkeletonSuspense>
+        </div>
       </div>
-    </div>
+    </Link>
   );
 }

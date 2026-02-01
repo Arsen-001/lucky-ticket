@@ -38,7 +38,7 @@ export async function HomeClaimSection({
       <Tabs
         defaultActiveKey={tabs[0].key}
         classNames={{
-          tab: 'w-30',
+          tab: 'min-w-30',
 
           children: 'flex-1 flex-col-stretch px-5 mt-3 inset-container-background',
         }}

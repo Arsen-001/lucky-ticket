@@ -6,7 +6,7 @@ import { Task } from '@/types/interfaces/tasks.interfaces';
 import { CheckCircle2 } from 'lucide-react';
 import { Button } from '@/components/shared/buttons/Button';
 import { useAppTranslations } from '@/hooks/useAppTranslations';
-import { TASK_ICON_MAP } from '@/utils/pages/tasks.utils';
+import { TaskIcon } from '@/components/pages/tabs/tasks/TaskIcon';
 
 interface TaskModalProps {
   task: Task | null;
@@ -20,15 +20,13 @@ export function TaskModal({ task, open, onClose, onAction }: TaskModalProps) {
 
   if (!task) return null;
 
-  const Icon = TASK_ICON_MAP[task.type];
-
   return (
     <Modal open={open} onClose={onClose}>
       <div className="bg-purple-gradient p-5 rounded-xl">
         <ModalCloseButton onClick={onClose} />
         <div className="flex flex-col items-center text-center mt-4">
           <div className="w-16 h-16 bg-pink/20 rounded-full flex items-center justify-center mb-4">
-            {Icon && <Icon className="text-pink" size={32} />}
+            <TaskIcon className="text-pink" size={32} type={task.type} />
           </div>
 
           <h3 className="text-xl font-bold mb-2">{task.title}</h3>
