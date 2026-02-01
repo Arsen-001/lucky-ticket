@@ -56,6 +56,7 @@ export function Button({
         className
       )}
       type={type}
+      onClick={!loading ? rest.onClick : undefined}
       {...rest}
     >
       {children}

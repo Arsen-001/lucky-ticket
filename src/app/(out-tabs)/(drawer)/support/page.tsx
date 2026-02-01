@@ -20,6 +20,9 @@ export default function SupportPage() {
   const filteredContent = filterSections(sections, searchValue);
   const content = isLoading ? getSectionsSkeletonData() : filteredContent;
 
+  const handleFocus = () => setIsFocused(true);
+  const handleBlur = () => setIsFocused(false);
+
   return (
     <div className="flex flex-col">
       <div
@@ -41,11 +44,7 @@ export default function SupportPage() {
         </div>
       </div>
       <div className="flex-col-stretch gap-6">
-        <GradientSearchInput
-          onChange={setSearchValue}
-          onFocus={() => setIsFocused(true)}
-          onBlur={() => setIsFocused(false)}
-        />
+        <GradientSearchInput onChange={setSearchValue} onFocus={handleFocus} onBlur={handleBlur} />
         <div className="flex flex-col">
           {!isLoading && !filteredContent.length && (
             <EmptyDataInfo animateOnMount className="mt-10" />
@@ -68,9 +67,9 @@ export default function SupportPage() {
                   <div className="flex-col-stretch gap-2">
                     {section?.articles?.map((article, index) => (
                       <SupportArticleItem
+                        key={index}
                         loading={isLoading}
                         article={article}
-                        key={index}
                         searchValue={searchValue}
                       />
                     ))}

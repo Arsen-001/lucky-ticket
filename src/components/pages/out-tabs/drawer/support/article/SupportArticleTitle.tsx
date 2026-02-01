@@ -6,6 +6,7 @@ import { SkeletonSuspense } from '@/components/shared/seleketons/SkeletonSuspens
 import { Skeleton } from '@/components/shared/seleketons/Skeleton';
 import type { HTMLAttributes } from 'react';
 import { CopyButton } from '@/components/shared/buttons/CopyButton';
+import { Share } from 'lucide-react';
 
 interface SupportArticleTitleProps extends HTMLAttributes<HTMLDivElement> {
   id: string;
@@ -23,8 +24,11 @@ export function SupportArticleTitle({ id, ...props }: SupportArticleTitleProps) 
           loading={isLoading}
           value={'Some Text'}
           variant="secondary"
-          className="flex-center gap-1 p-2.5 text-sm"
-        />
+          className="p-2 text-sm"
+          iconSize={18}
+        >
+          <Share size={18} />
+        </CopyButton>
       }
       title={
         <SkeletonSuspense
