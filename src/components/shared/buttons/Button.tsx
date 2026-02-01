@@ -2,12 +2,18 @@ import type { ButtonHTMLAttributes, Ref } from 'react';
 import { twMerge } from 'tailwind-merge';
 import { Loader2 } from 'lucide-react';
 
-export type ButtonVariants = 'primary' | 'secondary' | 'transparent' | 'purpleGradient';
+export type ButtonVariants =
+  | 'primary'
+  | 'secondary'
+  | 'transparent'
+  | 'purpleGradient'
+  | 'outlined';
 
 export interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
   variant?: ButtonVariants;
   loading?: boolean;
   ref?: Ref<HTMLButtonElement>;
+  loadingIconSize?: number;
 }
 
 export function Button({
@@ -15,6 +21,7 @@ export function Button({
   children,
   variant = 'primary',
   loading = false,
+  loadingIconSize = 20,
   disabled,
   type = 'button',
   ...rest
@@ -24,6 +31,7 @@ export function Button({
     secondary: 'bg-gradient-purple',
     transparent: 'bg-transparent',
     purpleGradient: 'bg-purple-gradient',
+    outlined: 'border border-white bg-transparent',
   };
 
   return (
@@ -51,7 +59,7 @@ export function Button({
       {...rest}
     >
       {children}
-      {loading && <Loader2 className="size-5 animate-spin" />}
+      {loading && <Loader2 size={loadingIconSize} className="animate-spin" />}
     </button>
   );
 }
