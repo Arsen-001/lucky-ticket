@@ -28,7 +28,7 @@ export function TaskList({
     return (
       <div className="flex flex-col gap-4 mt-4">
         <div className="flex flex-col gap-2">
-          <Skeleton variant="text" textSize="sm" className="h-5 w-32 bg-gray-200 rounded" />
+          <Skeleton variant="line" textSize="sm" className="h-5 w-32 bg-gray-200 rounded" />
           <Skeleton variant="line" className="rounded-full" />
         </div>
         <div className="flex flex-col gap-1.5 overflow-y-auto max-h-[500px] pr-1 scrollbar-hidden">

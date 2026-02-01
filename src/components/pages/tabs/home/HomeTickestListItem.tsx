@@ -48,10 +48,10 @@ export function HomeTickestListItem({
       >
         <Ticket loading {...ticketImageProps} />
         <div className="flex flex-col flex-1 gap-2">
-          <Skeleton className="w-30" variant={'title'} textSize="sm" />
+          <Skeleton className="w-30" variant={'line'} textSize="sm" />
           <div className="flex flex-col gap-0.5">
-            <Skeleton variant={'text'} className="h-3 " />
-            <Skeleton variant={'text'} className="h-3 " />
+            <Skeleton variant={'line'} className="h-3 " />
+            <Skeleton variant={'line'} className="h-3 " />
           </div>
         </div>
         <Skeleton variant="card" className="h-10 w-20" />

@@ -50,7 +50,7 @@ export const LeaderboardListItem = ({
       <div className="w-8 flex-center font-bold text-gray-400">
         <SkeletonSuspense
           loading={loading}
-          skeleton={<Skeleton variant="text" textSize="sm" className="w-4" />}
+          skeleton={<Skeleton variant="line" textSize="sm" className="w-4" />}
         >
           {rank}
         </SkeletonSuspense>
@@ -73,7 +73,7 @@ export const LeaderboardListItem = ({
         <div className="flex-1 flex-col-stretch gap-px min-w-0">
           <SkeletonSuspense
             loading={loading}
-            skeleton={<Skeleton variant="text" textSize="sm" className="w-20" />}
+            skeleton={<Skeleton variant="line" textSize="sm" className="w-20" />}
           >
             <div className="flex items-start  gap-1 min-w-0">
               <div className="font-semibold truncate ">{username}</div>
@@ -99,7 +99,7 @@ export const LeaderboardListItem = ({
             <div className="flex items-center gap-1.5 text-gold">
               <SkeletonSuspense
                 loading={loading}
-                skeleton={<Skeleton variant="text" textSize="sm" className="w-12" />}
+                skeleton={<Skeleton variant="line" textSize="sm" className="w-12" />}
               >
                 <Trophy className="stroke-2" size={14} />
                 <span className="font-semibold text-sm h-4.25">{points}</span>
@@ -109,7 +109,7 @@ export const LeaderboardListItem = ({
         </div>
         <SkeletonSuspense
           loading={loading}
-          skeleton={<Skeleton variant="text" textSize="sm" className="w-8" />}
+          skeleton={<Skeleton variant="line" textSize="sm" className="w-8" />}
         >
           <>
             {isPositive ? (

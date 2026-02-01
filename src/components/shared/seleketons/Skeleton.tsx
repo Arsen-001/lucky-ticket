@@ -2,7 +2,7 @@ import React, { type HTMLAttributes } from 'react';
 import { twMerge } from 'tailwind-merge';
 import '@/styles/components/skeleton.css';
 
-type Variant = 'text' | 'line' | 'title' | 'round' | 'card' | 'rounded-rectangle';
+type Variant = 'text' | 'line' | 'round' | 'card' | 'rounded-rectangle';
 type TextSize =
   | 'xs'
   | 'sm'
@@ -21,18 +21,19 @@ type TextSize =
 interface SkeletonProps extends HTMLAttributes<HTMLDivElement> {
   variant?: Variant;
   textSize?: TextSize;
+  lines?: number;
 }
 
 export const Skeleton: React.FC<SkeletonProps> = ({
-  variant = 'text',
+  variant = 'line',
   textSize = 'base',
+  lines = 3,
   className,
   ...rest
 }) => {
   const variantClass = {
     text: 'skeleton-text',
     line: 'skeleton-line',
-    title: 'skeleton-title',
     round: 'skeleton-round',
     card: 'skeleton-card',
     'rounded-rectangle': 'skeleton-rounded-rectangle',
@@ -53,6 +54,27 @@ export const Skeleton: React.FC<SkeletonProps> = ({
     '8xl': 'h-24',
     '9xl': 'h-32',
   }[textSize];
+
+  if (variant === 'text') {
+    return (
+      <div className={twMerge('flex flex-col gap-2 w-full', className)} aria-hidden {...rest}>
+        {Array.from({ length: lines }).map((_, i) => (
+          <div
+            key={i}
+            style={{
+              width: `${100 - (i % 2) * 5}%`,
+            }}
+            className={twMerge(
+              'skeleton w-full',
+              variantClass,
+              heightBasedOnTextSize
+              // i === lines - 1 && lines > 1 && 'w-3/4'
+            )}
+          />
+        ))}
+      </div>
+    );
+  }
 
   return (
     <div

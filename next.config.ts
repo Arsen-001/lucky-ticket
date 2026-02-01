@@ -9,7 +9,20 @@ const nextConfig: NextConfig = {
     remotePatterns: [],
   },
   devIndicators: false,
-  experimental: { globalNotFound: true },
+  experimental: {
+    globalNotFound: true,
+  },
+  webpack(config) {
+    config.module.rules.push({
+      test: /\.(mp4|webm|ogg|swf|ogv)$/,
+      type: 'asset/resource',
+      generator: {
+        filename: 'static/videos/[name].[hash][ext]',
+      },
+    });
+
+    return config;
+  },
 };
 
 const withNextIntl = createNextIntlPlugin();

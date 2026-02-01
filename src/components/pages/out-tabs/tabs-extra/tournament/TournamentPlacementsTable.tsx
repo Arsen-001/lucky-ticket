@@ -33,12 +33,18 @@ export function TournamentPlacementsTable({ places, isLoading }: TournamentPlace
       )}
     >
       <div className="w-25 rounded-l-sm overflow-hidden">
-        <SkeletonSuspense loading={loading} skeleton={<Skeleton className="w-full rounded-none" />}>
+        <SkeletonSuspense
+          loading={loading}
+          skeleton={<Skeleton variant="line" className="w-full rounded-none" />}
+        >
           <div className="w-full bg-background-overlay px-2 py-0.5">{place}</div>
         </SkeletonSuspense>
       </div>
       <div className="w-full rounded-r-sm overflow-hidden">
-        <SkeletonSuspense loading={loading} skeleton={<Skeleton className="w-full rounded-none" />}>
+        <SkeletonSuspense
+          loading={loading}
+          skeleton={<Skeleton variant="line" className="w-full rounded-none" />}
+        >
           <div className="w-full bg-background-overlay truncate px-2 py-0.5">{prize}</div>
         </SkeletonSuspense>
       </div>

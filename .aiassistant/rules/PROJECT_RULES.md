@@ -65,8 +65,12 @@ apply: always
 
 #### 5. Internationalization (i18n)
 
-- Use `useAppTranslations` hook for client-side translations.
-- All user-facing text must be internationalized using the dictionary keys.
+- Use `useAppTranslations` hook for **client components**.
+- Use `getAppTranslations` for **server components**.
+- **Hardcoded user-facing text is not allowed.**
+- All visible text (labels, buttons, placeholders, errors, titles, tooltips, empty states, etc.) **must be replaced with `next-intl` dictionary keys**.
+- Translation keys should be descriptive and grouped by feature or domain.
+- Components must not contain fallback literal strings outside of translation files.
 
 #### 6. Routing
 

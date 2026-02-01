@@ -76,8 +76,8 @@ export function HorizontalSliderCard({
           loading={loading}
           skeleton={
             <>
-              <Skeleton variant="title" />
-              <Skeleton variant="title" className="w-16" />
+              <Skeleton variant="line" />
+              <Skeleton variant="line" className="w-16" />
             </>
           }
         >
@@ -104,7 +104,7 @@ export function HorizontalSliderCard({
             <span className="text-pink-secondary">{label}</span>
             <SkeletonSuspense
               loading={loading}
-              skeleton={<Skeleton variant="text" textSize="xs" />}
+              skeleton={<Skeleton variant="line" textSize="xs" />}
             >
               <GoldenText>{value}</GoldenText>
             </SkeletonSuspense>

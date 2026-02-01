@@ -76,13 +76,13 @@ export const LeaderboardTopItem = ({
       <div className="overflow-hidden flex flex-col items-center gap-px">
         <SkeletonSuspense
           loading={loading}
-          skeleton={<Skeleton variant="text" textSize="sm" className="w-16" />}
+          skeleton={<Skeleton variant="line" textSize="sm" className="w-16" />}
         >
           <div className="font-semibold  text-center truncate w-full">{name}</div>
         </SkeletonSuspense>
         <SkeletonSuspense
           loading={loading}
-          skeleton={<Skeleton variant="text" textSize="sm" className="w-12" />}
+          skeleton={<Skeleton variant="line" textSize="sm" className="w-12" />}
         >
           <div className="flex-center gap-1 text-gold text-sm">
             <Trophy size={12} />

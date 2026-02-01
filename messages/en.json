@@ -54,7 +54,7 @@
   "notifications": "Notifications",
   "shop": "Shop",
   "exchange": "Exchange",
-  "support": "Help Center",
+  "support": "Support",
   "settings": "Settings",
   "languages": "Languages",
   "prize pool": "Prize Pool",
@@ -126,5 +126,10 @@
   "weekly progress": "Weekly Progress",
   "monthly progress": "Monthly Progress",
   "progress": "Progress",
-  "your place": "Your Place"
+  "your place": "Your Place",
+  "search": "Search",
+  "no results found": "No results found",
+  "no results description": "We could not find anything matching your request.",
+  "accept": "Accept",
+  "deny": "Deny"
 }

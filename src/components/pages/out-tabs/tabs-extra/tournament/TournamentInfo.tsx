@@ -76,7 +76,7 @@ export function TournamentInfo({ id, className, ...rest }: TournamentDetailsProp
                 loading={isLoading}
                 skeleton={
                   <Skeleton
-                    variant="text"
+                    variant="line"
                     textSize="sm"
                     className="block flex-1 min-w-5 max-w-2/3"
                   />

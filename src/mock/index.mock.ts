@@ -4,6 +4,7 @@ import { ticketsMock } from '@/mock/tickets.mock';
 import type { FetchArgs } from '@reduxjs/toolkit/query';
 import { tasksMock } from '@/mock/tasks.mock';
 import { leaderboardMock } from '@/mock/leaderboard.mock';
+import { supportMock } from '@/mock/support.mock';
 
 /**
  * Type for functional mock handlers.
@@ -22,6 +23,7 @@ export const mockData = {
   ...ticketsMock,
   ...tasksMock,
   ...leaderboardMock,
+  ...supportMock,
 } as const;
 
 export type MockData = typeof mockData;

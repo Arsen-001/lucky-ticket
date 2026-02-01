@@ -37,7 +37,7 @@ export function TaskCard({ task, loading, onAction, onClick }: TaskCardProps) {
           <div className="mb-1">
             <SkeletonSuspense
               loading={loading}
-              skeleton={<Skeleton variant="text" textSize="sm" className="w-10/12" />}
+              skeleton={<Skeleton variant="line" textSize="sm" className="w-10/12" />}
             >
               <h4 className="font-semibold leading-tight truncate">{task.title}</h4>
             </SkeletonSuspense>
@@ -45,14 +45,14 @@ export function TaskCard({ task, loading, onAction, onClick }: TaskCardProps) {
 
           <SkeletonSuspense
             loading={loading}
-            skeleton={<Skeleton variant="text" textSize="sm" className="w-full" />}
+            skeleton={<Skeleton variant="line" textSize="sm" className="w-full" />}
           >
             <p className="text-white-secondary text-sm line-clamp-1">{task.description}</p>
           </SkeletonSuspense>
 
           <SkeletonSuspense
             loading={loading}
-            skeleton={<Skeleton variant="text" textSize="sm" className="w-2/3" />}
+            skeleton={<Skeleton variant="line" textSize="sm" className="w-2/3" />}
           >
             <p className="text-pink-secondary text-sm">
               {t('reward')}: {task.reward}

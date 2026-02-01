@@ -88,7 +88,7 @@ export function TournamentCard({
       </div>
       <SkeletonSuspense
         loading={loading}
-        skeleton={<Skeleton variant="title" textSize="sm" className="w-32 mx-auto mt-1.5" />}
+        skeleton={<Skeleton variant="line" textSize="sm" className="w-32 mx-auto mt-1.5" />}
       >
         <h5 className="text-center text-sm font-semibold mt-1.5">{name}</h5>
       </SkeletonSuspense>
@@ -99,7 +99,7 @@ export function TournamentCard({
             <SkeletonSuspense
               loading={loading}
               skeleton={
-                <Skeleton variant="text" textSize="xs" className="flex-1 min-w-6 max-w-2/3" />
+                <Skeleton variant="line" textSize="xs" className="flex-1 min-w-6 max-w-2/3" />
               }
             >
               <GoldenText className="text-right font-semibold">{value}</GoldenText>
@@ -116,7 +116,7 @@ export function TournamentCard({
           <div className="flex-1 flex justify-center">
             <GoldenText className="text-xs font-semibold">{leftLabel}</GoldenText>
           </div>
-          <Link href={routes.tournaments.tournamentById(id)}>
+          <Link href={routes.tournaments.getById(id)}>
             <Button
               disabled={loading}
               className={twMerge(

@@ -11,14 +11,21 @@ interface ModalProps {
   destroyOnClose?: boolean;
   closeOnOverlayClick?: boolean;
   portalContainer?: HTMLElement;
+  hideOnEscape?: boolean;
 }
 
-export const Modal = ({ open, onClose, children, closeOnOverlayClick = true }: ModalProps) => {
+export const Modal = ({
+  open,
+  onClose,
+  children,
+  closeOnOverlayClick = true,
+  hideOnEscape = true,
+}: ModalProps) => {
   const ANIMATION_MS = 200;
 
   useEffect(() => {
     const handleKeyDown = (event: KeyboardEvent) => {
-      if (event.key === 'Escape' && open && onClose) {
+      if (event.key === 'Escape' && open && onClose && hideOnEscape && closeOnOverlayClick) {
         onClose();
       }
     };

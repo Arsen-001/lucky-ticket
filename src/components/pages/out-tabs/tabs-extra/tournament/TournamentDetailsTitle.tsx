@@ -19,7 +19,7 @@ export function TournamentDetailsTitle({ id, ...props }: TournamentDetailsHeader
       title={
         <SkeletonSuspense
           loading={isLoading}
-          skeleton={<Skeleton variant="title" textSize="lg" className=" mx-auto" />}
+          skeleton={<Skeleton variant="line" textSize="lg" className=" mx-auto" />}
         >
           {data?.name}
         </SkeletonSuspense>

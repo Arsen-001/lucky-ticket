@@ -42,4 +42,20 @@
   --color-telegram: rgba(8, 145, 178, 1);
 
   --drop-shadow-3xl: 0 20px 12px rgba(0, 0, 0, 0.3);
+
+  --gradient-pink: linear-gradient(
+    to right,
+    var(--color-gradient-darkpink),
+    var(--color-gradient-lightpink)
+  );
+  --gradient-purple: linear-gradient(
+    to right,
+    var(--color-gradient-purple),
+    var(--color-gradient-blue)
+  );
+  --gradient-purple-reverse: linear-gradient(
+    to left,
+    var(--color-gradient-purple),
+    var(--color-gradient-blue)
+  );
 }

@@ -6,20 +6,35 @@
   -ms-overflow-style: none;
 }
 
+@utility main-scrollbar {
+  overflow: scroll;
+  &::-webkit-scrollbar {
+    width: 6px;
+  }
+
+  &::-webkit-scrollbar-track {
+    border-radius: 100px;
+    background-color: var(--color-gradient-purple);
+  }
+
+  &::-webkit-scrollbar-thumb {
+    background: var(--gradient-pink);
+    border-radius: 100px;
+    border: 1px solid transparent;
+    background-clip: content-box;
+  }
+}
+
 @utility bg-pink-gradient {
-  background: linear-gradient(
-    to right,
-    var(--color-gradient-darkpink),
-    var(--color-gradient-lightpink)
-  );
+  background: var(--gradient-pink);
 }
 
 @utility bg-purple-gradient {
-  background: linear-gradient(to right, var(--color-gradient-purple), var(--color-gradient-blue));
+  background: var(--gradient-purple);
 }
 
 @utility bg-purple-gradient-reverse {
-  background: linear-gradient(to left, var(--color-gradient-purple), var(--color-gradient-blue));
+  background: var(--gradient-purple-reverse);
 }
 
 @utility flex-center {

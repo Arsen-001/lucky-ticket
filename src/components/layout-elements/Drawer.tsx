@@ -15,10 +15,10 @@ import {
   Users,
   X,
 } from 'lucide-react';
-import { type ReactNode } from 'react';
+import { type ReactNode, useEffect } from 'react';
 import { Link } from '@/components/shared/links/Link';
 import { useAppTranslations } from '@/hooks/useAppTranslations';
-import { Avatar } from '@/components/shared/Avatar';
+import { Avatar } from '@/components/shared/user-elements/Avatar';
 import { Button } from '@/components/shared/buttons/Button';
 
 export interface DrawerItem {
@@ -31,6 +31,16 @@ export function Drawer() {
   const t = useAppTranslations();
   const open = useAppSelector(selectDrawerOpen);
   const dispatch = useAppDispatch();
+
+  const handleDrawerClose = () => {
+    dispatch(closeDrawer());
+  };
+
+  useEffect(() => {
+    return () => {
+      handleDrawerClose();
+    };
+  }, []);
 
   const drawerItems: DrawerItem[] = [
     {
@@ -59,7 +69,7 @@ export function Drawer() {
       icon: <ArrowLeftRight />,
     },
     {
-      route: routes.helpCenter,
+      route: routes.support.index,
       title: t('support'),
       icon: <CircleQuestionMark />,
     },
@@ -75,15 +85,11 @@ export function Drawer() {
     },
   ] as const;
 
-  const handleDrawerClose = () => {
-    dispatch(closeDrawer());
-  };
-
   const tabIndex = open ? 100 : -1;
   return (
     <ClientPortal>
       <div
-        aria-hidden={open ? 'true' : 'false'}
+        aria-hidden={open ? 'false' : 'true'}
         className={twMerge('fixed inset-0 z-60', !open && 'pointer-events-none')}
       >
         {/*Overlay*/}
@@ -120,7 +126,7 @@ export function Drawer() {
                 href={route}
               >
                 <span>{icon}</span>
-                <span className="font-normal">{title}</span>
+                <span className="font-normal truncate">{title}</span>
               </Link>
             ))}
           </div>

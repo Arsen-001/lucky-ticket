@@ -36,7 +36,7 @@ export function TasksContainer({
         break;
       case TaskType.JOIN_TOURNAMENT:
         if (task.tournamentId) {
-          router.push(routes.tournaments.tournamentById(task.tournamentId));
+          router.push(routes.tournaments.getById(task.tournamentId));
           setIsTaskModalOpen(false);
         }
         break;

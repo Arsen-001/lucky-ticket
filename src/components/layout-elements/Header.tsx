@@ -1,6 +1,6 @@
 'use client';
 import { twMerge } from 'tailwind-merge';
-import { Avatar } from '@/components/shared/Avatar';
+import { Avatar } from '@/components/shared/user-elements/Avatar';
 import { useGetMeQuery } from '@/api/me.api';
 import { VerifiedBadge } from '@/components/shared/badges/VerifiedBadge';
 import { PrimeBadge } from '@/components/shared/badges/PrimeBadge';
@@ -39,7 +39,7 @@ export function Header({ className }: ClassNameProps) {
             loading={isLoading}
             skeleton={
               <>
-                <Skeleton variant="title" textSize="base" className="w-40" />
+                <Skeleton variant="line" textSize="base" className="w-40" />
                 <Skeleton variant="rounded-rectangle" className=" h-6 w-21.5" />
               </>
             }

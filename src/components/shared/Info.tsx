@@ -9,6 +9,7 @@ export interface InfoProps {
   extra?: ReactNode;
   className?: string;
   variant?: InfoVariants;
+  animateOnMount?: boolean;
   classNames?: {
     iconContainer?: string;
     icon?: string;
@@ -25,6 +26,7 @@ export function Info({
   extra,
   className,
   classNames,
+  animateOnMount,
 }: InfoProps) {
   const variantClasses: Record<InfoVariants, string> = {
     'pink-gradient': 'bg-pink-gradient',
@@ -36,6 +38,7 @@ export function Info({
       className={twMerge(
         'flex-1 flex-center flex-col w-full h-full max-h-full p-5 rounded-lg overflow-x-hidden overflow-y-auto',
         variantClasses[variant],
+        animateOnMount && 'animate-fade-in',
         className
       )}
     >
@@ -55,7 +58,12 @@ export function Info({
         </h4>
       )}
       {description && (
-        <p className={twMerge('text-white-secondary mt-1 text-center', classNames?.description)}>
+        <p
+          className={twMerge(
+            'text-white-secondary mt-1 text-center leading-1 text-sm',
+            classNames?.description
+          )}
+        >
           {description}
         </p>
       )}

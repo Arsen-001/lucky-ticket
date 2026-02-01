@@ -1,3 +1,5 @@
+'use client';
+
 import { type InputHTMLAttributes, type ReactNode, useRef } from 'react';
 import { twMerge } from 'tailwind-merge';
 
@@ -32,7 +34,11 @@ export function Input({ className, classNames, prefix, suffix, ...rest }: InputP
       )}
 
       <input
-        className={twMerge('bg-transparent outline-none w-full font-semibold', classNames?.input)}
+        className={twMerge(
+          'bg-transparent outline-none w-full font-semibold',
+          'selection:bg-pink selection:text-white',
+          classNames?.input
+        )}
         id={rest?.name}
         {...rest}
       />

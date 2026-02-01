@@ -4,7 +4,7 @@ export const routes = {
   leaderboard: '/leaderboard',
   tournaments: {
     index: '/tournaments',
-    tournamentById: function (tournamentId: string): `/tournaments/${string}` {
+    getById: function (tournamentId: string) {
       return (this.index + `/${tournamentId}`) as `/tournaments/${string}`;
     },
   },
@@ -24,10 +24,18 @@ export const routes = {
   notifications: '/notifications',
   shop: '/shop',
   exchange: '/exchange',
-  helpCenter: '/help-center',
+  support: {
+    index: '/support',
+    getById: function (id: string) {
+      return (this.index + `/${id}`) as `/support/${string}`;
+    },
+  },
+
   settings: '/settings',
   languages: '/languages',
 } as const;
+
+/* eslint-disable */
 
 type RouteValue<T> = T extends (...args: any[]) => infer R
   ? R
@@ -36,3 +44,4 @@ type RouteValue<T> = T extends (...args: any[]) => infer R
     : T;
 
 export type Route = RouteValue<typeof routes>;
+/* eslint-enable */

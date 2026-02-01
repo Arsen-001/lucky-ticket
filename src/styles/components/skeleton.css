@@ -11,9 +11,6 @@
 @utility skeleton-line {
   @apply h-3 rounded-sm;
 }
-@utility skeleton-title {
-  @apply h-6 rounded-sm;
-}
 @utility skeleton-round {
   @apply w-12 h-12 aspect-square rounded-full;
 }
