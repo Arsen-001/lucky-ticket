@@ -9,7 +9,7 @@ const DAILY_TASKS: Task[] = [
     title: 'Join Daily Tournament',
     description: 'Participate in at least one daily tournament to earn your reward.',
     reward: '500 Coins',
-    claimed: true,
+    claimed: false,
     tournamentId: tournamentsMock.tournaments[1].id,
   },
   {

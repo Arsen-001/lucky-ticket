@@ -4,6 +4,7 @@ import { type HTMLAttributes, ReactNode } from 'react';
 import { useRouter } from 'next/navigation';
 import { twMerge } from 'tailwind-merge';
 import { BackButton } from '@/components/shared/buttons/BackButton';
+import { handleSafeBack } from '@/utils/global/navigation.utils';
 
 interface PageHeaderProps extends Omit<HTMLAttributes<HTMLDivElement>, 'title'> {
   title?: ReactNode;
@@ -23,14 +24,7 @@ export function PageHeader({
 }: PageHeaderProps) {
   const router = useRouter();
 
-  const handleBack = () => {
-    if (backRoute) {
-      router.push(backRoute);
-    } else {
-      router.back();
-    }
-  };
-
+  const handleBack = () => handleSafeBack(router, backRoute);
   return (
     <div
       className={twMerge('py-5.75 px-5 relative flex items-center justify-between', className)}

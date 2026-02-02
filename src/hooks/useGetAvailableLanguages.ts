@@ -23,16 +23,15 @@ export function useGetAvailableLanguages() {
       name: t('armenian'),
       nativeName: 'Հայերեն',
     },
+    {
+      code: Locale.RUSSIAN,
+      name: t('russian'),
+      nativeName: 'Русский',
+    },
   ];
 
-  const sortedLanguages = [...languages].sort((a, b) => {
-    if (a.code === currentLocale) return -1;
-    if (b.code === currentLocale) return 1;
-    return 0;
-  });
-
   return {
-    languages: sortedLanguages,
+    languages,
     currentLocale,
   };
 }

@@ -8,12 +8,15 @@ import { EffectCoverflow } from 'swiper/modules';
 import { Swiper, SwiperSlide } from 'swiper/react';
 
 import { useGetTopTournamentsQuery } from '@/api/tournaments.api';
-import { HorizontalSliderCard } from '@/components/pages/tabs/home/HorizontalSliderCard';
+import { TournamentSlideCards } from '@/components/pages/tabs/home/TournamentSlideCards';
 import type { ClassNameProps } from '@/types/interfaces/component.interfcaes';
 import { twMerge } from 'tailwind-merge';
 import type { CSSProperties } from 'react';
 
-export function HorizontalSlider({ className, style }: ClassNameProps & { style?: CSSProperties }) {
+export function TopTournamentsSlider({
+  className,
+  style,
+}: ClassNameProps & { style?: CSSProperties }) {
   const { data: tournamentsData, isLoading } = useGetTopTournamentsQuery();
 
   const tournaments =
@@ -45,7 +48,7 @@ export function HorizontalSlider({ className, style }: ClassNameProps & { style?
       {tournaments?.map(({ id, ...rest }, index) => {
         return (
           <SwiperSlide className="overflow-visible pt-10" key={id || index}>
-            <HorizontalSliderCard id={id} loading={isLoading} {...rest} />
+            <TournamentSlideCards id={id} loading={isLoading} {...rest} />
           </SwiperSlide>
         );
       })}

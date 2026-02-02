@@ -4,6 +4,7 @@ import { Progress } from '@/components/shared/Progress';
 import { Skeleton } from '@/components/shared/seleketons/Skeleton';
 import { TaskCategoryType } from '@/types/enums/tasks.enums';
 import { useAppTranslations } from '@/hooks/useAppTranslations';
+import { SkeletonSuspense } from '@/components/shared/seleketons/SkeletonSuspense';
 
 interface TaskListProps {
   tasks: Task[];
@@ -24,27 +25,7 @@ export function TaskList({
 }: TaskListProps) {
   const t = useAppTranslations();
 
-  if (isLoading) {
-    return (
-      <div className="flex flex-col gap-4 mt-4">
-        <div className="flex flex-col gap-2">
-          <Skeleton variant="line" textSize="sm" className="h-5 w-32 bg-gray-200 rounded" />
-          <Skeleton variant="line" className="rounded-full" />
-        </div>
-        <div className="flex flex-col gap-1.5 overflow-y-auto max-h-[500px] pr-1 scrollbar-hidden">
-          {[...Array(5)].map((_, index) => (
-            <TaskCard
-              key={index}
-              loading={true}
-              task={{} as Task}
-              onAction={() => {}}
-              onClick={() => {}}
-            />
-          ))}
-        </div>
-      </div>
-    );
-  }
+  const content = isLoading ? [...Array(5)] : tasks;
 
   const categoryLabels: Record<TaskCategoryType, string> = {
     [TaskCategoryType.DAILY]: t('daily progress'),
@@ -54,22 +35,40 @@ export function TaskList({
 
   return (
     <div className="flex flex-col gap-4 mt-4">
-      <div className="flex flex-col gap-2">
-        <span className="text-sm font-bold text-white">{categoryLabels[category]}</span>
-        <Progress
-          percentage={progress}
-          className="h-6"
-          classNames={{
-            children: 'left-4 h-2.5 font-semibold',
-          }}
+      <div className="flex flex-col gap-1">
+        <SkeletonSuspense
+          loading={isLoading}
+          skeleton={
+            <Skeleton variant="line" textSize="sm" className="h-5 w-32 bg-gray-200 rounded" />
+          }
         >
-          {progress}%
-        </Progress>
+          <span className="text-sm font-bold text-white">{categoryLabels[category]}</span>
+        </SkeletonSuspense>
+        <SkeletonSuspense
+          loading={isLoading}
+          skeleton={<Skeleton variant="line" className="rounded-full" />}
+        >
+          <Progress
+            percentage={progress}
+            className="h-6"
+            classNames={{
+              children: 'left-4 h-2.5 font-semibold',
+            }}
+          >
+            {progress}%
+          </Progress>
+        </SkeletonSuspense>
       </div>
 
       <div className="flex flex-col gap-1.5">
-        {tasks.map(task => (
-          <TaskCard key={task.id} task={task} onAction={onAction} onClick={onClick} />
+        {content.map((task, index) => (
+          <TaskCard
+            loading={isLoading}
+            key={index}
+            task={task}
+            onAction={onAction}
+            onClick={onClick}
+          />
         ))}
       </div>
     </div>

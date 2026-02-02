@@ -44,7 +44,7 @@ export const LeaderboardTopItem = ({
           isFirst
             ? 'bg-[linear-gradient(to_bottom,theme(colors.gradient-darkpink)_0%,theme(colors.gradient-darkpink)_70%,transparent_100%)]'
             : 'bg-[linear-gradient(to_bottom,theme(colors.gradient-darkpink)_0%,theme(colors.gradient-darkpink)_45%,transparent_100%)]',
-          outline && 'border-2 border-b-0 border-gray-400 bg-primary/10'
+          outline && 'border-2 border-b-0 border-white-secondary bg-primary/10'
         )}
       />
       {isFirst && (
@@ -63,7 +63,14 @@ export const LeaderboardTopItem = ({
           loading={loading}
           skeleton={<Skeleton variant="round" className="w-full h-full aspect-square" />}
         >
-          <Image className="rounded-full" src={image} alt={name} width={100} height={100} />
+          <Image
+            className="rounded-full"
+            loading="eager"
+            src={image}
+            alt={name}
+            width={100}
+            height={100}
+          />
         </SkeletonSuspense>
         {!loading && (
           <div className="absolute p-1.25 w-8 aspect-square bg-gradient-darkpink rounded-full bottom-0 left-1/2 -translate-x-1/2 translate-y-1/2">

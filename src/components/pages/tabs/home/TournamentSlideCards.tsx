@@ -16,7 +16,7 @@ interface Info {
   value: string | number;
 }
 
-export interface VerticalSliderCardProps {
+export interface TournamentSlideCardsProps {
   id: string;
   type: MedalType;
   name: string;
@@ -29,7 +29,7 @@ export interface VerticalSliderCardProps {
   disabled?: boolean;
 }
 
-export function HorizontalSliderCard({
+export function TournamentSlideCards({
   id,
   type,
   startTime,
@@ -40,7 +40,7 @@ export function HorizontalSliderCard({
   teamSize,
   loading,
   disabled,
-}: VerticalSliderCardProps) {
+}: TournamentSlideCardsProps) {
   const t = useAppTranslations();
   const router = useRouter();
   const { leftTime, expired } = useCountDown(startTime);
@@ -52,7 +52,7 @@ export function HorizontalSliderCard({
   const info: Info[] = [
     {
       label: t('prize pool'),
-      value: prizePool + GlobalConstants.coinName,
+      value: prizePool + ' ' + GlobalConstants.coinName,
     },
     {
       label: t('team size'),
@@ -60,7 +60,7 @@ export function HorizontalSliderCard({
     },
     {
       label: t('guaranteed'),
-      value: guaranteedPool + GlobalConstants.coinName,
+      value: guaranteedPool + ' ' + GlobalConstants.coinName,
     },
   ];
 
