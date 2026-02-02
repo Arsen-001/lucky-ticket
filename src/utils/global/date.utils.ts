@@ -56,7 +56,12 @@ export const getTimeText = (
 export const getLeftTimestamp = (targetDate?: string | Date | number) =>
   dayjs(targetDate).valueOf() - dayjs().valueOf();
 
-export const durationToMilliseconds = (duration: Duration) => {
-  const { day = 0, hours = 0, minutes = 0, seconds = 0 } = duration;
-  return day * 24 * 60 * 60 * 1000 + hours * 60 * 60 * 1000 + minutes * 60 * 1000 + seconds * 1000;
+export const durationToMS = (duration: Duration) => {
+  const { year = 0, week = 0, day = 0, hours = 0, minutes = 0, seconds = 0 } = duration;
+
+  const totalDays = year * 365 + week * 7 + day;
+
+  return (
+    totalDays * 24 * 60 * 60 * 1000 + hours * 60 * 60 * 1000 + minutes * 60 * 1000 + seconds * 1000
+  );
 };

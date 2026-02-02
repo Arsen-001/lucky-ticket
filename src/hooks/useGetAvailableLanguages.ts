@@ -3,9 +3,10 @@
 import { useLocale } from 'next-intl';
 import { Locale } from '@/types/enums/locale.enums';
 import { useAppTranslations } from '@/hooks/useAppTranslations';
+import { LocaleType } from '@/types/types/locale.types';
 
 export interface Language {
-  code: string;
+  code: LocaleType;
   name: string;
   nativeName: string;
 }

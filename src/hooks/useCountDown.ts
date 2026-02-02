@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import {
   type CountdownState,
-  durationToMilliseconds,
+  durationToMS,
   getCountdown,
   getLeftTimestamp,
   getTimeText,
@@ -39,7 +39,7 @@ export const useCountDown = (targetDate?: string | Date | number): UseCountdownR
   const getPassedPercentage = (fullDuration?: Duration) => {
     if (!fullDuration) return 0;
     const leftTimestamp = getLeftTimestamp(targetDate);
-    const fullDurationTimestamp = durationToMilliseconds(fullDuration);
+    const fullDurationTimestamp = durationToMS(fullDuration);
     const leftPercentage = Math.floor((leftTimestamp / fullDurationTimestamp) * 100);
     return 100 - leftPercentage;
   };

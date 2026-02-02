@@ -1,8 +1,8 @@
-import { Locale } from '@/types/enums/locale.enums';
+import { defaultLocale } from '@/i18n/config';
 
 export const GlobalConstants = {
   projectName: 'Lucky Ticket',
   minPasswordLength: 8,
   coinName: 'LTC',
-  defaultLanguage: Locale.ENGLISH,
+  defaultLanguage: defaultLocale,
 };

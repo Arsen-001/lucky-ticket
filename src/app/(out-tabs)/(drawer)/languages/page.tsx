@@ -7,9 +7,10 @@ import { HighlightedText } from '@/components/shared/typography/HighlightedText'
 import { CheckCircle2 } from 'lucide-react';
 import { twMerge } from 'tailwind-merge';
 import { useRouter } from 'next/navigation';
-import Cookies from 'js-cookie';
 import { Button } from '@/components/shared/buttons/Button';
 import { filterLanguages } from '@/utils/pages/languages.utils';
+import { type LocaleType } from '@/types/types/locale.types';
+import { setAppLocale } from '@/services/locale';
 
 export default function LanguagesPage() {
   const { languages, currentLocale } = useGetAvailableLanguages();
@@ -22,8 +23,8 @@ export default function LanguagesPage() {
   const handleLanguageChange = (code: string) => {
     if (code === currentLocale) return;
 
-    startTransition(() => {
-      Cookies.set('locale', code, { expires: 365 });
+    startTransition(async () => {
+      await setAppLocale(code as LocaleType);
       router.refresh();
     });
   };
