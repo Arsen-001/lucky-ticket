@@ -98,7 +98,7 @@ export function TournamentBetModal({
 
         <div className="flex-center gap-2">
           <Button variant="secondary" className="py-2 rounded-full text-sm" onClick={setMaxBet}>
-            {t('max bet')}
+            {t('max')}
           </Button>
           <Button className="py-2 rounded-full text-sm" onClick={handleClose}>
             {t('bet')}
