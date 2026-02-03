@@ -30,6 +30,13 @@ export const Modal = ({
   const ANIMATION_MS = 200;
 
   useEffect(() => {
+    if (!open && typeof document !== 'undefined') {
+      const activeElement = document.activeElement as HTMLElement;
+      if (activeElement && activeElement instanceof HTMLElement) {
+        activeElement.blur();
+      }
+    }
+
     const handleKeyDown = (event: KeyboardEvent) => {
       if (event.key === 'Escape' && open && onClose && hideOnEscape && closeOnOverlayClick) {
         onClose();
@@ -43,7 +50,7 @@ export const Modal = ({
     return () => {
       window.removeEventListener('keydown', handleKeyDown);
     };
-  }, [open, onClose]);
+  }, [open, onClose, hideOnEscape, closeOnOverlayClick]);
 
   // Overlay click
   const handleOverlayClick = () => {
@@ -55,7 +62,8 @@ export const Modal = ({
   return (
     <ClientPortal>
       <div
-        aria-hidden={open ? 'false' : 'true'}
+        aria-hidden={!open}
+        inert={!open ? true : undefined}
         style={{ transitionDuration: `${ANIMATION_MS}ms` }}
         className={twMerge(
           'fixed inset-0 flex items-center justify-center z-100 transition-all backdrop-blur-[1px] p-7.5',

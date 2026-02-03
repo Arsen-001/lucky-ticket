@@ -101,8 +101,8 @@ export function TournamentSlideCards({
 
       <div className="w-full flex justify-evenly gap-2 mt-2 text-xs overflow-hidden">
         {info.map(({ label, value }) => (
-          <div key={label} className="flex-center flex-col flex-1 overflow-hidden">
-            <span className="text-pink-secondary truncate w-full">{label}</span>
+          <div key={label} className="flex-center text-center flex-col flex-1 overflow-hidden">
+            <span className="text-pink-secondary text-center truncate w-full">{label}</span>
             <SkeletonSuspense
               loading={loading}
               skeleton={<Skeleton variant="line" textSize="xs" />}
