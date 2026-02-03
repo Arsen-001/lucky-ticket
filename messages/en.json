@@ -134,5 +134,21 @@
   "deny": "Deny",
   "english": "English",
   "armenian": "Armenian",
-  "russian": "Russian"
+  "russian": "Russian",
+  "today": "Today",
+  "yesterday": "Yesterday",
+  "no notifications": "No notifications yet",
+  "mark all as read": "Mark all as read",
+  "january": "January",
+  "february": "February",
+  "march": "March",
+  "april": "April",
+  "may": "May",
+  "june": "June",
+  "july": "July",
+  "august": "August",
+  "september": "September",
+  "october": "October",
+  "november": "November",
+  "december": "December"
 }

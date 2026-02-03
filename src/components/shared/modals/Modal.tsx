@@ -3,6 +3,8 @@
 import { ReactNode, useEffect } from 'react';
 import { twMerge } from 'tailwind-merge';
 import { ClientPortal } from '@/components/shared/ClientPortal';
+import { ModalCloseButton } from '@/components/shared/modals/ModalCloseButton';
+import type { ButtonProps } from '@/components/shared/buttons/Button';
 
 interface ModalProps {
   open: boolean;
@@ -12,6 +14,8 @@ interface ModalProps {
   closeOnOverlayClick?: boolean;
   portalContainer?: HTMLElement;
   hideOnEscape?: boolean;
+  hideCloseButton?: boolean;
+  closeButtonProps?: ButtonProps;
 }
 
 export const Modal = ({
@@ -20,6 +24,8 @@ export const Modal = ({
   children,
   closeOnOverlayClick = true,
   hideOnEscape = true,
+  closeButtonProps,
+  hideCloseButton,
 }: ModalProps) => {
   const ANIMATION_MS = 200;
 
@@ -63,10 +69,17 @@ export const Modal = ({
         <div
           style={{ transitionDuration: `${ANIMATION_MS}ms` }}
           className={twMerge(
-            'w-full relative transition-all transform',
+            'w-full relative transition-all transform max-h-[70vh] overflow-scroll scrollbar-hidden rounded-lg',
             open ? 'scale-100' : 'scale-80'
           )}
         >
+          {onClose && !hideCloseButton && (
+            <ModalCloseButton
+              onClick={onClose}
+              {...closeButtonProps}
+              className={twMerge('z-10', closeButtonProps?.className)}
+            />
+          )}
           {children}
         </div>
       </div>

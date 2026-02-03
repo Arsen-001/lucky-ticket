@@ -11,6 +11,7 @@ import { filterSections, getSectionsSkeletonData } from '@/utils/pages/support.u
 import { EmptyDataInfo } from '@/components/shared/EmptyDataInfo';
 import { videos } from '@/constants/videos';
 import { twMerge } from 'tailwind-merge';
+import type { SupportSection } from '@/types/interfaces/support.interfaces';
 
 export default function SupportPage() {
   const [searchValue, setSearchValue] = useState<string>('');
@@ -18,7 +19,7 @@ export default function SupportPage() {
   const { data: sections = [], isLoading } = useGetSupportSectionsQuery();
 
   const filteredContent = filterSections(sections, searchValue);
-  const content = isLoading ? getSectionsSkeletonData() : filteredContent;
+  const content = isLoading ? (getSectionsSkeletonData() as SupportSection[]) : filteredContent;
 
   const handleFocus = () => setIsFocused(true);
   const handleBlur = () => setIsFocused(false);

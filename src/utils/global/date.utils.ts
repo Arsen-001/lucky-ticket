@@ -65,3 +65,8 @@ export const durationToMS = (duration: Duration) => {
     totalDays * 24 * 60 * 60 * 1000 + hours * 60 * 60 * 1000 + minutes * 60 * 1000 + seconds * 1000
   );
 };
+
+export const formatDate = (date?: string | Date | number, format = 'DD.MM.YYYY HH:mm') => {
+  if (!date) return '';
+  return dayjs(date).format(format);
+};

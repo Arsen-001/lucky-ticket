@@ -7,4 +7,5 @@ export const rtkTags = {
   tasks: 'Tasks',
   leaderboard: 'Leaderboard',
   support: 'Support',
+  notifications: 'Notifications',
 } as const;

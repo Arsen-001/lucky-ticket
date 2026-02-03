@@ -1,6 +1,7 @@
-import type { ButtonHTMLAttributes, Ref } from 'react';
+import type { ButtonHTMLAttributes, ReactElement, ReactNode, Ref } from 'react';
+import React from 'react';
 import { twMerge } from 'tailwind-merge';
-import { Loader2 } from 'lucide-react';
+import { Loader2, type LucideProps } from 'lucide-react';
 
 export type ButtonVariants =
   | 'primary'
@@ -13,7 +14,9 @@ export interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
   variant?: ButtonVariants;
   loading?: boolean;
   ref?: Ref<HTMLButtonElement>;
-  loadingIconSize?: number;
+  iconSize?: number;
+  icon?: ReactNode;
+  iconPosition?: 'left' | 'right';
 }
 
 export function Button({
@@ -21,7 +24,9 @@ export function Button({
   children,
   variant = 'primary',
   loading = false,
-  loadingIconSize = 20,
+  iconSize = 20,
+  icon,
+  iconPosition = 'left',
   disabled,
   type = 'button',
   ...rest
@@ -32,6 +37,25 @@ export function Button({
     transparent: 'bg-transparent',
     purpleGradient: 'bg-purple-gradient',
     outlined: 'border border-white bg-transparent',
+  };
+
+  const renderIcon = () => {
+    if (!icon) return null;
+
+    if (React.isValidElement(icon)) {
+      return React.cloneElement(icon as ReactElement<LucideProps>, {
+        size: iconSize,
+        width: iconSize,
+        height: iconSize,
+      });
+    }
+
+    if (typeof icon === 'function') {
+      const Icon = icon as React.ComponentType<LucideProps>;
+      return <Icon size={iconSize} width={iconSize} height={iconSize} />;
+    }
+
+    return icon;
   };
 
   return (
@@ -51,7 +75,7 @@ export function Button({
           disabled:active:scale-100
           disabled:hover:none
           hover:cursor-pointer`,
-        loading ? 'disabled:opacity-80 relative flex items-center justify-center gap-2' : '',
+        loading || icon ? 'disabled:opacity-80 relative flex-center gap-2' : '',
         !loading && disabled ? 'disabled:bg-disabled' : '',
         className
       )}
@@ -59,8 +83,12 @@ export function Button({
       onClick={!loading ? rest.onClick : undefined}
       {...rest}
     >
+      {!loading && icon && iconPosition === 'left' && renderIcon()}
       {children}
-      {loading && <Loader2 size={loadingIconSize} className="animate-spin" />}
+      {icon && iconPosition === 'right' && renderIcon()}
+      {loading && (
+        <Loader2 size={iconSize} width={iconSize} height={iconSize} className="animate-spin" />
+      )}
     </button>
   );
 }

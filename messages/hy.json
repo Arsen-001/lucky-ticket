@@ -134,5 +134,21 @@
   "deny": "Մերժել",
   "armenian": "Հայերեն",
   "russian": "Ռուսերեն",
-  "english": "Անգլերեն"
+  "english": "Անգլերեն",
+  "today": "Այսօր",
+  "yesterday": "Երեկ",
+  "no notifications": "Ծանուցումներ դեռ չկան",
+  "mark all as read": "Նշել բոլորը որպես կարդացված",
+  "january": "Հունվար",
+  "february": "Փետրվար",
+  "march": "Մարտ",
+  "april": "Ապրիլ",
+  "may": "Մայիս",
+  "june": "Հունիս",
+  "july": "Հուլիս",
+  "august": "Օգոստոս",
+  "september": "Սեպտեմբեր",
+  "october": "Հոկտեմբեր",
+  "november": "Նոյեմբեր",
+  "december": "Դեկտեմբեր"
 }

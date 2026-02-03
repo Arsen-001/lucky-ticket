@@ -5,6 +5,7 @@ import type { FetchArgs } from '@reduxjs/toolkit/query';
 import { tasksMock } from '@/mock/tasks.mock';
 import { leaderboardMock } from '@/mock/leaderboard.mock';
 import { supportMock } from '@/mock/support.mock';
+import { notificationsMock } from '@/mock/notifications.mock';
 
 /**
  * Type for functional mock handlers.
@@ -24,6 +25,7 @@ export const mockData = {
   ...tasksMock,
   ...leaderboardMock,
   ...supportMock,
+  ...notificationsMock,
 } as const;
 
 export type MockData = typeof mockData;

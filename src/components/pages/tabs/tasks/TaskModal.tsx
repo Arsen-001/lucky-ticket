@@ -1,7 +1,6 @@
 'use client';
 
 import { Modal } from '@/components/shared/modals/Modal';
-import { ModalCloseButton } from '@/components/shared/modals/ModalCloseButton';
 import { Task } from '@/types/interfaces/tasks.interfaces';
 import { CheckCircle2 } from 'lucide-react';
 import { Button } from '@/components/shared/buttons/Button';
@@ -23,7 +22,6 @@ export function TaskModal({ task, open, onClose, onAction }: TaskModalProps) {
   return (
     <Modal open={open} onClose={onClose}>
       <div className="bg-purple-gradient p-5 rounded-xl">
-        <ModalCloseButton onClick={onClose} />
         <div className="flex flex-col items-center text-center mt-4">
           <div className="w-16 h-16 bg-pink/20 rounded-full flex items-center justify-center mb-4">
             <TaskIcon className="text-pink" size={32} type={task.type} />

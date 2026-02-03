@@ -134,5 +134,21 @@
   "deny": "Отклонить",
   "english": "Английский",
   "armenian": "Армянский",
-  "russian": "Русский"
+  "russian": "Русский",
+  "today": "Сегодня",
+  "yesterday": "Вчера",
+  "no notifications": "Уведомлений пока нет",
+  "mark all as read": "Отметить все как прочитанные",
+  "january": "Январь",
+  "february": "Февраль",
+  "march": "Март",
+  "april": "Апрель",
+  "may": "Май",
+  "june": "Июнь",
+  "july": "Июль",
+  "august": "Август",
+  "september": "Сентябрь",
+  "october": "Октябрь",
+  "november": "Ноябрь",
+  "december": "Декабрь"
 }

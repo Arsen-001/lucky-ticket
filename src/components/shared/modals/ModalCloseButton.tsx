@@ -1,15 +1,10 @@
 'use client';
 
 import { X } from 'lucide-react';
-import { Button } from '@/components/shared/buttons/Button';
+import { Button, type ButtonProps } from '@/components/shared/buttons/Button';
 import { twMerge } from 'tailwind-merge';
 
-interface ModalCloseButtonProps {
-  onClick: () => void;
-  className?: string;
-}
-
-export function ModalCloseButton({ onClick, className }: ModalCloseButtonProps) {
+export function ModalCloseButton({ onClick, className, ...props }: ButtonProps) {
   return (
     <Button
       variant="transparent"
@@ -18,6 +13,7 @@ export function ModalCloseButton({ onClick, className }: ModalCloseButtonProps) 
         'absolute right-2 top-2 p-2 text-white/70 hover:text-white transition-colors',
         className
       )}
+      {...props}
     >
       <X size={20} />
     </Button>

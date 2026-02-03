@@ -57,7 +57,7 @@ export function TournamentBetModal({
   };
 
   return (
-    <Modal open={open} onClose={handleClose}>
+    <Modal open={open} onClose={handleClose} hideCloseButton>
       <div className="bg-purple-gradient rounded-3xl p-6 min-w-80 flex flex-col gap-2">
         {participatedTicketsCount !== undefined && participatedTicketsCount > 0 && (
           <div className="flex gap-2 items-center px-2 py-1 text-sm">
@@ -96,11 +96,15 @@ export function TournamentBetModal({
           </TournamentBetActionButton>
         </div>
 
-        <div className="flex-center gap-2">
-          <Button variant="secondary" className="py-2 rounded-full text-sm" onClick={setMaxBet}>
+        <div className="mt-4 flex-center gap-1 w-full overflow-hidden">
+          <Button
+            variant="secondary"
+            className="py-2 truncate rounded-full text-sm"
+            onClick={setMaxBet}
+          >
             {t('max')}
           </Button>
-          <Button className="py-2 rounded-full text-sm" onClick={handleClose}>
+          <Button className="py-2 truncate rounded-full text-sm" onClick={handleClose}>
             {t('bet')}
           </Button>
         </div>

@@ -5,7 +5,7 @@ import { CheckCircle2, Files } from 'lucide-react';
 import { Button, type ButtonProps } from './Button';
 import { twMerge } from 'tailwind-merge';
 
-interface CopyButtonProps extends Omit<ButtonProps, 'loadingIconSize'> {
+interface CopyButtonProps extends Omit<ButtonProps, 'iconSize'> {
   value: string;
   onCopy?: () => void;
   iconSize?: number;
@@ -39,7 +39,7 @@ export function CopyButton({
 
   return (
     <Button
-      loadingIconSize={iconSize}
+      iconSize={iconSize}
       variant={variant}
       className={twMerge(isCopied && 'bg-success', className)}
       {...props}

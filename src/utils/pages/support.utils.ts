@@ -21,5 +21,5 @@ export const getSectionsSkeletonData = (sectionCount: number = 3, articleCount: 
       title: 'Loading...',
       description: 'Loading...',
     })),
-  })) as SupportSection[];
+  }));
 };

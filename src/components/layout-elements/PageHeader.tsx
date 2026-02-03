@@ -5,12 +5,14 @@ import { useRouter } from 'next/navigation';
 import { twMerge } from 'tailwind-merge';
 import { BackButton } from '@/components/shared/buttons/BackButton';
 import { handleSafeBack } from '@/utils/global/navigation.utils';
+import { Button, type ButtonProps } from '@/components/shared/buttons/Button';
 
 interface PageHeaderProps extends Omit<HTMLAttributes<HTMLDivElement>, 'title'> {
   title?: ReactNode;
   hideBackButton?: boolean;
   backRoute?: string;
   extra?: ReactNode;
+  extraButtonProps?: ButtonProps | false;
   className?: string;
 }
 
@@ -19,6 +21,7 @@ export function PageHeader({
   hideBackButton,
   backRoute,
   extra,
+  extraButtonProps,
   className,
   ...props
 }: PageHeaderProps) {
@@ -40,7 +43,18 @@ export function PageHeader({
         )}
       </div>
 
-      <div className="flex items-center justify-end z-10">{extra}</div>
+      <div className="flex items-center justify-end z-10">
+        {!!extra
+          ? extra
+          : !!extraButtonProps && (
+              <Button
+                iconSize={18}
+                variant="secondary"
+                {...extraButtonProps}
+                className={twMerge('p-2 text-sm', extraButtonProps?.className)}
+              />
+            )}
+      </div>
     </div>
   );
 }

@@ -22,6 +22,9 @@ interface SkeletonProps extends HTMLAttributes<HTMLDivElement> {
   variant?: Variant;
   textSize?: TextSize;
   lines?: number;
+  classNames?: {
+    textLine: string;
+  };
 }
 
 export const Skeleton: React.FC<SkeletonProps> = ({
@@ -29,6 +32,7 @@ export const Skeleton: React.FC<SkeletonProps> = ({
   textSize = 'base',
   lines = 3,
   className,
+  classNames,
   ...rest
 }) => {
   const variantClass = {
@@ -67,8 +71,8 @@ export const Skeleton: React.FC<SkeletonProps> = ({
             className={twMerge(
               'skeleton w-full',
               variantClass,
-              heightBasedOnTextSize
-              // i === lines - 1 && lines > 1 && 'w-3/4'
+              heightBasedOnTextSize,
+              classNames?.textLine
             )}
           />
         ))}
