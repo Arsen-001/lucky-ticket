@@ -85,9 +85,10 @@ export function Button({
     >
       {!loading && icon && iconPosition === 'left' && renderIcon()}
       {children}
-      {icon && iconPosition === 'right' && renderIcon()}
-      {loading && (
+      {loading ? (
         <Loader2 size={iconSize} width={iconSize} height={iconSize} className="animate-spin" />
+      ) : (
+        icon && iconPosition === 'right' && renderIcon()
       )}
     </button>
   );

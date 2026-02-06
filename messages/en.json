@@ -151,5 +151,14 @@
   "october": "October",
   "november": "November",
   "december": "December",
-  "market": "Market"
+  "market": "Market",
+  "invited": "Invited",
+  "earned": "Earned",
+  "copy invite link": "Copy Invite Link",
+  "invited friends": "Invited Friends",
+  "no invited friends": "You haven't invited any friends yet",
+  "get rewards description": "Get rewards for every friend you invite to {projectName}",
+  "regular friends": "Regular Friends",
+  "from their earnings": "From their earnings",
+  "prime friends": "Prime Friends"
 }

@@ -39,17 +39,14 @@ export function CopyButton({
 
   return (
     <Button
-      iconSize={iconSize}
       variant={variant}
       className={twMerge(isCopied && 'bg-success', className)}
       {...props}
+      iconSize={iconSize}
       onClick={handleCopy}
+      icon={isCopied ? null : props.icon}
     >
-      {props?.loading ? null : isCopied ? (
-        <CheckCircle2 size={iconSize} />
-      ) : (
-        children || <Files size={iconSize} />
-      )}
+      {isCopied ? <CheckCircle2 size={iconSize} /> : children || <Files size={iconSize} />}
     </Button>
   );
 }

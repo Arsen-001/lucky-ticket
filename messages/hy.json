@@ -151,5 +151,14 @@
   "october": "Հոկտեմբեր",
   "november": "Նոյեմբեր",
   "december": "Դեկտեմբեր",
-  "market": "Մարկետ"
+  "market": "Մարկետ",
+  "invited": "Հրավիրված",
+  "earned": "Վաստակած",
+  "copy invite link": "Պատճենել հրավերի հղումը",
+  "invited friends": "Հրավիրված ընկերներ",
+  "no invited friends": "Դուք դեռ ոչ մի ընկեր չեք հրավիրել",
+  "get rewards description": "Ստացեք պարգևներ յուրաքանչյուր ընկերոջ համար, ում հրավիրում եք {projectName}",
+  "regular friends": "Սովորական ընկերներ",
+  "from their earnings": "Նրանց եկամուտից",
+  "prime friends": "Փրայմ ընկերներ"
 }

@@ -8,4 +8,5 @@ export const rtkTags = {
   leaderboard: 'Leaderboard',
   support: 'Support',
   notifications: 'Notifications',
+  referral: 'Referral',
 } as const;

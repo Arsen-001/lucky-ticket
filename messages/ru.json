@@ -151,5 +151,14 @@
   "october": "Октябрь",
   "november": "Ноябрь",
   "december": "Декабрь",
-  "market": "Рынок"
+  "market": "Рынок",
+  "invited": "Приглашено",
+  "earned": "Заработано",
+  "copy invite link": "Копировать ссылку",
+  "invited friends": "Приглашенные друзья",
+  "no invited friends": "Вы еще не пригласили ни одного друга",
+  "get rewards description": "Получайте награды за каждого друга, которого вы пригласите в {projectName}",
+  "regular friends": "Обычные друзья",
+  "from their earnings": "От их заработка",
+  "prime friends": "Prime друзья"
 }

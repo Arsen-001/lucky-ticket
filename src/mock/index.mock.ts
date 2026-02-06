@@ -6,6 +6,7 @@ import { tasksMock } from '@/mock/tasks.mock';
 import { leaderboardMock } from '@/mock/leaderboard.mock';
 import { supportMock } from '@/mock/support.mock';
 import { notificationsMock } from '@/mock/notifications.mock';
+import { referralMock } from '@/mock/referral.mock';
 
 /**
  * Type for functional mock handlers.
@@ -26,6 +27,7 @@ export const mockData = {
   ...leaderboardMock,
   ...supportMock,
   ...notificationsMock,
+  ...referralMock,
 } as const;
 
 export type MockData = typeof mockData;

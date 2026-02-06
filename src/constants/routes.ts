@@ -20,6 +20,9 @@ export const routes = {
 
   // drawer routes
   inviteFriends: '/invite-friends',
+  refererLink: function (refererId: string) {
+    return `/referer/${refererId}`;
+  },
   profile: '/profile',
   notifications: '/notifications',
   exchange: '/exchange',

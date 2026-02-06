@@ -5,4 +5,6 @@ export const GlobalConstants = {
   minPasswordLength: 8,
   coinName: 'LTC',
   defaultLanguage: defaultLocale,
+  referralPercentage: 10,
+  primeReferralPercentage: 20,
 };
