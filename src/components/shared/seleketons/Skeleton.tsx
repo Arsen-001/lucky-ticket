@@ -45,8 +45,8 @@ export const Skeleton: React.FC<SkeletonProps> = ({
 
   const heightBasedOnTextSize = {
     xs: 'h-4',
-    sm: 'h-5',
-    base: 'h-6',
+    sm: 'h-4.5',
+    base: 'h-5',
     lg: 'h-7',
     xl: 'h-7',
     '2xl': 'h-8',

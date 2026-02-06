@@ -9,4 +9,5 @@ export const rtkTags = {
   support: 'Support',
   notifications: 'Notifications',
   referral: 'Referral',
+  exchange: 'Exchange',
 } as const;

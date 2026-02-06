@@ -10,8 +10,8 @@ import {
   CircleQuestionMark,
   Globe,
   Settings,
-  User,
-  Users,
+  UserRound,
+  UserRoundPlus,
   X,
 } from 'lucide-react';
 import { type ReactNode, useEffect } from 'react';
@@ -45,12 +45,12 @@ export function Drawer() {
     {
       route: routes.profile,
       title: t('profile'),
-      icon: <User />,
+      icon: <UserRound />,
     },
     {
       route: routes.inviteFriends,
       title: t('invite friends'),
-      icon: <Users />,
+      icon: <UserRoundPlus />,
     },
     {
       route: routes.notifications,

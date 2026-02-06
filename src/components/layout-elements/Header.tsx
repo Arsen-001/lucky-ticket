@@ -55,9 +55,9 @@ export function Header({ className }: ClassNameProps) {
             <div className="bg-gradient-lightpink/30 flex-center gap-2 text-white-secondary text-sm font-semibold rounded-full py-0.5 px-2.5">
               <div className="flex items-center gap-1">
                 <Image src={icons.coin} alt="coin" className="w-3" />
-                <span>{GlobalConstants.coinName}</span>
+                <span className="font-semibold h-4.5">{GlobalConstants.coinName}</span>
               </div>
-              <span>{me?.coins}</span>
+              <span className="font-semibold h-4.5">{me?.coins}</span>
             </div>
           </SkeletonSuspense>
         </div>

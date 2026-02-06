@@ -47,6 +47,10 @@ export function Button({
         size: iconSize,
         width: iconSize,
         height: iconSize,
+        style: {
+          minWidth: iconSize,
+          minHeight: iconSize,
+        },
       });
     }
 
@@ -86,7 +90,13 @@ export function Button({
       {!loading && icon && iconPosition === 'left' && renderIcon()}
       {children}
       {loading ? (
-        <Loader2 size={iconSize} width={iconSize} height={iconSize} className="animate-spin" />
+        <Loader2
+          style={{ minWidth: iconSize, minHeight: iconSize }}
+          size={iconSize}
+          width={iconSize}
+          height={iconSize}
+          className="animate-spin"
+        />
       ) : (
         icon && iconPosition === 'right' && renderIcon()
       )}

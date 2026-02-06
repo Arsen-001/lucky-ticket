@@ -9,7 +9,7 @@ export const me: MeResponse = {
   isPrime: true,
   isVerified: true,
   avatar: images.avatar.src,
-  coins: 27,
+  coins: 537,
 };
 
 const meMock = { me };

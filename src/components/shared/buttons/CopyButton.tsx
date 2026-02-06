@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { CheckCircle2, Files } from 'lucide-react';
+import { Files } from 'lucide-react';
 import { Button, type ButtonProps } from './Button';
 import { twMerge } from 'tailwind-merge';
 
@@ -46,7 +46,7 @@ export function CopyButton({
       onClick={handleCopy}
       icon={isCopied ? null : props.icon}
     >
-      {isCopied ? <CheckCircle2 size={iconSize} /> : children || <Files size={iconSize} />}
+      {children || <Files size={iconSize} />}
     </Button>
   );
 }
