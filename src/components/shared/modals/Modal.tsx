@@ -30,13 +30,6 @@ export const Modal = ({
   const ANIMATION_MS = 200;
 
   useEffect(() => {
-    if (!open && typeof document !== 'undefined') {
-      const activeElement = document.activeElement as HTMLElement;
-      if (activeElement && activeElement instanceof HTMLElement) {
-        activeElement.blur();
-      }
-    }
-
     const handleKeyDown = (event: KeyboardEvent) => {
       if (event.key === 'Escape' && open && onClose && hideOnEscape && closeOnOverlayClick) {
         onClose();

@@ -3,21 +3,28 @@ set -e
 
 echo "[husky] Running pre-commit checks..."
 
-# 1) Lint and format staged files only
+# 1) Clean the project
+npm run clean
+if [ $? -ne 0 ]; then
+  echo "[husky] Cleaning project failed. Aborting commit."
+  exit 1
+fi
+
+# 2) Lint and format staged files only
 npx lint-staged
 if [ $? -ne 0 ]; then
   echo "[husky] lint-staged failed. Aborting commit."
   exit 1
 fi
 
-# 2) Type check the project
+# 3) Type check the project
 npm run type-check
 if [ $? -ne 0 ]; then
   echo "[husky] Type checking failed. Aborting commit."
   exit 1
 fi
 
-# 3) Ensure the project builds before committing
+# 4) Ensure the project builds before committing
 npm run build
 if [ $? -ne 0 ]; then
   echo "[husky] Build failed. Aborting commit."

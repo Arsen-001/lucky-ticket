@@ -48,7 +48,7 @@ export const LeaderboardList = ({ className, ...props }: HTMLAttributes<HTMLDivE
             <Divider classNames={{ title: 'font-semibold' }} className="border-white/10">
               {t('your place')}
             </Divider>
-            <div className={'sticky w-full bottom-3 mt-auto backdrop-blur-lg'}>
+            <div className={'sticky w-full bottom-3 mt-auto rounded-2xl overflow-hidden'}>
               <LeaderboardListItem
                 loading={isLoading}
                 rank={myPlace.place}
@@ -59,7 +59,7 @@ export const LeaderboardList = ({ className, ...props }: HTMLAttributes<HTMLDivE
                 isVerified={myPlace.isVerified}
                 isPrime={myPlace.isPrime}
                 outline
-                className="animate-slide-in-bottom"
+                className="animate-slide-in-bottom  backdrop-blur-lg"
                 style={{ animationDelay: '300ms' }}
               />
             </div>

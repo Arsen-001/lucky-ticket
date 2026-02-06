@@ -24,7 +24,7 @@ export interface TournamentSlideCardsProps {
   className?: string;
   teamSize: number;
   prizePool: number;
-  guaranteedPool: number;
+  guaranteed: number;
   loading?: boolean;
   disabled?: boolean;
 }
@@ -36,7 +36,7 @@ export function TournamentSlideCards({
   name,
   className,
   prizePool,
-  guaranteedPool,
+  guaranteed,
   teamSize,
   loading,
   disabled,
@@ -60,7 +60,7 @@ export function TournamentSlideCards({
     },
     {
       label: t('guaranteed'),
-      value: guaranteedPool + ' ' + GlobalConstants.coinName,
+      value: guaranteed + ' ' + GlobalConstants.coinName,
     },
   ];
 

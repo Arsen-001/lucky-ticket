@@ -84,6 +84,7 @@ export function Drawer() {
     <ClientPortal>
       <div
         aria-hidden={open ? 'false' : 'true'}
+        inert={!open ? true : undefined}
         className={twMerge('fixed inset-0 z-60', !open && 'pointer-events-none')}
       >
         {/*Overlay*/}
