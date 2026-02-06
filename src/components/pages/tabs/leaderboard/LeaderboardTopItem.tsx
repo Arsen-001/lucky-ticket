@@ -1,4 +1,4 @@
-import { Trophy } from 'lucide-react';
+import { ChevronsUp } from 'lucide-react';
 import Image from 'next/image';
 import { twMerge } from 'tailwind-merge';
 import { icons } from '@/constants/icons';
@@ -91,9 +91,9 @@ export const LeaderboardTopItem = ({
           loading={loading}
           skeleton={<Skeleton variant="line" textSize="sm" className="w-12" />}
         >
-          <div className="flex-center gap-1 text-gold text-sm">
-            <Trophy size={12} />
-            <div className="h-4.25">{points}</div>
+          <div className="flex-center text-gold text-sm">
+            <ChevronsUp size={16} />
+            <div className="h-4.5">{points}</div>
           </div>
         </SkeletonSuspense>
       </div>

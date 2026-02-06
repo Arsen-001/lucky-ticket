@@ -36,6 +36,15 @@ export function Drawer() {
   };
 
   useEffect(() => {
+    if (!open && typeof document !== 'undefined') {
+      const activeElement = document.activeElement as HTMLElement;
+      if (activeElement && activeElement instanceof HTMLElement) {
+        activeElement.blur();
+      }
+    }
+  }, [open]);
+
+  useEffect(() => {
     return () => {
       handleDrawerClose();
     };

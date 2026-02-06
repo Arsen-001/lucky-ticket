@@ -10,4 +10,5 @@ export interface MeResponse {
   points: number;
   phoneNumber?: string;
   twoFactorAuth?: boolean;
+  activityPoints: number;
 }

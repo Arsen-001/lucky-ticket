@@ -38,7 +38,6 @@ export function Avatar({ className, size = 54, shadow = false, ...rest }: Avatar
   return (
     <Image
       className={containerClassNames}
-      //TODO: Add fallback image path (from local assets)
       src={src}
       alt="avatar"
       priority

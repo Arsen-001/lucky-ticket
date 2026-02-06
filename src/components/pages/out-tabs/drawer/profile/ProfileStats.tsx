@@ -6,7 +6,7 @@ import { SkeletonSuspense } from '@/components/shared/seleketons/SkeletonSuspens
 import Image from 'next/image';
 import { icons } from '@/constants/icons';
 import { GlobalConstants } from '@/constants/global.constants';
-import { TrendingUp } from 'lucide-react';
+import { ChevronsUp } from 'lucide-react';
 
 export function ProfileStats() {
   const { data: me, isLoading } = useGetMeQuery();
@@ -25,7 +25,7 @@ export function ProfileStats() {
         >
           <div className="flex-center gap-2 items-center">
             <span className="text-lg font-black text-white">{me?.coins?.toLocaleString()}</span>
-            <span className="text-[10px] font-bold uppercase mt-1 text-gold">
+            <span className="text-xs font-bold uppercase mt-1 text-gold">
               {GlobalConstants.coinName}
             </span>
           </div>
@@ -33,9 +33,9 @@ export function ProfileStats() {
       </div>
 
       <div className="bg-white/5 rounded-2xl p-5 flex flex-col gap-1 items-center border border-white/10 transition-transform cursor-pointer hover:bg-white/10">
-        <div className="flex items-center gap-2 text-white/60 text-xs uppercase tracking-wider font-semibold">
-          <TrendingUp className="w-4 h-4 text-orange" />
-          <span className="font-semibold">{t('activity')}</span>
+        <div className="flex items-center gap-1 text-white/60 text-xs uppercase tracking-wider font-semibold">
+          <ChevronsUp className="w-5 h-5 text-gold" />
+          <div className="font-semibold h-3.5">{t('activity')}</div>
         </div>
         <SkeletonSuspense
           loading={isLoading}
@@ -43,7 +43,7 @@ export function ProfileStats() {
         >
           <div className="flex-center gap-2 items-center">
             <span className="text-lg font-black text-white">{me?.points?.toLocaleString()}</span>
-            <span className="text-[10px] text-orange font-bold uppercase mt-1">Points</span>
+            <span className="text-xs text-gold font-bold uppercase mt-1">Points</span>
           </div>
         </SkeletonSuspense>
       </div>

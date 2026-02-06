@@ -14,6 +14,7 @@ export const me: MeResponse = {
   points: 750,
   phoneNumber: '+37411111111',
   twoFactorAuth: true,
+  activityPoints: 750,
 };
 
 const meMock = { me };

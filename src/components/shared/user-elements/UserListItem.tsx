@@ -1,7 +1,7 @@
 import Image from 'next/image';
 import { twMerge } from 'tailwind-merge';
 import type { CSSProperties, ReactNode } from 'react';
-import { Trophy } from 'lucide-react';
+import { ChevronsUp } from 'lucide-react';
 
 import { SkeletonSuspense } from '@/components/shared/seleketons/SkeletonSuspense';
 import { Skeleton } from '@/components/shared/seleketons/Skeleton';
@@ -98,13 +98,13 @@ export const UserListItem = ({
             </div>
           </SkeletonSuspense>
           <div className="flex items-center gap-1 text-xs text-gray-400">
-            <div className="flex items-center gap-1.5 text-gold">
+            <div className="flex items-center text-gold">
               <SkeletonSuspense
                 loading={loading}
                 skeleton={<Skeleton variant="line" textSize="sm" className="w-12" />}
               >
-                <Trophy className="stroke-2" size={14} />
-                <span className="font-semibold text-sm h-4.25">{points}</span>
+                <ChevronsUp className="stroke-2" size={16} />
+                <span className="font-semibold text-sm h-4.5">{points}</span>
               </SkeletonSuspense>
             </div>
           </div>
