@@ -5,7 +5,7 @@ import { type ReactNode } from 'react';
 import { TabBarItem } from '@/components/layout-elements/TabBarItem';
 import { type Route, routes } from '@/constants/routes';
 import { useAppTranslations } from '@/hooks/useAppTranslations';
-import { ChartNoAxesColumnIncreasing, FileText, House, Trophy, Zap } from 'lucide-react';
+import { ChartNoAxesColumnIncreasing, FileText, House, ShoppingBag, Trophy } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { useLocation } from '@/hooks/useLocation';
 
@@ -40,9 +40,9 @@ export function TabBar({ className }: ClassNameProps) {
       name: t('home'),
     },
     {
-      route: routes.boosts,
-      icon: <Zap />,
-      name: t('boosts'),
+      route: routes.market,
+      icon: <ShoppingBag />,
+      name: t('market'),
     },
     {
       route: routes.tasks,

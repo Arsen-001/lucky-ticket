@@ -8,7 +8,7 @@ export const routes = {
       return (this.index + `/${tournamentId}`) as `/tournaments/${string}`;
     },
   },
-  boosts: '/boosts',
+  market: '/market',
   tasks: '/tasks',
 
   // auth routes
@@ -22,7 +22,6 @@ export const routes = {
   inviteFriends: '/invite-friends',
   profile: '/profile',
   notifications: '/notifications',
-  shop: '/shop',
   exchange: '/exchange',
   support: {
     index: '/support',

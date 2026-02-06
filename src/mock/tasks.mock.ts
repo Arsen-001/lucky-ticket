@@ -15,11 +15,11 @@ const DAILY_TASKS: Task[] = [
   {
     id: 'd2',
     type: TaskType.VISIT,
-    title: 'Visit Daily Shop',
-    description: 'Check out the new items in the shop today.',
+    title: 'Visit Daily Market',
+    description: 'Check out the new items in the Market today.',
     reward: '100 Coins',
     claimed: true,
-    visitLink: 'https://lucky-ticket.com/shop',
+    visitLink: 'https://lucky-ticket.com/market',
   },
   {
     id: 'd3',

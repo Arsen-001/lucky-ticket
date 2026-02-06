@@ -23,7 +23,7 @@ const articles: SupportArticle[] = [
     title: 'Buying Tickets',
     description: 'Learn how to buy tickets.',
     content:
-      'You can buy tickets from the shop or directly from a game page. The ticket price depends on the game you want to play. Make sure you have enough coins in your wallet before buying a ticket.',
+      'You can buy tickets from the market or directly from a game page. The ticket price depends on the game you want to play. Make sure you have enough coins in your wallet before buying a ticket.',
   },
   {
     id: '4',

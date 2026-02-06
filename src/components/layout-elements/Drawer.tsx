@@ -10,7 +10,6 @@ import {
   CircleQuestionMark,
   Globe,
   Settings,
-  ShoppingBag,
   User,
   Users,
   X,
@@ -57,11 +56,6 @@ export function Drawer() {
       route: routes.notifications,
       title: t('notifications'),
       icon: <Bell />,
-    },
-    {
-      route: routes.shop,
-      title: t('shop'),
-      icon: <ShoppingBag />,
     },
     {
       route: routes.exchange,

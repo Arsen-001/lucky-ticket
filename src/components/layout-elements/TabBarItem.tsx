@@ -23,7 +23,7 @@ export function TabBarItem({ active, onClick, name, icon, className, style }: Ta
       <span
         className={twMerge(
           'max-w-0 whitespace-nowrap overflow-hidden ',
-          active && 'ml-2 max-w-[24vw] tab-bar-transition font-semibold truncate'
+          active && 'ml-2 max-w-[20vw] tab-bar-transition font-semibold truncate'
         )}
       >
         {name}
