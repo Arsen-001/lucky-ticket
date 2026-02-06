@@ -12,8 +12,6 @@ export const InvitedFriendsList = () => {
 
   const content = isLoading ? (Array.from({ length: 3 }) as InvitedFriend[]) : friends;
 
-  console.log(friends);
-
   return (
     <div className="flex flex-col gap-3">
       <h3 className="text-lg font-bold px-1">{t('invited friends')}</h3>

@@ -6,17 +6,13 @@ export const ReferralInfoSection = () => {
   const t = useAppTranslations();
 
   return (
-    <div className="flex flex-col gap-4 p-5 bg-purple-gradient rounded-2xl">
+    <div className="flex flex-col gap-3 p-5 bg-purple-gradient rounded-2xl">
       <div className="flex flex-col gap-1">
         <h3 className="text-lg font-bold">{t('invite friends')}</h3>
-        <p className="text-sm text-gray-400">
-          {t('get rewards description', {
-            projectName: GlobalConstants.projectName,
-          })}
-        </p>
+        <p className="text-sm text-gray-400">{t('get rewards description')}</p>
       </div>
 
-      <div className="flex flex-col gap-3">
+      <div className="flex flex-col gap-2">
         <div className="flex items-center justify-between p-3 bg-white/5 rounded-2xl">
           <div className="flex flex-col">
             <span className="text-sm font-semibold">{t('regular friends')}</span>
