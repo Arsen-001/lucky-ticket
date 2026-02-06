@@ -6,8 +6,9 @@ export const invitedFriendsMock: InvitedFriend[] = [
     id: '1',
     username: 'john_doe',
     avatar: images.avatar.src,
-    isPrime: true,
+    isPrime: false,
     isVerified: true,
+    isVIP: true,
     points: 1500,
     earnedCoins: 300,
   },
@@ -43,6 +44,7 @@ export const invitedFriendsMock: InvitedFriend[] = [
 export const referralStatsMock: ReferralStats = {
   totalInvited: invitedFriendsMock.length,
   totalEarned: invitedFriendsMock.reduce((total, friend) => total + friend.earnedCoins, 0),
+  availableClaim: 37,
 };
 
 export const referralMock = {

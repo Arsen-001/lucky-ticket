@@ -206,5 +206,17 @@
   "balance": "Հաշվեկշիռ",
   "confirm": "Հաստատել",
   "cancel": "Չեղարկել",
-  "confirm exchange description": "Իսկապե՞ս ցանկանում եք կատարել այս փոխանակումը:"
+  "confirm exchange description": "Իսկապե՞ս ցանկանում եք կատարել այս փոխանակումը:",
+  "global rank": "Գլոբալ վարկանիշ",
+  "rank change": "Վարկանիշի փոփոխություն",
+  "performance metrics": "Արդյունավետության ցուցանիշներ",
+  "joined tournaments": "Մասնակցած մրցաշարեր",
+  "collected tickets": "Հավաքված տոմսեր",
+  "completed tasks": "Կատարված առաջադրանքներ",
+  "account settings": "Հաշվի կարգավորումներ",
+  "wallet settings": "Դրամապանակի կարգավորումներ",
+  "logout": "Դուրս գալ",
+  "activity": "Ակտիվություն",
+  "available to claim": "Հասանելի է ստանալու համար",
+  "claim reward": "Ստանալ պարգևը"
 }

@@ -7,8 +7,9 @@ import { SkeletonSuspense } from '@/components/shared/seleketons/SkeletonSuspens
 import { Skeleton } from '@/components/shared/seleketons/Skeleton';
 import { VerifiedBadge } from '@/components/shared/badges/VerifiedBadge';
 import { PrimeBadge } from '@/components/shared/badges/PrimeBadge';
+import { VIPBadge } from '@/components/shared/badges/VIPBadge';
 
-interface Props {
+export interface UserListItemProps {
   avatar: string;
   username: string;
   points: number;
@@ -19,6 +20,7 @@ interface Props {
   loading?: boolean;
   isVerified?: boolean;
   isPrime?: boolean;
+  isVIP?: boolean;
   outline?: boolean;
 }
 
@@ -33,8 +35,9 @@ export const UserListItem = ({
   loading,
   isVerified,
   isPrime,
+  isVIP,
   outline,
-}: Props) => {
+}: UserListItemProps) => {
   return (
     <div
       style={style}
@@ -79,6 +82,13 @@ export const UserListItem = ({
                 )}
                 {isPrime && (
                   <PrimeBadge
+                    className="p-0 h-5.5 aspect-square"
+                    hideText
+                    classNames={{ icon: 'w-3.5 h-3.5' }}
+                  />
+                )}
+                {isVIP && (
+                  <VIPBadge
                     className="p-0 h-5.5 aspect-square"
                     hideText
                     classNames={{ icon: 'w-3.5 h-3.5' }}

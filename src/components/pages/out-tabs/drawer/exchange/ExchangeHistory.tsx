@@ -10,7 +10,7 @@ import { ColumnType, Table } from '@/components/shared/Table';
 import { ExchangeHistoryItem } from '@/types/interfaces/exchange.interfaces';
 import { EmptyDataInfo } from '@/components/shared/EmptyDataInfo';
 
-export const ExchangeHistory = () => {
+export const ExchangeHistory = ({ className }: { className?: string }) => {
   const t = useAppTranslations();
   const { data: history = [], isLoading } = useGetExchangeHistoryQuery();
 
@@ -67,7 +67,7 @@ export const ExchangeHistory = () => {
   ];
 
   return (
-    <div className="flex flex-col gap-3 -mx-5 -mb-10 w-screen">
+    <div className={twMerge('flex flex-col gap-3 -mx-5 -mb-10 w-screen', className)}>
       <h3 className="text-center text-lg font-bold px-1">{t('exchange history')}</h3>
       <Table
         columns={columns}

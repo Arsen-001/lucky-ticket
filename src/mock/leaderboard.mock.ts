@@ -13,16 +13,18 @@ export const leaderboard: LeaderboardEntry[] = Array.from({ length: 20 }, (_, in
   place: index + 1,
   isVerified: faker.datatype.boolean(),
   isPrime: faker.datatype.boolean(),
+  isVIP: faker.datatype.boolean(),
 }));
 
 const myPlace = {
   username: me.username,
   points: 750,
   avatar: me.avatar,
-  rankChange: 2,
+  rankChange: faker.number.int({ min: -10, max: 10 }),
   place: faker.number.int({ min: 1, max: 40 }),
   isVerified: me.isVerified,
   isPrime: me.isPrime,
+  isVIP: me.isVIP,
 };
 
 if (myPlace.place < 20) {

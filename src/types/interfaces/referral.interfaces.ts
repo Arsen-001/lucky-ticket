@@ -6,9 +6,11 @@ export interface InvitedFriend {
   isVerified: boolean;
   points: number;
   earnedCoins: number;
+  isVIP?: boolean;
 }
 
 export interface ReferralStats {
   totalInvited: number;
   totalEarned: number;
+  availableClaim: number;
 }

@@ -6,6 +6,7 @@ export interface LeaderboardEntry {
   place: number;
   isVerified: boolean;
   isPrime: boolean;
+  isVIP?: boolean;
 }
 
 export interface LeaderboardResponse {

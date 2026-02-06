@@ -37,6 +37,7 @@ export const LeaderboardList = ({ className, ...props }: HTMLAttributes<HTMLDivE
               rankChange={entry.rankChange}
               isVerified={entry.isVerified}
               isPrime={entry.isPrime}
+              isVIP={entry.isVIP}
               outline={isMyPlace(entry.place)}
               className="animate-slide-in-bottom"
               style={{ animationDelay: `${index * 50}ms` }}
@@ -58,6 +59,7 @@ export const LeaderboardList = ({ className, ...props }: HTMLAttributes<HTMLDivE
                 rankChange={myPlace.rankChange}
                 isVerified={myPlace.isVerified}
                 isPrime={myPlace.isPrime}
+                isVIP={myPlace.isVIP}
                 outline
                 className="animate-slide-in-bottom  backdrop-blur-lg"
                 style={{ animationDelay: '300ms' }}

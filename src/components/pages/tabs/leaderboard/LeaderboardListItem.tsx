@@ -1,25 +1,23 @@
 import { ArrowDown, ArrowUp, Minus } from 'lucide-react';
-import type { CSSProperties } from 'react';
 
-import { UserListItem } from '@/components/shared/user-elements/UserListItem';
+import {
+  UserListItem,
+  type UserListItemProps,
+} from '@/components/shared/user-elements/UserListItem';
 import { SkeletonSuspense } from '@/components/shared/seleketons/SkeletonSuspense';
 import { Skeleton } from '@/components/shared/seleketons/Skeleton';
 
-interface Props {
+export interface LeaderboardListItemProps extends UserListItemProps {
   rank: number;
-  avatar: string;
-  username: string;
-  points: number;
   rankChange: number;
-  className?: string;
-  style?: CSSProperties;
-  loading?: boolean;
-  isVerified?: boolean;
-  isPrime?: boolean;
-  outline?: boolean;
 }
 
-export const LeaderboardListItem = ({ rank, loading, rankChange, ...rest }: Props) => {
+export const LeaderboardListItem = ({
+  rank,
+  loading,
+  rankChange,
+  ...rest
+}: LeaderboardListItemProps) => {
   const isPositive = rankChange > 0;
   const isNegative = rankChange < 0;
 

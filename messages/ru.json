@@ -206,5 +206,17 @@
   "balance": "Баланс",
   "confirm": "Подтвердить",
   "cancel": "Отмена",
-  "confirm exchange description": "Вы уверены, что хотите совершить этот обмен?"
+  "confirm exchange description": "Вы уверены, что хотите совершить этот обмен?",
+  "global rank": "Глобальный ранг",
+  "rank change": "Изменение ранга",
+  "performance metrics": "Показатели эффективности",
+  "joined tournaments": "Участие в турнирах",
+  "collected tickets": "Собрано билетов",
+  "completed tasks": "Выполнено заданий",
+  "account settings": "Настройки аккаунта",
+  "wallet settings": "Настройки кошелька",
+  "logout": "Выйти",
+  "activity": "Активность",
+  "available to claim": "Доступно для получения",
+  "claim reward": "Получить награду"
 }

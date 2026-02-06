@@ -22,7 +22,9 @@ export function Badge({ className, text, classNames, hideText, icon: Icon }: Bad
     >
       {Icon && <Icon className={twMerge('text-inherit w-4 h-4', classNames?.icon)} />}
       {text && !hideText && (
-        <span className={twMerge('text-inherit text-xs', classNames?.text)}>{text}</span>
+        <span className={twMerge('text-inherit text-sm h-4.5 font-semibold', classNames?.text)}>
+          {text}
+        </span>
       )}
     </div>
   );

@@ -4,7 +4,7 @@ import { InvitedFriendsList } from '@/components/pages/out-tabs/drawer/invite-fr
 
 export default function InviteFriendsPage() {
   return (
-    <div className="flex flex-col gap-6 pb-10">
+    <div className="flex flex-col gap-6">
       <ReferralInfoSection />
       <ReferralStatsCard />
       <InvitedFriendsList />

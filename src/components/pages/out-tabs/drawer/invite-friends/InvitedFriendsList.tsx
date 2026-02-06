@@ -29,6 +29,7 @@ export const InvitedFriendsList = () => {
                 username={friend.username}
                 points={friend.points}
                 isVerified={friend.isVerified}
+                isVIP={friend.isVIP}
                 isPrime={friend.isPrime}
                 rightContent={
                   <div className="flex flex-col items-end">

@@ -16,6 +16,7 @@ import { useAppDispatch } from '@/lib/rtk/hooks';
 import { openDrawer } from '@/lib/rtk/features/layout.slice';
 import { Link } from '@/components/shared/links/Link';
 import { routes } from '@/constants/routes';
+import { VIPBadge } from '@/components/shared/badges/VIPBadge';
 
 export function Header({ className }: ClassNameProps) {
   const dispatch = useAppDispatch();
@@ -28,13 +29,16 @@ export function Header({ className }: ClassNameProps) {
 
   return (
     <div
-      className={twMerge('h-20 bg-header py-1 px-3 flex justify-between items-center', className)}
+      className={twMerge(
+        'h-20 w-screen bg-header py-1 px-3 flex justify-between gap-3 items-center overflow-hidden',
+        className
+      )}
     >
-      <div className="flex items-center gap-4">
+      <div className="flex-1 overflow-hidden pl-2 py-2 flex items-center gap-4">
         <Link className="rounded-full" href={routes.profile}>
           <Avatar shadow />
         </Link>
-        <div className="flex flex-col items-start gap-1">
+        <div className="w-full overflow-hidden flex flex-col items-start gap-1">
           <SkeletonSuspense
             loading={isLoading}
             skeleton={
@@ -44,12 +48,17 @@ export function Header({ className }: ClassNameProps) {
               </>
             }
           >
-            <div className="flex items-center gap-3">
-              <div className="flex-center gap-2">
-                <span className="text-white-secondary text-base font-bold">{me?.username}</span>
+            <div className="w-full flex items-center gap-3">
+              <div className="w-full flex-center gap-2 overflow-hidden">
+                <span className="w text-white-secondary text-base font-bold truncate">
+                  {me?.username}
+                </span>
 
-                {me?.isVerified && <VerifiedBadge hideText />}
-                {me?.isPrime && <PrimeBadge hideText />}
+                <div className="flex-center gap-1">
+                  {me?.isVerified && <VerifiedBadge hideText />}
+                  {me?.isPrime && <PrimeBadge hideText />}
+                  {me?.isVIP && <VIPBadge hideText />}
+                </div>
               </div>
             </div>
             <div className="bg-gradient-lightpink/30 flex-center gap-2 text-white-secondary text-sm font-semibold rounded-full py-0.5 px-2.5">

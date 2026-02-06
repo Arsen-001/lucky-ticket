@@ -7,9 +7,11 @@ export const me: MeResponse = {
   username: 'Arsen 001',
   email: 'arsen@gmai.com',
   isPrime: true,
+  isVIP: true,
   isVerified: true,
   avatar: images.avatar.src,
   coins: 537,
+  points: 750,
   phoneNumber: '+37411111111',
   twoFactorAuth: true,
 };
