@@ -1,0 +1,56 @@
+'use client';
+
+import { useAppTranslations } from '@/hooks/useAppTranslations';
+import { SettingsMenuItem } from '@/components/pages/out-tabs/drawer/settings/SettingsMenuItem';
+import { Switch } from '@/components/shared/form-elements/Switch';
+import { ShieldAlert, ShieldCheck } from 'lucide-react';
+import { useGetMeQuery, useUpdateMeMutation } from '@/api/me.api';
+
+export default function SecurityPage() {
+  const t = useAppTranslations();
+  const { data: me, isLoading: isMeLoading } = useGetMeQuery();
+  const [updateMe, { isLoading: isUpdating }] = useUpdateMeMutation();
+
+  const is2FAEnabled = me?.twoFactorAuth ?? false;
+
+  const handleToggle2FA = async (checked: boolean) => {
+    try {
+      await updateMe({ twoFactorAuth: checked }).unwrap();
+    } catch (error) {
+      console.error('Failed to toggle 2FA:', error);
+    }
+  };
+
+  return (
+    <div className="flex flex-col gap-6">
+      <div className="flex flex-col gap-2">
+        <h2 className="text-gray-secondary text-sm font-bold uppercase px-4">
+          {t('two factor auth')}
+        </h2>
+        <SettingsMenuItem
+          icon={
+            is2FAEnabled ? (
+              <ShieldCheck className="text-green-500" size={20} />
+            ) : (
+              <ShieldAlert className="text-gray-secondary" size={20} />
+            )
+          }
+          title={t('2fa status')}
+          description={is2FAEnabled ? t('enabled') : t('disabled')}
+          rightElement={
+            <Switch
+              checked={is2FAEnabled || isUpdating}
+              onChange={handleToggle2FA}
+              loading={isMeLoading}
+              disabled={isMeLoading || isUpdating}
+            />
+          }
+        />
+      </div>
+
+      <div className="px-4">
+        <p className="text-sm text-gray-secondary leading-relaxed">{t('2fa description')}</p>
+      </div>
+    </div>
+  );
+}

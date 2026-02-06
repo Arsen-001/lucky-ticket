@@ -10,6 +10,8 @@ export const me: MeResponse = {
   isVerified: true,
   avatar: images.avatar.src,
   coins: 537,
+  phoneNumber: '+37411111111',
+  twoFactorAuth: true,
 };
 
 const meMock = { me };

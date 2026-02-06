@@ -16,6 +16,7 @@ import {
 } from '@/utils/pages/notification.utils';
 import { SkeletonSuspense } from '@/components/shared/seleketons/SkeletonSuspense';
 import { Skeleton } from '@/components/shared/seleketons/Skeleton';
+import { EmptyDataInfo } from '@/components/shared/EmptyDataInfo';
 
 dayjs.extend(isToday);
 dayjs.extend(isYesterday);
@@ -50,7 +51,7 @@ export function NotificationsContainer() {
               loading={isLoading}
               skeleton={<Skeleton variant="line" textSize="xs" className="w-40" />}
             >
-              <h3 className="text-xs font-bold text-white/40 uppercase tracking-wider ml-1">
+              <h3 className="text-gray-secondary text-sm font-bold uppercase tracking-wider ml-1">
                 {getNotificationsGroupTitle(date, t)}
               </h3>
             </SkeletonSuspense>
@@ -68,7 +69,7 @@ export function NotificationsContainer() {
         ))
       ) : (
         <div className="flex-center flex-col py-20 text-white/40">
-          <p>{t('no notifications')}</p>
+          <EmptyDataInfo description={t('no notifications')} />
         </div>
       )}
 

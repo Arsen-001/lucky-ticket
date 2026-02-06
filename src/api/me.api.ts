@@ -8,7 +8,15 @@ export const meApi = api.injectEndpoints({
       query: () => ({ url: 'me' }),
       providesTags: [rtkTags.me],
     }),
+    updateMe: builder.mutation<MeResponse, Partial<MeResponse>>({
+      query: body => ({
+        url: 'me',
+        method: 'PATCH',
+        body,
+      }),
+      invalidatesTags: [rtkTags.me],
+    }),
   }),
 });
 
-export const { useGetMeQuery } = meApi;
+export const { useGetMeQuery, useUpdateMeMutation } = meApi;

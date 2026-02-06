@@ -68,7 +68,7 @@ export function Drawer() {
       icon: <CircleQuestionMark />,
     },
     {
-      route: routes.settings,
+      route: routes.settings.index,
       title: t('settings'),
       icon: <Settings />,
     },

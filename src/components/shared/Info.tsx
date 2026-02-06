@@ -49,7 +49,9 @@ export function Info({
             classNames?.iconContainer
           )}
         >
-          {cloneElement(icon, { className: twMerge('w-8 h-8', classNames?.icon) })}
+          {cloneElement(icon, {
+            className: twMerge('w-8 h-8 text-white-secondary', classNames?.icon),
+          })}
         </div>
       )}
       {title && (

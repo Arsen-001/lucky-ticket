@@ -8,6 +8,7 @@ import { ExchangeStatus, ExchangeType } from '@/types/enums/exchnage.enums';
 import { GlobalConstants } from '@/constants/global.constants';
 import { ColumnType, Table } from '@/components/shared/Table';
 import { ExchangeHistoryItem } from '@/types/interfaces/exchange.interfaces';
+import { EmptyDataInfo } from '@/components/shared/EmptyDataInfo';
 
 export const ExchangeHistory = () => {
   const t = useAppTranslations();
@@ -73,7 +74,7 @@ export const ExchangeHistory = () => {
         dataSource={history}
         isLoading={isLoading}
         rowKey="id"
-        emptyText={t('no exchange history')}
+        emptyText={<EmptyDataInfo description={t('no exchange history')} />}
       />
     </div>
   );

@@ -33,7 +33,13 @@ export const routes = {
     },
   },
 
-  settings: '/settings',
+  settings: {
+    index: '/settings',
+    username: '/settings/username',
+    email: '/settings/email',
+    phone: '/settings/phone',
+    security: '/settings/security',
+  },
   languages: '/languages',
 } as const;
 

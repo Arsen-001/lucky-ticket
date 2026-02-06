@@ -11,6 +11,7 @@ const eslintConfig = defineConfig([
       '@typescript-eslint/no-empty-object-type': 'off',
       '@typescript-eslint/no-unused-vars': ['error', { argsIgnorePattern: '^_' }],
       'react-hooks/exhaustive-deps': 'off',
+      'react-hooks/set-state-in-effect': 'off',
     },
   },
   globalIgnores(['.next/**', 'out/**', 'build/**', 'next-env.d.ts']),

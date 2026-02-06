@@ -1,9 +1,11 @@
 export interface MeResponse {
   id: string;
   username: string;
-  email: string;
+  email?: string;
   isPrime: boolean;
   isVerified: boolean;
   avatar: string;
   coins: number;
+  phoneNumber?: string;
+  twoFactorAuth?: boolean;
 }

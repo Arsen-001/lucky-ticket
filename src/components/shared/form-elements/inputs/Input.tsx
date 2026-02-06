@@ -2,10 +2,12 @@
 
 import { type InputHTMLAttributes, type ReactNode, useRef } from 'react';
 import { twMerge } from 'tailwind-merge';
+import { Loader2 } from 'lucide-react';
 
 export interface InputProps extends Omit<InputHTMLAttributes<HTMLInputElement>, 'prefix'> {
   prefix?: ReactNode;
   suffix?: ReactNode;
+  loading?: boolean;
   classNames?: {
     input?: string;
     prefix?: string;
@@ -13,7 +15,7 @@ export interface InputProps extends Omit<InputHTMLAttributes<HTMLInputElement>, 
   };
 }
 
-export function Input({ className, classNames, prefix, suffix, ...rest }: InputProps) {
+export function Input({ className, classNames, prefix, suffix, loading, ...rest }: InputProps) {
   const containerRef = useRef<HTMLDivElement>(null);
 
   const focusInput = () => {
@@ -23,7 +25,7 @@ export function Input({ className, classNames, prefix, suffix, ...rest }: InputP
     <div
       ref={containerRef}
       className={twMerge(
-        'flex items-center gap-2 bg-background/40 text-sm p-4 rounded-lg w-full focus-outline',
+        'flex items-center gap-2 bg-background-overlay text-sm p-4 rounded-lg w-full focus-outline',
         className
       )}
     >
@@ -41,11 +43,12 @@ export function Input({ className, classNames, prefix, suffix, ...rest }: InputP
         )}
         id={rest?.name}
         {...rest}
+        disabled={loading || rest.disabled}
       />
 
-      {suffix && (
+      {(suffix || loading) && (
         <span onClick={focusInput} className={twMerge('shrink-0', classNames?.suffix)}>
-          {suffix}
+          {loading ? <Loader2 size={18} className="animate-spin" /> : suffix}
         </span>
       )}
     </div>

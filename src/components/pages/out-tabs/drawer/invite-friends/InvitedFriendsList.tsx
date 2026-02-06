@@ -5,6 +5,7 @@ import { UserListItem } from '@/components/shared/user-elements/UserListItem';
 import { GlobalConstants } from '@/constants/global.constants';
 import { useGetInvitedFriendsQuery } from '@/api/referral.api';
 import type { InvitedFriend } from '@/types/interfaces/referral.interfaces';
+import { EmptyDataInfo } from '@/components/shared/EmptyDataInfo';
 
 export const InvitedFriendsList = () => {
   const t = useAppTranslations();
@@ -42,9 +43,7 @@ export const InvitedFriendsList = () => {
               />
             ))}
         {!isLoading && !friends?.length && (
-          <div className="p-8 text-center text-gray-400 bg-background-overlay/50 rounded-3xl border-2 border-white/5">
-            {t('no invited friends')}
-          </div>
+          <EmptyDataInfo className="mt-10" description={t('no invited friends')} />
         )}
       </div>
     </div>

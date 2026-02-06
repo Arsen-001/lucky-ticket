@@ -60,7 +60,7 @@ export default function SupportPage() {
                   >
                     <HighlightedText
                       highlight={searchValue}
-                      className="font-semibold text-white/80"
+                      className="text-gray-secondary text-sm font-bold"
                     >
                       {section?.title || ''}
                     </HighlightedText>
