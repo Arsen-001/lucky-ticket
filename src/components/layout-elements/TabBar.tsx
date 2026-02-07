@@ -1,11 +1,18 @@
 'use client';
 import { twMerge } from 'tailwind-merge';
 import type { ClassNameProps } from '@/types/interfaces/component.interfcaes';
-import { type ReactNode } from 'react';
+import { type ReactElement, type ReactNode } from 'react';
 import { TabBarItem } from '@/components/layout-elements/TabBarItem';
 import { type Route, routes } from '@/constants/routes';
 import { useAppTranslations } from '@/hooks/useAppTranslations';
-import { ChartNoAxesColumnIncreasing, FileText, House, ShoppingBag, Trophy } from 'lucide-react';
+import {
+  ChartNoAxesColumnIncreasing,
+  FileText,
+  House,
+  type LucideProps,
+  ShoppingBag,
+  Trophy,
+} from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { useLocation } from '@/hooks/useLocation';
 
@@ -64,7 +71,7 @@ export function TabBar({ className }: ClassNameProps) {
       {tabs.map(({ route, icon, name }, index) => (
         <TabBarItem
           key={route}
-          icon={icon}
+          icon={icon as ReactElement<LucideProps>}
           name={name}
           onClick={() => handleTabClick(route)}
           active={activePath === route}

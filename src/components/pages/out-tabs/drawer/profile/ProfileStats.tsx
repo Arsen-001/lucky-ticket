@@ -3,10 +3,8 @@ import { useGetMeQuery } from '@/api/me.api';
 import { useAppTranslations } from '@/hooks/useAppTranslations';
 import { Skeleton } from '@/components/shared/seleketons/Skeleton';
 import { SkeletonSuspense } from '@/components/shared/seleketons/SkeletonSuspense';
-import Image from 'next/image';
-import { icons } from '@/constants/icons';
 import { GlobalConstants } from '@/constants/global.constants';
-import { ChevronsUp } from 'lucide-react';
+import { ChevronsUp, Wallet } from 'lucide-react';
 
 export function ProfileStats() {
   const { data: me, isLoading } = useGetMeQuery();
@@ -15,9 +13,9 @@ export function ProfileStats() {
   return (
     <div className="grid grid-cols-2 gap-4">
       <div className="bg-white/5 rounded-2xl p-5 flex flex-col gap-1 items-center border border-white/10 transition-transform cursor-pointer hover:bg-white/10">
-        <div className="flex items-center gap-2 text-white/60 text-xs uppercase tracking-wider font-semibold">
-          <Image src={icons.coin} alt="coin" className="w-3.5 h-3.5" />
-          <span className="font-semibold">{t('balance')}</span>
+        <div className="flex items-center gap-1.5 text-white/60 text-xs uppercase tracking-wider font-semibold">
+          <Wallet className="h-4.5 w-4.5 text-gold" />
+          <div className="font-semibold h-3.5">{t('balance')}</div>
         </div>
         <SkeletonSuspense
           loading={isLoading}

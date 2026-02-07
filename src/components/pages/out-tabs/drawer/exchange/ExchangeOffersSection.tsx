@@ -13,6 +13,7 @@ import { Skeleton } from '@/components/shared/seleketons/Skeleton';
 import { useState } from 'react';
 import { ExchangeOffer } from '@/types/interfaces/exchange.interfaces';
 import { ConfirmModal } from '@/components/shared/modals/ConfirmModal';
+import { GoldenText } from '@/components/shared/typography/GoldenText';
 
 export const ExchangeOffersSection = () => {
   const t = useAppTranslations();
@@ -35,18 +36,6 @@ export const ExchangeOffersSection = () => {
 
   const tabs = [
     {
-      key: ExchangeType.LTC_TO_USDT.toString(),
-      title: t('ltc to usdt'),
-      children: (
-        <ExchangeOffersList
-          offers={offers[ExchangeType.LTC_TO_USDT] || []}
-          isLoading={isOffersLoading}
-          onExchange={setSelectedOffer}
-          isExchanging={isExchanging}
-        />
-      ),
-    },
-    {
       key: ExchangeType.USDT_TO_LTC.toString(),
       title: t('usdt to ltc'),
       children: (
@@ -58,20 +47,33 @@ export const ExchangeOffersSection = () => {
         />
       ),
     },
+    {
+      key: ExchangeType.LTC_TO_USDT.toString(),
+      title: t('ltc to usdt'),
+      children: (
+        <ExchangeOffersList
+          offers={offers[ExchangeType.LTC_TO_USDT] || []}
+          isLoading={isOffersLoading}
+          onExchange={setSelectedOffer}
+          isExchanging={isExchanging}
+        />
+      ),
+    },
   ];
 
   return (
     <div className="flex flex-col  p-5 bg-purple-gradient rounded-2xl">
       <div className="bg-background-overlay rounded-xl flex items-center gap-3 py-3 px-4">
-        <div className="flex items-center gap-1 text-gray-400">
-          <Wallet size={16} /> <span className="h-5">{t('balance')}</span>
+        <div className="flex items-center gap-1 text-gray-400 text-sm">
+          <Wallet size={16} /> <span className="h-4.5">{t('balance')} :</span>
         </div>
         <SkeletonSuspense
           loading={isMeLoading}
           skeleton={<Skeleton textSize="base" className="w-16" />}
         >
-          <div className="h-5 text-gold font-semibold">
-            {me?.coins} {GlobalConstants.coinName}
+          <div className="h-5 font-semibold">
+            {me?.coins}{' '}
+            <GoldenText className="h-full font-bold text-xs">{GlobalConstants.coinName}</GoldenText>
           </div>
         </SkeletonSuspense>
       </div>

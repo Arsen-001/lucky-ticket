@@ -93,7 +93,7 @@ export const LeaderboardTopItem = ({
         >
           <div className="flex-center text-gold text-sm">
             <ChevronsUp size={16} />
-            <div className="h-4.5">{points}</div>
+            <div className="h-4.5 font-semibold">{points}</div>
           </div>
         </SkeletonSuspense>
       </div>

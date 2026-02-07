@@ -1,11 +1,11 @@
 import type { MarketData } from '@/types/interfaces/market.interfaces';
-import { BoostType } from '@/types/enums/market.enums';
+import { TicketBoostType } from '@/types/enums/market.enums';
 
 export const marketMock: MarketData = {
   boosts: [
     {
       id: 'b1',
-      type: BoostType.SPEED,
+      type: TicketBoostType.SPEED,
       ticketType: 'bronze',
       multiplier: 2,
       durationInHours: 24,
@@ -13,7 +13,7 @@ export const marketMock: MarketData = {
     },
     {
       id: 'b2',
-      type: BoostType.COLLECTION_TIME,
+      type: TicketBoostType.COLLECT_TIME,
       ticketType: 'bronze',
       multiplier: 2,
       durationInHours: 24,
@@ -21,7 +21,7 @@ export const marketMock: MarketData = {
     },
     {
       id: 'b3',
-      type: BoostType.SPEED,
+      type: TicketBoostType.SPEED,
       ticketType: 'silver',
       multiplier: 2,
       durationInHours: 24,
@@ -29,7 +29,7 @@ export const marketMock: MarketData = {
     },
     {
       id: 'b4',
-      type: BoostType.SPEED,
+      type: TicketBoostType.SPEED,
       ticketType: 'silver',
       multiplier: 2,
       durationInHours: 24,

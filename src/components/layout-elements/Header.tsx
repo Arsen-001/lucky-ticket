@@ -74,7 +74,7 @@ export function Header({ className }: ClassNameProps) {
               <div className="bg-gradient-lightpink/30 flex-center gap-2 text-white-secondary text-sm font-semibold rounded-full py-0.5 px-2.5">
                 <div className="flex items-center gap-1">
                   <span className="font-semibold h-4.5">{me?.coins}</span>
-                  <span className="font-semibold h-4.5 text-gold">{GlobalConstants.coinName}</span>
+                  <span className="font-bold h-4.5 text-gold">{GlobalConstants.coinName}</span>
                 </div>
               </div>
             </SkeletonSuspense>

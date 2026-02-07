@@ -1,4 +1,14 @@
-export enum BoostType {
+export enum TicketBoostType {
   SPEED,
-  COLLECTION_TIME,
+  COLLECT_TIME,
+}
+
+export enum MarketPriceType {
+  USDT,
+  COIN,
+}
+
+export enum MarketItemRequirementType {
+  ACTIVITY_POINTS,
+  INVITES,
 }

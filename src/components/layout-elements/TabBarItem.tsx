@@ -1,12 +1,13 @@
-import type { CSSProperties, ReactNode } from 'react';
+import { cloneElement, type CSSProperties, type ReactElement } from 'react';
 import { Button } from '@/components/shared/buttons/Button';
 import { twMerge } from 'tailwind-merge';
 import '@/styles/components/tab-bar-item.css';
+import type { LucideProps } from 'lucide-react';
 
 export interface TabBarItemProps {
   active: boolean;
   onClick?: () => void;
-  icon: ReactNode;
+  icon: ReactElement<LucideProps>;
   name: string;
   className?: string;
   style?: CSSProperties;
@@ -19,11 +20,11 @@ export function TabBarItem({ active, onClick, name, icon, className, style }: Ta
       style={style}
       className={twMerge('p-3 flex-center rounded-full', className)}
     >
-      {icon}
+      {cloneElement<LucideProps>(icon, { size: 22 })}
       <span
         className={twMerge(
-          'max-w-0 whitespace-nowrap overflow-hidden ',
-          active && 'ml-2 max-w-[20vw] tab-bar-transition font-semibold truncate'
+          'max-w-0 whitespace-nowrap overflow-hidden h-5.5',
+          active && 'ml-1 max-w-[24vw] tab-bar-transition font-bold truncate'
         )}
       >
         {name}

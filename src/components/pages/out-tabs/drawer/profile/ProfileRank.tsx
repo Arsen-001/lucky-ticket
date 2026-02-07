@@ -2,7 +2,7 @@
 import { useGetLeaderboardQuery } from '@/api/leaderboard.api';
 import { useAppTranslations } from '@/hooks/useAppTranslations';
 import { Skeleton } from '@/components/shared/seleketons/Skeleton';
-import { ArrowDown, ArrowUp, Minus, Trophy } from 'lucide-react';
+import { ArrowDown, ArrowUp, ChartNoAxesColumnIncreasing, Minus } from 'lucide-react';
 import { SkeletonSuspense } from '@/components/shared/seleketons/SkeletonSuspense';
 
 export function ProfileRank() {
@@ -42,7 +42,7 @@ export function ProfileRank() {
       <div className="bg-linear-to-br from-yellow-500/10 to-orange-500/10 rounded-2xl p-4 border border-yellow-500/20 flex items-center justify-between">
         <div className="flex items-center gap-4">
           <div className="w-12 h-12 rounded-xl bg-yellow-500/20 flex items-center justify-center text-yellow-500">
-            <Trophy size={24} />
+            <ChartNoAxesColumnIncreasing className="stroke-3" size={24} />
           </div>
           <div>
             <p className="text-white/60 text-sm">{t('global rank')}</p>
