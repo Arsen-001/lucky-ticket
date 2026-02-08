@@ -17,6 +17,7 @@ import {
 import { GlobalConstants } from '@/constants/global.constants';
 import { VIPBadge } from '@/components/shared/badges/VIPBadge';
 import { PrimeBadge } from '@/components/shared/badges/PrimeBadge';
+import type { MessageIds } from '@/types/types/i18n.types';
 
 export function MarketStatusList() {
   const t = useAppTranslations();
@@ -62,6 +63,7 @@ export function MarketStatusList() {
       console.error('Failed to buy status:', error);
     }
   };
+  console.log({ selectedStatus });
 
   return (
     <div className="pb-6">
@@ -86,7 +88,7 @@ export function MarketStatusList() {
             <MarketItemCard
               key={status.id}
               name={status.name}
-              count={status.count}
+              isNew={status.isNew}
               description={t('active for {days} days', { days: status.durationDays })}
               prices={status.prices}
               icon={
@@ -111,9 +113,11 @@ export function MarketStatusList() {
               <div className="flex flex-col gap-3">
                 <div className="grid grid-cols-1 gap-2">
                   {status.privileges.map((privilege, i) => (
-                    <div key={i} className="flex items-center gap-2 text-sm text-white/80">
+                    <div key={i} className="flex items-start gap-2 text-xs text-white/80">
                       <Check className="w-5 h-5 text-emerald-400" />
-                      <span>{privilege}</span>
+                      <div className="flex-1">
+                        {privilege && t(privilege, { percentage: isVip ? 100 : 50 })}
+                      </div>
                     </div>
                   ))}
                 </div>
@@ -164,15 +168,13 @@ export function MarketStatusList() {
               )}
               <div className="flex flex-col gap-1 text-left">
                 <span className="text-white font-bold">{selectedStatus?.status.name}</span>
-                <span className="text-xs text-white/60 leading-relaxed">
-                  {t('active for {days} days', {
-                    days: (
-                      <span className="text-emerald-400 font-bold">
-                        {selectedStatus?.status.durationDays} days
-                      </span>
-                    ),
-                  })}
-                </span>
+                {selectedStatus?.status.durationDays && (
+                  <span className="text-xs text-white/60 leading-relaxed">
+                    {t('active for {days} days', {
+                      days: selectedStatus?.status.durationDays,
+                    })}
+                  </span>
+                )}
               </div>
             </div>
 
@@ -182,9 +184,19 @@ export function MarketStatusList() {
               </span>
               <div className="grid grid-cols-1 gap-1.5">
                 {selectedStatus?.status.privileges.map((privilege, i) => (
-                  <div key={i} className="flex items-center gap-2 text-xs text-white/80">
-                    <Check className="w-3.5 h-3.5 text-emerald-400 shrink-0" />
-                    <span>{privilege}</span>
+                  <div
+                    key={i}
+                    className="flex items-start gap-2 text-sm text-white/80 overflow-hidden"
+                  >
+                    <Check className="h-4 w-4 block text-emerald-400" />
+                    <span className="flex-1 text-left">
+                      {selectedStatus?.status.statusType &&
+                        privilege &&
+                        t(privilege as MessageIds, {
+                          percentage:
+                            selectedStatus?.status.statusType === MarketStatusType.VIP ? 100 : 50,
+                        })}
+                    </span>
                   </div>
                 ))}
               </div>

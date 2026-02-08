@@ -20,7 +20,7 @@ export interface MarketItemBase {
   id: string;
   name: string;
   prices: MarketPrice[];
-  count?: number;
+  isNew?: boolean;
 }
 
 export interface MarketBoost extends MarketItemBase {

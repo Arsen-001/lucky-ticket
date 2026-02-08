@@ -5,14 +5,12 @@ import { useBuyTicketMutation, useGetMarketDataQuery } from '@/api/market.api';
 import { MarketItemCard } from './MarketItemCard';
 import { MarketSection } from './MarketSection';
 import { MarketPrice, MarketTicket } from '@/types/interfaces/market.interfaces';
-import type { TicketType } from '@/types/types/ticket.types';
 import { MarketPriceType } from '@/types/enums/market.enums';
 import { GlobalConstants } from '@/constants/global.constants';
 import { Tickets } from 'lucide-react';
 import { ConfirmModal } from '@/components/shared/modals/ConfirmModal';
-import { icons } from '@/constants/icons';
-import Image, { type StaticImageData } from 'next/image';
 import { useAppTranslations } from '@/hooks/useAppTranslations';
+import { Ticket } from '@/components/shared/icons/Ticket';
 
 export function MarketTicketList() {
   const t = useAppTranslations();
@@ -27,14 +25,6 @@ export function MarketTicketList() {
   const [ticketCounts, setTicketCounts] = useState<Record<string, number>>({});
 
   const tickets = isLoading ? (new Array(3).fill(null) as MarketTicket[]) : data?.tickets || [];
-
-  const ticketIcons: Record<TicketType, StaticImageData> = {
-    bronze: icons.bronzeTicket,
-    silver: icons.silverTicket,
-    gold: icons.goldenTicket,
-    platinum: icons.platinumTicket,
-    diamond: icons.diamondTicket,
-  };
 
   const handleBuyButtonClick = (ticket: MarketTicket, count: number, price: MarketPrice) => {
     setIsOpen(true);
@@ -85,7 +75,7 @@ export function MarketTicketList() {
             <MarketItemCard
               key={ticket?.id || index}
               loading={isLoading}
-              name={ticket?.name || ''}
+              name={ticket ? t(ticket.ticketType) : ''}
               description={t('purchase tickets to play')}
               prices={totalPrices}
               qualitySelectorProps={{
@@ -93,16 +83,7 @@ export function MarketTicketList() {
                 onChange: val => handleCountChange(ticket.id, val),
                 disabled: !ticket?.isAvailable,
               }}
-              icon={
-                ticket && (
-                  <Image
-                    src={ticketIcons[ticket.ticketType as TicketType]}
-                    alt="ticket"
-                    width={40}
-                    height={40}
-                  />
-                )
-              }
+              icon={ticket && <Ticket type={ticket.ticketType} height={40} />}
               onBuy={price => ticket && handleBuyButtonClick(ticket, count, price)}
               onClick={() => ticket && handleCardClick(ticket)}
               disabled={ticket && !ticket.isAvailable}
@@ -116,29 +97,21 @@ export function MarketTicketList() {
         onClose={() => setIsOpen(false)}
         onConfirm={handleBuy}
         loading={isBuying}
-        title={selectedTicket?.ticket.name}
+        title={
+          selectedTicket ? `${selectedTicket.count}x ${t(selectedTicket.ticket.ticketType)}` : ''
+        }
         content={
           <div className="text-white/80 text-center flex flex-col gap-4">
             <div className="flex items-center gap-4 bg-white/5 p-4 rounded-xl border border-white/5">
               <div className="p-2 bg-white/5 rounded-lg shrink-0">
-                {selectedTicket && (
-                  <Image
-                    src={ticketIcons[selectedTicket.ticket.ticketType as TicketType]}
-                    alt="ticket"
-                    width={48}
-                    height={48}
-                  />
-                )}
+                {selectedTicket && <Ticket type={selectedTicket.ticket.ticketType} height={40} />}
               </div>
               <div className="flex flex-col gap-1 text-left">
-                <span className="text-white font-bold">
-                  {selectedTicket?.count}x {selectedTicket?.ticket.name}
-                </span>
-                <span className="text-xs text-white/60 leading-relaxed">
-                  {t('participate in {ticketType} level draws', {
-                    ticketType: selectedTicket?.ticket.ticketType,
-                  })}
-                </span>
+                {selectedTicket?.ticket.ticketType && (
+                  <span className="text-xs text-white/60 leading-relaxed">
+                    {t(`participate in ${selectedTicket?.ticket.ticketType} level draws`)}
+                  </span>
+                )}
               </div>
             </div>
 

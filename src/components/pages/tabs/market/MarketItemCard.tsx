@@ -12,12 +12,13 @@ import {
   QuantitySelector,
   type QuantitySelectorProps,
 } from '@/components/pages/tabs/market/QuantitySelector';
-import { LockKeyhole } from 'lucide-react';
 import { useAppTranslations } from '@/hooks/useAppTranslations';
+import Image from 'next/image';
+import { icons } from '@/constants/icons';
 
 interface MarketItemCardProps {
-  name: string;
-  description?: string;
+  name: ReactNode;
+  description?: ReactNode;
   prices: MarketPrice[];
   icon?: ReactNode;
   onBuy?: (price: MarketPrice) => void;
@@ -27,7 +28,7 @@ interface MarketItemCardProps {
   children?: ReactNode;
   className?: string;
   qualitySelectorProps?: QuantitySelectorProps;
-  count?: number;
+  isNew?: boolean;
   classNames?: {
     icon?: string;
     title?: string;
@@ -50,7 +51,7 @@ export function MarketItemCard({
   className,
   classNames,
   qualitySelectorProps,
-  count,
+  isNew,
 }: MarketItemCardProps) {
   const t = useAppTranslations();
 
@@ -58,28 +59,25 @@ export function MarketItemCard({
     <div
       onClick={onClick}
       className={twMerge(
-        'bg-purple-gradient rounded-xl p-4 flex flex-col transition-all hover:scale-[1.01] h-full relative overflow-hidden',
+        'bg-purple-gradient rounded-xl p-4 flex flex-col transition-all h-full relative overflow-hidden',
         onClick && 'cursor-pointer',
         className
       )}
     >
-      {count !== undefined && (
-        <div className="absolute top-0 right-0 bg-white/10 backdrop-blur-md px-2 py-1 rounded-bl-xl border-l border-b border-white/10 z-10">
-          <span className="text-[10px] text-white/60 font-bold uppercase tracking-wider block leading-none mb-0.5">
-            {t('owned')}
-          </span>
-          <span className="text-sm text-white font-bold block leading-none text-center">
-            {count}
+      {isNew && (
+        <div className="absolute top-0 right-0 bg-orange-400/30 px-2 py-1.5 rounded-bl-xl border-l border-b border-white/10 z-10 shadow-lg">
+          <span className="text-[10px] text-orange-400 font-bold uppercase tracking-wider block leading-none ">
+            {t('new')}
           </span>
         </div>
       )}
       <SkeletonSuspense
         loading={loading}
-        skeleton={<Skeleton variant="card" className="h-16 w-full rounded-xl flex-center" />}
+        skeleton={<Skeleton variant="card" className="h-18 w-full rounded-xl flex-center" />}
       >
         <div
           className={twMerge(
-            'bg-white/5 rounded-xl p-3 shrink-0 h-16 flex-center shadow-inner',
+            'bg-white/5 rounded-xl h-18 shrink-0 flex-center shadow-inner',
             classNames?.icon
           )}
         >
@@ -154,7 +152,7 @@ export function MarketItemCard({
               )}
             >
               {disabled ? (
-                <LockKeyhole className="h-5 w-5 stroke-2" />
+                <Image src={icons.lock} alt="lock" className="w-auto h-5 object-contain" />
               ) : (
                 <>
                   <span className="text-sm font-semibold">{price.amount}</span>

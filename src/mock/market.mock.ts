@@ -15,7 +15,7 @@ export const marketMock: MarketData = {
       type: TicketBoostType.SPEED,
       ticketType: TicketsEnum.BRONZE,
       boostPercentage: 50,
-      count: 2,
+      isNew: true,
       prices: [{ type: MarketPriceType.LTC, amount: 100 }],
     },
     {
@@ -47,7 +47,7 @@ export const marketMock: MarketData = {
     {
       id: 't1',
       name: 'Bronze Ticket',
-      count: 15,
+      isNew: true,
       ticketType: TicketsEnum.BRONZE,
       isAvailable: true,
       prices: [{ type: MarketPriceType.LTC, amount: 50 }],
@@ -71,7 +71,7 @@ export const marketMock: MarketData = {
     {
       id: 's1',
       name: 'Prime Status',
-      count: 1,
+      isNew: true,
       statusType: MarketStatusType.PRIME,
       durationDays: 30,
       prices: [
@@ -79,10 +79,10 @@ export const marketMock: MarketData = {
         { type: MarketPriceType.USDT, amount: 10 },
       ],
       privileges: [
-        'Prime badge on profile',
-        '50% boost to ticket claim speed',
+        'prime badge on profile',
+        'increases bronze ticket speed with {percentage}%',
         '25% market discount',
-        'Priority support',
+        'priority support',
       ],
     },
     {
@@ -95,10 +95,10 @@ export const marketMock: MarketData = {
         { type: MarketPriceType.USDT, amount: 50 },
       ],
       privileges: [
-        'VIP badge on profile',
-        '100% boost to ticket claim speed',
+        'vip badge on profile',
+        'increases silver ticket speed with {percentage}%',
         '50% market discount',
-        'Exclusive VIP tournaments',
+        'participate in bronze level draws',
       ],
       requirements: [{ type: MarketItemRequirementType.ACTIVITY_POINTS, count: 1000 }],
     },

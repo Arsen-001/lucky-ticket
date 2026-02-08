@@ -13,6 +13,7 @@ import { TicketBoostIcon } from '@/components/pages/tabs/market/TicketBoostIcon'
 import { useAppTranslations } from '@/hooks/useAppTranslations';
 import { getNameId } from '@/utils/pages/market.utils';
 import { GlobalConstants } from '@/constants/global.constants';
+import { Ticket } from '@/components/shared/icons/Ticket';
 
 export function MarketBoostList() {
   const t = useAppTranslations();
@@ -61,20 +62,27 @@ export function MarketBoostList() {
           <MarketItemCard
             key={boost?.id || index}
             loading={isLoading}
-            name={t(getNameId(boost, boost?.ticketType))}
+            name={
+              <>
+                <Ticket height={18} className="mr-2 inline" type={boost?.ticketType} />
+                {t(getNameId(boost, boost?.ticketType))}
+              </>
+            }
             description={
-              boost?.type === TicketBoostType.SPEED
-                ? t('increases {ticketType} ticket speed with {percentage}%', {
-                    ticketType: boost?.ticketType,
-                    percentage: boost?.boostPercentage,
-                  })
-                : t('increases {ticketType} ticket collect time with {percentage}%', {
-                    ticketType: boost?.ticketType,
-                    percentage: boost?.boostPercentage,
-                  })
+              boost && boost.ticketType ? (
+                <>
+                  {boost.type === TicketBoostType.SPEED
+                    ? t(`increases ${boost.ticketType} ticket speed with {percentage}%`, {
+                        percentage: boost.boostPercentage,
+                      })
+                    : t(`increases ${boost.ticketType} ticket collect time with {percentage}%`, {
+                        percentage: boost.boostPercentage,
+                      })}
+                </>
+              ) : null
             }
             prices={boost?.prices || []}
-            count={boost?.count}
+            isNew={boost?.isNew}
             icon={<TicketBoostIcon type={boost?.type} />}
             onBuy={price => handleBuyButtonClick(boost, price)}
             onClick={() => handleCardClick(boost)}
@@ -85,48 +93,41 @@ export function MarketBoostList() {
         ))}
       </MarketSection>
       <ConfirmModal
-        open={isOpen}
+        open={!!selectedBoost && isOpen}
         onClose={() => setIsOpen(false)}
         onConfirm={handleBuy}
         loading={isBuying}
-        title={t(getNameId(selectedBoost?.boost, selectedBoost?.boost?.ticketType))}
+        title={
+          <>
+            {selectedBoost?.boost?.ticketType && (
+              <Ticket height={24} className="mr-2 inline" type={selectedBoost?.boost?.ticketType} />
+            )}
+            {t(getNameId(selectedBoost?.boost, selectedBoost?.boost?.ticketType))}
+          </>
+        }
         content={
-          <div className="text-white/80 text-center flex flex-col gap-4">
+          <div className="text-white/80 text-center flex flex-col gap-4 mt-2">
             <div className="flex items-center gap-4 bg-white/5 p-4 rounded-xl border border-white/5">
               <div className="p-2 bg-white/5 rounded-lg shrink-0">
-                <TicketBoostIcon
-                  type={selectedBoost?.boost.type}
-                  className="w-10 h-10 text-pink stroke-2"
-                />
+                <TicketBoostIcon type={selectedBoost?.boost.type} className="text-pink stroke-2" />
               </div>
               <div className="flex flex-col gap-1 text-left">
-                <span className="text-white font-bold">{selectedBoost?.boost.name}</span>
-                <span className="text-xs text-white/60 leading-relaxed">
+                <span className="text-sm text-white/60 leading-[1.2]">
                   {selectedBoost?.boost.type === TicketBoostType.SPEED
-                    ? t('increases {ticketType} ticket speed with {percentage}%', {
-                        ticketType: (
-                          <span className="text-pink-secondary font-bold capitalize">
-                            {selectedBoost?.boost.ticketType}
-                          </span>
-                        ),
-                        percentage: (
-                          <span className="text-emerald-400 font-bold">
-                            +{selectedBoost?.boost.boostPercentage}
-                          </span>
-                        ),
-                      })
-                    : t('increases {ticketType} ticket collect time with {percentage}%', {
-                        ticketType: (
-                          <span className="text-pink-secondary font-bold capitalize">
-                            {selectedBoost?.boost.ticketType}
-                          </span>
-                        ),
-                        percentage: (
-                          <span className="text-emerald-400 font-bold">
-                            +{selectedBoost?.boost.boostPercentage}
-                          </span>
-                        ),
-                      })}
+                    ? selectedBoost?.boost.ticketType &&
+                      t(
+                        `increases ${selectedBoost?.boost.ticketType} ticket speed with {percentage}%`,
+                        {
+                          percentage: selectedBoost?.boost.boostPercentage,
+                        }
+                      )
+                    : selectedBoost?.boost.ticketType &&
+                      t(
+                        `increases ${selectedBoost?.boost.ticketType} ticket collect time with {percentage}%`,
+                        {
+                          percentage: selectedBoost?.boost.boostPercentage,
+                        }
+                      )}
                 </span>
               </div>
             </div>
