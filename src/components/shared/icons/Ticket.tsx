@@ -4,8 +4,7 @@ import Image, { type ImageProps } from 'next/image';
 import { useEffect, useState } from 'react';
 import { getRandomNumber } from '@/utils/global/number.utils';
 import { twMerge } from 'tailwind-merge';
-
-export type TicketType = 'bronze' | 'silver' | 'gold' | 'diamond' | 'platinum';
+import type { TicketType } from '@/types/types/ticket.types';
 
 export interface TicketProps extends Omit<ImageProps, 'src' | 'alt' | 'loading'> {
   type: TicketType;

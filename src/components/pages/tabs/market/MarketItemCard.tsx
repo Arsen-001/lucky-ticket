@@ -3,88 +3,173 @@
 import { ReactNode } from 'react';
 import { twMerge } from 'tailwind-merge';
 import { Button } from '@/components/shared/buttons/Button';
-import Image from 'next/image';
-import { icons } from '@/constants/icons';
-import { useAppTranslations } from '@/hooks/useAppTranslations';
+import { MarketPrice } from '@/types/interfaces/market.interfaces';
+import { MarketPriceType } from '@/types/enums/market.enums';
+import { GlobalConstants } from '@/constants/global.constants';
 import { Skeleton } from '@/components/shared/seleketons/Skeleton';
-import type { StaticImport } from 'next/dist/shared/lib/get-img-props';
+import { SkeletonSuspense } from '@/components/shared/seleketons/SkeletonSuspense';
+import {
+  QuantitySelector,
+  type QuantitySelectorProps,
+} from '@/components/pages/tabs/market/QuantitySelector';
+import { LockKeyhole } from 'lucide-react';
+import { useAppTranslations } from '@/hooks/useAppTranslations';
 
 interface MarketItemCardProps {
-  title: string;
+  name: string;
   description?: string;
-  price: number;
-  currency?: 'LTC' | 'USD';
-  icon?: string | StaticImport;
-  iconComponent?: ReactNode;
-  onBuy?: () => void;
-  isLoading?: boolean;
+  prices: MarketPrice[];
+  icon?: ReactNode;
+  onBuy?: (price: MarketPrice) => void;
+  onClick?: () => void;
+  loading?: boolean;
   disabled?: boolean;
   children?: ReactNode;
   className?: string;
+  qualitySelectorProps?: QuantitySelectorProps;
+  count?: number;
+  classNames?: {
+    icon?: string;
+    title?: string;
+    description?: string;
+    children?: string;
+    button?: string;
+  };
 }
 
 export function MarketItemCard({
-  title,
+  name,
   description,
-  price,
-  currency = 'LTC',
+  prices,
   icon,
-  iconComponent,
   onBuy,
-  isLoading,
+  onClick,
+  loading,
   disabled,
   children,
   className,
+  classNames,
+  qualitySelectorProps,
+  count,
 }: MarketItemCardProps) {
   const t = useAppTranslations();
 
-  if (isLoading) {
-    return (
-      <div className={twMerge('bg-purple-gradient rounded-lg p-3 flex flex-col gap-2', className)}>
-        <div className="flex items-center gap-3">
-          <Skeleton variant="rounded-rectangle" className="w-12 h-12" />
-          <div className="flex flex-col gap-1 flex-1">
-            <Skeleton variant="line" className="w-24" textSize="sm" />
-            <Skeleton variant="line" className="w-32" textSize="xs" />
-          </div>
-        </div>
-        <Skeleton variant="card" className="h-10 w-full mt-2" />
-      </div>
-    );
-  }
-
   return (
-    <div className={twMerge('bg-purple-gradient rounded-lg p-3 flex flex-col gap-2', className)}>
-      <div className="flex items-center gap-3">
-        {(icon || iconComponent) && (
-          <div className="bg-white/5 rounded-lg p-2 shrink-0 w-12 h-12 flex-center">
-            {iconComponent
-              ? iconComponent
-              : icon && <Image src={icon} alt={title} width={40} height={40} />}
+    <div
+      onClick={onClick}
+      className={twMerge(
+        'bg-purple-gradient rounded-xl p-4 flex flex-col transition-all hover:scale-[1.01] h-full relative overflow-hidden',
+        onClick && 'cursor-pointer',
+        className
+      )}
+    >
+      {count !== undefined && (
+        <div className="absolute top-0 right-0 bg-white/10 backdrop-blur-md px-2 py-1 rounded-bl-xl border-l border-b border-white/10 z-10">
+          <span className="text-[10px] text-white/60 font-bold uppercase tracking-wider block leading-none mb-0.5">
+            {t('owned')}
+          </span>
+          <span className="text-sm text-white font-bold block leading-none text-center">
+            {count}
+          </span>
+        </div>
+      )}
+      <SkeletonSuspense
+        loading={loading}
+        skeleton={<Skeleton variant="card" className="h-16 w-full rounded-xl flex-center" />}
+      >
+        <div
+          className={twMerge(
+            'bg-white/5 rounded-xl p-3 shrink-0 h-16 flex-center shadow-inner',
+            classNames?.icon
+          )}
+        >
+          {icon}
+        </div>
+      </SkeletonSuspense>
+      <SkeletonSuspense loading={loading} skeleton={<Skeleton textSize="base" className="mt-2" />}>
+        <div
+          className={twMerge(
+            'mt-2 font-semibold text-white leading-tight overflow-hidden text-ellipsis whitespace-nowrap',
+            classNames?.title
+          )}
+        >
+          {name}
+        </div>
+      </SkeletonSuspense>
+
+      <SkeletonSuspense
+        loading={loading}
+        skeleton={
+          <Skeleton
+            variant="text"
+            classNames={{ textLine: 'h-3.5 rounded-sm' }}
+            lines={2}
+            className="mt-1 gap-0.5"
+          />
+        }
+      >
+        {description && (
+          <div
+            className={twMerge(
+              'mt-1 text-pink-secondary text-xs line-clamp-2 leading-[1.2] min-h-7.5',
+              classNames?.description
+            )}
+          >
+            {description}
           </div>
         )}
-        <div className="flex flex-col flex-1 overflow-hidden">
-          <span className="text-sm font-bold text-white truncate">{title}</span>
-          {description && <span className="text-xs text-white/60 truncate">{description}</span>}
+      </SkeletonSuspense>
+
+      {qualitySelectorProps && (
+        <div className="mt-2">
+          <SkeletonSuspense
+            loading={loading}
+            skeleton={<Skeleton variant="rounded-rectangle" className="h-8 w-23.25" />}
+          >
+            <div onClick={e => e.stopPropagation()}>
+              <QuantitySelector {...qualitySelectorProps} />
+            </div>
+          </SkeletonSuspense>
         </div>
-      </div>
+      )}
+      {children && <div className={twMerge('mt-1 flex-1', classNames?.children)}>{children}</div>}
 
-      {children}
-
-      <Button
-        onClick={onBuy}
-        disabled={disabled}
-        className="w-full mt-1 py-2 h-auto text-xs font-bold"
+      <SkeletonSuspense
+        loading={loading}
+        skeleton={<Skeleton variant="card" className="h-10 mt-2" />}
       >
-        <div className="flex-center gap-1.5">
-          {t('pay')} {price}{' '}
-          {currency === 'LTC' ? (
-            <Image src={icons.coin} alt="coin" width={14} height={14} />
-          ) : (
-            currency
-          )}
+        <div className={twMerge('flex gap-2 mt-2')}>
+          {prices.map((price, index) => (
+            <Button
+              key={index}
+              onClick={e => {
+                e.stopPropagation();
+                onBuy?.(price);
+              }}
+              disabled={disabled}
+              variant={price.type === MarketPriceType.USDT ? 'secondary' : 'primary'}
+              className={twMerge(
+                'w-full flex-center gap-1 py-2 h-10 text-sm font-semibold rounded-lg',
+                classNames?.button
+              )}
+            >
+              {disabled ? (
+                <LockKeyhole className="h-5 w-5 stroke-2" />
+              ) : (
+                <>
+                  <span className="text-sm font-semibold">{price.amount}</span>
+                  {price.type === MarketPriceType.LTC && (
+                    <span className="text-sm text-gold font-bold">{GlobalConstants.coinName}</span>
+                  )}
+                  {price.type === MarketPriceType.USDT && (
+                    <span className="text-sm text-emerald-400 font-bold">USDT</span>
+                  )}
+                </>
+              )}
+            </Button>
+          ))}
         </div>
-      </Button>
+      </SkeletonSuspense>
     </div>
   );
 }

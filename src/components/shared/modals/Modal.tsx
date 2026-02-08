@@ -77,7 +77,7 @@ export const Modal = ({
         <div
           style={{ transitionDuration: `${ANIMATION_MS}ms` }}
           className={twMerge(
-            'w-full relative transition-all transform max-h-[70vh] overflow-scroll scrollbar-hidden rounded-lg',
+            'w-full relative transition-all transform max-h-[80vh] overflow-scroll scrollbar-hidden rounded-lg',
             open ? 'scale-100' : 'scale-80'
           )}
         >

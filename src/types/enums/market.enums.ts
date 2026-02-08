@@ -1,14 +1,19 @@
 export enum TicketBoostType {
-  SPEED,
-  COLLECT_TIME,
+  SPEED = 'SPEED',
+  COLLECT_TIME = 'COLLECT_TIME',
 }
 
 export enum MarketPriceType {
-  USDT,
-  COIN,
+  USDT = 'USDT',
+  LTC = 'LTC',
 }
 
 export enum MarketItemRequirementType {
-  ACTIVITY_POINTS,
-  INVITES,
+  ACTIVITY_POINTS = 'ACTIVITY_POINTS',
+  INVITES = 'INVITES',
+}
+
+export enum MarketStatusType {
+  PRIME = 'PRIME',
+  VIP = 'VIP',
 }

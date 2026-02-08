@@ -1,57 +1,44 @@
-import type { TicketType } from '@/components/shared/icons/Ticket';
 import {
   MarketItemRequirementType,
   MarketPriceType,
-  type TicketBoostType,
+  MarketStatusType,
+  TicketBoostType,
 } from '@/types/enums/market.enums';
+import type { TicketType } from '@/types/types/ticket.types';
 
 export interface MarketPrice {
-  priceType: MarketPriceType;
-  count: number;
+  type: MarketPriceType;
+  amount: number;
 }
 
 export interface MarketRequirement {
-  requirementType: MarketItemRequirementType;
+  type: MarketItemRequirementType;
   count: number;
 }
 
 export interface MarketItemBase {
-  title: string;
-  price: MarketPrice | MarketPriceType[];
-  subscriptionHours?: number;
-  requirements?: MarketRequirement[];
-  availableCount?: number;
-  unavailable?: boolean;
-  finishDate?: string;
-  isNew?: boolean;
-  isPopular?: boolean;
+  id: string;
+  name: string;
+  prices: MarketPrice[];
+  count?: number;
 }
 
-export interface MarketBoost {
-  id: string;
+export interface MarketBoost extends MarketItemBase {
+  boostPercentage: number;
   type: TicketBoostType;
   ticketType: TicketType;
-  multiplier: number;
-  durationInHours: number;
-  price: number;
 }
 
-export interface MarketTicket {
-  id: string;
+export interface MarketTicket extends MarketItemBase {
   ticketType: TicketType;
-  price: number;
+  isAvailable: boolean;
 }
 
-export interface MarketStatus {
-  id: string;
-  statusType: 'prime' | 'vip';
-  price: number;
-  priceCurrency: 'LTC' | 'USD'; // Prime can be purchased with LTC or crypto
-  durationInDays: number;
-  benefits: string[];
-  requirements?: {
-    minActivityPoints: number;
-  };
+export interface MarketStatus extends MarketItemBase {
+  statusType: MarketStatusType;
+  privileges: string[];
+  requirements?: MarketRequirement[];
+  durationDays: number;
 }
 
 export interface MarketData {

@@ -1,9 +1,12 @@
+import { TicketsEnum } from '@/types/enums/ticket.enums';
+import type { RequireKeys } from '@/types/types/utils.types';
 import type {
   AvailableTicketItemProps,
   BaseTicketProps,
   BlockedTicketProps,
 } from '@/types/interfaces/ticket.interfaces';
-import type { RequireKeys } from '@/types/types/utils.types';
+
+export type TicketType = `${TicketsEnum}`;
 
 export type TicketRequirementType = 'join' | 'collect' | 'invite';
 

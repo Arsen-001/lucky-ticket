@@ -1,5 +1,4 @@
-import type { TicketType } from '@/components/shared/icons/Ticket';
-import type { TicketRequirementType } from '@/types/types/ticket.types';
+import type { TicketRequirementType, TicketType } from '@/types/types/ticket.types';
 import type { TournamentType } from '@/types/types/tournaments.types';
 import type { Duration } from '@/types/interfaces/date.interfaces';
 

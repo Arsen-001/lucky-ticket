@@ -1,8 +1,12 @@
 'use client';
-import type { Ticket as TicketDataType, TicketRequirementType } from '@/types/types/ticket.types';
+import type {
+  Ticket as TicketDataType,
+  TicketRequirementType,
+  TicketType,
+} from '@/types/types/ticket.types';
 import { twMerge } from 'tailwind-merge';
 import type { ClassNameProps } from '@/types/interfaces/component.interfcaes';
-import { Ticket, type TicketType } from '@/components/shared/icons/Ticket';
+import { Ticket } from '@/components/shared/icons/Ticket';
 import { Button } from '@/components/shared/buttons/Button';
 import { useCountDown } from '@/hooks/useCountDown';
 import { useAppTranslations } from '@/hooks/useAppTranslations';
