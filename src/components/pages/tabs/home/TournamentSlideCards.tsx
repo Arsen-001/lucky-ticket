@@ -77,8 +77,8 @@ export function TournamentSlideCards({
           loading={loading}
           skeleton={
             <>
-              <Skeleton variant="line" />
-              <Skeleton variant="line" className="w-16" />
+              <Skeleton variant="line" className="h-6" />
+              <Skeleton variant="line" className="h-5.5 w-20 mt-0.5" />
             </>
           }
         >
