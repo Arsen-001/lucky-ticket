@@ -8,7 +8,7 @@ import { Button } from '@/components/shared/buttons/Button';
 export type TabClassName = string | ((tabKey: string) => string);
 
 export interface TabsProps {
-  items: { key: string; title: string; children?: ReactNode }[];
+  items: { key: string; title: ReactNode; children?: ReactNode }[];
   activeKey?: string;
   defaultActiveKey?: string;
   onTabChange?: (key: string) => void;

@@ -11,6 +11,7 @@ import { Button } from '@/components/shared/buttons/Button';
 import { filterLanguages } from '@/utils/pages/languages.utils';
 import { type LocaleType } from '@/types/types/locale.types';
 import { setAppLocale } from '@/services/locale';
+import Image from 'next/image';
 
 export default function LanguagesPage() {
   const { languages, currentLocale } = useGetAvailableLanguages();
@@ -43,19 +44,24 @@ export default function LanguagesPage() {
               lang.code === currentLocale && 'ring-2 ring-pink'
             )}
           >
-            <div className="flex flex-col items-start gap-px overflow-hidden">
-              <HighlightedText
-                highlight={searchValue}
-                className="text-white-secondary font-semibold text-base truncate"
-              >
-                {lang.nativeName}
-              </HighlightedText>
-              <HighlightedText
-                highlight={searchValue}
-                className="text-sm text-gray-secondary font-semibold truncate"
-              >
-                {lang.name}
-              </HighlightedText>
+            <div className="flex items-center gap-4 overflow-hidden">
+              <div className="w-10 h-7 rounded overflow-hidden shrink-0 border border-white/10">
+                <Image src={lang.flag} alt={lang.name} className="w-full h-full object-cover" />
+              </div>
+              <div className="flex flex-col items-start gap-px overflow-hidden">
+                <HighlightedText
+                  highlight={searchValue}
+                  className="text-white-secondary font-semibold text-base truncate"
+                >
+                  {lang.nativeName}
+                </HighlightedText>
+                <HighlightedText
+                  highlight={searchValue}
+                  className="text-sm text-gray-secondary font-semibold truncate"
+                >
+                  {lang.name}
+                </HighlightedText>
+              </div>
             </div>
             {lang.code === currentLocale && (
               <CheckCircle2 size={24} className="text-pink shrink-0" />
