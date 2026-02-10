@@ -2,9 +2,9 @@
 import { useAppTranslations } from '@/hooks/useAppTranslations';
 import { Tabs } from '@/components/shared/Tabs';
 import { ArrowBigUp, CircleStar, Tickets } from 'lucide-react';
-import { MarketBoostList } from '@/components/pages/tabs/market/MarketBoostList';
-import { MarketTicketList } from '@/components/pages/tabs/market/MarketTicketList';
-import { MarketStatusList } from '@/components/pages/tabs/market/MarketStatusList';
+import { MarketBoostList } from '@/components/pages/tabs/market/boosts/MarketBoostList';
+import { MarketTicketList } from '@/components/pages/tabs/market/tickets/MarketTicketList';
+import { MarketStatusList } from '@/components/pages/tabs/market/status/MarketStatusList';
 import type { HTMLAttributes } from 'react';
 
 export function MarketTabs({ ...props }: HTMLAttributes<HTMLDivElement>) {
