@@ -5,13 +5,14 @@ import { closeDrawer, selectDrawerOpen } from '@/lib/rtk/features/layout.slice';
 import { ClientPortal } from '@/components/shared/ClientPortal';
 import { type Route, routes } from '@/constants/routes';
 import {
-  ArrowLeftRight,
   Bell,
+  ChartNoAxesColumnIncreasing,
   CircleQuestionMark,
   Globe,
   Settings,
   UserRound,
   UserRoundPlus,
+  Wallet,
   X,
 } from 'lucide-react';
 import { type ReactNode, useEffect } from 'react';
@@ -57,6 +58,11 @@ export function Drawer() {
       icon: <UserRound />,
     },
     {
+      route: routes.leaderboard,
+      title: t('leaderboard'),
+      icon: <ChartNoAxesColumnIncreasing />,
+    },
+    {
       route: routes.inviteFriends,
       title: t('invite friends'),
       icon: <UserRoundPlus />,
@@ -67,9 +73,9 @@ export function Drawer() {
       icon: <Bell />,
     },
     {
-      route: routes.exchange,
+      route: routes.wallet,
       title: t('exchange'),
-      icon: <ArrowLeftRight />,
+      icon: <Wallet />,
     },
     {
       route: routes.support.index,

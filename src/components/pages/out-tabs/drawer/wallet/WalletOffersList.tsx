@@ -1,22 +1,22 @@
 'use client';
 
 import { useAppTranslations } from '@/hooks/useAppTranslations';
-import { ExchangeOfferCard } from './ExchangeOfferCard';
+import { WalletOfferCard } from './WalletOfferCard';
 import type { ExchangeOffer } from '@/types/interfaces/exchange.interfaces';
 
-interface ExchangeOffersTabProps {
+interface WalletOffersTabProps {
   offers: ExchangeOffer[];
   isLoading: boolean;
   onExchange?: (offer: ExchangeOffer) => void;
   isExchanging?: boolean;
 }
 
-export const ExchangeOffersList = ({
+export const WalletOffersList = ({
   offers,
   isLoading,
   onExchange,
   isExchanging,
-}: ExchangeOffersTabProps) => {
+}: WalletOffersTabProps) => {
   const t = useAppTranslations();
 
   const content = isLoading ? (Array.from({ length: 3 }) as ExchangeOffer[]) : offers;
@@ -24,7 +24,7 @@ export const ExchangeOffersList = ({
   return (
     <div className="flex flex-col gap-2">
       {content.map((offer, index) => (
-        <ExchangeOfferCard
+        <WalletOfferCard
           loading={isLoading}
           key={index}
           offer={offer}

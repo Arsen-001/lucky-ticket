@@ -18,7 +18,7 @@ interface ExchangeOfferCardProps {
   isExchanging?: boolean;
 }
 
-export const ExchangeOfferCard = ({
+export const WalletOfferCard = ({
   loading,
   offer,
   onExchange,

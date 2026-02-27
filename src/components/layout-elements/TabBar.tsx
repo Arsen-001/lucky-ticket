@@ -5,14 +5,7 @@ import { type ReactElement, type ReactNode } from 'react';
 import { TabBarItem } from '@/components/layout-elements/TabBarItem';
 import { type Route, routes } from '@/constants/routes';
 import { useAppTranslations } from '@/hooks/useAppTranslations';
-import {
-  ChartNoAxesColumnIncreasing,
-  FileText,
-  House,
-  type LucideProps,
-  ShoppingBag,
-  Trophy,
-} from 'lucide-react';
+import { FileText, House, type LucideProps, ShoppingBag, Ticket, Trophy } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { useLocation } from '@/hooks/useLocation';
 
@@ -32,9 +25,9 @@ export function TabBar({ className }: ClassNameProps) {
 
   const tabs: Tab[] = [
     {
-      route: routes.leaderboard,
-      icon: <ChartNoAxesColumnIncreasing />,
-      name: t('leaderboard'),
+      route: routes.tickets.index,
+      icon: <Ticket />,
+      name: t('tickets'),
     },
     {
       route: routes.tournaments.index,
@@ -47,7 +40,7 @@ export function TabBar({ className }: ClassNameProps) {
       name: t('home'),
     },
     {
-      route: routes.market,
+      route: routes.market(),
       icon: <ShoppingBag />,
       name: t('market'),
     },

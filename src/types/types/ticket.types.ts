@@ -8,7 +8,7 @@ import type {
 
 export type TicketType = `${TicketsEnum}`;
 
-export type TicketRequirementType = 'join' | 'collect' | 'invite';
+export type TicketRequirementType = 'join' | 'collect' | 'invite' | 'task' | 'activity';
 
 export type Ticket = RequireKeys<
   Partial<BlockedTicketProps & AvailableTicketItemProps>,

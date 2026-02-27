@@ -1,9 +1,5 @@
 'use client';
-import type {
-  Ticket as TicketDataType,
-  TicketRequirementType,
-  TicketType,
-} from '@/types/types/ticket.types';
+import type { Ticket as TicketDataType, TicketType } from '@/types/types/ticket.types';
 import { twMerge } from 'tailwind-merge';
 import type { ClassNameProps } from '@/types/interfaces/component.interfcaes';
 import { Ticket } from '@/components/shared/icons/Ticket';
@@ -12,11 +8,14 @@ import { useCountDown } from '@/hooks/useCountDown';
 import { useAppTranslations } from '@/hooks/useAppTranslations';
 import type { MessageIds } from '@/types/types/i18n.types';
 import { Progress } from '@/components/shared/Progress';
-import { GoldenText } from '@/components/shared/typography/GoldenText';
 import Image from 'next/image';
 import { icons } from '@/constants/icons';
+import { CollectBadge } from '@/components/shared/badges/CollectBadge';
+import { BoostBadge } from '@/components/shared/badges/BoostBadge';
+import { SkeletonSuspense } from '@/components/shared/seleketons/SkeletonSuspense';
 import { Skeleton } from '@/components/shared/seleketons/Skeleton';
-import { getTicketPerTimeUnit } from '@/utils/global/units.utils';
+import { Link } from '@/components/shared/links/Link';
+import { routes } from '@/constants/routes';
 
 export type HomeTickestListItemProps = TicketDataType & ClassNameProps & { loading?: boolean };
 
@@ -24,10 +23,12 @@ export function HomeTickestListItem({
   ticketType,
   className,
   loading,
+  blocked,
+  isTimeBoosted,
+  isCollectionBoosted,
   ...rest
 }: HomeTickestListItemProps) {
   const t = useAppTranslations();
-  const blocked = !rest?.claimDate;
   const claimCountDown = useCountDown(rest?.claimDate);
   const autocollectFinishCountDown = useCountDown(rest?.autocollectFinishDate);
 
@@ -41,117 +42,81 @@ export function HomeTickestListItem({
 
   const ticketImageProps = {
     type: ticketType,
+    loading,
     width: 70,
     height: 42,
   };
 
-  if (loading) {
-    return (
-      <div
-        className={twMerge(
-          'bg-purple-gradient rounded-lg flex items-center gap-2 p-2 overflow-hidden',
-          className
-        )}
-      >
-        <Ticket loading {...ticketImageProps} />
-        <div className="flex flex-col flex-1 gap-2">
-          <div className="flex flex-col-stretch gap-1 overflow-hidden">
-            <Skeleton className="w-20" variant={'line'} textSize="sm" />
-            <div className="flex gap-x-1.5 gap-y-px flex-wrap">
-              <Skeleton variant={'line'} className="h-4 w-18 " />
-              <Skeleton variant={'line'} className="h-4 w-24 " />
-            </div>
-            <Skeleton variant={'line'} className="h-3 " />
-          </div>
-        </div>
-        <Skeleton variant="card" className="h-8 w-22.5" />
-      </div>
-    );
-  }
+  const percentage =
+    !loading && !blocked ? autocollectFinishCountDown.getPassedPercentage(rest.maxTime) : 0;
+  const titleId = titleIdByType?.[ticketType];
 
-  if (!blocked) {
-    const speedUnit = getTicketPerTimeUnit(t);
-
-    const percentage = autocollectFinishCountDown.getPassedPercentage(rest.maxTime);
-    return (
-      <div
-        className={twMerge(
-          'bg-purple-gradient rounded-lg flex items-center gap-2 p-2 overflow-hidden',
-          className
-        )}
-      >
-        <Ticket {...ticketImageProps} />
-        <div className="flex flex-col flex-1 gap-1 overflow-hidden">
-          <span className="text-sm font-semibold">{t(titleIdByType[ticketType])}</span>
-          <div className="flex gap-1.5 gap-y-px text-xs text-pink-secondary whitespace-nowrap flex-wrap">
-            <div className="flex-center gap-0.5 overflow-hidden">
-              <span className="flex-1 truncate">{t('speed')}:</span>
-              <GoldenText>
-                {rest?.speed} {speedUnit}
-              </GoldenText>
-            </div>
-            <div className="flex-center gap-0.5 overflow-hidden">
-              <span className="flex-1 truncate">{t('max time')}:</span>
-              <GoldenText>
-                {rest?.maxTime?.hours} {t('hour')[0]} {rest?.maxTime?.minutes} {t('minute')[0]}
-              </GoldenText>
-            </div>
-          </div>
-          <Progress
-            className="h-3 flex items-center"
-            classNames={{ children: 'absolute bottom-0 h-full right-3 pt-px' }}
-            percentage={percentage}
-          >
-            {autocollectFinishCountDown.leftTimeText}
-          </Progress>
-        </div>
-        <Button disabled={!claimCountDown?.expired} className="p-2 min-w-22.5 text-xs">
-          {claimCountDown.expired ? t('claim') : claimCountDown.leftTimeText}
-        </Button>
-      </div>
-    );
-  }
-
-  const requirementIdsByType: Record<TicketRequirementType, MessageIds> = {
-    join: 'join {tournamentName} tournament',
-    collect: 'collect {ticketName} tickets',
-    invite: 'invite friends',
+  const handleClaim = e => {
+    e.preventDefault();
   };
-
   return (
-    <div
-      className={twMerge(
-        'bg-purple-gradient rounded-lg flex items-center gap-2 p-2 max-w-full overflow-hidden',
-        className
-      )}
-    >
-      <Ticket {...ticketImageProps} />
-      <div className="flex flex-col flex-[1_1_0] gap-1 whitespace-nowrap overflow-hidden">
-        <div className="text-sm text-white font-semibold">{t(titleIdByType[ticketType])}</div>
-        <div className="w-full text-pink-secondary text-xs gap-px overflow-hidden">
-          {rest.requirements?.map(({ type, requirementType, totalCount, actualCount }) => {
-            const variableName = {
-              join: 'tournamentName',
-              collect: 'ticketName',
-            }[requirementType];
-            return (
-              <span
-                className="block leading-none w-full truncate"
-                key={`${type}-${requirementType}`}
+    <Link href={routes?.tickets?.getById(rest?.id)}>
+      <div
+        className={twMerge(
+          'bg-purple-gradient rounded-lg flex items-center p-3 overflow-hidden',
+          loading || !blocked ? 'gap-2' : 'gap-3 max-w-full',
+          className
+        )}
+      >
+        <>
+          <Ticket {...ticketImageProps} />
+
+          <div className="flex-available flex flex-col gap-2  overflow-hidden">
+            <SkeletonSuspense loading={loading} skeleton={<Skeleton className="h-5.5 w-9/12" />}>
+              <div className="flex items-center gap-3">
+                <div className="text-base h-5 text-white font-semibold">
+                  {titleId && t(titleId)}
+                </div>
+                <div className="flex items-center gap-1">
+                  {isTimeBoosted && <BoostBadge hideText />}
+                  {isCollectionBoosted && <CollectBadge hideText />}
+                </div>
+              </div>
+            </SkeletonSuspense>
+            <SkeletonSuspense
+              loading={loading}
+              skeleton={<Skeleton className="h-3.5 rounded-full" />}
+            >
+              {!blocked ? (
+                <>
+                  <Progress
+                    className="h-3.5 flex items-center"
+                    classNames={{ children: 'absolute bottom-0 h-full right-3 pt-0.5' }}
+                    percentage={percentage}
+                  >
+                    {autocollectFinishCountDown.leftTimeText}
+                  </Progress>
+                </>
+              ) : (
+                <div className="w-full text-pink-secondary text-sm leading-none font-normal line-clamp-2">
+                  {t('complete all requirements')}
+                </div>
+              )}
+            </SkeletonSuspense>
+          </div>
+          <SkeletonSuspense
+            loading={loading}
+            skeleton={<Skeleton variant="card" className="h-8 w-22.5" />}
+          >
+            {!blocked ? (
+              <Button
+                onClick={handleClaim}
+                disabled={!claimCountDown?.expired}
+                className="p-2 min-w-22.5 text-xs"
               >
-                {t(
-                  requirementIdsByType[requirementType],
-                  variableName && {
-                    [variableName]: type,
-                  }
-                )}{' '}
-                {actualCount}/{totalCount}
-              </span>
-            );
-          })}
-        </div>
+                {claimCountDown.expired ? t('claim') : claimCountDown.leftTimeText}
+              </Button>
+            ) : (
+              <Image className="mr-0" height={32} src={icons.lock} alt="lock" />
+            )}
+          </SkeletonSuspense>
+        </>
       </div>
-      <Image className="mr-5" height={32} src={icons.lock} alt="lock" />
-    </div>
+    </Link>
   );
 }

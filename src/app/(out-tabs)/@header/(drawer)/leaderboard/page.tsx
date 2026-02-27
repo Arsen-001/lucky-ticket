@@ -1,10 +1,8 @@
 'use client';
-
 import { PageHeader } from '@/components/layout-elements/PageHeader';
 import { useAppTranslations } from '@/hooks/useAppTranslations';
 
-export default function ExchangeHeader() {
+export default function LeaderboardHeader() {
   const t = useAppTranslations();
-
-  return <PageHeader title={t('exchange')} />;
+  return <PageHeader title={t('leaderboard')} />;
 }

@@ -1,6 +1,6 @@
 ---
 apply: by model decision
-instructions: Play rule when
+instructions: Apply when needed project file structure
 ---
 
 –

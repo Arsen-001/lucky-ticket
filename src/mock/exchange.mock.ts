@@ -1,48 +1,5 @@
 import { ExchangeStatus, ExchangeType } from '@/types/enums/exchnage.enums';
-import type { ExchangeHistoryItem, ExchangeOffers } from '@/types/interfaces/exchange.interfaces';
-
-export const exchangeOffersMock: ExchangeOffers = {
-  [ExchangeType.LTC_TO_USDT]: [
-    {
-      id: '1',
-      type: ExchangeType.LTC_TO_USDT,
-      payAmount: 100,
-      receivedAmount: 1,
-    },
-    {
-      id: '2',
-      type: ExchangeType.LTC_TO_USDT,
-      payAmount: 300,
-      receivedAmount: 5,
-    },
-    {
-      id: '3',
-      type: ExchangeType.LTC_TO_USDT,
-      payAmount: 1000,
-      receivedAmount: 12,
-    },
-  ],
-  [ExchangeType.USDT_TO_LTC]: [
-    {
-      id: '4',
-      type: ExchangeType.USDT_TO_LTC,
-      payAmount: 1,
-      receivedAmount: 50,
-    },
-    {
-      id: '5',
-      type: ExchangeType.USDT_TO_LTC,
-      payAmount: 5,
-      receivedAmount: 400,
-    },
-    {
-      id: '6',
-      type: ExchangeType.USDT_TO_LTC,
-      payAmount: 10,
-      receivedAmount: 900,
-    },
-  ],
-};
+import type { ExchangeHistoryItem } from '@/types/interfaces/exchange.interfaces';
 
 export const exchangeHistoryMock: ExchangeHistoryItem[] = [
   {
@@ -87,7 +44,6 @@ export const exchangeHistoryMock: ExchangeHistoryItem[] = [
   },
 ];
 export const exchangeMock = {
-  'exchange/offers': exchangeOffersMock,
   'exchange/history': exchangeHistoryMock,
   'POST exchange': { success: true },
 };

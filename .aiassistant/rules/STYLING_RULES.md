@@ -1,5 +1,6 @@
 ---
 apply: by model decision
+instructions: Apply when interacting with design and styles
 ---
 
 : src/\*_/_.{ts,tsx,scss,css}

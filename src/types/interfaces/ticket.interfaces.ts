@@ -5,6 +5,7 @@ import type { Duration } from '@/types/interfaces/date.interfaces';
 export interface BaseTicketProps {
   id: string;
   ticketType: TicketType;
+  count?: number;
 }
 
 export interface TicketRequirement {
@@ -12,10 +13,12 @@ export interface TicketRequirement {
   type?: TicketType | TournamentType;
   totalCount: number;
   actualCount: number;
+  title?: string;
 }
 
 export interface BlockedTicketProps extends BaseTicketProps {
-  requirements: TicketRequirement[];
+  blocked: boolean;
+  requirements?: TicketRequirement[];
 }
 
 export interface AvailableTicketItemProps extends BaseTicketProps {
@@ -23,4 +26,6 @@ export interface AvailableTicketItemProps extends BaseTicketProps {
   autocollectFinishDate: string;
   maxTime: Duration;
   speed: number;
+  isTimeBoosted: boolean;
+  isCollectionBoosted: boolean;
 }

@@ -47,7 +47,13 @@ export function Input({ className, classNames, prefix, suffix, loading, ...rest 
       />
 
       {(suffix || loading) && (
-        <span onClick={focusInput} className={twMerge('shrink-0', classNames?.suffix)}>
+        <span
+          onClick={focusInput}
+          className={twMerge(
+            'shrink-0 inline-flex items-center justify-center',
+            classNames?.suffix
+          )}
+        >
           {loading ? <Loader2 size={18} className="animate-spin" /> : suffix}
         </span>
       )}

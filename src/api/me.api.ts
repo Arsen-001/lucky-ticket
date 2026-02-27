@@ -14,7 +14,19 @@ export const meApi = api.injectEndpoints({
         method: 'PATCH',
         body,
       }),
-      invalidatesTags: [rtkTags.me],
+      async onQueryStarted(body, { dispatch, queryFulfilled }) {
+        try {
+          dispatch(
+            meApi.util.updateQueryData('getMe', undefined, draft => {
+              Object.assign(draft, body);
+            })
+          );
+          await queryFulfilled;
+        } catch {
+          // patchResult.undo();
+        }
+      },
+      // invalidatesTags: [rtkTags.me],
     }),
   }),
 });

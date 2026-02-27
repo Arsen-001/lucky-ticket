@@ -53,7 +53,7 @@ export const Table = <RecordType extends object>({
   rowKey,
   className,
   emptyText,
-  loadingRows = 3,
+  loadingRows = 5,
 }: TableProps<RecordType>) => {
   const getRowKey = (record: RecordType, index: number): string | number => {
     if (typeof rowKey === 'function') {

@@ -1,14 +1,13 @@
 export const routes = {
   // tab routes
   home: '/',
-  leaderboard: '/leaderboard',
   tournaments: {
     index: '/tournaments',
     getById: function (tournamentId: string) {
       return (this.index + `/${tournamentId}`) as `/tournaments/${string}`;
     },
   },
-  market: '/market',
+  market: (tab?: string) => `/market${tab ? `?tab=${tab}` : ''}`,
   tasks: '/tasks',
 
   // auth routes
@@ -25,7 +24,14 @@ export const routes = {
   },
   profile: '/profile',
   notifications: '/notifications',
-  exchange: '/exchange',
+  leaderboard: '/leaderboard',
+  wallet: '/wallet',
+  tickets: {
+    index: '/tickets',
+    getById: function (ticketId: string) {
+      return (this.index + `/${ticketId}`) as `/tickets/${string}`;
+    },
+  },
   support: {
     index: '/support',
     getById: function (id: string) {

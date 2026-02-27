@@ -11,4 +11,5 @@ export interface MeResponse {
   phoneNumber?: string;
   twoFactorAuth?: boolean;
   activityPoints: number;
+  walletId?: string | null;
 }
