@@ -1,36 +1,129 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Lucky Ticket
 
-## Getting Started
+Lucky Ticket is a multilingual, gamified reward platform with a built-in virtual economy and crypto exchange layer. Designed to convert user activity into measurable value, the platform allows users to collect tickets, participate in tournaments, complete tasks, and earn Lucky Ticket Coins (LTC), which can be spent within the ecosystem or exchanged for cryptocurrency.
 
-First, run the development server:
+## 🚀 Features
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+- **Gamified Rewards:** Daily ticket claims, activity points, and progression systems.
+- **Tournament System:** Compete in project and partner tournaments with varied prize pools.
+- **Virtual Economy:** Earn Lucky Ticket Coins (LTC) and use them in the Market or for crypto exchange.
+- **Status Levels:** Progress through Verified, Prime, and VIP tiers, each offering unique benefits.
+- **Referral System:** Invite friends and earn commissions based on their activity and status.
+- **Multilingual Support:** Fully localized experience in English, Armenian (Հայերեն), and Russian (Русский).
+- **Secure Account Management:** 2FA, email/phone verification, and personalized profile statistics.
+
+## 🛠 Tech Stack
+
+- **Framework:** [Next.js 15+](https://nextjs.org/) (App Router)
+- **Library:** [React 19](https://react.dev/)
+- **State Management:** [Redux Toolkit](https://redux-toolkit.js.org/)
+- **Styling:** [Tailwind CSS 4](https://tailwindcss.com/)
+- **Internationalization:** [next-intl](https://next-intl-docs.vercel.app/)
+- **Forms & Validation:** [React Hook Form](https://react-hook-form.com/) with [Yup](https://github.com/jquense/yup)
+- **Icons:** [Lucide React](https://lucide.dev/)
+- **Components:** [Swiper](https://swiperjs.com/) for sliders, custom UI components.
+- **Language:** [TypeScript](https://www.typescriptlang.org/)
+
+## 📂 Project Structure
+
+```text
+├── messages/           # Localization JSON files (en, hy, ru)
+├── public/             # Static assets
+├── src/
+│   ├── api/            # RTK Query API slices
+│   ├── app/            # Next.js App Router (pages, layouts, groups)
+│   ├── components/     # React components (pages, shared, layout)
+│   ├── constants/      # App-wide constants and routes
+│   ├── fonts/          # Local font configurations
+│   ├── hooks/          # Custom React hooks
+│   ├── i18n/           # Internationalization setup
+│   ├── lib/            # Third-party library configurations (Redux store, etc.)
+│   ├── mock/           # Mock data for development
+│   ├── providers/      # React context providers
+│   ├── services/       # Business logic and utility services
+│   ├── styles/         # Global styles and Tailwind configuration
+│   ├── types/          # TypeScript interfaces and types
+│   └── utils/          # Helper functions
+└── ... config files (next.config.ts, tsconfig.json, etc.)
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+## ⚙️ Requirements
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+- **Node.js:** 20.x or later
+- **Package Manager:** npm (recommended), yarn, pnpm, or bun
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+## 🛠 Setup & Run
 
-## Learn More
+1.  **Clone the repository:**
 
-To learn more about Next.js, take a look at the following resources:
+    ```bash
+    git clone <repository-url>
+    cd lucky-ticket
+    ```
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+2.  **Install dependencies:**
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+    ```bash
+    npm install
+    ```
 
-## Deploy on Vercel
+3.  **Configure environment variables:**
+    Copy `.env.example` to `.env` and fill in the required values.
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+    ```bash
+    cp .env.example .env
+    ```
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+4.  **Run the development server:**
+
+    ```bash
+    npm run dev
+    ```
+
+    Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+
+5.  **Build for production:**
+    ```bash
+    npm run build
+    npm start
+    ```
+
+## 📜 Available Scripts
+
+- `npm run dev` - Starts the development server.
+- `npm run build` - Builds the application for production.
+- `npm run start` - Starts the production server.
+- `npm run lint` - Runs ESLint to check for code quality issues.
+- `npm run format` - Formats the codebase using Prettier.
+- `npm run type-check` - Runs TypeScript compiler to check for type errors.
+- `npm run clean` - Removes the `.next` build folder.
+- `npm run rnm` - Removes the `node_modules` folder.
+- `npm run prepare` - Sets up Husky git hooks.
+
+## 🌐 Environment Variables
+
+| Variable               | Description                                  | Default       |
+| :--------------------- | :------------------------------------------- | :------------ |
+| `NEXT_PUBLIC_ENV`      | Current environment (development/production) | `development` |
+| `NEXT_PUBLIC_BASE_API` | Base URL for the backend API                 | -             |
+| `NEXT_PUBLIC_APP_URL`  | Public URL of the application                | -             |
+
+## 🧪 Testing
+
+> [!IMPORTANT]
+> TODO: Add automated tests (Unit, Integration, E2E). Playwright appears in dependencies but no tests are currently implemented.
+
+## 🌍 Localization
+
+The project uses `next-intl` for localization. Supported languages are:
+
+- 🇺🇸 English (`en`) - Default
+- 🇦🇲 Armenian (`hy`)
+- 🇷🇺 Russian (`ru`)
+
+Messages are stored in the `/messages` directory as JSON files.
+
+## 📄 License
+
+This project is private and proprietary.
+_(TODO: Update with specific license if applicable)_
