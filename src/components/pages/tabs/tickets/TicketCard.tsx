@@ -3,7 +3,6 @@
 import type { Ticket as TicketDataType, TicketType } from '@/types/types/ticket.types';
 import { twMerge } from 'tailwind-merge';
 import type { ClassNameProps } from '@/types/interfaces/component.interfcaes';
-import { Ticket } from '@/components/shared/icons/Ticket';
 import { Button } from '@/components/shared/buttons/Button';
 import { useAppTranslations } from '@/hooks/useAppTranslations';
 import type { MessageIds } from '@/types/types/i18n.types';
@@ -13,6 +12,7 @@ import Image from 'next/image';
 import { icons } from '@/constants/icons';
 import { SkeletonSuspense } from '@/components/shared/seleketons/SkeletonSuspense';
 import { Skeleton } from '@/components/shared/seleketons/Skeleton';
+import { TicketOverlap } from '@/components/shared/icons/TicketOverlap';
 
 export type TicketCardProps = TicketDataType & ClassNameProps & { loading?: boolean };
 
@@ -36,8 +36,7 @@ export function TicketCard({
 
   const ticketImageProps = {
     type: ticketType,
-    width: 80,
-    height: 48,
+    height: 70,
   };
 
   const titleId = titleIdByType?.[ticketType];
@@ -55,8 +54,8 @@ export function TicketCard({
           skeleton={<Skeleton className="h-20 w-full rounded-lg" />}
         >
           <div className="h-20 bg-white/8 rounded-lg flex items-center justify-center shrink-0">
-            <div className={!blocked ? 'shine-[110px]' : undefined}>
-              <Ticket {...ticketImageProps} className="z-1" />
+            <div className={!blocked ? 'shine-[130px]' : undefined}>
+              <TicketOverlap {...ticketImageProps} className="z-1" />
             </div>
           </div>
         </SkeletonSuspense>

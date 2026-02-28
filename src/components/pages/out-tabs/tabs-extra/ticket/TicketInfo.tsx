@@ -1,7 +1,6 @@
 'use client';
 
 import { useGetTicketByIdQuery } from '@/api/tickets.api';
-import { Ticket } from '@/components/shared/icons/Ticket';
 import type { HTMLAttributes } from 'react';
 import { useState } from 'react';
 import { useAppTranslations } from '@/hooks/useAppTranslations';
@@ -20,6 +19,7 @@ import { icons } from '@/constants/icons';
 import { TicketSendModal } from './TicketSendModal';
 import { useRouter } from 'next/navigation';
 import { routes } from '@/constants/routes';
+import { TicketOverlap } from '@/components/shared/icons/TicketOverlap';
 
 interface TicketInfoProps extends HTMLAttributes<HTMLDivElement> {
   id: string;
@@ -62,7 +62,7 @@ export function TicketInfo({ id, className, ...rest }: TicketInfoProps) {
     <div className={twMerge('max-w-full overflow-hidden', className)} {...rest}>
       <div className="flex justify-between items-center gap-3">
         <div className="flex-center bg-white/5 rounded-2xl p-4 min-w-[140px] h-[140px]">
-          <Ticket type={data?.ticketType || 'bronze'} loading={isLoading} width={100} height={60} />
+          <TicketOverlap type={data?.ticketType || 'bronze'} loading={isLoading} height={90} />
         </div>
 
         <div className="flex-1 flex flex-col gap-2">
@@ -114,11 +114,6 @@ export function TicketInfo({ id, className, ...rest }: TicketInfoProps) {
                   {data.maxTime?.hours || 0} {t('hour')[0]} {data.maxTime?.minutes || 0}{' '}
                   {t('minute')[0]}
                 </GoldenText>
-              </div>
-              <div className="flex flex-col gap-1 mt-2">
-                <span className="text-xs text-pink-secondary truncate">
-                  {t('complete all requirements')}
-                </span>
               </div>
             </div>
           )}
@@ -173,17 +168,17 @@ export function TicketInfo({ id, className, ...rest }: TicketInfoProps) {
         >
           {blocked ? (
             <div className="flex-center gap-2 bg-white/5 rounded-xl p-4">
-              <Image height={24} src={icons.lock} alt="lock" />
               <span className="text-sm font-medium uppercase tracking-wider">
-                {t('coming soon')}
+                {t('complete all requirements')}
               </span>
+              <Image className="pb-0.5" height={16} src={icons.lock} alt="lock" />
             </div>
           ) : (
             <div className="flex flex-col gap-3">
               <Button
                 onClick={handleClaim}
                 disabled={!claimCountDown?.expired}
-                className="w-full py-4 text-base"
+                className="w-full py-2 text-base"
               >
                 {claimCountDown.expired ? t('claim') : claimCountDown.leftTimeText}
               </Button>

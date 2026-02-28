@@ -1,7 +1,7 @@
 import { MarketItemCard } from '../MarketItemCard';
 import { MarketPrice, MarketTicket } from '@/types/interfaces/market.interfaces';
 import { useAppTranslations } from '@/hooks/useAppTranslations';
-import { Ticket } from '@/components/shared/icons/Ticket';
+import { TicketOverlap } from '@/components/shared/icons/TicketOverlap';
 
 interface MarketTicketItemProps {
   ticket: MarketTicket | null;
@@ -40,7 +40,7 @@ export const MarketTicketItem = ({
         onChange: onCountChange,
         disabled: !ticket.isAvailable,
       }}
-      icon={<Ticket type={ticket.ticketType} height={40} />}
+      icon={<TicketOverlap type={ticket.ticketType} height={70} />}
       onBuy={onBuy}
       onClick={onClick}
       disabled={!ticket.isAvailable}

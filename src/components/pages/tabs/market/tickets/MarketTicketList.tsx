@@ -7,9 +7,9 @@ import { MarketPrice, MarketTicket } from '@/types/interfaces/market.interfaces'
 import { MarketPriceType } from '@/types/enums/market.enums';
 import { Tickets } from 'lucide-react';
 import { useAppTranslations } from '@/hooks/useAppTranslations';
-import { Ticket } from '@/components/shared/icons/Ticket';
 import { MarketBuyModal } from '../MarketBuyModal';
 import { MarketTicketItem } from './MarketTicketItem';
+import { TicketOverlap } from '@/components/shared/icons/TicketOverlap';
 
 export function MarketTicketList() {
   const t = useAppTranslations();
@@ -92,7 +92,9 @@ export function MarketTicketList() {
         }
         price={selectedTicket?.price || { amount: 0, type: MarketPriceType.LTC }}
         priceLabel={t('total price')}
-        icon={selectedTicket && <Ticket type={selectedTicket.ticket.ticketType} height={40} />}
+        icon={
+          selectedTicket && <TicketOverlap type={selectedTicket.ticket.ticketType} height={40} />
+        }
         description={
           selectedTicket?.ticket.ticketType &&
           t(`participate in ${selectedTicket?.ticket.ticketType} level draws`)

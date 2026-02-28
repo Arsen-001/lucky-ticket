@@ -77,7 +77,7 @@ export function MarketItemCard({
       >
         <div
           className={twMerge(
-            'bg-white/5 rounded-xl h-18 shrink-0 flex-center shadow-inner',
+            'bg-white/5 rounded-xl h-20 shrink-0 flex-center shadow-inner',
             classNames?.icon
           )}
         >
