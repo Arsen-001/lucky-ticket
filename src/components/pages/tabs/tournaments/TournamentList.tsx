@@ -8,29 +8,19 @@ import { useAppTranslations } from '@/hooks/useAppTranslations';
 interface TournamentListProps {
   tournaments: TournamentCardProps[];
   isLoading: boolean;
-  filter: string;
-  searchValue: string;
 }
 
-export function TournamentList({
-  tournaments,
-  isLoading,
-  filter,
-  searchValue,
-}: TournamentListProps) {
+export function TournamentList({ tournaments, isLoading }: TournamentListProps) {
   const t = useAppTranslations();
 
   return (
-    <div
-      key={`${filter}-${searchValue}`}
-      className="py-5 grid grid-cols-2 gap-x-3 gap-y-4 content-start"
-    >
+    <div className="py-5 grid grid-cols-2 gap-x-3 gap-y-4 content-start">
       {tournaments.map((tournament, index) => (
         <TournamentCard
           key={index}
           loading={isLoading}
           {...tournament}
-          className="animate-slide-in-bottom"
+          className=""
           style={{ animationDelay: `${index * 50}ms` }}
         />
       ))}

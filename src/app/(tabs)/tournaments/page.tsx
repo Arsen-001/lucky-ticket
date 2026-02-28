@@ -41,13 +41,9 @@ export default function TournamentPage() {
         isSearchOpen={isSearchOpen}
         setIsSearchOpen={setIsSearchOpen}
       />
-
-      <TournamentList
-        tournaments={displayTournaments}
-        isLoading={isLoading}
-        filter={filter}
-        searchValue={searchValue}
-      />
+      <div key={`tournaments-${filter}-${searchValue}`} className="animate-slide-in-bottom">
+        <TournamentList tournaments={displayTournaments} isLoading={isLoading} />
+      </div>
     </div>
   );
 }

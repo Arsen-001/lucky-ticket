@@ -20,7 +20,7 @@ export const LeaderboardList = ({ className, ...props }: HTMLAttributes<HTMLDivE
 
   return (
     <div className={twMerge('flex-col-stretch flex-1', className)} {...props}>
-      <div className="bg-purple-gradient p-5 rounded-t-4xl flex-col-stretch gap-2 flex-1 border-b border-white/10">
+      <div className="bg-purple-gradient p-5 pb-16 rounded-t-4xl flex-col-stretch gap-2 flex-1 border-b border-white/10">
         {otherEntries.map((entry, index) => (
           <div
             className={

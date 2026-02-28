@@ -11,7 +11,7 @@ import { Progress } from '@/components/shared/Progress';
 import Image from 'next/image';
 import { icons } from '@/constants/icons';
 import { CollectBadge } from '@/components/shared/badges/CollectBadge';
-import { BoostBadge } from '@/components/shared/badges/BoostBadge';
+import { SpeedBadge } from '@/components/shared/badges/SpeedBadge';
 import { SkeletonSuspense } from '@/components/shared/seleketons/SkeletonSuspense';
 import { Skeleton } from '@/components/shared/seleketons/Skeleton';
 import { Link } from '@/components/shared/links/Link';
@@ -73,7 +73,7 @@ export function HomeTickestListItem({
                   {titleId && t(titleId)}
                 </div>
                 <div className="flex items-center gap-1">
-                  {isTimeBoosted && <BoostBadge hideText />}
+                  {isTimeBoosted && <SpeedBadge hideText />}
                   {isCollectionBoosted && <CollectBadge hideText />}
                 </div>
               </div>

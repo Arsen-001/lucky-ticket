@@ -4,7 +4,7 @@ import { CircleGauge } from 'lucide-react';
 import { twMerge } from 'tailwind-merge';
 import { useAppTranslations } from '@/hooks/useAppTranslations';
 
-export const BoostBadge = ({ ...rest }: BadgeProps) => {
+export const SpeedBadge = ({ ...rest }: BadgeProps) => {
   const t = useAppTranslations();
 
   return (
@@ -14,7 +14,8 @@ export const BoostBadge = ({ ...rest }: BadgeProps) => {
       {...rest}
       className={twMerge('text-gold p-1', rest.className)}
       classNames={{
-        icon: 'w-3.5 h-3.5',
+        ...rest.classNames,
+        icon: twMerge('w-3.5 h-3.5', rest.classNames?.icon),
       }}
     />
   );

@@ -14,7 +14,8 @@ export const CollectBadge = ({ ...rest }: BadgeProps) => {
       {...rest}
       className={twMerge('text-gold p-1', rest.className)}
       classNames={{
-        icon: 'w-3.5 h-3.5',
+        ...rest.classNames,
+        icon: twMerge('w-3.5 h-3.5', rest.classNames?.icon),
       }}
     />
   );

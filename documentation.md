@@ -134,11 +134,11 @@ LTC can be used to:
 - Buy tickets
 - Purchase boosts
 - Upgrade statuses
-- Exchange to cryptocurrency
+- Connect external wallet and exchange to cryptocurrency
 
 ### Connections
 
-LTC connects all core systems: market, tournaments, exchange, tasks, and progression.
+LTC connects all core systems: market, tournaments, wallet, tasks, and progression.
 
 ---
 
@@ -182,14 +182,28 @@ Statuses influence market prices, claim efficiency, tournaments, and social visi
 
 ### Purpose
 
-Tickets are the core progression and participation resource in Lucky Ticket.
+Tickets are the core progression and participation resource in Lucky Ticket. All available tickets can be viewed on the dedicated **Tickets page**.
 
-### 8.1 Ticket Categories
+### 8.1 Tickets Page
+
+The Tickets page displays all project and partner tickets. Users can tap on any ticket to open its **Ticket Details page**.
+
+### 8.2 Ticket Details Page
+
+The Details page provides in-depth information about a specific ticket, including its rarity, claim speed, and duration.
+
+- **Locked Ticket:** If a ticket is not yet unlocked, the bottom of the page displays the specific requirements (e.g., lower-tier claims, friend invites) needed to unlock it.
+- **Unlocked Ticket:** If the ticket is unlocked, the page displays action buttons:
+  - **Claim:** Collect accumulated tickets.
+  - **Buy:** Purchase the ticket using LTC.
+  - **Send:** Send the ticket to another user.
+
+### 8.3 Ticket Categories
 
 - **Project Tickets:** Bronze, Silver, Gold, Diamond, Platinum.
 - **Partner Tickets:** Required to participate in tournaments from partners (e.g., A-partner tournament can only be joined via having an A-ticket).
 
-### 8.2 Ticket Rarities
+### 8.4 Ticket Rarities
 
 - Bronze (Only Bronze tickets are available initially)
 - Silver
@@ -197,7 +211,7 @@ Tickets are the core progression and participation resource in Lucky Ticket.
 - Diamond
 - Platinum
 
-### 8.3 Ticket Unlocking
+### 8.5 Ticket Unlocking
 
 At first, only Bronze tickets are available. Higher-tier tickets are unlocked by meeting specific requirements:
 
@@ -209,7 +223,7 @@ At first, only Bronze tickets are available. Higher-tier tickets are unlocked by
 
 ### Connections
 
-Tickets connect claiming, tournaments, tasks, boosts, and market systems.
+Tickets connect the Tickets page, claiming, tournaments, tasks, boosts, and market systems.
 
 ---
 
@@ -375,23 +389,23 @@ The Market integrates with LTC, boosts, tickets, and statuses.
 
 ---
 
-## 15. Exchange System
+## 15. Wallet Page
 
 ### Purpose
 
-The Exchange system bridges virtual rewards and real-world value, allowing users to convert LTC to cryptocurrency and vice versa.
+The Wallet page serves as the central hub for managing the user's current account balance and connecting to external crypto wallets.
 
-### Offer-Based Logic
+### Features
 
-- **Fixed Offers:** Only predefined exchange offers are allowed. For example, 100 LTC can be exchanged for 1 USDT.
-- **No Partial Conversions:** Users cannot exchange amounts that do not match an active offer (e.g., if no offer exists for 50 LTC, a user cannot exchange 50 LTC for 0.5 USDT).
+- **Account Balance:** Displays the user's current LTC assets.
+- **External Wallet Connection:** Allows users to link their external cryptocurrency wallets to the platform for future transactions.
 
-### Exchange History
+### Transaction History
 
-After each exchange, the transaction details are recorded in the history log:
+A detailed record of all past activities, including earnings, purchases, and wallet-related events, is maintained in the history log:
 
-- **Type:** (e.g., LTC to USDT)
-- **Amount:** The quantity exchanged.
+- **Type:** The nature of the transaction (e.g., LTC to USDT).
+- **Amount:** The quantity involved.
 - **Date:** Timestamp of the transaction.
 - **Status:** (e.g., Completed, Pending, Failed).
 

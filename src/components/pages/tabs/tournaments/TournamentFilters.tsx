@@ -30,8 +30,8 @@ export function TournamentFilters({
 
   const filters: TabsProps['items'] = [
     { key: 'all', title: t('all') },
-    { key: 'participated', title: t('participated-filter') },
     { key: 'top', title: t('top') },
+    { key: 'participated', title: t('participated-filter') },
   ];
 
   return (
