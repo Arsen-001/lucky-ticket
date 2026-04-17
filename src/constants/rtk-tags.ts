@@ -11,4 +11,5 @@ export const rtkTags = {
   referral: 'Referral',
   exchange: 'Exchange',
   market: 'Market',
+  stakes: 'Stakes',
 } as const;

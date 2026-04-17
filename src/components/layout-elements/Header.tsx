@@ -9,6 +9,8 @@ import { SkeletonSuspense } from '@/components/shared/seleketons/SkeletonSuspens
 import { GlobalConstants } from '@/constants/global.constants';
 import { Button } from '@/components/shared/buttons/Button';
 import { AlignRight, ChevronsUp } from 'lucide-react';
+import Image from 'next/image';
+import { icons } from '@/constants/icons';
 import type { ClassNameProps } from '@/types/interfaces/component.interfcaes';
 import { useAppDispatch } from '@/lib/rtk/hooks';
 import { openDrawer } from '@/lib/rtk/features/layout.slice';
@@ -75,6 +77,17 @@ export function Header({ className }: ClassNameProps) {
                 <div className="flex items-center gap-1">
                   <span className="font-semibold h-4.5">{me?.coins}</span>
                   <span className="font-bold h-4.5 text-gold">{GlobalConstants.coinName}</span>
+                </div>
+              </div>
+            </SkeletonSuspense>
+            <SkeletonSuspense
+              loading={isLoading}
+              skeleton={<Skeleton variant="rounded-rectangle" className="h-5.5 w-16" />}
+            >
+              <div className="bg-gradient-lightpink/30 flex-center gap-2 text-white-secondary text-sm font-semibold rounded-full py-0.5 px-2.5">
+                <div className="flex items-center gap-1">
+                  <Image src={icons.telegramStar} alt="telegram star" width={13} height={13} />
+                  <span className="font-semibold h-4.5">{me?.telegramStars}</span>
                 </div>
               </div>
             </SkeletonSuspense>

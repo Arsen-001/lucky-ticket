@@ -15,6 +15,7 @@ export const me: MeResponse = {
   phoneNumber: '+37411111111',
   twoFactorAuth: true,
   activityPoints: 750,
+  telegramStars: 12,
 };
 
 const meMock = { me };

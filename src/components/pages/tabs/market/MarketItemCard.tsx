@@ -147,7 +147,7 @@ export function MarketItemCard({
               disabled={disabled}
               variant={price.type === MarketPriceType.USDT ? 'secondary' : 'primary'}
               className={twMerge(
-                'w-full flex-center gap-1 py-2 h-10 text-sm font-semibold rounded-lg',
+                'w-1/2 flex-center gap-1 p-1 text-xs font-semibold rounded-lg',
                 classNames?.button
               )}
             >
@@ -155,6 +155,13 @@ export function MarketItemCard({
                 <Image src={icons.lock} alt="lock" className="w-auto h-5 object-contain" />
               ) : (
                 <>
+                  {price.type === MarketPriceType.TELEGRAM_STARS && (
+                    <Image
+                      src={icons.telegramStar}
+                      alt="stars"
+                      className="w-3.5 pb-0.5 h-auto object-contain"
+                    />
+                  )}
                   <span className="text-sm font-semibold">{price.amount}</span>
                   {price.type === MarketPriceType.LTC && (
                     <span className="text-sm text-gold font-bold">{GlobalConstants.coinName}</span>

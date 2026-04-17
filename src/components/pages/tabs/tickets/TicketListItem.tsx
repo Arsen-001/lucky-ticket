@@ -124,7 +124,7 @@ export function TicketListItem({
 
   return (
     <Link
-      href={routes.tickets.getById(id)}
+      href={routes.tournaments.index}
       className={twMerge(
         'bg-purple-gradient rounded-lg flex items-center gap-2 p-2 overflow-hidden',
         className

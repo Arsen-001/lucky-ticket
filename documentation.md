@@ -459,6 +459,123 @@ A dedicated section where users can view their performance, transaction history,
 
 ---
 
-## 18. Conclusion
+## 18. Stakes System
 
-Lucky Ticket is a modular, scalable product built around engagement, fairness, and real value creation. Each system reinforces the others, creating a cohesive ecosystem that rewards consistent participation and long-term loyalty.
+### Purpose
+
+Stakes allow users to lock a portion of their LTC coins for a fixed period in exchange for guaranteed and bonus rewards. The mechanic encourages long-term coin commitment and rewards users proportionally to how much they stake.
+
+### Description
+
+A stake is a 3-hour claim-like session. The user selects an amount of LTC to lock, and after the full 3-hour period completes, the user receives all rewards associated with their stake level. Coins cannot be used while locked, but the user may cancel the stake early to retrieve their coins — however, no rewards are granted if the stake ends before the full duration.
+
+### 18.1 Stake Levels
+
+Stakes are organized into numbered levels (Level 1 through Level 4). Each level requires a minimum LTC deposit and grants a set of rewards. Higher levels include all rewards from every level below them — a user who meets the Level 3 threshold automatically receives all Level 1, Level 2, and Level 3 rewards.
+
+| Level   | Minimum Deposit | Guaranteed Ticket | Bonus Prizes                                              | Includes Lower Levels |
+| :------ | :-------------- | :---------------- | :-------------------------------------------------------- | :-------------------- |
+| Level 1 | 100 LTC         | Bronze            | LTC coins, Claim Speed Boost                              | (base level)          |
+| Level 2 | 500 LTC         | Silver            | LTC coins, Claim Speed Boost, Claim Duration Boost        | + Level 1             |
+| Level 3 | 1,000 LTC       | Gold              | LTC coins, Claim Speed Boost, Claim Duration Boost, Badge | + Level 1–2           |
+| Level 4 | 5,000 LTC       | Diamond           | Large LTC bonus, Claim Boosts, Exclusive Badge            | + Level 1–3           |
+
+> Thresholds and level count may be updated by the product team independently of this document.
+
+### 18.2 Reward Structure
+
+Every completed stake grants:
+
+- **Guaranteed Ticket:** A ticket corresponding to the user's stake level (Bronze at Level 1, Silver at Level 2, Gold at Level 3, Diamond at Level 4).
+- **All Lower-Level Tickets:** Tickets from every level below the user's current level are also awarded.
+- **Chance at Bonus Prizes:** Each level enters the user into a random draw for extra prizes, which may include:
+  - Additional LTC coins
+  - Boosts (Claim Speed or Claim Duration)
+  - Badges (Exclusive Badge at Level 4)
+- **Chance at Telegram Stars:** Completing a stake session enters the user into a draw for Telegram Stars proportional to the stake level (see Section 19). Stars are not guaranteed — they are part of the bonus prize pool.
+
+### 18.3 Stake Duration & Early Cancellation
+
+- **Duration:** Every stake lasts exactly **3 hours** regardless of level.
+- **Completion:** After 3 hours, all rewards (tickets, bonuses, and Telegram Stars) are distributed and become claimable.
+- **Consecutive Stakes:** A new stake can only be started after the user claims the rewards from the previous one. Unclaimed rewards block the next stake session.
+- **Early Cancellation:** The user may cancel the stake at any time before the 3-hour period ends. Locked coins are returned in full. No rewards are granted — including guaranteed tickets, bonus prizes, or a chance at Telegram Stars.
+
+### Connections
+
+Stakes connect the LTC currency system, tickets, boosts, badges, and Telegram Stars. Completing stakes contributes to overall user progression and may interact with tasks and leaderboard activity.
+
+---
+
+## 19. Telegram Stars Integration
+
+### Purpose
+
+Telegram Stars (XTR) are Telegram's native virtual currency. Lucky Ticket integrates Stars as a reward layer that runs alongside the existing LTC economy — giving users real Telegram value for their activity and enabling a frictionless in-app shop powered by Telegram's native payment infrastructure.
+
+### Description
+
+Stars are issued by Lucky Ticket directly to users' Telegram accounts via the Bot Payments API (currency code: `XTR`). Users accumulate Stars through platform activity and spend them in the Lucky Ticket Shop without leaving Telegram.
+
+### 19.1 How Users Earn Telegram Stars
+
+Stars are awarded through three channels:
+
+#### Stakes
+
+Every successfully completed stake session (all 3 hours, no early cancellation) enters the user into a **random draw** for Telegram Stars. Stars are not guaranteed — they are part of the bonus prize pool alongside LTC coins and Boosts. The chance and potential Star amount scale with stake level:
+
+| Stake Level | Star Draw Chance | Potential Stars Awarded |
+| :---------- | :--------------- | :---------------------- |
+| Level 1     | TBD              | TBD                     |
+| Level 2     | TBD              | TBD                     |
+| Level 3     | TBD              | TBD                     |
+| Level 4     | TBD              | TBD                     |
+
+> Exact probabilities and Star amounts per level are defined by the product team.
+
+#### Task Completion
+
+Completing tasks from any category (Daily, Weekly, Monthly) gives a **chance** to receive Telegram Stars in addition to the standard ticket/coin/boost prizes. Stars are not guaranteed on every task — they appear as a random bonus outcome. Star-eligible tasks are marked distinctly in the task list.
+
+#### Friend Invitations
+
+After reaching a specific number of invited friends, the user receives a **guaranteed** Telegram Stars bonus — no draw, no chance. Every defined milestone triggers an automatic Stars payout:
+
+| Friends Invited | Guaranteed Telegram Stars |
+| :-------------- | :------------------------ |
+| Milestone 1     | TBD                       |
+| Milestone 2     | TBD                       |
+| Milestone N     | TBD                       |
+
+> Exact milestones and Star amounts are defined by the product team. Stars are awarded automatically upon reaching the threshold — the user does not need to claim them manually.
+
+### 19.2 Spending Telegram Stars — The Shop
+
+Users spend their accumulated Stars in the **Lucky Ticket Shop**, powered by Telegram's native Stars payment flow. The Shop offers items purchasable exclusively with Stars (not LTC):
+
+- **Cosmetic items:** Avatar frames, profile effects, visual upgrades.
+- **Boosts:** Claim Speed and Claim Duration boosts.
+- **Exclusive tickets:** Partner or limited-edition tickets not available in the standard Market.
+- **Status upgrades:** Discounted or exclusive access to Prime/VIP status.
+
+> Shop inventory and pricing in Stars are managed by the product team and may be updated at any time.
+
+### 19.3 Technical Integration
+
+Lucky Ticket integrates Telegram Stars via the **Telegram Bot Payments API**:
+
+- Invoice links are generated server-side with `currency: "XTR"`.
+- Payments are processed natively inside Telegram — no external checkout.
+- Star balances and transaction history are visible in the user's Telegram account.
+- Lucky Ticket tracks awarded Stars per user for analytics and audit purposes.
+
+### Connections
+
+Telegram Stars connect the Stakes system, Task system, Invite Friends system, and the Lucky Ticket Shop. Stars serve as a bridge between Lucky Ticket's internal economy and Telegram's native value ecosystem.
+
+---
+
+## 20. Conclusion
+
+Lucky Ticket is a modular, scalable product built around engagement, fairness, and real value creation. Each system reinforces the others, creating a cohesive ecosystem that rewards consistent participation and long-term loyalty. The Telegram Stars integration extends this ecosystem into the native Telegram economy, giving users tangible real-world value for their activity on the platform.

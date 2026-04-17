@@ -14,8 +14,6 @@ import { CollectBadge } from '@/components/shared/badges/CollectBadge';
 import { SpeedBadge } from '@/components/shared/badges/SpeedBadge';
 import { SkeletonSuspense } from '@/components/shared/seleketons/SkeletonSuspense';
 import { Skeleton } from '@/components/shared/seleketons/Skeleton';
-import { Link } from '@/components/shared/links/Link';
-import { routes } from '@/constants/routes';
 
 export type HomeTickestListItemProps = TicketDataType & ClassNameProps & { loading?: boolean };
 
@@ -55,68 +53,64 @@ export function HomeTickestListItem({
     e.preventDefault();
   };
   return (
-    <Link href={routes?.tickets?.getById(rest?.id)}>
-      <div
-        className={twMerge(
-          'bg-purple-gradient rounded-lg flex items-center p-3 overflow-hidden',
-          loading || !blocked ? 'gap-2' : 'gap-3 max-w-full',
-          className
-        )}
-      >
-        <>
-          <Ticket {...ticketImageProps} />
+    <div
+      className={twMerge(
+        'bg-purple-gradient rounded-lg flex items-center p-3 overflow-hidden',
+        loading || !blocked ? 'gap-2' : 'gap-3 max-w-full',
+        className
+      )}
+    >
+      <>
+        <Ticket {...ticketImageProps} />
 
-          <div className="flex-available flex flex-col gap-2  overflow-hidden">
-            <SkeletonSuspense loading={loading} skeleton={<Skeleton className="h-5.5 w-9/12" />}>
-              <div className="flex items-center gap-3">
-                <div className="text-base h-5 text-white font-semibold">
-                  {titleId && t(titleId)}
-                </div>
-                <div className="flex items-center gap-1">
-                  {isTimeBoosted && <SpeedBadge hideText />}
-                  {isCollectionBoosted && <CollectBadge hideText />}
-                </div>
+        <div className="flex-available flex flex-col gap-2  overflow-hidden">
+          <SkeletonSuspense loading={loading} skeleton={<Skeleton className="h-5.5 w-9/12" />}>
+            <div className="flex items-center gap-3">
+              <div className="text-base h-5 text-white font-semibold">{titleId && t(titleId)}</div>
+              <div className="flex items-center gap-1">
+                {isTimeBoosted && <SpeedBadge hideText />}
+                {isCollectionBoosted && <CollectBadge hideText />}
               </div>
-            </SkeletonSuspense>
-            <SkeletonSuspense
-              loading={loading}
-              skeleton={<Skeleton className="h-3.5 rounded-full" />}
-            >
-              {!blocked ? (
-                <>
-                  <Progress
-                    className="h-3.5 flex items-center"
-                    classNames={{ children: 'absolute bottom-0 h-full right-3 pt-0.5' }}
-                    percentage={percentage}
-                  >
-                    {autocollectFinishCountDown.leftTimeText}
-                  </Progress>
-                </>
-              ) : (
-                <div className="w-full text-pink-secondary text-sm leading-none font-normal line-clamp-2">
-                  {t('complete all requirements')}
-                </div>
-              )}
-            </SkeletonSuspense>
-          </div>
+            </div>
+          </SkeletonSuspense>
           <SkeletonSuspense
             loading={loading}
-            skeleton={<Skeleton variant="card" className="h-8 w-22.5" />}
+            skeleton={<Skeleton className="h-3.5 rounded-full" />}
           >
             {!blocked ? (
-              <Button
-                onClick={handleClaim}
-                disabled={!claimCountDown?.expired}
-                className="p-2 min-w-22.5 text-xs"
-              >
-                {claimCountDown.expired ? t('claim') : claimCountDown.leftTimeText}
-              </Button>
+              <>
+                <Progress
+                  className="h-3.5 flex items-center"
+                  classNames={{ children: 'absolute bottom-0 h-full right-3 pt-0.5' }}
+                  percentage={percentage}
+                >
+                  {autocollectFinishCountDown.leftTimeText}
+                </Progress>
+              </>
             ) : (
-              <Image className="mr-0" height={32} src={icons.lock} alt="lock" />
+              <div className="w-full text-pink-secondary text-sm leading-none font-normal line-clamp-2">
+                {t('complete all requirements')}
+              </div>
             )}
           </SkeletonSuspense>
-        </>
-      </div>
-    </Link>
+        </div>
+        <SkeletonSuspense
+          loading={loading}
+          skeleton={<Skeleton variant="card" className="h-8 w-22.5" />}
+        >
+          {!blocked ? (
+            <Button
+              onClick={handleClaim}
+              disabled={!claimCountDown?.expired}
+              className="p-2 min-w-22.5 text-xs"
+            >
+              {claimCountDown.expired ? t('claim') : claimCountDown.leftTimeText}
+            </Button>
+          ) : (
+            <Image className="mr-0" height={32} src={icons.lock} alt="lock" />
+          )}
+        </SkeletonSuspense>
+      </>
+    </div>
   );
 }

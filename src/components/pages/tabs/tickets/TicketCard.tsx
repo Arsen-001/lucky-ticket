@@ -3,7 +3,6 @@
 import type { Ticket as TicketDataType, TicketType } from '@/types/types/ticket.types';
 import { twMerge } from 'tailwind-merge';
 import type { ClassNameProps } from '@/types/interfaces/component.interfcaes';
-import { Button } from '@/components/shared/buttons/Button';
 import { useAppTranslations } from '@/hooks/useAppTranslations';
 import type { MessageIds } from '@/types/types/i18n.types';
 import { Link } from '@/components/shared/links/Link';
@@ -16,16 +15,8 @@ import { TicketOverlap } from '@/components/shared/icons/TicketOverlap';
 
 export type TicketCardProps = TicketDataType & ClassNameProps & { loading?: boolean };
 
-export function TicketCard({
-  id,
-  ticketType,
-  className,
-  loading,
-  blocked,
-  count,
-}: TicketCardProps) {
+export function TicketCard({ ticketType, className, loading, blocked, count }: TicketCardProps) {
   const t = useAppTranslations();
-
   const titleIdByType: Record<TicketType, MessageIds> = {
     bronze: 'bronze',
     silver: 'silver',
@@ -42,7 +33,7 @@ export function TicketCard({
   const titleId = titleIdByType?.[ticketType];
 
   return (
-    <Link href={!loading ? routes.tickets.getById(id) : '#'}>
+    <Link href={!loading ? routes.tournaments.index : '#'}>
       <div
         className={twMerge(
           'w-full p-4 bg-purple-gradient card-outlined rounded-xl flex flex-col h-full',
@@ -72,15 +63,6 @@ export function TicketCard({
               <Image className="pb-0.5" height={14} src={icons.lock} alt="lock" />
             )}
           </h5>
-        </SkeletonSuspense>
-
-        <SkeletonSuspense
-          loading={loading}
-          skeleton={<Skeleton variant="card" className="h-8 mt-3 py-2 w-full" />}
-        >
-          <Button disabled={loading} className="flex-center mt-3 py-2 w-full text-xs rounded-lg">
-            {t('more')}
-          </Button>
         </SkeletonSuspense>
       </div>
     </Link>

@@ -9,6 +9,7 @@ import {
   ChartNoAxesColumnIncreasing,
   CircleQuestionMark,
   Globe,
+  Layers,
   Settings,
   UserRound,
   UserRoundPlus,
@@ -76,6 +77,11 @@ export function Drawer() {
       route: routes.wallet,
       title: t('exchange'),
       icon: <Wallet />,
+    },
+    {
+      route: routes.stakes,
+      title: t('stakes'),
+      icon: <Layers />,
     },
     {
       route: routes.support.index,

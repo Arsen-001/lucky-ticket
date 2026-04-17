@@ -47,6 +47,7 @@ export const routes = {
     security: '/settings/security',
   },
   languages: '/languages',
+  stakes: '/stakes',
 } as const;
 
 /* eslint-disable */

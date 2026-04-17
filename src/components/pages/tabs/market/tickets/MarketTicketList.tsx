@@ -53,6 +53,7 @@ export function MarketTicketList() {
       await buyTicket({
         ticketId: selectedTicket.ticket.id,
         count: selectedTicket.count,
+        priceType: selectedTicket.price.type,
       }).unwrap();
       setSelectedTicket(null);
       setIsOpen(false);

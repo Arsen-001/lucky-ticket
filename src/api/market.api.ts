@@ -16,11 +16,14 @@ export const marketApi = api.injectEndpoints({
       }),
       invalidatesTags: [rtkTags.market, rtkTags.me],
     }),
-    buyTicket: builder.mutation<void, { ticketId: string; count: number }>({
-      query: ({ ticketId, count }) => ({
+    buyTicket: builder.mutation<
+      void,
+      { ticketId: string; count: number; priceType: MarketPriceType }
+    >({
+      query: ({ ticketId, count, priceType }) => ({
         url: `market/tickets/${ticketId}/buy`,
         method: 'POST',
-        body: { count },
+        body: { count, priceType },
       }),
       invalidatesTags: [rtkTags.market, rtkTags.me, rtkTags.tickets],
     }),

@@ -16,7 +16,10 @@ export const marketMock: MarketData = {
       ticketType: TicketsEnum.BRONZE,
       boostPercentage: 50,
       isNew: true,
-      prices: [{ type: MarketPriceType.LTC, amount: 100 }],
+      prices: [
+        { type: MarketPriceType.LTC, amount: 100 },
+        { type: MarketPriceType.TELEGRAM_STARS, amount: 25 },
+      ],
     },
     {
       id: 'b2',
@@ -24,7 +27,10 @@ export const marketMock: MarketData = {
       type: TicketBoostType.SPEED,
       ticketType: TicketsEnum.SILVER,
       boostPercentage: 100,
-      prices: [{ type: MarketPriceType.LTC, amount: 200 }],
+      prices: [
+        { type: MarketPriceType.LTC, amount: 200 },
+        { type: MarketPriceType.TELEGRAM_STARS, amount: 50 },
+      ],
     },
     {
       id: 'b3',
@@ -32,7 +38,10 @@ export const marketMock: MarketData = {
       type: TicketBoostType.COLLECT_TIME,
       ticketType: TicketsEnum.GOLD,
       boostPercentage: 100,
-      prices: [{ type: MarketPriceType.LTC, amount: 150 }],
+      prices: [
+        { type: MarketPriceType.LTC, amount: 150 },
+        { type: MarketPriceType.TELEGRAM_STARS, amount: 35 },
+      ],
     },
     {
       id: 'b4',
@@ -40,7 +49,10 @@ export const marketMock: MarketData = {
       type: TicketBoostType.COLLECT_TIME,
       ticketType: TicketsEnum.GOLD,
       boostPercentage: 200,
-      prices: [{ type: MarketPriceType.LTC, amount: 300 }],
+      prices: [
+        { type: MarketPriceType.LTC, amount: 300 },
+        { type: MarketPriceType.TELEGRAM_STARS, amount: 75 },
+      ],
     },
   ],
   tickets: [
@@ -50,21 +62,30 @@ export const marketMock: MarketData = {
       isNew: true,
       ticketType: TicketsEnum.BRONZE,
       isAvailable: true,
-      prices: [{ type: MarketPriceType.LTC, amount: 50 }],
+      prices: [
+        { type: MarketPriceType.LTC, amount: 50 },
+        { type: MarketPriceType.TELEGRAM_STARS, amount: 15 },
+      ],
     },
     {
       id: 't2',
       name: 'Silver Ticket',
       ticketType: TicketsEnum.SILVER,
       isAvailable: true,
-      prices: [{ type: MarketPriceType.LTC, amount: 150 }],
+      prices: [
+        { type: MarketPriceType.LTC, amount: 150 },
+        { type: MarketPriceType.TELEGRAM_STARS, amount: 40 },
+      ],
     },
     {
       id: 't3',
       name: 'Gold Ticket',
       ticketType: TicketsEnum.GOLD,
       isAvailable: false,
-      prices: [{ type: MarketPriceType.LTC, amount: 500 }],
+      prices: [
+        { type: MarketPriceType.LTC, amount: 500 },
+        { type: MarketPriceType.TELEGRAM_STARS, amount: 125 },
+      ],
     },
   ],
   statuses: [
@@ -77,6 +98,7 @@ export const marketMock: MarketData = {
       prices: [
         { type: MarketPriceType.LTC, amount: 1000 },
         { type: MarketPriceType.USDT, amount: 10 },
+        { type: MarketPriceType.TELEGRAM_STARS, amount: 250 },
       ],
       privileges: [
         'prime badge on profile',
@@ -93,6 +115,7 @@ export const marketMock: MarketData = {
       prices: [
         { type: MarketPriceType.LTC, amount: 5000 },
         { type: MarketPriceType.USDT, amount: 50 },
+        { type: MarketPriceType.TELEGRAM_STARS, amount: 1250 },
       ],
       privileges: [
         'vip badge on profile',

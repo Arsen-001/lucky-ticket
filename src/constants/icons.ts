@@ -28,6 +28,7 @@ import silverTrophy from '@assets/icons/silver-trophy.webp';
 import google from '@assets/icons/google.png';
 
 import lock from '@assets/icons/lock.webp';
+import telegramStar from '@assets/icons/telegram-star.webp';
 
 export const icons = {
   boostUp,
@@ -60,4 +61,5 @@ export const icons = {
   google,
 
   lock,
+  telegramStar,
 } as const;
