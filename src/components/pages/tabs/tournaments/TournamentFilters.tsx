@@ -1,6 +1,6 @@
 'use client';
 
-import { Search, X } from 'lucide-react';
+import { Search, SlidersHorizontal, X } from 'lucide-react';
 import { twMerge } from 'tailwind-merge';
 import { Tabs, type TabsProps } from '@/components/shared/Tabs';
 import { Button } from '@/components/shared/buttons/Button';
@@ -16,6 +16,8 @@ interface TournamentFiltersProps {
   onSearchChange: (value: string) => void;
   isSearchOpen: boolean;
   setIsSearchOpen: (isOpen: boolean) => void;
+  activeFilterCount: number;
+  onFilterSheetOpen: () => void;
 }
 
 export function TournamentFilters({
@@ -25,6 +27,8 @@ export function TournamentFilters({
   onSearchChange,
   isSearchOpen,
   setIsSearchOpen,
+  activeFilterCount,
+  onFilterSheetOpen,
 }: TournamentFiltersProps) {
   const t = useAppTranslations();
 
@@ -35,10 +39,10 @@ export function TournamentFilters({
   ];
 
   return (
-    <div className="flex items-center justify-between">
+    <div className="flex items-center justify-between gap-2">
       <div
         className={twMerge(
-          'flex-1 mr-2 transition-all duration-300 ease-in-out origin-left flex items-center overflow-hidden',
+          'flex-1 transition-all duration-300 ease-in-out origin-left flex items-center overflow-hidden',
           isSearchOpen ? 'max-w-0 opacity-0 invisible' : 'max-w-full opacity-100 visible'
         )}
       >
@@ -57,8 +61,8 @@ export function TournamentFilters({
 
       <div
         className={twMerge(
-          'flex items-center transition-all duration-300 ease-in-out',
-          isSearchOpen ? 'flex-1' : 'w-10 overflow-hidden'
+          'flex items-center gap-1 transition-all duration-300 ease-in-out flex-shrink-0',
+          isSearchOpen ? 'flex-1' : ''
         )}
       >
         {isSearchOpen ? (
@@ -86,11 +90,33 @@ export function TournamentFilters({
         ) : (
           <Button
             variant="transparent"
-            className="p-2 min-w-10 h-10 flex-center ml-auto"
+            className="p-2 w-10 h-10 flex-center"
             onClick={() => setIsSearchOpen(true)}
           >
             <Search size={20} className="text-white/60" />
           </Button>
+        )}
+
+        {/* Advanced filter button — always visible */}
+        {!isSearchOpen && (
+          <div className="relative">
+            <Button
+              variant="transparent"
+              className="p-2 w-10 h-10 flex-center"
+              onClick={onFilterSheetOpen}
+              aria-label={t('filters')}
+            >
+              <SlidersHorizontal
+                size={20}
+                className={activeFilterCount > 0 ? 'text-[var(--color-pink)]' : 'text-white/60'}
+              />
+            </Button>
+            {activeFilterCount > 0 && (
+              <span className="absolute -top-0.5 -right-0.5 w-4 h-4 rounded-full bg-pink-gradient text-[10px] font-bold flex-center pointer-events-none">
+                {activeFilterCount}
+              </span>
+            )}
+          </div>
         )}
       </div>
     </div>

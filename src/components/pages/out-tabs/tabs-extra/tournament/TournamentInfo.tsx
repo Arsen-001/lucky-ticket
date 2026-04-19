@@ -24,6 +24,9 @@ export function TournamentInfo({ id, className, ...rest }: TournamentDetailsProp
   const t = useAppTranslations();
   const [isModalOpen, setIsModalOpen] = useState(false);
 
+  // TODO: replace with user ticket balance API for the given ticket type
+  const availableTickets = 15;
+
   const handleOpenModal = () => setIsModalOpen(true);
   const handleCloseModal = () => setIsModalOpen(false);
 
@@ -107,6 +110,10 @@ export function TournamentInfo({ id, className, ...rest }: TournamentDetailsProp
       <TournamentBetModal
         open={isModalOpen}
         onClose={handleCloseModal}
+        tournamentName={data?.name ?? ''}
+        tournamentType={data?.type ?? 'bronze'}
+        availableTickets={availableTickets}
+        participated={data?.participated}
         participatedTicketsCount={data?.participatedTicketsCount}
       />
     </div>

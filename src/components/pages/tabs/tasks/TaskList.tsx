@@ -1,5 +1,9 @@
-import { Task } from '@/types/interfaces/tasks.interfaces';
+import {
+  Task,
+  TaskCompletionBonus as TaskCompletionBonusType,
+} from '@/types/interfaces/tasks.interfaces';
 import { TaskCard } from './TaskCard';
+import { TaskCompletionBonus } from './TaskCompletionBonus';
 import { Progress } from '@/components/shared/Progress';
 import { Skeleton } from '@/components/shared/seleketons/Skeleton';
 import { TaskCategoryType } from '@/types/enums/tasks.enums';
@@ -10,6 +14,7 @@ interface TaskListProps {
   tasks: Task[];
   progress: number;
   category: TaskCategoryType;
+  completionBonus?: TaskCompletionBonusType;
   isLoading?: boolean;
   onAction: (task: Task) => void;
   onClick: (task: Task) => void;
@@ -19,6 +24,7 @@ export function TaskList({
   tasks,
   progress,
   category,
+  completionBonus,
   isLoading,
   onAction,
   onClick,
@@ -33,6 +39,8 @@ export function TaskList({
     [TaskCategoryType.MONTHLY]: t('monthly progress'),
   };
 
+  const completedCount = tasks.filter(task => task.claimed).length;
+
   return (
     <div className="flex flex-col gap-4 mt-4">
       <div className="flex flex-col gap-1">
@@ -42,7 +50,15 @@ export function TaskList({
             <Skeleton variant="line" textSize="sm" className="h-5 w-32 bg-gray-200 rounded" />
           }
         >
-          <span className="text-sm font-bold text-white">{categoryLabels[category]}</span>
+          <div className="flex items-center justify-between">
+            <span className="text-sm font-bold text-white">{categoryLabels[category]}</span>
+            <span className="text-xs text-white/50">
+              {t('{completed} of {total} tasks', {
+                completed: completedCount,
+                total: tasks.length,
+              })}
+            </span>
+          </div>
         </SkeletonSuspense>
         <SkeletonSuspense
           loading={isLoading}
@@ -71,6 +87,10 @@ export function TaskList({
           />
         ))}
       </div>
+
+      {completionBonus && !isLoading && (
+        <TaskCompletionBonus completionBonus={completionBonus} progress={progress} />
+      )}
     </div>
   );
 }

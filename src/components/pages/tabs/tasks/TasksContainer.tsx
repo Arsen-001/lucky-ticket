@@ -68,6 +68,7 @@ export function TasksContainer({
           tasks={tasks?.daily.items || []}
           progress={tasks?.daily.progress || 0}
           category={TaskCategoryType.DAILY}
+          completionBonus={tasks?.daily.completionBonus}
           isLoading={isLoading}
           onAction={handleTaskAction}
           onClick={handleTaskClick}
@@ -82,6 +83,7 @@ export function TasksContainer({
           tasks={tasks?.weekly.items || []}
           progress={tasks?.weekly.progress || 0}
           category={TaskCategoryType.WEEKLY}
+          completionBonus={tasks?.weekly.completionBonus}
           isLoading={isLoading}
           onAction={handleTaskAction}
           onClick={handleTaskClick}
@@ -96,6 +98,7 @@ export function TasksContainer({
           tasks={tasks?.monthly.items || []}
           progress={tasks?.monthly.progress || 0}
           category={TaskCategoryType.MONTHLY}
+          completionBonus={tasks?.monthly.completionBonus}
           isLoading={isLoading}
           onAction={handleTaskAction}
           onClick={handleTaskClick}

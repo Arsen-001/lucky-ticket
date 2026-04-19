@@ -30,9 +30,17 @@ export function TaskModal({ task, open, onClose, onAction }: TaskModalProps) {
           <h3 className="text-xl font-bold mb-2">{task.title}</h3>
           <p className="text-white/70 text-sm">{task.description}</p>
 
-          <div className="bg-white/5 rounded-xl p-3 w-full my-6">
-            <p className="text-xs text-white/50 uppercase tracking-wider mb-1">{t('reward')}</p>
-            <p className="font-bold text-yellow-500">{task.reward}</p>
+          <div className="bg-white/5 rounded-xl p-3 w-full my-6 grid grid-cols-2 gap-3">
+            <div>
+              <p className="text-xs text-white/50 uppercase tracking-wider mb-1">{t('reward')}</p>
+              <p className="font-bold text-yellow-500">{task.reward}</p>
+            </div>
+            <div>
+              <p className="text-xs text-white/50 uppercase tracking-wider mb-1">
+                {t('activity points')}
+              </p>
+              <p className="font-bold text-teal">+{task.activityPoints} AP</p>
+            </div>
           </div>
 
           {!task.claimed ? (

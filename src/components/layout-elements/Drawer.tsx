@@ -120,8 +120,8 @@ export function Drawer() {
         {/*Drawer*/}
         <div
           className={twMerge(
-            'flex-col-stretch fixed top-0 bottom-0 right-0 px-6 pt-30 pb-7.5 w-[50vw] bg-background-overlay transition-all duration-300 rounded-l-4xl z-1]',
-            open ? 'right-0' : '-right-[50vw]'
+            'flex-col-stretch fixed top-0 bottom-0 right-0 px-6 pt-30 pb-7.5 w-[65vw] bg-background-overlay transition-all duration-300 rounded-l-4xl z-1]',
+            open ? 'right-0' : '-right-[65vw]'
           )}
         >
           <Button

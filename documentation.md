@@ -22,7 +22,7 @@ This document describes Lucky Ticket as a complete product. It explains **what**
 
 ## 2. Product Overview
 
-Lucky Ticket is designed to convert user activity into measurable value. By interacting with the app daily, users collect tickets, participate in tournaments, complete tasks, and earn Lucky Ticket Coins (LTC). These coins can be spent inside the ecosystem or exchanged for cryptocurrency.
+Lucky Ticket is designed to convert user activity into measurable value. By interacting with the app daily, users collect tickets, participate in tournaments, complete tasks, and earn Lucky Coins (LC). These coins can be spent inside the ecosystem or exchanged for cryptocurrency.
 
 The product combines:
 
@@ -74,7 +74,7 @@ The profile represents the user publicly and internally. It contains:
 
 - **Avatar:** Visual identity, which will be customizable via the Market in the future.
 - **Activity Points:** Earned through engagement and used for rankings and VIP eligibility.
-- **Lucky Ticket Coins (LTC):** The primary internal currency.
+- **Lucky Coin (LC):** The primary internal currency.
 - **Current Status:** Verified, Prime, or VIP.
 - **Personal Statistics:** Tracking performance across the platform.
 
@@ -123,13 +123,13 @@ If the user does not open the app, their activity status decreases:
 
 The currency system enables value exchange, monetization, and rewards.
 
-### 6.1 Lucky Ticket Coins (LTC)
+### 6.1 Lucky Coin (LC)
 
-LTC is the internal currency earned through activity and rewards.
+LC is the internal currency earned through activity and rewards.
 
 ### Usage
 
-LTC can be used to:
+LC can be used to:
 
 - Buy tickets
 - Purchase boosts
@@ -138,7 +138,7 @@ LTC can be used to:
 
 ### Connections
 
-LTC connects all core systems: market, tournaments, wallet, tasks, and progression.
+LC connects all core systems: market, tournaments, wallet, tasks, and progression.
 
 ---
 
@@ -159,7 +159,7 @@ Statuses reward trust, loyalty, and engagement while enabling monetization and p
 ### 7.2 Status Acquisition
 
 - **Verified:** Identity confirmed via email or phone confirmation.
-- **Prime:** Purchased via the Market (LTC or cryptocurrency).
+- **Prime:** Purchased via the Market (LC or cryptocurrency).
 - **VIP:** High-tier status available for purchase only if the required Activity Points threshold is met.
 
 ### 7.3 Status Benefits
@@ -195,7 +195,7 @@ The Details page provides in-depth information about a specific ticket, includin
 - **Locked Ticket:** If a ticket is not yet unlocked, the bottom of the page displays the specific requirements (e.g., lower-tier claims, friend invites) needed to unlock it.
 - **Unlocked Ticket:** If the ticket is unlocked, the page displays action buttons:
   - **Claim:** Collect accumulated tickets.
-  - **Buy:** Purchase the ticket using LTC.
+  - **Buy:** Purchase the ticket using LC.
   - **Send:** Send the ticket to another user.
 
 ### 8.3 Ticket Categories
@@ -314,7 +314,7 @@ Each tournament includes:
 
 ### Connections
 
-Tournaments connect tickets, LTC rewards, tasks, and leaderboard positioning.
+Tournaments connect tickets, LC rewards, tasks, and leaderboard positioning.
 
 ---
 
@@ -337,6 +337,7 @@ Each task contains:
 - **Title:** A clear name for the task.
 - **Description:** A detailed explanation of what the user needs to do.
 - **Reward:** The prize awarded upon completion (tickets, coins, boosts).
+- **Activity Points:** A fixed number of Activity Points granted to the user upon completing the task.
 
 ### 12.3 Task Examples
 
@@ -347,6 +348,10 @@ Tasks guide user behavior and include actions such as:
 - Joining a tournament.
 - Sharing content on social media.
 - Daily/Weekly/Monthly check-ins.
+
+### 12.4 All-Tasks Completion Bonus
+
+When a user completes **all tasks** within a given category (Daily, Weekly, or Monthly), they receive an extra gift in addition to the individual task rewards. This bonus is separate from the per-task rewards and is awarded automatically upon finishing the last task in the set.
 
 ### Connections
 
@@ -380,12 +385,12 @@ The market is a central hub for purchasing improvements, resources, and statuses
 ### Sections
 
 - **Boosts:** Purchase upgrades for each available ticket parameter (Claim Speed, Claim Duration).
-- **Tickets:** Purchase project or partner tickets using LTC.
+- **Tickets:** Purchase project or partner tickets using LC.
 - **Statuses:** Purchase Prime or VIP status (VIP requires eligibility via Activity Points).
 
 ### Connections
 
-The Market integrates with LTC, boosts, tickets, and statuses.
+The Market integrates with LC, boosts, tickets, and statuses.
 
 ---
 
@@ -393,18 +398,46 @@ The Market integrates with LTC, boosts, tickets, and statuses.
 
 ### Purpose
 
-The Wallet page serves as the central hub for managing the user's current account balance and connecting to external crypto wallets.
+The Wallet page serves as the central hub for managing the user's balances and performing financial actions, including connecting external wallets, swapping currencies, and moving funds in or out of the platform.
 
-### Features
+### Balances
 
-- **Account Balance:** Displays the user's current LTC assets.
-- **External Wallet Connection:** Allows users to link their external cryptocurrency wallets to the platform for future transactions.
+The top of the Wallet page displays two balance figures:
+
+- **Lucky Coin (LC) Balance:** The user's current internal currency holdings.
+- **Telegram Stars (XTR) Balance:** The user's current Telegram Stars holdings earned through platform activity.
+
+### Action Sections
+
+The Wallet page provides three action sections:
+
+#### 1. Connect Wallet
+
+Allows users to link an external cryptocurrency wallet to the platform. A connected wallet is required for withdrawals and deposits involving cryptocurrency.
+
+#### 2. Swap Telegram Stars to Coins
+
+Allows users to convert their accumulated Telegram Stars (XTR) into Lucky Coins (LC) at a defined exchange rate. This action bridges Telegram's native currency back into the platform's internal economy.
+
+#### 3. Withdraw and Deposit
+
+Allows users to move funds in and out of the platform via a connected external wallet. Supported currency pairs:
+
+- **USD ↔ LC:** Deposit USD to receive LC, or withdraw LC as USD.
+- **TON ↔ LC:** Deposit TON (Toncoin) to receive LC, or withdraw LC as TON.
+
+Both directions (deposit and withdrawal) are available for each supported currency.
+
+**Withdrawal Rules:**
+
+- **Minimum Withdrawal Amount:** A minimum LC threshold must be met before a withdrawal can be initiated. Withdrawals below this limit are not permitted.
+- **Commission Fee:** A fee is deducted from each withdrawal. The fee amount or percentage is defined by the product team and displayed to the user before confirming the transaction.
 
 ### Transaction History
 
-A detailed record of all past activities, including earnings, purchases, and wallet-related events, is maintained in the history log:
+A detailed record of all past activities, including earnings, purchases, swaps, and wallet-related events, is maintained in the history log:
 
-- **Type:** The nature of the transaction (e.g., LTC to USDT).
+- **Type:** The nature of the transaction (e.g., LC to USDT, Stars to LC, Deposit, Withdrawal).
 - **Amount:** The quantity involved.
 - **Date:** Timestamp of the transaction.
 - **Status:** (e.g., Completed, Pending, Failed).
@@ -450,7 +483,7 @@ Encourages growth through referral rewards. Users can track their invited friend
 
 Users receive passive rewards based on the activity and earnings of their invited friends:
 
-- **Earnings Commission:** The inviter receives a percentage of the LTC (coins) and tickets earned by their referrals (e.g., a base of 1% from their earnings).
+- **Earnings Commission:** The inviter receives a percentage of the LC (coins) and tickets earned by their referrals (e.g., a base of 1% from their earnings).
 - **Scaling with Status:** The percentage of the benefit increases if the invited friend has a higher status. Inviting users who upgrade to Prime or VIP results in a higher commission percentage compared to Verified friends.
 
 ### 17.3 Profile Page (Statistics)
@@ -463,22 +496,22 @@ A dedicated section where users can view their performance, transaction history,
 
 ### Purpose
 
-Stakes allow users to lock a portion of their LTC coins for a fixed period in exchange for guaranteed and bonus rewards. The mechanic encourages long-term coin commitment and rewards users proportionally to how much they stake.
+Stakes allow users to lock a portion of their LC coins for a fixed period in exchange for guaranteed and bonus rewards. The mechanic encourages long-term coin commitment and rewards users proportionally to how much they stake.
 
 ### Description
 
-A stake is a 3-hour claim-like session. The user selects an amount of LTC to lock, and after the full 3-hour period completes, the user receives all rewards associated with their stake level. Coins cannot be used while locked, but the user may cancel the stake early to retrieve their coins — however, no rewards are granted if the stake ends before the full duration.
+A stake is a 3-hour claim-like session. The user selects an amount of LC to lock, and after the full 3-hour period completes, the user receives all rewards associated with their stake level. Coins cannot be used while locked, but the user may cancel the stake early to retrieve their coins — however, no rewards are granted if the stake ends before the full duration.
 
 ### 18.1 Stake Levels
 
-Stakes are organized into numbered levels (Level 1 through Level 4). Each level requires a minimum LTC deposit and grants a set of rewards. Higher levels include all rewards from every level below them — a user who meets the Level 3 threshold automatically receives all Level 1, Level 2, and Level 3 rewards.
+Stakes are organized into numbered levels (Level 1 through Level 4). Each level requires a minimum LC deposit and grants a set of rewards. Higher levels include all rewards from every level below them — a user who meets the Level 3 threshold automatically receives all Level 1, Level 2, and Level 3 rewards.
 
-| Level   | Minimum Deposit | Guaranteed Ticket | Bonus Prizes                                              | Includes Lower Levels |
-| :------ | :-------------- | :---------------- | :-------------------------------------------------------- | :-------------------- |
-| Level 1 | 100 LTC         | Bronze            | LTC coins, Claim Speed Boost                              | (base level)          |
-| Level 2 | 500 LTC         | Silver            | LTC coins, Claim Speed Boost, Claim Duration Boost        | + Level 1             |
-| Level 3 | 1,000 LTC       | Gold              | LTC coins, Claim Speed Boost, Claim Duration Boost, Badge | + Level 1–2           |
-| Level 4 | 5,000 LTC       | Diamond           | Large LTC bonus, Claim Boosts, Exclusive Badge            | + Level 1–3           |
+| Level   | Minimum Deposit | Guaranteed Ticket | Bonus Prizes                                             | Includes Lower Levels |
+| :------ | :-------------- | :---------------- | :------------------------------------------------------- | :-------------------- |
+| Level 1 | 100 LC          | Bronze            | LC coins, Claim Speed Boost                              | (base level)          |
+| Level 2 | 500 LC          | Silver            | LC coins, Claim Speed Boost, Claim Duration Boost        | + Level 1             |
+| Level 3 | 1,000 LC        | Gold              | LC coins, Claim Speed Boost, Claim Duration Boost, Badge | + Level 1–2           |
+| Level 4 | 5,000 LC        | Diamond           | Large LC bonus, Claim Boosts, Exclusive Badge            | + Level 1–3           |
 
 > Thresholds and level count may be updated by the product team independently of this document.
 
@@ -489,7 +522,7 @@ Every completed stake grants:
 - **Guaranteed Ticket:** A ticket corresponding to the user's stake level (Bronze at Level 1, Silver at Level 2, Gold at Level 3, Diamond at Level 4).
 - **All Lower-Level Tickets:** Tickets from every level below the user's current level are also awarded.
 - **Chance at Bonus Prizes:** Each level enters the user into a random draw for extra prizes, which may include:
-  - Additional LTC coins
+  - Additional LC coins
   - Boosts (Claim Speed or Claim Duration)
   - Badges (Exclusive Badge at Level 4)
 - **Chance at Telegram Stars:** Completing a stake session enters the user into a draw for Telegram Stars proportional to the stake level (see Section 19). Stars are not guaranteed — they are part of the bonus prize pool.
@@ -503,7 +536,7 @@ Every completed stake grants:
 
 ### Connections
 
-Stakes connect the LTC currency system, tickets, boosts, badges, and Telegram Stars. Completing stakes contributes to overall user progression and may interact with tasks and leaderboard activity.
+Stakes connect the LC currency system, tickets, boosts, badges, and Telegram Stars. Completing stakes contributes to overall user progression and may interact with tasks and leaderboard activity.
 
 ---
 
@@ -511,7 +544,7 @@ Stakes connect the LTC currency system, tickets, boosts, badges, and Telegram St
 
 ### Purpose
 
-Telegram Stars (XTR) are Telegram's native virtual currency. Lucky Ticket integrates Stars as a reward layer that runs alongside the existing LTC economy — giving users real Telegram value for their activity and enabling a frictionless in-app shop powered by Telegram's native payment infrastructure.
+Telegram Stars (XTR) are Telegram's native virtual currency. Lucky Ticket integrates Stars as a reward layer that runs alongside the existing LC economy — giving users real Telegram value for their activity and enabling a frictionless in-app shop powered by Telegram's native payment infrastructure.
 
 ### Description
 
@@ -523,7 +556,7 @@ Stars are awarded through three channels:
 
 #### Stakes
 
-Every successfully completed stake session (all 3 hours, no early cancellation) enters the user into a **random draw** for Telegram Stars. Stars are not guaranteed — they are part of the bonus prize pool alongside LTC coins and Boosts. The chance and potential Star amount scale with stake level:
+Every successfully completed stake session (all 3 hours, no early cancellation) enters the user into a **random draw** for Telegram Stars. Stars are not guaranteed — they are part of the bonus prize pool alongside LC coins and Boosts. The chance and potential Star amount scale with stake level:
 
 | Stake Level | Star Draw Chance | Potential Stars Awarded |
 | :---------- | :--------------- | :---------------------- |
@@ -552,7 +585,7 @@ After reaching a specific number of invited friends, the user receives a **guara
 
 ### 19.2 Spending Telegram Stars — The Shop
 
-Users spend their accumulated Stars in the **Lucky Ticket Shop**, powered by Telegram's native Stars payment flow. The Shop offers items purchasable exclusively with Stars (not LTC):
+Users spend their accumulated Stars in the **Lucky Ticket Shop**, powered by Telegram's native Stars payment flow. The Shop offers items purchasable exclusively with Stars (not LC):
 
 - **Cosmetic items:** Avatar frames, profile effects, visual upgrades.
 - **Boosts:** Claim Speed and Claim Duration boosts.

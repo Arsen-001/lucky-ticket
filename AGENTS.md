@@ -43,7 +43,7 @@ src/
 ├── types/
 │   ├── interfaces/        # *.interfaces.ts
 │   ├── types/             # *.types.ts
-│   └── enums/             # *.enum.ts
+│   └── enums/             # *.enums.ts
 ├── styles/
 │   ├── global/            # animations.css, theme.css, utilities.css
 │   └── components/        # Per-component styles
@@ -59,23 +59,23 @@ src/
 
 ## Naming Conventions
 
-| Artifact | Convention | Example |
-|---|---|---|
-| Component files | PascalCase | `Button.tsx`, `HomeTickestListItem.tsx` |
-| Component props | `<Name>Props` | `ButtonProps`, `InputProps` |
-| Hooks | `use` prefix | `useCountDown.ts`, `useAppTranslations.ts` |
-| Utilities | `*.utils.ts` | `date.utils.ts`, `string.utils.ts` |
-| API endpoints | `*.api.ts` | `tournaments.api.ts` |
-| Validation schemas | `*.schemes.ts` | `auth.schemes.ts` |
-| Type files | `*.types.ts` / `*.interfaces.ts` | `ticket.types.ts`, `user.interfaces.ts` |
-| Enums | `*.enum.ts` | `ticket.enum.ts` |
-| Constants | descriptive | `rtk-tags.ts`, `routes.ts` |
+| Artifact           | Convention                       | Example                                    |
+| ------------------ | -------------------------------- | ------------------------------------------ |
+| Component files    | PascalCase                       | `Button.tsx`, `HomeTickestListItem.tsx`    |
+| Component props    | `<Name>Props`                    | `ButtonProps`, `InputProps`                |
+| Hooks              | `use` prefix                     | `useCountDown.ts`, `useAppTranslations.ts` |
+| Utilities          | `*.utils.ts`                     | `date.utils.ts`, `string.utils.ts`         |
+| API endpoints      | `*.api.ts`                       | `tournaments.api.ts`                       |
+| Validation schemas | `*.schemes.ts`                   | `auth.schemes.ts`                          |
+| Type files         | `*.types.ts` / `*.interfaces.ts` | `ticket.types.ts`, `user.interfaces.ts`    |
+| Enums              | `*.enums.ts`                     | `ticket.enums.ts`                          |
+| Constants          | descriptive                      | `rtk-tags.ts`, `routes.ts`                 |
 
 ---
 
 ## Path Aliases
 
-```typescript
+```
 @/*       → ./src/*
 #/*       → ./*
 @messages/* → ./messages/*
@@ -90,10 +90,10 @@ Always use `@/` for imports within `src/`. Never use relative `../../` paths.
 
 ### Structure
 
-```typescript
+```tsx
 'use client'; // only if needed
 
-import type { ReactNode, ButtonHTMLAttributes } from 'react';
+import type { ButtonHTMLAttributes } from 'react';
 import { twMerge } from 'tailwind-merge';
 
 export type ButtonVariants = 'primary' | 'secondary' | 'transparent';
@@ -112,7 +112,11 @@ export function Button({ className, variant = 'primary', loading = false, ...res
 
   return (
     <button
-      className={twMerge(variantClasses[variant], 'text-white font-semibold py-3.5 px-6 rounded-lg', className)}
+      className={twMerge(
+        variantClasses[variant],
+        'text-white font-semibold py-3.5 px-6 rounded-lg',
+        className
+      )}
       {...rest}
     />
   );
@@ -121,6 +125,8 @@ export function Button({ className, variant = 'primary', loading = false, ...res
 
 ### Rules
 
+- **One component per file** — each file must export exactly one logical component
+- **Decompose aggressively** — if a component contains a distinct visual or logical unit that could stand alone (a list item, a card section, a form block, a stat row), extract it into its own file; do not leave it as an inline function or JSX block inside the parent
 - Use **named exports** for all components, utilities, and hooks
 - Use **default exports** only for pages and layouts
 - Use `export type { ... }` or `import type { ... }` for type-only imports
@@ -128,6 +134,34 @@ export function Button({ className, variant = 'primary', loading = false, ...res
 - Extend HTML element props when wrapping native elements (e.g., `extends ButtonHTMLAttributes<HTMLButtonElement>`)
 - Use `twMerge()` for all className composition — never string concatenation
 - Define variant maps as `Record<VariantType, string>` rather than inline ternaries
+
+### Sub-element Styling
+
+When a component needs to style multiple internal parts, accept a `classNames` object — not multiple `className*` props:
+
+```
+classNames?: { label?: string; icon?: string; wrapper?: string }
+```
+
+### Controlled / Uncontrolled Dual Mode
+
+Interactive components (Switch, Tabs, Select) support both modes in one component:
+
+```ts
+const activeValue = propValue !== undefined ? propValue : internalValue;
+```
+
+### Custom Image Icon Components
+
+Components like `Ticket`, `Medal`, and `TicketOverlap` follow a specific pattern:
+
+- Never accept `src` — derive it from the `type` prop via a variant map
+- Rename Next.js Image's `loading` prop to `nextLoading` to avoid collision with the component's own `loading: boolean`
+- When `loading={true}`, cycle through all type variants with `setInterval` + `animation-blink` class
+
+### `inert` Attribute
+
+Use `inert={!open ? true : undefined}` — not `inert={false}` — because React strips boolean HTML attributes when set to `false`.
 
 ---
 
@@ -138,6 +172,7 @@ export function Button({ className, variant = 'primary', loading = false, ...res
 - Use **CSS custom properties** defined in `styles/global/theme.css` for colors
 - Use **custom utilities** defined in `styles/global/utilities.css` (e.g., `flex-center`, `bg-pink-gradient`, `card-outlined`)
 - Use `twMerge()` from `tailwind-merge` whenever merging classes conditionally
+- When a component needs CSS Tailwind can't express (complex transitions, keyframes), create `/src/styles/components/<name>.css` and import it directly in the component. Define new utilities with the `@utility` at-rule (Tailwind v4 syntax)
 
 ### Custom Utilities Available
 
@@ -163,6 +198,17 @@ animate-slide-in-bottom   → slide up from 30px 0.4s ease-out
 animate-spin              → continuous rotation (Lucide icons)
 animation-blink           → pulsing opacity 1.8s
 ```
+
+Every list and grid uses inline `animationDelay` — never JS-based timers:
+
+```
+className="animate-slide-in-bottom"
+style={{ animationDelay: `${index * 100}ms` }}
+```
+
+Use `50ms` for dense grids (tournament cards), `100ms` for lists and tab items.
+
+`(tabs)/layout.tsx` wraps content in a `key={pathname}` div — React remounts it on each navigation, re-triggering CSS entry animations automatically. Never add JS animation resets.
 
 ### Theme Colors (CSS variables)
 
@@ -193,8 +239,9 @@ export const tournamentsApi = api.injectEndpoints({
 export const { useGetTournamentsQuery } = tournamentsApi;
 ```
 
-- Register cache tags in `src/constants/rtk-tags.ts`
+- Register cache tags in `src/constants/rtk-tags.ts` before use
 - Always use `providesTags` / `invalidatesTags` for cache management
+- Every new mock file must be imported and spread into `mockData` in `src/mock/index.mock.ts`
 
 ### Redux Slices
 
@@ -210,7 +257,7 @@ Never use raw `useDispatch` or `useSelector`.
 
 ## Forms
 
-```typescript
+```
 import { useForm } from 'react-hook-form';
 import { yupResolver } from '@hookform/resolvers/yup';
 import { getLoginSchema } from '@/lib/yup/auth.schemes';
@@ -241,6 +288,8 @@ import { routes } from '@/constants/routes';
 router.push(routes.tournaments.getById(id));
 ```
 
+Any prop that holds a navigation path must use the `Route` type from `src/constants/routes.ts`, not `string`.
+
 ### Route Groups
 
 - `(auth)` — authentication pages
@@ -250,6 +299,8 @@ router.push(routes.tournaments.getById(id));
 ---
 
 ## Internationalization
+
+**Never hardcode user-visible text** — every string rendered in the UI (labels, placeholders, error messages, button text, headings, empty states) must go through `t()`. Hardcoded English strings in JSX are a bug.
 
 Always use the custom hook, never raw `useTranslations`:
 
@@ -265,10 +316,22 @@ t('min length is {num}', { num: 8 });
 
 ## Loading / Skeleton Pattern
 
-```typescript
+Two distinct patterns — choose based on context:
+
+**Field-level skeletons** (single item, multiple fields): use `SkeletonSuspense` per field:
+
+```tsx
 <SkeletonSuspense loading={isLoading} skeleton={<Skeleton />}>
   <ActualContent />
 </SkeletonSuspense>
+```
+
+**List-level loading** (full list): use placeholder arrays, not `SkeletonSuspense` at the list level. Each item receives a `loading` prop and renders its own skeleton internally:
+
+```tsx
+const items = isLoading ? (new Array(5).fill({}) as ItemProps[]) : realData;
+
+items.map((item, index) => <Item loading={isLoading} {...item} />);
 ```
 
 ---
@@ -281,6 +344,12 @@ t('min length is {num}', { num: 8 });
 - Use `import type` for type-only imports consistently
 - Mark immutable props as `readonly`
 - Prefer interfaces for props, types for unions/utility types
+
+---
+
+## Constants
+
+Magic values (coin name `'LTC'`, `minPasswordLength`, `referralPercentage`) live in `src/constants/global.constants.ts`. Never hardcode them inline.
 
 ---
 
@@ -306,8 +375,24 @@ Run `type-check` before committing non-trivial changes.
 
 ## Key Project Notes
 
-- **Mobile-first** dark-theme app (background: `#1b1930`)
-- `reactStrictMode: false` in next.config.ts
+**Build & runtime**
+
+- Mobile-first dark-theme app (background: `#1b1930`)
+- `reactStrictMode: false` in `next.config.ts`
 - React Compiler (`reactCompiler: true`) is enabled — avoid manual `useMemo`/`useCallback` where the compiler can handle it
+
+**Development**
+
 - Mock base query simulates random 400–1200ms latency for dev data
+
+**Testing**
+
 - No test framework is configured; type-check + lint serve as safety nets
+
+---
+
+## Business Logic Documentation
+
+Full product and business logic documentation is located in [`documentation.md`](./documentation.md). It covers all platform systems: tickets, tournaments, tasks, stakes, leaderboard, market, wallet, statuses, Telegram Stars, and referral mechanics.
+
+**Any change that affects business logic — new features, modified rules, updated flows, or removed mechanics — must be reflected in `documentation.md`.** Keep it in sync with the implementation; treat it as the source of truth for product behavior.

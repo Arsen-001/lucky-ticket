@@ -3,7 +3,7 @@
 import { Task } from '@/types/interfaces/tasks.interfaces';
 import { TaskType } from '@/types/enums/tasks.enums';
 import { Button } from '@/components/shared/buttons/Button';
-import { CheckCircle2 } from 'lucide-react';
+import { CheckCircle2, Zap } from 'lucide-react';
 import { useAppTranslations } from '@/hooks/useAppTranslations';
 import { twMerge } from 'tailwind-merge';
 import { SkeletonSuspense } from '@/components/shared/seleketons/SkeletonSuspense';
@@ -56,6 +56,16 @@ export function TaskCard({ task, loading, onAction, onClick }: TaskCardProps) {
           >
             <p className="text-pink-secondary text-sm">
               {t('reward')}: {task?.reward}
+            </p>
+          </SkeletonSuspense>
+
+          <SkeletonSuspense
+            loading={loading}
+            skeleton={<Skeleton variant="line" textSize="sm" className="w-1/2" />}
+          >
+            <p className="text-teal text-xs flex items-center gap-0.5">
+              <Zap size={10} className="fill-teal" />
+              {t('+{points} ap', { points: task?.activityPoints })}
             </p>
           </SkeletonSuspense>
         </div>
