@@ -42,11 +42,6 @@ export function TournamentPlacements({ id }: { id: string }) {
             title: t('places'),
             children: <TournamentPlacementsTable places={data?.places} isLoading={isLoading} />,
           },
-          {
-            key: 'guaranteed',
-            title: t('guaranteed'),
-            children: <TournamentPlacementsTable places={data?.guaranteed} isLoading={isLoading} />,
-          },
         ]}
       />
     </div>

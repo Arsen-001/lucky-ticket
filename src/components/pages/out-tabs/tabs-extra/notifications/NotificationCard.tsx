@@ -1,6 +1,6 @@
 'use client';
 
-import { Notification } from '@/types/interfaces/notifications.interfaces';
+import type { Notification } from '@/types/interfaces/notifications.interfaces';
 import { twMerge } from 'tailwind-merge';
 import { formatDate } from '@/utils/global/date.utils';
 import { SkeletonSuspense } from '@/components/shared/seleketons/SkeletonSuspense';
@@ -10,23 +10,27 @@ interface NotificationCardProps {
   notification: Notification;
   loading?: boolean;
   onClick: (notification: Notification) => void;
+  index?: number;
 }
 
-export function NotificationCard({ notification, loading, onClick }: NotificationCardProps) {
-  return (
-    <div className="relative rounded-xl overflow-hidden">
-      <div
-        className={twMerge(
-          'absolute top-0 bottom-0 left-0 w-4 bg-pink transition-all',
-          notification?.read && '-left-4'
-        )}
-      />
+export function NotificationCard({
+  notification,
+  loading,
+  onClick,
+  index = 0,
+}: NotificationCardProps) {
+  const isUnread = !notification?.read;
 
+  return (
+    <div
+      className={twMerge(
+        'rounded-xl overflow-hidden shadow animate-slide-in-bottom border-l-[3px]',
+        isUnread ? 'border-electric-pink' : 'border-transparent'
+      )}
+      style={{ animationDelay: `${index * 80}ms` }}
+    >
       <div
-        className={twMerge(
-          'relative shadow bg-purple-gradient rounded-[inherit] px-4 py-3 flex flex-col gap-1 cursor-pointer transition-all',
-          !notification?.read && 'translate-x-1'
-        )}
+        className="bg-purple-gradient rounded-[inherit] px-4 py-3.5 flex flex-col gap-1.5 cursor-pointer transition-opacity active:opacity-75"
         onClick={() => !loading && onClick(notification)}
       >
         <div className="flex justify-between items-start gap-2">
@@ -34,21 +38,24 @@ export function NotificationCard({ notification, loading, onClick }: Notificatio
             loading={loading}
             skeleton={<Skeleton variant="line" textSize="base" className="w-3/4" />}
           >
-            <h4
-              className={twMerge(
-                'font-bold text-base',
-                !notification?.read ? 'text-white' : 'text-white/80'
-              )}
-            >
-              {notification?.title}
-            </h4>
+            <div className="flex items-center gap-2 min-w-0 flex-1">
+              {isUnread && <span className="shrink-0 w-2 h-2 rounded-full bg-electric-pink" />}
+              <h4
+                className={twMerge(
+                  'font-bold text-base truncate',
+                  isUnread ? 'text-white' : 'text-white/60'
+                )}
+              >
+                {notification?.title}
+              </h4>
+            </div>
           </SkeletonSuspense>
 
           <SkeletonSuspense
             loading={loading}
             skeleton={<Skeleton variant="line" textSize="xs" className="w-7" />}
           >
-            <span className="text-xs text-white/40 whitespace-nowrap pt-1">
+            <span className="text-xs text-white/40 whitespace-nowrap shrink-0 pt-0.5">
               {notification?.date && formatDate(notification.date, 'HH:mm')}
             </span>
           </SkeletonSuspense>
@@ -65,7 +72,14 @@ export function NotificationCard({ notification, loading, onClick }: Notificatio
             />
           }
         >
-          <p className="text-white/60 text-sm line-clamp-2">{notification?.content}</p>
+          <p
+            className={twMerge(
+              'text-sm line-clamp-2 leading-relaxed',
+              isUnread ? 'text-white/65' : 'text-white/40'
+            )}
+          >
+            {notification?.content}
+          </p>
         </SkeletonSuspense>
       </div>
     </div>

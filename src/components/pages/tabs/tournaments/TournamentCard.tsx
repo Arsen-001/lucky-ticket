@@ -29,7 +29,6 @@ export function TournamentCard({
   startTime,
   name,
   prizePool,
-  guaranteed,
   teamSize,
   loading,
   participated = false,
@@ -54,10 +53,6 @@ export function TournamentCard({
     {
       label: t('prize pool'),
       value: `${prizePool} ${GlobalConstants.coinName}`,
-    },
-    {
-      label: t('guaranteed'),
-      value: `${guaranteed} ${GlobalConstants.coinName}`,
     },
     {
       label: t('start'),

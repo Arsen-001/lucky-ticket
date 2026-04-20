@@ -23,11 +23,6 @@ const getMockPlacements = (): TournamentPlacesResponse => ({
     { from: 101, to: 200, percentage: 2 },
     { from: 201, to: 500, percentage: 2 },
   ],
-  guaranteed: [
-    { from: 1, percentage: 50 },
-    { from: 2, percentage: 30 },
-    { from: 3, percentage: 20 },
-  ],
 });
 
 export const tournaments: PersonalTournament[] = [
@@ -38,7 +33,7 @@ export const tournaments: PersonalTournament[] = [
     teamSize: getNum(),
     prizePool: getNum(),
     type: 'gold',
-    guaranteed: 1,
+
     places: getMockPlacements(),
     participated: true,
     participatedTicketsCount: getTicketsCount(),
@@ -50,7 +45,7 @@ export const tournaments: PersonalTournament[] = [
     teamSize: getNum(),
     prizePool: getNum(),
     type: 'silver',
-    guaranteed: 1,
+
     places: getMockPlacements(),
     participated: false,
   },
@@ -61,7 +56,7 @@ export const tournaments: PersonalTournament[] = [
     teamSize: getNum(),
     prizePool: getNum(),
     type: 'diamond',
-    guaranteed: 1,
+
     places: getMockPlacements(),
     participated: false,
   },
@@ -72,7 +67,7 @@ export const tournaments: PersonalTournament[] = [
     teamSize: getNum(),
     prizePool: getNum(),
     type: 'bronze',
-    guaranteed: 1,
+
     places: getMockPlacements(),
     participated: false,
   },
@@ -83,7 +78,7 @@ export const tournaments: PersonalTournament[] = [
     teamSize: getNum(),
     prizePool: getNum(),
     type: 'gold',
-    guaranteed: 1,
+
     places: getMockPlacements(),
     participated: false,
   },
@@ -94,7 +89,7 @@ export const tournaments: PersonalTournament[] = [
     teamSize: getNum(),
     prizePool: getNum(),
     type: 'silver',
-    guaranteed: 1,
+
     places: getMockPlacements(),
     participated: true,
     participatedTicketsCount: getTicketsCount(),
@@ -106,7 +101,7 @@ export const tournaments: PersonalTournament[] = [
     teamSize: getNum(),
     prizePool: getNum(),
     type: 'bronze',
-    guaranteed: 1,
+
     places: getMockPlacements(),
     participated: false,
   },
@@ -117,7 +112,7 @@ export const tournaments: PersonalTournament[] = [
     teamSize: getNum(),
     prizePool: getNum(),
     type: 'platinum',
-    guaranteed: 1,
+
     places: getMockPlacements(),
     participated: false,
   },

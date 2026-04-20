@@ -1,4 +1,4 @@
-import { ChevronsUp } from 'lucide-react';
+import { Zap } from 'lucide-react';
 import Image from 'next/image';
 import { twMerge } from 'tailwind-merge';
 import { icons } from '@/constants/icons';
@@ -91,8 +91,8 @@ export const LeaderboardTopItem = ({
           loading={loading}
           skeleton={<Skeleton variant="line" textSize="sm" className="w-12" />}
         >
-          <div className="flex-center text-gold text-sm">
-            <ChevronsUp size={16} />
+          <div className="flex-center gap-1 text-gold text-sm">
+            <Zap size={12} className="fill-gold text-gold" />
             <div className="h-4.5 font-semibold">{points}</div>
           </div>
         </SkeletonSuspense>

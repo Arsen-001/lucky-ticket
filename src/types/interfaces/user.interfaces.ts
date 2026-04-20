@@ -4,6 +4,7 @@ export interface MeResponse {
   email?: string;
   isPrime: boolean;
   isVIP: boolean;
+  vipLevel: number;
   isVerified: boolean;
   avatar: string;
   coins: number;

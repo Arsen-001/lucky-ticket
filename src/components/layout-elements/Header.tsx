@@ -8,7 +8,7 @@ import { Skeleton } from '@/components/shared/seleketons/Skeleton';
 import { SkeletonSuspense } from '@/components/shared/seleketons/SkeletonSuspense';
 import { GlobalConstants } from '@/constants/global.constants';
 import { Button } from '@/components/shared/buttons/Button';
-import { AlignRight, ChevronsUp } from 'lucide-react';
+import { AlignRight, Zap } from 'lucide-react';
 import Image from 'next/image';
 import { icons } from '@/constants/icons';
 import type { ClassNameProps } from '@/types/interfaces/component.interfcaes';
@@ -52,7 +52,7 @@ export function Header({ className }: ClassNameProps) {
                 <div className="flex-center gap-1">
                   {me?.isVerified && <VerifiedBadge hideText />}
                   {me?.isPrime && <PrimeBadge hideText />}
-                  {me?.isVIP && <VIPBadge hideText />}
+                  {me?.isVIP && <VIPBadge level={me.vipLevel} />}
                 </div>
               </div>
             </SkeletonSuspense>
@@ -64,7 +64,7 @@ export function Header({ className }: ClassNameProps) {
             >
               <div className="min-w-16 bg-gradient-lightpink/30 flex-center gap-2 text-white-secondary text-sm font-semibold rounded-full py-0.5 px-2.5">
                 <div className="flex items-center gap-px">
-                  <ChevronsUp className="min-w-4 min-h-4 stroke-3 text-gold" size={12} />
+                  <Zap className="min-w-3 min-h-3 fill-gold text-gold" size={12} />
                   <span className="font-semibold h-4.5">{me?.activityPoints}</span>
                 </div>
               </div>

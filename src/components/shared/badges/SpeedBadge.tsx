@@ -1,6 +1,6 @@
 'use client';
 import { Badge, type BadgeProps } from '@/components/shared/badges/Badge';
-import { CircleGauge } from 'lucide-react';
+import { ClockArrowUp } from 'lucide-react';
 import { twMerge } from 'tailwind-merge';
 import { useAppTranslations } from '@/hooks/useAppTranslations';
 
@@ -9,7 +9,7 @@ export const SpeedBadge = ({ ...rest }: BadgeProps) => {
 
   return (
     <Badge
-      icon={CircleGauge}
+      icon={ClockArrowUp}
       text={t('speed')}
       {...rest}
       className={twMerge('text-gold p-1', rest.className)}

@@ -1,6 +1,6 @@
 'use client';
 import { Badge, type BadgeProps } from '@/components/shared/badges/Badge';
-import { Layers } from 'lucide-react';
+import { Tickets } from 'lucide-react';
 import { twMerge } from 'tailwind-merge';
 import { useAppTranslations } from '@/hooks/useAppTranslations';
 
@@ -9,7 +9,7 @@ export const CollectBadge = ({ ...rest }: BadgeProps) => {
 
   return (
     <Badge
-      icon={Layers}
+      icon={Tickets}
       text={t('max time')}
       {...rest}
       className={twMerge('text-gold p-1', rest.className)}

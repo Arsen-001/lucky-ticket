@@ -1,7 +1,7 @@
 import Image from 'next/image';
 import { twMerge } from 'tailwind-merge';
 import type { CSSProperties, ReactNode } from 'react';
-import { ChevronsUp } from 'lucide-react';
+import { Zap } from 'lucide-react';
 
 import { SkeletonSuspense } from '@/components/shared/seleketons/SkeletonSuspense';
 import { Skeleton } from '@/components/shared/seleketons/Skeleton';
@@ -42,7 +42,7 @@ export const UserListItem = ({
     <div
       style={style}
       className={twMerge(
-        'flex items-center gap-1 p-3 bg-background-overlay/50 rounded-2xl border-2 border-white/5',
+        'flex items-center gap-1 p-2 bg-background-overlay/50 rounded-2xl border-2 border-white/5',
         outline && 'border-gray-400',
         className
       )}
@@ -98,13 +98,13 @@ export const UserListItem = ({
             </div>
           </SkeletonSuspense>
           <div className="flex items-center gap-1 text-xs text-gray-400">
-            <div className="flex items-center text-gold">
+            <div className="flex items-center gap-1 text-gold">
               <SkeletonSuspense
                 loading={loading}
                 skeleton={<Skeleton variant="line" textSize="sm" className="w-12" />}
               >
-                <ChevronsUp className="stroke-2" size={16} />
-                <span className="font-semibold text-sm h-4.5">{points}</span>
+                <Zap className="fill-gold text-gold" size={12} />
+                <span className="font-semibold text-xs pt-px">{points}</span>
               </SkeletonSuspense>
             </div>
           </div>

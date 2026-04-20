@@ -150,17 +150,17 @@ Statuses reward trust, loyalty, and engagement while enabling monetization and p
 
 ### 7.1 Status Levels
 
-| Status       | Description                                      | Duration     |
-| :----------- | :----------------------------------------------- | :----------- |
-| **Verified** | Identity confirmed via email or phone            | Permanent    |
-| **Prime**    | Paid mid-tier status with benefits               | Time-limited |
-| **VIP**      | High-tier status requiring activity and purchase | Time-limited |
+| Status       | Description                                           | Duration     |
+| :----------- | :---------------------------------------------------- | :----------- |
+| **Verified** | Identity confirmed via email or phone                 | Permanent    |
+| **Prime**    | Paid mid-tier status with benefits                    | Time-limited |
+| **VIP**      | High-tier leveled status with permanent game benefits | Permanent    |
 
 ### 7.2 Status Acquisition
 
 - **Verified:** Identity confirmed via email or phone confirmation.
 - **Prime:** Purchased via the Market (LC or cryptocurrency).
-- **VIP:** High-tier status available for purchase only if the required Activity Points threshold is met.
+- **VIP:** Unlocked and upgraded via the Market. No Activity Points requirement. Detailed acquisition rules are described in Section 7.4.
 
 ### 7.3 Status Benefits
 
@@ -171,6 +171,38 @@ Statuses grant various privileges, such as:
 - Market/Shop discounts
 - Tournament advantages
 - Early or priority access to features
+
+### 7.4 VIP Status — Levels & Acquisition
+
+VIP is a permanent, leveled status. Once unlocked it never decreases or expires. The level count is endless — users can keep upgrading indefinitely.
+
+#### Payment Options
+
+VIP can be purchased and upgraded using either:
+
+- **Lucky Coins (LC)**
+- **Telegram Stars (XTR)**
+
+Both currencies are accepted for both the initial unlock and all subsequent level upgrades.
+
+#### Pricing Model
+
+| Action            | Cost (example)                       | Notes                                      |
+| :---------------- | :----------------------------------- | :----------------------------------------- |
+| **First unlock**  | Higher price                         | e.g., 10 LC / equivalent in Stars          |
+| **Level upgrade** | Lower price for first level upgrades | e.g., 5 LC / equivalent in Stars per level |
+
+> Exact LC and Star prices per level are defined by the product team and may be updated independently of this document.
+
+#### Rules
+
+- The first purchase (unlock) costs more than the first few subsequent upgrades — rewarding early adopters and separating the barrier-to-entry from ongoing progression.
+- VIP level is permanent: it cannot decrease, expire, or be lost through inactivity.
+- Higher VIP levels grant incrementally stronger game benefits. Exact benefits per level are to be defined by the product team.
+
+#### VIP Benefits
+
+VIP benefits are game advantages granted per level. The full list will be defined by the product team. Benefits are permanent and stack with level progression.
 
 ### Connections
 
@@ -301,7 +333,6 @@ Each tournament includes:
 - **Name:** The title of the tournament.
 - **Required Ticket:** The specific ticket type needed to join (Project or Partner).
 - **Prize Pool:** The summary of all coins that will be distributed among winners.
-- **Guaranteed:** An number of coins awarded to any Verified user who participates in the tournament.
 - **Start Time:** The date and time when the tournament begins and winners are decided.
 - **Team Size:** The total number of users participating in the tournament.
 
@@ -310,7 +341,6 @@ Each tournament includes:
 - Users join by submitting one or more tickets.
 - Winners are selected randomly from the pool of participants at the designated Start Time.
 - **Probability:** Joining with more tickets increases the chance of winning.
-- Verified users receive guaranteed rewards upon participation.
 
 ### Connections
 
@@ -386,7 +416,7 @@ The market is a central hub for purchasing improvements, resources, and statuses
 
 - **Boosts:** Purchase upgrades for each available ticket parameter (Claim Speed, Claim Duration).
 - **Tickets:** Purchase project or partner tickets using LC.
-- **Statuses:** Purchase Prime or VIP status (VIP requires eligibility via Activity Points).
+- **Statuses:** Purchase Prime status (LC or cryptocurrency) or unlock/upgrade VIP status (LC or Telegram Stars). See Section 7.4 for VIP level details.
 
 ### Connections
 
@@ -481,10 +511,19 @@ Encourages growth through referral rewards. Users can track their invited friend
 
 **Referral Benefits:**
 
-Users receive passive rewards based on the activity and earnings of their invited friends:
+When an invited friend claims tickets, the inviter earns **10% of those tickets** as a claimable reward — mirroring the same claim mechanic used for regular tickets:
 
-- **Earnings Commission:** The inviter receives a percentage of the LC (coins) and tickets earned by their referrals (e.g., a base of 1% from their earnings).
-- **Scaling with Status:** The percentage of the benefit increases if the invited friend has a higher status. Inviting users who upgrade to Prime or VIP results in a higher commission percentage compared to Verified friends.
+- **Ticket Commission:** For every ticket a referred friend claims, the inviter accumulates a percentage of that amount as claimable tickets of the same type. The commission rate depends on whether the friend has **Telegram Premium**:
+
+  | Friend's Telegram Account | Commission Rate |
+  | :------------------------ | :-------------- |
+  | Regular                   | 10%             |
+  | Telegram Premium          | 20%             |
+
+  For example, if a regular friend claims 20 Bronze and 10 Silver tickets, the inviter can claim 2 Bronze and 1 Silver tickets. If that friend has Telegram Premium, the inviter can claim 4 Bronze and 2 Silver tickets.
+
+- **Claim Mechanic:** These referral tickets are not credited instantly — they accumulate and must be actively claimed by the inviter, the same way regular tickets are claimed.
+- **No LC Commission:** Referral rewards apply only to tickets. There is no commission on Lucky Coins (LC) earned by referred friends.
 
 ### 17.3 Profile Page (Statistics)
 

@@ -63,8 +63,8 @@ export function TaskCard({ task, loading, onAction, onClick }: TaskCardProps) {
             loading={loading}
             skeleton={<Skeleton variant="line" textSize="sm" className="w-1/2" />}
           >
-            <p className="text-teal text-xs flex items-center gap-0.5">
-              <Zap size={10} className="fill-teal" />
+            <p className="text-gold text-xs flex items-center gap-0.5">
+              <Zap size={10} className="fill-gold" />
               {t('+{points} ap', { points: task?.activityPoints })}
             </p>
           </SkeletonSuspense>

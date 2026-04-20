@@ -8,6 +8,7 @@ export const me: MeResponse = {
   email: 'arsen@gmai.com',
   isPrime: true,
   isVIP: true,
+  vipLevel: 2,
   isVerified: true,
   avatar: images.avatar.src,
   coins: 537,

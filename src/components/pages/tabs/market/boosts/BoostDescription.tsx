@@ -12,6 +12,10 @@ export const BoostDescription = ({ boost }: BoostDescriptionProps) => {
 
   if (!boost?.ticketType) return null;
 
+  if (boost.isAvailable === false) {
+    return <>{t('get {ticketType} ticket to unlock', { ticketType: boost.ticketType })}</>;
+  }
+
   const translationKey =
     boost.type === TicketBoostType.SPEED
       ? `increases ${boost.ticketType} ticket speed with {percentage}%`

@@ -4,7 +4,7 @@ import { useAppTranslations } from '@/hooks/useAppTranslations';
 import { Skeleton } from '@/components/shared/seleketons/Skeleton';
 import { SkeletonSuspense } from '@/components/shared/seleketons/SkeletonSuspense';
 import { GlobalConstants } from '@/constants/global.constants';
-import { ChevronsUp, Wallet } from 'lucide-react';
+import { Wallet, Zap } from 'lucide-react';
 
 export function ProfileStats() {
   const { data: me, isLoading } = useGetMeQuery();
@@ -32,7 +32,7 @@ export function ProfileStats() {
 
       <div className="bg-white/5 rounded-2xl p-5 flex flex-col gap-1 items-center border border-white/10 transition-transform cursor-pointer hover:bg-white/10">
         <div className="flex items-center gap-1 text-white/60 text-xs uppercase tracking-wider font-semibold">
-          <ChevronsUp className="w-5 h-5 text-gold" />
+          <Zap className="fill-gold text-gold" size={18} />
           <div className="font-semibold h-3.5">{t('activity')}</div>
         </div>
         <SkeletonSuspense

@@ -13,6 +13,15 @@ import { useAppTranslations } from '@/hooks/useAppTranslations';
 import { MarketBuyModal } from '../MarketBuyModal';
 import { BoostTitle } from './BoostTitle';
 import { BoostDescription } from './BoostDescription';
+import type { TicketType } from '@/types/types/ticket.types';
+
+const ticketColorMap: Record<TicketType, string> = {
+  bronze: 'text-bronze',
+  silver: 'text-silver',
+  gold: 'text-gold',
+  platinum: 'text-platinum',
+  diamond: 'text-diamond',
+};
 
 export function MarketBoostList() {
   const t = useAppTranslations();
@@ -66,11 +75,17 @@ export function MarketBoostList() {
             description={<BoostDescription boost={boost} />}
             prices={boost?.prices || []}
             isNew={boost?.isNew}
-            icon={<TicketBoostIcon type={boost?.type} />}
+            disabled={boost ? !boost.isAvailable : false}
+            icon={
+              <TicketBoostIcon
+                type={boost?.type}
+                className={boost?.ticketType ? ticketColorMap[boost.ticketType] : undefined}
+              />
+            }
             onBuy={price => handleBuyButtonClick(boost, price)}
             onClick={() => handleCardClick(boost)}
             classNames={{
-              icon: twMerge('[&>svg]:h-8 [&>svg]:w-8 [&>svg]:stroke-2 [&>svg]:text-pink'),
+              icon: twMerge('[&>svg]:h-8 [&>svg]:w-8 [&>svg]:stroke-2'),
             }}
           />
         ))}
@@ -80,9 +95,20 @@ export function MarketBoostList() {
         onClose={() => setIsOpen(false)}
         onConfirm={handleBuy}
         loading={isBuying}
+        disabled={selectedBoost?.boost.isAvailable === false}
         title={<BoostTitle boost={selectedBoost?.boost} size={24} />}
         price={selectedBoost?.price || { amount: 0, type: MarketPriceType.LTC }}
-        icon={<TicketBoostIcon type={selectedBoost?.boost.type} className="text-pink stroke-2" />}
+        icon={
+          <TicketBoostIcon
+            type={selectedBoost?.boost.type}
+            className={twMerge(
+              selectedBoost?.boost.ticketType
+                ? ticketColorMap[selectedBoost.boost.ticketType]
+                : undefined,
+              'stroke-2'
+            )}
+          />
+        }
         description={<BoostDescription boost={selectedBoost?.boost} />}
       />
     </div>

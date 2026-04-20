@@ -7,7 +7,6 @@ export interface Tournament {
   teamSize: number;
   prizePool: number;
   type: TournamentType;
-  guaranteed: number;
   places?: TournamentPlacesResponse;
 }
 
@@ -24,5 +23,4 @@ export interface TournamentPlace {
 
 export interface TournamentPlacesResponse {
   places: TournamentPlace[];
-  guaranteed: TournamentPlace[];
 }

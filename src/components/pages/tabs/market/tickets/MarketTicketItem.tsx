@@ -26,8 +26,7 @@ export const MarketTicketItem = ({
     return <MarketItemCard loading={isLoading} name="" prices={[]} />;
   }
 
-  const basePrice = ticket.prices[0]?.amount || 0;
-  const totalPrices = [{ ...ticket.prices[0], amount: basePrice * count }];
+  const totalPrices = ticket.prices.map(price => ({ ...price, amount: price.amount * count }));
 
   return (
     <MarketItemCard

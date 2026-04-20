@@ -6,5 +6,5 @@ export const GlobalConstants = {
   coinName: 'LC',
   defaultLanguage: defaultLocale,
   referralPercentage: 10,
-  primeReferralPercentage: 20,
+  telegramPremiumReferralPercentage: 20,
 };

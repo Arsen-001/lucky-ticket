@@ -14,6 +14,7 @@ interface ConfirmModalProps {
   confirmText?: string;
   cancelText?: string;
   loading?: boolean;
+  hideConfirm?: boolean;
 }
 
 export function ConfirmModal({
@@ -25,6 +26,7 @@ export function ConfirmModal({
   confirmText,
   cancelText,
   loading,
+  hideConfirm,
 }: ConfirmModalProps) {
   const t = useAppTranslations();
 
@@ -45,14 +47,16 @@ export function ConfirmModal({
           >
             {cancelText || t('cancel')}
           </Button>
-          <Button
-            variant="primary"
-            onClick={onConfirm}
-            className=" rounded-full px-4 py-1.5"
-            loading={loading}
-          >
-            {confirmText || t('confirm')}
-          </Button>
+          {!hideConfirm && (
+            <Button
+              variant="primary"
+              onClick={onConfirm}
+              className=" rounded-full px-4 py-1.5"
+              loading={loading}
+            >
+              {confirmText || t('confirm')}
+            </Button>
+          )}
         </div>
       </div>
     </Modal>

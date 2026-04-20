@@ -36,10 +36,6 @@ export function TournamentInfo({ id, className, ...rest }: TournamentDetailsProp
       value: data ? `${data.prizePool} ${GlobalConstants.coinName}` : '',
     },
     {
-      label: t('guaranteed'),
-      value: data ? `${data.guaranteed} ${GlobalConstants.coinName}` : '',
-    },
-    {
       label: t('start'),
       value: data?.startTime ? dayjs(data.startTime).format('DD/MM/YYYY') : '',
     },

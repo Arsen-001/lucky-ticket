@@ -14,6 +14,7 @@ interface MarketBuyModalProps {
   onClose: () => void;
   onConfirm: () => void;
   loading?: boolean;
+  disabled?: boolean;
   title: ReactNode;
   price: MarketPrice;
   priceLabel?: string;
@@ -27,6 +28,7 @@ export function MarketBuyModal({
   onClose,
   onConfirm,
   loading,
+  disabled,
   title,
   price,
   priceLabel,
@@ -42,6 +44,7 @@ export function MarketBuyModal({
       onClose={onClose}
       onConfirm={onConfirm}
       loading={loading}
+      hideConfirm={disabled}
       title={title}
       content={
         <div className="text-white/80 text-center flex flex-col gap-4 mt-2">
@@ -54,27 +57,29 @@ export function MarketBuyModal({
 
           {children}
 
-          <div className="flex justify-between items-center bg-white/5 p-3 px-4 rounded-xl">
-            <span className="text-sm text-white/60 uppercase font-bold tracking-wider">
-              {priceLabel || t('price')}
-            </span>
-            <div className="flex items-center gap-1.5">
-              <span className="text-lg font-bold text-white">{price.amount}</span>
-              {price.type === MarketPriceType.LTC && (
-                <span className="text-sm text-gold font-bold">{GlobalConstants.coinName}</span>
-              )}
-              {price.type === MarketPriceType.USDT && (
-                <span className="text-sm font-black text-emerald-400">USDT</span>
-              )}
-              {price.type === MarketPriceType.TELEGRAM_STARS && (
-                <Image
-                  src={icons.telegramStar}
-                  alt="stars"
-                  className="w-4.5 pb-1 h-auto object-contain"
-                />
-              )}
+          {!disabled && (
+            <div className="flex justify-between items-center bg-white/5 p-3 px-4 rounded-xl">
+              <span className="text-sm text-white/60 uppercase font-bold tracking-wider">
+                {priceLabel || t('price')}
+              </span>
+              <div className="flex items-center gap-1.5">
+                <span className="text-lg font-bold text-white">{price.amount}</span>
+                {price.type === MarketPriceType.LTC && (
+                  <span className="text-sm text-gold font-bold">{GlobalConstants.coinName}</span>
+                )}
+                {price.type === MarketPriceType.USDT && (
+                  <span className="text-sm font-black text-emerald-400">USDT</span>
+                )}
+                {price.type === MarketPriceType.TELEGRAM_STARS && (
+                  <Image
+                    src={icons.telegramStar}
+                    alt="stars"
+                    className="w-4.5 pb-1 h-auto object-contain"
+                  />
+                )}
+              </div>
             </div>
-          </div>
+          )}
         </div>
       }
     />

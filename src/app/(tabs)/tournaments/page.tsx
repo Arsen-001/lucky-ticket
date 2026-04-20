@@ -22,16 +22,13 @@ export default function TournamentPage() {
 
   const [selectedTypes, setSelectedTypes] = useState<TournamentType[]>([]);
   const [sortBy, setSortBy] = useState<SortOption>('soonest');
-  const [hasGuaranteedOnly, setHasGuaranteedOnly] = useState(false);
   const [isFilterSheetOpen, setIsFilterSheetOpen] = useState(false);
 
-  const activeFilterCount =
-    selectedTypes.length + (hasGuaranteedOnly ? 1 : 0) + (sortBy !== 'soonest' ? 1 : 0);
+  const activeFilterCount = selectedTypes.length + (sortBy !== 'soonest' ? 1 : 0);
 
   const handleReset = () => {
     setSelectedTypes([]);
     setSortBy('soonest');
-    setHasGuaranteedOnly(false);
   };
 
   const filteredTournaments =
@@ -45,9 +42,8 @@ export default function TournamentPage() {
 
         const matchesSearch = stringIncludes(tournament.name, searchValue);
         const matchesType = selectedTypes.length === 0 || selectedTypes.includes(tournament.type);
-        const matchesGuaranteed = !hasGuaranteedOnly || tournament.guaranteed > 0;
 
-        return matchesTab && matchesSearch && matchesType && matchesGuaranteed;
+        return matchesTab && matchesSearch && matchesType;
       })
       .sort((a, b) => {
         switch (sortBy) {
@@ -55,8 +51,6 @@ export default function TournamentPage() {
             return b.prizePool - a.prizePool;
           case 'soonest':
             return new Date(a.startTime).getTime() - new Date(b.startTime).getTime();
-          case 'guaranteed':
-            return b.guaranteed - a.guaranteed;
           case 'team-size':
             return a.teamSize - b.teamSize;
           default:
@@ -80,7 +74,7 @@ export default function TournamentPage() {
         onFilterSheetOpen={() => setIsFilterSheetOpen(true)}
       />
       <div
-        key={`tournaments-${filter}-${searchValue}-${selectedTypes.join()}-${sortBy}-${hasGuaranteedOnly}`}
+        key={`tournaments-${filter}-${searchValue}-${selectedTypes.join()}-${sortBy}`}
         className="animate-slide-in-bottom"
       >
         <TournamentList tournaments={displayTournaments} isLoading={isLoading} />
@@ -92,8 +86,6 @@ export default function TournamentPage() {
         onTypesChange={setSelectedTypes}
         sortBy={sortBy}
         onSortChange={setSortBy}
-        hasGuaranteedOnly={hasGuaranteedOnly}
-        onGuaranteedChange={setHasGuaranteedOnly}
         onReset={handleReset}
       />
     </div>

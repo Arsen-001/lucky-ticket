@@ -1,6 +1,6 @@
 'use client';
 
-import { Check, ShieldCheck } from 'lucide-react';
+import { Check } from 'lucide-react';
 import { twMerge } from 'tailwind-merge';
 import { ClientPortal } from '@/components/shared/ClientPortal';
 import { Button } from '@/components/shared/buttons/Button';
@@ -8,7 +8,7 @@ import { TournamentTypeChips } from '@/components/pages/tabs/tournaments/Tournam
 import type { TournamentType } from '@/types/types/tournaments.types';
 import { useAppTranslations } from '@/hooks/useAppTranslations';
 
-export type SortOption = 'soonest' | 'prize-pool' | 'guaranteed' | 'team-size';
+export type SortOption = 'soonest' | 'prize-pool' | 'team-size';
 
 interface SortItem {
   key: SortOption;
@@ -22,8 +22,6 @@ interface TournamentFilterSheetProps {
   onTypesChange: (types: TournamentType[]) => void;
   sortBy: SortOption;
   onSortChange: (sort: SortOption) => void;
-  hasGuaranteedOnly: boolean;
-  onGuaranteedChange: (v: boolean) => void;
   onReset: () => void;
 }
 
@@ -34,8 +32,6 @@ export function TournamentFilterSheet({
   onTypesChange,
   sortBy,
   onSortChange,
-  hasGuaranteedOnly,
-  onGuaranteedChange,
   onReset,
 }: TournamentFilterSheetProps) {
   const t = useAppTranslations();
@@ -43,7 +39,6 @@ export function TournamentFilterSheet({
   const sortItems: SortItem[] = [
     { key: 'soonest', label: t('starts soonest') },
     { key: 'prize-pool', label: t('highest prize pool') },
-    { key: 'guaranteed', label: t('highest guaranteed') },
     { key: 'team-size', label: t('best odds (smallest team)') },
   ];
 
@@ -121,20 +116,6 @@ export function TournamentFilterSheet({
                   )}
                 </button>
               ))}
-            </div>
-
-            {/* Rewards */}
-            <div className="flex flex-col gap-3">
-              <p className="text-sm font-semibold text-white/70">{t('rewards')}</p>
-              <Button
-                variant={hasGuaranteedOnly ? 'primary' : 'outlined'}
-                icon={<ShieldCheck />}
-                iconSize={16}
-                className="w-full py-2.5 text-sm rounded-xl justify-start"
-                onClick={() => onGuaranteedChange(!hasGuaranteedOnly)}
-              >
-                {t('guaranteed only')}
-              </Button>
             </div>
           </div>
 

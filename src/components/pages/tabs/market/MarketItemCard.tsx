@@ -137,23 +137,33 @@ export function MarketItemCard({
         skeleton={<Skeleton variant="card" className="h-10 mt-2" />}
       >
         <div className={twMerge('flex gap-2 mt-2')}>
-          {prices.map((price, index) => (
+          {disabled ? (
             <Button
-              key={index}
-              onClick={e => {
-                e.stopPropagation();
-                onBuy?.(price);
-              }}
-              disabled={disabled}
-              variant={price.type === MarketPriceType.USDT ? 'secondary' : 'primary'}
+              onClick={e => e.stopPropagation()}
+              disabled
+              variant="primary"
               className={twMerge(
-                'w-1/2 flex-center gap-1 p-1 text-xs font-semibold rounded-lg',
+                'w-full flex-center gap-1 p-1 text-xs font-semibold rounded-lg',
                 classNames?.button
               )}
             >
-              {disabled ? (
-                <Image src={icons.lock} alt="lock" className="w-auto h-5 object-contain" />
-              ) : (
+              <Image src={icons.lock} alt="lock" className="w-auto h-5 object-contain" />
+            </Button>
+          ) : (
+            prices.map((price, index) => (
+              <Button
+                key={index}
+                onClick={e => {
+                  e.stopPropagation();
+                  onBuy?.(price);
+                }}
+                variant={price.type === MarketPriceType.USDT ? 'secondary' : 'primary'}
+                className={twMerge(
+                  prices.length === 1 ? 'w-full' : 'w-1/2',
+                  'flex-center gap-1 p-1 text-xs font-semibold rounded-lg',
+                  classNames?.button
+                )}
+              >
                 <>
                   {price.type === MarketPriceType.TELEGRAM_STARS && (
                     <Image
@@ -170,9 +180,9 @@ export function MarketItemCard({
                     <span className="text-sm text-emerald-400 font-bold">USDT</span>
                   )}
                 </>
-              )}
-            </Button>
-          ))}
+              </Button>
+            ))
+          )}
         </div>
       </SkeletonSuspense>
     </div>

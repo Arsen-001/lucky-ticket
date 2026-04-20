@@ -9,8 +9,12 @@ export const invitedFriendsMock: InvitedFriend[] = [
     isPrime: false,
     isVerified: true,
     isVIP: true,
+    isTelegramPremium: false,
     points: 1500,
-    earnedCoins: 300,
+    claimableTickets: [
+      { type: 'bronze', amount: 3 },
+      { type: 'silver', amount: 1 },
+    ],
   },
   {
     id: '2',
@@ -18,8 +22,9 @@ export const invitedFriendsMock: InvitedFriend[] = [
     avatar: images.avatar.src,
     isPrime: false,
     isVerified: false,
+    isTelegramPremium: false,
     points: 800,
-    earnedCoins: 80,
+    claimableTickets: [{ type: 'bronze', amount: 2 }],
   },
   {
     id: '3',
@@ -27,8 +32,14 @@ export const invitedFriendsMock: InvitedFriend[] = [
     avatar: images.avatar.src,
     isPrime: true,
     isVerified: false,
+    isTelegramPremium: true,
     points: 2000,
-    earnedCoins: 400,
+    claimableTickets: [
+      { type: 'bronze', amount: 6 },
+      { type: 'silver', amount: 2 },
+      { type: 'gold', amount: 1 },
+      { type: 'platinum', amount: 1 },
+    ],
   },
   {
     id: '4',
@@ -36,15 +47,14 @@ export const invitedFriendsMock: InvitedFriend[] = [
     avatar: images.avatar.src,
     isPrime: false,
     isVerified: true,
+    isTelegramPremium: false,
     points: 1200,
-    earnedCoins: 120,
+    claimableTickets: [],
   },
 ];
 
 export const referralStatsMock: ReferralStats = {
   totalInvited: invitedFriendsMock.length,
-  totalEarned: invitedFriendsMock.reduce((total, friend) => total + friend.earnedCoins, 0),
-  availableClaim: 37,
 };
 
 export const referralMock = {

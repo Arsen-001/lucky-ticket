@@ -3,7 +3,6 @@ import { useState } from 'react';
 import type { Ticket as TicketDataType, TicketType } from '@/types/types/ticket.types';
 import { twMerge } from 'tailwind-merge';
 import type { ClassNameProps } from '@/types/interfaces/component.interfcaes';
-import { Ticket } from '@/components/shared/icons/Ticket';
 import { Button } from '@/components/shared/buttons/Button';
 import { useCountDown } from '@/hooks/useCountDown';
 import { useAppTranslations } from '@/hooks/useAppTranslations';
@@ -16,6 +15,7 @@ import { SpeedBadge } from '@/components/shared/badges/SpeedBadge';
 import { SkeletonSuspense } from '@/components/shared/seleketons/SkeletonSuspense';
 import { Skeleton } from '@/components/shared/seleketons/Skeleton';
 import { HomeTicketRequirementsModal } from '@/components/pages/tabs/home/HomeTicketRequirementsModal';
+import { TicketOverlap } from '@/components/shared/icons/TicketOverlap';
 
 export type HomeTickestListItemProps = TicketDataType & ClassNameProps & { loading?: boolean };
 
@@ -73,7 +73,7 @@ export function HomeTickestListItem({
           className
         )}
       >
-        <Ticket {...ticketImageProps} />
+        <TicketOverlap {...ticketImageProps} />
 
         <div className="flex-available flex flex-col gap-2 overflow-hidden">
           <SkeletonSuspense loading={loading} skeleton={<Skeleton className="h-5.5 w-9/12" />}>

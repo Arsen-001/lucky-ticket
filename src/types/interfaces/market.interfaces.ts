@@ -27,6 +27,7 @@ export interface MarketBoost extends MarketItemBase {
   boostPercentage: number;
   type: TicketBoostType;
   ticketType: TicketType;
+  isAvailable?: boolean;
 }
 
 export interface MarketTicket extends MarketItemBase {
@@ -38,7 +39,8 @@ export interface MarketStatus extends MarketItemBase {
   statusType: MarketStatusType;
   privileges: string[];
   requirements?: MarketRequirement[];
-  durationDays: number;
+  durationDays?: number;
+  upgradePrices?: MarketPrice[];
 }
 
 export interface MarketData {

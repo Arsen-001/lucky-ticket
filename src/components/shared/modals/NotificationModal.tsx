@@ -4,7 +4,6 @@ import { Modal } from '@/components/shared/modals/Modal';
 import { Notification } from '@/types/interfaces/notifications.interfaces';
 import { Bell } from 'lucide-react';
 import { formatDate } from '@/utils/global/date.utils';
-import { Divider } from '@/components/shared/Divider';
 
 interface NotificationModalProps {
   notification: Notification | null;
@@ -15,19 +14,20 @@ interface NotificationModalProps {
 export function NotificationModal({ notification, open, onClose }: NotificationModalProps) {
   return (
     <Modal open={open} onClose={onClose}>
-      <div className="bg-purple-gradient p-5 rounded-xl">
-        <div className="flex flex-col items-center text-center mt-4">
-          <div className="w-16 h-16 bg-pink/20 rounded-full flex items-center justify-center mb-4">
-            <Bell className="text-pink" size={32} />
+      <div className="bg-purple-gradient rounded-xl overflow-hidden">
+        <div className="flex flex-col items-center text-center px-6 pt-8 pb-6">
+          <div className="w-14 h-14 bg-electric-pink/15 rounded-full flex-center mb-4 border border-electric-pink/30">
+            <Bell className="text-electric-pink" size={26} />
           </div>
 
-          <h3 className="text-xl font-bold mb-2">{notification?.title}</h3>
-          <p className="text-white/70 text-sm whitespace-pre-wrap">{notification?.content}</p>
+          <h3 className="text-lg font-bold leading-snug mb-3">{notification?.title}</h3>
+          <p className="text-white/65 text-sm whitespace-pre-wrap leading-relaxed">
+            {notification?.content}
+          </p>
+        </div>
 
-          <div className="mt-6 w-full text-right">
-            <Divider className="border-white/10 mb-3" />
-            <span className="text-xs text-white/50">{formatDate(notification?.date)}</span>
-          </div>
+        <div className="border-t border-white/10 px-6 py-3 flex justify-end">
+          <span className="text-xs text-white/40">{formatDate(notification?.date)}</span>
         </div>
       </div>
     </Modal>

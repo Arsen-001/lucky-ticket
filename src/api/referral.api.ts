@@ -12,28 +12,30 @@ export const referralApi = api.injectEndpoints({
       query: () => ({ url: 'referral/stats' }),
       providesTags: [rtkTags.referral],
     }),
-    claim: builder.mutation<void, void>({
-      query: () => ({
-        url: 'referral/claim',
+    claimFriend: builder.mutation<void, { friendId: string }>({
+      query: ({ friendId }) => ({
+        url: `referral/claim/${friendId}`,
         method: 'POST',
       }),
       invalidatesTags: [rtkTags.referral],
-      async onQueryStarted(_, { dispatch, queryFulfilled }) {
+      async onQueryStarted({ friendId }, { dispatch, queryFulfilled }) {
         const patchResult = dispatch(
-          referralApi.util.updateQueryData('getReferralStats', undefined, draft => {
-            draft.availableClaim = 0;
+          referralApi.util.updateQueryData('getInvitedFriends', undefined, draft => {
+            const friend = draft.find(f => f.id === friendId);
+            if (friend) {
+              friend.claimableTickets = [];
+            }
           })
         );
         try {
           await queryFulfilled;
         } catch {
           patchResult.undo();
-        } finally {
         }
       },
     }),
   }),
 });
 
-export const { useGetInvitedFriendsQuery, useGetReferralStatsQuery, useClaimMutation } =
+export const { useGetInvitedFriendsQuery, useGetReferralStatsQuery, useClaimFriendMutation } =
   referralApi;

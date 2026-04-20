@@ -42,31 +42,46 @@ export function NotificationsContainer() {
   const content = isLoading ? getNotificationsSkeletonData(3, 2) : groupedNotifications;
   const contentExists = !!Object.keys(content).length;
 
+  const contentEntries = Object.entries(content);
+  let runningIndex = 0;
+  const groupAnimationIndexes = contentEntries.map(([_, items]) => {
+    const headerIndex = runningIndex;
+    runningIndex += items.length + 1;
+    return headerIndex;
+  });
+
   return (
     <div className="flex flex-col gap-6">
       {contentExists ? (
-        Object.entries(content)?.map(([date, notifications], index) => (
-          <div key={index} className="flex flex-col gap-3">
-            <SkeletonSuspense
-              loading={isLoading}
-              skeleton={<Skeleton variant="line" textSize="xs" className="w-40" />}
-            >
-              <h3 className="text-gray-secondary text-sm font-bold uppercase tracking-wider ml-1">
-                {getNotificationsGroupTitle(date, t)}
-              </h3>
-            </SkeletonSuspense>
-            <div className="flex flex-col gap-2">
-              {notifications?.map((notification, index) => (
-                <NotificationCard
-                  loading={isLoading}
-                  key={index}
-                  notification={notification as Notification}
-                  onClick={handleNotificationClick}
-                />
-              ))}
+        contentEntries.map(([date, groupNotifications], groupIndex) => {
+          const groupOffset = groupAnimationIndexes[groupIndex];
+          return (
+            <div key={groupIndex} className="flex flex-col gap-3">
+              <SkeletonSuspense
+                loading={isLoading}
+                skeleton={<Skeleton variant="line" textSize="xs" className="w-40" />}
+              >
+                <h3
+                  className="text-purple-secondary text-xs font-bold uppercase tracking-widest ml-1 animate-slide-in-bottom"
+                  style={{ animationDelay: `${groupOffset * 80}ms` }}
+                >
+                  {getNotificationsGroupTitle(date, t)}
+                </h3>
+              </SkeletonSuspense>
+              <div className="flex flex-col gap-2">
+                {groupNotifications.map((notification, cardIndex) => (
+                  <NotificationCard
+                    loading={isLoading}
+                    key={isLoading ? cardIndex : (notification as Notification).id}
+                    notification={notification as Notification}
+                    onClick={handleNotificationClick}
+                    index={groupOffset + cardIndex + 1}
+                  />
+                ))}
+              </div>
             </div>
-          </div>
-        ))
+          );
+        })
       ) : (
         <div className="flex-center flex-col py-20 text-white/40">
           <EmptyDataInfo description={t('no notifications')} />
