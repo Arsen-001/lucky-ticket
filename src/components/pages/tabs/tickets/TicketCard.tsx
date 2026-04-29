@@ -15,7 +15,14 @@ import { TicketOverlap } from '@/components/shared/icons/TicketOverlap';
 
 export type TicketCardProps = TicketDataType & ClassNameProps & { loading?: boolean };
 
-export function TicketCard({ ticketType, className, loading, blocked, count }: TicketCardProps) {
+export function TicketCard({
+  id,
+  ticketType,
+  className,
+  loading,
+  blocked,
+  count,
+}: TicketCardProps) {
   const t = useAppTranslations();
   const titleIdByType: Record<TicketType, MessageIds> = {
     bronze: 'bronze',
@@ -33,7 +40,7 @@ export function TicketCard({ ticketType, className, loading, blocked, count }: T
   const titleId = titleIdByType?.[ticketType];
 
   return (
-    <Link href={!loading ? routes.tournaments.index : '#'}>
+    <Link href={!loading ? routes.tickets.getById(id) : '#'}>
       <div
         className={twMerge(
           'w-full p-4 bg-purple-gradient card-outlined rounded-xl flex flex-col h-full',

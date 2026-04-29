@@ -21,6 +21,18 @@ export interface BlockedTicketProps extends BaseTicketProps {
   requirements?: TicketRequirement[];
 }
 
+export interface TicketEngine {
+  id: string;
+  cycleSeconds: number;
+  perCycleOutput: number;
+  cycleStartedAt: string;
+  pendingCount: number;
+  speedBoostMultiplier?: number;
+  speedBoostExpiresAt?: string;
+  capacityUpgradeMultiplier?: number;
+  instantClaimStarsCost: number;
+}
+
 export interface AvailableTicketItemProps extends BaseTicketProps {
   claimDate: string;
   autocollectFinishDate: string;
@@ -28,4 +40,5 @@ export interface AvailableTicketItemProps extends BaseTicketProps {
   speed: number;
   isTimeBoosted: boolean;
   isCollectionBoosted: boolean;
+  engines?: TicketEngine[];
 }

@@ -1,8 +1,48 @@
+import dayjs from 'dayjs';
 import { getRandomUpcomingDate } from '@/utils/global/date.utils';
 import type { Ticket } from '@/types/types/ticket.types';
+import type { TicketEngine } from '@/types/interfaces/ticket.interfaces';
 
 const getClaimDate = () => getRandomUpcomingDate(1, 180);
 const getAutocollectFinishDate = () => getRandomUpcomingDate(2000, 3000);
+
+const getPastIso = (offsetSeconds: number) =>
+  dayjs().subtract(offsetSeconds, 'second').toISOString();
+
+const getFutureIso = (offsetSeconds: number) => dayjs().add(offsetSeconds, 'second').toISOString();
+
+const bronzeEngines: TicketEngine[] = [
+  {
+    id: 'engine-bronze-1',
+    cycleSeconds: 3600,
+    perCycleOutput: 1,
+    cycleStartedAt: getPastIso(900),
+    pendingCount: 2,
+    speedBoostMultiplier: 2,
+    speedBoostExpiresAt: getFutureIso(7200),
+    instantClaimStarsCost: 5,
+  },
+];
+
+const silverEngines: TicketEngine[] = [
+  {
+    id: 'engine-silver-1',
+    cycleSeconds: 7200,
+    perCycleOutput: 1,
+    cycleStartedAt: getPastIso(1800),
+    pendingCount: 1,
+    instantClaimStarsCost: 10,
+  },
+  {
+    id: 'engine-silver-2',
+    cycleSeconds: 7200,
+    perCycleOutput: 2,
+    cycleStartedAt: getPastIso(3000),
+    pendingCount: 0,
+    capacityUpgradeMultiplier: 2,
+    instantClaimStarsCost: 10,
+  },
+];
 
 const tickets: Ticket[] = [
   {
@@ -19,6 +59,7 @@ const tickets: Ticket[] = [
     isCollectionBoosted: false,
     blocked: false,
     count: 10,
+    engines: bronzeEngines,
   },
   {
     id: '123e4567-e89b-12d3-a456-426655440001',
@@ -34,6 +75,7 @@ const tickets: Ticket[] = [
     isCollectionBoosted: true,
     blocked: false,
     count: 5,
+    engines: silverEngines,
   },
   {
     id: '123e4567-e89b-12d3-a456-426655440002',
