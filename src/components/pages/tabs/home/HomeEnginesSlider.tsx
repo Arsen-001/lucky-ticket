@@ -1,9 +1,12 @@
 'use client';
 
 import 'swiper/css';
+import 'swiper/css/effect-coverflow';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import dayjs from 'dayjs';
+import type { Swiper as SwiperType } from 'swiper';
+import { EffectCoverflow } from 'swiper/modules';
 import { Swiper, SwiperSlide } from 'swiper/react';
 import { twMerge } from 'tailwind-merge';
 
@@ -11,11 +14,11 @@ import { useGetTicketsQuery } from '@/api/tickets.api';
 import { EngineCard } from '@/components/pages/out-tabs/tabs-extra/ticket/EngineCard';
 import { EmptyDataInfo } from '@/components/shared/EmptyDataInfo';
 import {
-  MAX_BOOST_LEVEL,
   effectiveCycleSeconds,
   engineCapacity,
   engineElapsedSeconds,
   isEngineMaxed,
+  MAX_BOOST_LEVEL,
 } from '@/utils/global/ticket-engine.utils';
 import type { ClassNameProps } from '@/types/interfaces/component.interfcaes';
 import type { TicketEngine } from '@/types/interfaces/ticket.interfaces';
@@ -29,6 +32,8 @@ interface EngineWithTier {
 export function HomeEnginesSlider({ className }: ClassNameProps) {
   const { data: tickets, isLoading } = useGetTicketsQuery();
 
+  const swiperRef = useRef<SwiperType | null>(null);
+  const [activeIndex, setActiveIndex] = useState(0);
   const [items, setItems] = useState<EngineWithTier[]>([]);
   const [elapsedByEngine, setElapsedByEngine] = useState<Record<string, number>>({});
 
@@ -138,26 +143,59 @@ export function HomeEnginesSlider({ className }: ClassNameProps) {
   }
 
   return (
-    <Swiper
-      className={twMerge('w-full overflow-visible', className)}
-      slidesPerView={1.08}
-      spaceBetween={12}
-      grabCursor
-    >
-      {items.map(({ engine, tier }, index) => (
-        <SwiperSlide key={engine.id} className="h-auto">
-          <EngineCard
-            engine={engine}
-            tier={tier}
-            index={index}
-            elapsedSeconds={elapsedByEngine[engine.id] ?? 0}
-            onClaim={handleClaim}
-            onInstantClaim={handleClaim}
-            onUpgradeSpeed={handleUpgradeSpeed}
-            onUpgradeCapacity={handleUpgradeCapacity}
-          />
-        </SwiperSlide>
-      ))}
-    </Swiper>
+    <div className={twMerge('flex w-full flex-col items-center', className)}>
+      <Swiper
+        className="w-full overflow-visible pb-6 mt-5"
+        slidesPerView={1.4286}
+        spaceBetween={30}
+        centeredSlides
+        grabCursor
+        loop={items.length > 1}
+        modules={[EffectCoverflow]}
+        effect="coverflow"
+        coverflowEffect={{
+          rotate: 0,
+          slideShadows: false,
+          depth: 180,
+          modifier: 1,
+          stretch: 0,
+        }}
+        onSwiper={swiper => {
+          swiperRef.current = swiper;
+        }}
+        onSlideChange={swiper => setActiveIndex(swiper.realIndex)}
+      >
+        {items.map(({ engine, tier }, index) => (
+          <SwiperSlide key={engine.id} className="h-auto">
+            <EngineCard
+              engine={engine}
+              tier={tier}
+              index={index}
+              elapsedSeconds={elapsedByEngine[engine.id] ?? 0}
+              onClaim={handleClaim}
+              onInstantClaim={handleClaim}
+              onUpgradeSpeed={handleUpgradeSpeed}
+              onUpgradeCapacity={handleUpgradeCapacity}
+            />
+          </SwiperSlide>
+        ))}
+      </Swiper>
+      {items.length > 1 && (
+        <div className="flex items-center justify-center gap-2 pt-4">
+          {items.map(({ engine }, index) => (
+            <button
+              key={engine.id}
+              type="button"
+              aria-label={`Slide ${index + 1}`}
+              onClick={() => swiperRef.current?.slideToLoop(index)}
+              className={twMerge(
+                'h-2 rounded-full transition-all duration-300',
+                activeIndex === index ? 'w-5 bg-electric-pink' : 'w-2 bg-white/25'
+              )}
+            />
+          ))}
+        </div>
+      )}
+    </div>
   );
 }
