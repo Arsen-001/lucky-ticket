@@ -47,7 +47,16 @@ export const routes = {
     security: '/settings/security',
   },
   languages: '/languages',
-  stakes: '/stakes',
+  stakes: {
+    index: '/stakes',
+    new: '/stakes/new',
+    getById: function (stakeId: string) {
+      return (this.index + `/${stakeId}`) as `/stakes/${string}`;
+    },
+    getReadyById: function (stakeId: string) {
+      return (this.index + `/ready/${stakeId}`) as `/stakes/ready/${string}`;
+    },
+  },
 } as const;
 
 /* eslint-disable */

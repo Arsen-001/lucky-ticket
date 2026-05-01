@@ -7,6 +7,9 @@ export interface StakeLevelDefinition {
   guaranteedTicket: TicketType;
   allTickets: TicketType[];
   bonusPrizes: string[];
+  starsChance: number;
+  starsMin: number;
+  starsMax: number;
 }
 
 export interface ActiveStake {
@@ -19,12 +22,29 @@ export interface ActiveStake {
   claimed: boolean;
 }
 
+export interface StakeHistoryEntry {
+  id: string;
+  level: number;
+  amount: number;
+  ticketsCount: number;
+  bonusLC: number;
+  bonusStars: number;
+  outcome: 'completed' | 'cancelled';
+  completedAt: string;
+}
+
 export interface StakesData {
   levels: StakeLevelDefinition[];
-  activeStake: ActiveStake | null;
+  activeStakes: ActiveStake[];
+  history: StakeHistoryEntry[];
 }
 
 export interface StartStakeBody {
   level: number;
   amount: number;
+  durationMonths: number;
+}
+
+export interface StakeIdBody {
+  stakeId: string;
 }

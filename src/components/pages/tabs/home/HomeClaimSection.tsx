@@ -3,7 +3,7 @@ import { PartnersComingSoon } from '@/components/pages/tabs/home/PartnersComingS
 import { getAppTranslations } from '@/i18n/getAppTranslations';
 import type { ClassNameProps } from '@/types/interfaces/component.interfcaes';
 import { twMerge } from 'tailwind-merge';
-import { HomeTicketsList } from '@/components/pages/tabs/home/HomeTicketsList';
+import { HomeEnginesSlider } from '@/components/pages/tabs/home/HomeEnginesSlider';
 import type { CSSProperties } from 'react';
 
 export async function HomeClaimSection({
@@ -18,7 +18,7 @@ export async function HomeClaimSection({
       title: t('main'),
       children: (
         <div className="flex-available overflow-y-auto scrollbar-hidden py-2.5">
-          <HomeTicketsList />
+          <HomeEnginesSlider />
         </div>
       ),
     },
@@ -40,7 +40,7 @@ export async function HomeClaimSection({
         classNames={{
           tab: 'min-w-30',
 
-          children: 'flex-1 flex-col-stretch px-5 mt-3 inset-container-background',
+          children: 'px-5 mt-3 inset-container-background',
         }}
         className="mt-5"
         items={tabs}

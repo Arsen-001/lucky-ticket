@@ -24,7 +24,7 @@ export default async function TicketsPage() {
   ] as const;
 
   return (
-    <div className="py-10 px-5">
+    <div className="py-8 px-5">
       <Tabs
         defaultActiveKey={tabs[0].key}
         classNames={{

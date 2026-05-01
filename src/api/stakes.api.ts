@@ -1,6 +1,6 @@
 import { api } from '@/api/index.api';
 import { rtkTags } from '@/constants/rtk-tags';
-import type { StakesData, StartStakeBody } from '@/types/interfaces/stakes.interfaces';
+import type { StakeIdBody, StakesData, StartStakeBody } from '@/types/interfaces/stakes.interfaces';
 
 export const stakesApi = api.injectEndpoints({
   endpoints: builder => ({
@@ -12,12 +12,12 @@ export const stakesApi = api.injectEndpoints({
       query: body => ({ url: 'stakes/start', method: 'POST', body }),
       invalidatesTags: [rtkTags.stakes, rtkTags.me],
     }),
-    cancelStake: builder.mutation<{ success: boolean }, void>({
-      query: () => ({ url: 'stakes/cancel', method: 'POST' }),
+    cancelStake: builder.mutation<{ success: boolean }, StakeIdBody>({
+      query: body => ({ url: 'stakes/cancel', method: 'POST', body }),
       invalidatesTags: [rtkTags.stakes, rtkTags.me],
     }),
-    claimStake: builder.mutation<{ success: boolean }, void>({
-      query: () => ({ url: 'stakes/claim', method: 'POST' }),
+    claimStake: builder.mutation<{ success: boolean }, StakeIdBody>({
+      query: body => ({ url: 'stakes/claim', method: 'POST', body }),
       invalidatesTags: [rtkTags.stakes, rtkTags.me],
     }),
   }),

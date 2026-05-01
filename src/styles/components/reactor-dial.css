@@ -1,0 +1,47 @@
+@keyframes reactor-dial-fill {
+  from {
+    stroke-dashoffset: var(--reactor-dial-c, 360);
+  }
+  to {
+    stroke-dashoffset: 0;
+  }
+}
+
+@keyframes reactor-dial-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes reactor-dial-claim-pulse {
+  0%,
+  100% {
+    filter: brightness(1);
+  }
+  50% {
+    filter: brightness(1.15);
+  }
+}
+
+.reactor-dial-svg {
+  position: absolute;
+  inset: 0;
+  transform: rotate(-90deg);
+}
+
+.reactor-dial-spin {
+  position: absolute;
+  inset: 0;
+  animation: reactor-dial-spin 4s linear infinite;
+  opacity: 0.6;
+}
+
+.reactor-dial-progress {
+  transition: stroke-dashoffset 250ms ease-out;
+}
+
+.reactor-dial-progress[data-pending='false'] {
+  animation-name: reactor-dial-fill;
+  animation-timing-function: linear;
+  animation-fill-mode: forwards;
+}

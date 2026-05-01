@@ -31,6 +31,9 @@ export interface TicketEngine {
   speedBoostExpiresAt?: string;
   capacityUpgradeMultiplier?: number;
   instantClaimStarsCost: number;
+  engineLevel?: number;
+  speedLevel?: number;
+  capacityLevel?: number;
 }
 
 export interface AvailableTicketItemProps extends BaseTicketProps {

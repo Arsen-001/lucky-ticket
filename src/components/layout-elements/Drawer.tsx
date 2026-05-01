@@ -79,7 +79,7 @@ export function Drawer() {
       icon: <Wallet />,
     },
     {
-      route: routes.stakes,
+      route: routes.stakes.index,
       title: t('stakes'),
       icon: <Layers />,
     },

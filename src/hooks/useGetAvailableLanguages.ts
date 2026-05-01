@@ -35,6 +35,12 @@ export function useGetAvailableLanguages() {
       nativeName: 'Русский',
       flag: flags.russia,
     },
+    {
+      code: Locale.GERMAN,
+      name: t('german'),
+      nativeName: 'Deutsch',
+      flag: flags.germany,
+    },
   ];
 
   return {
