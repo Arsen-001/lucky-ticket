@@ -12,4 +12,7 @@ export const rtkTags = {
   exchange: 'Exchange',
   market: 'Market',
   stakes: 'Stakes',
+  wallet: 'Wallet',
+  walletTransactions: 'WalletTransactions',
+  starsPackages: 'StarsPackages',
 } as const;

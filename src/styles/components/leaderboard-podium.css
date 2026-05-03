@@ -1,0 +1,118 @@
+@keyframes lt-podium-float {
+  0%,
+  100% {
+    transform: translateY(-4px);
+  }
+  50% {
+    transform: translateY(4px);
+  }
+}
+
+@keyframes lt-podium-float-side {
+  0%,
+  100% {
+    transform: translateY(-2px);
+  }
+  50% {
+    transform: translateY(3px);
+  }
+}
+
+@keyframes lt-podium-ring-rotate {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes lt-podium-pulse-ring {
+  0% {
+    transform: scale(0.85);
+    opacity: 0.7;
+  }
+  100% {
+    transform: scale(1.45);
+    opacity: 0;
+  }
+}
+
+@keyframes lt-podium-sparkle {
+  0%,
+  100% {
+    opacity: 0;
+    transform: scale(0.4);
+  }
+  50% {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@keyframes lt-podium-confetti {
+  0% {
+    transform: translate3d(0, -10%, 0) rotate(0deg);
+    opacity: 0;
+  }
+  10% {
+    opacity: 0.85;
+  }
+  100% {
+    transform: translate3d(var(--lt-confetti-x, 0), 110%, 0) rotate(540deg);
+    opacity: 0;
+  }
+}
+
+@keyframes lt-podium-crown-bounce {
+  0%,
+  100% {
+    transform: translate(-50%, 0) rotate(-3deg);
+  }
+  50% {
+    transform: translate(-50%, -6px) rotate(3deg);
+  }
+}
+
+.lt-podium-stage {
+  background:
+    radial-gradient(circle at 50% 30%, rgba(248, 189, 62, 0.18) 0%, transparent 55%),
+    radial-gradient(circle at 25% 70%, rgba(116, 61, 245, 0.18) 0%, transparent 60%),
+    radial-gradient(circle at 75% 70%, rgba(222, 0, 155, 0.18) 0%, transparent 60%);
+}
+
+.lt-podium-1 {
+  animation: lt-podium-float 3.4s ease-in-out infinite;
+}
+
+.lt-podium-2,
+.lt-podium-3 {
+  animation: lt-podium-float-side 3.8s ease-in-out infinite;
+}
+
+.lt-podium-3 {
+  animation-delay: 0.6s;
+}
+
+.lt-podium-rotor {
+  animation: lt-podium-ring-rotate 8s linear infinite;
+}
+
+.lt-podium-rotor-rev {
+  animation: lt-podium-ring-rotate 12s linear infinite reverse;
+}
+
+.lt-podium-pulse {
+  animation: lt-podium-pulse-ring 2.4s cubic-bezier(0.22, 1, 0.36, 1) infinite;
+}
+
+.lt-podium-sparkle {
+  animation: lt-podium-sparkle 1.8s ease-in-out infinite;
+}
+
+.lt-podium-confetti-piece {
+  animation: lt-podium-confetti var(--lt-confetti-duration, 6s) linear infinite;
+  animation-delay: var(--lt-confetti-delay, 0s);
+}
+
+.lt-podium-crown {
+  animation: lt-podium-crown-bounce 2.2s ease-in-out infinite;
+  transform-origin: 50% 100%;
+}

@@ -1,4 +1,7 @@
+export type LeaderboardPeriod = 'today' | 'week' | 'month' | 'all';
+
 export interface LeaderboardEntry {
+  id: string;
   username: string;
   points: number;
   avatar: string;
@@ -10,6 +13,8 @@ export interface LeaderboardEntry {
 }
 
 export interface LeaderboardResponse {
+  period: LeaderboardPeriod;
+  total: number;
   places: LeaderboardEntry[];
   myPlace: LeaderboardEntry;
 }

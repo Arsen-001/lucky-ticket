@@ -30,7 +30,7 @@ export function PageHeader({
   const handleBack = () => handleSafeBack(router, backRoute);
   return (
     <div
-      className={twMerge('py-5.75 px-5 relative flex items-center justify-between', className)}
+      className={twMerge('py-3 px-5 relative flex items-center justify-between', className)}
       {...props}
     >
       <div className="flex items-center z-10">
@@ -39,7 +39,7 @@ export function PageHeader({
 
       <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 z-0 max-w-[60%] w-full flex justify-center">
         {title && (
-          <h1 className="text-white text-lg font-bold truncate text-center w-full">{title}</h1>
+          <h1 className="text-white text-base font-bold truncate text-center w-full">{title}</h1>
         )}
       </div>
 

@@ -11,83 +11,45 @@ const getPastIso = (offsetSeconds: number) =>
 
 const getFutureIso = (offsetSeconds: number) => dayjs().add(offsetSeconds, 'second').toISOString();
 
-const bronzeEngines: TicketEngine[] = [
-  {
-    id: 'engine-bronze-1',
-    cycleSeconds: 18,
-    perCycleOutput: 1,
-    cycleStartedAt: getPastIso(7),
-    pendingCount: 0,
-    instantClaimStarsCost: 5,
-    engineLevel: 1,
-    speedLevel: 0,
-    capacityLevel: 0,
-  },
-  {
-    id: 'engine-bronze-2',
-    cycleSeconds: 18,
-    perCycleOutput: 1,
-    cycleStartedAt: getPastIso(14),
-    pendingCount: 0,
-    instantClaimStarsCost: 5,
-    engineLevel: 1,
-    speedLevel: 2,
-    capacityLevel: 4,
-    speedBoostMultiplier: 2,
-    speedBoostExpiresAt: getFutureIso(7200),
-  },
-  {
-    id: 'engine-bronze-3',
-    cycleSeconds: 18,
-    perCycleOutput: 1,
-    cycleStartedAt: getPastIso(18),
-    pendingCount: 4,
-    instantClaimStarsCost: 5,
-    engineLevel: 2,
-    speedLevel: 8,
-    capacityLevel: 9,
-  },
-];
+interface EnginePreset {
+  cycleSeconds: number;
+  starsCost: number;
+}
 
-const silverEngines: TicketEngine[] = [
-  {
-    id: 'engine-silver-1',
-    cycleSeconds: 28,
-    perCycleOutput: 1,
-    cycleStartedAt: getPastIso(28),
-    pendingCount: 1,
-    instantClaimStarsCost: 10,
-    engineLevel: 1,
-    speedLevel: 1,
-    capacityLevel: 2,
-  },
-  {
-    id: 'engine-silver-2',
-    cycleSeconds: 28,
-    perCycleOutput: 1,
-    cycleStartedAt: getPastIso(11),
-    pendingCount: 0,
-    instantClaimStarsCost: 10,
-    engineLevel: 1,
-    speedLevel: 0,
-    capacityLevel: 0,
-    capacityUpgradeMultiplier: 2,
-  },
-];
+const tierPresets: Record<'bronze' | 'silver' | 'gold', EnginePreset> = {
+  bronze: { cycleSeconds: 18, starsCost: 5 },
+  silver: { cycleSeconds: 28, starsCost: 10 },
+  gold: { cycleSeconds: 40, starsCost: 15 },
+};
 
-const goldEngines: TicketEngine[] = [
-  {
-    id: 'engine-gold-1',
-    cycleSeconds: 40,
-    perCycleOutput: 1,
-    cycleStartedAt: getPastIso(22),
-    pendingCount: 0,
-    instantClaimStarsCost: 15,
-    engineLevel: 3,
-    speedLevel: 5,
-    capacityLevel: 3,
-  },
-];
+const buildEngines = (tier: 'bronze' | 'silver' | 'gold', count: number): TicketEngine[] => {
+  const preset = tierPresets[tier];
+  return Array.from({ length: count }).map((_, index) => {
+    const claimable = index % 3 === 0;
+    const speedLevel = index % 10;
+    const capacityLevel = (index * 2) % 10;
+    const engineLevel = 1 + Math.floor(index / 5);
+    return {
+      id: `engine-${tier}-${index + 1}`,
+      cycleSeconds: preset.cycleSeconds,
+      perCycleOutput: 1,
+      cycleStartedAt: getPastIso(claimable ? preset.cycleSeconds : index + 2),
+      pendingCount: claimable ? 1 + (index % 3) : 0,
+      instantClaimStarsCost: preset.starsCost,
+      engineLevel,
+      speedLevel,
+      capacityLevel,
+      ...(index % 4 === 1
+        ? { speedBoostMultiplier: 2, speedBoostExpiresAt: getFutureIso(7200) }
+        : {}),
+      ...(index % 5 === 2 ? { capacityUpgradeMultiplier: 2 } : {}),
+    } satisfies TicketEngine;
+  });
+};
+
+const bronzeEngines: TicketEngine[] = buildEngines('bronze', 9);
+const silverEngines: TicketEngine[] = buildEngines('silver', 7);
+const goldEngines: TicketEngine[] = buildEngines('gold', 4);
 
 const tickets: Ticket[] = [
   {

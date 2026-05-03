@@ -1,17 +1,19 @@
-import Link from 'next/link';
+import { ChevronRight, FileText } from 'lucide-react';
+import NextLink from 'next/link';
 import { type SupportArticleMeta } from '@/types/interfaces/support.interfaces';
 import { routes } from '@/constants/routes';
-import { ChevronRight } from 'lucide-react';
 import { HighlightedText } from '@/components/shared/typography/HighlightedText';
 import { SkeletonSuspense } from '@/components/shared/seleketons/SkeletonSuspense';
 import { Skeleton } from '@/components/shared/seleketons/Skeleton';
-import type { HTMLAttributes } from 'react';
 import { twMerge } from 'tailwind-merge';
+import type { CSSProperties } from 'react';
 
-export interface SupportSectionItemProps extends HTMLAttributes<HTMLDivElement> {
+export interface SupportArticleItemProps {
   article: SupportArticleMeta;
   loading?: boolean;
   searchValue?: string;
+  className?: string;
+  style?: CSSProperties;
 }
 
 export function SupportArticleItem({
@@ -19,54 +21,49 @@ export function SupportArticleItem({
   loading,
   searchValue = '',
   className,
-  ...props
-}: SupportSectionItemProps) {
+  style,
+}: SupportArticleItemProps) {
   return (
-    <Link href={routes.support.getById(article.id)}>
-      <div
-        className={twMerge(
-          'overflow-hidden flex items-center justify-between gap-2 bg-purple-gradient px-4 py-3 rounded-xl transition-opacity active:opacity-80',
-          className
-        )}
-        {...props}
-      >
-        <div className="overflow-hidden flex-1 flex flex-col gap-px">
-          <SkeletonSuspense
-            loading={loading}
-            skeleton={<Skeleton variant="line" textSize="base" className="w-2/3" />}
-          >
-            <HighlightedText
-              highlight={searchValue}
-              className="text-white-secondary font-semibold text-base truncate"
-            >
-              {article.title}
-            </HighlightedText>
-          </SkeletonSuspense>
-          <SkeletonSuspense
-            loading={loading}
-            skeleton={
-              <div className="flex flex-col gap-1 mt-1">
-                <Skeleton variant="line" textSize="xs" className="w-full" />
-              </div>
-            }
-          >
-            <HighlightedText
-              highlight={searchValue}
-              className="text-sm text-gray-secondary font-semibold truncate"
-            >
-              {article.description}
-            </HighlightedText>
-          </SkeletonSuspense>
-        </div>
-        <div>
-          <SkeletonSuspense
-            loading={loading}
-            skeleton={<Skeleton variant="card" className="w-6 h-6" />}
-          >
-            <ChevronRight size={24} />
-          </SkeletonSuspense>
-        </div>
+    <NextLink
+      href={loading ? routes.support.index : routes.support.getById(article.id)}
+      style={style}
+      className={twMerge(
+        'group bg-background-overlay/50 hover:bg-white/5 flex items-center gap-3 rounded-2xl border border-white/5 p-3 transition-colors active:scale-99',
+        className
+      )}
+    >
+      <div className="bg-electric-pink/15 border-electric-pink/30 flex-center h-9 w-9 flex-shrink-0 rounded-lg border">
+        <FileText size={16} className="text-electric-pink" strokeWidth={2.2} />
       </div>
-    </Link>
+      <div className="flex min-w-0 flex-1 flex-col gap-0.5">
+        <SkeletonSuspense
+          loading={loading}
+          skeleton={<Skeleton variant="line" textSize="sm" className="h-4 w-2/3" />}
+        >
+          <HighlightedText
+            highlight={searchValue}
+            className="truncate text-sm font-bold text-white"
+          >
+            {article.title}
+          </HighlightedText>
+        </SkeletonSuspense>
+        <SkeletonSuspense
+          loading={loading}
+          skeleton={<Skeleton variant="line" textSize="xs" className="h-3 w-full" />}
+        >
+          <HighlightedText
+            highlight={searchValue}
+            className="text-pink-secondary truncate text-[11px] font-medium"
+          >
+            {article.description}
+          </HighlightedText>
+        </SkeletonSuspense>
+      </div>
+      <ChevronRight
+        size={16}
+        className="text-pink-secondary group-hover:text-white flex-shrink-0 transition-colors"
+        strokeWidth={2.2}
+      />
+    </NextLink>
   );
 }

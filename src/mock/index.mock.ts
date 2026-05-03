@@ -10,6 +10,7 @@ import { referralMock } from '@/mock/referral.mock';
 import { exchangeMock } from '@/mock/exchange.mock';
 import { marketMock } from '@/mock/market.mock';
 import { stakesMock } from '@/mock/stakes.mock';
+import { walletMock } from '@/mock/wallet.mock';
 
 /**
  * Type for functional mock handlers.
@@ -34,6 +35,7 @@ export const mockData = {
   ...exchangeMock,
   market: marketMock,
   ...stakesMock,
+  ...walletMock,
 } as const;
 
 export type MockData = typeof mockData;

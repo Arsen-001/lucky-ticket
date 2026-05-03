@@ -1,43 +1,88 @@
+import { Crown, Star, Users } from 'lucide-react';
+import type { ReactNode } from 'react';
+import { twMerge } from 'tailwind-merge';
 import { useAppTranslations } from '@/hooks/useAppTranslations';
 import { GlobalConstants } from '@/constants/global.constants';
-import { Star } from 'lucide-react';
+
+interface RewardTier {
+  key: string;
+  label: string;
+  percent: number;
+  icon: ReactNode;
+  iconWrapClass: string;
+  percentClass: string;
+}
 
 export const ReferralInfoSection = () => {
   const t = useAppTranslations();
 
+  const tiers: RewardTier[] = [
+    {
+      key: 'regular',
+      label: t('regular friends'),
+      percent: GlobalConstants.referralPercentage,
+      icon: <Users size={14} className="text-electric-pink" strokeWidth={2.4} />,
+      iconWrapClass: 'bg-electric-pink/15',
+      percentClass: 'text-success',
+    },
+    {
+      key: 'telegram',
+      label: t('telegram premium'),
+      percent: GlobalConstants.telegramPremiumReferralPercentage,
+      icon: <Star size={14} className="fill-gold text-gold" />,
+      iconWrapClass: 'bg-gold/20',
+      percentClass: 'text-gold',
+    },
+    {
+      key: 'prime',
+      label: t('prime friends'),
+      percent: GlobalConstants.primeReferralPercentage,
+      icon: <Crown size={14} className="text-electric-purple" strokeWidth={2.4} />,
+      iconWrapClass: 'bg-electric-purple/20',
+      percentClass: 'text-electric-purple',
+    },
+  ];
+
   return (
-    <div className="flex flex-col gap-2.5 p-4 bg-purple-gradient rounded-2xl">
-      <div className="flex flex-col gap-0.5">
-        <h3 className="text-lg font-bold">{t('invite friends')}</h3>
-        <p className="text-sm text-gray-400">{t('get rewards description')}</p>
+    <div className="card-outlined bg-purple-gradient rounded-2xl p-3.5">
+      <div className="mb-2 flex items-center justify-between">
+        <h3 className="text-pink-secondary text-xs font-bold uppercase tracking-wider">
+          {t('rewards explained')}
+        </h3>
+        <span className="text-pink-secondary text-[10px]">{t('from their claimed tickets')}</span>
       </div>
 
-      <div className="flex flex-col gap-1.5">
-        <div className="flex items-center justify-between py-2.5 px-3 bg-white/5 rounded-xl">
-          <div className="flex flex-col">
-            <span className="text-sm font-semibold">{t('regular friends')}</span>
-            <span className="text-xs text-gray-400">{t('from their claimed tickets')}</span>
-          </div>
-          <span className="text-lg font-semibold text-success">
-            +{GlobalConstants.referralPercentage}%
-          </span>
-        </div>
-
-        <div className="flex items-center justify-between py-2.5 px-3 bg-gold/10 rounded-xl border border-gold/20">
-          <div className="flex flex-col">
-            <div className="flex items-center gap-1">
-              <Star size={13} className="fill-gold text-gold" />
-              <span className="text-sm font-semibold text-gold">
-                {t('telegram premium friends')}
-              </span>
+      <ul className="flex flex-col">
+        {tiers.map((tier, index) => (
+          <li
+            key={tier.key}
+            className={twMerge(
+              'flex items-center gap-2.5 py-2',
+              index !== tiers.length - 1 && 'border-b border-white/5'
+            )}
+          >
+            <div
+              className={twMerge(
+                'flex-center h-7 w-7 flex-shrink-0 rounded-lg',
+                tier.iconWrapClass
+              )}
+            >
+              {tier.icon}
             </div>
-            <span className="text-xs text-gray-400">{t('from their claimed tickets')}</span>
-          </div>
-          <span className="text-lg font-semibold text-gold">
-            +{GlobalConstants.telegramPremiumReferralPercentage}%
-          </span>
-        </div>
-      </div>
+            <span className="text-white-secondary flex-1 truncate text-sm font-semibold">
+              {tier.label}
+            </span>
+            <span
+              className={twMerge(
+                'text-base font-extrabold leading-none tabular-nums',
+                tier.percentClass
+              )}
+            >
+              +{tier.percent}%
+            </span>
+          </li>
+        ))}
+      </ul>
     </div>
   );
 };

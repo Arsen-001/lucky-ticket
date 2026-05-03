@@ -1,0 +1,223 @@
+'use client';
+
+import { useCallback, useEffect, useMemo, useRef, useState, useTransition } from 'react';
+import { useRouter, useSearchParams } from 'next/navigation';
+import { twMerge } from 'tailwind-merge';
+
+import { useGetLeaderboardQuery } from '@/api/leaderboard.api';
+import { useGetMeQuery } from '@/api/me.api';
+import { useAppTranslations } from '@/hooks/useAppTranslations';
+import { useDebounce } from '@/hooks/useDebounce';
+
+import { LeaderboardCountUp } from './LeaderboardCountUp';
+import { LeaderboardEmptyState } from './LeaderboardEmptyState';
+import { LeaderboardErrorState } from './LeaderboardErrorState';
+import { LeaderboardHeroCard } from './LeaderboardHeroCard';
+import { LeaderboardListItem } from './LeaderboardListItem';
+import { LeaderboardPeriodTabs } from './LeaderboardPeriodTabs';
+import { LeaderboardPodium, type PodiumPlayer, type PodiumRank } from './LeaderboardPodium';
+import type {
+  LeaderboardEntry,
+  LeaderboardPeriod,
+} from '@/types/interfaces/leaderboard.interfaces';
+
+const VALID_PERIODS: LeaderboardPeriod[] = ['today', 'week', 'month', 'all'];
+const COUNT_UP_PLACES = 10;
+
+const isValidPeriod = (value: string | null): value is LeaderboardPeriod =>
+  !!value && (VALID_PERIODS as string[]).includes(value);
+
+export function LeaderboardContainer() {
+  const t = useAppTranslations();
+  const router = useRouter();
+  const searchParams = useSearchParams();
+
+  const initialPeriod: LeaderboardPeriod = isValidPeriod(searchParams.get('period'))
+    ? (searchParams.get('period') as LeaderboardPeriod)
+    : 'all';
+
+  const [period, setPeriod] = useState<LeaderboardPeriod>(initialPeriod);
+  const debouncedPeriod = useDebounce(period, 200);
+  const [, startTransition] = useTransition();
+  const [announcement, setAnnouncement] = useState('');
+
+  const { data, isLoading, isFetching, isError, refetch } = useGetLeaderboardQuery(debouncedPeriod);
+  const { data: me } = useGetMeQuery();
+
+  const handlePeriodChange = useCallback(
+    (next: LeaderboardPeriod) => {
+      setPeriod(next);
+      startTransition(() => {
+        const params = new URLSearchParams(searchParams.toString());
+        if (next === 'all') params.delete('period');
+        else params.set('period', next);
+        router.replace(params.toString() ? `?${params}` : '?', { scroll: false });
+      });
+    },
+    [router, searchParams]
+  );
+
+  const places = data?.places ?? [];
+  const myPlace = data?.myPlace;
+
+  const rootRef = useRef<HTMLDivElement>(null);
+  const [isMyRowVisible, setIsMyRowVisible] = useState(false);
+
+  useEffect(() => {
+    const root = rootRef.current;
+    if (!root) return;
+    const target = root.querySelector<HTMLElement>('[data-leaderboard-me="true"]');
+    if (!target) {
+      setIsMyRowVisible(false);
+      return;
+    }
+    const observer = new IntersectionObserver(
+      ([entry]) => setIsMyRowVisible(entry.isIntersecting),
+      { threshold: 0.6 }
+    );
+    observer.observe(target);
+    return () => observer.disconnect();
+  }, [places, isLoading]);
+
+  const showFloatingMyPlace = !!myPlace && !isMyRowVisible;
+
+  const topFive = useMemo<PodiumPlayer[]>(
+    () =>
+      places.slice(0, 5).map(entry => ({
+        rank: entry.place as PodiumRank,
+        username: entry.username,
+        points: entry.points,
+        avatarUrl: entry.avatar,
+        fallbackInitial: entry.username.charAt(0).toUpperCase(),
+      })),
+    [places]
+  );
+  const restOfList = useMemo(() => places.slice(5), [places]);
+
+  useEffect(() => {
+    if (!data) return;
+    setAnnouncement(t('top {n}', { n: places.length }));
+  }, [data, places.length, t]);
+
+  if (!isLoading && !isError && places.length === 0) {
+    return (
+      <div className="flex flex-col gap-4 px-4 pb-6 pt-2">
+        <LeaderboardHeroCard myPlace={myPlace} total={data?.total} loading={isLoading} />
+        <LeaderboardPeriodTabs active={period} onChange={handlePeriodChange} />
+        <LeaderboardEmptyState />
+      </div>
+    );
+  }
+
+  return (
+    <div ref={rootRef} className="flex flex-col gap-4 px-4 pb-6 pt-2">
+      <LeaderboardHeroCard myPlace={myPlace} total={data?.total} loading={isLoading} />
+      <LeaderboardPeriodTabs active={period} onChange={handlePeriodChange} />
+
+      {isError ? (
+        <LeaderboardErrorState onRetry={() => refetch()} loading={isFetching} />
+      ) : (
+        <>
+          <LeaderboardPodium players={topFive} loading={isLoading} />
+          <ListBody
+            isLoading={isLoading}
+            places={restOfList}
+            total={data?.total ?? 0}
+            myPlace={myPlace}
+            meId={me?.id}
+          />
+        </>
+      )}
+
+      {showFloatingMyPlace && (
+        <div
+          aria-label={t('your place')}
+          className={twMerge(
+            'sticky bottom-2 z-10 -mx-1 mt-1 px-1 backdrop-blur-md',
+            'animate-slide-in-bottom'
+          )}
+        >
+          <LeaderboardListItem entry={myPlace} isMe />
+        </div>
+      )}
+
+      <span className="sr-only" role="status" aria-live="polite">
+        {announcement}
+      </span>
+    </div>
+  );
+}
+
+interface ListBodyProps {
+  isLoading: boolean;
+  places: LeaderboardEntry[];
+  total: number;
+  myPlace?: LeaderboardEntry;
+  meId?: string;
+}
+
+function ListBody({ isLoading, places, total, myPlace, meId }: ListBodyProps) {
+  const t = useAppTranslations();
+  const containerRef = useRef<HTMLDivElement>(null);
+  const skeletonItems = useMemo(() => Array.from({ length: 12 }), []);
+
+  return (
+    <div className="flex flex-col gap-2">
+      <div className="bg-background-overlay/40 sticky top-0 z-10 -mx-1 flex items-center gap-2.5 rounded-xl border border-white/5 px-3 py-2 backdrop-blur-md">
+        <span className="text-pink-secondary w-9 flex-shrink-0 text-[10px] font-bold uppercase tracking-wider">
+          {t('rank')}
+        </span>
+        <span className="text-pink-secondary flex-1 text-[10px] font-bold uppercase tracking-wider">
+          {t('player')}
+        </span>
+        <span className="text-pink-secondary flex-shrink-0 text-[10px] font-bold uppercase tracking-wider">
+          {t('change')}
+        </span>
+      </div>
+
+      <div
+        ref={containerRef}
+        className="flex flex-col gap-2 opacity-100"
+        role="list"
+        aria-busy={isLoading}
+      >
+        {isLoading
+          ? skeletonItems.map((_, index) => (
+              <LeaderboardListItem
+                key={`s-${index}`}
+                loading
+                style={{ animationDelay: `${index * 30}ms` }}
+                className="animate-slide-in-bottom"
+              />
+            ))
+          : places.map((entry, index) => {
+              const isMe = !!meId && entry.id === meId;
+              return (
+                <LeaderboardListItem
+                  key={entry.id}
+                  entry={entry}
+                  isMe={isMe}
+                  animateCounter={index < COUNT_UP_PLACES}
+                  className="animate-slide-in-bottom"
+                  style={{ animationDelay: `${Math.min(index, 30) * 30}ms` }}
+                />
+              );
+            })}
+      </div>
+
+      {!isLoading && total > 0 && (
+        <div className="text-pink-secondary mt-1 text-center text-[11px] font-semibold tabular-nums">
+          {myPlace ? (
+            <>
+              {t('top {n}', { n: places.length })} ·{' '}
+              <LeaderboardCountUp value={total} className="tabular-nums" />{' '}
+              {t('player').toLowerCase()}
+            </>
+          ) : (
+            t('top {n}', { n: places.length })
+          )}
+        </div>
+      )}
+    </div>
+  );
+}

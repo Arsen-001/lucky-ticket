@@ -1,0 +1,421 @@
+import Image from 'next/image';
+import { Crown, Sparkles, Star } from 'lucide-react';
+import { twMerge } from 'tailwind-merge';
+import { Skeleton } from '@/components/shared/seleketons/Skeleton';
+import { SkeletonSuspense } from '@/components/shared/seleketons/SkeletonSuspense';
+import { useAppTranslations } from '@/hooks/useAppTranslations';
+import { formatNumber } from '@/utils/global/number.utils';
+import type { CSSProperties, ReactNode } from 'react';
+import '@/styles/components/leaderboard-podium.css';
+
+export type PodiumRank = 1 | 2 | 3 | 4 | 5;
+
+export interface PodiumPlayer {
+  rank: PodiumRank;
+  username: string;
+  points: number;
+  avatarUrl?: string;
+  fallbackInitial: string;
+}
+
+export interface LeaderboardPodiumProps {
+  players?: PodiumPlayer[];
+  loading?: boolean;
+  className?: string;
+}
+
+interface RankTheme {
+  outerGradient: string;
+  ringGradient: string;
+  haloColor: string;
+  glow: string;
+  pulseColor: string;
+  badgeBg: string;
+  badgeText: string;
+  pointsGradient: string;
+  accentTextClass: string;
+}
+
+const RANK_THEME: Record<PodiumRank, RankTheme> = {
+  1: {
+    outerGradient: 'conic-gradient(from 0deg, #FFE08A, #F8BD3E, #FFFFFF, #B47B0A, #FFE08A)',
+    ringGradient: 'linear-gradient(180deg, #FFE08A 0%, #F8BD3E 50%, #B47B0A 100%)',
+    haloColor: 'rgba(248,189,62,0.55)',
+    glow: '0 0 40px rgba(248,189,62,0.6), 0 0 12px rgba(255,224,138,0.7) inset',
+    pulseColor: 'rgba(248,189,62,0.45)',
+    badgeBg: '#F8BD3E',
+    badgeText: '#1B192A',
+    pointsGradient: 'linear-gradient(180deg, #FFE08A 0%, #F8BD3E 60%, #B47B0A 100%)',
+    accentTextClass: 'text-gold',
+  },
+  2: {
+    outerGradient: 'conic-gradient(from 0deg, #E6E6E6, #C0C0C0, #FFFFFF, #6F6F6F, #E6E6E6)',
+    ringGradient: 'linear-gradient(180deg, #E6E6E6 0%, #C0C0C0 50%, #6F6F6F 100%)',
+    haloColor: 'rgba(216,216,216,0.4)',
+    glow: '0 0 24px rgba(216,216,216,0.4)',
+    pulseColor: 'rgba(216,216,216,0.35)',
+    badgeBg: '#A8AAA4',
+    badgeText: '#1B192A',
+    pointsGradient: 'linear-gradient(180deg, #F4F4F4 0%, #C0C0C0 60%, #6F6F6F 100%)',
+    accentTextClass: 'text-white-secondary',
+  },
+  3: {
+    outerGradient: 'conic-gradient(from 0deg, #E08A3A, #AC6122, #FFD2A0, #6B3A11, #E08A3A)',
+    ringGradient: 'linear-gradient(180deg, #E08A3A 0%, #AC6122 50%, #6B3A11 100%)',
+    haloColor: 'rgba(172,97,34,0.55)',
+    glow: '0 0 24px rgba(172,97,34,0.5)',
+    pulseColor: 'rgba(172,97,34,0.4)',
+    badgeBg: '#AC6122',
+    badgeText: '#FFE8C9',
+    pointsGradient: 'linear-gradient(180deg, #FFD2A0 0%, #E08A3A 60%, #6B3A11 100%)',
+    accentTextClass: 'text-bronze',
+  },
+  4: {
+    outerGradient: 'conic-gradient(from 0deg, #FF7BD7, #DE009B, #FFFFFF, #6E0150, #FF7BD7)',
+    ringGradient: 'linear-gradient(180deg, #FF7BD7 0%, #DE009B 50%, #6E0150 100%)',
+    haloColor: 'rgba(222,0,155,0.5)',
+    glow: '0 0 18px rgba(222,0,155,0.4)',
+    pulseColor: 'rgba(222,0,155,0.35)',
+    badgeBg: '#DE009B',
+    badgeText: '#FFFFFF',
+    pointsGradient: 'linear-gradient(180deg, #FF7BD7 0%, #DE009B 60%, #6E0150 100%)',
+    accentTextClass: 'text-electric-pink',
+  },
+  5: {
+    outerGradient: 'conic-gradient(from 0deg, #B49AF8, #743DF5, #FFFFFF, #2E0F86, #B49AF8)',
+    ringGradient: 'linear-gradient(180deg, #B49AF8 0%, #743DF5 50%, #2E0F86 100%)',
+    haloColor: 'rgba(116,61,245,0.5)',
+    glow: '0 0 18px rgba(116,61,245,0.4)',
+    pulseColor: 'rgba(116,61,245,0.35)',
+    badgeBg: '#743DF5',
+    badgeText: '#FFFFFF',
+    pointsGradient: 'linear-gradient(180deg, #B49AF8 0%, #743DF5 60%, #2E0F86 100%)',
+    accentTextClass: 'text-electric-purple',
+  },
+};
+
+const AVATAR_SIZE: Record<PodiumRank, number> = { 1: 124, 2: 70, 3: 70, 4: 56, 5: 56 };
+const REVEAL_DELAY_MS: Record<PodiumRank, number> = {
+  1: 320,
+  2: 240,
+  3: 160,
+  4: 80,
+  5: 0,
+};
+
+const SPARKLE_POSITIONS: { x: string; y: string; delay: number; size: number }[] = [
+  { x: '8%', y: '14%', delay: 0, size: 12 },
+  { x: '92%', y: '20%', delay: 0.4, size: 10 },
+  { x: '14%', y: '70%', delay: 0.8, size: 14 },
+  { x: '88%', y: '74%', delay: 1.2, size: 12 },
+  { x: '50%', y: '6%', delay: 0.2, size: 10 },
+  { x: '50%', y: '92%', delay: 1.0, size: 16 },
+];
+
+const CONFETTI_PIECES = Array.from({ length: 12 }).map((_, i) => {
+  const left = `${(i * 8.4 + 4) % 100}%`;
+  const colors = ['#F8BD3E', '#DE009B', '#743DF5', '#3FD9CF', '#E08A3A'];
+  const color = colors[i % colors.length];
+  const size = 6 + (i % 3) * 2;
+  const duration = 5 + ((i * 7) % 4);
+  const delay = (i * 0.6) % 4.5;
+  const drift = (i % 2 === 0 ? 1 : -1) * (12 + (i % 3) * 6);
+  return { id: i, left, color, size, duration, delay, drift };
+});
+
+export function LeaderboardPodium({ players, loading, className }: LeaderboardPodiumProps) {
+  const t = useAppTranslations();
+  const playersByRank = new Map<PodiumRank, PodiumPlayer>();
+  players?.forEach(player => playersByRank.set(player.rank, player));
+
+  return (
+    <section
+      aria-label={t('top {n}', { n: 5 })}
+      className={twMerge('relative h-[360px] overflow-hidden', className)}
+    >
+      <ConfettiLayer />
+
+      <div className="absolute inset-0 px-4 pt-2">
+        <PodiumSlot
+          rank={4}
+          player={playersByRank.get(4)}
+          loading={loading}
+          className="absolute bottom-3 left-2"
+        />
+        <PodiumSlot
+          rank={5}
+          player={playersByRank.get(5)}
+          loading={loading}
+          className="absolute bottom-3 right-2"
+        />
+        <PodiumSlot
+          rank={2}
+          player={playersByRank.get(2)}
+          loading={loading}
+          className="absolute left-1 top-6"
+        />
+        <PodiumSlot
+          rank={3}
+          player={playersByRank.get(3)}
+          loading={loading}
+          className="absolute right-1 top-6"
+        />
+        <PodiumSlot
+          rank={1}
+          player={playersByRank.get(1)}
+          loading={loading}
+          className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2"
+        />
+      </div>
+    </section>
+  );
+}
+
+interface PodiumSlotProps {
+  rank: PodiumRank;
+  player?: PodiumPlayer;
+  loading?: boolean;
+  className?: string;
+}
+
+function PodiumSlot({ rank, player, loading, className }: PodiumSlotProps) {
+  const theme = RANK_THEME[rank];
+  const size = AVATAR_SIZE[rank];
+  const isFirst = rank === 1;
+  const isEmpty = !loading && !player;
+  const floatClass =
+    rank === 1 ? 'lt-podium-1' : rank === 2 || rank === 4 ? 'lt-podium-2' : 'lt-podium-3';
+
+  return (
+    <div
+      style={{ animationDelay: `${REVEAL_DELAY_MS[rank]}ms` }}
+      className={twMerge(
+        'animate-slide-in-bottom flex flex-col items-center',
+        isEmpty && 'opacity-40 grayscale',
+        className
+      )}
+    >
+      {isFirst && (
+        <Crown
+          aria-hidden
+          size={26}
+          strokeWidth={2.4}
+          className="lt-podium-crown text-gold pointer-events-none absolute -top-1 left-1/2 z-20 drop-shadow-[0_0_8px_rgba(248,189,62,0.85)]"
+          style={{ fill: 'rgba(248,189,62,0.55)' }}
+        />
+      )}
+
+      <div className={twMerge('relative', floatClass)}>
+        {isFirst && <SparkleField parentSize={size} />}
+
+        <span
+          aria-hidden
+          className="lt-podium-pulse pointer-events-none absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 rounded-full"
+          style={{
+            width: size + 16,
+            height: size + 16,
+            background: theme.pulseColor,
+            filter: 'blur(2px)',
+          }}
+        />
+
+        <span
+          aria-hidden
+          className={twMerge(
+            'pointer-events-none absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 rounded-full',
+            isFirst ? 'lt-podium-rotor' : 'lt-podium-rotor-rev'
+          )}
+          style={{
+            width: size + 14,
+            height: size + 14,
+            background: theme.outerGradient,
+            filter: 'blur(0.4px)',
+          }}
+        />
+
+        <span
+          aria-hidden
+          className="bg-background-overlay pointer-events-none absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 rounded-full"
+          style={{
+            width: size + 6,
+            height: size + 6,
+          }}
+        />
+
+        <div
+          className="relative rounded-full p-[3px]"
+          style={{
+            width: size + 6,
+            height: size + 6,
+            background: theme.ringGradient,
+            boxShadow: theme.glow,
+          }}
+        >
+          <SkeletonSuspense
+            loading={loading || !player}
+            skeleton={<Skeleton variant="round" className="bg-background-overlay h-full w-full" />}
+          >
+            <div className="bg-background-overlay flex-center relative h-full w-full overflow-hidden rounded-full">
+              {player?.avatarUrl ? (
+                <Image
+                  src={player.avatarUrl}
+                  alt={player.username}
+                  width={size}
+                  height={size}
+                  loading="eager"
+                  className="h-full w-full rounded-full object-cover"
+                />
+              ) : (
+                <span
+                  aria-hidden
+                  className={twMerge(
+                    'font-extrabold',
+                    isFirst ? 'text-3xl' : 'text-xl',
+                    theme.accentTextClass
+                  )}
+                >
+                  {player?.fallbackInitial ?? '—'}
+                </span>
+              )}
+            </div>
+          </SkeletonSuspense>
+
+          <span
+            aria-label={`#${rank}`}
+            className="absolute -bottom-1 left-1/2 z-10 flex h-7 w-7 -translate-x-1/2 items-center justify-center rounded-full text-xs font-extrabold tabular-nums shadow-[0_2px_8px_rgba(0,0,0,0.55)]"
+            style={{
+              background: theme.badgeBg,
+              color: theme.badgeText,
+              border: '2px solid rgba(27,25,42,0.95)',
+            }}
+          >
+            {rank}
+          </span>
+        </div>
+      </div>
+
+      <div
+        className={twMerge(
+          'relative z-10 mt-4 flex flex-col items-center',
+          isFirst ? 'max-w-[160px]' : 'max-w-[100px]'
+        )}
+      >
+        <SkeletonSuspense
+          loading={loading || !player}
+          skeleton={<Skeleton variant="line" textSize="sm" className="h-4 w-16" />}
+        >
+          <span
+            title={player?.username}
+            className={twMerge(
+              'w-full truncate text-center font-bold',
+              isFirst ? 'text-[14px] text-white' : 'text-[12px] text-white/90'
+            )}
+          >
+            {player?.username ?? '—'}
+          </span>
+        </SkeletonSuspense>
+        <SkeletonSuspense
+          loading={loading || !player}
+          skeleton={<Skeleton variant="line" textSize="xs" className="mt-1 h-3 w-12" />}
+        >
+          <PointsBadge points={player?.points ?? 0} gradient={theme.pointsGradient} />
+        </SkeletonSuspense>
+      </div>
+    </div>
+  );
+}
+
+interface PointsBadgeProps {
+  points: number;
+  gradient: string;
+}
+
+function PointsBadge({ points, gradient }: PointsBadgeProps) {
+  return (
+    <span className="mt-1 inline-flex items-center gap-1 rounded-full border border-white/10 bg-black/30 px-2 py-0.5 text-[11px] font-extrabold tabular-nums">
+      <span
+        aria-hidden
+        className="inline-block h-2 w-2 rounded-full"
+        style={{ background: gradient }}
+      />
+      <span
+        style={{
+          backgroundImage: gradient,
+          WebkitBackgroundClip: 'text',
+          backgroundClip: 'text',
+          WebkitTextFillColor: 'transparent',
+        }}
+      >
+        {formatNumber(points)}
+      </span>
+    </span>
+  );
+}
+
+interface SparkleFieldProps {
+  parentSize: number;
+}
+
+function SparkleField({ parentSize }: SparkleFieldProps) {
+  return (
+    <>
+      {SPARKLE_POSITIONS.map((sparkle, index) => (
+        <Sparkles
+          key={index}
+          aria-hidden
+          size={sparkle.size}
+          className="lt-podium-sparkle text-gold pointer-events-none absolute -translate-x-1/2 -translate-y-1/2 drop-shadow-[0_0_4px_rgba(248,189,62,0.85)]"
+          style={
+            {
+              left: sparkle.x,
+              top: sparkle.y,
+              animationDelay: `${sparkle.delay}s`,
+              width: sparkle.size,
+              height: sparkle.size,
+              fill: 'rgba(248,189,62,0.55)',
+            } as CSSProperties
+          }
+        />
+      ))}
+      <Star
+        aria-hidden
+        size={10}
+        className="lt-podium-sparkle text-electric-pink pointer-events-none absolute"
+        style={
+          {
+            left: parentSize * 0.85,
+            top: parentSize * 0.1,
+            animationDelay: '0.6s',
+            fill: 'rgba(222,0,155,0.7)',
+          } as CSSProperties
+        }
+      />
+    </>
+  );
+}
+
+function ConfettiLayer(): ReactNode {
+  return (
+    <div aria-hidden className="pointer-events-none absolute inset-0 overflow-hidden">
+      {CONFETTI_PIECES.map(piece => (
+        <span
+          key={piece.id}
+          className="lt-podium-confetti-piece absolute top-0"
+          style={
+            {
+              left: piece.left,
+              width: piece.size,
+              height: piece.size,
+              background: piece.color,
+              borderRadius: piece.id % 2 === 0 ? '2px' : '50%',
+              opacity: 0.85,
+              ['--lt-confetti-duration' as never]: `${piece.duration}s`,
+              ['--lt-confetti-delay' as never]: `${piece.delay}s`,
+              ['--lt-confetti-x' as never]: `${piece.drift}px`,
+            } as CSSProperties
+          }
+        />
+      ))}
+    </div>
+  );
+}

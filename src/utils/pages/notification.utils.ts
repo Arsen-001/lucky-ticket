@@ -2,6 +2,14 @@ import dayjs from 'dayjs';
 import type { Dictionary, MessageIds } from '@/types/types/i18n.types';
 import type { Notification } from '@/types/interfaces/notifications.interfaces';
 
+export const formatRelativeTime = (iso: string, t: Dictionary, now = Date.now()) => {
+  const ago = Math.max(0, (now - new Date(iso).getTime()) / 1000);
+  if (ago < 60) return t('just now');
+  if (ago < 3600) return t('{n}m ago', { n: Math.floor(ago / 60) });
+  if (ago < 86400) return t('{n}h ago', { n: Math.floor(ago / 3600) });
+  return t('{n}d ago', { n: Math.floor(ago / 86400) });
+};
+
 export function getNotificationsSkeletonData(
   keysCount: number,
   arrayLength: number

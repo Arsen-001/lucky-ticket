@@ -1,83 +1,88 @@
 'use client';
 
+import { useState } from 'react';
 import { useGetSupportSectionsQuery } from '@/api/support.api';
 import { GradientSearchInput } from '@/components/pages/out-tabs/drawer/support/GradientSearchInput';
 import { SupportArticleItem } from '@/components/pages/out-tabs/drawer/support/SupportArticleItem';
-import { useState } from 'react';
-import { HighlightedText } from '@/components/shared/typography/HighlightedText';
+import { SupportChannelCard } from '@/components/pages/out-tabs/drawer/support/SupportChannelCard';
+import { SupportHeroCard } from '@/components/pages/out-tabs/drawer/support/SupportHeroCard';
+import { SupportTelegramCard } from '@/components/pages/out-tabs/drawer/support/SupportTelegramCard';
 import { Skeleton } from '@/components/shared/seleketons/Skeleton';
 import { SkeletonSuspense } from '@/components/shared/seleketons/SkeletonSuspense';
-import { filterSections, getSectionsSkeletonData } from '@/utils/pages/support.utils';
 import { EmptyDataInfo } from '@/components/shared/EmptyDataInfo';
-import { videos } from '@/constants/videos';
-import { twMerge } from 'tailwind-merge';
+import { useAppTranslations } from '@/hooks/useAppTranslations';
+import { filterSections, getSectionsSkeletonData } from '@/utils/pages/support.utils';
 import type { SupportSection } from '@/types/interfaces/support.interfaces';
 
 export default function SupportPage() {
+  const t = useAppTranslations();
   const [searchValue, setSearchValue] = useState<string>('');
-  const [isFocused, setIsFocused] = useState(false);
   const { data: sections = [], isLoading } = useGetSupportSectionsQuery();
 
   const filteredContent = filterSections(sections, searchValue);
   const content = isLoading ? (getSectionsSkeletonData() as SupportSection[]) : filteredContent;
+  const hasResults = content.some(section => !!section?.articles?.length);
 
-  const handleFocus = () => setIsFocused(true);
-  const handleBlur = () => setIsFocused(false);
+  const sectionOffsets = content.reduce<number[]>(acc => {
+    const last = acc[acc.length - 1] ?? 0;
+    const lastLen = content[acc.length - 1]?.articles?.length ?? 0;
+    acc.push(acc.length === 0 ? 0 : last + lastLen + 1);
+    return acc;
+  }, []);
 
   return (
-    <div className="flex flex-col">
-      <div
-        className={twMerge(
-          'flex justify-center transition-all duration-500 ease-in-out overflow-hidden',
-          isFocused ? 'opacity-0 h-0 pointer-events-none' : 'opacity-100 h-34'
-        )}
-      >
-        <div
-          className={twMerge(
-            'relative h-25 aspect-square overflow-hidden rounded-full transition-transform duration-500',
-            isFocused && 'scale-90'
-          )}
-        >
-          <video className="h-full scale-240" autoPlay loop muted playsInline>
-            <source {...videos.support.mp4} />
-            <source {...videos.support.webm} />
-          </video>
+    <div className="flex flex-col gap-4 px-4 pb-6 pt-2">
+      <SupportHeroCard />
+      <SupportTelegramCard />
+      <SupportChannelCard />
+
+      <div className="flex flex-col gap-3">
+        <div className="flex items-center justify-between px-1">
+          <h3 className="text-pink-secondary text-[11px] font-bold uppercase tracking-wider">
+            {t('knowledge base')}
+          </h3>
         </div>
-      </div>
-      <div className="flex-col-stretch gap-6">
-        <GradientSearchInput onChange={setSearchValue} onFocus={handleFocus} onBlur={handleBlur} />
-        <div className="flex flex-col">
-          {!isLoading && !filteredContent.length && (
-            <EmptyDataInfo animateOnMount className="mt-10" />
-          )}
-          {content.map(
-            (section, index) =>
-              !!section?.articles?.length && (
-                <div key={index} className="flex-col-stretch gap-1 mt-5">
-                  <SkeletonSuspense
-                    loading={isLoading}
-                    skeleton={<Skeleton variant="line" textSize="base" className="w-42" />}
+        <GradientSearchInput onChange={setSearchValue} />
+
+        {!isLoading && !hasResults && (
+          <EmptyDataInfo animateOnMount className="mt-4" description={t('no articles found')} />
+        )}
+
+        <div className="flex flex-col gap-4">
+          {content.map((section, sectionIndex) => {
+            if (!section?.articles?.length) return null;
+            const sectionOffset = sectionOffsets[sectionIndex] ?? 0;
+
+            return (
+              <div key={sectionIndex} className="flex flex-col gap-2">
+                <SkeletonSuspense
+                  loading={isLoading}
+                  skeleton={<Skeleton variant="line" textSize="xs" className="h-3 w-32" />}
+                >
+                  <h4
+                    className="text-pink-secondary ml-1 animate-slide-in-bottom text-[10px] font-bold uppercase tracking-widest"
+                    style={{ animationDelay: `${sectionOffset * 60}ms` }}
                   >
-                    <HighlightedText
-                      highlight={searchValue}
-                      className="text-gray-secondary text-sm font-bold"
-                    >
-                      {section?.title || ''}
-                    </HighlightedText>
-                  </SkeletonSuspense>
-                  <div className="flex-col-stretch gap-2">
-                    {section?.articles?.map((article, index) => (
-                      <SupportArticleItem
-                        key={index}
-                        loading={isLoading}
-                        article={article}
-                        searchValue={searchValue}
-                      />
-                    ))}
-                  </div>
+                    {section?.title || ''}
+                  </h4>
+                </SkeletonSuspense>
+                <div className="flex flex-col gap-2">
+                  {section.articles.map((article, articleIndex) => (
+                    <SupportArticleItem
+                      key={isLoading ? articleIndex : article.id}
+                      loading={isLoading}
+                      article={article}
+                      searchValue={searchValue}
+                      className="animate-slide-in-bottom"
+                      style={{
+                        animationDelay: `${(sectionOffset + articleIndex + 1) * 60}ms`,
+                      }}
+                    />
+                  ))}
                 </div>
-              )
-          )}
+              </div>
+            );
+          })}
         </div>
       </div>
     </div>

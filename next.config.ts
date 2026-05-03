@@ -6,7 +6,10 @@ const nextConfig: NextConfig = {
   reactCompiler: true,
   images: {
     //TODO: Add remote image patterns (aws and so on.)
-    remotePatterns: [],
+    remotePatterns: [
+      { protocol: 'https', hostname: 'i.pravatar.cc' },
+      { protocol: 'https', hostname: 'api.dicebear.com' },
+    ],
   },
   devIndicators: false,
   experimental: {

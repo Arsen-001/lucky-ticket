@@ -6,5 +6,5 @@ import { useAppTranslations } from '@/hooks/useAppTranslations';
 export default function InviteFriendsHeader() {
   const t = useAppTranslations();
 
-  return <PageHeader title={t('invite friends')} />;
+  return <PageHeader title={t('friends')} />;
 }

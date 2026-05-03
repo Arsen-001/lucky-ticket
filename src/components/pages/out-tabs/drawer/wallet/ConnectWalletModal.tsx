@@ -1,67 +1,90 @@
 'use client';
 
-import { useState } from 'react';
 import { Modal } from '@/components/shared/modals/Modal';
-import { Input } from '@/components/shared/form-elements/inputs/Input';
 import { Button } from '@/components/shared/buttons/Button';
 import { useAppTranslations } from '@/hooks/useAppTranslations';
-import { useGetMeQuery, useUpdateMeMutation } from '@/api/me.api';
-import { Wallet } from 'lucide-react';
+import { useConnectWalletMutation, useGetSupportedWalletsQuery } from '@/api/wallet.api';
+import { useState } from 'react';
+import { ChevronRight } from 'lucide-react';
+import { twMerge } from 'tailwind-merge';
+import { WalletProvider } from '@/types/enums/wallet.enums';
 
 interface ConnectWalletModalProps {
   open: boolean;
   onClose: () => void;
 }
 
-export const ConnectWalletModal = ({ open, onClose }: ConnectWalletModalProps) => {
+export function ConnectWalletModal({ open, onClose }: ConnectWalletModalProps) {
   const t = useAppTranslations();
-  const [walletId, setWalletId] = useState('');
-  const { data: me } = useGetMeQuery();
-  const [updateMe, { isLoading }] = useUpdateMeMutation();
+  const { data: wallets = [], isLoading } = useGetSupportedWalletsQuery();
+  const [connect, { isLoading: isConnecting }] = useConnectWalletMutation();
+  const [selected, setSelected] = useState<WalletProvider | null>(null);
 
-  const handleConnect = async () => {
-    if (!walletId.trim()) return;
-
+  const handleConnect = async (provider: WalletProvider) => {
+    setSelected(provider);
     try {
-      // Connect wallet and give some bonus coins to demonstrate UI update
-      await updateMe({ walletId, coins: (me?.coins || 0) + 100 }).unwrap();
+      await connect({ provider }).unwrap();
       onClose();
-    } catch (error) {
-      console.error('Failed to connect wallet:', error);
+    } catch {
+      /* surface via toast in v2 */
+    } finally {
+      setSelected(null);
     }
   };
 
   return (
     <Modal open={open} onClose={onClose}>
-      <div className="flex flex-col gap-6 p-6 bg-purple-gradient rounded-2xl">
-        <div className="flex flex-col gap-2 items-center text-center">
-          <div className="w-12 h-12 rounded-full bg-white/10 flex items-center justify-center mb-2">
-            <Wallet size={24} className="text-white" />
-          </div>
-          <h2 className="text-xl font-bold">{t('connect wallet')}</h2>
+      <div className="bg-purple-gradient flex flex-col gap-4 rounded-2xl p-6">
+        <div className="flex flex-col gap-1 text-center">
+          <h2 className="text-white text-xl font-extrabold">{t('connect wallet')}</h2>
+          <p className="text-pink-secondary text-[12px]">{t('choose a wallet provider')}</p>
         </div>
 
-        <div className="flex flex-col gap-4">
-          <div className="flex flex-col gap-1.5">
-            <label className="text-sm text-gray-400 px-1">{t('wallet id')}</label>
-            <Input
-              value={walletId}
-              onChange={e => setWalletId(e.target.value)}
-              placeholder={t('enter wallet id')}
-              className="bg-white/5 border border-white/10 focus-within:border-white/20 transition-colors"
-            />
-          </div>
-
-          <Button
-            onClick={handleConnect}
-            loading={isLoading}
-            disabled={!walletId.trim()}
-            className="w-full py-3 rounded-xl"
-          >
-            {t('connect')}
-          </Button>
+        <div className="flex flex-col gap-2">
+          {isLoading ? (
+            <div className="text-pink-secondary text-center text-[12px]">{t('loading')}</div>
+          ) : (
+            wallets.map(w => {
+              const isThisLoading = isConnecting && selected === w.provider;
+              return (
+                <button
+                  key={w.provider}
+                  type="button"
+                  onClick={() => handleConnect(w.provider)}
+                  disabled={isConnecting}
+                  className={twMerge(
+                    'flex items-center gap-3 rounded-xl border border-white/10 bg-white/5 p-3 text-left transition-colors',
+                    'hover:bg-white/10 disabled:opacity-50'
+                  )}
+                >
+                  <span
+                    className="flex-center h-9 w-9 flex-shrink-0 rounded-lg text-[12px] font-extrabold text-white"
+                    style={{ background: w.iconBg }}
+                  >
+                    {w.emoji}
+                  </span>
+                  <span className="flex-1 text-sm font-bold text-white">{w.name}</span>
+                  {isThisLoading ? (
+                    <span className="text-pink-secondary text-[10px] font-bold uppercase">
+                      {t('connecting')}
+                    </span>
+                  ) : (
+                    <ChevronRight size={14} className="text-pink-secondary" />
+                  )}
+                </button>
+              );
+            })
+          )}
         </div>
+
+        <p className="text-pink-secondary text-center text-[10px]">
+          {t('connect wallet disclaimer')}
+        </p>
+
+        <Button variant="secondary" onClick={onClose} className="rounded-full px-4 py-2">
+          {t('cancel')}
+        </Button>
       </div>
     </Modal>
   );
-};
+}

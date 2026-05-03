@@ -1,0 +1,206 @@
+'use client';
+
+import { useMemo, useState } from 'react';
+import { Modal } from '@/components/shared/modals/Modal';
+import { Button } from '@/components/shared/buttons/Button';
+import { Input } from '@/components/shared/form-elements/inputs/Input';
+import { useAppTranslations } from '@/hooks/useAppTranslations';
+import { useWithdrawTonMutation } from '@/api/wallet.api';
+import {
+  isValidTonAddress,
+  walletConstants,
+  formatTon,
+  tonScanUrl,
+} from '@/utils/pages/wallet.utils';
+import { CheckCircle2, ExternalLink } from 'lucide-react';
+
+interface WithdrawTonModalProps {
+  open: boolean;
+  onClose: () => void;
+  tonBalance: number;
+}
+
+type Step = 'form' | 'confirm' | 'success';
+
+export function WithdrawTonModal({ open, onClose, tonBalance }: WithdrawTonModalProps) {
+  const t = useAppTranslations();
+  const [withdraw, { isLoading, data: result }] = useWithdrawTonMutation();
+  const [step, setStep] = useState<Step>('form');
+  const [toAddress, setToAddress] = useState('');
+  const [amount, setAmount] = useState('');
+
+  const numericAmount = Number(amount) || 0;
+  const fee = walletConstants.TON_NETWORK_FEE;
+  const net = Math.max(0, numericAmount - fee);
+
+  const error = useMemo<string | null>(() => {
+    if (!toAddress) return null;
+    if (!isValidTonAddress(toAddress)) return t('invalid ton address');
+    if (numericAmount <= 0) return null;
+    if (numericAmount < walletConstants.TON_MIN_WITHDRAW)
+      return t('minimum withdrawal {n} ton', { n: walletConstants.TON_MIN_WITHDRAW });
+    if (numericAmount + fee > tonBalance) return t('insufficient balance');
+    return null;
+  }, [toAddress, numericAmount, fee, tonBalance, t]);
+
+  const canSubmit =
+    !error && isValidTonAddress(toAddress) && numericAmount >= walletConstants.TON_MIN_WITHDRAW;
+
+  const handleClose = () => {
+    setStep('form');
+    setToAddress('');
+    setAmount('');
+    onClose();
+  };
+
+  const handleMax = () => setAmount(String(Math.max(0, tonBalance - fee)));
+
+  const handleConfirm = async () => {
+    try {
+      await withdraw({ toAddress, amount: numericAmount }).unwrap();
+      setStep('success');
+    } catch {
+      /* surface via toast */
+    }
+  };
+
+  return (
+    <Modal open={open} onClose={handleClose}>
+      <div className="bg-purple-gradient flex flex-col gap-4 rounded-2xl p-6">
+        {step === 'form' && (
+          <>
+            <div className="flex flex-col gap-1 text-center">
+              <h2 className="text-white text-xl font-extrabold">{t('withdraw ton')}</h2>
+              <p className="text-pink-secondary text-[11px] font-bold uppercase tracking-wider">
+                {t('available')} · {formatTon(tonBalance, 4)} TON
+              </p>
+            </div>
+
+            <div className="flex flex-col gap-1.5">
+              <label className="text-pink-secondary px-1 text-[11px] font-bold uppercase tracking-wider">
+                {t('recipient address')}
+              </label>
+              <Input
+                value={toAddress}
+                onChange={e => setToAddress(e.target.value)}
+                placeholder="EQ..."
+                classNames={{ input: 'font-mono text-[12px]' }}
+              />
+            </div>
+
+            <div className="flex flex-col gap-1.5">
+              <label className="text-pink-secondary px-1 text-[11px] font-bold uppercase tracking-wider">
+                {t('amount')}
+              </label>
+              <Input
+                value={amount}
+                onChange={e => setAmount(e.target.value.replace(/[^0-9.]/g, ''))}
+                placeholder="0.0"
+                inputMode="decimal"
+                suffix={
+                  <button
+                    type="button"
+                    onClick={handleMax}
+                    className="text-electric-purple text-[10px] font-extrabold uppercase tracking-wider"
+                  >
+                    {t('max')}
+                  </button>
+                }
+              />
+            </div>
+
+            <div className="bg-background-overlay/60 flex flex-col gap-1.5 rounded-xl p-3 text-[12px]">
+              <Row label={t('network fee')} value={`${formatTon(fee, 4)} TON`} />
+              <Row label={t('you will receive')} value={`${formatTon(net, 4)} TON`} emphasis />
+              <Row
+                label={t('minimum withdrawal')}
+                value={`${formatTon(walletConstants.TON_MIN_WITHDRAW, 4)} TON`}
+              />
+            </div>
+
+            {error && <p className="text-error text-[11px] font-semibold">{error}</p>}
+
+            <Button
+              variant="primary"
+              disabled={!canSubmit}
+              onClick={() => setStep('confirm')}
+              className="rounded-xl"
+            >
+              {t('continue')}
+            </Button>
+          </>
+        )}
+
+        {step === 'confirm' && (
+          <>
+            <div className="flex flex-col gap-1 text-center">
+              <h2 className="text-white text-xl font-extrabold">{t('confirm withdraw')}</h2>
+              <p className="text-pink-secondary text-[12px]">
+                {t('send {amount} ton to {address}', {
+                  amount: formatTon(numericAmount, 4),
+                  address: `${toAddress.slice(0, 6)}...${toAddress.slice(-4)}`,
+                })}
+              </p>
+            </div>
+            <div className="flex gap-2">
+              <Button
+                variant="secondary"
+                onClick={() => setStep('form')}
+                className="flex-1 rounded-xl"
+              >
+                {t('back')}
+              </Button>
+              <Button
+                variant="primary"
+                onClick={handleConfirm}
+                loading={isLoading}
+                className="flex-1 rounded-xl"
+              >
+                {t('confirm')}
+              </Button>
+            </div>
+          </>
+        )}
+
+        {step === 'success' && result && (
+          <div className="flex flex-col items-center gap-3 text-center">
+            <CheckCircle2 size={42} className="text-success" strokeWidth={2.2} />
+            <h2 className="text-white text-xl font-extrabold">{t('withdrawal submitted')}</h2>
+            <p className="text-pink-secondary text-[12px]">
+              {t('arrives in approximately {n} sec', { n: result.estimatedArrivalSec })}
+            </p>
+            <a
+              href={tonScanUrl(result.txHash)}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-electric-purple inline-flex items-center gap-1 text-[12px] font-bold"
+            >
+              {t('view on tonscan')}
+              <ExternalLink size={12} strokeWidth={2.4} />
+            </a>
+            <Button variant="primary" onClick={handleClose} className="w-full rounded-xl">
+              {t('done')}
+            </Button>
+          </div>
+        )}
+      </div>
+    </Modal>
+  );
+}
+
+function Row({ label, value, emphasis }: { label: string; value: string; emphasis?: boolean }) {
+  return (
+    <div className="flex items-center justify-between gap-2">
+      <span className="text-pink-secondary">{label}</span>
+      <span
+        className={
+          emphasis
+            ? 'text-gold font-extrabold tabular-nums'
+            : 'text-white font-semibold tabular-nums'
+        }
+      >
+        {value}
+      </span>
+    </div>
+  );
+}

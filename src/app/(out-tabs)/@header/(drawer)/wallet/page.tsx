@@ -6,5 +6,5 @@ import { useAppTranslations } from '@/hooks/useAppTranslations';
 export default function WalletHeader() {
   const t = useAppTranslations();
 
-  return <PageHeader title={t('exchange')} />;
+  return <PageHeader title={t('wallet')} />;
 }

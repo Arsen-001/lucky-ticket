@@ -6,7 +6,7 @@ import { ArrowDown, ArrowUp, ChartNoAxesColumnIncreasing, Minus } from 'lucide-r
 import { SkeletonSuspense } from '@/components/shared/seleketons/SkeletonSuspense';
 
 export function ProfileRank() {
-  const { data: leaderboard, isLoading } = useGetLeaderboardQuery();
+  const { data: leaderboard, isLoading } = useGetLeaderboardQuery('all');
   const t = useAppTranslations();
 
   const myPlace = leaderboard?.myPlace;
