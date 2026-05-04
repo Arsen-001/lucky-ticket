@@ -41,7 +41,7 @@ export function ProfileStats() {
         >
           <div className="flex-center gap-2 items-center">
             <span className="text-lg font-black text-white">{me?.points?.toLocaleString()}</span>
-            <span className="text-xs text-gold font-bold uppercase mt-1">Points</span>
+            <span className="text-xs text-gold font-bold uppercase mt-1">{t('points')}</span>
           </div>
         </SkeletonSuspense>
       </div>

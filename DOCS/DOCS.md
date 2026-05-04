@@ -175,35 +175,50 @@ Statuses grant various privileges, such as:
 
 ### 7.4 VIP Status — Levels & Acquisition
 
-VIP is a permanent, leveled status. Once unlocked it never decreases or expires. The level count is endless — users can keep upgrading indefinitely.
+VIP is a permanent, leveled status. Once a level is reached it never decreases or expires. The system is currently structured as a **10-level ladder driven by lifetime Activity Points** — every threshold is permanent and unlocks incrementally stronger game benefits. The ladder may be extended in the future; the values below define the current shipped set.
+
+#### VIP Level Thresholds (Current)
+
+| Level    | Lifetime AP threshold | Notes                              |
+| :------- | --------------------: | :--------------------------------- |
+| Level 1  |                   100 | Entry tier                         |
+| Level 2  |                   500 | Early progression                  |
+| Level 3  |                 2,000 | Casual play                        |
+| Level 4  |                 5,000 | Regular player                     |
+| Level 5  |                10,000 | Engaged user                       |
+| Level 6  |                25,000 | High commitment                    |
+| Level 7  |                50,000 | Heavy user                         |
+| Level 8  |               100,000 | Dedicated player                   |
+| Level 9  |               250,000 | Veteran                            |
+| Level 10 |               500,000 | Top tier (current cap; extensible) |
+
+> Exact reward payouts per level are defined by the product team in `tasks.mock.ts → VIP_LEVELS` (mirrored by the backend in production).
 
 #### Payment Options
 
-VIP can be purchased and upgraded using either:
+VIP levels are reached automatically by accumulating Activity Points — there is no direct purchase. Users may also accelerate progression indirectly:
 
-- **Lucky Coins (LC)**
-- **Telegram Stars (XTR)**
-
-Both currencies are accepted for both the initial unlock and all subsequent level upgrades.
-
-#### Pricing Model
-
-| Action            | Cost (example)                       | Notes                                      |
-| :---------------- | :----------------------------------- | :----------------------------------------- |
-| **First unlock**  | Higher price                         | e.g., 10 LC / equivalent in Stars          |
-| **Level upgrade** | Lower price for first level upgrades | e.g., 5 LC / equivalent in Stars per level |
-
-> Exact LC and Star prices per level are defined by the product team and may be updated independently of this document.
+- **Lucky Coins (LC)** spent in market actions that grant AP.
+- **Telegram Stars (XTR)** spent on Capacity Upgrades / Instant Claims that drive engagement.
 
 #### Rules
 
-- The first purchase (unlock) costs more than the first few subsequent upgrades — rewarding early adopters and separating the barrier-to-entry from ongoing progression.
 - VIP level is permanent: it cannot decrease, expire, or be lost through inactivity.
+- Each level is reached when lifetime Activity Points first cross its threshold.
 - Higher VIP levels grant incrementally stronger game benefits. Exact benefits per level are to be defined by the product team.
 
 #### VIP Benefits
 
 VIP benefits are game advantages granted per level. The full list will be defined by the product team. Benefits are permanent and stack with level progression.
+
+### 7.5 Profile Status Category (Tasks)
+
+In the **Tasks page**, the Premium-related and VIP-tier tasks are unified under a single **"Profile Status"** category. The category contains two presentation blocks:
+
+1. **VIP-level slider** — a horizontal milestone slider showing the 10 VIP levels with their AP thresholds, current progress, and per-level rewards.
+2. **Buy Prime row** — a single compact row prompting the user to acquire Prime status (LC or crypto via Market, see §14).
+
+This grouping keeps all "user identity / progression status" tasks in one place rather than scattering Premium and VIP across the task list.
 
 ### Connections
 
@@ -415,22 +430,48 @@ Tournaments connect tickets, LC rewards, tasks, and leaderboard positioning.
 
 Tasks guide user behavior and introduce structured goals.
 
-### 12.1 Task Categories
+### 12.1 Task Frequencies
 
-- Daily tasks
-- Weekly tasks
-- Monthly tasks
+Tasks are organized by reset cadence into three top-level tabs:
 
-### 12.2 Task Structure
+- **Daily** — reset every 24 hours
+- **Weekly** — reset every 7 days
+- **Once** (one-time / lifetime) — never reset
+
+### 12.2 Task Categories
+
+Within each frequency tab, tasks are grouped into thematic categories. Each category corresponds to one gameplay system or progression axis:
+
+- **Tournaments** — participation, place wins, tier-specific play
+- **Tickets** — ticket collection milestones (general + per-tier)
+- **Engines** — engine ownership milestones (general + per-tier)
+- **Stakes** — completed stake count + total LC volume staked
+- **Stars** — purchasing and earning Telegram Stars
+- **Friends** — referral / invite milestones
+- **Leaderboard** — rank achievements per period (daily / weekly / monthly / all-time)
+- **Social** — platform follows (Telegram, Twitter/X, Discord, YouTube)
+- **Achievements** — wide-ranging lifetime badges spanning every system (see §12.5)
+- **Profile Status** — VIP-level progression + Buy Prime row (see §7.5)
+- **Profile** — account setup actions (verify email, 2FA, avatar, wallet)
+- **Partners** — cross-promotion with partner mini-apps
+- **Market** — first-touch and recurring market actions
+- **Quest** — onboarding chain shown only in the Once tab
+
+### 12.3 Task Structure
 
 Each task contains:
 
-- **Title:** A clear name for the task.
-- **Description:** A detailed explanation of what the user needs to do.
-- **Reward:** The prize awarded upon completion (tickets, coins, boosts).
-- **Activity Points:** A fixed number of Activity Points granted to the user upon completing the task.
+- **Title:** A pre-localized clear name for the task.
+- **Subtitle / Description:** Pre-localized explanation of what the user needs to do.
+- **Reward(s):** One or more prizes awarded upon completion (tickets, LC, AP, Stars, engines, premium).
+- **Progress:** `{ current, target }` numeric progress (target=1 for binary tasks).
+- **Status:** One of `IN_PROGRESS`, `READY_TO_CLAIM`, `COMPLETED`, `LOCKED`.
+- **Sub-steps (optional):** A list of sub-tasks (e.g., 7 day-of-week steps) that can be claimed individually or all at once via "Claim all".
+- **Tier (optional):** Tier this task belongs to — used for gating and tier-themed visuals.
+- **Rarity:** Visual rarity frame (`COMMON` / `RARE` / `EPIC` / `LEGENDARY`).
+- **Deeplink / External Link (optional):** Where the card navigates when tapped.
 
-### 12.3 Task Examples
+### 12.4 Task Examples
 
 Tasks guide user behavior and include actions such as:
 
@@ -440,9 +481,69 @@ Tasks guide user behavior and include actions such as:
 - Sharing content on social media.
 - Daily/Weekly/Monthly check-ins.
 
-### 12.4 All-Tasks Completion Bonus
+### 12.5 Achievements Category
 
-When a user completes **all tasks** within a given category (Daily, Weekly, or Monthly), they receive an extra gift in addition to the individual task rewards. This bonus is separate from the per-task rewards and is awarded automatically upon finishing the last task in the set.
+The **Achievements** category contains wide-ranging lifetime badges that span every gameplay system but **never duplicate** the count milestones already covered by the other category sliders. Achievements focus on:
+
+- **Special feats** — one-shot moments tied to specific actions (e.g., "Diamond Ticket", "Maxed Out", "Diamond Engineer").
+- **Cross-system combos** — challenges that span multiple systems in a window (e.g., "Triple Threat", "Currency Tycoon", "Quest Master").
+- **Hidden / time-based** — soft easter eggs (e.g., "Night Owl", "Early Bird", "Last Second", "Anniversary").
+- **Persistence / loyalty** — long-horizon goals (7/30/90/365-day streaks, "Loyal" — 1 year of activity).
+- **Statuses & wallet first-touch** — Verified, Prime, VIP unlock, wallet linked, first deposit/withdrawal, Stars→LC swap.
+- **Referral depth** — referrals beyond a count milestone (Premium friend, VIP referral, 3rd-level chain).
+
+#### Progressive Disclosure (Collapse)
+
+Achievements is a long list. The UI shows the **3 most actionable** achievements by default (READY_TO_CLAIM and IN_PROGRESS first, COMPLETED at the bottom). Two action buttons let the user expand:
+
+- **See more (+N)** — reveals the next batch (currently +2 per click).
+- **See all (N)** — expands every remaining achievement at once.
+- **Show less** — appears once expanded; collapses back to the initial 3 and smooth-scrolls back to the section start.
+
+When the section is expanded, the action row sticks to the bottom of the viewport (above the tab bar) so the user can collapse from anywhere in the list.
+
+#### Pin Mechanism (Achievements only)
+
+Inside Achievements, every non-completed / non-locked / non-ready task has a **pin button** in the top-right corner. Pinned achievements float to the top of their status group (after READY_TO_CLAIM and before unpinned IN_PROGRESS). There is no upper bound on the number of pins. Pin state is persisted in `localStorage` under the key `lt:pinned-tasks`.
+
+### 12.6 Milestone Sliders
+
+For categories with progressive count-based goals, the **once tab** renders a horizontal milestone slider above the regular row grid. Each card shows one threshold (e.g., 100 → 250 → 500 → 1000) and progresses left-to-right. Sliders apply to:
+
+- **Tournaments** — podium / participation / place 1st-2nd-3rd, plus per-tier variants
+- **Tickets** — collect N tickets (general + 4 tier sub-tabs: Silver/Gold/Platinum/Diamond)
+- **Engines** — own N engines (general + 4 tier sub-tabs)
+- **Stakes** — complete N stakes + stake N LC total (general + 4 tier sub-tabs)
+- **Stars** — purchase N Stars + earn N Stars (no sub-tabs)
+- **Friends** — invite N friends (no sub-tabs)
+- **Leaderboard** — reach top-N rank (4 period sub-tabs: daily / weekly / monthly / all-time)
+- **Profile Status** — VIP-level progression (single 10-card slider, see §7.5)
+
+Slider sub-tabs include a sliding indicator and animate a brief skeleton (~320 ms) on swap. Tier-tab keys whose tasks are locked for the current user (tier > USER_TIER) render a Lock icon.
+
+### 12.7 All-Tasks Completion Bonus
+
+When a user completes **all tasks** within a given frequency tab (Daily or Weekly), they receive an extra gift in addition to the individual task rewards. This bonus is separate from the per-task rewards and is awarded automatically upon finishing the last task in the set.
+
+### 12.8 One-Time Tab Category Order
+
+The Once tab uses a fixed ordering optimized for player progression and frequency of interaction:
+
+1. Tournaments
+2. Tickets
+3. Engines
+4. Stakes
+5. Stars
+6. Friends
+7. Leaderboard
+8. Social
+9. Achievements
+10. Profile Status
+11. Profile (hidden in Once — daily/weekly only)
+12. Partners (hidden in Once)
+13. Market (hidden in Once — first-touch lives in Profile)
+
+Profile, Partners, and Market are intentionally **excluded from the Once tab** because their tasks are either daily-recurring (Market visit) or already covered by Profile setup / Partner promotions in other surfaces.
 
 ### Connections
 
@@ -460,6 +561,27 @@ The leaderboard provides social comparison and competitive motivation.
 
 - Global ranking based on Activity Points.
 - Displays top users.
+
+### 13.1 Leaderboard Periods
+
+The leaderboard is computed across **four time windows**, each maintained independently and reset on its own cycle:
+
+| Period       | Reset cycle   | Notes                                           |
+| :----------- | :------------ | :---------------------------------------------- |
+| **Daily**    | Every 24 h    | Most volatile; rewards short bursts of activity |
+| **Weekly**   | Every 7 days  | Mid-term consistency                            |
+| **Monthly**  | Every 30 days | Long-term commitment                            |
+| **All-time** | Never resets  | Lifetime competitive ladder; hardest to crack   |
+
+Within the Tasks page, the Leaderboard category shows period sub-tabs that let the user view rank-milestone tasks per period. Reward payouts scale with period difficulty (All-time pays the most for the same rank).
+
+### 13.2 Rank Milestones
+
+For each period, rank-based milestone tasks are exposed as a horizontal slider:
+
+- top 1000 → top 500 → top 100 → top 50 → top 10 → **#1** (LEGENDARY)
+
+Reaching a higher (lower-numbered) rank in any period awards proportionally larger rewards. The #1 milestone always carries a Stars bonus.
 
 ### Connections
 
@@ -607,14 +729,15 @@ A stake is a 3-hour claim-like session. The user selects an amount of LC to lock
 
 ### 18.1 Stake Levels
 
-Stakes are organized into numbered levels (Level 1 through Level 4). Each level requires a minimum LC deposit and grants a set of rewards. Higher levels include all rewards from every level below them — a user who meets the Level 3 threshold automatically receives all Level 1, Level 2, and Level 3 rewards.
+Stakes are organized into numbered levels (Level 1 through Level 5). Each level requires a minimum LC deposit and grants a set of rewards. Higher levels include all rewards from every level below them — a user who meets the Level 3 threshold automatically receives all Level 1, Level 2, and Level 3 rewards.
 
 | Level   | Minimum Deposit | Guaranteed Ticket | Bonus Prizes                                                 | Includes Lower Levels |
 | :------ | :-------------- | :---------------- | :----------------------------------------------------------- | :-------------------- |
 | Level 1 | 100 LC          | Bronze            | LC coins, Engine Speed Boost                                 | (base level)          |
 | Level 2 | 500 LC          | Silver            | LC coins, Engine Speed Boost, Engine Capacity Upgrade        | + Level 1             |
 | Level 3 | 1,000 LC        | Gold              | LC coins, Engine Speed Boost, Engine Capacity Upgrade, Badge | + Level 1–2           |
-| Level 4 | 5,000 LC        | Diamond           | Large LC bonus, Engine Boosts & Upgrades, Exclusive Badge    | + Level 1–3           |
+| Level 4 | 2,500 LC        | Platinum          | LC coins, Engine Boosts & Upgrades, Premium Badge            | + Level 1–3           |
+| Level 5 | 5,000 LC        | Diamond           | Large LC bonus, Engine Boosts & Upgrades, Exclusive Badge    | + Level 1–4           |
 
 > Thresholds and level count may be updated by the product team independently of this document.
 
@@ -622,12 +745,12 @@ Stakes are organized into numbered levels (Level 1 through Level 4). Each level 
 
 Every completed stake grants:
 
-- **Guaranteed Ticket:** A ticket corresponding to the user's stake level (Bronze at Level 1, Silver at Level 2, Gold at Level 3, Diamond at Level 4).
+- **Guaranteed Ticket:** A ticket corresponding to the user's stake level (Bronze at L1, Silver at L2, Gold at L3, Platinum at L4, Diamond at L5).
 - **All Lower-Level Tickets:** Tickets from every level below the user's current level are also awarded.
 - **Chance at Bonus Prizes:** Each level enters the user into a random draw for extra prizes, which may include:
   - Additional LC coins
   - Engine Speed Boosts or Engine Capacity Upgrades (see Section 10)
-  - Badges (Exclusive Badge at Level 4)
+  - Badges (Premium Badge at Level 4, Exclusive Badge at Level 5)
 - **Chance at Telegram Stars:** Completing a stake session enters the user into a draw for Telegram Stars proportional to the stake level (see Section 19). Stars are not guaranteed — they are part of the bonus prize pool.
 
 ### 18.3 Stake Duration & Early Cancellation
@@ -667,6 +790,7 @@ Every successfully completed stake session (all 3 hours, no early cancellation) 
 | Level 2     | TBD              | TBD                     |
 | Level 3     | TBD              | TBD                     |
 | Level 4     | TBD              | TBD                     |
+| Level 5     | TBD              | TBD                     |
 
 > Exact probabilities and Star amounts per level are defined by the product team.
 

@@ -174,7 +174,7 @@ export function StakesClaimRewardsModal({
           {rolled.badge && (
             <PrizeRow
               icon={<LucideIcon Icon={Crown} />}
-              label={levelDef.level === 4 ? t('exclusive badge') : t('badge')}
+              label={levelDef.level === 5 ? t('exclusive badge') : t('badge')}
               sub={t('added to your profile')}
               accentClass="text-pink border-pink/40 bg-pink/15"
               delayMs={(levelDef.allTickets.length + 4) * 80}

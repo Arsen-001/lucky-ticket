@@ -1,16 +1,24 @@
 'use client';
 
-import { type CSSProperties, useState } from 'react';
+import { type CSSProperties, useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import {
+  ArrowUpRight,
   Check,
   ChevronDown,
   ChevronRight,
-  Circle,
   Clock3,
   Gift,
+  Hash,
+  type LucideIcon,
   Lock,
+  Pin,
+  PinOff,
+  Send,
+  Share2,
   TrendingUp,
+  Twitter,
+  Youtube,
 } from 'lucide-react';
 import { twMerge } from 'tailwind-merge';
 import { useAppTranslations } from '@/hooks/useAppTranslations';
@@ -18,12 +26,14 @@ import { useCountDown } from '@/hooks/useCountDown';
 import { Progress } from '@/components/shared/Progress';
 import { Button } from '@/components/shared/buttons/Button';
 import { Medal, type MedalType } from '@/components/shared/icons/Medal';
-import { TaskCategory, TaskRarity, TaskStatus } from '@/types/enums/tasks.enums';
+import { formatCompact } from '@/utils/global/number.utils';
+import { TaskCategory, TaskFrequency, TaskRarity, TaskStatus } from '@/types/enums/tasks.enums';
 import type { Task, TaskSubStep } from '@/types/interfaces/tasks.interfaces';
 import { routes, type Route } from '@/constants/routes';
 import { TaskCategoryIcon } from './TaskCategoryIcon';
 import { TaskRewardRow } from './TaskRewardRow';
-import { TaskRewardBadge } from './TaskRewardBadge';
+import { SectionShine } from './SectionShine';
+import { SubStepRow } from './SubStepRow';
 
 export interface TaskItemCardProps {
   task: Task;
@@ -31,8 +41,12 @@ export interface TaskItemCardProps {
   onClaimSubStep?: (task: Task, step: TaskSubStep) => void;
   expanded?: boolean;
   onToggleExpanded?: () => void;
+  highlightToken?: number | null;
   className?: string;
   style?: CSSProperties;
+  pinned?: boolean;
+  pinDisabled?: boolean;
+  onTogglePin?: (taskId: string) => void;
 }
 
 const RARITY_FRAME: Record<TaskRarity, string> = {
@@ -51,109 +65,35 @@ const TIER_FRAME: Record<string, string> = {
   all: 'task-card-tier-all',
 };
 
-function SubStepRow({
-  step,
-  claimed,
-  onClaim,
-  onNavigate,
-}: {
-  step: TaskSubStep;
-  claimed: boolean;
-  onClaim: () => void;
-  onNavigate?: () => void;
-}) {
-  const t = useAppTranslations();
-  const isClaimable = step.completed && !claimed;
-  const isFullyClaimed = step.completed && claimed;
-  const isPending = !step.completed;
-  const canNavigate = isPending && !!onNavigate;
-  const rowAction = isClaimable ? onClaim : canNavigate ? onNavigate : undefined;
-  const isInteractive = !!rowAction;
+/** Detect social platform from a task's external link to pick the right icon + brand-colored frame. */
+const SOCIAL_ICON_BY_HOST: { match: RegExp; icon: LucideIcon; gradient: string }[] = [
+  { match: /(?:^|\.)t\.me$/i, icon: Send, gradient: 'from-teal to-electric-purple' },
+  { match: /(?:^|\.)telegram\.(?:org|me)$/i, icon: Send, gradient: 'from-teal to-electric-purple' },
+  { match: /(?:^|\.)x\.com$/i, icon: Twitter, gradient: 'from-white/30 to-white/10' },
+  { match: /(?:^|\.)twitter\.com$/i, icon: Twitter, gradient: 'from-electric-purple to-pink' },
+  {
+    match: /(?:^|\.)discord\.(?:gg|com)$/i,
+    icon: Hash,
+    gradient: 'from-electric-purple to-diamond',
+  },
+  { match: /(?:^|\.)youtube\.com$/i, icon: Youtube, gradient: 'from-error to-pink' },
+  { match: /(?:^|\.)youtu\.be$/i, icon: Youtube, gradient: 'from-error to-pink' },
+];
 
-  return (
-    <div
-      role={isInteractive ? 'button' : undefined}
-      tabIndex={isInteractive ? 0 : undefined}
-      onClick={
-        rowAction
-          ? e => {
-              e.stopPropagation();
-              rowAction();
-            }
-          : undefined
-      }
-      onKeyDown={
-        rowAction
-          ? e => {
-              if (e.key === 'Enter' || e.key === ' ') {
-                e.preventDefault();
-                e.stopPropagation();
-                rowAction();
-              }
-            }
-          : undefined
-      }
-      className={twMerge(
-        'flex items-center gap-2.5 rounded-lg px-2.5 py-1.5 transition-all',
-        isClaimable &&
-          'bg-pink/10 border border-pink/20 cursor-pointer active:scale-[0.99] hover:bg-pink/15',
-        isFullyClaimed && 'bg-success/10',
-        isPending && 'bg-white/5',
-        canNavigate && 'cursor-pointer active:scale-[0.99] hover:bg-white/10'
-      )}
-    >
-      {isFullyClaimed ? (
-        <div className="flex-center w-5 h-5 rounded-full bg-success/30 shrink-0">
-          <Check size={11} className="text-success" />
-        </div>
-      ) : isClaimable ? (
-        <div className="flex-center w-5 h-5 rounded-full bg-pink/30 shrink-0 animate-task-pulse">
-          <Gift size={11} className="text-electric-pink" />
-        </div>
-      ) : (
-        <Circle size={18} className="text-white/30 shrink-0" />
-      )}
-      {step.label ? (
-        <span
-          className={twMerge(
-            'text-xs font-semibold flex-1 truncate',
-            isFullyClaimed && 'text-white/50',
-            isClaimable && 'text-white',
-            !step.completed && 'text-white/60'
-          )}
-        >
-          {step.label}
-        </span>
-      ) : (
-        <div className="flex-1" />
-      )}
-      {step.reward && !isFullyClaimed && <TaskRewardBadge reward={step.reward} size="sm" />}
-      {isPending && onNavigate && (
-        <button
-          type="button"
-          onClick={e => {
-            e.stopPropagation();
-            onNavigate();
-          }}
-          aria-label={t('open')}
-          className="flex-center w-6 h-6 rounded-full bg-electric-pink/15 border border-electric-pink/30 hover:bg-electric-pink/25 transition-colors shrink-0"
-        >
-          <ChevronRight size={12} className="text-electric-pink" strokeWidth={2.5} />
-        </button>
-      )}
-      {isClaimable && (
-        <span className="rounded-full bg-pink-gradient px-2.5 py-1 text-[10px] font-bold text-white shrink-0 pointer-events-none">
-          {t('claim')}
-        </span>
-      )}
-      {isFullyClaimed && (
-        <span className="text-[10px] font-semibold text-success uppercase tracking-wider shrink-0">
-          {t('claimed')}
-        </span>
-      )}
-    </div>
-  );
-}
+const resolveSocialIcon = (externalLink?: string) => {
+  if (!externalLink) return null;
+  let host = '';
+  try {
+    host = new URL(externalLink).hostname.toLowerCase();
+  } catch {
+    return null;
+  }
+  for (const entry of SOCIAL_ICON_BY_HOST) {
+    if (entry.match.test(host)) return entry;
+  }
+  // Fallback: anything else looks like a generic share action.
+  return { icon: Share2, gradient: 'from-pink to-electric-pink' };
+};
 
 export function TaskItemCard({
   task,
@@ -161,8 +101,12 @@ export function TaskItemCard({
   onClaimSubStep,
   expanded: expandedProp,
   onToggleExpanded,
+  highlightToken,
   className,
   style,
+  pinned = false,
+  pinDisabled = false,
+  onTogglePin,
 }: TaskItemCardProps) {
   const t = useAppTranslations();
   const router = useRouter();
@@ -195,6 +139,11 @@ export function TaskItemCard({
     }
   };
   const [locallyClaimed, setLocallyClaimed] = useState<Record<string, boolean>>({});
+  // Reset locally-claimed substep flags when the task identity changes —
+  // otherwise after a refetch the stale flags would persist and look claimed.
+  useEffect(() => {
+    setLocallyClaimed({});
+  }, [task.id]);
   const [isSimulating, setIsSimulating] = useState(false);
 
   const isStepClaimed = (step: TaskSubStep) => locallyClaimed[step.id] ?? !!step.claimed;
@@ -235,6 +184,23 @@ export function TaskItemCard({
     onClaim(task, unclaimed.length ? unclaimed.map(s => s.id) : undefined);
   };
 
+  const handleClaimAllSubSteps = async () => {
+    if (isSimulating) return;
+    const unclaimed = (task.subSteps ?? []).filter(s => s.completed && !isStepClaimed(s));
+    if (unclaimed.length < 2) return;
+    // Local-only batch claim — fires per-substep callback; no main task claim.
+    setIsSimulating(true);
+    for (const step of unclaimed) {
+      await new Promise(res => setTimeout(res, 220));
+      setLocallyClaimed(prev => ({ ...prev, [step.id]: true }));
+      onClaimSubStep?.(task, step);
+    }
+    await new Promise(res => setTimeout(res, 200));
+    setIsSimulating(false);
+  };
+
+  const claimableCount = (task.subSteps ?? []).filter(s => s.completed && !isStepClaimed(s)).length;
+
   const isLockedTournament = isLocked && task.category === TaskCategory.TOURNAMENTS;
 
   const handleCardClick = () => {
@@ -268,11 +234,27 @@ export function TaskItemCard({
     else if (task.externalLink) window.open(task.externalLink, '_blank', 'noopener,noreferrer');
   };
 
+  // Compact layout flag — applies only to ONCE-frequency tasks in selected
+  // categories (Social, Achievements, Profile Status, Profile). Daily/weekly
+  // tasks always render in the standard full-size row, even for these
+  // categories, so they look consistent with other categories' weekly tasks.
+  const isCompactRow =
+    task.frequency === TaskFrequency.ONCE &&
+    (task.category === TaskCategory.SOCIAL ||
+      task.category === TaskCategory.ACHIEVEMENTS ||
+      task.category === TaskCategory.PROFILE_STATUS ||
+      task.category === TaskCategory.PROFILE);
+  const showSubtitleInCompact =
+    task.category === TaskCategory.ACHIEVEMENTS ||
+    task.category === TaskCategory.PROFILE_STATUS ||
+    task.category === TaskCategory.PROFILE;
+
   return (
     <div
       style={style}
       className={twMerge(
-        'relative rounded-2xl transition-all bg-background-overlay overflow-hidden min-h-[88px]',
+        'relative rounded-2xl transition-all bg-background-overlay overflow-hidden',
+        isCompactRow ? (showSubtitleInCompact ? 'min-h-[68px]' : 'min-h-[60px]') : 'min-h-[88px]',
         isCompleted
           ? 'task-card-completed'
           : isLockedTournament
@@ -285,18 +267,57 @@ export function TaskItemCard({
         className
       )}
     >
-      {/* countdown — absolute top-right so the title gets the full row width */}
-      {task.resetAt && !isCompleted && !isLocked && !expired && (
-        <span className="pointer-events-none absolute top-2 right-2.5 z-[3] flex items-center gap-1 text-[10px] text-white/40 font-medium tabular-nums">
-          <Clock3 size={10} />
-          {leftTime}
-        </span>
-      )}
+      <SectionShine token={highlightToken ?? null} />
+
+      {/* Top-right cluster: countdown + pin button (pin hidden for ready-to-claim — they're already on top) */}
+      {(task.resetAt && !isCompleted && !isLocked && !expired) ||
+      (onTogglePin && !isCompleted && !isLocked && !isReady) ? (
+        <div className="absolute top-1.5 right-1.5 z-[3] flex items-center gap-1.5">
+          {task.resetAt && !isCompleted && !isLocked && !expired && (
+            <span className="pointer-events-none flex items-center gap-1 text-[10px] text-white/40 font-medium tabular-nums">
+              <Clock3 size={10} />
+              {leftTime}
+            </span>
+          )}
+          {onTogglePin && !isCompleted && !isLocked && !isReady && (
+            <button
+              type="button"
+              aria-label={pinned ? t('unpin') : t('pin')}
+              aria-pressed={pinned}
+              disabled={pinDisabled}
+              onClick={e => {
+                e.stopPropagation();
+                if (pinDisabled) return;
+                onTogglePin(task.id);
+              }}
+              className={twMerge(
+                'flex-center w-6 h-6 rounded-full transition-all active:scale-90',
+                pinned
+                  ? 'bg-electric-pink/20 text-electric-pink hover:bg-electric-pink/30'
+                  : pinDisabled
+                    ? 'bg-white/[0.04] text-white/20 cursor-not-allowed'
+                    : 'bg-white/5 text-white/40 hover:bg-white/10 hover:text-white/70'
+              )}
+            >
+              {pinned ? (
+                <PinOff size={12} strokeWidth={2.5} />
+              ) : (
+                <Pin size={12} strokeWidth={2.5} />
+              )}
+            </button>
+          )}
+        </div>
+      ) : null}
 
       {/* main row */}
       <div
         className={twMerge(
-          'relative z-[2] flex items-center gap-3 px-3 py-3 min-h-[88px]',
+          'relative z-[2] flex items-center gap-3',
+          isCompactRow
+            ? showSubtitleInCompact
+              ? 'px-3 py-2 min-h-[68px] gap-2.5'
+              : 'px-3 py-2 min-h-[60px] gap-2.5'
+            : 'px-3 py-3 min-h-[88px]',
           (!isLocked || isLockedTournament) && 'cursor-pointer active:scale-[0.99]'
         )}
         onClick={handleCardClick}
@@ -305,13 +326,35 @@ export function TaskItemCard({
         aria-expanded={hasSubSteps ? expanded : undefined}
       >
         {/* Icon */}
-        <div className="relative shrink-0 w-9 h-9 flex-center">
+        <div
+          className={twMerge('relative shrink-0 flex-center', isCompactRow ? 'w-8 h-8' : 'w-9 h-9')}
+        >
           {task.category === TaskCategory.TOURNAMENTS && task.tier ? (
             <Medal
               type={(task.tier === 'all' ? 'gold' : task.tier) as MedalType}
               width={36}
               height={36}
             />
+          ) : task.category === TaskCategory.SOCIAL && resolveSocialIcon(task.externalLink) ? (
+            (() => {
+              const social = resolveSocialIcon(task.externalLink)!;
+              const SocialIcon = social.icon;
+              return (
+                <div
+                  className={twMerge(
+                    'flex-center rounded-xl bg-gradient-to-br shadow-md shadow-black/20',
+                    isCompactRow ? 'w-8 h-8' : 'w-9 h-9',
+                    social.gradient
+                  )}
+                >
+                  <SocialIcon
+                    size={isCompactRow ? 16 : 18}
+                    className="text-white"
+                    strokeWidth={2.4}
+                  />
+                </div>
+              );
+            })()
           ) : (
             <TaskCategoryIcon category={task.category} size={18} />
           )}
@@ -328,32 +371,46 @@ export function TaskItemCard({
         </div>
 
         {/* Body */}
-        <div className="flex-1 min-w-0 flex flex-col gap-1">
+        <div
+          className={twMerge('flex-1 min-w-0 flex flex-col', isCompactRow ? 'gap-0.5' : 'gap-1')}
+        >
           <h4
             className={twMerge(
-              'text-[15px] font-extrabold leading-snug',
+              'font-extrabold leading-snug',
+              isCompactRow ? 'text-sm' : 'text-[15px]',
               expanded ? 'whitespace-normal break-words' : 'truncate w-max max-w-full'
             )}
           >
             {task.title}
           </h4>
 
-          {(task.subtitle || task.unlockHint) && (
-            <p className="text-[11px] text-white/50 line-clamp-1">
-              {isLocked && task.unlockHint ? task.unlockHint : task.subtitle}
-            </p>
-          )}
+          {((isCompactRow && showSubtitleInCompact) || !isCompactRow) &&
+            (task.subtitle || task.unlockHint) && (
+              <p
+                className={twMerge(
+                  'text-white/50 line-clamp-1',
+                  isCompactRow ? 'text-[10px]' : 'text-[11px]'
+                )}
+              >
+                {isLocked && task.unlockHint ? task.unlockHint : task.subtitle}
+              </p>
+            )}
 
-          <div className="flex items-center gap-2 mt-0.5 flex-wrap">
+          <div
+            className={twMerge(
+              'flex items-center gap-2 flex-wrap',
+              isCompactRow ? 'mt-0' : 'mt-0.5'
+            )}
+          >
             <TaskRewardRow rewards={task.rewards} size="sm" />
             {showProgress && !isCompleted && !isLocked && (
               <span className="text-[11px] text-white/50 font-semibold tabular-nums ml-auto">
-                {task.progress.current}/{task.progress.target}
+                {formatCompact(task.progress.current)}/{formatCompact(task.progress.target)}
               </span>
             )}
           </div>
 
-          {showProgress && !isCompleted && !isLocked && (
+          {showProgress && !isCompleted && !isLocked && !isCompactRow && (
             <Progress
               percentage={pct}
               className="h-1 mt-1"
@@ -388,8 +445,13 @@ export function TaskItemCard({
               </div>
             )
           ) : isCompleted ? (
-            <div className="flex-center w-9 h-9 rounded-full bg-success/20">
-              <Check size={16} className="text-success" />
+            <div
+              className={twMerge(
+                'flex-center rounded-full bg-success/20',
+                isCompactRow ? 'w-8 h-8' : 'w-9 h-9'
+              )}
+            >
+              <Check size={isCompactRow ? 14 : 16} className="text-success" />
             </div>
           ) : hasSubSteps ? (
             <div className="relative">
@@ -408,6 +470,25 @@ export function TaskItemCard({
                 </span>
               )}
             </div>
+          ) : task.externalLink ? (
+            <button
+              type="button"
+              aria-label={t('open')}
+              onClick={e => {
+                e.stopPropagation();
+                window.open(task.externalLink, '_blank', 'noopener,noreferrer');
+              }}
+              className={twMerge(
+                'flex-center rounded-full bg-electric-pink/15 border border-electric-pink/30 hover:bg-electric-pink/25 active:scale-95 transition-all',
+                isCompactRow ? 'w-8 h-8' : 'w-9 h-9'
+              )}
+            >
+              <ArrowUpRight
+                size={isCompactRow ? 14 : 16}
+                className="text-electric-pink"
+                strokeWidth={2.5}
+              />
+            </button>
           ) : (
             isInProgress && (
               <div className="flex-center w-9 h-9 rounded-full bg-white/5 hover:bg-white/10 transition-colors">
@@ -439,27 +520,34 @@ export function TaskItemCard({
               </button>
             )}
           </div>
-          {task.subSteps
-            ?.slice()
-            .sort((a, b) => {
-              // Sort order: claimable (completed && !claimed) first, then in-progress, then claimed
-              const stepRank = (s: TaskSubStep) => {
-                const claimed = isStepClaimed(s);
-                if (s.completed && !claimed) return 0;
-                if (!s.completed) return 1;
-                return 2;
-              };
-              return stepRank(a) - stepRank(b);
-            })
-            .map(step => (
-              <SubStepRow
-                key={step.id}
-                step={step}
-                claimed={isStepClaimed(step)}
-                onClaim={() => handleClaimSubStep(step)}
-                onNavigate={task.deeplink || task.externalLink ? handleStepNavigate : undefined}
-              />
-            ))}
+          {task.subSteps?.map(step => (
+            <SubStepRow
+              key={step.id}
+              step={step}
+              claimed={isStepClaimed(step)}
+              onClaim={() => handleClaimSubStep(step)}
+              onNavigate={task.deeplink || task.externalLink ? handleStepNavigate : undefined}
+            />
+          ))}
+
+          {/* Batch claim collected substeps — visible only when 2+ are claimable AND not all done */}
+          {!isCompleted && !allStepsDone && claimableCount >= 2 && (
+            <button
+              type="button"
+              disabled={isSimulating}
+              onClick={e => {
+                e.stopPropagation();
+                handleClaimAllSubSteps();
+              }}
+              className={twMerge(
+                'mt-1 w-full rounded-xl py-2 text-xs font-bold flex-center gap-1.5 transition-all bg-pink-gradient text-white active:scale-95 shadow-md shadow-electric-pink/25',
+                isSimulating && 'opacity-70 cursor-wait'
+              )}
+            >
+              <Gift size={12} />
+              {isSimulating ? t('claiming') : `${t('claim all')} (${claimableCount})`}
+            </button>
+          )}
 
           {/* Main bonus claim button — always present, gated by allStepsDone */}
           <div className="mt-2 pt-2 border-t border-white/5 flex flex-col gap-2">

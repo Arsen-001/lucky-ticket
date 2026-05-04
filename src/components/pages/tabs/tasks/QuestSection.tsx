@@ -38,7 +38,10 @@ export function QuestSection({
     <section
       ref={el => registerSection?.(TaskCategory.QUEST, el)}
       data-category={TaskCategory.QUEST}
-      className={twMerge('flex flex-col gap-3 px-4 pt-5 pb-1 scroll-mt-20', className)}
+      className={twMerge(
+        'flex flex-col gap-3 px-4 pt-5 pb-5 scroll-mt-20 border-y border-white/[0.07]',
+        className
+      )}
     >
       <header className="relative flex items-center gap-3 rounded-2xl overflow-hidden">
         <SectionShine token={highlightToken ?? null} />

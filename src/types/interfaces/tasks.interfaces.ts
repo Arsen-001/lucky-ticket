@@ -22,21 +22,34 @@ export interface TaskSubStep {
   reward?: TaskReward;
 }
 
+/**
+ * A user-facing task. All human-readable strings (title / subtitle / unlockHint /
+ * subSteps[].label) are expected to be **pre-localized by the backend** based on
+ * the user's selected language. The frontend renders them as-is and never
+ * parses or re-translates their content.
+ */
 export interface Task {
   id: string;
   category: TaskCategory;
   frequency: TaskFrequency;
   status: TaskStatus;
   rarity: TaskRarity;
+  /** Pre-localized title, e.g. "Reach top 10". */
   title: string;
+  /** Optional pre-localized subtitle / description. */
   subtitle?: string;
   rewards: TaskReward[];
   progress: { current: number; target: number };
+  /** ISO timestamp when this task resets (daily / weekly only). */
   resetAt?: string;
+  /** Pre-localized hint shown when the task is LOCKED (e.g. "Reach Silver first."). */
   unlockHint?: string;
+  /** In-app deeplink that the card navigates to when tapped (overrides externalLink). */
   deeplink?: Route | string;
+  /** Outside-app URL — opened in a new tab. */
   externalLink?: string;
   subSteps?: TaskSubStep[];
+  /** Tier this task belongs to — drives gating and tier-themed rendering. */
   tier?: `${TicketsEnum}` | 'all';
 }
 
