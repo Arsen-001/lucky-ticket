@@ -10,20 +10,12 @@ import {
   Crown,
   PiggyBank,
   Star,
-  Ticket as TicketIcon,
+  Ticket,
   TrendingUp,
   Users,
 } from 'lucide-react';
+import type { MedalType } from '@/components/shared/icons/Medal';
 import { icons } from '@/constants/icons';
-import {
-  GENERAL_SUB_TAB,
-  SLIDER_ID_PREFIX,
-  SLIDER_LEADERBOARD_PERIOD_TABS,
-  SLIDER_TIER_TABS_NO_BRONZE,
-  TASK_PAGE,
-  TOURNAMENT_PLACE_KEYS,
-} from '@/constants/tasks.constants';
-import type { MessageIds } from '@/types/types/i18n.types';
 import { useGetTasksQuery, useClaimTaskMutation, useWatchAdMutation } from '@/api/tasks.api';
 import { TaskCategory, TaskFrequency, TaskStatus } from '@/types/enums/tasks.enums';
 import type {
@@ -42,7 +34,7 @@ import { TasksFrequencyTabs } from './TasksFrequencyTabs';
 import { TasksCategoryNav, type CategoryNavItem } from './TasksCategoryNav';
 import { TasksCategorySection } from './TasksCategorySection';
 import { TournamentMilestoneSlider } from './TournamentMilestoneSlider';
-import { TournamentSubTabs, type PeriodSubTab, type TierSubTab } from './TournamentSubTabs';
+import { TournamentSubTabs, type TournamentSubTab } from './TournamentSubTabs';
 import { TournamentSlidersSkeleton } from './TournamentSlidersSkeleton';
 import { AdsSection } from './AdsSection';
 import type { TierName } from '@/types/types/tier.types';
@@ -161,65 +153,6 @@ const sortByOnceOrder = <T extends { category: TaskCategory }>(items: T[]): T[] 
   return [...items].sort((a, b) => rank(a.category) - rank(b.category));
 };
 
-// Generic helper — flips an `isSwitching` flag for `durationMs` whenever the
-// observed value changes (after first render). Used by every sub-tab state
-// in this component to drive the swap-skeleton UX.
-function useSubTabSwitching<T>(activeTab: T, durationMs = TASK_PAGE.subTabSkeletonMs) {
-  const [isSwitching, setIsSwitching] = useState(false);
-  const isFirstRender = useRef(true);
-  useEffect(() => {
-    if (isFirstRender.current) {
-      isFirstRender.current = false;
-      return;
-    }
-    setIsSwitching(true);
-    const id = window.setTimeout(() => setIsSwitching(false), durationMs);
-    return () => window.clearTimeout(id);
-  }, [activeTab, durationMs]);
-  return isSwitching;
-}
-
-// Per-category slider id-prefix patterns — drive `getRegularTasks` and
-// guarantee every category's milestone-chain tasks get pulled out of the
-// regular row grid in the once tab. Patterns mirror the prefixes defined
-// in `SLIDER_ID_PREFIX` (tasks.constants.ts).
-const ONCE_SLIDER_PATTERNS: Partial<Record<TaskCategory, RegExp>> = {
-  [TaskCategory.TICKETS]: /^ticket-(?:[a-z]+-)?collect-/,
-  [TaskCategory.ENGINES]: /^engine-(?:[a-z]+-)?collect-/,
-  [TaskCategory.STAKES]: /^stake-(?:[a-z]+-)?(?:count|volume)-/,
-  [TaskCategory.STARS]: /^star-(?:purchase|earn)-/,
-  [TaskCategory.FRIENDS]: /^friend-invite-/,
-  [TaskCategory.LEADERBOARD]: /^leaderboard-(?:daily|weekly|monthly|alltime)-rank-/,
-  [TaskCategory.PROFILE_STATUS]: /^vip-level-/,
-};
-
-/**
- * Tasks visible in the regular grid for a category in the once tab — i.e.
- * everything that is NOT pulled into a milestone slider above the grid.
- * Tournaments hide everything (every milestone is in a slider).
- */
-const getRegularTasks = (category: TaskCategory, allTasks: Task[]): Task[] => {
-  if (category === TaskCategory.TOURNAMENTS) return [];
-  const pattern = ONCE_SLIDER_PATTERNS[category];
-  if (!pattern) return allTasks;
-  return allTasks.filter(task => !pattern.test(task.id));
-};
-
-const TIER_TABS_NO_BRONZE = ['silver', 'gold', 'platinum', 'diamond'] as const;
-
-/**
- * Returns the set of tier sub-tabs whose tier-prefixed tasks are LOCKED for
- * the current user (used to render a lock icon next to those tabs).
- */
-const getLockedTierTabs = (
-  allTasks: Task[],
-  makePrefix: (tier: TierName) => string,
-  tiers: readonly TierName[] = TIER_TABS_NO_BRONZE
-): TierSubTab[] =>
-  tiers.filter(tier =>
-    allTasks.some(task => task.id.startsWith(makePrefix(tier)) && task.status === TaskStatus.LOCKED)
-  );
-
 export function TasksContent() {
   const t = useAppTranslations();
   const searchParams = useSearchParams();
@@ -253,23 +186,29 @@ export function TasksContent() {
     nonce: number;
   } | null>(null);
   const [taskHighlight, setTaskHighlight] = useState<{ id: string; nonce: number } | null>(null);
-  const [tournamentSubTab, setTournamentSubTab] = useState<TierSubTab>(GENERAL_SUB_TAB);
-  const [ticketsSubTab, setTicketsSubTab] = useState<TierSubTab>(GENERAL_SUB_TAB);
-  const [enginesSubTab, setEnginesSubTab] = useState<TierSubTab>(GENERAL_SUB_TAB);
-  const [stakesSubTab, setStakesSubTab] = useState<TierSubTab>(GENERAL_SUB_TAB);
-  const [leaderboardPeriodTab, setLeaderboardPeriodTab] = useState<PeriodSubTab>('daily');
-  const isSubTabSwitching = useSubTabSwitching(tournamentSubTab);
-  const isTicketsSubTabSwitching = useSubTabSwitching(ticketsSubTab);
-  const isEnginesSubTabSwitching = useSubTabSwitching(enginesSubTab);
-  const isStakesSubTabSwitching = useSubTabSwitching(stakesSubTab);
-  const isLeaderboardSubTabSwitching = useSubTabSwitching(leaderboardPeriodTab);
+  const [tournamentSubTab, setTournamentSubTab] = useState<TournamentSubTab>('general');
+  const [isSubTabSwitching, setIsSubTabSwitching] = useState(false);
+  const isFirstSubTabRender = useRef(true);
+  const [ticketsSubTab, setTicketsSubTab] = useState<TournamentSubTab>('general');
+  const [isTicketsSubTabSwitching, setIsTicketsSubTabSwitching] = useState(false);
+  const isFirstTicketsSubTabRender = useRef(true);
+  const [enginesSubTab, setEnginesSubTab] = useState<TournamentSubTab>('general');
+  const [isEnginesSubTabSwitching, setIsEnginesSubTabSwitching] = useState(false);
+  const isFirstEnginesSubTabRender = useRef(true);
+  const [stakesSubTab, setStakesSubTab] = useState<TournamentSubTab>('general');
+  const [isStakesSubTabSwitching, setIsStakesSubTabSwitching] = useState(false);
+  const isFirstStakesSubTabRender = useRef(true);
+  const [leaderboardPeriodTab, setLeaderboardPeriodTab] = useState<TournamentSubTab>('daily');
+  const [isLeaderboardSubTabSwitching, setIsLeaderboardSubTabSwitching] = useState(false);
+  const isFirstLeaderboardSubTabRender = useRef(true);
 
   // Pinned tasks — user can star any number of tasks; pinned ones float to
   // the top of their status group (right after READY_TO_CLAIM).
+  const PINNED_STORAGE_KEY = 'lt:pinned-tasks';
   const [pinnedIds, setPinnedIds] = useState<Set<string>>(() => {
     if (typeof window === 'undefined') return new Set();
     try {
-      const raw = window.localStorage.getItem(TASK_PAGE.pinnedStorageKey);
+      const raw = window.localStorage.getItem(PINNED_STORAGE_KEY);
       return raw ? new Set(JSON.parse(raw) as string[]) : new Set();
     } catch {
       return new Set();
@@ -277,7 +216,7 @@ export function TasksContent() {
   });
   useEffect(() => {
     try {
-      window.localStorage.setItem(TASK_PAGE.pinnedStorageKey, JSON.stringify([...pinnedIds]));
+      window.localStorage.setItem(PINNED_STORAGE_KEY, JSON.stringify([...pinnedIds]));
     } catch {
       /* storage unavailable — ignore */
     }
@@ -291,6 +230,57 @@ export function TasksContent() {
     });
   };
 
+  // Show a brief skeleton when the tournament sub-tab swaps so the content
+  // change feels intentional rather than instant.
+  useEffect(() => {
+    if (isFirstSubTabRender.current) {
+      isFirstSubTabRender.current = false;
+      return;
+    }
+    setIsSubTabSwitching(true);
+    const id = window.setTimeout(() => setIsSubTabSwitching(false), 320);
+    return () => window.clearTimeout(id);
+  }, [tournamentSubTab]);
+
+  useEffect(() => {
+    if (isFirstTicketsSubTabRender.current) {
+      isFirstTicketsSubTabRender.current = false;
+      return;
+    }
+    setIsTicketsSubTabSwitching(true);
+    const id = window.setTimeout(() => setIsTicketsSubTabSwitching(false), 320);
+    return () => window.clearTimeout(id);
+  }, [ticketsSubTab]);
+
+  useEffect(() => {
+    if (isFirstEnginesSubTabRender.current) {
+      isFirstEnginesSubTabRender.current = false;
+      return;
+    }
+    setIsEnginesSubTabSwitching(true);
+    const id = window.setTimeout(() => setIsEnginesSubTabSwitching(false), 320);
+    return () => window.clearTimeout(id);
+  }, [enginesSubTab]);
+
+  useEffect(() => {
+    if (isFirstStakesSubTabRender.current) {
+      isFirstStakesSubTabRender.current = false;
+      return;
+    }
+    setIsStakesSubTabSwitching(true);
+    const id = window.setTimeout(() => setIsStakesSubTabSwitching(false), 320);
+    return () => window.clearTimeout(id);
+  }, [stakesSubTab]);
+
+  useEffect(() => {
+    if (isFirstLeaderboardSubTabRender.current) {
+      isFirstLeaderboardSubTabRender.current = false;
+      return;
+    }
+    setIsLeaderboardSubTabSwitching(true);
+    const id = window.setTimeout(() => setIsLeaderboardSubTabSwitching(false), 320);
+    return () => window.clearTimeout(id);
+  }, [leaderboardPeriodTab]);
   const [pendingClaim, setPendingClaim] = useState<{
     id: string;
     open: boolean;
@@ -428,8 +418,7 @@ export function TasksContent() {
     const recompute = () => {
       if (Date.now() < scrollLockUntilRef.current) return;
 
-      const stickyOffset =
-        stickyNavRef.current?.offsetHeight ?? TASK_PAGE.stickyNavFallbackHeightPx;
+      const stickyOffset = stickyNavRef.current?.offsetHeight ?? 64;
       const scrollerTop = scroller.getBoundingClientRect().top;
       const probeY = scrollerTop + stickyOffset + 12;
 
@@ -500,7 +489,7 @@ export function TasksContent() {
     if (!el) return;
 
     const scroller = findScroller(el);
-    const stickyOffset = stickyNavRef.current?.offsetHeight ?? TASK_PAGE.stickyNavFallbackHeightPx;
+    const stickyOffset = stickyNavRef.current?.offsetHeight ?? 64;
 
     if (scroller) {
       const target =
@@ -644,100 +633,121 @@ export function TasksContent() {
             const isTicketsOnce =
               activeFrequency === TaskFrequency.ONCE && cat.category === TaskCategory.TICKETS;
             const ticketCollectPrefix =
-              ticketsSubTab === GENERAL_SUB_TAB
-                ? SLIDER_ID_PREFIX.ticketsGeneral
-                : SLIDER_ID_PREFIX.ticketsTier(ticketsSubTab);
+              ticketsSubTab === 'general' ? 'ticket-collect-' : `ticket-${ticketsSubTab}-collect-`;
             const ticketCollectTasks = isTicketsOnce
               ? allTasks.filter(task => task.id.startsWith(ticketCollectPrefix))
               : [];
             // Locked tier sub-tabs for tickets (tier > USER_TIER) — sourced from any ticket task in that tier.
-            const ticketsLockedTabs: TierSubTab[] = isTicketsOnce
-              ? getLockedTierTabs(allTasks, SLIDER_ID_PREFIX.ticketsTier)
+            const ticketsLockedTabs: TournamentSubTab[] = isTicketsOnce
+              ? (['silver', 'gold', 'platinum', 'diamond'] as const).filter(tier =>
+                  allTasks.some(
+                    task =>
+                      task.id.startsWith(`ticket-${tier}-collect-`) &&
+                      task.status === TaskStatus.LOCKED
+                  )
+                )
               : [];
 
             const isEnginesOnce =
               activeFrequency === TaskFrequency.ONCE && cat.category === TaskCategory.ENGINES;
             const engineCollectPrefix =
-              enginesSubTab === GENERAL_SUB_TAB
-                ? SLIDER_ID_PREFIX.enginesGeneral
-                : SLIDER_ID_PREFIX.enginesTier(enginesSubTab);
+              enginesSubTab === 'general' ? 'engine-collect-' : `engine-${enginesSubTab}-collect-`;
             const engineCollectTasks = isEnginesOnce
               ? allTasks.filter(task => task.id.startsWith(engineCollectPrefix))
               : [];
-            const enginesLockedTabs: TierSubTab[] = isEnginesOnce
-              ? getLockedTierTabs(allTasks, SLIDER_ID_PREFIX.enginesTier)
+            const enginesLockedTabs: TournamentSubTab[] = isEnginesOnce
+              ? (['silver', 'gold', 'platinum', 'diamond'] as const).filter(tier =>
+                  allTasks.some(
+                    task =>
+                      task.id.startsWith(`engine-${tier}-collect-`) &&
+                      task.status === TaskStatus.LOCKED
+                  )
+                )
               : [];
 
             const isLeaderboardOnce =
               activeFrequency === TaskFrequency.ONCE && cat.category === TaskCategory.LEADERBOARD;
             const leaderboardRankTasks = isLeaderboardOnce
               ? allTasks.filter(task =>
-                  task.id.startsWith(SLIDER_ID_PREFIX.leaderboardRank(leaderboardPeriodTab))
+                  task.id.startsWith(`leaderboard-${leaderboardPeriodTab}-rank-`)
                 )
               : [];
 
             const isFriendsOnce =
               activeFrequency === TaskFrequency.ONCE && cat.category === TaskCategory.FRIENDS;
             const friendInviteTasks = isFriendsOnce
-              ? allTasks.filter(task => task.id.startsWith(SLIDER_ID_PREFIX.friendsInvite))
+              ? allTasks.filter(task => task.id.startsWith('friend-invite-'))
               : [];
 
             const isStarsOnce =
               activeFrequency === TaskFrequency.ONCE && cat.category === TaskCategory.STARS;
             const starPurchaseTasks = isStarsOnce
-              ? allTasks.filter(task => task.id.startsWith(SLIDER_ID_PREFIX.starsPurchase))
+              ? allTasks.filter(task => task.id.startsWith('star-purchase-'))
               : [];
             const starEarnTasks = isStarsOnce
-              ? allTasks.filter(task => task.id.startsWith(SLIDER_ID_PREFIX.starsEarn))
+              ? allTasks.filter(task => task.id.startsWith('star-earn-'))
               : [];
 
             const isProfileStatusOnce =
               activeFrequency === TaskFrequency.ONCE &&
               cat.category === TaskCategory.PROFILE_STATUS;
             const vipTierTasks = isProfileStatusOnce
-              ? allTasks.filter(task => task.id.startsWith(SLIDER_ID_PREFIX.vipLevel))
+              ? allTasks.filter(task => task.id.startsWith('vip-level-'))
               : [];
 
             const isStakesOnce =
               activeFrequency === TaskFrequency.ONCE && cat.category === TaskCategory.STAKES;
             const stakeCountPrefix =
-              stakesSubTab === GENERAL_SUB_TAB
-                ? SLIDER_ID_PREFIX.stakesCount
-                : SLIDER_ID_PREFIX.stakesTierCount(stakesSubTab);
+              stakesSubTab === 'general' ? 'stake-count-' : `stake-${stakesSubTab}-count-`;
             const stakeVolumePrefix =
-              stakesSubTab === GENERAL_SUB_TAB
-                ? SLIDER_ID_PREFIX.stakesVolume
-                : SLIDER_ID_PREFIX.stakesTierVolume(stakesSubTab);
+              stakesSubTab === 'general' ? 'stake-volume-' : `stake-${stakesSubTab}-volume-`;
             const stakeCountTasks = isStakesOnce
               ? allTasks.filter(task => task.id.startsWith(stakeCountPrefix))
               : [];
             const stakeVolumeTasks = isStakesOnce
               ? allTasks.filter(task => task.id.startsWith(stakeVolumePrefix))
               : [];
-            const stakesLockedTabs: TierSubTab[] = isStakesOnce
-              ? getLockedTierTabs(allTasks, tier => `stake-${tier}-`)
+            const stakesLockedTabs: TournamentSubTab[] = isStakesOnce
+              ? (['silver', 'gold', 'platinum', 'diamond'] as const).filter(tier =>
+                  allTasks.some(
+                    task =>
+                      task.id.startsWith(`stake-${tier}-`) && task.status === TaskStatus.LOCKED
+                  )
+                )
               : [];
 
-            // General sliders (tier-agnostic): podium + total participation + 1st/2nd/3rd any tier.
+            // General sliders (tier-agnostic): podium + total participation + 1st/2nd/3rd any tier
             const generalSliderConfigs = [
               {
-                prefix: SLIDER_ID_PREFIX.tournamentPodium,
+                prefix: 'tournament-podium-',
                 title: t('podium milestones title'),
                 blurb: t('podium milestones blurb'),
                 unitLabel: t('podium'),
               },
               {
-                prefix: SLIDER_ID_PREFIX.tournamentPlayed,
+                prefix: 'tournament-played-',
                 title: t('play count title'),
                 blurb: t('play count blurb'),
                 unitLabel: t('tournament participation'),
               },
-              ...TOURNAMENT_PLACE_KEYS.map(place => ({
-                prefix: SLIDER_ID_PREFIX.tournamentPlace(place),
-                title: t(`place ${place} title` as MessageIds),
-                blurb: t(`place ${place} blurb` as MessageIds),
-                unitLabel: t(`place ${place}` as MessageIds),
-              })),
+              {
+                prefix: 'tournament-1st-',
+                title: t('place 1st title'),
+                blurb: t('place 1st blurb'),
+                unitLabel: t('place 1st'),
+              },
+              {
+                prefix: 'tournament-2nd-',
+                title: t('place 2nd title'),
+                blurb: t('place 2nd blurb'),
+                unitLabel: t('place 2nd'),
+              },
+              {
+                prefix: 'tournament-3rd-',
+                title: t('place 3rd title'),
+                blurb: t('place 3rd blurb'),
+                unitLabel: t('place 3rd'),
+              },
             ];
 
             // Per-tier sliders — built dynamically from the active tier sub-tab.
@@ -745,45 +755,67 @@ export function TasksContent() {
               const tierName = t(tier);
               return [
                 {
-                  prefix: SLIDER_ID_PREFIX.tournamentTierPlayed(tier),
+                  prefix: `tournament-${tier}-played-`,
                   title: t('tier participation title', { tier: tierName }),
                   blurb: t('tier participation blurb', { tier: tierName }),
                   unitLabel: `${tierName} · ${t('tournament participation')}`,
                 },
-                ...TOURNAMENT_PLACE_KEYS.map(place => ({
-                  prefix: SLIDER_ID_PREFIX.tournamentTierPlace(tier, place),
-                  title: t('tier place title', {
-                    tier: tierName,
-                    place: t(`place ${place}` as MessageIds),
-                  }),
-                  blurb: t('tier place blurb', {
-                    tier: tierName,
-                    place: t(`place ${place}` as MessageIds),
-                  }),
-                  unitLabel: `${tierName} · ${place}`,
-                })),
+                {
+                  prefix: `tournament-${tier}-1st-`,
+                  title: t('tier place title', { tier: tierName, place: t('place 1st') }),
+                  blurb: t('tier place blurb', { tier: tierName, place: t('place 1st') }),
+                  unitLabel: `${tierName} · 1st`,
+                },
+                {
+                  prefix: `tournament-${tier}-2nd-`,
+                  title: t('tier place title', { tier: tierName, place: t('place 2nd') }),
+                  blurb: t('tier place blurb', { tier: tierName, place: t('place 2nd') }),
+                  unitLabel: `${tierName} · 2nd`,
+                },
+                {
+                  prefix: `tournament-${tier}-3rd-`,
+                  title: t('tier place title', { tier: tierName, place: t('place 3rd') }),
+                  blurb: t('tier place blurb', { tier: tierName, place: t('place 3rd') }),
+                  unitLabel: `${tierName} · 3rd`,
+                },
               ];
             };
 
             const activeSliderConfigs = isTournamentsOnce
-              ? tournamentSubTab === GENERAL_SUB_TAB
+              ? tournamentSubTab === 'general'
                 ? generalSliderConfigs
-                : buildTierSliderConfigs(tournamentSubTab)
+                : buildTierSliderConfigs(tournamentSubTab as TierName)
               : [];
 
             const sliders = activeSliderConfigs
               .map(s => ({ ...s, tasks: allTasks.filter(task => task.id.startsWith(s.prefix)) }))
               .filter(s => s.tasks.length > 0);
 
-            // In the once tab, every category's milestone-chain tasks live in
-            // sliders above the grid — pull them out via the shared helper.
-            const regularTasks =
-              activeFrequency === TaskFrequency.ONCE
-                ? getRegularTasks(cat.category, allTasks)
-                : allTasks;
+            // Hide regular tasks for tournaments once (everything is in sliders now).
+            // For tickets/engines/stakes once, hide all milestone-chain tasks (general + tier variants).
+            const regularTasks = isTournamentsOnce
+              ? []
+              : isTicketsOnce
+                ? allTasks.filter(task => !/^ticket-(?:[a-z]+-)?collect-/.test(task.id))
+                : isEnginesOnce
+                  ? allTasks.filter(task => !/^engine-(?:[a-z]+-)?collect-/.test(task.id))
+                  : isStakesOnce
+                    ? allTasks.filter(task => !/^stake-(?:[a-z]+-)?(count|volume)-/.test(task.id))
+                    : isStarsOnce
+                      ? allTasks.filter(task => !/^star-(purchase|earn)-/.test(task.id))
+                      : isFriendsOnce
+                        ? allTasks.filter(task => !/^friend-invite-/.test(task.id))
+                        : isLeaderboardOnce
+                          ? allTasks.filter(
+                              task =>
+                                !/^leaderboard-(daily|weekly|monthly|alltime)-rank-/.test(task.id)
+                            )
+                          : isProfileStatusOnce
+                            ? allTasks.filter(task => !task.id.startsWith('vip-level-'))
+                            : allTasks;
 
             // Tabs to mark as locked (tier > USER_TIER) — sourced from any task's status in that tier group
-            const lockedTabs: TierSubTab[] = isTournamentsOnce
+            const lockedTabs: TournamentSubTab[] = isTournamentsOnce
               ? (['bronze', 'silver', 'gold', 'platinum', 'diamond'] as const).filter(tier =>
                   allTasks.some(
                     task =>
@@ -815,7 +847,7 @@ export function TasksContent() {
                 collapsible={
                   cat.category === TaskCategory.ACHIEVEMENTS &&
                   activeFrequency === TaskFrequency.ONCE
-                    ? TASK_PAGE.achievementsCollapse
+                    ? { initial: 3, step: 2 }
                     : undefined
                 }
                 pinnedIds={cat.category === TaskCategory.ACHIEVEMENTS ? pinnedIds : undefined}
@@ -851,7 +883,7 @@ export function TasksContent() {
                         active={ticketsSubTab}
                         onChange={setTicketsSubTab}
                         lockedTabs={ticketsLockedTabs}
-                        tabs={SLIDER_TIER_TABS_NO_BRONZE}
+                        tabs={['general', 'silver', 'gold', 'platinum', 'diamond']}
                       />
                       {isTicketsSubTabSwitching ? (
                         <TournamentSlidersSkeleton count={1} />
@@ -860,25 +892,29 @@ export function TasksContent() {
                           tasks={ticketCollectTasks}
                           onClaim={handleClaimTask}
                           title={
-                            ticketsSubTab === GENERAL_SUB_TAB
+                            ticketsSubTab === 'general'
                               ? t('tickets collected title')
-                              : t('tier tickets collected title', { tier: t(ticketsSubTab) })
+                              : t('tier tickets collected title', {
+                                  tier: t(ticketsSubTab as TierName),
+                                })
                           }
                           blurb={
-                            ticketsSubTab === GENERAL_SUB_TAB
+                            ticketsSubTab === 'general'
                               ? t('tickets collected blurb')
-                              : t('tier tickets collected blurb', { tier: t(ticketsSubTab) })
+                              : t('tier tickets collected blurb', {
+                                  tier: t(ticketsSubTab as TierName),
+                                })
                           }
                           unitLabel={
-                            ticketsSubTab === GENERAL_SUB_TAB
+                            ticketsSubTab === 'general'
                               ? t('tickets collected')
-                              : `${t(ticketsSubTab)} ${t('tickets collected')}`
+                              : `${t(ticketsSubTab as TierName)} ${t('tickets collected')}`
                           }
-                          headerIcon={TicketIcon}
+                          headerIcon={Ticket}
                           headerGradient="from-electric-pink to-pink"
-                          numberIcon={TicketIcon}
+                          numberIcon={Ticket}
                           cardIconType={
-                            ticketsSubTab === GENERAL_SUB_TAB ? 'bronze' : ticketsSubTab
+                            ticketsSubTab === 'general' ? 'bronze' : (ticketsSubTab as TierName)
                           }
                         />
                       ) : null}
@@ -889,7 +925,7 @@ export function TasksContent() {
                         active={enginesSubTab}
                         onChange={setEnginesSubTab}
                         lockedTabs={enginesLockedTabs}
-                        tabs={SLIDER_TIER_TABS_NO_BRONZE}
+                        tabs={['general', 'silver', 'gold', 'platinum', 'diamond']}
                       />
                       {isEnginesSubTabSwitching ? (
                         <TournamentSlidersSkeleton count={1} />
@@ -898,25 +934,29 @@ export function TasksContent() {
                           tasks={engineCollectTasks}
                           onClaim={handleClaimTask}
                           title={
-                            enginesSubTab === GENERAL_SUB_TAB
+                            enginesSubTab === 'general'
                               ? t('engines owned title')
-                              : t('tier engines owned title', { tier: t(enginesSubTab) })
+                              : t('tier engines owned title', {
+                                  tier: t(enginesSubTab as TierName),
+                                })
                           }
                           blurb={
-                            enginesSubTab === GENERAL_SUB_TAB
+                            enginesSubTab === 'general'
                               ? t('engines owned blurb')
-                              : t('tier engines owned blurb', { tier: t(enginesSubTab) })
+                              : t('tier engines owned blurb', {
+                                  tier: t(enginesSubTab as TierName),
+                                })
                           }
                           unitLabel={
-                            enginesSubTab === GENERAL_SUB_TAB
+                            enginesSubTab === 'general'
                               ? t('engines owned')
-                              : `${t(enginesSubTab)} ${t('engines owned')}`
+                              : `${t(enginesSubTab as TierName)} ${t('engines owned')}`
                           }
                           headerIcon={Cog}
                           headerGradient="from-platinum to-electric-purple"
                           numberIcon={Cog}
                           cardMedalType={
-                            enginesSubTab === GENERAL_SUB_TAB ? 'bronze' : enginesSubTab
+                            enginesSubTab === 'general' ? 'bronze' : (enginesSubTab as MedalType)
                           }
                         />
                       ) : null}
@@ -926,7 +966,7 @@ export function TasksContent() {
                       <TournamentSubTabs
                         active={leaderboardPeriodTab}
                         onChange={setLeaderboardPeriodTab}
-                        tabs={SLIDER_LEADERBOARD_PERIOD_TABS}
+                        tabs={['daily', 'weekly', 'monthly', 'alltime']}
                       />
                       {isLeaderboardSubTabSwitching ? (
                         <TournamentSlidersSkeleton count={1} />
@@ -1008,7 +1048,7 @@ export function TasksContent() {
                         active={stakesSubTab}
                         onChange={setStakesSubTab}
                         lockedTabs={stakesLockedTabs}
-                        tabs={SLIDER_TIER_TABS_NO_BRONZE}
+                        tabs={['general', 'silver', 'gold', 'platinum', 'diamond']}
                       />
                       {isStakesSubTabSwitching ? (
                         <TournamentSlidersSkeleton count={2} />
@@ -1019,25 +1059,29 @@ export function TasksContent() {
                               tasks={stakeCountTasks}
                               onClaim={handleClaimTask}
                               title={
-                                stakesSubTab === GENERAL_SUB_TAB
+                                stakesSubTab === 'general'
                                   ? t('stakes count title')
-                                  : t('tier stakes count title', { tier: t(stakesSubTab) })
+                                  : t('tier stakes count title', {
+                                      tier: t(stakesSubTab as TierName),
+                                    })
                               }
                               blurb={
-                                stakesSubTab === GENERAL_SUB_TAB
+                                stakesSubTab === 'general'
                                   ? t('stakes count blurb')
-                                  : t('tier stakes count blurb', { tier: t(stakesSubTab) })
+                                  : t('tier stakes count blurb', {
+                                      tier: t(stakesSubTab as TierName),
+                                    })
                               }
                               unitLabel={
-                                stakesSubTab === GENERAL_SUB_TAB
+                                stakesSubTab === 'general'
                                   ? t('stakes count')
-                                  : `${t(stakesSubTab)} ${t('stakes count')}`
+                                  : `${t(stakesSubTab as TierName)} ${t('stakes count')}`
                               }
                               headerIcon={PiggyBank}
                               headerGradient="from-teal to-diamond"
                               numberIcon={PiggyBank}
                               cardMedalType={
-                                stakesSubTab === GENERAL_SUB_TAB ? 'bronze' : stakesSubTab
+                                (stakesSubTab === 'general' ? 'bronze' : stakesSubTab) as MedalType
                               }
                             />
                           )}
@@ -1046,25 +1090,29 @@ export function TasksContent() {
                               tasks={stakeVolumeTasks}
                               onClaim={handleClaimTask}
                               title={
-                                stakesSubTab === GENERAL_SUB_TAB
+                                stakesSubTab === 'general'
                                   ? t('stakes volume title')
-                                  : t('tier stakes volume title', { tier: t(stakesSubTab) })
+                                  : t('tier stakes volume title', {
+                                      tier: t(stakesSubTab as TierName),
+                                    })
                               }
                               blurb={
-                                stakesSubTab === GENERAL_SUB_TAB
+                                stakesSubTab === 'general'
                                   ? t('stakes volume blurb')
-                                  : t('tier stakes volume blurb', { tier: t(stakesSubTab) })
+                                  : t('tier stakes volume blurb', {
+                                      tier: t(stakesSubTab as TierName),
+                                    })
                               }
                               unitLabel={
-                                stakesSubTab === GENERAL_SUB_TAB
+                                stakesSubTab === 'general'
                                   ? t('stakes volume')
-                                  : `${t(stakesSubTab)} ${t('stakes volume')}`
+                                  : `${t(stakesSubTab as TierName)} ${t('stakes volume')}`
                               }
                               headerIcon={Coins}
                               headerGradient="from-warning to-gold"
                               numberIcon={Coins}
                               cardMedalType={
-                                stakesSubTab === GENERAL_SUB_TAB ? 'bronze' : stakesSubTab
+                                (stakesSubTab === 'general' ? 'bronze' : stakesSubTab) as MedalType
                               }
                             />
                           )}

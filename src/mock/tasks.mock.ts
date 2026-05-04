@@ -16,7 +16,6 @@ import type {
   TasksResponse,
 } from '@/types/interfaces/tasks.interfaces';
 import { type TierName, TIER_RANK, tierLabel } from '@/types/types/tier.types';
-import { SLIDER_ID_PREFIX } from '@/constants/tasks.constants';
 
 const HOUR_MS = 60 * 60 * 1000;
 const DAY_MS = 24 * HOUR_MS;
@@ -493,7 +492,7 @@ const PLACE_MILESTONES: { target: number; rewards: TaskReward[]; rarity: TaskRar
 
 const buildPlaceMilestones = (place: PlaceKey): TaskBlueprint[] =>
   PLACE_MILESTONES.map(m => ({
-    id: `${SLIDER_ID_PREFIX.tournamentPlace(place)}${m.target}`,
+    id: `tournament-${place}-${m.target}`,
     title: `Take ${place} place ${m.target} ${m.target === 1 ? 'time' : 'times'}`,
     subtitle:
       m.target === 1
@@ -538,7 +537,7 @@ const buildTierPlaceMilestones = (tier: TierName, place: PlaceKey): TaskBlueprin
   const mult = TIER_REWARD_MULTIPLIER[tier];
   const tierCap = tierLabel(tier);
   return PLACE_MILESTONES.map(m => ({
-    id: `${SLIDER_ID_PREFIX.tournamentTierPlace(tier, place)}${m.target}`,
+    id: `tournament-${tier}-${place}-${m.target}`,
     title: `Take ${place} place in ${m.target} ${tierCap} tournament${m.target === 1 ? '' : 's'}`,
     subtitle: `${m.target} ${tierCap} ${place}-place finish${m.target === 1 ? '' : 'es'}.`,
     rewards: m.rewards.map(r => scaleReward(r, mult)),
@@ -553,7 +552,7 @@ const buildTierParticipationMilestones = (tier: TierName): TaskBlueprint[] => {
   const mult = TIER_REWARD_MULTIPLIER[tier];
   const tierCap = tierLabel(tier);
   return PARTICIPATION_MILESTONES.map(m => ({
-    id: `${SLIDER_ID_PREFIX.tournamentTierPlayed(tier)}${m.target}`,
+    id: `tournament-${tier}-played-${m.target}`,
     title: `Participate in ${m.target} ${tierCap} tournament${m.target === 1 ? '' : 's'}`,
     subtitle: `${m.target} ${tierCap} tournament${m.target === 1 ? '' : 's'} joined.`,
     rewards: m.rewards.map(r => scaleReward(r, mult)),
@@ -608,7 +607,7 @@ const TOURNAMENTS = buildCategory({
   once: [
     // ─── Podium (top-3) milestone chain — rendered as horizontal slider on once tab ───
     {
-      id: `${SLIDER_ID_PREFIX.tournamentPodium}1`,
+      id: 'tournament-podium-1',
       title: 'Take a prize place 1 time',
       subtitle: 'Take a prize place in any tournament category.',
       rewards: [ap(100)],
@@ -617,7 +616,7 @@ const TOURNAMENTS = buildCategory({
       rarity: TaskRarity.COMMON,
     },
     {
-      id: `${SLIDER_ID_PREFIX.tournamentPodium}5`,
+      id: 'tournament-podium-5',
       title: 'Take a prize place 5 times',
       subtitle: '5 times prize place.',
       rewards: [ltc(3), ap(200)],
@@ -626,7 +625,7 @@ const TOURNAMENTS = buildCategory({
       rarity: TaskRarity.RARE,
     },
     {
-      id: `${SLIDER_ID_PREFIX.tournamentPodium}10`,
+      id: 'tournament-podium-10',
       title: 'Take a prize place 10 times',
       subtitle: '10 times prize place.',
       rewards: [ltc(6), tickets(1), ap(350)],
@@ -635,7 +634,7 @@ const TOURNAMENTS = buildCategory({
       rarity: TaskRarity.RARE,
     },
     {
-      id: `${SLIDER_ID_PREFIX.tournamentPodium}25`,
+      id: 'tournament-podium-25',
       title: 'Take a prize place 25 times',
       subtitle: '25 times prize place — solid run.',
       rewards: [ltc(15), tickets(2), ap(700)],
@@ -644,7 +643,7 @@ const TOURNAMENTS = buildCategory({
       rarity: TaskRarity.EPIC,
     },
     {
-      id: `${SLIDER_ID_PREFIX.tournamentPodium}50`,
+      id: 'tournament-podium-50',
       title: 'Take a prize place 50 times',
       subtitle: '50 times prize place.',
       rewards: [ltc(30), tickets(4), ap(1500)],
@@ -653,7 +652,7 @@ const TOURNAMENTS = buildCategory({
       rarity: TaskRarity.EPIC,
     },
     {
-      id: `${SLIDER_ID_PREFIX.tournamentPodium}100`,
+      id: 'tournament-podium-100',
       title: 'Take a prize place 100 times',
       subtitle: 'Centurion — 100 times prize place.',
       rewards: [ltc(70), tickets(8), stars(15), ap(3000)],
@@ -663,7 +662,7 @@ const TOURNAMENTS = buildCategory({
     },
     // ─── Tournament participation milestones — rendered as horizontal slider ───
     {
-      id: `${SLIDER_ID_PREFIX.tournamentPlayed}1`,
+      id: 'tournament-played-1',
       title: 'Participate in 1 tournament',
       subtitle: 'Join any tournament for the first time.',
       rewards: [ap(80)],
@@ -672,7 +671,7 @@ const TOURNAMENTS = buildCategory({
       rarity: TaskRarity.COMMON,
     },
     {
-      id: `${SLIDER_ID_PREFIX.tournamentPlayed}5`,
+      id: 'tournament-played-5',
       title: 'Participate in 5 tournaments',
       subtitle: '5 tournaments joined.',
       rewards: [ltc(2), ap(180)],
@@ -681,7 +680,7 @@ const TOURNAMENTS = buildCategory({
       rarity: TaskRarity.RARE,
     },
     {
-      id: `${SLIDER_ID_PREFIX.tournamentPlayed}10`,
+      id: 'tournament-played-10',
       title: 'Participate in 10 tournaments',
       subtitle: '10 tournaments joined.',
       rewards: [ltc(5), tickets(1), ap(300)],
@@ -690,7 +689,7 @@ const TOURNAMENTS = buildCategory({
       rarity: TaskRarity.RARE,
     },
     {
-      id: `${SLIDER_ID_PREFIX.tournamentPlayed}25`,
+      id: 'tournament-played-25',
       title: 'Participate in 25 tournaments',
       subtitle: '25 tournaments — getting serious.',
       rewards: [ltc(12), tickets(2), ap(600)],
@@ -699,7 +698,7 @@ const TOURNAMENTS = buildCategory({
       rarity: TaskRarity.EPIC,
     },
     {
-      id: `${SLIDER_ID_PREFIX.tournamentPlayed}50`,
+      id: 'tournament-played-50',
       title: 'Participate in 50 tournaments',
       subtitle: '50 tournaments joined.',
       rewards: [ltc(25), tickets(4), ap(1200)],
@@ -708,7 +707,7 @@ const TOURNAMENTS = buildCategory({
       rarity: TaskRarity.EPIC,
     },
     {
-      id: `${SLIDER_ID_PREFIX.tournamentPlayed}100`,
+      id: 'tournament-played-100',
       title: 'Participate in 100 tournaments',
       subtitle: 'Centurion of competitions.',
       rewards: [ltc(60), tickets(8), stars(15), ap(2500)],
@@ -758,7 +757,7 @@ const buildLeaderboardPeriod = (period: LeaderboardPeriod): TaskBlueprint[] => {
   const mult = LEADERBOARD_PERIOD_MULTIPLIER[period];
   const periodLabel = period === 'alltime' ? 'all-time' : period;
   return LEADERBOARD_BASE_MILESTONES.map(m => ({
-    id: `${SLIDER_ID_PREFIX.leaderboardRank(period)}${m.rank}`,
+    id: `leaderboard-${period}-rank-${m.rank}`,
     title:
       m.rank === 1
         ? `Reach #1 on the ${periodLabel} leaderboard`
@@ -933,7 +932,7 @@ const FRIEND_INVITE_MILESTONES: FriendMilestone[] = [
 const FRIENDS = buildCategory({
   category: TaskCategory.FRIENDS,
   once: FRIEND_INVITE_MILESTONES.map(m => ({
-    id: `${SLIDER_ID_PREFIX.friendsInvite}${m.target}`,
+    id: `friend-invite-${m.target}`,
     title: `Invite ${m.target} friend${m.target === 1 ? '' : 's'}`,
     subtitle: 'Bring friends in via your referral link.',
     rewards: m.rewards,
@@ -1070,7 +1069,7 @@ const TIER_ENGINE_KEYS: Exclude<TierName, 'bronze'>[] = ['silver', 'gold', 'plat
 const buildTierEngineMilestones = (tier: TierName): TaskBlueprint[] => {
   const tierCap = tierLabel(tier);
   return ENGINE_MILESTONES_BY_TIER[tier].map(m => ({
-    id: `${SLIDER_ID_PREFIX.enginesTier(tier)}${m.target}`,
+    id: `engine-${tier}-collect-${m.target}`,
     title: `Own ${m.target} ${tierCap} engine${m.target === 1 ? '' : 's'}`,
     subtitle: `Collect ${tierCap}-tier engines from the market.`,
     rewards: m.rewards,
@@ -1086,7 +1085,7 @@ const ENGINES = buildCategory({
   once: [
     // General slider == Bronze milestones (1 → 100).
     ...ENGINE_MILESTONES_BY_TIER.bronze.map(m => ({
-      id: `${SLIDER_ID_PREFIX.enginesGeneral}${m.target}`,
+      id: `engine-collect-${m.target}`,
       title: `Own ${m.target} engine${m.target === 1 ? '' : 's'}`,
       subtitle: 'Buy or earn engines from the market and rewards.',
       rewards: m.rewards,
@@ -1234,7 +1233,7 @@ const STAKE_TIER_KEYS: Exclude<StakeTier, 'bronze'>[] = ['silver', 'gold', 'plat
 const buildTierStakeCount = (tier: StakeTier): TaskBlueprint[] => {
   const tierCap = tierLabel(tier);
   return STAKE_COUNT_MILESTONES_BY_TIER[tier].map(m => ({
-    id: `${SLIDER_ID_PREFIX.stakesTierCount(tier)}${m.target}`,
+    id: `stake-${tier}-count-${m.target}`,
     title: `Complete ${m.target} ${tierCap} stake${m.target === 1 ? '' : 's'}`,
     subtitle: `Hold ${tierCap}-tier stakes to completion.`,
     rewards: m.rewards,
@@ -1248,7 +1247,7 @@ const buildTierStakeCount = (tier: StakeTier): TaskBlueprint[] => {
 const buildTierStakeVolume = (tier: StakeTier): TaskBlueprint[] => {
   const tierCap = tierLabel(tier);
   return STAKE_VOLUME_MILESTONES_BY_TIER[tier].map(m => ({
-    id: `${SLIDER_ID_PREFIX.stakesTierVolume(tier)}${m.target}`,
+    id: `stake-${tier}-volume-${m.target}`,
     title: `Stake ${m.target} LTC at ${tierCap}`,
     subtitle: `Total LTC volume staked at ${tierCap} tier.`,
     rewards: m.rewards,
@@ -1264,7 +1263,7 @@ const STAKES = buildCategory({
   once: [
     // General == Bronze chains.
     ...STAKE_COUNT_MILESTONES_BY_TIER.bronze.map(m => ({
-      id: `${SLIDER_ID_PREFIX.stakesCount}${m.target}`,
+      id: `stake-count-${m.target}`,
       title: `Complete ${m.target} stake${m.target === 1 ? '' : 's'}`,
       subtitle: 'Hold stake sessions to full completion.',
       rewards: m.rewards,
@@ -1273,7 +1272,7 @@ const STAKES = buildCategory({
       rarity: m.rarity,
     })),
     ...STAKE_VOLUME_MILESTONES_BY_TIER.bronze.map(m => ({
-      id: `${SLIDER_ID_PREFIX.stakesVolume}${m.target}`,
+      id: `stake-volume-${m.target}`,
       title: `Stake ${m.target} LTC total`,
       subtitle: 'Cumulative LTC volume across all stakes.',
       rewards: m.rewards,
@@ -1322,7 +1321,7 @@ const STARS = buildCategory({
   category: TaskCategory.STARS,
   once: [
     ...STAR_PURCHASE_MILESTONES.map(m => ({
-      id: `${SLIDER_ID_PREFIX.starsPurchase}${m.target}`,
+      id: `star-purchase-${m.target}`,
       title: `Purchase ${m.target} Stars`,
       subtitle: 'Buy Stars via Telegram to top up your balance.',
       rewards: m.rewards,
@@ -1330,7 +1329,7 @@ const STARS = buildCategory({
       rarity: m.rarity,
     })),
     ...STAR_EARN_MILESTONES.map(m => ({
-      id: `${SLIDER_ID_PREFIX.starsEarn}${m.target}`,
+      id: `star-earn-${m.target}`,
       title: `Earn ${m.target} Stars`,
       subtitle: 'Receive Stars from rewards, gifts, and stake bonuses.',
       rewards: m.rewards,
@@ -1416,7 +1415,7 @@ const TIER_TICKET_KEYS: Exclude<TierName, 'bronze'>[] = ['silver', 'gold', 'plat
 const buildTierTicketMilestones = (tier: TierName): TaskBlueprint[] => {
   const tierCap = tierLabel(tier);
   return TICKET_MILESTONES_BY_TIER[tier].map(m => ({
-    id: `${SLIDER_ID_PREFIX.ticketsTier(tier)}${m.target}`,
+    id: `ticket-${tier}-collect-${m.target}`,
     title: `Collect ${m.target} ${tierCap} tickets`,
     subtitle: `Earn ${tierCap}-tier tickets from tournaments and rewards.`,
     rewards: m.rewards,
@@ -1431,7 +1430,7 @@ const TICKETS = buildCategory({
   once: [
     // General slider == Bronze milestones (1000 → 50000).
     ...TICKET_MILESTONES_BY_TIER.bronze.map(m => ({
-      id: `${SLIDER_ID_PREFIX.ticketsGeneral}${m.target}`,
+      id: `ticket-collect-${m.target}`,
       title: `Collect ${m.target} tickets`,
       subtitle: 'Earn through tournaments, friends, ads, or rewards.',
       rewards: m.rewards,
@@ -1512,7 +1511,7 @@ const PROFILE_STATUS = buildCategory({
       const isCurrent = !reached && USER_AP >= prevTarget;
       const status = reached ? TaskStatus.COMPLETED : isCurrent ? undefined : TaskStatus.LOCKED;
       return {
-        id: `${SLIDER_ID_PREFIX.vipLevel}${cfg.level}`,
+        id: `vip-level-${cfg.level}`,
         title: `Reach VIP Level ${cfg.level}`,
         subtitle: `${cfg.target.toLocaleString()} AP required`,
         rewards: cfg.rewards,
