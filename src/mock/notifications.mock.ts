@@ -119,7 +119,7 @@ const notifications = (
     {
       id: '12',
       type: 'tournament',
-      title: 'Tournaments Participation Reminder',
+      title: 'Tournament Participation Reminder',
       content: 'Reminder: You have an upcoming tournament. Do not miss it!',
       read: true,
       date: older5.toISOString(),
