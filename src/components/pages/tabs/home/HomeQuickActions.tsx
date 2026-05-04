@@ -13,7 +13,6 @@ import { icons } from '@/constants/icons';
 import { routes } from '@/constants/routes';
 import { useAppTranslations } from '@/hooks/useAppTranslations';
 import { useCountDown } from '@/hooks/useCountDown';
-import { TaskCategoryType } from '@/types/enums/tasks.enums';
 import type { ClassNameProps } from '@/types/interfaces/component.interfcaes';
 import type { Route } from '@/constants/routes';
 
@@ -66,9 +65,8 @@ export function HomeQuickActions({ className }: ClassNameProps) {
   }, []);
   const { leftTime, expired } = useCountDown(dailyResetDate);
 
-  const dailyTasks = tasksData?.[TaskCategoryType.DAILY]?.items ?? [];
-  const completedDailyCount = dailyTasks.filter(task => task.claimed).length;
-  const totalDailyCount = dailyTasks.length;
+  const completedDailyCount = tasksData?.dailyProgress.completedToday ?? 0;
+  const totalDailyCount = tasksData?.dailyProgress.totalToday ?? 0;
 
   return (
     <div className={twMerge('grid grid-cols-2 gap-2.5 px-4', className)}>
