@@ -47,6 +47,7 @@ export function TasksCategoryNav({
 }: TasksCategoryNavProps) {
   const t = useAppTranslations();
   const scrollRef = useRef<HTMLDivElement>(null);
+  const trackRef = useRef<HTMLDivElement>(null);
   const chipRefs = useRef<Map<TaskCategory, HTMLButtonElement>>(new Map());
   const [indicator, setIndicator] = useState<{ left: number; width: number } | null>(null);
 
@@ -96,7 +97,7 @@ export function TasksCategoryNav({
         ref={scrollRef}
         className="scrollbar-hidden relative overflow-x-auto px-4 py-3 scroll-smooth"
       >
-        <div className="relative inline-flex items-center gap-2">
+        <div ref={trackRef} className="relative inline-flex items-center gap-2">
           {/* Sliding active indicator — slides smoothly between chips during scroll */}
           {indicator && (
             <span

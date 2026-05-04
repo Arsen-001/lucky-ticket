@@ -35,17 +35,6 @@ export function AdsSection({
 
   const scrollerRef = useRef<HTMLDivElement>(null);
   const [activeIndex, setActiveIndex] = useState(0);
-  // Track which slot is currently being watched so the loading spinner only
-  // appears on that one card, not on every card in the carousel.
-  const [pendingSlotId, setPendingSlotId] = useState<string | null>(null);
-  // Clear the pending marker when the upstream `loading` flips back to false.
-  useEffect(() => {
-    if (!loading) setPendingSlotId(null);
-  }, [loading]);
-  const handleWatch = (slot: AdSlot) => {
-    setPendingSlotId(slot.id);
-    onWatch(slot);
-  };
 
   const slots = ads?.slots ?? [];
   const watched = ads?.watchedToday ?? 0;
@@ -161,12 +150,7 @@ export function AdsSection({
                   !isActive && interactive && 'cursor-pointer'
                 )}
               >
-                <AdSlideCard
-                  slot={slot}
-                  onWatch={handleWatch}
-                  loading={loading && slot.id === pendingSlotId}
-                  locked={locked}
-                />
+                <AdSlideCard slot={slot} onWatch={onWatch} loading={loading} locked={locked} />
               </div>
             );
           })}
