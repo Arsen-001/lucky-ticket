@@ -38,9 +38,19 @@ const stakeLevels: StakeLevelDefinition[] = [
   },
   {
     level: 4,
+    minDeposit: 2500,
+    guaranteedTicket: 'platinum',
+    allTickets: ['bronze', 'silver', 'gold', 'platinum'],
+    bonusPrizes: ['LC bonus', 'Speed Boost', 'Capacity Upgrade', 'Premium Badge'],
+    starsChance: 30,
+    starsMin: 70,
+    starsMax: 250,
+  },
+  {
+    level: 5,
     minDeposit: 5000,
     guaranteedTicket: 'diamond',
-    allTickets: ['bronze', 'silver', 'gold', 'diamond'],
+    allTickets: ['bronze', 'silver', 'gold', 'platinum', 'diamond'],
     bonusPrizes: ['Large LC bonus', 'Boosts & Upgrades', 'Exclusive Badge'],
     starsChance: 40,
     starsMin: 100,
@@ -55,9 +65,9 @@ const hoursAgo = (h: number) => new Date(Date.now() - h * 60 * 60 * 1000).toISOS
 const history: StakeHistoryEntry[] = [
   {
     id: 'h1',
-    level: 4,
+    level: 5,
     amount: 5000,
-    ticketsCount: 4,
+    ticketsCount: 5,
     bonusLC: 320,
     bonusStars: 120,
     outcome: 'completed',

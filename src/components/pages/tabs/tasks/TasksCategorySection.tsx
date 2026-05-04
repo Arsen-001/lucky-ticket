@@ -1,13 +1,15 @@
 'use client';
 
-import { type ReactNode, useMemo, useState } from 'react';
+import { type ReactNode, useEffect, useMemo, useRef, useState } from 'react';
 import { twMerge } from 'tailwind-merge';
 import { TaskCategory, TaskStatus } from '@/types/enums/tasks.enums';
 import type { Task, TaskSubStep } from '@/types/interfaces/tasks.interfaces';
 import { useAppTranslations } from '@/hooks/useAppTranslations';
 import type { MessageIds } from '@/types/types/i18n.types';
+import { TASK_PAGE } from '@/constants/tasks.constants';
 import { TaskCategoryIcon } from './TaskCategoryIcon';
 import { TaskItemCard } from './TaskItemCard';
+import { TaskItemCardCompact } from './TaskItemCardCompact';
 import { SectionShine } from './SectionShine';
 
 export interface TasksCategorySectionProps {
@@ -19,6 +21,22 @@ export interface TasksCategorySectionProps {
   className?: string;
   emptyHint?: ReactNode;
   highlightToken?: number | null;
+  taskHighlight?: { id: string; nonce: number } | null;
+  /** Render task cards in a 2-column grid (used for compact once-tab layouts). */
+  twoColumns?: boolean;
+  /** Optional slot rendered between the section header and the task grid (e.g. milestone slider). */
+  topSlot?: ReactNode;
+  /**
+   * Progressive disclosure: render only `initial` tasks at first; clicking
+   * "See more" reveals `step` more, and "See all" reveals everything.
+   */
+  collapsible?: { initial: number; step: number };
+  /** IDs of tasks pinned by the user — they float to the top of their status group. */
+  pinnedIds?: Set<string>;
+  /** Toggle pin/unpin for a task; bounded by `pinLimit` upstream. */
+  onTogglePin?: (taskId: string) => void;
+  /** Maximum number of tasks the user is allowed to pin (used to disable the button at limit). */
+  pinLimit?: number;
 }
 
 const STATUS_ORDER: Record<TaskStatus, number> = {
@@ -28,20 +46,31 @@ const STATUS_ORDER: Record<TaskStatus, number> = {
   [TaskStatus.LOCKED]: 3,
 };
 
-const sortTasks = (tasks: Task[]) =>
-  [...tasks].sort((a, b) => STATUS_ORDER[a.status] - STATUS_ORDER[b.status]);
+const sortTasks = (tasks: Task[], pinnedIds?: Set<string>) =>
+  [...tasks].sort((a, b) => {
+    const ar = STATUS_ORDER[a.status];
+    const br = STATUS_ORDER[b.status];
+    if (ar !== br) return ar - br;
+    // Within the same status group, pinned tasks float to the top.
+    const ap = pinnedIds?.has(a.id) ? 0 : 1;
+    const bp = pinnedIds?.has(b.id) ? 0 : 1;
+    return ap - bp;
+  });
 
 const CATEGORY_LABEL_KEY: Record<TaskCategory, MessageIds> = {
   [TaskCategory.ADS]: 'category ads',
   [TaskCategory.TOURNAMENTS]: 'category tournaments',
+  [TaskCategory.LEADERBOARD]: 'category leaderboard',
   [TaskCategory.SOCIAL]: 'category social',
   [TaskCategory.PROFILE]: 'category profile',
   [TaskCategory.FRIENDS]: 'category friends',
   [TaskCategory.QUEST]: 'category quest',
   [TaskCategory.MARKET]: 'category market',
+  [TaskCategory.ENGINES]: 'category engines',
+  [TaskCategory.TICKETS]: 'category tickets',
   [TaskCategory.STAKES]: 'category stakes',
-  [TaskCategory.PREMIUM]: 'category premium',
-  [TaskCategory.VIP]: 'category vip',
+  [TaskCategory.STARS]: 'category stars',
+  [TaskCategory.PROFILE_STATUS]: 'category profile-status',
   [TaskCategory.ACHIEVEMENTS]: 'category achievements',
   [TaskCategory.PARTNERS]: 'category partners',
 };
@@ -49,14 +78,17 @@ const CATEGORY_LABEL_KEY: Record<TaskCategory, MessageIds> = {
 const CATEGORY_BLURB_KEY: Record<TaskCategory, MessageIds> = {
   [TaskCategory.ADS]: 'category ads blurb',
   [TaskCategory.TOURNAMENTS]: 'category tournaments blurb',
+  [TaskCategory.LEADERBOARD]: 'category leaderboard blurb',
   [TaskCategory.SOCIAL]: 'category social blurb',
   [TaskCategory.PROFILE]: 'category profile blurb',
   [TaskCategory.FRIENDS]: 'category friends blurb',
   [TaskCategory.QUEST]: 'category quest blurb',
   [TaskCategory.MARKET]: 'category market blurb',
+  [TaskCategory.ENGINES]: 'category engines blurb',
+  [TaskCategory.TICKETS]: 'category tickets blurb',
   [TaskCategory.STAKES]: 'category stakes blurb',
-  [TaskCategory.PREMIUM]: 'category premium blurb',
-  [TaskCategory.VIP]: 'category vip blurb',
+  [TaskCategory.STARS]: 'category stars blurb',
+  [TaskCategory.PROFILE_STATUS]: 'category profile-status blurb',
   [TaskCategory.ACHIEVEMENTS]: 'category achievements blurb',
   [TaskCategory.PARTNERS]: 'category partners blurb',
 };
@@ -70,18 +102,66 @@ export function TasksCategorySection({
   className,
   emptyHint,
   highlightToken,
+  taskHighlight,
+  twoColumns,
+  topSlot,
+  collapsible,
+  pinnedIds,
+  onTogglePin,
+  pinLimit,
 }: TasksCategorySectionProps) {
   const t = useAppTranslations();
 
-  const sorted = useMemo(() => sortTasks(tasks), [tasks]);
+  const sorted = useMemo(() => sortTasks(tasks, pinnedIds), [tasks, pinnedIds]);
   const isEmpty = sorted.length === 0;
   const [openTaskId, setOpenTaskId] = useState<string | null>(null);
+  const [visibleCount, setVisibleCount] = useState(
+    collapsible ? Math.min(collapsible.initial, sorted.length) : sorted.length
+  );
+  // Re-sync the visible cap when the underlying list size changes (e.g. server
+  // refetch grew or shrank the list). Without this, newly-arrived tasks would
+  // stay hidden until the user clicks "See more"; and a shrunk list could leave
+  // visibleCount > sorted.length.
+  useEffect(() => {
+    if (!collapsible) {
+      setVisibleCount(sorted.length);
+    } else if (visibleCount > sorted.length) {
+      setVisibleCount(Math.max(collapsible.initial, sorted.length));
+    }
+  }, [sorted.length, collapsible?.initial, collapsible, visibleCount]);
+  const visibleTasks = collapsible ? sorted.slice(0, visibleCount) : sorted;
+  const hasMore = collapsible ? visibleCount < sorted.length : false;
+  const isExpandedBeyondInitial = !!collapsible && visibleCount > collapsible.initial;
+  const remaining = sorted.length - visibleCount;
+  const sectionRef = useRef<HTMLElement | null>(null);
+  // After the initial slide-in entry plays (≈400ms + last item delay), stop
+  // applying the animation class so re-renders (e.g. pin toggle re-orders the
+  // list) don't make every card flicker again.
+  const [entryDone, setEntryDone] = useState(false);
+  useEffect(() => {
+    const id = window.setTimeout(() => setEntryDone(true), TASK_PAGE.entryAnimationMs);
+    return () => window.clearTimeout(id);
+  }, []);
+  const handleShowLess = () => {
+    if (!collapsible) return;
+    setVisibleCount(collapsible.initial);
+    // Defer scroll until the layout shrinks so the target offset is correct.
+    requestAnimationFrame(() => {
+      sectionRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    });
+  };
 
   return (
     <section
-      ref={el => registerSection?.(category, el)}
+      ref={el => {
+        sectionRef.current = el;
+        registerSection?.(category, el);
+      }}
       data-category={category}
-      className={twMerge('flex flex-col gap-3 px-4 pt-5 pb-1 scroll-mt-20', className)}
+      className={twMerge(
+        'flex flex-col gap-3 px-4 pt-5 pb-5 scroll-mt-20 border-y border-white/[0.07]',
+        className
+      )}
     >
       <header className="relative flex items-center gap-3 rounded-2xl overflow-hidden">
         <SectionShine token={highlightToken ?? null} />
@@ -96,25 +176,112 @@ export function TasksCategorySection({
         </div>
       </header>
 
-      {isEmpty ? (
+      {topSlot}
+
+      {isEmpty && !topSlot ? (
         <div className="rounded-2xl bg-white/5 border border-white/5 px-4 py-6 text-center text-sm text-white/50">
           {emptyHint ?? t('no tasks here yet')}
         </div>
-      ) : (
-        <div className="flex flex-col gap-2">
-          {sorted.map((task, i) => (
-            <TaskItemCard
-              key={task.id}
-              task={task}
-              onClaim={onClaim}
-              onClaimSubStep={onClaimSubStep}
-              expanded={openTaskId === task.id}
-              onToggleExpanded={() => setOpenTaskId(prev => (prev === task.id ? null : task.id))}
-              className="animate-slide-in-bottom"
-              style={{ animationDelay: `${i * 60}ms` }}
-            />
-          ))}
-        </div>
+      ) : isEmpty ? null : (
+        <>
+          <div className={twMerge(twoColumns ? 'grid grid-cols-2 gap-2' : 'flex flex-col gap-2')}>
+            {visibleTasks.map((task, i) => {
+              const isPinned = pinnedIds?.has(task.id) ?? false;
+              const pinDisabled = !isPinned && !!pinLimit && (pinnedIds?.size ?? 0) >= pinLimit;
+              const animationClass = entryDone ? undefined : 'animate-slide-in-bottom';
+              const animationStyle = entryDone
+                ? undefined
+                : { animationDelay: `${i * TASK_PAGE.staggerDelayMs}ms` };
+              return twoColumns ? (
+                <TaskItemCardCompact
+                  key={task.id}
+                  task={task}
+                  onClaim={onClaim}
+                  highlightToken={taskHighlight?.id === task.id ? taskHighlight.nonce : null}
+                  className={animationClass}
+                  style={animationStyle}
+                  pinned={isPinned}
+                  pinDisabled={pinDisabled}
+                  onTogglePin={onTogglePin}
+                />
+              ) : (
+                <TaskItemCard
+                  key={task.id}
+                  task={task}
+                  onClaim={onClaim}
+                  onClaimSubStep={onClaimSubStep}
+                  expanded={openTaskId === task.id}
+                  onToggleExpanded={() =>
+                    setOpenTaskId(prev => (prev === task.id ? null : task.id))
+                  }
+                  highlightToken={taskHighlight?.id === task.id ? taskHighlight.nonce : null}
+                  className={animationClass}
+                  style={animationStyle}
+                  pinned={isPinned}
+                  pinDisabled={pinDisabled}
+                  onTogglePin={onTogglePin}
+                />
+              );
+            })}
+          </div>
+
+          {collapsible && (hasMore || isExpandedBeyondInitial) && (
+            <div
+              className={twMerge(
+                'flex items-center gap-2 mt-1',
+                // While expanded beyond initial, glue the action row to the
+                // bottom of the viewport (above the tab bar) so the user can
+                // collapse from anywhere in the long list.
+                isExpandedBeyondInitial &&
+                  'sticky bottom-[env(safe-area-inset-bottom,0px)] z-10 -mx-4 px-4 py-2 bg-background/85 backdrop-blur-md rounded-xl'
+              )}
+            >
+              <button
+                type="button"
+                onClick={() =>
+                  setVisibleCount(prev => Math.min(prev + collapsible.step, sorted.length))
+                }
+                disabled={!hasMore}
+                className={twMerge(
+                  'flex-1 rounded-xl py-2.5 text-xs font-bold transition-all active:scale-[0.98]',
+                  hasMore
+                    ? 'bg-electric-pink/15 border border-electric-pink/30 text-white hover:bg-electric-pink/25'
+                    : 'bg-white/4 text-white/25 cursor-not-allowed active:scale-100'
+                )}
+              >
+                {t('see more')}
+                {hasMore && (
+                  <span className="text-white ml-1">
+                    (+{Math.min(collapsible.step, remaining)})
+                  </span>
+                )}
+              </button>
+              {isExpandedBeyondInitial && (
+                <button
+                  type="button"
+                  onClick={handleShowLess}
+                  className="flex-1 rounded-xl bg-white/5 hover:bg-white/10 active:scale-[0.98] transition-all py-2.5 text-xs font-bold text-white/70"
+                >
+                  {t('show less')}
+                </button>
+              )}
+              <button
+                type="button"
+                onClick={() => setVisibleCount(sorted.length)}
+                disabled={!hasMore}
+                className={twMerge(
+                  'flex-1 rounded-xl py-2.5 text-xs font-bold transition-all active:scale-[0.98]',
+                  hasMore
+                    ? 'bg-electric-pink/15 border border-electric-pink/30 text-white hover:bg-electric-pink/25'
+                    : 'bg-white/4 text-white/25 cursor-not-allowed active:scale-100'
+                )}
+              >
+                {t('see all')}
+                {hasMore && <span className="text-white ml-1">({remaining})</span>}
+              </button>
+            </div>
+          )}
+        </>
       )}
     </section>
   );

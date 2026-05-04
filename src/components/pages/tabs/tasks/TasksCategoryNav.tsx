@@ -23,14 +23,17 @@ export interface TasksCategoryNavProps {
 const CATEGORY_LABEL_KEY: Record<TaskCategory, MessageIds> = {
   [TaskCategory.ADS]: 'category ads',
   [TaskCategory.TOURNAMENTS]: 'category tournaments',
+  [TaskCategory.LEADERBOARD]: 'category leaderboard',
   [TaskCategory.SOCIAL]: 'category social',
   [TaskCategory.PROFILE]: 'category profile',
   [TaskCategory.FRIENDS]: 'category friends',
   [TaskCategory.QUEST]: 'category quest',
   [TaskCategory.MARKET]: 'category market',
+  [TaskCategory.ENGINES]: 'category engines',
+  [TaskCategory.TICKETS]: 'category tickets',
   [TaskCategory.STAKES]: 'category stakes',
-  [TaskCategory.PREMIUM]: 'category premium',
-  [TaskCategory.VIP]: 'category vip',
+  [TaskCategory.STARS]: 'category stars',
+  [TaskCategory.PROFILE_STATUS]: 'category profile-status',
   [TaskCategory.ACHIEVEMENTS]: 'category achievements',
   [TaskCategory.PARTNERS]: 'category partners',
 };
@@ -44,7 +47,6 @@ export function TasksCategoryNav({
 }: TasksCategoryNavProps) {
   const t = useAppTranslations();
   const scrollRef = useRef<HTMLDivElement>(null);
-  const trackRef = useRef<HTMLDivElement>(null);
   const chipRefs = useRef<Map<TaskCategory, HTMLButtonElement>>(new Map());
   const [indicator, setIndicator] = useState<{ left: number; width: number } | null>(null);
 
@@ -94,7 +96,7 @@ export function TasksCategoryNav({
         ref={scrollRef}
         className="scrollbar-hidden relative overflow-x-auto px-4 py-3 scroll-smooth"
       >
-        <div ref={trackRef} className="relative inline-flex items-center gap-2">
+        <div className="relative inline-flex items-center gap-2">
           {/* Sliding active indicator — slides smoothly between chips during scroll */}
           {indicator && (
             <span
