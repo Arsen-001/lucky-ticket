@@ -10,7 +10,6 @@ import { Progress } from '@/components/shared/Progress';
 import { TaskRarity, TaskStatus } from '@/types/enums/tasks.enums';
 import type { Task } from '@/types/interfaces/tasks.interfaces';
 import { type Route } from '@/constants/routes';
-import { formatCompact } from '@/utils/global/number.utils';
 import { TaskCategoryIcon } from './TaskCategoryIcon';
 import { TaskRewardRow } from './TaskRewardRow';
 import { SectionShine } from './SectionShine';
@@ -165,7 +164,7 @@ export function TaskItemCardCompact({
         <div className="flex flex-col gap-0.5">
           <div className="flex items-center justify-between text-[10px] text-white/50 font-semibold tabular-nums">
             <span>
-              {formatCompact(task.progress.current)}/{formatCompact(task.progress.target)}
+              {task.progress.current}/{task.progress.target}
             </span>
             <span className="text-white/40">{pct}%</span>
           </div>

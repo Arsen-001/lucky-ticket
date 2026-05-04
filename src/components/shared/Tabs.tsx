@@ -4,7 +4,6 @@ import { type ReactNode, useEffect, useRef, useState } from 'react';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 import { twMerge } from 'tailwind-merge';
 import { Button } from '@/components/shared/buttons/Button';
-import { useAppTranslations } from '@/hooks/useAppTranslations';
 
 export type TabClassName = string | ((tabKey: string) => string);
 
@@ -33,7 +32,6 @@ export function Tabs({
   className,
   classNames,
 }: TabsProps) {
-  const t = useAppTranslations();
   const [internalActiveKey, setInternalActiveKey] = useState(defaultActiveKey || items[0]?.key);
   const activeKey = propActiveKey !== undefined ? propActiveKey : internalActiveKey;
 
@@ -142,7 +140,7 @@ export function Tabs({
           <Button
             className={twMerge(buttonClassName, 'left-0')}
             onClick={() => scroll('left')}
-            aria-label={t('scroll left')}
+            aria-label="Scroll left"
           >
             <ChevronLeft size={20} />
           </Button>
@@ -210,7 +208,7 @@ export function Tabs({
           <Button
             className={twMerge(buttonClassName, 'right-0')}
             onClick={() => scroll('right')}
-            aria-label={t('scroll right')}
+            aria-label="Scroll left"
           >
             <ChevronRight size={20} />
           </Button>

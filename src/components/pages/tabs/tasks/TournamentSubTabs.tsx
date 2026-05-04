@@ -6,21 +6,16 @@ import { useAppTranslations } from '@/hooks/useAppTranslations';
 import type { MessageIds } from '@/types/types/i18n.types';
 import type { TierName } from '@/types/types/tier.types';
 
-/** Tier-based sub-tabs (Tournaments / Tickets / Engines / Stakes). */
-export type TierSubTab = 'general' | TierName;
+export type TournamentSubTab = 'general' | TierName | 'daily' | 'weekly' | 'monthly' | 'alltime';
 
-/** Period-based sub-tabs (Leaderboard). */
-export type PeriodSubTab = 'daily' | 'weekly' | 'monthly' | 'alltime';
-
-/** Union of every sub-tab kind the component may receive. */
-export type TournamentSubTab = TierSubTab | PeriodSubTab;
-
-const TIER_NAMES = ['bronze', 'silver', 'gold', 'platinum', 'diamond'] as const;
-/** Type guard — narrows a TournamentSubTab to a TierName when applicable. */
-export const isTierSubTab = (tab: TournamentSubTab): tab is TierName =>
-  (TIER_NAMES as readonly string[]).includes(tab);
-
-const DEFAULT_TABS: TierSubTab[] = ['general', 'bronze', 'silver', 'gold', 'platinum', 'diamond'];
+const DEFAULT_TABS: TournamentSubTab[] = [
+  'general',
+  'bronze',
+  'silver',
+  'gold',
+  'platinum',
+  'diamond',
+];
 
 const LABEL_KEY: Record<TournamentSubTab, MessageIds> = {
   general: 'general',
@@ -48,26 +43,26 @@ const TIER_DOT: Record<TournamentSubTab, string> = {
   alltime: 'bg-gold',
 };
 
-export interface TournamentSubTabsProps<T extends TournamentSubTab = TournamentSubTab> {
-  active: T;
-  onChange: (next: T) => void;
+export interface TournamentSubTabsProps {
+  active: TournamentSubTab;
+  onChange: (next: TournamentSubTab) => void;
   /** Tier-tab keys whose tasks are locked for the current user (renders a lock icon). */
-  lockedTabs?: T[];
+  lockedTabs?: TournamentSubTab[];
   /** Override the default tab set (e.g. omit 'bronze' for ticket sliders). */
-  tabs?: T[];
+  tabs?: TournamentSubTab[];
   className?: string;
 }
 
-export function TournamentSubTabs<T extends TournamentSubTab>({
+export function TournamentSubTabs({
   active,
   onChange,
   lockedTabs = [],
-  tabs = DEFAULT_TABS as T[],
+  tabs = DEFAULT_TABS,
   className,
-}: TournamentSubTabsProps<T>) {
+}: TournamentSubTabsProps) {
   const t = useAppTranslations();
 
-  const renderTab = (tab: T) => {
+  const renderTab = (tab: TournamentSubTab) => {
     const isLocked = lockedTabs.includes(tab);
     return (
       <span className="inline-flex items-center justify-center gap-1.5 leading-none">
@@ -85,7 +80,7 @@ export function TournamentSubTabs<T extends TournamentSubTab>({
     <div className={className}>
       <Tabs
         activeKey={active}
-        onTabChange={key => onChange(key as T)}
+        onTabChange={key => onChange(key as TournamentSubTab)}
         hideMountAnimation
         items={tabs.map(tab => ({
           key: tab,

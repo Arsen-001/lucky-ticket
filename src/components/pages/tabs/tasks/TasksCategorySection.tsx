@@ -6,7 +6,6 @@ import { TaskCategory, TaskStatus } from '@/types/enums/tasks.enums';
 import type { Task, TaskSubStep } from '@/types/interfaces/tasks.interfaces';
 import { useAppTranslations } from '@/hooks/useAppTranslations';
 import type { MessageIds } from '@/types/types/i18n.types';
-import { TASK_PAGE } from '@/constants/tasks.constants';
 import { TaskCategoryIcon } from './TaskCategoryIcon';
 import { TaskItemCard } from './TaskItemCard';
 import { TaskItemCardCompact } from './TaskItemCardCompact';
@@ -118,17 +117,6 @@ export function TasksCategorySection({
   const [visibleCount, setVisibleCount] = useState(
     collapsible ? Math.min(collapsible.initial, sorted.length) : sorted.length
   );
-  // Re-sync the visible cap when the underlying list size changes (e.g. server
-  // refetch grew or shrank the list). Without this, newly-arrived tasks would
-  // stay hidden until the user clicks "See more"; and a shrunk list could leave
-  // visibleCount > sorted.length.
-  useEffect(() => {
-    if (!collapsible) {
-      setVisibleCount(sorted.length);
-    } else if (visibleCount > sorted.length) {
-      setVisibleCount(Math.max(collapsible.initial, sorted.length));
-    }
-  }, [sorted.length, collapsible?.initial, collapsible, visibleCount]);
   const visibleTasks = collapsible ? sorted.slice(0, visibleCount) : sorted;
   const hasMore = collapsible ? visibleCount < sorted.length : false;
   const isExpandedBeyondInitial = !!collapsible && visibleCount > collapsible.initial;
@@ -139,7 +127,7 @@ export function TasksCategorySection({
   // list) don't make every card flicker again.
   const [entryDone, setEntryDone] = useState(false);
   useEffect(() => {
-    const id = window.setTimeout(() => setEntryDone(true), TASK_PAGE.entryAnimationMs);
+    const id = window.setTimeout(() => setEntryDone(true), 800);
     return () => window.clearTimeout(id);
   }, []);
   const handleShowLess = () => {
@@ -189,9 +177,7 @@ export function TasksCategorySection({
               const isPinned = pinnedIds?.has(task.id) ?? false;
               const pinDisabled = !isPinned && !!pinLimit && (pinnedIds?.size ?? 0) >= pinLimit;
               const animationClass = entryDone ? undefined : 'animate-slide-in-bottom';
-              const animationStyle = entryDone
-                ? undefined
-                : { animationDelay: `${i * TASK_PAGE.staggerDelayMs}ms` };
+              const animationStyle = entryDone ? undefined : { animationDelay: `${i * 60}ms` };
               return twoColumns ? (
                 <TaskItemCardCompact
                   key={task.id}
@@ -233,7 +219,7 @@ export function TasksCategorySection({
                 // bottom of the viewport (above the tab bar) so the user can
                 // collapse from anywhere in the long list.
                 isExpandedBeyondInitial &&
-                  'sticky bottom-[env(safe-area-inset-bottom,0px)] z-10 -mx-4 px-4 py-2 bg-background/85 backdrop-blur-md rounded-xl'
+                  'sticky bottom-[0px] z-10 -mx-4 px-4 py-2 bg-background/85 backdrop-blur-md rounded-xl'
               )}
             >
               <button
@@ -246,7 +232,7 @@ export function TasksCategorySection({
                   'flex-1 rounded-xl py-2.5 text-xs font-bold transition-all active:scale-[0.98]',
                   hasMore
                     ? 'bg-electric-pink/15 border border-electric-pink/30 text-white hover:bg-electric-pink/25'
-                    : 'bg-white/4 text-white/25 cursor-not-allowed active:scale-100'
+                    : 'bg-white/[0.04] text-white/25 cursor-not-allowed active:scale-100'
                 )}
               >
                 {t('see more')}
@@ -273,7 +259,7 @@ export function TasksCategorySection({
                   'flex-1 rounded-xl py-2.5 text-xs font-bold transition-all active:scale-[0.98]',
                   hasMore
                     ? 'bg-electric-pink/15 border border-electric-pink/30 text-white hover:bg-electric-pink/25'
-                    : 'bg-white/4 text-white/25 cursor-not-allowed active:scale-100'
+                    : 'bg-white/[0.04] text-white/25 cursor-not-allowed active:scale-100'
                 )}
               >
                 {t('see all')}

@@ -1,12 +1,13 @@
 'use client';
 
-import { type CSSProperties, useEffect, useState } from 'react';
+import { type CSSProperties, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import {
   ArrowUpRight,
   Check,
   ChevronDown,
   ChevronRight,
+  Circle,
   Clock3,
   Gift,
   Hash,
@@ -26,14 +27,13 @@ import { useCountDown } from '@/hooks/useCountDown';
 import { Progress } from '@/components/shared/Progress';
 import { Button } from '@/components/shared/buttons/Button';
 import { Medal, type MedalType } from '@/components/shared/icons/Medal';
-import { formatCompact } from '@/utils/global/number.utils';
 import { TaskCategory, TaskFrequency, TaskRarity, TaskStatus } from '@/types/enums/tasks.enums';
 import type { Task, TaskSubStep } from '@/types/interfaces/tasks.interfaces';
 import { routes, type Route } from '@/constants/routes';
 import { TaskCategoryIcon } from './TaskCategoryIcon';
 import { TaskRewardRow } from './TaskRewardRow';
+import { TaskRewardBadge } from './TaskRewardBadge';
 import { SectionShine } from './SectionShine';
-import { SubStepRow } from './SubStepRow';
 
 export interface TaskItemCardProps {
   task: Task;
@@ -95,6 +95,110 @@ const resolveSocialIcon = (externalLink?: string) => {
   return { icon: Share2, gradient: 'from-pink to-electric-pink' };
 };
 
+function SubStepRow({
+  step,
+  claimed,
+  onClaim,
+  onNavigate,
+}: {
+  step: TaskSubStep;
+  claimed: boolean;
+  onClaim: () => void;
+  onNavigate?: () => void;
+}) {
+  const t = useAppTranslations();
+  const isClaimable = step.completed && !claimed;
+  const isFullyClaimed = step.completed && claimed;
+  const isPending = !step.completed;
+  const canNavigate = isPending && !!onNavigate;
+  const rowAction = isClaimable ? onClaim : canNavigate ? onNavigate : undefined;
+  const isInteractive = !!rowAction;
+
+  return (
+    <div
+      role={isInteractive ? 'button' : undefined}
+      tabIndex={isInteractive ? 0 : undefined}
+      onClick={
+        rowAction
+          ? e => {
+              e.stopPropagation();
+              rowAction();
+            }
+          : undefined
+      }
+      onKeyDown={
+        rowAction
+          ? e => {
+              if (e.key === 'Enter' || e.key === ' ') {
+                e.preventDefault();
+                e.stopPropagation();
+                rowAction();
+              }
+            }
+          : undefined
+      }
+      className={twMerge(
+        'flex items-center gap-2.5 rounded-lg px-2.5 py-1.5 transition-all',
+        isClaimable &&
+          'bg-pink/10 border border-pink/20 cursor-pointer active:scale-[0.99] hover:bg-pink/15',
+        isFullyClaimed && 'bg-success/10',
+        isPending && 'bg-white/5',
+        canNavigate && 'cursor-pointer active:scale-[0.99] hover:bg-white/10'
+      )}
+    >
+      {isFullyClaimed ? (
+        <div className="flex-center w-5 h-5 rounded-full bg-success/30 shrink-0">
+          <Check size={11} className="text-success" />
+        </div>
+      ) : isClaimable ? (
+        <div className="flex-center w-5 h-5 rounded-full bg-pink/30 shrink-0 animate-task-pulse">
+          <Gift size={11} className="text-electric-pink" />
+        </div>
+      ) : (
+        <Circle size={18} className="text-white/30 shrink-0" />
+      )}
+      {step.label ? (
+        <span
+          className={twMerge(
+            'text-xs font-semibold flex-1 truncate',
+            isFullyClaimed && 'text-white/50',
+            isClaimable && 'text-white',
+            !step.completed && 'text-white/60'
+          )}
+        >
+          {step.label}
+        </span>
+      ) : (
+        <div className="flex-1" />
+      )}
+      {step.reward && !isFullyClaimed && <TaskRewardBadge reward={step.reward} size="sm" />}
+      {isPending && onNavigate && (
+        <button
+          type="button"
+          onClick={e => {
+            e.stopPropagation();
+            onNavigate();
+          }}
+          aria-label={t('open')}
+          className="flex-center w-6 h-6 rounded-full bg-electric-pink/15 border border-electric-pink/30 hover:bg-electric-pink/25 transition-colors shrink-0"
+        >
+          <ChevronRight size={12} className="text-electric-pink" strokeWidth={2.5} />
+        </button>
+      )}
+      {isClaimable && (
+        <span className="rounded-full bg-pink-gradient px-2.5 py-1 text-[10px] font-bold text-white shrink-0 pointer-events-none">
+          {t('claim')}
+        </span>
+      )}
+      {isFullyClaimed && (
+        <span className="text-[10px] font-semibold text-success uppercase tracking-wider shrink-0">
+          {t('claimed')}
+        </span>
+      )}
+    </div>
+  );
+}
+
 export function TaskItemCard({
   task,
   onClaim,
@@ -139,11 +243,6 @@ export function TaskItemCard({
     }
   };
   const [locallyClaimed, setLocallyClaimed] = useState<Record<string, boolean>>({});
-  // Reset locally-claimed substep flags when the task identity changes —
-  // otherwise after a refetch the stale flags would persist and look claimed.
-  useEffect(() => {
-    setLocallyClaimed({});
-  }, [task.id]);
   const [isSimulating, setIsSimulating] = useState(false);
 
   const isStepClaimed = (step: TaskSubStep) => locallyClaimed[step.id] ?? !!step.claimed;
@@ -405,7 +504,7 @@ export function TaskItemCard({
             <TaskRewardRow rewards={task.rewards} size="sm" />
             {showProgress && !isCompleted && !isLocked && (
               <span className="text-[11px] text-white/50 font-semibold tabular-nums ml-auto">
-                {formatCompact(task.progress.current)}/{formatCompact(task.progress.target)}
+                {task.progress.current}/{task.progress.target}
               </span>
             )}
           </div>

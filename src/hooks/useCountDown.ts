@@ -21,9 +21,6 @@ export const useCountDown = (targetDate?: string | Date | number): UseCountdownR
   const t = useAppTranslations();
 
   useEffect(() => {
-    // No target → no countdown to tick. Skip the 1-second interval entirely
-    // to avoid spinning up dozens of timers on cards that have no resetAt.
-    if (!targetDate) return;
     const timer = setInterval(() => {
       setState(getCountdown(targetDate));
     }, 1000);

@@ -19,7 +19,6 @@ import { GlobalConstants } from '@/constants/global.constants';
 import { icons } from '@/constants/icons';
 import { routes } from '@/constants/routes';
 import { useAppDispatch } from '@/lib/rtk/hooks';
-import { useAppTranslations } from '@/hooks/useAppTranslations';
 import { openDrawer } from '@/lib/rtk/features/layout.slice';
 import type { ClassNameProps } from '@/types/interfaces/component.interfcaes';
 import type { ReactNode } from 'react';
@@ -84,7 +83,6 @@ function VerifiedSparkle() {
 }
 
 export function Header({ className }: ClassNameProps) {
-  const t = useAppTranslations();
   const dispatch = useAppDispatch();
   const router = useRouter();
   const { data: me, isLoading } = useGetMeQuery();
@@ -186,7 +184,7 @@ export function Header({ className }: ClassNameProps) {
       <Button
         onClick={handleDrawerOpen}
         variant="transparent"
-        aria-label={t('menu')}
+        aria-label="Menu"
         className="bg-electric-pink/10 border-electric-pink/30 hover:bg-electric-pink/20 hover:border-electric-pink/50 flex-center group relative h-10 w-10 flex-shrink-0 rounded-full border p-0 shadow-[0_0_12px_rgba(222,0,155,0.25)] transition-all duration-200"
       >
         <Menu
