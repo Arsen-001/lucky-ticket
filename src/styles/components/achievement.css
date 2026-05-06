@@ -1,0 +1,400 @@
+/*
+ * Achievement system: shapes, rarity treatments, animations.
+ * Shapes are clip-paths applied to a square wrapper. Rarity adds shine/glow/holo.
+ */
+
+@keyframes ach-shine-sweep {
+  0% {
+    transform: translateX(-150%) rotate(20deg);
+    opacity: 0;
+  }
+  20% {
+    opacity: 1;
+  }
+  60% {
+    transform: translateX(150%) rotate(20deg);
+    opacity: 1;
+  }
+  100% {
+    transform: translateX(150%) rotate(20deg);
+    opacity: 0;
+  }
+}
+
+@keyframes ach-pulse {
+  0%,
+  100% {
+    box-shadow: 0 0 0 0 currentColor;
+    filter: brightness(1);
+  }
+  50% {
+    box-shadow: 0 0 18px 4px currentColor;
+    filter: brightness(1.15);
+  }
+}
+
+@keyframes ach-rotate-ring {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes ach-holo-shift {
+  0% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+  100% {
+    background-position: 0% 50%;
+  }
+}
+
+@keyframes ach-burst {
+  0% {
+    transform: scale(0.6);
+    opacity: 0;
+  }
+  60% {
+    transform: scale(1.15);
+    opacity: 1;
+  }
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+@keyframes ach-collage-drift {
+  0% {
+    transform: translate(0, 0) rotate(-6deg);
+  }
+  50% {
+    transform: translate(6px, -6px) rotate(0deg);
+  }
+  100% {
+    transform: translate(0, 0) rotate(-6deg);
+  }
+}
+
+@keyframes ach-status-cycle-blue {
+  0%,
+  30% {
+    text-shadow:
+      0 0 6px rgba(56, 189, 248, 0.9),
+      0 0 18px rgba(56, 189, 248, 0.55);
+  }
+  33%,
+  100% {
+    text-shadow: none;
+  }
+}
+
+@keyframes ach-status-cycle-purple {
+  0%,
+  32% {
+    text-shadow: none;
+  }
+  34%,
+  64% {
+    text-shadow:
+      0 0 6px rgba(139, 92, 246, 0.95),
+      0 0 18px rgba(139, 92, 246, 0.55);
+  }
+  66%,
+  100% {
+    text-shadow: none;
+  }
+}
+
+@keyframes ach-status-cycle-vip {
+  0%,
+  65% {
+    text-shadow: none;
+    background-position: 0% 50%;
+  }
+  68%,
+  98% {
+    background-position: 100% 50%;
+  }
+}
+
+/* ---------------- Shapes ---------------- */
+
+.ach-shape-circle {
+  border-radius: 50%;
+}
+
+.ach-shape-hexagon {
+  clip-path: polygon(25% 5%, 75% 5%, 100% 50%, 75% 95%, 25% 95%, 0% 50%);
+}
+
+.ach-shape-shield {
+  clip-path: polygon(50% 0%, 100% 18%, 100% 65%, 50% 100%, 0% 65%, 0% 18%);
+}
+
+.ach-shape-crystal {
+  clip-path: polygon(50% 0%, 90% 30%, 80% 100%, 20% 100%, 10% 30%);
+}
+
+.ach-shape-polygon {
+  clip-path: polygon(20% 0%, 80% 0%, 100% 35%, 80% 100%, 20% 100%, 0% 35%);
+}
+
+/* ---------------- Rarity background fills ---------------- */
+
+.ach-rarity-common {
+  background:
+    radial-gradient(circle at 30% 25%, rgba(255, 255, 255, 0.18), transparent 55%),
+    linear-gradient(135deg, #2a2438, #1b1930);
+  color: rgba(172, 97, 34, 0.9);
+}
+
+.ach-rarity-rare {
+  background:
+    radial-gradient(circle at 30% 25%, rgba(255, 255, 255, 0.22), transparent 55%),
+    linear-gradient(135deg, #2a2e44, #1b1930);
+  color: rgba(168, 170, 164, 1);
+}
+
+.ach-rarity-epic {
+  background:
+    radial-gradient(circle at 30% 25%, rgba(255, 255, 255, 0.28), transparent 55%),
+    linear-gradient(135deg, rgba(116, 61, 245, 0.45), rgba(27, 25, 48, 1));
+  color: rgba(116, 61, 245, 1);
+}
+
+.ach-rarity-legendary {
+  background:
+    radial-gradient(circle at 30% 25%, rgba(255, 255, 255, 0.34), transparent 55%),
+    linear-gradient(135deg, rgba(248, 189, 62, 0.55), rgba(102, 23, 83, 1));
+  color: rgba(248, 189, 62, 1);
+}
+
+.ach-rarity-mythic {
+  background: linear-gradient(120deg, #ff00cc, #3333ff, #00ffe7, #ffd166, #ff00cc);
+  background-size: 300% 300%;
+  animation: ach-holo-shift 6s ease-in-out infinite;
+  color: #ffffff;
+}
+
+/* ---------------- Effects (idle / locked / animations) ---------------- */
+
+.ach-idle {
+  animation: ach-pulse 3.6s ease-in-out infinite;
+}
+
+.ach-shine::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    100deg,
+    transparent 30%,
+    rgba(255, 255, 255, 0.55) 50%,
+    transparent 70%
+  );
+  mix-blend-mode: screen;
+  animation: ach-shine-sweep 3.4s linear infinite;
+  pointer-events: none;
+}
+
+.ach-rotating-ring::before {
+  content: '';
+  position: absolute;
+  inset: -6%;
+  background: conic-gradient(
+    from 0deg,
+    transparent 0deg,
+    rgba(255, 255, 255, 0.6) 70deg,
+    transparent 140deg,
+    transparent 360deg
+  );
+  border-radius: inherit;
+  -webkit-mask: radial-gradient(circle, transparent 56%, #000 58%);
+  mask: radial-gradient(circle, transparent 56%, #000 58%);
+  animation: ach-rotate-ring 6s linear infinite;
+  pointer-events: none;
+}
+
+.ach-locked {
+  filter: grayscale(0.85) brightness(0.55);
+}
+
+.ach-burst {
+  animation: ach-burst 0.6s cubic-bezier(0.34, 1.56, 0.64, 1) both;
+}
+
+.ach-collage-drift {
+  animation: ach-collage-drift 9s ease-in-out infinite;
+}
+
+/* ---------------- Liquid metal username ---------------- */
+
+@keyframes liquid-metal-shift {
+  0%,
+  100% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+}
+
+.ach-status-username {
+  font-family: var(--font-display), 'Space Grotesk', sans-serif;
+  font-weight: 700;
+  letter-spacing: -0.5px;
+  background-size: 300% 100%;
+  background-clip: text;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  filter: drop-shadow(0 2px 8px rgba(0, 0, 0, 0.45));
+  animation: liquid-metal-shift 7s ease-in-out infinite;
+
+  /* Base: cool silver liquid metal */
+  background-image: linear-gradient(
+    100deg,
+    #c8c8d4 0%,
+    #ffffff 25%,
+    #aab0c0 50%,
+    #ffffff 75%,
+    #c8c8d4 100%
+  );
+}
+
+.ach-status-username.has-verified {
+  background-image: linear-gradient(
+    100deg,
+    #6e9bff 0%,
+    #e6f3ff 25%,
+    #38bdf8 50%,
+    #ffffff 75%,
+    #6e9bff 100%
+  );
+}
+
+.ach-status-username.has-prime {
+  background-image: linear-gradient(
+    100deg,
+    #8b5cf6 0%,
+    #f0e6ff 25%,
+    #a78bfa 50%,
+    #ffffff 75%,
+    #8b5cf6 100%
+  );
+}
+
+.ach-status-username.has-vip {
+  background-image: linear-gradient(
+    100deg,
+    #b8860b 0%,
+    #fff5d9 18%,
+    #f8bd3e 38%,
+    #ffffff 55%,
+    #f8bd3e 75%,
+    #b8860b 100%
+  );
+  filter: drop-shadow(0 2px 10px rgba(248, 189, 62, 0.45));
+}
+
+.ach-status-username.has-verified.has-prime.has-vip {
+  background-image: linear-gradient(
+    100deg,
+    #b8860b 0%,
+    #fff5d9 15%,
+    #f8bd3e 30%,
+    #ffd86b 45%,
+    #ffffff 55%,
+    #ffd86b 65%,
+    #f8bd3e 80%,
+    #b8860b 100%
+  );
+  filter: drop-shadow(0 3px 14px rgba(248, 189, 62, 0.55));
+}
+
+/* ---------------- Avatar ring + activity flame ---------------- */
+
+@keyframes flame-flicker {
+  0%,
+  100% {
+    transform: scale(1);
+    filter: drop-shadow(0 0 4px rgba(248, 189, 62, 0.6));
+  }
+  50% {
+    transform: scale(1.08);
+    filter: drop-shadow(0 0 8px rgba(248, 189, 62, 0.85));
+  }
+}
+
+.flame-pulse {
+  animation: flame-flicker 1.2s ease-in-out infinite;
+}
+
+.avatar-ring {
+  position: relative;
+}
+
+.avatar-ring::before {
+  content: '';
+  position: absolute;
+  inset: -8px;
+  border-radius: 50%;
+  padding: 3px;
+  background: conic-gradient(
+    from 0deg,
+    var(--ring-color, var(--color-electric-purple)) 0deg,
+    var(--ring-color, var(--color-electric-purple)) calc(var(--ring-progress, 0) * 1deg),
+    rgba(255, 255, 255, 0.08) calc(var(--ring-progress, 0) * 1deg),
+    rgba(255, 255, 255, 0.08) 360deg
+  );
+  -webkit-mask:
+    linear-gradient(#fff 0 0) content-box,
+    linear-gradient(#fff 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+  pointer-events: none;
+}
+
+.avatar-ring::after {
+  content: '';
+  position: absolute;
+  inset: -14px;
+  border-radius: 50%;
+  background: var(
+    --ring-shine-bg,
+    conic-gradient(
+      from 0deg,
+      var(--ring-color, var(--color-electric-purple)) 0deg,
+      var(--ring-color, var(--color-electric-purple)) 90deg,
+      transparent 90deg,
+      transparent 360deg
+    )
+  );
+  -webkit-mask: radial-gradient(circle, transparent 58%, #000 60%);
+  mask: radial-gradient(circle, transparent 58%, #000 60%);
+  animation: ach-rotate-ring 8s linear infinite;
+  opacity: 0.7;
+  pointer-events: none;
+}
+
+/* ---------------- Add-slot CTA pulse ---------------- */
+
+@keyframes add-slot-pulse {
+  0%,
+  100% {
+    box-shadow:
+      0 0 0 0 rgba(222, 0, 155, 0.55),
+      0 0 18px 0 rgba(222, 0, 155, 0.55);
+  }
+  50% {
+    box-shadow:
+      0 0 0 12px rgba(222, 0, 155, 0),
+      0 0 26px 6px rgba(222, 0, 155, 0.6);
+  }
+}
+
+.add-slot-pulse {
+  animation: add-slot-pulse 2.2s ease-in-out infinite;
+}

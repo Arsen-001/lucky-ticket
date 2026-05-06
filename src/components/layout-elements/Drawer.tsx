@@ -75,12 +75,14 @@ export function Drawer() {
     dispatch(closeDrawer());
   };
 
+  const asideRef = useRef<HTMLElement>(null);
   const swipeStart = useRef<{ x: number; y: number } | null>(null);
   const swipeAxis = useRef<'none' | 'horizontal' | 'vertical'>('none');
   const [swipeDelta, setSwipeDelta] = useState(0);
 
   const handlePointerDown = (e: ReactPointerEvent<HTMLElement>) => {
     if (e.pointerType === 'mouse') return;
+    e.currentTarget.setPointerCapture(e.pointerId);
     swipeStart.current = { x: e.clientX, y: e.clientY };
     swipeAxis.current = 'none';
   };
@@ -101,20 +103,87 @@ export function Drawer() {
     setSwipeDelta(Math.max(0, dx));
   };
 
-  const handlePointerEnd = () => {
-    if (!swipeStart.current) return;
-    if (swipeAxis.current === 'horizontal' && swipeDelta >= SWIPE_CLOSE_THRESHOLD_PX) {
-      handleDrawerClose();
+  const handlePointerEnd = (e: ReactPointerEvent<HTMLElement>) => {
+    if (!swipeStart.current) {
+      if (e.currentTarget.hasPointerCapture(e.pointerId)) {
+        e.currentTarget.releasePointerCapture(e.pointerId);
+      }
+      return;
     }
+    const shouldClose =
+      swipeAxis.current === 'horizontal' && swipeDelta >= SWIPE_CLOSE_THRESHOLD_PX;
     swipeStart.current = null;
     swipeAxis.current = 'none';
-    setSwipeDelta(0);
+    if (e.currentTarget.hasPointerCapture(e.pointerId)) {
+      e.currentTarget.releasePointerCapture(e.pointerId);
+    }
+    if (shouldClose) {
+      handleDrawerClose();
+      // delta is reset by the [open] effect after redux flips, which keeps
+      // the inline transform stable until then so the close animates from
+      // the current swipe position rather than snapping back.
+    } else {
+      setSwipeDelta(0);
+    }
   };
 
   useEffect(() => {
     if (!open) setSwipeDelta(0);
   }, [open]);
 
+  // Lock body scroll while open; restore previous overflow on close.
+  useEffect(() => {
+    if (!open || typeof document === 'undefined') return;
+    const previousOverflow = document.body.style.overflow;
+    document.body.style.overflow = 'hidden';
+    return () => {
+      document.body.style.overflow = previousOverflow;
+    };
+  }, [open]);
+
+  // Close on Escape + focus-trap Tab cycling within the aside while open.
+  useEffect(() => {
+    if (!open) return;
+    const aside = asideRef.current;
+    if (!aside || typeof document === 'undefined') return;
+
+    const focusableSelector =
+      'a[href], button:not([disabled]), input:not([disabled]), [tabindex]:not([tabindex="-1"])';
+
+    const getFocusable = () => Array.from(aside.querySelectorAll<HTMLElement>(focusableSelector));
+
+    const initial = getFocusable()[0];
+    initial?.focus();
+
+    const handleKey = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') {
+        event.preventDefault();
+        handleDrawerClose();
+        return;
+      }
+      if (event.key !== 'Tab') return;
+      const focusable = getFocusable();
+      if (focusable.length === 0) return;
+      const first = focusable[0];
+      const last = focusable[focusable.length - 1];
+      const active = document.activeElement;
+      if (event.shiftKey && active === first) {
+        event.preventDefault();
+        last.focus();
+      } else if (!event.shiftKey && active === last) {
+        event.preventDefault();
+        first.focus();
+      } else if (active && !aside.contains(active)) {
+        event.preventDefault();
+        first.focus();
+      }
+    };
+
+    document.addEventListener('keydown', handleKey);
+    return () => document.removeEventListener('keydown', handleKey);
+  }, [open]);
+
+  // Blur active element on close to release stale focus.
   useEffect(() => {
     if (!open && typeof document !== 'undefined') {
       const activeElement = document.activeElement;
@@ -208,6 +277,7 @@ export function Drawer() {
         />
 
         <aside
+          ref={asideRef}
           onPointerDown={handlePointerDown}
           onPointerMove={handlePointerMove}
           onPointerUp={handlePointerEnd}
