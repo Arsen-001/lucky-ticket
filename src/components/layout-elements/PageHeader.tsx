@@ -1,16 +1,17 @@
 'use client';
 
-import { type HTMLAttributes, ReactNode } from 'react';
+import { type HTMLAttributes, type ReactNode } from 'react';
 import { useRouter } from 'next/navigation';
 import { twMerge } from 'tailwind-merge';
 import { BackButton } from '@/components/shared/buttons/BackButton';
 import { handleSafeBack } from '@/utils/global/navigation.utils';
 import { Button, type ButtonProps } from '@/components/shared/buttons/Button';
+import type { Route } from '@/constants/routes';
 
-interface PageHeaderProps extends Omit<HTMLAttributes<HTMLDivElement>, 'title'> {
+export interface PageHeaderProps extends Omit<HTMLAttributes<HTMLDivElement>, 'title'> {
   title?: ReactNode;
   hideBackButton?: boolean;
-  backRoute?: string;
+  backRoute?: Route;
   extra?: ReactNode;
   extraButtonProps?: ButtonProps | false;
   className?: string;

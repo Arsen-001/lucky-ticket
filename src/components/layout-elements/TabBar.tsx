@@ -57,10 +57,14 @@ export function TabBar({ className }: ClassNameProps) {
   return (
     <div
       className={twMerge(
-        'bg-tab-bar px-5 py-4 flex justify-between items-center gap-2 animate-fade-in',
+        'bg-header relative px-5 py-4 flex justify-between items-center gap-2 overflow-hidden animate-fade-in',
         className
       )}
     >
+      <span
+        aria-hidden
+        className="pointer-events-none absolute inset-0 bg-[radial-gradient(120%_80%_at_0%_100%,rgba(222,0,155,0.08),transparent_60%),radial-gradient(120%_80%_at_100%_0%,rgba(248,189,62,0.06),transparent_55%)]"
+      />
       {tabs.map(({ route, icon, name }, index) => (
         <TabBarItem
           key={route}
@@ -68,7 +72,7 @@ export function TabBar({ className }: ClassNameProps) {
           name={name}
           onClick={() => handleTabClick(route)}
           active={activePath === route}
-          className="animate-slide-in-bottom"
+          className="relative z-1 animate-slide-in-bottom"
           style={{
             animationDelay: `${index * 100}ms`,
           }}

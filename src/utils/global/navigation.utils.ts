@@ -1,7 +1,7 @@
-import { AppRouterInstance } from 'next/dist/shared/lib/app-router-context.shared-runtime';
-import { routes } from '@/constants/routes';
+import type { AppRouterInstance } from 'next/dist/shared/lib/app-router-context.shared-runtime';
+import { type Route, routes } from '@/constants/routes';
 
-export const handleSafeBack = (router: AppRouterInstance, backRoute?: string) => {
+export const handleSafeBack = (router: AppRouterInstance, backRoute?: Route) => {
   if (backRoute) {
     router.push(backRoute);
     return;

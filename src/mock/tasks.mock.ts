@@ -15,7 +15,12 @@ import type {
   TaskReward,
   TasksResponse,
 } from '@/types/interfaces/tasks.interfaces';
-import { type TierName, TIER_RANK, tierLabel } from '@/types/types/tier.types';
+import {
+  type TierName,
+  TIER_RANK,
+  TIER_REWARD_MULTIPLIER,
+  tierLabel,
+} from '@/types/types/tier.types';
 
 const HOUR_MS = 60 * 60 * 1000;
 const DAY_MS = 24 * HOUR_MS;
@@ -506,15 +511,8 @@ const buildPlaceMilestones = (place: PlaceKey): TaskBlueprint[] =>
 
 // ───────────────── PER-TIER MILESTONES (Bronze/Silver/Gold/Platinum/Diamond) ─────────────────
 // For each tier × each chain (participation + 1st/2nd/3rd) we generate 6 milestone tasks.
-// Rewards are multiplied per tier difficulty. Tier field triggers applyTierLock.
-const TIER_REWARD_MULTIPLIER: Record<TierName, number> = {
-  bronze: 1.0,
-  silver: 1.5,
-  gold: 2.0,
-  platinum: 3.0,
-  diamond: 4.0,
-};
-
+// Rewards are multiplied per tier difficulty (`TIER_REWARD_MULTIPLIER` from tier.types.ts).
+// Tier field triggers applyTierLock.
 const PARTICIPATION_MILESTONES: { target: number; rewards: TaskReward[]; rarity: TaskRarity }[] = [
   { target: 1, rewards: [ap(80)], rarity: TaskRarity.COMMON },
   { target: 5, rewards: [ltc(2), ap(180)], rarity: TaskRarity.RARE },

@@ -2,7 +2,7 @@
 
 import { twMerge } from 'tailwind-merge';
 import { useGetTopTournamentsQuery } from '@/api/tournaments.api';
-import { TournamentCard } from '@/components/pages/tabs/tournaments/TournamentCard';
+import { HomeUpcomingTournamentCard } from '@/components/pages/tabs/home/HomeUpcomingTournamentCard';
 import { HomeSectionHeader } from '@/components/pages/tabs/home/HomeSectionHeader';
 import { useAppTranslations } from '@/hooks/useAppTranslations';
 import { routes } from '@/constants/routes';
@@ -30,12 +30,12 @@ export function HomeUpcomingTournaments({ className }: ClassNameProps) {
       />
       <div className="scrollbar-hidden flex snap-x snap-mandatory gap-3 overflow-x-auto px-4 pb-2">
         {items.map((tournament, index) => (
-          <TournamentCard
+          <HomeUpcomingTournamentCard
             key={tournament.id ?? index}
             {...tournament}
             loading={isLoading}
             style={{ animationDelay: `${index * 50}ms` }}
-            className="w-56 flex-shrink-0 snap-start animate-slide-in-bottom"
+            className="flex-shrink-0 snap-start animate-slide-in-bottom"
           />
         ))}
       </div>

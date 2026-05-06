@@ -22,6 +22,11 @@ export interface TaskSubStep {
   reward?: TaskReward;
 }
 
+export interface TaskChainContribution {
+  chainId: string;
+  amount: number;
+}
+
 export interface Task {
   id: string;
   category: TaskCategory;
@@ -38,6 +43,7 @@ export interface Task {
   externalLink?: string;
   subSteps?: TaskSubStep[];
   tier?: `${TicketsEnum}` | 'all';
+  chainContribution?: TaskChainContribution;
 }
 
 export interface QuestStep {
