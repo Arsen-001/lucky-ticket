@@ -1,4 +1,12 @@
 import localFont from 'next/font/local';
+import { Space_Grotesk } from 'next/font/google';
+
+export const spaceGrotesk = Space_Grotesk({
+  subsets: ['latin'],
+  weight: ['500', '600', '700'],
+  display: 'swap',
+  variable: '--font-display',
+});
 
 export const gilroy = localFont({
   src: [

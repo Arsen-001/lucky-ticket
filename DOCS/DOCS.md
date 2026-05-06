@@ -182,18 +182,18 @@ VIP is a permanent, leveled status. Once unlocked it never decreases or expires.
 VIP can be purchased and upgraded using either:
 
 - **Lucky Coins (LC)**
-- **Telegram Stars (XTR)**
+- **Lucky Stars (LS)**
 
 Both currencies are accepted for both the initial unlock and all subsequent level upgrades.
 
 #### Pricing Model
 
-| Action            | Cost (example)                       | Notes                                      |
-| :---------------- | :----------------------------------- | :----------------------------------------- |
-| **First unlock**  | Higher price                         | e.g., 10 LC / equivalent in Stars          |
-| **Level upgrade** | Lower price for first level upgrades | e.g., 5 LC / equivalent in Stars per level |
+| Action            | Cost (example)                       | Notes                                   |
+| :---------------- | :----------------------------------- | :-------------------------------------- |
+| **First unlock**  | Higher price                         | e.g., 10 LC / equivalent in LS          |
+| **Level upgrade** | Lower price for first level upgrades | e.g., 5 LC / equivalent in LS per level |
 
-> Exact LC and Star prices per level are defined by the product team and may be updated independently of this document.
+> Exact LC and LS prices per level are defined by the product team and may be updated independently of this document.
 
 #### Rules
 
@@ -275,7 +275,7 @@ An engine is a permanent, ownable producer that:
 
 - Produces **one specific ticket type** (Bronze, Silver, Gold, Diamond, Platinum, or partner-specific).
 - Runs on a **production cycle** — a fixed time interval after which it outputs tickets.
-- Has a **per-cycle output** — the number of tickets generated each cycle (default: 1, increasable via Telegram Stars upgrade).
+- Has a **per-cycle output** — the number of tickets generated each cycle (default: 1, increasable via a Capacity Upgrade purchased in Lucky Stars).
 - Accumulates produced tickets into a pending pool until the user claims them.
 
 Engine ownership is permanent. Engines do not expire, decay, or get lost through inactivity.
@@ -308,12 +308,12 @@ Users may own and run an **unlimited number of engines of any tier in parallel**
 
 This claim-gates-production rule applies per engine: each engine independently waits for its own output to be claimed before starting the next cycle. With multiple engines of the same tier, each engine's pending output must be claimed for that specific engine to resume — though the user claims the combined pool in a single action from the UI.
 
-### 9.6 Instant Claim (Telegram Stars)
+### 9.6 Instant Claim (Lucky Stars)
 
-Users may pay **Telegram Stars (XTR)** to receive an engine's next ticket immediately, skipping the remaining wait time of the current production cycle. After an instant claim, the engine begins its next cycle just as it would after a normal claim.
+Users may pay **Lucky Stars (LS)** to receive an engine's next ticket immediately, skipping the remaining wait time of the current production cycle. After an instant claim, the engine begins its next cycle just as it would after a normal claim.
 
 - **Acquisition:** Available directly from the Tickets / Ticket Details page on any engine that is currently mid-cycle.
-- **Cost:** Defined per engine tier by the product team. Higher-tier engines (Gold, Diamond, Platinum) cost more Stars to instant-claim than lower tiers.
+- **Cost:** Defined per engine tier by the product team. Higher-tier engines (Gold, Diamond, Platinum) cost more LS to instant-claim than lower tiers.
 - **Scope:** Targets a specific engine — only that engine's current cycle is fulfilled instantly; other owned engines continue their normal cycles.
 - **Stacking:** Can be combined with active Speed Boosts and Capacity Upgrades — instant claim delivers the full per-cycle output (e.g., 2 tickets if a 2× Capacity Upgrade is active).
 
@@ -321,10 +321,10 @@ Users may pay **Telegram Stars (XTR)** to receive an engine's next ticket immedi
 
 Each engine has two tunable parameters:
 
-| Parameter            | Meaning                                                   | Modified By                          |
-| :------------------- | :-------------------------------------------------------- | :----------------------------------- |
-| **Production Speed** | Time per production cycle (e.g., 1 ticket every 2 hours). | Engine Speed Boost (Section 10.1)    |
-| **Per-Cycle Output** | Number of tickets generated per cycle (default 1).        | Capacity Upgrade (Section 10.2, XTR) |
+| Parameter            | Meaning                                                   | Modified By                                 |
+| :------------------- | :-------------------------------------------------------- | :------------------------------------------ |
+| **Production Speed** | Time per production cycle (e.g., 1 ticket every 2 hours). | Engine Speed Boost (Section 10.1)           |
+| **Per-Cycle Output** | Number of tickets generated per cycle (default 1).        | Capacity Upgrade (Section 10.2, paid in LS) |
 
 > Default cycle times and base outputs per engine tier are defined by the product team and may be tuned independently of this document.
 
@@ -351,13 +351,13 @@ A Speed Boost reduces an engine's production cycle time, increasing how often it
 - **Duration:** Time-limited (defined by product team).
 - **Stacking:** Multiple speed boosts may stack within product-defined limits.
 
-### 10.2 Capacity Upgrade (Telegram Stars)
+### 10.2 Capacity Upgrade (Lucky Stars)
 
 A Capacity Upgrade increases an engine's **per-cycle output** — instead of producing 1 ticket per cycle, the engine produces 2 (or more) tickets per cycle. Cycle time is unchanged.
 
 **Example:** A Bronze engine that normally produces 1 ticket every 2 hours, with a 2× capacity upgrade, produces 2 tickets every 2 hours — doubling output without changing the cycle.
 
-- **Acquisition:** Purchased exclusively with **Telegram Stars (XTR)** in the Lucky Ticket Shop (see Section 19.2).
+- **Acquisition:** Purchased exclusively with **Lucky Stars (LS)** in the Lucky Ticket Shop (see Section 19.3).
 - **Scope:** Applied to a specific engine the user owns.
 - **Tiers:** Higher-tier capacity upgrades may yield 3 or more tickets per cycle (defined by product team).
 - **Duration:** Defined by product team (permanent or time-limited per upgrade tier).
@@ -370,7 +370,7 @@ Speed Boosts and Capacity Upgrades target independent engine parameters and may 
 
 ### Connections
 
-Boosts and upgrades connect engines to the Market (LC speed boosts), the Telegram Stars system (capacity upgrades), the Status system (boost privileges), and the LC and Stars currency systems.
+Boosts and upgrades connect engines to the Market (LC speed boosts), the Lucky Stars system (capacity upgrades — Section 19), the Status system (boost privileges), and the LC and LS currency systems.
 
 ---
 
@@ -478,9 +478,9 @@ The market is a central hub for purchasing improvements, resources, and statuses
 - **Engines:** Purchase additional ticket producer engines for any unlocked tier using LC (see Section 9).
 - **Boosts:** Purchase Engine Speed Boosts that reduce an engine's production cycle time (see Section 10.1).
 - **Tickets:** Purchase project or partner tickets directly using LC.
-- **Statuses:** Purchase Prime status (LC or cryptocurrency) or unlock/upgrade VIP status (LC or Telegram Stars). See Section 7.4 for VIP level details.
+- **Statuses:** Purchase Prime status (LC or cryptocurrency) or unlock/upgrade VIP status (LC or Lucky Stars). See Section 7.4 for VIP level details.
 
-> **Note:** Engine **Capacity Upgrades** are not sold here — they are exclusive to the Lucky Ticket Shop and purchased only with Telegram Stars (see Section 19.2).
+> **Note:** Engine **Capacity Upgrades** are not sold here — they are exclusive to the Lucky Ticket Shop and purchased only with Lucky Stars (see Section 19.3).
 
 ### Connections
 
@@ -496,24 +496,40 @@ The Wallet page serves as the central hub for managing the user's balances and p
 
 ### Balances
 
-The top of the Wallet page displays two balance figures:
+The top of the Wallet page displays three balance figures:
 
 - **Lucky Coin (LC) Balance:** The user's current internal currency holdings.
-- **Telegram Stars (XTR) Balance:** The user's current Telegram Stars holdings earned through platform activity.
+- **Lucky Stars (LS) Balance:** The user's current Lucky Stars holdings — an internal Lucky Ticket currency separate from Telegram Stars (see Section 19). Earned through platform activity; purchasable with Telegram Stars or TON.
+- **TON Balance:** The user's TON (Toncoin) holdings accumulated within the platform.
 
 ### Action Sections
 
-The Wallet page provides three action sections:
+The Wallet page provides the following action sections:
 
 #### 1. Connect Wallet
 
 Allows users to link an external cryptocurrency wallet to the platform. A connected wallet is required for withdrawals and deposits involving cryptocurrency.
 
-#### 2. Swap Telegram Stars to Coins
+#### 2. Buy Lucky Stars with Telegram Stars
 
-Allows users to convert their accumulated Telegram Stars (XTR) into Lucky Coins (LC) at a defined exchange rate. This action bridges Telegram's native currency back into the platform's internal economy.
+Allows users to purchase Lucky Stars (LS) using **Telegram Stars (XTR)** at a fixed **1:1 rate** — 1 Telegram Star = 1 Lucky Star. Powered by the Telegram Bot Payments API. Purchased Lucky Stars are credited to the user's LS balance and may then be spent in the Lucky Ticket Shop or swapped to LC.
 
-#### 3. Withdraw and Deposit
+> Reference rate: at the time of writing, 100 Telegram Stars cost approximately **$2 USD** (~$0.02 per Star), so 1 LS ≈ $0.02. Final pricing is governed by Telegram and may change over time.
+
+#### 3. Swap Lucky Stars ↔ Lucky Coins
+
+Allows users to convert Lucky Stars into LC and vice versa at a defined exchange rate. This bridges the Stars economy with the LC economy.
+
+#### 4. Swap Lucky Stars ↔ TON
+
+Allows users to exchange their accumulated TON balance into Lucky Stars and vice versa.
+
+- **Base rate** is anchored to the Telegram Stars equivalent (1 LS ≈ $0.02 USD worth of TON at the live TON market price).
+- **+5% bonus on TON → LS purchases:** Buying Lucky Stars with TON yields **5% more LS** than the equivalent Telegram Stars purchase would. This is a deliberate incentive to pay with crypto.
+  - _Example:_ paying TON worth of $2 yields **105 LS** instead of 100 LS.
+- The reverse direction (LS → TON) uses the base rate without the bonus.
+
+#### 5. Withdraw and Deposit
 
 Allows users to move funds in and out of the platform via a connected external wallet. Supported currency pairs:
 
@@ -591,7 +607,249 @@ When an invited friend claims tickets, the inviter earns **10% of those tickets*
 
 ### 17.3 Profile Page (Statistics)
 
-A dedicated section where users can view their performance, transaction history, and detailed progression metrics.
+A dedicated section where users can view their performance, transaction history, and detailed progression metrics. The page renders in **two modes**:
+
+- **Own view** — the user looking at their own profile. Has access to private balances, transaction history, settings, and all editing actions.
+- **Public view** — any other user looking at this user's profile. Sees the same hero, showcase, and social statistics, but financial balances and transaction history are hidden, and editing actions are replaced by social actions (Send Ticket, Invite to Tournament, Share, Like).
+
+Both modes share the same overall composition and animations — the differences are scoped to which sections render and which actions are exposed.
+
+#### 17.3.0a Routing & Entry Points
+
+- The public profile route is **`/profile/:userId`**.
+- **Every avatar in the app is clickable** and opens the corresponding user's public profile — including (but not limited to): the Leaderboard, Friends list / Invite Friends section, Tournament participants list, Referrals list, and any other surface that renders a user avatar.
+
+#### 17.3.0b Telegram WebApp Integration
+
+The Profile page is built to run inside a **Telegram WebApp** when available, with a graceful fallback to a regular web context:
+
+- When running inside Telegram WebApp, the user's identity (Telegram user id, name, default avatar) is sourced from the WebApp `initData`. Sharing the profile uses the native Telegram share API.
+- When running outside Telegram WebApp, the page falls back to placeholders for the missing data; sharing falls back to copying the profile link to the clipboard.
+
+#### 17.3.0 Own vs Public — Visibility Matrix
+
+| Element                                                                                     | Own view | Public view |
+| :------------------------------------------------------------------------------------------ | :------: | :---------: |
+| Avatar, banner, username, status badge                                                      |    ✅    |     ✅      |
+| Activity Points                                                                             |    ✅    |     ✅      |
+| Activity flame / streak                                                                     |    ✅    |     ✅      |
+| Badge showcase (pinned)                                                                     |    ✅    |     ✅      |
+| Total badges earned count (e.g., 47 / 120)                                                  |    ✅    |     ✅      |
+| "View all" badge grid                                                                       |    ✅    |     ✅      |
+| Public social stats (tournaments played/won, stakes completed, tickets sent, friends count) |    ✅    |     ✅      |
+| Likes received                                                                              |    ✅    |     ✅      |
+| Friends preview (avatars row)                                                               |    ✅    |     ✅      |
+| **LC / LS / TON balances**                                                                  |    ✅    |     ❌      |
+| **Transaction history entry**                                                               |    ✅    |     ❌      |
+| Per-tier ticket inventory counts                                                            |    ✅    |     ❌      |
+| Email / phone / 2FA / Settings entry                                                        |    ✅    |     ❌      |
+| Edit avatar / username / banner                                                             |    ✅    |     ❌      |
+| Pin / Replace / Unpin badge menu                                                            |    ✅    |     ❌      |
+| Buy showcase slot expansion                                                                 |    ✅    |     ❌      |
+| Share own profile                                                                           |    ✅    |      —      |
+| **Send Ticket / Invite to Tournament / Like** the profile owner                             |    —     |     ✅      |
+| **Share** this profile                                                                      |    —     |     ✅      |
+
+#### 17.3.1 Page Composition (top to bottom)
+
+1. **Hero Header**
+   - Large **avatar** with an **animated rotating gradient ring** around it. Ring color reflects the user's current status (Verified / Prime / VIP). Ring fill represents **progress to the next Activity Points threshold**.
+   - Cover **banner image** at the top of the page (cosmetic; customizable via the Lucky Ticket Shop).
+   - **Username** rendered with a **multi-status shine cycle**: the username's glow effect cycles through styles representing every status the user currently holds. Example: a user with Verified + Prime + VIP cycles through Verified-blue glow → Prime-purple glow → VIP-holographic glow (~2s per phase, looped). A user with a single status displays only that one effect.
+   - **Status badges** displayed beside the username (Verified / Prime / VIP X).
+   - **Decorative badge collage** — three semi-transparent badge silhouettes drift slowly behind the avatar/name. The three slots are **user-selectable**, similar to showcase pinning: the user actively picks which badges appear in the background. Empty slots simply do not render.
+   - **Activity flame** indicator next to the avatar (e.g., 7🔥 / 30🔥 / 100🔥) that pulses while the streak is active.
+
+2. **Quick Stats Row** — four pill cards with count-up animation on first render: Activity Points, LC, LS, TON.
+
+3. **Badge Showcase** — pinned badges (default 5 slots, expandable up to 20) with the animated "add slot" container and a "View all" entry to the full badge grid (see Section 17.4).
+
+4. **Recent Achievements** — a horizontal carousel of the last 3–5 unlocked badges.
+
+5. **Detailed Statistics** — collapsible sections per system: Tickets, Tournaments, Stakes, Tasks. Each section shows the relevant counters and personal bests.
+
+6. **Friends Preview** — first 5 friend avatars with a "See all" link to the full Invite Friends page.
+
+7. **Transaction History Entry** — a link/CTA opening the full transaction history on the Wallet page.
+
+> Animation principles: every list, grid, and stats row uses staggered entry (`animationDelay` 50–100ms per child). Hero elements (avatar ring, holo username, flame) animate idle; decorative collage drifts slowly.
+
+#### 17.3.2 Actions — Own Profile
+
+When viewing one's own profile, the following actions are available:
+
+- **Edit avatar** — opens the avatar picker. Cosmetic avatars and frames may be purchased in the Lucky Ticket Shop with Lucky Stars (see Section 19.3).
+- **Edit username** — routes to Settings (see Section 16).
+- **Change cover banner** — selects from owned banners. Premium banners are purchased in the Shop with Lucky Stars.
+- **Pin / Replace / Unpin badges** — managed via the showcase long-press menu (see Section 17.4.7).
+- **Pin / Replace decorative collage badges** — same long-press menu pattern, but on the three background-collage slots in the hero header.
+- **Buy showcase slot expansion** — via the animated "+slot" container next to the showcase (see Section 17.4.8).
+- **Preview as visitor** — a toggle button (typically in the top-right of the hero) that switches the page into the **Public view** of the user's own profile. While in preview, the page renders exactly as another user would see it — private balances, edit affordances, and Settings entry are hidden; social actions (Send Ticket, Invite to Tournament, Share, Like) appear on the action row but are non-functional (visual only). A persistent "Exit preview" button returns to Own view. Preview never modifies any data.
+- **Share own profile** — copy link or share via Telegram.
+- **Open Settings** — entry to the Settings & Security page (Section 16).
+
+#### 17.3.3 Actions — Other User's Profile
+
+When viewing another user's profile, the following actions are available (typically rendered as a row of buttons in the hero header):
+
+- **Send Ticket** — opens the ticket-sending modal (selects tier and quantity from the user's owned tickets). Mirrors the Send action defined in Section 8.2.
+- **Invite to Tournament** — opens a partner tournament picker. Available only for tournaments the inviter holds the required partner ticket for. Sends an in-app invite to the target user.
+- **Share profile** — copy link or share via Telegram.
+- **Like** — see Section 17.3.4.
+
+> Like is the only social signal action; chat, follow, send-currency, block, and report are intentionally not included.
+
+#### 17.3.4 Profile Likes
+
+Likes are a lightweight social signal that other users can give to a profile.
+
+- **Mechanic:** Each user may like a given profile **once per 24 hours**. After 24 hours have elapsed since the last like, the same user can like the same profile again. There is no global lifetime cap.
+- **Display:** The total received like count is visible on the profile (e.g., "❤ 234"). The button toggles its visual state for the viewer based on whether their daily like is currently active.
+- **Achievement integration:** Likes received contribute to the **Social** badge category — milestones at 100 / 1,000 / 10,000 received likes (exact tiers defined by the product team).
+- **No reverse-mechanic:** Likes do not grant LC, LS, or any other reward to either party. They are a pure vanity signal that ties into the badge progression system.
+
+### 17.4 Badges & Achievements
+
+#### Purpose
+
+Badges and Achievements add a long-term collection meta-game on top of the core systems. They convert milestones, mastery, and rare accomplishments into a visible, persistent identity layer that other users can see when viewing each other's profiles.
+
+#### Description
+
+Lucky Ticket ships with a deep collection of **100+ badges and achievements** spread across many categories. Every meaningful action in the platform contributes to one or more badges. Badges are non-tradeable — they are tied to the account that earned them.
+
+#### 17.4.1 Categories
+
+Badges are organized into themed categories. Final list and per-category counts are defined by the product team; representative categories include:
+
+- **Status:** Verified, Prime active, VIP I/V/X/XX/…
+- **Stakes:** Completed Level 1/2/3/4, total stakes completed, no-cancel streaks
+- **Tickets:** Claimed thresholds per tier (e.g., 100 / 1k / 10k Bronze, Silver, Gold, Diamond, Platinum)
+- **Engines:** Own all five tiers, own N engines, first Capacity Upgrade installed, total Speed Boosts used
+- **Tournaments:** Participated in N tournaments, won 1 / 5 / 25, first partner tournament win
+- **Streaks:** 7 / 30 / 100 / 365 consecutive days in app
+- **Activity Points:** AP milestones (1k / 10k / 100k cumulative)
+- **Leaderboard:** Reached Top 100 / Top 10 / Top 3 / #1 (weekly / monthly / all-time)
+- **Social:** Invited 1 / 5 / 25 / 100 friends, invited a Telegram Premium friend, sent N tickets
+- **Finance:** Earned cumulative LC, first withdrawal, Lucky Stars earned/spent thresholds
+- **Tasks:** All Daily for a week, all Weekly for a month, all Monthly completed
+- **Exclusives & Rare:** OG (registered in first N days), seasonal events, partner-specific, beta-tester
+
+#### 17.4.2 Rarity Tiers
+
+Every badge has a rarity that drives its visual treatment and the intensity of its animation effects:
+
+- Common
+- Rare
+- Epic
+- Legendary
+- Mythic
+
+> Exact rarity distribution per category is defined by the product team.
+
+#### 17.4.3 Visual Style
+
+Badges follow a **hybrid visual language** based on rarity:
+
+- **Common / Rare:** Premium metal finish — dark base, metallic frames (bronze / silver / gold), subtle highlight
+- **Epic / Legendary / Mythic:** Neon abstract — gradient accents (pink / teal / electric-purple), glow, shine sweep, holographic effects on Mythic
+
+Badge **shapes vary per category** — the silhouette itself signals what kind of accomplishment it is (e.g., shield for tournaments, crystal for stakes, hexagon for engines, circle for social, abstract polygon for exclusives). Final shape mapping is defined by the product team.
+
+#### 17.4.4 Animations
+
+Animation intensity scales with rarity:
+
+- **Idle pulse:** subtle breathing glow (all rarities)
+- **Shine sweep:** angled highlight passes across the badge periodically (Rare+)
+- **Rotating gradient ring:** animated border (Epic+)
+- **Holographic shift:** iridescent surface (Mythic)
+- **Particle burst:** one-time confetti/spark animation when first unlocked
+- **Tap response:** scale + ring pulse on press
+- **Stagger entry:** badges enter the profile with sequential `animationDelay` (50–100ms steps)
+
+#### 17.4.5 Locked vs Unlocked Display
+
+**All badges remain visible** to the user — both earned and not yet earned:
+
+- **Earned:** full color, full animations, unlock date displayed
+- **Locked:** desaturated/dimmed, lock icon overlay, **progress indicator** (e.g., 5 / 10 tournaments) showing how close the user is
+
+This visibility drives motivation and gives users a complete map of what's possible.
+
+#### 17.4.6 Badge Detail Modal
+
+Tapping any badge opens a detail modal containing:
+
+- Large rendering of the badge with full animations
+- Title and description
+- Earned date (or "Not yet earned")
+- Unlock criteria and current progress
+- Rarity tier
+- **Holders ratio:** percentage of all users who own the badge — reinforces rarity and prestige
+
+#### 17.4.7 Showcase & "View All"
+
+The Profile page presents badges in two layers:
+
+- **Showcase (top of profile):** A featured selection of pinned badges displayed prominently with full animations. This is the badge view shown to other users when they visit the profile.
+- **"View all":** Opens the complete grid of every badge in the system (earned and locked) with their progress and detail modals.
+
+#### 17.4.8 Pinned Badges (Showcase Slots)
+
+Users actively choose which badges appear in their showcase by pinning them into slots:
+
+- **5 free slots** are granted to every user.
+- Up to **20 total slots** can be unlocked through one-time purchases.
+- Each additional slot beyond the 5th costs **more than the previous one** — pricing is progressive (slot 6 cheapest, slot 20 most expensive).
+- Slot expansions are paid **exclusively in Lucky Stars (LS)** — consistent with the platform's monetization principle that premium in-game purchases route through the LS channel (see Section 19.4).
+- An **animated "add slot" container** is displayed adjacent to the showcase, inviting users to expand their lineup. The animation is intentionally eye-catching to drive monetization.
+- A purchased slot is **permanent** — once unlocked it is the user's forever.
+
+> Exact LS price per slot (and the progression curve from slot 6 → slot 20) is defined by the product team.
+
+#### 17.4.9 Other-User Profile View
+
+When a user opens another user's profile, the badge showcase is fully visible — including animations — and acts as that user's identity statement. Tapping any badge opens the same detail modal, allowing users to compare collections and discover badges they don't yet have.
+
+#### 17.4.10 Badge Data Model
+
+Each badge in the system carries the following fields (delivered by the backend `/badges` endpoint):
+
+- `id` — unique identifier
+- `name` — localized name
+- `description` — localized description and unlock criteria
+- `category` — Status / Stakes / Tickets / Engines / Tournaments / Streaks / Social / Finance / Tasks / Leaderboard / Activity Points / Exclusive
+- `rarity` — Common / Rare / Epic / Legendary / Mythic
+- `shape` — shield / crystal / hexagon / circle / abstract polygon (drives silhouette per category)
+- `iconUrl` (or icon code) — visual asset
+- `earned: boolean`
+- `earnedAt?: timestamp` — when the user earned it
+- `progress?: { current: number, target: number }` — for locked badges with measurable progress
+- `holdersPercentage: number` — share of all users who own the badge (drives the rarity-perception UI)
+- `isPinned: boolean` — currently in the showcase
+- `pinnedSlot?: number` — slot index (0–19) if pinned
+- `tier?: { current: number, max: number, thresholds: number[] }` — tier inside a single badge that levels up (e.g., one "Bronze Claimer" badge that progresses through 100 / 1k / 10k claims rather than three separate badges)
+- `series?: { id: string, name: string, position: number, total: number }` — group of related badges (e.g., "Stake Master Level 1–4" all share a series)
+- `hidden: boolean` — secret badge: invisible in the full grid until earned (used for exclusives, Easter-eggs, OG/limited badges)
+- `unlockReward?: { type: 'lc' | 'ls' | 'ticket' | 'boost' | 'capacity', amount?: number, ticketTier?: string }` — bonus granted to the user the moment the badge is earned (extra motivation layer on top of the badge itself)
+- `expiresAt?: timestamp` — for seasonal/event badges with a deadline (after expiry, the badge becomes locked-with-no-progress unless already earned, and earned ones may be marked as a "legacy" exclusive)
+- `relatedTo?: { type: 'tournament' | 'partner' | 'event' | 'engine', id: string }` — links the badge to a specific entity (a partner tournament badge points at the partner, etc.)
+- `shareable: boolean` — whether the user can share the badge externally
+- `shareUrl?: string` — when shareable, the URL used by the share action
+
+> Hidden badges (`hidden: true`) are not returned in the catalog listing for users who have not yet earned them. The user only discovers their existence by triggering the unlock condition.
+
+#### 17.4.11 Unlock Notification
+
+When a user earns a new badge, the platform notifies them:
+
+- **Common / Rare:** in-app toast with the badge thumbnail
+- **Epic+:** full-screen celebration modal with the badge animation, particle burst, and a CTA to view detail or pin to showcase
+
+#### Connections
+
+Badges connect to virtually every system in the platform: Status (Section 7), Tickets (Section 8), Engines (Section 9), Tournaments (Section 11), Tasks (Section 12), Leaderboard (Section 13), Wallet (Section 15), Stakes (Section 18), Lucky Stars (Section 19), and the Profile page (Section 17.3). They serve as the visible aggregation layer over all user activity.
 
 ---
 
@@ -628,91 +886,113 @@ Every completed stake grants:
   - Additional LC coins
   - Engine Speed Boosts or Engine Capacity Upgrades (see Section 10)
   - Badges (Exclusive Badge at Level 4)
-- **Chance at Telegram Stars:** Completing a stake session enters the user into a draw for Telegram Stars proportional to the stake level (see Section 19). Stars are not guaranteed — they are part of the bonus prize pool.
+- **Chance at Lucky Stars:** Completing a stake session enters the user into a draw for Lucky Stars (LS) proportional to the stake level (see Section 19). LS are not guaranteed — they are part of the bonus prize pool.
 
 ### 18.3 Stake Duration & Early Cancellation
 
 - **Duration:** Every stake lasts exactly **3 hours** regardless of level.
-- **Completion:** After 3 hours, all rewards (tickets, bonuses, and Telegram Stars) are distributed and become claimable.
+- **Completion:** After 3 hours, all rewards (tickets, bonuses, and Lucky Stars) are distributed and become claimable.
 - **Consecutive Stakes:** A new stake can only be started after the user claims the rewards from the previous one. Unclaimed rewards block the next stake session.
-- **Early Cancellation:** The user may cancel the stake at any time before the 3-hour period ends. Locked coins are returned in full. No rewards are granted — including guaranteed tickets, bonus prizes, or a chance at Telegram Stars.
+- **Early Cancellation:** The user may cancel the stake at any time before the 3-hour period ends. Locked coins are returned in full. No rewards are granted — including guaranteed tickets, bonus prizes, or a chance at Lucky Stars.
 
 ### Connections
 
-Stakes connect the LC currency system, tickets, boosts, badges, and Telegram Stars. Completing stakes contributes to overall user progression and may interact with tasks and leaderboard activity.
+Stakes connect the LC currency system, tickets, boosts, badges, and Lucky Stars. Completing stakes contributes to overall user progression and may interact with tasks and leaderboard activity.
 
 ---
 
-## 19. Telegram Stars Integration
+## 19. Lucky Stars (LS) System
 
 ### Purpose
 
-Telegram Stars (XTR) are Telegram's native virtual currency. Lucky Ticket integrates Stars as a reward layer that runs alongside the existing LC economy — giving users real Telegram value for their activity and enabling a frictionless in-app shop powered by Telegram's native payment infrastructure.
+**Lucky Stars (LS)** are Lucky Ticket's secondary internal currency, designed for premium upgrades and access to the exclusive Lucky Ticket Shop. They run alongside LC and bridge into the broader economy via Telegram Stars and TON. Lucky Stars are the primary monetization currency: most premium in-game purchases are paid in LS rather than LC.
 
 ### Description
 
-Stars are issued by Lucky Ticket directly to users' Telegram accounts via the Bot Payments API (currency code: `XTR`). Users accumulate Stars through platform activity and spend them in the Lucky Ticket Shop without leaving Telegram.
+Lucky Stars are a Lucky Ticket internal currency, stored in the user's app balance (visible on the Wallet page — see Section 15). Users:
 
-### 19.1 How Users Earn Telegram Stars
+1. **Earn** Lucky Stars through platform activity — stakes, tasks, friend invitations.
+2. **Buy** Lucky Stars with Telegram Stars (XTR) at a fixed 1:1 rate, or by exchanging TON (with a +5% bonus on the TON path).
+3. **Spend** Lucky Stars in the Lucky Ticket Shop.
 
-Stars are awarded through three channels:
+Lucky Stars are conceptually distinct from **Telegram Stars (XTR)** — Telegram's native virtual currency. Lucky Ticket integrates Telegram Stars only as a _purchase method_ for Lucky Stars; Telegram Stars themselves are not held in the user's app balance.
+
+### 19.1 How Users Earn Lucky Stars
+
+Lucky Stars are awarded through three channels:
 
 #### Stakes
 
-Every successfully completed stake session (all 3 hours, no early cancellation) enters the user into a **random draw** for Telegram Stars. Stars are not guaranteed — they are part of the bonus prize pool alongside LC coins and Boosts. The chance and potential Star amount scale with stake level:
+Every successfully completed stake session (all 3 hours, no early cancellation) enters the user into a **random draw** for Lucky Stars. Stars are not guaranteed — they are part of the bonus prize pool alongside LC coins and Boosts. The chance and potential Star amount scale with stake level:
 
-| Stake Level | Star Draw Chance | Potential Stars Awarded |
-| :---------- | :--------------- | :---------------------- |
-| Level 1     | TBD              | TBD                     |
-| Level 2     | TBD              | TBD                     |
-| Level 3     | TBD              | TBD                     |
-| Level 4     | TBD              | TBD                     |
+| Stake Level | Star Draw Chance | Potential Lucky Stars Awarded |
+| :---------- | :--------------- | :---------------------------- |
+| Level 1     | TBD              | TBD                           |
+| Level 2     | TBD              | TBD                           |
+| Level 3     | TBD              | TBD                           |
+| Level 4     | TBD              | TBD                           |
 
-> Exact probabilities and Star amounts per level are defined by the product team.
+> Exact probabilities and LS amounts per level are defined by the product team.
 
 #### Task Completion
 
-Completing tasks from any category (Daily, Weekly, Monthly) gives a **chance** to receive Telegram Stars in addition to the standard ticket/coin/boost prizes. Stars are not guaranteed on every task — they appear as a random bonus outcome. Star-eligible tasks are marked distinctly in the task list.
+Completing tasks from any category (Daily, Weekly, Monthly) gives a **chance** to receive Lucky Stars in addition to the standard ticket/coin/boost prizes. LS are not guaranteed on every task — they appear as a random bonus outcome. LS-eligible tasks are marked distinctly in the task list.
 
 #### Friend Invitations
 
-After reaching a specific number of invited friends, the user receives a **guaranteed** Telegram Stars bonus — no draw, no chance. Every defined milestone triggers an automatic Stars payout:
+After reaching a specific number of invited friends, the user receives a **guaranteed** Lucky Stars bonus — no draw, no chance. Every defined milestone triggers an automatic LS payout:
 
-| Friends Invited | Guaranteed Telegram Stars |
-| :-------------- | :------------------------ |
-| Milestone 1     | TBD                       |
-| Milestone 2     | TBD                       |
-| Milestone N     | TBD                       |
+| Friends Invited | Guaranteed Lucky Stars |
+| :-------------- | :--------------------- |
+| Milestone 1     | TBD                    |
+| Milestone 2     | TBD                    |
+| Milestone N     | TBD                    |
 
-> Exact milestones and Star amounts are defined by the product team. Stars are awarded automatically upon reaching the threshold — the user does not need to claim them manually.
+> Exact milestones and LS amounts are defined by the product team. LS are awarded automatically upon reaching the threshold — the user does not need to claim them manually.
 
-### 19.2 Spending Telegram Stars — The Shop
+### 19.2 Buying Lucky Stars
 
-Users spend their accumulated Stars in the **Lucky Ticket Shop**, powered by Telegram's native Stars payment flow. The Shop offers items purchasable exclusively with Stars (not LC):
+In addition to earning, users may buy Lucky Stars from the Wallet page (see Section 15):
 
-- **Engine Capacity Upgrades:** Increase the per-cycle output of an owned engine (e.g., 2 tickets per cycle instead of 1). Sold exclusively in the Shop and only with Stars (see Section 10.2).
+- **With Telegram Stars (XTR):** Fixed **1:1 rate** — 1 Telegram Star = 1 Lucky Star. Powered by the Telegram Bot Payments API. Reference price: 100 XTR ≈ $2 USD at the time of writing.
+- **With TON:** Users exchange their TON balance for Lucky Stars at the live TON-to-USD market rate, anchored to the LS/USD baseline of ~$0.02/LS. **A +5% bonus on the LS amount applies** to all TON → LS purchases as a deliberate crypto-payment incentive.
+  - _Example:_ a TON amount worth $2 yields **105 LS** (instead of 100 LS at the Telegram Stars equivalent).
+
+The reverse direction (LS → TON) uses the base rate without the bonus.
+
+### 19.3 Spending Lucky Stars — The Shop
+
+Users spend their Lucky Stars in the **Lucky Ticket Shop**. The Shop offers items purchasable exclusively with Lucky Stars (not LC):
+
+- **Engine Capacity Upgrades:** Increase the per-cycle output of an owned engine (e.g., 2 tickets per cycle instead of 1). Sold exclusively in the Shop and only with LS (see Section 10.2).
 - **Instant Claims:** Skip the remaining wait time on an engine's current cycle and receive its next ticket(s) immediately (see Section 9.6). Triggered from the Tickets / Ticket Details page on a per-engine basis.
 - **Cosmetic items:** Avatar frames, profile effects, visual upgrades.
 - **Exclusive tickets:** Partner or limited-edition tickets not available in the standard Market.
 - **Status upgrades:** Discounted or exclusive access to Prime/VIP status.
+- **Profile showcase slot expansions:** Unlock additional badge slots beyond the free 5 (see Section 17.4).
 
-> Shop inventory and pricing in Stars are managed by the product team and may be updated at any time.
+> Shop inventory and pricing in Lucky Stars are managed by the product team and may be updated at any time.
 
-### 19.3 Technical Integration
+### 19.4 Monetization Principle
 
-Lucky Ticket integrates Telegram Stars via the **Telegram Bot Payments API**:
+Lucky Stars are the **preferred currency for premium in-game purchases**. Whenever a feature offers a paid upgrade, expansion, or exclusive item that is not part of the core LC economy (engine purchases, ticket purchases, status purchases via LC), the payment is collected in Lucky Stars. This concentrates monetization through the Stars channel and incentivizes the Telegram-Stars / TON purchase paths.
+
+### 19.5 Technical Integration (Telegram Stars Purchase Flow)
+
+Lucky Ticket integrates the **Telegram Stars** purchase flow via the **Telegram Bot Payments API**:
 
 - Invoice links are generated server-side with `currency: "XTR"`.
 - Payments are processed natively inside Telegram — no external checkout.
-- Star balances and transaction history are visible in the user's Telegram account.
-- Lucky Ticket tracks awarded Stars per user for analytics and audit purposes.
+- Telegram Star transactions are visible in the user's Telegram account.
+- Upon successful payment, Lucky Ticket credits the user's Lucky Stars balance 1:1 with the Telegram Stars paid.
+- Lucky Ticket tracks all purchase events per user for analytics and audit purposes.
 
 ### Connections
 
-Telegram Stars connect the Stakes system, Task system, Invite Friends system, the Engine system (via Capacity Upgrades — see Section 10.2), and the Lucky Ticket Shop. Stars serve as a bridge between Lucky Ticket's internal economy and Telegram's native value ecosystem.
+Lucky Stars connect: the Stakes system, Task system, Invite Friends system, Engine system (Capacity Upgrades and Instant Claims), the Lucky Ticket Shop, the Wallet (Telegram Stars and TON purchase paths), and the Profile showcase (slot expansions — Section 17.4). Telegram Stars (XTR) and TON serve as bridges between external value and the Lucky Ticket internal economy.
 
 ---
 
 ## 20. Conclusion
 
-Lucky Ticket is a modular, scalable product built around engagement, fairness, and real value creation. Each system reinforces the others, creating a cohesive ecosystem that rewards consistent participation and long-term loyalty. The Telegram Stars integration extends this ecosystem into the native Telegram economy, giving users tangible real-world value for their activity on the platform.
+Lucky Ticket is a modular, scalable product built around engagement, fairness, and real value creation. Each system reinforces the others, creating a cohesive ecosystem that rewards consistent participation and long-term loyalty. The Lucky Stars (LS) currency, fueled by both Telegram Stars and TON, bridges the internal economy with external value — giving users tangible real-world worth for their activity on the platform.

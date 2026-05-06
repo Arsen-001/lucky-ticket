@@ -1,6 +1,7 @@
 'use client';
 
 import Image from 'next/image';
+import Link from 'next/link';
 import { ArrowDown, ArrowUp, Minus, Zap } from 'lucide-react';
 import { twMerge } from 'tailwind-merge';
 import { Medal } from '@/components/shared/icons/Medal';
@@ -10,6 +11,7 @@ import { VerifiedBadge } from '@/components/shared/badges/VerifiedBadge';
 import { useAppTranslations } from '@/hooks/useAppTranslations';
 import { LeaderboardCountUp } from './LeaderboardCountUp';
 import { Crown, Star } from 'lucide-react';
+import { routes } from '@/constants/routes';
 import type { LeaderboardEntry } from '@/types/interfaces/leaderboard.interfaces';
 import type { CSSProperties } from 'react';
 
@@ -54,7 +56,13 @@ export function LeaderboardListItem({
     >
       <RankBadge entry={entry} loading={loading} />
 
-      <div className="relative h-10 w-10 flex-shrink-0">
+      <Link
+        href={entry ? routes.profile.getByUserId(entry.id) : '#'}
+        className="relative h-10 w-10 flex-shrink-0 transition-transform active:scale-95"
+        onClick={e => {
+          if (!entry) e.preventDefault();
+        }}
+      >
         <SkeletonSuspense
           loading={loading || !entry}
           skeleton={<Skeleton variant="round" className="h-full w-full" />}
@@ -82,7 +90,7 @@ export function LeaderboardListItem({
             <Star size={6} className="fill-white text-white" />
           </span>
         )}
-      </div>
+      </Link>
 
       <div className="flex min-w-0 flex-1 flex-col gap-0.5">
         <div className="flex items-center gap-1">

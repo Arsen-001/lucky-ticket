@@ -1,6 +1,7 @@
 'use client';
 
 import Image from 'next/image';
+import Link from 'next/link';
 import { ChevronRight, Crown, Star, Zap } from 'lucide-react';
 import { twMerge } from 'tailwind-merge';
 import { Skeleton } from '@/components/shared/seleketons/Skeleton';
@@ -8,6 +9,7 @@ import { SkeletonSuspense } from '@/components/shared/seleketons/SkeletonSuspens
 import { Ticket } from '@/components/shared/icons/Ticket';
 import { VerifiedBadge } from '@/components/shared/badges/VerifiedBadge';
 import { useAppTranslations } from '@/hooks/useAppTranslations';
+import { routes } from '@/constants/routes';
 import type { InvitedFriend } from '@/types/interfaces/referral.interfaces';
 import type { CSSProperties } from 'react';
 
@@ -46,7 +48,14 @@ export function InvitedFriendRow({
         className
       )}
     >
-      <div className="relative flex-shrink-0">
+      <Link
+        href={friend ? routes.profile.getByUserId(friend.id) : '#'}
+        onClick={e => {
+          e.stopPropagation();
+          if (!friend) e.preventDefault();
+        }}
+        className="relative flex-shrink-0 transition-transform active:scale-95"
+      >
         <div className="h-11 w-11 overflow-hidden rounded-full">
           <SkeletonSuspense
             loading={loading || !friend}
@@ -71,7 +80,7 @@ export function InvitedFriendRow({
             <Star size={8} className="fill-white text-white" />
           </span>
         )}
-      </div>
+      </Link>
 
       <div className="flex min-w-0 flex-1 flex-col gap-0.5">
         <div className="flex items-center gap-1">

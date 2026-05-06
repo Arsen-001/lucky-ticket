@@ -3,6 +3,7 @@ import { type FC, type ReactNode, type SVGProps } from 'react';
 
 export interface BadgeProps {
   hideText?: boolean;
+  locked?: boolean;
   className?: string;
   icon?: FC<SVGProps<SVGSVGElement>>;
   text?: ReactNode;

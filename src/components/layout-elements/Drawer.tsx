@@ -87,7 +87,7 @@ export function Drawer() {
     {
       label: t('account'),
       items: [
-        { route: routes.profile, title: t('profile'), icon: <UserRound size={18} /> },
+        { route: routes.profile.index, title: t('profile'), icon: <UserRound size={18} /> },
         {
           route: routes.notifications,
           title: t('notifications'),
@@ -184,7 +184,7 @@ export function Drawer() {
           </div>
 
           <Link
-            href={routes.profile}
+            href={routes.profile.index}
             tabIndex={tabIndex}
             onClick={handleDrawerClose}
             className="card-outlined bg-purple-gradient mx-5 flex items-center gap-3 rounded-2xl p-3 transition-transform active:scale-99"

@@ -22,7 +22,13 @@ export const routes = {
   refererLink: function (refererId: string) {
     return `/referer/${refererId}`;
   },
-  profile: '/profile',
+  profile: {
+    index: '/profile',
+    getByUserId: function (userId: string) {
+      return ('/profile/' + userId) as `/profile/${string}`;
+    },
+    achievements: '/profile/achievements',
+  },
   notifications: '/notifications',
   leaderboard: '/leaderboard',
   wallet: '/wallet',
@@ -45,6 +51,8 @@ export const routes = {
     email: '/settings/email',
     phone: '/settings/phone',
     security: '/settings/security',
+    prime: '/settings/prime',
+    vip: '/settings/vip',
   },
   languages: '/languages',
   stakes: {

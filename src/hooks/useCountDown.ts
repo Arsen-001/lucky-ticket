@@ -16,11 +16,20 @@ export interface UseCountdownResult extends CountdownState {
   getPassedPercentage: (fullTime?: Duration) => number;
 }
 
+const INITIAL_COUNTDOWN_STATE: CountdownState = {
+  expired: false,
+  days: 0,
+  hours: 0,
+  minutes: 0,
+  seconds: 0,
+};
+
 export const useCountDown = (targetDate?: string | Date | number): UseCountdownResult => {
-  const [state, setState] = useState<CountdownState>(() => getCountdown(targetDate));
+  const [state, setState] = useState<CountdownState>(INITIAL_COUNTDOWN_STATE);
   const t = useAppTranslations();
 
   useEffect(() => {
+    setState(getCountdown(targetDate));
     const timer = setInterval(() => {
       setState(getCountdown(targetDate));
     }, 1000);

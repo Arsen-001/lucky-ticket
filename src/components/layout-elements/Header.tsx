@@ -112,7 +112,7 @@ export function Header({ className }: ClassNameProps) {
       )}
     >
       <Link
-        href={routes.profile}
+        href={routes.profile.index}
         className="relative flex h-[50px] w-[50px] flex-shrink-0 items-center justify-center rounded-full"
       >
         <Avatar shadow size={50} />
