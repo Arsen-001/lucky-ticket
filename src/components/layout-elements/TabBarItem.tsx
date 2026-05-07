@@ -18,7 +18,11 @@ export function TabBarItem({ active, onClick, name, icon, className, style }: Ta
       variant={active ? 'primary' : 'transparent'}
       onClick={onClick}
       style={style}
-      className={twMerge('p-3 flex-center rounded-full', className)}
+      className={twMerge(
+        'p-3 flex-center rounded-full',
+        active && 'tab-bar-active-flow text-white shadow-[0_4px_18px_rgba(222,0,155,0.45)]',
+        className
+      )}
     >
       {cloneElement<LucideProps>(icon, { size: 22 })}
       <span

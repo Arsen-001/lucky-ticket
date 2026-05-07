@@ -3,3 +3,25 @@
     max-width 450ms,
     margin-left 400ms;
 }
+
+.tab-bar-active-flow {
+  background: linear-gradient(
+    120deg,
+    #de009b 0%,
+    #a32183 25%,
+    #743df5 50%,
+    #a32183 75%,
+    #de009b 100%
+  );
+  background-size: 300% 100%;
+  animation: tab-bar-active-flow 18s linear infinite;
+}
+
+@keyframes tab-bar-active-flow {
+  0% {
+    background-position: 0% 50%;
+  }
+  100% {
+    background-position: 300% 50%;
+  }
+}
