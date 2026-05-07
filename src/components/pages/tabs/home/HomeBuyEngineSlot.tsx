@@ -15,17 +15,14 @@ export function HomeBuyEngineSlot({ className }: HomeBuyEngineSlotProps) {
     <Link
       href={routes.market('Boosts')}
       className={twMerge(
-        'border-pink/40 bg-pink/5 hover:bg-pink/10 flex min-h-[340px] flex-col items-center justify-center gap-3 rounded-2xl border-[1.5px] border-dashed p-5 text-center transition-colors',
+        'flex h-[calc(100vw-160px)] w-full flex-col items-center justify-center gap-3 p-5 text-center transition-transform active:scale-99',
         className
       )}
     >
-      <div className="bg-pink/15 flex-center h-12 w-12 rounded-full">
-        <Plus className="text-pink" size={24} strokeWidth={2.5} />
+      <div className="bg-electric-pink/20 border border-electric-pink/40 flex-center h-14 w-14 rounded-full shadow-[0_0_18px_rgba(222,0,155,0.35)]">
+        <Plus className="text-electric-pink" size={26} strokeWidth={2.6} />
       </div>
-      <span className="text-white-secondary text-sm font-bold leading-tight">
-        {t('buy engine')}
-      </span>
-      <span className="text-pink-secondary text-xs">{t('buy in market')}</span>
+      <span className="text-white text-base font-extrabold leading-tight">{t('buy engine')}</span>
     </Link>
   );
 }

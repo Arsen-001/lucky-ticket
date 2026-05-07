@@ -7,7 +7,7 @@ import { twMerge } from 'tailwind-merge';
 
 import { useGetMeQuery } from '@/api/me.api';
 import { useGetTicketsQuery } from '@/api/tickets.api';
-import { EngineCard } from '@/components/pages/out-tabs/tabs-extra/ticket/EngineCard';
+import { EngineCardCube } from '@/components/pages/tabs/home/EngineCardCube';
 import { HomeBuyEngineSlot } from '@/components/pages/tabs/home/HomeBuyEngineSlot';
 import { NotEnoughStarsModal } from '@/components/pages/tabs/home/NotEnoughStarsModal';
 import { EmptyDataInfo } from '@/components/shared/EmptyDataInfo';
@@ -28,7 +28,8 @@ interface EngineWithTier {
   tier: TicketType;
 }
 
-const SLIDE_WIDTH = 300;
+const SLIDE_WIDTH_CSS = 'calc(100vw - 160px)';
+const SLIDE_GUTTER_PX = 80;
 
 const CORE_TIER_COLORS: Record<TicketType, { mid: string; dark: string; glow: string }> = {
   bronze: {
@@ -264,8 +265,8 @@ export function HomeEnginesSlider({ className }: ClassNameProps) {
         ref={scrollerRef}
         className="scrollbar-hidden flex snap-x snap-mandatory items-stretch gap-3 overflow-x-auto overflow-y-visible pt-0 pb-0"
         style={{
-          scrollPaddingInline: `calc(50% - ${SLIDE_WIDTH / 2}px)`,
-          paddingInline: `calc(50% - ${SLIDE_WIDTH / 2}px)`,
+          scrollPaddingInline: `${SLIDE_GUTTER_PX}px`,
+          paddingInline: `${SLIDE_GUTTER_PX}px`,
         }}
       >
         {items.map(({ engine, tier }, index) => {
@@ -278,15 +279,16 @@ export function HomeEnginesSlider({ className }: ClassNameProps) {
               data-engine-index={index}
               onClick={!isActive ? () => scrollToIndex(index) : undefined}
               style={{
-                flex: `0 0 ${SLIDE_WIDTH}px`,
+                flex: `0 0 ${SLIDE_WIDTH_CSS}`,
                 transform: `translateX(${sideOffset}px) scale(${isActive ? 1 : 0.78})`,
+                zIndex: isActive ? 10 : 1,
               }}
               className={twMerge(
-                'flex min-h-[380px] origin-center snap-center items-center transition-all duration-[450ms] ease-[cubic-bezier(0.22,1,0.36,1)]',
+                'relative flex origin-center snap-center items-center transition-all duration-[450ms] ease-[cubic-bezier(0.22,1,0.36,1)] min-h-[calc(100vw-60px)]',
                 isActive ? 'opacity-100' : 'cursor-pointer opacity-60 saturate-75'
               )}
             >
-              <EngineCard
+              <EngineCardCube
                 engine={engine}
                 tier={tier}
                 index={index}
@@ -295,7 +297,7 @@ export function HomeEnginesSlider({ className }: ClassNameProps) {
                 onInstantClaim={handleInstantClaim}
                 onUpgradeSpeed={handleUpgradeSpeed}
                 onUpgradeCapacity={handleUpgradeCapacity}
-                className="w-full"
+                cubeClassName={twMerge('w-full', !isActive && 'pointer-events-none')}
               />
             </div>
           );
@@ -306,13 +308,14 @@ export function HomeEnginesSlider({ className }: ClassNameProps) {
           data-engine-index={buySlotIndex}
           onClick={activeIndex !== buySlotIndex ? () => scrollToIndex(buySlotIndex) : undefined}
           style={{
-            flex: `0 0 ${SLIDE_WIDTH}px`,
+            flex: `0 0 ${SLIDE_WIDTH_CSS}`,
             transform: `translateX(${
               activeIndex === buySlotIndex ? 0 : buySlotIndex < activeIndex ? 35 : -35
             }px) scale(${activeIndex === buySlotIndex ? 1 : 0.78})`,
+            zIndex: activeIndex === buySlotIndex ? 10 : 1,
           }}
           className={twMerge(
-            'flex min-h-[380px] origin-center snap-center items-center transition-all duration-[450ms] ease-[cubic-bezier(0.22,1,0.36,1)]',
+            'relative flex origin-center snap-center items-center transition-all duration-[450ms] ease-[cubic-bezier(0.22,1,0.36,1)] min-h-[calc(100vw-60px)]',
             activeIndex === buySlotIndex ? 'opacity-100' : 'cursor-pointer opacity-60 saturate-75'
           )}
         >
@@ -369,11 +372,13 @@ export function HomeEnginesSlider({ className }: ClassNameProps) {
                           : undefined
                       }
                     >
-                      <span aria-hidden className="eng-cube-core">
-                        <span className="eng-cube-core-shell eng-cube-core-shell--xy" />
-                        <span className="eng-cube-core-shell eng-cube-core-shell--yz" />
-                        <span className="eng-cube-core-shell eng-cube-core-shell--xz" />
-                      </span>
+                      {isClaimable && (
+                        <span aria-hidden className="eng-cube-core">
+                          <span className="eng-cube-core-shell eng-cube-core-shell--xy" />
+                          <span className="eng-cube-core-shell eng-cube-core-shell--yz" />
+                          <span className="eng-cube-core-shell eng-cube-core-shell--xz" />
+                        </span>
+                      )}
                       <span className="eng-cube-face eng-cube-face--front" />
                       <span className="eng-cube-face eng-cube-face--back" />
                       <span className="eng-cube-face eng-cube-face--top" />

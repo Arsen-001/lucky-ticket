@@ -1,0 +1,120 @@
+.engine-card-cube-perspective {
+  perspective: 1400px;
+  width: 100%;
+  position: relative;
+}
+
+.engine-card-cube {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  transform-style: preserve-3d;
+  transition: transform 420ms cubic-bezier(0.22, 1, 0.36, 1);
+  touch-action: pan-x;
+}
+
+.engine-card-cube--dragging {
+  transition: none;
+}
+
+.engine-card-cube-face {
+  position: absolute;
+  inset: 0;
+  border-radius: 15px;
+  backface-visibility: hidden;
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  box-shadow: inset 0 0 0 1px rgba(0, 0, 0, 0.25);
+}
+
+.engine-card-cube-face {
+  background: var(--gradient-purple);
+}
+
+.engine-card-cube-face--front {
+  transform: translateZ(var(--cube-half));
+}
+
+.engine-card-cube-face--back {
+  transform: rotateY(180deg) translateZ(var(--cube-half));
+}
+
+.engine-card-cube-face--top {
+  transform: rotateX(90deg) translateZ(var(--cube-half));
+}
+
+.engine-card-cube-face--bottom {
+  transform: rotateX(-90deg) translateZ(var(--cube-half));
+}
+
+/* 3D glowing core (mirrors dot-cube core) */
+.engine-card-cube-core {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 0;
+  height: 0;
+  pointer-events: none;
+  transform-style: preserve-3d;
+}
+
+.engine-card-cube-core-shell {
+  position: absolute;
+  top: -10px;
+  left: -10px;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: radial-gradient(
+    circle at 30% 30%,
+    rgb(255, 255, 255) 0%,
+    rgba(255, 220, 245, 0.95) 45%,
+    rgba(255, 120, 210, 0.75) 100%
+  );
+  box-shadow:
+    0 0 10px 3px rgba(255, 255, 255, 1),
+    0 0 20px 6px rgba(255, 220, 245, 0.85);
+}
+
+.engine-card-cube-core-shell--xy {
+  transform: translateZ(0);
+}
+
+.engine-card-cube-core-shell--yz {
+  transform: rotateY(90deg);
+}
+
+.engine-card-cube-core-shell--xz {
+  transform: rotateX(90deg);
+}
+
+/* Stat face content (sits on top of colored cube face) */
+.engine-card-cube-stat {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.25rem;
+  height: 100%;
+  width: 100%;
+  padding: 1rem;
+  text-align: center;
+}
+
+.engine-card-cube-stat-value {
+  font-size: 2.75rem;
+  font-weight: 900;
+  line-height: 1;
+  color: rgb(255, 255, 255);
+  font-variant-numeric: tabular-nums;
+  text-shadow: 0 4px 16px rgba(0, 0, 0, 0.45);
+}
+
+.engine-card-cube-stat-label {
+  font-size: 0.65rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.85);
+  margin-top: 0.5rem;
+  text-shadow: 0 1px 4px rgba(0, 0, 0, 0.4);
+}

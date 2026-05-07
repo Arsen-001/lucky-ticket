@@ -14,6 +14,7 @@ export interface ReactorDialProps {
   capacity: number;
   cycleSeconds: number;
   elapsedSeconds: number;
+  size?: number;
   className?: string;
 }
 
@@ -25,10 +26,7 @@ const TIER_GLOW: Record<TicketType, string> = {
   diamond: '#3FD9CF',
 };
 
-const SIZE = 110;
-const STROKE = 6;
-const RADIUS = (SIZE - STROKE) / 2;
-const CIRCUMFERENCE = 2 * Math.PI * RADIUS;
+const DEFAULT_SIZE = 110;
 
 const alphaHex = (alpha: number) => {
   const value = Math.max(0, Math.min(255, Math.round(alpha * 255)));
@@ -42,8 +40,14 @@ export function ReactorDial({
   capacity,
   cycleSeconds,
   elapsedSeconds,
+  size = DEFAULT_SIZE,
   className,
 }: ReactorDialProps) {
+  const STROKE = Math.max(4, Math.round(size * 0.055));
+  const RADIUS = (size - STROKE) / 2;
+  const CIRCUMFERENCE = 2 * Math.PI * RADIUS;
+  const ticketWidth = Math.round(size * 0.63);
+  const ticketHeight = Math.round(size * 0.44);
   const tierColor = `var(--color-${tier})`;
   const glow = TIER_GLOW[tier];
   const showOverlap = capacity > 1;
@@ -63,8 +67,8 @@ export function ReactorDial({
       };
 
   return (
-    <div className={twMerge('relative shrink-0', className)} style={{ width: SIZE, height: SIZE }}>
-      <svg width={SIZE} height={SIZE} className="reactor-dial-svg">
+    <div className={twMerge('relative shrink-0', className)} style={{ width: size, height: size }}>
+      <svg width={size} height={size} className="reactor-dial-svg">
         <defs>
           <linearGradient id={`reactor-dial-grad-${tier}`} x1="0%" y1="0%" x2="100%" y2="100%">
             <stop offset="0%" stopColor="var(--color-electric-purple)" />
@@ -72,16 +76,16 @@ export function ReactorDial({
           </linearGradient>
         </defs>
         <circle
-          cx={SIZE / 2}
-          cy={SIZE / 2}
+          cx={size / 2}
+          cy={size / 2}
           r={RADIUS}
           fill="none"
           stroke="rgba(255,255,255,0.08)"
           strokeWidth={STROKE}
         />
         <circle
-          cx={SIZE / 2}
-          cy={SIZE / 2}
+          cx={size / 2}
+          cy={size / 2}
           r={RADIUS}
           fill="none"
           stroke={`url(#reactor-dial-grad-${tier})`}
@@ -112,9 +116,9 @@ export function ReactorDial({
           style={{ opacity: pending ? 1 : 0.3 + progress * 0.7 }}
         >
           {showOverlap ? (
-            <TicketOverlap type={tier} width={70} />
+            <TicketOverlap type={tier} width={ticketWidth} />
           ) : (
-            <Ticket type={tier} width={70} height={48} />
+            <Ticket type={tier} width={ticketWidth} height={ticketHeight} />
           )}
         </div>
       </div>

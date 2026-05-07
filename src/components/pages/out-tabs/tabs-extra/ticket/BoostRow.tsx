@@ -15,6 +15,7 @@ export interface BoostRowProps {
   accent: string;
   costStars: number;
   onUpgrade: () => void;
+  compact?: boolean;
   className?: string;
 }
 
@@ -27,6 +28,7 @@ export function BoostRow({
   accent,
   costStars,
   onUpgrade,
+  compact = false,
   className,
 }: BoostRowProps) {
   const t = useAppTranslations();
@@ -35,12 +37,17 @@ export function BoostRow({
   return (
     <div
       className={twMerge(
-        'flex items-center gap-2.5 p-2 px-2.5 rounded-xl bg-black/28 border border-white/5',
+        compact
+          ? 'flex items-center gap-2 p-1.5 px-2 rounded-lg bg-black/28 border border-white/5'
+          : 'flex items-center gap-2.5 p-2 px-2.5 rounded-xl bg-black/28 border border-white/5',
         className
       )}
     >
       <div
-        className="w-6.5 h-6.5 rounded-lg flex-center shrink-0"
+        className={twMerge(
+          compact ? 'w-5.5 h-5.5 rounded-md' : 'w-6.5 h-6.5 rounded-lg',
+          'flex-center shrink-0'
+        )}
         style={{
           background: `${accent}1a`,
           border: `1px solid ${accent}55`,
@@ -48,16 +55,31 @@ export function BoostRow({
       >
         {icon}
       </div>
-      <div className="flex-1 min-w-0 flex flex-col gap-1.5">
-        <div className="flex items-center gap-1.5">
-          <span className="text-[11px] font-bold text-white tracking-wide">{label}</span>
+      <div className={twMerge('flex-1 min-w-0 flex flex-col', compact ? 'gap-1' : 'gap-1.5')}>
+        <div className={twMerge('flex items-center', compact ? 'gap-1' : 'gap-1.5')}>
           <span
-            className="text-[9px] font-extrabold tabular-nums tracking-wider px-1 py-px rounded"
+            className={twMerge(
+              'font-bold text-white tracking-wide',
+              compact ? 'text-[10px]' : 'text-[11px]'
+            )}
+          >
+            {label}
+          </span>
+          <span
+            className={twMerge(
+              'font-extrabold tabular-nums tracking-wider px-1 py-px rounded',
+              compact ? 'text-[8px]' : 'text-[9px]'
+            )}
             style={{ color: accent, background: `${accent}1f` }}
           >
             {level}/{max}
           </span>
-          <span className="ml-auto text-[10px] font-semibold text-pink-secondary truncate">
+          <span
+            className={twMerge(
+              'ml-auto font-semibold text-pink-secondary truncate',
+              compact ? 'text-[9px]' : 'text-[10px]'
+            )}
+          >
             {valueText}
           </span>
         </div>
@@ -67,7 +89,9 @@ export function BoostRow({
         onClick={onUpgrade}
         disabled={maxed}
         className={twMerge(
-          'min-w-16 shrink-0 h-7.5 px-2.5 rounded-lg text-[10px] font-extrabold tracking-wider flex-center gap-1 transition-all duration-100',
+          compact
+            ? 'min-w-14 shrink-0 h-6.5 px-2 rounded-md text-[9px] font-extrabold tracking-wider flex-center gap-1 transition-all duration-100'
+            : 'min-w-16 shrink-0 h-7.5 px-2.5 rounded-lg text-[10px] font-extrabold tracking-wider flex-center gap-1 transition-all duration-100',
           maxed
             ? 'bg-white/3 border border-white/5 text-pink-secondary cursor-default'
             : 'cursor-pointer hover:brightness-110 active:scale-99'
@@ -86,7 +110,12 @@ export function BoostRow({
           <span>{t('max')}</span>
         ) : (
           <>
-            <Image src={icons.telegramStar} alt="" height={11} width={11} />
+            <Image
+              src={icons.telegramStar}
+              alt=""
+              height={compact ? 10 : 11}
+              width={compact ? 10 : 11}
+            />
             <span className="tabular-nums">{costStars}</span>
           </>
         )}
