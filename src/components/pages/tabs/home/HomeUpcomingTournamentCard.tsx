@@ -1,5 +1,4 @@
 'use client';
-import { Clock, Trophy } from 'lucide-react';
 import { twMerge } from 'tailwind-merge';
 import { Link } from '@/components/shared/links/Link';
 import { Medal } from '@/components/shared/icons/Medal';
@@ -45,34 +44,41 @@ export function HomeUpcomingTournamentCard({
           <Medal height={48} type={type} loading={loading} />
         </div>
 
-        <div className="flex min-w-0 flex-1 flex-col justify-center gap-1">
+        <div className="flex min-w-0 flex-1 flex-col justify-center gap-1.5">
           <SkeletonSuspense
             loading={loading}
             skeleton={<Skeleton variant="line" textSize="sm" className="h-4 w-full" />}
           >
-            <h5 className="line-clamp-1 text-sm font-extrabold leading-tight text-white">{name}</h5>
+            <h5 className="line-clamp-1 text-[13px] font-bold leading-tight text-white">{name}</h5>
           </SkeletonSuspense>
 
-          <SkeletonSuspense
-            loading={loading}
-            skeleton={<Skeleton variant="line" textSize="xs" className="h-3 w-24" />}
-          >
-            <div className="flex items-center gap-2 text-[11px] font-bold tabular-nums">
-              <span className="inline-flex items-center gap-1">
-                <Trophy size={11} className="text-gold flex-shrink-0" strokeWidth={2.4} />
+          <div className="flex items-baseline justify-between gap-2">
+            <SkeletonSuspense
+              loading={loading}
+              skeleton={<Skeleton variant="line" textSize="lg" className="h-5 w-20" />}
+            >
+              <span
+                className="text-lg font-extrabold tabular-nums leading-none"
+                style={{ textShadow: '0 1px 4px rgba(248, 189, 62, 0.4)' }}
+              >
                 <GoldenText>
                   {prizePool?.toLocaleString()} {GlobalConstants.coinName}
                 </GoldenText>
               </span>
-              <span aria-hidden className="text-pink-secondary">
-                ·
+            </SkeletonSuspense>
+
+            <SkeletonSuspense
+              loading={loading}
+              skeleton={<Skeleton variant="line" textSize="lg" className="h-5 w-20" />}
+            >
+              <span
+                className="text-electric-pink text-xl font-black tabular-nums leading-none"
+                style={{ textShadow: '0 2px 8px rgba(222, 0, 155, 0.45)' }}
+              >
+                {leftTime || t('soon')}
               </span>
-              <span className="text-electric-pink inline-flex items-center gap-1">
-                <Clock size={10} strokeWidth={2.6} />
-                <span>{leftTime || t('soon')}</span>
-              </span>
-            </div>
-          </SkeletonSuspense>
+            </SkeletonSuspense>
+          </div>
         </div>
       </div>
     </Link>

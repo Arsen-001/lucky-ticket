@@ -1,5 +1,10 @@
 'use client';
 
+import 'swiper/css';
+import 'swiper/css/autoplay';
+
+import { Autoplay } from 'swiper/modules';
+import { Swiper, SwiperSlide } from 'swiper/react';
 import { twMerge } from 'tailwind-merge';
 import { useGetTopTournamentsQuery } from '@/api/tournaments.api';
 import { HomeUpcomingTournamentCard } from '@/components/pages/tabs/home/HomeUpcomingTournamentCard';
@@ -28,17 +33,30 @@ export function HomeUpcomingTournaments({ className }: ClassNameProps) {
         actionLabel={t('see all')}
         actionHref={routes.tournaments.index}
       />
-      <div className="scrollbar-hidden flex snap-x snap-mandatory gap-3 overflow-x-auto px-4 pb-2">
+      <Swiper
+        key={isLoading ? 'loading' : 'loaded'}
+        className="w-full"
+        modules={[Autoplay]}
+        centeredSlides
+        grabCursor
+        observer
+        observeParents
+        watchOverflow
+        loop={!isLoading && (tournaments?.length ?? 0) > 2}
+        slidesPerView="auto"
+        spaceBetween={20}
+        autoplay={{
+          delay: 2000,
+          disableOnInteraction: false,
+          pauseOnMouseEnter: true,
+        }}
+      >
         {items.map((tournament, index) => (
-          <HomeUpcomingTournamentCard
-            key={tournament.id ?? index}
-            {...tournament}
-            loading={isLoading}
-            style={{ animationDelay: `${index * 50}ms` }}
-            className="flex-shrink-0 snap-start animate-slide-in-bottom"
-          />
+          <SwiperSlide key={tournament.id ?? index} className="w-72! overflow-visible py-2">
+            <HomeUpcomingTournamentCard {...tournament} loading={isLoading} />
+          </SwiperSlide>
         ))}
-      </div>
+      </Swiper>
     </div>
   );
 }

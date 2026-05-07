@@ -11,6 +11,7 @@ import { EngineCard } from '@/components/pages/out-tabs/tabs-extra/ticket/Engine
 import { HomeBuyEngineSlot } from '@/components/pages/tabs/home/HomeBuyEngineSlot';
 import { NotEnoughStarsModal } from '@/components/pages/tabs/home/NotEnoughStarsModal';
 import { EmptyDataInfo } from '@/components/shared/EmptyDataInfo';
+import '@/styles/components/engines-cube-dot.css';
 import {
   effectiveCycleSeconds,
   engineCapacity,
@@ -29,12 +30,32 @@ interface EngineWithTier {
 
 const SLIDE_WIDTH = 300;
 
-const TIER_INDICATOR: Record<TicketType, { bg: string; shadow: string }> = {
-  bronze: { bg: 'bg-bronze', shadow: 'rgba(172,97,34,0.85)' },
-  silver: { bg: 'bg-silver', shadow: 'rgba(168,170,164,0.85)' },
-  gold: { bg: 'bg-gold', shadow: 'rgba(248,189,62,0.85)' },
-  platinum: { bg: 'bg-platinum', shadow: 'rgba(192,190,177,0.85)' },
-  diamond: { bg: 'bg-diamond', shadow: 'rgba(23,141,136,0.85)' },
+const CORE_TIER_COLORS: Record<TicketType, { mid: string; dark: string; glow: string }> = {
+  bronze: {
+    mid: 'rgba(255, 200, 130, 0.95)',
+    dark: 'rgba(140, 70, 20, 0.85)',
+    glow: 'rgba(214, 138, 77, 0.85)',
+  },
+  silver: {
+    mid: 'rgba(230, 232, 226, 0.95)',
+    dark: 'rgba(100, 102, 96, 0.85)',
+    glow: 'rgba(200, 202, 196, 0.85)',
+  },
+  gold: {
+    mid: 'rgba(255, 220, 130, 0.95)',
+    dark: 'rgba(150, 100, 20, 0.85)',
+    glow: 'rgba(248, 189, 62, 0.9)',
+  },
+  platinum: {
+    mid: 'rgba(235, 233, 220, 0.95)',
+    dark: 'rgba(110, 108, 95, 0.85)',
+    glow: 'rgba(212, 210, 197, 0.85)',
+  },
+  diamond: {
+    mid: 'rgba(160, 230, 225, 0.95)',
+    dark: 'rgba(20, 100, 95, 0.85)',
+    glow: 'rgba(95, 200, 194, 0.9)',
+  },
 };
 
 export function HomeEnginesSlider({ className }: ClassNameProps) {
@@ -302,15 +323,15 @@ export function HomeEnginesSlider({ className }: ClassNameProps) {
       {totalSlides > 1 && (
         <div
           ref={dotsRef}
-          className="scrollbar-hidden mx-auto -mt-5 flex h-10 w-full items-center overflow-x-auto px-5"
+          className="scrollbar-hidden mx-auto -mt-5 flex h-[64px] w-full items-center overflow-x-auto px-5"
         >
-          <div className="mx-auto flex items-center gap-2.5 px-2 py-1">
+          <div className="mx-auto flex items-center gap-[30px] px-2 py-1">
             {Array.from({ length: totalSlides }).map((_, index) => {
               const isActive = activeIndex === index;
-              const item = index < items.length ? items[index] : undefined;
               const isBuySlot = index === buySlotIndex;
+              const item = index < items.length ? items[index] : undefined;
+              const coreColors = item ? CORE_TIER_COLORS[item.tier] : undefined;
               const isClaimable = !!item && item.engine.pendingCount > 0;
-              const indicator = item ? TIER_INDICATOR[item.tier] : undefined;
               return (
                 <button
                   key={index}
@@ -319,42 +340,47 @@ export function HomeEnginesSlider({ className }: ClassNameProps) {
                   aria-label={`Slide ${index + 1}`}
                   onClick={() => scrollToIndex(index)}
                   className={twMerge(
-                    'relative flex flex-shrink-0 cursor-pointer items-center justify-center rounded-full transition-all duration-300',
-                    isBuySlot
-                      ? 'h-[20.77px] w-[20.77px] bg-transparent'
-                      : isActive
-                        ? 'bg-pink-gradient h-[20.77px] w-[20.77px]'
-                        : 'h-[16.25px] w-[16.25px] bg-white/25 hover:bg-white/40'
+                    'eng-cube-perspective relative flex-shrink-0 cursor-pointer p-0',
+                    isActive ? 'h-[26px] w-[26px]' : 'h-[16px] w-[16px]'
                   )}
                 >
-                  {isBuySlot && (
+                  {isBuySlot ? (
                     <Plus
                       className={twMerge(
-                        'text-electric-pink h-[20.77px] w-[20.77px] opacity-65',
+                        'text-electric-pink h-full w-full opacity-65',
                         !isActive && 'hover:opacity-80'
                       )}
                       strokeWidth={4}
                     />
-                  )}
-                  {isClaimable && !isActive && indicator && (
-                    <>
-                      <span
-                        aria-hidden
-                        className={twMerge(
-                          'animate-ping absolute -right-0.5 -top-0.5 h-2 w-2 rounded-full',
-                          indicator.bg
-                        )}
-                        style={{ boxShadow: `0 0 6px ${indicator.shadow}` }}
-                      />
-                      <span
-                        aria-hidden
-                        className={twMerge(
-                          'absolute -right-0.5 -top-0.5 h-2 w-2 rounded-full',
-                          indicator.bg
-                        )}
-                        style={{ boxShadow: `0 0 6px ${indicator.shadow}` }}
-                      />
-                    </>
+                  ) : (
+                    <span
+                      className={twMerge(
+                        'eng-cube h-full w-full',
+                        isActive && 'eng-cube--active',
+                        isClaimable && 'eng-cube--claimable'
+                      )}
+                      style={
+                        coreColors
+                          ? ({
+                              '--core-mid': coreColors.mid,
+                              '--core-dark': coreColors.dark,
+                              '--core-glow': coreColors.glow,
+                            } as React.CSSProperties)
+                          : undefined
+                      }
+                    >
+                      <span aria-hidden className="eng-cube-core">
+                        <span className="eng-cube-core-shell eng-cube-core-shell--xy" />
+                        <span className="eng-cube-core-shell eng-cube-core-shell--yz" />
+                        <span className="eng-cube-core-shell eng-cube-core-shell--xz" />
+                      </span>
+                      <span className="eng-cube-face eng-cube-face--front" />
+                      <span className="eng-cube-face eng-cube-face--back" />
+                      <span className="eng-cube-face eng-cube-face--top" />
+                      <span className="eng-cube-face eng-cube-face--bottom" />
+                      <span className="eng-cube-face eng-cube-face--left" />
+                      <span className="eng-cube-face eng-cube-face--right" />
+                    </span>
                   )}
                 </button>
               );

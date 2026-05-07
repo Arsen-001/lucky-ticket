@@ -4,11 +4,15 @@ import type {
   TournamentPlacesResponse,
 } from '@/types/interfaces/tournaments.interfaces';
 import { getRandomNumber } from '@/utils/global/number.utils';
-import { getRandomUpcomingDate } from '@/utils/global/date.utils';
 
-const getNum = () => getRandomNumber(1, 1000);
 const getTicketsCount = () => getRandomNumber(1, 20);
-const getStartTime = () => getRandomUpcomingDate(60, 10000);
+
+const getNextOccurrenceAt = (hour: number): string => {
+  const next = new Date();
+  next.setHours(hour, 0, 0, 0);
+  if (next <= new Date()) next.setDate(next.getDate() + 1);
+  return next.toISOString();
+};
 
 const getMockPlacements = (): TournamentPlacesResponse => ({
   places: [
@@ -27,92 +31,84 @@ const getMockPlacements = (): TournamentPlacesResponse => ({
 
 export const tournaments: PersonalTournament[] = [
   {
-    id: '123e4567-e89b-12d3-a456-426655440006',
-    name: 'Golden Clash',
-    startTime: getStartTime(),
-    teamSize: getNum(),
-    prizePool: getNum(),
-    type: 'gold',
-
+    id: '123e4567-e89b-12d3-a456-426655440010',
+    name: 'Morning Bronze · 06:00',
+    startTime: getNextOccurrenceAt(6),
+    teamSize: 64,
+    prizePool: 150,
+    type: 'bronze',
+    places: getMockPlacements(),
+    participated: false,
+  },
+  {
+    id: '123e4567-e89b-12d3-a456-426655440011',
+    name: 'Afternoon Bronze · 12:00',
+    startTime: getNextOccurrenceAt(12),
+    teamSize: 128,
+    prizePool: 220,
+    type: 'bronze',
     places: getMockPlacements(),
     participated: true,
     participatedTicketsCount: getTicketsCount(),
   },
   {
-    id: '123e4567-e89b-12d3-a456-426655440007',
-    name: 'Silver Solo Cup',
-    startTime: getStartTime(),
-    teamSize: getNum(),
-    prizePool: getNum(),
+    id: '123e4567-e89b-12d3-a456-426655440012',
+    name: 'Afternoon Silver · 12:00',
+    startTime: getNextOccurrenceAt(12),
+    teamSize: 96,
+    prizePool: 480,
     type: 'silver',
-
     places: getMockPlacements(),
     participated: false,
   },
   {
-    id: '123e4567-e89b-12d3-a456-42665544000a',
-    name: 'Diamond Blitz',
-    startTime: getStartTime(),
-    teamSize: getNum(),
-    prizePool: getNum(),
-    type: 'diamond',
-
-    places: getMockPlacements(),
-    participated: false,
-  },
-  {
-    id: '123e4567-e89b-12d3-a456-42665544000b',
-    name: 'Everyday Sprint',
-    startTime: getStartTime(),
-    teamSize: getNum(),
-    prizePool: getNum(),
+    id: '123e4567-e89b-12d3-a456-426655440013',
+    name: 'Evening Bronze · 18:00',
+    startTime: getNextOccurrenceAt(18),
+    teamSize: 256,
+    prizePool: 320,
     type: 'bronze',
-
     places: getMockPlacements(),
     participated: false,
   },
   {
-    id: '123e4567-e89b-12d3-a456-42665544000c',
-    name: 'Golden Marathon',
-    startTime: getStartTime(),
-    teamSize: getNum(),
-    prizePool: getNum(),
+    id: '123e4567-e89b-12d3-a456-426655440014',
+    name: 'Evening Gold · 18:00',
+    startTime: getNextOccurrenceAt(18),
+    teamSize: 64,
+    prizePool: 1200,
     type: 'gold',
-
     places: getMockPlacements(),
     participated: false,
   },
   {
-    id: '123e4567-e89b-12d3-a456-42665544000d',
-    name: 'Silver Showdown',
-    startTime: getStartTime(),
-    teamSize: getNum(),
-    prizePool: getNum(),
-    type: 'silver',
-
-    places: getMockPlacements(),
-    participated: true,
-    participatedTicketsCount: getTicketsCount(),
-  },
-  {
-    id: '123e4567-e89b-12d3-a456-426655440008',
-    name: 'Bronze Rush',
-    startTime: getStartTime(),
-    teamSize: getNum(),
-    prizePool: getNum(),
-    type: 'bronze',
-
-    places: getMockPlacements(),
-    participated: false,
-  },
-  {
-    id: '123e4567-e89b-12d3-a456-426655440009',
-    name: 'Platinum Peaks',
-    startTime: getStartTime(),
-    teamSize: getNum(),
-    prizePool: getNum(),
+    id: '123e4567-e89b-12d3-a456-426655440015',
+    name: 'Evening Platinum · 18:00',
+    startTime: getNextOccurrenceAt(18),
+    teamSize: 32,
+    prizePool: 2400,
     type: 'platinum',
-
+    places: getMockPlacements(),
+    participated: false,
+  },
+  {
+    id: '123e4567-e89b-12d3-a456-426655440016',
+    name: 'Night Silver · 00:00',
+    startTime: getNextOccurrenceAt(0),
+    teamSize: 96,
+    prizePool: 560,
+    type: 'silver',
+    places: getMockPlacements(),
+    participated: true,
+    participatedTicketsCount: getTicketsCount(),
+  },
+  {
+    id: '123e4567-e89b-12d3-a456-426655440017',
+    name: 'Night Diamond · 00:00',
+    startTime: getNextOccurrenceAt(0),
+    teamSize: 16,
+    prizePool: 5000,
+    type: 'diamond',
     places: getMockPlacements(),
     participated: false,
   },

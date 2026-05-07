@@ -397,6 +397,29 @@ Each tournament includes:
 - **Start Time:** The date and time when the tournament begins and winners are decided.
 - **Team Size:** The total number of users participating in the tournament.
 
+### 11.2.1 Tournament Naming Convention
+
+Daily project tournaments follow the pattern **`<TimeOfDay> <Tier> · HH:00`**, where `TimeOfDay` is one of:
+
+- **Morning** — starts at 06:00
+- **Afternoon** — starts at 12:00
+- **Evening** — starts at 18:00
+- **Night** — starts at 00:00
+
+Examples: `Morning Bronze · 06:00`, `Afternoon Silver · 12:00`, `Evening Gold · 18:00`, `Night Diamond · 00:00`.
+
+This pattern mirrors the daily-slot structure used in tasks (`BRONZE_DAILY_SLOTS` / `SILVER_DAILY_SLOTS` in `tasks.mock.ts`) so the player sees a consistent time-of-day vocabulary across both systems.
+
+Tier coverage across the day is uneven by design — lower tiers run more often, higher tiers are scarcer and concentrate on premium time slots:
+
+| Tier     | Typical slots                                   |
+| -------- | ----------------------------------------------- |
+| Bronze   | Morning · Afternoon · Evening · Night (any/all) |
+| Silver   | Afternoon · Night                               |
+| Gold     | Evening                                         |
+| Platinum | Evening                                         |
+| Diamond  | Night                                           |
+
 ### 11.3 Participation & Winning Logic
 
 - Users join by submitting one or more tickets.
