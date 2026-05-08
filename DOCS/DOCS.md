@@ -313,7 +313,7 @@ This claim-gates-production rule applies per engine: each engine independently w
 Users may pay **Lucky Stars (LS)** to receive an engine's next ticket immediately, skipping the remaining wait time of the current production cycle. After an instant claim, the engine begins its next cycle just as it would after a normal claim.
 
 - **Acquisition:** Available directly from the Tickets / Ticket Details page on any engine that is currently mid-cycle.
-- **Cost:** Defined per engine tier by the product team. Higher-tier engines (Gold, Diamond, Platinum) cost more LS to instant-claim than lower tiers.
+- **Cost formula:** **1 Lucky Star per remaining hour of the cycle, minimum 1 Star** — `cost = max(1, ceil(remainingSeconds / 3600))`. So skipping a 30-min remainder costs 1 ★, a 90-min remainder costs 2 ★, a 4h05m remainder costs 5 ★. The cost is recomputed live as the cycle elapses, getting cheaper the closer the engine is to finishing on its own.
 - **Scope:** Targets a specific engine — only that engine's current cycle is fulfilled instantly; other owned engines continue their normal cycles.
 - **Stacking:** Can be combined with active Speed Boosts and Capacity Upgrades — instant claim delivers the full per-cycle output (e.g., 2 tickets if a 2× Capacity Upgrade is active).
 
@@ -321,12 +321,43 @@ Users may pay **Lucky Stars (LS)** to receive an engine's next ticket immediatel
 
 Each engine has two tunable parameters:
 
-| Parameter            | Meaning                                                   | Modified By                                 |
-| :------------------- | :-------------------------------------------------------- | :------------------------------------------ |
-| **Production Speed** | Time per production cycle (e.g., 1 ticket every 2 hours). | Engine Speed Boost (Section 10.1)           |
-| **Per-Cycle Output** | Number of tickets generated per cycle (default 1).        | Capacity Upgrade (Section 10.2, paid in LS) |
+| Parameter            | Meaning                                                   | Modified By                                                                    |
+| :------------------- | :-------------------------------------------------------- | :----------------------------------------------------------------------------- |
+| **Production Speed** | Time per production cycle (e.g., 1 ticket every 2 hours). | Engine Speed Boost (Section 10.1) **+** Speed Chip (Section 10.4)              |
+| **Per-Cycle Output** | Number of tickets generated per cycle (default 1).        | Capacity Upgrade (Section 10.2, paid in LS) **+** Capacity Chip (Section 10.4) |
 
 > Default cycle times and base outputs per engine tier are defined by the product team and may be tuned independently of this document.
+
+In addition to the two parameters above, every engine exposes **two chip slots** (one Speed, one Capacity) into which tournament-won chips may be equipped. See Section 10.4 for the full chip mechanic.
+
+### 9.8 Productivity Metric
+
+Each engine has a derived stat — **Productivity (tickets/hour)** — visible in the engine UI. It represents the engine's output rate **before any time-limited Engine Booster** (Section 10.6) is applied, but **with** the Speed Chip and Capacity Chip currently equipped.
+
+Formula:
+
+```
+productivity = (3600 / cycleSeconds_with_chip) × capacity_with_chip
+```
+
+Where:
+
+- `cycleSeconds_with_chip` = base engine cycle reduced by the equipped Speed Chip's `effectPct` (and any permanent Speed Boost from 10.1 / status).
+- `capacity_with_chip` = base per-cycle output increased by the equipped Capacity Chip's `effectPct` (and any Capacity Upgrade from 10.2).
+- One-shot **Engine Boosters** (10.6) are deliberately **excluded** so the user sees their long-term baseline rate, not a number that drops when a 3-hour booster expires.
+
+### 9.9 Engine UI — Rotating Cube
+
+On the home screen, each owned engine is rendered as a **3D rotating cube** the user can swipe vertically (front → bottom → back → top → front). Four of the six faces carry distinct content:
+
+| Face       | Content                                                                                                                                                                                                                    |
+| :--------- | :------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Front**  | Live engine card — Reactor dial, tier-coloured Claim button, Speed/Capacity boost rows, cycle stats.                                                                                                                       |
+| **Bottom** | **Equipment grid** — 2 Chip slots (Speed / Capacity, see 10.4) on top, 2 Booster slots (10.6) below. Tapping a filled slot opens its picker; an active chip slot also shows an **X** unequip control (cost rules in 10.4). |
+| **Back**   | **Achievement showcase** — central trophy medal, badges-earned counter, hexagon achievement chips.                                                                                                                         |
+| **Top**    | **Engine Passport** — header with engine level pill, lifetime tickets (huge number), Productivity (Section 9.8), and footer with Owner + Created date.                                                                     |
+
+The two unused faces (left / right) are reserved for future content. The cube also carries a glowing core in the center, visible through the inner edges, that uses the engine's tier color.
 
 ### Connections
 
@@ -368,9 +399,247 @@ Speed Boosts and Capacity Upgrades target independent engine parameters and may 
 
 **Example:** A Bronze engine with both a 2× Speed Boost and a 2× Capacity Upgrade produces **2 tickets every 1 hour — 4× the base rate**.
 
+### 10.4 Chip Boosts (Tournament Rewards)
+
+In addition to the Market-purchased Speed Boost (10.1) and the Lucky-Stars Capacity Upgrade (10.2), engines support a third boost layer: **Chip Boosts**. Chips are big inventory items earned exclusively from tournaments (Section 11) and equipped onto engines through dedicated chip slots. Chips are assembled from **shards** — small fragments dropped by tournaments — that the user collects and spends to grow each chip's level.
+
+#### Chip Types
+
+There are exactly **two types of chip boosts**, each modifying one engine parameter:
+
+| Chip Type         | Affects                 | Effect Direction             |
+| :---------------- | :---------------------- | :--------------------------- |
+| **Speed Chip**    | Production cycle time   | Reduces cycle time per level |
+| **Capacity Chip** | Per-cycle ticket output | Increases per-cycle output   |
+
+#### Chip Levels & Effect
+
+Each chip is a leveled item with effect that grows linearly with level:
+
+- **Effect per level:** **+0.5%** of the chip's parameter (cumulative).
+- **Maximum effect:** **+100%** of the parameter, reached at the final level (`100% / 0.5% = 200` total levels).
+- **Level 1 is granted by the very first shard the user collects** for a given chip — the chip enters the user's inventory at Level 1 with +0.5% effect.
+
+#### Multiple Chips per Type & Quality
+
+A user is **not limited to one chip per type or one chip per quality**. Each chip is an independent inventory item — over time a user accumulates many chips, especially of the lower tiers (Bronze chips are the most common because Bronze tournaments are the most frequent). Each chip carries its own level, its own shard progress toward the next level, and its own equipped/unequipped state. The user chooses which chip to equip into the engine's two slots (one Speed slot, one Capacity slot — see 9.7).
+
+A typical user might end up holding, for example, eight Bronze Speed Chips at various levels, three Silver Speed Chips, and one Diamond Speed Chip — all coexisting in the inventory and ready to be slotted onto different engines.
+
+#### Minting Chips — First Free, Then Chip Builders
+
+The very **first chip** a user creates of any given (type, quality) combination is **free** — the system mints it automatically when the user receives their first matching shard. There is no cost or extra step for that initial mint.
+
+Every **additional chip** of the same (type, quality) combination — for example, a second Bronze Speed Chip on top of an existing one, typically because the user wants to dedicate a new chip to a newly-bought Bronze engine — requires a **Chip Builder**.
+
+| Mint scenario                               | Cost                                                  |
+| :------------------------------------------ | :---------------------------------------------------- |
+| First chip of a (type, quality)             | **Free** (auto-mint on first shard)                   |
+| Subsequent chip of the same (type, quality) | **1 Chip Builder of that quality** + 1 matching shard |
+
+#### Chip Builders
+
+A **Chip Builder** is a one-shot crafting item the user spends to start assembling a new chip alongside any existing chips of the same type and quality. Chip Builders are themselves **quality-tagged** — there is one Chip Builder variant per tier (Bronze, Silver, Gold, Platinum, Diamond), and each variant can only be used to mint chips of that exact tier.
+
+- **Acquisition:** Purchased in the Lucky Ticket Shop (Section 19.2) with Lucky Stars. The Shop sells five Chip Builder SKUs (Bronze Chip Builder, Silver Chip Builder, …). Higher-tier Chip Builders cost more Stars.
+- **Consumption:** A Chip Builder of quality X is consumed when the user confirms a new mint of a chip at quality X. It is paired with one matching shard (also quality X) to bootstrap a fresh Lvl 1 chip.
+- **Scope:** Chip Builders are tier-locked but type-agnostic — a Bronze Chip Builder can mint either a Bronze Speed Chip or a Bronze Capacity Chip (the user chooses), but cannot mint anything Silver or higher.
+- **Inventory:** Owned Chip Builders are tracked per tier in the Boost Inventory. The tier-filter chips show a small badge with the Chip Builder count for that tier.
+
+This pricing rule prevents low-effort chip duplication while still letting dedicated players grow a fleet of chips for a fleet of engines.
+
+#### Chip Shards — How Levels Are Earned
+
+Chips are not handed out at a finished level. Instead, each tournament awards **chip shards** — fragments that the user accumulates and consumes to level up an existing chip (or to mint a new chip at Level 1 if they choose).
+
+- The first shard of a given type the user receives mints a fresh chip at Lvl 1.
+- Subsequent shards may be either spent to upgrade an existing chip one level at a time, or — at the user's discretion — saved up to mint a brand-new chip at Lvl 1 (so the user can deliberately choose to grow many small chips or one big chip).
+- The **shard cost per level rises with the target level** — higher levels demand more shards. The progression is non-linear:
+
+| Target level | Shards required for THIS upgrade |
+| :----------- | :------------------------------- |
+| Lvl 2        | 1                                |
+| Lvl 3        | 3                                |
+| Lvl 4 …      | grows further (TBD by product)   |
+
+> The shard-cost curve beyond Lvl 3 is defined by the product team. The intent is to make later levels increasingly costly so that reaching +100% is a long-term aspirational goal.
+
+#### Shard Quality (Tournament Tier)
+
+Shards are tagged with a **quality tier** matching the tournament they were won in:
+
+- **Bronze shards** — from Bronze tournaments
+- **Silver shards** — from Silver tournaments
+- **Gold shards** — from Gold tournaments
+- **Platinum shards** — from Platinum tournaments
+- **Diamond shards** — from Diamond tournaments
+
+Quality determines visual rarity and may also factor into upgrade rules (e.g., higher-quality shards counting more toward level-up cost). The exact rule is defined by the product team.
+
+#### Acquisition — Tournaments Only
+
+Chip shards (and therefore chips themselves) are obtainable **exclusively from tournaments** — they cannot be bought, traded, or earned from tasks/stakes. This makes them a pure competitive-progression reward.
+
+The default placement-based shard distribution is:
+
+| Placement | Shards awarded |
+| :-------- | :------------- |
+| 1st place | 3              |
+| 2nd place | 2              |
+| 3rd place | 1              |
+| 4th+      | 0              |
+
+Shard quality is fixed by the tournament's tier (see above).
+
+#### Type Rotation — One Chip Type per Tournament
+
+Each tournament awards shards of **only one chip type** — either Speed **or** Capacity, never both in the same tournament. The two types **alternate**: consecutive tournaments cycle Speed → Capacity → Speed → Capacity… so users earn shards for both chips over time without any single tournament deciding both.
+
+- The next tournament's awarded shard type is shown on the tournament card before it starts, so users can pick which one to compete in based on which chip they want to grow.
+- The rotation runs independently per tournament tier (Bronze rotation, Silver rotation, etc.) and per tournament family (Project, Partner). Exact rotation schedule is defined by the product team.
+
+#### Visual Tier Styling
+
+Both shards and the resulting chips use the **tier color of their source tournament** for visual identity:
+
+| Quality  | Visual accent (theme variable) |
+| :------- | :----------------------------- |
+| Bronze   | `--color-bronze`               |
+| Silver   | `--color-silver`               |
+| Gold     | `--color-gold`                 |
+| Platinum | `--color-platinum`             |
+| Diamond  | `--color-diamond`              |
+
+In the inventory and on the engine cube's chip slots, each chip renders with its tier's gradient, border, and glow — keeping the rarity legible at a glance.
+
+#### Equipping & Re-equipping
+
+Each engine exposes **chip slots** — one slot per chip type (Speed and Capacity), so an engine can hold at most one Speed Chip and one Capacity Chip simultaneously.
+
+- **Attach:** A user equips an owned chip from the **Boost Inventory** (Section 10.5) into the matching slot on a specific engine.
+- **Tier rule:** A chip of quality X can be equipped on an engine whose tier is **X or lower** — chips work down the tier ladder, not up. Concretely:
+  - Bronze chip → only on Bronze engines.
+  - Silver chip → on Bronze or Silver engines.
+  - Gold chip → on Bronze, Silver, or Gold engines.
+  - Platinum chip → on Bronze, Silver, Gold, or Platinum engines.
+  - Diamond chip → on any engine.
+  - This makes higher-tier chips strictly more valuable (they cover lower tiers too) and prevents a fresh Bronze player from skipping straight to a Diamond engine boost.
+- **Equip cost:** Equipping a chip costs **Lucky Stars equal to the chip's current level** — a Lvl 1 chip costs 1 Star, a Lvl 12 chip costs 12 Stars, a Lvl 200 chip costs 200 Stars. The cost is paid at the moment of equip.
+- **Unequip cost:** Unequipping a chip costs **half of the equip price**, rounded up — `ceil(level / 2)` Stars. A Lvl 1 chip costs 1 Star to detach, a Lvl 12 chip costs 6, a Lvl 200 chip costs 100. This penalty discourages constantly shuffling chips between engines.
+- **Re-attach (full cost):** Moving a chip from engine A to engine B costs `unequip + equip` — `ceil(level/2) + level` Stars in total. Re-attaching back later pays the cost again.
+- **Tier rule still applies on re-attach:** the destination engine must still be at-or-below the chip's tier (see Tier rule above).
+- **Duration:** Each chip has either a **permanent** lifetime or a **time-limited** lifetime, declared per chip variant (see Section 10.5). The chip's effect is active only while it is equipped, and additionally only while the chip is alive (for time-limited variants).
+
+#### Stacking with Other Boosts
+
+Chip effects stack multiplicatively with the Speed Boost (10.1) and Capacity Upgrade (10.2), the same way 10.3 already describes for those two systems. A fully-equipped engine therefore combines four independent multipliers: base parameters × Speed Boost × Capacity Upgrade × Speed Chip × Capacity Chip.
+
+### 10.5 Boost Inventory
+
+The **Boost Inventory** is the user's storage for every owned-but-not-yet-equipped boost item. Anything acquired through the Market, the Lucky Ticket Shop, tournaments (chips), tasks, or stake bonuses lands in the inventory until the user equips it onto an engine.
+
+#### What the Inventory Holds
+
+The inventory is a unified view across all boost categories defined in this section:
+
+- **Speed Boosts** (Section 10.1) — Market-purchased or status-granted.
+- **Capacity Upgrades** (Section 10.2) — purchased with Lucky Stars in the Shop.
+- **Speed Chips** and **Capacity Chips** (Section 10.4) — built up from tournament-won shards.
+- **Chip Shards** (Section 10.4) — uncommitted fragments waiting to be spent on a level-up.
+
+Each inventory entry shows: type, current level (for chips) or remaining count (for shards) or magnitude (for Market/Shop boosts), and **lifetime state**.
+
+#### Shards in the Inventory
+
+Chip shards are not equipped on engines — they are spent. The inventory groups shards by chip type (Speed / Capacity) and by quality tier (Bronze, Silver, Gold, Platinum, Diamond). From the inventory the user:
+
+- Sees how many shards of each type/quality they currently hold.
+- Sees the next level-up cost for each chip (e.g., "Lvl 4 needs 5 shards").
+- Triggers a level-up action that consumes the required shards and bumps the chip by one level. Level-ups are one at a time; the user explicitly chooses when to commit.
+
+#### Lifetime: Permanent vs. Time-Limited
+
+Every boost item carries one of two lifetime variants:
+
+| Lifetime         | Behavior                                                                                                                                                                                           |
+| :--------------- | :------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Permanent**    | The item never expires. As long as it is equipped on an engine, its effect is active indefinitely. Unequipping does not consume it.                                                                |
+| **Time-Limited** | The item carries a duration (e.g., 24h, 7d). Its lifer counter ticks down only while the item is equipped on an engine. When it reaches zero, the item is consumed and removed from the inventory. |
+
+The lifetime variant is declared per boost item at acquisition time and is visible in the inventory. Higher-tier or rarer items lean permanent; common rewards lean time-limited. Exact split is defined by the product team.
+
+#### Equipping Flow
+
+From the inventory, a user selects a boost item and chooses an owned engine to apply it to. The corresponding slot on that engine (Speed slot or Capacity slot — see Section 9.7) accepts the item.
+
+- An engine slot accepts only items of the matching type.
+- Equipping a new item into an occupied slot replaces the previous occupant, which returns to the inventory (still alive, with any remaining time-limited duration intact).
+- Time-limited items pause their countdown when unequipped and resume only when equipped again — so the player can stockpile time-limited rewards and burn them strategically.
+
+#### Where the User Sees It
+
+The Boost Inventory is rendered as a dedicated screen reachable from the engine detail view (the engine's chip-slot face on the Engine Cube — see UI), and from the global navigation. From any equippable slot on an engine, tapping the empty slot ("+") opens the inventory filtered by matching type.
+
+### 10.6 Engine Boosters (One-Shot Timed Buffs)
+
+In contrast to the permanent **Chip Boosts** (Section 10.4) which sit in the chip slots and grant a continuous effect for as long as they are equipped, **Engine Boosters** are **one-shot, time-limited consumables** that the user activates on a specific engine. Once activated, the booster runs its duration, then disappears.
+
+#### Booster Stats
+
+A booster carries one of two stats — exactly the same axes as Chip Boosts:
+
+| Stat         | What it does                             |
+| :----------- | :--------------------------------------- |
+| **Time**     | Reduces the engine's production cycle.   |
+| **Capacity** | Increases the engine's per-cycle output. |
+
+The exact effect magnitude per booster variant (e.g., "−25% time" or "+1 per cycle") is defined by the product team.
+
+#### Booster Durations
+
+Each booster is sold/awarded with a fixed lifetime. The standard duration ladder is:
+
+| Duration     | Tier of impact           |
+| :----------- | :----------------------- |
+| **3 hours**  | Short burst — entry tier |
+| **6 hours**  | Standard short session   |
+| **12 hours** | Half-day buff            |
+| **24 hours** | Full-day buff            |
+| **48 hours** | Two-day buff — top tier  |
+
+The countdown starts when the booster is activated on an engine and runs in real time regardless of whether the user is in-app. The booster cannot be paused, transferred, or detached once activated.
+
+#### Booster Quality (Tier Lock)
+
+Each booster is **quality-tagged** Bronze / Silver / Gold / Platinum / Diamond — and the quality is **strictly tier-locked to the engine it can be applied to**:
+
+- A **Bronze** booster can ONLY be used on a **Bronze** engine.
+- A **Silver** booster can ONLY be used on a **Silver** engine.
+- … and so on for Gold, Platinum, Diamond.
+
+A higher-quality booster cannot be downgraded onto a lower-tier engine, and a lower-quality booster cannot be upgraded onto a higher-tier engine. This keeps Bronze rewards meaningful for early-game players and prevents end-game whales from stockpiling cheap Bronze boosters and applying them to Diamond engines.
+
+#### Acquisition
+
+Boosters are obtainable through three independent channels:
+
+- **Market / Shop purchase** — bought with LC (lower tiers) or Lucky Stars (higher tiers, durations 24/48h). Exact pricing per quality and duration is product-defined.
+- **Tasks** — awarded as drops from completing daily / weekly / monthly tasks (Section 12). Higher-tier task chains drop higher-tier boosters.
+- **Tournaments** — included in the prize pool of every tournament (Section 11) alongside LC, tickets, and chip shards. The tournament's tier dictates the booster's quality (Bronze tournament → Bronze booster).
+
+Unlike chip shards (Section 10.4) which are tournaments-only, boosters are intentionally available through multiple channels — they are the everyday consumable layer of engine progression.
+
+#### Activation Flow
+
+From the Boost Inventory or directly from the engine view, the user picks a booster and selects an owned engine of the matching tier. The booster activates immediately, its countdown timer starts, and the engine's stat is multiplied by the booster's effect for the full duration. Multiple boosters of different stats may run on the same engine simultaneously (e.g., a Time booster and a Capacity booster both ticking).
+
+#### Stacking
+
+Booster effects stack on top of base parameters and any equipped Chip Boosts. The stacking rule mirrors Section 10.3 — independent multipliers compound multiplicatively. A fully buffed engine simultaneously combines: base × Speed Boost (legacy 10.1) × Capacity Upgrade (legacy 10.2) × Speed Chip × Capacity Chip × active Time Booster(s) × active Capacity Booster(s).
+
 ### Connections
 
-Boosts and upgrades connect engines to the Market (LC speed boosts), the Lucky Stars system (capacity upgrades — Section 19), the Status system (boost privileges), and the LC and LS currency systems.
+Boosts and upgrades connect engines to the Market (LC speed boosts), the Lucky Stars system (capacity upgrades — Section 19), the Status system (boost privileges), the Tournament system (chip shards + boosters — Section 11), the Task system (booster drops — Section 12), the Boost Inventory (Section 10.5), and the LC and LS currency systems.
 
 ---
 
@@ -393,7 +662,7 @@ Each tournament includes:
 
 - **Name:** The title of the tournament.
 - **Required Ticket:** The specific ticket type needed to join (Project or Partner).
-- **Prize Pool:** The summary of all coins that will be distributed among winners.
+- **Prize Pool:** The summary of all rewards distributed among winners — typically LC, tickets, and **Chip Boosts** (Section 10.4) for top placements.
 - **Start Time:** The date and time when the tournament begins and winners are decided.
 - **Team Size:** The total number of users participating in the tournament.
 
@@ -426,9 +695,23 @@ Tier coverage across the day is uneven by design — lower tiers run more often,
 - Winners are selected randomly from the pool of participants at the designated Start Time.
 - **Probability:** Joining with more tickets increases the chance of winning.
 
+### 11.4 Chip Shards as Tournament Rewards
+
+The top three placements in every tournament receive **chip shards** (see Section 10.4) as part of the prize pool. Shards are the only way to obtain or upgrade a Chip Boost — they cannot be bought, traded, or earned outside tournaments.
+
+| Placement | Shards awarded |
+| :-------- | :------------- |
+| 1st place | 3              |
+| 2nd place | 2              |
+| 3rd place | 1              |
+
+Each individual tournament awards shards of **only one chip type** — Speed **or** Capacity. Consecutive tournaments alternate the awarded type (Speed → Capacity → Speed → …) so both chips grow over time. The awarded type and shard quality are visible on the tournament card before it starts.
+
+Shard quality matches the tournament tier (Bronze, Silver, Gold, Platinum, Diamond). The user spends shards in the Inventory (Section 10.5) to mint a new chip at Lvl 1 or to level up an existing chip — with rising cost per level toward the ultimate +100% effect ceiling. Chips live in the inventory and are equipped/re-equipped on any owned engine via the engine's two chip slots.
+
 ### Connections
 
-Tournaments connect tickets, LC rewards, tasks, and leaderboard positioning.
+Tournaments connect tickets, LC rewards, tasks, leaderboard positioning, and the Engine Boosts system (Section 10.4 — Chip Boosts).
 
 ---
 
@@ -989,6 +1272,7 @@ Users spend their Lucky Stars in the **Lucky Ticket Shop**. The Shop offers item
 
 - **Engine Capacity Upgrades:** Increase the per-cycle output of an owned engine (e.g., 2 tickets per cycle instead of 1). Sold exclusively in the Shop and only with LS (see Section 10.2).
 - **Instant Claims:** Skip the remaining wait time on an engine's current cycle and receive its next ticket(s) immediately (see Section 9.6). Triggered from the Tickets / Ticket Details page on a per-engine basis.
+- **Chip Builders:** A one-shot crafting item required to mint a second (or third, fourth, …) chip of the same (type, quality) — typically because the user wants a separate chip for a newly-purchased engine of that tier. The very first chip of any (type, quality) is auto-minted for free; only subsequent ones require a Chip Builder. See Section 10.4.
 - **Cosmetic items:** Avatar frames, profile effects, visual upgrades.
 - **Exclusive tickets:** Partner or limited-edition tickets not available in the standard Market.
 - **Status upgrades:** Discounted or exclusive access to Prime/VIP status.

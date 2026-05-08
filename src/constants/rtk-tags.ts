@@ -18,4 +18,5 @@ export const rtkTags = {
   achievements: 'Achievements',
   profile: 'Profile',
   profileById: ':ProfileById',
+  inventory: 'Inventory',
 } as const;

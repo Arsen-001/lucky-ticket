@@ -55,6 +55,7 @@ export const routes = {
     vip: '/settings/vip',
   },
   languages: '/languages',
+  inventory: '/inventory',
   stakes: {
     index: '/stakes',
     new: '/stakes/new',

@@ -13,6 +13,7 @@ import { stakesMock } from '@/mock/stakes.mock';
 import { walletMock } from '@/mock/wallet.mock';
 import { achievementsMock } from '@/mock/achievements.mock';
 import { profileMock } from '@/mock/profile.mock';
+import { inventoryMock } from '@/mock/inventory.mock';
 
 /**
  * Type for functional mock handlers.
@@ -40,6 +41,7 @@ export const mockData = {
   ...walletMock,
   ...achievementsMock,
   ...profileMock,
+  ...inventoryMock,
 } as const;
 
 export type MockData = typeof mockData;

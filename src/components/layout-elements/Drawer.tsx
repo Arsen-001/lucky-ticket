@@ -16,6 +16,7 @@ import {
   CircleQuestionMark,
   Globe,
   Layers,
+  Package,
   Settings,
   UserRound,
   UserRoundPlus,
@@ -218,6 +219,11 @@ export function Drawer() {
       label: t('activity'),
       items: [
         { route: routes.wallet, title: t('wallet'), icon: <Wallet size={18} /> },
+        {
+          route: routes.inventory,
+          title: t('boost inventory'),
+          icon: <Package size={18} />,
+        },
         {
           route: routes.stakes.index,
           title: t('stakes'),

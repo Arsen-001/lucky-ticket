@@ -9,62 +9,31 @@ import '@/styles/components/reactor-dial.css';
 
 export interface ReactorDialProps {
   tier: TicketType;
-  progress: number;
   pending: boolean;
   capacity: number;
-  cycleSeconds: number;
-  elapsedSeconds: number;
   size?: number;
   className?: string;
 }
 
-const TIER_GLOW: Record<TicketType, string> = {
-  bronze: '#E08A3A',
-  silver: '#D8D8D8',
-  gold: '#FFD56A',
-  platinum: '#E2E0D0',
-  diamond: '#3FD9CF',
-};
-
 const DEFAULT_SIZE = 110;
-
-const alphaHex = (alpha: number) => {
-  const value = Math.max(0, Math.min(255, Math.round(alpha * 255)));
-  return value.toString(16).padStart(2, '0');
-};
 
 export function ReactorDial({
   tier,
-  progress,
   pending,
   capacity,
-  cycleSeconds,
-  elapsedSeconds,
   size = DEFAULT_SIZE,
   className,
 }: ReactorDialProps) {
   const STROKE = Math.max(4, Math.round(size * 0.055));
-  const RADIUS = (size - STROKE) / 2;
-  const CIRCUMFERENCE = 2 * Math.PI * RADIUS;
+  const CORNER_RADIUS = 15;
+  const SIDE = size - STROKE;
+  const PERIMETER = 4 * SIDE - 8 * CORNER_RADIUS + 2 * Math.PI * CORNER_RADIUS;
   const ticketWidth = Math.round(size * 0.63);
   const ticketHeight = Math.round(size * 0.44);
   const tierColor = `var(--color-${tier})`;
-  const glow = TIER_GLOW[tier];
-  const showOverlap = capacity > 1;
+  const showOverlap = capacity > 1 || tier === 'bronze';
 
-  const innerStyle: CSSProperties = {
-    background: pending
-      ? `radial-gradient(circle, ${glow}55 0%, color-mix(in srgb, ${tierColor} 25%, transparent) 70%, rgba(0,0,0,0.3) 100%)`
-      : `radial-gradient(circle, ${glow}${alphaHex(progress * 0.55)} 0%, color-mix(in srgb, ${tierColor} ${Math.round(progress * 35)}%, transparent) ${50 + progress * 30}%, rgba(0,0,0,0.5) 100%)`,
-  };
-
-  const progressStyle: CSSProperties = pending
-    ? { strokeDashoffset: 0 }
-    : {
-        ['--reactor-dial-c' as string]: CIRCUMFERENCE,
-        animationDuration: `${cycleSeconds}s`,
-        animationDelay: `-${elapsedSeconds}s`,
-      };
+  const progressStyle: CSSProperties = { strokeDashoffset: 0 };
 
   return (
     <div className={twMerge('relative shrink-0', className)} style={{ width: size, height: size }}>
@@ -75,24 +44,30 @@ export function ReactorDial({
             <stop offset="100%" stopColor={tierColor} />
           </linearGradient>
         </defs>
-        <circle
-          cx={size / 2}
-          cy={size / 2}
-          r={RADIUS}
+        <rect
+          x={STROKE / 2}
+          y={STROKE / 2}
+          width={SIDE}
+          height={SIDE}
+          rx={CORNER_RADIUS}
+          ry={CORNER_RADIUS}
           fill="none"
           stroke="rgba(255,255,255,0.08)"
           strokeWidth={STROKE}
         />
-        <circle
-          cx={size / 2}
-          cy={size / 2}
-          r={RADIUS}
+        <rect
+          x={STROKE / 2}
+          y={STROKE / 2}
+          width={SIDE}
+          height={SIDE}
+          rx={CORNER_RADIUS}
+          ry={CORNER_RADIUS}
           fill="none"
           stroke={`url(#reactor-dial-grad-${tier})`}
           strokeWidth={STROKE}
           strokeLinecap="round"
-          strokeDasharray={CIRCUMFERENCE}
-          strokeDashoffset={CIRCUMFERENCE}
+          strokeDasharray={PERIMETER}
+          strokeDashoffset={PERIMETER}
           className="reactor-dial-progress"
           data-pending={pending ? 'true' : 'false'}
           style={progressStyle}
@@ -100,21 +75,10 @@ export function ReactorDial({
       </svg>
 
       <div
-        className="absolute rounded-full flex-center overflow-hidden transition-[background] duration-300"
-        style={{ inset: STROKE + 6, ...innerStyle }}
+        className="absolute flex-center overflow-hidden"
+        style={{ inset: STROKE + 2, borderRadius: CORNER_RADIUS - 4 }}
       >
-        {!pending && (
-          <div
-            className="reactor-dial-spin"
-            style={{
-              background: `conic-gradient(from ${progress * 360}deg, transparent 0deg, ${glow}33 30deg, transparent 60deg)`,
-            }}
-          />
-        )}
-        <div
-          className="relative flex items-center transition-opacity duration-200"
-          style={{ opacity: pending ? 1 : 0.3 + progress * 0.7 }}
-        >
+        <div className="relative flex items-center">
           {showOverlap ? (
             <TicketOverlap type={tier} width={ticketWidth} />
           ) : (

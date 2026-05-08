@@ -1,4 +1,5 @@
 import dayjs from 'dayjs';
+import type { InventoryBooster, InventoryChip } from '@/types/interfaces/inventory.interfaces';
 import type { TicketEngine } from '@/types/interfaces/ticket.interfaces';
 
 export const MAX_BOOST_LEVEL = 10;
@@ -12,13 +13,43 @@ export const baseSpeedMultiplier = (engineLevel: number) =>
 export const baseCapacity = (engineLevel: number) =>
   1 + Math.max(0, (engineLevel || 1) - 1) * MAX_BOOST_LEVEL;
 
-export const effectiveCycleSeconds = (engine: TicketEngine) =>
-  engine.cycleSeconds *
-  baseSpeedMultiplier(engine.engineLevel || 1) *
-  speedMultiplier(engine.speedLevel || 0);
+const isBoosterAlive = (booster: InventoryBooster) => {
+  if (!booster.expiresAt) return true;
+  return dayjs(booster.expiresAt).diff(dayjs()) > 0;
+};
 
-export const engineCapacity = (engine: TicketEngine) =>
-  baseCapacity(engine.engineLevel || 1) + (engine.capacityLevel || 0);
+export const effectiveCycleSeconds = (
+  engine: TicketEngine,
+  options?: { speedChip?: InventoryChip; speedBooster?: InventoryBooster }
+) => {
+  let multiplier =
+    engine.cycleSeconds *
+    baseSpeedMultiplier(engine.engineLevel || 1) *
+    speedMultiplier(engine.speedLevel || 0);
+
+  if (options?.speedChip) {
+    multiplier *= 1 - options.speedChip.effectPct / 100;
+  }
+  if (options?.speedBooster && isBoosterAlive(options.speedBooster)) {
+    multiplier *= 1 - options.speedBooster.effectPct / 100;
+  }
+  return multiplier;
+};
+
+export const engineCapacity = (
+  engine: TicketEngine,
+  options?: { capacityChip?: InventoryChip; capacityBooster?: InventoryBooster }
+) => {
+  let result = baseCapacity(engine.engineLevel || 1) + (engine.capacityLevel || 0);
+
+  if (options?.capacityChip) {
+    result *= 1 + options.capacityChip.effectPct / 100;
+  }
+  if (options?.capacityBooster && isBoosterAlive(options.capacityBooster)) {
+    result *= 1 + options.capacityBooster.effectPct / 100;
+  }
+  return Math.round(result);
+};
 
 export const engineElapsedSeconds = (engine: TicketEngine) => {
   const started = dayjs(engine.cycleStartedAt);

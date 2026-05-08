@@ -35,7 +35,7 @@
 }
 
 .engine-card-cube-face--back {
-  transform: rotateY(180deg) translateZ(var(--cube-half));
+  transform: rotateX(180deg) translateZ(var(--cube-half));
 }
 
 .engine-card-cube-face--top {

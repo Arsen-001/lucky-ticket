@@ -5,11 +5,23 @@ import dayjs from 'dayjs';
 import { Plus } from 'lucide-react';
 import { twMerge } from 'tailwind-merge';
 
+import {
+  useActivateBoosterMutation,
+  useEquipChipMutation,
+  useGetInventoryQuery,
+  useUnequipChipMutation,
+} from '@/api/inventory.api';
 import { useGetMeQuery } from '@/api/me.api';
 import { useGetTicketsQuery } from '@/api/tickets.api';
+import { findActiveBooster, findEquippedChip } from '@/utils/global/inventory.utils';
 import { EngineCardCube } from '@/components/pages/tabs/home/EngineCardCube';
+import { EngineSlotPickerModal } from '@/components/pages/tabs/home/EngineSlotPickerModal';
 import { HomeBuyEngineSlot } from '@/components/pages/tabs/home/HomeBuyEngineSlot';
 import { NotEnoughStarsModal } from '@/components/pages/tabs/home/NotEnoughStarsModal';
+import { ConfirmModal } from '@/components/shared/modals/ConfirmModal';
+import { useAppTranslations } from '@/hooks/useAppTranslations';
+import { chipEquipStarsCost } from '@/utils/global/inventory.utils';
+import type { InventoryChip } from '@/types/interfaces/inventory.interfaces';
 import { EmptyDataInfo } from '@/components/shared/EmptyDataInfo';
 import '@/styles/components/engines-cube-dot.css';
 import {
@@ -22,6 +34,7 @@ import {
 import type { ClassNameProps } from '@/types/interfaces/component.interfcaes';
 import type { TicketEngine } from '@/types/interfaces/ticket.interfaces';
 import type { TicketType } from '@/types/types/ticket.types';
+import type { InventoryChipType } from '@/types/interfaces/inventory.interfaces';
 
 interface EngineWithTier {
   engine: TicketEngine;
@@ -62,6 +75,18 @@ const CORE_TIER_COLORS: Record<TicketType, { mid: string; dark: string; glow: st
 export function HomeEnginesSlider({ className }: ClassNameProps) {
   const { data: tickets, isLoading } = useGetTicketsQuery();
   const { data: me } = useGetMeQuery();
+  const t = useAppTranslations();
+  const { data: inventory } = useGetInventoryQuery();
+  const [unequipChip, { isLoading: unequipping }] = useUnequipChipMutation();
+  const [equipChipMutation] = useEquipChipMutation();
+  const [activateBoosterMutation] = useActivateBoosterMutation();
+  const [chipToUnequip, setChipToUnequip] = useState<InventoryChip | null>(null);
+  const [pendingPick, setPendingPick] = useState<{
+    engineId: string;
+    category: 'chip' | 'booster';
+    type: InventoryChipType;
+    itemId: string;
+  } | null>(null);
 
   const scrollerRef = useRef<HTMLDivElement>(null);
   const dotsRef = useRef<HTMLDivElement>(null);
@@ -72,6 +97,12 @@ export function HomeEnginesSlider({ className }: ClassNameProps) {
     open: false,
     required: 0,
   });
+  const [pickerSlot, setPickerSlot] = useState<{
+    engineId: string;
+    engineTier: TicketType;
+    category: 'chip' | 'booster';
+    type: InventoryChipType;
+  } | null>(null);
 
   const currentStars = me?.telegramStars ?? 0;
 
@@ -105,8 +136,12 @@ export function HomeEnginesSlider({ className }: ClassNameProps) {
         let changed = false;
         const next = { ...prev };
         for (const { engine } of items) {
+          const speedChip = findEquippedChip(inventory?.chips, engine.id, 'speed');
+          const speedBooster = findActiveBooster(inventory?.boosters, engine.id, 'speed');
           const elapsed =
-            engine.pendingCount > 0 ? effectiveCycleSeconds(engine) : engineElapsedSeconds(engine);
+            engine.pendingCount > 0
+              ? effectiveCycleSeconds(engine, { speedChip, speedBooster })
+              : engineElapsedSeconds(engine);
           if (next[engine.id] !== elapsed) {
             next[engine.id] = elapsed;
             changed = true;
@@ -120,11 +155,21 @@ export function HomeEnginesSlider({ className }: ClassNameProps) {
         const next = prev.map(item => {
           const { engine } = item;
           if (engine.pendingCount > 0) return item;
-          const cycle = effectiveCycleSeconds(engine);
+          const speedChip = findEquippedChip(inventory?.chips, engine.id, 'speed');
+          const speedBooster = findActiveBooster(inventory?.boosters, engine.id, 'speed');
+          const capacityChip = findEquippedChip(inventory?.chips, engine.id, 'capacity');
+          const capacityBooster = findActiveBooster(inventory?.boosters, engine.id, 'capacity');
+          const cycle = effectiveCycleSeconds(engine, { speedChip, speedBooster });
           const elapsed = engineElapsedSeconds(engine);
           if (elapsed >= cycle) {
             changed = true;
-            return { ...item, engine: { ...engine, pendingCount: engineCapacity(engine) } };
+            return {
+              ...item,
+              engine: {
+                ...engine,
+                pendingCount: engineCapacity(engine, { capacityChip, capacityBooster }),
+              },
+            };
           }
           return item;
         });
@@ -209,7 +254,13 @@ export function HomeEnginesSlider({ className }: ClassNameProps) {
   const handleInstantClaim = (engineId: string) => {
     const engine = items.find(item => item.engine.id === engineId)?.engine;
     if (!engine) return;
-    requireStars(engine.instantClaimStarsCost, () => handleClaim(engineId));
+    const speedChip = findEquippedChip(inventory?.chips, engine.id, 'speed');
+    const speedBooster = findActiveBooster(inventory?.boosters, engine.id, 'speed');
+    const cycle = effectiveCycleSeconds(engine, { speedChip, speedBooster });
+    const elapsed = elapsedByEngine[engine.id] ?? engineElapsedSeconds(engine);
+    const remaining = Math.max(0, cycle - elapsed);
+    const cost = Math.max(1, Math.ceil(remaining / 3600));
+    requireStars(cost, () => handleClaim(engineId));
   };
 
   const promoteIfMaxed = (engine: TicketEngine): TicketEngine => {
@@ -297,6 +348,18 @@ export function HomeEnginesSlider({ className }: ClassNameProps) {
                 onInstantClaim={handleInstantClaim}
                 onUpgradeSpeed={handleUpgradeSpeed}
                 onUpgradeCapacity={handleUpgradeCapacity}
+                onSlotPick={slot =>
+                  setPickerSlot({
+                    engineId: engine.id,
+                    engineTier: tier,
+                    ...slot,
+                  })
+                }
+                onChipUnequip={chipId => {
+                  const chip = inventory?.chips.find(c => c.id === chipId);
+                  if (chip) setChipToUnequip(chip);
+                }}
+                pendingSlot={pendingPick}
                 cubeClassName={twMerge('w-full', !isActive && 'pointer-events-none')}
               />
             </div>
@@ -393,6 +456,74 @@ export function HomeEnginesSlider({ className }: ClassNameProps) {
           </div>
         </div>
       )}
+
+      <ConfirmModal
+        open={!!chipToUnequip}
+        loading={unequipping}
+        title={t('unequip chip confirm title')}
+        content={
+          chipToUnequip ? (
+            <p className="text-pink-secondary text-sm">
+              {t('unequip chip confirm content', {
+                cost: chipEquipStarsCost(chipToUnequip.level),
+              })}
+            </p>
+          ) : null
+        }
+        confirmText={t('unequip')}
+        onClose={() => setChipToUnequip(null)}
+        onConfirm={async () => {
+          if (!chipToUnequip) return;
+          await unequipChip({ chipId: chipToUnequip.id }).unwrap();
+          setChipToUnequip(null);
+        }}
+      />
+
+      <EngineSlotPickerModal
+        open={!!pickerSlot}
+        category={pickerSlot?.category ?? 'chip'}
+        type={pickerSlot?.type ?? 'speed'}
+        engineId={pickerSlot?.engineId ?? ''}
+        engineTier={pickerSlot?.engineTier ?? 'bronze'}
+        pendingPickId={pendingPick?.itemId ?? null}
+        onClose={() => setPickerSlot(null)}
+        onPickChip={async chip => {
+          if (!pickerSlot) return;
+          setPendingPick({
+            engineId: pickerSlot.engineId,
+            category: 'chip',
+            type: chip.type,
+            itemId: chip.id,
+          });
+          setPickerSlot(null);
+          try {
+            await equipChipMutation({
+              chipId: chip.id,
+              engineId: pickerSlot.engineId,
+            }).unwrap();
+          } finally {
+            setPendingPick(null);
+          }
+        }}
+        onPickBooster={async booster => {
+          if (!pickerSlot) return;
+          setPendingPick({
+            engineId: pickerSlot.engineId,
+            category: 'booster',
+            type: booster.type,
+            itemId: booster.id,
+          });
+          setPickerSlot(null);
+          try {
+            await activateBoosterMutation({
+              boosterId: booster.id,
+              engineId: pickerSlot.engineId,
+            }).unwrap();
+          } finally {
+            setPendingPick(null);
+          }
+        }}
+      />
 
       <NotEnoughStarsModal
         open={starsModal.open}

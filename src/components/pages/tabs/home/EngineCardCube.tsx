@@ -3,7 +3,6 @@
 import {
   type CSSProperties,
   type PointerEvent as ReactPointerEvent,
-  type ReactNode,
   useRef,
   useState,
 } from 'react';
@@ -12,12 +11,13 @@ import {
   EngineCard,
   type EngineCardProps,
 } from '@/components/pages/out-tabs/tabs-extra/ticket/EngineCard';
-import { useAppTranslations } from '@/hooks/useAppTranslations';
-import {
-  effectiveCycleSeconds,
-  engineCapacity,
-  formatCycleTime,
-} from '@/utils/global/ticket-engine.utils';
+import { useGetInventoryQuery } from '@/api/inventory.api';
+import { useGetMeQuery } from '@/api/me.api';
+import { effectiveCycleSeconds, engineCapacity } from '@/utils/global/ticket-engine.utils';
+import type { InventoryChipType } from '@/types/interfaces/inventory.interfaces';
+import { DEFAULT_BADGE_DEFS, EngineCubeBadgesFace } from './EngineCubeBadgesFace';
+import { EngineCubeSlot } from './EngineCubeSlot';
+import { EngineCubeStatsFace } from './EngineCubeStatsFace';
 import '@/styles/components/engine-card-cube.css';
 
 const FACE_SIZE = 'calc(100vw - 160px)';
@@ -27,23 +27,65 @@ const DRAG_DEGREES_PER_PX = 0.5;
 
 export interface EngineCardCubeProps extends EngineCardProps {
   cubeClassName?: string;
+  onSlotPick?: (slot: { category: 'chip' | 'booster'; type: InventoryChipType }) => void;
+  onChipUnequip?: (chipId: string) => void;
+  pendingSlot?: {
+    engineId: string;
+    category: 'chip' | 'booster';
+    type: InventoryChipType;
+  } | null;
 }
 
 export function EngineCardCube(props: EngineCardCubeProps) {
-  const { cubeClassName, ...engineCardProps } = props;
-  const { engine } = engineCardProps;
-  const t = useAppTranslations();
+  const { cubeClassName, onSlotPick, onChipUnequip, pendingSlot, ...engineCardProps } = props;
+  const isSlotPending = (category: 'chip' | 'booster', type: InventoryChipType) =>
+    !!pendingSlot &&
+    pendingSlot.engineId === props.engine.id &&
+    pendingSlot.category === category &&
+    pendingSlot.type === type;
+  const { engine, tier } = engineCardProps;
+  const tierAccent = `var(--color-${tier})`;
 
-  const cycle = effectiveCycleSeconds(engine);
-  const capacity = engineCapacity(engine);
   const speedLevel = engine.speedLevel ?? 0;
   const capacityLevel = engine.capacityLevel ?? 0;
   const engineLevel = engine.engineLevel ?? 1;
 
+  const { data: inventory } = useGetInventoryQuery();
+  const { data: me } = useGetMeQuery();
+  const chips = inventory?.chips ?? [];
+  const boosters = inventory?.boosters ?? [];
+  const equippedSpeedChip = chips.find(
+    c => c.equippedOnEngineId === engine.id && c.type === 'speed'
+  );
+  const equippedCapacityChip = chips.find(
+    c => c.equippedOnEngineId === engine.id && c.type === 'capacity'
+  );
+  const activeSpeedBooster = boosters.find(
+    b => b.activeOnEngineId === engine.id && b.type === 'speed'
+  );
+  const activeCapacityBooster = boosters.find(
+    b => b.activeOnEngineId === engine.id && b.type === 'capacity'
+  );
+
+  const capacity = engineCapacity(engine, {
+    capacityChip: equippedCapacityChip,
+    capacityBooster: activeCapacityBooster,
+  });
+
+  // Base stats — chip effects included, boosters excluded.
+  const baseCycleSeconds = effectiveCycleSeconds(engine, { speedChip: equippedSpeedChip });
+  const baseCapacity = engineCapacity(engine, { capacityChip: equippedCapacityChip });
+  const ticketsPerHour = baseCycleSeconds > 0 ? (3600 / baseCycleSeconds) * baseCapacity : 0;
+
   // Mock lifetime-style stats derived from current engine fields.
   const lifetimeProduced = engineLevel * (capacity + 5) * 17;
-  const lifetimeLc = engineLevel * 250 + capacityLevel * 60;
-  const totalBoostsCost = speedLevel * 8 + capacityLevel * 12;
+
+  const badges = DEFAULT_BADGE_DEFS({
+    spark: engineLevel >= 1,
+    speed: speedLevel >= 3,
+    capacity: capacityLevel >= 3,
+    veteran: lifetimeProduced >= 1000,
+  });
 
   const [rotation, setRotation] = useState(0);
   const [dragDelta, setDragDelta] = useState(0);
@@ -121,45 +163,63 @@ export function EngineCardCube(props: EngineCardCubeProps) {
           <EngineCard {...engineCardProps} compact className="w-full h-full" />
         </div>
 
-        <CubeStatFace
-          value={lifetimeProduced.toLocaleString()}
-          label={t('lifetime tickets')}
-          className="engine-card-cube-face engine-card-cube-face--top"
-        />
+        <div className="engine-card-cube-face engine-card-cube-face--back">
+          <EngineCubeBadgesFace badges={badges} accent={tierAccent} />
+        </div>
 
-        <CubeStatFace
-          value={`${lifetimeLc.toLocaleString()} LC`}
-          label={t('lc generated')}
-          className="engine-card-cube-face engine-card-cube-face--back"
-        />
+        <div className="engine-card-cube-face engine-card-cube-face--bottom">
+          <div className="flex h-full w-full flex-col items-center justify-center gap-3 p-4">
+            <div className="grid w-full max-w-[260px] grid-cols-2 gap-2">
+              <EngineCubeSlot
+                category="chip"
+                type="speed"
+                chip={equippedSpeedChip}
+                loading={isSlotPending('chip', 'speed')}
+                onClick={() => onSlotPick?.({ category: 'chip', type: 'speed' })}
+                onRemove={
+                  equippedSpeedChip ? () => onChipUnequip?.(equippedSpeedChip.id) : undefined
+                }
+              />
+              <EngineCubeSlot
+                category="chip"
+                type="capacity"
+                chip={equippedCapacityChip}
+                loading={isSlotPending('chip', 'capacity')}
+                onClick={() => onSlotPick?.({ category: 'chip', type: 'capacity' })}
+                onRemove={
+                  equippedCapacityChip ? () => onChipUnequip?.(equippedCapacityChip.id) : undefined
+                }
+              />
+            </div>
+            <div className="grid w-full max-w-[260px] grid-cols-2 gap-2">
+              <EngineCubeSlot
+                category="booster"
+                type="speed"
+                booster={activeSpeedBooster}
+                loading={isSlotPending('booster', 'speed')}
+                onClick={() => onSlotPick?.({ category: 'booster', type: 'speed' })}
+              />
+              <EngineCubeSlot
+                category="booster"
+                type="capacity"
+                booster={activeCapacityBooster}
+                loading={isSlotPending('booster', 'capacity')}
+                onClick={() => onSlotPick?.({ category: 'booster', type: 'capacity' })}
+              />
+            </div>
+          </div>
+        </div>
 
-        <CubeStatFace
-          value={formatCycleTime(cycle)}
-          label={t('current cycle')}
-          subtitle={`×${capacity} ${t('per cycle')}  ·  ${totalBoostsCost} ★`}
-          className="engine-card-cube-face engine-card-cube-face--bottom"
-        />
-      </div>
-    </div>
-  );
-}
-
-interface CubeStatFaceProps {
-  value: ReactNode;
-  label: ReactNode;
-  subtitle?: ReactNode;
-  className?: string;
-}
-
-function CubeStatFace({ value, label, subtitle, className }: CubeStatFaceProps) {
-  return (
-    <div className={className}>
-      <div className="engine-card-cube-stat">
-        <span className="engine-card-cube-stat-value">{value}</span>
-        <span className="engine-card-cube-stat-label">{label}</span>
-        {subtitle && (
-          <span className="text-pink-secondary mt-1 text-[11px] font-semibold">{subtitle}</span>
-        )}
+        <div className="engine-card-cube-face engine-card-cube-face--top">
+          <EngineCubeStatsFace
+            lifetimeProduced={lifetimeProduced}
+            ticketsPerHour={ticketsPerHour}
+            engineLevel={engineLevel}
+            ownerName={me?.username}
+            createdAt={engine.cycleStartedAt}
+            accent={tierAccent}
+          />
+        </div>
       </div>
     </div>
   );
