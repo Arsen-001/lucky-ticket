@@ -1,6 +1,6 @@
 # Lucky Ticket — Project Rules
 
-> **See also:** [`.claude/PROJECT_RULES.md`](.claude/PROJECT_RULES.md) for supplementary Claude-Code-specific rules (R1–R31), and [`.claude/skills/`](.claude/skills/) for invokable scaffolding skills:
+> **See also:** [`.claude/PROJECT_RULES.md`](.claude/PROJECT_RULES.md) for supplementary Claude-Code-specific rules (R1–R31), and [`.claude/skills/`](.claude/skills/git pull) for invokable scaffolding skills:
 >
 > - `/new-rtk-endpoint` — wire an API file + tag + mock through all three required places
 > - `/new-component` — scaffold a component matching project conventions
@@ -405,4 +405,4 @@ Run `type-check` before committing non-trivial changes.
 
 Full product and business logic documentation is located in [`documentation.md`](DOCS/DOCS.md). It covers all platform systems: tickets, tournaments, tasks, stakes, leaderboard, market, wallet, statuses, Telegram Stars, and referral mechanics.
 
-**Any change that affects business logic — new features, modified rules, updated flows, or removed mechanics — must be reflected in `documentation.md`.** Keep it in sync with the implementation; treat it as the source of truth for product behavior.
+**Any change that affects business logic — new features, modified rules, updated flows, or removed mechanics — must be reflected in `documentation.md`.** Keep it in sync with the implementation; treat it as the source of truth for product behavior
