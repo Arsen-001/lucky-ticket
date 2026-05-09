@@ -668,14 +668,16 @@ Each tournament includes:
 
 ### 11.2.1 Tournament Naming Convention
 
-Daily project tournaments follow the pattern **`<TimeOfDay> <Tier> · HH:00`**, where `TimeOfDay` is one of:
+Daily project tournaments follow the pattern **`<TimeOfDay> <Tier>`**, where `TimeOfDay` is one of:
 
 - **Morning** — starts at 06:00
 - **Afternoon** — starts at 12:00
 - **Evening** — starts at 18:00
 - **Night** — starts at 00:00
 
-Examples: `Morning Bronze · 06:00`, `Afternoon Silver · 12:00`, `Evening Gold · 18:00`, `Night Diamond · 00:00`.
+Examples: `Morning Bronze`, `Afternoon Silver`, `Evening Gold`, `Night Diamond`.
+
+The exact start time is **not** part of the name — it's surfaced separately in the UI as a date pill (`DD/MM/YYYY · HH:mm`) and a live countdown chip on every tournament surface. This keeps names short and reusable across days while the time/date metadata stays explicit.
 
 This pattern mirrors the daily-slot structure used in tasks (`BRONZE_DAILY_SLOTS` / `SILVER_DAILY_SLOTS` in `tasks.mock.ts`) so the player sees a consistent time-of-day vocabulary across both systems.
 
@@ -709,9 +711,87 @@ Each individual tournament awards shards of **only one chip type** — Speed **o
 
 Shard quality matches the tournament tier (Bronze, Silver, Gold, Platinum, Diamond). The user spends shards in the Inventory (Section 10.5) to mint a new chip at Lvl 1 or to level up an existing chip — with rising cost per level toward the ultimate +100% effect ceiling. Chips live in the inventory and are equipped/re-equipped on any owned engine via the engine's two chip slots.
 
+### 11.5 Tournament Lifecycle & Result Notification
+
+Each tournament has a **status**:
+
+- **`upcoming`** — tournament has not yet reached its Start Time. Users can join with tickets; the card shows a live countdown.
+- **`finished`** — Start Time has passed; winners are selected and the tournament is closed to new entries.
+
+**Result distribution at finish:**
+
+When a tournament transitions to `finished`, every participant's reward is computed from the percentage table (Section 11.3) applied to the prize pool, and **rewards are auto-credited** to each participant's balance — there is no manual claim step. Top 3 also receive their chip shards (Section 11.4) automatically.
+
+- Places **1–500** receive an LC share according to the percentage breakdown.
+- Place **501+** (if more participants exist than the percentage table covers) receive nothing.
+- Top 3 additionally receive shards (3 / 2 / 1).
+
+**Notification & result popup:**
+
+When a tournament finishes, every participant receives an in-app notification with their final placement and reward. When the user opens the finished tournament's detail page, a **result popup** auto-appears once:
+
+- **Top-3 winners:** celebratory popup with the medal, "You won", LC + shards.
+- **Placed 4–500:** "Your result" popup with the placement and LC.
+- **501+ (no place):** "Better luck next time" popup with no reward block.
+
+The popup is dismissible; once dismissed (`resultSeen: true`) it does not reappear, but the user can re-open it from the tournament page via the **Result** button at any time.
+
+**Page changes when finished:**
+
+- Countdown chip is replaced with an "Ended Xh ago" timestamp.
+- Join button is replaced with either **Result** (if user participated and has a placement) or **Tournament ended** (otherwise) — both clickable to open the result popup.
+- The detail page replaces the static trophies with a **leaderboard-style podium** (`LeaderboardPodium`, `maxRank=3`) showing the top-3 winners with their avatars, usernames, LC won, and shard reward chip.
+- Below the podium, a list of all other placement tiers (4–5, 6–10, …) shows the LC share for each tier. The user's own tier (if any) is highlighted with a tournament-tier-pink border, glow, and a Crown icon on the right.
+- Falling background animation in the podium is rendered as **small Star icons** in the tournament's tier color (`bronze` / `silver` / `gold` / `platinum` / `diamond`) instead of generic confetti pieces.
+
+### 11.6 Tournament List & Filters
+
+The tournaments tab lists every Personal Tournament, filtered through 4 tabs (sliding pink-gradient indicator, identical to the Tasks category nav):
+
+- **All** — only `upcoming` tournaments. Finished tournaments are hidden from this view.
+- **Top** — `upcoming` tournaments the user has not joined yet.
+- **Participated** — `upcoming` tournaments the user has joined (active participations).
+- **History** — `finished` tournaments the user participated in (read-only result entries).
+
+Each tab shows a count badge of matching tournaments. Tournaments outside any tab (e.g. finished + not participated) do not appear in the list — the user can only enter their detail page via direct link.
+
+### 11.7 Tournament API & Data Contract
+
+The Tournament data model (`PersonalTournament`) is a superset of the public `Tournament` plus user-specific fields:
+
+| Field                      | Type                        | Notes                                                              |
+| :------------------------- | :-------------------------- | :----------------------------------------------------------------- |
+| `id`                       | `string`                    | UUID                                                               |
+| `name`                     | `string`                    | `<TimeOfDay> <Tier>` per 11.2.1                                    |
+| `startTime`                | `string` (ISO)              | When winners are determined                                        |
+| `teamSize`                 | `number`                    | Total seats in the tournament                                      |
+| `prizePool`                | `number`                    | LC distributed among the placement table                           |
+| `type`                     | `TournamentType`            | `bronze` / `silver` / `gold` / `platinum` / `diamond`              |
+| `shardType`                | `'speed'` / `'capacity'`    | Which chip type's shards are dropped (alternates per 11.4)         |
+| `status`                   | `'upcoming'` / `'finished'` | Lifecycle state per 11.5                                           |
+| `winners`                  | `TournamentWinner[]?`       | Top-3 with `userId` + `username` + `avatar`. Only when `finished`. |
+| `places`                   | `TournamentPlacesResponse?` | Percentage breakdown (1, 2, 3, 4–5, 6–10, …, 201–500)              |
+| `participated`             | `boolean`                   | User has joined                                                    |
+| `participatedTicketsCount` | `number?`                   | How many tickets the user has submitted                            |
+| `userResult`               | `TournamentUserResult?`     | `{ place?, lc, shards? }` — only when `finished` AND user joined   |
+| `resultSeen`               | `boolean?`                  | Whether the result popup has been dismissed                        |
+
+**Endpoints** (`src/api/tournaments.api.ts`):
+
+| Endpoint                   | Method | Url                       | Purpose                                                                    |
+| :------------------------- | :----- | :------------------------ | :------------------------------------------------------------------------- |
+| `getTournaments`           | GET    | `tournaments`             | All personal tournaments (used by list page).                              |
+| `getTopTournaments`        | GET    | `topTournaments`          | Filtered upcoming-only feed (used by home slider).                         |
+| `getTournamentById`        | GET    | `tournaments/{id}`        | Single tournament detail.                                                  |
+| `getTournamentPlaces`      | GET    | `tournaments/{id}/places` | Percentage placement breakdown.                                            |
+| `joinTournament`           | POST   | `tournaments/join`        | Submit `{ tournamentId, ticketsCount }`. Invalidates `tournaments` + `me`. |
+| `markTournamentResultSeen` | POST   | `tournaments/result-seen` | Submit `{ tournamentId }` so the popup doesn't auto-open again.            |
+
+All endpoints are wired through the `tournaments` cache tag (`rtk-tags.ts`). `joinTournament` additionally invalidates `me` because LC/ticket balance changes.
+
 ### Connections
 
-Tournaments connect tickets, LC rewards, tasks, leaderboard positioning, and the Engine Boosts system (Section 10.4 — Chip Boosts).
+Tournaments connect tickets, LC rewards, tasks, leaderboard positioning, and the Engine Boosts system (Section 10.4 — Chip Boosts). Result notifications integrate with the Notification system (Section 17.1). The detail-page podium UI is the same component as the Leaderboard's (`LeaderboardPodium`).
 
 ---
 

@@ -6,6 +6,16 @@ import type {
   TournamentPlacesResponse,
 } from '@/types/interfaces/tournaments.interfaces';
 
+export interface JoinTournamentRequest {
+  tournamentId: string;
+  ticketsCount: number;
+}
+
+export interface JoinTournamentResponse {
+  participatedTicketsCount: number;
+  remainingTickets: number;
+}
+
 export const tournamentsApi = api.injectEndpoints({
   endpoints: builder => ({
     getTournaments: builder.query<PersonalTournament[], void>({
@@ -24,6 +34,14 @@ export const tournamentsApi = api.injectEndpoints({
       query: id => ({ url: `tournaments/${id}/places` }),
       providesTags: [rtkTags.tournaments],
     }),
+    joinTournament: builder.mutation<JoinTournamentResponse, JoinTournamentRequest>({
+      query: body => ({ url: 'tournaments/join', method: 'POST', body }),
+      invalidatesTags: [rtkTags.tournaments, rtkTags.me],
+    }),
+    markTournamentResultSeen: builder.mutation<void, { tournamentId: string }>({
+      query: body => ({ url: 'tournaments/result-seen', method: 'POST', body }),
+      invalidatesTags: [rtkTags.tournaments],
+    }),
   }),
 });
 
@@ -32,4 +50,6 @@ export const {
   useGetTournamentByIdQuery,
   useGetTopTournamentsQuery,
   useGetTournamentPlacesQuery,
+  useJoinTournamentMutation,
+  useMarkTournamentResultSeenMutation,
 } = tournamentsApi;

@@ -1,0 +1,216 @@
+.tournament-card-tier-bronze {
+  position: relative;
+  background:
+    linear-gradient(var(--color-background-overlay), var(--color-background-overlay)) padding-box,
+    linear-gradient(135deg, rgba(172, 97, 34, 0.9) 0%, rgba(172, 97, 34, 0.4) 100%) border-box;
+  border: 1.5px solid transparent;
+  box-shadow: 0 0 16px rgba(172, 97, 34, 0.18);
+}
+
+.tournament-card-tier-silver {
+  position: relative;
+  background:
+    linear-gradient(var(--color-background-overlay), var(--color-background-overlay)) padding-box,
+    linear-gradient(135deg, rgba(168, 170, 164, 0.9) 0%, rgba(168, 170, 164, 0.4) 100%) border-box;
+  border: 1.5px solid transparent;
+  box-shadow: 0 0 16px rgba(168, 170, 164, 0.18);
+}
+
+.tournament-card-tier-gold {
+  position: relative;
+  background:
+    linear-gradient(var(--color-background-overlay), var(--color-background-overlay)) padding-box,
+    linear-gradient(135deg, rgba(248, 189, 62, 0.95) 0%, rgba(248, 189, 62, 0.45) 100%) border-box;
+  border: 1.5px solid transparent;
+  box-shadow: 0 0 18px rgba(248, 189, 62, 0.25);
+}
+
+.tournament-card-tier-platinum {
+  position: relative;
+  background:
+    linear-gradient(var(--color-background-overlay), var(--color-background-overlay)) padding-box,
+    linear-gradient(135deg, rgba(192, 190, 177, 0.95) 0%, rgba(192, 190, 177, 0.45) 100%) border-box;
+  border: 1.5px solid transparent;
+  box-shadow: 0 0 18px rgba(192, 190, 177, 0.22);
+}
+
+.tournament-card-tier-diamond {
+  position: relative;
+  background:
+    linear-gradient(var(--color-background-overlay), var(--color-background-overlay)) padding-box,
+    linear-gradient(135deg, rgba(23, 141, 136, 0.95) 0%, rgba(23, 141, 136, 0.45) 100%) border-box;
+  border: 1.5px solid transparent;
+  box-shadow: 0 0 20px rgba(23, 141, 136, 0.3);
+}
+
+/* Bottom shine line — same pattern as task-card-default */
+.tournament-card-tier-bronze::after,
+.tournament-card-tier-silver::after,
+.tournament-card-tier-gold::after,
+.tournament-card-tier-platinum::after,
+.tournament-card-tier-diamond::after {
+  content: '';
+  position: absolute;
+  bottom: -1px;
+  left: 18%;
+  right: 18%;
+  height: 1px;
+  filter: blur(0.6px);
+  pointer-events: none;
+  z-index: 2;
+}
+
+.tournament-card-tier-bronze::after {
+  background: linear-gradient(90deg, transparent 0%, rgba(172, 97, 34, 0.85) 50%, transparent 100%);
+}
+.tournament-card-tier-silver::after {
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    rgba(168, 170, 164, 0.85) 50%,
+    transparent 100%
+  );
+}
+.tournament-card-tier-gold::after {
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    rgba(248, 189, 62, 0.95) 50%,
+    transparent 100%
+  );
+}
+.tournament-card-tier-platinum::after {
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    rgba(192, 190, 177, 0.85) 50%,
+    transparent 100%
+  );
+}
+.tournament-card-tier-diamond::after {
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    rgba(23, 141, 136, 0.95) 50%,
+    transparent 100%
+  );
+}
+
+/* Ended state — desaturated, neutral border */
+.tournament-card-finished {
+  position: relative;
+  background:
+    linear-gradient(rgba(29, 29, 52, 0.7), rgba(29, 29, 52, 0.7)) padding-box,
+    linear-gradient(
+        180deg,
+        rgba(255, 255, 255, 0.06) 0%,
+        rgba(255, 255, 255, 0.02) 50%,
+        rgba(255, 255, 255, 0.04) 100%
+      )
+      border-box;
+  border: 1px solid transparent;
+}
+
+/* Other-places row — purple→pink gradient border like task-card-default but compact */
+.tournament-rest-row {
+  position: relative;
+  background:
+    linear-gradient(var(--color-background-overlay), var(--color-background-overlay)) padding-box,
+    linear-gradient(
+        135deg,
+        rgba(116, 61, 245, 0.55) 0%,
+        rgba(222, 0, 155, 0.4) 60%,
+        rgba(116, 61, 245, 0.4) 100%
+      )
+      border-box;
+  border: 1px solid transparent;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.04);
+}
+
+.tournament-rest-row-alt {
+  position: relative;
+  background:
+    linear-gradient(var(--color-background-overlay), var(--color-background-overlay)) padding-box,
+    linear-gradient(
+        135deg,
+        rgba(222, 0, 155, 0.45) 0%,
+        rgba(116, 61, 245, 0.4) 60%,
+        rgba(222, 0, 155, 0.35) 100%
+      )
+      border-box;
+  border: 1px solid transparent;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.04);
+}
+
+/* ---------------- Liquid-metal text per rank ----------------
+   Shared shimmer animation, per-rank palette. Mirrors the
+   .ach-status-username styling used in the header. */
+
+@keyframes tournament-rank-text-shift {
+  0%,
+  100% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+}
+
+.tournament-rank-text {
+  font-weight: 800;
+  letter-spacing: -0.3px;
+  background-size: 300% 100%;
+  background-clip: text;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  animation: tournament-rank-text-shift 7s ease-in-out infinite;
+}
+
+.tournament-rank-text--gold {
+  background-image: linear-gradient(
+    100deg,
+    #b8860b 0%,
+    #fff5d9 18%,
+    #f8bd3e 38%,
+    #ffffff 55%,
+    #f8bd3e 75%,
+    #b8860b 100%
+  );
+  filter: drop-shadow(0 2px 10px rgba(248, 189, 62, 0.45));
+}
+
+.tournament-rank-text--silver {
+  background-image: linear-gradient(
+    100deg,
+    #c8c8d4 0%,
+    #ffffff 25%,
+    #aab0c0 50%,
+    #ffffff 75%,
+    #c8c8d4 100%
+  );
+  filter: drop-shadow(0 2px 8px rgba(168, 170, 164, 0.35));
+}
+
+.tournament-rank-text--bronze {
+  background-image: linear-gradient(
+    100deg,
+    #6b3a14 0%,
+    #f4c79a 22%,
+    #ac6122 50%,
+    #ffd8b3 75%,
+    #6b3a14 100%
+  );
+  filter: drop-shadow(0 2px 9px rgba(172, 97, 34, 0.4));
+}
+
+.tournament-rank-text--mid {
+  background-image: linear-gradient(
+    100deg,
+    #8b5cf6 0%,
+    #f0e6ff 25%,
+    #de009b 50%,
+    #ffffff 75%,
+    #8b5cf6 100%
+  );
+  filter: drop-shadow(0 2px 9px rgba(222, 0, 155, 0.4));
+}

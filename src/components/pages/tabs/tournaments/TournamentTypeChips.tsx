@@ -5,7 +5,7 @@ import { Medal } from '@/components/shared/icons/Medal';
 import type { TournamentType } from '@/types/types/tournaments.types';
 import { useAppTranslations } from '@/hooks/useAppTranslations';
 
-const ALL_TYPES: TournamentType[] = ['bronze', 'silver', 'gold', 'diamond', 'platinum'];
+const ALL_TYPES: TournamentType[] = ['bronze', 'silver', 'gold', 'platinum', 'diamond'];
 
 interface TournamentTypeChipsProps {
   selected: TournamentType[];
@@ -24,7 +24,7 @@ export function TournamentTypeChips({ selected, onChange }: TournamentTypeChipsP
   };
 
   return (
-    <div className="flex gap-2 overflow-x-auto scrollbar-hidden pb-1">
+    <div className="grid grid-cols-5 gap-1.5">
       {ALL_TYPES.map(type => {
         const isActive = selected.includes(type);
         return (
@@ -33,14 +33,14 @@ export function TournamentTypeChips({ selected, onChange }: TournamentTypeChipsP
             type="button"
             onClick={() => toggle(type)}
             className={twMerge(
-              'flex-shrink-0 flex items-center gap-1.5 rounded-full py-1.5 px-3 text-xs font-semibold border transition-all duration-200 active:scale-95',
+              'flex flex-col items-center justify-center gap-1 rounded-xl border py-2 px-1 text-[11px] font-bold transition-all duration-200 active:scale-95 leading-none',
               isActive
-                ? 'bg-pink-gradient border-transparent text-white'
-                : 'bg-transparent border-white/30 text-white/70 hover:border-white/60 hover:text-white'
+                ? 'bg-white/10 border-pink-secondary text-white'
+                : 'bg-white/5 border-white/15 text-white/65 hover:border-white/35 hover:text-white'
             )}
           >
-            <Medal type={type} height={20} />
-            <span className="capitalize">{t(type)}</span>
+            <Medal type={type} height={28} />
+            <span className="leading-none capitalize">{t(type)}</span>
           </button>
         );
       })}

@@ -1,6 +1,6 @@
 'use client';
 import { useGetTournamentsQuery } from '@/api/tournaments.api';
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 import { stringIncludes } from '@/utils/global/string.utils';
 import {
   TournamentFilters,
@@ -13,6 +13,22 @@ import {
   type SortOption,
 } from '@/components/pages/tabs/tournaments/TournamentFilterSheet';
 import type { TournamentType } from '@/types/types/tournaments.types';
+import type { PersonalTournament } from '@/types/interfaces/tournaments.interfaces';
+
+const matchesTab = (tournament: PersonalTournament, filter: TournamentFilterType): boolean => {
+  switch (filter) {
+    case 'all':
+      return tournament.status === 'upcoming';
+    case 'top':
+      return tournament.status === 'upcoming' && !tournament.participated;
+    case 'participated':
+      return tournament.status === 'upcoming' && tournament.participated;
+    case 'history':
+      return tournament.status === 'finished' && tournament.participated;
+    default:
+      return true;
+  }
+};
 
 export default function TournamentPage() {
   const { data: tournamentsData, isLoading } = useGetTournamentsQuery();
@@ -31,19 +47,38 @@ export default function TournamentPage() {
     setSortBy('soonest');
   };
 
+  const tabCounts = useMemo(() => {
+    const counts: Record<TournamentFilterType, number> = {
+      all: 0,
+      top: 0,
+      participated: 0,
+      history: 0,
+    };
+    tournamentsData?.forEach(tour => {
+      (Object.keys(counts) as TournamentFilterType[]).forEach(key => {
+        if (matchesTab(tour, key)) counts[key] += 1;
+      });
+    });
+    return counts;
+  }, [tournamentsData]);
+
+  const tabs = useMemo(
+    () =>
+      (['all', 'top', 'participated', 'history'] as const).map(key => ({
+        key,
+        count: tabCounts[key],
+      })),
+    [tabCounts]
+  );
+
   const filteredTournaments =
     tournamentsData
       ?.filter(tournament => {
-        const matchesTab =
-          searchValue ||
-          filter === 'all' ||
-          (filter === 'participated' && tournament.participated) ||
-          (filter === 'top' && !tournament.participated);
-
+        const tabPasses = searchValue ? true : matchesTab(tournament, filter);
         const matchesSearch = stringIncludes(tournament.name, searchValue);
         const matchesType = selectedTypes.length === 0 || selectedTypes.includes(tournament.type);
 
-        return matchesTab && matchesSearch && matchesType;
+        return tabPasses && matchesSearch && matchesType;
       })
       .sort((a, b) => {
         switch (sortBy) {
@@ -72,6 +107,7 @@ export default function TournamentPage() {
         setIsSearchOpen={setIsSearchOpen}
         activeFilterCount={activeFilterCount}
         onFilterSheetOpen={() => setIsFilterSheetOpen(true)}
+        tabs={tabs}
       />
       <div
         key={`tournaments-${filter}-${searchValue}-${selectedTypes.join()}-${sortBy}`}

@@ -2,12 +2,16 @@
 
 import { Search, SlidersHorizontal, X } from 'lucide-react';
 import { twMerge } from 'tailwind-merge';
-import { Tabs, type TabsProps } from '@/components/shared/Tabs';
 import { Button } from '@/components/shared/buttons/Button';
 import { DebouncedInput } from '@/components/shared/form-elements/inputs/DebouncedInput';
 import { useAppTranslations } from '@/hooks/useAppTranslations';
+import {
+  TournamentFiltersTabs,
+  type TournamentFilterKey,
+  type TournamentFilterTab,
+} from './TournamentFiltersTabs';
 
-export type TournamentFilterType = 'all' | 'participated' | 'top';
+export type TournamentFilterType = TournamentFilterKey;
 
 interface TournamentFiltersProps {
   filter: TournamentFilterType;
@@ -18,6 +22,7 @@ interface TournamentFiltersProps {
   setIsSearchOpen: (isOpen: boolean) => void;
   activeFilterCount: number;
   onFilterSheetOpen: () => void;
+  tabs: TournamentFilterTab[];
 }
 
 export function TournamentFilters({
@@ -29,34 +34,24 @@ export function TournamentFilters({
   setIsSearchOpen,
   activeFilterCount,
   onFilterSheetOpen,
+  tabs,
 }: TournamentFiltersProps) {
   const t = useAppTranslations();
 
-  const filters: TabsProps['items'] = [
-    { key: 'all', title: t('all') },
-    { key: 'top', title: t('top') },
-    { key: 'participated', title: t('participated-filter') },
-  ];
-
   return (
-    <div className="flex items-center justify-between gap-2">
+    <div className="flex items-center justify-between gap-2 min-w-0">
       <div
         className={twMerge(
-          'flex-1 transition-all duration-300 ease-in-out origin-left flex items-center overflow-hidden',
+          'min-w-0 flex-1 transition-all duration-300 ease-in-out origin-left flex items-center overflow-hidden',
           isSearchOpen ? 'max-w-0 opacity-0 invisible' : 'max-w-full opacity-100 visible'
         )}
       >
-        <div className="min-w-max">
-          <Tabs
-            items={filters}
-            activeKey={filter}
-            onTabChange={key => onFilterChange(key as TournamentFilterType)}
-            className="w-fit"
-            classNames={{
-              container: 'bg-transparent',
-            }}
-          />
-        </div>
+        <TournamentFiltersTabs
+          active={filter}
+          onChange={onFilterChange}
+          tabs={tabs}
+          className="w-full"
+        />
       </div>
 
       <div
@@ -97,7 +92,6 @@ export function TournamentFilters({
           </Button>
         )}
 
-        {/* Advanced filter button — always visible */}
         {!isSearchOpen && (
           <div className="relative">
             <Button

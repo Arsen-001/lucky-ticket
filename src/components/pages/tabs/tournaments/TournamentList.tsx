@@ -14,24 +14,21 @@ export function TournamentList({ tournaments, isLoading }: TournamentListProps) 
   const t = useAppTranslations();
 
   return (
-    <div className="py-5 grid grid-cols-2 gap-x-3 gap-y-4 content-start">
+    <div className="py-5 flex flex-col gap-3">
       {tournaments.map((tournament, index) => (
         <TournamentCard
           key={index}
           loading={isLoading}
           {...tournament}
-          className=""
-          style={{ animationDelay: `${index * 50}ms` }}
+          style={{ animationDelay: `${index * 60}ms` }}
         />
       ))}
       {!isLoading && tournaments.length === 0 && (
-        <div className="col-span-2">
-          <EmptyDataInfo
-            className="py-10"
-            title={t('tournaments not found')}
-            description={t('no results description')}
-          />
-        </div>
+        <EmptyDataInfo
+          className="py-10"
+          title={t('tournaments not found')}
+          description={t('no results description')}
+        />
       )}
     </div>
   );

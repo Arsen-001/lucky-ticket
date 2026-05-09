@@ -41,6 +41,11 @@ export const GlobalConstants = {
     platinum: 15000,
     diamond: 50000,
   },
+  tournamentShardRewards: {
+    first: 3,
+    second: 2,
+    third: 1,
+  },
 };
 
 export type ActivityTier = 'bronze' | 'silver' | 'gold' | 'platinum' | 'diamond';
