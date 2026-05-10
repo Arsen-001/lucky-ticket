@@ -219,18 +219,26 @@ Tickets are the core progression and participation resource in Lucky Ticket. All
 
 ### 8.1 Tickets Page
 
-The Tickets page displays all project and partner tickets. Users can tap on any ticket to open its **Ticket Details page**.
+The Tickets page is structured as a tier-tabs view:
 
-### 8.2 Ticket Details Page
+- **Summary row (top):** A 5-tile grid (Bronze · Silver · Gold · Platinum · Diamond) showing the user's current inventory count for each tier. Tapping a tile switches the active tier tab.
+- **Tab strip:** Six pill-style chips — five tier tabs (Bronze → Diamond) plus a **Partners** tab. Locked tiers render with a lock icon. The active tab carries a tier-color dot/icon plus a `×N` ready-to-claim badge in white.
+- **Tab content per tier:**
+  - **Unlocked tier:** A summary card (`X tickets in inventory · Y engines active`), a `{count} tickets ready · Claim all` callout (when any engine has pending output), and a 2-column grid of engine preview cards. Each card opens that engine's dedicated page.
+  - **Locked tier:** A locked-state hero plus the requirements list (Section 8.5).
+- **Partners tab:** Reserved for partner-ticket integrations — currently shows a "Coming soon" placeholder.
 
-The Details page provides in-depth information about a specific ticket, including its rarity, claim speed, and duration.
+Tapping a single engine's claim pill triggers an in-place claim (no navigation) and surfaces a confetti-style "Added to inventory" modal showing the claimed amount and tier. The general card area still navigates to that engine's details page.
 
-- **Locked Ticket:** If the user does not yet own an engine that produces this ticket type, the bottom of the page displays the specific requirements (e.g., lower-tier claims, friend invites) needed to unlock the engine for this tier.
-- **Unlocked Ticket:** If the user owns at least one engine of this tier, the page displays action buttons:
-  - **Claim:** Collect tickets accumulated by the user's engine(s) of this tier.
-  - **Buy Ticket:** Purchase the ticket directly using LC.
-  - **Buy Engine:** Purchase an additional producer engine of this tier (see Section 9).
-  - **Send:** Send the ticket to another user.
+### 8.2 Engine Details Page
+
+Each engine has its own dedicated page (`/engines/[id]`). The page mirrors the four faces of the home-screen engine cube as stacked sections, with each face wrapped in a neutral card with a tier-accent bottom shine line that pulses from center to edges:
+
+- **Front face — Reactor & claim:** Reactor dial with status (producing / output ready), cycle/capacity readout, claim CTA, and instant-claim (Stars).
+- **Top face — Engine passport:** Sci-fi HUD with lifetime tickets produced, tickets per hour, per-day projection, owner, and creation date.
+- **Bottom face — Slots:** 2 chip slots (speed / capacity) and 2 booster slots (speed / capacity). Tap to install/remove.
+- **Back face — Badges:** Earned achievement badges (Spark, Quick, Bulk, Veteran).
+- **Upgrades:** Speed and capacity upgrade rows (priced in Lucky Stars).
 
 ### 8.3 Ticket Categories
 
@@ -1346,23 +1354,46 @@ In addition to earning, users may buy Lucky Stars from the Wallet page (see Sect
 
 The reverse direction (LS → TON) uses the base rate without the bonus.
 
-### 19.3 Spending Lucky Stars — The Shop
+### 19.3 Spending Lucky Stars — The Mega Market
 
-Users spend their Lucky Stars in the **Lucky Ticket Shop**. The Shop offers items purchasable exclusively with Lucky Stars (not LC):
+The Market (Mega Market) is the unified shop. **All purchases are paid in either Lucky Coin (LC) or Lucky Stars (LS) — no fiat / USDT / TON.** Items that already _grant_ Lucky Stars (bundles containing stars) are LC-only — users cannot pay stars to receive stars.
 
-- **Engine Capacity Upgrades:** Increase the per-cycle output of an owned engine (e.g., 2 tickets per cycle instead of 1). Sold exclusively in the Shop and only with LS (see Section 10.2).
-- **Instant Claims:** Skip the remaining wait time on an engine's current cycle and receive its next ticket(s) immediately (see Section 9.6). Triggered from the Tickets / Ticket Details page on a per-engine basis.
-- **Chip Builders:** A one-shot crafting item required to mint a second (or third, fourth, …) chip of the same (type, quality) — typically because the user wants a separate chip for a newly-purchased engine of that tier. The very first chip of any (type, quality) is auto-minted for free; only subsequent ones require a Chip Builder. See Section 10.4.
-- **Cosmetic items:** Avatar frames, profile effects, visual upgrades.
-- **Exclusive tickets:** Partner or limited-edition tickets not available in the standard Market.
-- **Status upgrades:** Discounted or exclusive access to Prime/VIP status.
-- **Profile showcase slot expansions:** Unlock additional badge slots beyond the free 5 (see Section 17.4).
+The Market opens with a **Hero card** showing the current featured deal (with countdown if limited) and a horizontal **filter chip strip** with the following 8 categories, in priority order:
 
-> Shop inventory and pricing in Lucky Stars are managed by the product team and may be updated at any time.
+1. **All** — vertically stacked render of every other category.
+2. **Status** — PRIME and VIP subscriptions (see Section 7).
+3. **Boosters** — 10 SKUs (5 tiers × {speed, capacity}, all 4-hour duration). Effect scales by tier: Bronze +25% → Diamond +100%. Locks for tiers above the user's max unlocked tier (lock icon replaces the price button).
+4. **Chips** — 10 SKUs (5 tiers × {speed, capacity}). Sold pre-built at level 1 / +0.5%; same tier-lock rule as Boosters.
+5. **Chip Builders** — 5 SKUs (1× Bronze, ×3 Silver, ×5 Gold, ×7 Platinum, ×10 Diamond). Tier-locked.
+6. **Engines** — 5 SKUs (one per tier, all level 1, with limited remaining-supply for higher tiers). Tier-locked.
+7. **Cosmetics** — Avatar frames, badges, themes (mix of tier-themed and brand-themed accents). Always available regardless of tier.
+8. **Passes** — Time-limited subscriptions:
+   - **Auto-Claim Pass** — auto-claim every cycle. Sold in 4 durations: 1 day, 7 days, 15 days, 30 days.
+   - **Ad-Free Pass** — removes ads while keeping ad-task rewards.
+   - **+25% LC Pass** — +25% LC on every claim.
+   - **Tournament Pass** — free tournament entry, priority matchmaking, exclusive chip drop.
+
+**Card visual language:** every Market item card shares the same template — a neutral `bg-background-overlay` card with a tier-accent bottom shine line, a 14×14 rounded-2xl icon stage with tier-tinted border + inset glow, the item name, a meta line (e.g. level / duration / contents), and 1–2 price buttons (LC and/or Lucky Stars), arranged 2 per row.
+
+**Purchase flow:**
+
+- Tapping a price button checks the matching balance.
+- If the user has enough — opens a centered **purchase confirmation modal** with the item's icon, name, description, and price.
+- If Lucky Stars are insufficient — opens the **Not-enough-Stars bottom sheet** (with top-up presets).
+- If LC are insufficient — opens the **Not-enough-LC modal**.
+- Confirming dispatches the corresponding RTK mutation (`buyEngine`, `buyChip`, `buyBuilder`, `buyBooster`, `buyCosmetic`, `buyPass`, `buyStatus`). Mutations apply optimistic updates: the cost is deducted from `me.coins` / `me.telegramStars`, and the granted item is appended to the relevant cache (engines → ticket-tier engines, chips/boosters → inventory, builders → inventory.builders[tier]). On error, all patches are rolled back.
+
+**Discount mechanics:** Items can carry a `discountPct` and an `originalAmount` per price tier; the original is rendered with strikethrough beside the discounted amount. Featured deals can also carry an `expiresAt` rendered as a countdown.
+
+**Bundles (deferred):** A bundle category is defined in the data model (combo packs of tickets + stars + LC + boosters + engines + chips) but is not currently surfaced as its own tab. Bundle SKUs that include Lucky Stars in their contents are priced in LC only.
+
+> Market inventory and pricing are managed by the product team and may be updated at any time.
 
 ### 19.4 Monetization Principle
 
 Lucky Stars are the **preferred currency for premium in-game purchases**. Whenever a feature offers a paid upgrade, expansion, or exclusive item that is not part of the core LC economy (engine purchases, ticket purchases, status purchases via LC), the payment is collected in Lucky Stars. This concentrates monetization through the Stars channel and incentivizes the Telegram-Stars / TON purchase paths.
+
+**Hard rule:** Lucky Stars cannot be used to buy Lucky Stars. Bundles or items whose contents include LS as a reward are LC-only.
 
 ### 19.5 Technical Integration (Telegram Stars Purchase Flow)
 

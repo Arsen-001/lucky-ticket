@@ -36,7 +36,6 @@ import { DrawerItem } from '@/components/layout-elements/DrawerItem';
 import { Link } from '@/components/shared/links/Link';
 import { Skeleton } from '@/components/shared/seleketons/Skeleton';
 import { SkeletonSuspense } from '@/components/shared/seleketons/SkeletonSuspense';
-import { GlobalConstants } from '@/constants/global.constants';
 import { icons } from '@/constants/icons';
 import { type Route, routes } from '@/constants/routes';
 import { useAppTranslations } from '@/hooks/useAppTranslations';
@@ -305,8 +304,17 @@ export function Drawer() {
             href={routes.profile.index}
             tabIndex={tabIndex}
             onClick={handleDrawerClose}
-            className="card-outlined bg-purple-gradient mx-5 mt-5 flex items-center gap-3 rounded-2xl p-3 transition-transform active:scale-99"
+            className="bg-background-overlay relative mx-5 mt-5 flex items-center gap-3 overflow-hidden rounded-2xl p-3 transition-transform active:scale-99"
           >
+            <span
+              aria-hidden
+              className="pointer-events-none absolute bottom-0 left-[18%] right-[18%] h-[3px] z-2"
+              style={{
+                background:
+                  'linear-gradient(90deg, transparent 0%, color-mix(in srgb, var(--color-electric-pink) 90%, transparent) 50%, transparent 100%)',
+                filter: 'blur(0.8px)',
+              }}
+            />
             <div className="relative h-14 w-14 flex-shrink-0">
               <Avatar shadow size={56} />
               {me?.isVIP && (
@@ -337,19 +345,16 @@ export function Drawer() {
               loading={isLoading}
               icon={<Zap className="fill-gold text-gold" size={11} strokeWidth={2.4} />}
               value={me?.activityPoints?.toLocaleString() ?? 0}
-              label={t('ap')}
             />
             <DrawerBalancePill
               loading={isLoading}
               icon={<Image src={icons.coin} alt="" width={12} height={12} />}
               value={me?.coins?.toLocaleString() ?? 0}
-              label={GlobalConstants.coinName}
             />
             <DrawerBalancePill
               loading={isLoading}
               icon={<Image src={icons.telegramStar} alt="" width={12} height={12} />}
               value={me?.telegramStars ?? 0}
-              label={t('stars')}
             />
           </div>
 
@@ -377,9 +382,21 @@ export function Drawer() {
             ))}
           </nav>
 
-          <div className="border-t border-white/5 px-5 py-3">
-            <span className="text-pink-secondary text-[10px] font-semibold tracking-wider">
-              {GlobalConstants.projectName}
+          <div className="bg-background-overlay relative mx-5 mb-5 flex flex-col items-center gap-0.5 overflow-hidden rounded-2xl px-4 py-3">
+            <span
+              aria-hidden
+              className="pointer-events-none absolute bottom-0 left-[18%] right-[18%] z-2 h-[3px]"
+              style={{
+                background:
+                  'linear-gradient(90deg, transparent 0%, color-mix(in srgb, var(--color-electric-pink) 90%, transparent) 50%, transparent 100%)',
+                filter: 'blur(0.8px)',
+              }}
+            />
+            <span className="text-sm font-extrabold tracking-wide text-white">
+              Lucky Ticket 365
+            </span>
+            <span className="text-pink-secondary text-[10px] font-semibold tracking-wider uppercase">
+              {t('daily luck awaits')}
             </span>
           </div>
         </aside>

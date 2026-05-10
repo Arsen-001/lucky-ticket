@@ -3,7 +3,7 @@ export const rtkTags = {
   tournaments: 'Tournaments',
   tournamentById: ':TournamentById',
   tickets: 'Tickets',
-  ticketsById: ':TicketsById',
+  engines: 'Engines',
   tasks: 'Tasks',
   leaderboard: 'Leaderboard',
   support: 'Support',

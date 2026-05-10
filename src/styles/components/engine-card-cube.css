@@ -27,7 +27,7 @@
 }
 
 .engine-card-cube-face {
-  background: var(--gradient-purple);
+  background: var(--color-background-overlay);
 }
 
 .engine-card-cube-face--front {

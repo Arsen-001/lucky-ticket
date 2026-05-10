@@ -1,0 +1,131 @@
+.engine-preview-card-tier-bronze,
+.engine-preview-card-tier-silver,
+.engine-preview-card-tier-gold,
+.engine-preview-card-tier-platinum,
+.engine-preview-card-tier-diamond {
+  position: relative;
+  background: var(--color-background-overlay);
+}
+
+@keyframes engine-bottom-shine-pulse {
+  0%,
+  100% {
+    transform: scaleX(0.35);
+    opacity: 0.55;
+  }
+  50% {
+    transform: scaleX(1);
+    opacity: 1;
+  }
+}
+
+/* Bottom shine line — only accent left */
+.engine-preview-card-tier-bronze::after,
+.engine-preview-card-tier-silver::after,
+.engine-preview-card-tier-gold::after,
+.engine-preview-card-tier-platinum::after,
+.engine-preview-card-tier-diamond::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 18%;
+  right: 18%;
+  height: 1px;
+  filter: blur(0.6px);
+  pointer-events: none;
+  z-index: 2;
+}
+
+/* Top shine line — opt-in via .engine-preview-card--top-shine */
+.engine-preview-card--top-shine.engine-preview-card-tier-bronze::before,
+.engine-preview-card--top-shine.engine-preview-card-tier-silver::before,
+.engine-preview-card--top-shine.engine-preview-card-tier-gold::before,
+.engine-preview-card--top-shine.engine-preview-card-tier-platinum::before,
+.engine-preview-card--top-shine.engine-preview-card-tier-diamond::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 18%;
+  right: 18%;
+  height: 2px;
+  filter: blur(0.8px);
+  pointer-events: none;
+  z-index: 2;
+}
+
+.engine-preview-card--top-shine.engine-preview-card-tier-bronze::before {
+  background: linear-gradient(90deg, transparent 0%, rgba(172, 97, 34, 0.85) 50%, transparent 100%);
+}
+.engine-preview-card--top-shine.engine-preview-card-tier-silver::before {
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    rgba(168, 170, 164, 0.85) 50%,
+    transparent 100%
+  );
+}
+.engine-preview-card--top-shine.engine-preview-card-tier-gold::before {
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    rgba(248, 189, 62, 0.95) 50%,
+    transparent 100%
+  );
+}
+.engine-preview-card--top-shine.engine-preview-card-tier-platinum::before {
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    rgba(192, 190, 177, 0.85) 50%,
+    transparent 100%
+  );
+}
+.engine-preview-card--top-shine.engine-preview-card-tier-diamond::before {
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    rgba(23, 141, 136, 0.95) 50%,
+    transparent 100%
+  );
+}
+
+@utility engine-bottom-shine-pulse {
+  transform-origin: center;
+  animation: engine-bottom-shine-pulse 2.4s ease-in-out infinite;
+}
+
+.engine-preview-card-tier-bronze::after {
+  background: linear-gradient(90deg, transparent 0%, rgba(172, 97, 34, 0.85) 50%, transparent 100%);
+}
+.engine-preview-card-tier-silver::after {
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    rgba(168, 170, 164, 0.85) 50%,
+    transparent 100%
+  );
+}
+.engine-preview-card-tier-gold::after {
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    rgba(248, 189, 62, 0.95) 50%,
+    transparent 100%
+  );
+}
+.engine-preview-card-tier-platinum::after {
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    rgba(192, 190, 177, 0.85) 50%,
+    transparent 100%
+  );
+}
+.engine-preview-card-tier-diamond::after {
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    rgba(23, 141, 136, 0.95) 50%,
+    transparent 100%
+  );
+}

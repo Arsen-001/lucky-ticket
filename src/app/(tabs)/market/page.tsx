@@ -1,11 +1,11 @@
-import { MarketTabs } from '@/components/pages/tabs/market/MarketTabs';
+import { MarketView } from '@/components/pages/tabs/market/MarketView';
 import { Suspense } from 'react';
 
 export default function MarketPage() {
   return (
-    <div className="p-5 flex-col-stretch gap-10">
+    <div className="flex-col-stretch gap-4 p-5">
       <Suspense>
-        <MarketTabs className="mt-6" />
+        <MarketView />
       </Suspense>
     </div>
   );

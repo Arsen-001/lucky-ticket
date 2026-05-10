@@ -11,13 +11,22 @@ export function LcWalletComingSoonCard({ onNotifyMe }: LcWalletComingSoonCardPro
   const t = useAppTranslations();
 
   return (
-    <div className="card-outlined bg-background-overlay/70 relative overflow-hidden rounded-2xl p-4">
+    <div className="bg-background-overlay/70 relative overflow-hidden rounded-2xl p-4">
       <span
         aria-hidden
         className="bg-gold/40 absolute right-[-46px] top-3 z-10 rotate-45 px-12 py-1 text-[10px] font-extrabold uppercase tracking-widest text-background shadow-[0_2px_6px_rgba(0,0,0,0.45)]"
       >
         {t('coming soon')}
       </span>
+      <span
+        aria-hidden
+        className="pointer-events-none absolute bottom-0 left-[18%] right-[18%] z-2 h-[3px]"
+        style={{
+          background:
+            'linear-gradient(90deg, transparent 0%, color-mix(in srgb, var(--color-gold) 90%, transparent) 50%, transparent 100%)',
+          filter: 'blur(0.8px)',
+        }}
+      />
 
       <div className="relative flex items-start gap-3 opacity-90">
         <div className="bg-gold/15 flex-center h-10 w-10 flex-shrink-0 rounded-xl ring-1 ring-gold/25 grayscale-[30%]">

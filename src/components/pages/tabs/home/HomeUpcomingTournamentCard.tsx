@@ -10,13 +10,23 @@ import { useCountDown } from '@/hooks/useCountDown';
 import { GlobalConstants } from '@/constants/global.constants';
 import { routes } from '@/constants/routes';
 import type { Tournament } from '@/types/interfaces/tournaments.interfaces';
+import type { TournamentType } from '@/types/types/tournaments.types';
 import type { CSSProperties } from 'react';
+import '@/styles/components/engine-preview-card.css';
 
 export interface HomeUpcomingTournamentCardProps extends Tournament {
   loading?: boolean;
   className?: string;
   style?: CSSProperties;
 }
+
+const TIER_CLASS: Record<TournamentType, string> = {
+  bronze: 'engine-preview-card-tier-bronze',
+  silver: 'engine-preview-card-tier-silver',
+  gold: 'engine-preview-card-tier-gold',
+  platinum: 'engine-preview-card-tier-platinum',
+  diamond: 'engine-preview-card-tier-diamond',
+};
 
 export function HomeUpcomingTournamentCard({
   id,
@@ -36,11 +46,12 @@ export function HomeUpcomingTournamentCard({
       <div
         style={style}
         className={twMerge(
-          'card-outlined bg-purple-gradient flex h-[80px] w-72 items-center gap-2.5 rounded-xl px-3 transition-transform active:scale-99',
+          'flex h-[80px] w-72 items-center gap-2.5 rounded-xl px-3 transition-transform active:scale-99',
+          type ? `engine-preview-card--top-shine ${TIER_CLASS[type]}` : 'bg-background-overlay',
           className
         )}
       >
-        <div className="flex-center bg-white/6 h-[60px] w-[60px] flex-shrink-0 rounded-lg">
+        <div className="flex-center h-[60px] w-[60px] flex-shrink-0">
           <Medal height={48} type={type} loading={loading} />
         </div>
 

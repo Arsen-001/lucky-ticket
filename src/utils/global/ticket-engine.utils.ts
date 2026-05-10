@@ -1,6 +1,7 @@
 import dayjs from 'dayjs';
 import type { InventoryBooster, InventoryChip } from '@/types/interfaces/inventory.interfaces';
 import type { TicketEngine } from '@/types/interfaces/ticket.interfaces';
+import type { Ticket, TicketType } from '@/types/types/ticket.types';
 
 export const MAX_BOOST_LEVEL = 10;
 
@@ -59,6 +60,32 @@ export const engineElapsedSeconds = (engine: TicketEngine) => {
 
 export const isEngineMaxed = (engine: TicketEngine) =>
   (engine.speedLevel || 0) >= MAX_BOOST_LEVEL && (engine.capacityLevel || 0) >= MAX_BOOST_LEVEL;
+
+export interface EngineLocation {
+  engine: TicketEngine;
+  tier: TicketType;
+  ticketId: string;
+  indexInTier: number;
+}
+
+export const findEngineLocation = (
+  tickets: Ticket[] | undefined,
+  engineId: string
+): EngineLocation | null => {
+  if (!tickets) return null;
+  for (const ticket of tickets) {
+    const indexInTier = ticket.engines?.findIndex(engine => engine.id === engineId) ?? -1;
+    if (indexInTier >= 0 && ticket.engines) {
+      return {
+        engine: ticket.engines[indexInTier],
+        tier: ticket.ticketType,
+        ticketId: ticket.id,
+        indexInTier,
+      };
+    }
+  }
+  return null;
+};
 
 export const formatCycleTime = (seconds: number) => {
   const total = Math.max(0, Math.ceil(seconds));

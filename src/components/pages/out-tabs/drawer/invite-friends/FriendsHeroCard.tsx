@@ -49,21 +49,28 @@ export function FriendsHeroCard() {
   };
 
   return (
-    <div className="bg-pink-gradient relative overflow-hidden rounded-2xl p-4">
+    <div className="bg-background-overlay relative overflow-hidden rounded-2xl p-3">
       <span
         aria-hidden
-        className="pointer-events-none absolute -right-10 -top-10 h-32 w-32 rounded-full bg-white/15 blur-2xl"
+        className="bg-electric-pink/12 pointer-events-none absolute -right-8 -top-8 h-24 w-24 rounded-full blur-2xl"
+      />
+      <span
+        aria-hidden
+        className="pointer-events-none absolute bottom-0 left-[18%] right-[18%] z-2 h-[3px]"
+        style={{
+          background:
+            'linear-gradient(90deg, transparent 0%, color-mix(in srgb, var(--color-electric-pink) 90%, transparent) 50%, transparent 100%)',
+          filter: 'blur(0.8px)',
+        }}
       />
 
       <div className="relative flex items-center gap-3">
-        <div className="bg-white/20 flex-center h-10 w-10 flex-shrink-0 rounded-xl">
-          <UserPlus size={20} className="text-white" strokeWidth={2.4} />
+        <div className="bg-electric-pink/15 ring-electric-pink/30 flex-center h-10 w-10 flex-shrink-0 rounded-xl ring-1">
+          <UserPlus size={20} className="text-electric-pink" strokeWidth={2.2} />
         </div>
         <div className="flex min-w-0 flex-1 flex-col">
-          <h2 className="text-base font-extrabold leading-tight text-white">
-            {t('invite friends')}
-          </h2>
-          <p className="truncate text-[11px] text-white/80">{t('invite hero subtitle')}</p>
+          <h2 className="text-sm font-extrabold leading-tight text-white">{t('invite friends')}</h2>
+          <p className="text-pink-secondary truncate text-[11px]">{t('invite hero subtitle')}</p>
         </div>
         <HeroInlineStat
           label={t('invite hero stat invited')}
@@ -72,7 +79,7 @@ export function FriendsHeroCard() {
         />
       </div>
 
-      <div className="relative mt-3 flex flex-col rounded-xl bg-black/25 p-1.5">
+      <div className="relative mt-2.5 flex flex-col rounded-xl bg-black/25 p-1.5">
         <div className="mb-1 flex items-center justify-between px-2 pt-1.5">
           <span className="text-[9px] font-bold uppercase tracking-wider text-white/60">
             {t('per invite')}
@@ -100,14 +107,14 @@ export function FriendsHeroCard() {
         />
       </div>
 
-      <div className="relative mt-3 flex gap-2">
+      <div className="relative mt-2.5 flex gap-2">
         <Button
-          variant="transparent"
+          variant="primary"
           loading={isMeLoading || !linkReady}
           icon={copied ? <Check /> : <Share2 />}
-          iconSize={14}
+          iconSize={13}
           onClick={handleShare}
-          className="text-electric-pink h-9 flex-1 rounded-lg bg-white py-0 text-xs font-extrabold hover:bg-white/90"
+          className="bg-pink-gradient h-9 flex-1 rounded-lg py-0 text-xs font-extrabold text-white"
         >
           {copied ? t('link copied') : t('share invite')}
         </Button>
@@ -116,7 +123,7 @@ export function FriendsHeroCard() {
           loading={isMeLoading || !linkReady}
           onClick={handleCopy}
           aria-label={t('copy link')}
-          className="flex-center h-9 w-9 rounded-lg border border-white/30 bg-white/15 p-0 hover:bg-white/25"
+          className="flex-center h-9 w-9 rounded-lg bg-white/8 p-0 hover:bg-white/12"
         >
           {copied ? (
             <Check size={14} className="text-white" />
@@ -215,7 +222,9 @@ function HeroInlineStat({ label, value, accent, loading }: HeroInlineStatProps) 
           {value}
         </span>
       </SkeletonSuspense>
-      <span className="text-[9px] font-bold uppercase tracking-wider text-white/70">{label}</span>
+      <span className="text-pink-secondary text-[9px] font-bold uppercase tracking-wider">
+        {label}
+      </span>
     </div>
   );
 }

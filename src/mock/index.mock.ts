@@ -14,6 +14,20 @@ import { walletMock } from '@/mock/wallet.mock';
 import { achievementsMock } from '@/mock/achievements.mock';
 import { profileMock } from '@/mock/profile.mock';
 import { inventoryMock } from '@/mock/inventory.mock';
+import { enginesMock } from '@/mock/engines.mock';
+
+const successResponse = () => ({});
+
+const marketMutationHandlers = {
+  'POST market/engines/buy': successResponse,
+  'POST market/chips/buy': successResponse,
+  'POST market/builders/buy': successResponse,
+  'POST market/boosters/buy': successResponse,
+  'POST market/cosmetics/buy': successResponse,
+  'POST market/passes/buy': successResponse,
+  'POST market/tickets/buy': successResponse,
+  'POST market/statuses/buy': successResponse,
+};
 
 /**
  * Type for functional mock handlers.
@@ -37,11 +51,13 @@ export const mockData = {
   ...referralMock,
   ...exchangeMock,
   market: marketMock,
+  ...marketMutationHandlers,
   ...stakesMock,
   ...walletMock,
   ...achievementsMock,
   ...profileMock,
   ...inventoryMock,
+  ...enginesMock,
 } as const;
 
 export type MockData = typeof mockData;

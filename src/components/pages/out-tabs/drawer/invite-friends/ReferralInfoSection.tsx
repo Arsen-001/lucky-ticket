@@ -44,7 +44,16 @@ export const ReferralInfoSection = () => {
   ];
 
   return (
-    <div className="card-outlined bg-purple-gradient rounded-2xl p-3.5">
+    <div className="bg-background-overlay relative overflow-hidden rounded-2xl p-3.5">
+      <span
+        aria-hidden
+        className="pointer-events-none absolute bottom-0 left-[18%] right-[18%] z-2 h-[3px]"
+        style={{
+          background:
+            'linear-gradient(90deg, transparent 0%, color-mix(in srgb, var(--color-electric-pink) 90%, transparent) 50%, transparent 100%)',
+          filter: 'blur(0.8px)',
+        }}
+      />
       <div className="mb-2 flex items-center justify-between">
         <h3 className="text-pink-secondary text-xs font-bold uppercase tracking-wider">
           {t('rewards explained')}

@@ -32,17 +32,38 @@ export function DrawerItem({
         tabIndex={tabIndex}
         onClick={onNavigate}
         className={twMerge(
-          'group flex items-center gap-3 rounded-xl px-2.5 py-2.5 transition-colors',
+          'group relative flex items-center gap-3 overflow-hidden rounded-xl px-2.5 py-2.5 transition-colors',
           active
-            ? 'bg-electric-pink/15 text-white'
+            ? 'bg-background-overlay text-white'
             : 'text-white-secondary hover:bg-white/5 hover:text-white'
         )}
       >
+        {active && (
+          <span
+            aria-hidden
+            className="pointer-events-none absolute inset-0 overflow-hidden rounded-xl"
+            style={{
+              background:
+                'linear-gradient(135deg, transparent 30%, rgba(255,255,255,0.18) 50%, transparent 70%)',
+            }}
+          />
+        )}
+        {active && (
+          <span
+            aria-hidden
+            className="pointer-events-none absolute bottom-0 left-[18%] right-[18%] z-2 h-[3px]"
+            style={{
+              background:
+                'linear-gradient(90deg, transparent 0%, color-mix(in srgb, var(--color-electric-pink) 90%, transparent) 50%, transparent 100%)',
+              filter: 'blur(0.8px)',
+            }}
+          />
+        )}
         <span
           className={twMerge(
             'flex-center relative h-8 w-8 flex-shrink-0 rounded-lg transition-colors',
             active
-              ? 'bg-electric-pink/30 text-white'
+              ? 'bg-electric-pink/25 text-white'
               : 'bg-white/5 text-white-secondary group-hover:bg-white/10'
           )}
         >
@@ -55,16 +76,16 @@ export function DrawerItem({
             />
           )}
         </span>
-        <span className="flex-1 truncate text-sm font-semibold">{title}</span>
+        <span className="relative flex-1 truncate text-sm font-semibold">{title}</span>
         {showBadge && (
-          <span className="bg-electric-pink/20 text-electric-pink min-w-[20px] rounded-full px-1.5 py-0.5 text-center text-[10px] font-extrabold tabular-nums">
+          <span className="bg-electric-pink relative min-w-[20px] rounded-full px-1.5 py-0.5 text-center text-[10px] font-extrabold tabular-nums text-white">
             {badge > 99 ? '99+' : badge}
           </span>
         )}
         <ChevronRight
           size={16}
           className={twMerge(
-            'flex-shrink-0 transition-transform',
+            'relative flex-shrink-0 transition-transform',
             active ? 'text-electric-pink' : 'text-pink-secondary'
           )}
         />

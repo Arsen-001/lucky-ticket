@@ -59,11 +59,20 @@ export function MarketItemCard({
     <div
       onClick={onClick}
       className={twMerge(
-        'bg-purple-gradient rounded-xl p-4 flex flex-col transition-all h-full relative overflow-hidden',
+        'bg-background-overlay rounded-xl p-4 flex flex-col transition-all h-full relative overflow-hidden',
         onClick && 'cursor-pointer',
         className
       )}
     >
+      <span
+        aria-hidden
+        className="pointer-events-none absolute bottom-0 left-[18%] right-[18%] z-2 h-[3px]"
+        style={{
+          background:
+            'linear-gradient(90deg, transparent 0%, color-mix(in srgb, var(--color-electric-pink) 90%, transparent) 50%, transparent 100%)',
+          filter: 'blur(0.8px)',
+        }}
+      />
       {isNew && (
         <div className="absolute top-0 right-0 bg-orange-400/30 px-2 py-1.5 rounded-bl-xl border-l border-b border-white/10 z-10 shadow-lg">
           <span className="text-[10px] text-orange-400 font-bold uppercase tracking-wider block leading-none ">

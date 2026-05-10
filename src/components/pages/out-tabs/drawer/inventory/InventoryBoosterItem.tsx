@@ -21,14 +21,19 @@ export function InventoryBoosterItem({ booster, index, onActivate }: InventoryBo
 
   return (
     <div
-      className="animate-slide-in-bottom relative flex items-center gap-3 overflow-hidden rounded-2xl border p-3"
+      className="bg-background-overlay animate-slide-in-bottom relative flex items-center gap-3 overflow-hidden rounded-2xl p-3"
       style={{
         animationDelay: `${index * 60}ms`,
-        background: `linear-gradient(135deg, color-mix(in srgb, ${accent} 18%, var(--color-background-overlay)) 0%, var(--color-background-overlay) 75%)`,
-        borderColor: `color-mix(in srgb, ${accent} 50%, transparent)`,
-        boxShadow: `0 0 12px color-mix(in srgb, ${accent} 14%, transparent)`,
       }}
     >
+      <span
+        aria-hidden
+        className="pointer-events-none absolute bottom-0 left-[18%] right-[18%] z-2 h-[3px]"
+        style={{
+          background: `linear-gradient(90deg, transparent 0%, color-mix(in srgb, ${accent} 90%, transparent) 50%, transparent 100%)`,
+          filter: 'blur(0.8px)',
+        }}
+      />
       <div
         className="flex-center h-14 w-14 shrink-0 rounded-2xl border"
         style={{

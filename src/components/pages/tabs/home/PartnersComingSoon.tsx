@@ -1,10 +1,12 @@
-import type { ClassNameProps } from '@/types/interfaces/component.interfcaes';
-import { getAppTranslations } from '@/i18n/getAppTranslations';
-import { Info } from '@/components/shared/Info';
-import { Handshake } from 'lucide-react';
+'use client';
 
-export async function PartnersComingSoon({ className }: ClassNameProps) {
-  const t = await getAppTranslations();
+import { Handshake } from 'lucide-react';
+import { Info } from '@/components/shared/Info';
+import { useAppTranslations } from '@/hooks/useAppTranslations';
+import type { ClassNameProps } from '@/types/interfaces/component.interfcaes';
+
+export function PartnersComingSoon({ className }: ClassNameProps) {
+  const t = useAppTranslations();
   return (
     <Info
       variant="purple-gradient"

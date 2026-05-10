@@ -69,21 +69,24 @@ export function InventoryItem({
   return (
     <div
       className={twMerge(
-        'animate-slide-in-bottom relative flex flex-col gap-3 overflow-hidden rounded-2xl p-3.5',
+        'bg-background-overlay animate-slide-in-bottom relative flex flex-col gap-3 overflow-hidden rounded-2xl p-3.5',
         isLevelingUp && 'inventory-chip-flash'
       )}
       style={
         {
           '--chip-accent': accent,
           animationDelay: `${index * 60}ms`,
-          background: `linear-gradient(135deg, color-mix(in srgb, ${accent} 22%, var(--color-background-overlay)) 0%, var(--color-background-overlay) 70%)`,
-          border: `1px solid color-mix(in srgb, ${accent} ${canLevelUp ? 80 : 50}%, transparent)`,
-          boxShadow: canLevelUp
-            ? `0 0 0 1px color-mix(in srgb, ${accent} 35%, transparent), 0 12px 32px color-mix(in srgb, ${accent} 28%, transparent), 0 0 22px color-mix(in srgb, ${accent} 22%, transparent)`
-            : `0 0 0 1px color-mix(in srgb, ${accent} 18%, transparent), 0 8px 24px color-mix(in srgb, ${accent} 12%, transparent)`,
         } as React.CSSProperties
       }
     >
+      <span
+        aria-hidden
+        className="pointer-events-none absolute bottom-0 left-[18%] right-[18%] z-2 h-[3px]"
+        style={{
+          background: `linear-gradient(90deg, transparent 0%, color-mix(in srgb, ${accent} 90%, transparent) 50%, transparent 100%)`,
+          filter: 'blur(0.8px)',
+        }}
+      />
       <div className="flex items-center gap-3">
         <div
           className="flex-center h-16 w-16 shrink-0 rounded-2xl border"

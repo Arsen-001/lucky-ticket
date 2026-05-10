@@ -22,7 +22,7 @@ export interface InventoryShardCount {
   count: number;
 }
 
-export type InventoryBoosterDuration = 3 | 6 | 12 | 24 | 48;
+export type InventoryBoosterDuration = 3 | 4 | 6 | 12 | 24 | 48;
 
 export interface InventoryBooster {
   id: string;

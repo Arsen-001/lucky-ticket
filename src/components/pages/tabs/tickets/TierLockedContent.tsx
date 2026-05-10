@@ -1,0 +1,80 @@
+'use client';
+
+import Image from 'next/image';
+import { Ticket } from '@/components/shared/icons/Ticket';
+import { TicketDetailsRequirements } from '@/components/pages/out-tabs/tabs-extra/ticket/TicketDetailsRequirements';
+import { useAppTranslations } from '@/hooks/useAppTranslations';
+import { icons } from '@/constants/icons';
+import type { Ticket as TicketModel, TicketType } from '@/types/types/ticket.types';
+import type { MessageIds } from '@/types/types/i18n.types';
+
+const titleIdByType: Record<TicketType, MessageIds> = {
+  bronze: 'bronze',
+  silver: 'silver',
+  gold: 'golden',
+  platinum: 'platinum',
+  diamond: 'diamond',
+};
+
+const descriptionIdByType: Record<TicketType, MessageIds> = {
+  bronze: 'bronze ticket description',
+  silver: 'silver ticket description',
+  gold: 'golden ticket description',
+  platinum: 'platinum ticket description',
+  diamond: 'diamond ticket description',
+};
+
+export interface TierLockedContentProps {
+  ticket: TicketModel;
+  className?: string;
+}
+
+export function TierLockedContent({ ticket, className }: TierLockedContentProps) {
+  const t = useAppTranslations();
+  const tierColor = `var(--color-${ticket.ticketType})`;
+
+  return (
+    <div className={`flex flex-col gap-3 ${className ?? ''}`}>
+      <div
+        className="card-outlined rounded-2xl p-4.5 relative overflow-hidden"
+        style={{
+          background: `radial-gradient(circle at 100% 0%, color-mix(in srgb, ${tierColor} 28%, transparent) 0%, transparent 55%), var(--gradient-purple-reverse)`,
+        }}
+      >
+        <div className="flex items-start gap-4 relative">
+          <div
+            className="w-22 h-22 rounded-2xl flex-center shrink-0 relative"
+            style={{
+              background: `radial-gradient(circle at 50% 50%, color-mix(in srgb, ${tierColor} 50%, transparent) 0%, transparent 70%)`,
+            }}
+          >
+            <Ticket type={ticket.ticketType} width={84} height={84} />
+            <Image
+              src={icons.lock}
+              alt=""
+              height={20}
+              width={20}
+              className="absolute bottom-1 right-1"
+            />
+          </div>
+          <div className="flex-1 min-w-0">
+            <span className="inline-block text-[10px] font-extrabold uppercase tracking-wider px-2 py-0.5 rounded-full text-pink-secondary bg-pink-secondary/18 border border-pink-secondary/40">
+              {t('locked')}
+            </span>
+            <h2 className="mt-1.5 text-xl font-extrabold text-white tracking-tight leading-tight">
+              {t('{tier} ticket', { tier: t(titleIdByType[ticket.ticketType]) })}
+            </h2>
+            <div className="mt-1.5 text-[11px] text-white-secondary leading-snug">
+              {t(descriptionIdByType[ticket.ticketType])}
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <TicketDetailsRequirements
+        ticketType={ticket.ticketType}
+        requirements={ticket.requirements}
+      />
+    </div>
+  );
+}

@@ -8,12 +8,7 @@ export const ticketsApi = api.injectEndpoints({
       query: () => ({ url: '/tickets' }),
       providesTags: [rtkTags.tickets],
     }),
-
-    getTicketById: builder.query<Ticket, string>({
-      query: id => ({ url: `/tickets/${id}` }),
-      providesTags: [rtkTags.ticketsById],
-    }),
   }),
 });
 
-export const { useGetTicketsQuery, useGetTicketByIdQuery } = ticketsApi;
+export const { useGetTicketsQuery } = ticketsApi;

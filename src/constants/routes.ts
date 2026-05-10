@@ -34,8 +34,11 @@ export const routes = {
   wallet: '/wallet',
   tickets: {
     index: '/tickets',
-    getById: function (ticketId: string) {
-      return (this.index + `/${ticketId}`) as `/tickets/${string}`;
+  },
+  engines: {
+    index: '/engines',
+    getById: function (engineId: string) {
+      return (this.index + `/${engineId}`) as `/engines/${string}`;
     },
   },
   support: {
