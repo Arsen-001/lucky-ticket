@@ -958,7 +958,6 @@ Settings provide control, security, and personalization for the user's account.
 
 - **Two-Factor Authentication (2FA):** Enable extra security for the account.
 - **Email Confirmation:** Confirm or change the linked email address.
-- **Phone Confirmation:** Confirm or change the linked phone number.
 - **Change Username:** Update the public display name.
 - **Change Avatar:** Pick a profile picture from the user's owned avatar inventory. The picker lists every avatar the user owns — both the default free avatars and any paid avatars purchased in the Market. New avatars are acquired exclusively through the Market (see Section 16.1).
 - **Notification Preferences:** Per-channel (Email / Telegram bot) toggles for which notification categories the user receives. See Section 16.2.

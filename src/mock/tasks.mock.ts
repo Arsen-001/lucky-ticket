@@ -866,13 +866,6 @@ const PROFILE = buildCategory({
       deeplink: '/settings/security',
       rarity: TaskRarity.RARE,
     },
-    {
-      title: 'Confirm phone number',
-      subtitle: 'Add a phone number for recovery.',
-      rewards: [ap(40)],
-      progress: { current: 0, target: 1 },
-      deeplink: '/settings/phone',
-    },
     // ─── Profile (DOCS §4.2) ───
     {
       title: 'Customize your avatar',
