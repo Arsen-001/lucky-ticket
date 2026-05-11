@@ -98,7 +98,7 @@ export function MarketStatusSection({ onPurchase }: MarketStatusSectionProps) {
                 <ul className="text-white/55 flex flex-col gap-0.5 text-[10px]">
                   {status.privileges.slice(0, 3).map((privilege, idx) => (
                     <li key={idx} className="line-clamp-1">
-                      · {t(privilege as MessageIds)}
+                      · {t(privilege as MessageIds, { percentage: isVIP ? 100 : 50 })}
                     </li>
                   ))}
                 </ul>
