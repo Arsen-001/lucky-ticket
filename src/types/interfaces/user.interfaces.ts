@@ -7,6 +7,7 @@ export interface MeResponse {
   vipLevel: number;
   isVerified: boolean;
   avatar: string;
+  avatarId?: string;
   coins: number;
   points: number;
   phoneNumber?: string;

@@ -30,11 +30,12 @@ export default function SecurityPage() {
         <SettingsMenuItem
           icon={
             is2FAEnabled ? (
-              <ShieldCheck className="text-green-500" size={20} />
+              <ShieldCheck className="text-green-500" size={18} />
             ) : (
-              <ShieldAlert className="text-gray-secondary" size={20} />
+              <ShieldAlert className="text-gray-secondary" size={18} />
             )
           }
+          accent="teal"
           title={t('2fa status')}
           description={is2FAEnabled ? t('enabled') : t('disabled')}
           rightElement={

@@ -1,0 +1,97 @@
+import { images } from '@/constants/images';
+import type { UserAvatar } from '@/types/interfaces/avatars.interfaces';
+
+const avatars: UserAvatar[] = [
+  {
+    id: 'avatar-1',
+    src: 'https://randomuser.me/api/portraits/men/1.jpg',
+    name: 'Pixel Rookie',
+    tier: 'free',
+    level: 1,
+    owned: true,
+  },
+  {
+    id: 'avatar-2',
+    src: 'https://randomuser.me/api/portraits/men/15.jpg',
+    name: 'Pixel Scout',
+    tier: 'free',
+    level: 2,
+    owned: true,
+  },
+  {
+    id: 'avatar-3',
+    src: 'https://randomuser.me/api/portraits/men/32.jpg',
+    name: 'Sparkrunner',
+    tier: 'paid',
+    level: 3,
+    boost: { type: 'engineSpeed', pct: 3 },
+    owned: false,
+  },
+  {
+    id: 'avatar-4',
+    src: 'https://randomuser.me/api/portraits/women/8.jpg',
+    name: 'Coin Hunter',
+    tier: 'paid',
+    level: 4,
+    boost: { type: 'marketDiscount', pct: 5 },
+    owned: false,
+  },
+  {
+    id: 'avatar-5',
+    src: 'https://randomuser.me/api/portraits/women/22.jpg',
+    name: 'AP Drifter',
+    tier: 'paid',
+    level: 5,
+    boost: { type: 'apEarn', pct: 7 },
+    owned: false,
+  },
+  {
+    id: 'avatar-6',
+    src: 'https://randomuser.me/api/portraits/women/45.jpg',
+    name: 'Champion',
+    tier: 'paid',
+    level: 6,
+    boost: { type: 'tournamentReward', pct: 10 },
+    owned: false,
+  },
+  {
+    id: 'avatar-7',
+    src: 'https://randomuser.me/api/portraits/men/68.jpg',
+    name: 'Multiplier Adept',
+    tier: 'paid',
+    level: 7,
+    boost: { type: 'claimMultiplier', pct: 12 },
+    owned: false,
+  },
+  {
+    id: 'avatar-8',
+    src: 'https://randomuser.me/api/portraits/women/60.jpg',
+    name: 'Speedstar',
+    tier: 'paid',
+    level: 8,
+    boost: { type: 'engineSpeed', pct: 15 },
+    owned: false,
+  },
+  {
+    id: 'avatar-9',
+    src: 'https://randomuser.me/api/portraits/men/85.jpg',
+    name: 'Bargain Lord',
+    tier: 'paid',
+    level: 9,
+    boost: { type: 'marketDiscount', pct: 18 },
+    owned: false,
+  },
+  {
+    id: 'avatar-10',
+    src: images.avatar.src,
+    name: 'Cyber Emperor',
+    tier: 'paid',
+    level: 10,
+    boost: { type: 'claimMultiplier', pct: 25 },
+    owned: true,
+  },
+];
+
+export const avatarsMock = {
+  avatars,
+};

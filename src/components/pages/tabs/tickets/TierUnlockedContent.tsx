@@ -6,6 +6,7 @@ import { useAppTranslations } from '@/hooks/useAppTranslations';
 import type { TicketEngine } from '@/types/interfaces/ticket.interfaces';
 import type { Ticket, TicketType } from '@/types/types/ticket.types';
 import '@/styles/components/engine-preview-card.css';
+import '@/styles/components/achievement.css';
 
 const TIER_CLASS: Record<TicketType, string> = {
   bronze: 'engine-preview-card-tier-bronze',
@@ -13,6 +14,18 @@ const TIER_CLASS: Record<TicketType, string> = {
   gold: 'engine-preview-card-tier-gold',
   platinum: 'engine-preview-card-tier-platinum',
   diamond: 'engine-preview-card-tier-diamond',
+};
+
+const TIER_NUMBER_GRADIENT: Record<TicketType, string> = {
+  bronze:
+    'linear-gradient(100deg, #A35423 0%, #FFD2A0 25%, #E08A3A 50%, #FFEBC9 75%, #A35423 100%)',
+  silver:
+    'linear-gradient(100deg, #8C8E90 0%, #FFFFFF 25%, #D8D8D8 50%, #FFFFFF 75%, #8C8E90 100%)',
+  gold: 'linear-gradient(100deg, #B68A2C 0%, #FFF5D9 18%, #F8BD3E 38%, #FFFFFF 55%, #F8BD3E 75%, #B68A2C 100%)',
+  platinum:
+    'linear-gradient(100deg, #9F9D90 0%, #FFFFFF 25%, #E2E0D0 50%, #FFFFFF 75%, #9F9D90 100%)',
+  diamond:
+    'linear-gradient(100deg, #1B7E78 0%, #DFFFFC 25%, #3FD9CF 50%, #FFFFFF 75%, #1B7E78 100%)',
 };
 
 export interface TierUnlockedContentProps {
@@ -47,7 +60,13 @@ export function TierUnlockedContent({
             {t('in inventory')}
           </div>
           <div className="flex items-baseline gap-1.5 mt-0.5">
-            <span className="text-2xl font-extrabold text-white tabular-nums leading-none">
+            <span
+              className="ach-status-username tabular-nums leading-none"
+              style={{
+                fontSize: '30px',
+                backgroundImage: TIER_NUMBER_GRADIENT[tier],
+              }}
+            >
               {inventoryCount}
             </span>
             <span className="text-[11px] text-white-secondary">{t('tickets')}</span>
@@ -58,7 +77,13 @@ export function TierUnlockedContent({
             {t('engines')}
           </div>
           <div className="flex items-baseline gap-1 mt-0.5 justify-end">
-            <span className="text-2xl font-extrabold text-white tabular-nums leading-none">
+            <span
+              className="ach-status-username tabular-nums leading-none"
+              style={{
+                fontSize: '30px',
+                backgroundImage: TIER_NUMBER_GRADIENT[tier],
+              }}
+            >
               {engines.length}
             </span>
             <span className="text-[11px] text-white-secondary">{t('active')}</span>

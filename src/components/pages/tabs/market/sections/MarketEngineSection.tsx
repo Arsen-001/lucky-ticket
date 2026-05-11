@@ -22,7 +22,7 @@ export function MarketEngineSection({ engines, onPurchase }: MarketEngineSection
   if (!engines.length) return null;
 
   return (
-    <MarketSectionGrid title={t('engines')}>
+    <MarketSectionGrid title={t('engines')} icon={Cog} accent="var(--color-gold)">
       {engines.map(engine => {
         const accentVar = `var(--color-${engine.ticketType})`;
         const isLocked = !isTierUnlocked(engine.ticketType);

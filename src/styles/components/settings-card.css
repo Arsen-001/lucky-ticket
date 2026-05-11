@@ -1,0 +1,57 @@
+.settings-card {
+  position: relative;
+  background: var(--color-background-overlay);
+  overflow: hidden;
+}
+
+@keyframes settings-bottom-shine-pulse {
+  0%,
+  100% {
+    transform: scaleX(0.35);
+    opacity: 0.55;
+  }
+  50% {
+    transform: scaleX(1);
+    opacity: 1;
+  }
+}
+
+.settings-card::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 18%;
+  right: 18%;
+  height: 1px;
+  filter: blur(0.6px);
+  pointer-events: none;
+  z-index: 2;
+  transform-origin: center;
+  animation: settings-bottom-shine-pulse 2.4s ease-in-out infinite;
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    var(--settings-card-accent, rgba(255, 56, 144, 0.85)) 50%,
+    transparent 100%
+  );
+}
+
+.settings-card--gold {
+  --settings-card-accent: rgba(248, 189, 62, 0.95);
+}
+
+.settings-card--pink {
+  --settings-card-accent: rgba(255, 56, 144, 0.85);
+}
+
+.settings-card--purple {
+  --settings-card-accent: rgba(176, 132, 240, 0.85);
+}
+
+.settings-card--teal {
+  --settings-card-accent: rgba(45, 212, 191, 0.85);
+}
+
+.settings-card--error {
+  --settings-card-accent: rgba(220, 80, 80, 0.9);
+}

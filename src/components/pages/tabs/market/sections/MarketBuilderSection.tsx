@@ -23,7 +23,7 @@ export function MarketBuilderSection({ builders, onPurchase }: MarketBuilderSect
   if (!builders.length) return null;
 
   return (
-    <MarketSectionGrid title={t('chip builders')}>
+    <MarketSectionGrid title={t('chip builders')} icon={Hammer} accent="var(--color-teal)">
       {builders.map(builder => {
         const accentVar = builder.tier
           ? `var(--color-${builder.tier})`

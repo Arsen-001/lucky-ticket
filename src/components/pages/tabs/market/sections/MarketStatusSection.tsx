@@ -37,7 +37,7 @@ export function MarketStatusSection({ onPurchase }: MarketStatusSectionProps) {
   if (!isLoading && !statuses.length) return null;
 
   return (
-    <MarketSectionGrid title={t('statuses')}>
+    <MarketSectionGrid title={t('statuses')} icon={Crown} accent="var(--color-gold)">
       {statuses.map(status => {
         const isVIP = status.statusType === MarketStatusType.VIP;
         const accent = isVIP ? 'gold' : 'pink';

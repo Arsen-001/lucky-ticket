@@ -22,7 +22,7 @@ export function MarketChipSection({ chips, onPurchase }: MarketChipSectionProps)
   if (!chips.length) return null;
 
   return (
-    <MarketSectionGrid title={t('chips')}>
+    <MarketSectionGrid title={t('chips')} icon={Cpu} accent="var(--color-electric-purple)">
       {chips.map(chip => {
         const accentVar = `var(--color-${chip.quality})`;
         const Icon = chip.type === 'speed' ? Cpu : MemoryStick;

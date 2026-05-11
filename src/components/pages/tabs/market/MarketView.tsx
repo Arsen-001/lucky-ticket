@@ -3,7 +3,7 @@
 import { useMemo, useState, type ReactNode } from 'react';
 import { useGetMarketDataQuery } from '@/api/market.api';
 import { useGetMeQuery } from '@/api/me.api';
-import { MarketHero } from '@/components/pages/tabs/market/MarketHero';
+import { MarketHeroCarousel } from '@/components/pages/tabs/market/MarketHeroCarousel';
 import {
   MARKET_CATEGORY_ORDER,
   MarketCategoryChips,
@@ -90,10 +90,12 @@ export function MarketView() {
 
   return (
     <div className="flex flex-col gap-4">
-      <MarketHero />
-      <MarketCategoryChips active={active} onChange={setActive} />
+      <MarketHeroCarousel onPurchase={handlePurchase} />
+      <div className="px-5">
+        <MarketCategoryChips active={active} onChange={setActive} />
+      </div>
 
-      <div key={active} className="animate-slide-in-bottom flex flex-col gap-5">
+      <div key={active} className="animate-slide-in-bottom flex flex-col gap-5 px-5">
         {showAll
           ? MARKET_CATEGORY_ORDER.filter(k => k !== ALL_KEY).map(key => (
               <div key={key}>{sections?.[key as Exclude<MarketCategoryKey, 'all'>]}</div>

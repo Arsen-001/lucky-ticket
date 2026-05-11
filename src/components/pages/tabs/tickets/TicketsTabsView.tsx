@@ -13,7 +13,6 @@ import { TicketsTierSummary } from '@/components/pages/tabs/tickets/TicketsTierS
 import {
   PARTNERS_TAB_KEY,
   TICKETS_TIER_ORDER,
-  TicketsTierTabs,
   type TicketsTabKey,
   type TicketsTierTab,
 } from '@/components/pages/tabs/tickets/TicketsTierTabs';
@@ -33,7 +32,6 @@ export function TicketsTabsView() {
   const [completeEngineCycle] = useCompleteEngineCycleMutation();
 
   const [activeTab, setActiveTab] = useState<TicketsTabKey>(TicketsEnum.BRONZE);
-  const activeTier = activeTab === PARTNERS_TAB_KEY ? null : activeTab;
   const [elapsedByEngine, setElapsedByEngine] = useState<Record<string, number>>({});
   const [claimedModal, setClaimedModal] = useState<{
     open: boolean;
@@ -159,13 +157,11 @@ export function TicketsTabsView() {
   return (
     <div className="flex flex-col gap-4">
       <TicketsTierSummary
-        tickets={tickets}
+        tabs={tabs}
         loading={isFetching}
-        activeTier={activeTier ?? undefined}
-        onTierClick={setActiveTab}
+        active={activeTab}
+        onChange={setActiveTab}
       />
-
-      <TicketsTierTabs active={activeTab} onChange={setActiveTab} tabs={tabs} />
 
       <div key={activeTab} className="animate-slide-in-bottom">
         {renderTabContent()}

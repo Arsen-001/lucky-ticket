@@ -6,22 +6,9 @@
 
 .tab-bar-active-flow {
   background: linear-gradient(
-    120deg,
-    #de009b 0%,
-    #a32183 25%,
-    #743df5 50%,
-    #a32183 75%,
-    #de009b 100%
+    135deg,
+    var(--color-electric-pink) 0%,
+    var(--color-gradient-lightpink) 50%,
+    var(--color-electric-pink) 100%
   );
-  background-size: 300% 100%;
-  animation: tab-bar-active-flow 18s linear infinite;
-}
-
-@keyframes tab-bar-active-flow {
-  0% {
-    background-position: 0% 50%;
-  }
-  100% {
-    background-position: 300% 50%;
-  }
 }

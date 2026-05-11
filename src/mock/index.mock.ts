@@ -6,6 +6,7 @@ import { tasksMock } from '@/mock/tasks.mock';
 import { leaderboardMock } from '@/mock/leaderboard.mock';
 import { supportMock } from '@/mock/support.mock';
 import { notificationsMock } from '@/mock/notifications.mock';
+import { notificationPreferencesMock } from '@/mock/notification-preferences.mock';
 import { referralMock } from '@/mock/referral.mock';
 import { exchangeMock } from '@/mock/exchange.mock';
 import { marketMock } from '@/mock/market.mock';
@@ -15,6 +16,7 @@ import { achievementsMock } from '@/mock/achievements.mock';
 import { profileMock } from '@/mock/profile.mock';
 import { inventoryMock } from '@/mock/inventory.mock';
 import { enginesMock } from '@/mock/engines.mock';
+import { avatarsMock } from '@/mock/avatars.mock';
 
 const successResponse = () => ({});
 
@@ -48,6 +50,7 @@ export const mockData = {
   ...leaderboardMock,
   ...supportMock,
   ...notificationsMock,
+  ...notificationPreferencesMock,
   ...referralMock,
   ...exchangeMock,
   market: marketMock,
@@ -58,6 +61,7 @@ export const mockData = {
   ...profileMock,
   ...inventoryMock,
   ...enginesMock,
+  ...avatarsMock,
 } as const;
 
 export type MockData = typeof mockData;

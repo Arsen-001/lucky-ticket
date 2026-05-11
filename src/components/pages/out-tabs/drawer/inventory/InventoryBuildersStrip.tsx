@@ -1,4 +1,5 @@
-import { ScrollText } from 'lucide-react';
+import { Hammer } from 'lucide-react';
+import '@/styles/components/inventory.css';
 import { useAppTranslations } from '@/hooks/useAppTranslations';
 import { QUALITY_ACCENT, QUALITY_TIERS } from '@/utils/global/inventory.utils';
 import type { TicketType } from '@/types/types/ticket.types';
@@ -33,13 +34,16 @@ export function InventoryBuildersStrip({
           return (
             <div
               key={tier}
-              className="flex items-center justify-between gap-2 rounded-xl border bg-black/25 px-3 py-2"
-              style={{
-                borderColor: `color-mix(in srgb, ${accent} 45%, transparent)`,
-              }}
+              className="inventory-card-shine relative flex items-center justify-between gap-2 overflow-hidden rounded-xl border bg-black/25 px-3 py-2"
+              style={
+                {
+                  borderColor: `color-mix(in srgb, ${accent} 45%, transparent)`,
+                  '--chip-accent': accent,
+                } as React.CSSProperties
+              }
             >
               <div className="flex items-center gap-1.5 min-w-0">
-                <ScrollText
+                <Hammer
                   size={13}
                   stroke={accent}
                   fill={accent}

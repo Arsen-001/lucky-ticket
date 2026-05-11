@@ -1,0 +1,44 @@
+.avatar-tile {
+  position: relative;
+}
+
+@keyframes avatar-tile-rainbow {
+  0% {
+    background-position: 0% 50%;
+  }
+  100% {
+    background-position: 200% 50%;
+  }
+}
+
+.avatar-tile--rainbow {
+  background:
+    linear-gradient(var(--color-background-overlay), var(--color-background-overlay)) padding-box,
+    linear-gradient(
+        90deg,
+        rgba(255, 80, 180, 0.95),
+        rgba(255, 200, 100, 0.95),
+        rgba(120, 220, 255, 0.95),
+        rgba(180, 120, 255, 0.95),
+        rgba(255, 80, 180, 0.95)
+      )
+      border-box;
+  background-size:
+    100% 100%,
+    200% 100%;
+  animation: avatar-tile-rainbow 4s linear infinite;
+}
+
+.avatar-tile-badge--rainbow {
+  background: linear-gradient(
+    90deg,
+    rgba(255, 80, 180, 0.95),
+    rgba(255, 200, 100, 0.95),
+    rgba(120, 220, 255, 0.95),
+    rgba(180, 120, 255, 0.95),
+    rgba(255, 80, 180, 0.95)
+  );
+  background-size: 200% 100%;
+  animation: avatar-tile-rainbow 4s linear infinite;
+  color: rgb(20, 14, 36);
+}

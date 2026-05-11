@@ -1,7 +1,7 @@
 'use client';
 
 import { useMemo, useState } from 'react';
-import { Cpu, MemoryStick, ScrollText } from 'lucide-react';
+import { Cpu, Hammer, MemoryStick } from 'lucide-react';
 import { twMerge } from 'tailwind-merge';
 import { Button } from '@/components/shared/buttons/Button';
 import { Modal } from '@/components/shared/modals/Modal';
@@ -128,7 +128,7 @@ export function ChipMintModal({
           }}
         >
           <ChipMintCostRow
-            icon={<ScrollText size={13} stroke={accent} strokeWidth={2.4} />}
+            icon={<Hammer size={13} stroke={accent} strokeWidth={2.4} />}
             label={t('chip builder')}
             owned={buildersOwned}
             required={isFirst ? 0 : 1}

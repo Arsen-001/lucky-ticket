@@ -18,3 +18,12 @@ export interface Notification {
   type?: NotificationType;
   actionRoute?: Route;
 }
+
+export type NotificationChannel = 'email' | 'telegram';
+
+export type NotificationPreferenceKey = 'tournamentStart' | 'tournamentEnd' | 'stake' | 'system';
+
+export type NotificationPreferences = Record<
+  NotificationChannel,
+  Record<NotificationPreferenceKey, boolean>
+>;

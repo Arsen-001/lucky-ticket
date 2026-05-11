@@ -74,13 +74,13 @@ export function InventoryTypeFilter({ value, onChange, className }: InventoryTyp
   return (
     <div
       ref={scrollRef}
-      className={twMerge('scrollbar-hidden relative overflow-x-auto scroll-smooth', className)}
+      className={twMerge('scrollbar-hidden relative overflow-x-auto scroll-smooth py-3', className)}
     >
-      <div className="relative inline-flex items-center gap-2 py-1">
+      <div className="relative inline-flex items-center gap-2">
         {indicator && (
           <span
             aria-hidden
-            className="bg-pink-gradient shadow-electric-pink/30 pointer-events-none absolute top-0 bottom-0 rounded-full shadow-lg transition-[transform,width] duration-[450ms] ease-[cubic-bezier(0.22,1,0.36,1)]"
+            className="bg-pink-gradient pointer-events-none absolute top-0 bottom-0 rounded-full transition-[transform,width] duration-[450ms] ease-[cubic-bezier(0.22,1,0.36,1)]"
             style={{
               width: indicator.width,
               transform: `translateX(${indicator.left}px)`,

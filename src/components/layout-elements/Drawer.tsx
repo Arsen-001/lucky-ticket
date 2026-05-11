@@ -8,7 +8,6 @@ import {
   useRef,
   useState,
 } from 'react';
-import Image from 'next/image';
 import {
   Bell,
   ChartNoAxesColumnIncreasing,
@@ -18,10 +17,8 @@ import {
   Layers,
   Package,
   Settings,
-  UserRound,
   UserRoundPlus,
   Wallet,
-  Zap,
 } from 'lucide-react';
 import { twMerge } from 'tailwind-merge';
 
@@ -31,17 +28,16 @@ import { useGetStakesQuery } from '@/api/stakes.api';
 import { isStakeReady } from '@/utils/global/stakes.utils';
 import { Avatar } from '@/components/shared/user-elements/Avatar';
 import { ClientPortal } from '@/components/shared/ClientPortal';
-import { DrawerBalancePill } from '@/components/layout-elements/DrawerBalancePill';
 import { DrawerItem } from '@/components/layout-elements/DrawerItem';
 import { Link } from '@/components/shared/links/Link';
 import { Skeleton } from '@/components/shared/seleketons/Skeleton';
 import { SkeletonSuspense } from '@/components/shared/seleketons/SkeletonSuspense';
-import { icons } from '@/constants/icons';
 import { type Route, routes } from '@/constants/routes';
 import { useAppTranslations } from '@/hooks/useAppTranslations';
 import { useLocation } from '@/hooks/useLocation';
 import { closeDrawer, selectDrawerOpen } from '@/lib/rtk/features/layout.slice';
 import { useAppDispatch, useAppSelector } from '@/lib/rtk/hooks';
+import '@/styles/components/drawer.css';
 
 const SWIPE_CLOSE_THRESHOLD_PX = 80;
 
@@ -50,11 +46,6 @@ interface DrawerSectionItem {
   title: string;
   icon: ReactNode;
   badge?: number;
-}
-
-interface DrawerSection {
-  label: string;
-  items: DrawerSectionItem[];
 }
 
 export function Drawer() {
@@ -200,63 +191,42 @@ export function Drawer() {
     [dispatch]
   );
 
-  const sections: DrawerSection[] = [
+  const items: DrawerSectionItem[] = [
+    { route: routes.wallet, title: t('wallet'), icon: <Wallet size={18} /> },
     {
-      label: t('account'),
-      items: [
-        { route: routes.profile.index, title: t('profile'), icon: <UserRound size={18} /> },
-        {
-          route: routes.notifications,
-          title: t('notifications'),
-          icon: <Bell size={18} />,
-          badge: unreadCount,
-        },
-        { route: routes.settings.index, title: t('settings'), icon: <Settings size={18} /> },
-      ],
+      route: routes.inventory,
+      title: t('boost inventory'),
+      icon: <Package size={18} />,
     },
     {
-      label: t('activity'),
-      items: [
-        { route: routes.wallet, title: t('wallet'), icon: <Wallet size={18} /> },
-        {
-          route: routes.inventory,
-          title: t('boost inventory'),
-          icon: <Package size={18} />,
-        },
-        {
-          route: routes.stakes.index,
-          title: t('stakes'),
-          icon: <Layers size={18} />,
-          badge: claimableStakesCount,
-        },
-        {
-          route: routes.leaderboard,
-          title: t('leaderboard'),
-          icon: <ChartNoAxesColumnIncreasing size={18} />,
-        },
-      ],
+      route: routes.stakes.index,
+      title: t('stakes'),
+      icon: <Layers size={18} />,
+      badge: claimableStakesCount,
     },
     {
-      label: t('earn'),
-      items: [
-        {
-          route: routes.inviteFriends,
-          title: t('friends'),
-          icon: <UserRoundPlus size={18} />,
-        },
-      ],
+      route: routes.leaderboard,
+      title: t('leaderboard'),
+      icon: <ChartNoAxesColumnIncreasing size={18} />,
     },
     {
-      label: t('help'),
-      items: [
-        {
-          route: routes.support.index,
-          title: t('support'),
-          icon: <CircleQuestionMark size={18} />,
-        },
-        { route: routes.languages, title: t('languages'), icon: <Globe size={18} /> },
-      ],
+      route: routes.inviteFriends,
+      title: t('friends'),
+      icon: <UserRoundPlus size={18} />,
     },
+    {
+      route: routes.notifications,
+      title: t('notifications'),
+      icon: <Bell size={18} />,
+      badge: unreadCount,
+    },
+    { route: routes.settings.index, title: t('settings'), icon: <Settings size={18} /> },
+    {
+      route: routes.support.index,
+      title: t('support'),
+      icon: <CircleQuestionMark size={18} />,
+    },
+    { route: routes.languages, title: t('languages'), icon: <Globe size={18} /> },
   ];
 
   const isItemActive = (route: Route) => {
@@ -304,17 +274,8 @@ export function Drawer() {
             href={routes.profile.index}
             tabIndex={tabIndex}
             onClick={handleDrawerClose}
-            className="bg-background-overlay relative mx-5 mt-5 flex items-center gap-3 overflow-hidden rounded-2xl p-3 transition-transform active:scale-99"
+            className="bg-background-overlay relative mx-3 mt-5 flex items-center gap-3 overflow-hidden rounded-2xl px-2.5 py-3 transition-transform active:scale-99"
           >
-            <span
-              aria-hidden
-              className="pointer-events-none absolute bottom-0 left-[18%] right-[18%] h-[3px] z-2"
-              style={{
-                background:
-                  'linear-gradient(90deg, transparent 0%, color-mix(in srgb, var(--color-electric-pink) 90%, transparent) 50%, transparent 100%)',
-                filter: 'blur(0.8px)',
-              }}
-            />
             <div className="relative h-14 w-14 flex-shrink-0">
               <Avatar shadow size={56} />
               {me?.isVIP && (
@@ -337,61 +298,31 @@ export function Drawer() {
                 </span>
               </SkeletonSuspense>
             </div>
-            <ChevronRight className="text-pink-secondary flex-shrink-0" size={18} />
+            <ChevronRight className="text-pink-secondary flex-shrink-0" size={16} />
           </Link>
 
-          <div className="mx-5 mt-3 grid grid-cols-3 gap-1.5">
-            <DrawerBalancePill
-              loading={isLoading}
-              icon={<Zap className="fill-gold text-gold" size={11} strokeWidth={2.4} />}
-              value={me?.activityPoints?.toLocaleString() ?? 0}
-            />
-            <DrawerBalancePill
-              loading={isLoading}
-              icon={<Image src={icons.coin} alt="" width={12} height={12} />}
-              value={me?.coins?.toLocaleString() ?? 0}
-            />
-            <DrawerBalancePill
-              loading={isLoading}
-              icon={<Image src={icons.telegramStar} alt="" width={12} height={12} />}
-              value={me?.telegramStars ?? 0}
-            />
-          </div>
+          <div aria-hidden className="drawer-divider mx-3 mt-4" />
 
-          <nav className="scrollbar-hidden mt-4 flex-1 overflow-y-auto px-3 pb-6">
-            {sections.map(section => (
-              <div key={section.label} className="mb-3">
-                <div className="text-pink-secondary px-2 pb-1 text-[10px] font-bold uppercase tracking-wider">
-                  {section.label}
-                </div>
-                <ul className="flex flex-col">
-                  {section.items.map(item => (
-                    <DrawerItem
-                      key={String(item.route)}
-                      route={item.route}
-                      title={item.title}
-                      icon={item.icon}
-                      badge={item.badge}
-                      active={isItemActive(item.route)}
-                      tabIndex={tabIndex}
-                      onNavigate={handleDrawerClose}
-                    />
-                  ))}
-                </ul>
-              </div>
-            ))}
+          <nav className="scrollbar-hidden mt-2 flex-1 overflow-y-auto px-3 pb-2">
+            <ul className="flex flex-col">
+              {items.map(item => (
+                <DrawerItem
+                  key={String(item.route)}
+                  route={item.route}
+                  title={item.title}
+                  icon={item.icon}
+                  badge={item.badge}
+                  active={isItemActive(item.route)}
+                  tabIndex={tabIndex}
+                  onNavigate={handleDrawerClose}
+                />
+              ))}
+            </ul>
           </nav>
 
-          <div className="bg-background-overlay relative mx-5 mb-5 flex flex-col items-center gap-0.5 overflow-hidden rounded-2xl px-4 py-3">
-            <span
-              aria-hidden
-              className="pointer-events-none absolute bottom-0 left-[18%] right-[18%] z-2 h-[3px]"
-              style={{
-                background:
-                  'linear-gradient(90deg, transparent 0%, color-mix(in srgb, var(--color-electric-pink) 90%, transparent) 50%, transparent 100%)',
-                filter: 'blur(0.8px)',
-              }}
-            />
+          <div aria-hidden className="drawer-divider mx-3 mb-3" />
+
+          <div className="bg-background-overlay relative mx-3 mb-5 flex flex-col items-center gap-0.5 overflow-hidden rounded-2xl px-4 py-3">
             <span className="text-sm font-extrabold tracking-wide text-white">
               Lucky Ticket 365
             </span>

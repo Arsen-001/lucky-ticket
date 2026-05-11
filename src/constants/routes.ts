@@ -52,7 +52,6 @@ export const routes = {
     index: '/settings',
     username: '/settings/username',
     email: '/settings/email',
-    phone: '/settings/phone',
     security: '/settings/security',
     prime: '/settings/prime',
     vip: '/settings/vip',

@@ -47,7 +47,7 @@ export function LeaderboardListItem({
       className={twMerge(
         'bg-background-overlay flex items-center gap-2.5 rounded-2xl border p-2.5 transition-all',
         isMe
-          ? 'bg-purple-gradient border-electric-pink/55 shadow-[0_0_18px_rgba(222,0,155,0.22)]'
+          ? 'border-electric-pink/55 shadow-[0_0_18px_rgba(222,0,155,0.22)]'
           : isTop3
             ? 'border-gold/35 hover:border-gold/55'
             : 'border-white/5 hover:border-white/15',
@@ -84,7 +84,7 @@ export function LeaderboardListItem({
         </SkeletonSuspense>
         {entry?.isVIP && (
           <span
-            className="bg-pink-gradient border-background-overlay absolute -bottom-0.5 -right-0.5 flex h-3.5 w-3.5 items-center justify-center rounded-full border-2"
+            className="bg-electric-pink border-background-overlay absolute -bottom-0.5 -right-0.5 flex h-3.5 w-3.5 items-center justify-center rounded-full border-2"
             aria-label="VIP"
           >
             <Star size={6} className="fill-white text-white" />
@@ -204,7 +204,7 @@ function RankBadge({ entry, loading }: RankBadgeProps) {
   }
 
   return (
-    <div className="flex-center bg-purple-gradient h-9 w-9 flex-shrink-0 rounded-xl border border-white/15 text-sm font-extrabold tabular-nums text-white">
+    <div className="flex-center bg-background-overlay h-9 w-9 flex-shrink-0 rounded-xl border border-white/15 text-sm font-extrabold tabular-nums text-white">
       {place}
     </div>
   );

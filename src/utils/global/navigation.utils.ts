@@ -2,11 +2,6 @@ import type { AppRouterInstance } from 'next/dist/shared/lib/app-router-context.
 import { type Route, routes } from '@/constants/routes';
 
 export const handleSafeBack = (router: AppRouterInstance, backRoute?: Route) => {
-  if (backRoute) {
-    router.push(backRoute);
-    return;
-  }
-
   const hasInternalReferrer =
     typeof document !== 'undefined' &&
     document.referrer &&
@@ -14,7 +9,13 @@ export const handleSafeBack = (router: AppRouterInstance, backRoute?: Route) => 
 
   if (typeof window !== 'undefined' && window.history.length > 1 && hasInternalReferrer) {
     router.back();
-  } else {
-    router.push(routes.home);
+    return;
   }
+
+  if (backRoute) {
+    router.push(backRoute);
+    return;
+  }
+
+  router.push(routes.home);
 };

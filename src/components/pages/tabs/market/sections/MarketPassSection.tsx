@@ -29,7 +29,7 @@ export function MarketPassSection({ passes, onPurchase }: MarketPassSectionProps
   if (!passes.length) return null;
 
   return (
-    <MarketSectionGrid title={t('passes')}>
+    <MarketSectionGrid title={t('passes')} icon={Crown} accent="var(--color-gold)">
       {passes.map(pass => {
         const Icon = PASS_ICON[pass.passType] ?? Crown;
         const iconNode: ReactNode = (

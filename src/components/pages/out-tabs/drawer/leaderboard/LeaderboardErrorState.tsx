@@ -12,7 +12,7 @@ interface LeaderboardErrorStateProps {
 export function LeaderboardErrorState({ onRetry, loading }: LeaderboardErrorStateProps) {
   const t = useAppTranslations();
   return (
-    <div className="card-outlined bg-purple-gradient flex flex-col items-center gap-3 rounded-2xl p-6 text-center">
+    <div className="bg-background-overlay flex flex-col items-center gap-3 rounded-2xl border border-white/10 p-6 text-center">
       <div className="bg-error/15 border-error/30 flex-center h-12 w-12 rounded-full border">
         <AlertTriangle size={22} className="text-error" strokeWidth={2.2} />
       </div>

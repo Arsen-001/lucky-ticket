@@ -16,7 +16,7 @@ export function MarketBundleSection({ bundles, onBuy }: MarketBundleSectionProps
   if (!bundles.length) return null;
 
   return (
-    <MarketSectionGrid title={t('bundles')}>
+    <MarketSectionGrid title={t('bundles')} icon={Package} accent="var(--color-gold)">
       {bundles.map(bundle => (
         <MarketUniversalCard
           key={bundle.id}

@@ -11,12 +11,13 @@ export const me: MeResponse = {
   vipLevel: 2,
   isVerified: true,
   avatar: images.avatar.src,
+  avatarId: 'avatar-10',
   coins: 537,
   points: 750,
   phoneNumber: '+37411111111',
   twoFactorAuth: true,
   activityPoints: 750,
-  telegramStars: 12,
+  telegramStars: 10000,
 };
 
 const meMock = { me };

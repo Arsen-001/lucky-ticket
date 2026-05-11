@@ -69,12 +69,13 @@ export function InventoryItem({
   return (
     <div
       className={twMerge(
-        'bg-background-overlay animate-slide-in-bottom relative flex flex-col gap-3 overflow-hidden rounded-2xl p-3.5',
-        isLevelingUp && 'inventory-chip-flash'
+        'bg-background-overlay inventory-card-shine animate-slide-in-bottom relative flex flex-col gap-3 overflow-hidden rounded-2xl p-3.5',
+        isLevelingUp && 'inventory-chip-zoom'
       )}
       style={
         {
           '--chip-accent': accent,
+          '--shine-delay': `${index * 0.4}s`,
           animationDelay: `${index * 60}ms`,
         } as React.CSSProperties
       }
@@ -117,12 +118,7 @@ export function InventoryItem({
             >
               {t(chip.quality as Parameters<Dictionary>[0])}
             </span>
-            <span
-              className={twMerge(
-                'text-[11px] font-extrabold tabular-nums text-white',
-                isLevelingUp && 'inventory-chip-number-pop'
-              )}
-            >
+            <span className="text-[11px] font-extrabold tabular-nums text-white">
               Lvl {chip.level} · +{chip.effectPct.toFixed(1)}%
             </span>
           </div>
@@ -194,7 +190,7 @@ export function InventoryItem({
               background: `linear-gradient(135deg, ${accent} 0%, color-mix(in srgb, ${accent} 65%, white) 100%)`,
             }}
           >
-            <ArrowUp size={14} strokeWidth={3} className={isLevelingUp ? 'animate-bounce' : ''} />
+            <ArrowUp size={14} strokeWidth={3} />
             {isLevelingUp ? t('leveling up') : t('level up')}
             {!isLevelingUp && (
               <span className="text-white/85 tabular-nums">

@@ -1,0 +1,66 @@
+.drawer-divider {
+  position: relative;
+  height: 1px;
+  width: 100%;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    color-mix(in srgb, var(--color-electric-pink) 55%, transparent),
+    transparent
+  );
+  overflow: hidden;
+}
+
+.drawer-divider::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    90deg,
+    transparent 40%,
+    color-mix(in srgb, var(--color-electric-pink) 100%, transparent) 50%,
+    transparent 60%
+  );
+  animation: drawer-divider-scan 4s linear infinite;
+}
+
+@keyframes drawer-divider-scan {
+  0% {
+    transform: translateX(-100%);
+  }
+  100% {
+    transform: translateX(100%);
+  }
+}
+
+.drawer-profile-card {
+  position: relative;
+}
+
+.drawer-profile-card::before {
+  content: '';
+  position: absolute;
+  inset: -1px;
+  border-radius: inherit;
+  padding: 1px;
+  background: conic-gradient(
+    from 0deg,
+    transparent 0deg,
+    color-mix(in srgb, var(--color-electric-pink) 90%, transparent) 60deg,
+    transparent 120deg,
+    transparent 360deg
+  );
+  -webkit-mask:
+    linear-gradient(#fff 0 0) content-box,
+    linear-gradient(#fff 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+  animation: drawer-profile-spin 5s linear infinite;
+  pointer-events: none;
+}
+
+@keyframes drawer-profile-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}

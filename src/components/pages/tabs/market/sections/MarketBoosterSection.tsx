@@ -23,7 +23,7 @@ export function MarketBoosterSection({ boosters, onPurchase }: MarketBoosterSect
   if (!boosters.length) return null;
 
   return (
-    <MarketSectionGrid title={t('boosters')}>
+    <MarketSectionGrid title={t('boosters')} icon={Zap} accent="var(--color-electric-pink)">
       {boosters.map(booster => {
         const accentVar = `var(--color-${booster.quality})`;
         const TypeIcon = booster.type === 'speed' ? Cpu : MemoryStick;

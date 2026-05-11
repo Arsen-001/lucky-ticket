@@ -7,6 +7,7 @@ import {
   MarketStatusType,
   TicketBoostType,
 } from '@/types/enums/market.enums';
+import type { AvatarBoost } from '@/types/interfaces/avatars.interfaces';
 import type { InventoryChipType } from '@/types/interfaces/inventory.interfaces';
 import type { TicketType } from '@/types/types/ticket.types';
 
@@ -112,6 +113,14 @@ export interface MarketCosmetic extends MarketItemBase {
   description?: string;
   /** Optional accent for visual */
   accent?: TicketType | 'pink' | 'purple' | 'gold';
+  /** AVATAR cosmeticType only — points to the granted avatar inventory id (matches UserAvatar.id) */
+  avatarId?: string;
+  /** AVATAR cosmeticType only — preview image URL */
+  imageUrl?: string;
+  /** AVATAR cosmeticType only — level 1–10 (used for ring colour + sorting) */
+  avatarLevel?: number;
+  /** AVATAR cosmeticType only — bound boost granted while equipped */
+  avatarBoost?: AvatarBoost;
 }
 
 export interface MarketPass extends MarketItemBase {

@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useMemo, useRef, useState } from 'react';
 import { Plus, Sparkles, Zap } from 'lucide-react';
 import {
   useActivateBoosterMutation,
@@ -39,7 +39,16 @@ export function InventoryContainer() {
   const [animatingChipId, setAnimatingChipId] = useState<string | undefined>(undefined);
   const [unequipPendingId, setUnequipPendingId] = useState<string | undefined>(undefined);
 
-  const chips = data?.chips ?? [];
+  const rawChips = data?.chips ?? [];
+  const chipOrderRef = useRef<string[]>([]);
+  const chips = useMemo(() => {
+    const byId = new Map(rawChips.map(c => [c.id, c]));
+    const stable = chipOrderRef.current.filter(id => byId.has(id));
+    const fresh = rawChips.map(c => c.id).filter(id => !stable.includes(id));
+    const order = [...stable, ...fresh];
+    chipOrderRef.current = order;
+    return order.map(id => byId.get(id)!).filter(Boolean);
+  }, [rawChips]);
   const shards = data?.shards ?? [];
   const builders = data?.builders ?? {
     bronze: 0,
@@ -108,10 +117,10 @@ export function InventoryContainer() {
   };
 
   return (
-    <div className="flex flex-col gap-4 pb-8">
+    <div className="flex flex-col gap-1 pb-8">
       <InventoryTierFilter value={tierFilter} onChange={setTierFilter} />
 
-      <div className="flex flex-col gap-4 px-4">
+      <div className="flex flex-col gap-4">
         <InventoryTypeFilter value={typeFilter} onChange={setTypeFilter} />
 
         {isBoostersView ? (

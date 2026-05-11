@@ -37,7 +37,7 @@ export function LeaderboardPeriodTabs({ active, onChange }: LeaderboardPeriodTab
             className={twMerge(
               'cursor-pointer rounded-full px-2 py-1.5 text-[11px] font-bold uppercase tracking-wider transition-all',
               isActive
-                ? 'bg-pink-gradient text-white shadow-[0_4px_12px_rgba(222,0,155,0.35)]'
+                ? 'bg-electric-pink text-white shadow-[0_4px_12px_rgba(222,0,155,0.35)]'
                 : 'text-pink-secondary hover:text-white'
             )}
           >

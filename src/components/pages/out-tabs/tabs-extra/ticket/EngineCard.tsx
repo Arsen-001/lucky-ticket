@@ -1,5 +1,6 @@
 'use client';
 
+import type { CSSProperties } from 'react';
 import Image from 'next/image';
 import { twMerge } from 'tailwind-merge';
 import { Clock, Layers, Package, Zap } from 'lucide-react';
@@ -28,6 +29,16 @@ const TIER_GLOW: Record<TicketType, string> = {
   gold: '#FFD56A',
   platinum: '#E2E0D0',
   diamond: '#3FD9CF',
+};
+
+const ELECTRIC_PINK = '#DE009B';
+
+const TIER_CLAIM_FLOW: Record<TicketType, { c1: string; c2: string; c3: string }> = {
+  bronze: { c1: ELECTRIC_PINK, c2: '#FFB871', c3: '#E08A3A' },
+  silver: { c1: ELECTRIC_PINK, c2: '#FFFFFF', c3: '#D8D8D8' },
+  gold: { c1: ELECTRIC_PINK, c2: '#FFE89A', c3: '#FFD56A' },
+  platinum: { c1: ELECTRIC_PINK, c2: '#FFFFFF', c3: '#E2E0D0' },
+  diamond: { c1: ELECTRIC_PINK, c2: '#83F5EE', c3: '#3FD9CF' },
 };
 
 const SPEED_ACCENT = '#C5B0F8';
@@ -183,15 +194,18 @@ export function EngineCard({
           <button
             onClick={() => onClaim(engine.id)}
             className={twMerge(
-              'engine-claim-button relative flex cursor-pointer items-center justify-center gap-2 overflow-hidden rounded-xl text-white font-extrabold uppercase tracking-[0.16em] active:scale-99 transition-transform duration-100',
+              'engine-claim-button engine-claim-flow relative flex cursor-pointer items-center justify-center gap-2 overflow-hidden rounded-xl text-white font-extrabold uppercase tracking-[0.16em] active:scale-99 transition-transform duration-100',
               compact ? 'px-3 py-2.5 text-[12px] rounded-lg' : 'px-4 py-3 text-[14px]'
             )}
-            style={{
-              background: `linear-gradient(135deg, var(--color-electric-purple) 0%, var(--color-${tier}) 100%)`,
-              boxShadow: `0 8px 24px color-mix(in srgb, ${glow} 45%, transparent), inset 0 1px 0 rgba(255,255,255,0.35), inset 0 -2px 6px color-mix(in srgb, black 35%, transparent)`,
-            }}
+            style={
+              {
+                '--claim-flow-1': TIER_CLAIM_FLOW[tier].c1,
+                '--claim-flow-2': TIER_CLAIM_FLOW[tier].c2,
+                '--claim-flow-3': TIER_CLAIM_FLOW[tier].c3,
+                boxShadow: `0 8px 24px color-mix(in srgb, ${glow} 45%, transparent), inset 0 1px 0 rgba(255,255,255,0.35), inset 0 -2px 6px color-mix(in srgb, black 35%, transparent)`,
+              } as CSSProperties
+            }
           >
-            <span aria-hidden className="engine-claim-button-shine pointer-events-none" />
             <span className="relative z-1">{t(`${tier} ticket`)}</span>
             <span
               className="relative z-1 rounded-full bg-black/30 px-1.5 py-0.5 text-[12px] tabular-nums"

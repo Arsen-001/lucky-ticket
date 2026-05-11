@@ -8,6 +8,7 @@ export const rtkTags = {
   leaderboard: 'Leaderboard',
   support: 'Support',
   notifications: 'Notifications',
+  notificationPreferences: 'NotificationPreferences',
   referral: 'Referral',
   exchange: 'Exchange',
   market: 'Market',
@@ -19,4 +20,5 @@ export const rtkTags = {
   profile: 'Profile',
   profileById: ':ProfileById',
   inventory: 'Inventory',
+  avatars: 'Avatars',
 } as const;

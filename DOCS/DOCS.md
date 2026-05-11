@@ -960,7 +960,48 @@ Settings provide control, security, and personalization for the user's account.
 - **Email Confirmation:** Confirm or change the linked email address.
 - **Phone Confirmation:** Confirm or change the linked phone number.
 - **Change Username:** Update the public display name.
+- **Change Avatar:** Pick a profile picture from the user's owned avatar inventory. The picker lists every avatar the user owns — both the default free avatars and any paid avatars purchased in the Market. New avatars are acquired exclusively through the Market (see Section 16.1).
+- **Notification Preferences:** Per-channel (Email / Telegram bot) toggles for which notification categories the user receives. See Section 16.2.
 - **Sign Out:** Securely log out of the application.
+
+### 16.1 Avatars — Free & Paid Tiers
+
+Avatars are a marketable cosmetic category with **two tiers** and a **10-level progression ladder**:
+
+- **Free avatars** — granted to every user out of the box (Levels 1–2). Visual identity only; no gameplay effect.
+- **Paid avatars** — purchased in the Market with Lucky Coins (LC) or Lucky Stars (LS) (Levels 3–10). Every paid avatar carries a **bound boost** (engine speed, market discount, claim multiplier, AP earn, or tournament reward — exact boost type and value are defined by the product team per SKU).
+
+**Level ladder (1 → 10, 10 is the best):**
+
+| Level range | Tier         | Boost magnitude | Visual tier ring   |
+| :---------- | :----------- | :-------------- | :----------------- |
+| 1–2         | Free         | None            | Neutral / white    |
+| 3–4         | Paid (entry) | ~3–5%           | Bronze             |
+| 5–6         | Paid (mid)   | ~7–10%          | Silver             |
+| 7–8         | Paid (high)  | ~12–15%         | Gold               |
+| 9           | Paid (rare)  | ~18%            | Diamond            |
+| 10          | Paid (apex)  | ~25%            | Rainbow / animated |
+
+Exact boost percentages per SKU are defined by the product team; the table above describes the **progression shape**, not fixed numbers.
+
+**Rules:**
+
+- Avatar ownership is **permanent** — once acquired, the avatar stays in the user's inventory and the bound boost remains available whenever that avatar is equipped.
+- **Only one avatar is active at a time** — the boost from the currently equipped avatar applies; boosts from other owned avatars do not stack.
+- Equipping is performed from the Settings → Change Avatar picker. Switching avatars is free and instantaneous.
+- Avatar boosts **stack with status (Prime/VIP) boosts** and with engine chips/boosters according to their respective rules.
+- The picker renders avatars in level order, with a level badge and tier-coloured ring per tile. Level 10 carries an animated rainbow ring/badge to mark it as the apex avatar.
+
+### 16.2 Notification Preferences
+
+Two channels are supported: **Email** and **Telegram bot**. Each channel has its own independent set of category toggles. Categories cover the high-signal events:
+
+- **Tournament start** — fires ~10 minutes before a joined tournament begins.
+- **Tournament end** — fires after final places are announced.
+- **Staking ready** — fires when a stake is mature and ready to claim.
+- **System** — security, status, and account-related alerts.
+
+Toggles are saved instantly (no submit button). Categories not listed here are not exposed as user-toggleable preferences.
 
 ---
 
@@ -1072,7 +1113,7 @@ The Profile page is built to run inside a **Telegram WebApp** when available, wi
 
 When viewing one's own profile, the following actions are available:
 
-- **Edit avatar** — opens the avatar picker. Cosmetic avatars and frames may be purchased in the Lucky Ticket Shop with Lucky Stars (see Section 19.3).
+- **Edit avatar** — opens the avatar picker. The picker is also reachable from Settings (Section 16). New avatars are acquired in the Market; paid avatars carry a bound boost (see Section 16.1).
 - **Edit username** — routes to Settings (see Section 16).
 - **Change cover banner** — selects from owned banners. Premium banners are purchased in the Shop with Lucky Stars.
 - **Pin / Replace / Unpin badges** — managed via the showcase long-press menu (see Section 17.4.7).
@@ -1366,7 +1407,7 @@ The Market opens with a **Hero card** showing the current featured deal (with co
 4. **Chips** — 10 SKUs (5 tiers × {speed, capacity}). Sold pre-built at level 1 / +0.5%; same tier-lock rule as Boosters.
 5. **Chip Builders** — 5 SKUs (1× Bronze, ×3 Silver, ×5 Gold, ×7 Platinum, ×10 Diamond). Tier-locked.
 6. **Engines** — 5 SKUs (one per tier, all level 1, with limited remaining-supply for higher tiers). Tier-locked.
-7. **Cosmetics** — Avatar frames, badges, themes (mix of tier-themed and brand-themed accents). Always available regardless of tier.
+7. **Cosmetics** — Avatars, avatar frames, badges, themes (mix of tier-themed and brand-themed accents). Always available regardless of tier. **Avatars are a two-tier sub-category** — free avatars (granted by default, cosmetic only) and paid avatars (purchased here; each paid SKU carries a bound boost — see Section 16.1).
 8. **Passes** — Time-limited subscriptions:
    - **Auto-Claim Pass** — auto-claim every cycle. Sold in 4 durations: 1 day, 7 days, 15 days, 30 days.
    - **Ad-Free Pass** — removes ads while keeping ad-task rewards.

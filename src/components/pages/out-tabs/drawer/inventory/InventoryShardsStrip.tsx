@@ -1,4 +1,7 @@
-import { Settings } from 'lucide-react';
+'use client';
+
+import { useEffect, useRef, useState } from 'react';
+import { Clock, Layers, type LucideIcon } from 'lucide-react';
 import { useAppTranslations } from '@/hooks/useAppTranslations';
 import { QUALITY_ACCENT, QUALITY_TIERS } from '@/utils/global/inventory.utils';
 import type {
@@ -6,11 +9,79 @@ import type {
   InventoryShardCount,
 } from '@/types/interfaces/inventory.interfaces';
 import type { TicketType } from '@/types/types/ticket.types';
+import '@/styles/components/inventory.css';
 
 export interface InventoryShardsStripProps {
   shards: InventoryShardCount[];
   tierFilter: 'all' | TicketType;
   typeFilter: 'all' | InventoryChipType;
+}
+
+const TOOLTIP_HIDE_MS = 1800;
+const FLAT_THRESHOLD = 6;
+
+const TYPE_ICON: Record<InventoryChipType, LucideIcon> = {
+  speed: Clock,
+  capacity: Layers,
+};
+
+interface ShardCellProps {
+  tier: TicketType;
+  type: InventoryChipType;
+  count: number;
+  isOpen: boolean;
+  onTap: () => void;
+}
+
+function ShardCell({ tier, type, count, isOpen, onTap }: ShardCellProps) {
+  const t = useAppTranslations();
+  const tierAccent = QUALITY_ACCENT[tier];
+  const Icon = TYPE_ICON[type];
+  const fullName = `${t(tier)} ${type === 'speed' ? t('time') : t('capacity')}`;
+
+  return (
+    <div className="relative">
+      <button
+        type="button"
+        onClick={onTap}
+        title={fullName}
+        aria-label={fullName}
+        className="inventory-card-shine relative flex w-full flex-col items-center justify-center gap-1 overflow-hidden rounded-xl border bg-black/25 px-2 py-2.5 transition-all active:scale-95"
+        style={
+          {
+            borderColor: `color-mix(in srgb, ${tierAccent} 45%, transparent)`,
+            '--chip-accent': tierAccent,
+          } as React.CSSProperties
+        }
+      >
+        <Icon size={16} stroke={tierAccent} fill={tierAccent} fillOpacity={0.3} strokeWidth={2.4} />
+        <span
+          className="text-sm font-extrabold tabular-nums"
+          style={{ color: count > 0 ? 'white' : 'rgba(255,255,255,0.3)' }}
+        >
+          {count}
+        </span>
+      </button>
+
+      {isOpen && (
+        <div
+          role="tooltip"
+          className="animate-fade-in pointer-events-none absolute left-1/2 -top-2 z-10 -translate-x-1/2 -translate-y-full whitespace-nowrap rounded-lg bg-black/85 px-2.5 py-1 text-[10px] font-extrabold uppercase tracking-wider shadow-lg"
+          style={{
+            boxShadow: `0 0 14px color-mix(in srgb, ${tierAccent} 35%, transparent)`,
+            color: tierAccent,
+          }}
+        >
+          {fullName}
+          <span
+            aria-hidden
+            className="absolute left-1/2 top-full h-0 w-0 -translate-x-1/2 border-x-4 border-t-4 border-x-transparent"
+            style={{ borderTopColor: 'rgba(0,0,0,0.85)' }}
+          />
+        </div>
+      )}
+    </div>
+  );
 }
 
 export function InventoryShardsStrip({
@@ -19,58 +90,83 @@ export function InventoryShardsStrip({
   typeFilter,
 }: InventoryShardsStripProps) {
   const t = useAppTranslations();
+  const [activeKey, setActiveKey] = useState<string | null>(null);
+  const hideTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
-  const tiers = tierFilter === 'all' ? QUALITY_TIERS : [tierFilter];
+  useEffect(() => {
+    return () => {
+      if (hideTimerRef.current) clearTimeout(hideTimerRef.current);
+    };
+  }, []);
+
+  const showLabel = (key: string) => {
+    if (hideTimerRef.current) clearTimeout(hideTimerRef.current);
+    setActiveKey(key);
+    hideTimerRef.current = setTimeout(() => setActiveKey(null), TOOLTIP_HIDE_MS);
+  };
+
+  const visibleTiers = QUALITY_TIERS.filter(tier => tierFilter === 'all' || tierFilter === tier);
   const types: InventoryChipType[] = typeFilter === 'all' ? ['speed', 'capacity'] : [typeFilter];
-
-  const cells = tiers.flatMap(tier =>
-    types.map(type => {
-      const found = shards.find(s => s.quality === tier && s.type === type);
-      return { tier, type, count: found?.count ?? 0 };
-    })
-  );
+  const totalCells = visibleTiers.length * types.length;
+  const useFlat = totalCells < FLAT_THRESHOLD;
 
   return (
     <section className="flex flex-col gap-2">
       <span className="text-pink-secondary text-[10px] font-extrabold uppercase tracking-wider">
         {t('available shards')}
       </span>
-      <div className="grid grid-cols-2 gap-2">
-        {cells.map(cell => {
-          const tierAccent = QUALITY_ACCENT[cell.tier];
-          return (
-            <div
-              key={`${cell.tier}-${cell.type}`}
-              className="flex items-center justify-between gap-2 rounded-xl border bg-black/25 px-3 py-2"
-              style={{
-                borderColor: `color-mix(in srgb, ${tierAccent} 45%, transparent)`,
-              }}
-            >
-              <div className="flex items-center gap-1.5 min-w-0">
-                <Settings
-                  size={13}
-                  stroke={tierAccent}
-                  fill={tierAccent}
-                  fillOpacity={0.3}
-                  strokeWidth={2.4}
+
+      {useFlat ? (
+        <div
+          className="grid gap-2"
+          style={{
+            gridTemplateColumns: `repeat(${QUALITY_TIERS.length}, minmax(0, 1fr))`,
+          }}
+        >
+          {visibleTiers.flatMap(tier =>
+            types.map(type => {
+              const found = shards.find(s => s.quality === tier && s.type === type);
+              const key = `${tier}-${type}`;
+              return (
+                <ShardCell
+                  key={key}
+                  tier={tier}
+                  type={type}
+                  count={found?.count ?? 0}
+                  isOpen={activeKey === key}
+                  onTap={() => showLabel(key)}
                 />
-                <span
-                  className="text-[9px] font-extrabold uppercase tracking-wider truncate"
-                  style={{ color: tierAccent }}
-                >
-                  {t(cell.tier)} {cell.type === 'speed' ? t('time') : t('capacity')}
-                </span>
-              </div>
-              <span
-                className="text-sm font-extrabold tabular-nums"
-                style={{ color: cell.count > 0 ? 'white' : 'rgba(255,255,255,0.3)' }}
-              >
-                {cell.count}
-              </span>
+              );
+            })
+          )}
+        </div>
+      ) : (
+        <div
+          className="grid gap-2"
+          style={{
+            gridTemplateColumns: `repeat(${QUALITY_TIERS.length}, minmax(0, 1fr))`,
+          }}
+        >
+          {visibleTiers.map(tier => (
+            <div key={tier} className="flex flex-col gap-2">
+              {types.map(type => {
+                const found = shards.find(s => s.quality === tier && s.type === type);
+                const key = `${tier}-${type}`;
+                return (
+                  <ShardCell
+                    key={key}
+                    tier={tier}
+                    type={type}
+                    count={found?.count ?? 0}
+                    isOpen={activeKey === key}
+                    onTap={() => showLabel(key)}
+                  />
+                );
+              })}
             </div>
-          );
-        })}
-      </div>
+          ))}
+        </div>
+      )}
     </section>
   );
 }

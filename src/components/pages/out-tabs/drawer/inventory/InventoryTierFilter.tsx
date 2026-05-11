@@ -48,21 +48,13 @@ export function InventoryTierFilter({ value, onChange, className }: InventoryTie
   }, [value]);
 
   return (
-    <div
-      className={twMerge(
-        'bg-background/85 sticky top-0 z-30 border-b border-white/5 backdrop-blur-md',
-        className
-      )}
-    >
-      <div
-        ref={scrollRef}
-        className="scrollbar-hidden relative overflow-x-auto scroll-smooth px-4 py-3"
-      >
+    <div className={twMerge('bg-background/85 sticky top-0 z-30 backdrop-blur-md', className)}>
+      <div ref={scrollRef} className="scrollbar-hidden relative overflow-x-auto scroll-smooth py-3">
         <div className="relative inline-flex items-center gap-2">
           {indicator && (
             <span
               aria-hidden
-              className="bg-pink-gradient shadow-electric-pink/30 pointer-events-none absolute top-0 bottom-0 rounded-full shadow-lg transition-[transform,width] duration-[450ms] ease-[cubic-bezier(0.22,1,0.36,1)]"
+              className="bg-pink-gradient pointer-events-none absolute top-0 bottom-0 rounded-full transition-[transform,width] duration-[450ms] ease-[cubic-bezier(0.22,1,0.36,1)]"
               style={{
                 width: indicator.width,
                 transform: `translateX(${indicator.left}px)`,

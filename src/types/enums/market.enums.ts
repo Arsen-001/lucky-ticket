@@ -33,6 +33,7 @@ export enum MarketItemCategory {
 }
 
 export enum MarketCosmeticType {
+  AVATAR = 'AVATAR',
   AVATAR_FRAME = 'AVATAR_FRAME',
   BADGE = 'BADGE',
   THEME = 'THEME',
