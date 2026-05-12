@@ -35,7 +35,7 @@ export function HomeUpcomingTournaments({ className }: ClassNameProps) {
       />
       <Swiper
         key={isLoading ? 'loading' : 'loaded'}
-        className="w-full"
+        className="-mt-[10px] w-full"
         modules={[Autoplay]}
         centeredSlides
         grabCursor
@@ -52,7 +52,7 @@ export function HomeUpcomingTournaments({ className }: ClassNameProps) {
         }}
       >
         {items.map((tournament, index) => (
-          <SwiperSlide key={tournament.id ?? index} className="w-72! overflow-visible py-2">
+          <SwiperSlide key={tournament.id ?? index} className="w-72! overflow-visible py-[14px]">
             <HomeUpcomingTournamentCard {...tournament} loading={isLoading} />
           </SwiperSlide>
         ))}

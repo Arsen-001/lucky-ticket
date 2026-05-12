@@ -87,11 +87,11 @@ export function TicketsTierSummary({
                     }}
                   />
                 )}
-                <div className="flex-center relative h-[30px]">
+                <div className="flex-center relative h-[56px]">
                   {isPartners ? (
                     <Handshake
                       className={twMerge(
-                        'h-5 w-5 shrink-0 transition-opacity duration-300',
+                        'h-8 w-8 shrink-0 transition-opacity duration-300',
                         isActive ? 'text-white' : 'text-electric-pink/80'
                       )}
                       strokeWidth={2.4}
@@ -99,8 +99,8 @@ export function TicketsTierSummary({
                   ) : (
                     <TicketOverlap
                       type={tab.key as TicketType}
-                      width={38}
-                      height={30}
+                      width={64}
+                      height={52}
                       className={tab.locked ? 'opacity-55' : undefined}
                     />
                   )}

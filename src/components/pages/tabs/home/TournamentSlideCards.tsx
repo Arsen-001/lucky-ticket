@@ -90,7 +90,7 @@ export function TournamentSlideCards({
         )}
         loading={loading}
         type={type}
-        height={100}
+        height={200}
       />
 
       <div className="w-full flex justify-evenly gap-2 mt-2 text-xs overflow-hidden">

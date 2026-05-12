@@ -30,9 +30,7 @@ export function NotEnoughCoinsModal({
       title={t('not enough {coin}', { coin: GlobalConstants.coinName })}
       content={
         <div className="mt-2 flex flex-col items-center gap-3 text-center text-white/80">
-          <div className="bg-gold/15 ring-gold/30 flex-center h-14 w-14 rounded-full ring-1">
-            <CoinIcon size={28} />
-          </div>
+          <CoinIcon size={88} />
           <p className="text-pink-secondary text-sm">
             {t('not enough stars description', { balance: current, required })}
           </p>

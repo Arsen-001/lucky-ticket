@@ -11,7 +11,7 @@ export default async function HomePage() {
     <div className="flex flex-col gap-5 pt-3 pb-6">
       <HomeUpcomingTournaments />
 
-      <section className="flex flex-col gap-2">
+      <section className="-mt-[10px] flex flex-col gap-2">
         <HomeSectionHeader
           title={t('your engines')}
           actionLabel={t('see all')}

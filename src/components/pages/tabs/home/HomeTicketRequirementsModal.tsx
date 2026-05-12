@@ -65,7 +65,7 @@ export function HomeTicketRequirementsModal({
     <Modal open={open} onClose={onClose}>
       <div className="bg-purple-gradient rounded-3xl p-5 flex flex-col gap-4">
         <div className="flex items-center gap-3">
-          <TicketOverlap type={ticketType} width={44} height={44} />
+          <TicketOverlap type={ticketType} width={68} height={68} />
           <div className="flex flex-col gap-0.5">
             <span
               className={twMerge(

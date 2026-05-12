@@ -1,10 +1,9 @@
 'use client';
 
 import '@/styles/components/stakes.css';
-import Image from 'next/image';
 import { ChevronRight, Clock } from 'lucide-react';
 import Link from 'next/link';
-import { icons } from '@/constants/icons';
+import { CoinIcon } from '@/components/shared/icons/CoinIcon';
 import { GlobalConstants } from '@/constants/global.constants';
 import { routes } from '@/constants/routes';
 import { useAppTranslations } from '@/hooks/useAppTranslations';
@@ -53,7 +52,7 @@ export function StakesActiveStakeCard({ stake, levelDef }: StakesActiveStakeCard
             {t('locked')}
           </div>
           <div className="mt-0.5 flex items-baseline gap-1">
-            <Image src={icons.coin} alt="" className="h-3.5 w-auto self-center" />
+            <CoinIcon size={22} className="self-center" />
             <span className="text-gold text-[18px] font-extrabold leading-none tabular-nums">
               {stake.lockedAmount.toLocaleString()}
             </span>

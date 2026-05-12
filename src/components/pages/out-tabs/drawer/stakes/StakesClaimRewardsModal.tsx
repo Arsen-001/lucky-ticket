@@ -1,16 +1,15 @@
 'use client';
 
 import '@/styles/components/stakes.css';
-import Image from 'next/image';
 import type { ComponentType, ReactNode } from 'react';
 import { useMemo } from 'react';
 import type { LucideProps } from 'lucide-react';
 import { ArrowRight, Check, Crown, RotateCcw, Sparkles, Star, Zap } from 'lucide-react';
 import { Modal } from '@/components/shared/modals/Modal';
+import { CoinIcon } from '@/components/shared/icons/CoinIcon';
 import { Ticket } from '@/components/shared/icons/Ticket';
 import { GoldenText } from '@/components/shared/typography/GoldenText';
 import { GlobalConstants } from '@/constants/global.constants';
-import { icons } from '@/constants/icons';
 import { useAppTranslations } from '@/hooks/useAppTranslations';
 import { StakesTicketStack } from '@/components/pages/out-tabs/drawer/stakes/StakesTicketStack';
 import type { ActiveStake, StakeLevelDefinition } from '@/types/interfaces/stakes.interfaces';
@@ -134,7 +133,7 @@ export function StakesClaimRewardsModal({
           {levelDef.allTickets.map((tier, i) => (
             <PrizeRow
               key={tier}
-              icon={<Ticket type={tier} width={24} height={24} />}
+              icon={<Ticket type={tier} width={36} height={36} />}
               label={t('{tier} ticket', { tier: t(tierLabelKey[tier]) })}
               sub={t('guaranteed reward')}
               accentClass={`text-${tier === 'gold' ? 'gold' : tier} border-current/40 bg-current/15`}
@@ -143,7 +142,7 @@ export function StakesClaimRewardsModal({
           ))}
           {rolled.bonusLC > 0 && (
             <PrizeRow
-              icon={<Image src={icons.coin} alt="" className="h-5 w-auto" />}
+              icon={<CoinIcon size={32} />}
               label={t('+{amount} {coin} bonus', {
                 amount: rolled.bonusLC.toLocaleString(),
                 coin: GlobalConstants.coinName,

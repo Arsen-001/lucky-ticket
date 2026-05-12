@@ -101,25 +101,14 @@ export function TournamentBetModal({
     <Modal open={open} onClose={handleClose} hideCloseButton>
       <div className="bg-purple-gradient relative w-full max-w-[360px] mx-auto rounded-3xl overflow-hidden">
         <div className="relative flex flex-col items-center gap-4 px-5 pt-7 pb-5">
-          {/* Hero — ticket icon with tier halo + shine sweep */}
-          <div
-            className="relative flex-center w-28 h-28 rounded-full"
+          <TicketOverlap
+            type={tournamentType}
+            width={128}
+            height={128}
             style={{
-              background: `radial-gradient(circle, rgba(${haloRgb}, 0.28) 0%, rgba(${haloRgb}, 0.10) 45%, transparent 75%)`,
+              filter: `drop-shadow(0 4px 16px rgba(${haloRgb}, 0.45))`,
             }}
-          >
-            <TicketOverlap
-              type={tournamentType}
-              width={86}
-              height={86}
-              style={{
-                filter: `drop-shadow(0 4px 16px rgba(${haloRgb}, 0.45))`,
-              }}
-            />
-            <span className="pointer-events-none absolute inset-0 rounded-full overflow-hidden">
-              <span className="absolute -top-1/2 -left-1/2 h-[200%] w-[60%] bg-gradient-to-r from-transparent via-white/30 to-transparent animate-task-shine" />
-            </span>
-          </div>
+          />
 
           {/* Tier label + Tournament name */}
           <div className="flex flex-col items-center gap-1 leading-none">

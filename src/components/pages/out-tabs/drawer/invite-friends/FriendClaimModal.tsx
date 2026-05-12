@@ -136,10 +136,10 @@ export function FriendClaimModal({
             {tickets.map(({ type, amount }, index) => (
               <div
                 key={type}
-                className="card-outlined animate-slide-in-bottom flex flex-col items-center gap-1 rounded-xl bg-black/25 p-3"
-                style={{ animationDelay: `${index * 80}ms`, minWidth: 64 }}
+                className="animate-slide-in-bottom flex flex-col items-center gap-1"
+                style={{ animationDelay: `${index * 80}ms`, minWidth: 72 }}
               >
-                <Ticket type={type} width={40} height={40} className="drop-shadow-lg" />
+                <Ticket type={type} width={68} height={68} className="drop-shadow-lg" />
                 <span className="text-gold text-sm font-extrabold tabular-nums">×{amount}</span>
               </div>
             ))}

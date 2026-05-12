@@ -4,6 +4,7 @@ import '@/styles/components/stakes.css';
 import Image from 'next/image';
 import { AlertTriangle } from 'lucide-react';
 import { useState } from 'react';
+import { CoinIcon } from '@/components/shared/icons/CoinIcon';
 import { icons } from '@/constants/icons';
 import { GlobalConstants } from '@/constants/global.constants';
 import { useAppTranslations } from '@/hooks/useAppTranslations';
@@ -62,8 +63,7 @@ export function StakeCancelSection({
         <div className="text-white-secondary flex items-center justify-between text-[11px]">
           <span>{t('lc returned')}</span>
           <span className="text-success inline-flex items-center gap-1 font-extrabold tabular-nums">
-            <Image src={icons.coin} alt="" className="h-3.5 w-auto" />+
-            {lockedAmount.toLocaleString()} {GlobalConstants.coinName}
+            <CoinIcon size={22} />+{lockedAmount.toLocaleString()} {GlobalConstants.coinName}
           </span>
         </div>
         <div className="text-white-secondary mt-1.5 flex items-center justify-between text-[11px]">

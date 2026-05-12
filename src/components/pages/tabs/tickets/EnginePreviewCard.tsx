@@ -85,7 +85,6 @@ export function EnginePreviewCard({
         <ReactorDial
           key={`${engine.id}-${pending ? 'pending' : 'producing'}-${cycle.toFixed(2)}`}
           tier={tier}
-          pending={pending}
           capacity={capacity}
           size={56}
         />

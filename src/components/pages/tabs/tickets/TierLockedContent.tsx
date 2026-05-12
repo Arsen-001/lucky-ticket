@@ -42,18 +42,13 @@ export function TierLockedContent({ ticket, className }: TierLockedContentProps)
         }}
       >
         <div className="flex items-start gap-4 relative">
-          <div
-            className="w-22 h-22 rounded-2xl flex-center shrink-0 relative"
-            style={{
-              background: `radial-gradient(circle at 50% 50%, color-mix(in srgb, ${tierColor} 50%, transparent) 0%, transparent 70%)`,
-            }}
-          >
-            <Ticket type={ticket.ticketType} width={84} height={84} />
+          <div className="relative shrink-0">
+            <Ticket type={ticket.ticketType} width={120} height={120} />
             <Image
               src={icons.lock}
               alt=""
-              height={20}
-              width={20}
+              height={22}
+              width={22}
               className="absolute bottom-1 right-1"
             />
           </div>

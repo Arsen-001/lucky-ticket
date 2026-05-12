@@ -46,13 +46,18 @@ export function HomeUpcomingTournamentCard({
       <div
         style={style}
         className={twMerge(
-          'flex h-[80px] w-72 items-center gap-2.5 rounded-xl px-3 transition-transform active:scale-99',
+          'relative flex h-[80px] w-72 items-center gap-2.5 rounded-xl px-3 transition-transform active:scale-99',
           type ? `engine-preview-card--top-shine ${TIER_CLASS[type]}` : 'bg-background-overlay',
           className
         )}
       >
-        <div className="flex-center h-[60px] w-[60px] flex-shrink-0">
-          <Medal height={48} type={type} loading={loading} />
+        <div className="h-full w-[95px] flex-shrink-0">
+          <Medal
+            className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 drop-shadow-3xl"
+            height={95}
+            type={type}
+            loading={loading}
+          />
         </div>
 
         <div className="flex min-w-0 flex-1 flex-col justify-center gap-1.5">
@@ -69,7 +74,7 @@ export function HomeUpcomingTournamentCard({
               skeleton={<Skeleton variant="line" textSize="lg" className="h-5 w-20" />}
             >
               <span
-                className="text-lg font-extrabold tabular-nums leading-none"
+                className="whitespace-nowrap text-lg font-extrabold tabular-nums leading-none"
                 style={{ textShadow: '0 1px 4px rgba(248, 189, 62, 0.4)' }}
               >
                 <GoldenText>

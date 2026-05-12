@@ -115,11 +115,7 @@ export function Header({ className }: ClassNameProps) {
             skeleton={<Skeleton variant="rounded-rectangle" className="h-5.5 w-16" />}
           >
             <HeaderStatPill
-              icon={
-                <span className="bg-electric-pink/30 flex h-3.5 w-3.5 items-center justify-center rounded-full">
-                  <CoinIcon size={10} animated={false} />
-                </span>
-              }
+              icon={<CoinIcon size={22} />}
               value={me?.coins?.toLocaleString() ?? 0}
               accent={GlobalConstants.coinName}
             />

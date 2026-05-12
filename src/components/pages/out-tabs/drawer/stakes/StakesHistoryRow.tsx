@@ -1,9 +1,8 @@
 'use client';
 
 import '@/styles/components/stakes.css';
-import Image from 'next/image';
 import { Ticket } from '@/components/shared/icons/Ticket';
-import { icons } from '@/constants/icons';
+import { CoinIcon } from '@/components/shared/icons/CoinIcon';
 import { useAppTranslations } from '@/hooks/useAppTranslations';
 import { GlobalConstants } from '@/constants/global.constants';
 import { findLevelDef, formatStakeRelative } from '@/utils/global/stakes.utils';
@@ -23,9 +22,7 @@ export function StakesHistoryRow({ entry, levels }: StakesHistoryRowProps) {
 
   return (
     <div className="stake-card-shell stake-card-border flex items-center gap-3 px-3 py-2.5">
-      <div className="bg-background-overlay/60 flex h-9.5 w-9.5 shrink-0 items-center justify-center rounded-lg">
-        <Ticket type={levelDef.guaranteedTicket} width={28} height={28} />
-      </div>
+      <Ticket type={levelDef.guaranteedTicket} width={44} height={44} className="shrink-0" />
 
       <div className="relative min-w-0 flex-1">
         <div className="flex items-center gap-1.5">
@@ -62,7 +59,7 @@ export function StakesHistoryRow({ entry, levels }: StakesHistoryRowProps) {
       </div>
 
       <div className="relative flex items-center gap-1">
-        <Image src={icons.coin} alt="" className="h-3 w-auto" />
+        <CoinIcon size={20} />
         <span className="text-gold text-[11px] font-bold tabular-nums">
           {entry.amount.toLocaleString()}
         </span>
