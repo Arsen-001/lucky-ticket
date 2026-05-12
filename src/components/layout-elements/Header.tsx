@@ -16,6 +16,7 @@ import { Button } from '@/components/shared/buttons/Button';
 import { Link } from '@/components/shared/links/Link';
 import { HeaderStatPill } from '@/components/layout-elements/HeaderStatPill';
 import { VerifiedSparkleIcon } from '@/components/shared/icons/VerifiedSparkleIcon';
+import { CoinIcon } from '@/components/shared/icons/CoinIcon';
 import { NotEnoughStarsModal } from '@/components/pages/tabs/home/NotEnoughStarsModal';
 import { GlobalConstants } from '@/constants/global.constants';
 import { icons } from '@/constants/icons';
@@ -116,7 +117,7 @@ export function Header({ className }: ClassNameProps) {
             <HeaderStatPill
               icon={
                 <span className="bg-electric-pink/30 flex h-3.5 w-3.5 items-center justify-center rounded-full">
-                  <Image src={icons.coin} alt="" width={10} height={10} />
+                  <CoinIcon size={10} animated={false} />
                 </span>
               }
               value={me?.coins?.toLocaleString() ?? 0}

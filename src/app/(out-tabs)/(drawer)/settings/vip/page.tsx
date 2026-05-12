@@ -1,8 +1,8 @@
 'use client';
 
-import { Gem } from 'lucide-react';
 import { useGetMarketDataQuery } from '@/api/market.api';
 import { useGetMeQuery } from '@/api/me.api';
+import { VipIcon } from '@/components/shared/icons/VipIcon';
 import { SettingsPrivilegeList } from '@/components/pages/out-tabs/drawer/settings/SettingsPrivilegeList';
 import { SettingsStatusCTA } from '@/components/pages/out-tabs/drawer/settings/SettingsStatusCTA';
 import { SettingsStatusHero } from '@/components/pages/out-tabs/drawer/settings/SettingsStatusHero';
@@ -46,7 +46,7 @@ export default function VipSettingsPage() {
   return (
     <div className="flex flex-col gap-5">
       <SettingsStatusHero
-        icon={<Gem size={36} className="text-gold" strokeWidth={2.2} />}
+        icon={<VipIcon size={44} state={isVIP ? 'active' : 'locked'} />}
         title={isVIP ? t('vip level', { level: vipLevel }) : 'VIP'}
         statusLabel={statusLabel}
         description={description}

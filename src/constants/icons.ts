@@ -1,4 +1,3 @@
-import boostUp from '@assets/icons/boost-up.webp';
 import bronzeMedal from '@assets/icons/bronze-medal.webp';
 import bronzeTicket from '@assets/icons/bronze-ticket.webp';
 import bronzeTicketOverlap from '@assets/icons/bronze-ticket-overlap.webp';
@@ -31,7 +30,6 @@ import lock from '@assets/icons/lock.webp';
 import telegramStar from '@assets/icons/telegram-star.webp';
 
 export const icons = {
-  boostUp,
   bronzeMedal,
   bronzeTicket,
   bronzeTicketOverlap,

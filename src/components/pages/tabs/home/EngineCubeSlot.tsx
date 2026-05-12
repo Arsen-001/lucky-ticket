@@ -1,12 +1,9 @@
 import { Loader2, Plus, X } from 'lucide-react';
 import { twMerge } from 'tailwind-merge';
+import { BoosterIcon } from '@/components/shared/icons/BoosterIcon';
+import { ChipIcon } from '@/components/shared/icons/ChipIcon';
 import { useAppTranslations } from '@/hooks/useAppTranslations';
-import {
-  BOOSTER_TYPE_ICON,
-  CHIP_TYPE_ICON,
-  QUALITY_ACCENT,
-  TYPE_ACCENT,
-} from '@/utils/global/inventory.utils';
+import { QUALITY_ACCENT, TYPE_ACCENT } from '@/utils/global/inventory.utils';
 import type {
   InventoryBooster,
   InventoryChip,
@@ -44,7 +41,6 @@ export function EngineCubeSlot({
         ? QUALITY_ACCENT[booster.quality]
         : TYPE_ACCENT[type];
 
-  const Icon = category === 'chip' ? CHIP_TYPE_ICON[type] : BOOSTER_TYPE_ICON[type];
   const typeLabel = type === 'speed' ? t('time') : t('capacity');
 
   if (!filled) {
@@ -64,31 +60,20 @@ export function EngineCubeSlot({
         }}
       >
         <span
-          className="flex-center relative h-9 w-9 rounded-xl border"
-          style={{
-            borderColor: `color-mix(in srgb, ${accent} 50%, transparent)`,
-            backgroundColor: `color-mix(in srgb, ${accent} 12%, transparent)`,
-          }}
+          className="flex-center absolute top-1 right-1 z-10 h-5 w-5 rounded-full border"
+          style={{ backgroundColor: accent, borderColor: 'rgba(0,0,0,0.6)' }}
         >
-          <Icon size={18} stroke={accent} strokeWidth={2.2} opacity={0.85} />
-          <span
-            className="flex-center absolute -right-1.5 -bottom-1.5 h-4 w-4 rounded-full border"
-            style={{
-              backgroundColor: accent,
-              borderColor: 'rgba(0,0,0,0.6)',
-            }}
-          >
-            <Plus size={10} strokeWidth={3} stroke="white" />
-          </span>
+          <Plus size={12} strokeWidth={3} stroke="white" />
         </span>
-        <span
-          className="text-[9px] font-extrabold uppercase tracking-[0.16em]"
-          style={{ color: accent }}
-        >
-          {typeLabel}
-        </span>
-        <span className="text-[8px] font-bold uppercase tracking-wider text-white/40">
-          {category === 'chip' ? t('chip') : t('boost')}
+        {category === 'chip' ? (
+          <ChipIcon type={type} accent={accent} size={72} animated={false} />
+        ) : (
+          <BoosterIcon type={type} accent={accent} size={72} animated={false} />
+        )}
+        <span className="mt-0.5 flex items-center gap-1 whitespace-nowrap text-[9px] font-extrabold uppercase tracking-wider">
+          <span style={{ color: accent }}>{typeLabel}</span>
+          <span className="text-white/30">·</span>
+          <span className="text-white/45">{category === 'chip' ? t('chip') : t('boost')}</span>
         </span>
         {loading && (
           <span
@@ -121,32 +106,35 @@ export function EngineCubeSlot({
             background: `linear-gradient(180deg, color-mix(in srgb, white 12%, transparent) 0%, transparent 35%)`,
           }}
         />
-        <span
-          className="flex-center relative h-9 w-9 rounded-xl border"
-          style={{
-            borderColor: `color-mix(in srgb, ${accent} 70%, transparent)`,
-            backgroundColor: `color-mix(in srgb, ${accent} 28%, transparent)`,
-            boxShadow: `inset 0 0 12px color-mix(in srgb, ${accent} 50%, transparent)`,
-          }}
-        >
-          <Icon size={20} stroke={accent} fill={accent} fillOpacity={0.32} strokeWidth={2.2} />
-        </span>
-        <span
-          className="text-[9px] font-extrabold uppercase tracking-[0.18em] leading-none"
-          style={{ color: accent }}
-        >
-          {typeLabel}
-        </span>
-        {category === 'chip' && chip && (
-          <span className="text-[9px] font-extrabold tabular-nums text-white">
-            Lvl {chip.level} · +{chip.effectPct.toFixed(1)}%
-          </span>
+        {category === 'chip' ? (
+          <ChipIcon
+            type={type}
+            tier={chip?.quality}
+            accent={chip ? undefined : accent}
+            size={76}
+            animated={false}
+          />
+        ) : (
+          <BoosterIcon
+            type={type}
+            tier={booster?.quality}
+            accent={booster ? undefined : accent}
+            size={76}
+            animated={false}
+          />
         )}
-        {category === 'booster' && booster && (
-          <span className="text-[9px] font-extrabold tabular-nums text-white">
-            +{booster.effectPct}% · {booster.durationHours}h
-          </span>
-        )}
+        <span className="mt-0.5 flex items-center gap-1 whitespace-nowrap text-[9px] font-extrabold tabular-nums uppercase tracking-wider text-white">
+          {category === 'chip' && chip && (
+            <>
+              Lvl {chip.level} +{chip.effectPct.toFixed(1)}%
+            </>
+          )}
+          {category === 'booster' && booster && (
+            <>
+              +{booster.effectPct}% {booster.durationHours}h
+            </>
+          )}
+        </span>
       </button>
       {onRemove && !loading && (
         <button

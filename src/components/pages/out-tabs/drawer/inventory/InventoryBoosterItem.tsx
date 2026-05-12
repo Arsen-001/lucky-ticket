@@ -1,8 +1,9 @@
 import { Timer } from 'lucide-react';
 import { twMerge } from 'tailwind-merge';
 import { Button } from '@/components/shared/buttons/Button';
+import { BoosterIcon } from '@/components/shared/icons/BoosterIcon';
 import { useAppTranslations } from '@/hooks/useAppTranslations';
-import { BOOSTER_TYPE_ICON, CHIP_TYPE_ICON, QUALITY_ACCENT } from '@/utils/global/inventory.utils';
+import { CHIP_TYPE_ICON, QUALITY_ACCENT } from '@/utils/global/inventory.utils';
 import type { InventoryBooster } from '@/types/interfaces/inventory.interfaces';
 import type { Dictionary } from '@/types/types/i18n.types';
 
@@ -14,7 +15,6 @@ export interface InventoryBoosterItemProps {
 
 export function InventoryBoosterItem({ booster, index, onActivate }: InventoryBoosterItemProps) {
   const t = useAppTranslations();
-  const BoosterIcon = BOOSTER_TYPE_ICON[booster.type];
   const TypeMarker = CHIP_TYPE_ICON[booster.type];
   const accent = QUALITY_ACCENT[booster.quality];
   const typeLabel = booster.type === 'speed' ? t('time') : t('capacity');
@@ -34,16 +34,7 @@ export function InventoryBoosterItem({ booster, index, onActivate }: InventoryBo
           filter: 'blur(0.8px)',
         }}
       />
-      <div
-        className="flex-center h-14 w-14 shrink-0 rounded-2xl border"
-        style={{
-          borderColor: `color-mix(in srgb, ${accent} 65%, transparent)`,
-          backgroundColor: `color-mix(in srgb, ${accent} 22%, transparent)`,
-          boxShadow: `inset 0 0 14px color-mix(in srgb, ${accent} 40%, transparent)`,
-        }}
-      >
-        <BoosterIcon size={26} stroke={accent} fill={accent} fillOpacity={0.32} strokeWidth={2.2} />
-      </div>
+      <BoosterIcon type={booster.type} tier={booster.quality} size={64} className="shrink-0" />
 
       <div className="flex min-w-0 flex-1 flex-col gap-0.5">
         <span

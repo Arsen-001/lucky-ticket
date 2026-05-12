@@ -1,9 +1,11 @@
 'use client';
 
 import { useMemo, useState } from 'react';
-import { Cpu, Hammer, MemoryStick } from 'lucide-react';
+import { Hammer } from 'lucide-react';
 import { twMerge } from 'tailwind-merge';
 import { Button } from '@/components/shared/buttons/Button';
+import { ChipIcon } from '@/components/shared/icons/ChipIcon';
+import { ChipShardIcon } from '@/components/shared/icons/ChipShardIcon';
 import { Modal } from '@/components/shared/modals/Modal';
 import { useAppTranslations } from '@/hooks/useAppTranslations';
 import { QUALITY_ACCENT, QUALITY_TIERS, TYPE_ACCENT } from '@/utils/global/inventory.utils';
@@ -70,14 +72,21 @@ export function ChipMintModal({
               active={type === 'speed'}
               accent={TYPE_ACCENT.speed}
               onClick={() => setType('speed')}
-              icon={<Cpu size={18} stroke={TYPE_ACCENT.speed} strokeWidth={2.4} />}
+              icon={<ChipIcon type="speed" accent={TYPE_ACCENT.speed} size={32} animated={false} />}
               label={t('time')}
             />
             <ChipMintChoiceCell
               active={type === 'capacity'}
               accent={TYPE_ACCENT.capacity}
               onClick={() => setType('capacity')}
-              icon={<MemoryStick size={18} stroke={TYPE_ACCENT.capacity} strokeWidth={2.4} />}
+              icon={
+                <ChipIcon
+                  type="capacity"
+                  accent={TYPE_ACCENT.capacity}
+                  size={32}
+                  animated={false}
+                />
+              }
               label={t('capacity')}
             />
           </div>
@@ -135,13 +144,7 @@ export function ChipMintModal({
             ok={isFirst || hasBuilder}
           />
           <ChipMintCostRow
-            icon={
-              type === 'speed' ? (
-                <Cpu size={13} stroke={accent} strokeWidth={2.4} />
-              ) : (
-                <MemoryStick size={13} stroke={accent} strokeWidth={2.4} />
-              )
-            }
+            icon={<ChipShardIcon type={type} accent={accent} size={16} animated={false} />}
             label={t('matching shard')}
             owned={availableShards}
             required={1}

@@ -4,10 +4,11 @@ import Image from 'next/image';
 import { Loader2, Sparkles, Timer } from 'lucide-react';
 import { useGetInventoryQuery } from '@/api/inventory.api';
 import { Modal } from '@/components/shared/modals/Modal';
+import { BoosterIcon } from '@/components/shared/icons/BoosterIcon';
+import { ChipIcon } from '@/components/shared/icons/ChipIcon';
 import { icons } from '@/constants/icons';
 import { useAppTranslations } from '@/hooks/useAppTranslations';
 import {
-  BOOSTER_TYPE_ICON,
   CHIP_TYPE_ICON,
   QUALITY_ACCENT,
   canEquipChipOnTier,
@@ -111,7 +112,6 @@ export function EngineSlotPickerModal({
           <div className="flex max-h-[55vh] flex-col gap-2 overflow-y-auto">
             {eligibleChips.map(chip => {
               const accent = QUALITY_ACCENT[chip.quality];
-              const Icon = CHIP_TYPE_ICON[chip.type];
               const cost = chipEquipStarsCost(chip.level);
               return (
                 <button
@@ -124,21 +124,13 @@ export function EngineSlotPickerModal({
                     borderColor: `color-mix(in srgb, ${accent} 55%, transparent)`,
                   }}
                 >
-                  <div
-                    className="flex-center h-10 w-10 rounded-lg border"
-                    style={{
-                      borderColor: `color-mix(in srgb, ${accent} 60%, transparent)`,
-                      backgroundColor: `color-mix(in srgb, ${accent} 18%, transparent)`,
-                    }}
-                  >
-                    <Icon
-                      size={18}
-                      stroke={accent}
-                      fill={accent}
-                      fillOpacity={0.3}
-                      strokeWidth={2.4}
-                    />
-                  </div>
+                  <ChipIcon
+                    type={chip.type}
+                    tier={chip.quality}
+                    size={44}
+                    animated={false}
+                    className="shrink-0"
+                  />
                   <div className="flex flex-1 flex-col">
                     <span className="text-[12px] font-extrabold text-white">
                       {t(chip.quality)} · {chip.type === 'speed' ? t('time') : t('capacity')}
@@ -170,7 +162,6 @@ export function EngineSlotPickerModal({
           <div className="flex max-h-[55vh] flex-col gap-2 overflow-y-auto">
             {eligibleBoosters.map(booster => {
               const accent = QUALITY_ACCENT[booster.quality];
-              const BoosterIcon = BOOSTER_TYPE_ICON[booster.type];
               const TypeMarker = CHIP_TYPE_ICON[booster.type];
               return (
                 <button
@@ -183,21 +174,13 @@ export function EngineSlotPickerModal({
                     borderColor: `color-mix(in srgb, ${accent} 55%, transparent)`,
                   }}
                 >
-                  <div
-                    className="flex-center h-10 w-10 rounded-lg border"
-                    style={{
-                      borderColor: `color-mix(in srgb, ${accent} 60%, transparent)`,
-                      backgroundColor: `color-mix(in srgb, ${accent} 18%, transparent)`,
-                    }}
-                  >
-                    <BoosterIcon
-                      size={18}
-                      stroke={accent}
-                      fill={accent}
-                      fillOpacity={0.3}
-                      strokeWidth={2.4}
-                    />
-                  </div>
+                  <BoosterIcon
+                    type={booster.type}
+                    tier={booster.quality}
+                    size={44}
+                    animated={false}
+                    className="shrink-0"
+                  />
                   <div className="flex flex-1 flex-col">
                     <span className="text-[12px] font-extrabold text-white">
                       {t(booster.quality)} · {booster.type === 'speed' ? t('time') : t('capacity')}

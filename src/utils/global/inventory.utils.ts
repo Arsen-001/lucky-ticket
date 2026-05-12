@@ -1,4 +1,4 @@
-import { Boxes, Cpu, type LucideIcon, MemoryStick, Rocket } from 'lucide-react';
+import { Cpu, type LucideIcon, MemoryStick } from 'lucide-react';
 import type { TicketType } from '@/types/types/ticket.types';
 import type { InventoryChipType } from '@/types/interfaces/inventory.interfaces';
 
@@ -18,11 +18,6 @@ export const TYPE_ACCENT: Record<InventoryChipType, string> = {
 export const CHIP_TYPE_ICON: Record<InventoryChipType, LucideIcon> = {
   speed: Cpu,
   capacity: MemoryStick,
-};
-
-export const BOOSTER_TYPE_ICON: Record<InventoryChipType, LucideIcon> = {
-  speed: Rocket,
-  capacity: Boxes,
 };
 
 export const QUALITY_TIERS: TicketType[] = ['bronze', 'silver', 'gold', 'platinum', 'diamond'];

@@ -1,8 +1,8 @@
 'use client';
 
 import { useEffect, useRef, useState } from 'react';
-import { Clock, Layers, type LucideIcon } from 'lucide-react';
 import { useAppTranslations } from '@/hooks/useAppTranslations';
+import { ChipShardIcon } from '@/components/shared/icons/ChipShardIcon';
 import { QUALITY_ACCENT, QUALITY_TIERS } from '@/utils/global/inventory.utils';
 import type {
   InventoryChipType,
@@ -20,11 +20,6 @@ export interface InventoryShardsStripProps {
 const TOOLTIP_HIDE_MS = 1800;
 const FLAT_THRESHOLD = 6;
 
-const TYPE_ICON: Record<InventoryChipType, LucideIcon> = {
-  speed: Clock,
-  capacity: Layers,
-};
-
 interface ShardCellProps {
   tier: TicketType;
   type: InventoryChipType;
@@ -36,7 +31,6 @@ interface ShardCellProps {
 function ShardCell({ tier, type, count, isOpen, onTap }: ShardCellProps) {
   const t = useAppTranslations();
   const tierAccent = QUALITY_ACCENT[tier];
-  const Icon = TYPE_ICON[type];
   const fullName = `${t(tier)} ${type === 'speed' ? t('time') : t('capacity')}`;
 
   return (
@@ -46,15 +40,10 @@ function ShardCell({ tier, type, count, isOpen, onTap }: ShardCellProps) {
         onClick={onTap}
         title={fullName}
         aria-label={fullName}
-        className="inventory-card-shine relative flex w-full flex-col items-center justify-center gap-1 overflow-hidden rounded-xl border bg-black/25 px-2 py-2.5 transition-all active:scale-95"
-        style={
-          {
-            borderColor: `color-mix(in srgb, ${tierAccent} 45%, transparent)`,
-            '--chip-accent': tierAccent,
-          } as React.CSSProperties
-        }
+        className="relative flex w-full flex-col items-center justify-center gap-1.5 overflow-hidden rounded-xl border bg-black/25 px-2 py-3 transition-all active:scale-95"
+        style={{ borderColor: `color-mix(in srgb, ${tierAccent} 45%, transparent)` }}
       >
-        <Icon size={16} stroke={tierAccent} fill={tierAccent} fillOpacity={0.3} strokeWidth={2.4} />
+        <ChipShardIcon type={type} tier={tier} size={48} empty={count === 0} />
         <span
           className="text-sm font-extrabold tabular-nums"
           style={{ color: count > 0 ? 'white' : 'rgba(255,255,255,0.3)' }}

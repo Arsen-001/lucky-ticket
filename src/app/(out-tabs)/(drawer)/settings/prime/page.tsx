@@ -1,8 +1,8 @@
 'use client';
 
-import { Crown } from 'lucide-react';
 import { useGetMarketDataQuery } from '@/api/market.api';
 import { useGetMeQuery } from '@/api/me.api';
+import { PrimeIcon } from '@/components/shared/icons/PrimeIcon';
 import { SettingsPrivilegeList } from '@/components/pages/out-tabs/drawer/settings/SettingsPrivilegeList';
 import { SettingsStatusCTA } from '@/components/pages/out-tabs/drawer/settings/SettingsStatusCTA';
 import { SettingsStatusHero } from '@/components/pages/out-tabs/drawer/settings/SettingsStatusHero';
@@ -39,7 +39,7 @@ export default function PrimeSettingsPage() {
   return (
     <div className="flex flex-col gap-5">
       <SettingsStatusHero
-        icon={<Crown size={36} className="text-electric-pink" strokeWidth={2.2} />}
+        icon={<PrimeIcon size={44} state={isPrime ? 'active' : 'locked'} />}
         title={t('prime')}
         statusLabel={statusLabel}
         description={description}

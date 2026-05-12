@@ -34,21 +34,16 @@ export function InventoryBuildersStrip({
           return (
             <div
               key={tier}
-              className="inventory-card-shine relative flex items-center justify-between gap-2 overflow-hidden rounded-xl border bg-black/25 px-3 py-2"
-              style={
-                {
-                  borderColor: `color-mix(in srgb, ${accent} 45%, transparent)`,
-                  '--chip-accent': accent,
-                } as React.CSSProperties
-              }
+              className="relative flex items-center justify-between gap-2 overflow-hidden rounded-xl border bg-black/25 px-3 py-2.5"
+              style={{ borderColor: `color-mix(in srgb, ${accent} 45%, transparent)` }}
             >
-              <div className="flex items-center gap-1.5 min-w-0">
+              <div className="flex min-w-0 items-center gap-2">
                 <Hammer
-                  size={13}
+                  size={22}
                   stroke={accent}
                   fill={accent}
-                  fillOpacity={0.25}
-                  strokeWidth={2.4}
+                  fillOpacity={0.3}
+                  strokeWidth={2.2}
                 />
                 <span
                   className="text-[9px] font-extrabold uppercase tracking-wider truncate"

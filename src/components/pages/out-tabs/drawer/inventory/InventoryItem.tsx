@@ -1,25 +1,14 @@
-import {
-  ArrowUp,
-  Cpu,
-  Infinity as InfinityIcon,
-  type LucideIcon,
-  MemoryStick,
-  Timer,
-} from 'lucide-react';
+import { ArrowUp, Infinity as InfinityIcon, Timer } from 'lucide-react';
 import { twMerge } from 'tailwind-merge';
 import { useGetMeQuery } from '@/api/me.api';
 import { Button } from '@/components/shared/buttons/Button';
+import { ChipIcon } from '@/components/shared/icons/ChipIcon';
 import { useAppTranslations } from '@/hooks/useAppTranslations';
 import { chipUnequipStarsCost } from '@/utils/global/inventory.utils';
-import type { InventoryChip, InventoryChipType } from '@/types/interfaces/inventory.interfaces';
+import type { InventoryChip } from '@/types/interfaces/inventory.interfaces';
 import type { Dictionary } from '@/types/types/i18n.types';
 import type { TicketType } from '@/types/types/ticket.types';
 import '@/styles/components/inventory.css';
-
-const TYPE_ICON: Record<InventoryChipType, LucideIcon> = {
-  speed: Cpu,
-  capacity: MemoryStick,
-};
 
 const QUALITY_ACCENT: Record<TicketType, string> = {
   bronze: 'var(--color-bronze)',
@@ -52,7 +41,6 @@ export function InventoryItem({
 }: InventoryItemProps) {
   const t = useAppTranslations();
   const { data: me } = useGetMeQuery();
-  const ChipIcon = TYPE_ICON[chip.type];
   const accent = QUALITY_ACCENT[chip.quality];
   const isEquipped = !!chip.equippedOnEngineId;
   const unequipCost = chipUnequipStarsCost(chip.level);
@@ -69,16 +57,10 @@ export function InventoryItem({
   return (
     <div
       className={twMerge(
-        'bg-background-overlay inventory-card-shine animate-slide-in-bottom relative flex flex-col gap-3 overflow-hidden rounded-2xl p-3.5',
+        'bg-background-overlay animate-slide-in-bottom relative flex flex-col gap-3 overflow-hidden rounded-2xl p-3.5',
         isLevelingUp && 'inventory-chip-zoom'
       )}
-      style={
-        {
-          '--chip-accent': accent,
-          '--shine-delay': `${index * 0.4}s`,
-          animationDelay: `${index * 60}ms`,
-        } as React.CSSProperties
-      }
+      style={{ animationDelay: `${index * 60}ms` }}
     >
       <span
         aria-hidden
@@ -89,16 +71,7 @@ export function InventoryItem({
         }}
       />
       <div className="flex items-center gap-3">
-        <div
-          className="flex-center h-16 w-16 shrink-0 rounded-2xl border"
-          style={{
-            borderColor: `color-mix(in srgb, ${accent} 70%, transparent)`,
-            backgroundColor: `color-mix(in srgb, ${accent} 22%, transparent)`,
-            boxShadow: `inset 0 0 18px color-mix(in srgb, ${accent} 45%, transparent)`,
-          }}
-        >
-          <ChipIcon size={30} stroke={accent} fill={accent} fillOpacity={0.32} strokeWidth={2.2} />
-        </div>
+        <ChipIcon type={chip.type} tier={chip.quality} size={76} className="shrink-0" />
 
         <div className="flex min-w-0 flex-1 flex-col gap-0.5">
           <span
