@@ -1,142 +1,148 @@
+import type { FetchArgs } from '@reduxjs/toolkit/query';
 import {
   WalletCurrency,
-  WalletProvider,
   WalletTransactionStatus,
   WalletTransactionType,
 } from '@/types/enums/wallet.enums';
 import type {
+  BuyStarsRequest,
+  ConnectWalletRequest,
   DepositAddressResponse,
-  StarsPackage,
-  SupportedWallet,
   WalletState,
-  WalletTransaction,
+  WithdrawTonRequest,
 } from '@/types/interfaces/wallet.interfaces';
+import { appConfig } from '@/config/app.config';
+import { mockDb } from '@/mock/backend/db';
 
-const walletState: WalletState = {
-  isConnected: true,
-  address: 'EQAbCdEfGhIjKlMnOpQrStUvWxYzAaBbCcDdEeFfGgHhIiJjKx9k2',
-  provider: WalletProvider.TONKEEPER,
-  tonBalance: 12.4583,
-  starsBalance: 1240,
-  usdRate: 3.42,
-  network: 'mainnet',
+const randomHash = () =>
+  Array.from({ length: 64 }, () => '0123456789abcdef'[Math.floor(Math.random() * 16)]).join('');
+
+const round4 = (n: number) => Number(n.toFixed(4));
+
+/**
+ * `wallet` query — composed live from backend state + config.
+ * `starsBalance` is the shared user balance (`mockDb.user.telegramStars`),
+ * not a separate wallet field, so buying stars reflects everywhere.
+ */
+const getWalletState = (): WalletState => ({
+  isConnected: mockDb.wallet.isConnected,
+  address: mockDb.wallet.address,
+  provider: mockDb.wallet.provider,
+  tonBalance: mockDb.wallet.tonBalance,
+  starsBalance: mockDb.user.telegramStars,
+  usdRate: appConfig.wallet.tonUsdRate,
+  network: mockDb.wallet.network,
+});
+
+/** Transaction history — fresh copies so RTK Query detects in-place mutations. */
+const getTransactions = () => mockDb.wallet.transactions.map(tx => ({ ...tx }));
+
+const getDepositAddress = (): DepositAddressResponse => ({
+  address: mockDb.wallet.address ?? '',
+  network: mockDb.wallet.network,
+});
+
+/** POST wallet/connect — mark the wallet connected with the chosen provider. */
+const connectWallet = (args: FetchArgs) => {
+  const { provider } = (args.body ?? {}) as Partial<ConnectWalletRequest>;
+  if (provider) mockDb.wallet.provider = provider;
+  mockDb.wallet.isConnected = true;
+  if (!mockDb.wallet.address) {
+    mockDb.wallet.address = 'EQAbCdEfGhIjKlMnOpQrStUvWxYzAaBbCcDdEeFfGgHhIiJjKx9k2';
+  }
+  return {
+    data: {
+      success: true,
+      address: mockDb.wallet.address,
+      provider: mockDb.wallet.provider,
+    },
+  };
 };
 
-const supportedWallets: SupportedWallet[] = [
-  { provider: WalletProvider.TONKEEPER, name: 'Tonkeeper', iconBg: '#0098EA', emoji: 'TK' },
-  { provider: WalletProvider.MYTONWALLET, name: 'MyTonWallet', iconBg: '#3B6FE3', emoji: 'MT' },
-  {
-    provider: WalletProvider.TELEGRAM_WALLET,
-    name: 'Telegram Wallet',
-    iconBg: '#229ED9',
-    emoji: 'TG',
-  },
-  { provider: WalletProvider.TONHUB, name: 'Tonhub', iconBg: '#7C5CFF', emoji: 'TH' },
-];
+/** POST wallet/disconnect — clear the connection. */
+const disconnectWallet = () => {
+  mockDb.wallet.isConnected = false;
+  mockDb.wallet.address = undefined;
+  mockDb.wallet.provider = undefined;
+  return { data: { success: true } };
+};
 
-const walletTransactions: WalletTransaction[] = [
-  {
-    id: 'wtx_001',
-    type: WalletTransactionType.BUY_STARS,
-    description: 'Bought 500 Stars for 0.25 TON',
-    amount: 500,
-    currency: WalletCurrency.STARS,
-    status: WalletTransactionStatus.COMPLETED,
-    createdAt: new Date(Date.now() - 1000 * 60 * 4).toISOString(),
-    txHash: '7f3c1ab9e1d7af2401b6b3a5a3dbf512a98b2c1d5e7f6a4b3c2d1e0f9a8b7c6d',
-    fee: 0.005,
-  },
-  {
-    id: 'wtx_002',
-    type: WalletTransactionType.DEPOSIT_TON,
-    description: 'Deposited 5 TON',
-    amount: 5,
-    currency: WalletCurrency.TON,
-    status: WalletTransactionStatus.COMPLETED,
-    createdAt: new Date(Date.now() - 1000 * 60 * 60 * 2).toISOString(),
-    txHash: '8e2b3c4d5e6f7a8b9c0d1e2f3a4b5c6d7e8f9a0b1c2d3e4f5a6b7c8d9e0f1a2b',
-    counterparty: 'EQDc...mP31',
-  },
-  {
-    id: 'wtx_003',
+/** POST wallet/withdraw — debit TON balance, append a pending withdrawal tx. */
+const withdrawTon = (args: FetchArgs) => {
+  const { toAddress, amount } = (args.body ?? {}) as Partial<WithdrawTonRequest>;
+  const value = amount ?? 0;
+  const fee = appConfig.wallet.withdrawFeeTon;
+  if (value <= 0 || mockDb.wallet.tonBalance < value + fee) {
+    return { error: { status: 400, data: 'Insufficient TON balance' } };
+  }
+
+  mockDb.wallet.tonBalance = round4(mockDb.wallet.tonBalance - value - fee);
+  const txHash = randomHash();
+  mockDb.wallet.transactions.unshift({
+    id: `wtx_${Date.now()}`,
     type: WalletTransactionType.WITHDRAW_TON,
-    description: 'Withdrew 2.5 TON',
-    amount: 2.5,
+    description: `Withdrew ${value} TON`,
+    amount: value,
     currency: WalletCurrency.TON,
     status: WalletTransactionStatus.PENDING,
-    createdAt: new Date(Date.now() - 1000 * 60 * 60 * 6).toISOString(),
-    txHash: '9c8b7a6d5e4f3a2b1c0d9e8f7a6b5c4d3e2f1a0b9c8d7e6f5a4b3c2d1e0f9a8b',
-    counterparty: 'EQAv...8t1q',
-    fee: 0.05,
-  },
-  {
-    id: 'wtx_004',
+    createdAt: new Date().toISOString(),
+    txHash,
+    counterparty: toAddress,
+    fee,
+  });
+
+  return { data: { success: true, txHash, estimatedArrivalSec: 30 } };
+};
+
+/** POST wallet/buy-stars — debit TON, credit the shared Stars balance. */
+const buyStars = (args: FetchArgs) => {
+  const { packageId, customStars } = (args.body ?? {}) as Partial<BuyStarsRequest>;
+  const pkg = packageId ? appConfig.wallet.starsPackages.find(p => p.id === packageId) : undefined;
+  const baseRate = appConfig.wallet.starsPackages[0]; // 75 stars / 1 TON
+
+  let stars = 0;
+  let tonCost = 0;
+  if (pkg) {
+    stars = pkg.stars;
+    tonCost = pkg.tonCost;
+  } else if (customStars && customStars > 0) {
+    stars = customStars;
+    tonCost = round4(customStars / (baseRate.stars / baseRate.tonCost));
+  } else {
+    return { error: { status: 400, data: 'No package or custom amount provided' } };
+  }
+
+  if (mockDb.wallet.tonBalance < tonCost) {
+    return { error: { status: 400, data: 'Insufficient TON balance' } };
+  }
+
+  mockDb.wallet.tonBalance = round4(mockDb.wallet.tonBalance - tonCost);
+  mockDb.user.telegramStars += stars;
+  const txHash = randomHash();
+  mockDb.wallet.transactions.unshift({
+    id: `wtx_${Date.now()}`,
     type: WalletTransactionType.BUY_STARS,
-    description: 'Bought 100 Stars for 0.05 TON',
-    amount: 100,
+    description: `Bought ${stars} Stars for ${tonCost} TON`,
+    amount: stars,
     currency: WalletCurrency.STARS,
     status: WalletTransactionStatus.COMPLETED,
-    createdAt: new Date(Date.now() - 1000 * 60 * 60 * 24).toISOString(),
-    txHash: 'a1b2c3d4e5f6a7b8c9d0e1f2a3b4c5d6e7f8a9b0c1d2e3f4a5b6c7d8e9f0a1b2',
+    createdAt: new Date().toISOString(),
+    txHash,
     fee: 0.005,
-  },
-  {
-    id: 'wtx_005',
-    type: WalletTransactionType.DEPOSIT_TON,
-    description: 'Deposited 10 TON',
-    amount: 10,
-    currency: WalletCurrency.TON,
-    status: WalletTransactionStatus.COMPLETED,
-    createdAt: new Date(Date.now() - 1000 * 60 * 60 * 24 * 2).toISOString(),
-    txHash: 'b2c3d4e5f6a7b8c9d0e1f2a3b4c5d6e7f8a9b0c1d2e3f4a5b6c7d8e9f0a1b2c3',
-    counterparty: 'EQDc...mP31',
-  },
-  {
-    id: 'wtx_006',
-    type: WalletTransactionType.WITHDRAW_TON,
-    description: 'Withdrew 1 TON',
-    amount: 1,
-    currency: WalletCurrency.TON,
-    status: WalletTransactionStatus.FAILED,
-    createdAt: new Date(Date.now() - 1000 * 60 * 60 * 24 * 4).toISOString(),
-    counterparty: 'EQDz...4m9p',
-    fee: 0.05,
-  },
-];
+  });
 
-const starsPackages: StarsPackage[] = [
-  { id: 'pkg_75', stars: 75, tonCost: 1 },
-  { id: 'pkg_400', stars: 400, tonCost: 5, bonusPercent: 7, popular: true },
-  { id: 'pkg_850', stars: 850, tonCost: 10, bonusPercent: 13 },
-  { id: 'pkg_4700', stars: 4700, tonCost: 50, bonusPercent: 25 },
-];
-
-const depositAddress: DepositAddressResponse = {
-  address: 'EQAbCdEfGhIjKlMnOpQrStUvWxYzAaBbCcDdEeFfGgHhIiJjKx9k2',
-  network: 'mainnet',
+  return { data: { success: true, txHash, starsCredited: stars } };
 };
 
 export const walletMock = {
-  wallet: walletState,
-  'wallet/supported': supportedWallets,
-  'wallet/transactions': walletTransactions,
-  'wallet/stars-packages': starsPackages,
-  'wallet/deposit-address': depositAddress,
-  'POST wallet/connect': {
-    success: true,
-    address: walletState.address,
-    provider: walletState.provider,
-  },
-  'POST wallet/disconnect': { success: true },
-  'POST wallet/withdraw': {
-    success: true,
-    txHash: 'd4e5f6a7b8c9d0e1f2a3b4c5d6e7f8a9b0c1d2e3f4a5b6c7d8e9f0a1b2c3d4e5',
-    estimatedArrivalSec: 30,
-  },
-  'POST wallet/buy-stars': {
-    success: true,
-    txHash: 'e5f6a7b8c9d0e1f2a3b4c5d6e7f8a9b0c1d2e3f4a5b6c7d8e9f0a1b2c3d4e5f6',
-    starsCredited: 500,
-  },
+  wallet: getWalletState,
+  'wallet/supported': appConfig.wallet.supportedWallets,
+  'wallet/transactions': getTransactions,
+  'wallet/stars-packages': appConfig.wallet.starsPackages,
+  'wallet/deposit-address': getDepositAddress,
+  'POST wallet/connect': connectWallet,
+  'POST wallet/disconnect': disconnectWallet,
+  'POST wallet/withdraw': withdrawTon,
+  'POST wallet/buy-stars': buyStars,
   'POST wallet/notify-lc': { success: true },
 };

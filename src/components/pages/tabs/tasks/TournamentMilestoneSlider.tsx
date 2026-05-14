@@ -27,10 +27,10 @@ import { type Route, routes } from '@/constants/routes';
 import { TaskRewardRow } from './TaskRewardRow';
 
 const RARITY_FRAME: Record<TaskRarity, string> = {
-  [TaskRarity.COMMON]: 'task-card-default',
-  [TaskRarity.RARE]: 'task-card-rarity-rare',
-  [TaskRarity.EPIC]: 'task-card-rarity-epic',
-  [TaskRarity.LEGENDARY]: 'task-card-rarity-legendary',
+  [TaskRarity.BRONZE]: 'task-card-default',
+  [TaskRarity.SILVER]: 'task-card-rarity-rare',
+  [TaskRarity.GOLD]: 'task-card-rarity-epic',
+  [TaskRarity.PLATINUM]: 'task-card-rarity-legendary',
 };
 
 const SLIDE_WIDTH = 176;
@@ -55,7 +55,7 @@ export interface TournamentMilestoneSliderProps {
   numberIcon?: LucideIcon;
   /**
    * If provided, replaces the default Trophy badge on each card with the matching
-   * Lucky Ticket asset (bronze/silver/gold/platinum/diamond).
+   * LuckyTicket365 asset (bronze/silver/gold/platinum/diamond).
    */
   cardIconType?: TicketType;
   /**

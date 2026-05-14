@@ -23,6 +23,7 @@ import { useAppTranslations } from '@/hooks/useAppTranslations';
 import { chipEquipStarsCost } from '@/utils/global/inventory.utils';
 import type { InventoryChip } from '@/types/interfaces/inventory.interfaces';
 import { EmptyDataInfo } from '@/components/shared/EmptyDataInfo';
+import { Skeleton } from '@/components/shared/seleketons/Skeleton';
 import '@/styles/components/engines-cube-dot.css';
 import {
   effectiveCycleSeconds,
@@ -302,6 +303,33 @@ export function HomeEnginesSlider({ className }: ClassNameProps) {
       )
     );
   };
+
+  if (isLoading) {
+    return (
+      <div className={twMerge('-mt-5 mb-0 flex w-full flex-col items-stretch', className)}>
+        <div
+          className="scrollbar-hidden flex snap-x items-stretch gap-3 overflow-x-auto overflow-y-visible"
+          style={{ paddingInline: `${SLIDE_GUTTER_PX}px` }}
+        >
+          {[0, 1].map(i => (
+            <div
+              key={i}
+              style={{
+                flex: `0 0 ${SLIDE_WIDTH_CSS}`,
+                transform: `scale(${i === 0 ? 1 : 0.78})`,
+              }}
+              className={twMerge(
+                'relative flex origin-center items-center min-h-[calc(100vw-60px)]',
+                i !== 0 && 'opacity-60 saturate-75'
+              )}
+            >
+              <Skeleton variant="card" className="h-[calc(100vw-120px)] w-full rounded-3xl" />
+            </div>
+          ))}
+        </div>
+      </div>
+    );
+  }
 
   if (!isLoading && !items.length) {
     return <EmptyDataInfo className="mt-10" />;

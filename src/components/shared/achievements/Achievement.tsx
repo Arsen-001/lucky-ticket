@@ -13,6 +13,7 @@ import {
   Coins,
   Cpu,
   Crown,
+  Eye,
   Flame,
   FlaskConical,
   Gauge,
@@ -40,8 +41,9 @@ import {
   Wallet,
   Zap,
 } from 'lucide-react';
+
 import { twMerge } from 'tailwind-merge';
-import { AchievementRarity } from '@/types/enums/achievement.enums';
+import { AchievementCategory, AchievementRarity } from '@/types/enums/achievement.enums';
 import type { Achievement as AchievementType } from '@/types/interfaces/achievement.interfaces';
 import '@/styles/components/achievement.css';
 
@@ -49,6 +51,7 @@ const iconMap: Record<string, LucideIcon> = {
   'shield-check': ShieldCheck,
   'badge-check': BadgeCheck,
   crown: Crown,
+  eye: Eye,
   sparkles: Sparkles,
   gem: Gem,
   ticket: TicketIcon,
@@ -85,23 +88,63 @@ const iconMap: Record<string, LucideIcon> = {
 };
 
 const rarityIconColor: Record<AchievementRarity, string> = {
-  [AchievementRarity.COMMON]: '#FFFFFF',
-  [AchievementRarity.RARE]: '#5FE3F5',
-  [AchievementRarity.EPIC]: '#A78BFA',
-  [AchievementRarity.LEGENDARY]: '#F8BD3E',
-  [AchievementRarity.MYTHIC]: '#FF5FC8',
-  [AchievementRarity.MYTHIC_PLUS]: '#FFD700',
+  [AchievementRarity.BRONZE]: '#FFFFFF',
+  [AchievementRarity.SILVER]: '#5FE3F5',
+  [AchievementRarity.GOLD]: '#A78BFA',
+  [AchievementRarity.PLATINUM]: '#F8BD3E',
+  [AchievementRarity.DIAMOND]: '#FF5FC8',
+  [AchievementRarity.DIAMOND_PLUS]: '#FFD700',
+};
+
+type RarityImageMap = Record<AchievementRarity, string>;
+
+const mkMap = (prefix: string, goldTier: 'gold' | 'golden' = 'gold'): RarityImageMap => ({
+  [AchievementRarity.BRONZE]: `/assets/icons/badges/bronze-${prefix}.png`,
+  [AchievementRarity.SILVER]: `/assets/icons/badges/silver-${prefix}.png`,
+  [AchievementRarity.GOLD]: `/assets/icons/badges/${goldTier}-${prefix}.png`,
+  [AchievementRarity.PLATINUM]: `/assets/icons/badges/platinum-${prefix}.png`,
+  [AchievementRarity.DIAMOND]: `/assets/icons/badges/diamond-${prefix}.png`,
+  [AchievementRarity.DIAMOND_PLUS]: `/assets/icons/badges/diamond-plus-${prefix}.png`,
+});
+
+const badgeByCategoryMap: Partial<Record<AchievementCategory, RarityImageMap>> = {
+  [AchievementCategory.STATUS]: mkMap('profile-badge'),
+  [AchievementCategory.TICKETS]: mkMap('ticket-badge'),
+  [AchievementCategory.ACTIVITY_POINTS]: mkMap('activity-badge', 'golden'),
+};
+
+const badgeByIconCodeMap: Partial<Record<string, RarityImageMap>> = {
+  trophy: mkMap('1st-badge', 'golden'),
+  crown: mkMap('1st-badge', 'golden'),
+  'trending-up': mkMap('2nd-badge'),
+  medal: mkMap('3th-badge', 'golden'),
+};
+
+const tournamentBadgeMap: RarityImageMap = {
+  [AchievementRarity.BRONZE]: '/assets/icons/badges/bronze-tournament-badge.png',
+  [AchievementRarity.SILVER]: '/assets/icons/badges/silver-tournament-badge.png',
+  [AchievementRarity.GOLD]: '/assets/icons/badges/golden-tournament-badge.png',
+  [AchievementRarity.PLATINUM]: '/assets/icons/badges/platinum-tournament-badge.png',
+  [AchievementRarity.DIAMOND]: '/assets/icons/badges/diamond-tournament-badge.png',
+  [AchievementRarity.DIAMOND_PLUS]: '/assets/icons/badges/diamon-plus-tournament-badge.png',
+};
+
+const resolveBadgeSrc = (achievement: AchievementType): string | undefined => {
+  if (achievement.category === AchievementCategory.TOURNAMENTS) {
+    const byIcon = achievement.iconCode
+      ? badgeByIconCodeMap[achievement.iconCode]?.[achievement.rarity]
+      : undefined;
+    return byIcon ?? tournamentBadgeMap[achievement.rarity];
+  }
+  return (
+    badgeByCategoryMap[achievement.category]?.[achievement.rarity] ??
+    (achievement.iconCode
+      ? badgeByIconCodeMap[achievement.iconCode]?.[achievement.rarity]
+      : undefined)
+  );
 };
 
 export type AchievementSize = 'xs' | 'sm' | 'md' | 'lg' | 'xl';
-
-const sizePx: Record<AchievementSize, number> = {
-  xs: 36,
-  sm: 52,
-  md: 72,
-  lg: 96,
-  xl: 140,
-};
 
 const iconSize: Record<AchievementSize, number> = {
   xs: 16,
@@ -132,32 +175,42 @@ export function Achievement({
   overlay,
   style,
 }: AchievementProps) {
+  const isLocked = !achievement.earned;
+  const badgeSrc = resolveBadgeSrc(achievement);
   const Icon: LucideIcon =
     (achievement.iconCode ? iconMap[achievement.iconCode] : undefined) ?? Award;
-  const px = sizePx[size];
-  const isLocked = !achievement.earned;
   const rarityColor = rarityIconColor[achievement.rarity];
 
   return (
     <div
-      style={{ width: px, height: px, ...style }}
+      style={badgeSrc ? style : { width: 72, height: 72, ...style }}
       className={twMerge(
         'relative inline-flex flex-shrink-0 items-center justify-center',
         className
       )}
     >
-      <Icon
-        size={iconSize[size]}
-        strokeWidth={2}
-        className={twMerge('relative z-1', classNames?.icon)}
-        style={{
-          color: rarityColor,
-          opacity: isLocked ? 0.5 : 1,
-          filter: isLocked
-            ? `drop-shadow(0 0 4px ${rarityColor}33)`
-            : `drop-shadow(0 0 8px ${rarityColor}66)`,
-        }}
-      />
+      {badgeSrc ? (
+        //TODO: Next js Image component add spaces from edges
+        <img
+          src={badgeSrc}
+          alt={achievement.name}
+          className={twMerge('relative z-1 w-30 h-30 object-contain', classNames?.icon)}
+          style={{ opacity: isLocked ? 0.4 : 1 }}
+        />
+      ) : (
+        <Icon
+          size={iconSize[size]}
+          strokeWidth={2}
+          className={twMerge('relative z-1', classNames?.icon)}
+          style={{
+            color: rarityColor,
+            opacity: isLocked ? 0.5 : 1,
+            filter: isLocked
+              ? `drop-shadow(0 0 4px ${rarityColor}33)`
+              : `drop-shadow(0 0 8px ${rarityColor}66)`,
+          }}
+        />
+      )}
       {overlay && (
         <div className={twMerge('pointer-events-none absolute inset-0', classNames?.overlay)}>
           {overlay}

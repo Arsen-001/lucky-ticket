@@ -10,16 +10,17 @@ export enum AchievementCategory {
   SOCIAL = 'social',
   FINANCE = 'finance',
   TASKS = 'tasks',
+  ADS = 'ads',
   EXCLUSIVE = 'exclusive',
 }
 
 export enum AchievementRarity {
-  COMMON = 'common',
-  RARE = 'rare',
-  EPIC = 'epic',
-  LEGENDARY = 'legendary',
-  MYTHIC = 'mythic',
-  MYTHIC_PLUS = 'mythic_plus',
+  BRONZE = 'bronze',
+  SILVER = 'silver',
+  GOLD = 'gold',
+  PLATINUM = 'platinum',
+  DIAMOND = 'diamond',
+  DIAMOND_PLUS = 'diamond_plus',
 }
 
 export enum AchievementShape {

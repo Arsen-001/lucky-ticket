@@ -1,7 +1,8 @@
 import { defaultLocale } from '@/i18n/config';
+import { appConfig } from '@/config/app.config';
 
 export const GlobalConstants = {
-  projectName: 'Lucky Ticket',
+  projectName: 'LuckyTicket365',
   minPasswordLength: 8,
   coinName: 'LC',
   defaultLanguage: defaultLocale,
@@ -12,15 +13,17 @@ export const GlobalConstants = {
   inviteStars: 1,
   inviteTelegramPremiumActivityPoints: 20,
   inviteTelegramPremiumStars: 2,
-  stakeDurationHours: 3,
-  stakeCancelStarsPerLevel: 5,
-  stakeDurationMinMonths: 1,
-  stakeDurationMaxMonths: 12,
-  stakeAprMinPercent: 1,
-  stakeAprMaxPercent: 5,
-  telegramBotUrl: 'https://t.me/lucky_ticket_bot',
-  telegramSupportUrl: 'https://t.me/lucky_ticket_support',
-  telegramChannelUrl: 'https://t.me/lucky_ticket_channel',
+  // Stake values are sourced from the single config (`appConfig.stakes`) —
+  // change them there, not here.
+  stakeDurationHours: appConfig.stakes.durationHours,
+  stakeCancelStarsPerLevel: appConfig.stakes.cancelStarsPerLevel,
+  stakeDurationMinMonths: appConfig.stakes.durationMinMonths,
+  stakeDurationMaxMonths: appConfig.stakes.durationMaxMonths,
+  stakeAprMinPercent: appConfig.stakes.aprMinPercent,
+  stakeAprMaxPercent: appConfig.stakes.aprMaxPercent,
+  telegramBotUrl: 'https://t.me/luckyticket365_bot',
+  telegramSupportUrl: 'https://t.me/luckyticket365_support',
+  telegramChannelUrl: 'https://t.me/luckyticket365_channel',
 
   starName: 'LS',
   tonName: 'TON',

@@ -1,4 +1,4 @@
-# Lucky Ticket Development Guidelines
+# LuckyTicket365 Development Guidelines
 
 This document provides project-specific information and instructions for development, testing, and configuration.
 

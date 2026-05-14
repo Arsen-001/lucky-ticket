@@ -21,9 +21,9 @@ const notifications = (
     {
       id: '1',
       type: 'system',
-      title: 'Welcome to Lucky Ticket!',
+      title: 'Welcome to LuckyTicket365!',
       content:
-        'Welcome to Lucky Ticket! We are glad to have you on board. Let us know if you have any questions or need assistance.',
+        'Welcome to LuckyTicket365! We are glad to have you on board. Let us know if you have any questions or need assistance.',
       read: false,
       date: today.toISOString(),
     },

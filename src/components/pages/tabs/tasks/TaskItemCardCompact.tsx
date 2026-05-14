@@ -15,10 +15,10 @@ import { TaskRewardRow } from './TaskRewardRow';
 import { SectionShine } from './SectionShine';
 
 const RARITY_FRAME: Record<TaskRarity, string> = {
-  [TaskRarity.COMMON]: 'task-card-default',
-  [TaskRarity.RARE]: 'task-card-rarity-rare',
-  [TaskRarity.EPIC]: 'task-card-rarity-epic',
-  [TaskRarity.LEGENDARY]: 'task-card-rarity-legendary',
+  [TaskRarity.BRONZE]: 'task-card-default',
+  [TaskRarity.SILVER]: 'task-card-rarity-rare',
+  [TaskRarity.GOLD]: 'task-card-rarity-epic',
+  [TaskRarity.PLATINUM]: 'task-card-rarity-legendary',
 };
 
 export interface TaskItemCardCompactProps {

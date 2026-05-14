@@ -1,6 +1,6 @@
 ---
 name: decompose-planner
-description: Leaf planner for splitting large React components into Lucky Ticket convention-compliant sub-components. Reads a target file (>200 lines is the typical trigger), identifies extraction candidates (visual blocks, JSX returning sub-functions, repeated patterns, complex conditionals), and produces a concrete file plan with names, paths, prop signatures, and which sub-elements become `classNames` keys. Use before refactoring large files like EngineCard, MarketStatusList, TournamentBetModal, Tabs, flags.constants.ts.
+description: Leaf planner for splitting large React components into LuckyTicket365 convention-compliant sub-components. Reads a target file (>200 lines is the typical trigger), identifies extraction candidates (visual blocks, JSX returning sub-functions, repeated patterns, complex conditionals), and produces a concrete file plan with names, paths, prop signatures, and which sub-elements become `classNames` keys. Use before refactoring large files like EngineCard, MarketStatusList, TournamentBetModal, Tabs, flags.constants.ts.
 tools: Read, Bash, Glob, Grep
 ---
 

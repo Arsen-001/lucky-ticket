@@ -6,17 +6,16 @@ import { useAppTranslations } from '@/hooks/useAppTranslations';
 import { routes } from '@/constants/routes';
 import { AchievementRarity } from '@/types/enums/achievement.enums';
 import type { Achievement as AchievementType } from '@/types/interfaces/achievement.interfaces';
-import '@/styles/components/profile.css';
 
 const PREVIEW_LIMIT = 3;
 
 const rarityWeight: Record<AchievementRarity, number> = {
-  [AchievementRarity.MYTHIC_PLUS]: 6,
-  [AchievementRarity.MYTHIC]: 5,
-  [AchievementRarity.LEGENDARY]: 4,
-  [AchievementRarity.EPIC]: 3,
-  [AchievementRarity.RARE]: 2,
-  [AchievementRarity.COMMON]: 1,
+  [AchievementRarity.DIAMOND_PLUS]: 6,
+  [AchievementRarity.DIAMOND]: 5,
+  [AchievementRarity.PLATINUM]: 4,
+  [AchievementRarity.GOLD]: 3,
+  [AchievementRarity.SILVER]: 2,
+  [AchievementRarity.BRONZE]: 1,
 };
 
 export interface ProfileBadgesCollectionProps {
@@ -46,32 +45,34 @@ export function ProfileBadgesCollection({
     .slice(0, PREVIEW_LIMIT);
 
   return (
-    <section className="flex flex-col gap-3">
-      <header className="flex items-center justify-between">
-        <div className="flex flex-col">
+    <section className="flex flex-col gap-2.5">
+      <header className="flex items-center justify-between px-1">
+        <div className="flex items-baseline gap-2">
           <h3 className="text-base font-extrabold text-white">{t('badge collection')}</h3>
-          <span className="text-[11px] text-white/50 tabular-nums">
-            {totalEarned} / {totalAchievements}
+          <span className="text-[11px] font-bold tabular-nums text-white/45">
+            {totalEarned}/{totalAchievements}
           </span>
         </div>
         {isOwn && (
           <Link
             href={routes.profile.achievements}
-            className="text-electric-pink flex items-center gap-1 text-[11px] font-bold uppercase tracking-wider"
+            className="text-electric-pink flex items-center gap-0.5 text-[11px] font-extrabold uppercase tracking-wider"
           >
             {t('view all')}
-            <ChevronRight size={12} />
+            <ChevronRight size={14} />
           </Link>
         )}
       </header>
 
       {earned.length === 0 ? (
-        <div className="glass-card flex flex-col items-center gap-2 p-5 text-center">
+        <div className="bg-background-overlay flex flex-col items-center gap-2 rounded-2xl p-5 text-center">
           <Sparkles size={28} className="text-gold" />
           <p className="text-xs text-white/65">{t('badge collection empty')}</p>
         </div>
       ) : (
-        <AchievementGrid achievements={earned} onClick={onTapAchievement} />
+        <div className="bg-background-overlay rounded-2xl p-3">
+          <AchievementGrid achievements={earned} onClick={onTapAchievement} />
+        </div>
       )}
     </section>
   );

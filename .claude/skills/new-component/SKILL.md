@@ -1,6 +1,6 @@
 ---
 name: new-component
-description: Scaffold a new React component matching Lucky Ticket conventions — twMerge, Record-typed variants, classNames object, extends-HTML-props, named export. Use when adding a button, card, badge, list item, form element, layout piece, or any reusable UI primitive. Routes the component to the correct directory and skips 'use client' unless required.
+description: Scaffold a new React component matching LuckyTicket365 conventions — twMerge, Record-typed variants, classNames object, extends-HTML-props, named export. Use when adding a button, card, badge, list item, form element, layout piece, or any reusable UI primitive. Routes the component to the correct directory and skips 'use client' unless required.
 ---
 
 # new-component

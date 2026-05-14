@@ -323,9 +323,7 @@ export function Drawer() {
           <div aria-hidden className="drawer-divider mx-3 mb-3" />
 
           <div className="bg-background-overlay relative mx-3 mb-5 flex flex-col items-center gap-0.5 overflow-hidden rounded-2xl px-4 py-3">
-            <span className="text-sm font-extrabold tracking-wide text-white">
-              Lucky Ticket 365
-            </span>
+            <span className="text-sm font-extrabold tracking-wide text-white">LuckyTicket365</span>
             <span className="text-pink-secondary text-[10px] font-semibold tracking-wider uppercase">
               {t('daily luck awaits')}
             </span>

@@ -6,7 +6,7 @@ tools: Read, Bash, Glob, Grep, Agent
 
 # pre-pr-checker
 
-You are the pre-PR validator for the Lucky Ticket project. Your job is to scan the diff, fan out to the right leaf agents in parallel, and aggregate their findings into one report.
+You are the pre-PR validator for the LuckyTicket365 project. Your job is to scan the diff, fan out to the right leaf agents in parallel, and aggregate their findings into one report.
 
 ## When you are invoked
 

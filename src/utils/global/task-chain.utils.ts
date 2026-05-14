@@ -35,12 +35,12 @@ export const resolveTaskChain = (task: Task): TaskChainContribution | null => {
 };
 
 const RARITY_DOT_COLOR: Record<AchievementRarity, string> = {
-  [AchievementRarity.COMMON]: '#FFFFFF',
-  [AchievementRarity.RARE]: '#5FE3F5',
-  [AchievementRarity.EPIC]: '#A78BFA',
-  [AchievementRarity.LEGENDARY]: '#F8BD3E',
-  [AchievementRarity.MYTHIC]: '#FF5FC8',
-  [AchievementRarity.MYTHIC_PLUS]: '#FFD700',
+  [AchievementRarity.BRONZE]: '#FFFFFF',
+  [AchievementRarity.SILVER]: '#5FE3F5',
+  [AchievementRarity.GOLD]: '#A78BFA',
+  [AchievementRarity.PLATINUM]: '#F8BD3E',
+  [AchievementRarity.DIAMOND]: '#FF5FC8',
+  [AchievementRarity.DIAMOND_PLUS]: '#FFD700',
 };
 
 export interface ChainStatus {
@@ -59,12 +59,12 @@ export interface ChainStatus {
 }
 
 const RARITY_NAME: Record<AchievementRarity, string> = {
-  [AchievementRarity.COMMON]: 'Common',
-  [AchievementRarity.RARE]: 'Rare',
-  [AchievementRarity.EPIC]: 'Epic',
-  [AchievementRarity.LEGENDARY]: 'Legendary',
-  [AchievementRarity.MYTHIC]: 'Mythic',
-  [AchievementRarity.MYTHIC_PLUS]: 'Mythic+',
+  [AchievementRarity.BRONZE]: 'Bronze',
+  [AchievementRarity.SILVER]: 'Silver',
+  [AchievementRarity.GOLD]: 'Gold',
+  [AchievementRarity.PLATINUM]: 'Platinum',
+  [AchievementRarity.DIAMOND]: 'Diamond',
+  [AchievementRarity.DIAMOND_PLUS]: 'Diamond+',
 };
 
 export const getChainStatus = (

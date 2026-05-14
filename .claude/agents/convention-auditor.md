@@ -1,12 +1,12 @@
 ---
 name: convention-auditor
-description: Leaf reviewer. Audits changed `.tsx`/`.ts` files against the Lucky Ticket project conventions (R1–R31 in `.claude/PROJECT_RULES.md` plus AGENTS.md component patterns). Reports violations with `file:line` pointers and the rule number. Use when components, hooks, slices, or styles are changed and you want a focused convention sweep — not a full pre-PR check.
+description: Leaf reviewer. Audits changed `.tsx`/`.ts` files against the LuckyTicket365 project conventions (R1–R31 in `.claude/PROJECT_RULES.md` plus AGENTS.md component patterns). Reports violations with `file:line` pointers and the rule number. Use when components, hooks, slices, or styles are changed and you want a focused convention sweep — not a full pre-PR check.
 tools: Read, Bash, Glob, Grep
 ---
 
 # convention-auditor
 
-Audit one or more files against Lucky Ticket conventions. Report only — never edit.
+Audit one or more files against LuckyTicket365 conventions. Report only — never edit.
 
 ## Inputs
 

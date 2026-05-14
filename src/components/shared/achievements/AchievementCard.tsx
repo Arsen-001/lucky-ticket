@@ -10,51 +10,51 @@ import type { Achievement as AchievementType } from '@/types/interfaces/achievem
 import { rarityLabelKey } from '@/components/shared/achievements/achievement.utils';
 
 const rarityCardClass: Record<AchievementRarity, string> = {
-  [AchievementRarity.COMMON]:
+  [AchievementRarity.BRONZE]:
     'border-white/10 bg-white/[0.03] hover:border-white/20 hover:bg-white/5',
-  [AchievementRarity.RARE]:
+  [AchievementRarity.SILVER]:
     'border-[#5FE3F5]/30 bg-[#5FE3F5]/[0.07] hover:border-[#5FE3F5]/55 hover:bg-[#5FE3F5]/10 shadow-[0_0_18px_rgba(95,227,245,0.14)]',
-  [AchievementRarity.EPIC]:
+  [AchievementRarity.GOLD]:
     'border-[#A78BFA]/35 bg-[#A78BFA]/[0.08] hover:border-[#A78BFA]/60 hover:bg-[#A78BFA]/12 shadow-[0_0_20px_rgba(167,139,250,0.18)]',
-  [AchievementRarity.LEGENDARY]:
+  [AchievementRarity.PLATINUM]:
     'border-[#F8BD3E]/35 bg-[#F8BD3E]/[0.08] hover:border-[#F8BD3E]/60 hover:bg-[#F8BD3E]/12 shadow-[0_0_24px_rgba(248,189,62,0.22)]',
-  [AchievementRarity.MYTHIC]:
+  [AchievementRarity.DIAMOND]:
     'border-[#FF5FC8]/40 bg-[#FF5FC8]/[0.09] hover:border-[#FF5FC8]/65 hover:bg-[#FF5FC8]/14 shadow-[0_0_28px_rgba(255,95,200,0.26)]',
-  [AchievementRarity.MYTHIC_PLUS]:
+  [AchievementRarity.DIAMOND_PLUS]:
     'border-[#FFD700]/55 bg-[#FFD700]/[0.1] hover:border-[#FFD700]/80 hover:bg-[#FFD700]/15 shadow-[0_0_32px_rgba(255,215,0,0.3)]',
 };
 
 const rarityLockedCardClass: Record<AchievementRarity, string> = {
-  [AchievementRarity.COMMON]:
+  [AchievementRarity.BRONZE]:
     'border-white/8 bg-white/[0.02] hover:border-white/14 hover:bg-white/[0.035]',
-  [AchievementRarity.RARE]:
+  [AchievementRarity.SILVER]:
     'border-[#5FE3F5]/15 bg-[#5FE3F5]/[0.03] hover:border-[#5FE3F5]/30 hover:bg-[#5FE3F5]/[0.05]',
-  [AchievementRarity.EPIC]:
+  [AchievementRarity.GOLD]:
     'border-[#A78BFA]/18 bg-[#A78BFA]/[0.035] hover:border-[#A78BFA]/35 hover:bg-[#A78BFA]/[0.06]',
-  [AchievementRarity.LEGENDARY]:
+  [AchievementRarity.PLATINUM]:
     'border-[#F8BD3E]/18 bg-[#F8BD3E]/[0.035] hover:border-[#F8BD3E]/35 hover:bg-[#F8BD3E]/[0.06]',
-  [AchievementRarity.MYTHIC]:
+  [AchievementRarity.DIAMOND]:
     'border-[#FF5FC8]/22 bg-[#FF5FC8]/[0.04] hover:border-[#FF5FC8]/40 hover:bg-[#FF5FC8]/[0.07]',
-  [AchievementRarity.MYTHIC_PLUS]:
+  [AchievementRarity.DIAMOND_PLUS]:
     'border-[#FFD700]/25 bg-[#FFD700]/[0.05] hover:border-[#FFD700]/45 hover:bg-[#FFD700]/[0.08]',
 };
 
 const rarityLabelClass: Record<AchievementRarity, string> = {
-  [AchievementRarity.COMMON]: 'text-white/45',
-  [AchievementRarity.RARE]: 'text-[#5FE3F5]',
-  [AchievementRarity.EPIC]: 'text-[#A78BFA]',
-  [AchievementRarity.LEGENDARY]: 'text-[#F8BD3E]',
-  [AchievementRarity.MYTHIC]: 'text-[#FF5FC8]',
-  [AchievementRarity.MYTHIC_PLUS]: 'text-[#FFD700]',
+  [AchievementRarity.BRONZE]: 'text-white/45',
+  [AchievementRarity.SILVER]: 'text-[#5FE3F5]',
+  [AchievementRarity.GOLD]: 'text-[#A78BFA]',
+  [AchievementRarity.PLATINUM]: 'text-[#F8BD3E]',
+  [AchievementRarity.DIAMOND]: 'text-[#FF5FC8]',
+  [AchievementRarity.DIAMOND_PLUS]: 'text-[#FFD700]',
 };
 
 const rarityLockedLabelClass: Record<AchievementRarity, string> = {
-  [AchievementRarity.COMMON]: 'text-white/35',
-  [AchievementRarity.RARE]: 'text-[#5FE3F5]/55',
-  [AchievementRarity.EPIC]: 'text-[#A78BFA]/55',
-  [AchievementRarity.LEGENDARY]: 'text-[#F8BD3E]/55',
-  [AchievementRarity.MYTHIC]: 'text-[#FF5FC8]/60',
-  [AchievementRarity.MYTHIC_PLUS]: 'text-[#FFD700]/60',
+  [AchievementRarity.BRONZE]: 'text-white/35',
+  [AchievementRarity.SILVER]: 'text-[#5FE3F5]/55',
+  [AchievementRarity.GOLD]: 'text-[#A78BFA]/55',
+  [AchievementRarity.PLATINUM]: 'text-[#F8BD3E]/55',
+  [AchievementRarity.DIAMOND]: 'text-[#FF5FC8]/60',
+  [AchievementRarity.DIAMOND_PLUS]: 'text-[#FFD700]/60',
 };
 
 export interface AchievementCardProps {
@@ -153,10 +153,10 @@ export function AchievementCard({
           {achievement.name}
         </span>
         <span className={twMerge('text-[10px] font-bold uppercase tracking-wider', labelTone)}>
-          {achievement.rarity === AchievementRarity.MYTHIC_PLUS && achievement.tier
+          {achievement.rarity === AchievementRarity.DIAMOND_PLUS && achievement.tier
             ? achievement.tier.max === 0
-              ? `Mythic+ · Lv ${achievement.tier.current} · ∞`
-              : `Mythic+ · Lv ${achievement.tier.current}/${achievement.tier.max}`
+              ? `Diamond+ · Lv ${achievement.tier.current} · ∞`
+              : `Diamond+ · Lv ${achievement.tier.current}/${achievement.tier.max}`
             : t(rarityLabelKey(achievement.rarity))}
         </span>
       </div>

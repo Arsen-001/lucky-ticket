@@ -22,21 +22,21 @@ export interface AchievementDetailModalProps {
 }
 
 const rarityOrder: AchievementRarity[] = [
-  AchievementRarity.COMMON,
-  AchievementRarity.RARE,
-  AchievementRarity.EPIC,
-  AchievementRarity.LEGENDARY,
-  AchievementRarity.MYTHIC,
-  AchievementRarity.MYTHIC_PLUS,
+  AchievementRarity.BRONZE,
+  AchievementRarity.SILVER,
+  AchievementRarity.GOLD,
+  AchievementRarity.PLATINUM,
+  AchievementRarity.DIAMOND,
+  AchievementRarity.DIAMOND_PLUS,
 ];
 
 const rarityDot: Record<AchievementRarity, string> = {
-  [AchievementRarity.COMMON]: '#FFFFFF',
-  [AchievementRarity.RARE]: '#5FE3F5',
-  [AchievementRarity.EPIC]: '#A78BFA',
-  [AchievementRarity.LEGENDARY]: '#F8BD3E',
-  [AchievementRarity.MYTHIC]: '#FF5FC8',
-  [AchievementRarity.MYTHIC_PLUS]: '#FFD700',
+  [AchievementRarity.BRONZE]: '#FFFFFF',
+  [AchievementRarity.SILVER]: '#5FE3F5',
+  [AchievementRarity.GOLD]: '#A78BFA',
+  [AchievementRarity.PLATINUM]: '#F8BD3E',
+  [AchievementRarity.DIAMOND]: '#FF5FC8',
+  [AchievementRarity.DIAMOND_PLUS]: '#FFD700',
 };
 
 export function AchievementDetailModal({ achievement, onClose }: AchievementDetailModalProps) {
@@ -52,10 +52,10 @@ export function AchievementDetailModal({ achievement, onClose }: AchievementDeta
             <h2 className="text-xl font-extrabold text-white">{achievement.name}</h2>
             <div className="flex items-center gap-1.5 text-[11px] uppercase tracking-wider">
               <span className="font-bold" style={{ color: rarityDot[achievement.rarity] }}>
-                {achievement.rarity === AchievementRarity.MYTHIC_PLUS && achievement.tier
+                {achievement.rarity === AchievementRarity.DIAMOND_PLUS && achievement.tier
                   ? achievement.tier.max === 0
-                    ? `Mythic+ · Lv ${achievement.tier.current} · ∞`
-                    : `Mythic+ · Lv ${achievement.tier.current}/${achievement.tier.max}`
+                    ? `Diamond+ · Lv ${achievement.tier.current} · ∞`
+                    : `Diamond+ · Lv ${achievement.tier.current}/${achievement.tier.max}`
                   : t(rarityLabelKey(achievement.rarity))}
               </span>
               <span className="text-white/30">·</span>
@@ -179,7 +179,7 @@ function ChainLadder({ achievement }: ChainLadderProps) {
   if (!achievement.series) return null;
   const total = achievement.series.total;
   const currentPosition = achievement.series.position;
-  const isMythicPlus = achievement.rarity === AchievementRarity.MYTHIC_PLUS;
+  const isMythicPlus = achievement.rarity === AchievementRarity.DIAMOND_PLUS;
   const subTier = isMythicPlus ? achievement.tier : undefined;
 
   const lastVisible = Math.min(total, currentPosition + 3);
@@ -200,7 +200,7 @@ function ChainLadder({ achievement }: ChainLadderProps) {
       <div className="flex items-center gap-1">
         {Array.from({ length: renderTo - baseVisible + 1 }).map((_, i) => {
           const position = baseVisible + i;
-          const rarity = rarityOrder[position - 1] ?? AchievementRarity.COMMON;
+          const rarity = rarityOrder[position - 1] ?? AchievementRarity.BRONZE;
           const isCurrent = position === currentPosition;
           const isEarned =
             position < currentPosition || (position === currentPosition && achievement.earned);

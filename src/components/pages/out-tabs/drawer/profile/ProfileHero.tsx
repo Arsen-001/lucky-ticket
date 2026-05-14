@@ -63,11 +63,9 @@ export function ProfileHero({ profile, loading, isPreview, onTogglePreview }: Pr
   };
 
   const handlePrimeClick = () => {
-    if (profile?.isPrime) {
-      showTooltip('prime', t('prime active'));
-    } else {
-      router.push(routes.settings.prime);
-    }
+    // Always open the Prime page — it shows current status (active/inactive)
+    // and the full list of perks Prime grants, for prime and non-prime users alike.
+    router.push(routes.settings.prime);
   };
 
   const handleVipClick = () => {

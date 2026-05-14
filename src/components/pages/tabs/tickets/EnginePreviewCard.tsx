@@ -17,15 +17,6 @@ import {
 } from '@/utils/global/ticket-engine.utils';
 import type { TicketEngine } from '@/types/interfaces/ticket.interfaces';
 import type { TicketType } from '@/types/types/ticket.types';
-import '@/styles/components/engine-preview-card.css';
-
-const TIER_CLASS: Record<TicketType, string> = {
-  bronze: 'engine-preview-card-tier-bronze',
-  silver: 'engine-preview-card-tier-silver',
-  gold: 'engine-preview-card-tier-gold',
-  platinum: 'engine-preview-card-tier-platinum',
-  diamond: 'engine-preview-card-tier-diamond',
-};
 
 const TIER_GLOW: Record<TicketType, string> = {
   bronze: '#E08A3A',
@@ -76,8 +67,7 @@ export function EnginePreviewCard({
     <Link
       href={routes.engines.getById(engine.id)}
       className={twMerge(
-        'w-full rounded-2xl flex flex-col gap-2 p-2.5 transition-transform active:scale-99 cursor-pointer',
-        TIER_CLASS[tier],
+        'task-card-default bg-background-overlay w-full rounded-2xl flex flex-col gap-2 p-3 transition-transform active:scale-99 cursor-pointer',
         className
       )}
     >

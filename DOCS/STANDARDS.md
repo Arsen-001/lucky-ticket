@@ -1,6 +1,6 @@
-# Lucky Ticket — Engineering Standards
+# LuckyTicket365 — Engineering Standards
 
-> Production-grade engineering standards for Lucky Ticket. This document captures the **global best practices** for Security, Architecture, Code Quality, Performance, Observability, and Documentation — grounded in the official guidance for our exact stack (verified against Next.js 16.2, React 19.2, Redux Toolkit 2.11, OWASP Cheat Sheet Series).
+> Production-grade engineering standards for LuckyTicket365. This document captures the **global best practices** for Security, Architecture, Code Quality, Performance, Observability, and Documentation — grounded in the official guidance for our exact stack (verified against Next.js 16.2, React 19.2, Redux Toolkit 2.11, OWASP Cheat Sheet Series).
 >
 > **Stack:** Next.js 16 (App Router) · React 19 · TypeScript 5 (strict) · Redux Toolkit 2 + RTK Query · Tailwind CSS 4 · React Hook Form + Yup · next-intl · dayjs · Lucide · Swiper
 

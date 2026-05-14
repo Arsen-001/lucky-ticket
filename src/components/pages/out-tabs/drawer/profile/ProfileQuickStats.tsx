@@ -3,6 +3,7 @@ import type { ComponentType, SVGProps } from 'react';
 import Link from 'next/link';
 import { Heart, Star, Wallet } from 'lucide-react';
 import { twMerge } from 'tailwind-merge';
+import { CoinIcon } from '@/components/shared/icons/CoinIcon';
 import { TonIcon } from '@/components/shared/icons/TonIcon';
 import { Skeleton } from '@/components/shared/seleketons/Skeleton';
 import { SkeletonSuspense } from '@/components/shared/seleketons/SkeletonSuspense';
@@ -10,12 +11,15 @@ import { useAppTranslations } from '@/hooks/useAppTranslations';
 import { GlobalConstants } from '@/constants/global.constants';
 import { routes, type Route } from '@/constants/routes';
 import type { ProfileResponse } from '@/types/interfaces/profile.interfaces';
-import '@/styles/components/profile.css';
 
-type StatIcon = ComponentType<{ size?: number; className?: string }>;
+type StatIconComponent = ComponentType<{ size?: number; className?: string }>;
 
-const TonStatIcon: StatIcon = ({ size, className }) => (
-  <TonIcon size={size ?? 14} className={className} />
+const TonStatIcon: StatIconComponent = ({ size, className }) => (
+  <TonIcon size={size ?? 18} className={className} />
+);
+
+const CoinStatIcon: StatIconComponent = ({ size, className }) => (
+  <CoinIcon size={size ?? 22} className={className} />
 );
 
 export interface ProfileQuickStatsProps {
@@ -23,152 +27,169 @@ export interface ProfileQuickStatsProps {
   loading?: boolean;
 }
 
+interface QuickStatItem {
+  key: string;
+  icon: StatIconComponent | ComponentType<SVGProps<SVGSVGElement>>;
+  iconWrap?: boolean;
+  iconClass: string;
+  accent: string;
+  label: string;
+  value: number | undefined;
+  unit?: string;
+  decimals?: number;
+  href?: Route;
+}
+
 export function ProfileQuickStats({ profile, loading }: ProfileQuickStatsProps) {
   const t = useAppTranslations();
   const isOwn = profile?.isOwn ?? false;
 
-  if (!isOwn || !profile?.privateStats) {
-    return (
-      <div className="grid grid-cols-3 gap-2.5">
-        <StatCard
-          icon={Heart}
-          iconColor="text-electric-pink"
-          iconFill="fill-electric-pink"
-          label={t('likes')}
-          value={profile?.publicStats.likesReceived}
-          loading={loading}
-          delay={0}
-        />
-        <StatCard
-          icon={Star}
-          iconColor="text-gold"
-          iconFill="fill-gold"
-          label={t('streak')}
-          value={profile?.streak.days}
-          unit={t('days short')}
-          loading={loading}
-          delay={80}
-        />
-        <StatCard
-          icon={Wallet}
-          iconColor="text-success"
-          label={t('badges earned')}
-          value={profile?.publicStats.earnedAchievements}
-          unit={`/ ${profile?.publicStats.totalAchievements ?? 0}`}
-          loading={loading}
-          delay={160}
-        />
-      </div>
-    );
-  }
+  const items: QuickStatItem[] =
+    isOwn && profile?.privateStats
+      ? [
+          {
+            key: 'lc',
+            icon: CoinStatIcon,
+            iconClass: '',
+            accent: 'var(--color-gold)',
+            label: GlobalConstants.coinName,
+            value: profile.privateStats.lc,
+            href: routes.wallet,
+          },
+          {
+            key: 'ls',
+            icon: Star,
+            iconWrap: true,
+            iconClass: 'text-electric-pink fill-electric-pink',
+            accent: 'var(--color-electric-pink)',
+            label: GlobalConstants.starName,
+            value: profile.privateStats.ls,
+            href: routes.wallet,
+          },
+          {
+            key: 'ton',
+            icon: TonStatIcon,
+            iconClass: '',
+            accent: '#0098EA',
+            label: GlobalConstants.tonName,
+            value: profile.privateStats.ton,
+            decimals: 3,
+            href: routes.wallet,
+          },
+        ]
+      : [
+          {
+            key: 'likes',
+            icon: Heart,
+            iconWrap: true,
+            iconClass: 'text-electric-pink fill-electric-pink',
+            accent: 'var(--color-electric-pink)',
+            label: t('likes'),
+            value: profile?.publicStats.likesReceived,
+          },
+          {
+            key: 'streak',
+            icon: Star,
+            iconWrap: true,
+            iconClass: 'text-gold fill-gold',
+            accent: 'var(--color-gold)',
+            label: t('streak'),
+            value: profile?.streak.days,
+            unit: t('days short'),
+          },
+          {
+            key: 'badges',
+            icon: Wallet,
+            iconWrap: true,
+            iconClass: 'text-success',
+            accent: 'var(--color-success)',
+            label: t('badges earned'),
+            value: profile?.publicStats.earnedAchievements,
+            unit: `/ ${profile?.publicStats.totalAchievements ?? 0}`,
+          },
+        ];
+
+  const title = isOwn && profile?.privateStats ? t('wallet') : t('quick stats');
 
   return (
-    <div className="grid grid-cols-3 gap-2.5">
-      <StatCard
-        icon={Wallet}
-        iconColor="text-gold"
-        label={t('balance')}
-        value={profile.privateStats.lc}
-        unit={GlobalConstants.coinName}
-        loading={loading}
-        delay={0}
-        large
-        href={routes.wallet}
-      />
-      <StatCard
-        icon={Star}
-        iconColor="text-electric-pink"
-        iconFill="fill-electric-pink"
-        label={GlobalConstants.starName}
-        value={profile.privateStats.ls}
-        loading={loading}
-        delay={80}
-        href={routes.wallet}
-      />
-      <StatCard
-        icon={TonStatIcon}
-        iconColor="text-[#0098EA]"
-        label={GlobalConstants.tonName}
-        value={profile.privateStats.ton}
-        decimals={3}
-        loading={loading}
-        delay={160}
-        href={routes.wallet}
-      />
-    </div>
+    <section className="flex flex-col gap-2.5">
+      <h3 className="px-1 text-base font-extrabold text-white">{title}</h3>
+
+      <div className="bg-background-overlay grid grid-cols-3 divide-x divide-white/6 rounded-2xl p-1">
+        {items.map((item, idx) => (
+          <QuickStatColumn key={item.key} item={item} loading={loading} delay={idx * 60} />
+        ))}
+      </div>
+    </section>
   );
 }
 
-interface StatCardProps {
-  icon: ComponentType<SVGProps<SVGSVGElement>> | StatIcon;
-  iconColor: string;
-  iconFill?: string;
-  label: string;
-  value?: number;
-  unit?: string;
+interface QuickStatColumnProps {
+  item: QuickStatItem;
   loading?: boolean;
-  decimals?: number;
-  delay?: number;
-  large?: boolean;
-  href?: Route;
+  delay: number;
 }
 
-function StatCard({
-  icon: Icon,
-  iconColor,
-  iconFill,
-  label,
-  value,
-  unit,
-  loading,
-  decimals = 0,
-  delay = 0,
-  large,
-  href,
-}: StatCardProps) {
+function QuickStatColumn({ item, loading, delay }: QuickStatColumnProps) {
   const formatted =
-    value == null ? '—' : decimals > 0 ? value.toFixed(decimals) : value.toLocaleString();
+    item.value == null
+      ? '—'
+      : item.decimals && item.decimals > 0
+        ? item.value.toFixed(item.decimals)
+        : item.value.toLocaleString();
 
-  const className = twMerge(
-    'glass-card animate-slide-in-bottom flex flex-col gap-1 p-3 transition-transform',
-    large && 'col-span-1',
-    href && 'cursor-pointer active:scale-98 hover:bg-white/5'
-  );
+  const Icon = item.icon;
 
   const content = (
     <>
-      <div className="flex items-center gap-1">
-        <Icon size={14} className={twMerge(iconColor, iconFill)} />
-        <span className="line-clamp-1 text-[10px] font-bold uppercase tracking-wider text-white/55">
-          {label}
-        </span>
-      </div>
-      <SkeletonSuspense
-        loading={loading || value == null}
-        skeleton={<Skeleton variant="line" textSize="lg" className="h-6 w-16" />}
+      <span
+        className="flex-center h-8 w-8 rounded-lg"
+        style={
+          item.iconWrap
+            ? {
+                backgroundColor: `color-mix(in srgb, ${item.accent} 14%, transparent)`,
+                borderWidth: 1,
+                borderColor: `color-mix(in srgb, ${item.accent} 35%, transparent)`,
+              }
+            : undefined
+        }
       >
-        <div className="flex items-baseline gap-1">
-          <span className="text-lg font-black leading-tight text-white tabular-nums">
-            {formatted}
-          </span>
-          {unit && (
-            <span className={twMerge('text-[10px] font-bold uppercase', iconColor)}>{unit}</span>
+        <Icon size={item.iconWrap ? 16 : 22} className={item.iconClass} />
+      </span>
+      <SkeletonSuspense
+        loading={loading || item.value == null}
+        skeleton={<Skeleton variant="line" textSize="lg" className="h-5 w-12" />}
+      >
+        <div className="flex items-baseline gap-1 leading-none">
+          <span className="text-base font-black tabular-nums text-white">{formatted}</span>
+          {item.unit && (
+            <span className="text-[9px] font-bold uppercase" style={{ color: item.accent }}>
+              {item.unit}
+            </span>
           )}
         </div>
       </SkeletonSuspense>
+      <span className="text-[9px] font-bold uppercase tracking-wider text-white/45">
+        {item.label}
+      </span>
     </>
   );
 
-  if (href) {
+  const wrapperClass = twMerge(
+    'animate-slide-in-bottom flex flex-col items-center gap-1.5 py-3 transition-colors',
+    item.href && 'cursor-pointer active:scale-98 hover:bg-white/3'
+  );
+
+  if (item.href) {
     return (
-      <Link href={href} className={className} style={{ animationDelay: `${delay}ms` }}>
+      <Link href={item.href} className={wrapperClass} style={{ animationDelay: `${delay}ms` }}>
         {content}
       </Link>
     );
   }
 
   return (
-    <div className={className} style={{ animationDelay: `${delay}ms` }}>
+    <div className={wrapperClass} style={{ animationDelay: `${delay}ms` }}>
       {content}
     </div>
   );

@@ -48,7 +48,7 @@ console.log([...missing(hy, 'hy'), ...missing(ru, 'ru'), ...extra(hy, 'hy'), ...
 
 ## Don'ts
 
-- Don't translate Lucky Ticket–specific terms inconsistently (LC, XTR, VIP — keep as-is across locales)
+- Don't translate LuckyTicket365–specific terms inconsistently (LC, XTR, VIP — keep as-is across locales)
 - Don't reorder keys "for tidiness" — diffs become unreadable
 - Don't add a key only to `en.json` and call it done
 - Don't auto-machine-translate without flagging it for human review

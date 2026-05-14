@@ -83,19 +83,10 @@ export function MarketUniversalCard({
   return (
     <div
       className={twMerge(
-        'bg-background-overlay relative flex h-full flex-col gap-2 overflow-hidden rounded-2xl p-3',
+        'task-card-default bg-background-overlay relative flex h-full flex-col gap-2 overflow-hidden rounded-2xl p-3',
         className
       )}
     >
-      <span
-        aria-hidden
-        className="pointer-events-none absolute bottom-0 left-[18%] right-[18%] z-2 h-[3px]"
-        style={{
-          background: `linear-gradient(90deg, transparent 0%, color-mix(in srgb, ${accentColor} 90%, transparent) 50%, transparent 100%)`,
-          filter: 'blur(0.8px)',
-        }}
-      />
-
       {(isNew || discountPct || badge) && (
         <div className="absolute right-2 top-2 z-3 flex flex-col items-end gap-1">
           {badge}

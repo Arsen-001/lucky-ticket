@@ -5,16 +5,7 @@ import { EmptyDataInfo } from '@/components/shared/EmptyDataInfo';
 import { useAppTranslations } from '@/hooks/useAppTranslations';
 import type { TicketEngine } from '@/types/interfaces/ticket.interfaces';
 import type { Ticket, TicketType } from '@/types/types/ticket.types';
-import '@/styles/components/engine-preview-card.css';
 import '@/styles/components/achievement.css';
-
-const TIER_CLASS: Record<TicketType, string> = {
-  bronze: 'engine-preview-card-tier-bronze',
-  silver: 'engine-preview-card-tier-silver',
-  gold: 'engine-preview-card-tier-gold',
-  platinum: 'engine-preview-card-tier-platinum',
-  diamond: 'engine-preview-card-tier-diamond',
-};
 
 const TIER_NUMBER_GRADIENT: Record<TicketType, string> = {
   bronze:
@@ -54,7 +45,7 @@ export function TierUnlockedContent({
 
   return (
     <div className={`flex flex-col gap-3 ${className ?? ''}`}>
-      <div className={`${TIER_CLASS[tier]} rounded-2xl p-3.5 flex items-center gap-3`}>
+      <div className="task-card-default bg-background-overlay rounded-2xl p-3.5 flex items-center gap-3">
         <div className="flex-1 min-w-0">
           <div className="text-[10px] font-bold uppercase tracking-[1.2px] text-pink-secondary">
             {t('in inventory')}

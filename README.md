@@ -1,12 +1,12 @@
-# Lucky Ticket
+# LuckyTicket365
 
-Lucky Ticket is a multilingual, gamified reward platform with a built-in virtual economy and crypto exchange layer. Designed to convert user activity into measurable value, the platform allows users to collect tickets, participate in tournaments, complete tasks, and earn Lucky Ticket Coins (LTC), which can be spent within the ecosystem or exchanged for cryptocurrency.
+LuckyTicket365 is a multilingual, gamified reward platform with a built-in virtual economy and crypto exchange layer. Designed to convert user activity into measurable value, the platform allows users to collect tickets, participate in tournaments, complete tasks, and earn LuckyTicket365 Coins (LTC), which can be spent within the ecosystem or exchanged for cryptocurrency.
 
 ## 🚀 Features
 
 - **Gamified Rewards:** Daily ticket claims, activity points, and progression systems.
 - **Tournament System:** Compete in project and partner tournaments with varied prize pools.
-- **Virtual Economy:** Earn Lucky Ticket Coins (LTC) and use them in the Market or for crypto exchange.
+- **Virtual Economy:** Earn LuckyTicket365 Coins (LTC) and use them in the Market or for crypto exchange.
 - **Status Levels:** Progress through Verified, Prime, and VIP tiers, each offering unique benefits.
 - **Referral System:** Invite friends and earn commissions based on their activity and status.
 - **Multilingual Support:** Fully localized experience in English, Armenian (Հայերեն), and Russian (Русский).

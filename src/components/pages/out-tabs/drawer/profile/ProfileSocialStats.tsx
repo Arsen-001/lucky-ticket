@@ -1,99 +1,127 @@
 'use client';
 import { CheckCircle2, Crown, Gem, Send, Trophy, Users } from 'lucide-react';
-import { twMerge } from 'tailwind-merge';
 import { Skeleton } from '@/components/shared/seleketons/Skeleton';
 import { SkeletonSuspense } from '@/components/shared/seleketons/SkeletonSuspense';
 import { useAppTranslations } from '@/hooks/useAppTranslations';
 import type { ProfilePublicStats } from '@/types/interfaces/profile.interfaces';
-import '@/styles/components/profile.css';
 
 export interface ProfileSocialStatsProps {
   stats?: ProfilePublicStats;
   loading?: boolean;
 }
 
+interface StatItem {
+  icon: typeof Trophy;
+  label: string;
+  value: string | number;
+  accent: string;
+}
+
 export function ProfileSocialStats({ stats, loading }: ProfileSocialStatsProps) {
   const t = useAppTranslations();
 
-  const items = [
+  const items: StatItem[] = [
     {
       icon: Trophy,
       label: t('tournaments played'),
       value: stats?.tournamentsPlayed ?? 0,
-      color: 'text-gold',
-      bg: 'bg-gold/8',
+      accent: 'var(--color-gold)',
     },
     {
       icon: Crown,
       label: t('tournaments won'),
       value: stats?.tournamentsWon ?? 0,
-      color: 'text-electric-pink',
-      bg: 'bg-electric-pink/8',
+      accent: 'var(--color-electric-pink)',
     },
     {
       icon: Gem,
       label: t('stakes completed'),
       value: stats?.stakesCompleted ?? 0,
-      color: 'text-electric-purple',
-      bg: 'bg-electric-purple/8',
+      accent: 'var(--color-electric-purple)',
     },
     {
       icon: Send,
       label: t('tickets sent'),
       value: stats?.ticketsSent ?? 0,
-      color: 'text-teal',
-      bg: 'bg-teal/8',
+      accent: 'var(--color-teal)',
     },
     {
       icon: Users,
       label: t('friends'),
       value: stats?.friendsCount ?? 0,
-      color: 'text-blue-400',
-      bg: 'bg-blue-400/8',
+      accent: 'rgba(96, 165, 250, 1)',
     },
     {
       icon: CheckCircle2,
       label: t('badges earned'),
       value: stats != null ? `${stats.earnedAchievements} / ${stats.totalAchievements}` : '0 / 0',
-      color: 'text-success',
-      bg: 'bg-success/10',
+      accent: 'var(--color-success)',
     },
   ];
 
   return (
     <section className="flex flex-col gap-2.5">
-      <h3 className="text-base font-extrabold text-white">{t('statistics')}</h3>
-      <div className="grid grid-cols-2 gap-2.5">
+      <h3 className="px-1 text-base font-extrabold text-white">{t('statistics')}</h3>
+      <div className="grid grid-cols-2 gap-2">
         {items.map((it, idx) => (
-          <div
+          <SocialStatCard
             key={it.label}
-            className="glass-card animate-slide-in-bottom flex items-center gap-3 p-3"
-            style={{ animationDelay: `${idx * 50}ms` }}
-          >
-            <div
-              className={twMerge(
-                'flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-xl',
-                it.bg
-              )}
-            >
-              <it.icon size={18} className={it.color} />
-            </div>
-            <div className="flex min-w-0 flex-1 flex-col">
-              <SkeletonSuspense
-                loading={loading || stats == null}
-                skeleton={<Skeleton variant="line" textSize="lg" className="h-5 w-12" />}
-              >
-                <span className="text-base font-extrabold text-white tabular-nums">
-                  {typeof it.value === 'number' ? it.value.toLocaleString() : it.value}
-                </span>
-              </SkeletonSuspense>
-              <span className="line-clamp-1 text-[10px] font-semibold uppercase tracking-wider text-white/45">
-                {it.label}
-              </span>
-            </div>
-          </div>
+            item={it}
+            loading={loading || stats == null}
+            delay={idx * 50}
+          />
         ))}
       </div>
     </section>
+  );
+}
+
+interface SocialStatCardProps {
+  item: StatItem;
+  loading?: boolean;
+  delay: number;
+}
+
+function SocialStatCard({ item, loading, delay }: SocialStatCardProps) {
+  const Icon = item.icon;
+  return (
+    <div
+      className="animate-slide-in-bottom relative flex items-center gap-2.5 overflow-hidden rounded-xl border bg-black/25 p-3"
+      style={{
+        animationDelay: `${delay}ms`,
+        borderColor: `color-mix(in srgb, ${item.accent} 35%, transparent)`,
+      }}
+    >
+      <span
+        aria-hidden
+        className="pointer-events-none absolute -right-4 -top-4 h-16 w-16 rounded-full"
+        style={{
+          background: `radial-gradient(circle, color-mix(in srgb, ${item.accent} 40%, transparent), transparent 65%)`,
+        }}
+      />
+      <span
+        className="flex-center h-10 w-10 shrink-0 rounded-xl border"
+        style={{
+          backgroundColor: `color-mix(in srgb, ${item.accent} 14%, transparent)`,
+          borderColor: `color-mix(in srgb, ${item.accent} 40%, transparent)`,
+          color: item.accent,
+        }}
+      >
+        <Icon size={18} strokeWidth={2.4} />
+      </span>
+      <div className="relative flex min-w-0 flex-1 flex-col leading-none">
+        <SkeletonSuspense
+          loading={loading}
+          skeleton={<Skeleton variant="line" textSize="lg" className="h-5 w-12" />}
+        >
+          <span className="text-lg font-black tabular-nums leading-tight text-white">
+            {typeof item.value === 'number' ? item.value.toLocaleString() : item.value}
+          </span>
+        </SkeletonSuspense>
+        <span className="mt-0.5 line-clamp-1 text-[9px] font-bold uppercase tracking-wider text-white/45">
+          {item.label}
+        </span>
+      </div>
+    </div>
   );
 }

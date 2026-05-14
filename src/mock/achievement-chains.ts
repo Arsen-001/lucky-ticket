@@ -35,12 +35,12 @@ export interface ChainConfig {
 }
 
 const RARITY_ORDER: AchievementRarity[] = [
-  AchievementRarity.COMMON,
-  AchievementRarity.RARE,
-  AchievementRarity.EPIC,
-  AchievementRarity.LEGENDARY,
-  AchievementRarity.MYTHIC,
-  AchievementRarity.MYTHIC_PLUS,
+  AchievementRarity.BRONZE,
+  AchievementRarity.SILVER,
+  AchievementRarity.GOLD,
+  AchievementRarity.PLATINUM,
+  AchievementRarity.DIAMOND,
+  AchievementRarity.DIAMOND_PLUS,
 ];
 
 const SHAPE_FALLBACK = AchievementShape.CIRCLE;
@@ -74,7 +74,7 @@ const buildDescription = (
   if (isMythicPlus) {
     return `Endless tier — every level adds ${threshold.toLocaleString()} more ${unit}.`;
   }
-  if (rarity === AchievementRarity.COMMON) {
+  if (rarity === AchievementRarity.BRONZE) {
     return threshold === 1
       ? `Reach ${unit} for the first time.`
       : `Reach ${threshold.toLocaleString()} ${unit}.`;
@@ -103,7 +103,7 @@ export const buildChain = (config: ChainConfig): Achievement[] => {
   const current = config.current ?? 0;
 
   return RARITY_ORDER.map((rarity, index) => {
-    const isMythicPlus = rarity === AchievementRarity.MYTHIC_PLUS;
+    const isMythicPlus = rarity === AchievementRarity.DIAMOND_PLUS;
     const threshold = config.thresholds[index];
     const earned = index < earnedThrough;
 

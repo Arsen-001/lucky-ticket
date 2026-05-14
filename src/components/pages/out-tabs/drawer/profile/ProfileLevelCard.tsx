@@ -1,14 +1,14 @@
 'use client';
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { Award, Diamond, Gem, Medal, Shield, Zap } from 'lucide-react';
+import { Award, ChevronRight, Diamond, Gem, Medal, Shield, Zap } from 'lucide-react';
 import type { LucideIcon } from 'lucide-react';
+import { twMerge } from 'tailwind-merge';
 import { CloverIcon } from '@/components/shared/icons/CloverIcon';
 import { CloverProgressionModal } from '@/components/pages/out-tabs/drawer/profile/CloverProgressionModal';
 import { ConfirmModal } from '@/components/shared/modals/ConfirmModal';
 import { TierProgressionModal } from '@/components/pages/out-tabs/drawer/profile/TierProgressionModal';
 import { Skeleton } from '@/components/shared/seleketons/Skeleton';
-import { SkeletonSuspense } from '@/components/shared/seleketons/SkeletonSuspense';
 import { useAppTranslations } from '@/hooks/useAppTranslations';
 import {
   activityTierOrder,
@@ -20,7 +20,6 @@ import {
 } from '@/constants/global.constants';
 import { routes } from '@/constants/routes';
 import type { ActivityBestPeriod, ProfileResponse } from '@/types/interfaces/profile.interfaces';
-import '@/styles/components/profile.css';
 
 export interface ProfileLevelCardProps {
   profile?: ProfileResponse;
@@ -35,7 +34,7 @@ const tierIcon: Record<ActivityTier, LucideIcon> = {
   diamond: Diamond,
 };
 
-const tierStrokeColor: Record<ActivityTier, string> = {
+const tierAccent: Record<ActivityTier, string> = {
   bronze: '#d68a4d',
   silver: '#c8cac4',
   gold: '#f8bd3e',
@@ -56,112 +55,7 @@ const CLOVER_STROKE: Record<string, string> = {
   'rainbow-crown': '#DE009B',
 };
 const CLOVER_INACTIVE_STROKE = '#7DD37C';
-const ACTIVITY_STROKE = '#ff5fc8';
-
-interface RingProps {
-  size: number;
-  stroke: string;
-  progress: number;
-  prominent?: boolean;
-  shine?: boolean;
-  dotted?: boolean;
-  onClick?: () => void;
-  ariaLabel?: string;
-  tooltip?: string;
-  children: React.ReactNode;
-}
-
-const INACTIVE_STROKE = 'rgba(122, 122, 122, 0.55)';
-
-function Ring({
-  size,
-  stroke,
-  progress,
-  prominent,
-  shine,
-  dotted,
-  onClick,
-  ariaLabel,
-  tooltip,
-  children,
-}: RingProps) {
-  const strokeWidth = prominent ? 7 : 6;
-  const radius = (size - strokeWidth) / 2;
-  const circumference = 2 * Math.PI * radius;
-  const offset = circumference - (Math.min(100, Math.max(0, progress)) / 100) * circumference;
-
-  const ringInner = (
-    <div className="relative" style={{ width: size, height: size }}>
-      <svg className="ring-stat-svg" width={size} height={size} viewBox={`0 0 ${size} ${size}`}>
-        {dotted ? (
-          <circle
-            cx={size / 2}
-            cy={size / 2}
-            r={radius}
-            fill="none"
-            stroke={INACTIVE_STROKE}
-            strokeWidth={strokeWidth}
-            strokeLinecap="round"
-            strokeDasharray="2 6"
-          />
-        ) : (
-          <>
-            <circle
-              className="ring-stat-track"
-              cx={size / 2}
-              cy={size / 2}
-              r={radius}
-              fill="none"
-              strokeWidth={strokeWidth}
-            />
-            <circle
-              className="ring-stat-progress"
-              cx={size / 2}
-              cy={size / 2}
-              r={radius}
-              fill="none"
-              stroke={stroke}
-              strokeWidth={strokeWidth}
-              strokeLinecap="round"
-              strokeDasharray={circumference}
-              strokeDashoffset={offset}
-              transform={`rotate(-90 ${size / 2} ${size / 2})`}
-            />
-          </>
-        )}
-      </svg>
-      {shine && !dotted && (
-        <div className="ring-stat-shine" style={{ ['--ring-shine-color' as string]: stroke }} />
-      )}
-      <div className="ring-stat-content">{children}</div>
-      {tooltip && (
-        <span
-          role="status"
-          className="profile-badge-tooltip animate-fade-in pointer-events-none absolute left-1/2 top-full z-20 mt-1 -translate-x-1/2 whitespace-nowrap rounded-md border border-white/12 bg-black/85 px-2.5 py-1.5 text-[10px] font-semibold text-white shadow-lg backdrop-blur-md"
-        >
-          {tooltip}
-        </span>
-      )}
-    </div>
-  );
-
-  return (
-    <div className={`ring-stat ${prominent ? 'ring-stat--prominent' : ''}`}>
-      {onClick ? (
-        <button
-          type="button"
-          aria-label={ariaLabel}
-          onClick={onClick}
-          className="cursor-pointer transition-transform active:scale-95"
-        >
-          {ringInner}
-        </button>
-      ) : (
-        ringInner
-      )}
-    </div>
-  );
-}
+const ACTIVITY_ACCENT = '#ff5fc8';
 
 const periodTranslationKey: Record<ActivityBestPeriod, 'day' | 'weekly' | 'all time'> = {
   day: 'day',
@@ -193,12 +87,9 @@ export function ProfileLevelCard({ profile, loading }: ProfileLevelCardProps) {
   const activityPoints = profile?.activityPoints ?? 0;
   const tier = computeActivityTier(activityPoints);
   const TierIcon = tierIcon[tier];
-
+  const tierColor = tierAccent[tier];
   const tierIndex = activityTierOrder.indexOf(tier);
   const tierProgress = ((tierIndex + 1) / activityTierOrder.length) * 100;
-
-  const sideSize = 80;
-  const centerSize = 100;
 
   const cloverEval = profile
     ? {
@@ -235,94 +126,80 @@ export function ProfileLevelCard({ profile, loading }: ProfileLevelCardProps) {
   const [tierModalOpen, setTierModalOpen] = useState(false);
   const [cloverModalOpen, setCloverModalOpen] = useState(false);
 
-  const handleCloverClick = () => {
-    if (!profile) return;
-    setCloverModalOpen(true);
-  };
-
-  const handleActivityClick = () => {
-    if (!profile) return;
-    setActivityConfirmOpen(true);
-  };
-
-  const handleTierClick = () => {
-    if (!profile) return;
-    setTierModalOpen(true);
-  };
-
   const handleActivityConfirm = () => {
     setActivityConfirmOpen(false);
     router.push(routes.leaderboard);
   };
 
-  return (
-    <div className="grid grid-cols-3 items-end gap-2.5">
-      <SkeletonSuspense
-        loading={loading || !profile}
-        skeleton={<Skeleton variant="round" className="mx-auto h-[80px] w-[80px]" />}
-      >
-        <Ring
-          size={sideSize}
-          stroke={cloverStroke}
-          progress={cloverProgress}
-          dotted={cloverLevel === 0}
-          onClick={profile ? handleCloverClick : undefined}
-          ariaLabel={t('clover progression')}
-        >
-          <CloverIcon variant={cloverDisplayDef.variant} size={26} />
-          <span className="ring-stat-value mt-1 tabular-nums">
-            {cloverLevel}/{cloverLevels.length}
-          </span>
-        </Ring>
-      </SkeletonSuspense>
-
-      <SkeletonSuspense
-        loading={loading || !profile}
-        skeleton={<Skeleton variant="round" className="mx-auto h-[100px] w-[100px]" />}
-      >
-        <div className="flex flex-col items-center">
-          <Ring
-            size={centerSize}
-            stroke={ACTIVITY_STROKE}
-            progress={100}
-            prominent
-            shine
-            onClick={profile ? handleActivityClick : undefined}
-            ariaLabel={t('view leaderboard')}
-          >
-            <Zap size={20} strokeWidth={2.6} fill="currentColor" className="text-electric-pink" />
-            <span className="ring-stat-value tabular-nums mt-1">
-              {bestRecord.points.toLocaleString()}
-            </span>
-          </Ring>
-          {bestRecord.rank > 0 && (
-            <span className="ring-stat-rank mt-[10px]">
-              <span className="ring-stat-rank-period">
-                {t(periodTranslationKey[bestRecord.period])}
-              </span>
-              <span className="tabular-nums">#{bestRecord.rank}</span>
-            </span>
-          )}
+  if (loading || !profile) {
+    return (
+      <section className="flex flex-col gap-2.5">
+        <SectionHeader title={t('level & progression')} />
+        <div className="bg-background-overlay flex flex-col gap-2 rounded-2xl p-3">
+          {[0, 1, 2].map(i => (
+            <Skeleton key={i} variant="rounded-rectangle" className="h-14 w-full" />
+          ))}
         </div>
-      </SkeletonSuspense>
+      </section>
+    );
+  }
 
-      <SkeletonSuspense
-        loading={loading || !profile}
-        skeleton={<Skeleton variant="round" className="mx-auto h-[80px] w-[80px]" />}
-      >
-        <Ring
-          size={sideSize}
-          stroke={tierStrokeColor[tier]}
+  return (
+    <section className="flex flex-col gap-2.5">
+      <SectionHeader title={t('level & progression')} />
+
+      <div className="bg-background-overlay flex flex-col rounded-2xl p-1.5">
+        <ProgressionRow
+          icon={<CloverIcon variant={cloverDisplayDef.variant} size={26} />}
+          accent={cloverStroke}
+          label={t('lucky clover')}
+          valueLabel={`Lvl ${cloverLevel}/${cloverLevels.length}`}
+          progress={cloverProgress}
+          delay={0}
+          onClick={() => setCloverModalOpen(true)}
+          ariaLabel={t('clover progression')}
+        />
+
+        <Divider />
+
+        <ProgressionRow
+          icon={
+            <Zap
+              size={22}
+              strokeWidth={2.4}
+              fill={ACTIVITY_ACCENT}
+              fillOpacity={0.35}
+              stroke={ACTIVITY_ACCENT}
+            />
+          }
+          accent={ACTIVITY_ACCENT}
+          label={t('activity')}
+          valueLabel={bestRecord.points.toLocaleString()}
+          rankLabel={
+            bestRecord.rank > 0
+              ? { period: t(periodTranslationKey[bestRecord.period]), rank: bestRecord.rank }
+              : undefined
+          }
+          progress={100}
+          delay={80}
+          onClick={() => setActivityConfirmOpen(true)}
+          ariaLabel={t('view leaderboard')}
+        />
+
+        <Divider />
+
+        <ProgressionRow
+          icon={<TierIcon size={22} strokeWidth={2.4} style={{ color: tierColor }} />}
+          accent={tierColor}
+          label={t('activity tier')}
+          valueLabel={t(tier as ActivityTier)}
           progress={tierProgress}
-          onClick={profile ? handleTierClick : undefined}
+          subValueLabel={`${tierIndex + 1}/${activityTierOrder.length}`}
+          delay={160}
+          onClick={() => setTierModalOpen(true)}
           ariaLabel={t('tier progression')}
-        >
-          <TierIcon size={18} strokeWidth={2.4} style={{ color: tierStrokeColor[tier] }} />
-          <span className="ring-stat-value mt-1 tabular-nums">
-            {tierIndex + 1}/{activityTierOrder.length}
-          </span>
-        </Ring>
-      </SkeletonSuspense>
+        />
+      </div>
 
       <ConfirmModal
         open={activityConfirmOpen}
@@ -347,6 +224,107 @@ export function ProfileLevelCard({ profile, loading }: ProfileLevelCardProps) {
           profile={cloverEval}
         />
       )}
-    </div>
+    </section>
+  );
+}
+
+interface SectionHeaderProps {
+  title: string;
+}
+function SectionHeader({ title }: SectionHeaderProps) {
+  return <h3 className="px-1 text-base font-extrabold text-white">{title}</h3>;
+}
+
+function Divider() {
+  return <div className="mx-3 h-px bg-white/6" />;
+}
+
+interface ProgressionRowProps {
+  icon: React.ReactNode;
+  accent: string;
+  label: string;
+  valueLabel: string;
+  subValueLabel?: string;
+  rankLabel?: { period: string; rank: number };
+  progress: number;
+  delay: number;
+  onClick: () => void;
+  ariaLabel: string;
+}
+
+function ProgressionRow({
+  icon,
+  accent,
+  label,
+  valueLabel,
+  subValueLabel,
+  rankLabel,
+  progress,
+  delay,
+  onClick,
+  ariaLabel,
+}: ProgressionRowProps) {
+  const clampedProgress = Math.min(100, Math.max(0, progress));
+
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      aria-label={ariaLabel}
+      className={twMerge(
+        'animate-slide-in-bottom relative flex items-center gap-3 rounded-xl px-3 py-3 text-left transition-all active:scale-99',
+        'cursor-pointer hover:bg-white/4'
+      )}
+      style={{ animationDelay: `${delay}ms` }}
+    >
+      <span
+        className="flex-center h-11 w-11 shrink-0 rounded-xl border"
+        style={{
+          borderColor: `color-mix(in srgb, ${accent} 45%, transparent)`,
+          backgroundColor: `color-mix(in srgb, ${accent} 14%, transparent)`,
+          boxShadow: `inset 0 0 12px color-mix(in srgb, ${accent} 30%, transparent)`,
+        }}
+      >
+        {icon}
+      </span>
+
+      <div className="flex min-w-0 flex-1 flex-col gap-1.5">
+        <div className="flex items-baseline justify-between gap-2">
+          <span className="text-[10px] font-extrabold uppercase tracking-wider text-white/55">
+            {label}
+          </span>
+          <span className="flex items-baseline gap-1.5">
+            {rankLabel && (
+              <span className="text-[9px] font-bold uppercase tracking-wider text-white/40">
+                {rankLabel.period} · #{rankLabel.rank}
+              </span>
+            )}
+            <span
+              className="text-sm font-extrabold tabular-nums leading-none"
+              style={{ color: accent }}
+            >
+              {valueLabel}
+            </span>
+            {subValueLabel && (
+              <span className="text-[10px] font-bold tabular-nums text-white/45">
+                {subValueLabel}
+              </span>
+            )}
+          </span>
+        </div>
+        <div className="h-1.5 overflow-hidden rounded-full bg-white/6">
+          <div
+            className="h-full rounded-full transition-[width] duration-500"
+            style={{
+              width: `${clampedProgress}%`,
+              background: `linear-gradient(90deg, ${accent}, color-mix(in srgb, ${accent} 60%, white))`,
+              boxShadow: `0 0 6px color-mix(in srgb, ${accent} 50%, transparent)`,
+            }}
+          />
+        </div>
+      </div>
+
+      <ChevronRight size={16} className="shrink-0 text-white/35" />
+    </button>
   );
 }

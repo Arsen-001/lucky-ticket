@@ -39,8 +39,8 @@ export enum TaskRewardType {
 }
 
 export enum TaskRarity {
-  COMMON = 'common',
-  RARE = 'rare',
-  EPIC = 'epic',
-  LEGENDARY = 'legendary',
+  BRONZE = 'bronze',
+  SILVER = 'silver',
+  GOLD = 'gold',
+  PLATINUM = 'platinum',
 }

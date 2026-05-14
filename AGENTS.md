@@ -1,4 +1,4 @@
-# Lucky Ticket — Project Rules
+# LuckyTicket365 — Project Rules
 
 > **See also:** [`.claude/PROJECT_RULES.md`](.claude/PROJECT_RULES.md) for supplementary Claude-Code-specific rules (R1–R31), and [`.claude/skills/`](.claude/skills/git pull) for invokable scaffolding skills:
 >

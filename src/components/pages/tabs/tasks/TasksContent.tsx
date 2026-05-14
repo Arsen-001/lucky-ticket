@@ -8,6 +8,7 @@ import {
   Cog,
   Coins,
   Crown,
+  Eye,
   PiggyBank,
   Star,
   Ticket,
@@ -130,6 +131,7 @@ const tasksForFrequency = (cat: CategoryTasks, frequency: TaskFrequency): Task[]
 };
 
 const ONCE_CATEGORY_ORDER: TaskCategory[] = [
+  TaskCategory.ADS,
   TaskCategory.TOURNAMENTS,
   TaskCategory.TICKETS,
   TaskCategory.ENGINES,
@@ -679,6 +681,12 @@ export function TasksContent() {
               ? allTasks.filter(task => task.id.startsWith('friend-invite-'))
               : [];
 
+            const isAdsOnce =
+              activeFrequency === TaskFrequency.ONCE && cat.category === TaskCategory.ADS;
+            const adsWatchTasks = isAdsOnce
+              ? allTasks.filter(task => task.id.startsWith('ads-watch-'))
+              : [];
+
             const isStarsOnce =
               activeFrequency === TaskFrequency.ONCE && cat.category === TaskCategory.STARS;
             const starPurchaseTasks = isStarsOnce
@@ -805,14 +813,16 @@ export function TasksContent() {
                       ? allTasks.filter(task => !/^star-(purchase|earn)-/.test(task.id))
                       : isFriendsOnce
                         ? allTasks.filter(task => !/^friend-invite-/.test(task.id))
-                        : isLeaderboardOnce
-                          ? allTasks.filter(
-                              task =>
-                                !/^leaderboard-(daily|weekly|monthly|alltime)-rank-/.test(task.id)
-                            )
-                          : isProfileStatusOnce
-                            ? allTasks.filter(task => !task.id.startsWith('vip-level-'))
-                            : allTasks;
+                        : isAdsOnce
+                          ? allTasks.filter(task => !/^ads-watch-/.test(task.id))
+                          : isLeaderboardOnce
+                            ? allTasks.filter(
+                                task =>
+                                  !/^leaderboard-(daily|weekly|monthly|alltime)-rank-/.test(task.id)
+                              )
+                            : isProfileStatusOnce
+                              ? allTasks.filter(task => !task.id.startsWith('vip-level-'))
+                              : allTasks;
 
             // Tabs to mark as locked (tier > USER_TIER) — sourced from any task's status in that tier group
             const lockedTabs: TournamentSubTab[] = isTournamentsOnce
@@ -1000,6 +1010,19 @@ export function TasksContent() {
                       headerGradient="from-pink to-electric-pink"
                       numberIcon={Users}
                       cardImageSrc={icons.crown}
+                    />
+                  ) : isAdsOnce && adsWatchTasks.length > 0 ? (
+                    <TournamentMilestoneSlider
+                      tasks={adsWatchTasks}
+                      onClaim={handleClaimTask}
+                      title={t('ads watched title')}
+                      blurb={t('ads watched blurb')}
+                      unitLabel={t('ads watched')}
+                      headerIcon={Eye}
+                      headerGradient="from-teal to-electric-purple"
+                      numberIcon={Eye}
+                      cardLucideIcon={Eye}
+                      cardLucideGradient="from-teal to-electric-purple"
                     />
                   ) : isProfileStatusOnce && vipTierTasks.length > 0 ? (
                     <TournamentMilestoneSlider

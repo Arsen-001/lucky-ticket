@@ -1,12 +1,10 @@
 import { faker } from '@faker-js/faker';
-import meMock from '@/mock/me.mock';
+import { me } from '@/mock/me.mock';
 import type {
   LeaderboardEntry,
   LeaderboardPeriod,
   LeaderboardResponse,
 } from '@/types/interfaces/leaderboard.interfaces';
-
-const { me } = meMock;
 
 const TOTAL_BY_PERIOD: Record<LeaderboardPeriod, number> = {
   today: 4_120,

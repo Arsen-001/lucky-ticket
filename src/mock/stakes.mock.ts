@@ -1,128 +1,107 @@
+import type { FetchArgs } from '@reduxjs/toolkit/query';
 import { StakeStatus } from '@/types/enums/stakes.enums';
-import type {
-  StakeHistoryEntry,
-  StakeLevelDefinition,
-  StakesData,
-} from '@/types/interfaces/stakes.interfaces';
+import type { StakeIdBody, StakesData, StartStakeBody } from '@/types/interfaces/stakes.interfaces';
+import { appConfig } from '@/config/app.config';
+import { mockDb } from '@/mock/backend/db';
 
-const stakeLevels: StakeLevelDefinition[] = [
-  {
-    level: 1,
-    minDeposit: 100,
-    guaranteedTicket: 'bronze',
-    allTickets: ['bronze'],
-    bonusPrizes: ['LC bonus', 'Speed Boost'],
-    starsChance: 5,
-    starsMin: 5,
-    starsMax: 15,
-  },
-  {
-    level: 2,
-    minDeposit: 500,
-    guaranteedTicket: 'silver',
-    allTickets: ['bronze', 'silver'],
-    bonusPrizes: ['LC bonus', 'Speed Boost', 'Capacity Upgrade'],
-    starsChance: 10,
-    starsMin: 15,
-    starsMax: 40,
-  },
-  {
-    level: 3,
-    minDeposit: 1000,
-    guaranteedTicket: 'gold',
-    allTickets: ['bronze', 'silver', 'gold'],
-    bonusPrizes: ['LC bonus', 'Speed Boost', 'Capacity Upgrade', 'Badge'],
-    starsChance: 20,
-    starsMin: 40,
-    starsMax: 100,
-  },
-  {
-    level: 4,
-    minDeposit: 2500,
-    guaranteedTicket: 'platinum',
-    allTickets: ['bronze', 'silver', 'gold', 'platinum'],
-    bonusPrizes: ['LC bonus', 'Speed Boost', 'Capacity Upgrade', 'Premium Badge'],
-    starsChance: 30,
-    starsMin: 70,
-    starsMax: 250,
-  },
-  {
-    level: 5,
-    minDeposit: 5000,
-    guaranteedTicket: 'diamond',
-    allTickets: ['bronze', 'silver', 'gold', 'platinum', 'diamond'],
-    bonusPrizes: ['Large LC bonus', 'Boosts & Upgrades', 'Exclusive Badge'],
-    starsChance: 40,
-    starsMin: 100,
-    starsMax: 500,
-  },
-];
+const nowIso = () => new Date().toISOString();
 
-const minutesAgo = (m: number) => new Date(Date.now() - m * 60 * 1000).toISOString();
-const minutesFromNow = (m: number) => new Date(Date.now() + m * 60 * 1000).toISOString();
-const hoursAgo = (h: number) => new Date(Date.now() - h * 60 * 60 * 1000).toISOString();
+/**
+ * `stakes` query — composed live from config (levels) + shared backend state.
+ * Returns fresh copies so RTK Query detects changes after a mutation mutates
+ * `mockDb` in place (identical array refs would be skipped by structural sharing).
+ */
+const getStakes = (): StakesData => ({
+  levels: appConfig.stakes.levels,
+  activeStakes: mockDb.stakes.activeStakes.map(s => ({ ...s })),
+  history: mockDb.stakes.history.map(h => ({ ...h })),
+});
 
-const history: StakeHistoryEntry[] = [
-  {
-    id: 'h1',
-    level: 5,
-    amount: 5000,
-    ticketsCount: 5,
-    bonusLC: 320,
-    bonusStars: 120,
-    outcome: 'completed',
-    completedAt: hoursAgo(26),
-  },
-  {
-    id: 'h2',
-    level: 2,
-    amount: 500,
-    ticketsCount: 2,
-    bonusLC: 30,
-    bonusStars: 0,
-    outcome: 'completed',
-    completedAt: hoursAgo(49),
-  },
-  {
-    id: 'h3',
-    level: 1,
-    amount: 100,
+/** POST stakes/start — lock LC from the user balance into a new active stake. */
+const startStake = (args: FetchArgs) => {
+  const body = (args.body ?? {}) as Partial<StartStakeBody>;
+  const level = body.level ?? 1;
+  const amount = body.amount ?? 0;
+
+  if (amount <= 0 || mockDb.user.coins < amount) {
+    return { error: { status: 400, data: 'Insufficient balance' } };
+  }
+
+  mockDb.user.coins -= amount;
+  const start = Date.now();
+  mockDb.stakes.activeStakes.push({
+    id: `stake-${start}`,
+    level,
+    lockedAmount: amount,
+    startDate: new Date(start).toISOString(),
+    endDate: new Date(start + appConfig.stakes.durationHours * 3_600_000).toISOString(),
+    status: StakeStatus.ACTIVE,
+    claimed: false,
+  });
+
+  return { data: { success: true } };
+};
+
+/** POST stakes/cancel — refund the locked LC, charge a Stars penalty, archive. */
+const cancelStake = (args: FetchArgs) => {
+  const { stakeId } = (args.body ?? {}) as Partial<StakeIdBody>;
+  const idx = mockDb.stakes.activeStakes.findIndex(s => s.id === stakeId);
+  if (idx === -1) return { error: { status: 404, data: 'Stake not found' } };
+
+  const [stake] = mockDb.stakes.activeStakes.splice(idx, 1);
+  const penalty = appConfig.stakes.cancelStarsPerLevel * stake.level;
+
+  mockDb.user.coins += stake.lockedAmount;
+  mockDb.user.telegramStars = Math.max(0, mockDb.user.telegramStars - penalty);
+  mockDb.stakes.history.unshift({
+    id: `h-${Date.now()}`,
+    level: stake.level,
+    amount: stake.lockedAmount,
     ticketsCount: 0,
     bonusLC: 0,
     bonusStars: 0,
     outcome: 'cancelled',
-    completedAt: hoursAgo(73),
-  },
-];
+    completedAt: nowIso(),
+  });
 
-const stakesData: StakesData = {
-  levels: stakeLevels,
-  activeStakes: [
-    {
-      id: 'stake-mid',
-      level: 2,
-      lockedAmount: 500,
-      startDate: minutesAgo(65),
-      endDate: minutesFromNow(115),
-      status: StakeStatus.ACTIVE,
-      claimed: false,
-    },
-    {
-      id: 'stake-ready',
-      level: 3,
-      lockedAmount: 1500,
-      startDate: hoursAgo(4),
-      endDate: minutesAgo(60),
-      status: StakeStatus.COMPLETED,
-      claimed: false,
-    },
-  ],
-  history,
+  return { data: { success: true } };
+};
+
+/** POST stakes/claim — pay out rewards for a completed stake, archive it. */
+const claimStake = (args: FetchArgs) => {
+  const { stakeId } = (args.body ?? {}) as Partial<StakeIdBody>;
+  const idx = mockDb.stakes.activeStakes.findIndex(s => s.id === stakeId);
+  if (idx === -1) return { error: { status: 404, data: 'Stake not found' } };
+
+  const stake = mockDb.stakes.activeStakes[idx];
+  if (new Date(stake.endDate).getTime() > Date.now()) {
+    return { error: { status: 400, data: 'Stake not ready' } };
+  }
+
+  mockDb.stakes.activeStakes.splice(idx, 1);
+  const levelDef = appConfig.stakes.levels.find(l => l.level === stake.level);
+  const bonusLC = Math.round(stake.lockedAmount * (appConfig.stakes.aprMaxPercent / 100));
+  const bonusStars = levelDef ? Math.round((levelDef.starsMin + levelDef.starsMax) / 2) : 0;
+
+  mockDb.user.coins += stake.lockedAmount + bonusLC;
+  mockDb.user.telegramStars += bonusStars;
+  mockDb.stakes.history.unshift({
+    id: `h-${Date.now()}`,
+    level: stake.level,
+    amount: stake.lockedAmount,
+    ticketsCount: stake.level,
+    bonusLC,
+    bonusStars,
+    outcome: 'completed',
+    completedAt: nowIso(),
+  });
+
+  return { data: { success: true } };
 };
 
 export const stakesMock = {
-  stakes: stakesData,
-  'POST stakes/start': { success: true },
-  'POST stakes/cancel': { success: true },
-  'POST stakes/claim': { success: true },
+  stakes: getStakes,
+  'POST stakes/start': startStake,
+  'POST stakes/cancel': cancelStake,
+  'POST stakes/claim': claimStake,
 };

@@ -1,4 +1,4 @@
-# Lucky Ticket — Claude Code Rules (supplements AGENTS.md)
+# LuckyTicket365 — Claude Code Rules (supplements AGENTS.md)
 
 These rules cover project-specific conventions that aren't fully captured in AGENTS.md. They reflect actual patterns in the codebase and should be followed when writing or editing code.
 

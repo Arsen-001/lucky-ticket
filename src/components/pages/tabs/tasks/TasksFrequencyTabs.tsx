@@ -23,7 +23,7 @@ export function TasksFrequencyTabs({
     <span className="inline-flex items-center justify-center gap-1.5 leading-none">
       <span className="mt-[2px] capitalize leading-none">{label}</span>
       {ready > 0 && (
-        <span className="flex-center min-w-4 h-4 px-1 rounded-full bg-electric-pink text-[10px] font-bold text-white tabular-nums">
+        <span className="flex-center min-w-5 h-5 px-[5px] rounded-full bg-electric-pink text-[12px] font-bold text-white tabular-nums">
           {ready}
         </span>
       )}
@@ -52,7 +52,7 @@ export function TasksFrequencyTabs({
         ]}
         classNames={{
           container: 'mx-4 !w-auto',
-          tab: 'flex-1 !w-auto !text-xs !px-3 !py-1',
+          tab: 'flex-1 !w-auto !text-sm !px-[14px] !py-[5px]',
           scrollButtons: '!hidden',
         }}
       />

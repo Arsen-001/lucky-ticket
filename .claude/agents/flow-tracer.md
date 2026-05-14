@@ -6,7 +6,7 @@ tools: Read, Bash, Glob, Grep
 
 # flow-tracer
 
-Trace a user flow end-to-end across the Lucky Ticket codebase. Read-only investigation.
+Trace a user flow end-to-end across the LuckyTicket365 codebase. Read-only investigation.
 
 ## Inputs
 

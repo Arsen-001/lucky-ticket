@@ -50,10 +50,10 @@ export interface TaskItemCardProps {
 }
 
 const RARITY_FRAME: Record<TaskRarity, string> = {
-  [TaskRarity.COMMON]: 'task-card-default',
-  [TaskRarity.RARE]: 'task-card-rarity-rare',
-  [TaskRarity.EPIC]: 'task-card-rarity-epic',
-  [TaskRarity.LEGENDARY]: 'task-card-rarity-legendary',
+  [TaskRarity.BRONZE]: 'task-card-default',
+  [TaskRarity.SILVER]: 'task-card-rarity-rare',
+  [TaskRarity.GOLD]: 'task-card-rarity-epic',
+  [TaskRarity.PLATINUM]: 'task-card-rarity-legendary',
 };
 
 const TIER_FRAME: Record<string, string> = {
@@ -353,7 +353,7 @@ export function TaskItemCard({
       style={style}
       className={twMerge(
         'relative rounded-2xl transition-all bg-background-overlay overflow-hidden',
-        isCompactRow ? (showSubtitleInCompact ? 'min-h-[68px]' : 'min-h-[60px]') : 'min-h-[88px]',
+        isCompactRow ? (showSubtitleInCompact ? 'min-h-[68px]' : 'min-h-[60px]') : 'min-h-[108px]',
         isCompleted
           ? 'task-card-completed'
           : isLockedTournament
@@ -414,9 +414,9 @@ export function TaskItemCard({
           'relative z-[2] flex items-center gap-3',
           isCompactRow
             ? showSubtitleInCompact
-              ? 'px-3 py-2 min-h-[68px] gap-2.5'
-              : 'px-3 py-2 min-h-[60px] gap-2.5'
-            : 'px-3 py-3 min-h-[88px]',
+              ? 'pl-1.5 pr-3 py-2 min-h-[68px] gap-2.5'
+              : 'pl-1.5 pr-3 py-2 min-h-[60px] gap-2.5'
+            : 'pl-1.5 pr-3 py-3 min-h-[108px]',
           (!isLocked || isLockedTournament) && 'cursor-pointer active:scale-[0.99]'
         )}
         onClick={handleCardClick}
@@ -426,13 +426,22 @@ export function TaskItemCard({
       >
         {/* Icon */}
         <div
-          className={twMerge('relative shrink-0 flex-center', isCompactRow ? 'w-8 h-8' : 'w-9 h-9')}
+          className={twMerge(
+            'relative shrink-0 flex-center',
+            task.category === TaskCategory.TOURNAMENTS && task.tier
+              ? isCompactRow
+                ? 'w-[72px] h-[72px]'
+                : 'w-[84px] h-[84px]'
+              : isCompactRow
+                ? 'w-8 h-8'
+                : 'w-9 h-9'
+          )}
         >
           {task.category === TaskCategory.TOURNAMENTS && task.tier ? (
             <Medal
               type={(task.tier === 'all' ? 'gold' : task.tier) as MedalType}
-              width={36}
-              height={36}
+              width={isCompactRow ? 72 : 84}
+              height={isCompactRow ? 72 : 84}
             />
           ) : task.category === TaskCategory.SOCIAL && resolveSocialIcon(task.externalLink) ? (
             (() => {
@@ -471,7 +480,10 @@ export function TaskItemCard({
 
         {/* Body */}
         <div
-          className={twMerge('flex-1 min-w-0 flex flex-col', isCompactRow ? 'gap-0.5' : 'gap-1')}
+          className={twMerge(
+            'flex-1 min-w-0 flex flex-col',
+            isCompactRow ? 'gap-0.5 -ml-[5px]' : 'gap-1 -ml-1.5'
+          )}
         >
           <h4
             className={twMerge(
@@ -487,8 +499,9 @@ export function TaskItemCard({
             (task.subtitle || task.unlockHint) && (
               <p
                 className={twMerge(
-                  'text-white/50 line-clamp-1',
-                  isCompactRow ? 'text-[10px]' : 'text-[11px]'
+                  'text-white/50',
+                  isCompactRow ? 'text-[10px]' : 'text-[11px]',
+                  expanded ? 'whitespace-normal break-words' : 'line-clamp-1'
                 )}
               >
                 {isLocked && task.unlockHint ? task.unlockHint : task.subtitle}
@@ -522,14 +535,14 @@ export function TaskItemCard({
         <div className="shrink-0 flex items-center">
           {(isReady || allStepsDone) && !isCompleted ? (
             <Button
-              className="rounded-full px-3 py-2 text-xs font-bold animate-task-pulse flex-center gap-1 disabled:opacity-70"
+              className="rounded-full px-3 py-1.5 text-xs font-bold animate-task-pulse flex-center flex-col gap-0.5 disabled:opacity-70"
               disabled={isSimulating}
               onClick={e => {
                 e.stopPropagation();
                 handleClaimMain();
               }}
             >
-              <Gift size={12} />
+              <Gift size={14} />
               {isSimulating ? t('claiming') : t('claim')}
             </Button>
           ) : isLocked ? (
