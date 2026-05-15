@@ -517,6 +517,8 @@
   "owned": "Owned",
   "paid": "Paid",
   "pin": "Pin",
+  "replace": "Replace",
+  "pin to profile": "Pin to profile",
   "unpin": "Unpin",
   "paid via stars level {level}": "Paid via Telegram Stars · Level {level} stakes",
   "participate in bronze level draws": "Participate in bronze level draws and win valuable prizes.",

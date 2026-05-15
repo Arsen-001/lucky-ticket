@@ -13,7 +13,12 @@ import { marketMock } from '@/mock/market.mock';
 import { stakesMock } from '@/mock/stakes.mock';
 import { walletMock } from '@/mock/wallet.mock';
 import { achievementsMock } from '@/mock/achievements.mock';
-import { profileMock } from '@/mock/profile.mock';
+import { profileMock, ownProfile } from '@/mock/profile.mock';
+import { pinState } from '@/mock/pin-state.mock';
+import type {
+  PinAchievementRequest,
+  UnpinAchievementRequest,
+} from '@/types/interfaces/achievement.interfaces';
 import { inventoryMock } from '@/mock/inventory.mock';
 import { enginesMock } from '@/mock/engines.mock';
 import { avatarsMock } from '@/mock/avatars.mock';
@@ -42,6 +47,24 @@ export type MockHandler<T = any> = (args: FetchArgs) => T | Promise<T>;
  * Union type for mock values, allowing either static data or a functional handler.
  */
 export type MockValue<T = any> = T | MockHandler<T> | { data: T } | { error: any };
+const pinHandlers = {
+  'GET achievements': () => {
+    const achs = pinState.getAchievementsWithPins();
+    return { total: achs.length, earned: achs.filter(a => a.earned).length, achievements: achs };
+  },
+  'GET profile/me': () => ({ ...ownProfile, pinnedAchievements: pinState.getPinnedAchievements() }),
+  'POST profile/showcase/pin': (args: FetchArgs) => {
+    const body = args.body as PinAchievementRequest;
+    pinState.pin(body.achievementId, body.slot);
+    return { ...ownProfile, pinnedAchievements: pinState.getPinnedAchievements() };
+  },
+  'POST profile/showcase/unpin': (args: FetchArgs) => {
+    const body = args.body as UnpinAchievementRequest;
+    pinState.unpin(body.slot);
+    return { ...ownProfile, pinnedAchievements: pinState.getPinnedAchievements() };
+  },
+};
+
 export const mockData = {
   ...meMock,
   ...tournamentsMock,
@@ -59,6 +82,7 @@ export const mockData = {
   ...walletMock,
   ...achievementsMock,
   ...profileMock,
+  ...pinHandlers,
   ...inventoryMock,
   ...enginesMock,
   ...avatarsMock,

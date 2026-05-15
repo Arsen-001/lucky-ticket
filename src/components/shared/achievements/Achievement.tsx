@@ -4,6 +4,7 @@ import {
   Anchor,
   Award,
   BadgeCheck,
+  Layers,
   Banknote,
   Bolt,
   Brain,
@@ -38,6 +39,7 @@ import {
   Trophy,
   UserPlus,
   Users,
+  Vault,
   Wallet,
   Zap,
 } from 'lucide-react';
@@ -85,6 +87,8 @@ const iconMap: Record<string, LucideIcon> = {
   anchor: Anchor,
   flask: FlaskConical,
   snowflake: Snowflake,
+  vault: Vault,
+  layers: Layers,
 };
 
 const rarityIconColor: Record<AchievementRarity, string> = {
@@ -107,10 +111,21 @@ const mkMap = (prefix: string, goldTier: 'gold' | 'golden' = 'gold'): RarityImag
   [AchievementRarity.DIAMOND_PLUS]: `/assets/icons/badges/diamond-plus-${prefix}.webp`,
 });
 
+const taskBadgeMap: RarityImageMap = {
+  [AchievementRarity.BRONZE]: '/assets/icons/badges/bronze-task-badge.webp',
+  [AchievementRarity.SILVER]: '/assets/icons/badges/silver--task-badge.webp',
+  [AchievementRarity.GOLD]: '/assets/icons/badges/golden-task-badge.webp',
+  [AchievementRarity.PLATINUM]: '/assets/icons/badges/platinum-task-badge.webp',
+  [AchievementRarity.DIAMOND]: '/assets/icons/badges/diamond-task-badge.webp',
+  [AchievementRarity.DIAMOND_PLUS]: '/assets/icons/badges/diamond-plus-task-badge.webp',
+};
+
 const badgeByCategoryMap: Partial<Record<AchievementCategory, RarityImageMap>> = {
   [AchievementCategory.STATUS]: mkMap('profile-badge'),
   [AchievementCategory.TICKETS]: mkMap('ticket-badge'),
   [AchievementCategory.ACTIVITY_POINTS]: mkMap('activity-badge', 'golden'),
+  [AchievementCategory.STAKES]: mkMap('stake-badge', 'golden'),
+  [AchievementCategory.TASKS]: taskBadgeMap,
 };
 
 const badgeByIconCodeMap: Partial<Record<string, RarityImageMap>> = {

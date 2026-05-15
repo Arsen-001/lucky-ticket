@@ -1,12 +1,12 @@
 'use client';
 import { useMemo, useState } from 'react';
-import { useGetProfileQuery } from '@/api/profile.api';
+import { useGetProfileQuery, useUnpinAchievementMutation } from '@/api/profile.api';
 import { ProfileHero } from '@/components/pages/out-tabs/drawer/profile/ProfileHero';
 import { ProfileLevelCard } from '@/components/pages/out-tabs/drawer/profile/ProfileLevelCard';
 import { ProfileQuickStats } from '@/components/pages/out-tabs/drawer/profile/ProfileQuickStats';
 import { ProfileSocialStats } from '@/components/pages/out-tabs/drawer/profile/ProfileSocialStats';
-import { ProfileBadgesCollection } from '@/components/pages/out-tabs/drawer/profile/ProfileBadgesCollection';
 import { ProfileFooter } from '@/components/pages/out-tabs/drawer/profile/ProfileFooter';
+import { AchievementShowcase } from '@/components/shared/achievements/AchievementShowcase';
 import { AchievementDetailModal } from '@/components/shared/achievements/AchievementDetailModal';
 import type { Achievement } from '@/types/interfaces/achievement.interfaces';
 import type { ProfileResponse } from '@/types/interfaces/profile.interfaces';
@@ -17,6 +17,7 @@ export interface ProfilePageProps {
 
 export function ProfilePage({ userId }: ProfilePageProps) {
   const { data: profile, isLoading } = useGetProfileQuery(userId);
+  const [unpinAchievement] = useUnpinAchievementMutation();
   const [previewMode, setPreviewMode] = useState(false);
   const [selected, setSelected] = useState<Achievement | null>(null);
 
@@ -47,12 +48,15 @@ export function ProfilePage({ userId }: ProfilePageProps) {
 
           <ProfileQuickStats profile={effectiveProfile} loading={isLoading} />
 
-          <ProfileBadgesCollection
-            achievements={effectiveProfile.recentAchievements}
+          <AchievementShowcase
+            pinnedAchievements={effectiveProfile.pinnedAchievements}
+            showcaseSlots={effectiveProfile.showcaseSlots}
+            showcaseMaxSlots={effectiveProfile.showcaseMaxSlots}
             totalEarned={effectiveProfile.publicStats.earnedAchievements}
             totalAchievements={effectiveProfile.publicStats.totalAchievements}
             isOwn={effectiveProfile.isOwn}
-            onTapAchievement={ach => setSelected(ach)}
+            onTapSlot={(_slot, ach) => ach && setSelected(ach)}
+            onLongPressSlot={(slot, ach) => ach && unpinAchievement({ slot })}
           />
 
           <ProfileSocialStats stats={effectiveProfile.publicStats} loading={isLoading} />

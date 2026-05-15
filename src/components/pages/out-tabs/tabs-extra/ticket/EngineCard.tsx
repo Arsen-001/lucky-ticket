@@ -30,14 +30,12 @@ const TIER_GLOW: Record<TicketType, string> = {
   diamond: '#3FD9CF',
 };
 
-const ELECTRIC_PINK = '#DE009B';
-
 const TIER_CLAIM_FLOW: Record<TicketType, { c1: string; c2: string; c3: string }> = {
-  bronze: { c1: ELECTRIC_PINK, c2: '#FFB871', c3: '#E08A3A' },
-  silver: { c1: ELECTRIC_PINK, c2: '#FFFFFF', c3: '#D8D8D8' },
-  gold: { c1: ELECTRIC_PINK, c2: '#FFE89A', c3: '#FFD56A' },
-  platinum: { c1: ELECTRIC_PINK, c2: '#FFFFFF', c3: '#E2E0D0' },
-  diamond: { c1: ELECTRIC_PINK, c2: '#83F5EE', c3: '#3FD9CF' },
+  bronze: { c1: '#AC6122', c2: '#E08A3A', c3: '#FFC787' },
+  silver: { c1: '#A8AAA4', c2: '#D8D8D8', c3: '#FFFFFF' },
+  gold: { c1: '#F8BD3E', c2: '#FFD56A', c3: '#FFE89A' },
+  platinum: { c1: '#C0BEB1', c2: '#E2E0D0', c3: '#FFFFFF' },
+  diamond: { c1: '#178D88', c2: '#3FD9CF', c3: '#83F5EE' },
 };
 
 const SPEED_ACCENT = '#C5B0F8';
@@ -188,76 +186,126 @@ export function EngineCard({
       </div>
 
       <div className={twMerge('flex flex-col', compact ? 'gap-1.5' : 'mt-3 gap-2')}>
-        {pending ? (
-          <button
-            onClick={() => onClaim(engine.id)}
+        <div
+          className={twMerge(
+            'flex items-center bg-black/28 border border-white/5',
+            compact ? 'gap-2 p-1.5 px-2 rounded-lg' : 'gap-2.5 p-2 px-2.5 rounded-xl'
+          )}
+        >
+          <div
             className={twMerge(
-              'engine-claim-button engine-claim-flow relative flex cursor-pointer items-center justify-center gap-2 overflow-hidden rounded-xl text-white font-extrabold uppercase tracking-[0.16em] active:scale-99 transition-transform duration-100',
-              compact ? 'px-3 py-2.5 text-[12px] rounded-lg' : 'px-4 py-3 text-[14px]'
+              'relative flex-1 min-w-0 overflow-hidden flex items-center tabular-nums rounded-md',
+              pending ? 'justify-center gap-2' : 'justify-between'
             )}
             style={
-              {
-                '--claim-flow-1': TIER_CLAIM_FLOW[tier].c1,
-                '--claim-flow-2': TIER_CLAIM_FLOW[tier].c2,
-                '--claim-flow-3': TIER_CLAIM_FLOW[tier].c3,
-                boxShadow: `0 8px 24px color-mix(in srgb, ${glow} 45%, transparent), inset 0 1px 0 rgba(255,255,255,0.35), inset 0 -2px 6px color-mix(in srgb, black 35%, transparent)`,
-              } as CSSProperties
+              !pending ? { ['--next-in-accent' as string]: `var(--color-${tier})` } : undefined
             }
           >
-            <span className="relative z-1">{t(`${tier} ticket`)}</span>
-            <span
-              className="relative z-1 rounded-full bg-black/30 px-1.5 py-0.5 text-[12px] tabular-nums"
-              style={{ color: 'rgba(255,255,255,0.95)' }}
-            >
-              ×{capacity}
-            </span>
-          </button>
-        ) : (
-          <div className={twMerge('flex', compact ? 'gap-1.5' : 'gap-2')}>
-            <div
-              className={twMerge(
-                'relative flex-1 overflow-hidden rounded-xl border border-white/6 bg-white/3 flex items-center justify-between tabular-nums',
-                compact ? 'px-2.5 py-2 rounded-lg' : 'px-3 py-2.5'
-              )}
-              style={{ ['--next-in-accent' as string]: `var(--color-${tier})` }}
-            >
+            {!pending && (
               <EngineNextInFill
                 key={engine.cycleStartedAt}
                 cycleSeconds={cycle}
                 elapsedSeconds={elapsedSeconds}
               />
+            )}
+            {pending ? (
+              <span className="relative z-1 flex items-center gap-1.5">
+                <span
+                  aria-hidden
+                  className={twMerge(
+                    'relative inline-flex rounded-full',
+                    compact ? 'h-1.5 w-1.5' : 'h-2 w-2'
+                  )}
+                  style={{ background: glow, boxShadow: `0 0 6px ${glow}` }}
+                >
+                  <span
+                    className="absolute inset-0 rounded-full animate-ping"
+                    style={{ background: glow, opacity: 0.6 }}
+                  />
+                </span>
+                <span
+                  className={twMerge(
+                    'font-extrabold uppercase tracking-wider',
+                    compact ? 'text-[9px]' : 'text-[10px]'
+                  )}
+                  style={{ color: glow }}
+                >
+                  {t('ready')}
+                </span>
+              </span>
+            ) : (
               <span
                 className={twMerge(
                   'relative z-1 font-bold uppercase tracking-wider text-white',
-                  compact ? 'text-[8px]' : 'text-[9px]'
+                  compact ? 'text-[9px]' : 'text-[10px]'
                 )}
               >
                 {t('next in')}
               </span>
+            )}
+            {pending ? (
               <span
                 className={twMerge(
-                  'relative z-1 font-bold text-white',
-                  compact ? 'text-[13px]' : 'text-sm'
+                  'relative z-1 font-extrabold tabular-nums rounded-full',
+                  compact ? 'text-[10px] px-1.5 py-px' : 'text-[11px] px-2 py-0.5'
+                )}
+                style={{
+                  color: glow,
+                  background: `color-mix(in srgb, ${glow} 18%, transparent)`,
+                  border: `1px solid color-mix(in srgb, ${glow} 35%, transparent)`,
+                }}
+              >
+                ×{capacity}
+              </span>
+            ) : (
+              <span
+                className={twMerge(
+                  'relative z-1 font-extrabold tabular-nums text-white',
+                  compact ? 'text-[11px]' : 'text-[12px]'
                 )}
               >
                 {formatCycleTime(remaining)}
               </span>
-            </div>
+            )}
+          </div>
+          {pending ? (
+            <button
+              onClick={() => onClaim(engine.id)}
+              className={twMerge(
+                'engine-claim-button engine-claim-flow relative cursor-pointer overflow-hidden text-white font-extrabold uppercase tracking-wider flex-center shrink-0 active:scale-99 transition-transform duration-100',
+                compact
+                  ? 'min-w-14 h-6.5 px-2 rounded-md text-[9px]'
+                  : 'min-w-16 h-7.5 px-2.5 rounded-lg text-[10px]'
+              )}
+              style={
+                {
+                  '--claim-flow-1': TIER_CLAIM_FLOW[tier].c1,
+                  '--claim-flow-2': TIER_CLAIM_FLOW[tier].c2,
+                  '--claim-flow-3': TIER_CLAIM_FLOW[tier].c3,
+                  boxShadow: `0 4px 12px color-mix(in srgb, ${glow} 45%, transparent), inset 0 1px 0 rgba(255,255,255,0.3)`,
+                } as CSSProperties
+              }
+            >
+              <span className="relative z-1">{t('claim')}</span>
+            </button>
+          ) : (
             <button
               onClick={() => onInstantClaim(engine.id)}
               title={t('instant claim with stars')}
               className={twMerge(
-                'rounded-xl border border-gold/40 bg-gold/10 text-gold font-extrabold tracking-wide flex items-center cursor-pointer hover:bg-gold/15 active:scale-99 transition-all duration-100',
-                compact ? 'px-2.5 text-[10px] gap-1 rounded-lg' : 'px-3.5 text-[11px] gap-1.5'
+                'border border-gold/40 bg-gold/10 text-gold font-extrabold tracking-wider flex-center shrink-0 cursor-pointer hover:bg-gold/15 active:scale-99 transition-all duration-100 gap-1',
+                compact
+                  ? 'min-w-14 h-6.5 px-2 rounded-md text-[9px]'
+                  : 'min-w-16 h-7.5 px-2.5 rounded-lg text-[10px]'
               )}
             >
-              <TelegramStarIcon size={compact ? 12 : 16} />
+              <TelegramStarIcon size={compact ? 10 : 11} />
               <span>
                 {t('skip')} · {instantClaimCost}
               </span>
             </button>
-          </div>
-        )}
+          )}
+        </div>
 
         <div className={twMerge('flex flex-col', compact ? 'gap-1' : 'mt-1 gap-1.5')}>
           <BoostRow

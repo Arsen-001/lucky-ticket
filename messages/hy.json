@@ -517,6 +517,8 @@
   "owned": "Գնված է",
   "paid": "Վճարված",
   "pin": "Ամրացնել",
+  "replace": "Փոխարինել",
+  "pin to profile": "Ամրացնել պրոֆիլին",
   "unpin": "Հանել ամրացումը",
   "paid via stars level {level}": "Վճարված Telegram Stars-ով · Մակարդակ {level} ստավկաներ",
   "participate in bronze level draws": "Մասնակցեք բրոնզե մակարդակի խաղարկություններին և շահեք արժեքավոր մրցանակներ:",

@@ -517,6 +517,8 @@
   "owned": "Куплено",
   "paid": "Оплачено",
   "pin": "Закрепить",
+  "replace": "Заменить",
+  "pin to profile": "Прикрепить к профилю",
   "unpin": "Открепить",
   "paid via stars level {level}": "Оплачивается через Telegram Stars · ставки Уровня {level}",
   "participate in bronze level draws": "Участвуйте в розыгрышах бронзового уровня и выигрывайте ценные призы.",

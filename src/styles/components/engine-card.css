@@ -2,11 +2,13 @@
   background: linear-gradient(
     120deg,
     var(--claim-flow-1, #de009b) 0%,
-    var(--claim-flow-1, #de009b) 35%,
-    var(--claim-flow-2, #a32183) 45%,
+    var(--claim-flow-1, #de009b) 22%,
+    var(--claim-flow-purple, #743df5) 34%,
+    var(--claim-flow-2, #a32183) 42%,
     var(--claim-flow-3, #743df5) 50%,
-    var(--claim-flow-2, #a32183) 55%,
-    var(--claim-flow-1, #de009b) 65%,
+    var(--claim-flow-2, #a32183) 58%,
+    var(--claim-flow-purple, #743df5) 66%,
+    var(--claim-flow-1, #de009b) 78%,
     var(--claim-flow-1, #de009b) 100%
   );
   background-size: 200% 100%;
