@@ -1,6 +1,5 @@
 'use client';
 
-import Image from 'next/image';
 import { Bell, Flag, Layers, Mail, TrophyIcon, type LucideIcon } from 'lucide-react';
 import {
   useGetNotificationPreferencesQuery,
@@ -9,7 +8,7 @@ import {
 import { SettingsMenuItem } from '@/components/pages/out-tabs/drawer/settings/SettingsMenuItem';
 import { Switch } from '@/components/shared/form-elements/Switch';
 import { Tabs } from '@/components/shared/Tabs';
-import { icons } from '@/constants/icons';
+import { TelegramStarIcon } from '@/components/shared/icons/TelegramStarIcon';
 import { useAppTranslations } from '@/hooks/useAppTranslations';
 import type { MessageIds } from '@/types/types/i18n.types';
 import type {
@@ -140,7 +139,7 @@ export function NotificationPreferencesSection() {
             key: 'telegram',
             title: (
               <span className="inline-flex items-center gap-1.5">
-                <Image src={icons.telegramStar} alt="" width={14} height={14} />
+                <TelegramStarIcon size={14} />
                 {t('telegram bot')}
               </span>
             ),

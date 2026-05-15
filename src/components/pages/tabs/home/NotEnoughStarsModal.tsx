@@ -1,11 +1,10 @@
 'use client';
 
-import Image from 'next/image';
 import { twMerge } from 'tailwind-merge';
 import { ClientPortal } from '@/components/shared/ClientPortal';
 import { ModalCloseButton } from '@/components/shared/modals/ModalCloseButton';
+import { TelegramStarIcon } from '@/components/shared/icons/TelegramStarIcon';
 import { useAppTranslations } from '@/hooks/useAppTranslations';
-import { icons } from '@/constants/icons';
 
 const STAR_PRESETS = [100, 250, 500, 1000, 2500] as const;
 
@@ -58,7 +57,7 @@ export function NotEnoughStarsModal({
           <div className="flex flex-col gap-5 px-5 pb-7 pt-3">
             <div className="flex flex-col items-center gap-2 text-center">
               <div className="bg-gold/10 border-gold/25 flex-center h-14 w-14 rounded-full border">
-                <Image src={icons.telegramStar} alt="" width={28} height={28} />
+                <TelegramStarIcon size={28} />
               </div>
               <h3 className="text-lg font-extrabold text-white">
                 {hasRequirement ? t('not enough stars') : t('add stars')}
@@ -75,7 +74,7 @@ export function NotEnoughStarsModal({
 
             <div className="flex items-center justify-between rounded-xl bg-white/5 px-4 py-3">
               <div className="flex items-center gap-2">
-                <Image src={icons.telegramStar} alt="" width={18} height={18} />
+                <TelegramStarIcon size={18} />
                 <span className="text-pink-secondary text-xs font-semibold uppercase tracking-wider">
                   {t('balance')}
                 </span>
@@ -97,7 +96,7 @@ export function NotEnoughStarsModal({
                     onClick={() => onTopUp?.(amount)}
                     className="border-gold/30 bg-gold/8 flex items-center justify-center gap-2 rounded-xl border px-4 py-3 transition-colors hover:bg-gold/15 active:scale-99"
                   >
-                    <Image src={icons.telegramStar} alt="" width={20} height={20} />
+                    <TelegramStarIcon size={20} />
                     <span className="text-gold text-base font-extrabold tabular-nums">
                       +{amount}
                     </span>

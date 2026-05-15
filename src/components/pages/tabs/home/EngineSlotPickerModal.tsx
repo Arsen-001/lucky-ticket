@@ -1,12 +1,11 @@
 'use client';
 
-import Image from 'next/image';
 import { Loader2, Sparkles, Timer } from 'lucide-react';
 import { useGetInventoryQuery } from '@/api/inventory.api';
 import { Modal } from '@/components/shared/modals/Modal';
 import { BoosterIcon } from '@/components/shared/icons/BoosterIcon';
 import { ChipIcon } from '@/components/shared/icons/ChipIcon';
-import { icons } from '@/constants/icons';
+import { TelegramStarIcon } from '@/components/shared/icons/TelegramStarIcon';
 import { useAppTranslations } from '@/hooks/useAppTranslations';
 import {
   CHIP_TYPE_ICON,
@@ -149,7 +148,7 @@ export function EngineSlotPickerModal({
                       />
                     ) : (
                       <>
-                        <Image src={icons.telegramStar} alt="" width={12} height={12} />
+                        <TelegramStarIcon size={12} />
                         {cost}
                       </>
                     )}

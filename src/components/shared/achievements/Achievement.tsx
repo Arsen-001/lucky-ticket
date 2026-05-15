@@ -99,12 +99,12 @@ const rarityIconColor: Record<AchievementRarity, string> = {
 type RarityImageMap = Record<AchievementRarity, string>;
 
 const mkMap = (prefix: string, goldTier: 'gold' | 'golden' = 'gold'): RarityImageMap => ({
-  [AchievementRarity.BRONZE]: `/assets/icons/badges/bronze-${prefix}.png`,
-  [AchievementRarity.SILVER]: `/assets/icons/badges/silver-${prefix}.png`,
-  [AchievementRarity.GOLD]: `/assets/icons/badges/${goldTier}-${prefix}.png`,
-  [AchievementRarity.PLATINUM]: `/assets/icons/badges/platinum-${prefix}.png`,
-  [AchievementRarity.DIAMOND]: `/assets/icons/badges/diamond-${prefix}.png`,
-  [AchievementRarity.DIAMOND_PLUS]: `/assets/icons/badges/diamond-plus-${prefix}.png`,
+  [AchievementRarity.BRONZE]: `/assets/icons/badges/bronze-${prefix}.webp`,
+  [AchievementRarity.SILVER]: `/assets/icons/badges/silver-${prefix}.webp`,
+  [AchievementRarity.GOLD]: `/assets/icons/badges/${goldTier}-${prefix}.webp`,
+  [AchievementRarity.PLATINUM]: `/assets/icons/badges/platinum-${prefix}.webp`,
+  [AchievementRarity.DIAMOND]: `/assets/icons/badges/diamond-${prefix}.webp`,
+  [AchievementRarity.DIAMOND_PLUS]: `/assets/icons/badges/diamond-plus-${prefix}.webp`,
 });
 
 const badgeByCategoryMap: Partial<Record<AchievementCategory, RarityImageMap>> = {
@@ -121,12 +121,12 @@ const badgeByIconCodeMap: Partial<Record<string, RarityImageMap>> = {
 };
 
 const tournamentBadgeMap: RarityImageMap = {
-  [AchievementRarity.BRONZE]: '/assets/icons/badges/bronze-tournament-badge.png',
-  [AchievementRarity.SILVER]: '/assets/icons/badges/silver-tournament-badge.png',
-  [AchievementRarity.GOLD]: '/assets/icons/badges/golden-tournament-badge.png',
-  [AchievementRarity.PLATINUM]: '/assets/icons/badges/platinum-tournament-badge.png',
-  [AchievementRarity.DIAMOND]: '/assets/icons/badges/diamond-tournament-badge.png',
-  [AchievementRarity.DIAMOND_PLUS]: '/assets/icons/badges/diamon-plus-tournament-badge.png',
+  [AchievementRarity.BRONZE]: '/assets/icons/badges/bronze-tournament-badge.webp',
+  [AchievementRarity.SILVER]: '/assets/icons/badges/silver-tournament-badge.webp',
+  [AchievementRarity.GOLD]: '/assets/icons/badges/golden-tournament-badge.webp',
+  [AchievementRarity.PLATINUM]: '/assets/icons/badges/platinum-tournament-badge.webp',
+  [AchievementRarity.DIAMOND]: '/assets/icons/badges/diamond-tournament-badge.webp',
+  [AchievementRarity.DIAMOND_PLUS]: '/assets/icons/badges/diamon-plus-tournament-badge.webp',
 };
 
 const resolveBadgeSrc = (achievement: AchievementType): string | undefined => {

@@ -11,6 +11,7 @@ const nextConfig: NextConfig = {
       { protocol: 'https', hostname: 'api.dicebear.com' },
       { protocol: 'https', hostname: 'randomuser.me' },
     ],
+    qualities: [75, 100],
   },
   devIndicators: false,
   experimental: {

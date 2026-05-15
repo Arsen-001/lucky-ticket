@@ -60,15 +60,18 @@ export function Medal({
   const numWidth = typeof width === 'number' ? width : parseFloat(width as string);
   const numHeight = typeof height === 'number' ? height : parseFloat(height as string);
 
-  const finalWidth = !isNaN(numWidth)
+  const hasWidth = !isNaN(numWidth);
+  const hasHeight = !isNaN(numHeight);
+
+  const finalWidth = hasWidth
     ? numWidth
-    : !isNaN(numHeight)
+    : hasHeight
       ? Math.round(numHeight * ASPECT_RATIO)
       : BASE_WIDTH;
 
-  const finalHeight = !isNaN(numHeight)
+  const finalHeight = hasHeight
     ? numHeight
-    : !isNaN(numWidth)
+    : hasWidth
       ? Math.round(numWidth / ASPECT_RATIO)
       : BASE_HEIGHT;
 
@@ -83,8 +86,8 @@ export function Medal({
       style={{
         objectFit: 'contain',
         ...rest.style,
-        width,
-        height: width ? 'auto' : height,
+        width: hasWidth ? width : hasHeight ? 'auto' : undefined,
+        height: hasHeight ? height : hasWidth ? 'auto' : undefined,
         aspectRatio: `${BASE_WIDTH} / ${BASE_HEIGHT}`,
       }}
       className={twMerge(rest.className, loading && 'animation-blink')}

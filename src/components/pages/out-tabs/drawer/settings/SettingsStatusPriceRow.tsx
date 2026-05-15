@@ -1,9 +1,8 @@
 'use client';
 
-import Image from 'next/image';
 import { twMerge } from 'tailwind-merge';
+import { TelegramStarIcon } from '@/components/shared/icons/TelegramStarIcon';
 import { GlobalConstants } from '@/constants/global.constants';
-import { icons } from '@/constants/icons';
 import { useAppTranslations } from '@/hooks/useAppTranslations';
 import { MarketPriceType } from '@/types/enums/market.enums';
 import type { MarketPrice } from '@/types/interfaces/market.interfaces';
@@ -37,7 +36,7 @@ export function SettingsStatusPriceRow({ prices, label, className }: SettingsSta
               <span className="text-gold text-xs font-bold">{GlobalConstants.coinName}</span>
             )}
             {price.type === MarketPriceType.TELEGRAM_STARS && (
-              <Image src={icons.telegramStar} alt={t('stars')} width={14} height={14} />
+              <TelegramStarIcon size={14} alt={t('stars')} />
             )}
           </div>
         ))}

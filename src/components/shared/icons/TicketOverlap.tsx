@@ -6,11 +6,16 @@ import { getRandomNumber } from '@/utils/global/number.utils';
 import { twMerge } from 'tailwind-merge';
 import type { TicketType } from '@/types/types/ticket.types';
 
-export interface TicketOverlapProps extends Omit<ImageProps, 'src' | 'alt' | 'loading'> {
+export interface TicketOverlapProps extends Omit<
+  ImageProps,
+  'src' | 'alt' | 'loading' | 'fill' | 'className' | 'style'
+> {
   type: TicketType;
   loading?: boolean;
   nextLoading?: ImageProps['loading'];
   duration?: number;
+  className?: string;
+  style?: React.CSSProperties;
 }
 
 const ticketOverlapSources = {
@@ -28,6 +33,8 @@ export function TicketOverlap({
   nextLoading = 'eager',
   loading,
   duration = 3000,
+  className,
+  style,
   ...rest
 }: TicketOverlapProps) {
   const values = Object.values(ticketOverlapSources);
@@ -50,21 +57,22 @@ export function TicketOverlap({
     return () => clearInterval(interval);
   }, [loading, duration, valuesLength]);
 
+  const sizes = typeof width === 'number' ? `${width}px` : undefined;
+
   return (
-    <Image
-      {...rest}
-      src={loading ? values[ticketTypeIndex] : ticketOverlapSources[type]}
-      width={width}
-      height={height}
-      alt={`${type}-ticket-overlap`}
-      loading={nextLoading}
-      style={{
-        width,
-        height,
-        objectFit: 'contain',
-        ...rest.style,
-      }}
-      className={twMerge(rest.className, loading && 'animation-blink')}
-    />
+    <span
+      className={twMerge('relative inline-block shrink-0', className, loading && 'animation-blink')}
+      style={{ width, height, ...style }}
+    >
+      <Image
+        {...rest}
+        fill
+        sizes={sizes}
+        src={loading ? values[ticketTypeIndex] : ticketOverlapSources[type]}
+        alt={`${type}-ticket-overlap`}
+        loading={nextLoading}
+        style={{ objectFit: 'contain' }}
+      />
+    </span>
   );
 }

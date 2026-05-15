@@ -6,6 +6,7 @@ import type { ReactNode } from 'react';
 import { twMerge } from 'tailwind-merge';
 import { Skeleton } from '@/components/shared/seleketons/Skeleton';
 import { SkeletonSuspense } from '@/components/shared/seleketons/SkeletonSuspense';
+import { TelegramStarIcon } from '@/components/shared/icons/TelegramStarIcon';
 import { GlobalConstants } from '@/constants/global.constants';
 import { icons } from '@/constants/icons';
 import { useAppTranslations } from '@/hooks/useAppTranslations';
@@ -210,9 +211,7 @@ function PriceButton({ price, accent, onClick, fullWidth }: PriceButtonProps) {
         border: `1px solid color-mix(in srgb, ${accent} 35%, transparent)`,
       }}
     >
-      {isStars && (
-        <Image src={icons.telegramStar} alt="" width={14} height={14} className="object-contain" />
-      )}
+      {isStars && <TelegramStarIcon size={14} />}
       <span className="inline-flex items-baseline gap-1 tabular-nums">
         {price.originalAmount && (
           <span className="text-[10px] text-white/55 line-through">{price.originalAmount}</span>

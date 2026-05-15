@@ -1,11 +1,10 @@
 'use client';
 
 import type { CSSProperties } from 'react';
-import Image from 'next/image';
 import { twMerge } from 'tailwind-merge';
 import { Clock, Layers, Package, Zap } from 'lucide-react';
 import { useGetInventoryQuery } from '@/api/inventory.api';
-import { icons } from '@/constants/icons';
+import { TelegramStarIcon } from '@/components/shared/icons/TelegramStarIcon';
 import { useAppTranslations } from '@/hooks/useAppTranslations';
 import { ReactorDial } from '@/components/pages/out-tabs/tabs-extra/ticket/ReactorDial';
 import { EngineLevelBadge } from '@/components/pages/out-tabs/tabs-extra/ticket/EngineLevelBadge';
@@ -252,12 +251,7 @@ export function EngineCard({
                 compact ? 'px-2.5 text-[10px] gap-1 rounded-lg' : 'px-3.5 text-[11px] gap-1.5'
               )}
             >
-              <Image
-                src={icons.telegramStar}
-                alt=""
-                width={compact ? 12 : 16}
-                height={compact ? 12 : 16}
-              />
+              <TelegramStarIcon size={compact ? 12 : 16} />
               <span>
                 {t('skip')} · {instantClaimCost}
               </span>

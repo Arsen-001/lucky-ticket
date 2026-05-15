@@ -1,8 +1,7 @@
 'use client';
 
 import { twMerge } from 'tailwind-merge';
-import Image from 'next/image';
-import { icons } from '@/constants/icons';
+import { TelegramStarIcon } from '@/components/shared/icons/TelegramStarIcon';
 import { useAppTranslations } from '@/hooks/useAppTranslations';
 import type { ReactNode } from 'react';
 
@@ -110,12 +109,7 @@ export function BoostRow({
           <span>{t('max')}</span>
         ) : (
           <>
-            <Image
-              src={icons.telegramStar}
-              alt=""
-              height={compact ? 10 : 11}
-              width={compact ? 10 : 11}
-            />
+            <TelegramStarIcon size={compact ? 10 : 11} />
             <span className="tabular-nums">{costStars}</span>
           </>
         )}

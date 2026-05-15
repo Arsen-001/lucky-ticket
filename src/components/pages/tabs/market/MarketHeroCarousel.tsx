@@ -15,7 +15,7 @@ import {
   useGetMarketDataQuery,
 } from '@/api/market.api';
 import { GlobalConstants } from '@/constants/global.constants';
-import { icons } from '@/constants/icons';
+import { TelegramStarIcon } from '@/components/shared/icons/TelegramStarIcon';
 import { useAppTranslations } from '@/hooks/useAppTranslations';
 import { useCountDown } from '@/hooks/useCountDown';
 import { MarketPriceType } from '@/types/enums/market.enums';
@@ -323,9 +323,7 @@ function FeaturedSlideCard({ slide, onClick }: FeaturedSlideCardProps) {
               {firstPrice.type === MarketPriceType.LTC && (
                 <span className="text-[12px]">{GlobalConstants.coinName}</span>
               )}
-              {firstPrice.type === MarketPriceType.TELEGRAM_STARS && (
-                <Image src={icons.telegramStar} alt="" width={14} height={14} />
-              )}
+              {firstPrice.type === MarketPriceType.TELEGRAM_STARS && <TelegramStarIcon size={14} />}
             </span>
             <span className="text-[9px] font-bold uppercase tracking-wider text-white/65">
               {t('grab now')}

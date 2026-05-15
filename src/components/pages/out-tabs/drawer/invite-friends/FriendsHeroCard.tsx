@@ -1,6 +1,5 @@
 'use client';
 
-import Image from 'next/image';
 import { Check, Copy, Share2, Star, UserPlus, Zap } from 'lucide-react';
 import type { ReactNode } from 'react';
 import { useState } from 'react';
@@ -10,8 +9,8 @@ import { useGetReferralStatsQuery } from '@/api/referral.api';
 import { Button } from '@/components/shared/buttons/Button';
 import { Skeleton } from '@/components/shared/seleketons/Skeleton';
 import { SkeletonSuspense } from '@/components/shared/seleketons/SkeletonSuspense';
+import { TelegramStarIcon } from '@/components/shared/icons/TelegramStarIcon';
 import { GlobalConstants } from '@/constants/global.constants';
-import { icons } from '@/constants/icons';
 import { useAppTranslations } from '@/hooks/useAppTranslations';
 import { getRefererLink } from '@/utils/pages/referral.utils';
 
@@ -176,10 +175,7 @@ function RewardRow({
           icon={<Zap size={11} className="fill-gold text-gold" />}
           value={`+${activityPoints}`}
         />
-        <RewardChip
-          icon={<Image src={icons.telegramStar} alt="" width={11} height={11} />}
-          value={`+${stars}`}
-        />
+        <RewardChip icon={<TelegramStarIcon size={11} />} value={`+${stars}`} />
       </div>
     </div>
   );

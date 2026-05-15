@@ -1,6 +1,5 @@
 'use client';
 
-import Image from 'next/image';
 import { useMemo, useState } from 'react';
 import { Cpu, MemoryStick } from 'lucide-react';
 import { twMerge } from 'tailwind-merge';
@@ -8,7 +7,7 @@ import { useGetMeQuery } from '@/api/me.api';
 import { useGetTicketsQuery } from '@/api/tickets.api';
 import { Button } from '@/components/shared/buttons/Button';
 import { Modal } from '@/components/shared/modals/Modal';
-import { icons } from '@/constants/icons';
+import { TelegramStarIcon } from '@/components/shared/icons/TelegramStarIcon';
 import { useAppTranslations } from '@/hooks/useAppTranslations';
 import {
   QUALITY_ACCENT,
@@ -157,7 +156,7 @@ export function ChipEquipModal({
 
         <footer className="flex items-center justify-between gap-3">
           <div className="flex items-center gap-1.5 text-[11px] font-bold tabular-nums">
-            <Image src={icons.telegramStar} alt="" width={14} height={14} />
+            <TelegramStarIcon size={14} />
             <span className={canAfford ? 'text-white' : 'text-error'}>
               {userStars} / {cost}
             </span>

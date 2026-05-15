@@ -1,6 +1,5 @@
 'use client';
 
-import Image from 'next/image';
 import { useRouter } from 'next/navigation';
 import { useState } from 'react';
 import { Menu, Zap } from 'lucide-react';
@@ -17,9 +16,9 @@ import { Link } from '@/components/shared/links/Link';
 import { HeaderStatPill } from '@/components/layout-elements/HeaderStatPill';
 import { VerifiedSparkleIcon } from '@/components/shared/icons/VerifiedSparkleIcon';
 import { CoinIcon } from '@/components/shared/icons/CoinIcon';
+import { TelegramStarIcon } from '@/components/shared/icons/TelegramStarIcon';
 import { NotEnoughStarsModal } from '@/components/pages/tabs/home/NotEnoughStarsModal';
 import { GlobalConstants } from '@/constants/global.constants';
-import { icons } from '@/constants/icons';
 import { routes } from '@/constants/routes';
 import { useAppDispatch } from '@/lib/rtk/hooks';
 import { useAppTranslations } from '@/hooks/useAppTranslations';
@@ -127,7 +126,7 @@ export function Header({ className }: ClassNameProps) {
             <HeaderStatPill
               icon={
                 <span className="bg-electric-purple/35 flex h-3.5 w-3.5 items-center justify-center rounded-full">
-                  <Image src={icons.telegramStar} alt="" width={10} height={10} />
+                  <TelegramStarIcon size={10} />
                 </span>
               }
               value={me?.telegramStars ?? 0}

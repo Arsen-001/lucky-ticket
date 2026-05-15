@@ -1,10 +1,9 @@
 'use client';
 
-import Image from 'next/image';
 import type { ReactNode } from 'react';
 import { ConfirmModal } from '@/components/shared/modals/ConfirmModal';
+import { TelegramStarIcon } from '@/components/shared/icons/TelegramStarIcon';
 import { GlobalConstants } from '@/constants/global.constants';
-import { icons } from '@/constants/icons';
 import { useAppTranslations } from '@/hooks/useAppTranslations';
 import { MarketPriceType } from '@/types/enums/market.enums';
 import type { MarketPrice } from '@/types/interfaces/market.interfaces';
@@ -61,9 +60,7 @@ export function MarketPurchaseModal({
                 {price.type === MarketPriceType.LTC && (
                   <span className="text-gold text-sm font-bold">{GlobalConstants.coinName}</span>
                 )}
-                {price.type === MarketPriceType.TELEGRAM_STARS && (
-                  <Image src={icons.telegramStar} alt="" width={18} height={18} />
-                )}
+                {price.type === MarketPriceType.TELEGRAM_STARS && <TelegramStarIcon size={18} />}
               </div>
             </div>
           )}
