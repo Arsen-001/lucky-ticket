@@ -1465,8 +1465,8 @@ const TICKETS = buildCategory({
 });
 
 // ───────────────── PROFILE STATUS ─────────────────
-// 10-level VIP ladder driven by lifetime Activity Points + a single "Buy Prime"
-// row. The user's current AP is mocked at USER_AP — anything below it is
+// 10-level VIP ladder driven by lifetime Activity Points + a single
+// "Buy Lucky Player" row. The user's current AP is mocked at USER_AP — anything below it is
 // COMPLETED, the next-target level is IN_PROGRESS, the rest are LOCKED.
 interface VipLevelConfig {
   level: number;
@@ -1547,11 +1547,11 @@ const PROFILE_STATUS = buildCategory({
         unlockHint: !reached && !isCurrent ? `Reach VIP Level ${cfg.level - 1} first.` : undefined,
       };
     }),
-    // Single row — buy Prime status
+    // Single row — buy Lucky Player subscription
     {
-      id: 'profile-buy-prime',
-      title: 'Buy Prime status',
-      subtitle: 'Unlock Prime perks with LC or crypto.',
+      id: 'profile-buy-lucky-player',
+      title: 'Buy Lucky Player subscription',
+      subtitle: 'Unlock Lucky Player perks with LC or crypto.',
       rewards: [ltc(10), tickets(2), ap(500)],
       progress: { current: 0, target: 1 },
       deeplink: '/market',
@@ -1760,8 +1760,8 @@ const ACHIEVEMENTS = buildCategory({
       rarity: TaskRarity.SILVER,
     },
     {
-      title: 'Prime status',
-      subtitle: 'Activate Prime status (LC or crypto).',
+      title: 'Lucky Player subscription',
+      subtitle: 'Activate Lucky Player subscription (LC or crypto).',
       rewards: [ltc(20), tickets(4), ap(1000)],
       progress: { current: 0, target: 1 },
       rarity: TaskRarity.GOLD,

@@ -31,7 +31,7 @@ export const ownProfile: ProfileResponse = {
   avatar: images.avatar.src,
   banner: undefined,
   isVerified: true,
-  isPrime: true,
+  isLuckyPlayer: true,
   isVIP: true,
   vipLevel: 2,
   activityPoints: 750,

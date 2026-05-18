@@ -47,7 +47,7 @@ export interface ProfileResponse {
   avatar: string;
   banner?: string;
   isVerified: boolean;
-  isPrime: boolean;
+  isLuckyPlayer: boolean;
   isVIP: boolean;
   vipLevel: number;
   activityPoints: number;

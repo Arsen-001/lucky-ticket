@@ -10,6 +10,7 @@ import { ReactorDial } from '@/components/pages/out-tabs/tabs-extra/ticket/React
 import { EngineLevelBadge } from '@/components/pages/out-tabs/tabs-extra/ticket/EngineLevelBadge';
 import { EngineNextInFill } from '@/components/pages/out-tabs/tabs-extra/ticket/EngineNextInFill';
 import { BoostRow } from '@/components/pages/out-tabs/tabs-extra/ticket/BoostRow';
+import { TicketOverlap } from '@/components/shared/icons/TicketOverlap';
 import {
   effectiveCycleSeconds,
   engineCapacity,
@@ -51,6 +52,8 @@ export interface EngineCardProps {
   onUpgradeSpeed: (engineId: string) => void;
   onUpgradeCapacity: (engineId: string) => void;
   compact?: boolean;
+  /** What to show in the reactor circle — defaults to tickets */
+  reactorVisual?: 'ticket' | 'engine';
   className?: string;
 }
 
@@ -64,6 +67,7 @@ export function EngineCard({
   onUpgradeSpeed,
   onUpgradeCapacity,
   compact = false,
+  reactorVisual = 'ticket',
   className,
 }: EngineCardProps) {
   const t = useAppTranslations();
@@ -93,7 +97,7 @@ export function EngineCard({
     <div
       className={twMerge(
         compact
-          ? 'flex flex-col justify-between gap-1.5 h-full overflow-hidden rounded-2xl p-[11px] animate-slide-in-bottom'
+          ? 'flex flex-col justify-between h-full overflow-hidden rounded-2xl p-[11px] animate-slide-in-bottom'
           : 'card-outlined bg-purple-gradient rounded-2xl p-[17px] animate-slide-in-bottom',
         className
       )}
@@ -105,50 +109,43 @@ export function EngineCard({
           tier={tier}
           capacity={capacity}
           size={compact ? 86 : 110}
+          visual={reactorVisual}
         />
-        <div className={twMerge('flex-1 min-w-0 flex flex-col', compact ? 'gap-1' : 'gap-1.5')}>
-          <div className={twMerge('flex items-center flex-wrap', compact ? 'gap-1' : 'gap-1.5')}>
+        <div
+          className={twMerge(
+            'flex-1 min-w-0 flex flex-col',
+            compact ? 'items-center gap-1' : 'gap-1.5'
+          )}
+        >
+          <div
+            className={twMerge(
+              compact ? 'flex flex-col items-center gap-1' : 'flex items-center flex-wrap gap-1.5'
+            )}
+          >
+            <EngineLevelBadge level={engineLevel} tier={tier} />
             <span
               className={twMerge(
                 'font-extrabold text-white leading-tight',
-                compact ? 'text-[13px]' : 'text-sm'
+                compact ? 'text-[13px]' : 'text-sm ml-0'
               )}
             >
               {t('engine number', { number: index + 1 })}
             </span>
-            <span className="ml-auto">
-              <EngineLevelBadge level={engineLevel} tier={tier} />
-            </span>
           </div>
           <div
             className={twMerge(
-              'inline-flex items-center font-bold uppercase tracking-wider',
-              compact ? 'gap-1 text-[9px]' : 'gap-1.5 text-[10px]'
-            )}
-            style={{ color: pending ? glow : 'var(--color-pink-secondary)' }}
-          >
-            <span
-              className="w-1.5 h-1.5 rounded-full"
-              style={{
-                background: pending ? glow : 'var(--color-pink-secondary)',
-                boxShadow: pending ? `0 0 6px ${glow}` : 'none',
-              }}
-            />
-            {pending ? t('output ready') : t('producing')}
-          </div>
-
-          <div
-            className={twMerge(
-              'grid grid-cols-2 divide-x divide-white/8 rounded-xl border border-white/8 bg-black/30',
-              compact ? 'py-1' : 'py-1.5'
+              'rounded-xl border border-white/8 bg-black/30',
+              compact
+                ? 'flex w-fit flex-col divide-y divide-white/8 p-[5px]'
+                : 'grid grid-cols-2 divide-x divide-white/8 py-1.5'
             )}
           >
             <button
               type="button"
               title={t('cycle full', { time: formatCycleTime(cycle) })}
               className={twMerge(
-                'flex cursor-help items-center justify-center gap-1.5',
-                compact ? 'px-1.5' : 'px-2'
+                'flex cursor-help items-center gap-1.5',
+                compact ? 'justify-center px-2 py-0.5' : 'justify-center px-2'
               )}
             >
               <Clock size={compact ? 12 : 14} stroke={SPEED_ACCENT} strokeWidth={2.4} />
@@ -166,8 +163,8 @@ export function EngineCard({
               type="button"
               title={t('per cycle full', { capacity })}
               className={twMerge(
-                'flex cursor-help items-center justify-center gap-1.5',
-                compact ? 'px-1.5' : 'px-2'
+                'flex cursor-help items-center gap-1.5',
+                compact ? 'justify-center px-2 py-0.5' : 'justify-center px-2'
               )}
             >
               <Layers size={compact ? 12 : 14} stroke={CAPACITY_ACCENT} strokeWidth={2.4} />
@@ -192,61 +189,12 @@ export function EngineCard({
             compact ? 'gap-2 p-1.5 px-2 rounded-lg' : 'gap-2.5 p-2 px-2.5 rounded-xl'
           )}
         >
-          <div
-            className={twMerge(
-              'relative flex-1 min-w-0 overflow-hidden flex items-center tabular-nums rounded-md',
-              pending ? 'justify-center gap-2' : 'justify-between'
-            )}
-            style={
-              !pending ? { ['--next-in-accent' as string]: `var(--color-${tier})` } : undefined
-            }
-          >
-            {!pending && (
-              <EngineNextInFill
-                key={engine.cycleStartedAt}
-                cycleSeconds={cycle}
-                elapsedSeconds={elapsedSeconds}
-              />
-            )}
-            {pending ? (
-              <span className="relative z-1 flex items-center gap-1.5">
-                <span
-                  aria-hidden
-                  className={twMerge(
-                    'relative inline-flex rounded-full',
-                    compact ? 'h-1.5 w-1.5' : 'h-2 w-2'
-                  )}
-                  style={{ background: glow, boxShadow: `0 0 6px ${glow}` }}
-                >
-                  <span
-                    className="absolute inset-0 rounded-full animate-ping"
-                    style={{ background: glow, opacity: 0.6 }}
-                  />
-                </span>
-                <span
-                  className={twMerge(
-                    'font-extrabold uppercase tracking-wider',
-                    compact ? 'text-[9px]' : 'text-[10px]'
-                  )}
-                  style={{ color: glow }}
-                >
-                  {t('ready')}
-                </span>
-              </span>
-            ) : (
+          {pending ? (
+            <div className="relative flex-1 min-w-0 flex items-center justify-center gap-2 overflow-hidden rounded-md">
+              <TicketOverlap type={tier} width={32} height={24} className="shrink-0" />
               <span
                 className={twMerge(
-                  'relative z-1 font-bold uppercase tracking-wider text-white',
-                  compact ? 'text-[9px]' : 'text-[10px]'
-                )}
-              >
-                {t('next in')}
-              </span>
-            )}
-            {pending ? (
-              <span
-                className={twMerge(
-                  'relative z-1 font-extrabold tabular-nums rounded-full',
+                  'font-extrabold tabular-nums rounded-full',
                   compact ? 'text-[10px] px-1.5 py-px' : 'text-[11px] px-2 py-0.5'
                 )}
                 style={{
@@ -255,24 +203,46 @@ export function EngineCard({
                   border: `1px solid color-mix(in srgb, ${glow} 35%, transparent)`,
                 }}
               >
-                ×{capacity}
+                ×{engine.pendingCount}
               </span>
-            ) : (
-              <span
-                className={twMerge(
-                  'relative z-1 font-extrabold tabular-nums text-white',
-                  compact ? 'text-[11px]' : 'text-[12px]'
-                )}
-              >
-                {formatCycleTime(remaining)}
-              </span>
-            )}
-          </div>
+            </div>
+          ) : (
+            <div className="flex-1 min-w-0 flex items-center gap-2">
+              <TicketOverlap type={tier} width={32} height={24} className="shrink-0" />
+              <div className="flex-1 min-w-0 flex flex-col gap-0.5">
+                <span
+                  className={twMerge(
+                    'font-extrabold text-white leading-none truncate',
+                    compact ? 'text-[11px]' : 'text-[12px]'
+                  )}
+                >
+                  {t(`${tier} ticket` as Parameters<typeof t>[0])}
+                  <span className="ml-1 tabular-nums text-white/65 font-bold">
+                    {engine.pendingCount}/{capacity}
+                  </span>
+                </span>
+                <div
+                  className="relative h-1 w-full overflow-hidden rounded-full bg-white/10"
+                  style={
+                    {
+                      ['--next-in-accent' as string]: `var(--color-${tier})`,
+                    } as CSSProperties
+                  }
+                >
+                  <EngineNextInFill
+                    key={engine.cycleStartedAt}
+                    cycleSeconds={cycle}
+                    elapsedSeconds={elapsedSeconds}
+                  />
+                </div>
+              </div>
+            </div>
+          )}
           {pending ? (
             <button
               onClick={() => onClaim(engine.id)}
               className={twMerge(
-                'engine-claim-button engine-claim-flow relative cursor-pointer overflow-hidden text-white font-extrabold uppercase tracking-wider flex-center shrink-0 active:scale-99 transition-transform duration-100',
+                'engine-claim-button engine-claim-flow relative z-10 cursor-pointer overflow-hidden text-white font-extrabold uppercase tracking-wider flex-center shrink-0 active:scale-99 transition-transform duration-100',
                 compact
                   ? 'min-w-14 h-6.5 px-2 rounded-md text-[9px]'
                   : 'min-w-16 h-7.5 px-2.5 rounded-lg text-[10px]'
@@ -293,7 +263,7 @@ export function EngineCard({
               onClick={() => onInstantClaim(engine.id)}
               title={t('instant claim with stars')}
               className={twMerge(
-                'border border-gold/40 bg-gold/10 text-gold font-extrabold tracking-wider flex-center shrink-0 cursor-pointer hover:bg-gold/15 active:scale-99 transition-all duration-100 gap-1',
+                'relative z-20 border border-gold/40 bg-gold/10 text-gold font-extrabold tracking-wider flex-center shrink-0 cursor-pointer hover:bg-gold/15 active:scale-99 transition-all duration-100 gap-1',
                 compact
                   ? 'min-w-14 h-6.5 px-2 rounded-md text-[9px]'
                   : 'min-w-16 h-7.5 px-2.5 rounded-lg text-[10px]'

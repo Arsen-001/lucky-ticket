@@ -53,7 +53,7 @@ export const routes = {
     username: '/settings/username',
     email: '/settings/email',
     security: '/settings/security',
-    prime: '/settings/prime',
+    luckyPlayer: '/settings/lucky-player',
     vip: '/settings/vip',
   },
   languages: '/languages',

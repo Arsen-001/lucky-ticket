@@ -157,9 +157,9 @@
   box-shadow: 0 4px 16px rgba(248, 189, 62, 0.45);
 }
 
-/* ---------------- Tier status badges (Verified / Prime / VIP) ---------------- */
+/* ---------------- Tier status badges (Verified / Lucky Player / VIP) ---------------- */
 
-@keyframes tier-pulse-prime {
+@keyframes tier-pulse-lucky-player {
   0%,
   100% {
     box-shadow: 0 0 0 0 rgba(139, 92, 246, 0.45);
@@ -220,11 +220,11 @@
   border-color: rgba(56, 189, 248, 0.4);
 }
 
-.tier-badge--prime {
+.tier-badge--lucky-player {
   color: rgba(216, 180, 254, 1);
   background: linear-gradient(120deg, rgba(139, 92, 246, 0.22), rgba(167, 139, 250, 0.12));
   border-color: rgba(167, 139, 250, 0.5);
-  animation: tier-pulse-prime 2.4s ease-in-out infinite;
+  animation: tier-pulse-lucky-player 2.4s ease-in-out infinite;
 }
 
 .tier-badge--vip {

@@ -71,7 +71,7 @@ export function InventoryItem({
         }}
       />
       <div className="flex items-center gap-3">
-        <ChipIcon type={chip.type} tier={chip.quality} size={76} className="shrink-0" />
+        <ChipIcon type={chip.type} tier={chip.quality} size={137} className="shrink-0" />
 
         <div className="flex min-w-0 flex-1 flex-col gap-0.5">
           <span

@@ -43,7 +43,7 @@ export function Header({ className }: ClassNameProps) {
   const usernameClasses = twMerge(
     'ach-status-username truncate text-[15px] leading-tight',
     me?.isVerified && 'has-verified',
-    me?.isPrime && 'has-prime',
+    me?.isLuckyPlayer && 'has-lucky-player',
     me?.isVIP && 'has-vip'
   );
 

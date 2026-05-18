@@ -1,11 +1,13 @@
 'use client';
 
 import Image from 'next/image';
-import { Crown, ShieldCheck, Sparkles, Star } from 'lucide-react';
+import { ShieldCheck, Sparkles, Star } from 'lucide-react';
 import { useEffect, useRef, useState } from 'react';
 import { Modal } from '@/components/shared/modals/Modal';
 import { Button } from '@/components/shared/buttons/Button';
+import { LuckyPlayerIcon } from '@/components/shared/icons/LuckyPlayerIcon';
 import { Ticket } from '@/components/shared/icons/Ticket';
+import { VipIcon } from '@/components/shared/icons/VipIcon';
 import { useAppTranslations } from '@/hooks/useAppTranslations';
 import type { ClaimableTicket, InvitedFriend } from '@/types/interfaces/referral.interfaces';
 
@@ -111,14 +113,14 @@ export function FriendClaimModal({
               )}
               {friend.isVIP && (
                 <span className="bg-electric-pink/30 inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider text-white">
-                  <Star size={10} className="fill-white" />
+                  <VipIcon size={12} />
                   VIP
                 </span>
               )}
-              {friend.isPrime && (
+              {friend.isLuckyPlayer && (
                 <span className="text-electric-purple bg-electric-purple/25 inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider">
-                  <Crown size={10} strokeWidth={2.4} />
-                  {t('prime')}
+                  <LuckyPlayerIcon size={12} />
+                  {t('lucky player')}
                 </span>
               )}
               {friend.isTelegramPremium && (

@@ -95,7 +95,7 @@ export function EngineSlotPickerModal({
           </h2>
           <p className="text-pink-secondary mt-1 text-[11px]">
             {category === 'chip'
-              ? t('chip slot picker hint')
+              ? t('chip slot picker hint', { tier: t(engineTier) })
               : t('booster slot picker hint', { tier: t(engineTier) })}
           </p>
         </header>
@@ -123,13 +123,7 @@ export function EngineSlotPickerModal({
                     borderColor: `color-mix(in srgb, ${accent} 55%, transparent)`,
                   }}
                 >
-                  <ChipIcon
-                    type={chip.type}
-                    tier={chip.quality}
-                    size={44}
-                    animated={false}
-                    className="shrink-0"
-                  />
+                  <ChipIcon type={chip.type} tier={chip.quality} size={44} className="shrink-0" />
                   <div className="flex flex-1 flex-col">
                     <span className="text-[12px] font-extrabold text-white">
                       {t(chip.quality)} · {chip.type === 'speed' ? t('time') : t('capacity')}
@@ -177,7 +171,6 @@ export function EngineSlotPickerModal({
                     type={booster.type}
                     tier={booster.quality}
                     size={44}
-                    animated={false}
                     className="shrink-0"
                   />
                   <div className="flex flex-1 flex-col">

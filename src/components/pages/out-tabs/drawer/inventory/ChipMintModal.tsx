@@ -1,16 +1,19 @@
 'use client';
 
-import { useMemo, useState } from 'react';
-import { Hammer } from 'lucide-react';
+import { useState } from 'react';
 import { twMerge } from 'tailwind-merge';
 import { Button } from '@/components/shared/buttons/Button';
 import { ChipIcon } from '@/components/shared/icons/ChipIcon';
 import { ChipShardIcon } from '@/components/shared/icons/ChipShardIcon';
 import { Modal } from '@/components/shared/modals/Modal';
 import { useAppTranslations } from '@/hooks/useAppTranslations';
-import { QUALITY_ACCENT, QUALITY_TIERS, TYPE_ACCENT } from '@/utils/global/inventory.utils';
+import {
+  CHIP_MINT_SHARD_COST,
+  QUALITY_ACCENT,
+  QUALITY_TIERS,
+  TYPE_ACCENT,
+} from '@/utils/global/inventory.utils';
 import type {
-  InventoryChip,
   InventoryChipType,
   InventoryShardCount,
 } from '@/types/interfaces/inventory.interfaces';
@@ -23,9 +26,7 @@ export interface ChipMintModalProps {
   loading?: boolean;
   onClose: () => void;
   onConfirm: (params: { type: InventoryChipType; quality: TicketType }) => void;
-  chips: InventoryChip[];
   shards: InventoryShardCount[];
-  buildersByTier: Record<TicketType, number>;
 }
 
 export function ChipMintModal({
@@ -33,25 +34,15 @@ export function ChipMintModal({
   loading = false,
   onClose,
   onConfirm,
-  chips,
   shards,
-  buildersByTier,
 }: ChipMintModalProps) {
   const t = useAppTranslations();
   const [type, setType] = useState<InventoryChipType>('speed');
   const [quality, setQuality] = useState<TicketType>('bronze');
 
-  const existingCount = useMemo(
-    () => chips.filter(c => c.type === type && c.quality === quality).length,
-    [chips, type, quality]
-  );
   const availableShards = shards.find(s => s.type === type && s.quality === quality)?.count ?? 0;
-  const buildersOwned = buildersByTier[quality] ?? 0;
-
-  const isFirst = existingCount === 0;
-  const hasShard = availableShards >= 1;
-  const hasBuilder = buildersOwned >= 1;
-  const canMint = isFirst ? hasShard : hasShard && hasBuilder;
+  const requiredShards = CHIP_MINT_SHARD_COST[quality];
+  const hasShards = availableShards >= requiredShards;
 
   const accent = QUALITY_ACCENT[quality];
 
@@ -72,21 +63,14 @@ export function ChipMintModal({
               active={type === 'speed'}
               accent={TYPE_ACCENT.speed}
               onClick={() => setType('speed')}
-              icon={<ChipIcon type="speed" accent={TYPE_ACCENT.speed} size={32} animated={false} />}
+              icon={<ChipIcon type="speed" tier={quality} size={96} />}
               label={t('time')}
             />
             <ChipMintChoiceCell
               active={type === 'capacity'}
               accent={TYPE_ACCENT.capacity}
               onClick={() => setType('capacity')}
-              icon={
-                <ChipIcon
-                  type="capacity"
-                  accent={TYPE_ACCENT.capacity}
-                  size={32}
-                  animated={false}
-                />
-              }
+              icon={<ChipIcon type="capacity" tier={quality} size={96} />}
               label={t('capacity')}
             />
           </div>
@@ -137,28 +121,21 @@ export function ChipMintModal({
           }}
         >
           <ChipMintCostRow
-            icon={<Hammer size={13} stroke={accent} strokeWidth={2.4} />}
-            label={t('chip builder')}
-            owned={buildersOwned}
-            required={isFirst ? 0 : 1}
-            ok={isFirst || hasBuilder}
-          />
-          <ChipMintCostRow
-            icon={<ChipShardIcon type={type} accent={accent} size={16} animated={false} />}
+            icon={<ChipShardIcon type={type} tier={quality} size={48} />}
             label={t('matching shard')}
             owned={availableShards}
-            required={1}
-            ok={hasShard}
+            required={requiredShards}
+            ok={hasShards}
           />
         </section>
 
         <Button
           onClick={() => onConfirm({ type, quality })}
-          disabled={!canMint || loading}
+          disabled={!hasShards || loading}
           loading={loading}
           className="w-full py-3 text-[13px]"
         >
-          {isFirst ? t('mint free') : t('mint')}
+          {t('mint')}
         </Button>
       </div>
     </Modal>

@@ -1,4 +1,6 @@
 import { Cpu, type LucideIcon, MemoryStick } from 'lucide-react';
+import type { StaticImageData } from 'next/image';
+import { icons } from '@/constants/icons';
 import type { TicketType } from '@/types/types/ticket.types';
 import type { InventoryChipType } from '@/types/interfaces/inventory.interfaces';
 
@@ -8,6 +10,22 @@ export const QUALITY_ACCENT: Record<TicketType, string> = {
   gold: 'var(--color-gold)',
   platinum: 'var(--color-platinum)',
   diamond: 'var(--color-diamond)',
+};
+
+export const CHIP_ASSET: Record<TicketType, Record<InventoryChipType, StaticImageData>> = {
+  bronze: { speed: icons.bronzeTimeChip, capacity: icons.bronzeCapacityChip },
+  silver: { speed: icons.silverTimeChip, capacity: icons.silverCapacityChip },
+  gold: { speed: icons.goldenTimeChip, capacity: icons.goldenCapacityChip },
+  platinum: { speed: icons.platinumTimeChip, capacity: icons.platinumCapacityChip },
+  diamond: { speed: icons.diamondTimeChip, capacity: icons.diamondCapacityChip },
+};
+
+export const CHIP_SHARD_ASSET: Record<TicketType, Record<InventoryChipType, StaticImageData>> = {
+  bronze: { speed: icons.bronzeTimeShard, capacity: icons.bronzeCapacityShard },
+  silver: { speed: icons.silverTimeShard, capacity: icons.silverCapacityShard },
+  gold: { speed: icons.goldenTimeShard, capacity: icons.goldenCapacityShard },
+  platinum: { speed: icons.platinumTimeShard, capacity: icons.platinumCapacityShard },
+  diamond: { speed: icons.diamondTimeShard, capacity: icons.diamondCapacityShard },
 };
 
 export const TYPE_ACCENT: Record<InventoryChipType, string> = {
@@ -25,6 +43,14 @@ export const QUALITY_TIERS: TicketType[] = ['bronze', 'silver', 'gold', 'platinu
 export const CHIP_EFFECT_PER_LEVEL = 0.5;
 export const CHIP_MAX_LEVEL = 200;
 
+export const CHIP_MINT_SHARD_COST: Record<TicketType, number> = {
+  bronze: 10,
+  silver: 8,
+  gold: 6,
+  platinum: 4,
+  diamond: 2,
+};
+
 export const chipShardsForNextLevel = (currentLevel: number) => {
   const target = currentLevel + 1;
   if (target <= 1) return 1;
@@ -36,7 +62,7 @@ export const chipShardsForNextLevel = (currentLevel: number) => {
 export const tierRank = (tier: TicketType): number => QUALITY_TIERS.indexOf(tier);
 
 export const canEquipChipOnTier = (chipQuality: TicketType, engineTier: TicketType): boolean =>
-  tierRank(chipQuality) >= tierRank(engineTier);
+  chipQuality === engineTier;
 
 export const chipEquipStarsCost = (chipLevel: number): number => Math.max(1, chipLevel);
 

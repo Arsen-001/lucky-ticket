@@ -95,7 +95,7 @@ export function ProfileLevelCard({ profile, loading }: ProfileLevelCardProps) {
     ? {
         ticketsEarned: profile.ticketsEarned,
         isVerified: profile.isVerified,
-        isPrime: profile.isPrime,
+        isLuckyPlayer: profile.isLuckyPlayer,
         vipLevel: profile.vipLevel,
         activityPoints: profile.activityPoints,
       }

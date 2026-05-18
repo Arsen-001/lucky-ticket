@@ -10,7 +10,7 @@ import { ProfileShareSheet } from '@/components/pages/out-tabs/drawer/profile/Pr
 import { Skeleton } from '@/components/shared/seleketons/Skeleton';
 import { SkeletonSuspense } from '@/components/shared/seleketons/SkeletonSuspense';
 import { VerifiedBadge } from '@/components/shared/badges/VerifiedBadge';
-import { PrimeBadge } from '@/components/shared/badges/PrimeBadge';
+import { LuckyPlayerBadge } from '@/components/shared/badges/LuckyPlayerBadge';
 import { VIPBadge } from '@/components/shared/badges/VIPBadge';
 import { ConfirmModal } from '@/components/shared/modals/ConfirmModal';
 import { useAppTranslations } from '@/hooks/useAppTranslations';
@@ -62,10 +62,8 @@ export function ProfileHero({ profile, loading, isPreview, onTogglePreview }: Pr
     }
   };
 
-  const handlePrimeClick = () => {
-    // Always open the Prime page — it shows current status (active/inactive)
-    // and the full list of perks Prime grants, for prime and non-prime users alike.
-    router.push(routes.settings.prime);
+  const handleLuckyPlayerClick = () => {
+    router.push(routes.settings.luckyPlayer);
   };
 
   const handleVipClick = () => {
@@ -86,8 +84,8 @@ export function ProfileHero({ profile, loading, isPreview, onTogglePreview }: Pr
   };
   const ringColor: AvatarStatusColor = profile?.isVIP
     ? 'vip'
-    : profile?.isPrime
-      ? 'prime'
+    : profile?.isLuckyPlayer
+      ? 'lucky-player'
       : profile?.isVerified
         ? 'verified'
         : 'plain';
@@ -103,7 +101,7 @@ export function ProfileHero({ profile, loading, isPreview, onTogglePreview }: Pr
   const shineColors = profile
     ? [
         profile.isVIP && 'rgba(248, 189, 62, 1)',
-        profile.isPrime && 'rgba(139, 92, 246, 1)',
+        profile.isLuckyPlayer && 'rgba(139, 92, 246, 1)',
         profile.isVerified && 'rgba(56, 189, 248, 1)',
         tierShineColor[computeActivityTier(profile.activityPoints)],
       ].filter((c): c is string => Boolean(c))
@@ -120,7 +118,7 @@ export function ProfileHero({ profile, loading, isPreview, onTogglePreview }: Pr
   const usernameClasses = twMerge(
     'ach-status-username text-3xl font-extrabold text-white text-center leading-tight',
     profile?.isVerified && 'has-verified',
-    profile?.isPrime && 'has-prime',
+    profile?.isLuckyPlayer && 'has-lucky-player',
     profile?.isVIP && 'has-vip'
   );
 
@@ -236,15 +234,15 @@ export function ProfileHero({ profile, loading, isPreview, onTogglePreview }: Pr
 
           {profile?.isOwn && (
             <BadgeButton
-              active={tooltip?.key === 'prime'}
-              tooltipText={tooltip?.key === 'prime' ? tooltip.text : undefined}
-              ariaLabel={profile.isPrime ? t('prime active') : t('prime get')}
-              onClick={handlePrimeClick}
+              active={tooltip?.key === 'lucky-player'}
+              tooltipText={tooltip?.key === 'lucky-player' ? tooltip.text : undefined}
+              ariaLabel={profile.isLuckyPlayer ? t('lucky player active') : t('lucky player get')}
+              onClick={handleLuckyPlayerClick}
             >
-              <PrimeBadge locked={!profile.isPrime} />
+              <LuckyPlayerBadge locked={!profile.isLuckyPlayer} />
             </BadgeButton>
           )}
-          {!profile?.isOwn && profile?.isPrime && <PrimeBadge />}
+          {!profile?.isOwn && profile?.isLuckyPlayer && <LuckyPlayerBadge />}
 
           <button
             type="button"

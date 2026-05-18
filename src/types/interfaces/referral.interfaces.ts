@@ -9,7 +9,7 @@ export interface InvitedFriend {
   id: string;
   username: string;
   avatar: string;
-  isPrime: boolean;
+  isLuckyPlayer: boolean;
   isVerified: boolean;
   isTelegramPremium?: boolean;
   points: number;

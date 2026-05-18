@@ -34,7 +34,7 @@ export const mockDb = {
     id: faker.string.uuid(),
     username: 'Arsen 001',
     email: 'arsen@gmai.com',
-    isPrime: true,
+    isLuckyPlayer: true,
     isVIP: true,
     vipLevel: 2,
     isVerified: true,

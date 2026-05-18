@@ -1,6 +1,10 @@
 import type { FetchArgs } from '@reduxjs/toolkit/query';
 import type { InventorySnapshot } from '@/api/inventory.api';
-import { CHIP_EFFECT_PER_LEVEL, chipShardsForNextLevel } from '@/utils/global/inventory.utils';
+import {
+  CHIP_EFFECT_PER_LEVEL,
+  CHIP_MINT_SHARD_COST,
+  chipShardsForNextLevel,
+} from '@/utils/global/inventory.utils';
 import type {
   InventoryBooster,
   InventoryChip,
@@ -99,14 +103,6 @@ const initialShards: InventoryShardCount[] = [
   { type: 'capacity', quality: 'diamond', count: 0 },
 ];
 
-const initialBuilders: Record<TicketType, number> = {
-  bronze: 2,
-  silver: 1,
-  gold: 0,
-  platinum: 0,
-  diamond: 0,
-};
-
 const initialBoosters: InventoryBooster[] = [
   {
     id: 'boost-1',
@@ -163,13 +159,11 @@ const initialBoosters: InventoryBooster[] = [
 let inventoryState: InventorySnapshot = {
   chips: initialChips,
   shards: initialShards,
-  builders: initialBuilders,
   boosters: initialBoosters,
 };
 
 export const inventoryChipsMock = inventoryState.chips;
 export const inventoryShardsMock = inventoryState.shards;
-export const inventoryChipBuildersMock = inventoryState.builders;
 export const inventoryBoostersMock = inventoryState.boosters;
 
 const getInventoryHandler = () => inventoryState;
@@ -244,23 +238,16 @@ const mintChipHandler = (args: FetchArgs) => {
   const { type, quality } = body;
   if (!type || !quality) return inventoryState;
 
-  const existingCount = inventoryState.chips.filter(
-    c => c.type === type && c.quality === quality
-  ).length;
-  const isFirst = existingCount === 0;
+  const requiredShards = CHIP_MINT_SHARD_COST[quality];
   const shardCount =
     inventoryState.shards.find(s => s.type === type && s.quality === quality)?.count ?? 0;
-  if (shardCount < 1) return inventoryState;
-  if (!isFirst && (inventoryState.builders[quality] ?? 0) < 1) return inventoryState;
+  if (shardCount < requiredShards) return inventoryState;
 
   inventoryState = {
     ...inventoryState,
     shards: inventoryState.shards.map(s =>
-      s.type === type && s.quality === quality ? { ...s, count: s.count - 1 } : s
+      s.type === type && s.quality === quality ? { ...s, count: s.count - requiredShards } : s
     ),
-    builders: isFirst
-      ? inventoryState.builders
-      : { ...inventoryState.builders, [quality]: inventoryState.builders[quality] - 1 },
     chips: [
       ...inventoryState.chips,
       {

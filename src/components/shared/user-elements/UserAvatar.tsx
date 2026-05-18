@@ -5,11 +5,11 @@ import { Skeleton } from '@/components/shared/seleketons/Skeleton';
 import '@/styles/components/avatar.css';
 import '@/styles/components/achievement.css';
 
-export type AvatarStatusColor = 'verified' | 'prime' | 'vip' | 'plain';
+export type AvatarStatusColor = 'verified' | 'lucky-player' | 'vip' | 'plain';
 
 const colorVar: Record<AvatarStatusColor, string> = {
   verified: 'rgba(56, 189, 248, 1)',
-  prime: 'rgba(139, 92, 246, 1)',
+  'lucky-player': 'rgba(139, 92, 246, 1)',
   vip: 'rgba(248, 189, 62, 1)',
   plain: 'rgba(60, 34, 76, 1)',
 };

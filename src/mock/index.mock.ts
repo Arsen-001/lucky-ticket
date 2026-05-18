@@ -27,11 +27,9 @@ const successResponse = () => ({});
 
 const marketMutationHandlers = {
   'POST market/engines/buy': successResponse,
-  'POST market/chips/buy': successResponse,
-  'POST market/builders/buy': successResponse,
+  'POST market/shards/buy': successResponse,
   'POST market/boosters/buy': successResponse,
   'POST market/cosmetics/buy': successResponse,
-  'POST market/passes/buy': successResponse,
   'POST market/tickets/buy': successResponse,
   'POST market/statuses/buy': successResponse,
 };

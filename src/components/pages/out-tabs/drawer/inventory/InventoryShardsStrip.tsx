@@ -43,7 +43,7 @@ function ShardCell({ tier, type, count, isOpen, onTap }: ShardCellProps) {
         className="relative flex w-full flex-col items-center justify-center gap-1.5 overflow-hidden rounded-xl border bg-black/25 px-2 py-3 transition-all active:scale-95"
         style={{ borderColor: `color-mix(in srgb, ${tierAccent} 45%, transparent)` }}
       >
-        <ChipShardIcon type={type} tier={tier} size={48} empty={count === 0} />
+        <ChipShardIcon type={type} tier={tier} size={62} empty={count === 0} />
         <span
           className="text-sm font-extrabold tabular-nums"
           style={{ color: count > 0 ? 'white' : 'rgba(255,255,255,0.3)' }}

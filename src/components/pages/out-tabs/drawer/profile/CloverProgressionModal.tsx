@@ -118,8 +118,8 @@ function BlockerText({ blocker }: BlockerTextProps) {
   switch (blocker.type) {
     case 'verified':
       return <span>{t('blocker verify email')}</span>;
-    case 'prime':
-      return <span>{t('blocker prime required')}</span>;
+    case 'lucky-player':
+      return <span>{t('blocker lucky player required')}</span>;
     case 'vip':
       return (
         <span>
@@ -220,7 +220,7 @@ function GateChips({ blockers }: { blockers: ReturnType<typeof getCloverBlockers
           className="inline-flex items-center gap-1 rounded-full border border-white/15 bg-black/30 px-2 py-0.5 text-[9px] font-bold text-white/75"
         >
           {b.type === 'verified' && <ShieldCheck size={9} />}
-          {b.type === 'prime' && <Star size={9} />}
+          {b.type === 'lucky-player' && <Star size={9} />}
           <BlockerText blocker={b} />
         </span>
       ))}

@@ -6,17 +6,20 @@ import { useBuyStatusMutation, useGetMarketDataQuery } from '@/api/market.api';
 import { useGetMeQuery } from '@/api/me.api';
 import { MarketSectionGrid } from '@/components/pages/tabs/market/MarketSectionGrid';
 import { MarketUniversalCard } from '@/components/pages/tabs/market/MarketUniversalCard';
-import type { MarketSelectedPurchase } from '@/components/pages/tabs/market/MarketView';
+import type { MarketSelectedItem } from '@/components/pages/tabs/market/MarketView';
+import { LuckyPlayerIcon } from '@/components/shared/icons/LuckyPlayerIcon';
+import { VipIcon } from '@/components/shared/icons/VipIcon';
 import { useAppTranslations } from '@/hooks/useAppTranslations';
 import { MarketItemRequirementType, MarketStatusType } from '@/types/enums/market.enums';
-import type { MarketStatus } from '@/types/interfaces/market.interfaces';
+import type { MarketPrice, MarketStatus } from '@/types/interfaces/market.interfaces';
 import type { MessageIds } from '@/types/types/i18n.types';
 
 export interface MarketStatusSectionProps {
-  onPurchase?: (purchase: MarketSelectedPurchase) => void;
+  onSelect: (item: MarketSelectedItem) => void;
+  onBuy: (item: MarketSelectedItem, price: MarketPrice) => void;
 }
 
-export function MarketStatusSection({ onPurchase }: MarketStatusSectionProps) {
+export function MarketStatusSection({ onSelect, onBuy }: MarketStatusSectionProps) {
   const t = useAppTranslations();
   const { data, isLoading: isMarketLoading } = useGetMarketDataQuery();
   const { data: me, isLoading: isMeLoading } = useGetMeQuery();
@@ -40,9 +43,9 @@ export function MarketStatusSection({ onPurchase }: MarketStatusSectionProps) {
     <MarketSectionGrid title={t('statuses')} icon={Crown} accent="var(--color-gold)">
       {statuses.map(status => {
         const isVIP = status.statusType === MarketStatusType.VIP;
+        const isLuckyPlayer = status.statusType === MarketStatusType.LUCKY_PLAYER;
         const accent = isVIP ? 'gold' : 'pink';
         const accentVar = isVIP ? 'var(--color-gold)' : 'var(--color-electric-pink)';
-        const Icon = isVIP ? Crown : Gem;
         const activePrices = getActivePrices(status);
 
         const activityRequirement = !isVIP
@@ -58,60 +61,73 @@ export function MarketStatusSection({ onPurchase }: MarketStatusSectionProps) {
             : t('permanent')
           : t('active for {days} days', { days: status.durationDays });
 
-        const iconNode: ReactNode = (
-          <div
-            className="flex-center relative h-14 w-14 rounded-2xl border"
-            style={{
-              borderColor: `color-mix(in srgb, ${accentVar} 60%, transparent)`,
-              backgroundColor: `color-mix(in srgb, ${accentVar} 18%, transparent)`,
-              boxShadow: `inset 0 0 16px color-mix(in srgb, ${accentVar} 40%, transparent)`,
-            }}
-          >
-            <Icon size={28} stroke={accentVar} strokeWidth={2.2} />
-          </div>
-        );
+        const renderIcon = (size: number): ReactNode => {
+          if (isVIP) return <VipIcon size={size} />;
+          if (isLuckyPlayer) return <LuckyPlayerIcon size={size} />;
+          return (
+            <div
+              className="flex-center relative rounded-2xl border"
+              style={{
+                width: size,
+                height: size,
+                borderColor: `color-mix(in srgb, ${accentVar} 60%, transparent)`,
+                backgroundColor: `color-mix(in srgb, ${accentVar} 18%, transparent)`,
+                boxShadow: `inset 0 0 16px color-mix(in srgb, ${accentVar} 40%, transparent)`,
+              }}
+            >
+              <Gem size={Math.round(size * 0.5)} stroke={accentVar} strokeWidth={2.2} />
+            </div>
+          );
+        };
 
+        const displayName =
+          isVIP && userVipLevel > 0
+            ? `${status.name} · ${t('vip level', { level: userVipLevel })}`
+            : status.name;
+        const item: MarketSelectedItem = {
+          id: status.id,
+          name: displayName,
+          description: durationLabel,
+          iconNode: renderIcon(160),
+          prices: activePrices,
+          isNew: status.isNew,
+          accent,
+          meta: (
+            <div className="flex flex-col gap-2">
+              <ul className="text-white/70 flex flex-col gap-1 text-[12px]">
+                {status.privileges.map((privilege, idx) => (
+                  <li key={idx} className="flex items-start gap-1.5">
+                    <span style={{ color: accentVar }} className="mt-0.5">
+                      ·
+                    </span>
+                    <span>{t(privilege as MessageIds, { percentage: isVIP ? 100 : 50 })}</span>
+                  </li>
+                ))}
+              </ul>
+              {!isVIP && !meetsRequirements && activityRequirement && (
+                <span className="text-error text-[11px] font-bold">
+                  {t('needs {count} activity points', {
+                    count: activityRequirement.count,
+                    current: me?.activityPoints || 0,
+                  })}
+                </span>
+              )}
+            </div>
+          ),
+          mutate: price => buyStatus({ statusId: status.id, priceType: price.type }).unwrap(),
+        };
         return (
           <MarketUniversalCard
             key={status.id}
-            name={status.name}
+            name={displayName}
             accent={accent}
             isNew={status.isNew}
-            prices={activePrices}
             disabled={isDisabled}
-            onBuy={price =>
-              onPurchase?.({
-                id: status.id,
-                name: status.name,
-                description: durationLabel,
-                iconNode,
-                price,
-                mutate: () => buyStatus({ statusId: status.id, priceType: price.type }).unwrap(),
-              })
-            }
-            iconStage={iconNode}
-            meta={
-              <div className="flex flex-col gap-1">
-                <span className="text-white/55 text-[10px] font-bold uppercase tracking-wider">
-                  {durationLabel}
-                </span>
-                <ul className="text-white/55 flex flex-col gap-0.5 text-[10px]">
-                  {status.privileges.slice(0, 3).map((privilege, idx) => (
-                    <li key={idx} className="line-clamp-1">
-                      · {t(privilege as MessageIds, { percentage: isVIP ? 100 : 50 })}
-                    </li>
-                  ))}
-                </ul>
-                {!isVIP && !meetsRequirements && activityRequirement && (
-                  <span className="text-error text-[10px] font-bold">
-                    {t('needs {count} activity points', {
-                      count: activityRequirement.count,
-                      current: me?.activityPoints || 0,
-                    })}
-                  </span>
-                )}
-              </div>
-            }
+            iconStage={renderIcon(75)}
+            iconStageClassName="h-24"
+            prices={activePrices}
+            onClick={() => onSelect(item)}
+            onBuy={price => onBuy(item, price)}
           />
         );
       })}

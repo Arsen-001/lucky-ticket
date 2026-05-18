@@ -42,8 +42,8 @@ interface EngineWithTier {
   tier: TicketType;
 }
 
-const SLIDE_WIDTH_CSS = 'calc(100vw - 160px)';
-const SLIDE_GUTTER_PX = 80;
+const SLIDE_WIDTH_CSS = 'calc((100vw - 120px) / 1.038)';
+const SLIDE_PADDING_CSS = `calc((100vw - (100vw - 120px) / 1.038) / 2)`;
 
 const CORE_TIER_COLORS: Record<TicketType, { mid: string; dark: string; glow: string }> = {
   bronze: {
@@ -309,7 +309,7 @@ export function HomeEnginesSlider({ className }: ClassNameProps) {
       <div className={twMerge('-mt-5 mb-0 flex w-full flex-col items-stretch', className)}>
         <div
           className="scrollbar-hidden flex snap-x items-stretch gap-3 overflow-x-auto overflow-y-visible"
-          style={{ paddingInline: `${SLIDE_GUTTER_PX}px` }}
+          style={{ paddingInline: SLIDE_PADDING_CSS }}
         >
           {[0, 1].map(i => (
             <div
@@ -344,8 +344,8 @@ export function HomeEnginesSlider({ className }: ClassNameProps) {
         ref={scrollerRef}
         className="scrollbar-hidden flex snap-x snap-mandatory items-stretch gap-3 overflow-x-auto overflow-y-visible pt-0 pb-0"
         style={{
-          scrollPaddingInline: `${SLIDE_GUTTER_PX}px`,
-          paddingInline: `${SLIDE_GUTTER_PX}px`,
+          scrollPaddingInline: SLIDE_PADDING_CSS,
+          paddingInline: SLIDE_PADDING_CSS,
         }}
       >
         {items.map(({ engine, tier }, index) => {

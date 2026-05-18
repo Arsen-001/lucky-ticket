@@ -4,217 +4,213 @@ import 'swiper/css';
 import 'swiper/css/autoplay';
 
 import Image from 'next/image';
-import { useMemo } from 'react';
-import { Sparkles, Timer } from 'lucide-react';
+import { useMemo, type ReactNode } from 'react';
 import { Autoplay } from 'swiper/modules';
 import { Swiper, SwiperSlide } from 'swiper/react';
 import {
-  useBuyChipMutation,
   useBuyCosmeticMutation,
-  useBuyPassMutation,
+  useBuyShardMutation,
   useGetMarketDataQuery,
 } from '@/api/market.api';
-import { GlobalConstants } from '@/constants/global.constants';
+import '@/styles/components/tasks.css';
+import { ChipShardIcon } from '@/components/shared/icons/ChipShardIcon';
 import { TelegramStarIcon } from '@/components/shared/icons/TelegramStarIcon';
+import type { MarketSelectedItem } from '@/components/pages/tabs/market/MarketView';
+import { GlobalConstants } from '@/constants/global.constants';
 import { useAppTranslations } from '@/hooks/useAppTranslations';
-import { useCountDown } from '@/hooks/useCountDown';
 import { MarketPriceType } from '@/types/enums/market.enums';
-import type { MarketSelectedPurchase } from '@/components/pages/tabs/market/MarketView';
-import type { MarketChip, MarketPrice } from '@/types/interfaces/market.interfaces';
+import type { MarketAccent, MarketPrice } from '@/types/interfaces/market.interfaces';
 
 export interface MarketHeroCarouselProps {
-  onPurchase?: (purchase: MarketSelectedPurchase) => void;
+  onSelect: (item: MarketSelectedItem) => void;
+  onBuy: (item: MarketSelectedItem, price: MarketPrice) => void;
 }
 
-interface FeaturedSlide {
+interface FeaturedItem {
   id: string;
   title: string;
-  subtitle: string;
+  description: string;
   prices: MarketPrice[];
-  imageUrl?: string;
   expiresAt?: string;
   discountPct?: number;
   isNew?: boolean;
-  accent: string;
-  badgeKey: 'hot deal' | 'new' | 'limited' | 'apex';
-  mutate: () => Promise<unknown>;
+  accent: MarketAccent;
+  accentColor: string;
+  renderIcon: (size: number) => ReactNode;
+  mutate: (price: MarketPrice) => Promise<unknown>;
 }
 
-export function MarketHeroCarousel({ onPurchase }: MarketHeroCarouselProps) {
+const renderAvatarIcon = (
+  imageUrl: string,
+  title: string,
+  accentColor: string,
+  size: number
+): ReactNode => (
+  <div
+    className="relative h-full w-full overflow-hidden rounded-full border-2"
+    style={{
+      borderColor: `color-mix(in srgb, ${accentColor} 65%, transparent)`,
+      boxShadow: `0 0 16px color-mix(in srgb, ${accentColor} 38%, transparent)`,
+    }}
+  >
+    <Image src={imageUrl} alt={title} fill sizes={`${size}px`} className="object-cover" />
+  </div>
+);
+
+export function MarketHeroCarousel({ onSelect, onBuy }: MarketHeroCarouselProps) {
   const t = useAppTranslations();
   const { data, isLoading } = useGetMarketDataQuery();
   const [buyCosmetic] = useBuyCosmeticMutation();
-  const [buyPass] = useBuyPassMutation();
-  const [buyChip] = useBuyChipMutation();
+  const [buyShard] = useBuyShardMutation();
 
-  const slides = useMemo<FeaturedSlide[]>(() => {
+  const items = useMemo<FeaturedItem[]>(() => {
     if (!data) return [];
-    const list: FeaturedSlide[] = [];
+    const list: FeaturedItem[] = [];
+    const seen = new Set<string>();
 
-    const apex = data.cosmetics.find(c => c.avatarLevel === 10);
-    if (apex) {
-      list.push({
-        id: apex.id,
-        title: apex.name,
-        subtitle: apex.description ?? '',
-        prices: apex.prices,
-        imageUrl: apex.imageUrl,
-        expiresAt: apex.expiresAt,
-        discountPct: apex.discountPct,
-        isNew: apex.isNew,
-        accent: 'var(--color-electric-pink)',
-        badgeKey: 'apex',
-        mutate: () => buyCosmetic({ cosmeticId: apex.id, price: apex.prices[0] }).unwrap(),
-      });
-    }
+    const cosmeticToItem = (c: (typeof data.cosmetics)[number]): FeaturedItem => {
+      const accent: MarketAccent = (c.accent as MarketAccent) ?? 'pink';
+      const accentColor = c.accent ? `var(--color-${c.accent})` : 'var(--color-electric-pink)';
+      return {
+        id: c.id,
+        title: c.name,
+        description: c.description ?? '',
+        prices: c.prices,
+        expiresAt: c.expiresAt,
+        discountPct: c.discountPct,
+        isNew: c.isNew,
+        accent,
+        accentColor,
+        renderIcon: size =>
+          c.imageUrl
+            ? renderAvatarIcon(c.imageUrl, c.name, accentColor, size)
+            : renderAvatarIcon('', c.name, accentColor, size),
+        mutate: price => buyCosmetic({ cosmeticId: c.id, price }).unwrap(),
+      };
+    };
+
+    const shardToItem = (s: (typeof data.shards)[number]): FeaturedItem => ({
+      id: s.id,
+      title: s.name,
+      description: `+${s.count} ${t('shards')}`,
+      prices: s.prices,
+      discountPct: s.discountPct,
+      isNew: s.isNew,
+      accent: s.quality,
+      accentColor: `var(--color-${s.quality})`,
+      renderIcon: size => (
+        <div className="flex-center h-full w-full">
+          <ChipShardIcon type={s.type} tier={s.quality} size={Math.round(size / 1.3)} />
+        </div>
+      ),
+      mutate: price =>
+        buyShard({
+          shardId: s.id,
+          shardType: s.type,
+          quality: s.quality,
+          count: s.count,
+          price,
+        }).unwrap(),
+    });
+
+    const push = (entry: FeaturedItem) => {
+      if (seen.has(entry.id)) return;
+      seen.add(entry.id);
+      list.push(entry);
+    };
 
     data.cosmetics
-      .filter(c => c.featured && c.id !== apex?.id)
-      .forEach(c => {
-        list.push({
-          id: c.id,
-          title: c.name,
-          subtitle: c.description ?? '',
-          prices: c.prices,
-          imageUrl: c.imageUrl,
-          expiresAt: c.expiresAt,
-          discountPct: c.discountPct,
-          isNew: c.isNew,
-          accent: c.accent ? `var(--color-${c.accent})` : 'var(--color-electric-pink)',
-          badgeKey: 'hot deal',
-          mutate: () => buyCosmetic({ cosmeticId: c.id, price: c.prices[0] }).unwrap(),
-        });
-      });
+      .filter(c => c.featured || c.avatarLevel === 10)
+      .forEach(c => push(cosmeticToItem(c)));
+    data.shards.filter(s => s.featured).forEach(s => push(shardToItem(s)));
 
-    data.passes
-      .filter(p => p.featured)
-      .forEach(p => {
-        list.push({
-          id: p.id,
-          title: p.name,
-          subtitle: t('pass duration days', { days: p.durationDays }),
-          prices: p.prices,
-          expiresAt: p.expiresAt,
-          discountPct: p.discountPct,
-          isNew: p.isNew,
-          accent: 'var(--color-electric-purple)',
-          badgeKey: 'limited',
-          mutate: () => buyPass({ passId: p.id, price: p.prices[0] }).unwrap(),
-        });
-      });
-
-    data.chips
-      .filter(c => c.featured)
-      .forEach(c => {
-        list.push({
-          id: c.id,
-          title: c.name,
-          subtitle: chipSubtitle(c),
-          prices: c.prices,
-          discountPct: c.discountPct,
-          isNew: c.isNew,
-          accent: `var(--color-${c.quality})`,
-          badgeKey: 'hot deal',
-          mutate: () =>
-            buyChip({
-              chipId: c.id,
-              chipType: c.type,
-              quality: c.quality,
-              level: c.level,
-              effectPct: c.effectPct,
-              price: c.prices[0],
-            }).unwrap(),
-        });
-      });
+    // Backfill — guarantee at least 4 slides by adding top non-featured items
+    const MIN_ITEMS = 4;
+    if (list.length < MIN_ITEMS) {
+      const fillCosmetics = [...data.cosmetics]
+        .filter(c => !seen.has(c.id))
+        .sort((a, b) => (b.avatarLevel ?? 0) - (a.avatarLevel ?? 0));
+      const fillShards = [...data.shards]
+        .filter(s => !seen.has(s.id))
+        .sort((a, b) => (b.prices[0]?.amount ?? 0) - (a.prices[0]?.amount ?? 0));
+      const queue: FeaturedItem[] = [];
+      fillCosmetics.forEach(c => queue.push(cosmeticToItem(c)));
+      fillShards.forEach(s => queue.push(shardToItem(s)));
+      for (const entry of queue) {
+        if (list.length >= MIN_ITEMS) break;
+        push(entry);
+      }
+    }
 
     return list;
-  }, [data, buyCosmetic, buyPass, buyChip, t]);
+  }, [data, buyCosmetic, buyShard, t]);
 
-  if (!isLoading && !slides.length) return null;
+  if (isLoading) {
+    return (
+      <div className="px-5">
+        <div className="bg-background-overlay h-[100px] w-full animate-pulse rounded-xl" />
+      </div>
+    );
+  }
 
-  const items: (FeaturedSlide | null)[] = isLoading
-    ? (new Array(4).fill(null) as (FeaturedSlide | null)[])
-    : slides;
+  if (!items.length) return null;
+
+  const buildItem = (featured: FeaturedItem): MarketSelectedItem => ({
+    id: featured.id,
+    name: featured.title,
+    description: featured.description,
+    iconNode: <div className="h-32 w-32">{featured.renderIcon(128)}</div>,
+    prices: featured.prices,
+    expiresAt: featured.expiresAt,
+    isNew: featured.isNew,
+    discountPct: featured.discountPct,
+    accent: featured.accent,
+    mutate: featured.mutate,
+  });
 
   return (
-    <div className="flex flex-col gap-3">
-      <Swiper
-        key={isLoading ? 'loading' : 'loaded'}
-        className="w-full"
-        modules={[Autoplay]}
-        centeredSlides
-        grabCursor
-        observer
-        observeParents
-        watchOverflow
-        loop={!isLoading && slides.length > 2}
-        slidesPerView="auto"
-        spaceBetween={20}
-        autoplay={{
-          delay: 2000,
-          disableOnInteraction: false,
-          pauseOnMouseEnter: true,
-        }}
-      >
-        {items.map((slide, index) => (
-          <SwiperSlide key={slide?.id ?? index} className="w-72! overflow-visible py-2">
-            {slide ? (
-              <FeaturedSlideCard
-                slide={slide}
-                onClick={() =>
-                  onPurchase?.({
-                    id: slide.id,
-                    name: slide.title,
-                    description: slide.subtitle,
-                    iconNode: slide.imageUrl ? (
-                      <div className="relative h-14 w-14 overflow-hidden rounded-xl">
-                        <Image
-                          src={slide.imageUrl}
-                          alt={slide.title}
-                          fill
-                          sizes="56px"
-                          className="object-cover"
-                        />
-                      </div>
-                    ) : (
-                      <div
-                        className="flex-center h-14 w-14 rounded-xl"
-                        style={{
-                          backgroundColor: `color-mix(in srgb, ${slide.accent} 18%, transparent)`,
-                        }}
-                      >
-                        <Sparkles size={28} style={{ color: slide.accent }} strokeWidth={2.2} />
-                      </div>
-                    ),
-                    price: slide.prices[0],
-                    mutate: slide.mutate,
-                  })
-                }
-              />
-            ) : (
-              <div className="bg-background-overlay h-[132px] w-full rounded-2xl" />
-            )}
+    <Swiper
+      className="-mt-[10px] w-full"
+      modules={[Autoplay]}
+      centeredSlides
+      grabCursor
+      observer
+      observeParents
+      watchOverflow
+      loop={items.length > 2}
+      slidesPerView="auto"
+      spaceBetween={20}
+      autoplay={{
+        delay: 2000,
+        disableOnInteraction: false,
+        pauseOnMouseEnter: true,
+      }}
+    >
+      {items.map(featured => {
+        const item = buildItem(featured);
+        return (
+          <SwiperSlide key={featured.id} className="w-72! overflow-visible py-[14px]">
+            <MarketHeroCard
+              featured={featured}
+              onClick={() => onSelect(item)}
+              onBuy={price => onBuy(item, price)}
+            />
           </SwiperSlide>
-        ))}
-      </Swiper>
-    </div>
+        );
+      })}
+    </Swiper>
   );
 }
 
-function chipSubtitle(c: MarketChip): string {
-  return `Lvl ${c.level} · +${c.effectPct}%`;
-}
-
-interface FeaturedSlideCardProps {
-  slide: FeaturedSlide;
+interface MarketHeroCardProps {
+  featured: FeaturedItem;
   onClick: () => void;
+  onBuy: (price: MarketPrice) => void;
 }
 
-function FeaturedSlideCard({ slide, onClick }: FeaturedSlideCardProps) {
+function MarketHeroCard({ featured, onClick, onBuy }: MarketHeroCardProps) {
   const t = useAppTranslations();
-  const { leftTime, expired } = useCountDown(slide.expiresAt);
-  const showCountdown = !!slide.expiresAt && !expired;
-  const firstPrice = slide.prices[0];
+  const price = featured.prices[0];
 
   return (
     <div
@@ -227,108 +223,53 @@ function FeaturedSlideCard({ slide, onClick }: FeaturedSlideCardProps) {
           onClick();
         }
       }}
-      className="relative flex h-full min-h-[132px] w-full cursor-pointer flex-col overflow-hidden rounded-2xl text-left transition-transform active:scale-99"
-      style={{
-        background: `linear-gradient(135deg, color-mix(in srgb, ${slide.accent} 22%, transparent) 0%, var(--color-background-overlay) 65%)`,
-      }}
+      className="task-card-default relative flex h-[80px] w-72 cursor-pointer items-center gap-2.5 rounded-2xl px-3 transition-transform active:scale-99"
     >
-      <span
-        aria-hidden
-        className="pointer-events-none absolute -right-12 -top-12 h-40 w-40 rounded-full blur-3xl"
-        style={{ backgroundColor: `color-mix(in srgb, ${slide.accent} 35%, transparent)` }}
-      />
-      <span
-        aria-hidden
-        className="pointer-events-none absolute bottom-0 left-[14%] right-[14%] z-2 h-[3px]"
-        style={{
-          background: `linear-gradient(90deg, transparent 0%, color-mix(in srgb, ${slide.accent} 90%, transparent) 50%, transparent 100%)`,
-          filter: 'blur(0.8px)',
-        }}
-      />
-
-      <span
-        className="absolute left-3 top-3 z-2 inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[10px] font-extrabold uppercase tracking-wider text-white animate-pulse"
-        style={{ backgroundColor: `color-mix(in srgb, ${slide.accent} 38%, transparent)` }}
-      >
-        <Sparkles size={10} strokeWidth={2.6} />
-        {t(slide.badgeKey)}
-      </span>
-
-      <div className="relative flex flex-1 items-center gap-3 px-4 pt-10 pb-4">
-        {slide.imageUrl ? (
-          <div
-            className="relative h-16 w-16 shrink-0 overflow-hidden rounded-2xl border-2"
-            style={{
-              borderColor: `color-mix(in srgb, ${slide.accent} 65%, transparent)`,
-              boxShadow: `0 0 18px color-mix(in srgb, ${slide.accent} 40%, transparent)`,
-            }}
-          >
-            <Image
-              src={slide.imageUrl}
-              alt={slide.title}
-              fill
-              sizes="64px"
-              className="object-cover"
-            />
-          </div>
-        ) : (
-          <div
-            className="flex-center h-16 w-16 shrink-0 rounded-2xl border-2"
-            style={{
-              borderColor: `color-mix(in srgb, ${slide.accent} 55%, transparent)`,
-              backgroundColor: `color-mix(in srgb, ${slide.accent} 18%, transparent)`,
-              boxShadow: `inset 0 0 22px color-mix(in srgb, ${slide.accent} 40%, transparent)`,
-            }}
-          >
-            <Sparkles size={32} style={{ color: slide.accent }} strokeWidth={2.2} />
-          </div>
+      <div className="relative h-[78px] w-[78px] flex-shrink-0">
+        {featured.renderIcon(78)}
+        {featured.isNew && (
+          <span className="bg-electric-pink absolute -top-1.5 -right-1.5 z-1 rounded-full px-1.5 py-0.5 text-[8px] font-extrabold uppercase tracking-wider text-white">
+            {t('new')}
+          </span>
         )}
+        {!featured.isNew && featured.discountPct ? (
+          <span className="bg-pink-gradient absolute -top-1.5 -right-1.5 z-1 rounded-full px-1.5 py-0.5 text-[8px] font-extrabold tabular-nums text-white">
+            −{featured.discountPct}%
+          </span>
+        ) : null}
+      </div>
 
-        <div className="flex min-w-0 flex-1 flex-col gap-1">
-          <h3 className="line-clamp-1 text-base font-extrabold leading-tight text-white">
-            {slide.title}
-          </h3>
-          <p className="line-clamp-2 text-[12px] leading-snug text-white/65">{slide.subtitle}</p>
-          <div className="mt-1 flex items-center gap-2 text-[11px] font-bold uppercase tracking-wider">
-            {showCountdown && (
-              <span
-                className="inline-flex items-center gap-1 tabular-nums"
-                style={{ color: slide.accent }}
-              >
-                <Timer size={11} strokeWidth={2.5} />
-                {leftTime}
-              </span>
-            )}
-            {slide.discountPct ? (
-              <span
-                className="rounded-md px-1.5 py-0.5 text-background tabular-nums"
-                style={{ backgroundColor: slide.accent }}
-              >
-                −{slide.discountPct}%
-              </span>
-            ) : null}
-          </div>
-        </div>
-
-        {firstPrice && (
-          <div
-            className="flex-center shrink-0 flex-col rounded-xl px-3 py-2 text-white"
+      <div className="flex min-w-0 flex-1 flex-col justify-center gap-1">
+        <h5 className="line-clamp-1 text-[13px] font-bold leading-tight text-white">
+          {featured.title}
+        </h5>
+        {featured.description && (
+          <p className="text-pink-secondary line-clamp-1 text-[10px] leading-tight">
+            {featured.description}
+          </p>
+        )}
+        {price && (
+          <button
+            type="button"
+            onClick={e => {
+              e.stopPropagation();
+              onBuy(price);
+            }}
+            className="mt-0.5 inline-flex w-fit items-center gap-1 rounded-md px-2 py-1 text-[11px] font-extrabold tabular-nums text-white transition-transform active:scale-95"
             style={{
-              backgroundColor: `color-mix(in srgb, ${slide.accent} 30%, transparent)`,
-              border: `1px solid color-mix(in srgb, ${slide.accent} 55%, transparent)`,
+              backgroundColor: `color-mix(in srgb, ${featured.accentColor} 26%, transparent)`,
+              border: `1px solid color-mix(in srgb, ${featured.accentColor} 50%, transparent)`,
             }}
           >
-            <span className="inline-flex items-center gap-1 text-base font-extrabold tabular-nums leading-none">
-              {firstPrice.amount}
-              {firstPrice.type === MarketPriceType.LTC && (
-                <span className="text-[12px]">{GlobalConstants.coinName}</span>
-              )}
-              {firstPrice.type === MarketPriceType.TELEGRAM_STARS && <TelegramStarIcon size={14} />}
-            </span>
-            <span className="text-[9px] font-bold uppercase tracking-wider text-white/65">
-              {t('grab now')}
-            </span>
-          </div>
+            {price.type === MarketPriceType.TELEGRAM_STARS && <TelegramStarIcon size={11} />}
+            {price.originalAmount && (
+              <span className="text-[9px] text-white/55 line-through">{price.originalAmount}</span>
+            )}
+            <span>{price.amount}</span>
+            {price.type === MarketPriceType.LTC && (
+              <span className="text-gold text-[10px]">{GlobalConstants.coinName}</span>
+            )}
+          </button>
         )}
       </div>
     </div>

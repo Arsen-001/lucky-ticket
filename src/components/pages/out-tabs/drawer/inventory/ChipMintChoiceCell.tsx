@@ -21,7 +21,7 @@ export function ChipMintChoiceCell({
       type="button"
       onClick={onClick}
       className={twMerge(
-        'flex items-center gap-2 rounded-xl border px-3 py-2.5 text-left transition-colors',
+        'flex flex-col items-center justify-center gap-2 rounded-xl border px-3 py-3 transition-colors',
         active ? 'text-white' : 'text-white/65 hover:text-white/85'
       )}
       style={{

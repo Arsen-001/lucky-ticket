@@ -6,7 +6,7 @@ import { Zap } from 'lucide-react';
 import { SkeletonSuspense } from '@/components/shared/seleketons/SkeletonSuspense';
 import { Skeleton } from '@/components/shared/seleketons/Skeleton';
 import { VerifiedBadge } from '@/components/shared/badges/VerifiedBadge';
-import { PrimeBadge } from '@/components/shared/badges/PrimeBadge';
+import { LuckyPlayerBadge } from '@/components/shared/badges/LuckyPlayerBadge';
 import { VIPBadge } from '@/components/shared/badges/VIPBadge';
 
 export interface UserListItemProps {
@@ -19,7 +19,7 @@ export interface UserListItemProps {
   style?: CSSProperties;
   loading?: boolean;
   isVerified?: boolean;
-  isPrime?: boolean;
+  isLuckyPlayer?: boolean;
   isVIP?: boolean;
   outline?: boolean;
 }
@@ -34,7 +34,7 @@ export const UserListItem = ({
   style,
   loading,
   isVerified,
-  isPrime,
+  isLuckyPlayer,
   isVIP,
   outline,
 }: UserListItemProps) => {
@@ -80,8 +80,8 @@ export const UserListItem = ({
                     classNames={{ icon: 'w-3.5 h-3.5' }}
                   />
                 )}
-                {isPrime && (
-                  <PrimeBadge
+                {isLuckyPlayer && (
+                  <LuckyPlayerBadge
                     className="p-0 h-5.5 aspect-square"
                     hideText
                     classNames={{ icon: 'w-3.5 h-3.5' }}

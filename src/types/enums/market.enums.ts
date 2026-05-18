@@ -15,7 +15,7 @@ export enum MarketItemRequirementType {
 }
 
 export enum MarketStatusType {
-  PRIME = 'PRIME',
+  LUCKY_PLAYER = 'LUCKY_PLAYER',
   VIP = 'VIP',
 }
 
@@ -24,11 +24,9 @@ export enum MarketItemCategory {
   ENGINE = 'ENGINE',
   TICKET = 'TICKET',
   BOOST = 'BOOST',
-  CHIP = 'CHIP',
-  BUILDER = 'BUILDER',
+  SHARD = 'SHARD',
   BOOSTER = 'BOOSTER',
   COSMETIC = 'COSMETIC',
-  PASS = 'PASS',
   STATUS = 'STATUS',
 }
 
@@ -37,11 +35,4 @@ export enum MarketCosmeticType {
   AVATAR_FRAME = 'AVATAR_FRAME',
   BADGE = 'BADGE',
   THEME = 'THEME',
-}
-
-export enum MarketPassType {
-  AUTO_CLAIM = 'AUTO_CLAIM',
-  AD_FREE = 'AD_FREE',
-  LC_BOOST = 'LC_BOOST',
-  TOURNAMENT = 'TOURNAMENT',
 }

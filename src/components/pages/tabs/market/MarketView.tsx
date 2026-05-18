@@ -9,22 +9,36 @@ import {
   MarketCategoryChips,
   type MarketCategoryKey,
 } from '@/components/pages/tabs/market/MarketCategoryChips';
+import { MarketInfoModal } from '@/components/pages/tabs/market/MarketInfoModal';
 import { MarketPurchaseModal } from '@/components/pages/tabs/market/MarketPurchaseModal';
 import { NotEnoughCoinsModal } from '@/components/pages/tabs/market/NotEnoughCoinsModal';
 import { NotEnoughStarsModal } from '@/components/pages/tabs/home/NotEnoughStarsModal';
 import { MarketEngineSection } from '@/components/pages/tabs/market/sections/MarketEngineSection';
-import { MarketChipSection } from '@/components/pages/tabs/market/sections/MarketChipSection';
-import { MarketBuilderSection } from '@/components/pages/tabs/market/sections/MarketBuilderSection';
+import { MarketShardSection } from '@/components/pages/tabs/market/sections/MarketShardSection';
 import { MarketBoosterSection } from '@/components/pages/tabs/market/sections/MarketBoosterSection';
 import { MarketCosmeticSection } from '@/components/pages/tabs/market/sections/MarketCosmeticSection';
-import { MarketPassSection } from '@/components/pages/tabs/market/sections/MarketPassSection';
 import { MarketStatusSection } from '@/components/pages/tabs/market/sections/MarketStatusSection';
 import { MarketPriceType } from '@/types/enums/market.enums';
-import type { MarketPrice } from '@/types/interfaces/market.interfaces';
+import type { MarketAccent, MarketPrice } from '@/types/interfaces/market.interfaces';
 
 const ALL_KEY: MarketCategoryKey = 'all';
 
-export interface MarketSelectedPurchase {
+export interface MarketSelectedItem {
+  id: string;
+  name: string;
+  description?: ReactNode;
+  iconNode: ReactNode;
+  meta?: ReactNode;
+  prices: MarketPrice[];
+  expiresAt?: string;
+  remainingSupply?: number;
+  discountPct?: number;
+  isNew?: boolean;
+  accent?: MarketAccent;
+  mutate: (price: MarketPrice) => Promise<unknown>;
+}
+
+interface MarketActivePurchase {
   id: string;
   name: string;
   description?: ReactNode;
@@ -37,29 +51,47 @@ export function MarketView() {
   const [active, setActive] = useState<MarketCategoryKey>(ALL_KEY);
   const { data } = useGetMarketDataQuery();
   const { data: me } = useGetMeQuery();
-  const [purchase, setPurchase] = useState<MarketSelectedPurchase | null>(null);
+  const [infoItem, setInfoItem] = useState<MarketSelectedItem | null>(null);
+  const [purchase, setPurchase] = useState<MarketActivePurchase | null>(null);
   const [confirming, setConfirming] = useState(false);
   const [insufficientStars, setInsufficientStars] = useState<{ required: number } | null>(null);
   const [insufficientCoins, setInsufficientCoins] = useState<{ required: number } | null>(null);
 
   const showAll = active === ALL_KEY;
 
-  const handlePurchase = (next: MarketSelectedPurchase) => {
-    if (next.price.type === MarketPriceType.TELEGRAM_STARS) {
+  const handleSelect = (item: MarketSelectedItem) => {
+    setInfoItem(item);
+  };
+
+  const handleBuy = (item: MarketSelectedItem, price: MarketPrice) => {
+    if (price.type === MarketPriceType.TELEGRAM_STARS) {
       const balance = me?.telegramStars ?? 0;
-      if (balance < next.price.amount) {
-        setInsufficientStars({ required: next.price.amount });
+      if (balance < price.amount) {
+        setInsufficientStars({ required: price.amount });
         return;
       }
     }
-    if (next.price.type === MarketPriceType.LTC) {
+    if (price.type === MarketPriceType.LTC) {
       const balance = me?.coins ?? 0;
-      if (balance < next.price.amount) {
-        setInsufficientCoins({ required: next.price.amount });
+      if (balance < price.amount) {
+        setInsufficientCoins({ required: price.amount });
         return;
       }
     }
-    setPurchase(next);
+    setInfoItem(null);
+    setPurchase({
+      id: item.id,
+      name: item.name,
+      description: item.description,
+      iconNode: item.iconNode,
+      price,
+      mutate: () => item.mutate(price),
+    });
+  };
+
+  const handleBuyFromInfo = (price: MarketPrice) => {
+    if (!infoItem) return;
+    handleBuy(infoItem, price);
   };
 
   const handleConfirm = async () => {
@@ -78,19 +110,27 @@ export function MarketView() {
   const sections = useMemo(() => {
     if (!data) return null;
     return {
-      engines: <MarketEngineSection engines={data.engines} onPurchase={handlePurchase} />,
-      chips: <MarketChipSection chips={data.chips} onPurchase={handlePurchase} />,
-      builders: <MarketBuilderSection builders={data.builders} onPurchase={handlePurchase} />,
-      boosters: <MarketBoosterSection boosters={data.boosters} onPurchase={handlePurchase} />,
-      cosmetics: <MarketCosmeticSection cosmetics={data.cosmetics} onPurchase={handlePurchase} />,
-      passes: <MarketPassSection passes={data.passes} onPurchase={handlePurchase} />,
-      status: <MarketStatusSection onPurchase={handlePurchase} />,
+      engines: (
+        <MarketEngineSection engines={data.engines} onSelect={handleSelect} onBuy={handleBuy} />
+      ),
+      shards: <MarketShardSection shards={data.shards} onSelect={handleSelect} onBuy={handleBuy} />,
+      boosters: (
+        <MarketBoosterSection boosters={data.boosters} onSelect={handleSelect} onBuy={handleBuy} />
+      ),
+      cosmetics: (
+        <MarketCosmeticSection
+          cosmetics={data.cosmetics}
+          onSelect={handleSelect}
+          onBuy={handleBuy}
+        />
+      ),
+      status: <MarketStatusSection onSelect={handleSelect} onBuy={handleBuy} />,
     } as Record<Exclude<MarketCategoryKey, 'all'>, React.ReactNode>;
   }, [data]);
 
   return (
     <div className="flex flex-col gap-4">
-      <MarketHeroCarousel onPurchase={handlePurchase} />
+      <MarketHeroCarousel onSelect={handleSelect} onBuy={handleBuy} />
       <div className="px-5">
         <MarketCategoryChips active={active} onChange={setActive} />
       </div>
@@ -102,6 +142,13 @@ export function MarketView() {
             ))
           : sections?.[active as Exclude<MarketCategoryKey, 'all'>]}
       </div>
+
+      <MarketInfoModal
+        open={!!infoItem}
+        item={infoItem}
+        onClose={() => setInfoItem(null)}
+        onBuy={handleBuyFromInfo}
+      />
 
       <MarketPurchaseModal
         open={!!purchase}

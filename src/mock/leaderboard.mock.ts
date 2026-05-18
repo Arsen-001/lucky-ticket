@@ -1,10 +1,22 @@
 import { faker } from '@faker-js/faker';
+import { images } from '@/constants/images';
 import { me } from '@/mock/me.mock';
 import type {
   LeaderboardEntry,
   LeaderboardPeriod,
   LeaderboardResponse,
 } from '@/types/interfaces/leaderboard.interfaces';
+
+const LOCAL_AVATARS = [
+  images.avatar1.src,
+  images.avatar2.src,
+  images.avatar3.src,
+  images.avatar4.src,
+  images.avatar5.src,
+  images.avatar6.src,
+  images.avatarYerevan.src,
+  images.avatar.src,
+];
 
 const TOTAL_BY_PERIOD: Record<LeaderboardPeriod, number> = {
   today: 4_120,
@@ -47,12 +59,12 @@ const generateEntries = (period: LeaderboardPeriod, count = 100): LeaderboardEnt
       id: faker.string.uuid(),
       username: faker.internet.username().toLowerCase(),
       points,
-      avatar: `https://i.pravatar.cc/200?img=${(index * 7 + period.length * 3) % 70}`,
+      avatar: LOCAL_AVATARS[(index * 7 + period.length * 3) % LOCAL_AVATARS.length],
       rankChange:
         index < 3 ? faker.number.int({ min: 0, max: 5 }) : faker.number.int({ min: -8, max: 8 }),
       place: index + 1,
       isVerified: faker.datatype.boolean({ probability: 0.35 }),
-      isPrime: faker.datatype.boolean({ probability: 0.2 }),
+      isLuckyPlayer: faker.datatype.boolean({ probability: 0.2 }),
       isVIP: faker.datatype.boolean({ probability: 0.25 }),
     } satisfies LeaderboardEntry;
   });
@@ -71,7 +83,7 @@ const buildResponse = (period: LeaderboardPeriod): LeaderboardResponse => {
     rankChange: faker.number.int({ min: -5, max: 12 }),
     place: myRank,
     isVerified: me.isVerified,
-    isPrime: me.isPrime,
+    isLuckyPlayer: me.isLuckyPlayer,
     isVIP: me.isVIP,
   };
 

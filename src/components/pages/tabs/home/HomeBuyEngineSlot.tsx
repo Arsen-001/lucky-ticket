@@ -1,5 +1,6 @@
 import { Plus } from 'lucide-react';
 import { twMerge } from 'tailwind-merge';
+import { EngineIcon } from '@/components/shared/icons/EngineIcon';
 import { Link } from '@/components/shared/links/Link';
 import { useAppTranslations } from '@/hooks/useAppTranslations';
 import { routes } from '@/constants/routes';
@@ -15,12 +16,15 @@ export function HomeBuyEngineSlot({ className }: HomeBuyEngineSlotProps) {
     <Link
       href={routes.market('Boosts')}
       className={twMerge(
-        'flex h-[calc(100vw-160px)] w-full flex-col items-center justify-center gap-3 p-5 text-center transition-transform active:scale-99',
+        'flex h-[calc((100vw-120px)/1.038)] w-full flex-col items-center justify-center gap-3 p-5 text-center transition-transform active:scale-99',
         className
       )}
     >
-      <div className="bg-electric-pink/20 border border-electric-pink/40 flex-center h-14 w-14 rounded-full shadow-[0_0_18px_rgba(222,0,155,0.35)]">
-        <Plus className="text-electric-pink" size={26} strokeWidth={2.6} />
+      <div className="relative">
+        <EngineIcon tier="gold" size={132} empty />
+        <span className="bg-electric-pink/90 border-background flex-center absolute -bottom-1 -right-1 h-7 w-7 rounded-full border-2 shadow-[0_0_14px_rgba(222,0,155,0.55)]">
+          <Plus className="text-white" size={16} strokeWidth={2.8} />
+        </span>
       </div>
       <span className="text-white text-base font-extrabold leading-tight">{t('buy engine')}</span>
     </Link>

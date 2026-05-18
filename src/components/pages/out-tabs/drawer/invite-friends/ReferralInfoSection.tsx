@@ -34,9 +34,9 @@ export const ReferralInfoSection = () => {
       percentClass: 'text-gold',
     },
     {
-      key: 'prime',
-      label: t('prime friends'),
-      percent: GlobalConstants.primeReferralPercentage,
+      key: 'lucky-player',
+      label: t('lucky player friends'),
+      percent: GlobalConstants.luckyPlayerReferralPercentage,
       icon: <Crown size={14} className="text-electric-purple" strokeWidth={2.4} />,
       iconWrapClass: 'bg-electric-purple/20',
       percentClass: 'text-electric-purple',

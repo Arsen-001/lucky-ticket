@@ -8,7 +8,7 @@ export const GlobalConstants = {
   defaultLanguage: defaultLocale,
   referralPercentage: 5,
   telegramPremiumReferralPercentage: 10,
-  primeReferralPercentage: 15,
+  luckyPlayerReferralPercentage: 15,
   inviteActivityPoints: 10,
   inviteStars: 1,
   inviteTelegramPremiumActivityPoints: 20,
@@ -94,7 +94,7 @@ export interface CloverStatusGate {
   verifiedEmail?: boolean;
   tier?: ActivityTier;
   vipLevel?: number;
-  prime?: boolean;
+  luckyPlayer?: boolean;
 }
 
 export interface CloverLevelDef {
@@ -192,7 +192,7 @@ export const cloverLevels: CloverLevelDef[] = [
     name: 'Elite',
     ticketsRequired: 3000,
     variant: 'diamond',
-    statusGate: { tier: 'diamond', vipLevel: 5, prime: true },
+    statusGate: { tier: 'diamond', vipLevel: 5, luckyPlayer: true },
     description: 'Diamond clover — triple multiplier; closed events',
     unlock: 'Closed events + reward x3',
     rewardLs: 2500,
@@ -202,7 +202,7 @@ export const cloverLevels: CloverLevelDef[] = [
     name: 'Lucky Emperor',
     ticketsRequired: 6000,
     variant: 'rainbow-crown',
-    statusGate: { tier: 'diamond', vipLevel: 10, prime: true, verifiedEmail: true },
+    statusGate: { tier: 'diamond', vipLevel: 10, luckyPlayer: true, verifiedEmail: true },
     description: 'Rainbow imperial 7-leaf clover — maximum status, all privileges open',
     unlock: 'All privileges + cosmetics',
     rewardLs: 5000,
@@ -212,7 +212,7 @@ export const cloverLevels: CloverLevelDef[] = [
 export interface CloverEvalProfile {
   ticketsEarned: number;
   isVerified: boolean;
-  isPrime: boolean;
+  isLuckyPlayer: boolean;
   vipLevel: number;
   activityPoints: number;
 }
@@ -223,7 +223,7 @@ const isStatusGateMet = (
 ): boolean => {
   if (!gate) return true;
   if (gate.verifiedEmail && !profile.isVerified) return false;
-  if (gate.prime && !profile.isPrime) return false;
+  if (gate.luckyPlayer && !profile.isLuckyPlayer) return false;
   if (gate.vipLevel !== undefined && profile.vipLevel < gate.vipLevel) return false;
   if (gate.tier) {
     const userTier = computeActivityTier(profile.activityPoints);
@@ -251,7 +251,7 @@ export const getNextCloverLevelDef = (level: number): CloverLevelDef | undefined
   cloverLevels.find(def => def.level === level + 1);
 
 export interface CloverBlocker {
-  type: 'tickets' | 'verified' | 'tier' | 'vip' | 'prime';
+  type: 'tickets' | 'verified' | 'tier' | 'vip' | 'lucky-player';
   current?: number | string | boolean;
   required: number | string | boolean;
 }
@@ -272,8 +272,8 @@ export const getCloverBlockers = (
   if (gate?.verifiedEmail && !profile.isVerified) {
     blockers.push({ type: 'verified', current: false, required: true });
   }
-  if (gate?.prime && !profile.isPrime) {
-    blockers.push({ type: 'prime', current: false, required: true });
+  if (gate?.luckyPlayer && !profile.isLuckyPlayer) {
+    blockers.push({ type: 'lucky-player', current: false, required: true });
   }
   if (gate?.vipLevel !== undefined && profile.vipLevel < gate.vipLevel) {
     blockers.push({ type: 'vip', current: profile.vipLevel, required: gate.vipLevel });

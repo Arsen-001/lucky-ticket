@@ -66,9 +66,9 @@ export function EngineCubeSlot({
           <Plus size={12} strokeWidth={3} stroke="white" />
         </span>
         {category === 'chip' ? (
-          <ChipIcon type={type} accent={accent} size={72} animated={false} />
+          <ChipIcon type={type} size={72} empty />
         ) : (
-          <BoosterIcon type={type} accent={accent} size={72} animated={false} />
+          <BoosterIcon type={type} size={72} empty />
         )}
         <span className="mt-0.5 flex items-center gap-1 whitespace-nowrap text-[9px] font-extrabold uppercase tracking-wider">
           <span style={{ color: accent }}>{typeLabel}</span>
@@ -107,21 +107,9 @@ export function EngineCubeSlot({
           }}
         />
         {category === 'chip' ? (
-          <ChipIcon
-            type={type}
-            tier={chip?.quality}
-            accent={chip ? undefined : accent}
-            size={76}
-            animated={false}
-          />
+          <ChipIcon type={type} tier={chip?.quality} size={76} />
         ) : (
-          <BoosterIcon
-            type={type}
-            tier={booster?.quality}
-            accent={booster ? undefined : accent}
-            size={76}
-            animated={false}
-          />
+          <BoosterIcon type={type} tier={booster?.quality} size={76} />
         )}
         <span className="mt-0.5 flex items-center gap-1 whitespace-nowrap text-[9px] font-extrabold tabular-nums uppercase tracking-wider text-white">
           {category === 'chip' && chip && (

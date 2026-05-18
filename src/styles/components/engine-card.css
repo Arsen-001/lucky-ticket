@@ -52,3 +52,23 @@
   pointer-events: none;
   opacity: 0.95;
 }
+
+@keyframes engine-tap-pulse {
+  0%,
+  100% {
+    transform: scale(1);
+    filter: brightness(1) drop-shadow(0 0 0 transparent);
+  }
+  35% {
+    transform: scale(1.2);
+    filter: brightness(1.6) drop-shadow(0 0 18px rgba(255, 255, 255, 0.55));
+  }
+  70% {
+    transform: scale(1.05);
+    filter: brightness(0.85);
+  }
+}
+
+.engine-tap-pulse {
+  animation: engine-tap-pulse 0.38s ease-in-out;
+}

@@ -8,7 +8,7 @@ export interface LeaderboardEntry {
   rankChange: number;
   place: number;
   isVerified: boolean;
-  isPrime: boolean;
+  isLuckyPlayer: boolean;
   isVIP?: boolean;
 }
 

@@ -2,10 +2,11 @@
 
 import Image from 'next/image';
 import Link from 'next/link';
-import { ChevronRight, Crown, Star, Zap } from 'lucide-react';
+import { ChevronRight, Star, Zap } from 'lucide-react';
 import { twMerge } from 'tailwind-merge';
 import { Skeleton } from '@/components/shared/seleketons/Skeleton';
 import { SkeletonSuspense } from '@/components/shared/seleketons/SkeletonSuspense';
+import { LuckyPlayerIcon } from '@/components/shared/icons/LuckyPlayerIcon';
 import { Ticket } from '@/components/shared/icons/Ticket';
 import { VerifiedBadge } from '@/components/shared/badges/VerifiedBadge';
 import { useAppTranslations } from '@/hooks/useAppTranslations';
@@ -103,14 +104,7 @@ export function InvitedFriendRow({
                 aria-label={t('telegram premium')}
               />
             )}
-            {friend?.isPrime && (
-              <Crown
-                size={12}
-                className="text-electric-purple flex-shrink-0"
-                strokeWidth={2.4}
-                aria-label={t('prime')}
-              />
-            )}
+            {friend?.isLuckyPlayer && <LuckyPlayerIcon size={14} className="shrink-0" />}
           </SkeletonSuspense>
         </div>
         <SkeletonSuspense

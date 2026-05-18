@@ -16,7 +16,6 @@ import { BoosterActivateModal } from './BoosterActivateModal';
 import { ChipEquipModal } from './ChipEquipModal';
 import { ChipMintModal } from './ChipMintModal';
 import { InventoryBoosterItem } from './InventoryBoosterItem';
-import { InventoryBuildersStrip } from './InventoryBuildersStrip';
 import { InventoryItem } from './InventoryItem';
 import { InventoryTierFilter, type InventoryTierFilterValue } from './InventoryTierFilter';
 import { InventoryShardsStrip } from './InventoryShardsStrip';
@@ -50,13 +49,6 @@ export function InventoryContainer() {
     return order.map(id => byId.get(id)!).filter(Boolean);
   }, [rawChips]);
   const shards = data?.shards ?? [];
-  const builders = data?.builders ?? {
-    bronze: 0,
-    silver: 0,
-    gold: 0,
-    platinum: 0,
-    diamond: 0,
-  };
   const boosters = data?.boosters ?? [];
 
   const isBoostersView = typeFilter === 'boosters';
@@ -182,8 +174,6 @@ export function InventoryContainer() {
               </section>
             )}
 
-            <InventoryBuildersStrip buildersByTier={builders} tierFilter={tierFilter} />
-
             <button
               type="button"
               onClick={() => setMintOpen(true)}
@@ -215,9 +205,7 @@ export function InventoryContainer() {
         loading={minting}
         onClose={() => setMintOpen(false)}
         onConfirm={handleMintConfirm}
-        chips={chips}
         shards={shards}
-        buildersByTier={builders}
       />
     </div>
   );

@@ -11,7 +11,6 @@ import type { TicketType } from '@/types/types/ticket.types';
 export interface InventorySnapshot {
   chips: InventoryChip[];
   shards: InventoryShardCount[];
-  builders: Record<TicketType, number>;
   boosters: InventoryBooster[];
 }
 

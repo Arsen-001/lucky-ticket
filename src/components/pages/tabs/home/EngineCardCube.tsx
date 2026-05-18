@@ -20,8 +20,8 @@ import { EngineCubeSlot } from './EngineCubeSlot';
 import { EngineCubeStatsFace } from './EngineCubeStatsFace';
 import '@/styles/components/engine-card-cube.css';
 
-const FACE_SIZE = 'calc(100vw - 160px)';
-const FACE_HALF_DEPTH = 'calc((100vw - 160px) / 2 + 15px)';
+const FACE_SIZE = 'calc((100vw - 120px) / 1.038)';
+const FACE_HALF_DEPTH = 'calc((100vw - 120px) / 2.076 + 15px)';
 const SWIPE_INTENT_PX = 8;
 const DRAG_DEGREES_PER_PX = 0.5;
 
@@ -160,7 +160,12 @@ export function EngineCardCube(props: EngineCardCubeProps) {
         </span>
 
         <div className="engine-card-cube-face engine-card-cube-face--front">
-          <EngineCard {...engineCardProps} compact className="w-full h-full" />
+          <EngineCard
+            {...engineCardProps}
+            compact
+            reactorVisual="engine"
+            className="w-full h-full"
+          />
         </div>
 
         <div className="engine-card-cube-face engine-card-cube-face--back">

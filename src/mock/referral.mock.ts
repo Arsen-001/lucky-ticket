@@ -1,13 +1,25 @@
+import { images } from '@/constants/images';
 import { InvitedFriend, ReferralStats } from '@/types/interfaces/referral.interfaces';
 
-const avatar = (seed: number) => `https://i.pravatar.cc/200?img=${seed}`;
+const LOCAL_AVATARS = [
+  images.avatar1.src,
+  images.avatar2.src,
+  images.avatar3.src,
+  images.avatar4.src,
+  images.avatar5.src,
+  images.avatar6.src,
+  images.avatarYerevan.src,
+  images.avatar.src,
+];
+
+const avatar = (seed: number) => LOCAL_AVATARS[seed % LOCAL_AVATARS.length];
 
 export const invitedFriendsMock: InvitedFriend[] = [
   {
     id: '1',
     username: 'john_doe',
     avatar: avatar(12),
-    isPrime: false,
+    isLuckyPlayer: false,
     isVerified: true,
     isVIP: true,
     isTelegramPremium: false,
@@ -21,7 +33,7 @@ export const invitedFriendsMock: InvitedFriend[] = [
     id: '2',
     username: 'jane_smith',
     avatar: avatar(45),
-    isPrime: false,
+    isLuckyPlayer: false,
     isVerified: false,
     isTelegramPremium: false,
     points: 800,
@@ -31,7 +43,7 @@ export const invitedFriendsMock: InvitedFriend[] = [
     id: '3',
     username: 'alex_wilson',
     avatar: avatar(7),
-    isPrime: true,
+    isLuckyPlayer: true,
     isVerified: false,
     isTelegramPremium: true,
     points: 2000,
@@ -46,7 +58,7 @@ export const invitedFriendsMock: InvitedFriend[] = [
     id: '4',
     username: 'sarah_jones',
     avatar: avatar(32),
-    isPrime: false,
+    isLuckyPlayer: false,
     isVerified: true,
     isTelegramPremium: false,
     points: 1200,
@@ -56,7 +68,7 @@ export const invitedFriendsMock: InvitedFriend[] = [
     id: '5',
     username: 'mike_brown',
     avatar: avatar(60),
-    isPrime: true,
+    isLuckyPlayer: true,
     isVerified: true,
     isTelegramPremium: true,
     isVIP: true,
@@ -70,7 +82,7 @@ export const invitedFriendsMock: InvitedFriend[] = [
     id: '6',
     username: 'lina_park',
     avatar: avatar(48),
-    isPrime: false,
+    isLuckyPlayer: false,
     isVerified: false,
     isTelegramPremium: true,
     points: 540,
@@ -80,7 +92,7 @@ export const invitedFriendsMock: InvitedFriend[] = [
     id: '7',
     username: 'omar_amini',
     avatar: avatar(15),
-    isPrime: true,
+    isLuckyPlayer: true,
     isVerified: true,
     isTelegramPremium: false,
     points: 980,

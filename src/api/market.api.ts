@@ -4,7 +4,6 @@ import { inventoryApi } from '@/api/inventory.api';
 import { meApi } from '@/api/me.api';
 import { ticketsApi } from '@/api/tickets.api';
 import { rtkTags } from '@/constants/rtk-tags';
-import { chipShardsForNextLevel } from '@/utils/global/inventory.utils';
 import { MarketPriceType } from '@/types/enums/market.enums';
 import type {
   InventoryBoosterDuration,
@@ -96,70 +95,31 @@ export const marketApi = api.injectEndpoints({
       },
     }),
 
-    buyChip: builder.mutation<
+    buyShard: builder.mutation<
       void,
       {
-        chipId: string;
-        chipType: InventoryChipType;
+        shardId: string;
+        shardType: InventoryChipType;
         quality: TicketType;
-        level: number;
-        effectPct: number;
+        count: number;
         price: MarketPrice;
       }
     >({
-      query: ({ chipId, price }) => ({
-        url: 'market/chips/buy',
+      query: ({ shardId, price }) => ({
+        url: 'market/shards/buy',
         method: 'POST',
-        body: { chipId, priceType: price.type },
+        body: { shardId, priceType: price.type },
       }),
-      async onQueryStarted(
-        { chipType, quality, level, effectPct, price },
-        { dispatch, queryFulfilled }
-      ) {
+      async onQueryStarted({ shardType, quality, count, price }, { dispatch, queryFulfilled }) {
         const mePatch = dispatch(deductBalanceUpdater(price));
         const inventoryPatch = dispatch(
           inventoryApi.util.updateQueryData('getInventory', undefined, draft => {
-            draft.chips = [
-              ...draft.chips,
-              {
-                id: `chip-${quality}-${chipType}-${Date.now()}`,
-                type: chipType,
-                quality,
-                level,
-                effectPct,
-                shardsForNextLevel: chipShardsForNextLevel(level),
-                lifetime: 'permanent',
-                source: 'tournament',
-              },
-            ];
-          })
-        );
-        try {
-          await queryFulfilled;
-        } catch {
-          mePatch.undo();
-          inventoryPatch.undo();
-        }
-      },
-    }),
-
-    buyBuilder: builder.mutation<
-      void,
-      { builderId: string; tier: TicketType; count: number; price: MarketPrice }
-    >({
-      query: ({ builderId, price }) => ({
-        url: 'market/builders/buy',
-        method: 'POST',
-        body: { builderId, priceType: price.type },
-      }),
-      async onQueryStarted({ tier, count, price }, { dispatch, queryFulfilled }) {
-        const mePatch = dispatch(deductBalanceUpdater(price));
-        const inventoryPatch = dispatch(
-          inventoryApi.util.updateQueryData('getInventory', undefined, draft => {
-            draft.builders = {
-              ...draft.builders,
-              [tier]: (draft.builders[tier] ?? 0) + count,
-            };
+            const existing = draft.shards.find(s => s.type === shardType && s.quality === quality);
+            if (existing) {
+              existing.count += count;
+            } else {
+              draft.shards = [...draft.shards, { type: shardType, quality, count }];
+            }
           })
         );
         try {
@@ -230,22 +190,6 @@ export const marketApi = api.injectEndpoints({
         }
       },
     }),
-
-    buyPass: builder.mutation<void, { passId: string; price: MarketPrice }>({
-      query: ({ passId, price }) => ({
-        url: 'market/passes/buy',
-        method: 'POST',
-        body: { passId, priceType: price.type },
-      }),
-      async onQueryStarted({ price }, { dispatch, queryFulfilled }) {
-        const mePatch = dispatch(deductBalanceUpdater(price));
-        try {
-          await queryFulfilled;
-        } catch {
-          mePatch.undo();
-        }
-      },
-    }),
   }),
 });
 
@@ -254,9 +198,7 @@ export const {
   useBuyTicketMutation,
   useBuyStatusMutation,
   useBuyEngineMutation,
-  useBuyChipMutation,
-  useBuyBuilderMutation,
+  useBuyShardMutation,
   useBuyBoosterMutation,
   useBuyCosmeticMutation,
-  useBuyPassMutation,
 } = marketApi;

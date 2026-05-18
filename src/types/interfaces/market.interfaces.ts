@@ -2,12 +2,11 @@ import {
   MarketCosmeticType,
   MarketItemCategory,
   MarketItemRequirementType,
-  MarketPassType,
   MarketPriceType,
   MarketStatusType,
   TicketBoostType,
 } from '@/types/enums/market.enums';
-import type { AvatarBoost } from '@/types/interfaces/avatars.interfaces';
+import type { AvatarBoost, AvatarDailyReward } from '@/types/interfaces/avatars.interfaces';
 import type { InventoryChipType } from '@/types/interfaces/inventory.interfaces';
 import type { TicketType } from '@/types/types/ticket.types';
 
@@ -17,6 +16,8 @@ export interface MarketPrice {
   /** Optional original (pre-discount) amount — for showing strike-through */
   originalAmount?: number;
 }
+
+export type MarketAccent = TicketType | 'pink' | 'purple' | 'gold';
 
 export interface MarketRequirement {
   type: MarketItemRequirementType;
@@ -37,7 +38,7 @@ export interface MarketItemBase {
 }
 
 export interface MarketBundleItem {
-  kind: 'ticket' | 'stars' | 'ltc' | 'chip' | 'booster' | 'builder' | 'engine';
+  kind: 'ticket' | 'stars' | 'ltc' | 'chip' | 'booster' | 'engine';
   amount: number;
   /** Tier for tier-bound items (ticket, chip, booster, engine) */
   tier?: TicketType;
@@ -81,19 +82,11 @@ export interface MarketEngine extends MarketItemBase {
   remainingSupply?: number;
 }
 
-export interface MarketChip extends MarketItemBase {
-  category: MarketItemCategory.CHIP;
+export interface MarketShard extends MarketItemBase {
+  category: MarketItemCategory.SHARD;
   type: InventoryChipType;
   quality: TicketType;
-  level: number;
-  /** % effect at the listed level */
-  effectPct: number;
-}
-
-export interface MarketBuilder extends MarketItemBase {
-  category: MarketItemCategory.BUILDER;
-  /** Tier of builders this listing grants (some bundles span tiers) */
-  tier?: TicketType;
+  /** Number of shards granted by one purchase */
   count: number;
 }
 
@@ -121,13 +114,8 @@ export interface MarketCosmetic extends MarketItemBase {
   avatarLevel?: number;
   /** AVATAR cosmeticType only — bound boost granted while equipped */
   avatarBoost?: AvatarBoost;
-}
-
-export interface MarketPass extends MarketItemBase {
-  category: MarketItemCategory.PASS;
-  passType: MarketPassType;
-  durationDays: number;
-  perks: string[];
+  /** AVATAR cosmeticType only — daily reward granted while equipped (avatars L6+) */
+  avatarDailyReward?: AvatarDailyReward;
 }
 
 export interface MarketData {
@@ -135,10 +123,8 @@ export interface MarketData {
   engines: MarketEngine[];
   tickets: MarketTicket[];
   boosts: MarketBoost[];
-  chips: MarketChip[];
-  builders: MarketBuilder[];
+  shards: MarketShard[];
   boosters: MarketBooster[];
   cosmetics: MarketCosmetic[];
-  passes: MarketPass[];
   statuses: MarketStatus[];
 }

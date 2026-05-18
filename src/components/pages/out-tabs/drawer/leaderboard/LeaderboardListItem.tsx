@@ -10,7 +10,8 @@ import { SkeletonSuspense } from '@/components/shared/seleketons/SkeletonSuspens
 import { VerifiedBadge } from '@/components/shared/badges/VerifiedBadge';
 import { useAppTranslations } from '@/hooks/useAppTranslations';
 import { LeaderboardCountUp } from './LeaderboardCountUp';
-import { Crown, Star } from 'lucide-react';
+import { LuckyPlayerIcon } from '@/components/shared/icons/LuckyPlayerIcon';
+import { Star } from 'lucide-react';
 import { routes } from '@/constants/routes';
 import type { LeaderboardEntry } from '@/types/interfaces/leaderboard.interfaces';
 import type { CSSProperties } from 'react';
@@ -118,9 +119,7 @@ export function LeaderboardListItem({
                 classNames={{ icon: 'h-3 w-3' }}
               />
             )}
-            {entry?.isPrime && (
-              <Crown size={11} className="text-electric-purple flex-shrink-0" strokeWidth={2.4} />
-            )}
+            {entry?.isLuckyPlayer && <LuckyPlayerIcon size={13} className="shrink-0" />}
           </SkeletonSuspense>
         </div>
         <SkeletonSuspense
