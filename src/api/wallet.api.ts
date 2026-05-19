@@ -6,8 +6,6 @@ import type {
   ConnectWalletRequest,
   ConnectWalletResponse,
   DepositAddressResponse,
-  NotifyLcLaunchRequest,
-  NotifyLcLaunchResponse,
   StarsPackage,
   SupportedWallet,
   WalletState,
@@ -52,9 +50,6 @@ export const walletApi = api.injectEndpoints({
       query: body => ({ url: 'wallet/buy-stars', method: 'POST', body }),
       invalidatesTags: [rtkTags.wallet, rtkTags.walletTransactions, rtkTags.me],
     }),
-    notifyLcLaunch: builder.mutation<NotifyLcLaunchResponse, NotifyLcLaunchRequest>({
-      query: body => ({ url: 'wallet/notify-lc', method: 'POST', body }),
-    }),
   }),
 });
 
@@ -68,5 +63,4 @@ export const {
   useDisconnectWalletMutation,
   useWithdrawTonMutation,
   useBuyStarsMutation,
-  useNotifyLcLaunchMutation,
 } = walletApi;

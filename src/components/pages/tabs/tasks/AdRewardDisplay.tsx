@@ -1,11 +1,12 @@
 import { twMerge } from 'tailwind-merge';
-import { Coins, Sparkles, Star, Ticket, Trophy, Zap } from 'lucide-react';
+import { Coins, Sparkles, Star, Ticket, Trophy } from 'lucide-react';
 import type { LucideIcon } from 'lucide-react';
+import { BoltIcon } from '@/components/shared/icons/BoltIcon';
 import { TaskRewardType } from '@/types/enums/tasks.enums';
 import type { TaskReward } from '@/types/interfaces/tasks.interfaces';
 
 interface RewardStyle {
-  Icon: LucideIcon;
+  Icon: LucideIcon | null;
   iconClass: string;
   bgClass: string;
   glowClass: string;
@@ -28,8 +29,8 @@ const STYLE_MAP: Record<TaskRewardType, RewardStyle> = {
     ringClass: 'border-electric-pink/40',
   },
   [TaskRewardType.ACTIVITY_POINTS]: {
-    Icon: Zap,
-    iconClass: 'text-teal',
+    Icon: null,
+    iconClass: '',
     bgClass: 'bg-gradient-to-br from-teal/30 via-teal/10 to-transparent',
     glowClass: 'shadow-[0_0_14px_rgba(79,138,130,0.45)]',
     ringClass: 'border-teal/40',
@@ -90,11 +91,15 @@ export function AdRewardDisplay({ rewards, className }: AdRewardDisplayProps) {
               chipPadding
             )}
           >
-            <Icon
-              size={iconSize}
-              strokeWidth={2.2}
-              className={twMerge('shrink-0 drop-shadow-[0_0_4px_currentColor]', iconClass)}
-            />
+            {Icon ? (
+              <Icon
+                size={iconSize}
+                strokeWidth={2.2}
+                className={twMerge('shrink-0 drop-shadow-[0_0_4px_currentColor]', iconClass)}
+              />
+            ) : (
+              <BoltIcon size={iconSize + 10} />
+            )}
             <span
               className={twMerge('font-extrabold tabular-nums leading-none text-white', amountSize)}
             >

@@ -1,6 +1,6 @@
 'use client';
 import { useEffect, useRef, useState, type CSSProperties, type PointerEvent } from 'react';
-import { Clover, Crown, Gem, type LucideIcon, Star } from 'lucide-react';
+import { Crown, Gem, type LucideIcon, Star } from 'lucide-react';
 import { twMerge } from 'tailwind-merge';
 import '@/styles/components/profile.css';
 
@@ -9,14 +9,12 @@ const STORAGE_KEY = 'profile-banner-icon-positions-v1';
 const ICONS: Record<string, LucideIcon> = {
   crown: Crown,
   star: Star,
-  clover: Clover,
   gem: Gem,
 };
 
 const ICON_COLORS: Record<string, string> = {
   crown: 'rgba(248, 189, 62, 1)',
   star: 'rgba(56, 189, 248, 1)',
-  clover: 'rgba(95, 200, 194, 1)',
   gem: 'rgba(139, 92, 246, 1)',
 };
 
@@ -59,16 +57,6 @@ const DEFAULT_LAYOUT: DefaultIconConfig[] = [
     rotate: 18,
     opacity: 0.55,
     enterDelay: 0.2,
-  },
-  {
-    id: 'clover-bl',
-    iconCode: 'clover',
-    left: 6,
-    top: 60,
-    size: 48,
-    rotate: -8,
-    opacity: 0.5,
-    enterDelay: 0.35,
   },
   {
     id: 'gem-br',

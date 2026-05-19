@@ -1,7 +1,8 @@
 'use client';
 
 import Image from 'next/image';
-import { ShieldCheck, Sparkles, Star } from 'lucide-react';
+import { Sparkles, Star } from 'lucide-react';
+import { VerifiedSparkleIcon } from '@/components/shared/icons/VerifiedSparkleIcon';
 import { useEffect, useRef, useState } from 'react';
 import { Modal } from '@/components/shared/modals/Modal';
 import { Button } from '@/components/shared/buttons/Button';
@@ -107,7 +108,7 @@ export function FriendClaimModal({
             <div className="mt-2 flex flex-wrap items-center justify-center gap-1.5">
               {friend.isVerified && (
                 <span className="inline-flex items-center gap-1 rounded-full bg-white/15 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider text-white">
-                  <ShieldCheck size={10} strokeWidth={2.4} />
+                  <VerifiedSparkleIcon size={14} />
                   {t('verified')}
                 </span>
               )}

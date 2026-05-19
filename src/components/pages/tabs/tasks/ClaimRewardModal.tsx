@@ -1,13 +1,14 @@
 'use client';
 
 import { useEffect, useRef, useState } from 'react';
-import { Coins, Loader2, Sparkles, Star, Ticket, Trophy, Zap } from 'lucide-react';
+import { Coins, Loader2, Sparkles, Star, Ticket, Trophy } from 'lucide-react';
 import type { LucideIcon } from 'lucide-react';
 import { twMerge } from 'tailwind-merge';
 import { Modal } from '@/components/shared/modals/Modal';
 import { Button } from '@/components/shared/buttons/Button';
 import { useAppTranslations } from '@/hooks/useAppTranslations';
-import { GlobalConstants } from '@/constants/global.constants';
+import { BoltIcon } from '@/components/shared/icons/BoltIcon';
+import { LcLabel } from '@/components/shared/icons/LcLabel';
 import { TaskRewardType } from '@/types/enums/tasks.enums';
 import type { ClaimTaskResponse, TaskReward } from '@/types/interfaces/tasks.interfaces';
 import { TaskRewardRow } from './TaskRewardRow';
@@ -22,10 +23,9 @@ export interface ClaimRewardModalProps {
   onRetry?: () => void;
 }
 
-const REWARD_ICON: Record<TaskRewardType, LucideIcon> = {
+const REWARD_ICON: Record<Exclude<TaskRewardType, TaskRewardType.ACTIVITY_POINTS>, LucideIcon> = {
   [TaskRewardType.LTC]: Coins,
   [TaskRewardType.TICKETS]: Ticket,
-  [TaskRewardType.ACTIVITY_POINTS]: Zap,
   [TaskRewardType.STARS]: Star,
   [TaskRewardType.PREMIUM]: Sparkles,
   [TaskRewardType.ENGINE]: Trophy,
@@ -135,7 +135,8 @@ export function ClaimRewardModal({
   const primaryReward: TaskReward | undefined =
     result?.rewards.find(r => r.type === TaskRewardType.LTC) ?? result?.rewards[0];
 
-  const PrimaryIcon = primaryReward ? REWARD_ICON[primaryReward.type] : Coins;
+  const primaryIsAp = primaryReward?.type === TaskRewardType.ACTIVITY_POINTS;
+  const PrimaryIcon = primaryReward && !primaryIsAp ? REWARD_ICON[primaryReward.type] : Coins;
   const gradient = primaryReward
     ? REWARD_GRADIENT[primaryReward.type]
     : 'from-pink to-electric-pink';
@@ -166,7 +167,11 @@ export function ClaimRewardModal({
                       gradient
                     )}
                   >
-                    <PrimaryIcon size={56} className="text-white drop-shadow-lg" />
+                    {primaryIsAp ? (
+                      <BoltIcon size={84} className="drop-shadow-lg" />
+                    ) : (
+                      <PrimaryIcon size={56} className="text-white drop-shadow-lg" />
+                    )}
                   </div>
                   <span className="pointer-events-none absolute inset-0 rounded-full overflow-hidden">
                     <span className="absolute -top-1/2 -left-1/2 h-[200%] w-[60%] bg-gradient-to-r from-transparent via-white/30 to-transparent animate-task-shine" />
@@ -222,18 +227,15 @@ export function ClaimRewardModal({
                 </p>
                 <div className="flex items-center justify-around text-sm font-bold tabular-nums">
                   <div className="flex items-center gap-1">
-                    <Coins size={14} className="text-gold" />
+                    <LcLabel size={14} />
                     <span>{result.newBalance.ltc.toLocaleString()}</span>
-                    <span className="text-white/40 font-medium text-[11px]">
-                      {GlobalConstants.coinName}
-                    </span>
                   </div>
                   <div className="flex items-center gap-1">
                     <Ticket size={14} className="text-electric-pink" />
                     <span>{result.newBalance.tickets}</span>
                   </div>
                   <div className="flex items-center gap-1">
-                    <Zap size={14} className="text-teal" />
+                    <BoltIcon size={20} />
                     <span>{result.newBalance.activityPoints}</span>
                   </div>
                 </div>

@@ -76,7 +76,8 @@ export function EnginePreviewCard({
           key={`${engine.id}-${pending ? 'pending' : 'producing'}-${cycle.toFixed(2)}`}
           tier={tier}
           capacity={capacity}
-          size={56}
+          size={42}
+          visual="engine"
         />
         <div className="flex flex-1 min-w-0 flex-col justify-around items-start py-0.5">
           <h5 className="text-[12px] font-bold text-white leading-tight truncate w-full">
@@ -138,7 +139,7 @@ export function EnginePreviewCard({
             <span className="absolute -top-1/2 -left-1/2 h-[200%] w-[55%] bg-gradient-to-r from-transparent via-white/40 to-transparent animate-task-shine" />
           </span>
           <span className="relative inline-flex items-center gap-1 text-[9px] font-bold uppercase tracking-wider text-white">
-            <Zap size={10} stroke={glow} fill={glow} fillOpacity={0.4} strokeWidth={2.6} />
+            <Zap size={13} stroke={glow} fill={glow} fillOpacity={0.4} strokeWidth={2.6} />
             {t('claim')}
           </span>
           <span

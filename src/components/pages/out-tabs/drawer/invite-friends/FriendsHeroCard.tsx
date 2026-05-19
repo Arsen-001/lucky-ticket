@@ -1,6 +1,7 @@
 'use client';
 
-import { Check, Copy, Share2, Star, UserPlus, Zap } from 'lucide-react';
+import { Check, Copy, Share2, Star, UserPlus } from 'lucide-react';
+import { BoltIcon } from '@/components/shared/icons/BoltIcon';
 import type { ReactNode } from 'react';
 import { useState } from 'react';
 import { twMerge } from 'tailwind-merge';
@@ -171,10 +172,7 @@ function RewardRow({
         {label}
       </span>
       <div className="flex flex-shrink-0 items-center gap-1.5">
-        <RewardChip
-          icon={<Zap size={11} className="fill-gold text-gold" />}
-          value={`+${activityPoints}`}
-        />
+        <RewardChip icon={<BoltIcon size={16} />} value={`+${activityPoints}`} />
         <RewardChip icon={<TelegramStarIcon size={11} />} value={`+${stars}`} />
       </div>
     </div>

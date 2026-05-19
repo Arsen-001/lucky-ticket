@@ -32,6 +32,9 @@ export const routes = {
   notifications: '/notifications',
   leaderboard: '/leaderboard',
   wallet: '/wallet',
+  lc: '/lc',
+  vip: '/vip',
+  luckyPlayer: '/lucky-player',
   tickets: {
     index: '/tickets',
   },

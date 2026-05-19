@@ -1,6 +1,7 @@
 'use client';
 
-import { ArrowDown, ArrowUp, Minus, Trophy, Zap } from 'lucide-react';
+import { ArrowDown, ArrowUp, Minus, Trophy } from 'lucide-react';
+import { BoltIcon } from '@/components/shared/icons/BoltIcon';
 import { Skeleton } from '@/components/shared/seleketons/Skeleton';
 import { SkeletonSuspense } from '@/components/shared/seleketons/SkeletonSuspense';
 import { useAppTranslations } from '@/hooks/useAppTranslations';
@@ -55,7 +56,7 @@ export function LeaderboardHeroCard({ myPlace, total, loading }: LeaderboardHero
           skeleton={<Skeleton variant="line" className="h-5 w-12" />}
         >
           <span className="text-gold inline-flex items-center gap-1 text-sm font-extrabold tabular-nums">
-            <Zap size={12} className="fill-gold" />
+            <BoltIcon size={17} />
             {myPlace ? formatNumber(myPlace.points) : 0}
           </span>
         </SkeletonSuspense>

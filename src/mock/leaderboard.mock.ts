@@ -29,7 +29,7 @@ const MY_RANK_BY_PERIOD: Record<LeaderboardPeriod, number> = {
   today: 14,
   week: 73,
   month: 147,
-  all: 312,
+  all: 1,
 };
 
 const POINTS_FLOOR_BY_PERIOD: Record<LeaderboardPeriod, number> = {
@@ -66,6 +66,7 @@ const generateEntries = (period: LeaderboardPeriod, count = 100): LeaderboardEnt
       isVerified: faker.datatype.boolean({ probability: 0.35 }),
       isLuckyPlayer: faker.datatype.boolean({ probability: 0.2 }),
       isVIP: faker.datatype.boolean({ probability: 0.25 }),
+      vipLevel: faker.number.int({ min: 1, max: 10 }),
     } satisfies LeaderboardEntry;
   });
 };
@@ -85,6 +86,7 @@ const buildResponse = (period: LeaderboardPeriod): LeaderboardResponse => {
     isVerified: me.isVerified,
     isLuckyPlayer: me.isLuckyPlayer,
     isVIP: me.isVIP,
+    vipLevel: me.vipLevel,
   };
 
   if (myRank <= places.length) {

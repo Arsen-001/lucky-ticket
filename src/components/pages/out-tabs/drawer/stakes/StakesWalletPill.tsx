@@ -1,6 +1,6 @@
 'use client';
 
-import { CoinIcon } from '@/components/shared/icons/CoinIcon';
+import { LcLabel } from '@/components/shared/icons/LcLabel';
 import { useAppTranslations } from '@/hooks/useAppTranslations';
 
 export interface StakesWalletPillProps {
@@ -13,7 +13,7 @@ export function StakesWalletPill({ balance, locked = 0 }: StakesWalletPillProps)
 
   return (
     <div className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-back-button-background/60 px-3 py-1.5">
-      <CoinIcon size={28} />
+      <LcLabel size={28} />
       <div className="flex flex-col leading-tight">
         <span className="text-gold text-[13px] font-extrabold tabular-nums">
           {balance.toLocaleString()}

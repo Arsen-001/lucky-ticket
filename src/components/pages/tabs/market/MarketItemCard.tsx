@@ -5,7 +5,7 @@ import { twMerge } from 'tailwind-merge';
 import { Button } from '@/components/shared/buttons/Button';
 import { MarketPrice } from '@/types/interfaces/market.interfaces';
 import { MarketPriceType } from '@/types/enums/market.enums';
-import { GlobalConstants } from '@/constants/global.constants';
+import { LcLabel } from '@/components/shared/icons/LcLabel';
 import { Skeleton } from '@/components/shared/seleketons/Skeleton';
 import { SkeletonSuspense } from '@/components/shared/seleketons/SkeletonSuspense';
 import {
@@ -173,9 +173,7 @@ export function MarketItemCard({
                     />
                   )}
                   <span className="text-sm font-semibold">{price.amount}</span>
-                  {price.type === MarketPriceType.LTC && (
-                    <span className="text-sm text-gold font-bold">{GlobalConstants.coinName}</span>
-                  )}
+                  {price.type === MarketPriceType.LTC && <LcLabel size={14} />}
                   {price.type === MarketPriceType.USDT && (
                     <span className="text-sm text-emerald-400 font-bold">USDT</span>
                   )}

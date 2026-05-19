@@ -2,16 +2,16 @@
 
 import Image from 'next/image';
 import Link from 'next/link';
-import { ArrowDown, ArrowUp, Minus, Zap } from 'lucide-react';
+import { ArrowDown, ArrowUp, Minus } from 'lucide-react';
 import { twMerge } from 'tailwind-merge';
-import { Medal } from '@/components/shared/icons/Medal';
+import { BoltIcon } from '@/components/shared/icons/BoltIcon';
 import { Skeleton } from '@/components/shared/seleketons/Skeleton';
 import { SkeletonSuspense } from '@/components/shared/seleketons/SkeletonSuspense';
-import { VerifiedBadge } from '@/components/shared/badges/VerifiedBadge';
+import { VerifiedSparkleIcon } from '@/components/shared/icons/VerifiedSparkleIcon';
 import { useAppTranslations } from '@/hooks/useAppTranslations';
 import { LeaderboardCountUp } from './LeaderboardCountUp';
 import { LuckyPlayerIcon } from '@/components/shared/icons/LuckyPlayerIcon';
-import { Star } from 'lucide-react';
+import { VipIcon } from '@/components/shared/icons/VipIcon';
 import { routes } from '@/constants/routes';
 import type { LeaderboardEntry } from '@/types/interfaces/leaderboard.interfaces';
 import type { CSSProperties } from 'react';
@@ -39,7 +39,6 @@ export function LeaderboardListItem({
   const change = entry?.rankChange ?? 0;
   const positive = change > 0;
   const negative = change < 0;
-  const isTop3 = !!entry && entry.place <= 3;
 
   return (
     <div
@@ -49,9 +48,7 @@ export function LeaderboardListItem({
         'bg-background-overlay flex items-center gap-2.5 rounded-2xl border p-2.5 transition-all',
         isMe
           ? 'border-electric-pink/55 shadow-[0_0_18px_rgba(222,0,155,0.22)]'
-          : isTop3
-            ? 'border-gold/35 hover:border-gold/55'
-            : 'border-white/5 hover:border-white/15',
+          : 'border-white/5 hover:border-white/15',
         className
       )}
     >
@@ -83,14 +80,6 @@ export function LeaderboardListItem({
             </div>
           )}
         </SkeletonSuspense>
-        {entry?.isVIP && (
-          <span
-            className="bg-electric-pink border-background-overlay absolute -bottom-0.5 -right-0.5 flex h-3.5 w-3.5 items-center justify-center rounded-full border-2"
-            aria-label="VIP"
-          >
-            <Star size={6} className="fill-white text-white" />
-          </span>
-        )}
       </Link>
 
       <div className="flex min-w-0 flex-1 flex-col gap-0.5">
@@ -112,14 +101,9 @@ export function LeaderboardListItem({
                 {t('you')}
               </span>
             )}
-            {entry?.isVerified && (
-              <VerifiedBadge
-                hideText
-                className="h-4 w-4 flex-shrink-0 p-0"
-                classNames={{ icon: 'h-3 w-3' }}
-              />
-            )}
-            {entry?.isLuckyPlayer && <LuckyPlayerIcon size={13} className="shrink-0" />}
+            {entry?.isVerified && <VerifiedSparkleIcon size={15} className="shrink-0" />}
+            {entry?.isLuckyPlayer && <LuckyPlayerIcon size={15} className="shrink-0" />}
+            {entry?.isVIP && <VipIcon size={15} className="shrink-0" />}
           </SkeletonSuspense>
         </div>
         <SkeletonSuspense
@@ -127,7 +111,7 @@ export function LeaderboardListItem({
           skeleton={<Skeleton variant="line" textSize="xs" className="h-3 w-16" />}
         >
           <span className="text-gold inline-flex items-center gap-1 text-[12px] font-bold tabular-nums">
-            <Zap size={11} className="fill-gold" />
+            <BoltIcon size={16} />
             <LeaderboardCountUp value={entry?.points ?? 0} enabled={!!animateCounter} />
           </span>
         </SkeletonSuspense>
@@ -178,33 +162,9 @@ function RankBadge({ entry, loading }: RankBadgeProps) {
     return <Skeleton variant="round" className="h-9 w-9 flex-shrink-0" />;
   }
 
-  const place = entry.place;
-
-  if (place === 1) {
-    return (
-      <div className="flex-center h-9 w-9 flex-shrink-0">
-        <Medal type="gold" width={32} height={32} />
-      </div>
-    );
-  }
-  if (place === 2) {
-    return (
-      <div className="flex-center h-9 w-9 flex-shrink-0">
-        <Medal type="silver" width={32} height={32} />
-      </div>
-    );
-  }
-  if (place === 3) {
-    return (
-      <div className="flex-center h-9 w-9 flex-shrink-0">
-        <Medal type="bronze" width={32} height={32} />
-      </div>
-    );
-  }
-
   return (
     <div className="flex-center bg-background-overlay h-9 w-9 flex-shrink-0 rounded-xl border border-white/15 text-sm font-extrabold tabular-nums text-white">
-      {place}
+      {entry.place}
     </div>
   );
 }

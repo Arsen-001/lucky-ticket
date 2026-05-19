@@ -50,6 +50,7 @@ export interface ProfileResponse {
   isLuckyPlayer: boolean;
   isVIP: boolean;
   vipLevel: number;
+  level: number;
   activityPoints: number;
   activityBest: ActivityBest;
   apToNextLevel: number;

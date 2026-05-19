@@ -1,13 +1,12 @@
 import Image from 'next/image';
 import { twMerge } from 'tailwind-merge';
 import type { CSSProperties, ReactNode } from 'react';
-import { Zap } from 'lucide-react';
-
 import { SkeletonSuspense } from '@/components/shared/seleketons/SkeletonSuspense';
 import { Skeleton } from '@/components/shared/seleketons/Skeleton';
-import { VerifiedBadge } from '@/components/shared/badges/VerifiedBadge';
+import { VerifiedSparkleIcon } from '@/components/shared/icons/VerifiedSparkleIcon';
 import { LuckyPlayerBadge } from '@/components/shared/badges/LuckyPlayerBadge';
 import { VIPBadge } from '@/components/shared/badges/VIPBadge';
+import { BoltIcon } from '@/components/shared/icons/BoltIcon';
 
 export interface UserListItemProps {
   avatar: string;
@@ -73,13 +72,7 @@ export const UserListItem = ({
             <div className="flex items-start  gap-1 min-w-0">
               <div className="font-semibold truncate ">{username}</div>
               <div className="flex items-center gap-px">
-                {isVerified && (
-                  <VerifiedBadge
-                    className="p-0 h-5.5 aspect-square"
-                    hideText
-                    classNames={{ icon: 'w-3.5 h-3.5' }}
-                  />
-                )}
+                {isVerified && <VerifiedSparkleIcon size={16} className="shrink-0" />}
                 {isLuckyPlayer && (
                   <LuckyPlayerBadge
                     className="p-0 h-5.5 aspect-square"
@@ -103,7 +96,7 @@ export const UserListItem = ({
                 loading={loading}
                 skeleton={<Skeleton variant="line" textSize="sm" className="w-12" />}
               >
-                <Zap className="fill-gold text-gold" size={12} />
+                <BoltIcon size={17} />
                 <span className="font-semibold text-xs pt-px">{points}</span>
               </SkeletonSuspense>
             </div>

@@ -7,9 +7,11 @@ import {
   WalletTransactionStatus,
   WalletTransactionType,
 } from '@/types/enums/wallet.enums';
+import { LcTransactionDirection, LcTransactionType } from '@/types/enums/lc.enums';
 import type { MeResponse } from '@/types/interfaces/user.interfaces';
 import type { ActiveStake, StakeHistoryEntry } from '@/types/interfaces/stakes.interfaces';
 import type { WalletTransaction } from '@/types/interfaces/wallet.interfaces';
+import type { LcTransaction } from '@/types/interfaces/lc.interfaces';
 
 const minutesAgo = (m: number) => new Date(Date.now() - m * 60_000).toISOString();
 const minutesFromNow = (m: number) => new Date(Date.now() + m * 60_000).toISOString();
@@ -35,6 +37,7 @@ export const mockDb = {
     username: 'Arsen 001',
     email: 'arsen@gmai.com',
     isLuckyPlayer: true,
+    luckyPlayerExpiresAt: new Date(Date.now() + 18 * 24 * 3_600_000).toISOString(),
     isVIP: true,
     vipLevel: 2,
     isVerified: true,
@@ -179,5 +182,88 @@ export const mockDb = {
         fee: 0.05,
       },
     ] as WalletTransaction[],
+  },
+
+  lc: {
+    lifetimeEarned: 8420,
+    lifetimeSpent: 7883,
+    starsToLcRate: 2, // 1 Telegram Star = 2 LC
+    transactions: [
+      {
+        id: 'lctx_001',
+        type: LcTransactionType.TOURNAMENT_PRIZE,
+        direction: LcTransactionDirection.CREDIT,
+        amount: 280,
+        description: 'Tournament prize · Evening Bronze',
+        createdAt: minutesAgo(18),
+        balanceAfter: 537,
+        sourceId: 'trn_evening_bronze',
+      },
+      {
+        id: 'lctx_002',
+        type: LcTransactionType.MARKET_PURCHASE,
+        direction: LcTransactionDirection.DEBIT,
+        amount: 120,
+        description: 'Bought Capacity Chip · L2',
+        createdAt: hoursAgo(3),
+        balanceAfter: 257,
+        sourceId: 'mkt_chip_cap_l2',
+      },
+      {
+        id: 'lctx_003',
+        type: LcTransactionType.STAKE_REWARD,
+        direction: LcTransactionDirection.CREDIT,
+        amount: 95,
+        description: 'Stake reward · Level 2',
+        createdAt: hoursAgo(8),
+        balanceAfter: 377,
+        sourceId: 'stake-mid',
+      },
+      {
+        id: 'lctx_004',
+        type: LcTransactionType.TASK_REWARD,
+        direction: LcTransactionDirection.CREDIT,
+        amount: 40,
+        description: 'Daily task · Watch ad',
+        createdAt: hoursAgo(11),
+        balanceAfter: 282,
+      },
+      {
+        id: 'lctx_005',
+        type: LcTransactionType.CONVERT_FROM_STARS,
+        direction: LcTransactionDirection.CREDIT,
+        amount: 500,
+        description: 'Converted 250 Stars → 500 LC',
+        createdAt: hoursAgo(26),
+        balanceAfter: 242,
+      },
+      {
+        id: 'lctx_006',
+        type: LcTransactionType.ENGINE_UPGRADE,
+        direction: LcTransactionDirection.DEBIT,
+        amount: 320,
+        description: 'Upgraded engine speed · L3',
+        createdAt: hoursAgo(40),
+        balanceAfter: -258,
+      },
+      {
+        id: 'lctx_007',
+        type: LcTransactionType.REFERRAL,
+        direction: LcTransactionDirection.CREDIT,
+        amount: 62,
+        description: 'Referral bonus · @luckyfriend',
+        createdAt: hoursAgo(54),
+        balanceAfter: 62,
+      },
+      {
+        id: 'lctx_008',
+        type: LcTransactionType.MARKET_SALE,
+        direction: LcTransactionDirection.CREDIT,
+        amount: 180,
+        description: 'Sold Speed Chip · L1',
+        createdAt: hoursAgo(72),
+        balanceAfter: 0,
+      },
+    ] as LcTransaction[],
   },
 };

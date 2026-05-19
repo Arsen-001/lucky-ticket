@@ -8,7 +8,7 @@ import { MarketSectionGrid } from '@/components/pages/tabs/market/MarketSectionG
 import { MarketUniversalCard } from '@/components/pages/tabs/market/MarketUniversalCard';
 import type { MarketSelectedItem } from '@/components/pages/tabs/market/MarketView';
 import { Ticket } from '@/components/shared/icons/Ticket';
-import { GlobalConstants } from '@/constants/global.constants';
+import { LcLabel } from '@/components/shared/icons/LcLabel';
 import { useAppTranslations } from '@/hooks/useAppTranslations';
 import { MarketCosmeticType } from '@/types/enums/market.enums';
 import type { AvatarDailyReward } from '@/types/interfaces/avatars.interfaces';
@@ -96,7 +96,7 @@ export function MarketCosmeticSection({ cosmetics, onSelect, onBuy }: MarketCosm
               <div className="flex flex-col gap-1.5">
                 {avatar.avatarBoost && (
                   <span className="inline-flex items-center gap-1.5 text-[12px] font-bold text-white/85">
-                    <Zap size={13} style={{ color: accentValue }} strokeWidth={2.4} />
+                    <Zap size={17} style={{ color: accentValue }} strokeWidth={2.4} />
                     {t('avatar boost {pct} {type}', {
                       pct: avatar.avatarBoost.pct,
                       type: t(`avatar boost ${avatar.avatarBoost.type}`),
@@ -137,8 +137,9 @@ export function MarketCosmeticSection({ cosmetics, onSelect, onBuy }: MarketCosm
 function renderDailyReward(reward: AvatarDailyReward): ReactNode {
   if (reward.kind === 'ltc') {
     return (
-      <span className="text-gold inline-flex items-center gap-0.5 tabular-nums">
-        +{reward.amount} {GlobalConstants.coinName}
+      <span className="text-gold inline-flex items-center gap-1 tabular-nums">
+        +{reward.amount}
+        <LcLabel size={12} />
       </span>
     );
   }

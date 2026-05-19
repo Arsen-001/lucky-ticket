@@ -16,7 +16,7 @@ import '@/styles/components/tasks.css';
 import { ChipShardIcon } from '@/components/shared/icons/ChipShardIcon';
 import { TelegramStarIcon } from '@/components/shared/icons/TelegramStarIcon';
 import type { MarketSelectedItem } from '@/components/pages/tabs/market/MarketView';
-import { GlobalConstants } from '@/constants/global.constants';
+import { LcLabel } from '@/components/shared/icons/LcLabel';
 import { useAppTranslations } from '@/hooks/useAppTranslations';
 import { MarketPriceType } from '@/types/enums/market.enums';
 import type { MarketAccent, MarketPrice } from '@/types/interfaces/market.interfaces';
@@ -266,9 +266,7 @@ function MarketHeroCard({ featured, onClick, onBuy }: MarketHeroCardProps) {
               <span className="text-[9px] text-white/55 line-through">{price.originalAmount}</span>
             )}
             <span>{price.amount}</span>
-            {price.type === MarketPriceType.LTC && (
-              <span className="text-gold text-[10px]">{GlobalConstants.coinName}</span>
-            )}
+            {price.type === MarketPriceType.LTC && <LcLabel size={11} />}
           </button>
         )}
       </div>

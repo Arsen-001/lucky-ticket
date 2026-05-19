@@ -9,12 +9,13 @@ export type SettingsStatusAccent = 'pink' | 'gold';
 
 export interface SettingsStatusHeroProps {
   icon: ReactNode;
-  title: string;
+  title?: string;
   statusLabel: string;
   description?: string;
   active?: boolean;
   accent?: SettingsStatusAccent;
   loading?: boolean;
+  iconBare?: boolean;
   className?: string;
 }
 
@@ -31,6 +32,7 @@ export function SettingsStatusHero({
   active = false,
   accent = 'pink',
   loading = false,
+  iconBare = false,
   className,
 }: SettingsStatusHeroProps) {
   const accentVar = ACCENT_VAR[accent];
@@ -47,20 +49,54 @@ export function SettingsStatusHero({
         boxShadow: `inset 0 0 60px color-mix(in srgb, ${accentVar} 14%, transparent)`,
       }}
     >
-      <div
-        className="flex-center relative h-20 w-20 rounded-2xl border"
-        style={{
-          borderColor: `color-mix(in srgb, ${accentVar} 55%, transparent)`,
-          backgroundColor: `color-mix(in srgb, ${accentVar} 14%, transparent)`,
-          boxShadow: `inset 0 0 24px color-mix(in srgb, ${accentVar} 40%, transparent)`,
-        }}
-      >
-        {icon}
-      </div>
+      {iconBare ? (
+        <div className="flex-center relative">
+          <span
+            aria-hidden
+            className="pointer-events-none absolute inset-0 -z-10"
+            style={{
+              background: `radial-gradient(closest-side, ${accentVar}, transparent 70%)`,
+              filter: 'blur(28px)',
+              transform: 'scale(2.1)',
+              opacity: 0.9,
+            }}
+          />
+          <span
+            aria-hidden
+            className="pointer-events-none absolute inset-0 -z-10"
+            style={{
+              background: `radial-gradient(closest-side, color-mix(in srgb, ${accentVar} 70%, transparent), transparent 75%)`,
+              filter: 'blur(12px)',
+              transform: 'scale(1.4)',
+            }}
+          />
+          <div
+            className="flex-center relative"
+            style={{
+              filter: `drop-shadow(0 0 24px ${accentVar}) drop-shadow(0 12px 32px color-mix(in srgb, ${accentVar} 75%, transparent))`,
+            }}
+          >
+            {icon}
+          </div>
+        </div>
+      ) : (
+        <div
+          className="flex-center relative h-20 w-20 rounded-2xl border"
+          style={{
+            borderColor: `color-mix(in srgb, ${accentVar} 55%, transparent)`,
+            backgroundColor: `color-mix(in srgb, ${accentVar} 14%, transparent)`,
+            boxShadow: `inset 0 0 24px color-mix(in srgb, ${accentVar} 40%, transparent)`,
+          }}
+        >
+          {icon}
+        </div>
+      )}
 
-      <SkeletonSuspense loading={loading} skeleton={<Skeleton className="h-6 w-32" />}>
-        <h2 className="text-white text-xl font-bold leading-tight">{title}</h2>
-      </SkeletonSuspense>
+      {title && (
+        <SkeletonSuspense loading={loading} skeleton={<Skeleton className="h-6 w-32" />}>
+          <h2 className="text-white text-xl font-bold leading-tight">{title}</h2>
+        </SkeletonSuspense>
+      )}
 
       <SkeletonSuspense loading={loading} skeleton={<Skeleton className="h-5 w-24" />}>
         <span

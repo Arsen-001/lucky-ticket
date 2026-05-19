@@ -18,6 +18,7 @@ import {
 import { twMerge } from 'tailwind-merge';
 import { Button } from '@/components/shared/buttons/Button';
 import { Medal } from '@/components/shared/icons/Medal';
+import { LcLabel } from '@/components/shared/icons/LcLabel';
 import { Skeleton } from '@/components/shared/seleketons/Skeleton';
 import { SkeletonSuspense } from '@/components/shared/seleketons/SkeletonSuspense';
 import { GoldenText } from '@/components/shared/typography/GoldenText';
@@ -204,10 +205,11 @@ export function TournamentCard({
               <div className="flex items-center gap-1.5 flex-1 min-w-0 leading-none">
                 <Sparkles className="w-3.5 h-3.5 text-pink-secondary shrink-0" />
                 <GoldenText
-                  className="text-sm font-extrabold tabular-nums leading-none truncate"
+                  className="inline-flex items-center gap-1 text-sm font-extrabold tabular-nums leading-none truncate"
                   style={{ textShadow: '0 1px 4px rgba(248, 189, 62, 0.45)' }}
                 >
-                  {prizePool?.toLocaleString()} {GlobalConstants.coinName}
+                  {prizePool?.toLocaleString()}
+                  <LcLabel size={14} />
                 </GoldenText>
               </div>
               <div className="h-3.5 w-px bg-white/15 shrink-0" />

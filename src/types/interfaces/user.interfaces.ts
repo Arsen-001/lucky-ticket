@@ -3,6 +3,7 @@ export interface MeResponse {
   username: string;
   email?: string;
   isLuckyPlayer: boolean;
+  luckyPlayerExpiresAt?: string;
   isVIP: boolean;
   vipLevel: number;
   isVerified: boolean;

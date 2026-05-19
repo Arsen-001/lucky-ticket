@@ -144,5 +144,4 @@ export const walletMock = {
   'POST wallet/disconnect': disconnectWallet,
   'POST wallet/withdraw': withdrawTon,
   'POST wallet/buy-stars': buyStars,
-  'POST wallet/notify-lc': { success: true },
 };

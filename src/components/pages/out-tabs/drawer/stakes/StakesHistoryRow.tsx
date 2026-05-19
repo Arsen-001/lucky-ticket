@@ -2,9 +2,8 @@
 
 import '@/styles/components/stakes.css';
 import { Ticket } from '@/components/shared/icons/Ticket';
-import { CoinIcon } from '@/components/shared/icons/CoinIcon';
+import { LcLabel } from '@/components/shared/icons/LcLabel';
 import { useAppTranslations } from '@/hooks/useAppTranslations';
-import { GlobalConstants } from '@/constants/global.constants';
 import { findLevelDef, formatStakeRelative } from '@/utils/global/stakes.utils';
 import { StakesLevelChip } from '@/components/pages/out-tabs/drawer/stakes/StakesLevelChip';
 import type { StakeHistoryEntry, StakeLevelDefinition } from '@/types/interfaces/stakes.interfaces';
@@ -40,8 +39,9 @@ export function StakesHistoryRow({ entry, levels }: StakesHistoryRowProps) {
               {entry.bonusLC > 0 && (
                 <>
                   {' · '}
-                  <span className="text-gold font-bold">
-                    +{entry.bonusLC.toLocaleString()} {GlobalConstants.coinName}
+                  <span className="text-gold inline-flex items-center gap-1 font-bold">
+                    +{entry.bonusLC.toLocaleString()}
+                    <LcLabel size={11} />
                   </span>
                 </>
               )}
@@ -59,7 +59,7 @@ export function StakesHistoryRow({ entry, levels }: StakesHistoryRowProps) {
       </div>
 
       <div className="relative flex items-center gap-1">
-        <CoinIcon size={20} />
+        <LcLabel size={20} />
         <span className="text-gold text-[11px] font-bold tabular-nums">
           {entry.amount.toLocaleString()}
         </span>

@@ -49,13 +49,15 @@ export function AchievementShowcase({
             {pinnedAchievements.length} / {SHOWCASE_SLOTS} {t('pinned')}
           </span>
         </div>
-        <Link
-          href={routes.profile.achievements}
-          className="flex items-center gap-1 text-[11px] font-bold uppercase tracking-wider text-electric-pink"
-        >
-          {t('view all')} ({totalEarned}/{totalAchievements})
-          <ChevronRight size={12} />
-        </Link>
+        {isOwn && (
+          <Link
+            href={routes.profile.achievements}
+            className="flex items-center gap-1 text-[11px] font-bold uppercase tracking-wider text-electric-pink"
+          >
+            {t('view all')} ({totalEarned}/{totalAchievements})
+            <ChevronRight size={12} />
+          </Link>
+        )}
       </header>
 
       <div className="grid grid-cols-3 gap-2.5">

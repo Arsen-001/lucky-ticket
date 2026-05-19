@@ -16,6 +16,8 @@ export const rtkTags = {
   wallet: 'Wallet',
   walletTransactions: 'WalletTransactions',
   starsPackages: 'StarsPackages',
+  lc: 'Lc',
+  lcTransactions: 'LcTransactions',
   achievements: 'Achievements',
   profile: 'Profile',
   profileById: ':ProfileById',

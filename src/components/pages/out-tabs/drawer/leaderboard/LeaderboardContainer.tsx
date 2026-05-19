@@ -89,6 +89,9 @@ export function LeaderboardContainer() {
         points: entry.points,
         avatarUrl: entry.avatar,
         fallbackInitial: entry.username.charAt(0).toUpperCase(),
+        isVerified: entry.isVerified,
+        isLuckyPlayer: entry.isLuckyPlayer,
+        isVIP: entry.isVIP,
       })),
     [places]
   );

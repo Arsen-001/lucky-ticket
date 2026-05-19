@@ -118,7 +118,7 @@ export function InventoryContainer() {
         {isBoostersView ? (
           visibleBoosters.length === 0 ? (
             <div className="flex flex-col items-center gap-2 rounded-2xl border border-white/8 bg-black/25 p-6 text-center">
-              <Zap size={28} className="text-electric-purple" />
+              <Zap size={36} className="text-electric-purple" />
               <p className="text-xs text-white/65">{t('boosters empty')}</p>
             </div>
           ) : (

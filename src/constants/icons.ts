@@ -1,59 +1,62 @@
-import bronzeMedal from '@assets/icons/bronze-medal.webp';
-import bronzeTicket from '@assets/icons/bronze-ticket.webp';
-import bronzeTicketOverlap from '@assets/icons/bronze-ticket-overlap.webp';
-import bronzeTrophy from '@assets/icons/bronze-trophy.webp';
-import bronzeEngine from '@assets/icons/bronze-engine.webp';
-import bronzeCapacityChip from '@assets/icons/bronze-capacity-chip.webp';
-import bronzeCapacityShard from '@assets/icons/bronze-capacity-shard.webp';
-import bronzeTimeChip from '@assets/icons/bronze-time-chip.webp';
-import bronzeTimeShard from '@assets/icons/bronze-time-shard.webp';
+import bronzeEngine from '@assets/icons/engines/bronze-engine.webp';
+import silverEngine from '@assets/icons/engines/silver-engine.webp';
+import goldenEngine from '@assets/icons/engines/gold-engine.webp';
+import platinumEngine from '@assets/icons/engines/platinum-engine.webp';
+import diamondEngine from '@assets/icons/engines/diamond-engine.webp';
 
-import coin from '@assets/icons/lc-coin.webp';
-import crown from '@assets/icons/crown.webp';
+import bronzeTicket from '@assets/icons/tickets/bronze-ticket.webp';
+import bronzeTicketOverlap from '@assets/icons/tickets/bronze-ticket-overlap.webp';
+import silverTicket from '@assets/icons/tickets/silver-ticket.webp';
+import silverTicketOverlap from '@assets/icons/tickets/silver-ticket-overlap.webp';
+import goldenTicket from '@assets/icons/tickets/golden-ticket.webp';
+import goldenTicketOverlap from '@assets/icons/tickets/golden-ticket-overlap.webp';
+import platinumTicket from '@assets/icons/tickets/platinum-ticket.webp';
+import platinumTicketOverlap from '@assets/icons/tickets/platinum-ticket-overlap.webp';
+import diamondTicket from '@assets/icons/tickets/diamond-ticket.webp';
+import diamondTicketOverlap from '@assets/icons/tickets/diamond-ticket-overlap.webp';
 
-import diamondMedal from '@assets/icons/diamond-medal.webp';
-import diamondTicket from '@assets/icons/diamond-ticket.webp';
-import diamondTicketOverlap from '@assets/icons/diamond-ticket-overlap.webp';
-import diamondEngine from '@assets/icons/diamond-engine.webp';
-import diamondCapacityChip from '@assets/icons/diamond-capacity-chip.webp';
-import diamondCapacityShard from '@assets/icons/diamond-capacity-shard.webp';
-import diamondTimeChip from '@assets/icons/diamond-time-chip.webp';
-import diamondTimeShard from '@assets/icons/diamond-time-shard.webp';
+import bronzeMedal from '@assets/icons/medals/bronze-medal.webp';
+import silverMedal from '@assets/icons/medals/silver-medal.webp';
+import goldenMedal from '@assets/icons/medals/gold-medal.webp';
+import platinumMedal from '@assets/icons/medals/platinum-medal.webp';
+import diamondMedal from '@assets/icons/medals/diamond-medal.webp';
 
-import goldenMedal from '@assets/icons/gold-medal.webp';
-import goldenTicket from '@assets/icons/golden-ticket.webp';
-import goldenTicketOverlap from '@assets/icons/golden-ticket-overlap.webp';
-import goldenTrophy from '@assets/icons/golden-trophy.webp';
-import goldenEngine from '@assets/icons/gold-engine.webp';
-import goldenCapacityChip from '@assets/icons/golden-capacity-chip.webp';
-import goldenCapacityShard from '@assets/icons/golden-capacity-shard.webp';
-import goldenTimeChip from '@assets/icons/golden-time-chip.webp';
-import goldenTimeShard from '@assets/icons/golden-time-shard.webp';
+import bronzeTrophy from '@assets/icons/trophies/bronze-trophy.webp';
+import silverTrophy from '@assets/icons/trophies/silver-trophy.webp';
+import goldenTrophy from '@assets/icons/trophies/golden-trophy.webp';
 
-import platinumMedal from '@assets/icons/platinum-medal.webp';
-import platinumTicket from '@assets/icons/platinum-ticket.webp';
-import platinumTicketOverlap from '@assets/icons/platinum-ticket-overlap.webp';
-import platinumEngine from '@assets/icons/platinum-engine.webp';
-import platinumCapacityChip from '@assets/icons/platinum-capacity-chip.webp';
-import platinumCapacityShard from '@assets/icons/platinum-capacity-shard.webp';
-import platinumTimeChip from '@assets/icons/platinum-time-chip.webp';
-import platinumTimeShard from '@assets/icons/platinum-time-shard.webp';
+import bronzeCapacityChip from '@assets/icons/chips/bronze-capacity-chip.webp';
+import bronzeTimeChip from '@assets/icons/chips/bronze-time-chip.webp';
+import silverCapacityChip from '@assets/icons/chips/silver-capacity-chip.webp';
+import silverTimeChip from '@assets/icons/chips/silver-time-chip.webp';
+import goldenCapacityChip from '@assets/icons/chips/golden-capacity-chip.webp';
+import goldenTimeChip from '@assets/icons/chips/golden-time-chip.webp';
+import platinumCapacityChip from '@assets/icons/chips/platinum-capacity-chip.webp';
+import platinumTimeChip from '@assets/icons/chips/platinum-time-chip.webp';
+import diamondCapacityChip from '@assets/icons/chips/diamond-capacity-chip.webp';
+import diamondTimeChip from '@assets/icons/chips/diamond-time-chip.webp';
 
-import silverMedal from '@assets/icons/silver-medal.webp';
-import silverTicket from '@assets/icons/silver-ticket.webp';
-import silverTicketOverlap from '@assets/icons/silver-ticket-overlap.webp';
-import silverTrophy from '@assets/icons/silver-trophy.webp';
-import silverEngine from '@assets/icons/silver-engine.webp';
-import silverCapacityChip from '@assets/icons/silver-capacity-chip.webp';
-import silverCapacityShard from '@assets/icons/silver-capacity-shard.webp';
-import silverTimeChip from '@assets/icons/silver-time-chip.webp';
-import silverTimeShard from '@assets/icons/silver-time-shard.webp';
+import bronzeCapacityShard from '@assets/icons/shards/bronze-capacity-shard.webp';
+import bronzeTimeShard from '@assets/icons/shards/bronze-time-shard.webp';
+import silverCapacityShard from '@assets/icons/shards/silver-capacity-shard.webp';
+import silverTimeShard from '@assets/icons/shards/silver-time-shard.webp';
+import goldenCapacityShard from '@assets/icons/shards/golden-capacity-shard.webp';
+import goldenTimeShard from '@assets/icons/shards/golden-time-shard.webp';
+import platinumCapacityShard from '@assets/icons/shards/platinum-capacity-shard.webp';
+import platinumTimeShard from '@assets/icons/shards/platinum-time-shard.webp';
+import diamondCapacityShard from '@assets/icons/shards/diamond-capacity-shard.webp';
+import diamondTimeShard from '@assets/icons/shards/diamond-time-shard.webp';
 
-import google from '@assets/icons/google.webp';
+import coin from '@assets/icons/currencies/lc-coin.webp';
+import telegramStar from '@assets/icons/currencies/telegram-star.webp';
 
-import lock from '@assets/icons/lock.webp';
-import luckyPlayer from '@assets/icons/lucky-player.webp';
-import telegramStar from '@assets/icons/telegram-star.webp';
+import crown from '@assets/icons/statuses/crown.webp';
+import luckyPlayer from '@assets/icons/statuses/lucky-player.webp';
+import verified from '@assets/icons/statuses/verified.webp';
+
+import lock from '@assets/icons/ui/lock.webp';
+import google from '@assets/icons/ui/google.webp';
+import bolt from '@assets/icons/ui/bolt.webp';
 
 export const icons = {
   bronzeMedal,
@@ -112,4 +115,6 @@ export const icons = {
   lock,
   luckyPlayer,
   telegramStar,
+  bolt,
+  verified,
 } as const;

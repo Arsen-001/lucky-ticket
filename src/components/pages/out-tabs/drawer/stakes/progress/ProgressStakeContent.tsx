@@ -4,8 +4,7 @@ import '@/styles/components/stakes.css';
 import { useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { useCancelStakeMutation, useGetStakesQuery } from '@/api/stakes.api';
-import { CoinIcon } from '@/components/shared/icons/CoinIcon';
-import { GlobalConstants } from '@/constants/global.constants';
+import { LcLabel } from '@/components/shared/icons/LcLabel';
 import { routes } from '@/constants/routes';
 import { useAppTranslations } from '@/hooks/useAppTranslations';
 import { useCountDown } from '@/hooks/useCountDown';
@@ -86,12 +85,9 @@ export function ProgressStakeContent({ stakeId }: ProgressStakeContentProps) {
                 {t('locked')}
               </div>
               <div className="mt-0.5 flex items-baseline gap-1">
-                <CoinIcon size={22} className="self-center" />
+                <LcLabel size={22} className="self-center" />
                 <span className="text-gold text-[16px] font-extrabold leading-none tabular-nums">
                   {stake.lockedAmount.toLocaleString()}
-                </span>
-                <span className="text-pink-secondary text-[10px] font-bold">
-                  {GlobalConstants.coinName}
                 </span>
               </div>
             </div>

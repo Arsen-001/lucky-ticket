@@ -1,6 +1,8 @@
 'use client';
+import type { ReactNode } from 'react';
 import type { MedalType } from '@/components/shared/icons/Medal';
 import { Medal } from '@/components/shared/icons/Medal';
+import { LcLabel } from '@/components/shared/icons/LcLabel';
 import { GoldenText } from '@/components/shared/typography/GoldenText';
 import { useCountDown } from '@/hooks/useCountDown';
 import { useAppTranslations } from '@/hooks/useAppTranslations';
@@ -9,11 +11,10 @@ import { Button } from '@/components/shared/buttons/Button';
 import { SkeletonSuspense } from '@/components/shared/seleketons/SkeletonSuspense';
 import { Skeleton } from '@/components/shared/seleketons/Skeleton';
 import { useRouter } from 'next/navigation';
-import { GlobalConstants } from '@/constants/global.constants';
 
 interface Info {
   label: string;
-  value: string | number;
+  value: ReactNode;
 }
 
 export interface TournamentSlideCardsProps {
@@ -50,7 +51,12 @@ export function TournamentSlideCards({
   const info: Info[] = [
     {
       label: t('prize pool'),
-      value: prizePool + ' ' + GlobalConstants.coinName,
+      value: (
+        <span className="inline-flex items-center gap-1">
+          {prizePool}
+          <LcLabel size={14} />
+        </span>
+      ),
     },
     {
       label: t('team size'),

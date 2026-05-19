@@ -1,14 +1,15 @@
 'use client';
 
+import type { ReactNode } from 'react';
 import '@/styles/components/stakes.css';
+import { LcLabel } from '@/components/shared/icons/LcLabel';
 import { useAppTranslations } from '@/hooks/useAppTranslations';
-import { GlobalConstants } from '@/constants/global.constants';
 import { twMerge } from 'tailwind-merge';
 
 interface StatProps {
   label: string;
   value: string;
-  sub: string;
+  sub: ReactNode;
   variant?: 'default' | 'gold' | 'highlight';
 }
 
@@ -66,7 +67,7 @@ export function StakesSummaryCard({
         <Stat
           label={t('locked')}
           value={lockedAmount.toLocaleString()}
-          sub={GlobalConstants.coinName}
+          sub={<LcLabel size={12} />}
           variant="gold"
         />
         <Stat

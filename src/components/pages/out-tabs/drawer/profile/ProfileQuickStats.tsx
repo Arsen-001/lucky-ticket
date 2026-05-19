@@ -1,26 +1,15 @@
 'use client';
-import type { ComponentType, SVGProps } from 'react';
+import type { ComponentType, ReactNode, SVGProps } from 'react';
 import Link from 'next/link';
-import { Heart, Star, Wallet } from 'lucide-react';
+import { Award, Heart, Send } from 'lucide-react';
 import { twMerge } from 'tailwind-merge';
-import { CoinIcon } from '@/components/shared/icons/CoinIcon';
-import { TonIcon } from '@/components/shared/icons/TonIcon';
 import { Skeleton } from '@/components/shared/seleketons/Skeleton';
 import { SkeletonSuspense } from '@/components/shared/seleketons/SkeletonSuspense';
 import { useAppTranslations } from '@/hooks/useAppTranslations';
-import { GlobalConstants } from '@/constants/global.constants';
-import { routes, type Route } from '@/constants/routes';
+import type { Route } from '@/constants/routes';
 import type { ProfileResponse } from '@/types/interfaces/profile.interfaces';
 
 type StatIconComponent = ComponentType<{ size?: number; className?: string }>;
-
-const TonStatIcon: StatIconComponent = ({ size, className }) => (
-  <TonIcon size={size ?? 18} className={className} />
-);
-
-const CoinStatIcon: StatIconComponent = ({ size, className }) => (
-  <CoinIcon size={size ?? 22} className={className} />
-);
 
 export interface ProfileQuickStatsProps {
   profile?: ProfileResponse;
@@ -33,7 +22,7 @@ interface QuickStatItem {
   iconWrap?: boolean;
   iconClass: string;
   accent: string;
-  label: string;
+  label: ReactNode;
   value: number | undefined;
   unit?: string;
   decimals?: number;
@@ -42,78 +31,41 @@ interface QuickStatItem {
 
 export function ProfileQuickStats({ profile, loading }: ProfileQuickStatsProps) {
   const t = useAppTranslations();
-  const isOwn = profile?.isOwn ?? false;
 
-  const items: QuickStatItem[] =
-    isOwn && profile?.privateStats
-      ? [
-          {
-            key: 'lc',
-            icon: CoinStatIcon,
-            iconClass: '',
-            accent: 'var(--color-gold)',
-            label: GlobalConstants.coinName,
-            value: profile.privateStats.lc,
-            href: routes.wallet,
-          },
-          {
-            key: 'ls',
-            icon: Star,
-            iconWrap: true,
-            iconClass: 'text-electric-pink fill-electric-pink',
-            accent: 'var(--color-electric-pink)',
-            label: GlobalConstants.starName,
-            value: profile.privateStats.ls,
-            href: routes.wallet,
-          },
-          {
-            key: 'ton',
-            icon: TonStatIcon,
-            iconClass: '',
-            accent: '#0098EA',
-            label: GlobalConstants.tonName,
-            value: profile.privateStats.ton,
-            decimals: 3,
-            href: routes.wallet,
-          },
-        ]
-      : [
-          {
-            key: 'likes',
-            icon: Heart,
-            iconWrap: true,
-            iconClass: 'text-electric-pink fill-electric-pink',
-            accent: 'var(--color-electric-pink)',
-            label: t('likes'),
-            value: profile?.publicStats.likesReceived,
-          },
-          {
-            key: 'streak',
-            icon: Star,
-            iconWrap: true,
-            iconClass: 'text-gold fill-gold',
-            accent: 'var(--color-gold)',
-            label: t('streak'),
-            value: profile?.streak.days,
-            unit: t('days short'),
-          },
-          {
-            key: 'badges',
-            icon: Wallet,
-            iconWrap: true,
-            iconClass: 'text-success',
-            accent: 'var(--color-success)',
-            label: t('badges earned'),
-            value: profile?.publicStats.earnedAchievements,
-            unit: `/ ${profile?.publicStats.totalAchievements ?? 0}`,
-          },
-        ];
-
-  const title = isOwn && profile?.privateStats ? t('wallet') : t('quick stats');
+  const items: QuickStatItem[] = [
+    {
+      key: 'likes',
+      icon: Heart,
+      iconWrap: true,
+      iconClass: 'text-electric-pink fill-electric-pink',
+      accent: 'var(--color-electric-pink)',
+      label: t('likes'),
+      value: profile?.publicStats.likesReceived,
+    },
+    {
+      key: 'tickets-sent',
+      icon: Send,
+      iconWrap: true,
+      iconClass: 'text-teal',
+      accent: 'var(--color-teal)',
+      label: t('tickets sent'),
+      value: profile?.publicStats.ticketsSent,
+    },
+    {
+      key: 'badges',
+      icon: Award,
+      iconWrap: true,
+      iconClass: 'text-success',
+      accent: 'var(--color-success)',
+      label: t('badges earned'),
+      value: profile?.publicStats.earnedAchievements,
+      unit: `/ ${profile?.publicStats.totalAchievements ?? 0}`,
+    },
+  ];
 
   return (
     <section className="flex flex-col gap-2.5">
-      <h3 className="px-1 text-base font-extrabold text-white">{title}</h3>
+      <h3 className="px-1 text-base font-extrabold text-white">{t('quick stats')}</h3>
 
       <div className="bg-background-overlay grid grid-cols-3 divide-x divide-white/6 rounded-2xl p-1">
         {items.map((item, idx) => (

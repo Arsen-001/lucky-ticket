@@ -3,8 +3,7 @@
 import '@/styles/components/stakes.css';
 import { ChevronRight, Clock } from 'lucide-react';
 import Link from 'next/link';
-import { CoinIcon } from '@/components/shared/icons/CoinIcon';
-import { GlobalConstants } from '@/constants/global.constants';
+import { LcLabel } from '@/components/shared/icons/LcLabel';
 import { routes } from '@/constants/routes';
 import { useAppTranslations } from '@/hooks/useAppTranslations';
 import { useCountDown } from '@/hooks/useCountDown';
@@ -52,11 +51,10 @@ export function StakesActiveStakeCard({ stake, levelDef }: StakesActiveStakeCard
             {t('locked')}
           </div>
           <div className="mt-0.5 flex items-baseline gap-1">
-            <CoinIcon size={22} className="self-center" />
+            <LcLabel size={22} className="self-center" />
             <span className="text-gold text-[18px] font-extrabold leading-none tabular-nums">
               {stake.lockedAmount.toLocaleString()}
             </span>
-            <span className="text-gold text-[10px] font-bold">{GlobalConstants.coinName}</span>
           </div>
         </div>
 

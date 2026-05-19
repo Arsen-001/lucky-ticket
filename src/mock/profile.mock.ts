@@ -34,6 +34,7 @@ export const ownProfile: ProfileResponse = {
   isLuckyPlayer: true,
   isVIP: true,
   vipLevel: 2,
+  level: 42,
   activityPoints: 750,
   activityBest: {
     day: 32,
@@ -83,6 +84,7 @@ export const otherProfile: ProfileResponse = {
   id: 'user-2',
   publicId: '20347',
   username: 'NebulaPilot',
+  level: 78,
   isOwn: false,
   privateStats: undefined,
   liked: false,

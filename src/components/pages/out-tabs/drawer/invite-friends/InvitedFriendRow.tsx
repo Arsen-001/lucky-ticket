@@ -2,13 +2,14 @@
 
 import Image from 'next/image';
 import Link from 'next/link';
-import { ChevronRight, Star, Zap } from 'lucide-react';
+import { ChevronRight, Star } from 'lucide-react';
 import { twMerge } from 'tailwind-merge';
 import { Skeleton } from '@/components/shared/seleketons/Skeleton';
 import { SkeletonSuspense } from '@/components/shared/seleketons/SkeletonSuspense';
 import { LuckyPlayerIcon } from '@/components/shared/icons/LuckyPlayerIcon';
+import { BoltIcon } from '@/components/shared/icons/BoltIcon';
 import { Ticket } from '@/components/shared/icons/Ticket';
-import { VerifiedBadge } from '@/components/shared/badges/VerifiedBadge';
+import { VerifiedSparkleIcon } from '@/components/shared/icons/VerifiedSparkleIcon';
 import { useAppTranslations } from '@/hooks/useAppTranslations';
 import { routes } from '@/constants/routes';
 import type { InvitedFriend } from '@/types/interfaces/referral.interfaces';
@@ -90,13 +91,7 @@ export function InvitedFriendRow({
             skeleton={<Skeleton variant="line" textSize="sm" className="h-4 w-24" />}
           >
             <span className="truncate text-sm font-bold text-white">{friend?.username}</span>
-            {friend?.isVerified && (
-              <VerifiedBadge
-                hideText
-                className="h-4 w-4 flex-shrink-0 p-0"
-                classNames={{ icon: 'h-3 w-3' }}
-              />
-            )}
+            {friend?.isVerified && <VerifiedSparkleIcon size={15} className="shrink-0" />}
             {friend?.isTelegramPremium && (
               <Star
                 size={12}
@@ -113,7 +108,7 @@ export function InvitedFriendRow({
         >
           <div className="flex items-center gap-2 text-[11px]">
             <span className="text-gold flex items-center gap-1 font-semibold tabular-nums">
-              <Zap size={11} className="fill-gold text-gold" />
+              <BoltIcon size={16} />
               {friend?.points?.toLocaleString() ?? 0}
             </span>
             {claimable && (

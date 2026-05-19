@@ -2,9 +2,9 @@
 import { useMemo, useState } from 'react';
 import { useGetProfileQuery, useUnpinAchievementMutation } from '@/api/profile.api';
 import { ProfileHero } from '@/components/pages/out-tabs/drawer/profile/ProfileHero';
-import { ProfileLevelCard } from '@/components/pages/out-tabs/drawer/profile/ProfileLevelCard';
+import { ProfileLeaderboardCard } from '@/components/pages/out-tabs/drawer/profile/ProfileLeaderboardCard';
+import { ProfilePlayerLevelCard } from '@/components/pages/out-tabs/drawer/profile/ProfilePlayerLevelCard';
 import { ProfileQuickStats } from '@/components/pages/out-tabs/drawer/profile/ProfileQuickStats';
-import { ProfileSocialStats } from '@/components/pages/out-tabs/drawer/profile/ProfileSocialStats';
 import { ProfileFooter } from '@/components/pages/out-tabs/drawer/profile/ProfileFooter';
 import { AchievementShowcase } from '@/components/shared/achievements/AchievementShowcase';
 import { AchievementDetailModal } from '@/components/shared/achievements/AchievementDetailModal';
@@ -44,9 +44,11 @@ export function ProfilePage({ userId }: ProfilePageProps) {
 
       {effectiveProfile && (
         <div className="flex flex-col gap-5">
-          <ProfileLevelCard profile={effectiveProfile} loading={isLoading} />
+          {effectiveProfile.isOwn && (
+            <ProfilePlayerLevelCard level={effectiveProfile.level} loading={isLoading} />
+          )}
 
-          <ProfileQuickStats profile={effectiveProfile} loading={isLoading} />
+          <ProfileLeaderboardCard profile={effectiveProfile} loading={isLoading} />
 
           <AchievementShowcase
             pinnedAchievements={effectiveProfile.pinnedAchievements}
@@ -59,7 +61,7 @@ export function ProfilePage({ userId }: ProfilePageProps) {
             onLongPressSlot={(slot, ach) => ach && unpinAchievement({ slot })}
           />
 
-          <ProfileSocialStats stats={effectiveProfile.publicStats} loading={isLoading} />
+          <ProfileQuickStats profile={effectiveProfile} loading={isLoading} />
 
           <ProfileFooter
             isOwn={effectiveProfile.isOwn}

@@ -2,12 +2,12 @@
 import { twMerge } from 'tailwind-merge';
 import { Link } from '@/components/shared/links/Link';
 import { Medal } from '@/components/shared/icons/Medal';
+import { LcLabel } from '@/components/shared/icons/LcLabel';
 import { GoldenText } from '@/components/shared/typography/GoldenText';
 import { Skeleton } from '@/components/shared/seleketons/Skeleton';
 import { SkeletonSuspense } from '@/components/shared/seleketons/SkeletonSuspense';
 import { useAppTranslations } from '@/hooks/useAppTranslations';
 import { useCountDown } from '@/hooks/useCountDown';
-import { GlobalConstants } from '@/constants/global.constants';
 import { routes } from '@/constants/routes';
 import type { Tournament } from '@/types/interfaces/tournaments.interfaces';
 import type { TournamentType } from '@/types/types/tournaments.types';
@@ -78,7 +78,10 @@ export function HomeUpcomingTournamentCard({
                 style={{ textShadow: '0 1px 4px rgba(248, 189, 62, 0.4)' }}
               >
                 <GoldenText>
-                  {prizePool?.toLocaleString()} {GlobalConstants.coinName}
+                  <span className="inline-flex items-center gap-1">
+                    {prizePool?.toLocaleString()}
+                    <LcLabel size={16} />
+                  </span>
                 </GoldenText>
               </span>
             </SkeletonSuspense>

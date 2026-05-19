@@ -1,6 +1,7 @@
 import { twMerge } from 'tailwind-merge';
-import { Coins, Sparkles, Star, Ticket, Trophy, Zap } from 'lucide-react';
+import { Coins, Sparkles, Star, Ticket, Trophy } from 'lucide-react';
 import type { LucideIcon } from 'lucide-react';
+import { BoltIcon } from '@/components/shared/icons/BoltIcon';
 import { TaskRewardType } from '@/types/enums/tasks.enums';
 import type { TaskReward } from '@/types/interfaces/tasks.interfaces';
 
@@ -10,10 +11,9 @@ export interface TaskRewardBadgeProps {
   className?: string;
 }
 
-const ICON_MAP: Record<TaskRewardType, LucideIcon> = {
+const ICON_MAP: Record<Exclude<TaskRewardType, TaskRewardType.ACTIVITY_POINTS>, LucideIcon> = {
   [TaskRewardType.LTC]: Coins,
   [TaskRewardType.TICKETS]: Ticket,
-  [TaskRewardType.ACTIVITY_POINTS]: Zap,
   [TaskRewardType.STARS]: Star,
   [TaskRewardType.PREMIUM]: Sparkles,
   [TaskRewardType.ENGINE]: Trophy,
@@ -35,8 +35,8 @@ const SIZE_MAP = {
 };
 
 export function TaskRewardBadge({ reward, size = 'md', className }: TaskRewardBadgeProps) {
-  const Icon = ICON_MAP[reward.type];
   const cfg = SIZE_MAP[size];
+  const Icon = reward.type !== TaskRewardType.ACTIVITY_POINTS ? ICON_MAP[reward.type] : null;
   return (
     <div
       className={twMerge(
@@ -47,7 +47,7 @@ export function TaskRewardBadge({ reward, size = 'md', className }: TaskRewardBa
         className
       )}
     >
-      <Icon size={cfg.icon} className="shrink-0" />
+      {Icon ? <Icon size={cfg.icon} className="shrink-0" /> : <BoltIcon size={cfg.icon + 6} />}
       <span>+{reward.amount}</span>
     </div>
   );

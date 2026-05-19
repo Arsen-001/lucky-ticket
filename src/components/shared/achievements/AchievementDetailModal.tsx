@@ -1,8 +1,9 @@
 'use client';
-import { Calendar, Lock, Sparkles, Star, TicketCheck, Users, Zap } from 'lucide-react';
+import { Calendar, Lock, Sparkles, Star, TicketCheck, Users } from 'lucide-react';
 import dayjs from 'dayjs';
 import { twMerge } from 'tailwind-merge';
 import { Achievement } from '@/components/shared/achievements/Achievement';
+import { BoltIcon } from '@/components/shared/icons/BoltIcon';
 import { AchievementProgressBar } from '@/components/shared/achievements/AchievementProgressBar';
 import { Modal } from '@/components/shared/modals/Modal';
 import { useAppTranslations } from '@/hooks/useAppTranslations';
@@ -138,7 +139,7 @@ function ChainRewardCard({ reward, earned }: ChainRewardCardProps) {
       ? { icon: TicketCheck, label: `+${reward.tickets} tickets`, color: '#4DB85F' }
       : null,
     reward.activityPoints
-      ? { icon: Zap, label: `+${reward.activityPoints} AP`, color: '#FF5FC8' }
+      ? { icon: null, label: `+${reward.activityPoints} AP`, color: '#FF5FC8' }
       : null,
     reward.ls ? { icon: Star, label: `+${reward.ls} LS`, color: '#F8BD3E' } : null,
     reward.lc ? { icon: Sparkles, label: `+${reward.lc} LC`, color: '#A78BFA' } : null,
@@ -162,7 +163,7 @@ function ChainRewardCard({ reward, earned }: ChainRewardCardProps) {
               color: chip.color,
             }}
           >
-            <chip.icon size={11} strokeWidth={2.6} />
+            {chip.icon ? <chip.icon size={11} strokeWidth={2.6} /> : <BoltIcon size={16} />}
             {chip.label}
           </span>
         ))}

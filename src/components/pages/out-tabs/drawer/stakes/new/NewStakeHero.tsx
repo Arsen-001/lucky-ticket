@@ -5,6 +5,7 @@ import { Star } from 'lucide-react';
 import { GlobalConstants } from '@/constants/global.constants';
 import { useAppTranslations } from '@/hooks/useAppTranslations';
 import { GoldenText } from '@/components/shared/typography/GoldenText';
+import { LcLabel } from '@/components/shared/icons/LcLabel';
 import { NewStakeLevelPicker } from '@/components/pages/out-tabs/drawer/stakes/new/NewStakeLevelPicker';
 import { StakesLevelChip } from '@/components/pages/out-tabs/drawer/stakes/StakesLevelChip';
 import {
@@ -63,7 +64,7 @@ export function NewStakeHero({
             <GoldenText className="text-[38px] font-extrabold leading-none tabular-nums tracking-tight">
               {deposit.toLocaleString()}
             </GoldenText>
-            <span className="text-gold text-sm font-extrabold">{GlobalConstants.coinName}</span>
+            <LcLabel size={20} />
           </div>
           <div className="text-white-secondary mt-1 text-[11px]">
             {t('of {amount} {coin} available', {

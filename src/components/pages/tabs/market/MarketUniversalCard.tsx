@@ -6,7 +6,7 @@ import { twMerge } from 'tailwind-merge';
 import { Skeleton } from '@/components/shared/seleketons/Skeleton';
 import { SkeletonSuspense } from '@/components/shared/seleketons/SkeletonSuspense';
 import { TelegramStarIcon } from '@/components/shared/icons/TelegramStarIcon';
-import { GlobalConstants } from '@/constants/global.constants';
+import { LcLabel } from '@/components/shared/icons/LcLabel';
 import { icons } from '@/constants/icons';
 import { useAppTranslations } from '@/hooks/useAppTranslations';
 import { MarketPriceType } from '@/types/enums/market.enums';
@@ -177,7 +177,7 @@ function PriceButton({ price, accent, onClick, fullWidth }: PriceButtonProps) {
         )}
         <span className="text-sm">{price.amount}</span>
       </span>
-      {isLtc && <span className="text-gold text-[11px] font-bold">{GlobalConstants.coinName}</span>}
+      {isLtc && <LcLabel size={12} />}
     </button>
   );
 }

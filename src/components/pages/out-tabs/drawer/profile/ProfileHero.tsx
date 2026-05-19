@@ -7,11 +7,12 @@ import Image from 'next/image';
 import { UserAvatar, type AvatarStatusColor } from '@/components/shared/user-elements/UserAvatar';
 import { BannerIconsLayer } from '@/components/pages/out-tabs/drawer/profile/BannerIconsLayer';
 import { ProfileShareSheet } from '@/components/pages/out-tabs/drawer/profile/ProfileShareSheet';
+import { ProfileStatusIconButton } from '@/components/pages/out-tabs/drawer/profile/ProfileStatusIconButton';
 import { Skeleton } from '@/components/shared/seleketons/Skeleton';
 import { SkeletonSuspense } from '@/components/shared/seleketons/SkeletonSuspense';
-import { VerifiedBadge } from '@/components/shared/badges/VerifiedBadge';
-import { LuckyPlayerBadge } from '@/components/shared/badges/LuckyPlayerBadge';
-import { VIPBadge } from '@/components/shared/badges/VIPBadge';
+import { LuckyPlayerIcon } from '@/components/shared/icons/LuckyPlayerIcon';
+import { VerifiedSparkleIcon } from '@/components/shared/icons/VerifiedSparkleIcon';
+import { VipIcon } from '@/components/shared/icons/VipIcon';
 import { ConfirmModal } from '@/components/shared/modals/ConfirmModal';
 import { useAppTranslations } from '@/hooks/useAppTranslations';
 import {
@@ -82,6 +83,7 @@ export function ProfileHero({ profile, loading, isPreview, onTogglePreview }: Pr
     setVipUpgradeOpen(false);
     router.push(routes.settings.vip);
   };
+
   const ringColor: AvatarStatusColor = profile?.isVIP
     ? 'vip'
     : profile?.isLuckyPlayer
@@ -138,8 +140,8 @@ export function ProfileHero({ profile, loading, isPreview, onTogglePreview }: Pr
 
         <BannerIconsLayer editable={!!profile?.isOwn && !isPreview} />
 
-        {showPreviewToggle && (
-          <div className="absolute right-4 top-4 z-2">
+        <div className="absolute right-4 top-4 z-2 flex flex-col items-end gap-2">
+          {showPreviewToggle && (
             <button
               type="button"
               onClick={onTogglePreview}
@@ -148,8 +150,16 @@ export function ProfileHero({ profile, loading, isPreview, onTogglePreview }: Pr
             >
               {isPreview ? <EyeOff size={16} /> : <Eye size={16} />}
             </button>
-          </div>
-        )}
+          )}
+          <button
+            type="button"
+            onClick={() => setShareOpen(true)}
+            aria-label={t('share')}
+            className="flex h-9 w-9 items-center justify-center rounded-full backdrop-blur-md border border-white/15 bg-black/30 text-white/90 transition-all active:scale-95"
+          >
+            <Share2 size={16} />
+          </button>
+        </div>
       </div>
 
       <div className="profile-avatar-wrap flex flex-col items-center gap-3 px-5">
@@ -198,60 +208,82 @@ export function ProfileHero({ profile, loading, isPreview, onTogglePreview }: Pr
           <h1 className={usernameClasses}>{profile?.username}</h1>
         </SkeletonSuspense>
 
-        <div className="flex flex-wrap items-center justify-center gap-1.5">
+        <div className="flex flex-wrap items-center justify-center gap-3">
           {profile?.isOwn && (
-            <BadgeButton
+            <TooltipWrap
               active={tooltip?.key === 'verified'}
               tooltipText={tooltip?.key === 'verified' ? tooltip.text : undefined}
-              ariaLabel={profile.isVerified ? t('email verified') : t('verify your email')}
-              onClick={handleVerifiedClick}
             >
-              <VerifiedBadge locked={!profile.isVerified} />
-            </BadgeButton>
+              <ProfileStatusIconButton
+                variant="verified"
+                icon={<VerifiedSparkleIcon size={51} />}
+                locked={!profile.isVerified}
+                ariaLabel={profile.isVerified ? t('email verified') : t('verify your email')}
+                onClick={handleVerifiedClick}
+              />
+            </TooltipWrap>
           )}
-          {!profile?.isOwn && profile?.isVerified && <VerifiedBadge />}
+          {!profile?.isOwn && profile?.isVerified && (
+            <ProfileStatusIconButton
+              variant="verified"
+              icon={<VerifiedSparkleIcon size={51} />}
+              ariaLabel={t('email verified')}
+            />
+          )}
 
           {profile?.isOwn && (
-            <BadgeButton
+            <TooltipWrap
               active={tooltip?.key === 'vip'}
               tooltipText={tooltip?.key === 'vip' ? tooltip.text : undefined}
-              ariaLabel={
-                profile.isVIP
-                  ? vipMaxed
-                    ? t('max level reached')
-                    : t('upgrade vip')
-                  : t('get vip')
-              }
-              onClick={handleVipClick}
             >
-              <VIPBadge
+              <ProfileStatusIconButton
+                variant="vip"
+                icon={<VipIcon size={51} state={profile.isVIP ? 'active' : 'locked'} />}
                 level={profile.isVIP ? profile.vipLevel : undefined}
                 locked={!profile.isVIP}
+                ariaLabel={
+                  profile.isVIP
+                    ? vipMaxed
+                      ? t('max level reached')
+                      : t('upgrade vip')
+                    : t('get vip')
+                }
+                onClick={handleVipClick}
               />
-            </BadgeButton>
+            </TooltipWrap>
           )}
-          {!profile?.isOwn && profile?.isVIP && <VIPBadge level={profile.vipLevel} />}
+          {!profile?.isOwn && profile?.isVIP && (
+            <ProfileStatusIconButton
+              variant="vip"
+              icon={<VipIcon size={51} />}
+              level={profile.vipLevel}
+              ariaLabel={t('vip level', { level: profile.vipLevel })}
+            />
+          )}
 
           {profile?.isOwn && (
-            <BadgeButton
+            <TooltipWrap
               active={tooltip?.key === 'lucky-player'}
               tooltipText={tooltip?.key === 'lucky-player' ? tooltip.text : undefined}
-              ariaLabel={profile.isLuckyPlayer ? t('lucky player active') : t('lucky player get')}
-              onClick={handleLuckyPlayerClick}
             >
-              <LuckyPlayerBadge locked={!profile.isLuckyPlayer} />
-            </BadgeButton>
+              <ProfileStatusIconButton
+                variant="lucky-player"
+                icon={
+                  <LuckyPlayerIcon size={51} state={profile.isLuckyPlayer ? 'active' : 'locked'} />
+                }
+                locked={!profile.isLuckyPlayer}
+                ariaLabel={profile.isLuckyPlayer ? t('lucky player active') : t('lucky player get')}
+                onClick={handleLuckyPlayerClick}
+              />
+            </TooltipWrap>
           )}
-          {!profile?.isOwn && profile?.isLuckyPlayer && <LuckyPlayerBadge />}
-
-          <button
-            type="button"
-            onClick={() => setShareOpen(true)}
-            className="tier-badge tier-badge--share"
-          >
-            <Share2 size={12} strokeWidth={2.6} />
-            <span>{t('share')}</span>
-          </button>
+          {!profile?.isOwn && profile?.isLuckyPlayer && (
+            <ProfileStatusIconButton
+              variant="lucky-player"
+              icon={<LuckyPlayerIcon size={51} />}
+              ariaLabel={t('lucky player active')}
+            />
+          )}
         </div>
       </div>
 
@@ -281,25 +313,16 @@ export function ProfileHero({ profile, loading, isPreview, onTogglePreview }: Pr
   );
 }
 
-interface BadgeButtonProps {
+interface TooltipWrapProps {
   active: boolean;
   tooltipText?: string;
-  ariaLabel: string;
-  onClick: () => void;
   children: React.ReactNode;
 }
 
-function BadgeButton({ active, tooltipText, ariaLabel, onClick, children }: BadgeButtonProps) {
+function TooltipWrap({ active, tooltipText, children }: TooltipWrapProps) {
   return (
     <span className="relative">
-      <button
-        type="button"
-        aria-label={ariaLabel}
-        onClick={onClick}
-        className="cursor-pointer transition-transform active:scale-95"
-      >
-        {children}
-      </button>
+      {children}
       {active && tooltipText && (
         <span
           role="status"

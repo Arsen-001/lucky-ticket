@@ -10,6 +10,7 @@ export interface LeaderboardEntry {
   isVerified: boolean;
   isLuckyPlayer: boolean;
   isVIP?: boolean;
+  vipLevel?: number;
 }
 
 export interface LeaderboardResponse {

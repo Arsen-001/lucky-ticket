@@ -17,17 +17,9 @@ import { ConnectWalletModal } from './ConnectWalletModal';
 import { DepositTonModal } from './DepositTonModal';
 import { WithdrawTonModal } from './WithdrawTonModal';
 import { BuyStarsModal } from './BuyStarsModal';
-import { LcNotifyMeModal } from './LcNotifyMeModal';
 import { NotEnoughStarsModal } from '@/components/pages/tabs/home/NotEnoughStarsModal';
 
-type WalletModal =
-  | 'connect'
-  | 'deposit'
-  | 'withdraw'
-  | 'buyStars'
-  | 'notifyLc'
-  | 'notEnough'
-  | null;
+type WalletModal = 'connect' | 'deposit' | 'withdraw' | 'buyStars' | 'notEnough' | null;
 
 export function WalletContainer() {
   const router = useRouter();
@@ -84,7 +76,7 @@ export function WalletContainer() {
         onBuyMore={() => setModal('notEnough')}
       />
 
-      <LcWalletComingSoonCard onNotifyMe={() => setModal('notifyLc')} />
+      <LcWalletComingSoonCard />
 
       <WalletTransactionHistory
         transactions={transactions}
@@ -108,7 +100,6 @@ export function WalletContainer() {
         tonBalance={tonBalance}
         initialStars={pendingTopUp}
       />
-      <LcNotifyMeModal open={modal === 'notifyLc'} onClose={() => setModal(null)} />
       <NotEnoughStarsModal
         open={modal === 'notEnough'}
         onClose={() => setModal(null)}

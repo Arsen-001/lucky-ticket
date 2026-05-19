@@ -1,13 +1,13 @@
 'use client';
 
 import { useEffect, useRef, useState } from 'react';
-import { Coins, Cpu, MemoryStick, Trophy } from 'lucide-react';
+import { Cpu, MemoryStick, Trophy } from 'lucide-react';
 import type { LucideIcon } from 'lucide-react';
 import { Modal } from '@/components/shared/modals/Modal';
 import { Button } from '@/components/shared/buttons/Button';
 import { Medal, type MedalType } from '@/components/shared/icons/Medal';
+import { LcLabel } from '@/components/shared/icons/LcLabel';
 import { useAppTranslations } from '@/hooks/useAppTranslations';
-import { GlobalConstants } from '@/constants/global.constants';
 import type { InventoryChipType } from '@/types/interfaces/inventory.interfaces';
 import type { TournamentUserResult } from '@/types/interfaces/tournaments.interfaces';
 import type { TournamentType } from '@/types/types/tournaments.types';
@@ -223,12 +223,9 @@ export function TournamentResultModal({
             {(view === 'top-three' || view === 'mid-place') && (
               <>
                 <div className="inline-flex items-baseline gap-2 leading-none">
-                  <Coins size={26} className={`${iconColorClass} drop-shadow-md self-center`} />
+                  <LcLabel size={26} className="self-center" />
                   <span className={`${textClass} text-4xl tabular-nums leading-none`}>
                     {counter}
-                  </span>
-                  <span className={`${textClass} text-2xl tabular-nums leading-none`}>
-                    {GlobalConstants.coinName}
                   </span>
                 </div>
                 {view === 'top-three' && shards > 0 && (

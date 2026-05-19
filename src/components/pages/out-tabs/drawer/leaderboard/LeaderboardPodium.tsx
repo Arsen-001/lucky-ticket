@@ -1,8 +1,11 @@
 import Image from 'next/image';
-import { Crown, Sparkles, Star } from 'lucide-react';
+import { Crown, Sparkles, Star, User } from 'lucide-react';
 import { twMerge } from 'tailwind-merge';
 import { Skeleton } from '@/components/shared/seleketons/Skeleton';
 import { SkeletonSuspense } from '@/components/shared/seleketons/SkeletonSuspense';
+import { VerifiedSparkleIcon } from '@/components/shared/icons/VerifiedSparkleIcon';
+import { LuckyPlayerIcon } from '@/components/shared/icons/LuckyPlayerIcon';
+import { VipIcon } from '@/components/shared/icons/VipIcon';
 import { useAppTranslations } from '@/hooks/useAppTranslations';
 import { formatNumber } from '@/utils/global/number.utils';
 import type { CSSProperties, ReactNode } from 'react';
@@ -15,7 +18,10 @@ export interface PodiumPlayer {
   username: string;
   points: number;
   avatarUrl?: string;
-  fallbackInitial: string;
+  fallbackInitial?: string;
+  isVerified?: boolean;
+  isLuckyPlayer?: boolean;
+  isVIP?: boolean;
   /** Optional element rendered next to the points badge (e.g., a tier-specific reward chip). */
   extra?: ReactNode;
 }
@@ -289,7 +295,7 @@ function PodiumSlot({ rank, player, loading, className }: PodiumSlotProps) {
                   loading="eager"
                   className="h-full w-full rounded-full object-cover"
                 />
-              ) : (
+              ) : player?.fallbackInitial ? (
                 <span
                   aria-hidden
                   className={twMerge(
@@ -298,8 +304,15 @@ function PodiumSlot({ rank, player, loading, className }: PodiumSlotProps) {
                     theme.accentTextClass
                   )}
                 >
-                  {player?.fallbackInitial ?? '—'}
+                  {player.fallbackInitial}
                 </span>
+              ) : (
+                <User
+                  aria-hidden
+                  size={Math.round(size * 0.55)}
+                  strokeWidth={2}
+                  className={twMerge('opacity-70', theme.accentTextClass)}
+                />
               )}
             </div>
           </SkeletonSuspense>
@@ -328,16 +341,29 @@ function PodiumSlot({ rank, player, loading, className }: PodiumSlotProps) {
           loading={loading || !player}
           skeleton={<Skeleton variant="line" textSize="sm" className="h-4 w-16" />}
         >
-          <span
-            title={player?.username}
-            className={twMerge(
-              'w-full truncate text-center font-bold',
-              isFirst ? 'text-[14px] text-white' : 'text-[12px] text-white/90'
-            )}
-          >
-            {player?.username ?? '—'}
-          </span>
+          <div className="flex w-full items-center justify-center gap-1">
+            <span
+              title={player?.username}
+              className={twMerge(
+                'min-w-0 truncate text-center font-bold',
+                isFirst ? 'text-[14px] text-white' : 'text-[12px] text-white/90'
+              )}
+            >
+              {player?.username ?? '—'}
+            </span>
+          </div>
         </SkeletonSuspense>
+        {player && (
+          <div className="mt-0.5 flex items-center gap-0.5">
+            {player.isVerified && (
+              <VerifiedSparkleIcon size={isFirst ? 18 : 14} className="shrink-0" />
+            )}
+            {player.isLuckyPlayer && (
+              <LuckyPlayerIcon size={isFirst ? 18 : 14} className="shrink-0" />
+            )}
+            {player.isVIP && <VipIcon size={isFirst ? 18 : 14} className="shrink-0" />}
+          </div>
+        )}
         <SkeletonSuspense
           loading={loading || !player}
           skeleton={<Skeleton variant="line" textSize="xs" className="mt-1 h-3 w-12" />}
@@ -359,22 +385,13 @@ interface PointsBadgeProps {
 
 function PointsBadge({ points, gradient }: PointsBadgeProps) {
   return (
-    <span className="mt-1 inline-flex items-center gap-1 rounded-full border border-white/10 bg-black/30 px-2 py-0.5 text-[11px] font-extrabold tabular-nums">
+    <span className="mt-1 inline-flex items-center gap-1 rounded-full border border-white/10 bg-black/30 px-2 py-0.5 text-[11px] font-extrabold tabular-nums text-white">
       <span
         aria-hidden
         className="inline-block h-2 w-2 rounded-full"
         style={{ background: gradient }}
       />
-      <span
-        style={{
-          backgroundImage: gradient,
-          WebkitBackgroundClip: 'text',
-          backgroundClip: 'text',
-          WebkitTextFillColor: 'transparent',
-        }}
-      >
-        {formatNumber(points)}
-      </span>
+      {formatNumber(points)}
     </span>
   );
 }

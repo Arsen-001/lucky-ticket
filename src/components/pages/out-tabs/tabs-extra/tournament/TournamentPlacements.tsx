@@ -1,6 +1,6 @@
 'use client';
 
-import { Coins, Cpu, Crown, MemoryStick } from 'lucide-react';
+import { Cpu, Crown, MemoryStick } from 'lucide-react';
 import { twMerge } from 'tailwind-merge';
 import { useGetTournamentByIdQuery, useGetTournamentPlacesQuery } from '@/api/tournaments.api';
 import { useAppTranslations } from '@/hooks/useAppTranslations';
@@ -10,6 +10,7 @@ import {
   type PodiumRank,
 } from '@/components/pages/out-tabs/drawer/leaderboard/LeaderboardPodium';
 import { Skeleton } from '@/components/shared/seleketons/Skeleton';
+import { LcLabel } from '@/components/shared/icons/LcLabel';
 import { GlobalConstants } from '@/constants/global.constants';
 import type { TournamentType } from '@/types/types/tournaments.types';
 
@@ -60,14 +61,15 @@ function TierRow({ place, percentage, lc, index, isMe }: TierRowProps) {
 
       {/* Body — % */}
       <div className="flex min-w-0 flex-1 flex-col gap-0.5">
-        <span className="text-sm font-bold text-white/85 leading-none">
-          {percentage}% {GlobalConstants.coinName}
+        <span className="inline-flex items-center gap-1 text-sm font-bold text-white/85 leading-none">
+          {percentage}%
+          <LcLabel size={12} />
         </span>
       </div>
 
       {/* LC reward */}
       <span className="text-gold inline-flex items-center gap-1 text-[13px] font-bold tabular-nums shrink-0">
-        <Coins size={12} className="fill-gold/30" />
+        <LcLabel size={14} />
         {lc !== undefined ? lc.toLocaleString() : '—'}
       </span>
 
@@ -120,7 +122,7 @@ export function TournamentPlacements({ id }: TournamentPlacementsProps) {
         username: winner?.username ?? `${rank === 1 ? '1st' : rank === 2 ? '2nd' : '3rd'}`,
         points: lc,
         avatarUrl: winner?.avatar,
-        fallbackInitial: rank === 1 ? '🥇' : rank === 2 ? '🥈' : '🥉',
+        fallbackInitial: winner?.username?.charAt(0).toUpperCase(),
         extra: (
           <span
             className={twMerge(
@@ -157,9 +159,7 @@ export function TournamentPlacements({ id }: TournamentPlacementsProps) {
           <span className="text-pink-secondary flex-1 text-[10px] font-bold uppercase tracking-wider">
             {t('prize')}
           </span>
-          <span className="text-pink-secondary flex-shrink-0 text-[10px] font-bold uppercase tracking-wider">
-            {GlobalConstants.coinName}
-          </span>
+          <LcLabel size={14} className="flex-shrink-0" />
         </div>
 
         <div className="flex flex-col gap-2">

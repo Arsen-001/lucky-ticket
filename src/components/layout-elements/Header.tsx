@@ -2,7 +2,7 @@
 
 import { useRouter } from 'next/navigation';
 import { useState } from 'react';
-import { Menu, Zap } from 'lucide-react';
+import { Menu } from 'lucide-react';
 import { twMerge } from 'tailwind-merge';
 import { useGetMeQuery } from '@/api/me.api';
 import { useGetNotificationsQuery } from '@/api/notifications.api';
@@ -14,11 +14,12 @@ import { SkeletonSuspense } from '@/components/shared/seleketons/SkeletonSuspens
 import { Button } from '@/components/shared/buttons/Button';
 import { Link } from '@/components/shared/links/Link';
 import { HeaderStatPill } from '@/components/layout-elements/HeaderStatPill';
-import { VerifiedSparkleIcon } from '@/components/shared/icons/VerifiedSparkleIcon';
+import { VipIcon } from '@/components/shared/icons/VipIcon';
+import { LuckyPlayerIcon } from '@/components/shared/icons/LuckyPlayerIcon';
+import { BoltIcon } from '@/components/shared/icons/BoltIcon';
 import { CoinIcon } from '@/components/shared/icons/CoinIcon';
 import { TelegramStarIcon } from '@/components/shared/icons/TelegramStarIcon';
 import { NotEnoughStarsModal } from '@/components/pages/tabs/home/NotEnoughStarsModal';
-import { GlobalConstants } from '@/constants/global.constants';
 import { routes } from '@/constants/routes';
 import { useAppDispatch } from '@/lib/rtk/hooks';
 import { useAppTranslations } from '@/hooks/useAppTranslations';
@@ -41,7 +42,7 @@ export function Header({ className }: ClassNameProps) {
   const hasUpdates = unreadCount + claimableStakesCount > 0;
 
   const usernameClasses = twMerge(
-    'ach-status-username truncate text-[15px] leading-tight',
+    'ach-status-username truncate text-[18px] leading-tight',
     me?.isVerified && 'has-verified',
     me?.isLuckyPlayer && 'has-lucky-player',
     me?.isVIP && 'has-vip'
@@ -71,64 +72,83 @@ export function Header({ className }: ClassNameProps) {
       <Link
         href={routes.profile.index}
         aria-label={t('profile')}
-        className="relative z-1 flex h-[50px] w-[50px] flex-shrink-0 items-center justify-center rounded-full"
+        className="relative z-1 flex h-[60px] w-[60px] flex-shrink-0 items-center justify-center rounded-full"
       >
-        <Avatar shadow size={50} />
+        <Avatar shadow size={60} />
         {me?.isVIP && (
           <span
             aria-label={t('vip level', { level: me.vipLevel })}
-            className="bg-pink-gradient border-header absolute -bottom-0.5 -right-0.5 flex h-[18px] w-[18px] items-center justify-center rounded-full border-2 text-[9px] font-extrabold text-white"
+            className="border-header text-background absolute -bottom-1 -right-1 flex h-[22px] min-w-[22px] items-center justify-center rounded-full border-2 px-1 text-[11px] font-black leading-none tabular-nums"
+            style={{
+              background: 'linear-gradient(135deg, #fff5d9 0%, #f8bd3e 45%, #b8860b 100%)',
+              boxShadow:
+                '0 4px 12px -2px color-mix(in srgb, var(--color-gold) 70%, transparent), 0 0 0 1px rgba(255,255,255,0.55) inset, 0 -1px 0 0 rgba(0,0,0,0.18) inset',
+              textShadow: '0 1px 0 rgba(255,255,255,0.35)',
+            }}
           >
             {me.vipLevel}
           </span>
         )}
       </Link>
 
-      <div className="relative z-1 flex min-w-0 flex-1 flex-col gap-1">
+      <div className="relative z-1 flex min-w-0 flex-1 flex-col gap-[10px]">
         <div className="flex items-center gap-1.5 overflow-hidden">
           <SkeletonSuspense
             loading={isLoading}
-            skeleton={<Skeleton variant="line" className="h-5 w-32" />}
+            skeleton={<Skeleton variant="line" className="h-6 w-32" />}
           >
             <span className={usernameClasses}>{me?.username}</span>
-            {me?.isVerified && <VerifiedSparkleIcon />}
+            {me?.isLuckyPlayer && (
+              <Link
+                href={routes.settings.luckyPlayer}
+                aria-label={t('lucky player')}
+                className="flex-center shrink-0 rounded-full"
+              >
+                <LuckyPlayerIcon size={22} />
+              </Link>
+            )}
+            {me?.isVIP && (
+              <Link
+                href={routes.settings.vip}
+                aria-label={t('vip level', { level: me.vipLevel })}
+                className="flex-center shrink-0 rounded-full"
+              >
+                <VipIcon size={22} />
+              </Link>
+            )}
           </SkeletonSuspense>
         </div>
 
         <div className="flex flex-wrap items-center gap-1.5">
           <SkeletonSuspense
             loading={isLoading}
-            skeleton={<Skeleton variant="rounded-rectangle" className="h-5.5 w-14" />}
+            skeleton={<Skeleton variant="rounded-rectangle" className="h-7 w-16" />}
           >
             <HeaderStatPill
-              icon={
-                <span className="bg-gold/25 flex h-3.5 w-3.5 items-center justify-center rounded-full">
-                  <Zap className="fill-gold text-gold" size={9} strokeWidth={2.6} />
-                </span>
-              }
+              accent="gold"
+              icon={<BoltIcon size={22} />}
               value={me?.activityPoints?.toLocaleString() ?? 0}
             />
           </SkeletonSuspense>
           <SkeletonSuspense
             loading={isLoading}
-            skeleton={<Skeleton variant="rounded-rectangle" className="h-5.5 w-16" />}
+            skeleton={<Skeleton variant="rounded-rectangle" className="h-7 w-18" />}
           >
             <HeaderStatPill
+              accent="pink"
               icon={<CoinIcon size={22} />}
               value={me?.coins?.toLocaleString() ?? 0}
-              accent={GlobalConstants.coinName}
+              onClick={() => router.push(routes.lc)}
+              ariaLabel="LC"
             />
           </SkeletonSuspense>
           <SkeletonSuspense
             loading={isLoading}
-            skeleton={<Skeleton variant="rounded-rectangle" className="h-5.5 w-12" />}
+            skeleton={<Skeleton variant="rounded-rectangle" className="h-7 w-14" />}
           >
             <HeaderStatPill
-              icon={
-                <span className="bg-electric-purple/35 flex h-3.5 w-3.5 items-center justify-center rounded-full">
-                  <TelegramStarIcon size={10} />
-                </span>
-              }
+              accent="purple"
+              icon={<TelegramStarIcon size={18} />}
               value={me?.telegramStars ?? 0}
               onClick={() => setStarsModalOpen(true)}
               ariaLabel={t('add stars')}

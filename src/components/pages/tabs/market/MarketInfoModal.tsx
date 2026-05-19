@@ -4,7 +4,7 @@ import { Timer } from 'lucide-react';
 import { twMerge } from 'tailwind-merge';
 import { Modal } from '@/components/shared/modals/Modal';
 import { TelegramStarIcon } from '@/components/shared/icons/TelegramStarIcon';
-import { GlobalConstants } from '@/constants/global.constants';
+import { LcLabel } from '@/components/shared/icons/LcLabel';
 import { useAppTranslations } from '@/hooks/useAppTranslations';
 import { useCountDown } from '@/hooks/useCountDown';
 import { MarketPriceType } from '@/types/enums/market.enums';
@@ -134,7 +134,7 @@ function PriceButton({ price, accent, onClick }: PriceButtonProps) {
         )}
         <span>{price.amount}</span>
       </span>
-      {isLtc && <span className="text-gold text-[13px] font-bold">{GlobalConstants.coinName}</span>}
+      {isLtc && <LcLabel size={14} />}
     </button>
   );
 }

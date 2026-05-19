@@ -6,7 +6,7 @@ import { ConfirmModal } from '@/components/shared/modals/ConfirmModal';
 import { useAppTranslations } from '@/hooks/useAppTranslations';
 import { MarketPrice } from '@/types/interfaces/market.interfaces';
 import { MarketPriceType } from '@/types/enums/market.enums';
-import { GlobalConstants } from '@/constants/global.constants';
+import { LcLabel } from '@/components/shared/icons/LcLabel';
 import { icons } from '@/constants/icons';
 
 interface MarketBuyModalProps {
@@ -18,6 +18,7 @@ interface MarketBuyModalProps {
   title: ReactNode;
   price: MarketPrice;
   priceLabel?: string;
+  confirmText?: string;
   icon: ReactNode;
   description: ReactNode;
   children?: ReactNode;
@@ -32,6 +33,7 @@ export function MarketBuyModal({
   title,
   price,
   priceLabel,
+  confirmText,
   icon,
   description,
   children,
@@ -45,6 +47,7 @@ export function MarketBuyModal({
       onConfirm={onConfirm}
       loading={loading}
       hideConfirm={disabled}
+      confirmText={confirmText}
       title={title}
       content={
         <div className="text-white/80 text-center flex flex-col gap-4 mt-2">
@@ -64,9 +67,7 @@ export function MarketBuyModal({
               </span>
               <div className="flex items-center gap-1.5">
                 <span className="text-lg font-bold text-white">{price.amount}</span>
-                {price.type === MarketPriceType.LTC && (
-                  <span className="text-sm text-gold font-bold">{GlobalConstants.coinName}</span>
-                )}
+                {price.type === MarketPriceType.LTC && <LcLabel size={16} />}
                 {price.type === MarketPriceType.USDT && (
                   <span className="text-sm font-black text-emerald-400">USDT</span>
                 )}

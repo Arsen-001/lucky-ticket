@@ -72,14 +72,6 @@ export interface BuyStarsResponse {
   starsCredited: number;
 }
 
-export interface NotifyLcLaunchRequest {
-  email?: string;
-}
-
-export interface NotifyLcLaunchResponse {
-  success: boolean;
-}
-
 export interface ConnectWalletRequest {
   provider: WalletProvider;
 }

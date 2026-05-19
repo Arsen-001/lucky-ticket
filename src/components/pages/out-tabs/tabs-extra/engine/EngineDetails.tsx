@@ -193,6 +193,7 @@ export function EngineDetails({ id }: EngineDetailsProps) {
         onInstantClaim={() => handleInstantClaim()}
         onUpgradeSpeed={() => handleUpgradeSpeed()}
         onUpgradeCapacity={() => handleUpgradeCapacity()}
+        reactorVisual="engine"
       />
 
       <CubeFaceCard accent={tierAccent} aspect="4/3">
