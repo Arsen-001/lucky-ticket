@@ -49,19 +49,13 @@ export function FriendsHeroCard() {
   };
 
   return (
-    <div className="bg-background-overlay relative overflow-hidden rounded-2xl p-3">
+    <div
+      className="shine-card relative overflow-hidden rounded-2xl p-3"
+      style={{ ['--shine-card-accent' as string]: 'var(--color-electric-pink)' }}
+    >
       <span
         aria-hidden
         className="bg-electric-pink/12 pointer-events-none absolute -right-8 -top-8 h-24 w-24 rounded-full blur-2xl"
-      />
-      <span
-        aria-hidden
-        className="pointer-events-none absolute bottom-0 left-[18%] right-[18%] z-2 h-[3px]"
-        style={{
-          background:
-            'linear-gradient(90deg, transparent 0%, color-mix(in srgb, var(--color-electric-pink) 90%, transparent) 50%, transparent 100%)',
-          filter: 'blur(0.8px)',
-        }}
       />
 
       <div className="relative flex items-center gap-3">

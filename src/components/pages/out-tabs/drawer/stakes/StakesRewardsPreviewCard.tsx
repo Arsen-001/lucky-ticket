@@ -50,7 +50,10 @@ export function StakesRewardsPreviewCard({
   const t = useAppTranslations();
 
   return (
-    <div className="stake-card-shell stake-card-border p-3.5">
+    <div
+      className="stake-card-shell stake-card-border p-3.5"
+      style={{ ['--stake-card-accent' as string]: `var(--color-${levelDef.guaranteedTicket})` }}
+    >
       <div className="relative flex flex-col gap-3">
         <div>
           <div className="mb-2 flex items-center gap-1.5">

@@ -53,7 +53,10 @@ export function NewStakeHero({
   const aprLabel = aprPercent.toFixed(aprPercent % 1 === 0 ? 0 : 1);
 
   return (
-    <div className="stake-card-shell stake-card-border px-5 py-5">
+    <div
+      className="stake-card-shell stake-card-border px-5 py-5"
+      style={{ ['--stake-card-accent' as string]: `var(--color-${activeLevel.guaranteedTicket})` }}
+    >
       <div className="relative text-center">
         <StakesLevelChip level={activeLevel.level} tier={activeLevel.guaranteedTicket} size="lg" />
         <div className="mt-3.5">

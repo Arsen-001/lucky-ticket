@@ -8,16 +8,12 @@ import { Swiper, SwiperSlide } from 'swiper/react';
 import { twMerge } from 'tailwind-merge';
 import { useGetTopTournamentsQuery } from '@/api/tournaments.api';
 import { HomeUpcomingTournamentCard } from '@/components/pages/tabs/home/HomeUpcomingTournamentCard';
-import { HomeSectionHeader } from '@/components/pages/tabs/home/HomeSectionHeader';
-import { useAppTranslations } from '@/hooks/useAppTranslations';
-import { routes } from '@/constants/routes';
 import type { ClassNameProps } from '@/types/interfaces/component.interfcaes';
 import type { Tournament } from '@/types/interfaces/tournaments.interfaces';
 
 const SKELETON_TOURNAMENTS = new Array(4).fill({}) as Tournament[];
 
 export function HomeUpcomingTournaments({ className }: ClassNameProps) {
-  const t = useAppTranslations();
   const { data: tournaments, isLoading } = useGetTopTournamentsQuery();
 
   const items = isLoading || !tournaments?.length ? SKELETON_TOURNAMENTS : tournaments;
@@ -28,14 +24,9 @@ export function HomeUpcomingTournaments({ className }: ClassNameProps) {
 
   return (
     <div className={twMerge('flex flex-col gap-3', className)}>
-      <HomeSectionHeader
-        title={t('upcoming tournaments')}
-        actionLabel={t('see all')}
-        actionHref={routes.tournaments.index}
-      />
       <Swiper
         key={isLoading ? 'loading' : 'loaded'}
-        className="-mt-[10px] w-full"
+        className="w-full"
         modules={[Autoplay]}
         centeredSlides
         grabCursor

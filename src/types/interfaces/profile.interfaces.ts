@@ -29,13 +29,15 @@ export interface ProfileFriendPreview {
   avatar?: string;
 }
 
-export type ActivityBestPeriod = 'day' | 'week' | 'all_time';
+export type ActivityBestPeriod = 'day' | 'week' | 'month' | 'all_time';
 
 export interface ActivityBest {
   day: number;
   dayRank: number;
   week: number;
   weekRank: number;
+  month: number;
+  monthRank: number;
   allTime: number;
   allTimeRank: number;
 }

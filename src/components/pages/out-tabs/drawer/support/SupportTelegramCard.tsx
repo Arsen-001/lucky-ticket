@@ -13,10 +13,23 @@ export function SupportTelegramCard() {
       target="_blank"
       rel="noopener noreferrer"
       className="bg-pink-gradient relative flex items-center gap-3 overflow-hidden rounded-2xl p-4 transition-transform active:scale-99"
+      style={{
+        boxShadow:
+          'inset 0 1px 0 rgba(255,255,255,0.15), 0 4px 16px -8px color-mix(in srgb, var(--color-electric-pink) 40%, transparent)',
+      }}
     >
       <span
         aria-hidden
         className="pointer-events-none absolute -right-10 -top-10 h-32 w-32 rounded-full bg-white/15 blur-2xl"
+      />
+      <span
+        aria-hidden
+        className="pointer-events-none absolute bottom-0 left-[6%] right-[6%] z-2 h-px"
+        style={{
+          background:
+            'linear-gradient(90deg, transparent 0%, rgba(255,255,255,0.45) 35%, rgba(255,255,255,0.8) 50%, rgba(255,255,255,0.45) 65%, transparent 100%)',
+          filter: 'blur(0.6px)',
+        }}
       />
       <div className="bg-white/20 flex-center relative h-11 w-11 flex-shrink-0 rounded-xl">
         <Send size={20} className="text-white" strokeWidth={2.4} />

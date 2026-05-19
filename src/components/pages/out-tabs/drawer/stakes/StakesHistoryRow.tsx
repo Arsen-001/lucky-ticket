@@ -20,7 +20,10 @@ export function StakesHistoryRow({ entry, levels }: StakesHistoryRowProps) {
   if (!levelDef) return null;
 
   return (
-    <div className="stake-card-shell stake-card-border flex items-center gap-3 px-3 py-2.5">
+    <div
+      className="stake-card-shell stake-card-border flex items-center gap-3 px-3 py-2.5"
+      style={{ ['--stake-card-accent' as string]: `var(--color-${levelDef.guaranteedTicket})` }}
+    >
       <Ticket type={levelDef.guaranteedTicket} width={44} height={44} className="shrink-0" />
 
       <div className="relative min-w-0 flex-1">

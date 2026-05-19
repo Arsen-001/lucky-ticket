@@ -57,19 +57,14 @@ export function InventoryItem({
   return (
     <div
       className={twMerge(
-        'bg-background-overlay animate-slide-in-bottom relative flex flex-col gap-3 overflow-hidden rounded-2xl p-3.5',
+        'shine-card animate-slide-in-bottom relative flex flex-col gap-3 overflow-hidden rounded-2xl p-3.5',
         isLevelingUp && 'inventory-chip-zoom'
       )}
-      style={{ animationDelay: `${index * 60}ms` }}
+      style={{
+        animationDelay: `${index * 60}ms`,
+        ['--shine-card-accent' as string]: accent,
+      }}
     >
-      <span
-        aria-hidden
-        className="pointer-events-none absolute bottom-0 left-[18%] right-[18%] z-2 h-[3px]"
-        style={{
-          background: `linear-gradient(90deg, transparent 0%, color-mix(in srgb, ${accent} 90%, transparent) 50%, transparent 100%)`,
-          filter: 'blur(0.8px)',
-        }}
-      />
       <div className="flex items-center gap-3">
         <ChipIcon type={chip.type} tier={chip.quality} size={137} className="shrink-0" />
 

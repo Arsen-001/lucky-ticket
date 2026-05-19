@@ -41,6 +41,8 @@ export const ownProfile: ProfileResponse = {
     dayRank: 24,
     week: 98,
     weekRank: 11,
+    month: 240,
+    monthRank: 9,
     allTime: 143,
     allTimeRank: 7,
   },

@@ -128,6 +128,8 @@ export function Header({ className }: ClassNameProps) {
               accent="gold"
               icon={<BoltIcon size={22} />}
               value={me?.activityPoints?.toLocaleString() ?? 0}
+              onClick={() => router.push(routes.leaderboard)}
+              ariaLabel={t('view leaderboard')}
             />
           </SkeletonSuspense>
           <SkeletonSuspense

@@ -66,8 +66,9 @@ export function EnginePreviewCard({
   return (
     <Link
       href={routes.engines.getById(engine.id)}
+      style={{ ['--shine-card-accent' as string]: tierColor }}
       className={twMerge(
-        'task-card-default bg-background-overlay w-full rounded-2xl flex flex-col gap-2 p-3 transition-transform active:scale-99 cursor-pointer',
+        'shine-card w-full rounded-2xl flex flex-col gap-2 p-3 transition-transform active:scale-99 cursor-pointer',
         className
       )}
     >

@@ -70,7 +70,10 @@ export function ProgressStakeContent({ stakeId }: ProgressStakeContentProps) {
         })}
       </div>
 
-      <div className="stake-card-shell stake-card-border px-5 py-6">
+      <div
+        className="stake-card-shell stake-card-border px-5 py-6"
+        style={{ ['--stake-card-accent' as string]: `var(--color-${levelDef.guaranteedTicket})` }}
+      >
         <div className="relative text-center">
           <StakeCountdownRing
             levelDef={levelDef}

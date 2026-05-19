@@ -18,7 +18,8 @@ export function LcWalletComingSoonCard() {
     <button
       type="button"
       onClick={() => router.push(routes.lc)}
-      className="bg-background-overlay/70 hover:bg-background-overlay relative w-full overflow-hidden rounded-2xl p-4 text-left transition-colors active:scale-99 cursor-pointer"
+      className="shine-card relative w-full overflow-hidden rounded-2xl p-4 text-left transition-colors active:scale-99 cursor-pointer"
+      style={{ ['--shine-card-accent' as string]: 'var(--color-gold)' }}
     >
       <span
         aria-hidden
@@ -26,15 +27,6 @@ export function LcWalletComingSoonCard() {
         style={{
           background: 'radial-gradient(circle, rgba(248,189,62,0.22) 0%, transparent 65%)',
           filter: 'blur(2px)',
-        }}
-      />
-      <span
-        aria-hidden
-        className="pointer-events-none absolute bottom-0 left-[18%] right-[18%] z-2 h-[3px]"
-        style={{
-          background:
-            'linear-gradient(90deg, transparent 0%, color-mix(in srgb, var(--color-gold) 90%, transparent) 50%, transparent 100%)',
-          filter: 'blur(0.8px)',
         }}
       />
 

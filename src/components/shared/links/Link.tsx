@@ -1,5 +1,5 @@
 import NextLink, { type LinkProps as NextLinkProps } from 'next/link';
-import type { ReactNode } from 'react';
+import type { CSSProperties, ReactNode } from 'react';
 import { twMerge } from 'tailwind-merge';
 import type { Route } from '@/constants/routes';
 
@@ -8,6 +8,7 @@ export interface LinkProps extends Omit<NextLinkProps, 'href'> {
   className?: string;
   href: Route;
   tabIndex?: number;
+  style?: CSSProperties;
 }
 
 export function Link({ children, className, ...rest }: LinkProps) {

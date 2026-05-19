@@ -45,7 +45,7 @@ export function LeaderboardListItem({
       style={style}
       data-leaderboard-me={isMe ? 'true' : undefined}
       className={twMerge(
-        'bg-background-overlay flex items-center gap-2.5 rounded-2xl border p-2.5 transition-all',
+        'bg-background-overlay flex items-center gap-2.5 rounded-2xl border px-2.5 py-[3px] transition-all',
         isMe
           ? 'border-electric-pink/55 shadow-[0_0_18px_rgba(222,0,155,0.22)]'
           : 'border-white/5 hover:border-white/15',
@@ -82,7 +82,7 @@ export function LeaderboardListItem({
         </SkeletonSuspense>
       </Link>
 
-      <div className="flex min-w-0 flex-1 flex-col gap-0.5">
+      <div className="flex min-w-0 flex-1 flex-col justify-center gap-0.5 py-[5px]">
         <div className="flex items-center gap-1">
           <SkeletonSuspense
             loading={loading || !entry}
@@ -111,7 +111,7 @@ export function LeaderboardListItem({
           skeleton={<Skeleton variant="line" textSize="xs" className="h-3 w-16" />}
         >
           <span className="text-gold inline-flex items-center gap-1 text-[12px] font-bold tabular-nums">
-            <BoltIcon size={16} />
+            <BoltIcon size={32} />
             <LeaderboardCountUp value={entry?.points ?? 0} enabled={!!animateCounter} />
           </span>
         </SkeletonSuspense>

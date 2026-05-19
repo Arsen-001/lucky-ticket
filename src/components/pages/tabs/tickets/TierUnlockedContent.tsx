@@ -45,7 +45,10 @@ export function TierUnlockedContent({
 
   return (
     <div className={`flex flex-col gap-3 ${className ?? ''}`}>
-      <div className="task-card-default bg-background-overlay rounded-2xl p-3.5 flex items-center gap-3">
+      <div
+        className="shine-card rounded-2xl p-3.5 flex items-center gap-3"
+        style={{ ['--shine-card-accent' as string]: `var(--color-${tier})` }}
+      >
         <div className="flex-1 min-w-0">
           <div className="text-[10px] font-bold uppercase tracking-[1.2px] text-pink-secondary">
             {t('in inventory')}

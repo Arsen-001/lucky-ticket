@@ -28,17 +28,11 @@ export function TonWalletHero({
 
   if (loading) {
     return (
-      <div className="bg-background-overlay relative overflow-hidden rounded-2xl p-5">
+      <div
+        className="shine-card relative overflow-hidden rounded-2xl p-5"
+        style={{ ['--shine-card-accent' as string]: 'var(--color-electric-purple)' }}
+      >
         <Skeleton variant="rounded-rectangle" className="h-32 w-full" />
-        <span
-          aria-hidden
-          className="pointer-events-none absolute bottom-0 left-[18%] right-[18%] z-2 h-[3px]"
-          style={{
-            background:
-              'linear-gradient(90deg, transparent 0%, color-mix(in srgb, var(--color-electric-purple) 90%, transparent) 50%, transparent 100%)',
-            filter: 'blur(0.8px)',
-          }}
-        />
       </div>
     );
   }
@@ -56,7 +50,10 @@ function TonWalletDisconnected({ onConnect }: { onConnect: () => void }) {
   const t = useAppTranslations();
 
   return (
-    <div className="bg-background-overlay relative overflow-hidden rounded-2xl p-5">
+    <div
+      className="shine-card relative overflow-hidden rounded-2xl p-5"
+      style={{ ['--shine-card-accent' as string]: 'var(--color-electric-purple)' }}
+    >
       <span
         aria-hidden
         className="bg-electric-purple/15 pointer-events-none absolute -right-12 -top-12 h-44 w-44 rounded-full blur-2xl"
@@ -64,15 +61,6 @@ function TonWalletDisconnected({ onConnect }: { onConnect: () => void }) {
       <span
         aria-hidden
         className="bg-pink/10 pointer-events-none absolute -bottom-16 -left-12 h-40 w-40 rounded-full blur-2xl"
-      />
-      <span
-        aria-hidden
-        className="pointer-events-none absolute bottom-0 left-[18%] right-[18%] z-2 h-[3px]"
-        style={{
-          background:
-            'linear-gradient(90deg, transparent 0%, color-mix(in srgb, var(--color-electric-purple) 90%, transparent) 50%, transparent 100%)',
-          filter: 'blur(0.8px)',
-        }}
       />
 
       <div className="relative flex flex-col items-center gap-3 text-center">
@@ -120,7 +108,10 @@ function TonWalletConnected({ state, onDisconnect, disconnecting }: TonWalletCon
   };
 
   return (
-    <div className="bg-background-overlay relative overflow-hidden rounded-2xl p-4">
+    <div
+      className="shine-card relative overflow-hidden rounded-2xl p-4"
+      style={{ ['--shine-card-accent' as string]: 'var(--color-electric-purple)' }}
+    >
       <span
         aria-hidden
         className="bg-pink/10 pointer-events-none absolute -right-14 -top-14 h-44 w-44 rounded-full blur-2xl"
@@ -132,15 +123,6 @@ function TonWalletConnected({ state, onDisconnect, disconnecting }: TonWalletCon
       <span
         aria-hidden
         className="pointer-events-none absolute inset-0 rotate-12 -translate-x-1/3 bg-gradient-to-r from-transparent via-white/[0.04] to-transparent"
-      />
-      <span
-        aria-hidden
-        className="pointer-events-none absolute bottom-0 left-[18%] right-[18%] z-2 h-[3px]"
-        style={{
-          background:
-            'linear-gradient(90deg, transparent 0%, color-mix(in srgb, var(--color-electric-purple) 90%, transparent) 50%, transparent 100%)',
-          filter: 'blur(0.8px)',
-        }}
       />
 
       <div className="relative flex items-center justify-between gap-2">

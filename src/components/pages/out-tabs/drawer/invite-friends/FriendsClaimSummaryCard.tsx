@@ -31,16 +31,10 @@ export function FriendsClaimSummaryCard({
     .map(([type, amount]) => ({ type, amount }));
 
   return (
-    <div className="bg-background-overlay relative flex flex-col gap-3 overflow-hidden rounded-2xl p-4">
-      <span
-        aria-hidden
-        className="pointer-events-none absolute bottom-0 left-[18%] right-[18%] z-2 h-[3px]"
-        style={{
-          background:
-            'linear-gradient(90deg, transparent 0%, color-mix(in srgb, var(--color-gold) 90%, transparent) 50%, transparent 100%)',
-          filter: 'blur(0.8px)',
-        }}
-      />
+    <div
+      className="shine-card relative flex flex-col gap-3 overflow-hidden rounded-2xl p-4"
+      style={{ ['--shine-card-accent' as string]: 'var(--color-gold)' }}
+    >
       <div className="flex items-center gap-3">
         <div className="bg-gold/15 border-gold/30 flex-center h-10 w-10 flex-shrink-0 rounded-xl border">
           <Gift size={20} className="text-gold" strokeWidth={2.2} />

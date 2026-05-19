@@ -1,7 +1,6 @@
 'use client';
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { ChevronRight } from 'lucide-react';
 import { twMerge } from 'tailwind-merge';
 import { BoltIcon } from '@/components/shared/icons/BoltIcon';
 import { ConfirmModal } from '@/components/shared/modals/ConfirmModal';
@@ -16,28 +15,21 @@ export interface ProfileLeaderboardCardProps {
   loading?: boolean;
 }
 
-interface BestRecord {
+type PeriodLabelKey = 'today' | 'weekly' | 'monthly' | 'all time';
+
+interface PeriodCell {
   period: ActivityBestPeriod;
+  labelKey: PeriodLabelKey;
   points: number;
   rank: number;
 }
 
-const PERIOD_KEY: Record<ActivityBestPeriod, 'day' | 'weekly' | 'all time'> = {
-  day: 'day',
-  week: 'weekly',
-  all_time: 'all time',
-};
-
-const pickBest = (best: ProfileResponse['activityBest'] | undefined): BestRecord => {
-  const candidates: BestRecord[] = [
-    { period: 'all_time', points: best?.allTime ?? 0, rank: best?.allTimeRank ?? 0 },
-    { period: 'week', points: best?.week ?? 0, rank: best?.weekRank ?? 0 },
-    { period: 'day', points: best?.day ?? 0, rank: best?.dayRank ?? 0 },
-  ];
-  return candidates.reduce((winner, current) =>
-    current.points > winner.points ? current : winner
-  );
-};
+const buildCells = (best: ProfileResponse['activityBest']): PeriodCell[] => [
+  { period: 'day', labelKey: 'today', points: best.day, rank: best.dayRank },
+  { period: 'week', labelKey: 'weekly', points: best.week, rank: best.weekRank },
+  { period: 'month', labelKey: 'monthly', points: best.month, rank: best.monthRank },
+  { period: 'all_time', labelKey: 'all time', points: best.allTime, rank: best.allTimeRank },
+];
 
 export function ProfileLeaderboardCard({ profile, loading }: ProfileLeaderboardCardProps) {
   const t = useAppTranslations();
@@ -53,8 +45,7 @@ export function ProfileLeaderboardCard({ profile, loading }: ProfileLeaderboardC
     );
   }
 
-  const best = pickBest(profile.activityBest);
-  const hasRank = best.rank > 0;
+  const cells = buildCells(profile.activityBest);
 
   const handleConfirm = () => {
     setOpen(false);
@@ -71,27 +62,35 @@ export function ProfileLeaderboardCard({ profile, loading }: ProfileLeaderboardC
           onClick={() => setOpen(true)}
           aria-label={t('view leaderboard')}
           className={twMerge(
-            'bg-background-overlay relative flex items-center gap-3 rounded-2xl p-3 text-left transition-all',
+            'bg-background-overlay relative flex items-center gap-2.5 rounded-2xl p-0 text-left transition-all',
             'cursor-pointer active:scale-99 hover:bg-white/4'
           )}
         >
-          <BoltIcon size={60} className="shrink-0" />
-
-          <div className="flex min-w-0 flex-1 flex-col gap-0.5">
-            <span className="text-[10px] font-extrabold uppercase tracking-wider text-white/50">
-              {t('activity')}
-            </span>
-            <span className="text-gold text-lg font-black leading-none tabular-nums">
-              {formatNumber(profile.activityPoints)}
-            </span>
-            {hasRank && (
-              <span className="text-[10px] font-bold tracking-wider text-white/45">
-                {t(PERIOD_KEY[best.period])} · #{best.rank}
-              </span>
-            )}
+          <div className="flex-center shrink-0 overflow-hidden">
+            <BoltIcon size={80} className="m-0 p-0" />
           </div>
 
-          <ChevronRight size={18} className="shrink-0 text-white/35" />
+          <div className="-ml-6 grid flex-1 grid-cols-4 items-center">
+            {cells.map((cell, index) => (
+              <div
+                key={cell.period}
+                className={twMerge(
+                  'flex flex-col items-center gap-1 px-1.5 py-1.5',
+                  index < cells.length - 1 && 'border-r border-white/8'
+                )}
+              >
+                <span className="text-[9px] font-extrabold uppercase tracking-wider text-white/45">
+                  {t(cell.labelKey)}
+                </span>
+                <span className="text-gold text-base font-black leading-none tabular-nums">
+                  {formatNumber(cell.points)}
+                </span>
+                <span className="text-[10px] font-bold tabular-nums text-white/55">
+                  {cell.rank > 0 ? `#${cell.rank}` : '—'}
+                </span>
+              </div>
+            ))}
+          </div>
         </button>
       </section>
 

@@ -17,19 +17,13 @@ export function StarsBalanceCard({ balance, loading, onBuyMore, disabled }: Star
   const t = useAppTranslations();
 
   return (
-    <div className="bg-background-overlay relative flex items-center gap-3 overflow-hidden rounded-2xl px-4 py-3">
+    <div
+      className="shine-card relative flex items-center gap-3 overflow-hidden rounded-2xl px-4 py-3"
+      style={{ ['--shine-card-accent' as string]: 'var(--color-electric-pink)' }}
+    >
       <span
         aria-hidden
         className="bg-electric-pink/10 pointer-events-none absolute -right-10 -top-10 h-24 w-24 rounded-full blur-2xl"
-      />
-      <span
-        aria-hidden
-        className="pointer-events-none absolute bottom-0 left-[18%] right-[18%] z-2 h-[3px]"
-        style={{
-          background:
-            'linear-gradient(90deg, transparent 0%, color-mix(in srgb, var(--color-electric-pink) 90%, transparent) 50%, transparent 100%)',
-          filter: 'blur(0.8px)',
-        }}
       />
       <div className="bg-electric-purple/15 flex-center relative h-9 w-9 flex-shrink-0 rounded-xl">
         <Star size={16} className="text-gold fill-gold" strokeWidth={2.2} />

@@ -1,22 +1,12 @@
-import { getAppTranslations } from '@/i18n/getAppTranslations';
 import { HomeEnginesSlider } from '@/components/pages/tabs/home/HomeEnginesSlider';
-import { HomeSectionHeader } from '@/components/pages/tabs/home/HomeSectionHeader';
 import { HomeUpcomingTournaments } from '@/components/pages/tabs/home/HomeUpcomingTournaments';
-import { routes } from '@/constants/routes';
 
-export default async function HomePage() {
-  const t = await getAppTranslations();
-
+export default function HomePage() {
   return (
     <div className="flex flex-col gap-5 pt-3 pb-6">
       <HomeUpcomingTournaments />
 
-      <section className="-mt-[10px] flex flex-col gap-2">
-        <HomeSectionHeader
-          title={t('your engines')}
-          actionLabel={t('see all')}
-          actionHref={routes.tickets.index}
-        />
+      <section className="flex flex-col gap-2">
         <HomeEnginesSlider />
       </section>
     </div>

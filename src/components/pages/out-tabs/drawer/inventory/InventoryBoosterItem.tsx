@@ -21,19 +21,12 @@ export function InventoryBoosterItem({ booster, index, onActivate }: InventoryBo
 
   return (
     <div
-      className="bg-background-overlay animate-slide-in-bottom relative flex items-center gap-3 overflow-hidden rounded-2xl p-3"
+      className="shine-card animate-slide-in-bottom relative flex items-center gap-3 overflow-hidden rounded-2xl p-3"
       style={{
         animationDelay: `${index * 60}ms`,
+        ['--shine-card-accent' as string]: accent,
       }}
     >
-      <span
-        aria-hidden
-        className="pointer-events-none absolute bottom-0 left-[18%] right-[18%] z-2 h-[3px]"
-        style={{
-          background: `linear-gradient(90deg, transparent 0%, color-mix(in srgb, ${accent} 90%, transparent) 50%, transparent 100%)`,
-          filter: 'blur(0.8px)',
-        }}
-      />
       <BoosterIcon type={booster.type} tier={booster.quality} size={64} className="shrink-0" />
 
       <div className="flex min-w-0 flex-1 flex-col gap-0.5">

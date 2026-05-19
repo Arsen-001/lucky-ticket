@@ -31,6 +31,7 @@ export function StakesActiveStakeCard({ stake, levelDef }: StakesActiveStakeCard
         'stake-card-shell stake-card-border relative block p-3 text-left transition-transform duration-200',
         ready && '-translate-y-0.5'
       )}
+      style={{ ['--stake-card-accent' as string]: `var(--color-${levelDef.guaranteedTicket})` }}
     >
       <div className="relative">
         <div className="flex min-h-[22px] items-start justify-between">

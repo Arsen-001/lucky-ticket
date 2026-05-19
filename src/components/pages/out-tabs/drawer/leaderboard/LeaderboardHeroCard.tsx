@@ -21,7 +21,7 @@ export function LeaderboardHeroCard({ myPlace, total, loading }: LeaderboardHero
   const negative = change < 0;
 
   return (
-    <div className="bg-background-overlay card-outlined relative flex items-center gap-3 overflow-hidden rounded-2xl px-3.5 py-2.5">
+    <div className="task-card-default relative flex items-center gap-3 overflow-hidden rounded-2xl px-3.5 py-0.5">
       <span
         aria-hidden
         className="bg-pink/10 pointer-events-none absolute -right-10 -top-10 h-28 w-28 rounded-full blur-2xl"
@@ -32,9 +32,6 @@ export function LeaderboardHeroCard({ myPlace, total, loading }: LeaderboardHero
       </div>
 
       <div className="relative flex min-w-0 flex-1 items-baseline gap-1.5">
-        <span className="text-pink-secondary text-[10px] font-bold uppercase tracking-wider">
-          {t('your rank')}
-        </span>
         <SkeletonSuspense
           loading={loading}
           skeleton={<Skeleton variant="line" className="h-5 w-12" />}
@@ -56,7 +53,7 @@ export function LeaderboardHeroCard({ myPlace, total, loading }: LeaderboardHero
           skeleton={<Skeleton variant="line" className="h-5 w-12" />}
         >
           <span className="text-gold inline-flex items-center gap-1 text-sm font-extrabold tabular-nums">
-            <BoltIcon size={17} />
+            <BoltIcon size={48} />
             {myPlace ? formatNumber(myPlace.points) : 0}
           </span>
         </SkeletonSuspense>

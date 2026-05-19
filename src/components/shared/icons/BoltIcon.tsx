@@ -12,7 +12,7 @@ export interface BoltIconProps {
 export function BoltIcon({ size = 18, className, style }: BoltIconProps) {
   return (
     <span
-      className={twMerge('relative inline-flex shrink-0', className)}
+      className={twMerge('relative inline-flex shrink-0 rotate-[25deg]', className)}
       style={{ width: size, height: size, ...style }}
       aria-hidden
     >

@@ -26,19 +26,13 @@ export default function LanguagesPage() {
 
   return (
     <div className="flex flex-col gap-4 px-4 pb-6 pt-2">
-      <div className="bg-background-overlay relative overflow-hidden rounded-2xl p-3">
+      <div
+        className="shine-card relative overflow-hidden rounded-2xl p-3"
+        style={{ ['--shine-card-accent' as string]: 'var(--color-electric-pink)' }}
+      >
         <span
           aria-hidden
           className="bg-electric-pink/12 pointer-events-none absolute -right-8 -top-8 h-24 w-24 rounded-full blur-2xl"
-        />
-        <span
-          aria-hidden
-          className="pointer-events-none absolute bottom-0 left-[18%] right-[18%] z-2 h-[3px]"
-          style={{
-            background:
-              'linear-gradient(90deg, transparent 0%, color-mix(in srgb, var(--color-electric-pink) 90%, transparent) 50%, transparent 100%)',
-            filter: 'blur(0.8px)',
-          }}
         />
         <div className="relative flex items-center gap-3">
           <div className="bg-electric-pink/15 ring-electric-pink/30 flex-center h-10 w-10 flex-shrink-0 rounded-xl ring-1">
@@ -62,22 +56,17 @@ export default function LanguagesPage() {
                 type="button"
                 onClick={() => handleLanguageChange(lang.code)}
                 disabled={isPending}
-                style={{ animationDelay: `${index * 60}ms` }}
+                style={{
+                  animationDelay: `${index * 60}ms`,
+                  ...(isActive
+                    ? { ['--shine-card-accent' as string]: 'var(--color-electric-pink)' }
+                    : {}),
+                }}
                 className={twMerge(
-                  'bg-background-overlay animate-slide-in-bottom relative flex w-full items-center gap-3 overflow-hidden rounded-2xl p-3 text-left transition-all active:scale-99 disabled:opacity-60'
+                  'animate-slide-in-bottom relative flex w-full items-center gap-3 overflow-hidden rounded-2xl p-3 text-left transition-all active:scale-99 disabled:opacity-60',
+                  isActive ? 'shine-card' : 'bg-background-overlay'
                 )}
               >
-                {isActive && (
-                  <span
-                    aria-hidden
-                    className="pointer-events-none absolute bottom-0 left-[18%] right-[18%] z-2 h-[3px]"
-                    style={{
-                      background:
-                        'linear-gradient(90deg, transparent 0%, color-mix(in srgb, var(--color-electric-pink) 90%, transparent) 50%, transparent 100%)',
-                      filter: 'blur(0.8px)',
-                    }}
-                  />
-                )}
                 {isActive && (
                   <span
                     aria-hidden
