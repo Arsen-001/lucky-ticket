@@ -22,13 +22,13 @@ export function StakesHistoryRow({ entry, levels }: StakesHistoryRowProps) {
   return (
     <div
       className="stake-card-shell stake-card-border flex items-center gap-3 px-3 py-2.5"
-      style={{ ['--stake-card-accent' as string]: `var(--color-${levelDef.guaranteedTicket})` }}
+      style={{ ['--stake-card-accent' as string]: `var(--color-${levelDef.tier})` }}
     >
-      <Ticket type={levelDef.guaranteedTicket} width={44} height={44} className="shrink-0" />
+      <Ticket type={levelDef.tier} width={44} height={44} className="shrink-0" />
 
       <div className="relative min-w-0 flex-1">
         <div className="flex items-center gap-1.5">
-          <StakesLevelChip level={levelDef.level} tier={levelDef.guaranteedTicket} size="sm" />
+          <StakesLevelChip level={levelDef.level} tier={levelDef.tier} size="sm" />
           <span className="text-pink-secondary text-[10px] font-semibold">
             {formatStakeRelative(entry.completedAt, t)}
           </span>
@@ -38,21 +38,15 @@ export function StakesHistoryRow({ entry, levels }: StakesHistoryRowProps) {
             <span className="font-bold text-error/90">{t('cancelled · LC returned')}</span>
           ) : (
             <span>
-              {t('{count} tickets', { count: entry.ticketsCount })}
-              {entry.bonusLC > 0 && (
-                <>
-                  {' · '}
-                  <span className="text-gold inline-flex items-center gap-1 font-bold">
-                    +{entry.bonusLC.toLocaleString()}
-                    <LcLabel size={11} />
-                  </span>
-                </>
-              )}
-              {entry.bonusStars > 0 && (
+              <span className="text-gold inline-flex items-center gap-1 font-bold">
+                +{entry.yieldLC.toLocaleString()}
+                <LcLabel size={11} />
+              </span>
+              {entry.bonusLS > 0 && (
                 <>
                   {' · '}
                   <span className="text-gold font-bold">
-                    +{entry.bonusStars} {t('stars')}
+                    +{entry.bonusLS} {t('stars')}
                   </span>
                 </>
               )}

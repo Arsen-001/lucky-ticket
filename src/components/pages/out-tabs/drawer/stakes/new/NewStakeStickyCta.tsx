@@ -13,6 +13,7 @@ export interface NewStakeStickyCtaProps {
   amount: number;
   minDeposit: number;
   balance: number;
+  tierLocked?: boolean;
   loading?: boolean;
   onConfirm: () => void;
 }
@@ -22,16 +23,19 @@ export function NewStakeStickyCta({
   amount,
   minDeposit,
   balance,
+  tierLocked = false,
   loading = false,
   onConfirm,
 }: NewStakeStickyCtaProps) {
   const t = useAppTranslations();
   const belowMin = amount < minDeposit;
   const insufficient = amount > balance;
-  const valid = !belowMin && !insufficient;
+  const valid = !belowMin && !insufficient && !tierLocked;
 
   let label: string;
-  if (belowMin) {
+  if (tierLocked) {
+    label = t('locked');
+  } else if (belowMin) {
     label = t('min {amount} {coin}', { amount: minDeposit, coin: GlobalConstants.coinName });
   } else if (insufficient) {
     label = t('not enough {coin}', { coin: GlobalConstants.coinName });

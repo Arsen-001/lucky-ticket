@@ -2,8 +2,9 @@
 
 import Image from 'next/image';
 import { Ticket } from '@/components/shared/icons/Ticket';
-import { TicketDetailsRequirements } from '@/components/pages/out-tabs/tabs-extra/ticket/TicketDetailsRequirements';
+import { useGetMeQuery } from '@/api/me.api';
 import { useAppTranslations } from '@/hooks/useAppTranslations';
+import { GlobalConstants } from '@/constants/global.constants';
 import { icons } from '@/constants/icons';
 import type { Ticket as TicketModel, TicketType } from '@/types/types/ticket.types';
 import type { MessageIds } from '@/types/types/i18n.types';
@@ -31,7 +32,12 @@ export interface TierLockedContentProps {
 
 export function TierLockedContent({ ticket, className }: TierLockedContentProps) {
   const t = useAppTranslations();
+  const { data: me } = useGetMeQuery();
   const tierColor = `var(--color-${ticket.ticketType})`;
+  const threshold = GlobalConstants.apTierThresholds[ticket.ticketType];
+  const currentAp = me?.activityPoints ?? 0;
+  const progressPct =
+    threshold > 0 ? Math.min(100, Math.round((currentAp / threshold) * 100)) : 100;
 
   return (
     <div className={`flex flex-col gap-3 ${className ?? ''}`}>
@@ -66,10 +72,26 @@ export function TierLockedContent({ ticket, className }: TierLockedContentProps)
         </div>
       </div>
 
-      <TicketDetailsRequirements
-        ticketType={ticket.ticketType}
-        requirements={ticket.requirements}
-      />
+      <div className="card-outlined bg-purple-gradient flex flex-col gap-2.5 rounded-2xl p-4">
+        <span className="text-pink-secondary text-[11px] font-extrabold uppercase tracking-wider">
+          {t('unlock requirement')}
+        </span>
+        <p className="text-white-secondary text-[12px] leading-snug">
+          {t('reach {tier} tier with {ap} ap', {
+            tier: t(titleIdByType[ticket.ticketType]),
+            ap: threshold.toLocaleString(),
+          })}
+        </p>
+        <div className="h-2 overflow-hidden rounded-full bg-white/8">
+          <div
+            className="h-full rounded-full transition-[width] duration-500"
+            style={{ width: `${progressPct}%`, background: tierColor }}
+          />
+        </div>
+        <span className="text-[11px] font-semibold tabular-nums text-white/55">
+          {currentAp.toLocaleString()} / {threshold.toLocaleString()} AP
+        </span>
+      </div>
     </div>
   );
 }

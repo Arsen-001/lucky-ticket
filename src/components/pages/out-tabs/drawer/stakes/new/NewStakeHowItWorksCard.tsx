@@ -14,7 +14,7 @@ export function NewStakeHowItWorksCard() {
       </div>
       <p className="text-white-secondary flex-1 text-[11px] leading-relaxed">
         <strong className="text-white">
-          {t('lock for {hours} hours', { hours: GlobalConstants.stakeDurationHours })}
+          {t('lock for up to {max} months', { max: GlobalConstants.stakeDurationMaxMonths })}
         </strong>{' '}
         {t('cancel any time description')}
       </p>

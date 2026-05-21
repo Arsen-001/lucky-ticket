@@ -3,15 +3,24 @@ import { useState } from 'react';
 import { LogOut } from 'lucide-react';
 import dayjs from 'dayjs';
 import { ConfirmModal } from '@/components/shared/modals/ConfirmModal';
+import { ProfileSupportIds } from '@/components/pages/out-tabs/drawer/profile/ProfileSupportIds';
 import { useAppTranslations } from '@/hooks/useAppTranslations';
 
 export interface ProfileFooterProps {
   isOwn: boolean;
   memberSince: string;
+  userId: string;
+  publicId: string;
   onSignOut?: () => void;
 }
 
-export function ProfileFooter({ isOwn, memberSince, onSignOut }: ProfileFooterProps) {
+export function ProfileFooter({
+  isOwn,
+  memberSince,
+  userId,
+  publicId,
+  onSignOut,
+}: ProfileFooterProps) {
   const t = useAppTranslations();
   const [signOutOpen, setSignOutOpen] = useState(false);
   const formattedDate = dayjs(memberSince).format('MMM D, YYYY');
@@ -23,6 +32,8 @@ export function ProfileFooter({ isOwn, memberSince, onSignOut }: ProfileFooterPr
 
   return (
     <section className="flex flex-col gap-2.5">
+      {isOwn && <ProfileSupportIds userId={userId} publicId={publicId} />}
+
       {isOwn && (
         <button
           type="button"

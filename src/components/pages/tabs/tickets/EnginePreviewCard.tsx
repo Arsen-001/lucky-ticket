@@ -1,6 +1,6 @@
 'use client';
 
-import { Clock, Layers, Sparkles, Zap } from 'lucide-react';
+import { Clock, Layers, Sparkles } from 'lucide-react';
 import { twMerge } from 'tailwind-merge';
 import { useGetInventoryQuery } from '@/api/inventory.api';
 import { ReactorDial } from '@/components/pages/out-tabs/tabs-extra/ticket/ReactorDial';
@@ -139,8 +139,7 @@ export function EnginePreviewCard({
           >
             <span className="absolute -top-1/2 -left-1/2 h-[200%] w-[55%] bg-gradient-to-r from-transparent via-white/40 to-transparent animate-task-shine" />
           </span>
-          <span className="relative inline-flex items-center gap-1 text-[9px] font-bold uppercase tracking-wider text-white">
-            <Zap size={13} stroke={glow} fill={glow} fillOpacity={0.4} strokeWidth={2.6} />
+          <span className="relative text-[9px] font-bold uppercase tracking-wider text-white">
             {t('claim')}
           </span>
           <span

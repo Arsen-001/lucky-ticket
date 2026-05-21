@@ -5,7 +5,9 @@ import { twMerge } from 'tailwind-merge';
 import { Modal } from '@/components/shared/modals/Modal';
 import { Button } from '@/components/shared/buttons/Button';
 import { TicketOverlap } from '@/components/shared/icons/TicketOverlap';
+import { BoltIcon } from '@/components/shared/icons/BoltIcon';
 import { useAppTranslations } from '@/hooks/useAppTranslations';
+import { GlobalConstants } from '@/constants/global.constants';
 import type { TicketType } from '@/types/types/ticket.types';
 import type { MessageIds } from '@/types/types/i18n.types';
 
@@ -66,6 +68,7 @@ export function TicketClaimedModal({ open, tier, count, onClose }: TicketClaimed
   const counter = useCounter(open ? count : 0);
   const glow = TIER_GLOW[tier];
   const tierColor = `var(--color-${tier})`;
+  const claimAp = GlobalConstants.apRewards.claimByTier[tier];
 
   return (
     <Modal open={open} onClose={onClose} hideCloseButton>
@@ -102,6 +105,13 @@ export function TicketClaimedModal({ open, tier, count, onClose }: TicketClaimed
           </div>
           <span className="text-[12px] text-white-secondary">
             {count === 1 ? t('ticket added to inventory') : t('tickets added to inventory')}
+          </span>
+        </div>
+
+        <div className="border-teal/35 bg-teal/12 relative flex items-center gap-1.5 rounded-full border px-3 py-1.5">
+          <BoltIcon size={15} />
+          <span className="text-teal text-[12px] font-extrabold">
+            {t('plus {n} ap', { n: claimAp })}
           </span>
         </div>
 

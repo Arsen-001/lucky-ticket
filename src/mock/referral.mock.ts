@@ -14,7 +14,7 @@ const LOCAL_AVATARS = [
 
 const avatar = (seed: number) => LOCAL_AVATARS[seed % LOCAL_AVATARS.length];
 
-export const invitedFriendsMock: InvitedFriend[] = [
+const baseFriends: Omit<InvitedFriend, 'liked' | 'likesReceived'>[] = [
   {
     id: '1',
     username: 'john_doe',
@@ -99,6 +99,12 @@ export const invitedFriendsMock: InvitedFriend[] = [
     claimableTickets: [{ type: 'silver', amount: 4 }],
   },
 ];
+
+export const invitedFriendsMock: InvitedFriend[] = baseFriends.map((friend, i) => ({
+  ...friend,
+  liked: i % 4 === 1,
+  likesReceived: 35 + i * 44,
+}));
 
 export const referralStatsMock: ReferralStats = {
   totalInvited: invitedFriendsMock.length,

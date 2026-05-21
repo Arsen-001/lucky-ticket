@@ -6,6 +6,7 @@ import { EmptyDataInfo } from '@/components/shared/EmptyDataInfo';
 import { FriendClaimModal } from '@/components/pages/out-tabs/drawer/invite-friends/FriendClaimModal';
 import { FriendsClaimAllModal } from '@/components/pages/out-tabs/drawer/invite-friends/FriendsClaimAllModal';
 import { InvitedFriendRow } from '@/components/pages/out-tabs/drawer/invite-friends/InvitedFriendRow';
+import { PlayerQuickCard } from '@/components/shared/user-elements/PlayerQuickCard';
 import {
   FriendsFilterChips,
   type FriendsFilter,
@@ -31,6 +32,8 @@ export const InvitedFriendsList = () => {
   const { data: friends = [], isLoading } = useGetInvitedFriendsQuery();
   const [claimFriend, { isLoading: isClaiming }] = useClaimFriendMutation();
   const [selectedFriend, setSelectedFriend] = useState<InvitedFriend | null>(null);
+  const [cardFriend, setCardFriend] = useState<InvitedFriend | null>(null);
+  const [cardOpen, setCardOpen] = useState(false);
   const [filter, setFilter] = useState<FriendsFilter>('all');
   const [isClaimingAll, setIsClaimingAll] = useState(false);
   const [claimAllSnapshot, setClaimAllSnapshot] = useState<{
@@ -76,6 +79,11 @@ export const InvitedFriendsList = () => {
       return sumClaimable(b) - sumClaimable(a) || b.points - a.points;
     });
   }, [friends, filter]);
+
+  const openCard = (friend: InvitedFriend) => {
+    setCardFriend(friend);
+    setCardOpen(true);
+  };
 
   const handleClaim = async (friendId: string) => {
     await claimFriend({ friendId });
@@ -141,6 +149,7 @@ export const InvitedFriendsList = () => {
               key={friend.id}
               friend={friend}
               onClaim={setSelectedFriend}
+              onOpenCard={openCard}
               className="animate-slide-in-bottom"
               style={{ animationDelay: `${index * 60}ms` }}
             />
@@ -174,6 +183,23 @@ export const InvitedFriendsList = () => {
           totalTickets={claimAllSnapshot.totalTickets}
           ticketsByTier={claimAllSnapshot.ticketsByTier}
           isClaiming={isClaimingAll}
+        />
+      )}
+
+      {cardFriend && (
+        <PlayerQuickCard
+          key={cardFriend.id}
+          open={cardOpen}
+          onClose={() => setCardOpen(false)}
+          userId={cardFriend.id}
+          username={cardFriend.username}
+          avatar={cardFriend.avatar}
+          liked={cardFriend.liked}
+          likesReceived={cardFriend.likesReceived}
+          points={cardFriend.points}
+          isVerified={cardFriend.isVerified}
+          isLuckyPlayer={cardFriend.isLuckyPlayer}
+          isVIP={cardFriend.isVIP}
         />
       )}
     </div>

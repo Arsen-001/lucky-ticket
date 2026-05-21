@@ -47,7 +47,7 @@ const renderAvatarIcon = (
   size: number
 ): ReactNode => (
   <div
-    className="relative h-full w-full overflow-hidden rounded-full border-2"
+    className="relative h-full w-full overflow-hidden rounded-xl border-2"
     style={{
       borderColor: `color-mix(in srgb, ${accentColor} 65%, transparent)`,
       boxShadow: `0 0 16px color-mix(in srgb, ${accentColor} 38%, transparent)`,
@@ -223,7 +223,7 @@ function MarketHeroCard({ featured, onClick, onBuy }: MarketHeroCardProps) {
           onClick();
         }
       }}
-      className="task-card-default relative flex h-[80px] w-72 cursor-pointer items-center gap-2.5 rounded-2xl px-3 transition-transform active:scale-99"
+      className="task-card-default relative flex h-[82px] w-72 cursor-pointer items-center gap-2.5 rounded-[10px] px-3 transition-transform active:scale-99"
     >
       <div className="relative h-[78px] w-[78px] flex-shrink-0">
         {featured.renderIcon(78)}

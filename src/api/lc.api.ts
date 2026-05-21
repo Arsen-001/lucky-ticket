@@ -1,8 +1,8 @@
 import { api } from '@/api/index.api';
 import { rtkTags } from '@/constants/rtk-tags';
 import type {
-  ConvertStarsToLcRequest,
-  ConvertStarsToLcResponse,
+  ConvertLcToTonRequest,
+  ConvertLcToTonResponse,
   LcState,
   LcTransaction,
 } from '@/types/interfaces/lc.interfaces';
@@ -17,11 +17,11 @@ export const lcApi = api.injectEndpoints({
       query: () => ({ url: 'lc/transactions' }),
       providesTags: [rtkTags.lcTransactions],
     }),
-    convertStarsToLc: builder.mutation<ConvertStarsToLcResponse, ConvertStarsToLcRequest>({
-      query: body => ({ url: 'lc/convert', method: 'POST', body }),
-      invalidatesTags: [rtkTags.lc, rtkTags.lcTransactions, rtkTags.me],
+    convertLcToTon: builder.mutation<ConvertLcToTonResponse, ConvertLcToTonRequest>({
+      query: body => ({ url: 'lc/convert-ton', method: 'POST', body }),
+      invalidatesTags: [rtkTags.lc, rtkTags.lcTransactions, rtkTags.me, rtkTags.wallet],
     }),
   }),
 });
 
-export const { useGetLcStateQuery, useGetLcTransactionsQuery, useConvertStarsToLcMutation } = lcApi;
+export const { useGetLcStateQuery, useGetLcTransactionsQuery, useConvertLcToTonMutation } = lcApi;

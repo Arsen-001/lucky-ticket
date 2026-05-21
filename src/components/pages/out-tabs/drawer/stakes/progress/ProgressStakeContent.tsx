@@ -8,7 +8,12 @@ import { LcLabel } from '@/components/shared/icons/LcLabel';
 import { routes } from '@/constants/routes';
 import { useAppTranslations } from '@/hooks/useAppTranslations';
 import { useCountDown } from '@/hooks/useCountDown';
-import { computeStakeProgress, findLevelDef, isStakeReady } from '@/utils/global/stakes.utils';
+import {
+  computeStakeMonths,
+  computeStakeProgress,
+  findLevelDef,
+  isStakeReady,
+} from '@/utils/global/stakes.utils';
 import { StakeCancelSection } from '@/components/pages/out-tabs/drawer/stakes/progress/StakeCancelSection';
 import { StakeCountdownRing } from '@/components/pages/out-tabs/drawer/stakes/progress/StakeCountdownRing';
 import { StakesRewardsPreviewCard } from '@/components/pages/out-tabs/drawer/stakes/StakesRewardsPreviewCard';
@@ -64,15 +69,12 @@ export function ProgressStakeContent({ stakeId }: ProgressStakeContentProps) {
   return (
     <div className="flex flex-col gap-1 pb-4">
       <div className="text-pink-secondary mb-3 text-[10px] font-bold uppercase tracking-wider">
-        {t('level {level} · {count} tickets', {
-          level: levelDef.level,
-          count: levelDef.allTickets.length,
-        })}
+        {t('level {level}', { level: levelDef.level })}
       </div>
 
       <div
         className="stake-card-shell stake-card-border px-5 py-6"
-        style={{ ['--stake-card-accent' as string]: `var(--color-${levelDef.guaranteedTicket})` }}
+        style={{ ['--stake-card-accent' as string]: `var(--color-${levelDef.tier})` }}
       >
         <div className="relative text-center">
           <StakeCountdownRing
@@ -107,7 +109,11 @@ export function ProgressStakeContent({ stakeId }: ProgressStakeContentProps) {
       </div>
 
       <StakesSectionLabel>{t('rewards on completion')}</StakesSectionLabel>
-      <StakesRewardsPreviewCard levelDef={levelDef} />
+      <StakesRewardsPreviewCard
+        levelDef={levelDef}
+        deposit={stake.lockedAmount}
+        durationMonths={computeStakeMonths(stake.startDate, stake.endDate)}
+      />
 
       <div className="mt-5">
         <StakeCancelSection

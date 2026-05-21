@@ -21,6 +21,7 @@ import {
   TIER_REWARD_MULTIPLIER,
   tierLabel,
 } from '@/types/types/tier.types';
+import { GlobalConstants } from '@/constants/global.constants';
 
 const HOUR_MS = 60 * 60 * 1000;
 const DAY_MS = 24 * HOUR_MS;
@@ -79,6 +80,34 @@ const applyTierLockToCategory = (cat: CategoryTasks): CategoryTasks => ({
   daily: cat.daily.map(applyTierLock),
   weekly: cat.weekly.map(applyTierLock),
   once: cat.once.map(applyTierLock),
+});
+
+// AP on daily/weekly tasks is normalized to the canonical tier rates
+// (DOCS §5.3) — daily 1–5, weekly 2–6 by task tier. One-time tasks keep
+// their bespoke AP ("varies" in the table). Non-AP rewards are preserved.
+const taskTierAp = (frequency: TaskFrequency, tier?: Task['tier']): number | null => {
+  const key = tier && tier !== 'all' ? tier : 'bronze';
+  if (frequency === TaskFrequency.DAILY) return GlobalConstants.apRewards.dailyTaskByTier[key];
+  if (frequency === TaskFrequency.WEEKLY) return GlobalConstants.apRewards.weeklyTaskByTier[key];
+  return null;
+};
+
+const normalizeTaskAp = (task: Task): Task => {
+  const apValue = taskTierAp(task.frequency, task.tier);
+  if (apValue === null) return task;
+  const nonAp = task.rewards.filter(r => r.type !== TaskRewardType.ACTIVITY_POINTS);
+  const rewards = [...nonAp, ap(apValue)];
+  if (!task.subSteps?.length) return { ...task, rewards };
+
+  // Each sub-step grants a flat 1 AP; the task header keeps its tier AP.
+  const subSteps = task.subSteps.map(step => ({ ...step, reward: ap(1) }));
+  return { ...task, rewards, subSteps };
+};
+
+const normalizeCategoryAp = (cat: CategoryTasks): CategoryTasks => ({
+  ...cat,
+  daily: cat.daily.map(normalizeTaskAp),
+  weekly: cat.weekly.map(normalizeTaskAp),
 });
 
 const buildSubSteps = (
@@ -180,15 +209,11 @@ interface AdsConfig {
 }
 
 const ADS_CONFIG: AdsConfig = {
-  total: 10,
+  total: 20,
   watchedToday: 3,
   resetHours: 8,
-  rewardTiers: [
-    { upTo: 3, rewards: [ap(5)] },
-    { upTo: 6, rewards: [ltc(1), ap(10)] },
-    { upTo: 9, rewards: [ltc(2), ap(15)] },
-    { upTo: 10, rewards: [ltc(5), tickets(1), stars(2)] },
-  ],
+  // Every ad/video grants a flat AP reward — DOCS §5.3 "Watch a video".
+  rewardTiers: [{ upTo: 20, rewards: [ap(GlobalConstants.apRewards.watchVideo)] }],
 };
 
 const getAdRewards = (index: number): TaskReward[] => {
@@ -2026,7 +2051,7 @@ const CATEGORIES: CategoryTasks[] = [
   PARTNERS,
 ];
 
-const PROCESSED_CATEGORIES = CATEGORIES.map(applyTierLockToCategory);
+const PROCESSED_CATEGORIES = CATEGORIES.map(applyTierLockToCategory).map(normalizeCategoryAp);
 
 // ============================================================
 // MOCK BACKEND STATE — simulates real server behavior so frontend

@@ -16,6 +16,10 @@ import { LeaderboardHeroCard } from './LeaderboardHeroCard';
 import { LeaderboardListItem } from './LeaderboardListItem';
 import { LeaderboardPeriodTabs } from './LeaderboardPeriodTabs';
 import { LeaderboardPodium, type PodiumPlayer, type PodiumRank } from './LeaderboardPodium';
+import {
+  PlayerQuickCard,
+  type QuickCardPlayer,
+} from '@/components/shared/user-elements/PlayerQuickCard';
 import type {
   LeaderboardEntry,
   LeaderboardPeriod,
@@ -40,6 +44,13 @@ export function LeaderboardContainer() {
   const debouncedPeriod = useDebounce(period, 200);
   const [, startTransition] = useTransition();
   const [announcement, setAnnouncement] = useState('');
+  const [cardPlayer, setCardPlayer] = useState<QuickCardPlayer | null>(null);
+  const [cardOpen, setCardOpen] = useState(false);
+
+  const openCard = (player: QuickCardPlayer) => {
+    setCardPlayer(player);
+    setCardOpen(true);
+  };
 
   const { data, isLoading, isFetching, isError, refetch } = useGetLeaderboardQuery(debouncedPeriod);
   const { data: me } = useGetMeQuery();
@@ -92,6 +103,9 @@ export function LeaderboardContainer() {
         isVerified: entry.isVerified,
         isLuckyPlayer: entry.isLuckyPlayer,
         isVIP: entry.isVIP,
+        id: entry.id,
+        liked: entry.liked,
+        likesReceived: entry.likesReceived,
       })),
     [places]
   );
@@ -121,13 +135,19 @@ export function LeaderboardContainer() {
         <LeaderboardErrorState onRetry={() => refetch()} loading={isFetching} />
       ) : (
         <>
-          <LeaderboardPodium players={topFive} loading={isLoading} />
+          <LeaderboardPodium
+            players={topFive}
+            loading={isLoading}
+            onOpenCard={openCard}
+            meId={me?.id}
+          />
           <ListBody
             isLoading={isLoading}
             places={restOfList}
             total={data?.total ?? 0}
             myPlace={myPlace}
             meId={me?.id}
+            onOpenCard={openCard}
           />
         </>
       )}
@@ -147,6 +167,15 @@ export function LeaderboardContainer() {
       <span className="sr-only" role="status" aria-live="polite">
         {announcement}
       </span>
+
+      {cardPlayer && (
+        <PlayerQuickCard
+          key={cardPlayer.userId}
+          open={cardOpen}
+          onClose={() => setCardOpen(false)}
+          {...cardPlayer}
+        />
+      )}
     </div>
   );
 }
@@ -157,9 +186,10 @@ interface ListBodyProps {
   total: number;
   myPlace?: LeaderboardEntry;
   meId?: string;
+  onOpenCard: (player: QuickCardPlayer) => void;
 }
 
-function ListBody({ isLoading, places, total, myPlace, meId }: ListBodyProps) {
+function ListBody({ isLoading, places, total, myPlace, meId, onOpenCard }: ListBodyProps) {
   const t = useAppTranslations();
   const containerRef = useRef<HTMLDivElement>(null);
   const skeletonItems = useMemo(() => Array.from({ length: 12 }), []);
@@ -201,6 +231,7 @@ function ListBody({ isLoading, places, total, myPlace, meId }: ListBodyProps) {
                   entry={entry}
                   isMe={isMe}
                   animateCounter={index < COUNT_UP_PLACES}
+                  onOpenCard={onOpenCard}
                   className="animate-slide-in-bottom"
                   style={{ animationDelay: `${Math.min(index, 30) * 30}ms` }}
                 />

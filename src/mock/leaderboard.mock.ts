@@ -1,6 +1,7 @@
 import { faker } from '@faker-js/faker';
 import { images } from '@/constants/images';
 import { me } from '@/mock/me.mock';
+import { otherProfile } from '@/mock/profile.mock';
 import type {
   LeaderboardEntry,
   LeaderboardPeriod,
@@ -67,12 +68,29 @@ const generateEntries = (period: LeaderboardPeriod, count = 100): LeaderboardEnt
       isLuckyPlayer: faker.datatype.boolean({ probability: 0.2 }),
       isVIP: faker.datatype.boolean({ probability: 0.25 }),
       vipLevel: faker.number.int({ min: 1, max: 10 }),
+      liked: faker.datatype.boolean({ probability: 0.15 }),
+      likesReceived: faker.number.int({ min: 0, max: 4200 }),
     } satisfies LeaderboardEntry;
   });
 };
 
 const buildResponse = (period: LeaderboardPeriod): LeaderboardResponse => {
   const places = generateEntries(period);
+
+  // Bind place #3 to a real mock profile (NebulaPilot / user-2) so the player
+  // card's "View profile" opens an actual page instead of a 404.
+  const bound = places[2];
+  if (bound) {
+    places[2] = {
+      ...bound,
+      id: otherProfile.id,
+      username: otherProfile.username,
+      avatar: otherProfile.avatar,
+      liked: otherProfile.liked,
+      likesReceived: otherProfile.publicStats.likesReceived,
+    };
+  }
+
   const myRank = MY_RANK_BY_PERIOD[period];
   const myPlaceInList = places.find(entry => entry.place === myRank);
 
@@ -87,6 +105,8 @@ const buildResponse = (period: LeaderboardPeriod): LeaderboardResponse => {
     isLuckyPlayer: me.isLuckyPlayer,
     isVIP: me.isVIP,
     vipLevel: me.vipLevel,
+    liked: false,
+    likesReceived: 234,
   };
 
   if (myRank <= places.length) {

@@ -9,7 +9,12 @@ import { LcLabel } from '@/components/shared/icons/LcLabel';
 import { routes } from '@/constants/routes';
 import { useAppTranslations } from '@/hooks/useAppTranslations';
 import { useCountDown } from '@/hooks/useCountDown';
-import { computeStakeProgress, findLevelDef, isStakeReady } from '@/utils/global/stakes.utils';
+import {
+  computeStakeMonths,
+  computeStakeProgress,
+  findLevelDef,
+  isStakeReady,
+} from '@/utils/global/stakes.utils';
 import { StakeCountdownRing } from '@/components/pages/out-tabs/drawer/stakes/progress/StakeCountdownRing';
 import { StakesClaimRewardsModal } from '@/components/pages/out-tabs/drawer/stakes/StakesClaimRewardsModal';
 import { StakesRewardsPreviewCard } from '@/components/pages/out-tabs/drawer/stakes/StakesRewardsPreviewCard';
@@ -73,15 +78,12 @@ export function ReadyStakeContent({ stakeId }: ReadyStakeContentProps) {
   return (
     <div className="flex flex-col gap-1 pb-4">
       <div className="text-pink-secondary mb-3 text-[10px] font-bold uppercase tracking-wider">
-        {t('level {level} · {count} tickets', {
-          level: levelDef.level,
-          count: levelDef.allTickets.length,
-        })}
+        {t('level {level}', { level: levelDef.level })}
       </div>
 
       <div
         className="stake-card-shell stake-card-border px-5 py-6"
-        style={{ ['--stake-card-accent' as string]: `var(--color-${levelDef.guaranteedTicket})` }}
+        style={{ ['--stake-card-accent' as string]: `var(--color-${levelDef.tier})` }}
       >
         <div className="relative text-center">
           <StakeCountdownRing
@@ -116,7 +118,11 @@ export function ReadyStakeContent({ stakeId }: ReadyStakeContentProps) {
       </div>
 
       <StakesSectionLabel>{t('rewards ready')}</StakesSectionLabel>
-      <StakesRewardsPreviewCard levelDef={levelDef} />
+      <StakesRewardsPreviewCard
+        levelDef={levelDef}
+        deposit={stake.lockedAmount}
+        durationMonths={computeStakeMonths(stake.startDate, stake.endDate)}
+      />
 
       <div className="sticky bottom-0 -mx-5 mt-5 px-5 pb-2 pt-6 bg-gradient-to-b from-transparent to-background">
         <Button

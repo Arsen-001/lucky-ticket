@@ -40,8 +40,8 @@ function ShardCell({ tier, type, count, isOpen, onTap }: ShardCellProps) {
         onClick={onTap}
         title={fullName}
         aria-label={fullName}
-        className="relative flex w-full flex-col items-center justify-center gap-1.5 overflow-hidden rounded-xl border bg-black/25 px-2 py-3 transition-all active:scale-95"
-        style={{ borderColor: `color-mix(in srgb, ${tierAccent} 45%, transparent)` }}
+        className="shine-card relative flex w-full flex-col items-center justify-center gap-1.5 overflow-hidden rounded-xl px-2 py-3 transition-all active:scale-95"
+        style={{ ['--shine-card-accent' as string]: tierAccent }}
       >
         <ChipShardIcon type={type} tier={tier} size={62} empty={count === 0} />
         <span

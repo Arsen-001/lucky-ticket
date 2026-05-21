@@ -6,6 +6,7 @@ import { twMerge } from 'tailwind-merge';
 import { Modal } from '@/components/shared/modals/Modal';
 import { Button } from '@/components/shared/buttons/Button';
 import { TicketOverlap } from '@/components/shared/icons/TicketOverlap';
+import { BoltIcon } from '@/components/shared/icons/BoltIcon';
 import { useAppTranslations } from '@/hooks/useAppTranslations';
 import { GlobalConstants } from '@/constants/global.constants';
 import type { InventoryChipType } from '@/types/interfaces/inventory.interfaces';
@@ -55,6 +56,7 @@ export function TournamentBetModal({
   const ShardIcon = shardType === 'capacity' ? MemoryStick : Cpu;
   const shardLabel = shardType === 'capacity' ? t('capacity') : t('time');
   const topShards = GlobalConstants.tournamentShardRewards.first;
+  const joinAp = GlobalConstants.apRewards.tournamentJoinByTier[tournamentType];
 
   const isMinReached = betCount <= 1;
   const isMaxReached = betCount >= availableTickets;
@@ -244,6 +246,15 @@ export function TournamentBetModal({
           <p className="text-[11px] text-center text-white/55 leading-snug">
             {t('more tickets higher chance')}
           </p>
+
+          {/* AP reward for joining */}
+          <div className="border-teal/30 bg-teal/12 inline-flex items-center gap-1.5 rounded-full border px-3 py-1">
+            <BoltIcon size={13} />
+            <span className="text-teal text-[11px] font-extrabold">
+              {t('plus {n} ap', { n: joinAp })}
+            </span>
+            <span className="text-[11px] text-white/50">{t('for joining')}</span>
+          </div>
 
           {/* Action — gradient + shine */}
           <Button

@@ -1,10 +1,9 @@
 'use client';
 
 import { type HTMLAttributes, type ReactNode } from 'react';
-import { useRouter } from 'next/navigation';
 import { twMerge } from 'tailwind-merge';
 import { BackButton } from '@/components/shared/buttons/BackButton';
-import { handleSafeBack } from '@/utils/global/navigation.utils';
+import { useSafeBack } from '@/hooks/useSafeBack';
 import { Button, type ButtonProps } from '@/components/shared/buttons/Button';
 import type { Route } from '@/constants/routes';
 
@@ -26,9 +25,8 @@ export function PageHeader({
   className,
   ...props
 }: PageHeaderProps) {
-  const router = useRouter();
+  const handleBack = useSafeBack(backRoute);
 
-  const handleBack = () => handleSafeBack(router, backRoute);
   return (
     <div
       className={twMerge('py-3 px-5 relative flex items-center justify-between', className)}

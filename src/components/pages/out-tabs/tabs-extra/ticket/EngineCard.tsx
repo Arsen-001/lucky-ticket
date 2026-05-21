@@ -1,11 +1,13 @@
 'use client';
 
-import type { CSSProperties } from 'react';
+import { useEffect, useState, type CSSProperties } from 'react';
 import { twMerge } from 'tailwind-merge';
 import { Clock, Layers, Package, Zap } from 'lucide-react';
 import { useGetInventoryQuery } from '@/api/inventory.api';
 import { TelegramStarIcon } from '@/components/shared/icons/TelegramStarIcon';
+import { BoltIcon } from '@/components/shared/icons/BoltIcon';
 import { useAppTranslations } from '@/hooks/useAppTranslations';
+import { GlobalConstants } from '@/constants/global.constants';
 import { ReactorDial } from '@/components/pages/out-tabs/tabs-extra/ticket/ReactorDial';
 import { EngineLevelBadge } from '@/components/pages/out-tabs/tabs-extra/ticket/EngineLevelBadge';
 import { EngineNextInFill } from '@/components/pages/out-tabs/tabs-extra/ticket/EngineNextInFill';
@@ -93,6 +95,26 @@ export function EngineCard({
 
   const glow = TIER_GLOW[tier];
 
+  // After a claim, the info layer flashes the claim result for 2s, then reverts.
+  const [claimInfo, setClaimInfo] = useState<{ tickets: number; ap: number } | null>(null);
+
+  useEffect(() => {
+    if (!claimInfo) return;
+    const id = window.setTimeout(() => setClaimInfo(null), 2000);
+    return () => window.clearTimeout(id);
+  }, [claimInfo]);
+
+  const handleClaim = () => {
+    setClaimInfo({
+      tickets: engine.pendingCount,
+      ap: GlobalConstants.apRewards.claimByTier[tier],
+    });
+    onClaim(engine.id);
+  };
+
+  const ticketsCount = useCountUp(claimInfo?.tickets ?? 0, !!claimInfo);
+  const apCount = useCountUp(claimInfo?.ap ?? 0, !!claimInfo);
+
   return (
     <div
       className={twMerge(
@@ -117,68 +139,98 @@ export function EngineCard({
             compact ? 'items-center gap-1' : 'gap-1.5'
           )}
         >
-          <div
-            className={twMerge(
-              compact ? 'flex flex-col items-center gap-1' : 'flex items-center flex-wrap gap-1.5'
-            )}
-          >
-            <EngineLevelBadge level={engineLevel} tier={tier} />
-            <span
-              className={twMerge(
-                'font-extrabold text-white leading-tight',
-                compact ? 'text-[13px]' : 'text-sm ml-0'
-              )}
+          {claimInfo ? (
+            <div
+              className="border-success/60 bg-success/20 animate-fade-in flex flex-1 flex-col items-center justify-center gap-1 rounded-xl border px-2 py-1.5"
+              style={{
+                boxShadow:
+                  '0 0 22px rgba(74, 222, 128, 0.55), inset 0 0 14px rgba(74, 222, 128, 0.22)',
+              }}
             >
-              {t('engine number', { number: index + 1 })}
-            </span>
-          </div>
-          <div
-            className={twMerge(
-              'rounded-xl border border-white/8 bg-black/30',
-              compact
-                ? 'flex w-fit flex-col divide-y divide-white/8 p-[5px]'
-                : 'grid grid-cols-2 divide-x divide-white/8 py-1.5'
-            )}
-          >
-            <button
-              type="button"
-              title={t('cycle full', { time: formatCycleTime(cycle) })}
-              className={twMerge(
-                'flex cursor-help items-center gap-1.5',
-                compact ? 'justify-center px-2 py-0.5' : 'justify-center px-2'
-              )}
-            >
-              <Clock size={compact ? 12 : 14} stroke={SPEED_ACCENT} strokeWidth={2.4} />
-              <span
-                className={twMerge(
-                  'font-extrabold tabular-nums',
-                  compact ? 'text-[12px]' : 'text-[13px]'
-                )}
-                style={{ color: SPEED_ACCENT }}
-              >
-                {formatCycleTime(cycle)}
+              <span className="text-success animate-slide-in-bottom text-[8px] font-extrabold uppercase tracking-[1.5px]">
+                {t('claimed')}
               </span>
-            </button>
-            <button
-              type="button"
-              title={t('per cycle full', { capacity })}
-              className={twMerge(
-                'flex cursor-help items-center gap-1.5',
-                compact ? 'justify-center px-2 py-0.5' : 'justify-center px-2'
-              )}
-            >
-              <Layers size={compact ? 12 : 14} stroke={CAPACITY_ACCENT} strokeWidth={2.4} />
               <span
-                className={twMerge(
-                  'font-extrabold tabular-nums',
-                  compact ? 'text-[12px]' : 'text-[13px]'
-                )}
-                style={{ color: CAPACITY_ACCENT }}
+                className="text-success animate-slide-in-bottom flex items-center gap-1 text-sm font-extrabold tabular-nums"
+                style={{ animationDelay: '70ms' }}
               >
-                ×{compactNumber(capacity)}
+                <TicketOverlap type={tier} width={22} height={16} />+{ticketsCount}
               </span>
-            </button>
-          </div>
+              <span
+                className="text-teal animate-slide-in-bottom flex items-center gap-1 text-sm font-extrabold tabular-nums"
+                style={{ animationDelay: '140ms' }}
+              >
+                <BoltIcon size={14} />+{apCount} AP
+              </span>
+            </div>
+          ) : (
+            <>
+              <div
+                className={twMerge(
+                  compact
+                    ? 'flex flex-col items-center gap-1'
+                    : 'flex items-center flex-wrap gap-1.5'
+                )}
+              >
+                <EngineLevelBadge level={engineLevel} tier={tier} />
+                <span
+                  className={twMerge(
+                    'font-extrabold text-white leading-tight',
+                    compact ? 'text-[13px]' : 'text-sm ml-0'
+                  )}
+                >
+                  {t('engine number', { number: index + 1 })}
+                </span>
+              </div>
+              <div
+                className={twMerge(
+                  'rounded-xl border border-white/8 bg-black/30',
+                  compact
+                    ? 'flex w-fit flex-col divide-y divide-white/8 p-[5px]'
+                    : 'grid grid-cols-2 divide-x divide-white/8 py-1.5'
+                )}
+              >
+                <button
+                  type="button"
+                  title={t('cycle full', { time: formatCycleTime(cycle) })}
+                  className={twMerge(
+                    'flex cursor-help items-center gap-1.5',
+                    compact ? 'justify-center px-2 py-0.5' : 'justify-center px-2'
+                  )}
+                >
+                  <Clock size={compact ? 12 : 14} stroke={SPEED_ACCENT} strokeWidth={2.4} />
+                  <span
+                    className={twMerge(
+                      'font-extrabold tabular-nums',
+                      compact ? 'text-[12px]' : 'text-[13px]'
+                    )}
+                    style={{ color: SPEED_ACCENT }}
+                  >
+                    {formatCycleTime(cycle)}
+                  </span>
+                </button>
+                <button
+                  type="button"
+                  title={t('per cycle full', { capacity })}
+                  className={twMerge(
+                    'flex cursor-help items-center gap-1.5',
+                    compact ? 'justify-center px-2 py-0.5' : 'justify-center px-2'
+                  )}
+                >
+                  <Layers size={compact ? 12 : 14} stroke={CAPACITY_ACCENT} strokeWidth={2.4} />
+                  <span
+                    className={twMerge(
+                      'font-extrabold tabular-nums',
+                      compact ? 'text-[12px]' : 'text-[13px]'
+                    )}
+                    style={{ color: CAPACITY_ACCENT }}
+                  >
+                    ×{compactNumber(capacity)}
+                  </span>
+                </button>
+              </div>
+            </>
+          )}
         </div>
       </div>
 
@@ -240,7 +292,7 @@ export function EngineCard({
           )}
           {pending ? (
             <button
-              onClick={() => onClaim(engine.id)}
+              onClick={handleClaim}
               className={twMerge(
                 'engine-claim-button engine-claim-flow relative z-10 cursor-pointer overflow-hidden text-white font-extrabold uppercase tracking-wider flex-center shrink-0 active:scale-99 transition-transform duration-100',
                 compact
@@ -334,4 +386,26 @@ const compactFormatter = new Intl.NumberFormat('en', {
 function compactNumber(value: number): string {
   if (value < 1000) return String(value);
   return compactFormatter.format(value);
+}
+
+/** Eases a number from 0 to `target` while `run` is true. */
+function useCountUp(target: number, run: boolean, durationMs = 550): number {
+  const [value, setValue] = useState(0);
+  useEffect(() => {
+    if (!run) {
+      setValue(0);
+      return;
+    }
+    let raf = 0;
+    let start: number | null = null;
+    const tick = (ts: number) => {
+      if (start === null) start = ts;
+      const ratio = Math.min(1, (ts - start) / durationMs);
+      setValue(Math.round(target * (1 - Math.pow(1 - ratio, 3))));
+      if (ratio < 1) raf = requestAnimationFrame(tick);
+    };
+    raf = requestAnimationFrame(tick);
+    return () => cancelAnimationFrame(raf);
+  }, [target, run, durationMs]);
+  return value;
 }

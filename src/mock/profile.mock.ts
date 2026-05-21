@@ -1,7 +1,10 @@
 import { images } from '@/constants/images';
 import { faker } from '@faker-js/faker';
+import type { FetchArgs } from '@reduxjs/toolkit/query';
 import { achievements } from '@/mock/achievements.mock';
+import { GlobalConstants } from '@/constants/global.constants';
 import type { ProfileResponse } from '@/types/interfaces/profile.interfaces';
+import type { TicketType } from '@/types/types/ticket.types';
 
 const pinned = achievements
   .filter(a => a.isPinned)
@@ -34,7 +37,6 @@ export const ownProfile: ProfileResponse = {
   isLuckyPlayer: true,
   isVIP: true,
   vipLevel: 2,
-  level: 42,
   activityPoints: 750,
   activityBest: {
     day: 32,
@@ -46,8 +48,6 @@ export const ownProfile: ProfileResponse = {
     allTime: 143,
     allTimeRank: 7,
   },
-  apToNextLevel: 250,
-  apForCurrentLevel: 500,
   ticketsEarned: 120,
   memberSince: '2024-09-12',
   streak: { days: 30, active: true },
@@ -74,6 +74,8 @@ export const ownProfile: ProfileResponse = {
       bronze: 154,
       silver: 41,
       gold: 8,
+      platinum: 4,
+      diamond: 2,
     },
   },
   recentAchievements: recent,
@@ -86,7 +88,6 @@ export const otherProfile: ProfileResponse = {
   id: 'user-2',
   publicId: '20347',
   username: 'NebulaPilot',
-  level: 78,
   isOwn: false,
   privateStats: undefined,
   liked: false,
@@ -98,9 +99,46 @@ export const otherProfile: ProfileResponse = {
   },
 };
 
+// One like per profile per 24h; liking grants the liker +1 AP (DOCS §5.3 / §17.3.4).
+const likeProfileHandler = (args: FetchArgs) => {
+  const { userId } = (args.body ?? {}) as { userId?: string };
+  const target = userId === 'me' ? ownProfile : otherProfile;
+  target.publicStats = {
+    ...target.publicStats,
+    likesReceived: target.publicStats.likesReceived + 1,
+  };
+  target.liked = true;
+  target.canLikeAt = new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString();
+  ownProfile.activityPoints += 1;
+  return {
+    likesReceived: target.publicStats.likesReceived,
+    liked: true,
+    canLikeAt: target.canLikeAt,
+  };
+};
+
+// Sending consumes the sender's tickets and grants +1 AP. Platinum/Diamond
+// require Lucky Player; quantity is capped at the per-tier daily limit.
+const sendTicketHandler = (args: FetchArgs) => {
+  const { tier, quantity = 0 } = (args.body ?? {}) as { tier?: TicketType; quantity?: number };
+  if (!tier) return { error: { status: 400, data: 'Tier is required' } };
+  const limits =
+    GlobalConstants.ticketSendDailyLimits[ownProfile.isLuckyPlayer ? 'luckyPlayer' : 'default'];
+  if (limits[tier] <= 0) {
+    return { error: { status: 403, data: 'Lucky Player status required for this tier' } };
+  }
+  const sent = Math.min(Math.max(0, quantity), limits[tier]);
+  const byTier = ownProfile.privateStats?.ticketsByTier;
+  if (byTier) byTier[tier] = Math.max(0, (byTier[tier] ?? 0) - sent);
+  ownProfile.activityPoints += 1;
+  return { success: true };
+};
+
 export const profileMock = {
   profile: {
     me: ownProfile,
     'user-2': otherProfile,
   },
+  'POST profile/like': likeProfileHandler,
+  'POST profile/send-ticket': sendTicketHandler,
 };

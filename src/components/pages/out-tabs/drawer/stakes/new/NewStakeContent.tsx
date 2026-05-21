@@ -8,6 +8,7 @@ import { useGetStakesQuery, useStartStakeMutation } from '@/api/stakes.api';
 import { routes } from '@/constants/routes';
 import { useAppTranslations } from '@/hooks/useAppTranslations';
 import { findLevelForDeposit } from '@/utils/global/stakes.utils';
+import { useUnlockedTiers } from '@/hooks/useUnlockedTiers';
 import { NewStakeHero } from '@/components/pages/out-tabs/drawer/stakes/new/NewStakeHero';
 import { NewStakeStickyCta } from '@/components/pages/out-tabs/drawer/stakes/new/NewStakeStickyCta';
 import { StakesRewardsPreviewCard } from '@/components/pages/out-tabs/drawer/stakes/StakesRewardsPreviewCard';
@@ -23,6 +24,7 @@ export function NewStakeContent() {
   const { data: stakes, isLoading: stakesLoading } = useGetStakesQuery();
   const { data: me, isLoading: meLoading } = useGetMeQuery();
   const [startStake, { isLoading: starting }] = useStartStakeMutation();
+  const { isTierUnlocked } = useUnlockedTiers();
 
   const balance = me?.coins ?? 0;
   const levels = stakes?.levels ?? [];
@@ -42,10 +44,11 @@ export function NewStakeContent() {
 
   const safeDeposit = deposit || minDepositOfFirst;
   const activeLevel = findLevelForDeposit(levels, safeDeposit);
+  const tierLocked = !isTierUnlocked(activeLevel.tier);
   const sliderMax = Math.min(Math.max(balance, minDepositOfFirst), SLIDER_CAP);
 
   const handleConfirm = async () => {
-    if (safeDeposit < activeLevel.minDeposit || safeDeposit > balance) return;
+    if (tierLocked || safeDeposit < activeLevel.minDeposit || safeDeposit > balance) return;
     const result = await startStake({
       level: activeLevel.level,
       amount: safeDeposit,
@@ -80,13 +83,18 @@ export function NewStakeContent() {
       <StakesSectionLabel>
         {t('what you will get level {level}', { level: activeLevel.level })}
       </StakesSectionLabel>
-      <StakesRewardsPreviewCard levelDef={activeLevel} />
+      <StakesRewardsPreviewCard
+        levelDef={activeLevel}
+        deposit={safeDeposit}
+        durationMonths={durationMonths}
+      />
 
       <NewStakeStickyCta
         level={activeLevel.level}
         amount={safeDeposit}
         minDeposit={activeLevel.minDeposit}
         balance={balance}
+        tierLocked={tierLocked}
         loading={starting}
         onConfirm={handleConfirm}
       />

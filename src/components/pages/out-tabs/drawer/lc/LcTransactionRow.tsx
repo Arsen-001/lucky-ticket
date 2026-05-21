@@ -71,6 +71,11 @@ const TYPE_META: Record<LcTransactionType, TypeMeta> = {
     iconClass: 'text-gold',
     iconBg: 'bg-gold/15',
   },
+  [LcTransactionType.CONVERT_TO_TON]: {
+    Icon: ArrowDownUp,
+    iconClass: 'text-teal',
+    iconBg: 'bg-teal/15',
+  },
 };
 
 export function LcTransactionRow({

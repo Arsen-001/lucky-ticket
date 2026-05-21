@@ -3,7 +3,7 @@ import { useMemo, useState } from 'react';
 import { useGetProfileQuery, useUnpinAchievementMutation } from '@/api/profile.api';
 import { ProfileHero } from '@/components/pages/out-tabs/drawer/profile/ProfileHero';
 import { ProfileLeaderboardCard } from '@/components/pages/out-tabs/drawer/profile/ProfileLeaderboardCard';
-import { ProfilePlayerLevelCard } from '@/components/pages/out-tabs/drawer/profile/ProfilePlayerLevelCard';
+import { ProfileActivityCard } from '@/components/pages/out-tabs/drawer/profile/ProfileActivityCard';
 import { ProfileQuickStats } from '@/components/pages/out-tabs/drawer/profile/ProfileQuickStats';
 import { ProfileFooter } from '@/components/pages/out-tabs/drawer/profile/ProfileFooter';
 import { AchievementShowcase } from '@/components/shared/achievements/AchievementShowcase';
@@ -45,7 +45,7 @@ export function ProfilePage({ userId }: ProfilePageProps) {
       {effectiveProfile && (
         <div className="flex flex-col gap-5">
           {effectiveProfile.isOwn && (
-            <ProfilePlayerLevelCard level={effectiveProfile.level} loading={isLoading} />
+            <ProfileActivityCard activityPoints={effectiveProfile.activityPoints} />
           )}
 
           <ProfileLeaderboardCard profile={effectiveProfile} loading={isLoading} />
@@ -66,6 +66,8 @@ export function ProfilePage({ userId }: ProfilePageProps) {
           <ProfileFooter
             isOwn={effectiveProfile.isOwn}
             memberSince={effectiveProfile.memberSince}
+            userId={effectiveProfile.id}
+            publicId={effectiveProfile.publicId}
           />
         </div>
       )}

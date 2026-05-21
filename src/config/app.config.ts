@@ -11,56 +11,11 @@ import { WalletProvider } from '@/types/enums/wallet.enums';
  */
 
 const stakeLevels: StakeLevelDefinition[] = [
-  {
-    level: 1,
-    minDeposit: 100,
-    guaranteedTicket: 'bronze',
-    allTickets: ['bronze'],
-    bonusPrizes: ['LC bonus', 'Speed Boost'],
-    starsChance: 5,
-    starsMin: 5,
-    starsMax: 15,
-  },
-  {
-    level: 2,
-    minDeposit: 500,
-    guaranteedTicket: 'silver',
-    allTickets: ['bronze', 'silver'],
-    bonusPrizes: ['LC bonus', 'Speed Boost', 'Capacity Upgrade'],
-    starsChance: 10,
-    starsMin: 15,
-    starsMax: 40,
-  },
-  {
-    level: 3,
-    minDeposit: 1000,
-    guaranteedTicket: 'gold',
-    allTickets: ['bronze', 'silver', 'gold'],
-    bonusPrizes: ['LC bonus', 'Speed Boost', 'Capacity Upgrade', 'Badge'],
-    starsChance: 20,
-    starsMin: 40,
-    starsMax: 100,
-  },
-  {
-    level: 4,
-    minDeposit: 2500,
-    guaranteedTicket: 'platinum',
-    allTickets: ['bronze', 'silver', 'gold', 'platinum'],
-    bonusPrizes: ['LC bonus', 'Speed Boost', 'Capacity Upgrade', 'Premium Badge'],
-    starsChance: 30,
-    starsMin: 70,
-    starsMax: 250,
-  },
-  {
-    level: 5,
-    minDeposit: 5000,
-    guaranteedTicket: 'diamond',
-    allTickets: ['bronze', 'silver', 'gold', 'platinum', 'diamond'],
-    bonusPrizes: ['Large LC bonus', 'Boosts & Upgrades', 'Exclusive Badge'],
-    starsChance: 40,
-    starsMin: 100,
-    starsMax: 500,
-  },
+  { level: 1, minDeposit: 100, tier: 'bronze', starsChance: 5, starsMin: 5, starsMax: 15 },
+  { level: 2, minDeposit: 500, tier: 'silver', starsChance: 10, starsMin: 15, starsMax: 40 },
+  { level: 3, minDeposit: 1000, tier: 'gold', starsChance: 20, starsMin: 40, starsMax: 100 },
+  { level: 4, minDeposit: 2500, tier: 'platinum', starsChance: 30, starsMin: 70, starsMax: 250 },
+  { level: 5, minDeposit: 5000, tier: 'diamond', starsChance: 40, starsMin: 100, starsMax: 500 },
 ];
 
 const supportedWallets: SupportedWallet[] = [
@@ -75,26 +30,29 @@ const supportedWallets: SupportedWallet[] = [
   { provider: WalletProvider.TONHUB, name: 'Tonhub', iconBg: '#7C5CFF', emoji: 'TH' },
 ];
 
+// LS packages anchored to 1 LS = $0.02 at tonUsdRate, with a single volume bonus.
 const starsPackages: StarsPackage[] = [
-  { id: 'pkg_75', stars: 75, tonCost: 1 },
-  { id: 'pkg_400', stars: 400, tonCost: 5, bonusPercent: 7, popular: true },
-  { id: 'pkg_850', stars: 850, tonCost: 10, bonusPercent: 13 },
-  { id: 'pkg_4700', stars: 4700, tonCost: 50, bonusPercent: 25 },
+  { id: 'pkg_171', stars: 171, tonCost: 1 },
+  { id: 'pkg_898', stars: 898, tonCost: 5, bonusPercent: 5, popular: true },
+  { id: 'pkg_1881', stars: 1881, tonCost: 10, bonusPercent: 10 },
+  { id: 'pkg_9833', stars: 9833, tonCost: 50, bonusPercent: 15 },
 ];
 
 export const appConfig = {
   stakes: {
-    /** Hours a stake stays locked before it can be claimed. */
-    durationHours: 3,
     /** Telegram Stars penalty per stake level when cancelling early. */
     cancelStarsPerLevel: 5,
     /** Bounds of the duration slider on the "new stake" screen (months). */
     durationMinMonths: 1,
     durationMaxMonths: 12,
-    /** APR range mapped across the duration slider (percent). */
+    /** Total-period yield rate mapped across the duration slider (percent). */
     aprMinPercent: 1,
     aprMaxPercent: 5,
-    /** Stake tier definitions — deposit thresholds, ticket & bonus rewards. */
+    /** Divisor in the stake AP formula: `deposit × months ÷ apDivisor` (DOCS §5.3 / §18.3). */
+    apDivisor: 10_000,
+    /** Bonus added to the stake AP base when it completes (forfeited on cancel). */
+    apCompletionBonusPercent: 50,
+    /** Stake tier definitions — deposit thresholds + bonus-draw values. */
     levels: stakeLevels,
   },
   wallet: {
@@ -102,6 +60,8 @@ export const appConfig = {
     tonUsdRate: 3.42,
     /** Flat TON network fee charged on a withdrawal. */
     withdrawFeeTon: 0.05,
+    /** USD value of one LC — used to price the LC → TON conversion (DOCS §6.1). */
+    lcUsdRate: 0.00001,
     /** Wallet apps the user can connect. */
     supportedWallets,
     /** Stars purchase packages — price catalog. */

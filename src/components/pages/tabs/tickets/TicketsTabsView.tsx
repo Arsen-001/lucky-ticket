@@ -19,6 +19,7 @@ import {
 import { TierUnlockedContent } from '@/components/pages/tabs/tickets/TierUnlockedContent';
 import { TierLockedContent } from '@/components/pages/tabs/tickets/TierLockedContent';
 import { PartnersComingSoon } from '@/components/pages/tabs/home/PartnersComingSoon';
+import { useUnlockedTiers } from '@/hooks/useUnlockedTiers';
 import { TicketsEnum } from '@/types/enums/ticket.enums';
 import { findActiveBooster, findEquippedChip } from '@/utils/global/inventory.utils';
 import { effectiveCycleSeconds, engineElapsedSeconds } from '@/utils/global/ticket-engine.utils';
@@ -30,6 +31,7 @@ export function TicketsTabsView() {
   const [claimEngine] = useClaimEngineMutation();
   const [claimEnginesForTier] = useClaimEnginesForTierMutation();
   const [completeEngineCycle] = useCompleteEngineCycleMutation();
+  const { isTierUnlocked } = useUnlockedTiers();
 
   const [activeTab, setActiveTab] = useState<TicketsTabKey>(TicketsEnum.BRONZE);
   const [elapsedByEngine, setElapsedByEngine] = useState<Record<string, number>>({});
@@ -87,21 +89,17 @@ export function TicketsTabsView() {
   const ticketByTier = (tier: TicketType): Ticket | undefined =>
     tickets?.find(item => item.ticketType === tier);
 
-  const tabs: TicketsTierTab[] = useMemo(() => {
-    const tierTabs = TICKETS_TIER_ORDER.map<TicketsTierTab>(tier => {
-      const ticket = tickets?.find(item => item.ticketType === tier);
-      const readyCount = (enginesByTier[tier] ?? []).reduce(
+  const tabs: TicketsTierTab[] = [
+    ...TICKETS_TIER_ORDER.map<TicketsTierTab>(tier => ({
+      key: tier,
+      count: (enginesByTier[tier] ?? []).reduce(
         (sum, engine) => sum + (engine.pendingCount > 0 ? 1 : 0),
         0
-      );
-      return {
-        key: tier,
-        count: readyCount,
-        locked: ticket?.blocked ?? false,
-      };
-    });
-    return [...tierTabs, { key: PARTNERS_TAB_KEY, count: 0 }];
-  }, [enginesByTier, tickets]);
+      ),
+      locked: !isTierUnlocked(tier),
+    })),
+    { key: PARTNERS_TAB_KEY, count: 0 },
+  ];
 
   const handleClaimAllForTier = async (tier: TicketType) => {
     const engines = enginesByTier[tier] ?? [];
@@ -139,7 +137,7 @@ export function TicketsTabsView() {
         </div>
       );
     }
-    if (ticket.blocked) {
+    if (!isTierUnlocked(activeTab)) {
       return <TierLockedContent ticket={ticket} />;
     }
     return (

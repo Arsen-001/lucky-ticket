@@ -14,7 +14,7 @@ export function HomeBuyEngineSlot({ className }: HomeBuyEngineSlotProps) {
 
   return (
     <Link
-      href={routes.market('Boosts')}
+      href={routes.market('engines')}
       className={twMerge(
         'flex h-[calc((100vw-120px)/1.038)] w-full flex-col items-center justify-center gap-3 p-5 text-center transition-transform active:scale-99',
         className

@@ -3,6 +3,7 @@
 import { Lock, Star } from 'lucide-react';
 import { twMerge } from 'tailwind-merge';
 import { useAppTranslations } from '@/hooks/useAppTranslations';
+import { useUnlockedTiers } from '@/hooks/useUnlockedTiers';
 import type { StakeLevelDefinition } from '@/types/interfaces/stakes.interfaces';
 import type { TicketType } from '@/types/types/ticket.types';
 
@@ -38,6 +39,7 @@ export function NewStakeLevelPicker({
   className,
 }: NewStakeLevelPickerProps) {
   const t = useAppTranslations();
+  const { isTierUnlocked } = useUnlockedTiers();
 
   return (
     <div
@@ -45,13 +47,13 @@ export function NewStakeLevelPicker({
       style={{ gridTemplateColumns: `repeat(${levels.length}, minmax(0, 1fr))` }}
     >
       {levels.map(lv => {
-        const reachable = balance >= lv.minDeposit;
+        const reachable = balance >= lv.minDeposit && isTierUnlocked(lv.tier);
         const isActive = activeLevel === lv.level;
         const stateClass = !reachable
           ? 'cursor-not-allowed border-white/5 bg-white/[0.02] text-disabled'
           : isActive
-            ? `${tierActive[lv.guaranteedTicket]} -translate-y-0.5 shadow-[0_4px_14px_rgba(0,0,0,0.35)]`
-            : tierIdle[lv.guaranteedTicket];
+            ? `${tierActive[lv.tier]} -translate-y-0.5 shadow-[0_4px_14px_rgba(0,0,0,0.35)]`
+            : tierIdle[lv.tier];
 
         return (
           <button

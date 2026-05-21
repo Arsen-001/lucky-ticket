@@ -49,6 +49,7 @@ export const mockDb = {
     twoFactorAuth: true,
     activityPoints: 750,
     telegramStars: 10000,
+    lastActivityAt: new Date(Date.now() - 2 * 24 * 3_600_000).toISOString(),
   } as MeResponse,
 
   stakes: {
@@ -77,9 +78,8 @@ export const mockDb = {
         id: 'h1',
         level: 5,
         amount: 5000,
-        ticketsCount: 5,
-        bonusLC: 320,
-        bonusStars: 120,
+        yieldLC: 250,
+        bonusLS: 120,
         outcome: 'completed',
         completedAt: hoursAgo(26),
       },
@@ -87,9 +87,8 @@ export const mockDb = {
         id: 'h2',
         level: 2,
         amount: 500,
-        ticketsCount: 2,
-        bonusLC: 30,
-        bonusStars: 0,
+        yieldLC: 15,
+        bonusLS: 0,
         outcome: 'completed',
         completedAt: hoursAgo(49),
       },
@@ -97,9 +96,8 @@ export const mockDb = {
         id: 'h3',
         level: 1,
         amount: 100,
-        ticketsCount: 0,
-        bonusLC: 0,
-        bonusStars: 0,
+        yieldLC: 0,
+        bonusLS: 0,
         outcome: 'cancelled',
         completedAt: hoursAgo(73),
       },
@@ -187,7 +185,6 @@ export const mockDb = {
   lc: {
     lifetimeEarned: 8420,
     lifetimeSpent: 7883,
-    starsToLcRate: 2, // 1 Telegram Star = 2 LC
     transactions: [
       {
         id: 'lctx_001',
@@ -265,5 +262,15 @@ export const mockDb = {
         balanceAfter: 0,
       },
     ] as LcTransaction[],
+  },
+
+  platform: {
+    /**
+     * Total active players on the platform — drives the tournament-tier
+     * activation gate (DOCS §11.2.2). Seeded above the Diamond threshold
+     * (1,000,000) so every tier is live; lower it to watch higher tiers
+     * gate off (their tournaments disappear from the list / block joining).
+     */
+    activePlayers: 1_250_000,
   },
 };

@@ -8,6 +8,7 @@ export enum LcTransactionType {
   ENGINE_UPGRADE = 'engine_upgrade',
   CONVERT_FROM_STARS = 'convert_from_stars',
   CONVERT_TO_STARS = 'convert_to_stars',
+  CONVERT_TO_TON = 'convert_to_ton',
 }
 
 export enum LcTransactionDirection {

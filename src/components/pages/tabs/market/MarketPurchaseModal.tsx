@@ -4,7 +4,9 @@ import type { ReactNode } from 'react';
 import { ConfirmModal } from '@/components/shared/modals/ConfirmModal';
 import { TelegramStarIcon } from '@/components/shared/icons/TelegramStarIcon';
 import { LcLabel } from '@/components/shared/icons/LcLabel';
+import { BoltIcon } from '@/components/shared/icons/BoltIcon';
 import { useAppTranslations } from '@/hooks/useAppTranslations';
+import { GlobalConstants } from '@/constants/global.constants';
 import { MarketPriceType } from '@/types/enums/market.enums';
 import type { MarketPrice } from '@/types/interfaces/market.interfaces';
 
@@ -30,6 +32,11 @@ export function MarketPurchaseModal({
   price,
 }: MarketPurchaseModalProps) {
   const t = useAppTranslations();
+
+  const purchaseAp =
+    price?.type === MarketPriceType.TELEGRAM_STARS
+      ? Math.floor(price.amount / GlobalConstants.apRewards.purchaseLsPerAp)
+      : 0;
 
   return (
     <ConfirmModal
@@ -60,6 +67,16 @@ export function MarketPurchaseModal({
                 {price.type === MarketPriceType.LTC && <LcLabel size={16} />}
                 {price.type === MarketPriceType.TELEGRAM_STARS && <TelegramStarIcon size={18} />}
               </div>
+            </div>
+          )}
+
+          {purchaseAp > 0 && (
+            <div className="flex items-center justify-center gap-1.5">
+              <BoltIcon size={13} />
+              <span className="text-teal text-[12px] font-bold">
+                {t('plus {n} ap', { n: purchaseAp })}
+              </span>
+              <span className="text-[12px] text-white/50">{t('for this purchase')}</span>
             </div>
           )}
         </div>

@@ -1,4 +1,5 @@
 import type { Achievement } from '@/types/interfaces/achievement.interfaces';
+import type { TicketType } from '@/types/types/ticket.types';
 
 export interface ProfileStreak {
   days: number;
@@ -52,11 +53,8 @@ export interface ProfileResponse {
   isLuckyPlayer: boolean;
   isVIP: boolean;
   vipLevel: number;
-  level: number;
   activityPoints: number;
   activityBest: ActivityBest;
-  apToNextLevel: number;
-  apForCurrentLevel: number;
   ticketsEarned: number;
   memberSince: string;
   streak: ProfileStreak;
@@ -91,4 +89,14 @@ export interface InviteToTournamentRequest {
 export interface InviteToTournamentResponse {
   success: boolean;
   invitationId: string;
+}
+
+export interface SendTicketRequest {
+  userId: string;
+  tier: TicketType;
+  quantity: number;
+}
+
+export interface SendTicketResponse {
+  success: boolean;
 }

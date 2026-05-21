@@ -6,7 +6,9 @@ import { twMerge } from 'tailwind-merge';
 import Image from 'next/image';
 import { UserAvatar, type AvatarStatusColor } from '@/components/shared/user-elements/UserAvatar';
 import { BannerIconsLayer } from '@/components/pages/out-tabs/drawer/profile/BannerIconsLayer';
+import { ProfileAvatarEditButton } from '@/components/pages/out-tabs/drawer/profile/ProfileAvatarEditButton';
 import { ProfileShareSheet } from '@/components/pages/out-tabs/drawer/profile/ProfileShareSheet';
+import { ProfileSocialActions } from '@/components/pages/out-tabs/drawer/profile/ProfileSocialActions';
 import { ProfileStatusIconButton } from '@/components/pages/out-tabs/drawer/profile/ProfileStatusIconButton';
 import { Skeleton } from '@/components/shared/seleketons/Skeleton';
 import { SkeletonSuspense } from '@/components/shared/seleketons/SkeletonSuspense';
@@ -199,6 +201,8 @@ export function ProfileHero({ profile, loading, isPreview, onTogglePreview }: Pr
               shineColors={shineColors}
             />
           </SkeletonSuspense>
+
+          {profile?.isOwn && !isPreview && <ProfileAvatarEditButton />}
         </div>
 
         <SkeletonSuspense
@@ -285,6 +289,10 @@ export function ProfileHero({ profile, loading, isPreview, onTogglePreview }: Pr
             />
           )}
         </div>
+
+        {profile && !profile.isOwn && (
+          <ProfileSocialActions profile={profile} isPreview={isPreview} />
+        )}
       </div>
 
       <ProfileShareSheet

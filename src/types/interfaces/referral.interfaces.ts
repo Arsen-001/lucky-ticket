@@ -15,6 +15,8 @@ export interface InvitedFriend {
   points: number;
   claimableTickets: ClaimableTicket[];
   isVIP?: boolean;
+  liked: boolean;
+  likesReceived: number;
 }
 
 export interface ReferralStats {

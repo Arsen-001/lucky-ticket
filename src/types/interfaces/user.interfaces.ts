@@ -15,5 +15,7 @@ export interface MeResponse {
   twoFactorAuth?: boolean;
   activityPoints: number;
   telegramStars: number;
+  /** ISO timestamp of the user's last AP-earning action — drives the decay status. */
+  lastActivityAt?: string;
   walletId?: string | null;
 }

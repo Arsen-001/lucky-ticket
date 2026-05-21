@@ -12,7 +12,7 @@
 
 ### 1.2 Product Type
 
-LuckyTicket365 is a multilingual, gamified reward platform with a built-in virtual economy and crypto exchange layer.
+LuckyTicket365 is a multilingual, gamified reward platform with a built-in virtual economy and an integrated TON crypto wallet.
 
 ### 1.3 Purpose of the Document
 
@@ -29,7 +29,7 @@ The product combines:
 - **Engagement mechanics:** Daily usage, streaks, decay
 - **Progression systems:** Tickets, statuses, boosts
 - **Competitive mechanics:** Tournaments, leaderboards
-- **Monetization:** Market, status purchases, exchange offers
+- **Monetization:** Market, status purchases, Lucky Stars
 
 All systems are interconnected to encourage long-term retention and consistent activity.
 
@@ -75,7 +75,7 @@ The profile represents the user publicly and internally. It contains:
 - **Avatar:** Visual identity, which will be customizable via the Market in the future.
 - **Activity Points:** Earned through engagement and used for rankings and VIP eligibility.
 - **Lucky Coin (LC):** The primary internal currency.
-- **Current Status:** Verified, Prime, or VIP.
+- **Current Status:** Verified, Lucky Player, or VIP.
 - **Personal Statistics:** Tracking performance across the platform.
 
 The profile connects to the leaderboard, tournaments, Market, and social features.
@@ -86,34 +86,82 @@ The profile connects to the leaderboard, tournaments, Market, and social feature
 
 ### Purpose
 
-Activity Points measure engagement and consistency. They are used to rank users and to gate access to high-level features such as VIP status.
+Activity Points (AP) are the **single progression metric** of LuckyTicket365. They measure engagement and consistency, and act as the **universal gate** that unlocks higher-tier content across the whole platform. There is no separate "player level" — the profile shows the raw AP count.
 
-### Description
+### 5.1 Tiers
 
-Activity Points increase when users perform meaningful actions and decrease during inactivity.
+A user's **tier** is derived from accumulated AP:
 
-### 5.1 How Activity Points Are Earned
+| Tier     | AP threshold | Reached by (perfect daily-baseline player) |
+| :------- | :----------- | :----------------------------------------- |
+| Bronze   | 0            | start                                      |
+| Silver   | 1,400        | ~1 month                                   |
+| Gold     | 5,500        | ~4 months                                  |
+| Platinum | 14,000       | ~10 months                                 |
+| Diamond  | 22,000       | ~16 months                                 |
 
-Users gain points through every action, including:
+The pacing describes a player who collects the full daily baseline every day. Tournaments make it faster; missed days slower.
 
-- Claiming tickets
-- Completing tasks
-- Participating in tournaments
-- Changing or upgrading status
-- Daily app usage
+### 5.2 The AP Tier Gate
 
-### 5.2 Activity Decay
+AP-tier is the universal gate. A feature of tier `T` requires `AP-tier ≥ T`; the user can always use their own tier and every lower tier.
 
-If the user does not open the app, their activity status decreases:
+- **Tier-gated:** producer engines, tournaments, stakes, tier-bound market items.
+- **Not gated:** avatars, statuses / VIP, referral.
 
-- A fixed number of Activity Points is deducted for each day the app is not opened.
-- This creates pressure for consistent engagement.
+### 5.3 How Activity Points Are Earned
+
+AP is earned from a data-driven **source registry** — every meaningful action grants AP. Each source carries a base amount, an optional daily cap, and (for spendable actions) proportional scaling:
+
+| Source                    | AP                                    | Limit                                                          |
+| :------------------------ | :------------------------------------ | :------------------------------------------------------------- |
+| Daily login streak        | 3                                     | 1×/day                                                         |
+| Daily task                | 1 / 2 / 3 / 4 / 5                     | by task tier (Bronze→Diamond), ~15/day                         |
+| Weekly task               | 2 / 3 / 4 / 5 / 6                     | by task tier (Bronze→Diamond), ~3/week                         |
+| One-time task             | varies                                | once per task                                                  |
+| Verify email              | 20                                    | one-time                                                       |
+| Claim                     | 1 / 2 / 3 / 4 / 5                     | per claim, by tier (Bronze→Diamond), 5×/day                    |
+| Watch a video             | 2                                     | 20×/day (daily cap 40 AP)                                      |
+| Send a ticket to a friend | 1                                     | 3×/day                                                         |
+| Like a profile            | 1                                     | 3×/day                                                         |
+| Invite a friend           | 10 (20 for a Telegram Premium friend) | per invite                                                     |
+| Join a tournament         | 1 / 2 / 3 / 4 / 5                     | by tournament tier (Bronze→Diamond), per join                  |
+| Purchase                  | 1 per 10 LS spent                     | no daily cap                                                   |
+| Complete a stake          | `LC staked × months / 10,000`         | accrues over stake, +50% on completion, forfeited if cancelled |
+
+Tiered sources (daily / weekly tasks, claim, tournament join) scale with the relevant tier — Bronze→Diamond — and recurring daily sources carry per-day caps. **One-off and on-top sources** — verify-email, one-time tasks, friend invites, tournament joins, stake completion — are earned above the daily baseline (Section 5.4). **Purchases are uncapped:** 1 AP per 10 LS spent with no daily limit, so a heavy spender climbs tiers substantially faster than a free player.
+
+### 5.4 Daily Baseline
+
+The **daily baseline** is the approximate AP a fully-active player earns per day without donation. It is **tier-dependent** — it rises as the player climbs, because daily tasks, weekly tasks and claim all scale with tier:
+
+| Tier     | Daily baseline |
+| :------- | :------------- |
+| Bronze   | ~70            |
+| Silver   | ~90            |
+| Gold     | ~111           |
+| Platinum | ~131           |
+| Diamond  | ~152           |
+
+These figures live in `dailyBaselineApByTier`. The baseline is shown on the AP dashboard and is the basis of the decay rate (Section 5.5). One-off and on-top sources — verify-email, one-time tasks, invites, tournaments, stakes, purchases — are earned above this baseline.
+
+### 5.5 Activity Decay
+
+If the user stops opening the app, AP decays:
+
+- **Grace period:** 7 days of inactivity with no decay.
+- **After grace:** AP drops by `0.5 ×` the player's tier daily baseline per inactive day (≈ 35 AP at Bronze, ≈ 76 at Diamond). Floor: 0.
+- Any action resets the grace timer and stops the decay.
+- Decay lowers AP → lowers tier → **freezes** (makes temporarily unusable) content above the new tier. **No assets are lost** — engines, tickets, LC remain; they are frozen until AP recovers.
+- Bronze tier is 0 AP and the decay floor is 0, so a user can never fall below Bronze — Bronze content and non-gated AP sources always remain available, so a returning user can always climb back.
+
+### 5.6 AP Dashboard
+
+AP has a dedicated dashboard screen, opened by tapping the AP count on the profile. It shows current AP, tier, progress to the next tier, decay status, the full breakdown of AP sources with the no-donation daily ceiling, and which tournaments the current tier unlocks.
 
 ### Connections
 
-- Leaderboard ranking
-- VIP eligibility
-- Overall user progression
+AP connects to: the tier gate on engines / tournaments / stakes / market, the leaderboard ranking, the profile (AP shown instead of a level), and the daily task surface (each task shows its AP reward).
 
 ---
 
@@ -121,25 +169,23 @@ If the user does not open the app, their activity status decreases:
 
 ### Purpose
 
-The currency system enables value exchange, monetization, and rewards.
+LuckyTicket365 runs on **two separate currencies**: Lucky Coin (LC), the internal reward currency, and Lucky Stars (LS), the real-money currency. They do not convert into each other.
 
-### 6.1 Lucky Coin (LC)
+### 6.1 Lucky Coin (LC) — internal reward currency
 
-LC is the internal currency earned through activity and rewards.
+LC is the internal reward currency. It is **earned only by playing** — tournament prizes, stake yield (APR), task and ad rewards — and is spent inside the platform: buying tickets, producer engines, speed boosts, and upgrading statuses.
 
-### Usage
+- LC has a fixed real-money valuation of **$0.00001 per LC**, used to price its conversion to TON.
+- LC **cannot be acquired by conversion** — there is no TON→LC or LS→LC path, and no fiat/crypto LC deposit. LC enters the economy only by playing.
+- LC reaches real money by **converting to TON** at its $0.00001 valuation; the resulting TON is withdrawn through the wallet (Section 15). A **direct LC withdrawal is coming soon**.
 
-LC can be used to:
+### 6.2 Lucky Stars (LS) — real-money currency
 
-- Buy tickets
-- Buy ticket producer engines (see Section 9)
-- Purchase engine speed boosts
-- Upgrade statuses
-- Connect external wallet and exchange to cryptocurrency
+LS is the premium / real-money currency (see Section 19). It is **bought with real money** (Telegram Stars at 1:1, or TON) in unlimited quantity, and is also earned in-game from stakes, tasks, and invites. LS is spent on premium upgrades. **LS is never withdrawn and does not convert into LC or TON** — it flows in and is spent inside the platform.
 
 ### Connections
 
-LC connects all core systems: market, tournaments, wallet, tasks, and progression.
+LC connects market, tournaments, stakes, tasks, and progression. LS connects the Market premium rail, the Shop, the Wallet purchase paths, and engine premium actions (instant claim, capacity upgrade).
 
 ---
 
@@ -147,25 +193,25 @@ LC connects all core systems: market, tournaments, wallet, tasks, and progressio
 
 ### Purpose
 
-Statuses reward trust, loyalty, and engagement while enabling monetization and progression control.
+Statuses reward trust, loyalty, and engagement while enabling monetization. Statuses are **not** AP-tier-gated — they are acquired with currency, independently of progression.
 
 ### 7.1 Status Levels
 
-| Status       | Description                                           | Duration     |
-| :----------- | :---------------------------------------------------- | :----------- |
-| **Verified** | Identity confirmed via email or phone                 | Permanent    |
-| **Prime**    | Paid mid-tier status with benefits                    | Time-limited |
-| **VIP**      | High-tier leveled status with permanent game benefits | Permanent    |
+| Status           | Description                                           | Duration     |
+| :--------------- | :---------------------------------------------------- | :----------- |
+| **Verified**     | Identity confirmed via email or phone                 | Permanent    |
+| **Lucky Player** | Paid mid-tier status with benefits                    | Time-limited |
+| **VIP**          | High-tier leveled status with permanent game benefits | Permanent    |
 
 ### 7.2 Status Acquisition
 
-- **Verified:** Identity confirmed via email or phone confirmation.
-- **Prime:** Purchased via the Market (LC or cryptocurrency).
-- **VIP:** Unlocked and upgraded via the Market. No Activity Points requirement. Detailed acquisition rules are described in Section 7.4.
+- **Verified:** Identity confirmed via email or phone confirmation. Free.
+- **Lucky Player:** A paid, time-limited subscription (monthly), purchased via the Market with Lucky Coins (LC) or Lucky Stars (LS).
+- **VIP:** Unlocked and upgraded via the Market. No Activity Points requirement. Detailed rules in Section 7.4.
 
 ### 7.3 Status Benefits
 
-Statuses grant various privileges, such as:
+Statuses grant privileges, such as:
 
 - Badge displayed aside the user's nickname
 - Engine speed boosts (faster production cycles)
@@ -173,41 +219,38 @@ Statuses grant various privileges, such as:
 - Tournament advantages
 - Early or priority access to features
 
+Benefit magnitudes are bounded so they cannot break economy balance: the combined boost from all sources stays within ~×2, and discounts stay within ~30%.
+
 ### 7.4 VIP Status — Levels & Acquisition
 
-VIP is a permanent, leveled status. Once unlocked it never decreases or expires. The level count is endless — users can keep upgrading indefinitely.
+VIP is a permanent, leveled status. Once unlocked it never decreases or expires. VIP has a **maximum level of 20** (`maxVipLevel`).
 
 #### Payment Options
 
-VIP can be purchased and upgraded using either:
-
-- **Lucky Coins (LC)**
-- **Lucky Stars (LS)**
-
-Both currencies are accepted for both the initial unlock and all subsequent level upgrades.
+VIP can be purchased and upgraded with either **Lucky Coins (LC)** or **Lucky Stars (LS)** — both currencies are accepted for the initial unlock and for every level upgrade.
 
 #### Pricing Model
 
-| Action            | Cost (example)                       | Notes                                   |
-| :---------------- | :----------------------------------- | :-------------------------------------- |
-| **First unlock**  | Higher price                         | e.g., 10 LC / equivalent in LS          |
-| **Level upgrade** | Lower price for first level upgrades | e.g., 5 LC / equivalent in LS per level |
+| Action            | Cost                             | Notes                                                          |
+| :---------------- | :------------------------------- | :------------------------------------------------------------- |
+| **First unlock**  | ~500 LS (or LC equivalent)       | Higher one-time barrier to entry                               |
+| **Level upgrade** | ~100 × 1.15^(n−1) LS for level n | Grows per level; cheaper than the initial unlock at low levels |
 
-> Exact LC and LS prices per level are defined by the product team and may be updated independently of this document.
+> Exact LC and LS prices per level are knobs and may be tuned by the product team.
 
 #### Rules
 
-- The first purchase (unlock) costs more than the first few subsequent upgrades — rewarding early adopters and separating the barrier-to-entry from ongoing progression.
+- The first purchase (unlock) costs more than the first few subsequent upgrades.
 - VIP level is permanent: it cannot decrease, expire, or be lost through inactivity.
-- Higher VIP levels grant incrementally stronger game benefits. Exact benefits per level are to be defined by the product team.
+- Higher VIP levels grant incrementally stronger game benefits, up to level 20.
 
 #### VIP Benefits
 
-VIP benefits are game advantages granted per level. The full list will be defined by the product team. Benefits are permanent and stack with level progression.
+VIP benefits are per-level game advantages (engine speed, market discount, claim multiplier, tournament edge). Benefits are permanent and stack with level progression, within the bounds in Section 7.3.
 
 ### Connections
 
-Statuses influence market prices, claim efficiency, tournaments, and social visibility.
+Statuses influence market prices, claim efficiency, tournaments, and social visibility. They are bought with LC or LS and are not gated by AP.
 
 ---
 
@@ -253,17 +296,15 @@ Each engine has its own dedicated page (`/engines/[id]`). The page mirrors the f
 - Diamond
 - Platinum
 
-### 8.5 Engine Unlocking
+### 8.5 Engine Unlocking — AP Tier Gate
 
-At first, only the Bronze engine is available (gifted on first launch). Higher-tier **producer engines** are unlocked by meeting specific requirements:
+At first, only the Bronze engine is available (gifted on first launch). Higher-tier **producer engines** are gated by the **AP tier** (Section 5.2): an engine of tier `T` can be acquired and used only when the user's `AP-tier ≥ T`.
 
-- Claiming a required number of lower-tier tickets (e.g., Bronze)
-- Inviting a certain number of friends
-- Participating in a specific number of tournaments
-- Maintaining daily activity (visiting every day during X consecutive days)
-- Completing specific tasks
+This replaces the former per-engine requirement checklist. The AP system already aggregates every engagement action (claiming tickets, inviting friends, playing tournaments, daily activity, completing tasks) into a single number — so the AP-tier gate **is** that checklist, unified into one metric.
 
-Once an engine tier is unlocked, the user may acquire as many engines of that tier as desired (see Section 9).
+- Reaching Silver AP unlocks Silver engines, Gold AP unlocks Gold engines, and so on.
+- Once a tier is unlocked, the user may acquire as many engines of that tier as desired (see Section 9).
+- If AP decays below a tier threshold, engines of that tier **freeze** (no production, no claim) until AP recovers — they are not lost (see Section 5.5).
 
 ### Connections
 
@@ -334,7 +375,17 @@ Each engine has two tunable parameters:
 | **Production Speed** | Time per production cycle (e.g., 1 ticket every 2 hours). | Engine Speed Boost (Section 10.1) **+** Speed Chip (Section 10.4)              |
 | **Per-Cycle Output** | Number of tickets generated per cycle (default 1).        | Capacity Upgrade (Section 10.2, paid in LS) **+** Capacity Chip (Section 10.4) |
 
-> Default cycle times and base outputs per engine tier are defined by the product team and may be tuned independently of this document.
+**Base production ladder per tier** (knobs — cycle time doubles each tier, base output is 1 ticket/cycle for all tiers):
+
+| Tier     | Cycle time | Base output    |
+| :------- | :--------- | :------------- |
+| Bronze   | 2 h        | 1 ticket/cycle |
+| Silver   | 4 h        | 1 ticket/cycle |
+| Gold     | 8 h        | 1 ticket/cycle |
+| Platinum | 16 h       | 1 ticket/cycle |
+| Diamond  | 32 h       | 1 ticket/cycle |
+
+Because production is claim-gated (Section 9.5), the effective output also depends on how often the player claims.
 
 In addition to the two parameters above, every engine exposes **two chip slots** (one Speed, one Capacity) into which tournament-won chips may be equipped. See Section 10.4 for the full chip mechanic.
 
@@ -669,10 +720,22 @@ Each tournament requires a specific ticket type.
 Each tournament includes:
 
 - **Name:** The title of the tournament.
+- **Tier:** Bronze / Silver / Gold / Platinum / Diamond — drives the AP-tier entry gate and the reward magnitudes.
 - **Required Ticket:** The specific ticket type needed to join (Project or Partner).
-- **Prize Pool:** The summary of all rewards distributed among winners — typically LC, tickets, and **Chip Boosts** (Section 10.4) for top placements.
+- **Prize Pool:** The LC distributed among winners, plus chip shards for the top 3. The pool is `prizePool = teamSize × prizeLcPerSeat`, where `prizeLcPerSeat` is a per-tier knob:
+
+  | Tier     | LC per seat |
+  | :------- | ----------: |
+  | Bronze   |          40 |
+  | Silver   |         100 |
+  | Gold     |         250 |
+  | Platinum |         600 |
+  | Diamond  |       1,500 |
+
 - **Start Time:** The date and time when the tournament begins and winners are decided.
-- **Team Size:** The total number of users participating in the tournament.
+- **Team Size:** The total number of seats. `teamSizeCap` = 500 per instance; when more eligible players exist than the cap, additional parallel instances of the slot are spawned.
+
+The prize pool is the platform's main LC faucet; it scales with the player base because more players spawn more tournament instances.
 
 ### 11.2.1 Tournament Naming Convention
 
@@ -699,11 +762,47 @@ Tier coverage across the day is uneven by design — lower tiers run more often,
 | Platinum | Evening                                         |
 | Diamond  | Night                                           |
 
+### 11.2.2 Tier Activation — Active-Player Gate
+
+Beyond the per-user AP-tier gate, every tournament tier carries a **platform-wide activation threshold**: the tier only becomes playable once the number of **active players** on the platform crosses a hidden threshold. Reaching Silver AP-tier does **not**, by itself, let a user into Silver tournaments — the platform must also have grown large enough.
+
+| Tier     | Active players required to open the tier |
+| -------- | ---------------------------------------- |
+| Bronze   | 0 — open from launch                     |
+| Silver   | 10,000                                   |
+| Gold     | 50,000                                   |
+| Platinum | 200,000                                  |
+| Diamond  | 1,000,000                                |
+
+- The count is **active players only** — not total registered accounts.
+- The threshold is **never surfaced in the UI** — there is no progress bar or "X players to unlock" hint. A tier that has not been activated simply shows no tournaments.
+- In practice the gate is one-directional: once a tier opens it stays open as the player base keeps growing.
+- Thresholds live in `tournamentTierActivePlayerThresholds` in `global.constants.ts`.
+
 ### 11.3 Participation & Winning Logic
 
-- Users join by submitting one or more tickets.
+- **Entry requires three conditions:** the correct ticket, `AP-tier ≥ tournament tier` (Section 5.2), **and** the tournament tier must be platform-activated (Section 11.2.2). A player can enter their own tier and every lower tier.
+- Users join by submitting one or more tickets. Submitted tickets are **consumed**.
 - Winners are selected randomly from the pool of participants at the designated Start Time.
 - **Probability:** Joining with more tickets increases the chance of winning.
+- **AP reward:** joining grants AP scaled by the tournament's tier — 1 AP at Bronze up to 5 AP at Diamond (`apRewards.tournamentJoinByTier`). Placement does not grant AP.
+
+**Prize distribution.** The prize pool is split across placements by a top-heavy percentage table:
+
+| Placement | Share of pool          |
+| :-------- | :--------------------- |
+| 1st       | 12%                    |
+| 2nd       | 8%                     |
+| 3rd       | 5%                     |
+| 4–5       | 4% each                |
+| 6–10      | 2% each                |
+| 11–25     | 1% each                |
+| 26–50     | 0.4% each              |
+| 51–100    | 0.2% each              |
+| 101–500   | remainder, ~0.05% each |
+| 501+      | 0                      |
+
+**Economic role:** a tournament is a ticket **sink** and an LC **faucet** — tickets are consumed, LC is created and distributed. To prevent an infinite-money loop, the LC cost of buying a ticket in the Market exceeds the average LC a ticket returns in a tournament (see Section 14).
 
 ### 11.4 Chip Shards as Tournament Rewards
 
@@ -778,7 +877,7 @@ The Tournament data model (`PersonalTournament`) is a superset of the public `To
 | `shardType`                | `'speed'` / `'capacity'`    | Which chip type's shards are dropped (alternates per 11.4)         |
 | `status`                   | `'upcoming'` / `'finished'` | Lifecycle state per 11.5                                           |
 | `winners`                  | `TournamentWinner[]?`       | Top-3 with `userId` + `username` + `avatar`. Only when `finished`. |
-| `places`                   | `TournamentPlacesResponse?` | Percentage breakdown (1, 2, 3, 4–5, 6–10, …, 201–500)              |
+| `places`                   | `TournamentPlacesResponse?` | Percentage breakdown (1, 2, 3, 4–5, 6–10, …, 101–500)              |
 | `participated`             | `boolean`                   | User has joined                                                    |
 | `participatedTicketsCount` | `number?`                   | How many tickets the user has submitted                            |
 | `userResult`               | `TournamentUserResult?`     | `{ place?, lc, shards? }` — only when `finished` AND user joined   |
@@ -886,20 +985,39 @@ Leaderboard ranking depends on activity, tasks, and tournaments.
 
 ### Purpose
 
-The market is a central hub for purchasing improvements, resources, and statuses using internal or external currency.
+The Market is the central hub for purchasing improvements, resources, and statuses. All purchases are paid in **Lucky Coin (LC)** or **Lucky Stars (LS)** — no fiat or crypto (see Section 19.3 for the full Mega Market structure).
 
 ### Sections
 
-- **Engines:** Purchase additional ticket producer engines for any unlocked tier using LC (see Section 9).
-- **Boosts:** Purchase Engine Speed Boosts that reduce an engine's production cycle time (see Section 10.1).
-- **Tickets:** Purchase project or partner tickets directly using LC.
-- **Statuses:** Purchase Prime status (LC or cryptocurrency) or unlock/upgrade VIP status (LC or Lucky Stars). See Section 7.4 for VIP level details.
+- **Engines:** Purchase additional producer engines for any unlocked tier with LC.
+- **Boosts:** Engine Speed Boosts that reduce an engine's production cycle time (Section 10.1).
+- **Tickets:** Purchase project or partner tickets directly with LC.
+- **Statuses:** Lucky Player subscription and VIP unlock/upgrade (LC or LS — Section 7).
+- Premium items (chips, chip builders, higher-tier boosters, passes) are paid in LS.
 
-> **Note:** Engine **Capacity Upgrades** are not sold here — they are exclusive to the LuckyTicket365 Shop and purchased only with Lucky Stars (see Section 19.3).
+> Engine **Capacity Upgrades** are not sold here — they are exclusive to the LuckyTicket365 Shop, paid only with LS (Section 19.3).
+
+### 14.1 AP Tier Gate
+
+Tier-bound market items (engines, chips, chip builders, boosters, tier tickets) are gated by the **AP tier** (Section 5.2): an item of tier `T` is buyable only when `AP-tier ≥ T`. Cosmetics (avatars, frames, themes) are **not** gated.
+
+### 14.2 LC Price Ladder
+
+The Market is the platform's main LC **sink** — the counterweight to the tournament LC faucet. Base LC prices follow a ~×3 per-tier ladder (knobs):
+
+| Item        | Bronze | Silver |   Gold | Platinum | Diamond |
+| :---------- | -----: | -----: | -----: | -------: | ------: |
+| Engine      |  2,000 |  6,000 | 18,000 |   54,000 | 160,000 |
+| Ticket      |     60 |    150 |    375 |      900 |   2,250 |
+| Speed boost |    500 |  1,500 |  4,500 |   13,500 |  40,000 |
+
+The ticket price equals `1.5 × prizeLcPerSeat` for its tier — always above the average LC a ticket returns in a tournament. This **house edge** keeps bought tickets from being a profitable money loop; free engine-produced tickets are the free roll.
+
+**Balance rule:** total LC spent in the Market per day should be ≥ the total LC faucet per day (tournaments + tasks + ads + stake APR), keeping LC mildly deflationary so it does not lose value.
 
 ### Connections
 
-The Market integrates with LC, engines, boosts, tickets, and statuses.
+The Market integrates with LC, LS, engines, boosts, tickets, statuses, and the AP tier gate.
 
 ---
 
@@ -907,65 +1025,47 @@ The Market integrates with LC, engines, boosts, tickets, and statuses.
 
 ### Purpose
 
-The Wallet page serves as the central hub for managing the user's balances and performing financial actions, including connecting external wallets, swapping currencies, and moving funds in or out of the platform.
+The Wallet page is the hub for the user's balances and money actions — connecting an external wallet, buying Lucky Stars, converting Lucky Coin to TON, and withdrawing TON.
 
 ### Balances
 
-The top of the Wallet page displays three balance figures:
+The Wallet shows three balances:
 
-- **Lucky Coin (LC) Balance:** The user's current internal currency holdings.
-- **Lucky Stars (LS) Balance:** The user's current Lucky Stars holdings — an internal LuckyTicket365 currency separate from Telegram Stars (see Section 19). Earned through platform activity; purchasable with Telegram Stars or TON.
-- **TON Balance:** The user's TON (Toncoin) holdings accumulated within the platform.
+- **Lucky Coin (LC):** internal reward currency (Section 6.1). Earned by playing; not bought. Reaches real money by **converting to TON** (see Action Section 4).
+- **Lucky Stars (LS):** real-money premium currency (Section 6.2, Section 19). Bought with Telegram Stars or TON, also earned in-game; spent on premium. **Not withdrawn.**
+- **TON:** the user's TON (Toncoin) holdings, used to buy LS.
 
 ### Action Sections
 
-The Wallet page provides the following action sections:
-
 #### 1. Connect Wallet
 
-Allows users to link an external cryptocurrency wallet to the platform. A connected wallet is required for withdrawals and deposits involving cryptocurrency.
+Links an external TON wallet — required for the TON purchase path.
 
 #### 2. Buy Lucky Stars with Telegram Stars
 
-Allows users to purchase Lucky Stars (LS) using **Telegram Stars (XTR)** at a fixed **1:1 rate** — 1 Telegram Star = 1 Lucky Star. Powered by the Telegram Bot Payments API. Purchased Lucky Stars are credited to the user's LS balance and may then be spent in the LuckyTicket365 Shop or swapped to LC.
+Purchase LS with **Telegram Stars (XTR)** at a fixed **1:1 rate** — 1 Telegram Star = 1 LS. Powered by the Telegram Bot Payments API.
 
-> Reference rate: at the time of writing, 100 Telegram Stars cost approximately **$2 USD** (~$0.02 per Star), so 1 LS ≈ $0.02. Final pricing is governed by Telegram and may change over time.
+> Reference: 100 Telegram Stars ≈ $2 USD, so 1 LS ≈ $0.02. Final Telegram pricing may change.
 
-#### 3. Swap Lucky Stars ↔ Lucky Coins
+#### 3. Buy Lucky Stars with TON
 
-Allows users to convert Lucky Stars into LC and vice versa at a defined exchange rate. This bridges the Stars economy with the LC economy.
+Purchase LS by spending TON. The LS amount is computed from the live TON→USD rate against the $0.02/LS anchor, with a **volume bonus** on larger packages (e.g. +0% / +5% / +10% / +15%). This is a one-directional purchase path — LS is not converted back to TON.
 
-#### 4. Swap Lucky Stars ↔ TON
+#### 4. Convert Lucky Coin to TON
 
-Allows users to exchange their accumulated TON balance into Lucky Stars and vice versa.
+LC reaches real money through **TON**. The user converts LC to TON at the fixed **$0.00001/LC** valuation (priced against the live TON→USD rate); the resulting TON lands in the wallet's TON balance and is cashed out via the TON withdrawal path above.
 
-- **Base rate** is anchored to the Telegram Stars equivalent (1 LS ≈ $0.02 USD worth of TON at the live TON market price).
-- **+5% bonus on TON → LS purchases:** Buying Lucky Stars with TON yields **5% more LS** than the equivalent Telegram Stars purchase would. This is a deliberate incentive to pay with crypto.
-  - _Example:_ paying TON worth of $2 yields **105 LS** instead of 100 LS.
-- The reverse direction (LS → TON) uses the base rate without the bonus.
+- The withdrawal action itself handles **TON only** — LC is never withdrawn directly.
+- A **direct LC withdrawal** (LC straight to fiat/USDT, with its own minimums and commission) is **coming soon**.
+- LC cannot be bought with real money (no deposit); it enters the economy solely through play and leaves it only by conversion to TON.
 
-#### 5. Withdraw and Deposit
+### Note on conversions
 
-Allows users to move funds in and out of the platform via a connected external wallet. Supported currency pairs:
-
-- **USD ↔ LC:** Deposit USD to receive LC, or withdraw LC as USD.
-- **TON ↔ LC:** Deposit TON (Toncoin) to receive LC, or withdraw LC as TON.
-
-Both directions (deposit and withdrawal) are available for each supported currency.
-
-**Withdrawal Rules:**
-
-- **Minimum Withdrawal Amount:** A minimum LC threshold must be met before a withdrawal can be initiated. Withdrawals below this limit are not permitted.
-- **Commission Fee:** A fee is deducted from each withdrawal. The fee amount or percentage is defined by the product team and displayed to the user before confirming the transaction.
+LC and LS do not convert into each other, and LS cannot be withdrawn. There is no LC deposit — LC is obtained only by playing, and leaves the economy by converting to TON (Action Section 4).
 
 ### Transaction History
 
-A detailed record of all past activities, including earnings, purchases, swaps, and wallet-related events, is maintained in the history log:
-
-- **Type:** The nature of the transaction (e.g., LC to USDT, Stars to LC, Deposit, Withdrawal).
-- **Amount:** The quantity involved.
-- **Date:** Timestamp of the transaction.
-- **Status:** (e.g., Completed, Pending, Failed).
+A record of all balance events (LS purchases, in-game LS/LC earnings, spends), each with **Type**, **Amount**, **Date**, and **Status** (Completed / Pending / Failed).
 
 ---
 
@@ -1009,7 +1109,7 @@ Exact boost percentages per SKU are defined by the product team; the table above
 - Avatar ownership is **permanent** — once acquired, the avatar stays in the user's inventory and the bound boost remains available whenever that avatar is equipped.
 - **Only one avatar is active at a time** — the boost from the currently equipped avatar applies; boosts from other owned avatars do not stack.
 - Equipping is performed from the Settings → Change Avatar picker. Switching avatars is free and instantaneous.
-- Avatar boosts **stack with status (Prime/VIP) boosts** and with engine chips/boosters according to their respective rules.
+- Avatar boosts **stack with status (Lucky Player/VIP) boosts** and with engine chips/boosters according to their respective rules.
 - The picker renders avatars in level order, with a level badge and tier-coloured ring per tile. Level 10 carries an animated rainbow ring/badge to mark it as the apex avatar.
 
 ### 16.2 Notification Preferences
@@ -1040,22 +1140,23 @@ Provides assistance through:
 Encourages growth through referral rewards. Users can track their invited friends and view details such as:
 
 - Invited friend count.
-- Friend's status (Verified, Prime, VIP).
+- Friend's status (Verified, Lucky Player, VIP).
 - Friend's Activity Points.
 - Friend's username and avatar.
 
 **Referral Benefits:**
 
-When an invited friend claims tickets, the inviter earns **10% of those tickets** as a claimable reward — mirroring the same claim mechanic used for regular tickets:
+When an invited friend claims tickets, the inviter earns a percentage of those tickets as a claimable reward — mirroring the same claim mechanic used for regular tickets:
 
-- **Ticket Commission:** For every ticket a referred friend claims, the inviter accumulates a percentage of that amount as claimable tickets of the same type. The commission rate depends on whether the friend has **Telegram Premium**:
+- **Ticket Commission:** For every ticket a referred friend claims, the inviter accumulates a percentage of that amount as claimable tickets of the same type. The commission rate has three tiers, keyed to the friend's account:
 
-  | Friend's Telegram Account | Commission Rate |
-  | :------------------------ | :-------------- |
-  | Regular                   | 10%             |
-  | Telegram Premium          | 20%             |
+  | Friend's Account | Commission Rate |
+  | :--------------- | :-------------- |
+  | Regular          | 5%              |
+  | Telegram Premium | 10%             |
+  | Lucky Player     | 15%             |
 
-  For example, if a regular friend claims 20 Bronze and 10 Silver tickets, the inviter can claim 2 Bronze and 1 Silver tickets. If that friend has Telegram Premium, the inviter can claim 4 Bronze and 2 Silver tickets.
+  For example, if a regular friend claims 20 Bronze tickets, the inviter can claim 1 Bronze ticket; a Lucky Player friend claiming the same yields 3 Bronze tickets to the inviter. (Final percentages are knobs.)
 
 - **Claim Mechanic:** These referral tickets are not credited instantly — they accumulate and must be actively claimed by the inviter, the same way regular tickets are claimed.
 - **No LC Commission:** Referral rewards apply only to tickets. There is no commission on Lucky Coins (LC) earned by referred friends.
@@ -1108,10 +1209,10 @@ The Profile page is built to run inside a **Telegram WebApp** when available, wi
 #### 17.3.1 Page Composition (top to bottom)
 
 1. **Hero Header**
-   - Large **avatar** with an **animated rotating gradient ring** around it. Ring color reflects the user's current status (Verified / Prime / VIP). Ring fill represents **progress to the next Activity Points threshold**.
+   - Large **avatar** with an **animated rotating gradient ring** around it. Ring color reflects the user's current status (Verified / Lucky Player / VIP). Ring fill represents **progress to the next Activity Points threshold**.
    - Cover **banner image** at the top of the page (cosmetic; customizable via the LuckyTicket365 Shop).
-   - **Username** rendered with a **multi-status shine cycle**: the username's glow effect cycles through styles representing every status the user currently holds. Example: a user with Verified + Prime + VIP cycles through Verified-blue glow → Prime-purple glow → VIP-holographic glow (~2s per phase, looped). A user with a single status displays only that one effect.
-   - **Status badges** displayed beside the username (Verified / Prime / VIP X).
+   - **Username** rendered with a **multi-status shine cycle**: the username's glow effect cycles through styles representing every status the user currently holds. Example: a user with Verified + Lucky Player + VIP cycles through Verified-blue glow → Lucky Player-purple glow → VIP-holographic glow (~2s per phase, looped). A user with a single status displays only that one effect.
+   - **Status badges** displayed beside the username (Verified / Lucky Player / VIP X).
    - **Decorative badge collage** — three semi-transparent badge silhouettes drift slowly behind the avatar/name. The three slots are **user-selectable**, similar to showcase pinning: the user actively picks which badges appear in the background. Empty slots simply do not render.
    - **Activity flame** indicator next to the avatar (e.g., 7🔥 / 30🔥 / 100🔥) that pulses while the streak is active.
 
@@ -1148,6 +1249,9 @@ When viewing one's own profile, the following actions are available:
 When viewing another user's profile, the following actions are available (typically rendered as a row of buttons in the hero header):
 
 - **Send Ticket** — opens the ticket-sending modal (selects tier and quantity from the user's owned tickets). Mirrors the Send action defined in Section 8.2.
+  - **Daily limit per recipient, by tier.** Bronze / Silver / Gold are sendable by everyone — **1 each per day** to a given player. **Platinum and Diamond require Lucky Player status.**
+  - With **Lucky Player**, the per-recipient daily limits rise to **Bronze 5 / Silver 4 / Gold 3 / Platinum 2 / Diamond 1**.
+  - Limits live in `ticketSendDailyLimits` (`default` / `luckyPlayer`).
 - **Invite to Tournament** — opens a partner tournament picker. Available only for tournaments the inviter holds the required partner ticket for. Sends an in-app invite to the target user.
 - **Share profile** — copy link or share via Telegram.
 - **Like** — see Section 17.3.4.
@@ -1177,7 +1281,7 @@ LuckyTicket365 ships with a deep collection of **100+ badges and achievements** 
 
 Badges are organized into themed categories. Final list and per-category counts are defined by the product team; representative categories include:
 
-- **Status:** Verified, Prime active, VIP I/V/X/XX/…
+- **Status:** Verified, Lucky Player active, VIP I/V/X/XX/…
 - **Stakes:** Completed Level 1/2/3/4, total stakes completed, no-cancel streaks
 - **Tickets:** Claimed thresholds per tier (e.g., 100 / 1k / 10k Bronze, Silver, Gold, Diamond, Platinum)
 - **Engines:** Own all five tiers, own N engines, first Capacity Upgrade installed, total Speed Boosts used
@@ -1312,47 +1416,48 @@ Badges connect to virtually every system in the platform: Status (Section 7), Ti
 
 ### Purpose
 
-Stakes allow users to lock a portion of their LC coins for a fixed period in exchange for guaranteed and bonus rewards. The mechanic encourages long-term coin commitment and rewards users proportionally to how much they stake.
+A stake is a **time-locked LC deposit**. The user locks an amount of LC for a chosen number of months and, on completion, receives the deposit back plus an APR yield. Stakes are the LC "bank": they pull LC out of circulation (a velocity sink that fights inflation) while paying a modest, tunable return.
 
 ### Description
 
-A stake is a 3-hour claim-like session. The user selects an amount of LC to lock, and after the full 3-hour period completes, the user receives all rewards associated with their stake level. Coins cannot be used while locked, but the user may cancel the stake early to retrieve their coins — however, no rewards are granted if the stake ends before the full duration.
+The user picks an LC amount and a duration. The LC is locked for that period; locked LC cannot be spent. On completion the principal is returned together with the APR yield and a bonus draw. The stake may be cancelled early to retrieve the principal, but the yield and bonus are forfeited.
 
-### 18.1 Stake Levels
+### 18.1 Duration & APR
 
-Stakes are organized into numbered levels (Level 1 through Level 4). Each level requires a minimum LC deposit and grants a set of rewards. Higher levels include all rewards from every level below them — a user who meets the Level 3 threshold automatically receives all Level 1, Level 2, and Level 3 rewards.
+- **Duration:** a slider of **1 to 12 months** (the range is a knob).
+- **Yield:** `yield = deposit × rate`, where `rate` scales linearly with the chosen duration — **1% at 1 month → 5% at 12 months**. The yield is paid in LC on completion.
+  - _Example:_ 1,000 LC locked for 12 months → +50 LC.
+- The APR is a small LC faucet; the locked principal is a much larger velocity sink, so stakes are net anti-inflationary. The APR curve is the primary anti-inflation tuning lever.
 
-| Level   | Minimum Deposit | Guaranteed Ticket | Bonus Prizes                                                 | Includes Lower Levels |
-| :------ | :-------------- | :---------------- | :----------------------------------------------------------- | :-------------------- |
-| Level 1 | 100 LC          | Bronze            | LC coins, Engine Speed Boost                                 | (base level)          |
-| Level 2 | 500 LC          | Silver            | LC coins, Engine Speed Boost, Engine Capacity Upgrade        | + Level 1             |
-| Level 3 | 1,000 LC        | Gold              | LC coins, Engine Speed Boost, Engine Capacity Upgrade, Badge | + Level 1–2           |
-| Level 4 | 5,000 LC        | Diamond           | Large LC bonus, Engine Boosts & Upgrades, Exclusive Badge    | + Level 1–3           |
+### 18.2 Stake Tiers (deposit thresholds)
 
-> Thresholds and level count may be updated by the product team independently of this document.
+Stakes have five tiers keyed to the minimum deposit. The tier is **AP-tier gated** (a stake of tier `T` requires `AP-tier ≥ T`, Section 5.2) and determines the quality of the completion bonus draw.
 
-### 18.2 Reward Structure
+| Tier     | Minimum Deposit |
+| :------- | :-------------- |
+| Bronze   | 100 LC          |
+| Silver   | 500 LC          |
+| Gold     | 1,000 LC        |
+| Platinum | 2,500 LC        |
+| Diamond  | 5,000 LC        |
+
+### 18.3 Reward Structure
 
 Every completed stake grants:
 
-- **Guaranteed Ticket:** A ticket corresponding to the user's stake level (Bronze at Level 1, Silver at Level 2, Gold at Level 3, Diamond at Level 4).
-- **All Lower-Level Tickets:** Tickets from every level below the user's current level are also awarded.
-- **Chance at Bonus Prizes:** Each level enters the user into a random draw for extra prizes, which may include:
-  - Additional LC coins
-  - Engine Speed Boosts or Engine Capacity Upgrades (see Section 10)
-  - Badges (Exclusive Badge at Level 4)
-- **Chance at Lucky Stars:** Completing a stake session enters the user into a draw for Lucky Stars (LS) proportional to the stake level (see Section 19). LS are not guaranteed — they are part of the bonus prize pool.
+- **Principal returned** in full.
+- **APR yield** in LC (Section 18.1).
+- **Bonus draw:** a chance at extra prizes — Lucky Stars, Engine Boosts, or tickets — with the chance and amounts scaling by stake tier.
+- **AP:** base `LC staked × months / 10,000` Activity Points, plus a **+50% completion bonus** — granted on completion, forfeited on early cancellation.
 
-### 18.3 Stake Duration & Early Cancellation
+### 18.4 Cancellation & Concurrency
 
-- **Duration:** Every stake lasts exactly **3 hours** regardless of level.
-- **Completion:** After 3 hours, all rewards (tickets, bonuses, and Lucky Stars) are distributed and become claimable.
-- **Consecutive Stakes:** A new stake can only be started after the user claims the rewards from the previous one. Unclaimed rewards block the next stake session.
-- **Early Cancellation:** The user may cancel the stake at any time before the 3-hour period ends. Locked coins are returned in full. No rewards are granted — including guaranteed tickets, bonus prizes, or a chance at Lucky Stars.
+- **Early cancellation:** the principal is returned in full; the APR yield and bonus draw are forfeited; an LS cancellation penalty applies (scaling with stake tier).
+- **Multiple concurrent stakes** are allowed — the player may run several stakes at once.
 
 ### Connections
 
-Stakes connect the LC currency system, tickets, boosts, badges, and Lucky Stars. Completing stakes contributes to overall user progression and may interact with tasks and leaderboard activity.
+Stakes connect the LC currency system (velocity sink + APR faucet), the AP tier gate, Lucky Stars, boosts, and tickets via the bonus draw.
 
 ---
 
@@ -1367,7 +1472,7 @@ Stakes connect the LC currency system, tickets, boosts, badges, and Lucky Stars.
 Lucky Stars are a LuckyTicket365 internal currency, stored in the user's app balance (visible on the Wallet page — see Section 15). Users:
 
 1. **Earn** Lucky Stars through platform activity — stakes, tasks, friend invitations.
-2. **Buy** Lucky Stars with Telegram Stars (XTR) at a fixed 1:1 rate, or by exchanging TON (with a +5% bonus on the TON path).
+2. **Buy** Lucky Stars with Telegram Stars (XTR) at a fixed 1:1 rate, or with TON (with a volume bonus on larger packages).
 3. **Spend** Lucky Stars in the LuckyTicket365 Shop.
 
 Lucky Stars are conceptually distinct from **Telegram Stars (XTR)** — Telegram's native virtual currency. LuckyTicket365 integrates Telegram Stars only as a _purchase method_ for Lucky Stars; Telegram Stars themselves are not held in the user's app balance.
@@ -1378,16 +1483,17 @@ Lucky Stars are awarded through three channels:
 
 #### Stakes
 
-Every successfully completed stake session (all 3 hours, no early cancellation) enters the user into a **random draw** for Lucky Stars. Stars are not guaranteed — they are part of the bonus prize pool alongside LC coins and Boosts. The chance and potential Star amount scale with stake level:
+A completed stake (no early cancellation — Section 18) enters the user into the **bonus draw**, which can award Lucky Stars. Stars are not guaranteed — they are one possible bonus-draw outcome alongside boosts and tickets. The draw chance and potential Star amount scale with the stake tier:
 
-| Stake Level | Star Draw Chance | Potential Lucky Stars Awarded |
-| :---------- | :--------------- | :---------------------------- |
-| Level 1     | TBD              | TBD                           |
-| Level 2     | TBD              | TBD                           |
-| Level 3     | TBD              | TBD                           |
-| Level 4     | TBD              | TBD                           |
+| Stake Tier | Star Draw Chance | Potential Lucky Stars |
+| :--------- | :--------------- | :-------------------- |
+| Bronze     | 5%               | 5–15                  |
+| Silver     | 10%              | 15–40                 |
+| Gold       | 20%              | 40–100                |
+| Platinum   | 30%              | 70–250                |
+| Diamond    | 40%              | 100–500               |
 
-> Exact probabilities and LS amounts per level are defined by the product team.
+> Probabilities and amounts are knobs and may be tuned by the product team.
 
 #### Task Completion
 
@@ -1410,10 +1516,7 @@ After reaching a specific number of invited friends, the user receives a **guara
 In addition to earning, users may buy Lucky Stars from the Wallet page (see Section 15):
 
 - **With Telegram Stars (XTR):** Fixed **1:1 rate** — 1 Telegram Star = 1 Lucky Star. Powered by the Telegram Bot Payments API. Reference price: 100 XTR ≈ $2 USD at the time of writing.
-- **With TON:** Users exchange their TON balance for Lucky Stars at the live TON-to-USD market rate, anchored to the LS/USD baseline of ~$0.02/LS. **A +5% bonus on the LS amount applies** to all TON → LS purchases as a deliberate crypto-payment incentive.
-  - _Example:_ a TON amount worth $2 yields **105 LS** (instead of 100 LS at the Telegram Stars equivalent).
-
-The reverse direction (LS → TON) uses the base rate without the bonus.
+- **With TON:** Users spend TON to buy Lucky Stars at the live TON-to-USD market rate, anchored to the ~$0.02/LS baseline, with a **volume bonus** on larger packages (e.g. +0% / +5% / +10% / +15% by package size). This is a one-directional purchase — LS is not converted back to TON.
 
 ### 19.3 Spending Lucky Stars — The Mega Market
 

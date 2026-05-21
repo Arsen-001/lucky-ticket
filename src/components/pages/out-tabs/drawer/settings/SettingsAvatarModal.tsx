@@ -1,20 +1,23 @@
 'use client';
 
+import Image from 'next/image';
 import Link from 'next/link';
 import { useEffect, useState } from 'react';
-import { Check, Lock, ShoppingBag, Sparkles } from 'lucide-react';
+import { Check, Gift, Lock, ShoppingBag, Sparkles, Star } from 'lucide-react';
 import { twMerge } from 'tailwind-merge';
 import { useGetAvatarInventoryQuery } from '@/api/avatars.api';
 import { useUpdateMeMutation } from '@/api/me.api';
 import { Button } from '@/components/shared/buttons/Button';
 import { Modal } from '@/components/shared/modals/Modal';
 import { Skeleton } from '@/components/shared/seleketons/Skeleton';
-import { UserAvatar } from '@/components/shared/user-elements/UserAvatar';
+import { LcLabel } from '@/components/shared/icons/LcLabel';
+import { Ticket } from '@/components/shared/icons/Ticket';
 import { routes } from '@/constants/routes';
 import { useAppTranslations } from '@/hooks/useAppTranslations';
 import type { MessageIds } from '@/types/types/i18n.types';
 import type {
   AvatarBoostType,
+  AvatarDailyReward,
   UserAvatar as UserAvatarItem,
 } from '@/types/interfaces/avatars.interfaces';
 import '@/styles/components/avatar-tile.css';
@@ -81,14 +84,14 @@ export function SettingsAvatarModal({ open, onClose, currentAvatarId }: Settings
     try {
       await updateMe({ avatar: selected.src, avatarId: selected.id }).unwrap();
       onClose();
-    } catch (error) {
-      console.error('Failed to update avatar:', error);
+    } catch {
+      // mock backend never rejects; the optimistic update already applied
     }
   };
 
   return (
     <Modal open={open} onClose={onClose}>
-      <div className="bg-purple-gradient flex flex-col gap-5 rounded-2xl p-6">
+      <div className="bg-purple-gradient flex max-h-[80vh] flex-col gap-5 rounded-2xl p-6">
         <div className="flex flex-col gap-1 text-center">
           <h3 className="text-xl font-bold text-white">{t('change avatar')}</h3>
           <p className="text-sm text-white/65 leading-relaxed">
@@ -96,19 +99,21 @@ export function SettingsAvatarModal({ open, onClose, currentAvatarId }: Settings
           </p>
         </div>
 
-        <div className="grid grid-cols-3 gap-3">
-          {isLoading
-            ? Array.from({ length: 9 }).map((_, i) => (
-                <Skeleton key={i} className="aspect-square w-full rounded-2xl" />
-              ))
-            : sortedAvatars.map(avatar => (
-                <AvatarTile
-                  key={avatar.id}
-                  avatar={avatar}
-                  selected={avatar.id === selectedId}
-                  onSelect={() => handleSelect(avatar.id)}
-                />
-              ))}
+        <div className="min-h-0 flex-1 overflow-y-auto scrollbar-hidden">
+          <div className="grid grid-cols-3 gap-3 p-1.5">
+            {isLoading
+              ? Array.from({ length: 9 }).map((_, i) => (
+                  <Skeleton key={i} className="aspect-square w-full rounded-2xl" />
+                ))
+              : sortedAvatars.map(avatar => (
+                  <AvatarTile
+                    key={avatar.id}
+                    avatar={avatar}
+                    selected={avatar.id === selectedId}
+                    onSelect={() => handleSelect(avatar.id)}
+                  />
+                ))}
+          </div>
         </div>
 
         {selected && (
@@ -181,10 +186,15 @@ function AvatarTile({ avatar, selected, onSelect }: AvatarTileProps) {
         selected && 'ring-2 ring-electric-pink ring-offset-2 ring-offset-background'
       )}
     >
-      <UserAvatar
+      <Image
         src={avatar.src}
-        size={64}
-        className={twMerge('!h-full !w-full !min-h-0 !min-w-0', locked && 'opacity-40 grayscale')}
+        alt={avatar.name}
+        width={96}
+        height={96}
+        className={twMerge(
+          'h-full w-full rounded-xl object-cover',
+          locked && 'opacity-40 grayscale'
+        )}
       />
       <span
         className={twMerge(
@@ -240,14 +250,51 @@ function SelectedAvatarInfo({ avatar, labelKey }: SelectedAvatarInfoProps) {
           <Lock size={12} strokeWidth={2.6} />
           {t('avatar locked buy in market')}
         </div>
-      ) : labelKey && avatar.boost ? (
-        <div className="flex items-center gap-1.5 text-[12px] text-emerald-300">
-          <Sparkles size={12} strokeWidth={2.6} />
-          {t(labelKey, { percentage: avatar.boost.pct })}
-        </div>
       ) : (
-        <span className="text-[12px] text-white/45">{t('no boost free avatar')}</span>
+        <div className="flex flex-col gap-1">
+          {labelKey && avatar.boost && (
+            <div className="flex items-center gap-1.5 text-[12px] text-emerald-300">
+              <Sparkles size={12} strokeWidth={2.6} />
+              {t(labelKey, { percentage: avatar.boost.pct })}
+            </div>
+          )}
+          {avatar.dailyReward && (
+            <div className="flex items-center gap-1.5 text-[12px] text-white/80">
+              <Gift size={12} strokeWidth={2.6} className="text-gold" />
+              <span>{t('avatar daily reward')}:</span>
+              {renderAvatarDailyReward(avatar.dailyReward)}
+            </div>
+          )}
+          {!avatar.boost && !avatar.dailyReward && (
+            <span className="text-[12px] text-white/45">{t('no boost free avatar')}</span>
+          )}
+        </div>
       )}
     </div>
+  );
+}
+
+function renderAvatarDailyReward(reward: AvatarDailyReward) {
+  if (reward.kind === 'ltc') {
+    return (
+      <span className="text-gold inline-flex items-center gap-1 font-bold tabular-nums">
+        +{reward.amount}
+        <LcLabel size={12} />
+      </span>
+    );
+  }
+  if (reward.kind === 'stars') {
+    return (
+      <span className="text-gold inline-flex items-center gap-0.5 font-bold tabular-nums">
+        +{reward.amount}
+        <Star size={11} className="fill-gold" />
+      </span>
+    );
+  }
+  return (
+    <span className="inline-flex items-center gap-1 font-bold tabular-nums text-white">
+      +{reward.amount}
+      <Ticket type={reward.tier ?? 'bronze'} width={14} height={14} />
+    </span>
   );
 }

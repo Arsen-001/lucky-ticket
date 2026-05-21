@@ -1,6 +1,7 @@
 'use client';
 
-import { useMemo, useState, type ReactNode } from 'react';
+import { useEffect, useMemo, useState, type ReactNode } from 'react';
+import { useSearchParams } from 'next/navigation';
 import { useGetMarketDataQuery } from '@/api/market.api';
 import { useGetMeQuery } from '@/api/me.api';
 import { MarketHeroCarousel } from '@/components/pages/tabs/market/MarketHeroCarousel';
@@ -20,6 +21,7 @@ import { MarketCosmeticSection } from '@/components/pages/tabs/market/sections/M
 import { MarketStatusSection } from '@/components/pages/tabs/market/sections/MarketStatusSection';
 import { MarketPriceType } from '@/types/enums/market.enums';
 import type { MarketAccent, MarketPrice } from '@/types/interfaces/market.interfaces';
+import '@/styles/components/market.css';
 
 const ALL_KEY: MarketCategoryKey = 'all';
 
@@ -48,7 +50,15 @@ interface MarketActivePurchase {
 }
 
 export function MarketView() {
-  const [active, setActive] = useState<MarketCategoryKey>(ALL_KEY);
+  const searchParams = useSearchParams();
+  const tabParam = searchParams.get('tab');
+  const initialTab: MarketCategoryKey =
+    tabParam && (MARKET_CATEGORY_ORDER as readonly string[]).includes(tabParam)
+      ? (tabParam as MarketCategoryKey)
+      : ALL_KEY;
+
+  const [active, setActive] = useState<MarketCategoryKey>(initialTab);
+  const [highlight, setHighlight] = useState(initialTab !== ALL_KEY);
   const { data } = useGetMarketDataQuery();
   const { data: me } = useGetMeQuery();
   const [infoItem, setInfoItem] = useState<MarketSelectedItem | null>(null);
@@ -57,7 +67,19 @@ export function MarketView() {
   const [insufficientStars, setInsufficientStars] = useState<{ required: number } | null>(null);
   const [insufficientCoins, setInsufficientCoins] = useState<{ required: number } | null>(null);
 
+  // Sync the active tab when the ?tab= param changes without a full remount
+  // (e.g. router.push to the market while already on the market page).
+  useEffect(() => {
+    setActive(initialTab);
+    setHighlight(initialTab !== ALL_KEY);
+  }, [initialTab]);
+
   const showAll = active === ALL_KEY;
+
+  const handleCategoryChange = (key: MarketCategoryKey) => {
+    setActive(key);
+    setHighlight(false);
+  };
 
   const handleSelect = (item: MarketSelectedItem) => {
     setInfoItem(item);
@@ -132,15 +154,19 @@ export function MarketView() {
     <div className="flex flex-col gap-4">
       <MarketHeroCarousel onSelect={handleSelect} onBuy={handleBuy} />
       <div className="px-5">
-        <MarketCategoryChips active={active} onChange={setActive} />
+        <MarketCategoryChips active={active} onChange={handleCategoryChange} />
       </div>
 
       <div key={active} className="animate-slide-in-bottom flex flex-col gap-5 px-5">
-        {showAll
-          ? MARKET_CATEGORY_ORDER.filter(k => k !== ALL_KEY).map(key => (
-              <div key={key}>{sections?.[key as Exclude<MarketCategoryKey, 'all'>]}</div>
-            ))
-          : sections?.[active as Exclude<MarketCategoryKey, 'all'>]}
+        {showAll ? (
+          MARKET_CATEGORY_ORDER.filter(k => k !== ALL_KEY).map(key => (
+            <div key={key}>{sections?.[key as Exclude<MarketCategoryKey, 'all'>]}</div>
+          ))
+        ) : (
+          <div className={highlight ? 'market-section-highlight' : undefined}>
+            {sections?.[active as Exclude<MarketCategoryKey, 'all'>]}
+          </div>
+        )}
       </div>
 
       <MarketInfoModal

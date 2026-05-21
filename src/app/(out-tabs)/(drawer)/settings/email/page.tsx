@@ -4,8 +4,11 @@ import { useEffect, useState } from 'react';
 import { useAppTranslations } from '@/hooks/useAppTranslations';
 import { Input } from '@/components/shared/form-elements/inputs/Input';
 import { Button } from '@/components/shared/buttons/Button';
+import { BoltIcon } from '@/components/shared/icons/BoltIcon';
+import { ArrivalShine } from '@/components/shared/ArrivalShine';
 import { Mail } from 'lucide-react';
 import { useGetMeQuery, useUpdateMeMutation } from '@/api/me.api';
+import { GlobalConstants } from '@/constants/global.constants';
 
 export default function EmailPage() {
   const t = useAppTranslations();
@@ -32,7 +35,7 @@ export default function EmailPage() {
 
   return (
     <div className="flex flex-col gap-6">
-      <div className="flex flex-col gap-2">
+      <ArrivalShine id="verifyEmail" className="flex flex-col gap-2">
         <label className="text-gray-secondary text-sm font-semibold px-1">{t('email')}</label>
         <Input
           loading={isMeLoading}
@@ -46,7 +49,16 @@ export default function EmailPage() {
         <p className="text-xs text-gray-secondary px-1">
           {t('confirm or change your email address')}
         </p>
-      </div>
+        {me && !me.isVerified && (
+          <div className="border-teal/30 bg-teal/12 mx-1 inline-flex w-fit items-center gap-1.5 rounded-full border px-3 py-1">
+            <BoltIcon size={13} />
+            <span className="text-teal text-[11px] font-extrabold">
+              {t('plus {n} ap', { n: GlobalConstants.apRewards.verifyEmail })}
+            </span>
+            <span className="text-[11px] text-white/50">{t('for verifying email')}</span>
+          </div>
+        )}
+      </ArrivalShine>
       <Button
         onClick={handleSave}
         className="w-full"

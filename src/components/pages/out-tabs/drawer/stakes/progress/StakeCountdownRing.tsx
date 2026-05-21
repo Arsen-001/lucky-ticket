@@ -2,8 +2,8 @@
 
 import '@/styles/components/stakes.css';
 import { useAppTranslations } from '@/hooks/useAppTranslations';
+import { Sparkles } from 'lucide-react';
 import { StakesLevelChip } from '@/components/pages/out-tabs/drawer/stakes/StakesLevelChip';
-import { StakesTicketStack } from '@/components/pages/out-tabs/drawer/stakes/StakesTicketStack';
 import type { StakeLevelDefinition } from '@/types/interfaces/stakes.interfaces';
 import { twMerge } from 'tailwind-merge';
 
@@ -72,8 +72,8 @@ export function StakeCountdownRing({
       >
         {ready ? (
           <>
-            <div className="stakes-pulse-halo">
-              <StakesTicketStack tiers={levelDef.allTickets} size={60} />
+            <div className="stakes-pulse-halo flex-center">
+              <Sparkles size={54} className="text-success" strokeWidth={1.6} />
             </div>
             <div className="text-success mt-1.5 text-[11px] font-extrabold uppercase tracking-widest">
               {t('rewards ready')}
@@ -88,7 +88,7 @@ export function StakeCountdownRing({
               {leftTime}
             </div>
             <div className="mt-1">
-              <StakesLevelChip level={levelDef.level} tier={levelDef.guaranteedTicket} />
+              <StakesLevelChip level={levelDef.level} tier={levelDef.tier} />
             </div>
           </>
         )}

@@ -8,7 +8,6 @@ import { supportMock } from '@/mock/support.mock';
 import { notificationsMock } from '@/mock/notifications.mock';
 import { notificationPreferencesMock } from '@/mock/notification-preferences.mock';
 import { referralMock } from '@/mock/referral.mock';
-import { exchangeMock } from '@/mock/exchange.mock';
 import { marketMock } from '@/mock/market.mock';
 import { stakesMock } from '@/mock/stakes.mock';
 import { walletMock } from '@/mock/wallet.mock';
@@ -74,7 +73,6 @@ export const mockData = {
   ...notificationsMock,
   ...notificationPreferencesMock,
   ...referralMock,
-  ...exchangeMock,
   market: marketMock,
   ...marketMutationHandlers,
   ...stakesMock,

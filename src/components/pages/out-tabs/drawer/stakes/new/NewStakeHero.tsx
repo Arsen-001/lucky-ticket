@@ -55,10 +55,10 @@ export function NewStakeHero({
   return (
     <div
       className="stake-card-shell stake-card-border px-5 py-5"
-      style={{ ['--stake-card-accent' as string]: `var(--color-${activeLevel.guaranteedTicket})` }}
+      style={{ ['--stake-card-accent' as string]: `var(--color-${activeLevel.tier})` }}
     >
       <div className="relative text-center">
-        <StakesLevelChip level={activeLevel.level} tier={activeLevel.guaranteedTicket} size="lg" />
+        <StakesLevelChip level={activeLevel.level} tier={activeLevel.tier} size="lg" />
         <div className="mt-3.5">
           <div className="text-pink-secondary text-[10px] font-bold uppercase tracking-widest">
             {t('you will lock')}

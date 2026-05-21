@@ -1,4 +1,5 @@
 import { StoreProvider } from '@/providers/StoreProvider';
+import { NavigationHistoryProvider } from '@/providers/NavigationHistoryProvider';
 import { NextIntlClientProvider } from 'next-intl';
 import { gilroy, spaceGrotesk } from '@/fonts/index.fonts';
 import { getLocale } from 'next-intl/server';
@@ -14,7 +15,9 @@ export default async function RootLayout({ children }: ChildrenProps) {
         <body className={`${gilroy.className} ${spaceGrotesk.variable}`}>
           <div id="scroll-container">
             <NextIntlClientProvider>
-              <div className="max-w-140 m-auto h-full overflow-hidden">{children}</div>
+              <NavigationHistoryProvider>
+                <div className="max-w-140 m-auto h-full overflow-hidden">{children}</div>
+              </NavigationHistoryProvider>
             </NextIntlClientProvider>
           </div>
           <div id="portal-root" />

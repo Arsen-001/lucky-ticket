@@ -1,4 +1,5 @@
 import Image from 'next/image';
+import { useRouter } from 'next/navigation';
 import { Crown, Sparkles, Star, User } from 'lucide-react';
 import { twMerge } from 'tailwind-merge';
 import { Skeleton } from '@/components/shared/seleketons/Skeleton';
@@ -8,6 +9,8 @@ import { LuckyPlayerIcon } from '@/components/shared/icons/LuckyPlayerIcon';
 import { VipIcon } from '@/components/shared/icons/VipIcon';
 import { useAppTranslations } from '@/hooks/useAppTranslations';
 import { formatNumber } from '@/utils/global/number.utils';
+import { routes } from '@/constants/routes';
+import type { QuickCardPlayer } from '@/components/shared/user-elements/PlayerQuickCard';
 import type { CSSProperties, ReactNode } from 'react';
 import '@/styles/components/leaderboard-podium.css';
 
@@ -24,6 +27,10 @@ export interface PodiumPlayer {
   isVIP?: boolean;
   /** Optional element rendered next to the points badge (e.g., a tier-specific reward chip). */
   extra?: ReactNode;
+  /** Identity fields — when set, the avatar opens the shared player quick-card. */
+  id?: string;
+  liked?: boolean;
+  likesReceived?: number;
 }
 
 export interface LeaderboardPodiumProps {
@@ -36,6 +43,10 @@ export interface LeaderboardPodiumProps {
   confettiVariant?: 'pieces' | 'stars';
   /** When set, overrides per-piece random colors with a single color (used for star variant). */
   confettiColor?: string;
+  /** Tapping a podium avatar opens the shared player quick-card. */
+  onOpenCard?: (player: QuickCardPlayer) => void;
+  /** The viewer's own id — their podium avatar stays non-interactive. */
+  meId?: string;
 }
 
 interface RankTheme {
@@ -144,6 +155,8 @@ export function LeaderboardPodium({
   maxRank = 5,
   confettiVariant = 'pieces',
   confettiColor,
+  onOpenCard,
+  meId,
 }: LeaderboardPodiumProps) {
   const t = useAppTranslations();
   const playersByRank = new Map<PodiumRank, PodiumPlayer>();
@@ -168,12 +181,16 @@ export function LeaderboardPodium({
               rank={4}
               player={playersByRank.get(4)}
               loading={loading}
+              onOpenCard={onOpenCard}
+              meId={meId}
               className="absolute bottom-3 left-2"
             />
             <PodiumSlot
               rank={5}
               player={playersByRank.get(5)}
               loading={loading}
+              onOpenCard={onOpenCard}
+              meId={meId}
               className="absolute bottom-3 right-2"
             />
           </>
@@ -182,18 +199,24 @@ export function LeaderboardPodium({
           rank={2}
           player={playersByRank.get(2)}
           loading={loading}
+          onOpenCard={onOpenCard}
+          meId={meId}
           className={twMerge('absolute', isTop3Only ? 'left-3 bottom-6' : 'left-1 top-6')}
         />
         <PodiumSlot
           rank={3}
           player={playersByRank.get(3)}
           loading={loading}
+          onOpenCard={onOpenCard}
+          meId={meId}
           className={twMerge('absolute', isTop3Only ? 'right-3 bottom-6' : 'right-1 top-6')}
         />
         <PodiumSlot
           rank={1}
           player={playersByRank.get(1)}
           loading={loading}
+          onOpenCard={onOpenCard}
+          meId={meId}
           className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2"
         />
       </div>
@@ -206,15 +229,42 @@ interface PodiumSlotProps {
   player?: PodiumPlayer;
   loading?: boolean;
   className?: string;
+  onOpenCard?: (player: QuickCardPlayer) => void;
+  meId?: string;
 }
 
-function PodiumSlot({ rank, player, loading, className }: PodiumSlotProps) {
+function PodiumSlot({ rank, player, loading, className, onOpenCard, meId }: PodiumSlotProps) {
+  const t = useAppTranslations();
+  const router = useRouter();
   const theme = RANK_THEME[rank];
   const size = AVATAR_SIZE[rank];
   const isFirst = rank === 1;
   const isEmpty = !loading && !player;
   const floatClass =
     rank === 1 ? 'lt-podium-1' : rank === 2 || rank === 4 ? 'lt-podium-2' : 'lt-podium-3';
+
+  const isMe = !!player?.id && player.id === meId;
+  const interactive = !!player?.id && (isMe || !!onOpenCard);
+  const RingTag = interactive ? 'button' : 'div';
+  const handleTap = () => {
+    if (!player?.id) return;
+    if (isMe) {
+      router.push(routes.profile.index);
+      return;
+    }
+    onOpenCard?.({
+      userId: player.id,
+      username: player.username,
+      avatar: player.avatarUrl ?? '',
+      liked: player.liked ?? false,
+      likesReceived: player.likesReceived ?? 0,
+      points: player.points,
+      place: player.rank,
+      isVerified: player.isVerified,
+      isLuckyPlayer: player.isLuckyPlayer,
+      isVIP: player.isVIP,
+    });
+  };
 
   return (
     <div
@@ -272,8 +322,20 @@ function PodiumSlot({ rank, player, loading, className }: PodiumSlotProps) {
           }}
         />
 
-        <div
-          className="relative rounded-full p-[3px]"
+        <RingTag
+          type={interactive ? 'button' : undefined}
+          onClick={interactive ? handleTap : undefined}
+          aria-label={
+            !interactive
+              ? undefined
+              : isMe
+                ? t('view profile')
+                : t('open player card', { name: player?.username ?? '' })
+          }
+          className={twMerge(
+            'relative rounded-full p-[3px]',
+            interactive && 'cursor-pointer transition-transform active:scale-95'
+          )}
           style={{
             width: size + 6,
             height: size + 6,
@@ -328,7 +390,7 @@ function PodiumSlot({ rank, player, loading, className }: PodiumSlotProps) {
           >
             {rank}
           </span>
-        </div>
+        </RingTag>
       </div>
 
       <div

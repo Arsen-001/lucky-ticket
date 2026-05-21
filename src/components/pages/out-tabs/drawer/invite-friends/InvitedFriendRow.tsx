@@ -1,7 +1,6 @@
 'use client';
 
 import Image from 'next/image';
-import Link from 'next/link';
 import { ChevronRight, Star } from 'lucide-react';
 import { twMerge } from 'tailwind-merge';
 import { Skeleton } from '@/components/shared/seleketons/Skeleton';
@@ -11,13 +10,14 @@ import { BoltIcon } from '@/components/shared/icons/BoltIcon';
 import { Ticket } from '@/components/shared/icons/Ticket';
 import { VerifiedSparkleIcon } from '@/components/shared/icons/VerifiedSparkleIcon';
 import { useAppTranslations } from '@/hooks/useAppTranslations';
-import { routes } from '@/constants/routes';
 import type { InvitedFriend } from '@/types/interfaces/referral.interfaces';
 import type { CSSProperties } from 'react';
 
 export interface InvitedFriendRowProps {
   friend?: InvitedFriend;
   onClaim?: (friend: InvitedFriend) => void;
+  /** Tapping the avatar opens the shared player quick-card. */
+  onOpenCard?: (friend: InvitedFriend) => void;
   loading?: boolean;
   className?: string;
   style?: CSSProperties;
@@ -26,6 +26,7 @@ export interface InvitedFriendRowProps {
 export function InvitedFriendRow({
   friend,
   onClaim,
+  onOpenCard,
   loading,
   className,
   style,
@@ -50,13 +51,22 @@ export function InvitedFriendRow({
         className
       )}
     >
-      <Link
-        href={friend ? routes.profile.getByUserId(friend.id) : '#'}
+      <div
+        role="button"
+        tabIndex={friend ? 0 : -1}
+        aria-label={friend ? t('open player card', { name: friend.username }) : undefined}
         onClick={e => {
           e.stopPropagation();
-          if (!friend) e.preventDefault();
+          if (friend) onOpenCard?.(friend);
         }}
-        className="relative flex-shrink-0 transition-transform active:scale-95"
+        onKeyDown={e => {
+          if ((e.key === 'Enter' || e.key === ' ') && friend) {
+            e.preventDefault();
+            e.stopPropagation();
+            onOpenCard?.(friend);
+          }
+        }}
+        className="relative flex-shrink-0 cursor-pointer transition-transform active:scale-95"
       >
         <div className="h-11 w-11 overflow-hidden rounded-full">
           <SkeletonSuspense
@@ -82,7 +92,7 @@ export function InvitedFriendRow({
             <Star size={8} className="fill-white text-white" />
           </span>
         )}
-      </Link>
+      </div>
 
       <div className="flex min-w-0 flex-1 flex-col gap-0.5">
         <div className="flex items-center gap-1">

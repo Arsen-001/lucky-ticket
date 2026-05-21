@@ -1,21 +1,21 @@
 'use client';
 
+import { ArrowLeftRight } from 'lucide-react';
 import { twMerge } from 'tailwind-merge';
-import { TelegramStarIcon } from '@/components/shared/icons/TelegramStarIcon';
 import { useAppTranslations } from '@/hooks/useAppTranslations';
 
 export interface LcActionButtonsProps {
   disabled?: boolean;
-  onBuy: () => void;
+  onConvertTon: () => void;
 }
 
-export function LcActionButtons({ disabled, onBuy }: LcActionButtonsProps) {
+export function LcActionButtons({ disabled, onConvertTon }: LcActionButtonsProps) {
   const t = useAppTranslations();
 
   return (
     <button
       type="button"
-      onClick={onBuy}
+      onClick={onConvertTon}
       disabled={disabled}
       className={twMerge(
         'bg-pink-gradient relative flex w-full items-center justify-center gap-2 overflow-hidden rounded-2xl px-5 py-4 text-sm font-extrabold uppercase tracking-wider text-white transition-transform active:scale-99 cursor-pointer',
@@ -33,8 +33,8 @@ export function LcActionButtons({ disabled, onBuy }: LcActionButtonsProps) {
           <span className="animate-task-shine absolute -left-1/2 -top-1/2 h-[200%] w-[55%] bg-gradient-to-r from-transparent via-white/55 to-transparent" />
         </span>
       )}
-      <TelegramStarIcon size={16} className="relative" />
-      <span className="relative">{t('buy lc')}</span>
+      <ArrowLeftRight size={16} className="relative" strokeWidth={2.6} />
+      <span className="relative">{t('convert to ton')}</span>
     </button>
   );
 }

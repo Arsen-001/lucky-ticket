@@ -6,6 +6,8 @@ import type {
 } from '@/types/interfaces/tournaments.interfaces';
 import { images } from '@/constants/images';
 import { getRandomNumber } from '@/utils/global/number.utils';
+import { mockDb } from '@/mock/backend/db';
+import { GlobalConstants, isTournamentTierActivated } from '@/constants/global.constants';
 
 const getTicketsCount = () => getRandomNumber(1, 20);
 
@@ -24,16 +26,15 @@ const getHoursAgo = (hours: number): string => {
 
 const getMockPlacements = (): TournamentPlacesResponse => ({
   places: [
-    { from: 1, percentage: 25 },
-    { from: 2, percentage: 18 },
-    { from: 3, percentage: 15 },
-    { from: 4, to: 5, percentage: 12 },
-    { from: 6, to: 10, percentage: 10 },
-    { from: 11, to: 20, percentage: 8 },
-    { from: 21, to: 50, percentage: 5 },
-    { from: 51, to: 100, percentage: 3 },
-    { from: 101, to: 200, percentage: 2 },
-    { from: 201, to: 500, percentage: 2 },
+    { from: 1, percentage: 12 },
+    { from: 2, percentage: 8 },
+    { from: 3, percentage: 5 },
+    { from: 4, to: 5, percentage: 4 },
+    { from: 6, to: 10, percentage: 2 },
+    { from: 11, to: 25, percentage: 1 },
+    { from: 26, to: 50, percentage: 0.4 },
+    { from: 51, to: 100, percentage: 0.2 },
+    { from: 101, to: 500, percentage: 0.05 },
   ],
 });
 
@@ -49,7 +50,7 @@ export const tournaments: PersonalTournament[] = [
     name: 'Morning Bronze',
     startTime: getNextOccurrenceAt(6),
     teamSize: 64,
-    prizePool: 150,
+    prizePool: 2560,
     type: 'bronze',
     shardType: 'speed',
     status: 'upcoming',
@@ -61,7 +62,7 @@ export const tournaments: PersonalTournament[] = [
     name: 'Afternoon Bronze',
     startTime: getNextOccurrenceAt(12),
     teamSize: 128,
-    prizePool: 220,
+    prizePool: 5120,
     type: 'bronze',
     shardType: 'capacity',
     status: 'upcoming',
@@ -74,7 +75,7 @@ export const tournaments: PersonalTournament[] = [
     name: 'Afternoon Silver',
     startTime: getNextOccurrenceAt(12),
     teamSize: 96,
-    prizePool: 480,
+    prizePool: 9600,
     type: 'silver',
     shardType: 'speed',
     status: 'upcoming',
@@ -86,7 +87,7 @@ export const tournaments: PersonalTournament[] = [
     name: 'Evening Bronze',
     startTime: getNextOccurrenceAt(18),
     teamSize: 256,
-    prizePool: 320,
+    prizePool: 10240,
     type: 'bronze',
     shardType: 'speed',
     status: 'upcoming',
@@ -98,7 +99,7 @@ export const tournaments: PersonalTournament[] = [
     name: 'Evening Gold',
     startTime: getNextOccurrenceAt(18),
     teamSize: 64,
-    prizePool: 1200,
+    prizePool: 16000,
     type: 'gold',
     shardType: 'capacity',
     status: 'upcoming',
@@ -110,7 +111,7 @@ export const tournaments: PersonalTournament[] = [
     name: 'Evening Platinum',
     startTime: getNextOccurrenceAt(18),
     teamSize: 32,
-    prizePool: 2400,
+    prizePool: 19200,
     type: 'platinum',
     shardType: 'speed',
     status: 'upcoming',
@@ -122,7 +123,7 @@ export const tournaments: PersonalTournament[] = [
     name: 'Night Silver',
     startTime: getNextOccurrenceAt(0),
     teamSize: 96,
-    prizePool: 560,
+    prizePool: 9600,
     type: 'silver',
     shardType: 'capacity',
     status: 'upcoming',
@@ -135,7 +136,7 @@ export const tournaments: PersonalTournament[] = [
     name: 'Night Diamond',
     startTime: getNextOccurrenceAt(0),
     teamSize: 16,
-    prizePool: 5000,
+    prizePool: 24000,
     type: 'diamond',
     shardType: 'capacity',
     status: 'upcoming',
@@ -149,7 +150,7 @@ export const tournaments: PersonalTournament[] = [
     name: 'Morning Gold',
     startTime: getHoursAgo(2),
     teamSize: 64,
-    prizePool: 800,
+    prizePool: 16000,
     type: 'gold',
     shardType: 'speed',
     status: 'finished',
@@ -166,7 +167,7 @@ export const tournaments: PersonalTournament[] = [
     name: 'Yesterday Silver',
     startTime: getHoursAgo(20),
     teamSize: 96,
-    prizePool: 480,
+    prizePool: 9600,
     type: 'silver',
     shardType: 'capacity',
     status: 'finished',
@@ -187,7 +188,7 @@ export const tournaments: PersonalTournament[] = [
     name: 'Yesterday Bronze',
     startTime: getHoursAgo(36),
     teamSize: 128,
-    prizePool: 220,
+    prizePool: 5120,
     type: 'bronze',
     shardType: 'speed',
     status: 'finished',
@@ -209,13 +210,34 @@ export const topTournaments: Tournament[] = tournaments.filter(
   tournament => tournament.status === 'upcoming' && !tournament.participated
 );
 
+/**
+ * Tournament-tier activation gate (DOCS §11.2.2): a tier's tournaments are
+ * only listed once the platform's active-player count crosses its threshold.
+ * The detail endpoint (`tournaments/{id}`) is intentionally NOT gated — a
+ * tournament stays reachable by direct link (§11.6); only joining is blocked.
+ */
+const gateByActivation = <T extends Tournament>(list: T[]): T[] =>
+  list.filter(tour => isTournamentTierActivated(tour.type, mockDb.platform.activePlayers));
+
 /* ─── Mutation handlers ─── */
 
 const joinTournament = (args: { body?: unknown }) => {
   const body = (args.body ?? {}) as { tournamentId?: string; ticketsCount?: number };
   const ticketsCount = Math.max(1, body.ticketsCount ?? 1);
   const tournament = tournaments.find(tour => tour.id === body.tournamentId);
+
+  // Entry condition #3 (DOCS §11.3): the tournament tier must be platform-activated.
+  if (tournament && !isTournamentTierActivated(tournament.type, mockDb.platform.activePlayers)) {
+    return { error: { status: 403, data: 'Tournament tier not yet available' } };
+  }
+
   const participated = (tournament?.participatedTicketsCount ?? 0) + ticketsCount;
+
+  // Joining a tournament grants AP scaled by the tournament's tier — per join,
+  // not per ticket (DOCS §5.3 / §11.3). The `me` tag is invalidated after.
+  mockDb.user.activityPoints +=
+    GlobalConstants.apRewards.tournamentJoinByTier[tournament?.type ?? 'bronze'];
+
   return {
     participatedTicketsCount: participated,
     remainingTickets: 15 - ticketsCount,
@@ -225,7 +247,10 @@ const joinTournament = (args: { body?: unknown }) => {
 const markTournamentResultSeen = () => undefined;
 
 export const tournamentsMock = {
-  topTournaments,
+  // `GET tournaments` (gated list) wins over the raw `tournaments` array,
+  // which is kept for `tournaments/{id}` + `/places` path traversal.
+  'GET tournaments': () => gateByActivation(tournaments),
+  topTournaments: () => gateByActivation(topTournaments),
   tournaments,
   'POST tournaments/join': joinTournament,
   'POST tournaments/result-seen': markTournamentResultSeen,

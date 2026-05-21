@@ -119,7 +119,7 @@ export function AchievementCard({
             e.stopPropagation();
             onPin();
           }}
-          className="absolute right-1.5 top-1.5 z-2 flex h-5 w-5 cursor-pointer items-center justify-center rounded-full border border-white/15 bg-black/55 backdrop-blur-sm transition-colors hover:border-electric-pink/50 hover:bg-electric-pink/15"
+          className="absolute right-0 top-0 z-2 flex h-7.5 w-7.5 cursor-pointer items-center justify-center rounded-full border border-white/15 bg-black/55 backdrop-blur-sm transition-colors hover:border-electric-pink/50 hover:bg-electric-pink/15"
           style={
             achievement.isPinned
               ? { borderColor: 'rgba(255,95,200,0.5)', background: 'rgba(255,95,200,0.18)' }
@@ -127,7 +127,7 @@ export function AchievementCard({
           }
         >
           <Bookmark
-            size={10}
+            size={15}
             strokeWidth={2.6}
             style={{ color: achievement.isPinned ? '#FF5FC8' : 'rgba(255,255,255,0.7)' }}
             fill={achievement.isPinned ? '#FF5FC8' : 'none'}

@@ -7,9 +7,13 @@ import { LcLabel } from '@/components/shared/icons/LcLabel';
 import { routes } from '@/constants/routes';
 import { useAppTranslations } from '@/hooks/useAppTranslations';
 import { useCountDown } from '@/hooks/useCountDown';
-import { computeStakeProgress, isStakeReady } from '@/utils/global/stakes.utils';
+import {
+  computeStakeMonths,
+  computeStakeProgress,
+  computeStakeReturnCoins,
+  isStakeReady,
+} from '@/utils/global/stakes.utils';
 import { StakesLevelChip } from '@/components/pages/out-tabs/drawer/stakes/StakesLevelChip';
-import { StakesTicketStack } from '@/components/pages/out-tabs/drawer/stakes/StakesTicketStack';
 import type { ActiveStake, StakeLevelDefinition } from '@/types/interfaces/stakes.interfaces';
 import { twMerge } from 'tailwind-merge';
 
@@ -23,6 +27,8 @@ export function StakesActiveStakeCard({ stake, levelDef }: StakesActiveStakeCard
   const countdown = useCountDown(stake.endDate);
   const ready = countdown.expired || isStakeReady(stake.endDate);
   const progress = computeStakeProgress(stake.startDate, stake.endDate);
+  const months = computeStakeMonths(stake.startDate, stake.endDate);
+  const yieldLC = computeStakeReturnCoins(stake.lockedAmount, months);
 
   return (
     <Link
@@ -31,11 +37,11 @@ export function StakesActiveStakeCard({ stake, levelDef }: StakesActiveStakeCard
         'stake-card-shell stake-card-border relative block p-3 text-left transition-transform duration-200',
         ready && '-translate-y-0.5'
       )}
-      style={{ ['--stake-card-accent' as string]: `var(--color-${levelDef.guaranteedTicket})` }}
+      style={{ ['--stake-card-accent' as string]: `var(--color-${levelDef.tier})` }}
     >
       <div className="relative">
         <div className="flex min-h-[22px] items-start justify-between">
-          <StakesLevelChip level={levelDef.level} tier={levelDef.guaranteedTicket} />
+          <StakesLevelChip level={levelDef.level} tier={levelDef.tier} />
           {ready && (
             <span className="rounded-full bg-success/90 px-2 py-0.5 text-[9px] font-extrabold uppercase tracking-wider text-white shadow-[0_0_12px_rgba(74,222,128,0.6)]">
               {t('ready')}
@@ -43,8 +49,14 @@ export function StakesActiveStakeCard({ stake, levelDef }: StakesActiveStakeCard
           )}
         </div>
 
-        <div className="relative mt-2.5 flex h-14 items-center justify-center overflow-hidden rounded-xl">
-          <StakesTicketStack tiers={levelDef.allTickets} size={42} />
+        <div className="relative mt-2.5 flex h-14 flex-col items-center justify-center gap-0.5 overflow-hidden rounded-xl bg-black/20">
+          <span className="text-pink-secondary text-[9px] font-bold uppercase tracking-wider">
+            {t('yield')}
+          </span>
+          <span className="text-success inline-flex items-center gap-1 text-[16px] font-extrabold leading-none tabular-nums">
+            +{yieldLC.toLocaleString()}
+            <LcLabel size={15} />
+          </span>
         </div>
 
         <div className="mt-2.5">

@@ -8,6 +8,7 @@ import {
   CheckCircle2,
   Clock,
   Cpu,
+  Lock,
   MemoryStick,
   Plus,
   Sparkles,
@@ -25,7 +26,9 @@ import { GoldenText } from '@/components/shared/typography/GoldenText';
 import { Button } from '@/components/shared/buttons/Button';
 import { useAppTranslations } from '@/hooks/useAppTranslations';
 import { useCountDown } from '@/hooks/useCountDown';
+import { useUnlockedTiers } from '@/hooks/useUnlockedTiers';
 import { GlobalConstants } from '@/constants/global.constants';
+import type { TicketType } from '@/types/types/ticket.types';
 import type { TournamentType } from '@/types/types/tournaments.types';
 import { TournamentBetModal } from './TournamentBetModal';
 import { TournamentResultModal } from './TournamentResultModal';
@@ -57,6 +60,7 @@ const TIER_CLASS: Record<TournamentType, string> = {
 export function TournamentInfo({ id, className, ...rest }: TournamentDetailsProps) {
   const { data, isLoading } = useGetTournamentByIdQuery(id);
   const t = useAppTranslations();
+  const { isTierUnlocked } = useUnlockedTiers();
   const [isBetModalOpen, setIsBetModalOpen] = useState(false);
   const [isResultModalOpen, setIsResultModalOpen] = useState(false);
   const [resultDismissed, setResultDismissed] = useState(false);
@@ -65,6 +69,7 @@ export function TournamentInfo({ id, className, ...rest }: TournamentDetailsProp
   const availableTickets = 15;
 
   const isFinished = data?.status === 'finished';
+  const tierLocked = data ? !isTierUnlocked(data.type as TicketType) : false;
   const { leftTimeText, days, hours, minutes } = useCountDown(
     isFinished ? undefined : data?.startTime
   );
@@ -84,7 +89,10 @@ export function TournamentInfo({ id, className, ...rest }: TournamentDetailsProp
     }
   }, [shouldShowResultModal, isResultModalOpen]);
 
-  const handleOpenBetModal = () => setIsBetModalOpen(true);
+  const handleOpenBetModal = () => {
+    if (tierLocked) return;
+    setIsBetModalOpen(true);
+  };
   const handleCloseBetModal = () => setIsBetModalOpen(false);
   const handleCloseResultModal = () => {
     setIsResultModalOpen(false);
@@ -252,10 +260,12 @@ export function TournamentInfo({ id, className, ...rest }: TournamentDetailsProp
                 </button>
               ) : (
                 <Button
-                  disabled={isLoading}
+                  disabled={isLoading || tierLocked}
                   onClick={handleOpenBetModal}
                   icon={
-                    participated ? (
+                    tierLocked ? (
+                      <Lock strokeWidth={2.6} />
+                    ) : participated ? (
                       <Plus strokeWidth={3} />
                     ) : isStartingSoon ? (
                       <Zap strokeWidth={2.6} />
@@ -275,7 +285,9 @@ export function TournamentInfo({ id, className, ...rest }: TournamentDetailsProp
                   <span className="pointer-events-none absolute inset-0 overflow-hidden rounded-full">
                     <span className="absolute -top-1/2 -left-1/2 h-[200%] w-[55%] bg-gradient-to-r from-transparent via-white/40 to-transparent animate-task-shine" />
                   </span>
-                  <span className="leading-none relative">{t(participated ? 'add' : 'join')}</span>
+                  <span className="leading-none relative">
+                    {t(tierLocked ? 'locked' : participated ? 'add' : 'join')}
+                  </span>
                 </Button>
               )}
             </SkeletonSuspense>

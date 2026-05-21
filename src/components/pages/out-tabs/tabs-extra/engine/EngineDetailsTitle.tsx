@@ -7,6 +7,7 @@ import { useAppTranslations } from '@/hooks/useAppTranslations';
 import { SkeletonSuspense } from '@/components/shared/seleketons/SkeletonSuspense';
 import { Skeleton } from '@/components/shared/seleketons/Skeleton';
 import { findEngineLocation } from '@/utils/global/ticket-engine.utils';
+import { routes } from '@/constants/routes';
 
 interface EngineDetailsTitleProps extends HTMLAttributes<HTMLDivElement> {
   id: string;
@@ -21,6 +22,7 @@ export function EngineDetailsTitle({ id, ...props }: EngineDetailsTitleProps) {
   return (
     <PageHeader
       {...props}
+      backRoute={routes.tickets.index}
       title={
         <SkeletonSuspense
           loading={isLoading}

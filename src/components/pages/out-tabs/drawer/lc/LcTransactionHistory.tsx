@@ -22,6 +22,7 @@ const FILTERS: LcTransactionFilter[] = [
 const CONVERT_TYPES = new Set<LcTransactionType>([
   LcTransactionType.CONVERT_FROM_STARS,
   LcTransactionType.CONVERT_TO_STARS,
+  LcTransactionType.CONVERT_TO_TON,
 ]);
 
 const PAGE_SIZE = 20;

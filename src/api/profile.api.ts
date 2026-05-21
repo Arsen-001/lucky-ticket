@@ -6,6 +6,8 @@ import type {
   InviteToTournamentResponse,
   LikeProfileResponse,
   ProfileResponse,
+  SendTicketRequest,
+  SendTicketResponse,
 } from '@/types/interfaces/profile.interfaces';
 import type {
   BuySlotResponse,
@@ -24,8 +26,13 @@ export const profileApi = api.injectEndpoints({
     }),
 
     likeProfile: builder.mutation<LikeProfileResponse, string>({
-      query: userId => ({ url: `profile/${userId}/like`, method: 'POST' }),
+      query: userId => ({ url: 'profile/like', method: 'POST', body: { userId } }),
       invalidatesTags: (_result, _error, userId) => [{ type: rtkTags.profileById, id: userId }],
+    }),
+
+    sendTicket: builder.mutation<SendTicketResponse, SendTicketRequest>({
+      query: body => ({ url: 'profile/send-ticket', method: 'POST', body }),
+      invalidatesTags: [{ type: rtkTags.profileById, id: 'me' }, rtkTags.tickets],
     }),
 
     pinAchievement: builder.mutation<ProfileResponse, PinAchievementRequest>({
@@ -62,6 +69,7 @@ export const profileApi = api.injectEndpoints({
 export const {
   useGetProfileQuery,
   useLikeProfileMutation,
+  useSendTicketMutation,
   usePinAchievementMutation,
   useUnpinAchievementMutation,
   useBuyShowcaseSlotMutation,

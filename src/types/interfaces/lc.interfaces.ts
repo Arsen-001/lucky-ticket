@@ -6,8 +6,6 @@ export interface LcState {
   lifetimeSpent: number;
   /** Net change in the last 24h (positive = earned more than spent). */
   change24h: number;
-  /** Stars-to-LC exchange rate (1 Star = X LC). */
-  starsToLcRate: number;
 }
 
 export interface LcTransaction {
@@ -22,12 +20,15 @@ export interface LcTransaction {
   sourceId?: string;
 }
 
-export interface ConvertStarsToLcRequest {
-  stars: number;
+export interface ConvertLcToTonRequest {
+  /** LC to convert into TON. */
+  lcAmount: number;
 }
 
-export interface ConvertStarsToLcResponse {
+export interface ConvertLcToTonResponse {
   success: boolean;
-  starsSpent: number;
-  lcCredited: number;
+  /** LC debited from the balance. */
+  lcSpent: number;
+  /** TON credited to the wallet balance. */
+  tonCredited: number;
 }

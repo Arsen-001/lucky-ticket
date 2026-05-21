@@ -31,6 +31,7 @@ export const routes = {
   },
   notifications: '/notifications',
   leaderboard: '/leaderboard',
+  activity: '/activity',
   wallet: '/wallet',
   lc: '/lc',
   vip: '/vip',

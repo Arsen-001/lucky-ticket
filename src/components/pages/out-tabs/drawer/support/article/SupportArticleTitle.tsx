@@ -6,6 +6,7 @@ import { SkeletonSuspense } from '@/components/shared/seleketons/SkeletonSuspens
 import { Skeleton } from '@/components/shared/seleketons/Skeleton';
 import type { HTMLAttributes } from 'react';
 import { CopyButton } from '@/components/shared/buttons/CopyButton';
+import { routes } from '@/constants/routes';
 import { Share } from 'lucide-react';
 
 interface SupportArticleTitleProps extends HTMLAttributes<HTMLDivElement> {
@@ -18,6 +19,7 @@ export function SupportArticleTitle({ id, ...props }: SupportArticleTitleProps) 
   return (
     <PageHeader
       {...props}
+      backRoute={routes.support.index}
       extra={
         //TODO: handle copy action
         <CopyButton

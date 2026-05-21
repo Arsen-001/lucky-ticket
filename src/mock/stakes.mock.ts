@@ -3,6 +3,11 @@ import { StakeStatus } from '@/types/enums/stakes.enums';
 import type { StakeIdBody, StakesData, StartStakeBody } from '@/types/interfaces/stakes.interfaces';
 import { appConfig } from '@/config/app.config';
 import { mockDb } from '@/mock/backend/db';
+import {
+  computeStakeActivityPoints,
+  computeStakeMonths,
+  computeStakeReturnCoins,
+} from '@/utils/global/stakes.utils';
 
 const nowIso = () => new Date().toISOString();
 
@@ -22,6 +27,7 @@ const startStake = (args: FetchArgs) => {
   const body = (args.body ?? {}) as Partial<StartStakeBody>;
   const level = body.level ?? 1;
   const amount = body.amount ?? 0;
+  const months = body.durationMonths ?? appConfig.stakes.durationMinMonths;
 
   if (amount <= 0 || mockDb.user.coins < amount) {
     return { error: { status: 400, data: 'Insufficient balance' } };
@@ -34,7 +40,7 @@ const startStake = (args: FetchArgs) => {
     level,
     lockedAmount: amount,
     startDate: new Date(start).toISOString(),
-    endDate: new Date(start + appConfig.stakes.durationHours * 3_600_000).toISOString(),
+    endDate: new Date(start + months * 30 * 86_400_000).toISOString(),
     status: StakeStatus.ACTIVE,
     claimed: false,
   });
@@ -57,9 +63,8 @@ const cancelStake = (args: FetchArgs) => {
     id: `h-${Date.now()}`,
     level: stake.level,
     amount: stake.lockedAmount,
-    ticketsCount: 0,
-    bonusLC: 0,
-    bonusStars: 0,
+    yieldLC: 0,
+    bonusLS: 0,
     outcome: 'cancelled',
     completedAt: nowIso(),
   });
@@ -80,18 +85,23 @@ const claimStake = (args: FetchArgs) => {
 
   mockDb.stakes.activeStakes.splice(idx, 1);
   const levelDef = appConfig.stakes.levels.find(l => l.level === stake.level);
-  const bonusLC = Math.round(stake.lockedAmount * (appConfig.stakes.aprMaxPercent / 100));
-  const bonusStars = levelDef ? Math.round((levelDef.starsMin + levelDef.starsMax) / 2) : 0;
+  const months = computeStakeMonths(stake.startDate, stake.endDate);
+  const yieldLC = computeStakeReturnCoins(stake.lockedAmount, months);
+  const bonusLS =
+    levelDef && Math.random() * 100 < levelDef.starsChance
+      ? Math.round(levelDef.starsMin + Math.random() * (levelDef.starsMax - levelDef.starsMin))
+      : 0;
 
-  mockDb.user.coins += stake.lockedAmount + bonusLC;
-  mockDb.user.telegramStars += bonusStars;
+  mockDb.user.coins += stake.lockedAmount + yieldLC;
+  mockDb.user.telegramStars += bonusLS;
+  // Completion grants AP — forfeited on early cancellation (DOCS §5.3 / §18.3).
+  mockDb.user.activityPoints += computeStakeActivityPoints(stake.lockedAmount, months);
   mockDb.stakes.history.unshift({
     id: `h-${Date.now()}`,
     level: stake.level,
     amount: stake.lockedAmount,
-    ticketsCount: stake.level,
-    bonusLC,
-    bonusStars,
+    yieldLC,
+    bonusLS,
     outcome: 'completed',
     completedAt: nowIso(),
   });

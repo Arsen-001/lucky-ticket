@@ -1,11 +1,12 @@
 import type { FetchArgs } from '@reduxjs/toolkit/query';
 import { LcTransactionDirection, LcTransactionType } from '@/types/enums/lc.enums';
 import type {
-  ConvertStarsToLcRequest,
+  ConvertLcToTonRequest,
   LcState,
   LcTransaction,
 } from '@/types/interfaces/lc.interfaces';
 import { mockDb } from '@/mock/backend/db';
+import { lcToTon } from '@/utils/global/lc.utils';
 
 const HOUR_MS = 3_600_000;
 
@@ -23,41 +24,41 @@ const getLcState = (): LcState => ({
   lifetimeEarned: mockDb.lc.lifetimeEarned,
   lifetimeSpent: mockDb.lc.lifetimeSpent,
   change24h: compute24hChange(),
-  starsToLcRate: mockDb.lc.starsToLcRate,
 });
 
 const getTransactions = (): LcTransaction[] => mockDb.lc.transactions.map(tx => ({ ...tx }));
 
-const convertStarsToLc = (args: FetchArgs) => {
-  const { stars } = (args.body ?? {}) as Partial<ConvertStarsToLcRequest>;
-  const amount = stars ?? 0;
+const convertLcToTon = (args: FetchArgs) => {
+  const { lcAmount } = (args.body ?? {}) as Partial<ConvertLcToTonRequest>;
+  const amount = lcAmount ?? 0;
+
   if (amount <= 0) {
-    return { error: { status: 400, data: 'Stars amount must be positive' } };
+    return { error: { status: 400, data: 'Amount must be positive' } };
   }
-  if (mockDb.user.telegramStars < amount) {
-    return { error: { status: 400, data: 'Insufficient Stars balance' } };
+  if (mockDb.user.coins < amount) {
+    return { error: { status: 400, data: 'Insufficient LC balance' } };
   }
 
-  const lcCredited = amount * mockDb.lc.starsToLcRate;
-  mockDb.user.telegramStars -= amount;
-  mockDb.user.coins += lcCredited;
-  mockDb.lc.lifetimeEarned += lcCredited;
+  const tonCredited = Number(lcToTon(amount).toFixed(4));
+  mockDb.user.coins -= amount;
+  mockDb.lc.lifetimeSpent += amount;
+  mockDb.wallet.tonBalance = Number((mockDb.wallet.tonBalance + tonCredited).toFixed(4));
 
   mockDb.lc.transactions.unshift({
     id: `lctx_${Date.now()}`,
-    type: LcTransactionType.CONVERT_FROM_STARS,
-    direction: LcTransactionDirection.CREDIT,
-    amount: lcCredited,
-    description: `Converted ${amount} Stars → ${lcCredited} LC`,
+    type: LcTransactionType.CONVERT_TO_TON,
+    direction: LcTransactionDirection.DEBIT,
+    amount,
+    description: `Converted ${amount} LC → ${tonCredited} TON`,
     createdAt: new Date().toISOString(),
     balanceAfter: mockDb.user.coins,
   });
 
-  return { data: { success: true, starsSpent: amount, lcCredited } };
+  return { data: { success: true, lcSpent: amount, tonCredited } };
 };
 
 export const lcMock = {
   lc: getLcState,
   'lc/transactions': getTransactions,
-  'POST lc/convert': convertStarsToLc,
+  'POST lc/convert-ton': convertLcToTon,
 };

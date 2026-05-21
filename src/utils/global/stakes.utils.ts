@@ -15,9 +15,26 @@ export const computeStakeAprPercent = (months: number) => {
 };
 
 export const computeStakeReturnCoins = (deposit: number, months: number) => {
-  const apr = computeStakeAprPercent(months);
-  return Math.round((deposit * apr * months) / (12 * 100));
+  const ratePercent = computeStakeAprPercent(months);
+  return Math.round((deposit * ratePercent) / 100);
 };
+
+/**
+ * AP granted when a stake completes. The base `deposit × months ÷ stakeApDivisor`
+ * accrues over the stake; completion adds a `stakeApCompletionBonusPercent` bonus
+ * on top (forfeited on early cancellation) — DOCS §5.3 / §18.3.
+ */
+export const computeStakeActivityPoints = (deposit: number, months: number) => {
+  const base = (deposit * months) / GlobalConstants.stakeApDivisor;
+  return Math.round(base * (1 + GlobalConstants.stakeApCompletionBonusPercent / 100));
+};
+
+/** Whole months a stake runs, derived from its start/end dates. */
+export const computeStakeMonths = (start: string, end: string) =>
+  Math.max(
+    1,
+    Math.round((new Date(end).getTime() - new Date(start).getTime()) / (30 * 86_400_000))
+  );
 
 export const findLevelDef = (levels: StakeLevelDefinition[], level: number) =>
   levels.find(l => l.level === level);

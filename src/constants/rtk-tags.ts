@@ -10,7 +10,6 @@ export const rtkTags = {
   notifications: 'Notifications',
   notificationPreferences: 'NotificationPreferences',
   referral: 'Referral',
-  exchange: 'Exchange',
   market: 'Market',
   stakes: 'Stakes',
   wallet: 'Wallet',

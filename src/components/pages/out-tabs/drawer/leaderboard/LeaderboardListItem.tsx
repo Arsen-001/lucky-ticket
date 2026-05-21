@@ -12,6 +12,7 @@ import { useAppTranslations } from '@/hooks/useAppTranslations';
 import { LeaderboardCountUp } from './LeaderboardCountUp';
 import { LuckyPlayerIcon } from '@/components/shared/icons/LuckyPlayerIcon';
 import { VipIcon } from '@/components/shared/icons/VipIcon';
+import type { QuickCardPlayer } from '@/components/shared/user-elements/PlayerQuickCard';
 import { routes } from '@/constants/routes';
 import type { LeaderboardEntry } from '@/types/interfaces/leaderboard.interfaces';
 import type { CSSProperties } from 'react';
@@ -21,6 +22,8 @@ export interface LeaderboardListItemProps {
   loading?: boolean;
   isMe?: boolean;
   animateCounter?: boolean;
+  /** Tapping the avatar of another player opens the shared quick-card. */
+  onOpenCard?: (player: QuickCardPlayer) => void;
   className?: string;
   style?: CSSProperties;
 }
@@ -32,6 +35,7 @@ export function LeaderboardListItem({
   loading,
   isMe,
   animateCounter,
+  onOpenCard,
   className,
   style,
 }: LeaderboardListItemProps) {
@@ -39,6 +43,45 @@ export function LeaderboardListItem({
   const change = entry?.rankChange ?? 0;
   const positive = change > 0;
   const negative = change < 0;
+
+  const handleAvatarTap = () => {
+    if (!entry) return;
+    onOpenCard?.({
+      userId: entry.id,
+      username: entry.username,
+      avatar: entry.avatar,
+      liked: entry.liked,
+      likesReceived: entry.likesReceived,
+      points: entry.points,
+      place: entry.place,
+      isVerified: entry.isVerified,
+      isLuckyPlayer: entry.isLuckyPlayer,
+      isVIP: entry.isVIP,
+    });
+  };
+
+  const avatarClass = 'relative h-10 w-10 flex-shrink-0 transition-transform active:scale-95';
+  const avatarInner = (
+    <SkeletonSuspense
+      loading={loading || !entry}
+      skeleton={<Skeleton variant="round" className="h-full w-full" />}
+    >
+      {entry?.avatar ? (
+        <Image
+          src={entry.avatar}
+          alt={entry.username}
+          width={40}
+          height={40}
+          loading="lazy"
+          className="h-10 w-10 rounded-full object-cover"
+        />
+      ) : (
+        <div className="flex-center bg-electric-purple/20 text-electric-purple h-10 w-10 rounded-full text-sm font-extrabold">
+          {getInitial(entry?.username)}
+        </div>
+      )}
+    </SkeletonSuspense>
+  );
 
   return (
     <div
@@ -54,33 +97,20 @@ export function LeaderboardListItem({
     >
       <RankBadge entry={entry} loading={loading} />
 
-      <Link
-        href={entry ? routes.profile.getByUserId(entry.id) : '#'}
-        className="relative h-10 w-10 flex-shrink-0 transition-transform active:scale-95"
-        onClick={e => {
-          if (!entry) e.preventDefault();
-        }}
-      >
-        <SkeletonSuspense
-          loading={loading || !entry}
-          skeleton={<Skeleton variant="round" className="h-full w-full" />}
+      {isMe ? (
+        <Link href={routes.profile.index} className={avatarClass}>
+          {avatarInner}
+        </Link>
+      ) : (
+        <button
+          type="button"
+          className={avatarClass}
+          onClick={handleAvatarTap}
+          aria-label={entry ? t('open player card', { name: entry.username }) : undefined}
         >
-          {entry?.avatar ? (
-            <Image
-              src={entry.avatar}
-              alt={entry.username}
-              width={40}
-              height={40}
-              loading="lazy"
-              className="h-10 w-10 rounded-full object-cover"
-            />
-          ) : (
-            <div className="flex-center bg-electric-purple/20 text-electric-purple h-10 w-10 rounded-full text-sm font-extrabold">
-              {getInitial(entry?.username)}
-            </div>
-          )}
-        </SkeletonSuspense>
-      </Link>
+          {avatarInner}
+        </button>
+      )}
 
       <div className="flex min-w-0 flex-1 flex-col justify-center gap-0.5 py-[5px]">
         <div className="flex items-center gap-1">
