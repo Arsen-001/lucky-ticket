@@ -5,7 +5,7 @@ export enum TicketBoostType {
 
 export enum MarketPriceType {
   USDT = 'USDT',
-  LTC = 'LTC',
+  LC = 'LC',
   TELEGRAM_STARS = 'TELEGRAM_STARS',
 }
 

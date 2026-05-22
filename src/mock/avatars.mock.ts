@@ -52,7 +52,7 @@ const avatars: UserAvatar[] = [
     tier: 'paid',
     level: 6,
     boost: { type: 'tournamentReward', pct: 10 },
-    dailyReward: { kind: 'ltc', amount: 50 },
+    dailyReward: { kind: 'lc', amount: 50_000 },
     owned: false,
   },
   {
@@ -62,7 +62,7 @@ const avatars: UserAvatar[] = [
     tier: 'paid',
     level: 7,
     boost: { type: 'claimMultiplier', pct: 12 },
-    dailyReward: { kind: 'ltc', amount: 120 },
+    dailyReward: { kind: 'lc', amount: 120_000 },
     owned: false,
   },
   {

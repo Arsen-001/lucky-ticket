@@ -8,7 +8,6 @@ const CATEGORY_TO_CHAIN: Partial<Record<TaskCategory, string>> = {
   [TaskCategory.LEADERBOARD]: 'leaderboard-top',
   [TaskCategory.FRIENDS]: 'invite-friends',
   [TaskCategory.SOCIAL]: 'likes-received',
-  [TaskCategory.MARKET]: 'tickets-collected',
   [TaskCategory.ENGINES]: 'buy-engine',
   [TaskCategory.TICKETS]: 'tickets-collected',
   [TaskCategory.STAKES]: 'stakes-created',

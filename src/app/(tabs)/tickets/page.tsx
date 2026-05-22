@@ -1,9 +1,12 @@
+import { ArrivalShine } from '@/components/shared/ArrivalShine';
 import { TicketsTabsView } from '@/components/pages/tabs/tickets/TicketsTabsView';
 
 export default function TicketsPage() {
   return (
     <div className="py-6 px-5">
-      <TicketsTabsView />
+      <ArrivalShine id="claim" scroll={false}>
+        <TicketsTabsView />
+      </ArrivalShine>
     </div>
   );
 }

@@ -32,7 +32,7 @@ export function SettingsStatusPriceRow({ prices, label, className }: SettingsSta
             className="flex items-center gap-1.5 rounded-full bg-white/5 px-3 py-1.5"
           >
             <span className="text-sm font-bold tabular-nums text-white">{price.amount}</span>
-            {price.type === MarketPriceType.LTC && <LcLabel size={14} />}
+            {price.type === MarketPriceType.LC && <LcLabel size={14} />}
             {price.type === MarketPriceType.TELEGRAM_STARS && (
               <TelegramStarIcon size={14} alt={t('stars')} />
             )}

@@ -275,7 +275,7 @@ function SelectedAvatarInfo({ avatar, labelKey }: SelectedAvatarInfoProps) {
 }
 
 function renderAvatarDailyReward(reward: AvatarDailyReward) {
-  if (reward.kind === 'ltc') {
+  if (reward.kind === 'lc') {
     return (
       <span className="text-gold inline-flex items-center gap-1 font-bold tabular-nums">
         +{reward.amount}

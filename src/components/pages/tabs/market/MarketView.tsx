@@ -93,7 +93,7 @@ export function MarketView() {
         return;
       }
     }
-    if (price.type === MarketPriceType.LTC) {
+    if (price.type === MarketPriceType.LC) {
       const balance = me?.coins ?? 0;
       if (balance < price.amount) {
         setInsufficientCoins({ required: price.amount });

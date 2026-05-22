@@ -38,7 +38,7 @@ export interface MarketItemBase {
 }
 
 export interface MarketBundleItem {
-  kind: 'ticket' | 'stars' | 'ltc' | 'chip' | 'booster' | 'engine';
+  kind: 'ticket' | 'stars' | 'lc' | 'chip' | 'booster' | 'engine';
   amount: number;
   /** Tier for tier-bound items (ticket, chip, booster, engine) */
   tier?: TicketType;

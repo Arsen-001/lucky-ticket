@@ -6,7 +6,6 @@ export enum TaskCategory {
   PROFILE = 'profile',
   FRIENDS = 'friends',
   QUEST = 'quest',
-  MARKET = 'market',
   ENGINES = 'engines',
   TICKETS = 'tickets',
   STAKES = 'stakes',
@@ -30,7 +29,7 @@ export enum TaskStatus {
 }
 
 export enum TaskRewardType {
-  LTC = 'ltc',
+  LC = 'lc',
   TICKETS = 'tickets',
   ACTIVITY_POINTS = 'activity_points',
   STARS = 'stars',

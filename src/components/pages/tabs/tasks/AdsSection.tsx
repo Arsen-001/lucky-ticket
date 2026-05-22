@@ -10,6 +10,7 @@ import type { AdSlot, AdsBlock } from '@/types/interfaces/tasks.interfaces';
 import { TaskCategoryIcon } from './TaskCategoryIcon';
 import { AdSlideCard } from './AdSlideCard';
 import { SectionShine } from './SectionShine';
+import { ArrivalShine } from '@/components/shared/ArrivalShine';
 
 export interface AdsSectionProps {
   ads?: AdsBlock;
@@ -104,7 +105,9 @@ export function AdsSection({
         <SectionShine token={highlightToken ?? null} />
         <TaskCategoryIcon category={TaskCategory.ADS} size={20} />
         <div className="min-w-0 flex-1">
-          <h2 className="text-base font-extrabold leading-tight">{t('category ads')}</h2>
+          <ArrivalShine id="watchVideo" variant="title">
+            <h2 className="text-base font-extrabold leading-tight">{t('category ads')}</h2>
+          </ArrivalShine>
           <p className="text-[11px] text-pink-secondary">{t('ads progress', { watched, total })}</p>
         </div>
         {ads?.resetAt && !expired && (

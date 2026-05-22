@@ -7,6 +7,7 @@ import { useAppTranslations } from '@/hooks/useAppTranslations';
 import { Skeleton } from '@/components/shared/seleketons/Skeleton';
 import { SkeletonSuspense } from '@/components/shared/seleketons/SkeletonSuspense';
 import type { DailyProgressInfo, StreakInfo } from '@/types/interfaces/tasks.interfaces';
+import { ArrivalShine } from '@/components/shared/ArrivalShine';
 import { StreakModal } from './StreakModal';
 
 export interface TasksHeaderProps {
@@ -92,22 +93,26 @@ export function TasksHeader({
             loading={loading}
             skeleton={<Skeleton variant="card" className="w-16 h-16 rounded-2xl" />}
           >
-            <button
-              type="button"
-              onClick={() => setStreakModalOpen(true)}
-              className="flex flex-col items-center gap-0.5 rounded-2xl bg-gradient-to-br from-orange/30 to-electric-pink/30 px-3 py-2 border border-orange/40 hover:scale-105 active:scale-95 transition-transform cursor-pointer"
-              aria-label={t('open streak details')}
-            >
-              <Flame
-                size={22}
-                className="fill-orange text-warning animate-task-flame"
-                strokeWidth={1.5}
-              />
-              <div className="flex items-baseline gap-0.5 leading-none">
-                <span className="text-base font-extrabold tabular-nums">{days}</span>
-                <span className="text-[10px] text-white/70">{t(days === 1 ? 'day' : 'days')}</span>
-              </div>
-            </button>
+            <ArrivalShine id="streak">
+              <button
+                type="button"
+                onClick={() => setStreakModalOpen(true)}
+                className="flex flex-col items-center gap-0.5 rounded-2xl bg-gradient-to-br from-orange/30 to-electric-pink/30 px-3 py-2 border border-orange/40 hover:scale-105 active:scale-95 transition-transform cursor-pointer"
+                aria-label={t('open streak details')}
+              >
+                <Flame
+                  size={22}
+                  className="fill-orange text-warning animate-task-flame"
+                  strokeWidth={1.5}
+                />
+                <div className="flex items-baseline gap-0.5 leading-none">
+                  <span className="text-base font-extrabold tabular-nums">{days}</span>
+                  <span className="text-[10px] text-white/70">
+                    {t(days === 1 ? 'day' : 'days')}
+                  </span>
+                </div>
+              </button>
+            </ArrivalShine>
           </SkeletonSuspense>
         </div>
       </div>

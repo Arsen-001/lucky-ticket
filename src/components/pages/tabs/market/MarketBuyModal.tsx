@@ -67,7 +67,7 @@ export function MarketBuyModal({
               </span>
               <div className="flex items-center gap-1.5">
                 <span className="text-lg font-bold text-white">{price.amount}</span>
-                {price.type === MarketPriceType.LTC && <LcLabel size={16} />}
+                {price.type === MarketPriceType.LC && <LcLabel size={16} />}
                 {price.type === MarketPriceType.USDT && (
                   <span className="text-sm font-black text-emerald-400">USDT</span>
                 )}

@@ -28,7 +28,6 @@ const CATEGORY_LABEL_KEY: Record<TaskCategory, MessageIds> = {
   [TaskCategory.PROFILE]: 'category profile',
   [TaskCategory.FRIENDS]: 'category friends',
   [TaskCategory.QUEST]: 'category quest',
-  [TaskCategory.MARKET]: 'category market',
   [TaskCategory.ENGINES]: 'category engines',
   [TaskCategory.TICKETS]: 'category tickets',
   [TaskCategory.STAKES]: 'category stakes',

@@ -24,7 +24,7 @@ export interface ClaimRewardModalProps {
 }
 
 const REWARD_ICON: Record<Exclude<TaskRewardType, TaskRewardType.ACTIVITY_POINTS>, LucideIcon> = {
-  [TaskRewardType.LTC]: Coins,
+  [TaskRewardType.LC]: Coins,
   [TaskRewardType.TICKETS]: Ticket,
   [TaskRewardType.STARS]: Star,
   [TaskRewardType.PREMIUM]: Sparkles,
@@ -32,7 +32,7 @@ const REWARD_ICON: Record<Exclude<TaskRewardType, TaskRewardType.ACTIVITY_POINTS
 };
 
 const REWARD_GRADIENT: Record<TaskRewardType, string> = {
-  [TaskRewardType.LTC]: 'from-gold to-orange',
+  [TaskRewardType.LC]: 'from-gold to-orange',
   [TaskRewardType.TICKETS]: 'from-electric-pink to-pink',
   [TaskRewardType.ACTIVITY_POINTS]: 'from-teal to-diamond',
   [TaskRewardType.STARS]: 'from-warning to-gold',
@@ -133,7 +133,7 @@ export function ClaimRewardModal({
   const view: ModalView = error ? 'error' : result ? 'success' : 'loading';
 
   const primaryReward: TaskReward | undefined =
-    result?.rewards.find(r => r.type === TaskRewardType.LTC) ?? result?.rewards[0];
+    result?.rewards.find(r => r.type === TaskRewardType.LC) ?? result?.rewards[0];
 
   const primaryIsAp = primaryReward?.type === TaskRewardType.ACTIVITY_POINTS;
   const PrimaryIcon = primaryReward && !primaryIsAp ? REWARD_ICON[primaryReward.type] : Coins;
@@ -228,7 +228,7 @@ export function ClaimRewardModal({
                 <div className="flex items-center justify-around text-sm font-bold tabular-nums">
                   <div className="flex items-center gap-1">
                     <LcLabel size={14} />
-                    <span>{result.newBalance.ltc.toLocaleString()}</span>
+                    <span>{result.newBalance.lc.toLocaleString()}</span>
                   </div>
                   <div className="flex items-center gap-1">
                     <Ticket size={14} className="text-electric-pink" />

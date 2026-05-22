@@ -95,10 +95,10 @@ A user's **tier** is derived from accumulated AP:
 | Tier     | AP threshold | Reached by (perfect daily-baseline player) |
 | :------- | :----------- | :----------------------------------------- |
 | Bronze   | 0            | start                                      |
-| Silver   | 1,400        | ~1 month                                   |
-| Gold     | 5,500        | ~4 months                                  |
-| Platinum | 14,000       | ~10 months                                 |
-| Diamond  | 22,000       | ~16 months                                 |
+| Silver   | 2,000        | ~1 month                                   |
+| Gold     | 10,000       | ~4 months                                  |
+| Platinum | 30,000       | ~10 months                                 |
+| Diamond  | 54,000       | ~16 months                                 |
 
 The pacing describes a player who collects the full daily baseline every day. Tournaments make it faster; missed days slower.
 
@@ -127,9 +127,10 @@ AP is earned from a data-driven **source registry** — every meaningful action 
 | Invite a friend           | 10 (20 for a Telegram Premium friend) | per invite                                                     |
 | Join a tournament         | 1 / 2 / 3 / 4 / 5                     | by tournament tier (Bronze→Diamond), per join                  |
 | Purchase                  | 1 per 10 LS spent                     | no daily cap                                                   |
-| Complete a stake          | `LC staked × months / 10,000`         | accrues over stake, +50% on completion, forfeited if cancelled |
+| Spend LC                  | 1 per 25,000 LC spent                 | no daily cap                                                   |
+| Complete a stake          | `LC staked × months / 10,000,000`     | accrues over stake, +50% on completion, forfeited if cancelled |
 
-Tiered sources (daily / weekly tasks, claim, tournament join) scale with the relevant tier — Bronze→Diamond — and recurring daily sources carry per-day caps. **One-off and on-top sources** — verify-email, one-time tasks, friend invites, tournament joins, stake completion — are earned above the daily baseline (Section 5.4). **Purchases are uncapped:** 1 AP per 10 LS spent with no daily limit, so a heavy spender climbs tiers substantially faster than a free player.
+Tiered sources (daily / weekly tasks, claim, tournament join) scale with the relevant tier — Bronze→Diamond — and recurring daily sources carry per-day caps. **One-off and on-top sources** — verify-email, one-time tasks, friend invites, tournament joins, stake completion — are earned above the daily baseline (Section 5.4). **Purchases are uncapped:** 1 AP per 10 LS or per 25,000 LC spent with no daily limit, so a heavy spender climbs tiers substantially faster than a free player.
 
 ### 5.4 Daily Baseline
 
@@ -158,6 +159,8 @@ If the user stops opening the app, AP decays:
 ### 5.6 AP Dashboard
 
 AP has a dedicated dashboard screen, opened by tapping the AP count on the profile. It shows current AP, tier, progress to the next tier, decay status, the full breakdown of AP sources with the no-donation daily ceiling, and which tournaments the current tier unlocks.
+
+Every row in the AP-source breakdown is a **deep link** to the screen where that action is performed. On arrival the relevant target briefly **shines** — and scrolls into view if it is off-screen — so the player sees exactly where to earn the AP. A source that points at a whole screen (claim, like a profile, join a tournament, purchase) glows the page; a source that points at a specific block (verify email, watch a video, invite a friend, send a ticket, complete a stake, daily login streak) glows that block's heading. Task sources additionally open the correct frequency tab (daily / weekly / one-time).
 
 ### Connections
 
@@ -726,11 +729,11 @@ Each tournament includes:
 
   | Tier     | LC per seat |
   | :------- | ----------: |
-  | Bronze   |          40 |
-  | Silver   |         100 |
-  | Gold     |         250 |
-  | Platinum |         600 |
-  | Diamond  |       1,500 |
+  | Bronze   |      40,000 |
+  | Silver   |     100,000 |
+  | Gold     |     250,000 |
+  | Platinum |     600,000 |
+  | Diamond  |   1,500,000 |
 
 - **Start Time:** The date and time when the tournament begins and winners are decided.
 - **Team Size:** The total number of seats. `teamSizeCap` = 500 per instance; when more eligible players exist than the cap, additional parallel instances of the slot are spawned.
@@ -944,15 +947,15 @@ The **Ads** category in the **One-time** tasks tab holds a single task type — 
 - **Levels:** 7 cumulative view-count thresholds — **10, 25, 50, 100, 200, 400, 800** ads watched.
 - **Rewards per level:**
 
-  | Level | Ads watched | Reward                                 |
-  | ----- | ----------- | -------------------------------------- |
-  | 1     | 10          | 1 LC, 50 AP                            |
-  | 2     | 25          | 3 LC, 150 AP                           |
-  | 3     | 50          | 6 LC, 1 ticket, 300 AP                 |
-  | 4     | 100         | 12 LC, 2 tickets, 600 AP               |
-  | 5     | 200         | 25 LC, 3 tickets, 5 Stars, 1,200 AP    |
-  | 6     | 400         | 50 LC, 5 tickets, 10 Stars, 2,400 AP   |
-  | 7     | 800         | 100 LC, 10 tickets, 20 Stars, 5,000 AP |
+  | Level | Ads watched | Reward                                     |
+  | ----- | ----------- | ------------------------------------------ |
+  | 1     | 10          | 1,000 LC, 50 AP                            |
+  | 2     | 25          | 3,000 LC, 150 AP                           |
+  | 3     | 50          | 6,000 LC, 1 ticket, 300 AP                 |
+  | 4     | 100         | 12,000 LC, 2 tickets, 600 AP               |
+  | 5     | 200         | 25,000 LC, 3 tickets, 5 Stars, 1,200 AP    |
+  | 6     | 400         | 50,000 LC, 5 tickets, 10 Stars, 2,400 AP   |
+  | 7     | 800         | 100,000 LC, 10 tickets, 20 Stars, 5,000 AP |
 
 - After the 7th level, the slider shows a **“Coming soon”** card — additional levels are planned.
 - Tapping a level card sends the user to the daily **Ads** block (`/tasks?frequency=daily&category=ads`), where ads are actually watched. The daily ads block (per-day slot rewards) is a separate mechanic and is unaffected.
@@ -1005,11 +1008,11 @@ Tier-bound market items (engines, chips, chip builders, boosters, tier tickets) 
 
 The Market is the platform's main LC **sink** — the counterweight to the tournament LC faucet. Base LC prices follow a ~×3 per-tier ladder (knobs):
 
-| Item        | Bronze | Silver |   Gold | Platinum | Diamond |
-| :---------- | -----: | -----: | -----: | -------: | ------: |
-| Engine      |  2,000 |  6,000 | 18,000 |   54,000 | 160,000 |
-| Ticket      |     60 |    150 |    375 |      900 |   2,250 |
-| Speed boost |    500 |  1,500 |  4,500 |   13,500 |  40,000 |
+| Item        |    Bronze |    Silver |       Gold |   Platinum |     Diamond |
+| :---------- | --------: | --------: | ---------: | ---------: | ----------: |
+| Engine      | 2,000,000 | 6,000,000 | 18,000,000 | 54,000,000 | 160,000,000 |
+| Ticket      |    60,000 |   150,000 |    375,000 |    900,000 |   2,250,000 |
+| Speed boost |   500,000 | 1,500,000 |  4,500,000 | 13,500,000 |  40,000,000 |
 
 The ticket price equals `1.5 × prizeLcPerSeat` for its tier — always above the average LC a ticket returns in a tournament. This **house edge** keeps bought tickets from being a profitable money loop; free engine-produced tickets are the free roll.
 
@@ -1426,7 +1429,7 @@ The user picks an LC amount and a duration. The LC is locked for that period; lo
 
 - **Duration:** a slider of **1 to 12 months** (the range is a knob).
 - **Yield:** `yield = deposit × rate`, where `rate` scales linearly with the chosen duration — **1% at 1 month → 5% at 12 months**. The yield is paid in LC on completion.
-  - _Example:_ 1,000 LC locked for 12 months → +50 LC.
+  - _Example:_ 1,000,000 LC locked for 12 months → +50,000 LC.
 - The APR is a small LC faucet; the locked principal is a much larger velocity sink, so stakes are net anti-inflationary. The APR curve is the primary anti-inflation tuning lever.
 
 ### 18.2 Stake Tiers (deposit thresholds)
@@ -1435,11 +1438,11 @@ Stakes have five tiers keyed to the minimum deposit. The tier is **AP-tier gated
 
 | Tier     | Minimum Deposit |
 | :------- | :-------------- |
-| Bronze   | 100 LC          |
-| Silver   | 500 LC          |
-| Gold     | 1,000 LC        |
-| Platinum | 2,500 LC        |
-| Diamond  | 5,000 LC        |
+| Bronze   | 100,000 LC      |
+| Silver   | 500,000 LC      |
+| Gold     | 1,000,000 LC    |
+| Platinum | 2,500,000 LC    |
+| Diamond  | 5,000,000 LC    |
 
 ### 18.3 Reward Structure
 
@@ -1448,7 +1451,7 @@ Every completed stake grants:
 - **Principal returned** in full.
 - **APR yield** in LC (Section 18.1).
 - **Bonus draw:** a chance at extra prizes — Lucky Stars, Engine Boosts, or tickets — with the chance and amounts scaling by stake tier.
-- **AP:** base `LC staked × months / 10,000` Activity Points, plus a **+50% completion bonus** — granted on completion, forfeited on early cancellation.
+- **AP:** base `LC staked × months / 10,000,000` Activity Points, plus a **+50% completion bonus** — granted on completion, forfeited on early cancellation.
 
 ### 18.4 Cancellation & Concurrency
 

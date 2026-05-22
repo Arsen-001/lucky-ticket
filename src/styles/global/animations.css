@@ -59,8 +59,21 @@
     }
   }
 
+  @keyframes arrival-title-shine {
+    0%,
+    100% {
+      text-shadow: 0 0 0 transparent;
+    }
+    40% {
+      text-shadow:
+        0 0 14px rgba(222, 0, 155, 0.95),
+        0 0 5px rgba(222, 0, 155, 0.7);
+    }
+  }
+
   --animate-fade-in: fade-in 0.3s ease-out both;
   --animate-slide-in-bottom: slide-in-bottom 0.4s ease-out both;
   --animate-fill: fill 1.6s linear infinite;
   --animate-arrival-shine: arrival-shine 0.95s ease-in-out 3;
+  --animate-arrival-title-shine: arrival-title-shine 0.95s ease-in-out 3;
 }

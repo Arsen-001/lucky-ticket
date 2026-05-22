@@ -5,6 +5,7 @@ import {
   CalendarDays,
   ChevronRight,
   Clapperboard,
+  Coins,
   Flame,
   Heart,
   ListChecks,
@@ -39,9 +40,11 @@ interface ApSource {
   ap: string;
   apFallbackKey?: MessageIds;
   hintKey: MessageIds;
-  hintParams?: Record<string, number>;
+  hintParams?: Record<string, number | string>;
   /** Screen where the player performs this action to earn the AP. */
   route: Route;
+  /** Extra query appended after `?highlight=` (e.g. `frequency=weekly`). */
+  query?: string;
 }
 
 const { apRewards, inviteActivityPoints } = GlobalConstants;
@@ -71,6 +74,7 @@ const SOURCES: ApSource[] = [
     ap: tierRange(apRewards.dailyTaskByTier),
     hintKey: 'by task tier',
     route: routes.tasks,
+    query: 'frequency=daily',
   },
   {
     id: 'weeklyTask',
@@ -80,6 +84,7 @@ const SOURCES: ApSource[] = [
     ap: tierRange(apRewards.weeklyTaskByTier),
     hintKey: 'by task tier',
     route: routes.tasks,
+    query: 'frequency=weekly',
   },
   {
     id: 'oneTimeTask',
@@ -90,6 +95,7 @@ const SOURCES: ApSource[] = [
     apFallbackKey: 'varies',
     hintKey: 'once per task',
     route: routes.tasks,
+    query: 'frequency=once',
   },
   {
     id: 'verifyEmail',
@@ -169,6 +175,16 @@ const SOURCES: ApSource[] = [
     route: routes.market(),
   },
   {
+    id: 'spendLc',
+    category: 'spend',
+    Icon: Coins,
+    labelKey: 'ap source spend lc',
+    ap: '+1',
+    hintKey: 'per {n} lc no cap',
+    hintParams: { n: apRewards.spendLcPerAp.toLocaleString() },
+    route: routes.market(),
+  },
+  {
     id: 'stake',
     category: 'spend',
     Icon: TrendingUp,
@@ -214,7 +230,7 @@ export function ActivitySourcesList({ activityPoints = 0 }: ActivitySourcesListP
           {SOURCES.filter(s => s.category === category).map(source => (
             <Link
               key={source.id}
-              href={`${source.route}?highlight=${source.id}`}
+              href={`${source.route}?highlight=${source.id}${source.query ? `&${source.query}` : ''}`}
               className="bg-background-overlay flex items-center gap-3 rounded-xl p-3 transition-all hover:bg-white/8 active:scale-99"
             >
               <div className="flex-center text-electric-pink h-9 w-9 shrink-0 rounded-lg bg-white/5">

@@ -15,7 +15,7 @@ import type { TicketType } from '@/types/types/ticket.types';
 
 const deductBalanceUpdater = (price: MarketPrice) =>
   meApi.util.updateQueryData('getMe', undefined, draft => {
-    if (price.type === MarketPriceType.LTC) {
+    if (price.type === MarketPriceType.LC) {
       draft.coins = Math.max(0, draft.coins - price.amount);
     } else if (price.type === MarketPriceType.TELEGRAM_STARS) {
       draft.telegramStars = Math.max(0, draft.telegramStars - price.amount);

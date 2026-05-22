@@ -112,7 +112,7 @@ interface PriceButtonProps {
 
 function PriceButton({ price, accent, onClick }: PriceButtonProps) {
   const isStars = price.type === MarketPriceType.TELEGRAM_STARS;
-  const isLtc = price.type === MarketPriceType.LTC;
+  const isLc = price.type === MarketPriceType.LC;
 
   return (
     <button
@@ -134,7 +134,7 @@ function PriceButton({ price, accent, onClick }: PriceButtonProps) {
         )}
         <span>{price.amount}</span>
       </span>
-      {isLtc && <LcLabel size={14} />}
+      {isLc && <LcLabel size={14} />}
     </button>
   );
 }

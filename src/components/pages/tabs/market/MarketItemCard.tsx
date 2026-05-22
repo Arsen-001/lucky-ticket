@@ -173,7 +173,7 @@ export function MarketItemCard({
                     />
                   )}
                   <span className="text-sm font-semibold">{price.amount}</span>
-                  {price.type === MarketPriceType.LTC && <LcLabel size={14} />}
+                  {price.type === MarketPriceType.LC && <LcLabel size={14} />}
                   {price.type === MarketPriceType.USDT && (
                     <span className="text-sm text-emerald-400 font-bold">USDT</span>
                   )}

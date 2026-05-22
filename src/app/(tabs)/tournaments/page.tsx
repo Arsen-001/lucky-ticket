@@ -14,6 +14,7 @@ import {
 } from '@/components/pages/tabs/tournaments/TournamentFilterSheet';
 import type { TournamentType } from '@/types/types/tournaments.types';
 import type { PersonalTournament } from '@/types/interfaces/tournaments.interfaces';
+import { ArrivalShine } from '@/components/shared/ArrivalShine';
 
 const matchesTab = (tournament: PersonalTournament, filter: TournamentFilterType): boolean => {
   switch (filter) {
@@ -97,7 +98,7 @@ export default function TournamentPage() {
   const displayTournaments = isLoading ? placeholderTournaments : filteredTournaments;
 
   return (
-    <div className="flex flex-col min-h-full p-5">
+    <ArrivalShine id="tournamentEntry" scroll={false} className="flex flex-col min-h-full p-5">
       <TournamentFilters
         filter={filter}
         onFilterChange={setFilter}
@@ -124,6 +125,6 @@ export default function TournamentPage() {
         onSortChange={setSortBy}
         onReset={handleReset}
       />
-    </div>
+    </ArrivalShine>
   );
 }

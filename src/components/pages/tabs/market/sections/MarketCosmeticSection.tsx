@@ -135,7 +135,7 @@ export function MarketCosmeticSection({ cosmetics, onSelect, onBuy }: MarketCosm
 }
 
 function renderDailyReward(reward: AvatarDailyReward): ReactNode {
-  if (reward.kind === 'ltc') {
+  if (reward.kind === 'lc') {
     return (
       <span className="text-gold inline-flex items-center gap-1 tabular-nums">
         +{reward.amount}

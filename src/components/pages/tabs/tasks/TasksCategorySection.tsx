@@ -9,6 +9,7 @@ import type { MessageIds } from '@/types/types/i18n.types';
 import { TaskCategoryIcon } from './TaskCategoryIcon';
 import { TaskItemCard } from './TaskItemCard';
 import { TaskItemCardCompact } from './TaskItemCardCompact';
+import { TaskItemRow } from './TaskItemRow';
 import { SectionShine } from './SectionShine';
 
 export interface TasksCategorySectionProps {
@@ -21,8 +22,11 @@ export interface TasksCategorySectionProps {
   emptyHint?: ReactNode;
   highlightToken?: number | null;
   taskHighlight?: { id: string; nonce: number } | null;
-  /** Render task cards in a 2-column grid (used for compact once-tab layouts). */
-  twoColumns?: boolean;
+  /**
+   * Card layout: `cards` = full cards (1-col), `grid` = compact tiles (2-col),
+   * `rows` = compact single-line rows (1-col).
+   */
+  layout?: 'cards' | 'grid' | 'rows';
   /** Optional slot rendered between the section header and the task grid (e.g. milestone slider). */
   topSlot?: ReactNode;
   /**
@@ -64,7 +68,6 @@ const CATEGORY_LABEL_KEY: Record<TaskCategory, MessageIds> = {
   [TaskCategory.PROFILE]: 'category profile',
   [TaskCategory.FRIENDS]: 'category friends',
   [TaskCategory.QUEST]: 'category quest',
-  [TaskCategory.MARKET]: 'category market',
   [TaskCategory.ENGINES]: 'category engines',
   [TaskCategory.TICKETS]: 'category tickets',
   [TaskCategory.STAKES]: 'category stakes',
@@ -82,7 +85,6 @@ const CATEGORY_BLURB_KEY: Record<TaskCategory, MessageIds> = {
   [TaskCategory.PROFILE]: 'category profile blurb',
   [TaskCategory.FRIENDS]: 'category friends blurb',
   [TaskCategory.QUEST]: 'category quest blurb',
-  [TaskCategory.MARKET]: 'category market blurb',
   [TaskCategory.ENGINES]: 'category engines blurb',
   [TaskCategory.TICKETS]: 'category tickets blurb',
   [TaskCategory.STAKES]: 'category stakes blurb',
@@ -102,7 +104,7 @@ export function TasksCategorySection({
   emptyHint,
   highlightToken,
   taskHighlight,
-  twoColumns,
+  layout = 'cards',
   topSlot,
   collapsible,
   pinnedIds,
@@ -172,25 +174,45 @@ export function TasksCategorySection({
         </div>
       ) : isEmpty ? null : (
         <>
-          <div className={twMerge(twoColumns ? 'grid grid-cols-2 gap-2' : 'flex flex-col gap-2')}>
+          <div
+            className={twMerge(
+              layout === 'grid' ? 'grid grid-cols-2 gap-2' : 'flex flex-col gap-2'
+            )}
+          >
             {visibleTasks.map((task, i) => {
               const isPinned = pinnedIds?.has(task.id) ?? false;
               const pinDisabled = !isPinned && !!pinLimit && (pinnedIds?.size ?? 0) >= pinLimit;
               const animationClass = entryDone ? undefined : 'animate-slide-in-bottom';
               const animationStyle = entryDone ? undefined : { animationDelay: `${i * 60}ms` };
-              return twoColumns ? (
-                <TaskItemCardCompact
-                  key={task.id}
-                  task={task}
-                  onClaim={onClaim}
-                  highlightToken={taskHighlight?.id === task.id ? taskHighlight.nonce : null}
-                  className={animationClass}
-                  style={animationStyle}
-                  pinned={isPinned}
-                  pinDisabled={pinDisabled}
-                  onTogglePin={onTogglePin}
-                />
-              ) : (
+              const taskShine = taskHighlight?.id === task.id ? taskHighlight.nonce : null;
+              if (layout === 'grid') {
+                return (
+                  <TaskItemCardCompact
+                    key={task.id}
+                    task={task}
+                    onClaim={onClaim}
+                    highlightToken={taskShine}
+                    className={animationClass}
+                    style={animationStyle}
+                    pinned={isPinned}
+                    pinDisabled={pinDisabled}
+                    onTogglePin={onTogglePin}
+                  />
+                );
+              }
+              if (layout === 'rows') {
+                return (
+                  <TaskItemRow
+                    key={task.id}
+                    task={task}
+                    onClaim={onClaim}
+                    highlightToken={taskShine}
+                    className={animationClass}
+                    style={animationStyle}
+                  />
+                );
+              }
+              return (
                 <TaskItemCard
                   key={task.id}
                   task={task}
@@ -200,7 +222,7 @@ export function TasksCategorySection({
                   onToggleExpanded={() =>
                     setOpenTaskId(prev => (prev === task.id ? null : task.id))
                   }
-                  highlightToken={taskHighlight?.id === task.id ? taskHighlight.nonce : null}
+                  highlightToken={taskShine}
                   className={animationClass}
                   style={animationStyle}
                   pinned={isPinned}

@@ -41,6 +41,7 @@ import { AdsSection } from './AdsSection';
 import type { TierName } from '@/types/types/tier.types';
 import { QuestSection } from './QuestSection';
 import { ClaimRewardModal } from './ClaimRewardModal';
+import { ArrivalShine } from '@/components/shared/ArrivalShine';
 
 const triggerHaptic = (type: 'light' | 'medium' = 'light') => {
   if (typeof window === 'undefined') return;
@@ -144,7 +145,6 @@ const ONCE_CATEGORY_ORDER: TaskCategory[] = [
   TaskCategory.PROFILE_STATUS,
   TaskCategory.PROFILE,
   TaskCategory.PARTNERS,
-  TaskCategory.MARKET,
 ];
 
 const sortByOnceOrder = <T extends { category: TaskCategory }>(items: T[]): T[] => {
@@ -353,12 +353,10 @@ export function TasksContent() {
     }
     const categoryItems: CategoryNavItem[] = [];
     data.categories.forEach(cat => {
-      // Hide Profile, Market, and Partners chips from the one-time tab — same as the section list.
+      // Hide Profile and Partners chips from the one-time tab — same as the section list.
       if (
         activeFrequency === TaskFrequency.ONCE &&
-        (cat.category === TaskCategory.PROFILE ||
-          cat.category === TaskCategory.MARKET ||
-          cat.category === TaskCategory.PARTNERS)
+        (cat.category === TaskCategory.PROFILE || cat.category === TaskCategory.PARTNERS)
       ) {
         return;
       }
@@ -545,7 +543,7 @@ export function TasksContent() {
         result: {
           id: slot.id,
           rewards: slot.rewards,
-          newBalance: { ltc: 12345, tickets: 12, activityPoints: 4500 },
+          newBalance: { lc: 12_345_000, tickets: 12, activityPoints: 4500 },
         },
       });
     } catch {
@@ -564,15 +562,12 @@ export function TasksContent() {
   const showQuest = activeFrequency === TaskFrequency.ONCE && !!data?.quest;
   const filteredCategories =
     data?.categories.filter(c => tasksForFrequency(c, activeFrequency).length > 0) ?? [];
-  // Hide Profile and Market from the one-time tab — they live elsewhere
-  // (Profile setup is part of Settings; Market actions are first-touch only).
+  // Hide Profile and Partners from the one-time tab — they live elsewhere
+  // (Profile setup is part of Settings).
   const onceFiltered =
     activeFrequency === TaskFrequency.ONCE
       ? filteredCategories.filter(
-          c =>
-            c.category !== TaskCategory.PROFILE &&
-            c.category !== TaskCategory.MARKET &&
-            c.category !== TaskCategory.PARTNERS
+          c => c.category !== TaskCategory.PROFILE && c.category !== TaskCategory.PARTNERS
         )
       : filteredCategories;
   const visibleCategories =
@@ -584,12 +579,14 @@ export function TasksContent() {
     <div className="flex flex-col">
       <TasksHeader streak={data?.streak} dailyProgress={data?.dailyProgress} loading={isLoading} />
 
-      <TasksFrequencyTabs
-        active={activeFrequency}
-        onChange={handleSelectFrequency}
-        counts={frequencyCounts}
-        className="pb-3"
-      />
+      <ArrivalShine id={['dailyTask', 'weeklyTask', 'oneTimeTask']}>
+        <TasksFrequencyTabs
+          active={activeFrequency}
+          onChange={handleSelectFrequency}
+          counts={frequencyCounts}
+          className="pb-3"
+        />
+      </ArrivalShine>
 
       <TasksCategoryNav
         items={navItems}
@@ -847,12 +844,14 @@ export function TasksContent() {
                   highlightToken?.category === cat.category ? highlightToken.nonce : null
                 }
                 taskHighlight={taskHighlight}
-                twoColumns={
-                  activeFrequency === TaskFrequency.ONCE &&
-                  cat.category !== TaskCategory.SOCIAL &&
-                  cat.category !== TaskCategory.ACHIEVEMENTS &&
-                  cat.category !== TaskCategory.PROFILE_STATUS &&
-                  cat.category !== TaskCategory.PROFILE
+                layout={
+                  cat.category === TaskCategory.SOCIAL || cat.category === TaskCategory.PROFILE
+                    ? 'rows'
+                    : activeFrequency === TaskFrequency.ONCE &&
+                        cat.category !== TaskCategory.ACHIEVEMENTS &&
+                        cat.category !== TaskCategory.PROFILE_STATUS
+                      ? 'grid'
+                      : 'cards'
                 }
                 collapsible={
                   cat.category === TaskCategory.ACHIEVEMENTS &&

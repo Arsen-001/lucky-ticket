@@ -126,5 +126,5 @@ export interface ClaimTaskRequest {
 export interface ClaimTaskResponse {
   id: string;
   rewards: TaskReward[];
-  newBalance: { ltc: number; tickets: number; activityPoints: number };
+  newBalance: { lc: number; tickets: number; activityPoints: number };
 }

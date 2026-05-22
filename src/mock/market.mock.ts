@@ -26,10 +26,10 @@ export const marketMock: MarketData = {
       contents: [
         { kind: 'ticket', amount: 5, tier: TicketsEnum.BRONZE },
         { kind: 'stars', amount: 100 },
-        { kind: 'ltc', amount: 250 },
+        { kind: 'lc', amount: 250_000 },
         { kind: 'booster', amount: 1, tier: TicketsEnum.BRONZE },
       ],
-      prices: [{ type: MarketPriceType.LTC, amount: 999, originalAmount: 1499 }],
+      prices: [{ type: MarketPriceType.LC, amount: 999_000, originalAmount: 1_499_000 }],
     },
     {
       id: 'bundle-silver',
@@ -42,7 +42,7 @@ export const marketMock: MarketData = {
         { kind: 'chip', amount: 1, tier: TicketsEnum.SILVER },
         { kind: 'stars', amount: 250 },
       ],
-      prices: [{ type: MarketPriceType.LTC, amount: 2799, originalAmount: 3699 }],
+      prices: [{ type: MarketPriceType.LC, amount: 2_799_000, originalAmount: 3_699_000 }],
     },
     {
       id: 'bundle-gold',
@@ -55,7 +55,7 @@ export const marketMock: MarketData = {
         { kind: 'engine', amount: 1, tier: TicketsEnum.GOLD },
       ],
       prices: [
-        { type: MarketPriceType.LTC, amount: 4999, originalAmount: 6299 },
+        { type: MarketPriceType.LC, amount: 4_999_000, originalAmount: 6_299_000 },
         { type: MarketPriceType.TELEGRAM_STARS, amount: 1499, originalAmount: 1899 },
       ],
     },
@@ -72,7 +72,7 @@ export const marketMock: MarketData = {
         { kind: 'chip', amount: 2, tier: TicketsEnum.DIAMOND },
         { kind: 'stars', amount: 2500 },
       ],
-      prices: [{ type: MarketPriceType.LTC, amount: 39999, originalAmount: 47499 }],
+      prices: [{ type: MarketPriceType.LC, amount: 39_999_000, originalAmount: 47_499_000 }],
     },
   ],
 
@@ -84,7 +84,7 @@ export const marketMock: MarketData = {
       ticketType: TicketsEnum.BRONZE,
       engineLevel: 1,
       prices: [
-        { type: MarketPriceType.LTC, amount: 800 },
+        { type: MarketPriceType.LC, amount: 800_000 },
         { type: MarketPriceType.TELEGRAM_STARS, amount: 200 },
       ],
     },
@@ -95,7 +95,7 @@ export const marketMock: MarketData = {
       ticketType: TicketsEnum.SILVER,
       engineLevel: 1,
       prices: [
-        { type: MarketPriceType.LTC, amount: 1800 },
+        { type: MarketPriceType.LC, amount: 1_800_000 },
         { type: MarketPriceType.TELEGRAM_STARS, amount: 450 },
       ],
     },
@@ -107,7 +107,7 @@ export const marketMock: MarketData = {
       engineLevel: 1,
       remainingSupply: 24,
       prices: [
-        { type: MarketPriceType.LTC, amount: 4500 },
+        { type: MarketPriceType.LC, amount: 4_500_000 },
         { type: MarketPriceType.TELEGRAM_STARS, amount: 1100 },
       ],
     },
@@ -119,7 +119,7 @@ export const marketMock: MarketData = {
       engineLevel: 1,
       remainingSupply: 8,
       prices: [
-        { type: MarketPriceType.LTC, amount: 9800 },
+        { type: MarketPriceType.LC, amount: 9_800_000 },
         { type: MarketPriceType.TELEGRAM_STARS, amount: 1999 },
       ],
     },
@@ -132,7 +132,7 @@ export const marketMock: MarketData = {
       remainingSupply: 3,
       isNew: true,
       prices: [
-        { type: MarketPriceType.LTC, amount: 19999 },
+        { type: MarketPriceType.LC, amount: 19_999_000 },
         { type: MarketPriceType.TELEGRAM_STARS, amount: 4999 },
       ],
     },
@@ -146,7 +146,7 @@ export const marketMock: MarketData = {
       ticketType: TicketsEnum.BRONZE,
       isAvailable: true,
       prices: [
-        { type: MarketPriceType.LTC, amount: 50 },
+        { type: MarketPriceType.LC, amount: 50_000 },
         { type: MarketPriceType.TELEGRAM_STARS, amount: 15 },
       ],
     },
@@ -156,7 +156,7 @@ export const marketMock: MarketData = {
       ticketType: TicketsEnum.SILVER,
       isAvailable: true,
       prices: [
-        { type: MarketPriceType.LTC, amount: 150 },
+        { type: MarketPriceType.LC, amount: 150_000 },
         { type: MarketPriceType.TELEGRAM_STARS, amount: 40 },
       ],
     },
@@ -166,7 +166,7 @@ export const marketMock: MarketData = {
       ticketType: TicketsEnum.GOLD,
       isAvailable: false,
       prices: [
-        { type: MarketPriceType.LTC, amount: 500 },
+        { type: MarketPriceType.LC, amount: 500_000 },
         { type: MarketPriceType.TELEGRAM_STARS, amount: 125 },
       ],
     },
@@ -176,7 +176,7 @@ export const marketMock: MarketData = {
       ticketType: TicketsEnum.PLATINUM,
       isAvailable: false,
       prices: [
-        { type: MarketPriceType.LTC, amount: 1500 },
+        { type: MarketPriceType.LC, amount: 1_500_000 },
         { type: MarketPriceType.TELEGRAM_STARS, amount: 375 },
       ],
     },
@@ -186,7 +186,7 @@ export const marketMock: MarketData = {
       ticketType: TicketsEnum.DIAMOND,
       isAvailable: false,
       prices: [
-        { type: MarketPriceType.LTC, amount: 5000 },
+        { type: MarketPriceType.LC, amount: 5_000_000 },
         { type: MarketPriceType.TELEGRAM_STARS, amount: 1250 },
       ],
     },
@@ -202,7 +202,7 @@ export const marketMock: MarketData = {
       isNew: true,
       isAvailable: true,
       prices: [
-        { type: MarketPriceType.LTC, amount: 100 },
+        { type: MarketPriceType.LC, amount: 100_000 },
         { type: MarketPriceType.TELEGRAM_STARS, amount: 25 },
       ],
     },
@@ -214,7 +214,7 @@ export const marketMock: MarketData = {
       boostPercentage: 100,
       isAvailable: true,
       prices: [
-        { type: MarketPriceType.LTC, amount: 150 },
+        { type: MarketPriceType.LC, amount: 150_000 },
         { type: MarketPriceType.TELEGRAM_STARS, amount: 35 },
       ],
     },
@@ -226,7 +226,7 @@ export const marketMock: MarketData = {
       boostPercentage: 100,
       isAvailable: true,
       prices: [
-        { type: MarketPriceType.LTC, amount: 200 },
+        { type: MarketPriceType.LC, amount: 200_000 },
         { type: MarketPriceType.TELEGRAM_STARS, amount: 50 },
       ],
     },
@@ -238,7 +238,7 @@ export const marketMock: MarketData = {
       boostPercentage: 100,
       isAvailable: true,
       prices: [
-        { type: MarketPriceType.LTC, amount: 250 },
+        { type: MarketPriceType.LC, amount: 250_000 },
         { type: MarketPriceType.TELEGRAM_STARS, amount: 60 },
       ],
     },
@@ -250,7 +250,7 @@ export const marketMock: MarketData = {
       boostPercentage: 150,
       isAvailable: false,
       prices: [
-        { type: MarketPriceType.LTC, amount: 400 },
+        { type: MarketPriceType.LC, amount: 400_000 },
         { type: MarketPriceType.TELEGRAM_STARS, amount: 100 },
       ],
     },
@@ -262,7 +262,7 @@ export const marketMock: MarketData = {
       boostPercentage: 200,
       isAvailable: false,
       prices: [
-        { type: MarketPriceType.LTC, amount: 500 },
+        { type: MarketPriceType.LC, amount: 500_000 },
         { type: MarketPriceType.TELEGRAM_STARS, amount: 125 },
       ],
     },
@@ -274,7 +274,7 @@ export const marketMock: MarketData = {
       boostPercentage: 200,
       isAvailable: false,
       prices: [
-        { type: MarketPriceType.LTC, amount: 800 },
+        { type: MarketPriceType.LC, amount: 800_000 },
         { type: MarketPriceType.TELEGRAM_STARS, amount: 200 },
       ],
     },
@@ -286,7 +286,7 @@ export const marketMock: MarketData = {
       boostPercentage: 300,
       isAvailable: false,
       prices: [
-        { type: MarketPriceType.LTC, amount: 1000 },
+        { type: MarketPriceType.LC, amount: 1_000_000 },
         { type: MarketPriceType.TELEGRAM_STARS, amount: 250 },
       ],
     },
@@ -298,7 +298,7 @@ export const marketMock: MarketData = {
       boostPercentage: 300,
       isAvailable: false,
       prices: [
-        { type: MarketPriceType.LTC, amount: 1500 },
+        { type: MarketPriceType.LC, amount: 1_500_000 },
         { type: MarketPriceType.TELEGRAM_STARS, amount: 375 },
       ],
     },
@@ -310,7 +310,7 @@ export const marketMock: MarketData = {
       boostPercentage: 400,
       isAvailable: false,
       prices: [
-        { type: MarketPriceType.LTC, amount: 2000 },
+        { type: MarketPriceType.LC, amount: 2_000_000 },
         { type: MarketPriceType.TELEGRAM_STARS, amount: 500 },
       ],
     },
@@ -325,7 +325,7 @@ export const marketMock: MarketData = {
       quality: TicketsEnum.BRONZE,
       count: 1,
       prices: [
-        { type: MarketPriceType.LTC, amount: 30 },
+        { type: MarketPriceType.LC, amount: 30_000 },
         { type: MarketPriceType.TELEGRAM_STARS, amount: 5 },
       ],
     },
@@ -337,7 +337,7 @@ export const marketMock: MarketData = {
       quality: TicketsEnum.BRONZE,
       count: 1,
       prices: [
-        { type: MarketPriceType.LTC, amount: 30 },
+        { type: MarketPriceType.LC, amount: 30_000 },
         { type: MarketPriceType.TELEGRAM_STARS, amount: 5 },
       ],
     },
@@ -349,7 +349,7 @@ export const marketMock: MarketData = {
       quality: TicketsEnum.SILVER,
       count: 1,
       prices: [
-        { type: MarketPriceType.LTC, amount: 70 },
+        { type: MarketPriceType.LC, amount: 70_000 },
         { type: MarketPriceType.TELEGRAM_STARS, amount: 12 },
       ],
     },
@@ -361,7 +361,7 @@ export const marketMock: MarketData = {
       quality: TicketsEnum.SILVER,
       count: 1,
       prices: [
-        { type: MarketPriceType.LTC, amount: 70 },
+        { type: MarketPriceType.LC, amount: 70_000 },
         { type: MarketPriceType.TELEGRAM_STARS, amount: 12 },
       ],
     },
@@ -374,7 +374,7 @@ export const marketMock: MarketData = {
       count: 1,
       isNew: true,
       prices: [
-        { type: MarketPriceType.LTC, amount: 150 },
+        { type: MarketPriceType.LC, amount: 150_000 },
         { type: MarketPriceType.TELEGRAM_STARS, amount: 25 },
       ],
     },
@@ -386,7 +386,7 @@ export const marketMock: MarketData = {
       quality: TicketsEnum.GOLD,
       count: 1,
       prices: [
-        { type: MarketPriceType.LTC, amount: 150 },
+        { type: MarketPriceType.LC, amount: 150_000 },
         { type: MarketPriceType.TELEGRAM_STARS, amount: 25 },
       ],
     },
@@ -398,7 +398,7 @@ export const marketMock: MarketData = {
       quality: TicketsEnum.PLATINUM,
       count: 1,
       prices: [
-        { type: MarketPriceType.LTC, amount: 320 },
+        { type: MarketPriceType.LC, amount: 320_000 },
         { type: MarketPriceType.TELEGRAM_STARS, amount: 55 },
       ],
     },
@@ -410,7 +410,7 @@ export const marketMock: MarketData = {
       quality: TicketsEnum.PLATINUM,
       count: 1,
       prices: [
-        { type: MarketPriceType.LTC, amount: 320 },
+        { type: MarketPriceType.LC, amount: 320_000 },
         { type: MarketPriceType.TELEGRAM_STARS, amount: 55 },
       ],
     },
@@ -424,7 +424,7 @@ export const marketMock: MarketData = {
       isNew: true,
       featured: true,
       prices: [
-        { type: MarketPriceType.LTC, amount: 650 },
+        { type: MarketPriceType.LC, amount: 650_000 },
         { type: MarketPriceType.TELEGRAM_STARS, amount: 110 },
       ],
     },
@@ -437,7 +437,7 @@ export const marketMock: MarketData = {
       count: 1,
       featured: true,
       prices: [
-        { type: MarketPriceType.LTC, amount: 650 },
+        { type: MarketPriceType.LC, amount: 650_000 },
         { type: MarketPriceType.TELEGRAM_STARS, amount: 110 },
       ],
     },
@@ -454,7 +454,7 @@ export const marketMock: MarketData = {
       durationHours: 4,
       count: 1,
       prices: [
-        { type: MarketPriceType.LTC, amount: 120 },
+        { type: MarketPriceType.LC, amount: 120_000 },
         { type: MarketPriceType.TELEGRAM_STARS, amount: 30 },
       ],
     },
@@ -468,7 +468,7 @@ export const marketMock: MarketData = {
       durationHours: 4,
       count: 1,
       prices: [
-        { type: MarketPriceType.LTC, amount: 120 },
+        { type: MarketPriceType.LC, amount: 120_000 },
         { type: MarketPriceType.TELEGRAM_STARS, amount: 30 },
       ],
     },
@@ -482,7 +482,7 @@ export const marketMock: MarketData = {
       durationHours: 4,
       count: 1,
       prices: [
-        { type: MarketPriceType.LTC, amount: 240 },
+        { type: MarketPriceType.LC, amount: 240_000 },
         { type: MarketPriceType.TELEGRAM_STARS, amount: 60 },
       ],
     },
@@ -496,7 +496,7 @@ export const marketMock: MarketData = {
       durationHours: 4,
       count: 1,
       prices: [
-        { type: MarketPriceType.LTC, amount: 240 },
+        { type: MarketPriceType.LC, amount: 240_000 },
         { type: MarketPriceType.TELEGRAM_STARS, amount: 60 },
       ],
     },
@@ -510,7 +510,7 @@ export const marketMock: MarketData = {
       durationHours: 4,
       count: 1,
       prices: [
-        { type: MarketPriceType.LTC, amount: 480 },
+        { type: MarketPriceType.LC, amount: 480_000 },
         { type: MarketPriceType.TELEGRAM_STARS, amount: 120 },
       ],
     },
@@ -524,7 +524,7 @@ export const marketMock: MarketData = {
       durationHours: 4,
       count: 1,
       prices: [
-        { type: MarketPriceType.LTC, amount: 480 },
+        { type: MarketPriceType.LC, amount: 480_000 },
         { type: MarketPriceType.TELEGRAM_STARS, amount: 120 },
       ],
     },
@@ -538,7 +538,7 @@ export const marketMock: MarketData = {
       durationHours: 4,
       count: 1,
       prices: [
-        { type: MarketPriceType.LTC, amount: 960 },
+        { type: MarketPriceType.LC, amount: 960_000 },
         { type: MarketPriceType.TELEGRAM_STARS, amount: 240 },
       ],
     },
@@ -552,7 +552,7 @@ export const marketMock: MarketData = {
       durationHours: 4,
       count: 1,
       prices: [
-        { type: MarketPriceType.LTC, amount: 960 },
+        { type: MarketPriceType.LC, amount: 960_000 },
         { type: MarketPriceType.TELEGRAM_STARS, amount: 240 },
       ],
     },
@@ -567,7 +567,7 @@ export const marketMock: MarketData = {
       count: 1,
       isNew: true,
       prices: [
-        { type: MarketPriceType.LTC, amount: 2000 },
+        { type: MarketPriceType.LC, amount: 2_000_000 },
         { type: MarketPriceType.TELEGRAM_STARS, amount: 500 },
       ],
     },
@@ -582,7 +582,7 @@ export const marketMock: MarketData = {
       count: 1,
       isNew: true,
       prices: [
-        { type: MarketPriceType.LTC, amount: 2000 },
+        { type: MarketPriceType.LC, amount: 2_000_000 },
         { type: MarketPriceType.TELEGRAM_STARS, amount: 500 },
       ],
     },
@@ -601,7 +601,7 @@ export const marketMock: MarketData = {
       avatarLevel: 3,
       avatarBoost: { type: 'engineSpeed', pct: 3 },
       prices: [
-        { type: MarketPriceType.LTC, amount: 300 },
+        { type: MarketPriceType.LC, amount: 300_000 },
         { type: MarketPriceType.TELEGRAM_STARS, amount: 75 },
       ],
     },
@@ -617,7 +617,7 @@ export const marketMock: MarketData = {
       avatarLevel: 4,
       avatarBoost: { type: 'marketDiscount', pct: 5 },
       prices: [
-        { type: MarketPriceType.LTC, amount: 450 },
+        { type: MarketPriceType.LC, amount: 450_000 },
         { type: MarketPriceType.TELEGRAM_STARS, amount: 110 },
       ],
     },
@@ -633,7 +633,7 @@ export const marketMock: MarketData = {
       avatarLevel: 5,
       avatarBoost: { type: 'apEarn', pct: 7 },
       prices: [
-        { type: MarketPriceType.LTC, amount: 700 },
+        { type: MarketPriceType.LC, amount: 700_000 },
         { type: MarketPriceType.TELEGRAM_STARS, amount: 175 },
       ],
     },
@@ -648,9 +648,9 @@ export const marketMock: MarketData = {
       imageUrl: images.avatar4.src,
       avatarLevel: 6,
       avatarBoost: { type: 'tournamentReward', pct: 10 },
-      avatarDailyReward: { kind: 'ltc', amount: 50 },
+      avatarDailyReward: { kind: 'lc', amount: 50_000 },
       prices: [
-        { type: MarketPriceType.LTC, amount: 1000 },
+        { type: MarketPriceType.LC, amount: 1_000_000 },
         { type: MarketPriceType.TELEGRAM_STARS, amount: 250 },
       ],
     },
@@ -665,9 +665,9 @@ export const marketMock: MarketData = {
       imageUrl: images.avatar5.src,
       avatarLevel: 7,
       avatarBoost: { type: 'claimMultiplier', pct: 12 },
-      avatarDailyReward: { kind: 'ltc', amount: 120 },
+      avatarDailyReward: { kind: 'lc', amount: 120_000 },
       prices: [
-        { type: MarketPriceType.LTC, amount: 1500 },
+        { type: MarketPriceType.LC, amount: 1_500_000 },
         { type: MarketPriceType.TELEGRAM_STARS, amount: 375 },
       ],
     },
@@ -685,7 +685,7 @@ export const marketMock: MarketData = {
       avatarDailyReward: { kind: 'stars', amount: 5 },
       featured: true,
       prices: [
-        { type: MarketPriceType.LTC, amount: 2200 },
+        { type: MarketPriceType.LC, amount: 2_200_000 },
         { type: MarketPriceType.TELEGRAM_STARS, amount: 550 },
       ],
     },
@@ -703,7 +703,7 @@ export const marketMock: MarketData = {
       avatarDailyReward: { kind: 'stars', amount: 12 },
       featured: true,
       prices: [
-        { type: MarketPriceType.LTC, amount: 3500 },
+        { type: MarketPriceType.LC, amount: 3_500_000 },
         { type: MarketPriceType.TELEGRAM_STARS, amount: 875 },
       ],
     },
@@ -721,7 +721,7 @@ export const marketMock: MarketData = {
       avatarDailyReward: { kind: 'ticket', amount: 1, tier: 'gold' },
       isNew: true,
       prices: [
-        { type: MarketPriceType.LTC, amount: 6000 },
+        { type: MarketPriceType.LC, amount: 6_000_000 },
         { type: MarketPriceType.TELEGRAM_STARS, amount: 1500 },
       ],
     },
@@ -735,7 +735,7 @@ export const marketMock: MarketData = {
       statusType: MarketStatusType.LUCKY_PLAYER,
       durationDays: 30,
       prices: [
-        { type: MarketPriceType.LTC, amount: 1000 },
+        { type: MarketPriceType.LC, amount: 1_000_000 },
         { type: MarketPriceType.TELEGRAM_STARS, amount: 250 },
       ],
       privileges: [
@@ -750,11 +750,11 @@ export const marketMock: MarketData = {
       name: 'VIP Status',
       statusType: MarketStatusType.VIP,
       prices: [
-        { type: MarketPriceType.LTC, amount: 5000 },
+        { type: MarketPriceType.LC, amount: 5_000_000 },
         { type: MarketPriceType.TELEGRAM_STARS, amount: 1250 },
       ],
       upgradePrices: [
-        { type: MarketPriceType.LTC, amount: 2500 },
+        { type: MarketPriceType.LC, amount: 2_500_000 },
         { type: MarketPriceType.TELEGRAM_STARS, amount: 625 },
       ],
       privileges: [

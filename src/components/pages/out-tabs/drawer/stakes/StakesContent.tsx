@@ -6,6 +6,7 @@ import { useGetMeQuery } from '@/api/me.api';
 import { useAppTranslations } from '@/hooks/useAppTranslations';
 import { Skeleton } from '@/components/shared/seleketons/Skeleton';
 import { SkeletonSuspense } from '@/components/shared/seleketons/SkeletonSuspense';
+import { ArrivalShine } from '@/components/shared/ArrivalShine';
 import { StakesActiveStakeCard } from '@/components/pages/out-tabs/drawer/stakes/StakesActiveStakeCard';
 import { StakesEmptyActiveCard } from '@/components/pages/out-tabs/drawer/stakes/StakesEmptyActiveCard';
 import { StakesHistoryRow } from '@/components/pages/out-tabs/drawer/stakes/StakesHistoryRow';
@@ -53,14 +54,16 @@ export function StakesContent() {
 
       <div>
         <StakesSectionLabel>
-          <span className="flex items-center gap-2">
-            {t('your active stakes')}
-            {activeStakes.length > 0 && (
-              <span className="text-pink-secondary text-[10px] font-bold uppercase tracking-wider">
-                {activeStakes.length}
-              </span>
-            )}
-          </span>
+          <ArrivalShine id="stake" variant="title">
+            <span className="flex items-center gap-2">
+              {t('your active stakes')}
+              {activeStakes.length > 0 && (
+                <span className="text-pink-secondary text-[10px] font-bold uppercase tracking-wider">
+                  {activeStakes.length}
+                </span>
+              )}
+            </span>
+          </ArrivalShine>
         </StakesSectionLabel>
 
         <SkeletonSuspense

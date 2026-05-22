@@ -11,11 +11,25 @@ import { WalletProvider } from '@/types/enums/wallet.enums';
  */
 
 const stakeLevels: StakeLevelDefinition[] = [
-  { level: 1, minDeposit: 100, tier: 'bronze', starsChance: 5, starsMin: 5, starsMax: 15 },
-  { level: 2, minDeposit: 500, tier: 'silver', starsChance: 10, starsMin: 15, starsMax: 40 },
-  { level: 3, minDeposit: 1000, tier: 'gold', starsChance: 20, starsMin: 40, starsMax: 100 },
-  { level: 4, minDeposit: 2500, tier: 'platinum', starsChance: 30, starsMin: 70, starsMax: 250 },
-  { level: 5, minDeposit: 5000, tier: 'diamond', starsChance: 40, starsMin: 100, starsMax: 500 },
+  { level: 1, minDeposit: 100_000, tier: 'bronze', starsChance: 5, starsMin: 5, starsMax: 15 },
+  { level: 2, minDeposit: 500_000, tier: 'silver', starsChance: 10, starsMin: 15, starsMax: 40 },
+  { level: 3, minDeposit: 1_000_000, tier: 'gold', starsChance: 20, starsMin: 40, starsMax: 100 },
+  {
+    level: 4,
+    minDeposit: 2_500_000,
+    tier: 'platinum',
+    starsChance: 30,
+    starsMin: 70,
+    starsMax: 250,
+  },
+  {
+    level: 5,
+    minDeposit: 5_000_000,
+    tier: 'diamond',
+    starsChance: 40,
+    starsMin: 100,
+    starsMax: 500,
+  },
 ];
 
 const supportedWallets: SupportedWallet[] = [
@@ -49,7 +63,7 @@ export const appConfig = {
     aprMinPercent: 1,
     aprMaxPercent: 5,
     /** Divisor in the stake AP formula: `deposit × months ÷ apDivisor` (DOCS §5.3 / §18.3). */
-    apDivisor: 10_000,
+    apDivisor: 10_000_000,
     /** Bonus added to the stake AP base when it completes (forfeited on cancel). */
     apCompletionBonusPercent: 50,
     /** Stake tier definitions — deposit thresholds + bonus-draw values. */

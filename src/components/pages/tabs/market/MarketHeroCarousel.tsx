@@ -266,7 +266,7 @@ function MarketHeroCard({ featured, onClick, onBuy }: MarketHeroCardProps) {
               <span className="text-[9px] text-white/55 line-through">{price.originalAmount}</span>
             )}
             <span>{price.amount}</span>
-            {price.type === MarketPriceType.LTC && <LcLabel size={11} />}
+            {price.type === MarketPriceType.LC && <LcLabel size={11} />}
           </button>
         )}
       </div>

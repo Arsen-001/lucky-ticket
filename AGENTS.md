@@ -359,7 +359,7 @@ items.map((item, index) => <Item loading={isLoading} {...item} />);
 
 ## Constants
 
-Magic values (coin name `'LTC'`, `minPasswordLength`, `referralPercentage`) live in `src/constants/global.constants.ts`. Never hardcode them inline.
+Magic values (coin name `'LC'`, `minPasswordLength`, `referralPercentage`) live in `src/constants/global.constants.ts`. Never hardcode them inline.
 
 ---
 

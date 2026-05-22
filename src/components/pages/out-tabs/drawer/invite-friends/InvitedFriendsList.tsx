@@ -2,6 +2,7 @@
 
 import { useMemo, useState } from 'react';
 import { useClaimFriendMutation, useGetInvitedFriendsQuery } from '@/api/referral.api';
+import { ArrivalShine } from '@/components/shared/ArrivalShine';
 import { EmptyDataInfo } from '@/components/shared/EmptyDataInfo';
 import { FriendClaimModal } from '@/components/pages/out-tabs/drawer/invite-friends/FriendClaimModal';
 import { FriendsClaimAllModal } from '@/components/pages/out-tabs/drawer/invite-friends/FriendsClaimAllModal';
@@ -131,9 +132,11 @@ export const InvitedFriendsList = () => {
       />
 
       <div className="flex items-center justify-between px-1">
-        <h3 className="text-base font-bold">
-          {t('invited friends count', { count: friends.length })}
-        </h3>
+        <ArrivalShine id="sendTicket" variant="title">
+          <h3 className="text-base font-bold">
+            {t('invited friends count', { count: friends.length })}
+          </h3>
+        </ArrivalShine>
       </div>
 
       {friends.length > 0 && (

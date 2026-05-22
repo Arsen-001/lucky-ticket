@@ -14,7 +14,7 @@ export interface AvatarBoost {
   pct: number;
 }
 
-export type AvatarDailyRewardKind = 'ltc' | 'stars' | 'ticket';
+export type AvatarDailyRewardKind = 'lc' | 'stars' | 'ticket';
 
 export interface AvatarDailyReward {
   kind: AvatarDailyRewardKind;

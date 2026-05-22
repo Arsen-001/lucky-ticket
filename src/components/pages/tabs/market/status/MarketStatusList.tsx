@@ -152,7 +152,7 @@ export function MarketStatusList() {
         onConfirm={handleBuy}
         loading={isBuying}
         title={selectedStatus?.status.name}
-        price={selectedStatus?.price || { amount: 0, type: MarketPriceType.LTC }}
+        price={selectedStatus?.price || { amount: 0, type: MarketPriceType.LC }}
         icon={<StatusIcon type={selectedStatus?.status.statusType} />}
         description={
           <div className="flex flex-col gap-1 text-left">

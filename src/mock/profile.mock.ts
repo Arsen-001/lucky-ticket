@@ -67,7 +67,7 @@ export const ownProfile: ProfileResponse = {
     likesReceived: 234,
   },
   privateStats: {
-    lc: 537,
+    lc: 537_000,
     ls: 12,
     ton: 0.42,
     ticketsByTier: {

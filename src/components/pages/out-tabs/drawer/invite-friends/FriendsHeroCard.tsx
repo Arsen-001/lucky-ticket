@@ -10,6 +10,7 @@ import { useGetReferralStatsQuery } from '@/api/referral.api';
 import { Button } from '@/components/shared/buttons/Button';
 import { Skeleton } from '@/components/shared/seleketons/Skeleton';
 import { SkeletonSuspense } from '@/components/shared/seleketons/SkeletonSuspense';
+import { ArrivalShine } from '@/components/shared/ArrivalShine';
 import { TelegramStarIcon } from '@/components/shared/icons/TelegramStarIcon';
 import { GlobalConstants } from '@/constants/global.constants';
 import { useAppTranslations } from '@/hooks/useAppTranslations';
@@ -63,7 +64,11 @@ export function FriendsHeroCard() {
           <UserPlus size={20} className="text-electric-pink" strokeWidth={2.2} />
         </div>
         <div className="flex min-w-0 flex-1 flex-col">
-          <h2 className="text-sm font-extrabold leading-tight text-white">{t('invite friends')}</h2>
+          <ArrivalShine id="invite" variant="title">
+            <h2 className="text-sm font-extrabold leading-tight text-white">
+              {t('invite friends')}
+            </h2>
+          </ArrivalShine>
           <p className="text-pink-secondary truncate text-[11px]">{t('invite hero subtitle')}</p>
         </div>
         <HeroInlineStat

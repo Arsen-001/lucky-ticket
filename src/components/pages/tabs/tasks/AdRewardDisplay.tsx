@@ -14,7 +14,7 @@ interface RewardStyle {
 }
 
 const STYLE_MAP: Record<TaskRewardType, RewardStyle> = {
-  [TaskRewardType.LTC]: {
+  [TaskRewardType.LC]: {
     Icon: Coins,
     iconClass: 'text-gold',
     bgClass: 'bg-gradient-to-br from-gold/30 via-gold/10 to-transparent',

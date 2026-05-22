@@ -12,7 +12,7 @@ export interface TaskRewardBadgeProps {
 }
 
 const ICON_MAP: Record<Exclude<TaskRewardType, TaskRewardType.ACTIVITY_POINTS>, LucideIcon> = {
-  [TaskRewardType.LTC]: Coins,
+  [TaskRewardType.LC]: Coins,
   [TaskRewardType.TICKETS]: Ticket,
   [TaskRewardType.STARS]: Star,
   [TaskRewardType.PREMIUM]: Sparkles,
@@ -20,7 +20,7 @@ const ICON_MAP: Record<Exclude<TaskRewardType, TaskRewardType.ACTIVITY_POINTS>, 
 };
 
 const COLOR_MAP: Record<TaskRewardType, string> = {
-  [TaskRewardType.LTC]: 'text-gold',
+  [TaskRewardType.LC]: 'text-gold',
   [TaskRewardType.TICKETS]: 'text-electric-pink',
   [TaskRewardType.ACTIVITY_POINTS]: 'text-teal',
   [TaskRewardType.STARS]: 'text-warning',

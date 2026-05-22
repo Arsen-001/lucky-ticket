@@ -49,10 +49,10 @@ export const GlobalConstants = {
   decayGraceDays: 7,
   apTierThresholds: {
     bronze: 0,
-    silver: 1400,
-    gold: 5500,
-    platinum: 14000,
-    diamond: 22000,
+    silver: 2000,
+    gold: 10000,
+    platinum: 30000,
+    diamond: 54000,
   },
   /**
    * Canonical AP-source rates — mirrors DOCS §5.3 "How Activity Points Are
@@ -72,6 +72,8 @@ export const GlobalConstants = {
     claimDailyLimit: 5,
     /** LS spent per 1 AP from purchases — no daily cap. */
     purchaseLsPerAp: 10,
+    /** LC spent per 1 AP from spending — no daily cap. */
+    spendLcPerAp: 25_000,
     dailyTaskByTier: { bronze: 1, silver: 2, gold: 3, platinum: 4, diamond: 5 },
     weeklyTaskByTier: { bronze: 2, silver: 3, gold: 4, platinum: 5, diamond: 6 },
     claimByTier: { bronze: 1, silver: 2, gold: 3, platinum: 4, diamond: 5 },
