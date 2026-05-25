@@ -84,6 +84,20 @@ export const appConfig = {
     /** Stake tier definitions — deposit thresholds + bonus-draw values. */
     levels: stakeLevels,
   },
+  engines: {
+    /**
+     * Base cycle time (seconds) for a freshly-purchased engine at engineLevel=1
+     * with no chips/boosters and capacityLevel=0 — i.e. the time to mint 1
+     * ticket of that tier. Geometric: each tier doubles the previous one.
+     */
+    baseCycleSecondsByTier: {
+      bronze: 7_200, // 2h
+      silver: 14_400, // 4h
+      gold: 28_800, // 8h
+      platinum: 57_600, // 16h
+      diamond: 115_200, // 32h
+    },
+  },
   wallet: {
     /** TON → USD conversion rate shown in the wallet. */
     tonUsdRate: 3.42,

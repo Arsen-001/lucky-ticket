@@ -17,6 +17,7 @@ import {
   Layers,
   Package,
   Settings,
+  User,
   UserRoundPlus,
   Wallet,
 } from 'lucide-react';
@@ -192,6 +193,7 @@ export function Drawer() {
   );
 
   const items: DrawerSectionItem[] = [
+    { route: routes.profile.index, title: t('profile'), icon: <User size={18} /> },
     { route: routes.wallet, title: t('wallet'), icon: <Wallet size={18} /> },
     {
       route: routes.inventory,

@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState, type CSSProperties } from 'react';
+import { useEffect, useRef, useState, type CSSProperties } from 'react';
 import { twMerge } from 'tailwind-merge';
 import { Clock, Layers, Package, Zap } from 'lucide-react';
 import { useGetInventoryQuery } from '@/api/inventory.api';
@@ -10,15 +10,14 @@ import { useAppTranslations } from '@/hooks/useAppTranslations';
 import { GlobalConstants } from '@/constants/global.constants';
 import { ReactorDial } from '@/components/pages/out-tabs/tabs-extra/ticket/ReactorDial';
 import { EngineLevelBadge } from '@/components/pages/out-tabs/tabs-extra/ticket/EngineLevelBadge';
-import { EngineNextInFill } from '@/components/pages/out-tabs/tabs-extra/ticket/EngineNextInFill';
 import { BoostRow } from '@/components/pages/out-tabs/tabs-extra/ticket/BoostRow';
 import { TicketOverlap } from '@/components/shared/icons/TicketOverlap';
+import { ClientPortal } from '@/components/shared/ClientPortal';
 import {
   effectiveCycleSeconds,
   engineCapacity,
   formatCycleTime,
   MAX_BOOST_LEVEL,
-  speedMultiplier,
 } from '@/utils/global/ticket-engine.utils';
 import { findActiveBooster, findEquippedChip } from '@/utils/global/inventory.utils';
 import type { TicketEngine } from '@/types/interfaces/ticket.interfaces';
@@ -79,7 +78,12 @@ export function EngineCard({
   const capacityChip = findEquippedChip(inventory?.chips, engine.id, 'capacity');
   const capacityBooster = findActiveBooster(inventory?.boosters, engine.id, 'capacity');
 
-  const cycle = effectiveCycleSeconds(engine, { speedChip, speedBooster });
+  const cycle = effectiveCycleSeconds(engine, {
+    speedChip,
+    speedBooster,
+    capacityChip,
+    capacityBooster,
+  });
   const capacity = engineCapacity(engine, { capacityChip, capacityBooster });
   const pending = engine.pendingCount > 0;
   const remaining = Math.max(0, cycle - elapsedSeconds);
@@ -88,32 +92,77 @@ export function EngineCard({
   const capacityLevel = engine.capacityLevel ?? 0;
   const engineLevel = engine.engineLevel ?? 1;
 
-  const speedReductionPct = Math.round((1 - speedMultiplier(speedLevel)) * 100);
   const speedCost = 5 + speedLevel * 3;
   const capacityCost = 8 + capacityLevel * 4;
   const instantClaimCost = Math.max(1, Math.ceil(remaining / 3600));
 
   const glow = TIER_GLOW[tier];
 
-  // After a claim, the info layer flashes the claim result for 2s, then reverts.
-  const [claimInfo, setClaimInfo] = useState<{ tickets: number; ap: number } | null>(null);
+  type FlightItem = {
+    top: number;
+    left: number;
+    width: number;
+    height: number;
+    dx: number;
+    dy: number;
+  };
+  const [flightData, setFlightData] = useState<{
+    tickets: FlightItem;
+    ap: FlightItem;
+  } | null>(null);
+  const ticketsGroupRef = useRef<HTMLDivElement>(null);
+  const apGroupRef = useRef<HTMLDivElement>(null);
+  const flyTimerRef = useRef<number | null>(null);
 
   useEffect(() => {
-    if (!claimInfo) return;
-    const id = window.setTimeout(() => setClaimInfo(null), 2000);
-    return () => window.clearTimeout(id);
-  }, [claimInfo]);
+    return () => {
+      if (flyTimerRef.current !== null) window.clearTimeout(flyTimerRef.current);
+    };
+  }, []);
+
+  const pendingApReward = GlobalConstants.apRewards.claimByTier[tier];
 
   const handleClaim = () => {
-    setClaimInfo({
-      tickets: engine.pendingCount,
-      ap: GlobalConstants.apRewards.claimByTier[tier],
-    });
-    onClaim(engine.id);
-  };
+    if (!pending || flightData) return;
+    const ticketsEl = ticketsGroupRef.current;
+    const apEl = apGroupRef.current;
+    if (!ticketsEl || !apEl) {
+      onClaim(engine.id);
+      return;
+    }
 
-  const ticketsCount = useCountUp(claimInfo?.tickets ?? 0, !!claimInfo);
-  const apCount = useCountUp(claimInfo?.ap ?? 0, !!claimInfo);
+    const computeFlight = (
+      el: HTMLElement,
+      targetSelector: string,
+      fallbackY: number
+    ): FlightItem => {
+      const rect = el.getBoundingClientRect();
+      const target = document.querySelector(targetSelector);
+      const targetRect = target?.getBoundingClientRect();
+      const fromX = rect.left + rect.width / 2;
+      const fromY = rect.top + rect.height / 2;
+      const toX = targetRect ? targetRect.left + targetRect.width / 2 : fromX;
+      const toY = targetRect ? targetRect.top + targetRect.height / 2 : fallbackY;
+      return {
+        top: rect.top,
+        left: rect.left,
+        width: rect.width,
+        height: rect.height,
+        dx: toX - fromX,
+        dy: toY - fromY,
+      };
+    };
+
+    setFlightData({
+      tickets: computeFlight(ticketsEl, '[data-flight-target="tickets"]', window.innerHeight - 40),
+      ap: computeFlight(apEl, '[data-flight-target="ap"]', 40),
+    });
+
+    flyTimerRef.current = window.setTimeout(() => {
+      setFlightData(null);
+      onClaim(engine.id);
+    }, 1400);
+  };
 
   return (
     <div
@@ -139,98 +188,68 @@ export function EngineCard({
             compact ? 'items-center gap-1' : 'gap-1.5'
           )}
         >
-          {claimInfo ? (
-            <div
-              className="border-success/60 bg-success/20 animate-fade-in flex flex-1 flex-col items-center justify-center gap-1 rounded-xl border px-2 py-1.5"
-              style={{
-                boxShadow:
-                  '0 0 22px rgba(74, 222, 128, 0.55), inset 0 0 14px rgba(74, 222, 128, 0.22)',
-              }}
+          <div
+            className={twMerge(
+              compact ? 'flex flex-col items-center gap-1' : 'flex items-center flex-wrap gap-1.5'
+            )}
+          >
+            <EngineLevelBadge level={engineLevel} tier={tier} />
+            <span
+              className={twMerge(
+                'font-extrabold text-white leading-tight',
+                compact ? 'text-[13px]' : 'text-sm ml-0'
+              )}
             >
-              <span className="text-success animate-slide-in-bottom text-[8px] font-extrabold uppercase tracking-[1.5px]">
-                {t('claimed')}
-              </span>
+              {t('engine number', { number: index + 1 })}
+            </span>
+          </div>
+          <div
+            className={twMerge(
+              'rounded-xl border border-white/8 bg-black/30',
+              compact
+                ? 'flex w-fit flex-col divide-y divide-white/8 p-[5px]'
+                : 'grid grid-cols-2 divide-x divide-white/8 py-1.5'
+            )}
+          >
+            <button
+              type="button"
+              title={t('cycle full', { time: formatCycleTime(cycle) })}
+              className={twMerge(
+                'flex cursor-help items-center gap-1.5',
+                compact ? 'justify-center px-2 py-0.5' : 'justify-center px-2'
+              )}
+            >
+              <Clock size={compact ? 12 : 14} stroke={SPEED_ACCENT} strokeWidth={2.4} />
               <span
-                className="text-success animate-slide-in-bottom flex items-center gap-1 text-sm font-extrabold tabular-nums"
-                style={{ animationDelay: '70ms' }}
+                className={twMerge(
+                  'font-extrabold tabular-nums',
+                  compact ? 'text-[12px]' : 'text-[13px]'
+                )}
+                style={{ color: SPEED_ACCENT }}
               >
-                <TicketOverlap type={tier} width={22} height={16} />+{ticketsCount}
+                {formatCycleTime(cycle)}
               </span>
+            </button>
+            <button
+              type="button"
+              title={t('per cycle full', { capacity })}
+              className={twMerge(
+                'flex cursor-help items-center gap-1.5',
+                compact ? 'justify-center px-2 py-0.5' : 'justify-center px-2'
+              )}
+            >
+              <Layers size={compact ? 12 : 14} stroke={CAPACITY_ACCENT} strokeWidth={2.4} />
               <span
-                className="text-teal animate-slide-in-bottom flex items-center gap-1 text-sm font-extrabold tabular-nums"
-                style={{ animationDelay: '140ms' }}
+                className={twMerge(
+                  'font-extrabold tabular-nums',
+                  compact ? 'text-[12px]' : 'text-[13px]'
+                )}
+                style={{ color: CAPACITY_ACCENT }}
               >
-                <BoltIcon size={14} />+{apCount} AP
+                ×{compactNumber(capacity)}
               </span>
-            </div>
-          ) : (
-            <>
-              <div
-                className={twMerge(
-                  compact
-                    ? 'flex flex-col items-center gap-1'
-                    : 'flex items-center flex-wrap gap-1.5'
-                )}
-              >
-                <EngineLevelBadge level={engineLevel} tier={tier} />
-                <span
-                  className={twMerge(
-                    'font-extrabold text-white leading-tight',
-                    compact ? 'text-[13px]' : 'text-sm ml-0'
-                  )}
-                >
-                  {t('engine number', { number: index + 1 })}
-                </span>
-              </div>
-              <div
-                className={twMerge(
-                  'rounded-xl border border-white/8 bg-black/30',
-                  compact
-                    ? 'flex w-fit flex-col divide-y divide-white/8 p-[5px]'
-                    : 'grid grid-cols-2 divide-x divide-white/8 py-1.5'
-                )}
-              >
-                <button
-                  type="button"
-                  title={t('cycle full', { time: formatCycleTime(cycle) })}
-                  className={twMerge(
-                    'flex cursor-help items-center gap-1.5',
-                    compact ? 'justify-center px-2 py-0.5' : 'justify-center px-2'
-                  )}
-                >
-                  <Clock size={compact ? 12 : 14} stroke={SPEED_ACCENT} strokeWidth={2.4} />
-                  <span
-                    className={twMerge(
-                      'font-extrabold tabular-nums',
-                      compact ? 'text-[12px]' : 'text-[13px]'
-                    )}
-                    style={{ color: SPEED_ACCENT }}
-                  >
-                    {formatCycleTime(cycle)}
-                  </span>
-                </button>
-                <button
-                  type="button"
-                  title={t('per cycle full', { capacity })}
-                  className={twMerge(
-                    'flex cursor-help items-center gap-1.5',
-                    compact ? 'justify-center px-2 py-0.5' : 'justify-center px-2'
-                  )}
-                >
-                  <Layers size={compact ? 12 : 14} stroke={CAPACITY_ACCENT} strokeWidth={2.4} />
-                  <span
-                    className={twMerge(
-                      'font-extrabold tabular-nums',
-                      compact ? 'text-[12px]' : 'text-[13px]'
-                    )}
-                    style={{ color: CAPACITY_ACCENT }}
-                  >
-                    ×{compactNumber(capacity)}
-                  </span>
-                </button>
-              </div>
-            </>
-          )}
+            </button>
+          </div>
         </div>
       </div>
 
@@ -242,21 +261,42 @@ export function EngineCard({
           )}
         >
           {pending ? (
-            <div className="relative flex-1 min-w-0 flex items-center justify-center gap-2 overflow-hidden rounded-md">
-              <TicketOverlap type={tier} width={32} height={24} className="shrink-0" />
-              <span
-                className={twMerge(
-                  'font-extrabold tabular-nums rounded-full',
-                  compact ? 'text-[10px] px-1.5 py-px' : 'text-[11px] px-2 py-0.5'
-                )}
-                style={{
-                  color: glow,
-                  background: `color-mix(in srgb, ${glow} 18%, transparent)`,
-                  border: `1px solid color-mix(in srgb, ${glow} 35%, transparent)`,
-                }}
-              >
-                ×{engine.pendingCount}
-              </span>
+            <div
+              className="relative flex-1 min-w-0 flex items-center justify-center gap-1.5 overflow-hidden rounded-md"
+              style={{ visibility: flightData ? 'hidden' : undefined }}
+            >
+              <div ref={ticketsGroupRef} className="flex items-center gap-1.5">
+                <TicketOverlap type={tier} width={32} height={24} className="shrink-0" />
+                <span
+                  className={twMerge(
+                    'font-extrabold tabular-nums rounded-full',
+                    compact ? 'text-[10px] px-1.5 py-px' : 'text-[11px] px-2 py-0.5'
+                  )}
+                  style={{
+                    color: glow,
+                    background: `color-mix(in srgb, ${glow} 18%, transparent)`,
+                    border: `1px solid color-mix(in srgb, ${glow} 35%, transparent)`,
+                  }}
+                >
+                  ×{engine.pendingCount}
+                </span>
+              </div>
+              <div ref={apGroupRef} className="flex items-center gap-1.5">
+                <BoltIcon size={24} className="shrink-0" />
+                <span
+                  className={twMerge(
+                    'font-extrabold tabular-nums rounded-full',
+                    compact ? 'text-[10px] px-1.5 py-px' : 'text-[11px] px-2 py-0.5'
+                  )}
+                  style={{
+                    color: 'var(--color-teal)',
+                    background: 'color-mix(in srgb, var(--color-teal) 18%, transparent)',
+                    border: '1px solid color-mix(in srgb, var(--color-teal) 35%, transparent)',
+                  }}
+                >
+                  +{pendingApReward}
+                </span>
+              </div>
             </div>
           ) : (
             <div className="flex-1 min-w-0 flex items-center gap-2">
@@ -273,28 +313,24 @@ export function EngineCard({
                     {engine.pendingCount}/{capacity}
                   </span>
                 </span>
-                <div
-                  className="relative h-1 w-full overflow-hidden rounded-full bg-white/10"
-                  style={
-                    {
-                      ['--next-in-accent' as string]: `var(--color-${tier})`,
-                    } as CSSProperties
-                  }
+                <span
+                  className={twMerge(
+                    'text-white inline-flex items-center gap-1 leading-none tabular-nums font-bold',
+                    compact ? 'text-[10px]' : 'text-[11px]'
+                  )}
                 >
-                  <EngineNextInFill
-                    key={engine.cycleStartedAt}
-                    cycleSeconds={cycle}
-                    elapsedSeconds={elapsedSeconds}
-                  />
-                </div>
+                  <Clock size={compact ? 9 : 10} strokeWidth={2.4} />
+                  {formatRemainingTime(remaining)}
+                </span>
               </div>
             </div>
           )}
           {pending ? (
             <button
               onClick={handleClaim}
+              disabled={!!flightData}
               className={twMerge(
-                'engine-claim-button engine-claim-flow relative z-10 cursor-pointer overflow-hidden text-white font-extrabold uppercase tracking-wider flex-center shrink-0 active:scale-99 transition-transform duration-100',
+                'engine-claim-button engine-claim-flow relative z-10 cursor-pointer overflow-hidden text-white font-extrabold uppercase tracking-wider flex-center shrink-0 active:scale-99 transition-transform duration-100 disabled:opacity-70',
                 compact
                   ? 'min-w-14 h-6.5 px-2 rounded-md text-[9px]'
                   : 'min-w-16 h-7.5 px-2.5 rounded-lg text-[10px]'
@@ -332,11 +368,7 @@ export function EngineCard({
         <div className={twMerge('flex flex-col', compact ? 'gap-1' : 'mt-1 gap-1.5')}>
           <BoostRow
             label={t('speed')}
-            valueText={
-              speedLevel > 0
-                ? t('minus {percent}% time', { percent: speedReductionPct })
-                : t('no boost')
-            }
+            valueText={`+${speedLevel}%`}
             level={speedLevel}
             max={MAX_BOOST_LEVEL}
             accent={SPEED_ACCENT}
@@ -355,7 +387,7 @@ export function EngineCard({
           />
           <BoostRow
             label={t('capacity')}
-            valueText={t('×{capacity} per cycle', { capacity })}
+            valueText={`+${capacityLevel}%`}
             level={capacityLevel}
             max={MAX_BOOST_LEVEL}
             accent={CAPACITY_ACCENT}
@@ -374,6 +406,69 @@ export function EngineCard({
           />
         </div>
       </div>
+
+      {flightData && (
+        <ClientPortal>
+          <div
+            aria-hidden
+            className="engine-claim-fly pointer-events-none fixed z-[200] flex items-center gap-1.5"
+            style={
+              {
+                top: flightData.tickets.top,
+                left: flightData.tickets.left,
+                width: flightData.tickets.width,
+                height: flightData.tickets.height,
+                '--fly-dx': `${flightData.tickets.dx}px`,
+                '--fly-dy': `${flightData.tickets.dy}px`,
+              } as CSSProperties
+            }
+          >
+            <TicketOverlap type={tier} width={32} height={24} className="shrink-0" />
+            <span
+              className={twMerge(
+                'font-extrabold tabular-nums rounded-full',
+                compact ? 'text-[10px] px-1.5 py-px' : 'text-[11px] px-2 py-0.5'
+              )}
+              style={{
+                color: glow,
+                background: `color-mix(in srgb, ${glow} 18%, transparent)`,
+                border: `1px solid color-mix(in srgb, ${glow} 35%, transparent)`,
+              }}
+            >
+              ×{engine.pendingCount}
+            </span>
+          </div>
+          <div
+            aria-hidden
+            className="engine-claim-fly pointer-events-none fixed z-[200] flex items-center gap-1.5"
+            style={
+              {
+                top: flightData.ap.top,
+                left: flightData.ap.left,
+                width: flightData.ap.width,
+                height: flightData.ap.height,
+                '--fly-dx': `${flightData.ap.dx}px`,
+                '--fly-dy': `${flightData.ap.dy}px`,
+              } as CSSProperties
+            }
+          >
+            <BoltIcon size={24} className="shrink-0" />
+            <span
+              className={twMerge(
+                'font-extrabold tabular-nums rounded-full',
+                compact ? 'text-[10px] px-1.5 py-px' : 'text-[11px] px-2 py-0.5'
+              )}
+              style={{
+                color: 'var(--color-teal)',
+                background: 'color-mix(in srgb, var(--color-teal) 18%, transparent)',
+                border: '1px solid color-mix(in srgb, var(--color-teal) 35%, transparent)',
+              }}
+            >
+              +{pendingApReward}
+            </span>
+          </div>
+        </ClientPortal>
+      )}
     </div>
   );
 }
@@ -388,24 +483,10 @@ function compactNumber(value: number): string {
   return compactFormatter.format(value);
 }
 
-/** Eases a number from 0 to `target` while `run` is true. */
-function useCountUp(target: number, run: boolean, durationMs = 550): number {
-  const [value, setValue] = useState(0);
-  useEffect(() => {
-    if (!run) {
-      setValue(0);
-      return;
-    }
-    let raf = 0;
-    let start: number | null = null;
-    const tick = (ts: number) => {
-      if (start === null) start = ts;
-      const ratio = Math.min(1, (ts - start) / durationMs);
-      setValue(Math.round(target * (1 - Math.pow(1 - ratio, 3))));
-      if (ratio < 1) raf = requestAnimationFrame(tick);
-    };
-    raf = requestAnimationFrame(tick);
-    return () => cancelAnimationFrame(raf);
-  }, [target, run, durationMs]);
-  return value;
+function formatRemainingTime(seconds: number): string {
+  const total = Math.max(0, Math.ceil(seconds));
+  const h = Math.floor(total / 3600);
+  const m = Math.floor((total % 3600) / 60);
+  const s = total % 60;
+  return `${String(h).padStart(2, '0')}:${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')}`;
 }

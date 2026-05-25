@@ -245,3 +245,8 @@
 .cube-hud--compact .cube-hud-scanline {
   margin-block: 2px;
 }
+
+.cube-hud--bare::before,
+.cube-hud--bare::after {
+  display: none;
+}

@@ -1,6 +1,7 @@
 import dayjs from 'dayjs';
+import { appConfig } from '@/config/app.config';
 import { getRandomUpcomingDate } from '@/utils/global/date.utils';
-import type { Ticket } from '@/types/types/ticket.types';
+import type { Ticket, TicketType } from '@/types/types/ticket.types';
 import type { TicketEngine } from '@/types/interfaces/ticket.interfaces';
 
 const getClaimDate = () => getRandomUpcomingDate(1, 180);
@@ -16,10 +17,14 @@ interface EnginePreset {
   starsCost: number;
 }
 
-const tierPresets: Record<'bronze' | 'silver' | 'gold', EnginePreset> = {
-  bronze: { cycleSeconds: 18, starsCost: 5 },
-  silver: { cycleSeconds: 28, starsCost: 10 },
-  gold: { cycleSeconds: 40, starsCost: 15 },
+const { baseCycleSecondsByTier } = appConfig.engines;
+
+const tierPresets: Record<TicketType, EnginePreset> = {
+  bronze: { cycleSeconds: baseCycleSecondsByTier.bronze, starsCost: 5 },
+  silver: { cycleSeconds: baseCycleSecondsByTier.silver, starsCost: 10 },
+  gold: { cycleSeconds: baseCycleSecondsByTier.gold, starsCost: 15 },
+  platinum: { cycleSeconds: baseCycleSecondsByTier.platinum, starsCost: 25 },
+  diamond: { cycleSeconds: baseCycleSecondsByTier.diamond, starsCost: 40 },
 };
 
 const buildEngines = (tier: 'bronze' | 'silver' | 'gold', count: number): TicketEngine[] => {

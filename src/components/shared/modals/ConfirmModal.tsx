@@ -32,13 +32,20 @@ export function ConfirmModal({
 
   return (
     <Modal open={open} onClose={onClose}>
-      <div className="bg-purple-gradient p-6 rounded-2xl flex flex-col gap-6">
-        <div className="flex flex-col gap-2 text-center">
+      <div
+        className="bg-background relative flex flex-col gap-6 overflow-hidden rounded-2xl border border-white/10 p-6 shadow-[0_24px_60px_rgba(0,0,0,0.55)]"
+        style={{
+          backgroundImage:
+            'radial-gradient(circle at 50% 0%, rgba(124, 58, 237, 0.22) 0%, transparent 60%),' +
+            'radial-gradient(circle at 100% 100%, rgba(222, 0, 155, 0.14) 0%, transparent 55%)',
+        }}
+      >
+        <div className="relative z-1 flex flex-col gap-2 text-center">
           {title && <h3 className="text-xl font-bold text-white">{title}</h3>}
           {content}
         </div>
 
-        <div className="flex-center gap-3">
+        <div className="flex-center relative z-1 gap-3">
           <Button
             variant="secondary"
             onClick={onClose}

@@ -72,6 +72,7 @@ export function TabBar({ className }: ClassNameProps) {
           name={name}
           onClick={() => handleTabClick(route)}
           active={activePath === route}
+          flightTarget={route === routes.tickets.index ? 'tickets' : undefined}
           className="relative z-1 animate-slide-in-bottom"
           style={{
             animationDelay: `${index * 100}ms`,

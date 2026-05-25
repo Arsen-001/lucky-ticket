@@ -1,5 +1,6 @@
 'use client';
 
+import { twMerge } from 'tailwind-merge';
 import { useAppTranslations } from '@/hooks/useAppTranslations';
 import {
   GlobalConstants,
@@ -7,8 +8,10 @@ import {
   computeActivityTier,
   computeNextTierThreshold,
 } from '@/constants/global.constants';
+import { Medal } from '@/components/shared/icons/Medal';
 import { Skeleton } from '@/components/shared/seleketons/Skeleton';
 import { SkeletonSuspense } from '@/components/shared/seleketons/SkeletonSuspense';
+import { formatCompact } from '@/utils/global/number.utils';
 
 export interface ActivityHeroCardProps {
   activityPoints?: number;
@@ -19,68 +22,144 @@ export function ActivityHeroCard({ activityPoints = 0, loading }: ActivityHeroCa
   const t = useAppTranslations();
   const tier = computeActivityTier(activityPoints);
   const accent = `var(--color-${tier})`;
-  const tierFloor = GlobalConstants.apTierThresholds[tier];
+  const tierIdx = activityTierOrder.indexOf(tier);
   const nextThreshold = computeNextTierThreshold(activityPoints);
-  const next =
-    nextThreshold !== null
-      ? {
-          threshold: nextThreshold,
-          tier: activityTierOrder[activityTierOrder.indexOf(tier) + 1],
-          progressPct: Math.min(
-            100,
-            Math.round(((activityPoints - tierFloor) / (nextThreshold - tierFloor)) * 100)
-          ),
-          remaining: nextThreshold - activityPoints,
-        }
-      : null;
+  const nextTier = nextThreshold !== null ? activityTierOrder[tierIdx + 1] : null;
+  const remainingToNext = nextThreshold !== null ? nextThreshold - activityPoints : 0;
+
+  // Each tier sits in the centre of one of 5 equal columns (space-around),
+  // so medal centres land at 10/30/50/70/90 %. The bar fill is interpolated
+  // along those same positions to stay visually anchored to the medals.
+  const columnCenterPercent = (idx: number) => ((idx + 0.5) / activityTierOrder.length) * 100;
+
+  let fillPercent: number;
+  if (nextThreshold === null) {
+    fillPercent = columnCenterPercent(tierIdx);
+  } else {
+    const floor = GlobalConstants.apTierThresholds[tier];
+    const currentPos = columnCenterPercent(tierIdx);
+    const nextPos = columnCenterPercent(tierIdx + 1);
+    const segmentProgress = (activityPoints - floor) / (nextThreshold - floor);
+    fillPercent = currentPos + segmentProgress * (nextPos - currentPos);
+  }
 
   return (
-    <section className="bg-background-overlay flex flex-col gap-4 rounded-2xl p-5">
-      <div className="flex items-end justify-between gap-3">
-        <div className="flex flex-col gap-1">
-          <span className="text-pink-secondary text-[10px] font-bold uppercase tracking-wider">
-            {t('activity points')}
-          </span>
-          <SkeletonSuspense
-            loading={loading}
-            skeleton={<Skeleton variant="line" textSize="3xl" className="w-32" />}
-          >
-            <span className="text-4xl font-black leading-none tabular-nums text-white">
-              {activityPoints.toLocaleString()}
-            </span>
-          </SkeletonSuspense>
-        </div>
-        <span
-          className="flex items-center rounded-full border px-3 py-1 text-[11px] font-extrabold uppercase tracking-wider"
-          style={{
-            color: accent,
-            borderColor: `color-mix(in srgb, ${accent} 50%, transparent)`,
-            backgroundColor: `color-mix(in srgb, ${accent} 14%, transparent)`,
-          }}
-        >
-          {t(tier)}
+    <section
+      className="relative flex flex-col gap-5 overflow-hidden rounded-2xl border p-5"
+      style={{
+        background: `radial-gradient(circle at 50% 0%, color-mix(in srgb, ${accent} 28%, transparent) 0%, transparent 55%), radial-gradient(circle at 100% 100%, color-mix(in srgb, ${accent} 14%, transparent) 0%, transparent 50%), linear-gradient(160deg, color-mix(in srgb, ${accent} 6%, var(--color-background-overlay)) 0%, var(--color-background-overlay) 100%)`,
+        borderColor: `color-mix(in srgb, ${accent} 30%, transparent)`,
+      }}
+    >
+      <div className="flex flex-col items-center gap-2">
+        <span className="text-pink-secondary text-[10px] font-bold uppercase tracking-[0.2em]">
+          {t('activity points')}
         </span>
+        <SkeletonSuspense
+          loading={loading}
+          skeleton={<Skeleton variant="line" textSize="5xl" className="w-40" />}
+        >
+          <span
+            className="text-5xl font-black leading-none tabular-nums"
+            style={{
+              color: accent,
+              textShadow: `0 0 24px color-mix(in srgb, ${accent} 45%, transparent)`,
+            }}
+          >
+            {activityPoints.toLocaleString()}
+          </span>
+        </SkeletonSuspense>
       </div>
 
-      {next ? (
-        <div className="flex flex-col gap-1.5">
+      <div className="flex flex-col">
+        <div className="relative">
           <div className="h-2 overflow-hidden rounded-full bg-white/8">
             <div
-              className="h-full rounded-full transition-[width] duration-500"
-              style={{ width: `${next.progressPct}%`, background: accent }}
+              className="h-full rounded-full transition-[width] duration-700"
+              style={{ width: `${fillPercent}%`, background: accent }}
             />
           </div>
-          <div className="flex justify-between text-[11px] font-semibold">
-            <span className="tabular-nums text-white/55">
-              {activityPoints.toLocaleString()} / {next.threshold.toLocaleString()}
-            </span>
-            <span style={{ color: accent }}>
-              {t('{n} AP to {tier}', { n: next.remaining.toLocaleString(), tier: t(next.tier) })}
-            </span>
+          <div className="pointer-events-none absolute inset-0 flex items-center">
+            {activityTierOrder.map((stopTier, idx) => {
+              const stopAccent = `var(--color-${stopTier})`;
+              const reached = idx <= tierIdx;
+              const isCurrent = idx === tierIdx;
+              return (
+                <div key={stopTier} className="flex-center flex-1">
+                  <div
+                    className={twMerge(
+                      'flex-center rounded-full transition-all',
+                      isCurrent ? 'h-[54px] w-[54px]' : 'h-7 w-7'
+                    )}
+                    style={{
+                      background: isCurrent
+                        ? `radial-gradient(circle, color-mix(in srgb, ${stopAccent} 45%, transparent) 0%, color-mix(in srgb, ${stopAccent} 12%, transparent) 60%, transparent 100%)`
+                        : reached
+                          ? `radial-gradient(circle, color-mix(in srgb, ${stopAccent} 22%, transparent) 0%, transparent 70%)`
+                          : 'color-mix(in srgb, var(--color-background) 85%, black)',
+                      border: !reached
+                        ? '1px solid color-mix(in srgb, white 14%, transparent)'
+                        : undefined,
+                      boxShadow: isCurrent
+                        ? `0 0 20px color-mix(in srgb, ${stopAccent} 60%, transparent)`
+                        : undefined,
+                    }}
+                  >
+                    <Medal
+                      type={stopTier}
+                      width={isCurrent ? 45 : 22}
+                      style={{
+                        filter: reached ? undefined : 'grayscale(85%) brightness(0.55)',
+                        opacity: reached ? 1 : 0.5,
+                      }}
+                    />
+                  </div>
+                </div>
+              );
+            })}
           </div>
         </div>
+
+        <div className="mt-10 flex">
+          {activityTierOrder.map((stopTier, idx) => {
+            const threshold = GlobalConstants.apTierThresholds[stopTier];
+            const stopAccent = `var(--color-${stopTier})`;
+            const reached = idx <= tierIdx;
+            const isCurrent = idx === tierIdx;
+            return (
+              <div key={stopTier} className="flex flex-1 flex-col items-center gap-0.5">
+                <span
+                  className="text-[9px] font-extrabold uppercase leading-none tracking-wider"
+                  style={{
+                    color: isCurrent ? stopAccent : reached ? 'white' : 'rgba(255,255,255,0.42)',
+                  }}
+                >
+                  {t(stopTier)}
+                </span>
+                <span
+                  className={twMerge(
+                    'text-[10px] leading-none tabular-nums',
+                    isCurrent && 'font-bold'
+                  )}
+                  style={{ color: isCurrent ? stopAccent : 'rgba(255,255,255,0.42)' }}
+                >
+                  {threshold === 0 ? '0' : formatCompact(threshold)}
+                </span>
+              </div>
+            );
+          })}
+        </div>
+      </div>
+
+      {nextThreshold !== null && nextTier ? (
+        <div className="text-center text-[11px] font-bold" style={{ color: accent }}>
+          {t('{n} AP to {tier}', {
+            n: remainingToNext.toLocaleString(),
+            tier: t(nextTier),
+          })}
+        </div>
       ) : (
-        <div className="text-[12px] font-bold" style={{ color: accent }}>
+        <div className="text-center text-[12px] font-bold" style={{ color: accent }}>
           {t('max tier reached')}
         </div>
       )}

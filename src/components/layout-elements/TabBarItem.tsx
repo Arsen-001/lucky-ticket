@@ -11,13 +11,23 @@ export interface TabBarItemProps {
   name: string;
   className?: string;
   style?: CSSProperties;
+  flightTarget?: string;
 }
-export function TabBarItem({ active, onClick, name, icon, className, style }: TabBarItemProps) {
+export function TabBarItem({
+  active,
+  onClick,
+  name,
+  icon,
+  className,
+  style,
+  flightTarget,
+}: TabBarItemProps) {
   return (
     <Button
       variant={active ? 'primary' : 'transparent'}
       onClick={onClick}
       style={style}
+      data-flight-target={flightTarget}
       className={twMerge(
         'p-3 flex-center rounded-full',
         active && 'tab-bar-active-flow text-white shadow-[0_4px_18px_rgba(222,0,155,0.45)]',

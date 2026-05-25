@@ -9,6 +9,14 @@ export const GlobalConstants = {
   referralPercentage: 5,
   telegramPremiumReferralPercentage: 10,
   luckyPlayerReferralPercentage: 15,
+  /** Engine cycle speed reduction granted by Lucky Player status (stacks with chips/boosters). */
+  luckyPlayerEngineSpeedBoostPct: 10,
+  /**
+   * Hard floor for engine output rate: no matter how many speed boosts stack
+   * (engine level + speed level + speed chip + speed booster), one ticket can
+   * never be minted faster than this many seconds. 900s = 15 minutes.
+   */
+  engineMinSecondsPerTicket: 900,
   inviteActivityPoints: 10,
   inviteStars: 1,
   inviteTelegramPremiumActivityPoints: 20,
@@ -82,7 +90,7 @@ export const GlobalConstants = {
     spendLcPerAp: 25_000,
     dailyTaskByTier: { bronze: 1, silver: 2, gold: 3, platinum: 4, diamond: 5 },
     weeklyTaskByTier: { bronze: 2, silver: 3, gold: 4, platinum: 5, diamond: 6 },
-    claimByTier: { bronze: 1, silver: 2, gold: 3, platinum: 4, diamond: 5 },
+    claimByTier: { bronze: 1, silver: 2, gold: 4, platinum: 8, diamond: 16 },
     tournamentJoinByTier: { bronze: 1, silver: 2, gold: 3, platinum: 4, diamond: 5 },
   },
   /**

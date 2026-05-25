@@ -19,6 +19,7 @@ import { EngineSlotPickerModal } from '@/components/pages/tabs/home/EngineSlotPi
 import { HomeBuyEngineSlot } from '@/components/pages/tabs/home/HomeBuyEngineSlot';
 import { NotEnoughStarsModal } from '@/components/pages/tabs/home/NotEnoughStarsModal';
 import { ConfirmModal } from '@/components/shared/modals/ConfirmModal';
+import { TelegramStarIcon } from '@/components/shared/icons/TelegramStarIcon';
 import { useAppTranslations } from '@/hooks/useAppTranslations';
 import { chipEquipStarsCost } from '@/utils/global/inventory.utils';
 import type { InventoryChip } from '@/types/interfaces/inventory.interfaces';
@@ -82,6 +83,13 @@ export function HomeEnginesSlider({ className }: ClassNameProps) {
   const [equipChipMutation] = useEquipChipMutation();
   const [activateBoosterMutation] = useActivateBoosterMutation();
   const [chipToUnequip, setChipToUnequip] = useState<InventoryChip | null>(null);
+  const [skipConfirm, setSkipConfirm] = useState<{ engineId: string; cost: number } | null>(null);
+  const [upgradeConfirm, setUpgradeConfirm] = useState<{
+    engineId: string;
+    type: 'speed' | 'capacity';
+    cost: number;
+    nextLevel: number;
+  } | null>(null);
   const [pendingPick, setPendingPick] = useState<{
     engineId: string;
     category: 'chip' | 'booster';
@@ -139,9 +147,16 @@ export function HomeEnginesSlider({ className }: ClassNameProps) {
         for (const { engine } of items) {
           const speedChip = findEquippedChip(inventory?.chips, engine.id, 'speed');
           const speedBooster = findActiveBooster(inventory?.boosters, engine.id, 'speed');
+          const capacityChip = findEquippedChip(inventory?.chips, engine.id, 'capacity');
+          const capacityBooster = findActiveBooster(inventory?.boosters, engine.id, 'capacity');
           const elapsed =
             engine.pendingCount > 0
-              ? effectiveCycleSeconds(engine, { speedChip, speedBooster })
+              ? effectiveCycleSeconds(engine, {
+                  speedChip,
+                  speedBooster,
+                  capacityChip,
+                  capacityBooster,
+                })
               : engineElapsedSeconds(engine);
           if (next[engine.id] !== elapsed) {
             next[engine.id] = elapsed;
@@ -160,7 +175,12 @@ export function HomeEnginesSlider({ className }: ClassNameProps) {
           const speedBooster = findActiveBooster(inventory?.boosters, engine.id, 'speed');
           const capacityChip = findEquippedChip(inventory?.chips, engine.id, 'capacity');
           const capacityBooster = findActiveBooster(inventory?.boosters, engine.id, 'capacity');
-          const cycle = effectiveCycleSeconds(engine, { speedChip, speedBooster });
+          const cycle = effectiveCycleSeconds(engine, {
+            speedChip,
+            speedBooster,
+            capacityChip,
+            capacityBooster,
+          });
           const elapsed = engineElapsedSeconds(engine);
           if (elapsed >= cycle) {
             changed = true;
@@ -257,11 +277,34 @@ export function HomeEnginesSlider({ className }: ClassNameProps) {
     if (!engine) return;
     const speedChip = findEquippedChip(inventory?.chips, engine.id, 'speed');
     const speedBooster = findActiveBooster(inventory?.boosters, engine.id, 'speed');
-    const cycle = effectiveCycleSeconds(engine, { speedChip, speedBooster });
+    const capacityChip = findEquippedChip(inventory?.chips, engine.id, 'capacity');
+    const capacityBooster = findActiveBooster(inventory?.boosters, engine.id, 'capacity');
+    const cycle = effectiveCycleSeconds(engine, {
+      speedChip,
+      speedBooster,
+      capacityChip,
+      capacityBooster,
+    });
     const elapsed = elapsedByEngine[engine.id] ?? engineElapsedSeconds(engine);
     const remaining = Math.max(0, cycle - elapsed);
     const cost = Math.max(1, Math.ceil(remaining / 3600));
-    requireStars(cost, () => handleClaim(engineId));
+    setSkipConfirm({ engineId, cost });
+  };
+
+  const fastForwardEngine = (engineId: string) => {
+    const engine = items.find(item => item.engine.id === engineId)?.engine;
+    if (!engine) return;
+    const capacityChip = findEquippedChip(inventory?.chips, engine.id, 'capacity');
+    const capacityBooster = findActiveBooster(inventory?.boosters, engine.id, 'capacity');
+    const fullCapacity = engineCapacity(engine, { capacityChip, capacityBooster });
+    updateEngine(engineId, e => ({ ...e, pendingCount: fullCapacity }));
+  };
+
+  const confirmSkip = () => {
+    if (!skipConfirm) return;
+    const { engineId, cost } = skipConfirm;
+    setSkipConfirm(null);
+    requireStars(cost, () => fastForwardEngine(engineId));
   };
 
   const promoteIfMaxed = (engine: TicketEngine): TicketEngine => {
@@ -280,25 +323,29 @@ export function HomeEnginesSlider({ className }: ClassNameProps) {
     const engine = items.find(item => item.engine.id === engineId)?.engine;
     if (!engine) return;
     const cost = 5 + (engine.speedLevel ?? 0) * 3;
-    requireStars(cost, () =>
-      updateEngine(engineId, e =>
-        promoteIfMaxed({
-          ...e,
-          speedLevel: Math.min(MAX_BOOST_LEVEL, (e.speedLevel ?? 0) + 1),
-        })
-      )
-    );
+    const nextLevel = Math.min(MAX_BOOST_LEVEL, (engine.speedLevel ?? 0) + 1);
+    setUpgradeConfirm({ engineId, type: 'speed', cost, nextLevel });
   };
 
   const handleUpgradeCapacity = (engineId: string) => {
     const engine = items.find(item => item.engine.id === engineId)?.engine;
     if (!engine) return;
     const cost = 8 + (engine.capacityLevel ?? 0) * 4;
+    const nextLevel = Math.min(MAX_BOOST_LEVEL, (engine.capacityLevel ?? 0) + 1);
+    setUpgradeConfirm({ engineId, type: 'capacity', cost, nextLevel });
+  };
+
+  const confirmUpgrade = () => {
+    if (!upgradeConfirm) return;
+    const { engineId, type, cost } = upgradeConfirm;
+    setUpgradeConfirm(null);
     requireStars(cost, () =>
       updateEngine(engineId, e =>
         promoteIfMaxed({
           ...e,
-          capacityLevel: Math.min(MAX_BOOST_LEVEL, (e.capacityLevel ?? 0) + 1),
+          ...(type === 'speed'
+            ? { speedLevel: Math.min(MAX_BOOST_LEVEL, (e.speedLevel ?? 0) + 1) }
+            : { capacityLevel: Math.min(MAX_BOOST_LEVEL, (e.capacityLevel ?? 0) + 1) }),
         })
       )
     );
@@ -551,6 +598,53 @@ export function HomeEnginesSlider({ className }: ClassNameProps) {
             setPendingPick(null);
           }
         }}
+      />
+
+      <ConfirmModal
+        open={!!skipConfirm}
+        onClose={() => setSkipConfirm(null)}
+        onConfirm={confirmSkip}
+        title={t('skip cycle title')}
+        content={
+          skipConfirm ? (
+            <div className="flex flex-col items-center gap-3">
+              <p className="text-pink-secondary text-sm">{t('skip cycle description')}</p>
+              <div className="border-gold/40 bg-gold/10 text-gold inline-flex items-center gap-1.5 rounded-full border px-3.5 py-1.5 text-sm font-extrabold tabular-nums">
+                <TelegramStarIcon size={14} />
+                {skipConfirm.cost}
+              </div>
+            </div>
+          ) : null
+        }
+        confirmText={t('skip')}
+      />
+
+      <ConfirmModal
+        open={!!upgradeConfirm}
+        onClose={() => setUpgradeConfirm(null)}
+        onConfirm={confirmUpgrade}
+        title={
+          upgradeConfirm?.type === 'speed' ? t('upgrade speed title') : t('upgrade capacity title')
+        }
+        content={
+          upgradeConfirm ? (
+            <div className="flex flex-col items-center gap-3">
+              <p className="text-pink-secondary text-sm">
+                {upgradeConfirm.type === 'speed'
+                  ? t('upgrade speed description')
+                  : t('upgrade capacity description')}
+              </p>
+              <div className="text-pink-secondary text-[11px] font-bold uppercase tracking-wider">
+                {t('level {level}', { level: upgradeConfirm.nextLevel })}
+              </div>
+              <div className="border-gold/40 bg-gold/10 text-gold inline-flex items-center gap-1.5 rounded-full border px-3.5 py-1.5 text-sm font-extrabold tabular-nums">
+                <TelegramStarIcon size={14} />
+                {upgradeConfirm.cost}
+              </div>
+            </div>
+          ) : null
+        }
+        confirmText={t('confirm')}
       />
 
       <NotEnoughStarsModal

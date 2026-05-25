@@ -13,9 +13,14 @@ import {
 } from '@/components/pages/out-tabs/tabs-extra/ticket/EngineCard';
 import { useGetInventoryQuery } from '@/api/inventory.api';
 import { useGetMeQuery } from '@/api/me.api';
-import { effectiveCycleSeconds, engineCapacity } from '@/utils/global/ticket-engine.utils';
+import {
+  effectiveCycleSeconds,
+  engineCapacity,
+  engineLevelBoostPct,
+  speedLevelBoostPct,
+} from '@/utils/global/ticket-engine.utils';
 import type { InventoryChipType } from '@/types/interfaces/inventory.interfaces';
-import { DEFAULT_BADGE_DEFS, EngineCubeBadgesFace } from './EngineCubeBadgesFace';
+import { EngineCubeBackFace } from './EngineCubeBackFace';
 import { EngineCubeSlot } from './EngineCubeSlot';
 import { EngineCubeStatsFace } from './EngineCubeStatsFace';
 import '@/styles/components/engine-card-cube.css';
@@ -72,20 +77,35 @@ export function EngineCardCube(props: EngineCardCubeProps) {
     capacityBooster: activeCapacityBooster,
   });
 
-  // Base stats — chip effects included, boosters excluded.
-  const baseCycleSeconds = effectiveCycleSeconds(engine, { speedChip: equippedSpeedChip });
-  const baseCapacity = engineCapacity(engine, { capacityChip: equippedCapacityChip });
-  const ticketsPerHour = baseCycleSeconds > 0 ? (3600 / baseCycleSeconds) * baseCapacity : 0;
+  // Factory "out of the box" state — the cube's stats at engineLevel=1,
+  // speedLevel=0, capacityLevel=0, no chips, no boosters. Stays constant for
+  // a given tier no matter how the engine is upgraded.
+  const baseCycleSeconds = engine.cycleSeconds;
+  const baseCapacity = 1;
 
   // Mock lifetime-style stats derived from current engine fields.
   const lifetimeProduced = engineLevel * (capacity + 5) * 17;
 
-  const badges = DEFAULT_BADGE_DEFS({
-    spark: engineLevel >= 1,
-    speed: speedLevel >= 3,
-    capacity: capacityLevel >= 3,
-    veteran: lifetimeProduced >= 1000,
+  // Total effective cycle/capacity with chips + boosters applied — used on the
+  // back face's "Total" summary row so the player sees the final output values.
+  const totalCycleSeconds = effectiveCycleSeconds(engine, {
+    speedChip: equippedSpeedChip,
+    speedBooster: activeSpeedBooster,
+    capacityChip: equippedCapacityChip,
+    capacityBooster: activeCapacityBooster,
   });
+  const totalCapacity = engineCapacity(engine, {
+    capacityChip: equippedCapacityChip,
+    capacityBooster: activeCapacityBooster,
+  });
+  const ticketsPerHour = totalCycleSeconds > 0 ? (3600 / totalCycleSeconds) * totalCapacity : 0;
+
+  // Aggregated additive speed boost (mirrors `effectiveCycleSeconds()`).
+  const totalBoostPct =
+    engineLevelBoostPct(engineLevel) +
+    speedLevelBoostPct(speedLevel) +
+    (equippedSpeedChip?.effectPct ?? 0) +
+    (activeSpeedBooster?.effectPct ?? 0);
 
   const [rotation, setRotation] = useState(0);
   const [dragDelta, setDragDelta] = useState(0);
@@ -169,7 +189,19 @@ export function EngineCardCube(props: EngineCardCubeProps) {
         </div>
 
         <div className="engine-card-cube-face engine-card-cube-face--back">
-          <EngineCubeBadgesFace badges={badges} accent={tierAccent} />
+          <EngineCubeBackFace
+            engineLevel={engineLevel}
+            speedLevel={speedLevel}
+            capacityLevel={capacityLevel}
+            baseCycleSeconds={baseCycleSeconds}
+            baseCapacity={baseCapacity}
+            totalBoostPct={totalBoostPct}
+            speedChip={equippedSpeedChip}
+            capacityChip={equippedCapacityChip}
+            speedBooster={activeSpeedBooster}
+            capacityBooster={activeCapacityBooster}
+            accent={tierAccent}
+          />
         </div>
 
         <div className="engine-card-cube-face engine-card-cube-face--bottom">

@@ -9,6 +9,7 @@ export interface HeaderStatPillProps {
   accent?: HeaderStatPillAccent;
   onClick?: () => void;
   ariaLabel?: string;
+  flightTarget?: string;
 }
 
 const ACCENT_ICON_BG: Record<HeaderStatPillAccent, string> = {
@@ -36,6 +37,7 @@ export function HeaderStatPill({
   accent = 'gold',
   onClick,
   ariaLabel,
+  flightTarget,
 }: HeaderStatPillProps) {
   const baseClassName = twMerge(
     'inline-flex h-7 items-center gap-1.5 rounded-full border bg-white/5 pl-0.5 pr-3 text-xs font-bold text-white backdrop-blur-sm',
@@ -49,7 +51,9 @@ export function HeaderStatPill({
 
   const content = (
     <>
-      <span className={iconSlotClassName}>{icon}</span>
+      <span className={iconSlotClassName} data-flight-target={flightTarget}>
+        {icon}
+      </span>
       <span className="leading-none tabular-nums tracking-tight">{value}</span>
     </>
   );
