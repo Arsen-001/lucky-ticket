@@ -2,13 +2,15 @@
 
 import '@/styles/components/stakes.css';
 import Image from 'next/image';
-import { ArrowDownToLine, Star, TrendingUp } from 'lucide-react';
+import { ArrowDownToLine, TrendingUp } from 'lucide-react';
 import { icons } from '@/constants/icons';
 import { LcLabel } from '@/components/shared/icons/LcLabel';
 import { BoltIcon } from '@/components/shared/icons/BoltIcon';
 import { useAppTranslations } from '@/hooks/useAppTranslations';
 import {
-  computeStakeActivityPoints,
+  computeStakeBaseAp,
+  computeStakeCompletionBonusAp,
+  computeStakeCompletionStars,
   computeStakeAprPercent,
   computeStakeReturnCoins,
 } from '@/utils/global/stakes.utils';
@@ -28,7 +30,9 @@ export function StakesRewardsPreviewCard({
   const t = useAppTranslations();
   const ratePercent = computeStakeAprPercent(durationMonths);
   const yieldLC = computeStakeReturnCoins(deposit, durationMonths);
-  const stakeAp = computeStakeActivityPoints(deposit, durationMonths);
+  const stakeBaseAp = computeStakeBaseAp(deposit, durationMonths);
+  const stakeBonusAp = computeStakeCompletionBonusAp(deposit, durationMonths);
+  const completionStars = computeStakeCompletionStars(durationMonths, levelDef);
   const rateLabel = ratePercent.toFixed(ratePercent % 1 === 0 ? 0 : 1);
 
   return (
@@ -72,10 +76,13 @@ export function StakesRewardsPreviewCard({
           </div>
           <div className="flex-1 leading-tight">
             <div className="text-[11px] font-bold text-white">{t('activity points')}</div>
-            <div className="text-white-secondary text-[10px]">{t('on stake completion')}</div>
+            <div className="text-white-secondary text-[10px]">
+              {t('plus {n} ap on completion', { n: stakeBonusAp })}
+            </div>
           </div>
-          <span className="text-teal inline-flex items-center gap-1 text-[13px] font-extrabold tabular-nums">
-            {t('plus {n} ap', { n: stakeAp })}
+          <span className="text-teal inline-flex flex-col items-end gap-0 text-[11px] font-extrabold leading-tight tabular-nums">
+            <span>{t('plus {n} ap', { n: stakeBaseAp })}</span>
+            <span className="text-white-secondary text-[9px] font-semibold">{t('at start')}</span>
           </span>
         </div>
 
@@ -84,18 +91,13 @@ export function StakesRewardsPreviewCard({
             <Image src={icons.telegramStar} alt="" className="h-4 w-auto" />
           </div>
           <div className="flex-1 leading-tight">
-            <div className="text-gold flex items-center gap-1 text-[11px] font-bold">
-              <Star size={11} fill="currentColor" strokeWidth={0} />
-              {t('bonus draw')}
-            </div>
-            <div className="text-white-secondary text-[10px]">
-              {t('{percent}% chance · {min}–{max} stars if won', {
-                percent: levelDef.starsChance,
-                min: levelDef.starsMin,
-                max: levelDef.starsMax,
-              })}
-            </div>
+            <div className="text-[11px] font-bold text-white">{t('stars on completion')}</div>
+            <div className="text-white-secondary text-[10px]">{t('on stake completion')}</div>
           </div>
+          <span className="text-gold inline-flex items-center gap-1 text-[13px] font-extrabold tabular-nums">
+            +{completionStars}
+            <Image src={icons.telegramStar} alt="" className="h-3 w-auto" />
+          </span>
         </div>
       </div>
     </div>

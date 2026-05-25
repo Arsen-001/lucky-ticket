@@ -13,6 +13,13 @@ export interface NewStakeStickyCtaProps {
   amount: number;
   minDeposit: number;
   balance: number;
+  stakeFee: number;
+  stakeFeeFree: boolean;
+  bronzeFreeRemaining: number;
+  /** Hint text shown under the CTA explaining the duration trade-off. */
+  hint?: string;
+  /** LC balance left after this stake locks the deposit — shown as subtitle when valid. */
+  balanceAfter?: number;
   tierLocked?: boolean;
   loading?: boolean;
   onConfirm: () => void;
@@ -23,6 +30,11 @@ export function NewStakeStickyCta({
   amount,
   minDeposit,
   balance,
+  stakeFee,
+  stakeFeeFree,
+  bronzeFreeRemaining,
+  hint,
+  balanceAfter,
   tierLocked = false,
   loading = false,
   onConfirm,
@@ -44,7 +56,7 @@ export function NewStakeStickyCta({
   }
 
   return (
-    <div className="sticky bottom-0 mx-5 mt-2  p-0">
+    <div className="mt-3">
       <button
         type="button"
         onClick={valid && !loading ? onConfirm : undefined}
@@ -56,18 +68,38 @@ export function NewStakeStickyCta({
             : 'cursor-not-allowed border border-white/10 bg-white/5 opacity-60 backdrop-blur-md'
         )}
       >
-        <span className="relative z-10 mt-1">{label}</span>
+        <span className="relative z-10">{label}</span>
         {loading ? (
           <Loader2 size={18} className="relative z-10 animate-spin" />
         ) : valid ? (
-          <span className="relative z-10 inline-flex items-center gap-1.5 text-base">
-            <Image src={icons.telegramStar} alt="" className="h-3.5 w-auto" />
-            <span className="tabular-nums mt-1 font-bold">
-              {Math.floor(amount / 100).toLocaleString()}
+          stakeFeeFree ? (
+            <span className="relative z-10 inline-flex items-center gap-1.5 text-[12px] font-extrabold uppercase tracking-wider text-white">
+              <span className="leading-none">{t('free')}</span>
+              <span className="text-bronze inline-flex items-center rounded-full bg-bronze/20 px-1.5 py-0.5 text-[9px] font-bold leading-none tabular-nums">
+                {bronzeFreeRemaining}/{GlobalConstants.stakeBronzeFreeStartCount}
+              </span>
             </span>
-          </span>
+          ) : (
+            <span className="relative z-10 inline-flex items-center gap-1.5 text-base">
+              <Image src={icons.telegramStar} alt="" className="h-3.5 w-auto" />
+              <span className="font-bold leading-none tabular-nums">
+                {stakeFee.toLocaleString()}
+              </span>
+            </span>
+          )
         ) : null}
       </button>
+      {valid && balanceAfter !== undefined && (
+        <div className="text-white-secondary mt-1.5 text-center text-[10px] tabular-nums">
+          {t('balance after {n} {coin}', {
+            n: balanceAfter.toLocaleString(),
+            coin: GlobalConstants.coinName,
+          })}
+        </div>
+      )}
+      {hint && valid && (
+        <div className="text-pink-secondary mt-1 text-center text-[10px] font-semibold">{hint}</div>
+      )}
     </div>
   );
 }

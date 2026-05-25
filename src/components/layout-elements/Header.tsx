@@ -8,6 +8,7 @@ import { useGetMeQuery } from '@/api/me.api';
 import { useGetNotificationsQuery } from '@/api/notifications.api';
 import { useGetStakesQuery } from '@/api/stakes.api';
 import { isStakeReady } from '@/utils/global/stakes.utils';
+import { formatCompact } from '@/utils/global/number.utils';
 import { Avatar } from '@/components/shared/user-elements/Avatar';
 import { Skeleton } from '@/components/shared/seleketons/Skeleton';
 import { SkeletonSuspense } from '@/components/shared/seleketons/SkeletonSuspense';
@@ -127,7 +128,7 @@ export function Header({ className }: ClassNameProps) {
             <HeaderStatPill
               accent="gold"
               icon={<BoltIcon size={22} />}
-              value={me?.activityPoints?.toLocaleString() ?? 0}
+              value={formatCompact(me?.activityPoints ?? 0)}
               onClick={() => router.push(routes.activity)}
               ariaLabel={t('activity points')}
             />
@@ -139,7 +140,7 @@ export function Header({ className }: ClassNameProps) {
             <HeaderStatPill
               accent="pink"
               icon={<CoinIcon size={22} />}
-              value={me?.coins?.toLocaleString() ?? 0}
+              value={formatCompact(me?.coins ?? 0)}
               onClick={() => router.push(routes.lc)}
               ariaLabel="LC"
             />

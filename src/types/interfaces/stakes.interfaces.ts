@@ -6,10 +6,8 @@ export interface StakeLevelDefinition {
   minDeposit: number;
   /** Tier identity of this stake level — drives accent colour and the AP-tier gate. */
   tier: TicketType;
-  /** Bonus-draw: chance and LS range awarded on completion. */
-  starsChance: number;
-  starsMin: number;
-  starsMax: number;
+  /** Stars awarded on full completion = `months × completionStarsPerMonth`. Forfeited on cancel. */
+  completionStarsPerMonth: number;
 }
 
 export interface ActiveStake {
@@ -26,10 +24,14 @@ export interface StakeHistoryEntry {
   id: string;
   level: number;
   amount: number;
+  /** Stake duration in months — used for restake pre-fill and history display. */
+  durationMonths: number;
   /** APR yield paid in LC on completion. */
   yieldLC: number;
-  /** Lucky Stars awarded by the completion bonus draw (0 if the draw missed). */
+  /** Lucky Stars granted on completion (`months × completionStarsPerMonth`; 0 if cancelled). */
   bonusLS: number;
+  /** Total Activity Points the stake awarded (base + completion bonus, or base only if cancelled). */
+  apAwarded: number;
   outcome: 'completed' | 'cancelled';
   completedAt: string;
 }

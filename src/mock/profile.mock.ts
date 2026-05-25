@@ -37,7 +37,7 @@ export const ownProfile: ProfileResponse = {
   isLuckyPlayer: true,
   isVIP: true,
   vipLevel: 2,
-  activityPoints: 750,
+  activityPoints: 18_500,
   activityBest: {
     day: 32,
     dayRank: 24,

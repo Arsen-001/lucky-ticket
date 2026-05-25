@@ -1,15 +1,20 @@
 'use client';
 
 import '@/styles/components/stakes.css';
+import Image from 'next/image';
 import { ChevronRight, Clock } from 'lucide-react';
 import Link from 'next/link';
 import { LcLabel } from '@/components/shared/icons/LcLabel';
+import { BoltIcon } from '@/components/shared/icons/BoltIcon';
+import { icons } from '@/constants/icons';
 import { routes } from '@/constants/routes';
 import { useAppTranslations } from '@/hooks/useAppTranslations';
 import { useCountDown } from '@/hooks/useCountDown';
+import { formatCompact } from '@/utils/global/number.utils';
 import {
+  computeStakeCompletionBonusAp,
+  computeStakeCompletionStars,
   computeStakeMonths,
-  computeStakeProgress,
   computeStakeReturnCoins,
   isStakeReady,
 } from '@/utils/global/stakes.utils';
@@ -26,16 +31,17 @@ export function StakesActiveStakeCard({ stake, levelDef }: StakesActiveStakeCard
   const t = useAppTranslations();
   const countdown = useCountDown(stake.endDate);
   const ready = countdown.expired || isStakeReady(stake.endDate);
-  const progress = computeStakeProgress(stake.startDate, stake.endDate);
   const months = computeStakeMonths(stake.startDate, stake.endDate);
   const yieldLC = computeStakeReturnCoins(stake.lockedAmount, months);
+  const stakeBonusAp = computeStakeCompletionBonusAp(stake.lockedAmount, months);
+  const completionStars = computeStakeCompletionStars(months, levelDef);
 
   return (
     <Link
       href={ready ? routes.stakes.getReadyById(stake.id) : routes.stakes.getById(stake.id)}
       className={twMerge(
         'stake-card-shell stake-card-border relative block p-3 text-left transition-transform duration-200',
-        ready && '-translate-y-0.5'
+        ready && 'stakes-ready-glow -translate-y-0.5'
       )}
       style={{ ['--stake-card-accent' as string]: `var(--color-${levelDef.tier})` }}
     >
@@ -54,7 +60,7 @@ export function StakesActiveStakeCard({ stake, levelDef }: StakesActiveStakeCard
             {t('yield')}
           </span>
           <span className="text-success inline-flex items-center gap-1 text-[16px] font-extrabold leading-none tabular-nums">
-            +{yieldLC.toLocaleString()}
+            +{formatCompact(yieldLC)}
             <LcLabel size={15} />
           </span>
         </div>
@@ -63,10 +69,34 @@ export function StakesActiveStakeCard({ stake, levelDef }: StakesActiveStakeCard
           <div className="text-pink-secondary text-[9px] font-bold uppercase tracking-wider">
             {t('locked')}
           </div>
-          <div className="mt-0.5 flex items-baseline gap-1">
-            <LcLabel size={22} className="self-center" />
+          <div className="mt-0.5 flex items-center gap-1">
+            <LcLabel size={22} />
             <span className="text-gold text-[18px] font-extrabold leading-none tabular-nums">
-              {stake.lockedAmount.toLocaleString()}
+              {formatCompact(stake.lockedAmount)}
+            </span>
+          </div>
+        </div>
+
+        <div className="mt-2.5">
+          <div className="text-pink-secondary text-[9px] font-bold uppercase tracking-wider">
+            {t('ap completion bonus')}
+          </div>
+          <div className="mt-0.5 flex items-center gap-1">
+            <BoltIcon size={16} className="text-teal" />
+            <span className="text-teal text-[15px] font-extrabold leading-none tabular-nums">
+              +{stakeBonusAp}
+            </span>
+          </div>
+        </div>
+
+        <div className="mt-2.5">
+          <div className="text-pink-secondary text-[9px] font-bold uppercase tracking-wider">
+            {t('stars on completion')}
+          </div>
+          <div className="mt-0.5 flex items-center gap-1">
+            <Image src={icons.telegramStar} alt="" className="h-4 w-auto" />
+            <span className="text-gold text-[15px] font-extrabold leading-none tabular-nums">
+              +{completionStars}
             </span>
           </div>
         </div>
@@ -88,7 +118,7 @@ export function StakesActiveStakeCard({ stake, levelDef }: StakesActiveStakeCard
             ) : (
               <>
                 <Clock size={11} className="text-pink-secondary" strokeWidth={2.4} />
-                {countdown.leftTime}
+                {countdown.leftTimeShort}
               </>
             )}
           </span>
@@ -101,15 +131,6 @@ export function StakesActiveStakeCard({ stake, levelDef }: StakesActiveStakeCard
             )}
           />
         </div>
-
-        {!ready && (
-          <div className="bg-background-overlay/60 mt-2 h-0.5 overflow-hidden rounded-full">
-            <div
-              className="bg-pink-gradient h-full rounded-full transition-all duration-500"
-              style={{ width: `${progress}%` }}
-            />
-          </div>
-        )}
       </div>
     </Link>
   );

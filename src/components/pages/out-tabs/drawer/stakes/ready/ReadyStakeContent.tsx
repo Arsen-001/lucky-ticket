@@ -1,26 +1,53 @@
 'use client';
 
 import '@/styles/components/stakes.css';
-import { useEffect, useState } from 'react';
+import { useEffect, useState, type ReactNode } from 'react';
 import { useRouter } from 'next/navigation';
-import { ArrowRight } from 'lucide-react';
+import Image from 'next/image';
+import { ArrowDownToLine, Sparkles } from 'lucide-react';
+import { BoltIcon } from '@/components/shared/icons/BoltIcon';
+import { icons } from '@/constants/icons';
 import { useClaimStakeMutation, useGetStakesQuery } from '@/api/stakes.api';
 import { LcLabel } from '@/components/shared/icons/LcLabel';
+import { GoldenText } from '@/components/shared/typography/GoldenText';
 import { routes } from '@/constants/routes';
 import { useAppTranslations } from '@/hooks/useAppTranslations';
-import { useCountDown } from '@/hooks/useCountDown';
+import { formatCompact } from '@/utils/global/number.utils';
 import {
+  computeStakeAprPercent,
+  computeStakeCompletionBonusAp,
+  computeStakeCompletionStars,
   computeStakeMonths,
-  computeStakeProgress,
+  computeStakeReturnCoins,
   findLevelDef,
   isStakeReady,
 } from '@/utils/global/stakes.utils';
-import { StakeCountdownRing } from '@/components/pages/out-tabs/drawer/stakes/progress/StakeCountdownRing';
-import { StakesClaimRewardsModal } from '@/components/pages/out-tabs/drawer/stakes/StakesClaimRewardsModal';
-import { StakesRewardsPreviewCard } from '@/components/pages/out-tabs/drawer/stakes/StakesRewardsPreviewCard';
-import { StakesSectionLabel } from '@/components/pages/out-tabs/drawer/stakes/StakesSectionLabel';
+import { StakesClaimSuccessModal } from '@/components/pages/out-tabs/drawer/stakes/StakesClaimSuccessModal';
 import { Skeleton } from '@/components/shared/seleketons/Skeleton';
 import { Button } from '@/components/shared/buttons/Button';
+
+interface PrizeCardProps {
+  icon: ReactNode;
+  label: string;
+  value: ReactNode;
+  accentClass: string;
+  delayMs?: number;
+}
+
+function PrizeCard({ icon, label, value, accentClass, delayMs = 0 }: PrizeCardProps) {
+  return (
+    <div
+      className={`animate-fade-in animate-slide-in-bottom flex flex-col items-center gap-2 rounded-2xl border p-3.5 text-center ${accentClass}`}
+      style={{ animationDelay: `${delayMs}ms` }}
+    >
+      <div className="flex-center h-13 w-13 rounded-full bg-black/25">{icon}</div>
+      <div className="text-pink-secondary text-[9px] font-bold uppercase tracking-wider">
+        {label}
+      </div>
+      <div className="text-center leading-none">{value}</div>
+    </div>
+  );
+}
 
 export interface ReadyStakeContentProps {
   stakeId: string;
@@ -34,22 +61,40 @@ export function ReadyStakeContent({ stakeId }: ReadyStakeContentProps) {
 
   const stake = stakes?.activeStakes.find(s => s.id === stakeId);
   const levelDef = stake && stakes ? findLevelDef(stakes.levels, stake.level) : undefined;
+  const ready = stake ? isStakeReady(stake.endDate) : false;
 
-  const countdown = useCountDown(stake?.endDate);
-  const ready = stake ? countdown.expired || isStakeReady(stake.endDate) : false;
-
-  const [rewardsOpen, setRewardsOpen] = useState(false);
+  const [claimedSnapshot, setClaimedSnapshot] = useState<{
+    amount: number;
+    stars: number;
+    ap: number;
+  } | null>(null);
 
   useEffect(() => {
+    if (claimedSnapshot !== null) return;
     if (!isLoading && stake && !ready) {
       router.replace(routes.stakes.getById(stake.id));
     }
-  }, [isLoading, stake, ready, router]);
+  }, [isLoading, stake, ready, router, claimedSnapshot]);
+
+  if (claimedSnapshot !== null) {
+    return (
+      <StakesClaimSuccessModal
+        open
+        onClose={() => {
+          setClaimedSnapshot(null);
+          router.replace(routes.stakes.index);
+        }}
+        amount={claimedSnapshot.amount}
+        stars={claimedSnapshot.stars}
+        ap={claimedSnapshot.ap}
+      />
+    );
+  }
 
   if (isLoading) {
     return (
       <div className="flex flex-col gap-4">
-        <Skeleton className="h-72 rounded-2xl" />
+        <Skeleton className="h-24 rounded-2xl" />
         <Skeleton className="h-44 rounded-2xl" />
       </div>
     );
@@ -61,88 +106,131 @@ export function ReadyStakeContent({ stakeId }: ReadyStakeContentProps) {
     );
   }
 
-  const progress = computeStakeProgress(stake.startDate, stake.endDate);
+  const months = computeStakeMonths(stake.startDate, stake.endDate);
+  const yieldLC = computeStakeReturnCoins(stake.lockedAmount, months);
+  const ratePercent = computeStakeAprPercent(months);
+  const rateLabel = ratePercent.toFixed(ratePercent % 1 === 0 ? 0 : 1);
+  const totalLC = stake.lockedAmount + yieldLC;
+  const bonusAp = computeStakeCompletionBonusAp(stake.lockedAmount, months);
+  const completionStars = computeStakeCompletionStars(months, levelDef);
 
   const handleClaim = async () => {
     const result = await claimStake({ stakeId: stake.id });
     if ('data' in result && result.data?.success) {
-      setRewardsOpen(true);
+      setClaimedSnapshot({ amount: totalLC, stars: completionStars, ap: bonusAp });
     }
   };
 
-  const handleRewardsClose = () => {
-    setRewardsOpen(false);
-    router.replace(routes.stakes.index);
-  };
+  // List of prizes — easy to add more entries later; the grid auto-wraps.
+  const prizes: Omit<PrizeCardProps, 'delayMs'>[] = [
+    {
+      icon: <ArrowDownToLine size={26} className="text-white/80" />,
+      label: t('principal returned'),
+      accentClass: 'border-white/15 bg-white/[0.04]',
+      value: (
+        <span className="text-gold inline-flex items-center gap-1 text-[16px] font-extrabold tabular-nums">
+          {formatCompact(stake.lockedAmount)}
+          <LcLabel size={14} />
+        </span>
+      ),
+    },
+    {
+      icon: <LcLabel size={28} />,
+      label: t('apr yield'),
+      accentClass: 'border-success/40 bg-success/10',
+      value: (
+        <div className="flex flex-col items-center gap-1">
+          <span className="text-success inline-flex items-center gap-1 text-[16px] font-extrabold tabular-nums">
+            +{formatCompact(yieldLC)}
+            <LcLabel size={14} />
+          </span>
+          <span className="text-white-secondary text-[9px] font-semibold">
+            {t('rate {rate}% for {n} months', { rate: rateLabel, n: months })}
+          </span>
+        </div>
+      ),
+    },
+    {
+      icon: <BoltIcon size={26} className="text-teal" />,
+      label: t('ap completion bonus'),
+      accentClass: 'border-teal/40 bg-teal/10',
+      value: (
+        <span className="text-teal inline-flex items-center gap-1 text-[18px] font-extrabold tabular-nums">
+          +{bonusAp}
+          <BoltIcon size={14} />
+        </span>
+      ),
+    },
+    {
+      icon: <Image src={icons.telegramStar} alt="" className="h-7 w-auto" />,
+      label: t('stars on completion'),
+      accentClass: 'border-gold/40 bg-gold/10',
+      value: (
+        <span className="text-gold inline-flex items-center gap-1 text-[18px] font-extrabold tabular-nums">
+          +{completionStars}
+          <Image src={icons.telegramStar} alt="" className="h-3.5 w-auto" />
+        </span>
+      ),
+    },
+  ];
 
   return (
-    <div className="flex flex-col gap-1 pb-4">
-      <div className="text-pink-secondary mb-3 text-[10px] font-bold uppercase tracking-wider">
-        {t('level {level}', { level: levelDef.level })}
-      </div>
-
+    <div className="flex flex-col gap-5 pb-4">
       <div
-        className="stake-card-shell stake-card-border px-5 py-6"
-        style={{ ['--stake-card-accent' as string]: `var(--color-${levelDef.tier})` }}
+        className="animate-fade-in relative overflow-hidden rounded-3xl border border-success/30 px-5 py-7 text-center"
+        style={{
+          background:
+            'radial-gradient(circle at 50% 0%, rgba(74,222,128,0.25) 0%, transparent 55%),' +
+            'linear-gradient(180deg, #1F2A28 0%, #151F35 100%)',
+        }}
       >
-        <div className="relative text-center">
-          <StakeCountdownRing
-            levelDef={levelDef}
-            leftTime={countdown.leftTime}
-            progress={progress}
-            ready
-          />
-
-          <div className="mt-5 grid grid-cols-2 gap-2.5 text-left">
-            <div className="rounded-xl border border-white/5 bg-black/30 px-3 py-2.5">
-              <div className="text-pink-secondary text-[9px] font-bold uppercase tracking-wider">
-                {t('locked')}
-              </div>
-              <div className="mt-0.5 flex items-baseline gap-1">
-                <LcLabel size={22} className="self-center" />
-                <span className="text-gold text-[16px] font-extrabold leading-none tabular-nums">
-                  {stake.lockedAmount.toLocaleString()}
-                </span>
-              </div>
-            </div>
-            <div className="rounded-xl border border-success/30 bg-success/10 px-3 py-2.5">
-              <div className="text-success text-[9px] font-bold uppercase tracking-wider">
-                {t('status')}
-              </div>
-              <div className="text-success mt-0.5 text-[14px] font-extrabold uppercase leading-none tracking-wider">
-                {t('ready')}
-              </div>
-            </div>
+        <div className="pointer-events-none absolute -top-4 left-1/2 -translate-x-1/2">
+          <Sparkles size={56} className="text-success/30" strokeWidth={1.5} />
+        </div>
+        <div className="relative">
+          <div className="border-success/35 bg-success/15 text-success inline-flex items-center gap-1.5 rounded-full border px-2.5 py-1 text-[10px] font-extrabold uppercase tracking-widest">
+            <span className="bg-success h-1.5 w-1.5 rounded-full shadow-[0_0_8px_var(--color-success)]" />
+            {t('stake complete')}
+          </div>
+          <h2 className="mt-4 text-[14px] font-bold uppercase tracking-widest text-white/70">
+            {t('you earned')}
+          </h2>
+          <div className="mt-2 flex items-center justify-center gap-2">
+            <GoldenText className="text-[32px] font-extrabold leading-none tabular-nums tracking-tight">
+              +{formatCompact(yieldLC)}
+            </GoldenText>
+            <LcLabel size={30} />
           </div>
         </div>
       </div>
 
-      <StakesSectionLabel>{t('rewards ready')}</StakesSectionLabel>
-      <StakesRewardsPreviewCard
-        levelDef={levelDef}
-        deposit={stake.lockedAmount}
-        durationMonths={computeStakeMonths(stake.startDate, stake.endDate)}
-      />
+      <div>
+        <div className="text-pink-secondary mb-2 text-[11px] font-bold uppercase tracking-wider">
+          {t('your prizes')}
+        </div>
 
-      <div className="sticky bottom-0 -mx-5 mt-5 px-5 pb-2 pt-6 bg-gradient-to-b from-transparent to-background">
+        <div className="grid grid-cols-2 gap-2.5">
+          {prizes.map((prize, i) => (
+            <PrizeCard key={i} {...prize} delayMs={i * 80} />
+          ))}
+        </div>
+      </div>
+
+      <div className="to-background sticky bottom-0 -mx-5 mt-2 bg-gradient-to-b from-transparent px-5 pb-2 pt-6">
         <Button
           type="button"
           onClick={handleClaim}
           disabled={claiming}
-          className="stakes-btn-glow flex w-full items-center justify-center gap-2 rounded-2xl px-5 py-4 text-[13px] font-extrabold uppercase tracking-wider text-white shadow-[0_10px_28px_rgba(222,0,155,0.45),inset_0_1px_0_rgba(255,255,255,0.25)] disabled:opacity-60"
-          style={{ background: 'linear-gradient(135deg, #DE009B 0%, #743DF5 100%)' }}
+          className="border-success/30 flex w-full items-center justify-center rounded-2xl border px-5 py-4 text-[13px] font-extrabold uppercase tracking-wider text-white shadow-[0_3px_9px_rgba(74,222,128,0.15),inset_0_1px_0_rgba(255,255,255,0.08)] disabled:opacity-60"
+          style={{
+            background:
+              'radial-gradient(circle at 50% 0%, rgba(74,222,128,0.25) 0%, transparent 55%),' +
+              'linear-gradient(180deg, #1F2A28 0%, #151F35 100%)',
+          }}
         >
-          <span>{t('open rewards')}</span>
-          <ArrowRight size={18} strokeWidth={2.5} />
+          {t('claim')}
         </Button>
       </div>
-
-      <StakesClaimRewardsModal
-        open={rewardsOpen}
-        onClose={handleRewardsClose}
-        levelDef={levelDef}
-        stake={stake}
-      />
     </div>
   );
 }

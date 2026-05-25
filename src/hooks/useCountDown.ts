@@ -12,6 +12,8 @@ import type { Duration } from '@/types/interfaces/date.interfaces';
 
 export interface UseCountdownResult extends CountdownState {
   leftTime: string;
+  /** Adaptive short label: "5 days", "5h 30m", "12m 30s", or "30s". */
+  leftTimeShort: string;
   leftTimeText: string;
   getPassedPercentage: (fullTime?: Duration) => number;
 }
@@ -43,8 +45,22 @@ export const useCountDown = (targetDate?: string | Date | number): UseCountdownR
     seconds: t('second')[0],
   };
 
-  const leftTime = `${pad(state.hours)}:${pad(state.minutes)}:${pad(state.seconds)}`;
+  const hhmmss = `${pad(state.hours)}:${pad(state.minutes)}:${pad(state.seconds)}`;
+  const leftTime = state.days > 0 ? `${state.days}${t('day')[0]} ${hhmmss}` : hhmmss;
   const leftTimeText = getTimeText(state, timeUnits);
+
+  let leftTimeShort: string;
+  if (state.days >= 2) {
+    leftTimeShort = t('{n} days left', { n: state.days });
+  } else if (state.days === 1) {
+    leftTimeShort = t('1 day left');
+  } else if (state.hours > 0) {
+    leftTimeShort = `${state.hours}${timeUnits.hours} ${state.minutes}${timeUnits.minutes}`;
+  } else if (state.minutes > 0) {
+    leftTimeShort = `${state.minutes}${timeUnits.minutes} ${state.seconds}${timeUnits.seconds}`;
+  } else {
+    leftTimeShort = `${state.seconds}${timeUnits.seconds}`;
+  }
   const getPassedPercentage = (fullDuration?: Duration) => {
     if (!fullDuration) return 0;
     const leftTimestamp = getLeftTimestamp(targetDate);
@@ -53,5 +69,5 @@ export const useCountDown = (targetDate?: string | Date | number): UseCountdownR
     return 100 - leftPercentage;
   };
 
-  return { ...state, leftTime, leftTimeText, getPassedPercentage };
+  return { ...state, leftTime, leftTimeShort, leftTimeText, getPassedPercentage };
 };

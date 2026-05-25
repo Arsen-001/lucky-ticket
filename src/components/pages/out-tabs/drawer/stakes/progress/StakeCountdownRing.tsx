@@ -87,7 +87,10 @@ export function StakeCountdownRing({
             <div className="text-[32px] font-extrabold leading-none tracking-tight text-white tabular-nums">
               {leftTime}
             </div>
-            <div className="mt-1">
+            <div className="text-electric-pink mt-1 text-[10px] font-bold tabular-nums">
+              {progress}%
+            </div>
+            <div className="mt-1.5">
               <StakesLevelChip level={levelDef.level} tier={levelDef.tier} />
             </div>
           </>

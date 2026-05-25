@@ -4,6 +4,7 @@ import { Cpu, Crown, MemoryStick } from 'lucide-react';
 import { twMerge } from 'tailwind-merge';
 import { useGetTournamentByIdQuery, useGetTournamentPlacesQuery } from '@/api/tournaments.api';
 import { useAppTranslations } from '@/hooks/useAppTranslations';
+import { formatCompact } from '@/utils/global/number.utils';
 import {
   LeaderboardPodium,
   type PodiumPlayer,
@@ -70,7 +71,7 @@ function TierRow({ place, percentage, lc, index, isMe }: TierRowProps) {
       {/* LC reward */}
       <span className="text-gold inline-flex items-center gap-1 text-[13px] font-bold tabular-nums shrink-0">
         <LcLabel size={14} />
-        {lc !== undefined ? lc.toLocaleString() : '—'}
+        {lc !== undefined ? formatCompact(lc) : '—'}
       </span>
 
       {/* Crown — only for the user's row */}

@@ -10,6 +10,7 @@ import { BoltIcon } from '@/components/shared/icons/BoltIcon';
 import { Ticket } from '@/components/shared/icons/Ticket';
 import { VerifiedSparkleIcon } from '@/components/shared/icons/VerifiedSparkleIcon';
 import { useAppTranslations } from '@/hooks/useAppTranslations';
+import { formatCompact } from '@/utils/global/number.utils';
 import type { InvitedFriend } from '@/types/interfaces/referral.interfaces';
 import type { CSSProperties } from 'react';
 
@@ -119,7 +120,7 @@ export function InvitedFriendRow({
           <div className="flex items-center gap-2 text-[11px]">
             <span className="text-gold flex items-center gap-1 font-semibold tabular-nums">
               <BoltIcon size={16} />
-              {friend?.points?.toLocaleString() ?? 0}
+              {formatCompact(friend?.points ?? 0)}
             </span>
             {claimable && (
               <span className="text-pink-secondary truncate">· {t('tickets to claim')}</span>

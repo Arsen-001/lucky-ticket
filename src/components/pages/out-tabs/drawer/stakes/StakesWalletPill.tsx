@@ -2,6 +2,7 @@
 
 import { LcLabel } from '@/components/shared/icons/LcLabel';
 import { useAppTranslations } from '@/hooks/useAppTranslations';
+import { formatCompact } from '@/utils/global/number.utils';
 
 export interface StakesWalletPillProps {
   balance: number;
@@ -16,11 +17,11 @@ export function StakesWalletPill({ balance, locked = 0 }: StakesWalletPillProps)
       <LcLabel size={28} />
       <div className="flex flex-col leading-tight">
         <span className="text-gold text-[13px] font-extrabold tabular-nums">
-          {balance.toLocaleString()}
+          {formatCompact(balance)}
         </span>
         {locked > 0 && (
           <span className="text-pink-secondary text-[9px] font-bold tracking-wider">
-            {t('{amount} locked', { amount: locked.toLocaleString() })}
+            {t('{amount} locked', { amount: formatCompact(locked) })}
           </span>
         )}
       </div>

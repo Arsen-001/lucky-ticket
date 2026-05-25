@@ -8,6 +8,7 @@ import { Skeleton } from '@/components/shared/seleketons/Skeleton';
 import { SkeletonSuspense } from '@/components/shared/seleketons/SkeletonSuspense';
 import { useAppTranslations } from '@/hooks/useAppTranslations';
 import { useCountDown } from '@/hooks/useCountDown';
+import { formatCompact } from '@/utils/global/number.utils';
 import { routes } from '@/constants/routes';
 import type { Tournament } from '@/types/interfaces/tournaments.interfaces';
 import type { TournamentType } from '@/types/types/tournaments.types';
@@ -79,7 +80,7 @@ export function HomeUpcomingTournamentCard({
               >
                 <GoldenText>
                   <span className="inline-flex items-center gap-1">
-                    {prizePool?.toLocaleString()}
+                    {prizePool != null ? formatCompact(prizePool) : ''}
                     <LcLabel size={16} />
                   </span>
                 </GoldenText>

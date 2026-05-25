@@ -31,14 +31,18 @@ export const getCountdown = (targetDate?: string | Date | number): CountdownStat
     return expiredResult;
   }
 
-  const dur = dayjs.duration(diff);
+  const totalSeconds = Math.floor(diff / 1000);
+  const days = Math.floor(totalSeconds / 86_400);
+  const hours = Math.floor((totalSeconds % 86_400) / 3600);
+  const minutes = Math.floor((totalSeconds % 3600) / 60);
+  const seconds = totalSeconds % 60;
 
   return {
     expired: false,
-    days: dur.days(),
-    hours: dur.hours(),
-    minutes: dur.minutes(),
-    seconds: dur.seconds(),
+    days,
+    hours,
+    minutes,
+    seconds,
   };
 };
 

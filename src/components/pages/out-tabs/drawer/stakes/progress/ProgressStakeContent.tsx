@@ -2,13 +2,18 @@
 
 import '@/styles/components/stakes.css';
 import { useEffect } from 'react';
+import Image from 'next/image';
 import { useRouter } from 'next/navigation';
 import { useCancelStakeMutation, useGetStakesQuery } from '@/api/stakes.api';
+import { useGetMeQuery } from '@/api/me.api';
 import { LcLabel } from '@/components/shared/icons/LcLabel';
+import { icons } from '@/constants/icons';
 import { routes } from '@/constants/routes';
 import { useAppTranslations } from '@/hooks/useAppTranslations';
 import { useCountDown } from '@/hooks/useCountDown';
+import { formatCompact } from '@/utils/global/number.utils';
 import {
+  computeStakeCancelFee,
   computeStakeMonths,
   computeStakeProgress,
   findLevelDef,
@@ -28,6 +33,7 @@ export function ProgressStakeContent({ stakeId }: ProgressStakeContentProps) {
   const t = useAppTranslations();
   const router = useRouter();
   const { data: stakes, isLoading } = useGetStakesQuery();
+  const { data: me } = useGetMeQuery();
   const [cancelStake, { isLoading: cancelling }] = useCancelStakeMutation();
 
   const stake = stakes?.activeStakes.find(s => s.id === stakeId);
@@ -66,10 +72,24 @@ export function ProgressStakeContent({ stakeId }: ProgressStakeContentProps) {
     }
   };
 
+  const cancelFee = computeStakeCancelFee(stake.lockedAmount);
+  const starsBalance = me?.telegramStars ?? 0;
+
   return (
     <div className="flex flex-col gap-1 pb-4">
-      <div className="text-pink-secondary mb-3 text-[10px] font-bold uppercase tracking-wider">
-        {t('level {level}', { level: levelDef.level })}
+      <div className="mb-3 flex items-center justify-between gap-2">
+        <div className="text-pink-secondary text-[10px] font-bold uppercase tracking-wider">
+          {t('level {level}', { level: levelDef.level })}
+        </div>
+        <div className="inline-flex items-center gap-1 rounded-full border border-white/10 bg-back-button-background/60 px-2.5 py-1.5">
+          <Image src={icons.telegramStar} alt="" className="h-3.5 w-auto" />
+          <span className="text-gold text-[12px] font-extrabold tabular-nums">
+            {formatCompact(starsBalance)}
+          </span>
+          <span className="text-pink-secondary text-[8px] font-bold uppercase tracking-wider">
+            {t('cancel')} −{cancelFee}
+          </span>
+        </div>
       </div>
 
       <div
@@ -89,10 +109,10 @@ export function ProgressStakeContent({ stakeId }: ProgressStakeContentProps) {
               <div className="text-pink-secondary text-[9px] font-bold uppercase tracking-wider">
                 {t('locked')}
               </div>
-              <div className="mt-0.5 flex items-baseline gap-1">
-                <LcLabel size={22} className="self-center" />
+              <div className="mt-0.5 flex items-center gap-1">
+                <LcLabel size={22} />
                 <span className="text-gold text-[16px] font-extrabold leading-none tabular-nums">
-                  {stake.lockedAmount.toLocaleString()}
+                  {formatCompact(stake.lockedAmount)}
                 </span>
               </div>
             </div>
@@ -117,8 +137,8 @@ export function ProgressStakeContent({ stakeId }: ProgressStakeContentProps) {
 
       <div className="mt-5">
         <StakeCancelSection
-          level={levelDef.level}
           lockedAmount={stake.lockedAmount}
+          durationMonths={computeStakeMonths(stake.startDate, stake.endDate)}
           loading={cancelling}
           onCancel={handleCancel}
         />

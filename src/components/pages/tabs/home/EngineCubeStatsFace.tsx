@@ -1,6 +1,7 @@
 import dayjs from 'dayjs';
 import { CalendarDays, TrendingUp, UserRound } from 'lucide-react';
 import { useAppTranslations } from '@/hooks/useAppTranslations';
+import { formatCompact } from '@/utils/global/number.utils';
 import '@/styles/components/engine-cube-faces.css';
 
 export interface EngineCubeStatsFaceProps {
@@ -57,7 +58,7 @@ export function EngineCubeStatsFace({
       <div className="grid grid-cols-2 gap-3">
         <div className="flex flex-col items-start gap-0.5">
           <span className="cube-hud-stat-value cube-hud-stat-value--md">
-            {lifetimeProduced.toLocaleString()}
+            {formatCompact(lifetimeProduced)}
           </span>
           <span className="text-[8px] font-extrabold uppercase tracking-[0.16em] text-white/55">
             {t('lifetime tickets')}

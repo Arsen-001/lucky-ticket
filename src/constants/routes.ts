@@ -65,6 +65,7 @@ export const routes = {
   stakes: {
     index: '/stakes',
     new: '/stakes/new',
+    history: '/stakes/history',
     getById: function (stakeId: string) {
       return (this.index + `/${stakeId}`) as `/stakes/${string}`;
     },

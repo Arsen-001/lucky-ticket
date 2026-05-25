@@ -24,6 +24,7 @@ import { SkeletonSuspense } from '@/components/shared/seleketons/SkeletonSuspens
 import { GoldenText } from '@/components/shared/typography/GoldenText';
 import { useAppTranslations } from '@/hooks/useAppTranslations';
 import { useCountDown } from '@/hooks/useCountDown';
+import { formatCompact } from '@/utils/global/number.utils';
 import { GlobalConstants } from '@/constants/global.constants';
 import { routes } from '@/constants/routes';
 import type {
@@ -208,7 +209,7 @@ export function TournamentCard({
                   className="inline-flex items-center gap-1 text-sm font-extrabold tabular-nums leading-none truncate"
                   style={{ textShadow: '0 1px 4px rgba(248, 189, 62, 0.45)' }}
                 >
-                  {prizePool?.toLocaleString()}
+                  {prizePool != null ? formatCompact(prizePool) : ''}
                   <LcLabel size={14} />
                 </GoldenText>
               </div>

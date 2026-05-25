@@ -11,25 +11,11 @@ import { WalletProvider } from '@/types/enums/wallet.enums';
  */
 
 const stakeLevels: StakeLevelDefinition[] = [
-  { level: 1, minDeposit: 100_000, tier: 'bronze', starsChance: 5, starsMin: 5, starsMax: 15 },
-  { level: 2, minDeposit: 500_000, tier: 'silver', starsChance: 10, starsMin: 15, starsMax: 40 },
-  { level: 3, minDeposit: 1_000_000, tier: 'gold', starsChance: 20, starsMin: 40, starsMax: 100 },
-  {
-    level: 4,
-    minDeposit: 2_500_000,
-    tier: 'platinum',
-    starsChance: 30,
-    starsMin: 70,
-    starsMax: 250,
-  },
-  {
-    level: 5,
-    minDeposit: 5_000_000,
-    tier: 'diamond',
-    starsChance: 40,
-    starsMin: 100,
-    starsMax: 500,
-  },
+  { level: 1, minDeposit: 100_000, tier: 'bronze', completionStarsPerMonth: 2 },
+  { level: 2, minDeposit: 500_000, tier: 'silver', completionStarsPerMonth: 3 },
+  { level: 3, minDeposit: 1_000_000, tier: 'gold', completionStarsPerMonth: 4 },
+  { level: 4, minDeposit: 2_500_000, tier: 'platinum', completionStarsPerMonth: 5 },
+  { level: 5, minDeposit: 5_000_000, tier: 'diamond', completionStarsPerMonth: 6 },
 ];
 
 const supportedWallets: SupportedWallet[] = [
@@ -54,8 +40,6 @@ const starsPackages: StarsPackage[] = [
 
 export const appConfig = {
   stakes: {
-    /** Telegram Stars penalty per stake level when cancelling early. */
-    cancelStarsPerLevel: 5,
     /** Bounds of the duration slider on the "new stake" screen (months). */
     durationMinMonths: 1,
     durationMaxMonths: 12,
@@ -63,9 +47,40 @@ export const appConfig = {
     aprMinPercent: 1,
     aprMaxPercent: 5,
     /** Divisor in the stake AP formula: `deposit × months ÷ apDivisor` (DOCS §5.3 / §18.3). */
-    apDivisor: 10_000_000,
+    apDivisor: 50_000,
     /** Bonus added to the stake AP base when it completes (forfeited on cancel). */
     apCompletionBonusPercent: 50,
+    /** LC required to add 1 ⭐ to the base stake fee (`base = ceil(deposit / feeStep)`). */
+    feeStep: 100_000,
+    /** Discount % per stake month — applied to the base fee. */
+    feeMonthDiscountPercent: 1,
+    /**
+     * Volume-discount brackets applied on top of the month discount. The user
+     * gets the percent of the largest bracket whose `threshold` they meet.
+     * Lucky Player holders get the boosted set.
+     */
+    feeVolumeDiscount: {
+      default: [
+        { threshold: 1_000_000, percent: 10 },
+        { threshold: 2_500_000, percent: 12 },
+        { threshold: 5_000_000, percent: 15 },
+        { threshold: 10_000_000, percent: 20 },
+      ],
+      luckyPlayer: [
+        { threshold: 1_000_000, percent: 20 },
+        { threshold: 2_500_000, percent: 22 },
+        { threshold: 5_000_000, percent: 25 },
+        { threshold: 10_000_000, percent: 30 },
+      ],
+    },
+    /** Stake fee never drops below this floor (in Stars). */
+    feeMinStars: 1,
+    /** Cancel fee never drops below this floor (in Stars). */
+    cancelFeeMinStars: 2,
+    /** Cancel fee = `cancelFeeMultiplier × base` (no discounts). */
+    cancelFeeMultiplier: 2,
+    /** First N stakes opened at the Bronze tier are free (cancel fee still applies). */
+    bronzeFreeStartCount: 10,
     /** Stake tier definitions — deposit thresholds + bonus-draw values. */
     levels: stakeLevels,
   },

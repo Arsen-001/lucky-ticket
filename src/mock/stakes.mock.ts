@@ -4,7 +4,11 @@ import type { StakeIdBody, StakesData, StartStakeBody } from '@/types/interfaces
 import { appConfig } from '@/config/app.config';
 import { mockDb } from '@/mock/backend/db';
 import {
-  computeStakeActivityPoints,
+  computeStakeBaseAp,
+  computeStakeCancelFee,
+  computeStakeCompletionBonusAp,
+  computeStakeCompletionStars,
+  computeStakeFee,
   computeStakeMonths,
   computeStakeReturnCoins,
 } from '@/utils/global/stakes.utils';
@@ -33,7 +37,19 @@ const startStake = (args: FetchArgs) => {
     return { error: { status: 400, data: 'Insufficient balance' } };
   }
 
+  const isLuckyPlayer = mockDb.user.isLuckyPlayer ?? false;
+  const bronzeOpened = mockDb.user.bronzeStakesOpened ?? 0;
+  const feeBreakdown = computeStakeFee(amount, months, isLuckyPlayer, level, bronzeOpened);
+
+  if (mockDb.user.telegramStars < feeBreakdown.fee) {
+    return { error: { status: 400, data: 'Insufficient Stars for stake fee' } };
+  }
+
   mockDb.user.coins -= amount;
+  mockDb.user.telegramStars -= feeBreakdown.fee;
+  if (level === 1) mockDb.user.bronzeStakesOpened = bronzeOpened + 1;
+  // Base AP credited the moment the stake starts (DOCS §5.3) — retained even if cancelled.
+  mockDb.user.activityPoints += computeStakeBaseAp(amount, months);
   const start = Date.now();
   mockDb.stakes.activeStakes.push({
     id: `stake-${start}`,
@@ -55,7 +71,10 @@ const cancelStake = (args: FetchArgs) => {
   if (idx === -1) return { error: { status: 404, data: 'Stake not found' } };
 
   const [stake] = mockDb.stakes.activeStakes.splice(idx, 1);
-  const penalty = appConfig.stakes.cancelStarsPerLevel * stake.level;
+  const penalty = computeStakeCancelFee(stake.lockedAmount);
+  const cancelMonths = computeStakeMonths(stake.startDate, stake.endDate);
+  // Cancel keeps the base AP that was credited on start (DOCS §5.3) — record it for history.
+  const baseApKept = computeStakeBaseAp(stake.lockedAmount, cancelMonths);
 
   mockDb.user.coins += stake.lockedAmount;
   mockDb.user.telegramStars = Math.max(0, mockDb.user.telegramStars - penalty);
@@ -63,8 +82,10 @@ const cancelStake = (args: FetchArgs) => {
     id: `h-${Date.now()}`,
     level: stake.level,
     amount: stake.lockedAmount,
+    durationMonths: cancelMonths,
     yieldLC: 0,
     bonusLS: 0,
+    apAwarded: baseApKept,
     outcome: 'cancelled',
     completedAt: nowIso(),
   });
@@ -87,21 +108,23 @@ const claimStake = (args: FetchArgs) => {
   const levelDef = appConfig.stakes.levels.find(l => l.level === stake.level);
   const months = computeStakeMonths(stake.startDate, stake.endDate);
   const yieldLC = computeStakeReturnCoins(stake.lockedAmount, months);
-  const bonusLS =
-    levelDef && Math.random() * 100 < levelDef.starsChance
-      ? Math.round(levelDef.starsMin + Math.random() * (levelDef.starsMax - levelDef.starsMin))
-      : 0;
+  const bonusLS = levelDef ? computeStakeCompletionStars(months, levelDef) : 0;
+
+  const completionBonusAp = computeStakeCompletionBonusAp(stake.lockedAmount, months);
+  const baseAp = computeStakeBaseAp(stake.lockedAmount, months);
 
   mockDb.user.coins += stake.lockedAmount + yieldLC;
   mockDb.user.telegramStars += bonusLS;
-  // Completion grants AP — forfeited on early cancellation (DOCS §5.3 / §18.3).
-  mockDb.user.activityPoints += computeStakeActivityPoints(stake.lockedAmount, months);
+  // Completion bonus AP on top of the base granted at start (DOCS §5.3 / §18.3).
+  mockDb.user.activityPoints += completionBonusAp;
   mockDb.stakes.history.unshift({
     id: `h-${Date.now()}`,
     level: stake.level,
     amount: stake.lockedAmount,
+    durationMonths: months,
     yieldLC,
     bonusLS,
+    apAwarded: baseAp + completionBonusAp,
     outcome: 'completed',
     completedAt: nowIso(),
   });

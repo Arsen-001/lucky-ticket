@@ -6,6 +6,7 @@ import { twMerge } from 'tailwind-merge';
 import { Skeleton } from '@/components/shared/seleketons/Skeleton';
 import { SkeletonSuspense } from '@/components/shared/seleketons/SkeletonSuspense';
 import { useAppTranslations } from '@/hooks/useAppTranslations';
+import { formatCompact } from '@/utils/global/number.utils';
 import type { Route } from '@/constants/routes';
 import type { ProfileResponse } from '@/types/interfaces/profile.interfaces';
 
@@ -88,7 +89,7 @@ function QuickStatColumn({ item, loading, delay }: QuickStatColumnProps) {
       ? '—'
       : item.decimals && item.decimals > 0
         ? item.value.toFixed(item.decimals)
-        : item.value.toLocaleString();
+        : formatCompact(item.value);
 
   const Icon = item.icon;
 

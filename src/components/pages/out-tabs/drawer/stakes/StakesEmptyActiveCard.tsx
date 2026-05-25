@@ -4,6 +4,9 @@ import { Lock } from 'lucide-react';
 import Link from 'next/link';
 import { routes } from '@/constants/routes';
 import { useAppTranslations } from '@/hooks/useAppTranslations';
+import type { TicketType } from '@/types/types/ticket.types';
+
+const TIERS: TicketType[] = ['bronze', 'silver', 'gold', 'platinum', 'diamond'];
 
 export function StakesEmptyActiveCard() {
   const t = useAppTranslations();
@@ -20,7 +23,17 @@ export function StakesEmptyActiveCard() {
       <p className="text-white-secondary mt-1 text-[11px] leading-relaxed">
         {t('lock LC for hours description')}
       </p>
-      <span className="bg-pink-gradient mt-3.5 inline-flex items-center gap-1.5 rounded-full px-3.5 py-2 text-[11px] font-extrabold uppercase tracking-wider text-white">
+      <div className="mt-3 flex items-center gap-1">
+        {TIERS.map(tier => (
+          <span
+            key={tier}
+            className="h-1.5 w-6 rounded-full"
+            style={{ background: `var(--color-${tier})` }}
+            aria-hidden
+          />
+        ))}
+      </div>
+      <span className="bg-pink-gradient mt-3 inline-flex items-center gap-1.5 rounded-full px-3.5 py-2 text-[11px] font-extrabold uppercase tracking-wider text-white">
         {t('start a stake')} →
       </span>
     </Link>

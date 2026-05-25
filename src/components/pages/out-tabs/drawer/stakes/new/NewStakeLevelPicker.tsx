@@ -2,8 +2,12 @@
 
 import { Lock, Star } from 'lucide-react';
 import { twMerge } from 'tailwind-merge';
+import { useGetMeQuery } from '@/api/me.api';
+import { GlobalConstants } from '@/constants/global.constants';
+import type { ActivityTier } from '@/constants/global.constants';
 import { useAppTranslations } from '@/hooks/useAppTranslations';
 import { useUnlockedTiers } from '@/hooks/useUnlockedTiers';
+import { formatCompact } from '@/utils/global/number.utils';
 import type { StakeLevelDefinition } from '@/types/interfaces/stakes.interfaces';
 import type { TicketType } from '@/types/types/ticket.types';
 
@@ -40,6 +44,8 @@ export function NewStakeLevelPicker({
 }: NewStakeLevelPickerProps) {
   const t = useAppTranslations();
   const { isTierUnlocked } = useUnlockedTiers();
+  const { data: me } = useGetMeQuery();
+  const currentAp = me?.activityPoints ?? 0;
 
   return (
     <div
@@ -47,8 +53,12 @@ export function NewStakeLevelPicker({
       style={{ gridTemplateColumns: `repeat(${levels.length}, minmax(0, 1fr))` }}
     >
       {levels.map(lv => {
-        const reachable = balance >= lv.minDeposit && isTierUnlocked(lv.tier);
+        const tierUnlocked = isTierUnlocked(lv.tier);
+        const reachable = balance >= lv.minDeposit && tierUnlocked;
         const isActive = activeLevel === lv.level;
+        const apGap = !tierUnlocked
+          ? Math.max(0, GlobalConstants.apTierThresholds[lv.tier as ActivityTier] - currentAp)
+          : 0;
         const stateClass = !reachable
           ? 'cursor-not-allowed border-white/5 bg-white/[0.02] text-disabled'
           : isActive
@@ -74,11 +84,16 @@ export function NewStakeLevelPicker({
               ) : (
                 <Lock className="mb-0.5" size={12} />
               )}
-              {t('level {level}', { level: lv.level })}
+              {t('lvl {level}', { level: lv.level })}
             </span>
             <span className="text-xs font-extrabold tabular-nums">
-              {lv.minDeposit.toLocaleString()}
+              {formatCompact(lv.minDeposit)}
             </span>
+            {!tierUnlocked && apGap > 0 && (
+              <span className="text-error/75 mt-0.5 text-[8px] font-bold tabular-nums">
+                {t('need {n} ap', { n: formatCompact(apGap) })}
+              </span>
+            )}
           </button>
         );
       })}

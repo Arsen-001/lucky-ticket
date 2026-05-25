@@ -1,9 +1,11 @@
 'use client';
 
 import '@/styles/components/stakes.css';
+import { useState } from 'react';
 import { Star } from 'lucide-react';
 import { GlobalConstants } from '@/constants/global.constants';
 import { useAppTranslations } from '@/hooks/useAppTranslations';
+import { formatCompact } from '@/utils/global/number.utils';
 import { GoldenText } from '@/components/shared/typography/GoldenText';
 import { LcLabel } from '@/components/shared/icons/LcLabel';
 import { NewStakeLevelPicker } from '@/components/pages/out-tabs/drawer/stakes/new/NewStakeLevelPicker';
@@ -42,6 +44,8 @@ export function NewStakeHero({
   onDurationChange,
 }: NewStakeHeroProps) {
   const t = useAppTranslations();
+  const [depositTooltip, setDepositTooltip] = useState(false);
+  const [durationTooltip, setDurationTooltip] = useState(false);
   const next = findNextLevelOver(levels, deposit);
   const clampedDeposit = Math.min(Math.max(deposit, sliderMin), sliderMax);
   const sliderRange = Math.max(1, sliderMax - sliderMin);
@@ -63,7 +67,7 @@ export function NewStakeHero({
           <div className="text-pink-secondary text-[10px] font-bold uppercase tracking-widest">
             {t('you will lock')}
           </div>
-          <div className="mt-1 flex items-baseline justify-center gap-1.5">
+          <div className="mt-1 flex items-center justify-center gap-1.5">
             <GoldenText className="text-[38px] font-extrabold leading-none tabular-nums tracking-tight">
               {deposit.toLocaleString()}
             </GoldenText>
@@ -79,7 +83,6 @@ export function NewStakeHero({
 
         {next && (
           <div className="border-electric-purple/30 bg-electric-purple/15 text-electric-purple mt-3 inline-flex items-center gap-1.5 rounded-full border px-3 py-1.5 text-[10px] font-bold tracking-wide">
-            <Star size={11} fill="currentColor" strokeWidth={0} />
             {t('+{amount} {coin} for level {level}', {
               amount: (next.minDeposit - deposit).toLocaleString(),
               coin: GlobalConstants.coinName,
@@ -88,18 +91,48 @@ export function NewStakeHero({
           </div>
         )}
 
-        <input
-          type="range"
-          min={sliderMin}
-          max={sliderMax}
-          step={1}
-          value={clampedDeposit}
-          onChange={e => onDepositChange(Number(e.target.value))}
-          className="stakes-slider mt-4 w-full"
-          style={{
-            background: `linear-gradient(90deg, var(--color-electric-pink) 0%, var(--color-electric-purple) ${sliderProgress}%, rgba(255,255,255,0.08) ${sliderProgress}%)`,
-          }}
-        />
+        <div className="relative mt-4">
+          {depositTooltip && (
+            <div
+              className="border-electric-pink/40 bg-background pointer-events-none absolute -top-7 -translate-x-1/2 rounded-md border px-2 py-0.5 text-[10px] font-extrabold text-white shadow-lg tabular-nums"
+              style={{ left: `${sliderProgress}%` }}
+            >
+              {formatCompact(clampedDeposit)}
+            </div>
+          )}
+          <input
+            type="range"
+            min={sliderMin}
+            max={sliderMax}
+            step={1}
+            value={clampedDeposit}
+            onChange={e => onDepositChange(Number(e.target.value))}
+            onPointerDown={() => setDepositTooltip(true)}
+            onPointerUp={() => setDepositTooltip(false)}
+            onPointerLeave={() => setDepositTooltip(false)}
+            className="stakes-slider w-full"
+            style={{
+              background: `linear-gradient(90deg, var(--color-electric-pink) 0%, var(--color-electric-purple) ${sliderProgress}%, rgba(255,255,255,0.08) ${sliderProgress}%)`,
+            }}
+          />
+        </div>
+
+        <div className="mt-2 flex gap-1.5">
+          {[
+            { label: '25%', value: Math.max(sliderMin, Math.floor(balance * 0.25)) },
+            { label: '50%', value: Math.max(sliderMin, Math.floor(balance * 0.5)) },
+            { label: t('max'), value: Math.min(sliderMax, balance) },
+          ].map(preset => (
+            <button
+              key={preset.label}
+              type="button"
+              onClick={() => onDepositChange(preset.value)}
+              className="border-electric-pink/25 bg-electric-pink/10 text-electric-pink hover:bg-electric-pink/15 flex-1 rounded-full border px-2 py-1 text-[10px] font-extrabold uppercase tracking-wider transition-colors"
+            >
+              {preset.label}
+            </button>
+          ))}
+        </div>
 
         <NewStakeLevelPicker
           levels={levels}
@@ -117,19 +150,73 @@ export function NewStakeHero({
             {t('{n} months', { n: clampedDuration })}
           </span>
         </div>
-        <input
-          type="range"
-          min={DURATION_MIN}
-          max={DURATION_MAX}
-          step={1}
-          value={clampedDuration}
-          onChange={e => onDurationChange(Number(e.target.value))}
-          aria-label={t('pick duration')}
-          className="stakes-slider mt-2 w-full"
-          style={{
-            background: `linear-gradient(90deg, var(--color-electric-pink) 0%, var(--color-electric-purple) ${durationProgress}%, rgba(255,255,255,0.08) ${durationProgress}%)`,
-          }}
-        />
+        <div className="relative mt-2">
+          {durationTooltip && (
+            <div
+              className="border-electric-pink/40 bg-background pointer-events-none absolute -top-7 -translate-x-1/2 rounded-md border px-2 py-0.5 text-[10px] font-extrabold text-white shadow-lg tabular-nums"
+              style={{ left: `${durationProgress}%` }}
+            >
+              {t('{n} months', { n: clampedDuration })}
+            </div>
+          )}
+          <input
+            type="range"
+            min={DURATION_MIN}
+            max={DURATION_MAX}
+            step={1}
+            value={clampedDuration}
+            onChange={e => onDurationChange(Number(e.target.value))}
+            onPointerDown={() => setDurationTooltip(true)}
+            onPointerUp={() => setDurationTooltip(false)}
+            onPointerLeave={() => setDurationTooltip(false)}
+            aria-label={t('pick duration')}
+            className="stakes-slider w-full"
+            style={{
+              background: `linear-gradient(90deg, var(--color-electric-pink) 0%, var(--color-electric-purple) ${durationProgress}%, rgba(255,255,255,0.08) ${durationProgress}%)`,
+            }}
+          />
+        </div>
+
+        <div className="mt-3 flex items-end justify-between gap-0.5">
+          {Array.from({ length: DURATION_MAX - DURATION_MIN + 1 }, (_, i) => {
+            const month = DURATION_MIN + i;
+            const apr = computeStakeAprPercent(month);
+            const minHeight = 6;
+            const maxHeight = 26;
+            const aprRange =
+              GlobalConstants.stakeAprMaxPercent - GlobalConstants.stakeAprMinPercent;
+            const ratio = aprRange > 0 ? (apr - GlobalConstants.stakeAprMinPercent) / aprRange : 0;
+            const heightPx = minHeight + ratio * (maxHeight - minHeight);
+            const isActive = month === clampedDuration;
+            return (
+              <button
+                key={month}
+                type="button"
+                onClick={() => onDurationChange(month)}
+                aria-label={t('{n} months', { n: month })}
+                className="group flex flex-1 flex-col items-center gap-1"
+              >
+                <div
+                  className={
+                    isActive
+                      ? 'bg-electric-pink w-full rounded-sm transition-all duration-200'
+                      : 'bg-electric-purple/30 group-hover:bg-electric-purple/50 w-full rounded-sm transition-all duration-200'
+                  }
+                  style={{ height: `${heightPx}px` }}
+                />
+                <span
+                  className={
+                    isActive
+                      ? 'text-electric-pink text-[8px] font-extrabold tabular-nums'
+                      : 'text-white/30 text-[8px] font-bold tabular-nums'
+                  }
+                >
+                  {month}
+                </span>
+              </button>
+            );
+          })}
+        </div>
 
         <div className="border-gold/30 bg-gold/10 mt-4 flex items-center justify-between rounded-xl border px-3 py-2.5">
           <div className="flex items-center gap-2 text-left">

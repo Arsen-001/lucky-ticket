@@ -113,22 +113,22 @@ AP-tier is the universal gate. A feature of tier `T` requires `AP-tier ≥ T`; t
 
 AP is earned from a data-driven **source registry** — every meaningful action grants AP. Each source carries a base amount, an optional daily cap, and (for spendable actions) proportional scaling:
 
-| Source                    | AP                                    | Limit                                                          |
-| :------------------------ | :------------------------------------ | :------------------------------------------------------------- |
-| Daily login streak        | 3                                     | 1×/day                                                         |
-| Daily task                | 1 / 2 / 3 / 4 / 5                     | by task tier (Bronze→Diamond), ~15/day                         |
-| Weekly task               | 2 / 3 / 4 / 5 / 6                     | by task tier (Bronze→Diamond), ~3/week                         |
-| One-time task             | varies                                | once per task                                                  |
-| Verify email              | 20                                    | one-time                                                       |
-| Claim                     | 1 / 2 / 3 / 4 / 5                     | per claim, by tier (Bronze→Diamond), 5×/day                    |
-| Watch a video             | 2                                     | 20×/day (daily cap 40 AP)                                      |
-| Send a ticket to a friend | 1                                     | 3×/day                                                         |
-| Like a profile            | 1                                     | 3×/day                                                         |
-| Invite a friend           | 10 (20 for a Telegram Premium friend) | per invite                                                     |
-| Join a tournament         | 1 / 2 / 3 / 4 / 5                     | by tournament tier (Bronze→Diamond), per join                  |
-| Purchase                  | 1 per 10 LS spent                     | no daily cap                                                   |
-| Spend LC                  | 1 per 25,000 LC spent                 | no daily cap                                                   |
-| Complete a stake          | `LC staked × months / 10,000,000`     | accrues over stake, +50% on completion, forfeited if cancelled |
+| Source                    | AP                                    | Limit                                                                                          |
+| :------------------------ | :------------------------------------ | :--------------------------------------------------------------------------------------------- |
+| Daily login streak        | 3                                     | 1×/day                                                                                         |
+| Daily task                | 1 / 2 / 3 / 4 / 5                     | by task tier (Bronze→Diamond), ~15/day                                                         |
+| Weekly task               | 2 / 3 / 4 / 5 / 6                     | by task tier (Bronze→Diamond), ~3/week                                                         |
+| One-time task             | varies                                | once per task                                                                                  |
+| Verify email              | 20                                    | one-time                                                                                       |
+| Claim                     | 1 / 2 / 3 / 4 / 5                     | per claim, by tier (Bronze→Diamond), 5×/day                                                    |
+| Watch a video             | 2                                     | 20×/day (daily cap 40 AP)                                                                      |
+| Send a ticket to a friend | 1                                     | 3×/day                                                                                         |
+| Like a profile            | 1                                     | 3×/day                                                                                         |
+| Invite a friend           | 10 (20 for a Telegram Premium friend) | per invite                                                                                     |
+| Join a tournament         | 1 / 2 / 3 / 4 / 5                     | by tournament tier (Bronze→Diamond), per join                                                  |
+| Purchase                  | 1 per 10 LS spent                     | no daily cap                                                                                   |
+| Spend LC                  | 1 per 25,000 LC spent                 | no daily cap                                                                                   |
+| Complete a stake          | `LC staked × months / 50,000`         | base credited on start (retained on cancel), +50% bonus on completion (forfeited if cancelled) |
 
 Tiered sources (daily / weekly tasks, claim, tournament join) scale with the relevant tier — Bronze→Diamond — and recurring daily sources carry per-day caps. **One-off and on-top sources** — verify-email, one-time tasks, friend invites, tournament joins, stake completion — are earned above the daily baseline (Section 5.4). **Purchases are uncapped:** 1 AP per 10 LS or per 25,000 LC spent with no daily limit, so a heavy spender climbs tiers substantially faster than a free player.
 
@@ -1423,7 +1423,7 @@ A stake is a **time-locked LC deposit**. The user locks an amount of LC for a ch
 
 ### Description
 
-The user picks an LC amount and a duration. The LC is locked for that period; locked LC cannot be spent. On completion the principal is returned together with the APR yield and a bonus draw. The stake may be cancelled early to retrieve the principal, but the yield and bonus are forfeited.
+The user picks an LC amount and a duration. The LC is locked for that period; locked LC cannot be spent. On completion the principal is returned together with the APR yield, an AP completion bonus, and a guaranteed Lucky Stars payout. The stake may be cancelled early to retrieve the principal, but the yield, AP bonus, and completion Stars are forfeited.
 
 ### 18.1 Duration & APR
 
@@ -1434,7 +1434,7 @@ The user picks an LC amount and a duration. The LC is locked for that period; lo
 
 ### 18.2 Stake Tiers (deposit thresholds)
 
-Stakes have five tiers keyed to the minimum deposit. The tier is **AP-tier gated** (a stake of tier `T` requires `AP-tier ≥ T`, Section 5.2) and determines the quality of the completion bonus draw.
+Stakes have five tiers keyed to the minimum deposit. The tier is **AP-tier gated** (a stake of tier `T` requires `AP-tier ≥ T`, Section 5.2) and determines the per-month multiplier for the completion Stars payout.
 
 | Tier     | Minimum Deposit |
 | :------- | :-------------- |
@@ -1450,17 +1450,49 @@ Every completed stake grants:
 
 - **Principal returned** in full.
 - **APR yield** in LC (Section 18.1).
-- **Bonus draw:** a chance at extra prizes — Lucky Stars, Engine Boosts, or tickets — with the chance and amounts scaling by stake tier.
-- **AP:** base `LC staked × months / 10,000,000` Activity Points, plus a **+50% completion bonus** — granted on completion, forfeited on early cancellation.
+- **Completion Stars:** a guaranteed Lucky Stars payout = `months × completionStarsPerMonth`, where the per-month multiplier scales by stake tier (Bronze 2 → Silver 3 → Gold 4 → Platinum 5 → Diamond 6). Forfeited on early cancellation.
+- **AP:** the base `LC staked × months / 50,000` Activity Points is credited the moment the stake starts and is retained even if the stake is cancelled early. A **+50% completion bonus** on the base is granted only when the stake runs to the end — forfeited on early cancellation.
 
 ### 18.4 Cancellation & Concurrency
 
-- **Early cancellation:** the principal is returned in full; the APR yield and bonus draw are forfeited; an LS cancellation penalty applies (scaling with stake tier).
+- **Early cancellation:** the principal is returned in full and the base AP credited at start is retained; the APR yield, the +50% AP completion bonus, and the completion Stars are forfeited; a Stars cancellation penalty applies (see Section 18.5).
 - **Multiple concurrent stakes** are allowed — the player may run several stakes at once.
+
+### 18.5 Fees (Stars)
+
+Both opening and cancelling a stake costs Telegram Stars. Fees scale with the locked amount and (for stake-start only) with the chosen duration.
+
+**Base fee unit** (used by both):
+
+```
+base = ceil(deposit / 100,000)   // 100,000 LC = 1 ⭐
+```
+
+**Stake-start fee** — `max(1, ceil(base × (1 − totalDiscount/100)))`, where:
+
+- `monthDiscount = months × 1%` — longer commitments pay less.
+- `volumeDiscount` — bracketed by deposit size, doubled for Lucky Player holders:
+
+  | Deposit  | Default | Lucky Player |
+  | :------- | ------: | -----------: |
+  | < 1M LC  |      0% |           0% |
+  | 1M LC+   |     10% |          20% |
+  | 2.5M LC+ |     12% |          22% |
+  | 5M LC+   |     15% |          25% |
+  | 10M LC+  |     20% |          30% |
+
+- `totalDiscount = monthDiscount + volumeDiscount`, capped at 99%.
+- Minimum stake fee: **1 ⭐** (floor).
+
+**Cancellation fee** — `max(2, 2 × base)`. No discounts apply; the cancel multiplier is fixed at 2 and the floor is 2 ⭐.
+
+**Bronze-tier onboarding waiver** — the **first 10 Bronze stakes** a user opens lifetime are free (stake-start fee = 0). The cancel fee still applies normally. The counter is incremented when a Bronze stake is opened (irrespective of outcome).
+
+> All rounding uses `ceil` — partial Stars never round down.
 
 ### Connections
 
-Stakes connect the LC currency system (velocity sink + APR faucet), the AP tier gate, Lucky Stars, boosts, and tickets via the bonus draw.
+Stakes connect the LC currency system (velocity sink + APR faucet), the AP tier gate, and the Lucky Stars faucet via the guaranteed completion Stars payout. The fee schedule (Section 18.5) also routes Stars into platform revenue via stake creation and cancellation.
 
 ---
 
@@ -1486,17 +1518,17 @@ Lucky Stars are awarded through three channels:
 
 #### Stakes
 
-A completed stake (no early cancellation — Section 18) enters the user into the **bonus draw**, which can award Lucky Stars. Stars are not guaranteed — they are one possible bonus-draw outcome alongside boosts and tickets. The draw chance and potential Star amount scale with the stake tier:
+A completed stake (no early cancellation — Section 18) pays a **guaranteed** Lucky Stars amount = `months × completionStarsPerMonth`. The per-month multiplier scales with the stake tier:
 
-| Stake Tier | Star Draw Chance | Potential Lucky Stars |
-| :--------- | :--------------- | :-------------------- |
-| Bronze     | 5%               | 5–15                  |
-| Silver     | 10%              | 15–40                 |
-| Gold       | 20%              | 40–100                |
-| Platinum   | 30%              | 70–250                |
-| Diamond    | 40%              | 100–500               |
+| Stake Tier | Stars per Month | 1-month payout | 12-month payout |
+| :--------- | :-------------- | :------------- | :-------------- |
+| Bronze     | 2               | 2              | 24              |
+| Silver     | 3               | 3              | 36              |
+| Gold       | 4               | 4              | 48              |
+| Platinum   | 5               | 5              | 60              |
+| Diamond    | 6               | 6              | 72              |
 
-> Probabilities and amounts are knobs and may be tuned by the product team.
+> Multipliers are knobs and may be tuned by the product team.
 
 #### Task Completion
 
