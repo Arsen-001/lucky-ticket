@@ -67,7 +67,6 @@ export function ProfilePage({ userId }: ProfilePageProps) {
             isOwn={effectiveProfile.isOwn}
             memberSince={effectiveProfile.memberSince}
             userId={effectiveProfile.id}
-            publicId={effectiveProfile.publicId}
           />
         </div>
       )}

@@ -90,8 +90,18 @@ export function NewStakeContent() {
   const apAtMax = computeStakeActivityPoints(safeDeposit, maxMonths);
   const apNow = computeStakeActivityPoints(safeDeposit, durationMonths);
   const apDelta = apAtMax - apNow;
-  const lcAtMax = computeStakeReturnCoins(safeDeposit, maxMonths);
-  const lcNow = computeStakeReturnCoins(safeDeposit, durationMonths);
+  const lcAtMax = computeStakeReturnCoins(
+    safeDeposit,
+    maxMonths,
+    me?.isLuckyPlayer ?? false,
+    me?.isVIP ?? false
+  );
+  const lcNow = computeStakeReturnCoins(
+    safeDeposit,
+    durationMonths,
+    me?.isLuckyPlayer ?? false,
+    me?.isVIP ?? false
+  );
   const lcDelta = lcAtMax - lcNow;
   const ctaHint =
     durationMonths < maxMonths && apDelta > 0

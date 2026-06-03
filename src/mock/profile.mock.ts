@@ -29,7 +29,6 @@ const earnedCount = achievements.filter(a => a.earned).length;
 
 export const ownProfile: ProfileResponse = {
   id: 'me',
-  publicId: '11111',
   username: 'Arsen 001',
   avatar: images.avatar.src,
   banner: undefined,
@@ -86,7 +85,6 @@ export const ownProfile: ProfileResponse = {
 export const otherProfile: ProfileResponse = {
   ...ownProfile,
   id: 'user-2',
-  publicId: '20347',
   username: 'NebulaPilot',
   isOwn: false,
   privateStats: undefined,
@@ -122,10 +120,13 @@ const likeProfileHandler = (args: FetchArgs) => {
 const sendTicketHandler = (args: FetchArgs) => {
   const { tier, quantity = 0 } = (args.body ?? {}) as { tier?: TicketType; quantity?: number };
   if (!tier) return { error: { status: 400, data: 'Tier is required' } };
+  // VIP inherits the Lucky Player send-limit table (DOCS §7.3).
   const limits =
-    GlobalConstants.ticketSendDailyLimits[ownProfile.isLuckyPlayer ? 'luckyPlayer' : 'default'];
+    GlobalConstants.ticketSendDailyLimits[
+      ownProfile.isLuckyPlayer || ownProfile.isVIP ? 'luckyPlayer' : 'default'
+    ];
   if (limits[tier] <= 0) {
-    return { error: { status: 403, data: 'Lucky Player status required for this tier' } };
+    return { error: { status: 403, data: 'Lucky Player or VIP status required for this tier' } };
   }
   const sent = Math.min(Math.max(0, quantity), limits[tier]);
   const byTier = ownProfile.privateStats?.ticketsByTier;

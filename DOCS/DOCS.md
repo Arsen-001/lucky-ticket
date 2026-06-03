@@ -121,7 +121,7 @@ AP is earned from a data-driven **source registry** — every meaningful action 
 | One-time task             | varies                                | once per task                                                                                  |
 | Verify email              | 20                                    | one-time                                                                                       |
 | Claim                     | 1 / 2 / 3 / 4 / 5                     | per claim, by tier (Bronze→Diamond), 5×/day                                                    |
-| Watch a video             | 2                                     | 20×/day (daily cap 40 AP)                                                                      |
+| Watch a video             | 2                                     | 10×/day default · 20×/day with LP · 40×/day with VIP (daily cap = limit × 2 AP)                |
 | Send a ticket to a friend | 1                                     | 3×/day                                                                                         |
 | Like a profile            | 1                                     | 3×/day                                                                                         |
 | Invite a friend           | 10 (20 for a Telegram Premium friend) | per invite                                                                                     |
@@ -214,15 +214,53 @@ Statuses reward trust, loyalty, and engagement while enabling monetization. Stat
 
 ### 7.3 Status Benefits
 
-Statuses grant privileges, such as:
+Statuses grant a fixed set of privileges. **Lucky Player** and **VIP** never stack — when both are active, the higher-tier (VIP) value supersedes Lucky Player. The same magnitude is also never applied to the matching status purchase (e.g. VIP discount is **not** applied when buying / upgrading VIP itself).
 
-- Badge displayed aside the user's nickname
-- Engine speed boosts (faster production cycles)
-- Market/Shop discounts
-- Tournament advantages
-- Early or priority access to features
+All perk magnitudes live in `src/constants/global.constants.ts` and can be tuned without code changes.
 
-Benefit magnitudes are bounded so they cannot break economy balance: the combined boost from all sources stays within ~×2, and discounts stay within ~30%.
+#### Lucky Player perks
+
+| Perk                            | Value                     | Source constant                                  |
+| :------------------------------ | :------------------------ | :----------------------------------------------- |
+| Engine speed boost (additive)   | +10%                      | `luckyPlayerEngineSpeedBoostPct`                 |
+| Stake LC yield boost            | +20%                      | `luckyPlayerStakeYieldBoostPct`                  |
+| Stake fee volume discount       | doubled brackets (20–30%) | `appConfig.stakes.feeVolumeDiscount.luckyPlayer` |
+| Market discount on every item   | −10%                      | `luckyPlayerMarketDiscountPct`                   |
+| Tournament LC reward boost      | +25%                      | `luckyPlayerTournamentRewardBoostPct`            |
+| Tournament join AP boost        | +50%                      | `luckyPlayerTournamentJoinApBoostPct`            |
+| Daily ads cap                   | 20                        | `apRewards.luckyPlayerWatchVideoDailyLimit`      |
+| Referral percentage             | 15%                       | `luckyPlayerReferralPercentage`                  |
+| Higher ticket send daily limits | B5/S4/G3/P2/D1            | `ticketSendDailyLimits.luckyPlayer`              |
+| Send Platinum/Diamond tickets   | allowed                   | `ticketSendDailyLimits.default = 0` for P/D      |
+| Profile badge                   | LP icon + glow            | n/a (visual)                                     |
+| Priority support                | yes                       | n/a (operations)                                 |
+
+#### VIP perks
+
+VIP is the high-tier permanent status; values exceed Lucky Player at every category and apply regardless of VIP level (no per-level scaling).
+
+| Perk                            | Value                         | Source constant                                  |
+| :------------------------------ | :---------------------------- | :----------------------------------------------- |
+| Engine speed boost (additive)   | +25%                          | `vipEngineSpeedBoostPct`                         |
+| Stake LC yield boost            | +40%                          | `vipStakeYieldBoostPct`                          |
+| Stake fee volume discount       | doubled brackets (same as LP) | `appConfig.stakes.feeVolumeDiscount.luckyPlayer` |
+| Market discount on every item   | −20%                          | `vipMarketDiscountPct`                           |
+| Tournament LC reward boost      | +50%                          | `vipTournamentRewardBoostPct`                    |
+| Tournament join AP boost        | +100%                         | `vipTournamentJoinApBoostPct`                    |
+| Daily ads cap                   | 40                            | `vipWatchVideoDailyLimit`                        |
+| Referral percentage             | 25%                           | `vipReferralPercentage`                          |
+| Higher ticket send daily limits | inherits LP table             | `ticketSendDailyLimits.luckyPlayer`              |
+| Send Platinum/Diamond tickets   | allowed                       | (same gate as LP)                                |
+| Profile badge                   | Animated VIP-level            | n/a (visual)                                     |
+| Dedicated support               | yes                           | n/a (operations)                                 |
+
+#### Stacking & self-discount rules
+
+- **Higher-tier wins.** If both LP and VIP are active, every percent-based perk uses the VIP value. The two values are never summed.
+- **No self-discount.** When buying / upgrading the **VIP** status, the VIP market discount is excluded. When buying the **Lucky Player** status, the LP market discount is excluded.
+- **Avatar boosts** still stack additively on top of the chosen status (DOCS §6 / market avatars).
+
+Benefit magnitudes stay bounded so they cannot break economy balance: combined boosts from all sources stay within ~×2 effective output, and discounts stay within ~30%.
 
 ### 7.4 VIP Status — Levels & Acquisition
 
@@ -249,7 +287,7 @@ VIP can be purchased and upgraded with either **Lucky Coins (LC)** or **Lucky St
 
 #### VIP Benefits
 
-VIP benefits are per-level game advantages (engine speed, market discount, claim multiplier, tournament edge). Benefits are permanent and stack with level progression, within the bounds in Section 7.3.
+The full list of VIP perks (engine speed, stake yield, market discount, tournament boosts, ads cap, referral %, send limits, profile badge, dedicated support) and their concrete magnitudes are documented in **Section 7.3 — Status Benefits → VIP perks table**. Values currently apply uniformly to every VIP level (no per-level scaling); the leveling system is reserved for future cosmetic / social differentiation. Stacking and self-discount rules from §7.3 apply.
 
 ### Connections
 
@@ -392,6 +430,27 @@ Because production is claim-gated (Section 9.5), the effective output also depen
 
 In addition to the two parameters above, every engine exposes **two chip slots** (one Speed, one Capacity) into which tournament-won chips may be equipped. See Section 10.4 for the full chip mechanic.
 
+#### Boost-stacking model (Lords-Mobile-style additive)
+
+All speed boosts stack **additively**, then are applied as a single divisor to the base cycle. The same model applies to capacity.
+
+```
+totalBoostPct = engineLevelBoostPct + speedLevelBoostPct + statusEngineSpeedBoostPct
+              + speedChip.effectPct + speedBooster.effectPct
+rawCycle      = engine.cycleSeconds / (1 + totalBoostPct / 100)
+floor         = capacity × engineMinSecondsPerTicket
+finalCycle    = max(rawCycle, floor)
+```
+
+Where:
+
+- Each **engine level** above 1 contributes `+100%` (`ENGINE_LEVEL_SPEED_BOOST_PCT`).
+- Each **speed-level upgrade** contributes `+1%` (`SPEED_LEVEL_BOOST_PCT_PER_LEVEL`).
+- Each **capacity-level upgrade** contributes `+1%` to capacity (`CAPACITY_LEVEL_BOOST_PCT_PER_LEVEL`).
+- **Status boost** uses VIP value if active, otherwise LP, otherwise 0 (DOCS §7.3).
+
+**Hard speed floor.** No matter how many boosts stack, one ticket can never be minted faster than `GlobalConstants.engineMinSecondsPerTicket = 900s` (15 minutes per ticket). `effectiveCycleSeconds()` clamps the result against `capacity × 900s`.
+
 ### 9.8 Productivity Metric
 
 Each engine has a derived stat — **Productivity (tickets/hour)** — visible in the engine UI. It represents the engine's output rate **before any time-limited Engine Booster** (Section 10.6) is applied, but **with** the Speed Chip and Capacity Chip currently equipped.
@@ -412,12 +471,12 @@ Where:
 
 On the home screen, each owned engine is rendered as a **3D rotating cube** the user can swipe vertically (front → bottom → back → top → front). Four of the six faces carry distinct content:
 
-| Face       | Content                                                                                                                                                                                                                    |
-| :--------- | :------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **Front**  | Live engine card — Reactor dial, tier-coloured Claim button, Speed/Capacity boost rows, cycle stats.                                                                                                                       |
-| **Bottom** | **Equipment grid** — 2 Chip slots (Speed / Capacity, see 10.4) on top, 2 Booster slots (10.6) below. Tapping a filled slot opens its picker; an active chip slot also shows an **X** unequip control (cost rules in 10.4). |
-| **Back**   | **Achievement showcase** — central trophy medal, badges-earned counter, hexagon achievement chips.                                                                                                                         |
-| **Top**    | **Engine Passport** — header with engine level pill, lifetime tickets (huge number), Productivity (Section 9.8), and footer with Owner + Created date.                                                                     |
+| Face       | Content                                                                                                                                                                                                                                                                                                                                     |
+| :--------- | :------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| **Front**  | Live engine card — Reactor dial, tier-coloured Claim button, Speed/Capacity boost rows, cycle stats.                                                                                                                                                                                                                                        |
+| **Bottom** | **Equipment grid** — 2 Chip slots (Speed / Capacity, see 10.4) on top, 2 Booster slots (10.6) below. Tapping a filled slot opens its picker; an active chip slot also shows an **X** unequip control (cost rules in 10.4).                                                                                                                  |
+| **Back**   | **Stats panel** — header (`ENGINE STATS` + level pill), then five stacked stat rows (`BASE` factory cycle/capacity → `ENGINE` level upgrades → `CHIP` slot effects → `BOOST` active boosters → `LP/VIP` status perk), and a `TOTAL` row at the bottom showing aggregated ⚡ and 📦 boost percentages. Uses the LM-additive model from §9.7. |
+| **Top**    | **Engine Passport** — header with engine level pill, lifetime tickets (huge number), Productivity (Section 9.8), and footer with Owner + Created date.                                                                                                                                                                                      |
 
 The two unused faces (left / right) are reserved for future content. The cube also carries a glowing core in the center, visible through the inner edges, that uses the engine's tier color.
 
@@ -1449,7 +1508,7 @@ Stakes have five tiers keyed to the minimum deposit. The tier is **AP-tier gated
 Every completed stake grants:
 
 - **Principal returned** in full.
-- **APR yield** in LC (Section 18.1).
+- **APR yield** in LC (Section 18.1). Lucky Player holders receive an additive **+20%** on top of the APR yield (`luckyPlayerStakeYieldBoostPct`); VIP holders receive **+40%** (`vipStakeYieldBoostPct`). The two never stack — the higher-tier value wins (DOCS §7.3).
 - **Completion Stars:** a guaranteed Lucky Stars payout = `months × completionStarsPerMonth`, where the per-month multiplier scales by stake tier (Bronze 2 → Silver 3 → Gold 4 → Platinum 5 → Diamond 6). Forfeited on early cancellation.
 - **AP:** the base `LC staked × months / 50,000` Activity Points is credited the moment the stake starts and is retained even if the stake is cancelled early. A **+50% completion bonus** on the base is granted only when the stake runs to the end — forfeited on early cancellation.
 

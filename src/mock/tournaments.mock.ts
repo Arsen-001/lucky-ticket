@@ -8,6 +8,7 @@ import { images } from '@/constants/images';
 import { getRandomNumber } from '@/utils/global/number.utils';
 import { mockDb } from '@/mock/backend/db';
 import { GlobalConstants, isTournamentTierActivated } from '@/constants/global.constants';
+import { applyStatusTournamentJoinApBoost } from '@/utils/global/tournament.utils';
 
 const getTicketsCount = () => getRandomNumber(1, 20);
 
@@ -234,9 +235,15 @@ const joinTournament = (args: { body?: unknown }) => {
   const participated = (tournament?.participatedTicketsCount ?? 0) + ticketsCount;
 
   // Joining a tournament grants AP scaled by the tournament's tier — per join,
-  // not per ticket (DOCS §5.3 / §11.3). The `me` tag is invalidated after.
-  mockDb.user.activityPoints +=
-    GlobalConstants.apRewards.tournamentJoinByTier[tournament?.type ?? 'bronze'];
+  // not per ticket (DOCS §5.3 / §11.3). Lucky Player holders get a flat % boost
+  // on top of the base value (DOCS §7.3, `luckyPlayerTournamentJoinApBoostPct`).
+  // The `me` tag is invalidated after.
+  const baseJoinAp = GlobalConstants.apRewards.tournamentJoinByTier[tournament?.type ?? 'bronze'];
+  mockDb.user.activityPoints += applyStatusTournamentJoinApBoost(
+    baseJoinAp,
+    mockDb.user.isLuckyPlayer ?? false,
+    mockDb.user.isVIP ?? false
+  );
 
   return {
     participatedTicketsCount: participated,

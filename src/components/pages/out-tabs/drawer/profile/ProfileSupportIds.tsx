@@ -5,7 +5,6 @@ import { useAppTranslations } from '@/hooks/useAppTranslations';
 
 export interface ProfileSupportIdsProps {
   userId: string;
-  publicId: string;
 }
 
 interface SupportIdRow {
@@ -14,14 +13,11 @@ interface SupportIdRow {
   value: string;
 }
 
-export function ProfileSupportIds({ userId, publicId }: ProfileSupportIdsProps) {
+export function ProfileSupportIds({ userId }: ProfileSupportIdsProps) {
   const t = useAppTranslations();
   const [copiedKey, setCopiedKey] = useState<string | null>(null);
 
-  const rows: SupportIdRow[] = [
-    { key: 'user', label: t('user id'), value: userId },
-    { key: 'public', label: t('public id'), value: `#${publicId}` },
-  ];
+  const rows: SupportIdRow[] = [{ key: 'user', label: t('user id'), value: userId }];
 
   const handleCopy = async (row: SupportIdRow) => {
     try {

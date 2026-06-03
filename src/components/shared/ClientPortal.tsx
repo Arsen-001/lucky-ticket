@@ -1,6 +1,6 @@
 'use client';
 
-import { type ReactNode, useEffect, useRef, useState } from 'react';
+import { type ReactNode, useEffect, useState } from 'react';
 import { createPortal } from 'react-dom';
 
 type ClientPortalProps = {
@@ -14,20 +14,15 @@ export const ClientPortal = ({
   selector = '#portal-root',
   show = true,
 }: ClientPortalProps) => {
-  const ref = useRef<Element | null>(null);
-  const [mounted, setMounted] = useState(false);
+  const [container, setContainer] = useState<Element | null>(null);
 
   useEffect(() => {
-    const container = document.querySelector(selector);
-    if (!container) return;
-    ref.current = container;
-    setMounted(true);
-    // document.body.style.overflow = 'hidden';
+    setContainer(document.querySelector(selector));
   }, [selector]);
 
-  if (!mounted || !show || !ref?.current) {
+  if (!show || !container) {
     return null;
   }
 
-  return createPortal(children, ref?.current);
+  return createPortal(children, container);
 };

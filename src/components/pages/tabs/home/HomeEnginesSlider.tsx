@@ -100,7 +100,31 @@ export function HomeEnginesSlider({ className }: ClassNameProps) {
   const scrollerRef = useRef<HTMLDivElement>(null);
   const dotsRef = useRef<HTMLDivElement>(null);
   const [activeIndex, setActiveIndex] = useState(0);
-  const [items, setItems] = useState<EngineWithTier[]>([]);
+
+  // Flatten owned engines straight from tickets during render so cached data
+  // paints engines on the first frame — no skeleton/empty flash when the Home
+  // tab remounts on navigation (the (tabs) layout remounts via key={pathname}).
+  const flatFromTickets: EngineWithTier[] = tickets
+    ? tickets
+        .filter(ticket => !ticket.blocked && ticket.engines?.length)
+        .flatMap(
+          ticket =>
+            ticket.engines?.map<EngineWithTier>(engine => ({
+              engine,
+              tier: ticket.ticketType,
+            })) ?? []
+        )
+    : [];
+
+  const [items, setItems] = useState<EngineWithTier[]>(flatFromTickets);
+  // Re-seed when fresh tickets arrive (server data supersedes the locally
+  // advanced pendingCount). Render-phase sync avoids the one-frame effect lag.
+  const [seededTickets, setSeededTickets] = useState(tickets);
+  if (tickets !== seededTickets) {
+    setSeededTickets(tickets);
+    setItems(flatFromTickets);
+  }
+
   const [elapsedByEngine, setElapsedByEngine] = useState<Record<string, number>>({});
   const [starsModal, setStarsModal] = useState<{ open: boolean; required: number }>({
     open: false,
@@ -114,6 +138,8 @@ export function HomeEnginesSlider({ className }: ClassNameProps) {
   } | null>(null);
 
   const currentStars = me?.telegramStars ?? 0;
+  const isLp = me?.isLuckyPlayer ?? false;
+  const isVip = me?.isVIP ?? false;
 
   const requireStars = (cost: number, onPaid: () => void) => {
     if (currentStars < cost) {
@@ -122,20 +148,6 @@ export function HomeEnginesSlider({ className }: ClassNameProps) {
     }
     onPaid();
   };
-
-  useEffect(() => {
-    if (!tickets) return;
-    const flat = tickets
-      .filter(ticket => !ticket.blocked && ticket.engines?.length)
-      .flatMap(
-        ticket =>
-          ticket.engines?.map<EngineWithTier>(engine => ({
-            engine,
-            tier: ticket.ticketType,
-          })) ?? []
-      );
-    setItems(flat);
-  }, [tickets]);
 
   useEffect(() => {
     if (!items.length) return;
@@ -156,6 +168,8 @@ export function HomeEnginesSlider({ className }: ClassNameProps) {
                   speedBooster,
                   capacityChip,
                   capacityBooster,
+                  isLuckyPlayer: isLp,
+                  isVip,
                 })
               : engineElapsedSeconds(engine);
           if (next[engine.id] !== elapsed) {
@@ -180,6 +194,8 @@ export function HomeEnginesSlider({ className }: ClassNameProps) {
             speedBooster,
             capacityChip,
             capacityBooster,
+            isLuckyPlayer: isLp,
+            isVip,
           });
           const elapsed = engineElapsedSeconds(engine);
           if (elapsed >= cycle) {
@@ -284,6 +300,8 @@ export function HomeEnginesSlider({ className }: ClassNameProps) {
       speedBooster,
       capacityChip,
       capacityBooster,
+      isLuckyPlayer: isLp,
+      isVip,
     });
     const elapsed = elapsedByEngine[engine.id] ?? engineElapsedSeconds(engine);
     const remaining = Math.max(0, cycle - elapsed);

@@ -48,8 +48,11 @@ export function ProfileSendTicketModal({
 
   const byTier = me?.privateStats?.ticketsByTier ?? {};
   const ownedTiers = TIER_ORDER.filter(tt => (byTier[tt] ?? 0) > 0);
+  // VIP inherits the Lucky Player send-limit table (DOCS §7.3).
   const sendLimits =
-    GlobalConstants.ticketSendDailyLimits[me?.isLuckyPlayer ? 'luckyPlayer' : 'default'];
+    GlobalConstants.ticketSendDailyLimits[
+      me?.isLuckyPlayer || me?.isVIP ? 'luckyPlayer' : 'default'
+    ];
 
   const [tier, setTier] = useState<TicketType | null>(null);
   const [quantity, setQuantity] = useState(1);

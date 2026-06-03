@@ -1,4 +1,4 @@
-import { Crown, Star, Users } from 'lucide-react';
+import { Crown, Gem, Star, Users } from 'lucide-react';
 import type { ReactNode } from 'react';
 import { twMerge } from 'tailwind-merge';
 import { useAppTranslations } from '@/hooks/useAppTranslations';
@@ -40,6 +40,14 @@ export const ReferralInfoSection = () => {
       icon: <Crown size={14} className="text-electric-purple" strokeWidth={2.4} />,
       iconWrapClass: 'bg-electric-purple/20',
       percentClass: 'text-electric-purple',
+    },
+    {
+      key: 'vip',
+      label: t('vip friends'),
+      percent: GlobalConstants.vipReferralPercentage,
+      icon: <Gem size={14} className="text-gold" strokeWidth={2.4} />,
+      iconWrapClass: 'bg-gold/20',
+      percentClass: 'text-gold',
     },
   ];
 

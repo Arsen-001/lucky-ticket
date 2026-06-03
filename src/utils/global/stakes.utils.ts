@@ -14,9 +14,21 @@ export const computeStakeAprPercent = (months: number) => {
   return minApr + ratio * (maxApr - minApr);
 };
 
-export const computeStakeReturnCoins = (deposit: number, months: number) => {
+export const computeStakeReturnCoins = (
+  deposit: number,
+  months: number,
+  isLuckyPlayer = false,
+  isVip = false
+) => {
   const ratePercent = computeStakeAprPercent(months);
-  return Math.round((deposit * ratePercent) / 100);
+  const base = (deposit * ratePercent) / 100;
+  // VIP supersedes LP — the higher-tier yield boost wins, never stacks.
+  const statusBoostPct = isVip
+    ? GlobalConstants.vipStakeYieldBoostPct
+    : isLuckyPlayer
+      ? GlobalConstants.luckyPlayerStakeYieldBoostPct
+      : 0;
+  return Math.round(base * (1 + statusBoostPct / 100));
 };
 
 /**

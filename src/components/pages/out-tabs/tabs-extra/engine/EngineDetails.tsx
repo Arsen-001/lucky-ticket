@@ -51,6 +51,8 @@ export function EngineDetails({ id }: EngineDetailsProps) {
   const { data: tickets, isLoading } = useGetTicketsQuery();
   const { data: me } = useGetMeQuery();
   const { data: inventory } = useGetInventoryQuery();
+  const isLp = me?.isLuckyPlayer ?? false;
+  const isVip = me?.isVIP ?? false;
 
   const [equipChipMutation] = useEquipChipMutation();
   const [activateBoosterMutation] = useActivateBoosterMutation();
@@ -96,7 +98,12 @@ export function EngineDetails({ id }: EngineDetailsProps) {
   useEffect(() => {
     if (!engine) return;
     const tick = () => {
-      const cycle = effectiveCycleSeconds(engine, { speedChip, speedBooster });
+      const cycle = effectiveCycleSeconds(engine, {
+        speedChip,
+        speedBooster,
+        isLuckyPlayer: isLp,
+        isVip,
+      });
       const elapsed =
         engine.pendingCount > 0 ? cycle : Math.min(cycle, engineElapsedSeconds(engine));
       setElapsedSeconds(elapsed);
@@ -107,7 +114,7 @@ export function EngineDetails({ id }: EngineDetailsProps) {
     tick();
     const intervalId = window.setInterval(tick, 1000);
     return () => window.clearInterval(intervalId);
-  }, [engine, speedChip, speedBooster, completeEngineCycle]);
+  }, [engine, speedChip, speedBooster, isLp, isVip, completeEngineCycle]);
 
   if (isLoading) {
     return <div className="px-5 py-4 text-pink-secondary text-sm">{t('loading')}</div>;
@@ -121,9 +128,20 @@ export function EngineDetails({ id }: EngineDetailsProps) {
     );
   }
 
-  const cycle = effectiveCycleSeconds(engine, { speedChip, speedBooster });
+  const cycle = effectiveCycleSeconds(engine, {
+    speedChip,
+    speedBooster,
+    isLuckyPlayer: isLp,
+    isVip,
+  });
   const capacity = engineCapacity(engine, { capacityChip, capacityBooster });
-  const baseCycleSeconds = effectiveCycleSeconds(engine, { speedChip });
+  // Productivity is "before time-limited booster" but *with* permanent boosts
+  // (engine/speed levels, chip, status) — so status must be included here too.
+  const baseCycleSeconds = effectiveCycleSeconds(engine, {
+    speedChip,
+    isLuckyPlayer: isLp,
+    isVip,
+  });
   const baseCapacity = engineCapacity(engine, { capacityChip });
   const ticketsPerHour = baseCycleSeconds > 0 ? (3600 / baseCycleSeconds) * baseCapacity : 0;
 

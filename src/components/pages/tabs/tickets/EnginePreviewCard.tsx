@@ -3,6 +3,7 @@
 import { Clock, Layers, Sparkles } from 'lucide-react';
 import { twMerge } from 'tailwind-merge';
 import { useGetInventoryQuery } from '@/api/inventory.api';
+import { useGetMeQuery } from '@/api/me.api';
 import { ReactorDial } from '@/components/pages/out-tabs/tabs-extra/ticket/ReactorDial';
 import { EngineLevelBadge } from '@/components/pages/out-tabs/tabs-extra/ticket/EngineLevelBadge';
 import { EngineNextInFill } from '@/components/pages/out-tabs/tabs-extra/ticket/EngineNextInFill';
@@ -48,12 +49,18 @@ export function EnginePreviewCard({
 }: EnginePreviewCardProps) {
   const t = useAppTranslations();
   const { data: inventory } = useGetInventoryQuery();
+  const { data: me } = useGetMeQuery();
   const speedChip = findEquippedChip(inventory?.chips, engine.id, 'speed');
   const speedBooster = findActiveBooster(inventory?.boosters, engine.id, 'speed');
   const capacityChip = findEquippedChip(inventory?.chips, engine.id, 'capacity');
   const capacityBooster = findActiveBooster(inventory?.boosters, engine.id, 'capacity');
 
-  const cycle = effectiveCycleSeconds(engine, { speedChip, speedBooster });
+  const cycle = effectiveCycleSeconds(engine, {
+    speedChip,
+    speedBooster,
+    isLuckyPlayer: me?.isLuckyPlayer ?? false,
+    isVip: me?.isVIP ?? false,
+  });
   const capacity = engineCapacity(engine, { capacityChip, capacityBooster });
   const pending = engine.pendingCount > 0;
   const remaining = Math.max(0, cycle - elapsedSeconds);

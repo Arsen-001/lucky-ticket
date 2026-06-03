@@ -12,6 +12,8 @@ import {
   useBuyShardMutation,
   useGetMarketDataQuery,
 } from '@/api/market.api';
+import { useGetMeQuery } from '@/api/me.api';
+import { applyStatusMarketDiscount } from '@/utils/global/market.utils';
 import '@/styles/components/tasks.css';
 import { ChipShardIcon } from '@/components/shared/icons/ChipShardIcon';
 import { TelegramStarIcon } from '@/components/shared/icons/TelegramStarIcon';
@@ -60,6 +62,9 @@ const renderAvatarIcon = (
 export function MarketHeroCarousel({ onSelect, onBuy }: MarketHeroCarouselProps) {
   const t = useAppTranslations();
   const { data, isLoading } = useGetMarketDataQuery();
+  const { data: me } = useGetMeQuery();
+  const isLp = me?.isLuckyPlayer ?? false;
+  const isVip = me?.isVIP ?? false;
   const [buyCosmetic] = useBuyCosmeticMutation();
   const [buyShard] = useBuyShardMutation();
 
@@ -75,7 +80,7 @@ export function MarketHeroCarousel({ onSelect, onBuy }: MarketHeroCarouselProps)
         id: c.id,
         title: c.name,
         description: c.description ?? '',
-        prices: c.prices,
+        prices: applyStatusMarketDiscount(c.prices, isLp, isVip),
         expiresAt: c.expiresAt,
         discountPct: c.discountPct,
         isNew: c.isNew,
@@ -93,7 +98,7 @@ export function MarketHeroCarousel({ onSelect, onBuy }: MarketHeroCarouselProps)
       id: s.id,
       title: s.name,
       description: `+${s.count} ${t('shards')}`,
-      prices: s.prices,
+      prices: applyStatusMarketDiscount(s.prices, isLp, isVip),
       discountPct: s.discountPct,
       isNew: s.isNew,
       accent: s.quality,
@@ -143,7 +148,7 @@ export function MarketHeroCarousel({ onSelect, onBuy }: MarketHeroCarouselProps)
     }
 
     return list;
-  }, [data, buyCosmetic, buyShard, t]);
+  }, [data, buyCosmetic, buyShard, t, isLp, isVip]);
 
   if (isLoading) {
     return (

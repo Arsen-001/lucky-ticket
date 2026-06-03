@@ -78,7 +78,7 @@ export const { selectCount, selectStatus } = counterSlice.selectors;
 export const incrementIfOdd =
   (amount: number): AppThunk =>
   (dispatch, getState) => {
-    const currentValue = selectCount(getState() as any);
+    const currentValue = selectCount(getState() as unknown as Parameters<typeof selectCount>[0]);
 
     if (currentValue % 2 === 1 || currentValue % 2 === -1) {
       dispatch(incrementByAmount(amount));

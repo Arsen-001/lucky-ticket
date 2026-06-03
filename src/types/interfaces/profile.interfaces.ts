@@ -45,7 +45,6 @@ export interface ActivityBest {
 
 export interface ProfileResponse {
   id: string;
-  publicId: string;
   username: string;
   avatar: string;
   banner?: string;

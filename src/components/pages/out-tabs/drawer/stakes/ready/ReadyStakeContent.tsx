@@ -8,6 +8,7 @@ import { ArrowDownToLine, Sparkles } from 'lucide-react';
 import { BoltIcon } from '@/components/shared/icons/BoltIcon';
 import { icons } from '@/constants/icons';
 import { useClaimStakeMutation, useGetStakesQuery } from '@/api/stakes.api';
+import { useGetMeQuery } from '@/api/me.api';
 import { LcLabel } from '@/components/shared/icons/LcLabel';
 import { GoldenText } from '@/components/shared/typography/GoldenText';
 import { routes } from '@/constants/routes';
@@ -57,6 +58,7 @@ export function ReadyStakeContent({ stakeId }: ReadyStakeContentProps) {
   const t = useAppTranslations();
   const router = useRouter();
   const { data: stakes, isLoading } = useGetStakesQuery();
+  const { data: me } = useGetMeQuery();
   const [claimStake, { isLoading: claiming }] = useClaimStakeMutation();
 
   const stake = stakes?.activeStakes.find(s => s.id === stakeId);
@@ -107,7 +109,12 @@ export function ReadyStakeContent({ stakeId }: ReadyStakeContentProps) {
   }
 
   const months = computeStakeMonths(stake.startDate, stake.endDate);
-  const yieldLC = computeStakeReturnCoins(stake.lockedAmount, months);
+  const yieldLC = computeStakeReturnCoins(
+    stake.lockedAmount,
+    months,
+    me?.isLuckyPlayer ?? false,
+    me?.isVIP ?? false
+  );
   const ratePercent = computeStakeAprPercent(months);
   const rateLabel = ratePercent.toFixed(ratePercent % 1 === 0 ? 0 : 1);
   const totalLC = stake.lockedAmount + yieldLC;

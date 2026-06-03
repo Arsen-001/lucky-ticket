@@ -190,6 +190,12 @@ export const enginesApi = api.injectEndpoints({
         const inventory = inventoryApi.endpoints.getInventory.select()(
           getState() as Parameters<ReturnType<typeof inventoryApi.endpoints.getInventory.select>>[0]
         ).data;
+        // Status (VIP > LP) speed boost must be applied to the *actual*
+        // production cycle, not just the UI — otherwise the engine shows a
+        // shorter (boosted) cycle but never mints faster (DOCS §7.3 / §9.7).
+        const me = meApi.endpoints.getMe.select()(
+          getState() as Parameters<ReturnType<typeof meApi.endpoints.getMe.select>>[0]
+        ).data;
         const patch = dispatch(
           ticketsApi.util.updateQueryData('getTickets', undefined, draft => {
             for (const ticket of draft) {
@@ -199,7 +205,12 @@ export const enginesApi = api.injectEndpoints({
               const speedBooster = findActiveBooster(inventory?.boosters, engineId, 'speed');
               const capacityChip = findEquippedChip(inventory?.chips, engineId, 'capacity');
               const capacityBooster = findActiveBooster(inventory?.boosters, engineId, 'capacity');
-              const cycle = effectiveCycleSeconds(engine, { speedChip, speedBooster });
+              const cycle = effectiveCycleSeconds(engine, {
+                speedChip,
+                speedBooster,
+                isLuckyPlayer: me?.isLuckyPlayer ?? false,
+                isVip: me?.isVIP ?? false,
+              });
               const elapsed = dayjs().diff(dayjs(engine.cycleStartedAt), 'second');
               if (elapsed >= cycle) {
                 engine.pendingCount = engineCapacity(engine, { capacityChip, capacityBooster });

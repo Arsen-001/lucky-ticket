@@ -3,6 +3,7 @@
 import { Cpu, MemoryStick, Timer, Zap } from 'lucide-react';
 import type { ReactNode } from 'react';
 import { useBuyBoosterMutation } from '@/api/market.api';
+import { useGetMeQuery } from '@/api/me.api';
 import { MarketSectionGrid } from '@/components/pages/tabs/market/MarketSectionGrid';
 import { MarketUniversalCard } from '@/components/pages/tabs/market/MarketUniversalCard';
 import type { MarketSelectedItem } from '@/components/pages/tabs/market/MarketView';
@@ -11,6 +12,7 @@ import { useAppTranslations } from '@/hooks/useAppTranslations';
 import { useUnlockedTiers } from '@/hooks/useUnlockedTiers';
 import type { InventoryBoosterDuration } from '@/types/interfaces/inventory.interfaces';
 import type { MarketBooster, MarketPrice } from '@/types/interfaces/market.interfaces';
+import { applyStatusMarketDiscount } from '@/utils/global/market.utils';
 
 export interface MarketBoosterSectionProps {
   boosters: MarketBooster[];
@@ -22,6 +24,9 @@ export function MarketBoosterSection({ boosters, onSelect, onBuy }: MarketBooste
   const t = useAppTranslations();
   const { isTierUnlocked } = useUnlockedTiers();
   const [buyBooster] = useBuyBoosterMutation();
+  const { data: me } = useGetMeQuery();
+  const isLp = me?.isLuckyPlayer ?? false;
+  const isVip = me?.isVIP ?? false;
   if (!boosters.length) return null;
 
   return (
@@ -37,12 +42,13 @@ export function MarketBoosterSection({ boosters, onSelect, onBuy }: MarketBooste
           <BoosterIcon type={booster.type} tier={booster.quality} size={140} />
         );
         const description = `+${booster.effectPct}% · ${t('duration hours', { n: booster.durationHours })}`;
+        const discountedPrices = applyStatusMarketDiscount(booster.prices, isLp, isVip);
         const item: MarketSelectedItem = {
           id: booster.id,
           name: booster.name,
           description,
           iconNode: modalIcon,
-          prices: booster.prices,
+          prices: discountedPrices,
           isNew: booster.isNew,
           discountPct: booster.discountPct,
           accent: booster.quality,
@@ -83,7 +89,7 @@ export function MarketBoosterSection({ boosters, onSelect, onBuy }: MarketBooste
             disabled={isLocked}
             iconStage={cardIcon}
             iconStageClassName="h-40"
-            prices={booster.prices}
+            prices={discountedPrices}
             onClick={() => onSelect(item)}
             onBuy={price => onBuy(item, price)}
           />

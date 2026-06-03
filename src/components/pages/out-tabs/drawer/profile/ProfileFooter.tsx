@@ -10,17 +10,10 @@ export interface ProfileFooterProps {
   isOwn: boolean;
   memberSince: string;
   userId: string;
-  publicId: string;
   onSignOut?: () => void;
 }
 
-export function ProfileFooter({
-  isOwn,
-  memberSince,
-  userId,
-  publicId,
-  onSignOut,
-}: ProfileFooterProps) {
+export function ProfileFooter({ isOwn, memberSince, userId, onSignOut }: ProfileFooterProps) {
   const t = useAppTranslations();
   const [signOutOpen, setSignOutOpen] = useState(false);
   const formattedDate = dayjs(memberSince).format('MMM D, YYYY');
@@ -32,7 +25,7 @@ export function ProfileFooter({
 
   return (
     <section className="flex flex-col gap-2.5">
-      {isOwn && <ProfileSupportIds userId={userId} publicId={publicId} />}
+      {isOwn && <ProfileSupportIds userId={userId} />}
 
       {isOwn && (
         <button

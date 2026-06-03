@@ -43,9 +43,9 @@ export const marketApi = api.injectEndpoints({
 
     buyStatus: builder.mutation<void, { statusId: string; priceType: MarketPriceType }>({
       query: ({ statusId, priceType }) => ({
-        url: `market/statuses/${statusId}/buy`,
+        url: 'market/statuses/buy',
         method: 'POST',
-        body: { priceType },
+        body: { statusId, priceType },
       }),
       invalidatesTags: [rtkTags.market, rtkTags.me],
     }),

@@ -11,6 +11,28 @@ export const GlobalConstants = {
   luckyPlayerReferralPercentage: 15,
   /** Engine cycle speed reduction granted by Lucky Player status (stacks with chips/boosters). */
   luckyPlayerEngineSpeedBoostPct: 10,
+  /** Flat discount applied to every Market item price for Lucky Player holders (DOCS §7.3). */
+  luckyPlayerMarketDiscountPct: 10,
+  /** Multiplier (in %) added to stake LC yield for Lucky Player holders — stacks on top of APR. */
+  luckyPlayerStakeYieldBoostPct: 20,
+  /** Bonus (in %) applied to LC rewards from tournament placements for Lucky Player holders. */
+  luckyPlayerTournamentRewardBoostPct: 25,
+  /** Bonus (in %) applied to AP earned when joining a tournament for Lucky Player holders. */
+  luckyPlayerTournamentJoinApBoostPct: 50,
+  /**
+   * VIP perk magnitudes (DOCS §7.3 — high-tier permanent status). Per design,
+   * VIP values exceed Lucky Player at every category and supersede them when
+   * both are active — the higher-tier value wins, the two never stack (DOCS
+   * §7.3). Tied to `maxVipLevel = 20` (no per-level scaling here — the listed
+   * value is what a VIP holder gets regardless of their level).
+   */
+  vipEngineSpeedBoostPct: 25,
+  vipStakeYieldBoostPct: 40,
+  vipMarketDiscountPct: 20,
+  vipTournamentRewardBoostPct: 50,
+  vipTournamentJoinApBoostPct: 100,
+  vipWatchVideoDailyLimit: 40,
+  vipReferralPercentage: 25,
   /**
    * Hard floor for engine output rate: no matter how many speed boosts stack
    * (engine level + speed level + speed chip + speed booster), one ticket can
@@ -78,7 +100,10 @@ export const GlobalConstants = {
     dailyStreak: 3,
     verifyEmail: 20,
     watchVideo: 2,
-    watchVideoDailyLimit: 20,
+    /** Default daily ads cap. Lucky Player gets the boosted limit below. */
+    watchVideoDailyLimit: 10,
+    /** Daily ads cap for Lucky Player holders (DOCS §7.3). */
+    luckyPlayerWatchVideoDailyLimit: 20,
     sendTicket: 1,
     sendTicketDailyLimit: 3,
     likeProfile: 1,

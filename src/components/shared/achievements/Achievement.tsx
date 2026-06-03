@@ -1,4 +1,5 @@
 'use client';
+import Image from 'next/image';
 import { type CSSProperties, type ReactNode } from 'react';
 import {
   Anchor,
@@ -205,10 +206,11 @@ export function Achievement({
       )}
     >
       {badgeSrc ? (
-        //TODO: Next js Image component add spaces from edges
-        <img
+        <Image
           src={badgeSrc}
           alt={achievement.name}
+          width={120}
+          height={120}
           className={twMerge('relative z-1 w-30 h-30 object-contain', classNames?.icon)}
           style={{ opacity: isLocked ? 0.4 : 1 }}
         />

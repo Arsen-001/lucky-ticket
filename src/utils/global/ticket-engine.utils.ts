@@ -56,14 +56,22 @@ export const effectiveCycleSeconds = (
     speedBooster?: InventoryBooster;
     capacityChip?: InventoryChip;
     capacityBooster?: InventoryBooster;
-    luckyPlayerBoostPct?: number;
+    isLuckyPlayer?: boolean;
+    isVip?: boolean;
     avatarBoostPct?: number;
   }
 ) => {
+  // VIP supersedes LP — higher-tier engine speed boost wins, no stacking.
+  const statusBoostPct = options?.isVip
+    ? GlobalConstants.vipEngineSpeedBoostPct
+    : options?.isLuckyPlayer
+      ? GlobalConstants.luckyPlayerEngineSpeedBoostPct
+      : 0;
+
   let totalBoostPct =
     engineLevelBoostPct(engine.engineLevel || 1) +
     speedLevelBoostPct(engine.speedLevel || 0) +
-    (options?.luckyPlayerBoostPct ?? 0) +
+    statusBoostPct +
     (options?.avatarBoostPct ?? 0);
 
   if (options?.speedChip) totalBoostPct += options.speedChip.effectPct;

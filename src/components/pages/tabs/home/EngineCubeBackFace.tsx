@@ -12,6 +12,10 @@ export interface EngineCubeBackFaceProps {
   baseCapacity: number;
   /** Aggregated additive speed-boost % from all sources (level + chip + booster + LP + ...). */
   totalBoostPct: number;
+  /** Speed-boost % granted by status (LP or VIP — whichever is active). 0 if neither. */
+  luckyPlayerBoostPct?: number;
+  /** Short status label for the boost row (e.g. "LP", "VIP"). Defaults to "LP". */
+  statusLabel?: string;
   speedChip?: InventoryChip;
   capacityChip?: InventoryChip;
   speedBooster?: InventoryBooster;
@@ -77,6 +81,8 @@ export function EngineCubeBackFace({
   baseCycleSeconds,
   baseCapacity,
   totalBoostPct,
+  luckyPlayerBoostPct = 0,
+  statusLabel,
   speedChip,
   capacityChip,
   speedBooster,
@@ -163,6 +169,19 @@ export function EngineCubeBackFace({
             icon={<Package size={11} stroke={CAPACITY_ACCENT} strokeWidth={2.6} />}
             text={capacityBooster ? `+${capacityBooster.effectPct}%` : '—'}
             dim={!capacityBooster}
+          />
+        </StatRow>
+
+        <StatRow label={statusLabel ?? t('lp')}>
+          <InlineStat
+            icon={<Zap size={11} stroke={SPEED_ACCENT} strokeWidth={2.6} />}
+            text={luckyPlayerBoostPct > 0 ? `+${luckyPlayerBoostPct}%` : '—'}
+            dim={luckyPlayerBoostPct === 0}
+          />
+          <InlineStat
+            icon={<Package size={11} stroke={CAPACITY_ACCENT} strokeWidth={2.6} />}
+            text="—"
+            dim
           />
         </StatRow>
 

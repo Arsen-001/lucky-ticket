@@ -13,6 +13,7 @@ import {
 } from '@/components/pages/out-tabs/tabs-extra/ticket/EngineCard';
 import { useGetInventoryQuery } from '@/api/inventory.api';
 import { useGetMeQuery } from '@/api/me.api';
+import { GlobalConstants } from '@/constants/global.constants';
 import {
   effectiveCycleSeconds,
   engineCapacity,
@@ -86,13 +87,25 @@ export function EngineCardCube(props: EngineCardCubeProps) {
   // Mock lifetime-style stats derived from current engine fields.
   const lifetimeProduced = engineLevel * (capacity + 5) * 17;
 
-  // Total effective cycle/capacity with chips + boosters applied — used on the
-  // back face's "Total" summary row so the player sees the final output values.
+  // Status (VIP > LP) grants a flat additive engine speed boost. VIP
+  // supersedes LP — higher tier wins, never stacks (DOCS §7.3).
+  const isLp = me?.isLuckyPlayer ?? false;
+  const isVip = me?.isVIP ?? false;
+  const statusEngineSpeedBoostPct = isVip
+    ? GlobalConstants.vipEngineSpeedBoostPct
+    : isLp
+      ? GlobalConstants.luckyPlayerEngineSpeedBoostPct
+      : 0;
+
+  // Total effective cycle/capacity with chips + boosters + status applied —
+  // drives the back face's "Total" summary row.
   const totalCycleSeconds = effectiveCycleSeconds(engine, {
     speedChip: equippedSpeedChip,
     speedBooster: activeSpeedBooster,
     capacityChip: equippedCapacityChip,
     capacityBooster: activeCapacityBooster,
+    isLuckyPlayer: isLp,
+    isVip,
   });
   const totalCapacity = engineCapacity(engine, {
     capacityChip: equippedCapacityChip,
@@ -104,6 +117,7 @@ export function EngineCardCube(props: EngineCardCubeProps) {
   const totalBoostPct =
     engineLevelBoostPct(engineLevel) +
     speedLevelBoostPct(speedLevel) +
+    statusEngineSpeedBoostPct +
     (equippedSpeedChip?.effectPct ?? 0) +
     (activeSpeedBooster?.effectPct ?? 0);
 
@@ -196,6 +210,8 @@ export function EngineCardCube(props: EngineCardCubeProps) {
             baseCycleSeconds={baseCycleSeconds}
             baseCapacity={baseCapacity}
             totalBoostPct={totalBoostPct}
+            luckyPlayerBoostPct={statusEngineSpeedBoostPct}
+            statusLabel={isVip ? 'VIP' : isLp ? 'LP' : undefined}
             speedChip={equippedSpeedChip}
             capacityChip={equippedCapacityChip}
             speedBooster={activeSpeedBooster}

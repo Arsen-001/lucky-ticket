@@ -3,6 +3,7 @@
 import { Gem } from 'lucide-react';
 import type { ReactNode } from 'react';
 import { useBuyShardMutation } from '@/api/market.api';
+import { useGetMeQuery } from '@/api/me.api';
 import { MarketSectionGrid } from '@/components/pages/tabs/market/MarketSectionGrid';
 import { MarketUniversalCard } from '@/components/pages/tabs/market/MarketUniversalCard';
 import type { MarketSelectedItem } from '@/components/pages/tabs/market/MarketView';
@@ -10,6 +11,7 @@ import { ChipShardIcon } from '@/components/shared/icons/ChipShardIcon';
 import { useAppTranslations } from '@/hooks/useAppTranslations';
 import { useUnlockedTiers } from '@/hooks/useUnlockedTiers';
 import type { MarketPrice, MarketShard } from '@/types/interfaces/market.interfaces';
+import { applyStatusMarketDiscount } from '@/utils/global/market.utils';
 
 export interface MarketShardSectionProps {
   shards: MarketShard[];
@@ -21,6 +23,9 @@ export function MarketShardSection({ shards, onSelect, onBuy }: MarketShardSecti
   const t = useAppTranslations();
   const { isTierUnlocked } = useUnlockedTiers();
   const [buyShard] = useBuyShardMutation();
+  const { data: me } = useGetMeQuery();
+  const isLp = me?.isLuckyPlayer ?? false;
+  const isVip = me?.isVIP ?? false;
   if (!shards.length) return null;
 
   return (
@@ -34,12 +39,13 @@ export function MarketShardSection({ shards, onSelect, onBuy }: MarketShardSecti
           <ChipShardIcon type={shard.type} tier={shard.quality} size={140} />
         );
         const description = `+${shard.count} ${t('shards')}`;
+        const discountedPrices = applyStatusMarketDiscount(shard.prices, isLp, isVip);
         const item: MarketSelectedItem = {
           id: shard.id,
           name: shard.name,
           description,
           iconNode: modalIcon,
-          prices: shard.prices,
+          prices: discountedPrices,
           isNew: shard.isNew,
           discountPct: shard.discountPct,
           accent: shard.quality,
@@ -62,7 +68,7 @@ export function MarketShardSection({ shards, onSelect, onBuy }: MarketShardSecti
             disabled={isLocked}
             iconStage={cardIcon}
             iconStageClassName="h-28"
-            prices={shard.prices}
+            prices={discountedPrices}
             onClick={() => onSelect(item)}
             onBuy={price => onBuy(item, price)}
           />

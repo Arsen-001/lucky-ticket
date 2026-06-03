@@ -7,6 +7,7 @@ import {
   useCompleteEngineCycleMutation,
 } from '@/api/engines.api';
 import { useGetInventoryQuery } from '@/api/inventory.api';
+import { useGetMeQuery } from '@/api/me.api';
 import { useGetTicketsQuery } from '@/api/tickets.api';
 import { TicketClaimedModal } from '@/components/pages/tabs/tickets/TicketClaimedModal';
 import { TicketsTierSummary } from '@/components/pages/tabs/tickets/TicketsTierSummary';
@@ -28,6 +29,9 @@ import type { Ticket, TicketType } from '@/types/types/ticket.types';
 export function TicketsTabsView() {
   const { data: tickets, isFetching } = useGetTicketsQuery();
   const { data: inventory } = useGetInventoryQuery();
+  const { data: me } = useGetMeQuery();
+  const isLp = me?.isLuckyPlayer ?? false;
+  const isVip = me?.isVIP ?? false;
   const [claimEngine] = useClaimEngineMutation();
   const [claimEnginesForTier] = useClaimEnginesForTierMutation();
   const [completeEngineCycle] = useCompleteEngineCycleMutation();
@@ -67,7 +71,12 @@ export function TicketsTabsView() {
         for (const engine of allEngines) {
           const speedChip = findEquippedChip(inventory?.chips, engine.id, 'speed');
           const speedBooster = findActiveBooster(inventory?.boosters, engine.id, 'speed');
-          const cycle = effectiveCycleSeconds(engine, { speedChip, speedBooster });
+          const cycle = effectiveCycleSeconds(engine, {
+            speedChip,
+            speedBooster,
+            isLuckyPlayer: isLp,
+            isVip,
+          });
           const elapsed = engine.pendingCount > 0 ? cycle : engineElapsedSeconds(engine);
           if (next[engine.id] !== elapsed) {
             next[engine.id] = elapsed;

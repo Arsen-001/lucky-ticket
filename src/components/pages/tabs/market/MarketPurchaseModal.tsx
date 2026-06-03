@@ -19,6 +19,7 @@ export interface MarketPurchaseModalProps {
   description?: ReactNode;
   iconNode?: ReactNode;
   price?: MarketPrice;
+  confirmText?: string;
 }
 
 export function MarketPurchaseModal({
@@ -30,6 +31,7 @@ export function MarketPurchaseModal({
   description,
   iconNode,
   price,
+  confirmText,
 }: MarketPurchaseModalProps) {
   const t = useAppTranslations();
 
@@ -44,6 +46,7 @@ export function MarketPurchaseModal({
       onClose={onClose}
       onConfirm={onConfirm}
       loading={loading}
+      confirmText={confirmText ?? t('buy')}
       title={title ?? t('confirm purchase')}
       content={
         <div className="mt-2 flex flex-col gap-4 text-center text-white/80">

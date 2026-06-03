@@ -6,6 +6,7 @@ import { ArrowDownToLine, TrendingUp } from 'lucide-react';
 import { icons } from '@/constants/icons';
 import { LcLabel } from '@/components/shared/icons/LcLabel';
 import { BoltIcon } from '@/components/shared/icons/BoltIcon';
+import { useGetMeQuery } from '@/api/me.api';
 import { useAppTranslations } from '@/hooks/useAppTranslations';
 import {
   computeStakeBaseAp,
@@ -28,8 +29,14 @@ export function StakesRewardsPreviewCard({
   durationMonths,
 }: StakesRewardsPreviewCardProps) {
   const t = useAppTranslations();
+  const { data: me } = useGetMeQuery();
   const ratePercent = computeStakeAprPercent(durationMonths);
-  const yieldLC = computeStakeReturnCoins(deposit, durationMonths);
+  const yieldLC = computeStakeReturnCoins(
+    deposit,
+    durationMonths,
+    me?.isLuckyPlayer ?? false,
+    me?.isVIP ?? false
+  );
   const stakeBaseAp = computeStakeBaseAp(deposit, durationMonths);
   const stakeBonusAp = computeStakeCompletionBonusAp(deposit, durationMonths);
   const completionStars = computeStakeCompletionStars(durationMonths, levelDef);

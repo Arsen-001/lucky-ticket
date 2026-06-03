@@ -12,6 +12,7 @@ import {
 } from '@/components/pages/tabs/market/MarketCategoryChips';
 import { MarketInfoModal } from '@/components/pages/tabs/market/MarketInfoModal';
 import { MarketPurchaseModal } from '@/components/pages/tabs/market/MarketPurchaseModal';
+import { MarketPurchaseSuccessModal } from '@/components/pages/tabs/market/MarketPurchaseSuccessModal';
 import { NotEnoughCoinsModal } from '@/components/pages/tabs/market/NotEnoughCoinsModal';
 import { NotEnoughStarsModal } from '@/components/pages/tabs/home/NotEnoughStarsModal';
 import { MarketEngineSection } from '@/components/pages/tabs/market/sections/MarketEngineSection';
@@ -37,6 +38,8 @@ export interface MarketSelectedItem {
   discountPct?: number;
   isNew?: boolean;
   accent?: MarketAccent;
+  /** Confirm-button label for this item (e.g. "Upgrade" for VIP). Defaults to "Buy". */
+  confirmText?: string;
   mutate: (price: MarketPrice) => Promise<unknown>;
 }
 
@@ -46,6 +49,7 @@ interface MarketActivePurchase {
   description?: ReactNode;
   iconNode: ReactNode;
   price: MarketPrice;
+  confirmText?: string;
   mutate: () => Promise<unknown>;
 }
 
@@ -64,6 +68,11 @@ export function MarketView() {
   const [infoItem, setInfoItem] = useState<MarketSelectedItem | null>(null);
   const [purchase, setPurchase] = useState<MarketActivePurchase | null>(null);
   const [confirming, setConfirming] = useState(false);
+  const [success, setSuccess] = useState<{
+    name: string;
+    description?: ReactNode;
+    iconNode: ReactNode;
+  } | null>(null);
   const [insufficientStars, setInsufficientStars] = useState<{ required: number } | null>(null);
   const [insufficientCoins, setInsufficientCoins] = useState<{ required: number } | null>(null);
 
@@ -107,6 +116,7 @@ export function MarketView() {
       description: item.description,
       iconNode: item.iconNode,
       price,
+      confirmText: item.confirmText,
       mutate: () => item.mutate(price),
     });
   };
@@ -121,6 +131,11 @@ export function MarketView() {
     setConfirming(true);
     try {
       await purchase.mutate();
+      setSuccess({
+        name: purchase.name,
+        description: purchase.description,
+        iconNode: purchase.iconNode,
+      });
       setPurchase(null);
     } catch (error) {
       console.error('Purchase failed:', error);
@@ -185,6 +200,7 @@ export function MarketView() {
         description={purchase?.description}
         iconNode={purchase?.iconNode}
         price={purchase?.price}
+        confirmText={purchase?.confirmText}
       />
 
       <NotEnoughStarsModal
@@ -199,6 +215,14 @@ export function MarketView() {
         onClose={() => setInsufficientCoins(null)}
         required={insufficientCoins?.required ?? 0}
         current={me?.coins ?? 0}
+      />
+
+      <MarketPurchaseSuccessModal
+        open={!!success}
+        onClose={() => setSuccess(null)}
+        itemName={success?.name}
+        itemDescription={success?.description}
+        itemIcon={success?.iconNode}
       />
     </div>
   );

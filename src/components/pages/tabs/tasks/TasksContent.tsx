@@ -23,7 +23,6 @@ import type {
   AdSlot,
   CategoryTasks,
   ClaimTaskResponse,
-  QuestStep,
   Task,
   TaskSubStep,
 } from '@/types/interfaces/tasks.interfaces';
@@ -39,7 +38,6 @@ import { TournamentSubTabs, type TournamentSubTab } from './TournamentSubTabs';
 import { TournamentSlidersSkeleton } from './TournamentSlidersSkeleton';
 import { AdsSection } from './AdsSection';
 import type { TierName } from '@/types/types/tier.types';
-import { QuestSection } from './QuestSection';
 import { ClaimRewardModal } from './ClaimRewardModal';
 import { ArrivalShine } from '@/components/shared/ArrivalShine';
 
@@ -181,7 +179,6 @@ export function TasksContent() {
     } else if (v === 'once' && activeFrequency !== TaskFrequency.ONCE) {
       setActiveFrequency(TaskFrequency.ONCE);
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [searchParams]);
   const [highlightToken, setHighlightToken] = useState<{
     category: TaskCategory;
@@ -326,11 +323,6 @@ export function TasksContent() {
     if (data.ads) {
       counts[TaskFrequency.DAILY] += data.ads.slots.filter(s => !s.watched).length;
     }
-    if (data.quest) {
-      counts[TaskFrequency.ONCE] += data.quest.steps.filter(
-        s => s.status === TaskStatus.READY_TO_CLAIM
-      ).length;
-    }
     return counts;
   }, [data]);
 
@@ -343,12 +335,6 @@ export function TasksContent() {
       items.push({
         category: TaskCategory.ADS,
         readyCount: data.ads.slots.filter(s => !s.watched).length,
-      });
-    }
-    if (activeFrequency === TaskFrequency.ONCE && data.quest) {
-      items.push({
-        category: TaskCategory.QUEST,
-        readyCount: data.quest.steps.filter(s => s.status === TaskStatus.READY_TO_CLAIM).length,
       });
     }
     const categoryItems: CategoryNavItem[] = [];
@@ -376,6 +362,35 @@ export function TasksContent() {
     setActiveCategory(navItems[0]?.category ?? null);
   }, [activeFrequency, navItems]);
 
+  const handleSelectCategory = (category: TaskCategory) => {
+    triggerHaptic('light');
+    setActiveCategory(category);
+    setHighlightToken({ category, nonce: Date.now() });
+
+    const el = sectionRefs.current.get(category);
+    if (!el) return;
+
+    const scroller = findScroller(el);
+    const stickyOffset = stickyNavRef.current?.offsetHeight ?? 64;
+
+    if (scroller) {
+      const target =
+        scroller.scrollTop +
+        el.getBoundingClientRect().top -
+        scroller.getBoundingClientRect().top -
+        stickyOffset -
+        8;
+      const clamped = Math.max(0, Math.min(target, scroller.scrollHeight - scroller.clientHeight));
+      const distance = Math.abs(clamped - scroller.scrollTop);
+      const lockMs = Math.min(1400, Math.max(500, distance * 1.6 + 200));
+      scrollLockUntilRef.current = Date.now() + lockMs;
+      scroller.scrollTo({ top: clamped, behavior: 'smooth' });
+    } else {
+      scrollLockUntilRef.current = Date.now() + 900;
+      el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+  };
+
   // When URL has ?category=..., scroll to that section once it's registered
   useEffect(() => {
     if (!data) return;
@@ -391,7 +406,6 @@ export function TasksContent() {
       }
     }, 150);
     return () => window.clearTimeout(id);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [searchParams, data, activeFrequency]);
 
   // When URL has ?task=<id>, fire a highlight shine on that specific task card
@@ -480,35 +494,6 @@ export function TasksContent() {
     };
   }, [data, activeFrequency, navItems.length]);
 
-  const handleSelectCategory = (category: TaskCategory) => {
-    triggerHaptic('light');
-    setActiveCategory(category);
-    setHighlightToken({ category, nonce: Date.now() });
-
-    const el = sectionRefs.current.get(category);
-    if (!el) return;
-
-    const scroller = findScroller(el);
-    const stickyOffset = stickyNavRef.current?.offsetHeight ?? 64;
-
-    if (scroller) {
-      const target =
-        scroller.scrollTop +
-        el.getBoundingClientRect().top -
-        scroller.getBoundingClientRect().top -
-        stickyOffset -
-        8;
-      const clamped = Math.max(0, Math.min(target, scroller.scrollHeight - scroller.clientHeight));
-      const distance = Math.abs(clamped - scroller.scrollTop);
-      const lockMs = Math.min(1400, Math.max(500, distance * 1.6 + 200));
-      scrollLockUntilRef.current = Date.now() + lockMs;
-      scroller.scrollTo({ top: clamped, behavior: 'smooth' });
-    } else {
-      scrollLockUntilRef.current = Date.now() + 900;
-      el.scrollIntoView({ behavior: 'smooth', block: 'start' });
-    }
-  };
-
   const handleSelectFrequency = (frequency: TaskFrequency) => {
     if (frequency === activeFrequency) return;
     triggerHaptic('light');
@@ -530,7 +515,6 @@ export function TasksContent() {
 
   const handleClaimTask = (task: Task, bundleSubStepIds?: string[]) =>
     runClaim(task.id, bundleSubStepIds);
-  const handleClaimQuestStep = (step: QuestStep) => runClaim(step.id);
   const handleClaimSubStep = (_task: Task, step: TaskSubStep) => runClaim(step.id);
 
   const handleWatchAd = async (slot: AdSlot) => {
@@ -559,7 +543,6 @@ export function TasksContent() {
   if (isError || !data) return <TasksLoadError onRetry={refetch} />;
 
   const showAds = activeFrequency === TaskFrequency.DAILY && !!data?.ads?.slots.length;
-  const showQuest = activeFrequency === TaskFrequency.ONCE && !!data?.quest;
   const filteredCategories =
     data?.categories.filter(c => tasksForFrequency(c, activeFrequency).length > 0) ?? [];
   // Hide Profile and Partners from the one-time tab — they live elsewhere
@@ -573,7 +556,7 @@ export function TasksContent() {
   const visibleCategories =
     activeFrequency === TaskFrequency.ONCE ? sortByOnceOrder(onceFiltered) : onceFiltered;
 
-  const allEmpty = !showAds && !showQuest && visibleCategories.length === 0;
+  const allEmpty = !showAds && visibleCategories.length === 0;
 
   return (
     <div className="flex flex-col">
@@ -610,17 +593,6 @@ export function TasksContent() {
               registerSection={registerSection}
               highlightToken={
                 highlightToken?.category === TaskCategory.ADS ? highlightToken.nonce : null
-              }
-            />
-          )}
-
-          {showQuest && data?.quest && (
-            <QuestSection
-              quest={data.quest}
-              onClaimStep={handleClaimQuestStep}
-              registerSection={registerSection}
-              highlightToken={
-                highlightToken?.category === TaskCategory.QUEST ? highlightToken.nonce : null
               }
             />
           )}

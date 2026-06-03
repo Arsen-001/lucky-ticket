@@ -18,6 +18,7 @@ import {
   TrendingUp,
   UserPlus,
 } from 'lucide-react';
+import { useGetMeQuery } from '@/api/me.api';
 import { Link } from '@/components/shared/links/Link';
 import { useAppTranslations } from '@/hooks/useAppTranslations';
 import {
@@ -211,7 +212,14 @@ export interface ActivitySourcesListProps {
 
 export function ActivitySourcesList({ activityPoints = 0 }: ActivitySourcesListProps) {
   const t = useAppTranslations();
+  const { data: me } = useGetMeQuery();
   const dailyBaseline = computeDailyBaselineAp(activityPoints);
+  // VIP supersedes LP — highest tier wins.
+  const watchVideoLimit = me?.isVIP
+    ? GlobalConstants.vipWatchVideoDailyLimit
+    : me?.isLuckyPlayer
+      ? apRewards.luckyPlayerWatchVideoDailyLimit
+      : apRewards.watchVideoDailyLimit;
 
   return (
     <section className="flex flex-col gap-3">
@@ -227,29 +235,35 @@ export function ActivitySourcesList({ activityPoints = 0 }: ActivitySourcesListP
           <span className="text-[10px] font-bold uppercase tracking-wider text-white/40">
             {t(CATEGORY_LABEL[category])}
           </span>
-          {SOURCES.filter(s => s.category === category).map(source => (
-            <Link
-              key={source.id}
-              href={`${source.route}?highlight=${source.id}${source.query ? `&${source.query}` : ''}`}
-              className="bg-background-overlay flex items-center gap-3 rounded-xl p-3 transition-all hover:bg-white/8 active:scale-99"
-            >
-              <div className="flex-center text-electric-pink h-9 w-9 shrink-0 rounded-lg bg-white/5">
-                <source.Icon size={17} strokeWidth={2.2} />
-              </div>
-              <div className="flex min-w-0 flex-1 flex-col">
-                <span className="truncate text-[13px] font-bold text-white">
-                  {t(source.labelKey)}
+          {SOURCES.filter(s => s.category === category).map(source => {
+            const hintParams =
+              source.id === 'watchVideo'
+                ? { ...source.hintParams, n: watchVideoLimit }
+                : source.hintParams;
+            return (
+              <Link
+                key={source.id}
+                href={`${source.route}?highlight=${source.id}${source.query ? `&${source.query}` : ''}`}
+                className="bg-background-overlay flex items-center gap-3 rounded-xl p-3 transition-all hover:bg-white/8 active:scale-99"
+              >
+                <div className="flex-center text-electric-pink h-9 w-9 shrink-0 rounded-lg bg-white/5">
+                  <source.Icon size={17} strokeWidth={2.2} />
+                </div>
+                <div className="flex min-w-0 flex-1 flex-col">
+                  <span className="truncate text-[13px] font-bold text-white">
+                    {t(source.labelKey)}
+                  </span>
+                  <span className="text-white-secondary text-[11px]">
+                    {t(source.hintKey, hintParams)}
+                  </span>
+                </div>
+                <span className="text-success shrink-0 text-[13px] font-extrabold tabular-nums">
+                  {source.ap ? `${source.ap} AP` : t(source.apFallbackKey ?? 'varies')}
                 </span>
-                <span className="text-white-secondary text-[11px]">
-                  {t(source.hintKey, source.hintParams)}
-                </span>
-              </div>
-              <span className="text-success shrink-0 text-[13px] font-extrabold tabular-nums">
-                {source.ap ? `${source.ap} AP` : t(source.apFallbackKey ?? 'varies')}
-              </span>
-              <ChevronRight size={15} className="shrink-0 text-white/25" />
-            </Link>
-          ))}
+                <ChevronRight size={15} className="shrink-0 text-white/25" />
+              </Link>
+            );
+          })}
         </div>
       ))}
     </section>

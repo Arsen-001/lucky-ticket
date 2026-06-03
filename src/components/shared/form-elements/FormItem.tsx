@@ -1,13 +1,13 @@
 'use client';
 
-import { useFormContext } from 'react-hook-form';
+import { type RegisterOptions, useFormContext } from 'react-hook-form';
 import { cloneElement, type ReactElement } from 'react';
 import { twMerge } from 'tailwind-merge';
 
 export interface FormItemProps {
   name: string;
   label?: string;
-  rules?: any;
+  rules?: RegisterOptions;
   children: ReactElement;
   layout?: 'vertical' | 'horizontal';
   infoMessage?: string;

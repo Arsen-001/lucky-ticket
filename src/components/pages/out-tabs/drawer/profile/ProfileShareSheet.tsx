@@ -1,6 +1,6 @@
 'use client';
 import { useEffect, useState } from 'react';
-import { Check, Copy, Hash, Send, Share2 } from 'lucide-react';
+import { Check, Copy, Send, Share2 } from 'lucide-react';
 import type { LucideIcon } from 'lucide-react';
 import { twMerge } from 'tailwind-merge';
 import { ClientPortal } from '@/components/shared/ClientPortal';
@@ -20,24 +20,15 @@ export interface ProfileShareSheetProps {
   onClose: () => void;
   url?: string;
   username?: string;
-  publicId?: string;
 }
 
-export function ProfileShareSheet({
-  open,
-  onClose,
-  url,
-  username,
-  publicId,
-}: ProfileShareSheetProps) {
+export function ProfileShareSheet({ open, onClose, url, username }: ProfileShareSheetProps) {
   const t = useAppTranslations();
   const [copied, setCopied] = useState(false);
-  const [idCopied, setIdCopied] = useState(false);
 
   useEffect(() => {
     if (!open) {
       setCopied(false);
-      setIdCopied(false);
     }
   }, [open]);
 
@@ -50,16 +41,6 @@ export function ProfileShareSheet({
     try {
       await navigator.clipboard?.writeText(shareUrl);
       setCopied(true);
-    } catch {
-      /* noop */
-    }
-  };
-
-  const handleCopyId = async () => {
-    if (!publicId) return;
-    try {
-      await navigator.clipboard?.writeText(`#${publicId}`);
-      setIdCopied(true);
     } catch {
       /* noop */
     }
@@ -82,17 +63,6 @@ export function ProfileShareSheet({
   };
 
   const options: ShareOption[] = [
-    ...(publicId
-      ? [
-          {
-            key: 'copy-id',
-            label: idCopied ? t('id copied', { id: publicId }) : t('copy id', { id: publicId }),
-            icon: idCopied ? Check : Hash,
-            iconClass: idCopied ? 'text-success' : 'text-electric-pink',
-            onClick: handleCopyId,
-          },
-        ]
-      : []),
     {
       key: 'copy',
       label: copied ? t('link copied') : t('copy link'),

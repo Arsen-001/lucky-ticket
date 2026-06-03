@@ -13,7 +13,7 @@ import { type MockData, mockData } from '@/mock/index.mock';
  * - Simulated random delay and error handling
  */
 export const mockBaseQuery =
-  <TMockMap extends Record<string, any>>(
+  <TMockMap extends Record<string, unknown>>(
     mockMap: TMockMap,
     { minDelay = 400, maxDelay = 1200 }: { minDelay?: number; maxDelay?: number } = {}
   ): BaseQueryFn<string | FetchArgs, unknown, FetchBaseQueryError> =>
@@ -38,15 +38,18 @@ export const mockBaseQuery =
       if (mockMap[cleanPath] !== undefined) return mockMap[cleanPath];
 
       // 3. Fallback to segment-by-segment traversal (supports finding by id/uuid in arrays)
-      let current: any = mockMap;
+      let current: unknown = mockMap;
       for (const segment of segments) {
         if (!current) return undefined;
 
         if (Array.isArray(current)) {
           // If we encounter an array, we assume the segment is an ID
-          current = current.find(item => item && (item.id === segment || item.uuid === segment));
+          current = current.find(item => {
+            const record = item as Record<string, unknown> | null;
+            return !!record && (record.id === segment || record.uuid === segment);
+          });
         } else if (typeof current === 'object' && segment in current) {
-          current = current[segment];
+          current = (current as Record<string, unknown>)[segment];
         } else {
           return undefined;
         }
@@ -74,16 +77,16 @@ export const mockBaseQuery =
 
       // If mock already returns an RTK-Query compatible result object, return it directly
       if (result && typeof result === 'object' && ('data' in result || 'error' in result)) {
-        return result as any;
+        return result as { data: unknown } | { error: FetchBaseQueryError };
       }
 
       return { data: result };
-    } catch (error: any) {
+    } catch (error) {
       console.error(`[MockBaseQuery] Execution error:`, error);
       return {
         error: {
           status: 500,
-          data: error.message || 'Internal Mock Error',
+          data: error instanceof Error ? error.message : 'Internal Mock Error',
         } as FetchBaseQueryError,
       };
     }

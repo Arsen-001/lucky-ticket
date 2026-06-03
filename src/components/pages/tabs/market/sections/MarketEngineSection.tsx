@@ -3,6 +3,7 @@
 import { Cog } from 'lucide-react';
 import type { ReactNode } from 'react';
 import { useBuyEngineMutation } from '@/api/market.api';
+import { useGetMeQuery } from '@/api/me.api';
 import { MarketSectionGrid } from '@/components/pages/tabs/market/MarketSectionGrid';
 import { MarketUniversalCard } from '@/components/pages/tabs/market/MarketUniversalCard';
 import type { MarketSelectedItem } from '@/components/pages/tabs/market/MarketView';
@@ -10,6 +11,7 @@ import { EngineIcon } from '@/components/shared/icons/EngineIcon';
 import { useAppTranslations } from '@/hooks/useAppTranslations';
 import { useUnlockedTiers } from '@/hooks/useUnlockedTiers';
 import type { MarketEngine, MarketPrice } from '@/types/interfaces/market.interfaces';
+import { applyStatusMarketDiscount } from '@/utils/global/market.utils';
 
 export interface MarketEngineSectionProps {
   engines: MarketEngine[];
@@ -21,6 +23,9 @@ export function MarketEngineSection({ engines, onSelect, onBuy }: MarketEngineSe
   const t = useAppTranslations();
   const { isTierUnlocked } = useUnlockedTiers();
   const [buyEngine] = useBuyEngineMutation();
+  const { data: me } = useGetMeQuery();
+  const isLp = me?.isLuckyPlayer ?? false;
+  const isVip = me?.isVIP ?? false;
   if (!engines.length) return null;
 
   return (
@@ -30,12 +35,13 @@ export function MarketEngineSection({ engines, onSelect, onBuy }: MarketEngineSe
         const cardIcon: ReactNode = <EngineIcon tier={engine.ticketType} size={144} />;
         const modalIcon: ReactNode = <EngineIcon tier={engine.ticketType} size={156} />;
         const description = t('level x', { n: engine.engineLevel });
+        const discountedPrices = applyStatusMarketDiscount(engine.prices, isLp, isVip);
         const item: MarketSelectedItem = {
           id: engine.id,
           name: engine.name,
           description,
           iconNode: modalIcon,
-          prices: engine.prices,
+          prices: discountedPrices,
           remainingSupply: engine.remainingSupply,
           isNew: engine.isNew,
           discountPct: engine.discountPct,
@@ -58,7 +64,7 @@ export function MarketEngineSection({ engines, onSelect, onBuy }: MarketEngineSe
             disabled={isLocked}
             iconStage={cardIcon}
             iconStageClassName="h-40"
-            prices={engine.prices}
+            prices={discountedPrices}
             onClick={() => onSelect(item)}
             onBuy={price => onBuy(item, price)}
           />

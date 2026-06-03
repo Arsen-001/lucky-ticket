@@ -299,7 +299,6 @@ export function ProfileHero({ profile, loading, isPreview, onTogglePreview }: Pr
         open={shareOpen}
         onClose={() => setShareOpen(false)}
         username={profile?.username}
-        publicId={profile?.publicId}
       />
 
       <ConfirmModal

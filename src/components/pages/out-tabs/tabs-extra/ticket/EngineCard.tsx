@@ -4,6 +4,7 @@ import { useEffect, useRef, useState, type CSSProperties } from 'react';
 import { twMerge } from 'tailwind-merge';
 import { Clock, Layers, Package, Zap } from 'lucide-react';
 import { useGetInventoryQuery } from '@/api/inventory.api';
+import { useGetMeQuery } from '@/api/me.api';
 import { TelegramStarIcon } from '@/components/shared/icons/TelegramStarIcon';
 import { BoltIcon } from '@/components/shared/icons/BoltIcon';
 import { useAppTranslations } from '@/hooks/useAppTranslations';
@@ -73,16 +74,18 @@ export function EngineCard({
 }: EngineCardProps) {
   const t = useAppTranslations();
   const { data: inventory } = useGetInventoryQuery();
+  const { data: me } = useGetMeQuery();
   const speedChip = findEquippedChip(inventory?.chips, engine.id, 'speed');
   const speedBooster = findActiveBooster(inventory?.boosters, engine.id, 'speed');
   const capacityChip = findEquippedChip(inventory?.chips, engine.id, 'capacity');
   const capacityBooster = findActiveBooster(inventory?.boosters, engine.id, 'capacity');
-
   const cycle = effectiveCycleSeconds(engine, {
     speedChip,
     speedBooster,
     capacityChip,
     capacityBooster,
+    isLuckyPlayer: me?.isLuckyPlayer ?? false,
+    isVip: me?.isVIP ?? false,
   });
   const capacity = engineCapacity(engine, { capacityChip, capacityBooster });
   const pending = engine.pendingCount > 0;

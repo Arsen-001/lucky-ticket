@@ -4,6 +4,7 @@ import Image from 'next/image';
 import { Gift, Sparkles, Star, UserRound, Zap } from 'lucide-react';
 import type { ReactNode } from 'react';
 import { useBuyCosmeticMutation } from '@/api/market.api';
+import { useGetMeQuery } from '@/api/me.api';
 import { MarketSectionGrid } from '@/components/pages/tabs/market/MarketSectionGrid';
 import { MarketUniversalCard } from '@/components/pages/tabs/market/MarketUniversalCard';
 import type { MarketSelectedItem } from '@/components/pages/tabs/market/MarketView';
@@ -17,6 +18,7 @@ import type {
   MarketCosmetic,
   MarketPrice,
 } from '@/types/interfaces/market.interfaces';
+import { applyStatusMarketDiscount } from '@/utils/global/market.utils';
 
 export interface MarketCosmeticSectionProps {
   cosmetics: MarketCosmetic[];
@@ -27,6 +29,9 @@ export interface MarketCosmeticSectionProps {
 export function MarketCosmeticSection({ cosmetics, onSelect, onBuy }: MarketCosmeticSectionProps) {
   const t = useAppTranslations();
   const [buyCosmetic] = useBuyCosmeticMutation();
+  const { data: me } = useGetMeQuery();
+  const isLp = me?.isLuckyPlayer ?? false;
+  const isVip = me?.isVIP ?? false;
 
   const avatars = cosmetics.filter(c => c.cosmeticType === MarketCosmeticType.AVATAR);
   if (!avatars.length) return null;
@@ -82,12 +87,13 @@ export function MarketCosmeticSection({ cosmetics, onSelect, onBuy }: MarketCosm
             </div>
           );
 
+        const discountedPrices = applyStatusMarketDiscount(avatar.prices, isLp, isVip);
         const item: MarketSelectedItem = {
           id: avatar.id,
           name: avatar.name,
           description: avatar.description,
           iconNode: renderIcon(165),
-          prices: avatar.prices,
+          prices: discountedPrices,
           isNew: avatar.isNew,
           discountPct: avatar.discountPct,
           accent,
@@ -124,7 +130,7 @@ export function MarketCosmeticSection({ cosmetics, onSelect, onBuy }: MarketCosm
             discountPct={avatar.discountPct}
             iconStage={renderIcon(139)}
             iconStageClassName="h-40"
-            prices={avatar.prices}
+            prices={discountedPrices}
             onClick={() => onSelect(item)}
             onBuy={price => onBuy(item, price)}
           />

@@ -4,6 +4,7 @@ import '@/styles/components/stakes.css';
 import Image from 'next/image';
 import { ChevronRight, Clock } from 'lucide-react';
 import Link from 'next/link';
+import { useGetMeQuery } from '@/api/me.api';
 import { LcLabel } from '@/components/shared/icons/LcLabel';
 import { BoltIcon } from '@/components/shared/icons/BoltIcon';
 import { icons } from '@/constants/icons';
@@ -29,10 +30,16 @@ export interface StakesActiveStakeCardProps {
 
 export function StakesActiveStakeCard({ stake, levelDef }: StakesActiveStakeCardProps) {
   const t = useAppTranslations();
+  const { data: me } = useGetMeQuery();
   const countdown = useCountDown(stake.endDate);
   const ready = countdown.expired || isStakeReady(stake.endDate);
   const months = computeStakeMonths(stake.startDate, stake.endDate);
-  const yieldLC = computeStakeReturnCoins(stake.lockedAmount, months);
+  const yieldLC = computeStakeReturnCoins(
+    stake.lockedAmount,
+    months,
+    me?.isLuckyPlayer ?? false,
+    me?.isVIP ?? false
+  );
   const stakeBonusAp = computeStakeCompletionBonusAp(stake.lockedAmount, months);
   const completionStars = computeStakeCompletionStars(months, levelDef);
 

@@ -4,7 +4,7 @@ import { type FieldValues, FormProvider, UseFormReturn } from 'react-hook-form';
 import type { ReactNode } from 'react';
 import { twMerge } from 'tailwind-merge';
 
-export interface FormProps<T extends FieldValues = any> {
+export interface FormProps<T extends FieldValues = FieldValues> {
   form: UseFormReturn<T>;
   onSubmit: (values: T) => void;
   children: ReactNode;
@@ -12,7 +12,13 @@ export interface FormProps<T extends FieldValues = any> {
   noStyle?: boolean;
 }
 
-export function Form({ form, onSubmit, children, errorMessage, noStyle }: FormProps) {
+export function Form<T extends FieldValues = FieldValues>({
+  form,
+  onSubmit,
+  children,
+  errorMessage,
+  noStyle,
+}: FormProps<T>) {
   const { handleSubmit } = form;
   return (
     <FormProvider {...form}>

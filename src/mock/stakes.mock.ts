@@ -107,7 +107,12 @@ const claimStake = (args: FetchArgs) => {
   mockDb.stakes.activeStakes.splice(idx, 1);
   const levelDef = appConfig.stakes.levels.find(l => l.level === stake.level);
   const months = computeStakeMonths(stake.startDate, stake.endDate);
-  const yieldLC = computeStakeReturnCoins(stake.lockedAmount, months);
+  const yieldLC = computeStakeReturnCoins(
+    stake.lockedAmount,
+    months,
+    mockDb.user.isLuckyPlayer ?? false,
+    mockDb.user.isVIP ?? false
+  );
   const bonusLS = levelDef ? computeStakeCompletionStars(months, levelDef) : 0;
 
   const completionBonusAp = computeStakeCompletionBonusAp(stake.lockedAmount, months);

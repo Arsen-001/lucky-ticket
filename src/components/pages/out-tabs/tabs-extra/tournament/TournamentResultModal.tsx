@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { Cpu, MemoryStick, Trophy } from 'lucide-react';
 import type { LucideIcon } from 'lucide-react';
+import { useGetMeQuery } from '@/api/me.api';
 import { Modal } from '@/components/shared/modals/Modal';
 import { Button } from '@/components/shared/buttons/Button';
 import { Medal, type MedalType } from '@/components/shared/icons/Medal';
@@ -11,6 +12,10 @@ import { useAppTranslations } from '@/hooks/useAppTranslations';
 import type { InventoryChipType } from '@/types/interfaces/inventory.interfaces';
 import type { TournamentUserResult } from '@/types/interfaces/tournaments.interfaces';
 import type { TournamentType } from '@/types/types/tournaments.types';
+import {
+  applyStatusTournamentLcBoost,
+  statusTournamentLcBoostPct,
+} from '@/utils/global/tournament.utils';
 import '@/styles/components/tournament-card.css';
 
 interface TournamentResultModalProps {
@@ -109,10 +114,20 @@ export function TournamentResultModal({
   result,
 }: TournamentResultModalProps) {
   const t = useAppTranslations();
+  const { data: me } = useGetMeQuery();
   const ShardIcon: LucideIcon = shardType === 'capacity' ? MemoryStick : Cpu;
 
   const place = result?.place;
-  const lc = result?.lc ?? 0;
+  const isLp = me?.isLuckyPlayer ?? false;
+  const isVip = me?.isVIP ?? false;
+  // `result.lc` is the BASE placement reward; the status (VIP > LP) boost is
+  // applied here for display via the same util a backend credit path would use,
+  // so the % shown always matches the applied bonus (DOCS §7.3).
+  const baseLc = result?.lc ?? 0;
+  const lc = applyStatusTournamentLcBoost(baseLc, isLp, isVip);
+  const statusBonusLc = lc - baseLc;
+  const statusBoostPct = statusTournamentLcBoostPct(isLp, isVip);
+  const statusLabelKey = isVip ? 'vip' : 'lucky player';
   const shards = result?.shards ?? 0;
 
   const view: ResultView =
@@ -228,6 +243,17 @@ export function TournamentResultModal({
                     {counter}
                   </span>
                 </div>
+                {statusBonusLc > 0 && (
+                  <span
+                    className={`inline-flex items-center gap-1 rounded-full border px-2 py-0.5 text-[10px] font-extrabold uppercase tracking-[0.16em] ${
+                      isVip
+                        ? 'border-gold/40 bg-gold/15 text-gold'
+                        : 'border-electric-pink/35 bg-electric-pink/12 text-electric-pink'
+                    }`}
+                  >
+                    {t(statusLabelKey)} +{statusBoostPct}%
+                  </span>
+                )}
                 {view === 'top-three' && shards > 0 && (
                   <div className="inline-flex items-center gap-1.5 leading-none">
                     <ShardIcon size={18} className={iconColorClass} strokeWidth={2.4} />

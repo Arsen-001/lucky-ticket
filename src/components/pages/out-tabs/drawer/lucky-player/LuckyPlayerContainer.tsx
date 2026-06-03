@@ -76,11 +76,6 @@ export function LuckyPlayerContainer() {
 
       <SettingsPrivilegeList title={t('what you get')} privileges={privileges} percentage={50} />
 
-      <SettingsPrivilegeList
-        title={t('what you can do')}
-        privileges={['send platinum diamond tickets', 'higher ticket send limits']}
-      />
-
       {luckyPlayerStatus && primaryPrice && (
         <div className="bg-purple-gradient flex flex-col gap-4 rounded-2xl p-4">
           <SettingsStatusPriceRow prices={prices} label={t('monthly price')} />
