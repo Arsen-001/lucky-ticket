@@ -1,5 +1,6 @@
 import { StoreProvider } from '@/providers/StoreProvider';
 import { NavigationHistoryProvider } from '@/providers/NavigationHistoryProvider';
+import { Onboarding } from '@/components/onboarding/Onboarding';
 import { NextIntlClientProvider } from 'next-intl';
 import { gilroy, spaceGrotesk } from '@/fonts/index.fonts';
 import { getLocale } from 'next-intl/server';
@@ -17,6 +18,7 @@ export default async function RootLayout({ children }: ChildrenProps) {
             <NextIntlClientProvider>
               <NavigationHistoryProvider>
                 <div className="max-w-140 m-auto h-full overflow-hidden">{children}</div>
+                <Onboarding />
               </NavigationHistoryProvider>
             </NextIntlClientProvider>
           </div>

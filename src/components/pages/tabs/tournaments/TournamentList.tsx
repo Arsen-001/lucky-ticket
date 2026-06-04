@@ -15,14 +15,25 @@ export function TournamentList({ tournaments, isLoading }: TournamentListProps) 
 
   return (
     <div className="py-5 flex flex-col gap-3">
-      {tournaments.map((tournament, index) => (
-        <TournamentCard
-          key={index}
-          loading={isLoading}
-          {...tournament}
-          style={{ animationDelay: `${index * 60}ms` }}
-        />
-      ))}
+      {tournaments.map((tournament, index) =>
+        index === 0 ? (
+          <div key={index} data-tour="tournaments">
+            <TournamentCard
+              loading={isLoading}
+              {...tournament}
+              tourJoinAnchor
+              style={{ animationDelay: `${index * 60}ms` }}
+            />
+          </div>
+        ) : (
+          <TournamentCard
+            key={index}
+            loading={isLoading}
+            {...tournament}
+            style={{ animationDelay: `${index * 60}ms` }}
+          />
+        )
+      )}
       {!isLoading && tournaments.length === 0 && (
         <EmptyDataInfo
           className="py-10"

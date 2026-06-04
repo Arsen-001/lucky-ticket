@@ -110,6 +110,31 @@ export const appConfig = {
     /** Stars purchase packages — price catalog. */
     starsPackages,
   },
+  onboardingTour: {
+    /**
+     * Master switch for the first-run guided tour. When `false` the tour never
+     * auto-starts — so you can test the whole app freely — but the manual
+     * "replay" entry in Settings still works regardless of this flag.
+     */
+    autoStart: true,
+    /**
+     * Free starter gifts granted when the player claims them after the first-run
+     * language step. One Bronze engine is always part of the pack (built in
+     * `engines.api`); these are the additional amounts.
+     */
+    welcomePack: { bronzeTickets: 5, activityPoints: 1 },
+  },
+  account: {
+    /**
+     * Demo/mock master switch for the WHOLE app. When `true` every screen is
+     * served as a brand-new "level zero" account (empty holdings, zero
+     * stats/history, nothing earned); when `false` it serves the full rich
+     * demo fixtures. No fixture data is ever deleted — the rich data lives in
+     * the `false` branch of each mock, so the backend still sees the full
+     * shape it must produce. Flip this one flag to switch the project zero↔demo.
+     */
+    fresh: true,
+  },
 };
 
 export type AppConfig = typeof appConfig;

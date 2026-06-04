@@ -1,0 +1,58 @@
+'use client';
+
+import { useEffect, useRef, useState } from 'react';
+import { useGetMeQuery } from '@/api/me.api';
+import { useGrantWelcomePackMutation } from '@/api/engines.api';
+import { appConfig } from '@/config/app.config';
+import { useAppDispatch } from '@/lib/rtk/hooks';
+import { startTour } from '@/lib/rtk/features/onboarding-tour.slice';
+import { OnboardingLanguageStep } from '@/components/onboarding/OnboardingLanguageStep';
+import { OnboardingGiftsStep } from '@/components/onboarding/OnboardingGiftsStep';
+import { OnboardingTour } from '@/components/onboarding/OnboardingTour';
+
+type OnboardingPhase = 'idle' | 'language' | 'gifts' | 'done';
+
+/**
+ * First-run onboarding orchestrator, mounted once at the app root. For a
+ * brand-new level-zero account (0 AP, hasn't seen the tour) it runs: language
+ * picker → welcome-gifts screen → guided tour. Claiming the gifts grants the
+ * starter pack (engine + tickets + AP) and starts the tour, which renders in
+ * the chosen language. The tour itself is always mounted and simply reacts to
+ * its Redux `running` state, so the Settings "replay" entry keeps working.
+ */
+export function Onboarding() {
+  const dispatch = useAppDispatch();
+  const { data: me } = useGetMeQuery();
+  const [grantWelcomePack] = useGrantWelcomePackMutation();
+  const [phase, setPhase] = useState<OnboardingPhase>('idle');
+  const decidedRef = useRef(false);
+
+  // Decide once (per session) whether this is a first run needing the language step.
+  useEffect(() => {
+    if (decidedRef.current || !me) return;
+    decidedRef.current = true;
+    const isFirstRun = !me.hasSeenTour && me.activityPoints === 0;
+    setPhase(appConfig.onboardingTour.autoStart && isFirstRun ? 'language' : 'done');
+  }, [me]);
+
+  const handleLanguageConfirm = () => {
+    setPhase('gifts');
+  };
+
+  const handleClaimGifts = () => {
+    setPhase('done');
+    // Grant the welcome pack (engine + tickets + AP), then start the tour (whose
+    // engine step now has something to highlight). The grant patches the cache
+    // instantly, so the engine is present by the time the tour navigates home.
+    grantWelcomePack();
+    dispatch(startTour());
+  };
+
+  return (
+    <>
+      {phase === 'language' && <OnboardingLanguageStep onConfirm={handleLanguageConfirm} />}
+      {phase === 'gifts' && <OnboardingGiftsStep onClaim={handleClaimGifts} />}
+      <OnboardingTour />
+    </>
+  );
+}

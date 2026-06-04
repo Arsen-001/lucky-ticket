@@ -11,25 +11,17 @@ import { SkeletonSuspense } from '@/components/shared/seleketons/SkeletonSuspens
 import { LcLabel } from '@/components/shared/icons/LcLabel';
 import { BoltIcon } from '@/components/shared/icons/BoltIcon';
 import { icons } from '@/constants/icons';
+import { ChevronDown } from 'lucide-react';
 import { StakesHistoryRow } from '@/components/pages/out-tabs/drawer/stakes/StakesHistoryRow';
+import {
+  StakesHistorySortModal,
+  STAKE_HISTORY_SORTS,
+  type StakeHistorySortId,
+} from '@/components/pages/out-tabs/drawer/stakes/history/StakesHistorySortModal';
 import { formatCompact } from '@/utils/global/number.utils';
 import type { StakeHistoryEntry } from '@/types/interfaces/stakes.interfaces';
 
-type SortId = 'newest' | 'oldest' | 'highest' | 'level';
-
-interface SortOption {
-  id: SortId;
-  labelKey: 'newest' | 'oldest' | 'highest yield' | 'by level';
-}
-
-const SORTS: SortOption[] = [
-  { id: 'newest', labelKey: 'newest' },
-  { id: 'oldest', labelKey: 'oldest' },
-  { id: 'highest', labelKey: 'highest yield' },
-  { id: 'level', labelKey: 'by level' },
-];
-
-const sortHistory = (history: StakeHistoryEntry[], sortBy: SortId) => {
+const sortHistory = (history: StakeHistoryEntry[], sortBy: StakeHistorySortId) => {
   const copy = [...history];
   switch (sortBy) {
     case 'newest':
@@ -67,7 +59,10 @@ export function StakesHistoryContent() {
   const t = useAppTranslations();
   const { data: stakes, isLoading } = useGetStakesQuery();
   const [filter, setFilter] = useState<FilterId>('all');
-  const [sortBy, setSortBy] = useState<SortId>('newest');
+  const [sortBy, setSortBy] = useState<StakeHistorySortId>('newest');
+  const [sortOpen, setSortOpen] = useState(false);
+
+  const sortLabelKey = STAKE_HISTORY_SORTS.find(s => s.id === sortBy)?.labelKey ?? 'newest';
 
   const allHistory = stakes ? sortHistory(stakes.history, sortBy) : [];
   const visible = allHistory.filter(entry => matchesFilter(entry, filter));
@@ -164,19 +159,24 @@ export function StakesHistoryContent() {
           })}
         </div>
 
-        <select
-          value={sortBy}
-          onChange={e => setSortBy(e.target.value as SortId)}
+        <button
+          type="button"
+          onClick={() => setSortOpen(true)}
+          aria-haspopup="dialog"
           aria-label={t('sort by')}
-          className="text-white-secondary shrink-0 rounded-full border border-white/10 bg-background-overlay px-2.5 py-1.5 text-[11px] font-bold uppercase tracking-wider"
+          className="text-white-secondary inline-flex shrink-0 items-center gap-1.5 rounded-full border border-white/10 bg-background-overlay px-3 py-1.5 text-[11px] font-bold uppercase tracking-wider transition-colors active:scale-95"
         >
-          {SORTS.map(({ id, labelKey }) => (
-            <option key={id} value={id} className="bg-background">
-              {t(labelKey)}
-            </option>
-          ))}
-        </select>
+          <span>{t(sortLabelKey)}</span>
+          <ChevronDown size={14} className="text-white/60" />
+        </button>
       </div>
+
+      <StakesHistorySortModal
+        open={sortOpen}
+        onClose={() => setSortOpen(false)}
+        value={sortBy}
+        onChange={setSortBy}
+      />
 
       <SkeletonSuspense
         loading={isLoading}

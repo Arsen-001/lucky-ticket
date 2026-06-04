@@ -134,7 +134,7 @@ function PriceButton({ price, accent, onClick }: PriceButtonProps) {
         )}
         <span>{price.amount}</span>
       </span>
-      {isLc && <LcLabel size={14} />}
+      {isLc && <LcLabel size={14} interactive={false} />}
     </button>
   );
 }

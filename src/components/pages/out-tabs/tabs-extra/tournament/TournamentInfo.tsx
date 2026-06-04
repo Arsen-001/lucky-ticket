@@ -7,9 +7,7 @@ import {
   CalendarDays,
   CheckCircle2,
   Clock,
-  Cpu,
   Lock,
-  MemoryStick,
   Plus,
   Sparkles,
   Ticket,
@@ -20,6 +18,7 @@ import { twMerge } from 'tailwind-merge';
 import { useGetTournamentByIdQuery } from '@/api/tournaments.api';
 import { Medal } from '@/components/shared/icons/Medal';
 import { LcLabel } from '@/components/shared/icons/LcLabel';
+import { ShardZoomButton } from '@/components/pages/out-tabs/tabs-extra/tournament/ShardZoomButton';
 import { Skeleton } from '@/components/shared/seleketons/Skeleton';
 import { SkeletonSuspense } from '@/components/shared/seleketons/SkeletonSuspense';
 import { GoldenText } from '@/components/shared/typography/GoldenText';
@@ -74,7 +73,6 @@ export function TournamentInfo({ id, className, ...rest }: TournamentDetailsProp
     isFinished ? undefined : data?.startTime
   );
   const isStartingSoon = !isFinished && days === 0 && hours === 0 && minutes < 60;
-  const ShardIcon = data?.shardType === 'capacity' ? MemoryStick : Cpu;
   const topShards = GlobalConstants.tournamentShardRewards.first;
   const participated = !!data?.participated;
   const ticketCount = data?.participatedTicketsCount ?? 0;
@@ -197,7 +195,9 @@ export function TournamentInfo({ id, className, ...rest }: TournamentDetailsProp
               </div>
               <div className="h-3.5 w-px bg-white/15 shrink-0" />
               <div className="flex items-center gap-1 shrink-0 leading-none">
-                <ShardIcon className="w-3.5 h-3.5 text-pink-secondary shrink-0" strokeWidth={2.4} />
+                {data?.shardType && (
+                  <ShardZoomButton type={data.shardType} tier={data.type} size={16} />
+                )}
                 <span className="text-xs font-bold text-white tabular-nums leading-none">
                   ×{topShards}
                 </span>

@@ -7,4 +7,5 @@ export const enginesMock = {
   'POST engines/upgrade-speed': successResponse,
   'POST engines/upgrade-capacity': successResponse,
   'POST engines/complete-cycle': successResponse,
+  'POST engines/grant-welcome': successResponse,
 };

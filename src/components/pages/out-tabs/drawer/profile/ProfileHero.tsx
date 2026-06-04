@@ -4,6 +4,7 @@ import { useRouter } from 'next/navigation';
 import { Eye, EyeOff, Share2 } from 'lucide-react';
 import { twMerge } from 'tailwind-merge';
 import Image from 'next/image';
+import { useUpdateBannerIconsMutation } from '@/api/profile.api';
 import { UserAvatar, type AvatarStatusColor } from '@/components/shared/user-elements/UserAvatar';
 import { BannerIconsLayer } from '@/components/pages/out-tabs/drawer/profile/BannerIconsLayer';
 import { ProfileAvatarEditButton } from '@/components/pages/out-tabs/drawer/profile/ProfileAvatarEditButton';
@@ -42,6 +43,7 @@ export function ProfileHero({ profile, loading, isPreview, onTogglePreview }: Pr
   const [shareOpen, setShareOpen] = useState(false);
   const [vipUpgradeOpen, setVipUpgradeOpen] = useState(false);
   const tooltipTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const [updateBannerIcons] = useUpdateBannerIconsMutation();
 
   const vipMaxed = (profile?.vipLevel ?? 0) >= GlobalConstants.maxVipLevel;
 
@@ -140,7 +142,11 @@ export function ProfileHero({ profile, loading, isPreview, onTogglePreview }: Pr
           />
         )}
 
-        <BannerIconsLayer editable={!!profile?.isOwn && !isPreview} />
+        <BannerIconsLayer
+          editable={!!profile?.isOwn && !isPreview}
+          positions={profile?.bannerIconPositions}
+          onPositionsChange={positions => updateBannerIcons({ positions })}
+        />
 
         <div className="absolute right-4 top-4 z-2 flex flex-col items-end gap-2">
           {showPreviewToggle && (

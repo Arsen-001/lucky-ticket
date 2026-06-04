@@ -15,6 +15,7 @@ import {
 import type { TournamentType } from '@/types/types/tournaments.types';
 import type { PersonalTournament } from '@/types/interfaces/tournaments.interfaces';
 import { ArrivalShine } from '@/components/shared/ArrivalShine';
+import { useUnlockedTiers } from '@/hooks/useUnlockedTiers';
 
 const matchesTab = (tournament: PersonalTournament, filter: TournamentFilterType): boolean => {
   switch (filter) {
@@ -33,6 +34,7 @@ const matchesTab = (tournament: PersonalTournament, filter: TournamentFilterType
 
 export default function TournamentPage() {
   const { data: tournamentsData, isLoading } = useGetTournamentsQuery();
+  const { isTierUnlocked } = useUnlockedTiers();
   const [filter, setFilter] = useState<TournamentFilterType>('all');
   const [searchValue, setSearchValue] = useState('');
   const [isSearchOpen, setIsSearchOpen] = useState(false);
@@ -72,6 +74,11 @@ export default function TournamentPage() {
     [tabCounts]
   );
 
+  // A tournament is locked when its tier sits above the player's AP tier and it
+  // has not finished yet (DOCS §5.2 tier gate). Available (joinable) ones float up.
+  const isTournamentLocked = (tournament: PersonalTournament): boolean =>
+    tournament.status !== 'finished' && !isTierUnlocked(tournament.type);
+
   const filteredTournaments =
     tournamentsData
       ?.filter(tournament => {
@@ -82,6 +89,9 @@ export default function TournamentPage() {
         return tabPasses && matchesSearch && matchesType;
       })
       .sort((a, b) => {
+        const lockedDelta = Number(isTournamentLocked(a)) - Number(isTournamentLocked(b));
+        if (lockedDelta !== 0) return lockedDelta;
+
         switch (sortBy) {
           case 'prize-pool':
             return b.prizePool - a.prizePool;

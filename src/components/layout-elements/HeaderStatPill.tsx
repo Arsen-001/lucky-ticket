@@ -10,6 +10,8 @@ export interface HeaderStatPillProps {
   onClick?: () => void;
   ariaLabel?: string;
   flightTarget?: string;
+  /** `data-tour` anchor id for the onboarding tour spotlight. */
+  dataTour?: string;
 }
 
 const ACCENT_ICON_BG: Record<HeaderStatPillAccent, string> = {
@@ -38,6 +40,7 @@ export function HeaderStatPill({
   onClick,
   ariaLabel,
   flightTarget,
+  dataTour,
 }: HeaderStatPillProps) {
   const baseClassName = twMerge(
     'inline-flex h-7 items-center gap-1.5 rounded-full border bg-white/5 pl-0.5 pr-3 text-xs font-bold text-white backdrop-blur-sm',
@@ -64,6 +67,7 @@ export function HeaderStatPill({
     return (
       <button
         type="button"
+        data-tour={dataTour}
         onClick={onClick}
         aria-label={ariaLabel}
         className={twMerge(baseClassName, 'transition-all hover:bg-white/10 active:scale-95')}
@@ -75,7 +79,7 @@ export function HeaderStatPill({
   }
 
   return (
-    <div className={baseClassName} style={style}>
+    <div className={baseClassName} style={style} data-tour={dataTour}>
       {content}
     </div>
   );

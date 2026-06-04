@@ -3,6 +3,7 @@ import { faker } from '@faker-js/faker';
 import type { FetchArgs } from '@reduxjs/toolkit/query';
 import { achievements } from '@/mock/achievements.mock';
 import { GlobalConstants } from '@/constants/global.constants';
+import { mockDb } from '@/mock/backend/db';
 import type { ProfileResponse } from '@/types/interfaces/profile.interfaces';
 import type { TicketType } from '@/types/types/ticket.types';
 
@@ -25,75 +26,112 @@ const friendsPreview = Array.from({ length: 12 }).map((_, i) => ({
   avatar: images.avatar.src,
 }));
 
-const earnedCount = achievements.filter(a => a.earned).length;
-
 export const ownProfile: ProfileResponse = {
   id: 'me',
   username: 'Arsen 001',
   avatar: images.avatar.src,
   banner: undefined,
-  isVerified: true,
-  isLuckyPlayer: true,
-  isVIP: true,
-  vipLevel: 2,
-  activityPoints: 18_500,
-  activityBest: {
-    day: 32,
-    dayRank: 24,
-    week: 98,
-    weekRank: 11,
-    month: 240,
-    monthRank: 9,
-    allTime: 143,
-    allTimeRank: 7,
-  },
-  ticketsEarned: 120,
+  // Account-level fields mirror the single source of truth (`mockDb.user`) so
+  // the profile always matches the header / wallet / tier gates. Overlaid live
+  // at serve time via `buildAccountOverlay()`.
+  isVerified: mockDb.user.isVerified ?? false,
+  isLuckyPlayer: mockDb.user.isLuckyPlayer,
+  isVIP: mockDb.user.isVIP,
+  vipLevel: mockDb.user.vipLevel,
+  activityPoints: mockDb.user.activityPoints,
+  activityBest: mockDb.accountStats.activityBest,
+  ticketsEarned: mockDb.accountStats.ticketsEarned,
   memberSince: '2024-09-12',
-  streak: { days: 30, active: true },
+  streak: mockDb.accountStats.streak,
   showcaseSlots: 3,
   showcaseMaxSlots: 3,
   pinnedAchievements: pinned,
   collageAchievements: collage,
-  friendsPreview: friendsPreview.slice(0, 5),
+  friendsPreview: friendsPreview.slice(0, mockDb.accountStats.friendsCount),
   publicStats: {
-    tournamentsPlayed: 12,
-    tournamentsWon: 3,
-    stakesCompleted: 8,
-    ticketsSent: 17,
-    friendsCount: friendsPreview.length,
+    tournamentsPlayed: mockDb.accountStats.tournamentsPlayed,
+    tournamentsWon: mockDb.accountStats.tournamentsWon,
+    stakesCompleted: mockDb.accountStats.stakesCompleted,
+    ticketsSent: mockDb.accountStats.ticketsSent,
+    friendsCount: mockDb.accountStats.friendsCount,
     totalAchievements: achievements.length,
-    earnedAchievements: earnedCount,
-    likesReceived: 234,
+    earnedAchievements: mockDb.accountStats.earnedAchievements,
+    likesReceived: mockDb.accountStats.likesReceived,
   },
   privateStats: {
-    lc: 537_000,
-    ls: 12,
-    ton: 0.42,
-    ticketsByTier: {
-      bronze: 154,
-      silver: 41,
-      gold: 8,
-      platinum: 4,
-      diamond: 2,
-    },
+    lc: mockDb.user.coins,
+    ls: mockDb.user.telegramStars,
+    ton: mockDb.accountStats.ton,
+    ticketsByTier: mockDb.accountStats.ticketsByTier,
   },
-  recentAchievements: recent,
+  recentAchievements: mockDb.accountStats.earnedAchievements > 0 ? recent : [],
   isOwn: true,
   liked: false,
+  bannerIconPositions: {},
 };
+
+/**
+ * Live account-level fields read from the single source of truth
+ * (`mockDb.user`). Spread over the own-profile response at serve time so a
+ * change to the account (AP, status, balances) shows up on the profile too —
+ * no duplicated hardcoded values to keep in sync.
+ */
+export const buildAccountOverlay = (): Partial<ProfileResponse> => ({
+  isVerified: mockDb.user.isVerified ?? false,
+  isLuckyPlayer: mockDb.user.isLuckyPlayer,
+  isVIP: mockDb.user.isVIP,
+  vipLevel: mockDb.user.vipLevel,
+  activityPoints: mockDb.user.activityPoints,
+  privateStats: ownProfile.privateStats && {
+    ...ownProfile.privateStats,
+    lc: mockDb.user.coins,
+    ls: mockDb.user.telegramStars,
+  },
+});
 
 export const otherProfile: ProfileResponse = {
   ...ownProfile,
   id: 'user-2',
   username: 'NebulaPilot',
   isOwn: false,
+  // A distinct, populated public player — independent of the signed-in
+  // account's level (visiting a profile always shows real data).
+  isVerified: true,
+  isLuckyPlayer: false,
+  isVIP: true,
+  vipLevel: 5,
+  activityPoints: 42_000,
+  ticketsEarned: 480,
+  streak: { days: 12, active: true },
+  activityBest: {
+    day: 28,
+    dayRank: 31,
+    week: 140,
+    weekRank: 8,
+    month: 360,
+    monthRank: 5,
+    allTime: 410,
+    allTimeRank: 4,
+  },
+  friendsPreview: friendsPreview.slice(0, 5),
+  recentAchievements: recent,
   privateStats: undefined,
   liked: false,
+  // Distinct arrangement so visitors can see this is a public, per-user layout.
+  bannerIconPositions: {
+    'crown-tl': { left: 9, top: 52 },
+    'star-tr': { left: 46, top: 7 },
+    'gem-br': { left: 79, top: 48 },
+  },
   publicStats: {
-    ...ownProfile.publicStats,
-    likesReceived: 891,
+    tournamentsPlayed: 64,
     tournamentsWon: 17,
     stakesCompleted: 42,
+    ticketsSent: 51,
+    friendsCount: 30,
+    totalAchievements: achievements.length,
+    earnedAchievements: 38,
+    likesReceived: 891,
   },
 };
 
@@ -107,7 +145,7 @@ const likeProfileHandler = (args: FetchArgs) => {
   };
   target.liked = true;
   target.canLikeAt = new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString();
-  ownProfile.activityPoints += 1;
+  mockDb.user.activityPoints += 1;
   return {
     likesReceived: target.publicStats.likesReceived,
     liked: true,
@@ -131,8 +169,20 @@ const sendTicketHandler = (args: FetchArgs) => {
   const sent = Math.min(Math.max(0, quantity), limits[tier]);
   const byTier = ownProfile.privateStats?.ticketsByTier;
   if (byTier) byTier[tier] = Math.max(0, (byTier[tier] ?? 0) - sent);
-  ownProfile.activityPoints += 1;
+  mockDb.user.activityPoints += 1;
   return { success: true };
+};
+
+// Persist the owner's banner collage layout — last write wins.
+const updateBannerIconsHandler = (args: FetchArgs) => {
+  const { positions } = (args.body ?? {}) as {
+    positions?: ProfileResponse['bannerIconPositions'];
+  };
+  ownProfile.bannerIconPositions = positions ?? {};
+  // Return a copy, never the raw singleton: RTK Query stores the result in the
+  // cache where Immer deep-freezes it in dev. Freezing `ownProfile` itself would
+  // lock the shared mock object and make the next write throw (read-only prop).
+  return { ...ownProfile };
 };
 
 export const profileMock = {
@@ -142,4 +192,5 @@ export const profileMock = {
   },
   'POST profile/like': likeProfileHandler,
   'POST profile/send-ticket': sendTicketHandler,
+  'PATCH profile/banner-icons': updateBannerIconsHandler,
 };

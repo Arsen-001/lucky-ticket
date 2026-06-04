@@ -13,7 +13,7 @@ import { stakesMock } from '@/mock/stakes.mock';
 import { walletMock } from '@/mock/wallet.mock';
 import { lcMock } from '@/mock/lc.mock';
 import { achievementsMock } from '@/mock/achievements.mock';
-import { profileMock, ownProfile } from '@/mock/profile.mock';
+import { profileMock, ownProfile, buildAccountOverlay } from '@/mock/profile.mock';
 import { pinState } from '@/mock/pin-state.mock';
 import type {
   PinAchievementRequest,
@@ -50,16 +50,28 @@ const pinHandlers = {
     const achs = pinState.getAchievementsWithPins();
     return { total: achs.length, earned: achs.filter(a => a.earned).length, achievements: achs };
   },
-  'GET profile/me': () => ({ ...ownProfile, pinnedAchievements: pinState.getPinnedAchievements() }),
+  'GET profile/me': () => ({
+    ...ownProfile,
+    ...buildAccountOverlay(),
+    pinnedAchievements: pinState.getPinnedAchievements(),
+  }),
   'POST profile/showcase/pin': (args: FetchArgs) => {
     const body = args.body as PinAchievementRequest;
     pinState.pin(body.achievementId, body.slot);
-    return { ...ownProfile, pinnedAchievements: pinState.getPinnedAchievements() };
+    return {
+      ...ownProfile,
+      ...buildAccountOverlay(),
+      pinnedAchievements: pinState.getPinnedAchievements(),
+    };
   },
   'POST profile/showcase/unpin': (args: FetchArgs) => {
     const body = args.body as UnpinAchievementRequest;
     pinState.unpin(body.slot);
-    return { ...ownProfile, pinnedAchievements: pinState.getPinnedAchievements() };
+    return {
+      ...ownProfile,
+      ...buildAccountOverlay(),
+      pinnedAchievements: pinState.getPinnedAchievements(),
+    };
   },
 };
 

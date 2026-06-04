@@ -232,8 +232,8 @@ All perk magnitudes live in `src/constants/global.constants.ts` and can be tuned
 | Referral percentage             | 15%                       | `luckyPlayerReferralPercentage`                  |
 | Higher ticket send daily limits | B5/S4/G3/P2/D1            | `ticketSendDailyLimits.luckyPlayer`              |
 | Send Platinum/Diamond tickets   | allowed                   | `ticketSendDailyLimits.default = 0` for P/D      |
+| Bulk "Claim all" per tier       | enabled                   | n/a (UI gate, LP only)                           |
 | Profile badge                   | LP icon + glow            | n/a (visual)                                     |
-| Priority support                | yes                       | n/a (operations)                                 |
 
 #### VIP perks
 
@@ -308,7 +308,7 @@ The Tickets page is structured as a tier-tabs view:
 - **Summary row (top):** A 5-tile grid (Bronze · Silver · Gold · Platinum · Diamond) showing the user's current inventory count for each tier. Tapping a tile switches the active tier tab.
 - **Tab strip:** Six pill-style chips — five tier tabs (Bronze → Diamond) plus a **Partners** tab. Locked tiers render with a lock icon. The active tab carries a tier-color dot/icon plus a `×N` ready-to-claim badge in white.
 - **Tab content per tier:**
-  - **Unlocked tier:** A summary card (`X tickets in inventory · Y engines active`), a `{count} tickets ready · Claim all` callout (when any engine has pending output), and a 2-column grid of engine preview cards. Each card opens that engine's dedicated page.
+  - **Unlocked tier:** A summary card (`X tickets in inventory · Y engines active`), a `{count} tickets ready · Claim all` callout (when any engine has pending output **and** the player holds **Lucky Player** — otherwise each engine is claimed individually; see Section 7), and a 2-column grid of engine preview cards. Each card opens that engine's dedicated page.
   - **Locked tier:** A locked-state hero plus the requirements list (Section 8.5).
 - **Partners tab:** Reserved for partner-ticket integrations — currently shows a "Coming soon" placeholder.
 
@@ -372,7 +372,7 @@ Engine ownership is permanent. Engines do not expire, decay, or get lost through
 
 ### 9.2 Initial Engine (First-Launch Gift)
 
-Every new user receives **one Bronze producer engine** for free on first app launch. This engine starts producing immediately, allowing every user to begin progressing without any purchase, unlock, or external action.
+Every new user receives **one Bronze producer engine** for free — part of a **welcome pack** granted during onboarding, not at account creation. Right after the first-run **language selection** step a gifts screen presents the pack — **1 Bronze engine, 5 Bronze tickets, and 1 activity point** (see Section 17.5) — and the player taps **Claim** to receive it. A brand-new account owns **no engine and no tickets** until then. Once granted, the engine starts producing immediately (it arrives with one ready ticket so the guided tour's claim finale works), allowing every user to begin progressing without any purchase, unlock, or external action. (The ticket/AP amounts live in `appConfig.onboardingTour.welcomePack`.)
 
 ### 9.3 Acquiring Additional Engines
 
@@ -1292,6 +1292,15 @@ The Profile page is built to run inside a **Telegram WebApp** when available, wi
 
 > Animation principles: every list, grid, and stats row uses staggered entry (`animationDelay` 50–100ms per child). Hero elements (avatar ring, holo username, flame) animate idle; decorative collage drifts slowly.
 
+#### 17.3.1a Banner Decorative Icons
+
+Layered over the cover banner are three small **decorative icons** (a crown, a star, and a gem) — purely cosmetic flair, semi-transparent, with a slow idle drift and a staggered entry that flies each icon out from behind the avatar on load. These are **distinct** from the decorative badge collage (item 1 above): the collage sits behind the avatar/name and is badge-based, whereas these icons sit on the banner and are freely positioned.
+
+- **Owner-arranged.** On their **own** profile (and not while in _Preview as visitor_), the owner can **drag** each icon to reposition it on the banner. Other viewers see the icons but cannot move them.
+- **Avatar-safe placement.** Icons are constrained to stay within the banner **and outside the avatar's circular zone** — a dragged icon that would overlap the avatar is pushed to the nearest valid spot, so the avatar is never covered.
+- **Server-persisted, last write wins.** Each drag's final position is saved to the backend (keyed per icon), so the arrangement persists across sessions and devices; the most recent edit is the one kept.
+- **Public, per-user.** The saved arrangement is part of the profile and is **shown to everyone** who opens it (read-only for visitors). Icons with no saved position fall back to a default layout.
+
 #### 17.3.2 Actions — Own Profile
 
 When viewing one's own profile, the following actions are available:
@@ -1301,6 +1310,7 @@ When viewing one's own profile, the following actions are available:
 - **Change cover banner** — selects from owned banners. Premium banners are purchased in the Shop with Lucky Stars.
 - **Pin / Replace / Unpin badges** — managed via the showcase long-press menu (see Section 17.4.7).
 - **Pin / Replace decorative collage badges** — same long-press menu pattern, but on the three background-collage slots in the hero header.
+- **Arrange banner icons** — drag the decorative banner icons (crown / star / gem) to reposition them on the cover banner; positions save automatically and are shown publicly. Icons cannot be placed over the avatar (see Section 17.3.1a).
 - **Buy showcase slot expansion** — via the animated "+slot" container next to the showcase (see Section 17.4.8).
 - **Preview as visitor** — a toggle button (typically in the top-right of the hero) that switches the page into the **Public view** of the user's own profile. While in preview, the page renders exactly as another user would see it — private balances, edit affordances, and Settings entry are hidden; social actions (Send Ticket, Invite to Tournament, Share, Like) appear on the action row but are non-functional (visual only). A persistent "Exit preview" button returns to Own view. Preview never modifies any data.
 - **Share own profile** — copy link or share via Telegram.
@@ -1474,6 +1484,48 @@ Badges connect to virtually every system in the platform: Status (Section 7), Ti
 
 ---
 
+### 17.5 Onboarding Tour
+
+A first-run **guided tour** introduces a brand-new player to the whole app — what each area is and how to play. It targets a **level-zero account** (0 AP, and **no engine yet** — the free Bronze engine is granted after the language step below; see Section 9) and runs as an **interactive spotlight walkthrough**: the screen dims, the relevant on-screen element is highlighted, a short caption explains it, and an **animated hand** points at the spotlight and mimics a tap so the player sees exactly where to press. The tour **navigates itself** between screens; on each one the player taps the highlighted element to advance (there is no "Next" button).
+
+#### Language selection (first run)
+
+Before the very first tour, a **language picker** is shown to the brand-new account. The player chooses the UI language (English, Armenian, Russian, German); the choice is persisted in the `locale` cookie, applied immediately, and the guided tour then runs **in the chosen language** (every tour caption is localized). The selection defaults to the current locale, so a player who just wants English taps **Continue**. After confirming the language, a **welcome-gifts screen** presents the brand-new account's starter pack — **1 Bronze engine, 5 Bronze tickets, and 1 activity point** (Section 9.2) — and tapping **Claim** grants them (the account has none until this point) before the tour begins, so its first step has an engine to spotlight. A search field filters the list (by native name, English name, or locale code) and the list scrolls, so the picker scales to a large language catalogue. The picker and the tour share one trigger (see _Trigger & Persistence_); the language can still be changed any time later via Settings → Language.
+
+#### Steps
+
+The tour visits nine stops, in order:
+
+| #   | Screen         | Highlights                      | Teaches                                 |
+| --- | -------------- | ------------------------------- | --------------------------------------- |
+| 1   | Home           | The free Bronze engine          | It mints tickets automatically          |
+| 2   | Tickets        | The tickets summary             | Where minted tickets collect            |
+| 3   | Tournaments    | A tournament card               | Spend tickets, win LC + chips           |
+| 4   | Tasks          | The task tab rows               | Earn AP and rewards                     |
+| 5   | Header         | The AP pill                     | AP is progression, Bronze→Diamond       |
+| 6   | Stakes         | The stakes summary              | Lock LC for yield + AP                  |
+| 7   | Invite Friends | The referral hero               | Earn a share from friends               |
+| 8   | Home           | The engine's **Claim** button   | Claims the first ticket                 |
+| 9   | Tournaments    | The first tournament's **Join** | Enter the first tournament — the finale |
+
+The last two steps perform a **real action**: the player claims their first ticket, then taps **Join** on the first tournament to enter it (opening the join sheet) — the finale. After the claim step the tour briefly waits for the claim animation to finish (so the ticket actually mints) before navigating to Tournaments. Every other step is acknowledged with a tap. A **Skip tour** control is always available, and pressing Escape exits.
+
+#### Trigger & Persistence
+
+- **First-run flow:** for an account with `activityPoints === 0` that has not seen the tour, the `Onboarding` orchestrator shows the **language picker first**, then starts the guided tour once the language is confirmed — gated by the `appConfig.onboardingTour.autoStart` switch (set it to `false` to suppress the whole first-run flow — picker and tour — while testing the rest of the app).
+- **Completion** (finishing or skipping) is persisted on the user via `hasSeenTour`, so it does not reappear.
+- **Replay / reset:** Settings → _App tour_ offers "Take the tour" (run it any time, ignoring the flag) and "Reset onboarding" (clear `hasSeenTour` so it auto-shows again for a level-zero account).
+
+#### Extending the Tour
+
+Steps are defined declaratively in one place (`TOUR_STEPS` in `onboarding-tour.constants.ts`). Adding a step requires no engine changes: add a step object, put a `data-tour="<anchor>"` attribute on the element to highlight, and add its two translation keys (title + body) to every locale file (`en` / `ru` / `hy` / `de`). A step may also set `secondaryAnchor` to a second `data-tour` value — the spotlight then covers the **union** of both boxes (used by the Tasks step to highlight its two tab rows: the frequency tabs plus the sticky category nav, which can't share a wrapper without breaking its sticky scroll).
+
+#### Connections
+
+The tour spans Home / Engines (Section 9), Tickets (Section 8), Tournaments (Section 11), Tasks (Section 12), Activity Points (Section 5), Stakes (Section 18), and Invite Friends (Section 17.2).
+
+---
+
 ## 18. Stakes System
 
 ### Purpose
@@ -1640,6 +1692,8 @@ The Market opens with a **Hero card** showing the current featured deal (with co
 - If Lucky Stars are insufficient — opens the **Not-enough-Stars bottom sheet** (with top-up presets).
 - If LC are insufficient — opens the **Not-enough-LC modal**.
 - Confirming dispatches the corresponding RTK mutation (`buyEngine`, `buyChip`, `buyBuilder`, `buyBooster`, `buyCosmetic`, `buyPass`, `buyStatus`). Mutations apply optimistic updates: the cost is deducted from `me.coins` / `me.telegramStars`, and the granted item is appended to the relevant cache (engines → ticket-tier engines, chips/boosters → inventory, builders → inventory.builders[tier]). On error, all patches are rolled back.
+
+**Card-body tap:** tapping a card's body (not its price buttons) opens an item **info sheet** — except **Status** cards (Lucky Player / VIP), whose body links to the status's dedicated page (`/settings/lucky-player`, `/settings/vip` — the single canonical route used everywhere: header pills, profile, stakes, market) where it can be reviewed, bought, or extended. This link stays active even when the status is already owned (the in-card buy buttons lock, the body still navigates). Price buttons always buy in place.
 
 **Discount mechanics:** Items can carry a `discountPct` and an `originalAmount` per price tier; the original is rendered with strikethrough beside the discounted amount. Featured deals can also carry an `expiresAt` rendered as a countdown.
 

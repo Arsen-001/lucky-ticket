@@ -20,4 +20,6 @@ export interface MeResponse {
   walletId?: string | null;
   /** Lifetime count of Bronze-tier stakes opened — gates the "first 10 Bronze free" rule. */
   bronzeStakesOpened?: number;
+  /** Whether the user has completed or skipped the first-run onboarding tour. */
+  hasSeenTour?: boolean;
 }

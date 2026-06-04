@@ -1,6 +1,7 @@
 'use client';
 
 import { useFormatter } from 'next-intl';
+import { useRouter } from 'next/navigation';
 import { Crown, Gem } from 'lucide-react';
 import type { ReactNode } from 'react';
 import { useBuyStatusMutation, useGetMarketDataQuery } from '@/api/market.api';
@@ -11,6 +12,7 @@ import type { MarketSelectedItem } from '@/components/pages/tabs/market/MarketVi
 import { LuckyPlayerIcon } from '@/components/shared/icons/LuckyPlayerIcon';
 import { VipIcon } from '@/components/shared/icons/VipIcon';
 import { GlobalConstants } from '@/constants/global.constants';
+import { routes, type Route } from '@/constants/routes';
 import { useAppTranslations } from '@/hooks/useAppTranslations';
 import { MarketItemRequirementType, MarketStatusType } from '@/types/enums/market.enums';
 import type { MarketPrice, MarketStatus } from '@/types/interfaces/market.interfaces';
@@ -25,6 +27,7 @@ export interface MarketStatusSectionProps {
 export function MarketStatusSection({ onSelect, onBuy }: MarketStatusSectionProps) {
   const t = useAppTranslations();
   const format = useFormatter();
+  const router = useRouter();
   const { data, isLoading: isMarketLoading } = useGetMarketDataQuery();
   const { data: me, isLoading: isMeLoading } = useGetMeQuery();
   const [buyStatus] = useBuyStatusMutation();
@@ -158,6 +161,13 @@ export function MarketStatusSection({ onSelect, onBuy }: MarketStatusSectionProp
           ),
           mutate: price => buyStatus({ statusId: status.id, priceType: price.type }).unwrap(),
         };
+        // Tapping a status card opens its dedicated page (Lucky Player / VIP)
+        // instead of the generic info sheet; the buy buttons still buy in place.
+        const statusPage: Route | undefined = isVIP
+          ? routes.settings.vip
+          : isLuckyPlayer
+            ? routes.settings.luckyPlayer
+            : undefined;
         return (
           <MarketUniversalCard
             key={status.id}
@@ -169,7 +179,8 @@ export function MarketStatusSection({ onSelect, onBuy }: MarketStatusSectionProp
             iconStage={renderIcon(75)}
             iconStageClassName="h-24"
             prices={activePrices}
-            onClick={() => onSelect(item)}
+            onClick={() => (statusPage ? router.push(statusPage) : onSelect(item))}
+            clickableWhenDisabled={!!statusPage}
             onBuy={price => onBuy(item, price)}
           />
         );

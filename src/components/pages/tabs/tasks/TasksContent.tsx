@@ -29,7 +29,6 @@ import type {
 import { useAppTranslations } from '@/hooks/useAppTranslations';
 import { useCountDown } from '@/hooks/useCountDown';
 import { Skeleton } from '@/components/shared/seleketons/Skeleton';
-import { TasksHeader } from './TasksHeader';
 import { TasksFrequencyTabs } from './TasksFrequencyTabs';
 import { TasksCategoryNav, type CategoryNavItem } from './TasksCategoryNav';
 import { TasksCategorySection } from './TasksCategorySection';
@@ -56,13 +55,6 @@ const triggerHaptic = (type: 'light' | 'medium' = 'light') => {
 function TasksSkeleton() {
   return (
     <div className="px-4 pt-3 flex flex-col gap-4">
-      <div className="flex justify-between items-center gap-3">
-        <Skeleton variant="line" className="w-32 h-7" />
-        <div className="flex gap-2">
-          <Skeleton variant="card" className="w-16 h-16 rounded-full" />
-          <Skeleton variant="card" className="w-16 h-16 rounded-2xl" />
-        </div>
-      </div>
       <Skeleton variant="card" className="w-full h-10 rounded-full" />
       <div className="flex gap-2 overflow-hidden">
         {Array.from({ length: 6 }).map((_, i) => (
@@ -559,23 +551,26 @@ export function TasksContent() {
   const allEmpty = !showAds && visibleCategories.length === 0;
 
   return (
-    <div className="flex flex-col">
-      <TasksHeader streak={data?.streak} dailyProgress={data?.dailyProgress} loading={isLoading} />
-
-      <ArrivalShine id={['dailyTask', 'weeklyTask', 'oneTimeTask']}>
-        <TasksFrequencyTabs
-          active={activeFrequency}
-          onChange={handleSelectFrequency}
-          counts={frequencyCounts}
-          className="pb-3"
-        />
-      </ArrivalShine>
+    <div className="flex flex-col pt-3">
+      {/* Tour step "tasks" spotlights both tab rows — this frequency row plus the
+          category nav below (tagged `tasks-nav`), unioned by the tour engine. */}
+      <div data-tour="tasks">
+        <ArrivalShine id={['dailyTask', 'weeklyTask', 'oneTimeTask']}>
+          <TasksFrequencyTabs
+            active={activeFrequency}
+            onChange={handleSelectFrequency}
+            counts={frequencyCounts}
+            className="pb-3"
+          />
+        </ArrivalShine>
+      </div>
 
       <TasksCategoryNav
         items={navItems}
         activeCategory={activeCategory}
         onSelect={handleSelectCategory}
         containerRef={stickyNavRef}
+        dataTour="tasks-nav"
       />
 
       {allEmpty ? (

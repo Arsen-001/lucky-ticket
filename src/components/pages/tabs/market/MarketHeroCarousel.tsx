@@ -22,6 +22,7 @@ import { LcLabel } from '@/components/shared/icons/LcLabel';
 import { useAppTranslations } from '@/hooks/useAppTranslations';
 import { MarketPriceType } from '@/types/enums/market.enums';
 import type { MarketAccent, MarketPrice } from '@/types/interfaces/market.interfaces';
+import { formatCompactPrice } from '@/utils/global/number.utils';
 
 export interface MarketHeroCarouselProps {
   onSelect: (item: MarketSelectedItem) => void;
@@ -268,10 +269,12 @@ function MarketHeroCard({ featured, onClick, onBuy }: MarketHeroCardProps) {
           >
             {price.type === MarketPriceType.TELEGRAM_STARS && <TelegramStarIcon size={11} />}
             {price.originalAmount && (
-              <span className="text-[9px] text-white/55 line-through">{price.originalAmount}</span>
+              <span className="text-[9px] text-white/55 line-through">
+                {formatCompactPrice(price.originalAmount)}
+              </span>
             )}
-            <span>{price.amount}</span>
-            {price.type === MarketPriceType.LC && <LcLabel size={11} />}
+            <span>{formatCompactPrice(price.amount)}</span>
+            {price.type === MarketPriceType.LC && <LcLabel size={11} interactive={false} />}
           </button>
         )}
       </div>

@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useMemo, useState, type ReactNode } from 'react';
-import { useSearchParams } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { useGetMarketDataQuery } from '@/api/market.api';
 import { useGetMeQuery } from '@/api/me.api';
 import { MarketHeroCarousel } from '@/components/pages/tabs/market/MarketHeroCarousel';
@@ -21,6 +21,7 @@ import { MarketBoosterSection } from '@/components/pages/tabs/market/sections/Ma
 import { MarketCosmeticSection } from '@/components/pages/tabs/market/sections/MarketCosmeticSection';
 import { MarketStatusSection } from '@/components/pages/tabs/market/sections/MarketStatusSection';
 import { MarketPriceType } from '@/types/enums/market.enums';
+import { routes } from '@/constants/routes';
 import type { MarketAccent, MarketPrice } from '@/types/interfaces/market.interfaces';
 import '@/styles/components/market.css';
 
@@ -54,6 +55,7 @@ interface MarketActivePurchase {
 }
 
 export function MarketView() {
+  const router = useRouter();
   const searchParams = useSearchParams();
   const tabParam = searchParams.get('tab');
   const initialTab: MarketCategoryKey =
@@ -95,6 +97,8 @@ export function MarketView() {
   };
 
   const handleBuy = (item: MarketSelectedItem, price: MarketPrice) => {
+    // Close the info sheet first so a "not enough" modal never stacks on top of it.
+    setInfoItem(null);
     if (price.type === MarketPriceType.TELEGRAM_STARS) {
       const balance = me?.telegramStars ?? 0;
       if (balance < price.amount) {
@@ -109,7 +113,6 @@ export function MarketView() {
         return;
       }
     }
-    setInfoItem(null);
     setPurchase({
       id: item.id,
       name: item.name,
@@ -142,6 +145,12 @@ export function MarketView() {
     } finally {
       setConfirming(false);
     }
+  };
+
+  // Star top-up presets route to the wallet's buy-stars flow with the chosen amount.
+  const handleTopUpStars = (amount: number) => {
+    setInsufficientStars(null);
+    router.push(`${routes.wallet}?topUp=${amount}`);
   };
 
   const sections = useMemo(() => {
@@ -208,6 +217,7 @@ export function MarketView() {
         onClose={() => setInsufficientStars(null)}
         requiredStars={insufficientStars?.required}
         currentStars={me?.telegramStars ?? 0}
+        onTopUp={handleTopUpStars}
       />
 
       <NotEnoughCoinsModal

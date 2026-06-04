@@ -120,15 +120,17 @@ export function StakesContent() {
         loading={isLoading}
         skeleton={<Skeleton className="h-22 w-full rounded-2xl" />}
       >
-        <StakesSummaryCard
-          activeCount={activeStakes.length}
-          lockedAmount={totalLocked}
-          readyCount={readyCount}
-          lifetimeEarned={lifetimeEarned}
-          topTier={topTier}
-          nextTierAp={nextTierApGap}
-          tierProgressPercent={tierProgressPercent}
-        />
+        <div data-tour="stakes">
+          <StakesSummaryCard
+            activeCount={activeStakes.length}
+            lockedAmount={totalLocked}
+            readyCount={readyCount}
+            lifetimeEarned={lifetimeEarned}
+            topTier={topTier}
+            nextTierAp={nextTierApGap}
+            tierProgressPercent={tierProgressPercent}
+          />
+        </div>
       </SkeletonSuspense>
 
       {readyCount >= 2 && (

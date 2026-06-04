@@ -155,7 +155,9 @@ export function TicketsTabsView() {
         tier={activeTab}
         engines={enginesByTier[activeTab] ?? []}
         elapsedByEngine={elapsedByEngine}
-        onClaimAll={() => handleClaimAllForTier(activeTab)}
+        // "Claim all" is a Lucky Player–only perk; without it the prop is omitted
+        // so the button isn't rendered (DOCS §7.3 / §8.4).
+        onClaimAll={isLp ? () => handleClaimAllForTier(activeTab) : undefined}
         onClaimEngine={engineId => handleClaimEngine(activeTab, engineId)}
       />
     );
@@ -163,12 +165,14 @@ export function TicketsTabsView() {
 
   return (
     <div className="flex flex-col gap-4">
-      <TicketsTierSummary
-        tabs={tabs}
-        loading={isFetching}
-        active={activeTab}
-        onChange={setActiveTab}
-      />
+      <div data-tour="tickets">
+        <TicketsTierSummary
+          tabs={tabs}
+          loading={isFetching}
+          active={activeTab}
+          onChange={setActiveTab}
+        />
+      </div>
 
       <div key={activeTab} className="animate-slide-in-bottom">
         {renderTabContent()}

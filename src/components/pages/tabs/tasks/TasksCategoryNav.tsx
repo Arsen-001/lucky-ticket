@@ -18,6 +18,8 @@ export interface TasksCategoryNavProps {
   onSelect: (category: TaskCategory) => void;
   containerRef?: RefObject<HTMLDivElement | null>;
   className?: string;
+  /** Optional `data-tour` anchor applied to the sticky root (onboarding tour). */
+  dataTour?: string;
 }
 
 const CATEGORY_LABEL_KEY: Record<TaskCategory, MessageIds> = {
@@ -43,6 +45,7 @@ export function TasksCategoryNav({
   onSelect,
   containerRef,
   className,
+  dataTour,
 }: TasksCategoryNavProps) {
   const t = useAppTranslations();
   const scrollRef = useRef<HTMLDivElement>(null);
@@ -87,6 +90,7 @@ export function TasksCategoryNav({
   return (
     <div
       ref={containerRef}
+      data-tour={dataTour}
       className={twMerge(
         'sticky top-0 z-30 backdrop-blur-md bg-background/85 border-b border-white/5',
         className

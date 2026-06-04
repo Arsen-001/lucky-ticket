@@ -8,12 +8,11 @@ import {
   CheckCircle2,
   Clock,
   Cpu,
+  Lock,
   MemoryStick,
-  Plus,
   Sparkles,
   Ticket,
   Users,
-  Zap,
 } from 'lucide-react';
 import { twMerge } from 'tailwind-merge';
 import { Button } from '@/components/shared/buttons/Button';
@@ -24,6 +23,7 @@ import { SkeletonSuspense } from '@/components/shared/seleketons/SkeletonSuspens
 import { GoldenText } from '@/components/shared/typography/GoldenText';
 import { useAppTranslations } from '@/hooks/useAppTranslations';
 import { useCountDown } from '@/hooks/useCountDown';
+import { useUnlockedTiers } from '@/hooks/useUnlockedTiers';
 import { formatCompact } from '@/utils/global/number.utils';
 import { GlobalConstants } from '@/constants/global.constants';
 import { routes } from '@/constants/routes';
@@ -43,6 +43,8 @@ export type TournamentCardProps = (Tournament | PersonalTournament) & {
   participatedTicketsCount?: number;
   userResult?: TournamentUserResult;
   resultSeen?: boolean;
+  /** Marks this card's Join button as the onboarding-tour "tournament-join" anchor. */
+  tourJoinAnchor?: boolean;
   className?: string;
   style?: CSSProperties;
 };
@@ -72,12 +74,17 @@ export function TournamentCard({
   participatedTicketsCount,
   userResult,
   resultSeen,
+  tourJoinAnchor = false,
   className,
   style,
 }: TournamentCardProps) {
   const t = useAppTranslations();
   const router = useRouter();
+  const { isTierUnlocked } = useUnlockedTiers();
   const isFinished = status === 'finished';
+  // A tournament whose tier sits above the player's AP tier is shown but locked
+  // (DOCS §5.2 tier gate / §11). Finished tournaments are never locked.
+  const locked = !isFinished && !!type && !isTierUnlocked(type);
   const tierClass: Record<TournamentType, string> = {
     bronze: 'tournament-card-tier-bronze',
     silver: 'tournament-card-tier-silver',
@@ -101,6 +108,7 @@ export function TournamentCard({
   const handleActionClick = (e: MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
+    if (locked) return;
     if (isFinished) {
       setIsResultModalOpen(true);
     } else {
@@ -109,7 +117,7 @@ export function TournamentCard({
   };
 
   const handleCardClick = () => {
-    if (loading || !id) return;
+    if (loading || !id || locked) return;
     router.push(routes.tournaments.getById(id));
   };
 
@@ -128,29 +136,35 @@ export function TournamentCard({
           }
         }}
         style={style}
+        aria-disabled={locked || undefined}
         className={twMerge(
-          'w-full rounded-2xl flex items-stretch gap-3 p-3 transition-transform active:scale-99 cursor-pointer focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-white',
+          'w-full rounded-2xl flex items-stretch gap-3 p-3 transition-transform focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-white',
+          locked ? 'cursor-not-allowed' : 'active:scale-99 cursor-pointer',
           isFinished
             ? 'tournament-card-finished'
             : type
               ? tierClass[type]
               : 'bg-background-overlay',
+          locked && 'opacity-70 saturate-[0.55]',
           className
         )}
       >
         {/* Medal stage — left */}
         <div
           className={twMerge(
-            'flex-center bg-white/8 rounded-lg w-24 shrink-0 self-stretch',
+            'w-24 shrink-0 self-stretch rounded-lg relative overflow-hidden',
+            loading ? 'skeleton' : 'flex-center bg-white/8',
             isFinished && 'opacity-80'
           )}
         >
-          <Medal
-            className="drop-shadow-xl drop-shadow-black/30"
-            height={84}
-            type={type}
-            loading={loading}
-          />
+          {!loading && (
+            <Medal className="drop-shadow-xl drop-shadow-black/30" height={84} type={type} />
+          )}
+          {locked && (
+            <span className="flex-center absolute inset-0 rounded-lg bg-black/45 backdrop-blur-[1px]">
+              <Lock className="text-white/90" size={26} strokeWidth={2.4} />
+            </span>
+          )}
         </div>
 
         {/* Right column — 4 rows */}
@@ -276,32 +290,25 @@ export function TournamentCard({
                 >
                   {t('ended')}
                 </button>
+              ) : locked ? (
+                <span className="ml-auto inline-flex shrink-0 items-center gap-1.5 rounded-full border border-white/10 bg-white/5 px-3.5 py-2 text-[11px] font-extrabold uppercase leading-none tracking-[0.14em] text-white/55">
+                  <Lock size={12} strokeWidth={2.6} />
+                  {t('locked')}
+                </span>
               ) : (
                 <Button
+                  data-tour={tourJoinAnchor ? 'tournament-join' : undefined}
                   disabled={loading}
                   onClick={handleActionClick}
-                  icon={
-                    participated ? (
-                      <Plus strokeWidth={3} />
-                    ) : isStartingSoon ? (
-                      <Zap strokeWidth={2.6} />
-                    ) : (
-                      <Sparkles strokeWidth={2.4} />
-                    )
-                  }
-                  iconSize={13}
                   className={twMerge(
-                    'ml-auto shrink-0 py-2 px-4 rounded-full text-[11px] font-extrabold uppercase tracking-[0.14em] leading-none overflow-hidden',
+                    'ml-auto shrink-0 py-2 px-4 rounded-full text-[11px] font-extrabold uppercase tracking-[0.14em] leading-none',
                     'shadow-[0_4px_14px_rgba(0,0,0,0.4),inset_0_1px_0_rgba(255,255,255,0.28)]',
                     'transition-transform active:scale-95',
                     participated && 'bg-success',
                     !participated && isStartingSoon && 'animate-pulse'
                   )}
                 >
-                  <span className="pointer-events-none absolute inset-0 overflow-hidden rounded-full">
-                    <span className="absolute -top-1/2 -left-1/2 h-[200%] w-[55%] bg-gradient-to-r from-transparent via-white/40 to-transparent animate-task-shine" />
-                  </span>
-                  <span className="leading-none relative">{t(participated ? 'add' : 'join')}</span>
+                  <span className="leading-none">{t(participated ? 'add' : 'join')}</span>
                 </Button>
               )}
             </SkeletonSuspense>

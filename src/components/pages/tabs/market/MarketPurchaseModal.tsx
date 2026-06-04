@@ -67,7 +67,7 @@ export function MarketPurchaseModal({
               </span>
               <div className="flex items-center gap-1.5">
                 <span className="text-lg font-bold tabular-nums text-white">{price.amount}</span>
-                {price.type === MarketPriceType.LC && <LcLabel size={16} />}
+                {price.type === MarketPriceType.LC && <LcLabel size={16} interactive={false} />}
                 {price.type === MarketPriceType.TELEGRAM_STARS && <TelegramStarIcon size={18} />}
               </div>
             </div>

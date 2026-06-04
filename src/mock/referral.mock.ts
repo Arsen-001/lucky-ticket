@@ -1,5 +1,6 @@
 import { images } from '@/constants/images';
 import { InvitedFriend, ReferralStats } from '@/types/interfaces/referral.interfaces';
+import { appConfig } from '@/config/app.config';
 
 const LOCAL_AVATARS = [
   images.avatar1.src,
@@ -100,11 +101,14 @@ const baseFriends: Omit<InvitedFriend, 'liked' | 'likesReceived'>[] = [
   },
 ];
 
-export const invitedFriendsMock: InvitedFriend[] = baseFriends.map((friend, i) => ({
-  ...friend,
-  liked: i % 4 === 1,
-  likesReceived: 35 + i * 44,
-}));
+// Level-zero: no invited friends yet (the demo roster stays in `baseFriends`).
+export const invitedFriendsMock: InvitedFriend[] = appConfig.account.fresh
+  ? []
+  : baseFriends.map((friend, i) => ({
+      ...friend,
+      liked: i % 4 === 1,
+      likesReceived: 35 + i * 44,
+    }));
 
 export const referralStatsMock: ReferralStats = {
   totalInvited: invitedFriendsMock.length,

@@ -1,0 +1,76 @@
+/* Onboarding tour spotlight — the dim is a giant box-shadow around a rounded
+ * "hole" punched over the highlighted element; the ring pulses to draw the eye.
+ * Both follow the target with a quick eased transition as the tour advances. */
+
+.tour-overlay-dim {
+  position: absolute;
+  border-radius: 18px;
+  box-shadow: 0 0 0 9999px rgba(9, 7, 18, 0.6);
+  pointer-events: none;
+  transition:
+    top 0.28s cubic-bezier(0.22, 1, 0.36, 1),
+    left 0.28s cubic-bezier(0.22, 1, 0.36, 1),
+    width 0.28s cubic-bezier(0.22, 1, 0.36, 1),
+    height 0.28s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.tour-overlay-ring {
+  position: absolute;
+  border-radius: 18px;
+  pointer-events: none;
+  animation: tour-ring-pulse 1.8s ease-in-out infinite;
+  transition:
+    top 0.28s cubic-bezier(0.22, 1, 0.36, 1),
+    left 0.28s cubic-bezier(0.22, 1, 0.36, 1),
+    width 0.28s cubic-bezier(0.22, 1, 0.36, 1),
+    height 0.28s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+@keyframes tour-ring-pulse {
+  0%,
+  100% {
+    box-shadow:
+      0 0 0 2px var(--color-electric-pink),
+      0 0 16px 2px color-mix(in srgb, var(--color-electric-pink) 55%, transparent);
+  }
+  50% {
+    box-shadow:
+      0 0 0 3px var(--color-electric-pink),
+      0 0 30px 7px color-mix(in srgb, var(--color-electric-pink) 78%, transparent);
+  }
+}
+
+/* Animated hand pointing at the spotlight, mimicking a tap so the player sees
+ * exactly where to press. Anchored at the hole centre; its top-left (the
+ * fingertip) rests just off the target and presses onto it on each tap. It
+ * ignores pointer events so the real tap still lands on the hit target above. */
+.tour-tap-hand {
+  position: absolute;
+  z-index: 1;
+  pointer-events: none;
+  color: #fff;
+  transform-origin: top left;
+  filter: drop-shadow(0 3px 5px rgba(0, 0, 0, 0.6))
+    drop-shadow(0 0 6px color-mix(in srgb, var(--color-electric-pink) 70%, transparent));
+  animation: tour-tap 1.5s cubic-bezier(0.4, 0, 0.2, 1) infinite;
+  transition:
+    top 0.28s cubic-bezier(0.22, 1, 0.36, 1),
+    left 0.28s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+@keyframes tour-tap {
+  0%,
+  22% {
+    transform: translate(13px, 15px) rotate(-10deg) scale(1);
+  }
+  40% {
+    transform: translate(2px, 3px) rotate(-10deg) scale(0.82);
+  }
+  52% {
+    transform: translate(7px, 8px) rotate(-10deg) scale(0.9);
+  }
+  68%,
+  100% {
+    transform: translate(13px, 15px) rotate(-10deg) scale(1);
+  }
+}

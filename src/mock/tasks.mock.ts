@@ -22,6 +22,7 @@ import {
   tierLabel,
 } from '@/types/types/tier.types';
 import { GlobalConstants } from '@/constants/global.constants';
+import { appConfig } from '@/config/app.config';
 
 const HOUR_MS = 60 * 60 * 1000;
 const DAY_MS = 24 * HOUR_MS;
@@ -45,7 +46,11 @@ const nextId = (prefix: string) => `${prefix}-${++_id}`;
 // (TierName + TIER_RANK live in src/types/types/tier.types.ts —
 //  shared with the rest of the codebase.)
 // ============================================================
-const USER_TIER: TierName = 'platinum';
+const fresh = appConfig.account.fresh;
+
+// A level-zero account is Bronze tier (0 AP) — higher-tier tasks lock; the full
+// demo keeps Platinum access. (Nothing deleted — both branches kept.)
+const USER_TIER: TierName = fresh ? 'bronze' : 'platinum';
 
 const isTierUnlocked = (tier?: string): boolean => {
   if (!tier || tier === 'all') return true;
@@ -1946,8 +1951,8 @@ const PARTNERS = buildCategory({
 });
 
 // Streak — single source of truth. `reached` derived from currentDays.
-const STREAK_CURRENT_DAYS = 5;
-const STREAK_BEST_DAYS = 14;
+const STREAK_CURRENT_DAYS = fresh ? 0 : 5;
+const STREAK_BEST_DAYS = fresh ? 0 : 14;
 const STREAK_MILESTONES: { day: number; reward: TaskReward }[] = [
   { day: 7, reward: lc(2) },
   { day: 14, reward: lc(5) },
@@ -2008,7 +2013,9 @@ const mockState = {
   claimedTaskIds: new Set<string>(),
   claimedSubStepIds: new Set<string>(),
   watchedAdIds: new Set<string>(),
-  balance: { lc: 12_345_000, tickets: 12, activityPoints: 4500 },
+  balance: fresh
+    ? { lc: 0, tickets: 0, activityPoints: 0 }
+    : { lc: 12_345_000, tickets: 12, activityPoints: 4500 },
 };
 
 const applyMockState = (task: Task): Task => {
@@ -2045,8 +2052,37 @@ const buildLiveAds = (): AdsBlock => {
   };
 };
 
+// Level-zero reset: every non-locked task back to zero progress / not-done.
+// Locked (tier-gated) tasks stay locked. Demo data is untouched — used when
+// `fresh` is false.
+const resetTaskForFresh = (task: Task): Task =>
+  task.status === TaskStatus.LOCKED
+    ? task
+    : {
+        ...task,
+        status: TaskStatus.IN_PROGRESS,
+        progress: { ...task.progress, current: 0 },
+        subSteps: task.subSteps?.map(s => ({ ...s, completed: false, claimed: false })),
+      };
+
+const freshQuest: Quest = {
+  ...QUEST,
+  steps: QUEST.steps.map(step => ({
+    ...step,
+    status: step.status === TaskStatus.LOCKED ? TaskStatus.LOCKED : TaskStatus.IN_PROGRESS,
+  })),
+};
+
 const buildTasksResponse = (): TasksResponse => {
-  const liveCategories = PROCESSED_CATEGORIES.map(c => ({
+  const sourceCategories = fresh
+    ? PROCESSED_CATEGORIES.map(c => ({
+        ...c,
+        daily: c.daily.map(resetTaskForFresh),
+        weekly: c.weekly.map(resetTaskForFresh),
+        once: c.once.map(resetTaskForFresh),
+      }))
+    : PROCESSED_CATEGORIES;
+  const liveCategories = sourceCategories.map(c => ({
     ...c,
     daily: c.daily.map(applyMockState),
     weekly: c.weekly.map(applyMockState),
@@ -2056,7 +2092,7 @@ const buildTasksResponse = (): TasksResponse => {
     streak: STREAK,
     dailyProgress: computeDailyProgress(liveCategories),
     ads: buildLiveAds(),
-    quest: QUEST,
+    quest: fresh ? freshQuest : QUEST,
     categories: liveCategories,
   };
 };

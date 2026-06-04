@@ -747,10 +747,10 @@ export const marketMock: MarketData = {
         'lp tournament join ap boost',
         'higher ticket send limits',
         'send platinum diamond tickets',
+        'lp claim all tickets',
         'lp watch ads daily',
         'lp referral boost',
         'lucky player badge on profile',
-        'priority support',
       ],
     },
     {

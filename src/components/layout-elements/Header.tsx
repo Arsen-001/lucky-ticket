@@ -132,6 +132,7 @@ export function Header({ className }: ClassNameProps) {
               onClick={() => router.push(routes.activity)}
               ariaLabel={t('activity points')}
               flightTarget="ap"
+              dataTour="ap"
             />
           </SkeletonSuspense>
           <SkeletonSuspense

@@ -3,6 +3,7 @@ import { api } from '@/api/index.api';
 import { meApi } from '@/api/me.api';
 import { ticketsApi } from '@/api/tickets.api';
 import { rtkTags } from '@/constants/rtk-tags';
+import { appConfig } from '@/config/app.config';
 import {
   MAX_BOOST_LEVEL,
   effectiveCycleSeconds,
@@ -24,6 +25,26 @@ const promoteIfMaxed = (engine: TicketEngine): TicketEngine => {
     };
   }
   return engine;
+};
+
+const STARTER_ENGINE_ID = 'engine-bronze-starter';
+
+// The free Bronze starter engine, granted once after the onboarding language
+// step. Comes with one ready ticket so the tour's claim finale has something to
+// collect (DOCS §9 / §17.5).
+const buildStarterEngine = (): TicketEngine => {
+  const cycleSeconds = appConfig.engines.baseCycleSecondsByTier.bronze;
+  return {
+    id: STARTER_ENGINE_ID,
+    cycleSeconds,
+    perCycleOutput: 1,
+    cycleStartedAt: dayjs().subtract(cycleSeconds, 'second').toISOString(),
+    pendingCount: 1,
+    instantClaimStarsCost: 5,
+    engineLevel: 1,
+    speedLevel: 0,
+    capacityLevel: 0,
+  };
 };
 
 export const enginesApi = api.injectEndpoints({
@@ -225,6 +246,45 @@ export const enginesApi = api.injectEndpoints({
         }
       },
     }),
+
+    // Grants the brand-new account's welcome pack — fired once when the player
+    // claims it after the onboarding language step: a free Bronze engine (with
+    // one ready ticket for the tour's claim finale), a starter Bronze-ticket
+    // balance, and a first activity point. Idempotent (keyed on the starter
+    // engine) and does not invalidate the tickets tag, so the grant persists.
+    grantWelcomePack: builder.mutation<void, void>({
+      query: () => ({ url: 'engines/grant-welcome', method: 'POST' }),
+      async onQueryStarted(_arg, { dispatch, queryFulfilled, getState }) {
+        const tickets = ticketsApi.endpoints.getTickets.select()(
+          getState() as Parameters<ReturnType<typeof ticketsApi.endpoints.getTickets.select>>[0]
+        ).data;
+        const alreadyGranted = tickets?.some(ticket =>
+          ticket.engines?.some(engine => engine.id === STARTER_ENGINE_ID)
+        );
+        if (alreadyGranted) return;
+
+        const { bronzeTickets, activityPoints } = appConfig.onboardingTour.welcomePack;
+        const ticketsPatch = dispatch(
+          ticketsApi.util.updateQueryData('getTickets', undefined, draft => {
+            const bronze = draft.find(ticket => ticket.ticketType === 'bronze');
+            if (!bronze) return;
+            bronze.engines = [...(bronze.engines ?? []), buildStarterEngine()];
+            bronze.count = (bronze.count ?? 0) + bronzeTickets;
+          })
+        );
+        const mePatch = dispatch(
+          meApi.util.updateQueryData('getMe', undefined, draft => {
+            draft.activityPoints += activityPoints;
+          })
+        );
+        try {
+          await queryFulfilled;
+        } catch {
+          ticketsPatch.undo();
+          mePatch.undo();
+        }
+      },
+    }),
   }),
 });
 
@@ -235,4 +295,5 @@ export const {
   useUpgradeEngineSpeedMutation,
   useUpgradeEngineCapacityMutation,
   useCompleteEngineCycleMutation,
+  useGrantWelcomePackMutation,
 } = enginesApi;

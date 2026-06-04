@@ -5,7 +5,9 @@ import { InvitedFriendsList } from '@/components/pages/out-tabs/drawer/invite-fr
 export default function InviteFriendsPage() {
   return (
     <div className="flex flex-col gap-4 px-4 pb-6 pt-2">
-      <FriendsHeroCard />
+      <div data-tour="referrals">
+        <FriendsHeroCard />
+      </div>
       <ReferralInfoSection />
       <InvitedFriendsList />
     </div>

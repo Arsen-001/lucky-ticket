@@ -12,6 +12,7 @@ import type {
   InventoryShardCount,
 } from '@/types/interfaces/inventory.interfaces';
 import type { TicketType } from '@/types/types/ticket.types';
+import { appConfig } from '@/config/app.config';
 
 const initialChips: InventoryChip[] = [
   {
@@ -158,11 +159,13 @@ const initialBoosters: InventoryBooster[] = [
   },
 ];
 
-let inventoryState: InventorySnapshot = {
-  chips: initialChips,
-  shards: initialShards,
-  boosters: initialBoosters,
-};
+const fresh = appConfig.account.fresh;
+
+// Level-zero: empty inventory (zeroed shard counts keep the strip's shape). The
+// rich demo data above is untouched — selected only in the `else` branch.
+let inventoryState: InventorySnapshot = fresh
+  ? { chips: [], shards: initialShards.map(s => ({ ...s, count: 0 })), boosters: [] }
+  : { chips: initialChips, shards: initialShards, boosters: initialBoosters };
 
 export const inventoryChipsMock = inventoryState.chips;
 export const inventoryShardsMock = inventoryState.shards;

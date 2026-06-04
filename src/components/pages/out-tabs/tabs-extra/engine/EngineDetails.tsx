@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import { useRouter } from 'next/navigation';
 import {
   useClaimEngineMutation,
   useCompleteEngineCycleMutation,
@@ -21,6 +22,7 @@ import { ConfirmModal } from '@/components/shared/modals/ConfirmModal';
 import { EngineSlotPickerModal } from '@/components/pages/tabs/home/EngineSlotPickerModal';
 import { NotEnoughStarsModal } from '@/components/pages/tabs/home/NotEnoughStarsModal';
 import { useAppTranslations } from '@/hooks/useAppTranslations';
+import { routes } from '@/constants/routes';
 import {
   chipEquipStarsCost,
   findActiveBooster,
@@ -78,6 +80,7 @@ export function EngineDetails({ id }: EngineDetailsProps) {
     open: false,
     required: 0,
   });
+  const router = useRouter();
 
   const location = findEngineLocation(tickets, id);
   const engine = location?.engine ?? null;
@@ -153,6 +156,11 @@ export function EngineDetails({ id }: EngineDetailsProps) {
   const instantClaimCost = Math.max(1, Math.ceil(remaining / 3600));
   const lifetimeProduced = engineLevel * (capacity + 5) * 17;
   const currentStars = me?.telegramStars ?? 0;
+
+  const handleTopUpStars = (amount: number) => {
+    setStarsModal(prev => ({ ...prev, open: false }));
+    router.push(`${routes.wallet}?topUp=${amount}`);
+  };
 
   const requireStars = (cost: number, onPaid: () => void) => {
     if (currentStars < cost) {
@@ -342,6 +350,7 @@ export function EngineDetails({ id }: EngineDetailsProps) {
         onClose={() => setStarsModal(prev => ({ ...prev, open: false }))}
         requiredStars={starsModal.required}
         currentStars={currentStars}
+        onTopUp={handleTopUpStars}
       />
     </div>
   );

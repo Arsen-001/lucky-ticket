@@ -56,6 +56,8 @@ const bronzeEngines: TicketEngine[] = buildEngines('bronze', 9);
 const silverEngines: TicketEngine[] = buildEngines('silver', 7);
 const goldEngines: TicketEngine[] = buildEngines('gold', 4);
 
+const fresh = appConfig.account.fresh;
+
 const tickets: Ticket[] = [
   {
     id: '123e4567-e89b-12d3-a456-426655440000',
@@ -166,4 +168,17 @@ const tickets: Ticket[] = [
   },
 ] as const;
 
-export const ticketsMock = { tickets };
+// Level-zero view: no owned tickets and no engines — the free Bronze starter is
+// part of the welcome pack granted after the language step (`grantWelcomePack`), every
+// locked-tier requirement reset to zero progress. Derived from `tickets` so the
+// shape always matches the rich demo (which stays intact in the `else` branch).
+const freshTickets: Ticket[] = tickets.map(ticket => ({
+  ...ticket,
+  count: 0,
+  isTimeBoosted: false,
+  isCollectionBoosted: false,
+  engines: ticket.engines ? [] : ticket.engines,
+  requirements: ticket.requirements?.map(requirement => ({ ...requirement, actualCount: 0 })),
+}));
+
+export const ticketsMock = { tickets: fresh ? freshTickets : tickets };

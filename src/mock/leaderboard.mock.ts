@@ -7,6 +7,9 @@ import type {
   LeaderboardPeriod,
   LeaderboardResponse,
 } from '@/types/interfaces/leaderboard.interfaces';
+import { appConfig } from '@/config/app.config';
+
+const fresh = appConfig.account.fresh;
 
 const LOCAL_AVATARS = [
   images.avatar1.src,
@@ -91,22 +94,24 @@ const buildResponse = (period: LeaderboardPeriod): LeaderboardResponse => {
     };
   }
 
-  const myRank = MY_RANK_BY_PERIOD[period];
+  // Level-zero player sits unranked at the very bottom with no points — the
+  // generated leaderboard (other players) is the world catalog and stays.
+  const myRank = fresh ? TOTAL_BY_PERIOD[period] : MY_RANK_BY_PERIOD[period];
   const myPlaceInList = places.find(entry => entry.place === myRank);
 
   const myPlace: LeaderboardEntry = {
     id: me.id,
     username: me.username,
-    points: myPlaceInList?.points ?? POINTS_FLOOR_BY_PERIOD[period] + 80,
+    points: fresh ? 0 : (myPlaceInList?.points ?? POINTS_FLOOR_BY_PERIOD[period] + 80),
     avatar: me.avatar,
-    rankChange: faker.number.int({ min: -5, max: 12 }),
+    rankChange: fresh ? 0 : faker.number.int({ min: -5, max: 12 }),
     place: myRank,
     isVerified: me.isVerified,
     isLuckyPlayer: me.isLuckyPlayer,
     isVIP: me.isVIP,
     vipLevel: me.vipLevel,
     liked: false,
-    likesReceived: 234,
+    likesReceived: fresh ? 0 : 234,
   };
 
   if (myRank <= places.length) {

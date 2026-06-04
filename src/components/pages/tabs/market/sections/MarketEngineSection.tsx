@@ -29,7 +29,7 @@ export function MarketEngineSection({ engines, onSelect, onBuy }: MarketEngineSe
   if (!engines.length) return null;
 
   return (
-    <MarketSectionGrid title={t('engines')} icon={Cog} accent="var(--color-gold)">
+    <MarketSectionGrid title={t('engines title')} icon={Cog} accent="var(--color-gold)">
       {engines.map(engine => {
         const isLocked = !isTierUnlocked(engine.ticketType);
         const cardIcon: ReactNode = <EngineIcon tier={engine.ticketType} size={144} />;

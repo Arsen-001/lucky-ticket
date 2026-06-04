@@ -9,6 +9,9 @@ import { getRandomNumber } from '@/utils/global/number.utils';
 import { mockDb } from '@/mock/backend/db';
 import { GlobalConstants, isTournamentTierActivated } from '@/constants/global.constants';
 import { applyStatusTournamentJoinApBoost } from '@/utils/global/tournament.utils';
+import { appConfig } from '@/config/app.config';
+
+const fresh = appConfig.account.fresh;
 
 const getTicketsCount = () => getRandomNumber(1, 20);
 
@@ -253,12 +256,27 @@ const joinTournament = (args: { body?: unknown }) => {
 
 const markTournamentResultSeen = () => undefined;
 
+// Level-zero view: same upcoming catalog, but the player hasn't joined anything
+// and has no results/history. The rich demo (`tournaments`) is untouched.
+const freshTournaments: PersonalTournament[] = tournaments.map(tournament => ({
+  ...tournament,
+  participated: false,
+  participatedTicketsCount: 0,
+  userResult: undefined,
+  resultSeen: undefined,
+}));
+
+const servedTournaments = fresh ? freshTournaments : tournaments;
+const servedTop = servedTournaments.filter(
+  tournament => tournament.status === 'upcoming' && !tournament.participated
+);
+
 export const tournamentsMock = {
   // `GET tournaments` (gated list) wins over the raw `tournaments` array,
   // which is kept for `tournaments/{id}` + `/places` path traversal.
-  'GET tournaments': () => gateByActivation(tournaments),
-  topTournaments: () => gateByActivation(topTournaments),
-  tournaments,
+  'GET tournaments': () => gateByActivation(servedTournaments),
+  topTournaments: () => gateByActivation(servedTop),
+  tournaments: servedTournaments,
   'POST tournaments/join': joinTournament,
   'POST tournaments/result-seen': markTournamentResultSeen,
 };

@@ -1,11 +1,12 @@
 'use client';
 
 import { useState } from 'react';
-import { Cpu, MemoryStick, Minus, Plus, Sparkles } from 'lucide-react';
+import { Minus, Plus, Sparkles } from 'lucide-react';
 import { twMerge } from 'tailwind-merge';
 import { Modal } from '@/components/shared/modals/Modal';
 import { Button } from '@/components/shared/buttons/Button';
 import { TicketOverlap } from '@/components/shared/icons/TicketOverlap';
+import { ChipShardIcon } from '@/components/shared/icons/ChipShardIcon';
 import { BoltIcon } from '@/components/shared/icons/BoltIcon';
 import { useAppTranslations } from '@/hooks/useAppTranslations';
 import { GlobalConstants } from '@/constants/global.constants';
@@ -53,7 +54,6 @@ export function TournamentBetModal({
   const t = useAppTranslations();
   const [betCount, setBetCount] = useState(1);
   const [isEditing, setIsEditing] = useState(false);
-  const ShardIcon = shardType === 'capacity' ? MemoryStick : Cpu;
   const shardLabel = shardType === 'capacity' ? t('capacity') : t('time');
   const topShards = GlobalConstants.tournamentShardRewards.first;
   const joinAp = GlobalConstants.apRewards.tournamentJoinByTier[tournamentType];
@@ -157,7 +157,12 @@ export function TournamentBetModal({
                 {t('1st')}
               </span>
               <span className="text-white/30">·</span>
-              <ShardIcon size={14} className="text-pink-secondary shrink-0" strokeWidth={2.4} />
+              <ChipShardIcon
+                type={shardType}
+                tier={tournamentType}
+                size={16}
+                className="shrink-0"
+              />
               <span className={twMerge(tierTextClass, 'text-sm tabular-nums leading-none')}>
                 +{topShards}
               </span>

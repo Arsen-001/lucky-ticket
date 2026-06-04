@@ -29,7 +29,11 @@ export function NotEnoughStarsModal({
 
   const hasRequirement = typeof requiredStars === 'number';
   const deficit = hasRequirement ? Math.max(1, requiredStars - currentStars) : null;
-  const presets = (deficit ? [deficit, ...STAR_PRESETS] : [...STAR_PRESETS]).sort((a, b) => a - b);
+  // De-duplicate so the exact-deficit chip never collides with a matching preset
+  // (which would render two identical buttons and clash on the `amount` key).
+  const presets = Array.from(new Set(deficit ? [deficit, ...STAR_PRESETS] : STAR_PRESETS)).sort(
+    (a, b) => a - b
+  );
 
   return (
     <ClientPortal>

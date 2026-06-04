@@ -1,6 +1,6 @@
 'use client';
 
-import { Cpu, Crown, MemoryStick } from 'lucide-react';
+import { Crown } from 'lucide-react';
 import { twMerge } from 'tailwind-merge';
 import { useGetTournamentByIdQuery, useGetTournamentPlacesQuery } from '@/api/tournaments.api';
 import { useAppTranslations } from '@/hooks/useAppTranslations';
@@ -12,6 +12,7 @@ import {
 } from '@/components/pages/out-tabs/drawer/leaderboard/LeaderboardPodium';
 import { Skeleton } from '@/components/shared/seleketons/Skeleton';
 import { LcLabel } from '@/components/shared/icons/LcLabel';
+import { ShardZoomButton } from '@/components/pages/out-tabs/tabs-extra/tournament/ShardZoomButton';
 import { GlobalConstants } from '@/constants/global.constants';
 import type { TournamentType } from '@/types/types/tournaments.types';
 
@@ -95,7 +96,6 @@ export function TournamentPlacements({ id }: TournamentPlacementsProps) {
   const { data: tournament } = useGetTournamentByIdQuery(id);
   const t = useAppTranslations();
 
-  const ShardIcon = tournament?.shardType === 'capacity' ? MemoryStick : Cpu;
   const prizePool = tournament?.prizePool;
   const userPlace = tournament?.userResult?.place;
 
@@ -131,7 +131,10 @@ export function TournamentPlacements({ id }: TournamentPlacementsProps) {
               SHARD_TIER_TEXT[rank]
             )}
           >
-            <ShardIcon size={11} strokeWidth={2.4} />+{shards}
+            {tournament?.shardType && (
+              <ShardZoomButton type={tournament.shardType} tier={tournament.type} size={13} />
+            )}
+            +{shards}
           </span>
         ),
       } as PodiumPlayer;

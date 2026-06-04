@@ -12,6 +12,8 @@ export interface LcLabelProps {
   style?: CSSProperties;
   /** When true, blocks parent click handlers (default: true). */
   stopPropagation?: boolean;
+  /** When false, renders a plain decorative coin with no link to /lc (default: true). */
+  interactive?: boolean;
 }
 
 /**
@@ -19,8 +21,26 @@ export interface LcLabelProps {
  * Use anywhere "LC" would otherwise appear as plain text — the icon stands in
  * for the currency abbreviation.
  */
-export function LcLabel({ size = 14, className, style, stopPropagation = true }: LcLabelProps) {
+export function LcLabel({
+  size = 14,
+  className,
+  style,
+  stopPropagation = true,
+  interactive = true,
+}: LcLabelProps) {
   const router = useRouter();
+
+  if (!interactive) {
+    return (
+      <span
+        aria-label="LC"
+        style={style}
+        className={twMerge('inline-flex shrink-0 items-center align-middle', className)}
+      >
+        <CoinIcon size={size} />
+      </span>
+    );
+  }
 
   const go = () => router.push(routes.lc);
 

@@ -34,8 +34,6 @@ export const routes = {
   activity: '/activity',
   wallet: '/wallet',
   lc: '/lc',
-  vip: '/vip',
-  luckyPlayer: '/lucky-player',
   tickets: {
     index: '/tickets',
   },

@@ -11,6 +11,7 @@ import { icons } from '@/constants/icons';
 import { useAppTranslations } from '@/hooks/useAppTranslations';
 import { MarketPriceType } from '@/types/enums/market.enums';
 import type { MarketAccent, MarketPrice } from '@/types/interfaces/market.interfaces';
+import { formatCompactPrice } from '@/utils/global/number.utils';
 
 const ACCENT_COLOR: Record<MarketAccent, string> = {
   bronze: '#E08A3A',
@@ -34,6 +35,8 @@ export interface MarketUniversalCardProps {
   isNew?: boolean;
   discountPct?: number;
   disabled?: boolean;
+  /** Keep the card body clickable even when `disabled` (e.g. an owned status card that still links to its page). The buy buttons stay locked. */
+  clickableWhenDisabled?: boolean;
   loading?: boolean;
   prices?: MarketPrice[];
   onClick?: () => void;
@@ -50,6 +53,7 @@ export function MarketUniversalCard({
   isNew,
   discountPct,
   disabled,
+  clickableWhenDisabled,
   loading,
   prices,
   onClick,
@@ -58,14 +62,16 @@ export function MarketUniversalCard({
 }: MarketUniversalCardProps) {
   const t = useAppTranslations();
   const accentColor = accentValue(accent);
+  // The body stays interactive when enabled, or when explicitly allowed while disabled.
+  const cardClickable = !loading && (!disabled || !!clickableWhenDisabled);
 
   return (
     <div
       role="button"
-      tabIndex={disabled ? -1 : 0}
-      onClick={disabled || loading ? undefined : onClick}
+      tabIndex={cardClickable ? 0 : -1}
+      onClick={cardClickable ? onClick : undefined}
       onKeyDown={e => {
-        if (disabled || loading) return;
+        if (!cardClickable) return;
         if (e.key === 'Enter' || e.key === ' ') {
           e.preventDefault();
           onClick?.();
@@ -73,8 +79,8 @@ export function MarketUniversalCard({
       }}
       className={twMerge(
         'task-card-default bg-background-overlay relative flex h-full flex-col gap-2 overflow-hidden rounded-2xl p-3 text-left transition-transform active:scale-99 hover:brightness-110',
-        disabled && 'cursor-default hover:brightness-100',
-        !disabled && 'cursor-pointer',
+        !cardClickable && 'cursor-default hover:brightness-100',
+        cardClickable && 'cursor-pointer',
         className
       )}
     >
@@ -162,8 +168,8 @@ function PriceButton({ price, accent, onClick, fullWidth }: PriceButtonProps) {
         onClick();
       }}
       className={twMerge(
-        'flex-center relative gap-1 overflow-hidden rounded-lg px-2 py-2 text-xs font-semibold text-white transition-transform active:scale-[0.97] hover:brightness-110',
-        fullWidth ? 'w-full' : 'flex-1'
+        'flex-center relative gap-1 overflow-hidden whitespace-nowrap rounded-lg px-2 py-2 text-xs font-semibold text-white transition-transform active:scale-[0.97] hover:brightness-110',
+        fullWidth ? 'w-full' : 'min-w-0 flex-1'
       )}
       style={{
         backgroundColor: `color-mix(in srgb, ${accent} 18%, transparent)`,
@@ -173,11 +179,13 @@ function PriceButton({ price, accent, onClick, fullWidth }: PriceButtonProps) {
       {isStars && <TelegramStarIcon size={14} />}
       <span className="inline-flex items-baseline gap-1 tabular-nums">
         {price.originalAmount && (
-          <span className="text-[10px] text-white/55 line-through">{price.originalAmount}</span>
+          <span className="text-[10px] text-white/55 line-through">
+            {formatCompactPrice(price.originalAmount)}
+          </span>
         )}
-        <span className="text-sm">{price.amount}</span>
+        <span className="text-sm">{formatCompactPrice(price.amount)}</span>
       </span>
-      {isLc && <LcLabel size={12} />}
+      {isLc && <LcLabel size={12} interactive={false} />}
     </button>
   );
 }

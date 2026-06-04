@@ -145,7 +145,7 @@ function renderDailyReward(reward: AvatarDailyReward): ReactNode {
     return (
       <span className="text-gold inline-flex items-center gap-1 tabular-nums">
         +{reward.amount}
-        <LcLabel size={12} />
+        <LcLabel size={12} interactive={false} />
       </span>
     );
   }

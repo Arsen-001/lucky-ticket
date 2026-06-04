@@ -42,16 +42,6 @@
   }
 }
 
-@keyframes task-flame-flicker {
-  0%,
-  100% {
-    transform: scale(1) rotate(-2deg);
-  }
-  50% {
-    transform: scale(1.08) rotate(2deg);
-  }
-}
-
 @utility animate-task-prize {
   animation: task-prize-spin 1.6s cubic-bezier(0.2, 0.8, 0.4, 1.2) both;
 }
@@ -66,10 +56,6 @@
 
 @utility animate-task-pulse {
   animation: task-pulse-glow 1.8s ease-in-out infinite;
-}
-
-@utility animate-task-flame {
-  animation: task-flame-flicker 1.4s ease-in-out infinite;
 }
 
 .task-confetti-particle {

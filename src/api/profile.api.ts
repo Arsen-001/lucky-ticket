@@ -8,6 +8,7 @@ import type {
   ProfileResponse,
   SendTicketRequest,
   SendTicketResponse,
+  UpdateBannerIconsRequest,
 } from '@/types/interfaces/profile.interfaces';
 import type {
   BuySlotResponse,
@@ -63,6 +64,25 @@ export const profileApi = api.injectEndpoints({
     inviteToTournament: builder.mutation<InviteToTournamentResponse, InviteToTournamentRequest>({
       query: body => ({ url: 'profile/invite-tournament', method: 'POST', body }),
     }),
+
+    // Persist the owner's banner collage layout. Optimistically patches the
+    // owner's profile cache so the icons stay where they were dropped without
+    // waiting for the round-trip; the mock backend keeps the last write.
+    updateBannerIcons: builder.mutation<ProfileResponse, UpdateBannerIconsRequest>({
+      query: body => ({ url: 'profile/banner-icons', method: 'PATCH', body }),
+      async onQueryStarted({ positions }, { dispatch, queryFulfilled }) {
+        const patch = dispatch(
+          profileApi.util.updateQueryData('getProfile', undefined, draft => {
+            draft.bannerIconPositions = positions;
+          })
+        );
+        try {
+          await queryFulfilled;
+        } catch {
+          patch.undo();
+        }
+      },
+    }),
   }),
 });
 
@@ -76,4 +96,5 @@ export const {
   usePinCollageMutation,
   useUnpinCollageMutation,
   useInviteToTournamentMutation,
+  useUpdateBannerIconsMutation,
 } = profileApi;

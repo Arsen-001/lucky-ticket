@@ -8,6 +8,7 @@ import type {
   AchievementCatalogResponse,
 } from '@/types/interfaces/achievement.interfaces';
 import { buildChain, type ChainConfig } from '@/mock/achievement-chains';
+import { appConfig } from '@/config/app.config';
 
 const make = (a: Partial<Achievement> & Pick<Achievement, 'id' | 'name'>): Achievement => ({
   description: a.name,
@@ -128,7 +129,7 @@ const chainConfigs: ChainConfig[] = [
 
 const chainAchievements: Achievement[] = chainConfigs.flatMap(buildChain);
 
-export const achievements: Achievement[] = [
+const demoAchievements: Achievement[] = [
   // ─── Status — VIP levels 1–6 (Bronze → Diamond+) ───
   make({
     id: 'vip-1',
@@ -215,6 +216,25 @@ export const achievements: Achievement[] = [
 
   ...chainAchievements,
 ];
+
+const fresh = appConfig.account.fresh;
+
+// Level-zero: nothing earned or showcased yet — definitions kept intact (the
+// rich, earned demo lives in `demoAchievements`).
+export const achievements: Achievement[] = fresh
+  ? demoAchievements.map(achievement => ({
+      ...achievement,
+      earned: false,
+      earnedAt: undefined,
+      isPinned: false,
+      pinnedSlot: undefined,
+      isCollagePinned: false,
+      collageSlot: undefined,
+      progress: achievement.progress
+        ? { ...achievement.progress, current: 0 }
+        : achievement.progress,
+    }))
+  : demoAchievements;
 
 const earnedCount = achievements.filter(a => a.earned).length;
 

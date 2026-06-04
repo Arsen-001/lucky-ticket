@@ -1,13 +1,13 @@
 'use client';
 
 import { useEffect, useRef, useState } from 'react';
-import { Cpu, MemoryStick, Trophy } from 'lucide-react';
-import type { LucideIcon } from 'lucide-react';
+import { Trophy } from 'lucide-react';
 import { useGetMeQuery } from '@/api/me.api';
 import { Modal } from '@/components/shared/modals/Modal';
 import { Button } from '@/components/shared/buttons/Button';
 import { Medal, type MedalType } from '@/components/shared/icons/Medal';
 import { LcLabel } from '@/components/shared/icons/LcLabel';
+import { ChipShardIcon } from '@/components/shared/icons/ChipShardIcon';
 import { useAppTranslations } from '@/hooks/useAppTranslations';
 import type { InventoryChipType } from '@/types/interfaces/inventory.interfaces';
 import type { TournamentUserResult } from '@/types/interfaces/tournaments.interfaces';
@@ -54,14 +54,6 @@ const RANK_HALO_RGB: Record<1 | 2 | 3, string> = {
   2: '192, 190, 177',
   3: '172, 97, 34',
 };
-
-const RANK_ICON_COLOR: Record<1 | 2 | 3, string> = {
-  1: 'text-gold',
-  2: 'text-silver',
-  3: 'text-bronze',
-};
-
-const MID_ICON_COLOR = 'text-electric-pink';
 
 const useCounter = (target: number, durationMs = 900) => {
   const [value, setValue] = useState(0);
@@ -115,7 +107,6 @@ export function TournamentResultModal({
 }: TournamentResultModalProps) {
   const t = useAppTranslations();
   const { data: me } = useGetMeQuery();
-  const ShardIcon: LucideIcon = shardType === 'capacity' ? MemoryStick : Cpu;
 
   const place = result?.place;
   const isLp = me?.isLuckyPlayer ?? false;
@@ -149,11 +140,6 @@ export function TournamentResultModal({
     : view === 'mid-place'
       ? MID_TEXT_CLASS
       : RANK_TEXT_CLASS[1];
-  const iconColorClass = rank
-    ? RANK_ICON_COLOR[rank]
-    : view === 'mid-place'
-      ? MID_ICON_COLOR
-      : RANK_ICON_COLOR[1];
 
   useEffect(() => {
     if (open && (view === 'top-three' || view === 'mid-place')) {
@@ -254,9 +240,14 @@ export function TournamentResultModal({
                     {t(statusLabelKey)} +{statusBoostPct}%
                   </span>
                 )}
-                {view === 'top-three' && shards > 0 && (
+                {view === 'top-three' && shards > 0 && shardType && (
                   <div className="inline-flex items-center gap-1.5 leading-none">
-                    <ShardIcon size={18} className={iconColorClass} strokeWidth={2.4} />
+                    <ChipShardIcon
+                      type={shardType}
+                      tier={tournamentType}
+                      size={22}
+                      className="shrink-0"
+                    />
                     <span className={`${textClass} text-2xl tabular-nums leading-none`}>
                       {shards}
                     </span>

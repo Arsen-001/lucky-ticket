@@ -1,6 +1,7 @@
 'use client';
 
 import { useCallback, useEffect, useRef, useState } from 'react';
+import { useRouter } from 'next/navigation';
 import dayjs from 'dayjs';
 import { Plus } from 'lucide-react';
 import { twMerge } from 'tailwind-merge';
@@ -21,6 +22,7 @@ import { NotEnoughStarsModal } from '@/components/pages/tabs/home/NotEnoughStars
 import { ConfirmModal } from '@/components/shared/modals/ConfirmModal';
 import { TelegramStarIcon } from '@/components/shared/icons/TelegramStarIcon';
 import { useAppTranslations } from '@/hooks/useAppTranslations';
+import { routes } from '@/constants/routes';
 import { chipEquipStarsCost } from '@/utils/global/inventory.utils';
 import type { InventoryChip } from '@/types/interfaces/inventory.interfaces';
 import { EmptyDataInfo } from '@/components/shared/EmptyDataInfo';
@@ -137,9 +139,15 @@ export function HomeEnginesSlider({ className }: ClassNameProps) {
     type: InventoryChipType;
   } | null>(null);
 
+  const router = useRouter();
   const currentStars = me?.telegramStars ?? 0;
   const isLp = me?.isLuckyPlayer ?? false;
   const isVip = me?.isVIP ?? false;
+
+  const handleTopUpStars = (amount: number) => {
+    setStarsModal(prev => ({ ...prev, open: false }));
+    router.push(`${routes.wallet}?topUp=${amount}`);
+  };
 
   const requireStars = (cost: number, onPaid: () => void) => {
     if (currentStars < cost) {
@@ -436,6 +444,7 @@ export function HomeEnginesSlider({ className }: ClassNameProps) {
                 engine={engine}
                 tier={tier}
                 index={index}
+                tourAnchor={isActive}
                 elapsedSeconds={elapsedByEngine[engine.id] ?? 0}
                 onClaim={handleClaim}
                 onInstantClaim={handleInstantClaim}
@@ -670,6 +679,7 @@ export function HomeEnginesSlider({ className }: ClassNameProps) {
         onClose={() => setStarsModal(prev => ({ ...prev, open: false }))}
         requiredStars={starsModal.required}
         currentStars={currentStars}
+        onTopUp={handleTopUpStars}
       />
     </div>
   );

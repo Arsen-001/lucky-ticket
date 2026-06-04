@@ -32,7 +32,7 @@ export function NotEnoughCoinsModal({
         <div className="mt-2 flex flex-col items-center gap-3 text-center text-white/80">
           <CoinIcon size={88} />
           <p className="text-pink-secondary text-sm">
-            {t('not enough stars description', { balance: current, required })}
+            {t('not enough coins description', { balance: current, required })}
           </p>
         </div>
       }

@@ -1,5 +1,6 @@
 import { Notification } from '@/types/interfaces/notifications.interfaces';
 import { routes } from '@/constants/routes';
+import { appConfig } from '@/config/app.config';
 
 const now = new Date();
 const today = new Date(now);
@@ -128,4 +129,7 @@ const notifications = (
   ] satisfies Notification[]
 ).sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
 
-export const notificationsMock = { notifications };
+// Level-zero: an empty inbox (the demo notifications stay in `notifications`).
+export const notificationsMock = {
+  notifications: appConfig.account.fresh ? [] : notifications,
+};

@@ -56,6 +56,8 @@ export interface EngineCardProps {
   compact?: boolean;
   /** What to show in the reactor circle — defaults to tickets */
   reactorVisual?: 'ticket' | 'engine';
+  /** When true, marks the reactor dial as the onboarding-tour "engine" anchor. */
+  tourAnchor?: boolean;
   className?: string;
 }
 
@@ -70,6 +72,7 @@ export function EngineCard({
   onUpgradeCapacity,
   compact = false,
   reactorVisual = 'ticket',
+  tourAnchor = false,
   className,
 }: EngineCardProps) {
   const t = useAppTranslations();
@@ -178,13 +181,15 @@ export function EngineCard({
       style={{ animationDelay: `${index * 60}ms` }}
     >
       <div className={twMerge('flex items-center relative', compact ? 'gap-2.5' : 'gap-3')}>
-        <ReactorDial
-          key={`${engine.id}-${pending ? 'pending' : 'producing'}-${cycle.toFixed(2)}`}
-          tier={tier}
-          capacity={capacity}
-          size={compact ? 86 : 110}
-          visual={reactorVisual}
-        />
+        <div data-tour={tourAnchor ? 'engine' : undefined} className="shrink-0">
+          <ReactorDial
+            key={`${engine.id}-${pending ? 'pending' : 'producing'}-${cycle.toFixed(2)}`}
+            tier={tier}
+            capacity={capacity}
+            size={compact ? 86 : 110}
+            visual={reactorVisual}
+          />
+        </div>
         <div
           className={twMerge(
             'flex-1 min-w-0 flex flex-col',
@@ -330,6 +335,7 @@ export function EngineCard({
           )}
           {pending ? (
             <button
+              data-tour="claim-cta"
               onClick={handleClaim}
               disabled={!!flightData}
               className={twMerge(

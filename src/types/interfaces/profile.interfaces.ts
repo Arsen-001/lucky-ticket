@@ -30,6 +30,12 @@ export interface ProfileFriendPreview {
   avatar?: string;
 }
 
+/** Banner collage icon position, stored as a percentage of the banner box. */
+export interface BannerIconPosition {
+  left: number;
+  top: number;
+}
+
 export type ActivityBestPeriod = 'day' | 'week' | 'month' | 'all_time';
 
 export interface ActivityBest {
@@ -68,6 +74,8 @@ export interface ProfileResponse {
   isOwn: boolean;
   liked: boolean;
   canLikeAt?: string;
+  /** Per-icon banner collage positions (keyed by icon id). Owner-editable, public. */
+  bannerIconPositions?: Record<string, BannerIconPosition>;
 }
 
 export interface LikeProfileResponse {
@@ -98,4 +106,8 @@ export interface SendTicketRequest {
 
 export interface SendTicketResponse {
   success: boolean;
+}
+
+export interface UpdateBannerIconsRequest {
+  positions: Record<string, BannerIconPosition>;
 }

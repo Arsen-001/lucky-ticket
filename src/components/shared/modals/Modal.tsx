@@ -10,9 +10,7 @@ interface ModalProps {
   open: boolean;
   onClose?: () => void;
   children: ReactNode;
-  destroyOnClose?: boolean;
   closeOnOverlayClick?: boolean;
-  portalContainer?: HTMLElement;
   hideOnEscape?: boolean;
   hideCloseButton?: boolean;
   closeButtonProps?: ButtonProps;
