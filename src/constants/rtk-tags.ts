@@ -6,6 +6,7 @@ export const rtkTags = {
   engines: 'Engines',
   tasks: 'Tasks',
   leaderboard: 'Leaderboard',
+  jackpot: 'Jackpot',
   support: 'Support',
   notifications: 'Notifications',
   notificationPreferences: 'NotificationPreferences',

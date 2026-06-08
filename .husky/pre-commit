@@ -24,7 +24,14 @@ if [ $? -ne 0 ]; then
   exit 1
 fi
 
-# 4) Ensure the project builds before committing
+# 4) Run the unit + guardrail test suite (fast, no browser)
+npm test
+if [ $? -ne 0 ]; then
+  echo "[husky] Tests failed. Aborting commit."
+  exit 1
+fi
+
+# 5) Ensure the project builds before committing
 npm run build
 if [ $? -ne 0 ]; then
   echo "[husky] Build failed. Aborting commit."

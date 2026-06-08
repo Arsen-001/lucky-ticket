@@ -12,8 +12,8 @@ export default async function RootLayout({ children }: ChildrenProps) {
 
   return (
     <StoreProvider>
-      <html lang={locale}>
-        <body className={`${gilroy.className} ${spaceGrotesk.variable}`}>
+      <html lang={locale} className={`${gilroy.variable} ${spaceGrotesk.variable}`}>
+        <body>
           <div id="scroll-container">
             <NextIntlClientProvider>
               <NavigationHistoryProvider>

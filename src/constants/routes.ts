@@ -31,6 +31,8 @@ export const routes = {
   },
   notifications: '/notifications',
   leaderboard: '/leaderboard',
+  jackpot: '/jackpot',
+  promo: '/promo',
   activity: '/activity',
   wallet: '/wallet',
   lc: '/lc',

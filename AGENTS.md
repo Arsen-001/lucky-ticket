@@ -377,6 +377,8 @@ Magic values (coin name `'LC'`, `minPasswordLength`, `referralPercentage`) live 
 npm run lint        # ESLint
 npm run type-check  # tsc --noEmit
 npm run format      # Prettier
+npm test            # Vitest unit + guardrail suite (tests/)
+npm run test:e2e    # Playwright smoke over every screen (e2e/)
 ```
 
 Run `type-check` before committing non-trivial changes.
@@ -397,7 +399,9 @@ Run `type-check` before committing non-trivial changes.
 
 **Testing**
 
-- No test framework is configured; type-check + lint serve as safety nets
+- **Vitest** (`npm test`) runs the unit + guardrail suite in `tests/` — economy math (jackpot/stakes), i18n en/ru/hy/de parity, RTK 3-place wiring, and DOCS↔constants drift. Fast, node-only, no browser.
+- **Playwright** (`npm run test:e2e`) runs a smoke in `e2e/` over every static route from `routes.ts` **plus key detail pages** (tournament / profile / support / stake / engine by id) — each screen must render without runtime crashes or leaked i18n placeholders. Auto-starts the dev server (mock backend); shared assertion lives in `e2e/helpers.ts`.
+- type-check + lint remain the first-line safety nets.
 
 ---
 
