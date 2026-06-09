@@ -2,7 +2,7 @@
 
 import { useGetJackpotQuery, useGetJackpotWinnersQuery } from '@/api/jackpot.api';
 import { useAppTranslations } from '@/hooks/useAppTranslations';
-import { Button } from '@/components/shared/buttons/Button';
+import { QueryErrorState } from '@/components/shared/error/QueryErrorState';
 import { JackpotHero } from './JackpotHero';
 import { JackpotInvolvement } from './JackpotInvolvement';
 import { JackpotHowItWorks } from './JackpotHowItWorks';
@@ -15,14 +15,7 @@ export function JackpotContainer() {
   const { data: winners, isLoading: winnersLoading } = useGetJackpotWinnersQuery();
 
   if (isError) {
-    return (
-      <div className="flex flex-col items-center gap-4 px-4 pb-6 pt-12 text-center">
-        <p className="text-white-secondary text-sm font-medium">{t('couldnt load jackpot')}</p>
-        <Button variant="secondary" className="px-5 py-2.5 text-sm" onClick={() => refetch()}>
-          {t('retry')}
-        </Button>
-      </div>
-    );
+    return <QueryErrorState onRetry={() => refetch()} message={t('couldnt load jackpot')} />;
   }
 
   return (
@@ -31,7 +24,11 @@ export function JackpotContainer() {
       <JackpotInvolvement activeTournaments={data?.myActiveTournamentsCount} loading={isLoading} />
       <JackpotHowItWorks />
       <JackpotDistributionBar />
-      <JackpotWinnersFeed winners={winners} loading={winnersLoading} />
+      <JackpotWinnersFeed
+        winners={winners}
+        loading={winnersLoading}
+        allTimePaidOut={data?.allTimePaidOut}
+      />
     </div>
   );
 }

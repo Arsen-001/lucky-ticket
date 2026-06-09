@@ -7,6 +7,7 @@ import { Modal } from '@/components/shared/modals/Modal';
 import { Button } from '@/components/shared/buttons/Button';
 import { TelegramStarIcon } from '@/components/shared/icons/TelegramStarIcon';
 import { useAppTranslations } from '@/hooks/useAppTranslations';
+import { useToast } from '@/hooks/useToast';
 import { useBuyStarsMutation, useGetStarsPackagesQuery } from '@/api/wallet.api';
 import { formatTon } from '@/utils/pages/wallet.utils';
 import { formatNumber } from '@/utils/global/number.utils';
@@ -40,6 +41,7 @@ const matchPackageByStars = (packages: StarsPackage[], stars: number): StarsPack
 
 export function BuyStarsModal({ open, onClose, tonBalance, initialStars }: BuyStarsModalProps) {
   const t = useAppTranslations();
+  const toast = useToast();
   const { data: packages = [] } = useGetStarsPackagesQuery(undefined, { skip: !open });
   const [buyStars, { isLoading: isBuying, data: result }] = useBuyStarsMutation();
   const [step, setStep] = useState<Step>('select');
@@ -134,7 +136,7 @@ export function BuyStarsModal({ open, onClose, tonBalance, initialStars }: BuySt
       setSubmittedStars(starsOut);
       setStep('success');
     } catch {
-      /* surface via toast */
+      toast.error(t('action failed'));
     }
   };
 

@@ -26,6 +26,7 @@ import {
 import { StakesClaimSuccessModal } from '@/components/pages/out-tabs/drawer/stakes/StakesClaimSuccessModal';
 import { Skeleton } from '@/components/shared/seleketons/Skeleton';
 import { Button } from '@/components/shared/buttons/Button';
+import { QueryErrorState } from '@/components/shared/error/QueryErrorState';
 
 interface PrizeCardProps {
   icon: ReactNode;
@@ -57,7 +58,7 @@ export interface ReadyStakeContentProps {
 export function ReadyStakeContent({ stakeId }: ReadyStakeContentProps) {
   const t = useAppTranslations();
   const router = useRouter();
-  const { data: stakes, isLoading } = useGetStakesQuery();
+  const { data: stakes, isLoading, isError, refetch } = useGetStakesQuery();
   const { data: me } = useGetMeQuery();
   const [claimStake, { isLoading: claiming }] = useClaimStakeMutation();
 
@@ -101,6 +102,8 @@ export function ReadyStakeContent({ stakeId }: ReadyStakeContentProps) {
       </div>
     );
   }
+
+  if (isError) return <QueryErrorState onRetry={() => refetch()} />;
 
   if (!stake || !levelDef) {
     return (

@@ -10,13 +10,14 @@ import { AchievementShowcase } from '@/components/shared/achievements/Achievemen
 import { AchievementDetailModal } from '@/components/shared/achievements/AchievementDetailModal';
 import type { Achievement } from '@/types/interfaces/achievement.interfaces';
 import type { ProfileResponse } from '@/types/interfaces/profile.interfaces';
+import { QueryErrorState } from '@/components/shared/error/QueryErrorState';
 
 export interface ProfilePageProps {
   userId?: string;
 }
 
 export function ProfilePage({ userId }: ProfilePageProps) {
-  const { data: profile, isLoading } = useGetProfileQuery(userId);
+  const { data: profile, isLoading, isError, refetch } = useGetProfileQuery(userId);
   const [unpinAchievement] = useUnpinAchievementMutation();
   const [previewMode, setPreviewMode] = useState(false);
   const [selected, setSelected] = useState<Achievement | null>(null);
@@ -32,6 +33,8 @@ export function ProfilePage({ userId }: ProfilePageProps) {
     }
     return profile;
   }, [profile, previewMode]);
+
+  if (isError) return <QueryErrorState onRetry={() => refetch()} />;
 
   return (
     <div className="-mt-4 flex flex-col gap-5 pb-12">

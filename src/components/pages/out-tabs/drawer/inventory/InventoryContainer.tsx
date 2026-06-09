@@ -11,6 +11,7 @@ import {
   useUnequipChipMutation,
 } from '@/api/inventory.api';
 import { useAppTranslations } from '@/hooks/useAppTranslations';
+import { useToast } from '@/hooks/useToast';
 import type { InventoryBooster, InventoryChip } from '@/types/interfaces/inventory.interfaces';
 import { BoosterActivateModal } from './BoosterActivateModal';
 import { ChipEquipModal } from './ChipEquipModal';
@@ -20,10 +21,12 @@ import { InventoryItem } from './InventoryItem';
 import { InventoryTierFilter, type InventoryTierFilterValue } from './InventoryTierFilter';
 import { InventoryShardsStrip } from './InventoryShardsStrip';
 import { InventoryTypeFilter, type InventoryTypeFilterValue } from './InventoryTypeFilter';
+import { QueryErrorState } from '@/components/shared/error/QueryErrorState';
 
 export function InventoryContainer() {
   const t = useAppTranslations();
-  const { data, isLoading } = useGetInventoryQuery();
+  const toast = useToast();
+  const { data, isLoading, isError, refetch } = useGetInventoryQuery();
   const [equipChipMutation, { isLoading: equipping }] = useEquipChipMutation();
   const [unequipChipMutation] = useUnequipChipMutation();
   const [levelUpChipMutation] = useLevelUpChipMutation();
@@ -50,6 +53,8 @@ export function InventoryContainer() {
   }, [rawChips]);
   const shards = data?.shards ?? [];
   const boosters = data?.boosters ?? [];
+
+  if (isError) return <QueryErrorState onRetry={() => refetch()} />;
 
   const isBoostersView = typeFilter === 'boosters';
   const chipTypeFilter: 'all' | 'speed' | 'capacity' =
@@ -81,14 +86,20 @@ export function InventoryContainer() {
 
   const handleEquipConfirm = async (engineId: string) => {
     if (!equipChip) return;
-    await equipChipMutation({ chipId: equipChip.id, engineId }).unwrap();
-    setEquipChip(undefined);
+    try {
+      await equipChipMutation({ chipId: equipChip.id, engineId }).unwrap();
+      setEquipChip(undefined);
+    } catch {
+      toast.error(t('action failed'));
+    }
   };
 
   const handleUnequip = async (chip: InventoryChip) => {
     setUnequipPendingId(chip.id);
     try {
       await unequipChipMutation({ chipId: chip.id }).unwrap();
+    } catch {
+      toast.error(t('action failed'));
     } finally {
       setUnequipPendingId(undefined);
     }
@@ -96,16 +107,24 @@ export function InventoryContainer() {
 
   const handleActivateConfirm = async (engineId: string) => {
     if (!activateBooster) return;
-    await activateBoosterMutation({ boosterId: activateBooster.id, engineId }).unwrap();
-    setActivateBooster(undefined);
+    try {
+      await activateBoosterMutation({ boosterId: activateBooster.id, engineId }).unwrap();
+      setActivateBooster(undefined);
+    } catch {
+      toast.error(t('action failed'));
+    }
   };
 
   const handleMintConfirm = async (params: {
     type: InventoryChip['type'];
     quality: InventoryChip['quality'];
   }) => {
-    await mintChipMutation(params).unwrap();
-    setMintOpen(false);
+    try {
+      await mintChipMutation(params).unwrap();
+      setMintOpen(false);
+    } catch {
+      toast.error(t('action failed'));
+    }
   };
 
   return (

@@ -24,6 +24,7 @@ import { StakeCountdownRing } from '@/components/pages/out-tabs/drawer/stakes/pr
 import { StakesRewardsPreviewCard } from '@/components/pages/out-tabs/drawer/stakes/StakesRewardsPreviewCard';
 import { StakesSectionLabel } from '@/components/pages/out-tabs/drawer/stakes/StakesSectionLabel';
 import { Skeleton } from '@/components/shared/seleketons/Skeleton';
+import { QueryErrorState } from '@/components/shared/error/QueryErrorState';
 
 export interface ProgressStakeContentProps {
   stakeId: string;
@@ -32,7 +33,7 @@ export interface ProgressStakeContentProps {
 export function ProgressStakeContent({ stakeId }: ProgressStakeContentProps) {
   const t = useAppTranslations();
   const router = useRouter();
-  const { data: stakes, isLoading } = useGetStakesQuery();
+  const { data: stakes, isLoading, isError, refetch } = useGetStakesQuery();
   const { data: me } = useGetMeQuery();
   const [cancelStake, { isLoading: cancelling }] = useCancelStakeMutation();
 
@@ -56,6 +57,8 @@ export function ProgressStakeContent({ stakeId }: ProgressStakeContentProps) {
       </div>
     );
   }
+
+  if (isError) return <QueryErrorState onRetry={() => refetch()} />;
 
   if (!stake || !levelDef) {
     return (

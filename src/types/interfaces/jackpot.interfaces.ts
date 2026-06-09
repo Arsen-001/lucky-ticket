@@ -9,8 +9,10 @@ import type { ActivityTier } from '@/constants/global.constants';
 export interface JackpotState {
   /** Current LC in the global pot. */
   pot: number;
-  /** Biggest jackpot ever dropped (LC) — the all-time record. */
+  /** Biggest jackpot ever dropped (LC) — the all-time record (a single drop). */
   record: number;
+  /** Sum of every jackpot ever paid out to players (LC) — lifetime total, not a single drop. */
+  allTimePaidOut: number;
   /** Approx LC the pot accrues per second — drives the live odometer creep. */
   accrualPerSecond: number;
   /** How many active (joined, not-yet-finished) tournaments the player is in. */

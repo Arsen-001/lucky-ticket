@@ -4,6 +4,9 @@ import { useEffect, useMemo, useState, type ReactNode } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useGetMarketDataQuery } from '@/api/market.api';
 import { useGetMeQuery } from '@/api/me.api';
+import { useAppTranslations } from '@/hooks/useAppTranslations';
+import { useToast } from '@/hooks/useToast';
+import { QueryErrorState } from '@/components/shared/error/QueryErrorState';
 import { MarketHeroCarousel } from '@/components/pages/tabs/market/MarketHeroCarousel';
 import {
   MARKET_CATEGORY_ORDER,
@@ -63,9 +66,11 @@ export function MarketView() {
       ? (tabParam as MarketCategoryKey)
       : ALL_KEY;
 
+  const t = useAppTranslations();
+  const toast = useToast();
   const [active, setActive] = useState<MarketCategoryKey>(initialTab);
   const [highlight, setHighlight] = useState(initialTab !== ALL_KEY);
-  const { data } = useGetMarketDataQuery();
+  const { data, isError, refetch } = useGetMarketDataQuery();
   const { data: me } = useGetMeQuery();
   const [infoItem, setInfoItem] = useState<MarketSelectedItem | null>(null);
   const [purchase, setPurchase] = useState<MarketActivePurchase | null>(null);
@@ -142,6 +147,7 @@ export function MarketView() {
       setPurchase(null);
     } catch (error) {
       console.error('Purchase failed:', error);
+      toast.error(t('action failed'));
     } finally {
       setConfirming(false);
     }
@@ -173,6 +179,8 @@ export function MarketView() {
       status: <MarketStatusSection onSelect={handleSelect} onBuy={handleBuy} />,
     } as Record<Exclude<MarketCategoryKey, 'all'>, React.ReactNode>;
   }, [data]);
+
+  if (isError) return <QueryErrorState onRetry={() => refetch()} />;
 
   return (
     <div className="flex flex-col gap-4">

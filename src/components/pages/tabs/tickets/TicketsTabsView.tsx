@@ -25,9 +25,10 @@ import { TicketsEnum } from '@/types/enums/ticket.enums';
 import { findActiveBooster, findEquippedChip } from '@/utils/global/inventory.utils';
 import { effectiveCycleSeconds, engineElapsedSeconds } from '@/utils/global/ticket-engine.utils';
 import type { Ticket, TicketType } from '@/types/types/ticket.types';
+import { QueryErrorState } from '@/components/shared/error/QueryErrorState';
 
 export function TicketsTabsView() {
-  const { data: tickets, isFetching } = useGetTicketsQuery();
+  const { data: tickets, isFetching, isError, refetch } = useGetTicketsQuery();
   const { data: inventory } = useGetInventoryQuery();
   const { data: me } = useGetMeQuery();
   const isLp = me?.isLuckyPlayer ?? false;
@@ -94,6 +95,8 @@ export function TicketsTabsView() {
     const intervalId = window.setInterval(tick, 1000);
     return () => window.clearInterval(intervalId);
   }, [enginesByTier, inventory, completeEngineCycle]);
+
+  if (isError) return <QueryErrorState onRetry={() => refetch()} />;
 
   const ticketByTier = (tier: TicketType): Ticket | undefined =>
     tickets?.find(item => item.ticketType === tier);

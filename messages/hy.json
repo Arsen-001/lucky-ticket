@@ -1233,5 +1233,14 @@
   "promo invalid": "Կոդն անվավեր է։ Ստուգիր և փորձիր նորից։",
   "promo expired": "Կոդի ժամկետը լրացել է։",
   "promo used": "Դու արդեն ակտիվացրել ես այս կոդը։",
-  "find codes on channel": "Թարմ կոդերը՝ մեր ալիքում"
+  "find codes on channel": "Թարմ կոդերը՝ մեր ալիքում",
+  "paid out all-time": "Ընդամենը վճարված",
+  "something went wrong": "Ինչ-որ բան սխալ գնաց",
+  "please try again": "Խնդրում ենք նորից փորձել։",
+  "couldnt load data": "Չհաջողվեց բեռնել տվյալները",
+  "action failed": "Չհաջողվեց, փորձեք նորից",
+  "no internet connection": "Ինտերնետ կապ չկա",
+  "check connection and retry": "Ստուգեք կապը և նորից փորձեք",
+  "under maintenance": "Տեխնիկական աշխատանքներ",
+  "maintenance description": "Մենք բարելավում ենք հավելվածը և շուտով կվերադառնանք: Փորձեք մի փոքր ուշ:"
 }

@@ -31,12 +31,15 @@ import {
   sortHistoryNewestFirst,
   sortStakesReadyFirst,
 } from '@/utils/global/stakes.utils';
+import { QueryErrorState } from '@/components/shared/error/QueryErrorState';
 
 export function StakesContent() {
   const t = useAppTranslations();
-  const { data: stakes, isLoading } = useGetStakesQuery();
+  const { data: stakes, isLoading, isError, refetch } = useGetStakesQuery();
   const { data: me } = useGetMeQuery();
   const [claimStake, { isLoading: claimingAll }] = useClaimStakeMutation();
+
+  if (isError) return <QueryErrorState onRetry={() => refetch()} />;
 
   const balance = me?.coins ?? 0;
   const activeStakes = stakes ? sortStakesReadyFirst(stakes.activeStakes) : [];

@@ -27,6 +27,9 @@ const AVATARS = [
 const ACCRUAL_PER_SECOND = 92;
 const BASE_POT = 4_812_640;
 const RECORD_POT = 9_240_180;
+// Lifetime sum of every jackpot ever paid out — a historical figure that only
+// moves when a jackpot detonates, so unlike `pot` it is NOT animated live.
+const ALL_TIME_PAID_OUT = 142_480_000;
 const startedAt = Date.now();
 
 const buildJackpotState = (): JackpotState => {
@@ -34,6 +37,7 @@ const buildJackpotState = (): JackpotState => {
   return {
     pot: Math.round(BASE_POT + elapsedSeconds * ACCRUAL_PER_SECOND),
     record: RECORD_POT,
+    allTimePaidOut: ALL_TIME_PAID_OUT,
     accrualPerSecond: ACCRUAL_PER_SECOND,
     myActiveTournamentsCount: fresh ? 0 : 3,
   };

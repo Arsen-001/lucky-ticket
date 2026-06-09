@@ -1,13 +1,16 @@
 'use client';
 
 import { useGetMeQuery } from '@/api/me.api';
+import { QueryErrorState } from '@/components/shared/error/QueryErrorState';
 import { ActivityHeroCard } from '@/components/pages/out-tabs/drawer/activity/ActivityHeroCard';
 import { ActivityDecayCard } from '@/components/pages/out-tabs/drawer/activity/ActivityDecayCard';
 import { ActivitySourcesList } from '@/components/pages/out-tabs/drawer/activity/ActivitySourcesList';
 import { ActivityTierPerks } from '@/components/pages/out-tabs/drawer/activity/ActivityTierPerks';
 
 export function ActivityContent() {
-  const { data: me, isLoading } = useGetMeQuery();
+  const { data: me, isLoading, isError, refetch } = useGetMeQuery();
+
+  if (isError) return <QueryErrorState onRetry={() => refetch()} />;
 
   return (
     <div className="flex flex-col gap-4 pb-10">

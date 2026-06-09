@@ -1781,7 +1781,7 @@ Reached from a compact **"Jackpot" button at the top of Home** and from a **draw
 2. **Your involvement** — how many active tournaments the player is in (any could be the charged one), or a prompt to join one if they're in none.
 3. **How it works** — the three-step grow → arm → drop explainer.
 4. **Where the pot goes** — the 20% / 80% (50·30·20) split, visualised.
-5. **Recent jackpots** — a feed of past drops, each headlined by the total pot that dropped, with tier, tournament, time, and the 1st-place winner's face.
+5. **Recent jackpots** — a feed of past drops, headed by a lifetime **"paid out all-time"** total (`JackpotState.allTimePaidOut` — the sum of every jackpot ever dropped; a historical figure, not animated live). Each drop is then headlined by the total pot that dropped, with tier, tournament, time, and the 1st-place winner's face.
 
 ## 21. Conclusion
 

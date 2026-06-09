@@ -14,6 +14,7 @@ import {
 } from '@/components/shared/achievements/achievement.utils';
 import { twMerge } from 'tailwind-merge';
 import type { Achievement } from '@/types/interfaces/achievement.interfaces';
+import { QueryErrorState } from '@/components/shared/error/QueryErrorState';
 
 type Filter = 'all' | 'earned' | 'locked';
 
@@ -28,13 +29,15 @@ const VISIBLE_CATEGORIES: AchievementCategory[] = [
 
 export default function Page() {
   const t = useAppTranslations();
-  const { data, isLoading } = useGetAchievementsQuery();
+  const { data, isLoading, isError, refetch } = useGetAchievementsQuery();
   const [pinAchievement] = usePinAchievementMutation();
   const [filter, setFilter] = useState<Filter>('all');
   const [category, setCategory] = useState<AchievementCategory | 'all'>('all');
   const [rarity, setRarity] = useState<AchievementRarity | 'all'>('all');
   const [selected, setSelected] = useState<Achievement | null>(null);
   const [pinTarget, setPinTarget] = useState<Achievement | null>(null);
+
+  if (isError) return <QueryErrorState onRetry={() => refetch()} />;
 
   const allAchievements = (data?.achievements ?? []).filter(a =>
     VISIBLE_CATEGORIES.includes(a.category)

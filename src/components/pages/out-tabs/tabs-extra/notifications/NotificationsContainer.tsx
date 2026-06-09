@@ -23,13 +23,14 @@ import {
 import { SkeletonSuspense } from '@/components/shared/seleketons/SkeletonSuspense';
 import { Skeleton } from '@/components/shared/seleketons/Skeleton';
 import { EmptyDataInfo } from '@/components/shared/EmptyDataInfo';
+import { QueryErrorState } from '@/components/shared/error/QueryErrorState';
 
 dayjs.extend(isToday);
 dayjs.extend(isYesterday);
 
 export function NotificationsContainer() {
   const t = useAppTranslations();
-  const { data: notifications, isLoading } = useGetNotificationsQuery();
+  const { data: notifications, isLoading, isError, refetch } = useGetNotificationsQuery();
   const [markAsRead] = useMarkAsReadMutation();
   const [markAllAsRead, { isLoading: isMarkingAll }] = useMarkAllAsReadMutation();
   const [selectedNotification, setSelectedNotification] = useState<Notification | null>(null);
@@ -73,6 +74,8 @@ export function NotificationsContainer() {
     if (filter === 'unread') return notifications.filter(n => !n.read);
     return notifications.filter(n => n.type === filter);
   }, [notifications, filter]);
+
+  if (isError) return <QueryErrorState onRetry={() => refetch()} />;
 
   const groupedNotifications = groupNotificationsByDate(filtered);
   const content = isLoading ? getNotificationsSkeletonData(2, 2) : groupedNotifications;

@@ -1233,5 +1233,14 @@
   "promo invalid": "Dieser Code ist ungültig. Bitte prüfen und erneut versuchen.",
   "promo expired": "Dieser Code ist abgelaufen.",
   "promo used": "Du hast diesen Code bereits eingelöst.",
-  "find codes on channel": "Frische Codes gibt's auf unserem Kanal"
+  "find codes on channel": "Frische Codes gibt's auf unserem Kanal",
+  "paid out all-time": "Insgesamt ausgezahlt",
+  "something went wrong": "Etwas ist schiefgelaufen",
+  "please try again": "Bitte versuchen Sie es erneut.",
+  "couldnt load data": "Daten konnten nicht geladen werden",
+  "action failed": "Aktion fehlgeschlagen, bitte erneut versuchen",
+  "no internet connection": "Keine Internetverbindung",
+  "check connection and retry": "Überprüfen Sie Ihre Verbindung und versuchen Sie es erneut",
+  "under maintenance": "Wartungsarbeiten",
+  "maintenance description": "Wir verbessern die App und sind bald zurück. Bitte versuchen Sie es später erneut."
 }

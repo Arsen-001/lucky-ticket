@@ -18,13 +18,14 @@ import { DepositTonModal } from './DepositTonModal';
 import { WithdrawTonModal } from './WithdrawTonModal';
 import { BuyStarsModal } from './BuyStarsModal';
 import { NotEnoughStarsModal } from '@/components/pages/tabs/home/NotEnoughStarsModal';
+import { QueryErrorState } from '@/components/shared/error/QueryErrorState';
 
 type WalletModal = 'connect' | 'deposit' | 'withdraw' | 'buyStars' | 'notEnough' | null;
 
 export function WalletContainer() {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const { data: state, isLoading } = useGetWalletStateQuery();
+  const { data: state, isLoading, isError, refetch } = useGetWalletStateQuery();
   const { data: transactions, isLoading: isTxLoading } = useGetWalletTransactionsQuery();
   const [disconnect, { isLoading: isDisconnecting }] = useDisconnectWalletMutation();
   const [modal, setModal] = useState<WalletModal>(null);
@@ -42,6 +43,8 @@ export function WalletContainer() {
     setModal(state?.isConnected ? 'buyStars' : 'connect');
     router.replace(routes.wallet, { scroll: false });
   }, [searchParams, state?.isConnected, router]);
+
+  if (isError) return <QueryErrorState onRetry={() => refetch()} />;
 
   const requireConnected = (next: WalletModal) => {
     setModal(isConnected ? next : 'connect');

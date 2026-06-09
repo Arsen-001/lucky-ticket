@@ -346,6 +346,37 @@ items.map((item, index) => <Item loading={isLoading} {...item} />);
 
 ---
 
+## Error Handling Pattern
+
+The app must stay resilient when the backend fails (404 / 500 / timeout). Three layers:
+
+**1. Render crash → error boundary.** `src/app/error.tsx` (with i18n, via `AppErrorFallback`) and `src/app/global-error.tsx` (last-resort, own `<html>`, hardcoded copy — the one place i18n can't reach) turn any uncaught render error into a recoverable "something went wrong · retry" instead of a white screen. Don't rely solely on `?.` chains to avoid crashes — the boundary is the safety net.
+
+**2. Failed query → `QueryErrorState`.** Top-level containers that own a screen's main query must surface `isError`, not silently render an empty/zero/"not found" state:
+
+```tsx
+const { data, isLoading, isError, refetch } = useGetXQuery();
+// ...all other hooks first (rules-of-hooks)...
+if (isError) return <QueryErrorState onRetry={() => refetch()} />;
+```
+
+Place the guard **after every hook** (and after any `useMemo`/`useEffect`), before the main JSX return — never as an early return above a hook.
+
+**3. Failed mutation → `useToast`.** Every `.unwrap()` must live in `try/catch`; the `catch` surfaces a toast so a backend error is never a silent no-op:
+
+```tsx
+const toast = useToast();
+try {
+  await doThing(args).unwrap();
+} catch {
+  toast.error(t('action failed'));
+}
+```
+
+`useToast()` from `@/hooks/useToast` returns `{ error, success, info }`; pass already-translated text. The viewport (`ToastViewport`) is mounted once in the root layout. Mutations dispatched fire-and-forget (no `.unwrap()`, e.g. optimistic claims) don't throw, so they don't need a `catch`.
+
+---
+
 ## TypeScript Conventions
 
 - Enable strict mode — no `@ts-ignore` unless absolutely necessary with a comment explaining why

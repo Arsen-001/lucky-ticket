@@ -1233,5 +1233,14 @@
   "promo invalid": "This code isn't valid. Check it and try again.",
   "promo expired": "This code has expired.",
   "promo used": "You've already redeemed this code.",
-  "find codes on channel": "Find fresh codes on our channel"
+  "find codes on channel": "Find fresh codes on our channel",
+  "paid out all-time": "Paid out all-time",
+  "something went wrong": "Something went wrong",
+  "please try again": "Please try again.",
+  "couldnt load data": "Couldn't load data",
+  "action failed": "Something went wrong, please try again",
+  "no internet connection": "No internet connection",
+  "check connection and retry": "Check your connection and try again",
+  "under maintenance": "Under maintenance",
+  "maintenance description": "We are improving the app and will be back shortly. Please try again later."
 }

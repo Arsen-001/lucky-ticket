@@ -10,6 +10,7 @@ import { SupportTelegramCard } from '@/components/pages/out-tabs/drawer/support/
 import { Skeleton } from '@/components/shared/seleketons/Skeleton';
 import { SkeletonSuspense } from '@/components/shared/seleketons/SkeletonSuspense';
 import { EmptyDataInfo } from '@/components/shared/EmptyDataInfo';
+import { QueryErrorState } from '@/components/shared/error/QueryErrorState';
 import { useAppTranslations } from '@/hooks/useAppTranslations';
 import { filterSections, getSectionsSkeletonData } from '@/utils/pages/support.utils';
 import type { SupportSection } from '@/types/interfaces/support.interfaces';
@@ -17,7 +18,9 @@ import type { SupportSection } from '@/types/interfaces/support.interfaces';
 export default function SupportPage() {
   const t = useAppTranslations();
   const [searchValue, setSearchValue] = useState<string>('');
-  const { data: sections = [], isLoading } = useGetSupportSectionsQuery();
+  const { data: sections = [], isLoading, isError, refetch } = useGetSupportSectionsQuery();
+
+  if (isError) return <QueryErrorState onRetry={() => refetch()} />;
 
   const filteredContent = filterSections(sections, searchValue);
   const content = isLoading ? (getSectionsSkeletonData() as SupportSection[]) : filteredContent;

@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { useAppTranslations } from '@/hooks/useAppTranslations';
+import { useToast } from '@/hooks/useToast';
 import { Input } from '@/components/shared/form-elements/inputs/Input';
 import { Button } from '@/components/shared/buttons/Button';
 import { UserPen } from 'lucide-react';
@@ -9,6 +10,7 @@ import { useGetMeQuery, useUpdateMeMutation } from '@/api/me.api';
 
 export default function UsernamePage() {
   const t = useAppTranslations();
+  const toast = useToast();
   const { data: me, isLoading: isMeLoading } = useGetMeQuery();
   const [updateMe, { isLoading: isUpdating }] = useUpdateMeMutation();
   const [username, setUsername] = useState('');
@@ -25,6 +27,7 @@ export default function UsernamePage() {
       await updateMe({ username }).unwrap();
     } catch (error) {
       console.error('Failed to update username:', error);
+      toast.error(t('action failed'));
     }
   };
 

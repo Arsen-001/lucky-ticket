@@ -158,6 +158,16 @@ export const appConfig = {
      */
     fresh: true,
   },
+  maintenance: {
+    /**
+     * Master switch for the full-screen "under maintenance" overlay. When
+     * `true`, every screen is blocked until it's flipped back. On a real
+     * backend this would be driven by a 503 response; here it's a manual/admin
+     * flag. The "no internet" overlay is separate — it's driven by the browser's
+     * `navigator.onLine`, not this flag.
+     */
+    enabled: false,
+  },
 };
 
 export type AppConfig = typeof appConfig;

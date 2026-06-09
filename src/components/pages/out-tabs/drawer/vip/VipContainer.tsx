@@ -13,14 +13,19 @@ import { SettingsStatusHero } from '@/components/pages/out-tabs/drawer/settings/
 import { SettingsStatusPriceRow } from '@/components/pages/out-tabs/drawer/settings/SettingsStatusPriceRow';
 import { GlobalConstants } from '@/constants/global.constants';
 import { useAppTranslations } from '@/hooks/useAppTranslations';
+import { useToast } from '@/hooks/useToast';
+import { QueryErrorState } from '@/components/shared/error/QueryErrorState';
 import { MarketStatusType } from '@/types/enums/market.enums';
 
 export function VipContainer() {
   const t = useAppTranslations();
+  const toast = useToast();
   const { data: me, isLoading: isMeLoading } = useGetMeQuery();
-  const { data: market, isLoading: isMarketLoading } = useGetMarketDataQuery();
+  const { data: market, isLoading: isMarketLoading, isError, refetch } = useGetMarketDataQuery();
   const [buyStatus, { isLoading: isBuying }] = useBuyStatusMutation();
   const [buyOpen, setBuyOpen] = useState(false);
+
+  if (isError) return <QueryErrorState onRetry={() => refetch()} />;
 
   const isLoading = isMeLoading || isMarketLoading;
   const vipLevel = me?.vipLevel ?? 0;
@@ -55,7 +60,7 @@ export function VipContainer() {
       }).unwrap();
       setBuyOpen(false);
     } catch {
-      /* surface via toast in future */
+      toast.error(t('action failed'));
     }
   };
 
