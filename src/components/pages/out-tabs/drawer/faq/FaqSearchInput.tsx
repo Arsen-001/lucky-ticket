@@ -7,7 +7,7 @@ import {
   type DebouncedInputProps,
 } from '@/components/shared/form-elements/inputs/DebouncedInput';
 
-export function GradientSearchInput({ className, ...props }: DebouncedInputProps) {
+export function FaqSearchInput({ className, ...props }: DebouncedInputProps) {
   const t = useAppTranslations();
   return (
     <DebouncedInput

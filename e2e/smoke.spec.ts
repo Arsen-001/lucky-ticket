@@ -29,6 +29,8 @@ const ROUTES = [
   '/profile',
   '/profile/achievements',
   '/support',
+  '/faq',
+  '/privacy',
   '/settings',
   '/settings/username',
   '/settings/email',

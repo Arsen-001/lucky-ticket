@@ -1242,5 +1242,8 @@
   "no internet connection": "Нет подключения к интернету",
   "check connection and retry": "Проверьте соединение и попробуйте снова",
   "under maintenance": "Идут технические работы",
-  "maintenance description": "Мы улучшаем приложение и скоро вернёмся. Зайдите чуть позже."
+  "maintenance description": "Мы улучшаем приложение и скоро вернёмся. Зайдите чуть позже.",
+  "faq": "Частые вопросы",
+  "privacy policy": "Политика конфиденциальности",
+  "last updated {date}": "Обновлено {date}"
 }

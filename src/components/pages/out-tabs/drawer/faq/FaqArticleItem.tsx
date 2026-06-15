@@ -1,31 +1,34 @@
 import { ChevronRight, FileText } from 'lucide-react';
 import NextLink from 'next/link';
-import { type SupportArticleMeta } from '@/types/interfaces/support.interfaces';
+import { type FaqArticleMeta } from '@/types/interfaces/faq.interfaces';
 import { routes } from '@/constants/routes';
 import { HighlightedText } from '@/components/shared/typography/HighlightedText';
 import { SkeletonSuspense } from '@/components/shared/seleketons/SkeletonSuspense';
 import { Skeleton } from '@/components/shared/seleketons/Skeleton';
+import { getLocalizedText } from '@/utils/pages/faq.utils';
 import { twMerge } from 'tailwind-merge';
 import type { CSSProperties } from 'react';
 
-export interface SupportArticleItemProps {
-  article: SupportArticleMeta;
+export interface FaqArticleItemProps {
+  article: FaqArticleMeta;
+  locale: string;
   loading?: boolean;
   searchValue?: string;
   className?: string;
   style?: CSSProperties;
 }
 
-export function SupportArticleItem({
+export function FaqArticleItem({
   article,
+  locale,
   loading,
   searchValue = '',
   className,
   style,
-}: SupportArticleItemProps) {
+}: FaqArticleItemProps) {
   return (
     <NextLink
-      href={loading ? routes.support.index : routes.support.getById(article.id)}
+      href={loading ? routes.faq.index : routes.faq.getById(article.id)}
       style={style}
       className={twMerge(
         'group bg-background-overlay/50 hover:bg-white/5 flex items-center gap-3 rounded-2xl border border-white/5 p-3 transition-colors active:scale-99',
@@ -44,7 +47,7 @@ export function SupportArticleItem({
             highlight={searchValue}
             className="truncate text-sm font-bold text-white"
           >
-            {article.title}
+            {getLocalizedText(article.title, locale)}
           </HighlightedText>
         </SkeletonSuspense>
         <SkeletonSuspense
@@ -55,7 +58,7 @@ export function SupportArticleItem({
             highlight={searchValue}
             className="text-pink-secondary truncate text-[11px] font-medium"
           >
-            {article.description}
+            {getLocalizedText(article.description, locale)}
           </HighlightedText>
         </SkeletonSuspense>
       </div>

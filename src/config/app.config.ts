@@ -156,7 +156,7 @@ export const appConfig = {
      * the `false` branch of each mock, so the backend still sees the full
      * shape it must produce. Flip this one flag to switch the project zero↔demo.
      */
-    fresh: true,
+    fresh: false,
   },
   maintenance: {
     /**

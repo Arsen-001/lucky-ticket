@@ -1242,5 +1242,8 @@
   "no internet connection": "Ինտերնետ կապ չկա",
   "check connection and retry": "Ստուգեք կապը և նորից փորձեք",
   "under maintenance": "Տեխնիկական աշխատանքներ",
-  "maintenance description": "Մենք բարելավում ենք հավելվածը և շուտով կվերադառնանք: Փորձեք մի փոքր ուշ:"
+  "maintenance description": "Մենք բարելավում ենք հավելվածը և շուտով կվերադառնանք: Փորձեք մի փոքր ուշ:",
+  "faq": "Հաճախ տրվող հարցեր",
+  "privacy policy": "Գաղտնիության քաղաքականություն",
+  "last updated {date}": "Թարմացվել է {date}"
 }

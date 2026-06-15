@@ -4,7 +4,8 @@ import { ticketsMock } from '@/mock/tickets.mock';
 import type { FetchArgs } from '@reduxjs/toolkit/query';
 import { tasksMock } from '@/mock/tasks.mock';
 import { leaderboardMock } from '@/mock/leaderboard.mock';
-import { supportMock } from '@/mock/support.mock';
+import { faqMock } from '@/mock/faq.mock';
+import { privacyMock } from '@/mock/privacy.mock';
 import { notificationsMock } from '@/mock/notifications.mock';
 import { notificationPreferencesMock } from '@/mock/notification-preferences.mock';
 import { referralMock } from '@/mock/referral.mock';
@@ -83,7 +84,8 @@ export const mockData = {
   ...ticketsMock,
   ...tasksMock,
   ...leaderboardMock,
-  ...supportMock,
+  ...faqMock,
+  ...privacyMock,
   ...notificationsMock,
   ...notificationPreferencesMock,
   ...referralMock,

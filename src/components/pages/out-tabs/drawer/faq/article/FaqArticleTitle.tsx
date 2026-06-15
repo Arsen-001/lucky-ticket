@@ -1,25 +1,28 @@
 'use client';
 
+import { useLocale } from 'next-intl';
 import { PageHeader } from '@/components/layout-elements/PageHeader';
-import { useGetSupportArticleByIdQuery } from '@/api/support.api';
+import { useGetFaqArticleByIdQuery } from '@/api/faq.api';
 import { SkeletonSuspense } from '@/components/shared/seleketons/SkeletonSuspense';
 import { Skeleton } from '@/components/shared/seleketons/Skeleton';
 import type { HTMLAttributes } from 'react';
 import { CopyButton } from '@/components/shared/buttons/CopyButton';
 import { routes } from '@/constants/routes';
+import { getLocalizedText } from '@/utils/pages/faq.utils';
 import { Share } from 'lucide-react';
 
-interface SupportArticleTitleProps extends HTMLAttributes<HTMLDivElement> {
+interface FaqArticleTitleProps extends HTMLAttributes<HTMLDivElement> {
   id: string;
 }
 
-export function SupportArticleTitle({ id, ...props }: SupportArticleTitleProps) {
-  const { data, isLoading } = useGetSupportArticleByIdQuery(id);
+export function FaqArticleTitle({ id, ...props }: FaqArticleTitleProps) {
+  const locale = useLocale();
+  const { data, isLoading } = useGetFaqArticleByIdQuery(id);
 
   return (
     <PageHeader
       {...props}
-      backRoute={routes.support.index}
+      backRoute={routes.faq.index}
       extra={
         //TODO: handle copy action
         <CopyButton
@@ -37,7 +40,7 @@ export function SupportArticleTitle({ id, ...props }: SupportArticleTitleProps) 
           loading={isLoading}
           skeleton={<Skeleton variant="line" textSize="lg" className="w-42 mx-auto" />}
         >
-          {data?.title}
+          {data ? getLocalizedText(data.title, locale) : undefined}
         </SkeletonSuspense>
       }
     />

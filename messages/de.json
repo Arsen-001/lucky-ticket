@@ -1242,5 +1242,8 @@
   "no internet connection": "Keine Internetverbindung",
   "check connection and retry": "Überprüfen Sie Ihre Verbindung und versuchen Sie es erneut",
   "under maintenance": "Wartungsarbeiten",
-  "maintenance description": "Wir verbessern die App und sind bald zurück. Bitte versuchen Sie es später erneut."
+  "maintenance description": "Wir verbessern die App und sind bald zurück. Bitte versuchen Sie es später erneut.",
+  "faq": "FAQ",
+  "privacy policy": "Datenschutzrichtlinie",
+  "last updated {date}": "Zuletzt aktualisiert {date}"
 }
