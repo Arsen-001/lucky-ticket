@@ -13,10 +13,14 @@ import {
   ChartNoAxesColumnIncreasing,
   ChevronRight,
   CircleQuestionMark,
+  Gift,
   Globe,
   Layers,
+  LifeBuoy,
   Package,
   Settings,
+  ShieldCheck,
+  Sparkles,
   User,
   UserRoundPlus,
   Wallet,
@@ -212,6 +216,16 @@ export function Drawer() {
       icon: <ChartNoAxesColumnIncreasing size={18} />,
     },
     {
+      route: routes.jackpot,
+      title: t('jackpot'),
+      icon: <Sparkles size={18} />,
+    },
+    {
+      route: routes.promo,
+      title: t('promo code'),
+      icon: <Gift size={18} />,
+    },
+    {
       route: routes.inviteFriends,
       title: t('friends'),
       icon: <UserRoundPlus size={18} />,
@@ -224,9 +238,19 @@ export function Drawer() {
     },
     { route: routes.settings.index, title: t('settings'), icon: <Settings size={18} /> },
     {
+      route: routes.faq.index,
+      title: t('faq'),
+      icon: <CircleQuestionMark size={18} />,
+    },
+    {
       route: routes.support.index,
       title: t('support'),
-      icon: <CircleQuestionMark size={18} />,
+      icon: <LifeBuoy size={18} />,
+    },
+    {
+      route: routes.privacy,
+      title: t('privacy policy'),
+      icon: <ShieldCheck size={18} />,
     },
     { route: routes.languages, title: t('languages'), icon: <Globe size={18} /> },
   ];

@@ -5,6 +5,7 @@ import { Modal } from '@/components/shared/modals/Modal';
 import { Button } from '@/components/shared/buttons/Button';
 import { Input } from '@/components/shared/form-elements/inputs/Input';
 import { useAppTranslations } from '@/hooks/useAppTranslations';
+import { useToast } from '@/hooks/useToast';
 import { useWithdrawTonMutation } from '@/api/wallet.api';
 import {
   isValidTonAddress,
@@ -24,6 +25,7 @@ type Step = 'form' | 'confirm' | 'success';
 
 export function WithdrawTonModal({ open, onClose, tonBalance }: WithdrawTonModalProps) {
   const t = useAppTranslations();
+  const toast = useToast();
   const [withdraw, { isLoading, data: result }] = useWithdrawTonMutation();
   const [step, setStep] = useState<Step>('form');
   const [toAddress, setToAddress] = useState('');
@@ -60,7 +62,7 @@ export function WithdrawTonModal({ open, onClose, tonBalance }: WithdrawTonModal
       await withdraw({ toAddress, amount: numericAmount }).unwrap();
       setStep('success');
     } catch {
-      /* surface via toast */
+      toast.error(t('action failed'));
     }
   };
 

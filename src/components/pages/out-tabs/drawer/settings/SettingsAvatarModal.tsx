@@ -14,6 +14,7 @@ import { LcLabel } from '@/components/shared/icons/LcLabel';
 import { Ticket } from '@/components/shared/icons/Ticket';
 import { routes } from '@/constants/routes';
 import { useAppTranslations } from '@/hooks/useAppTranslations';
+import { useToast } from '@/hooks/useToast';
 import type { MessageIds } from '@/types/types/i18n.types';
 import type {
   AvatarBoostType,
@@ -57,6 +58,7 @@ export interface SettingsAvatarModalProps {
 
 export function SettingsAvatarModal({ open, onClose, currentAvatarId }: SettingsAvatarModalProps) {
   const t = useAppTranslations();
+  const toast = useToast();
   const { data: avatars, isLoading } = useGetAvatarInventoryQuery();
   const [updateMe, { isLoading: isSaving }] = useUpdateMeMutation();
   const [selectedId, setSelectedId] = useState<string | undefined>(currentAvatarId);
@@ -85,7 +87,7 @@ export function SettingsAvatarModal({ open, onClose, currentAvatarId }: Settings
       await updateMe({ avatar: selected.src, avatarId: selected.id }).unwrap();
       onClose();
     } catch {
-      // mock backend never rejects; the optimistic update already applied
+      toast.error(t('action failed'));
     }
   };
 

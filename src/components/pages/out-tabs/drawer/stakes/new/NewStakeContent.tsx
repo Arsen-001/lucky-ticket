@@ -29,6 +29,7 @@ import { StakesRewardsPreviewCard } from '@/components/pages/out-tabs/drawer/sta
 import { StakesSectionLabel } from '@/components/pages/out-tabs/drawer/stakes/StakesSectionLabel';
 import { StakesWalletPill } from '@/components/pages/out-tabs/drawer/stakes/StakesWalletPill';
 import { Skeleton } from '@/components/shared/seleketons/Skeleton';
+import { QueryErrorState } from '@/components/shared/error/QueryErrorState';
 
 const SLIDER_CAP = 10_000_000;
 
@@ -36,7 +37,7 @@ export function NewStakeContent() {
   const t = useAppTranslations();
   const router = useRouter();
   const searchParams = useSearchParams();
-  const { data: stakes, isLoading: stakesLoading } = useGetStakesQuery();
+  const { data: stakes, isLoading: stakesLoading, isError, refetch } = useGetStakesQuery();
   const { data: me, isLoading: meLoading } = useGetMeQuery();
   const [startStake, { isLoading: starting }] = useStartStakeMutation();
   const { isTierUnlocked } = useUnlockedTiers();
@@ -59,6 +60,8 @@ export function NewStakeContent() {
   const [openedSnapshot, setOpenedSnapshot] = useState<{ amount: number; months: number } | null>(
     null
   );
+
+  if (isError) return <QueryErrorState onRetry={() => refetch()} />;
 
   if (stakesLoading || meLoading || levels.length === 0) {
     return (

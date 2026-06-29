@@ -70,5 +70,11 @@ coverage/
 .cache/
 tmp/
 
+# Playwright
+/test-results/
+/playwright-report/
+/playwright/.cache/
+/blob-report/
+
 # ── GSD baseline (auto-generated) ──
 .mcp.json

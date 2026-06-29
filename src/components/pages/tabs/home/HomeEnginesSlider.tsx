@@ -22,6 +22,7 @@ import { NotEnoughStarsModal } from '@/components/pages/tabs/home/NotEnoughStars
 import { ConfirmModal } from '@/components/shared/modals/ConfirmModal';
 import { TelegramStarIcon } from '@/components/shared/icons/TelegramStarIcon';
 import { useAppTranslations } from '@/hooks/useAppTranslations';
+import { useToast } from '@/hooks/useToast';
 import { routes } from '@/constants/routes';
 import { chipEquipStarsCost } from '@/utils/global/inventory.utils';
 import type { InventoryChip } from '@/types/interfaces/inventory.interfaces';
@@ -80,6 +81,7 @@ export function HomeEnginesSlider({ className }: ClassNameProps) {
   const { data: tickets, isLoading } = useGetTicketsQuery();
   const { data: me } = useGetMeQuery();
   const t = useAppTranslations();
+  const toast = useToast();
   const { data: inventory } = useGetInventoryQuery();
   const [unequipChip, { isLoading: unequipping }] = useUnequipChipMutation();
   const [equipChipMutation] = useEquipChipMutation();
@@ -576,8 +578,12 @@ export function HomeEnginesSlider({ className }: ClassNameProps) {
         onClose={() => setChipToUnequip(null)}
         onConfirm={async () => {
           if (!chipToUnequip) return;
-          await unequipChip({ chipId: chipToUnequip.id }).unwrap();
-          setChipToUnequip(null);
+          try {
+            await unequipChip({ chipId: chipToUnequip.id }).unwrap();
+            setChipToUnequip(null);
+          } catch {
+            toast.error(t('action failed'));
+          }
         }}
       />
 
@@ -603,6 +609,8 @@ export function HomeEnginesSlider({ className }: ClassNameProps) {
               chipId: chip.id,
               engineId: pickerSlot.engineId,
             }).unwrap();
+          } catch {
+            toast.error(t('action failed'));
           } finally {
             setPendingPick(null);
           }
@@ -621,6 +629,8 @@ export function HomeEnginesSlider({ className }: ClassNameProps) {
               boosterId: booster.id,
               engineId: pickerSlot.engineId,
             }).unwrap();
+          } catch {
+            toast.error(t('action failed'));
           } finally {
             setPendingPick(null);
           }

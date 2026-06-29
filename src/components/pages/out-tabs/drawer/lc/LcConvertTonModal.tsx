@@ -5,6 +5,7 @@ import { ArrowDown, CheckCircle2, Coins } from 'lucide-react';
 import { twMerge } from 'tailwind-merge';
 import { Modal } from '@/components/shared/modals/Modal';
 import { useAppTranslations } from '@/hooks/useAppTranslations';
+import { useToast } from '@/hooks/useToast';
 import { useConvertLcToTonMutation } from '@/api/lc.api';
 import { formatNumber } from '@/utils/global/number.utils';
 import { lcToTon } from '@/utils/global/lc.utils';
@@ -22,6 +23,7 @@ const fmtTon = (n: number) => String(Number(n.toFixed(6)));
 
 export function LcConvertTonModal({ open, onClose, balance }: LcConvertTonModalProps) {
   const t = useAppTranslations();
+  const toast = useToast();
   const [convert, { isLoading }] = useConvertLcToTonMutation();
   const [step, setStep] = useState<Step>('select');
   const [lcInput, setLcInput] = useState('');
@@ -48,7 +50,7 @@ export function LcConvertTonModal({ open, onClose, balance }: LcConvertTonModalP
       setSubmitted({ lc: res.lcSpent, ton: res.tonCredited });
       setStep('success');
     } catch {
-      /* surface via toast in future */
+      toast.error(t('action failed'));
     }
   };
 

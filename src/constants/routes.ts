@@ -31,6 +31,8 @@ export const routes = {
   },
   notifications: '/notifications',
   leaderboard: '/leaderboard',
+  jackpot: '/jackpot',
+  promo: '/promo',
   activity: '/activity',
   wallet: '/wallet',
   lc: '/lc',
@@ -43,11 +45,15 @@ export const routes = {
       return (this.index + `/${engineId}`) as `/engines/${string}`;
     },
   },
+  faq: {
+    index: '/faq',
+    getById: function (id: string) {
+      return (this.index + `/${id}`) as `/faq/${string}`;
+    },
+  },
+  privacy: '/privacy',
   support: {
     index: '/support',
-    getById: function (id: string) {
-      return (this.index + `/${id}`) as `/support/${string}`;
-    },
   },
 
   settings: {

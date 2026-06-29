@@ -864,6 +864,8 @@ Beyond the per-user AP-tier gate, every tournament tier carries a **platform-wid
 | 101–500   | remainder, ~0.05% each |
 | 501+      | 0                      |
 
+> **Jackpot skim.** Before this distribution, **10% of every tournament's prize pool is diverted into the single global Jackpot pot** (Section 20). The percentage table above therefore distributes the remaining **90%**. The skim is EV-neutral — it is paid back when the jackpot drops — so it changes neither the long-run LC faucet nor the house edge.
+
 **Economic role:** a tournament is a ticket **sink** and an LC **faucet** — tickets are consumed, LC is created and distributed. To prevent an infinite-money loop, the LC cost of buying a ticket in the Market exceeds the average LC a ticket returns in a tournament (see Section 14).
 
 ### 11.4 Chip Shards as Tournament Rewards
@@ -1526,6 +1528,14 @@ The tour spans Home / Engines (Section 9), Tickets (Section 8), Tournaments (Sec
 
 ---
 
+### 17.6 Promo Codes
+
+Operator-issued **promo codes** let players redeem rewards from a dedicated page (`/promo`, reached via the drawer). The player enters a code; on success a reward reveal lists what was granted and the affected balances refresh.
+
+- A code grants one or more rewards — any mix of **LC**, **tickets** (of a given tier), or **Lucky Stars**.
+- Codes are single-use per account: redeeming the same code twice returns "already used"; invalid and expired codes return their own messages.
+- Codes are created and managed operator-side (admin/backend); the catalog is never exposed to the client. Players discover codes through distribution channels such as the Telegram channel.
+
 ## 18. Stakes System
 
 ### Purpose
@@ -1723,6 +1733,56 @@ Lucky Stars connect: the Stakes system, Task system, Invite Friends system, Engi
 
 ---
 
-## 20. Conclusion
+## 20. Jackpot
+
+The **Jackpot** is a single, platform-wide progressive prize pool that grows from tournament play and detonates — without warning — onto one secretly-chosen tournament, splashing a large payout across that tournament's players. It is the platform's headline "lucky" moment: every ticket in every tournament carries the dream, because nobody knows which tournament is the charged one.
+
+### 20.1 Accrual
+
+- The jackpot is **one global pot** shared across the whole platform — not per-tier.
+- **10% of every tournament's prize pool** (all tiers) is skimmed into the pot when that tournament finishes (`appConfig.jackpot.accrualPercent`). The placement table (Section 11.3) then distributes the remaining 90%.
+- The skim is an **EV-neutral redistribution**: no new LC is minted, and the skimmed amount is paid back out when the pot drops. The long-run LC faucet and the Market house edge (Section 14) are unchanged — the jackpot only **concentrates** existing LC into rare, large payouts.
+- Because high-tier pools are far larger than low-tier ones (Section 11.2), the pot is funded mostly by the upper tiers, yet it can drop on any tier — a deliberate "anyone can win big" hook.
+
+### 20.2 Charging & the Secret Moment
+
+- An operator **secretly "charges"** the jackpot onto exactly **one tournament instance** of **any tier** (Bronze → Diamond) from the admin side. Charging targets a single instance, not a whole slot: when a popular slot has spawned parallel `teamSizeCap`-capped instances (Section 11.2), only the charged instance pays the jackpot; the others run as normal tournaments.
+- The charged tournament's **finish is the drop moment**. Players are **never told** which tournament is charged or when the drop will happen — there is intentionally **no countdown** anywhere in the UI. The suspense is spread across every tournament.
+
+### 20.3 Distribution When the Pot Drops
+
+When the charged instance finishes, the **entire pot** is paid out **on top of** the normal Section 11.3 prize (which is unaffected):
+
+| Recipient        | Share of pot | Notes                                                        |
+| :--------------- | -----------: | :----------------------------------------------------------- |
+| All participants |      **20%** | Split **equally** among every player in the charged instance |
+| 1st place        |      **40%** | 50% of the 80% podium share                                  |
+| 2nd place        |      **24%** | 30% of the podium share                                      |
+| 3rd place        |      **16%** | 20% of the podium share                                      |
+
+- Config: `appConfig.jackpot.participantsSharePercent` (20), `podiumSharePercent` (80), `podiumSplitPercent` (50/30/20). The whole-pot figures above are derived by `getJackpotWholePotSplit`.
+- The **20% consolation** guarantees nobody in the charged tournament walks away with a jackpot-zero; the **80% podium** delivers the headline payout. A pure winner-takes-all model was rejected in favour of this spread.
+- The jackpot win is surfaced to recipients **inside the existing tournament result popup** (`TournamentResultModal`, Section 11.5) as a distinct "JACKPOT" block, shown separately from the normal placement prize so the windfall is unmistakable.
+
+### 20.4 Rounding, Reset & Carry-Forward
+
+- Shares are floored to whole LC. Any **indivisible rounding remainder** (at most a few hundred LC, mostly from the equal 20% split across up to 500 participants) is **carried forward** as the seed of the next round rather than being lost or created.
+- After a drop the pot **resets to ≈0** (carrying only that remainder) and immediately begins accruing again. The live odometer on the jackpot page makes the renewed climb visible.
+
+### 20.5 The "Jackpot Ticket"
+
+There is **no separate jackpot-ticket entity**. The "lucky ticket" is thematic: because any tournament could be the charged one, **every regular ticket a player submits is potentially the jackpot ticket**. The fantasy is spread across all play rather than gated behind a special item.
+
+### 20.6 Jackpot Page
+
+Reached from a compact **"Jackpot" button at the top of Home** and from a **drawer entry**. The page (`/jackpot`) shows:
+
+1. **Hero** — the live pot odometer (creeps up with "+X" pops as tournaments feed it), an all-time **Record** line, and the intrigue line "Can drop in any tournament. At any moment." No countdown.
+2. **Your involvement** — how many active tournaments the player is in (any could be the charged one), or a prompt to join one if they're in none.
+3. **How it works** — the three-step grow → arm → drop explainer.
+4. **Where the pot goes** — the 20% / 80% (50·30·20) split, visualised.
+5. **Recent jackpots** — a feed of past drops, headed by a lifetime **"paid out all-time"** total (`JackpotState.allTimePaidOut` — the sum of every jackpot ever dropped; a historical figure, not animated live). Each drop is then headlined by the total pot that dropped, with tier, tournament, time, and the 1st-place winner's face.
+
+## 21. Conclusion
 
 LuckyTicket365 is a modular, scalable product built around engagement, fairness, and real value creation. Each system reinforces the others, creating a cohesive ecosystem that rewards consistent participation and long-term loyalty. The Lucky Stars (LS) currency, fueled by both Telegram Stars and TON, bridges the internal economy with external value — giving users tangible real-world worth for their activity on the platform.

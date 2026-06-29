@@ -116,13 +116,36 @@ export const appConfig = {
      * auto-starts — so you can test the whole app freely — but the manual
      * "replay" entry in Settings still works regardless of this flag.
      */
-    autoStart: true,
+    autoStart: false,
     /**
      * Free starter gifts granted when the player claims them after the first-run
      * language step. One Bronze engine is always part of the pack (built in
      * `engines.api`); these are the additional amounts.
      */
     welcomePack: { bronzeTickets: 5, activityPoints: 1 },
+  },
+  jackpot: {
+    /**
+     * Percent of EVERY tournament's prize pool skimmed into the single global
+     * jackpot pot (DOCS §20). This is an EV-neutral redistribution — no new LC
+     * is minted; the skim is paid back out when the pot drops, so the house
+     * edge (DOCS §14) is preserved.
+     */
+    accrualPercent: 10,
+    /**
+     * When the pot drops on the secretly-charged tournament instance, this
+     * percent is split EQUALLY among ALL of that instance's participants
+     * (consolation — nobody walks away with a jackpot-zero).
+     */
+    participantsSharePercent: 20,
+    /** The remaining percent of the dropped pot, paid to the top-3 podium. */
+    podiumSharePercent: 80,
+    /**
+     * How the podium share splits across 1st / 2nd / 3rd (percent OF the podium
+     * share). Whole-pot equivalents (via `getJackpotWholePotSplit`): 1st 40%,
+     * 2nd 24%, 3rd 16%.
+     */
+    podiumSplitPercent: { first: 50, second: 30, third: 20 },
   },
   account: {
     /**
@@ -133,7 +156,17 @@ export const appConfig = {
      * the `false` branch of each mock, so the backend still sees the full
      * shape it must produce. Flip this one flag to switch the project zero↔demo.
      */
-    fresh: true,
+    fresh: false,
+  },
+  maintenance: {
+    /**
+     * Master switch for the full-screen "under maintenance" overlay. When
+     * `true`, every screen is blocked until it's flipped back. On a real
+     * backend this would be driven by a 503 response; here it's a manual/admin
+     * flag. The "no internet" overlay is separate — it's driven by the browser's
+     * `navigator.onLine`, not this flag.
+     */
+    enabled: false,
   },
 };
 

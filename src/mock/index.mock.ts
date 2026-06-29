@@ -4,7 +4,8 @@ import { ticketsMock } from '@/mock/tickets.mock';
 import type { FetchArgs } from '@reduxjs/toolkit/query';
 import { tasksMock } from '@/mock/tasks.mock';
 import { leaderboardMock } from '@/mock/leaderboard.mock';
-import { supportMock } from '@/mock/support.mock';
+import { faqMock } from '@/mock/faq.mock';
+import { privacyMock } from '@/mock/privacy.mock';
 import { notificationsMock } from '@/mock/notifications.mock';
 import { notificationPreferencesMock } from '@/mock/notification-preferences.mock';
 import { referralMock } from '@/mock/referral.mock';
@@ -22,6 +23,8 @@ import type {
 import { inventoryMock } from '@/mock/inventory.mock';
 import { enginesMock } from '@/mock/engines.mock';
 import { avatarsMock } from '@/mock/avatars.mock';
+import { jackpotMock } from '@/mock/jackpot.mock';
+import { promoMock } from '@/mock/promo.mock';
 
 const successResponse = () => ({});
 
@@ -81,7 +84,8 @@ export const mockData = {
   ...ticketsMock,
   ...tasksMock,
   ...leaderboardMock,
-  ...supportMock,
+  ...faqMock,
+  ...privacyMock,
   ...notificationsMock,
   ...notificationPreferencesMock,
   ...referralMock,
@@ -96,6 +100,8 @@ export const mockData = {
   ...inventoryMock,
   ...enginesMock,
   ...avatarsMock,
+  ...jackpotMock,
+  ...promoMock,
 } as const;
 
 export type MockData = typeof mockData;

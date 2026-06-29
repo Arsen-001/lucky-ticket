@@ -1,0 +1,29 @@
+@keyframes toast-in {
+  from {
+    opacity: 0;
+    transform: translateY(-12px) scale(0.97);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+@keyframes toast-out {
+  from {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+  to {
+    opacity: 0;
+    transform: translateY(-10px) scale(0.97);
+  }
+}
+
+.toast-item-enter {
+  animation: toast-in 0.28s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.toast-item-leave {
+  animation: toast-out 0.2s ease-in forwards;
+}

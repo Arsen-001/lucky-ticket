@@ -1,4 +1,11 @@
 @theme {
+  /* Fonts. `--font-main` (Gilroy) is provided by next/font (src/fonts/index.fonts.ts)
+     and bound on <html> in the root layout. `--font-sans` is the single variable that
+     drives the whole app's default font (Tailwind's base font + the `font-sans`
+     utility) — swap the next/font face there to change the font everywhere. The
+     Space Grotesk display accent stays available via `var(--font-display)`. */
+  --font-sans: var(--font-main), ui-sans-serif, system-ui, sans-serif;
+
   --color-bronze: rgba(172, 97, 34, 1);
   --color-silver: rgba(168, 170, 164, 1);
   --color-gold: rgba(248, 189, 62, 1);

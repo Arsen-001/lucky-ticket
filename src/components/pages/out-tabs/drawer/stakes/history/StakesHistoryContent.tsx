@@ -20,6 +20,7 @@ import {
 } from '@/components/pages/out-tabs/drawer/stakes/history/StakesHistorySortModal';
 import { formatCompact } from '@/utils/global/number.utils';
 import type { StakeHistoryEntry } from '@/types/interfaces/stakes.interfaces';
+import { QueryErrorState } from '@/components/shared/error/QueryErrorState';
 
 const sortHistory = (history: StakeHistoryEntry[], sortBy: StakeHistorySortId) => {
   const copy = [...history];
@@ -57,10 +58,12 @@ const matchesFilter = (entry: StakeHistoryEntry, filter: FilterId) =>
 
 export function StakesHistoryContent() {
   const t = useAppTranslations();
-  const { data: stakes, isLoading } = useGetStakesQuery();
+  const { data: stakes, isLoading, isError, refetch } = useGetStakesQuery();
   const [filter, setFilter] = useState<FilterId>('all');
   const [sortBy, setSortBy] = useState<StakeHistorySortId>('newest');
   const [sortOpen, setSortOpen] = useState(false);
+
+  if (isError) return <QueryErrorState onRetry={() => refetch()} />;
 
   const sortLabelKey = STAKE_HISTORY_SORTS.find(s => s.id === sortBy)?.labelKey ?? 'newest';
 

@@ -15,6 +15,7 @@ import {
 import type { TournamentType } from '@/types/types/tournaments.types';
 import type { PersonalTournament } from '@/types/interfaces/tournaments.interfaces';
 import { ArrivalShine } from '@/components/shared/ArrivalShine';
+import { QueryErrorState } from '@/components/shared/error/QueryErrorState';
 import { useUnlockedTiers } from '@/hooks/useUnlockedTiers';
 
 const matchesTab = (tournament: PersonalTournament, filter: TournamentFilterType): boolean => {
@@ -33,7 +34,7 @@ const matchesTab = (tournament: PersonalTournament, filter: TournamentFilterType
 };
 
 export default function TournamentPage() {
-  const { data: tournamentsData, isLoading } = useGetTournamentsQuery();
+  const { data: tournamentsData, isLoading, isError, refetch } = useGetTournamentsQuery();
   const { isTierUnlocked } = useUnlockedTiers();
   const [filter, setFilter] = useState<TournamentFilterType>('all');
   const [searchValue, setSearchValue] = useState('');
@@ -106,6 +107,8 @@ export default function TournamentPage() {
 
   const placeholderTournaments = new Array(10).fill({}) as TournamentCardProps[];
   const displayTournaments = isLoading ? placeholderTournaments : filteredTournaments;
+
+  if (isError) return <QueryErrorState onRetry={() => refetch()} />;
 
   return (
     <ArrivalShine id="tournamentEntry" scroll={false} className="flex flex-col min-h-full p-5">

@@ -13,14 +13,19 @@ import { SettingsStatusActionButton } from '@/components/pages/out-tabs/drawer/s
 import { SettingsStatusHero } from '@/components/pages/out-tabs/drawer/settings/SettingsStatusHero';
 import { SettingsStatusPriceRow } from '@/components/pages/out-tabs/drawer/settings/SettingsStatusPriceRow';
 import { useAppTranslations } from '@/hooks/useAppTranslations';
+import { useToast } from '@/hooks/useToast';
+import { QueryErrorState } from '@/components/shared/error/QueryErrorState';
 import { MarketStatusType } from '@/types/enums/market.enums';
 
 export function LuckyPlayerContainer() {
   const t = useAppTranslations();
+  const toast = useToast();
   const { data: me, isLoading: isMeLoading } = useGetMeQuery();
-  const { data: market, isLoading: isMarketLoading } = useGetMarketDataQuery();
+  const { data: market, isLoading: isMarketLoading, isError, refetch } = useGetMarketDataQuery();
   const [buyStatus, { isLoading: isBuying }] = useBuyStatusMutation();
   const [buyOpen, setBuyOpen] = useState(false);
+
+  if (isError) return <QueryErrorState onRetry={() => refetch()} />;
 
   const isLuckyPlayer = me?.isLuckyPlayer ?? false;
   const expiresAt = me?.luckyPlayerExpiresAt;
@@ -55,7 +60,7 @@ export function LuckyPlayerContainer() {
       }).unwrap();
       setBuyOpen(false);
     } catch {
-      /* surface via toast in future */
+      toast.error(t('action failed'));
     }
   };
 

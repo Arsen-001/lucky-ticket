@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { useAppTranslations } from '@/hooks/useAppTranslations';
+import { useToast } from '@/hooks/useToast';
 import { Input } from '@/components/shared/form-elements/inputs/Input';
 import { Button } from '@/components/shared/buttons/Button';
 import { BoltIcon } from '@/components/shared/icons/BoltIcon';
@@ -12,6 +13,7 @@ import { GlobalConstants } from '@/constants/global.constants';
 
 export default function EmailPage() {
   const t = useAppTranslations();
+  const toast = useToast();
   const { data: me, isLoading: isMeLoading } = useGetMeQuery();
   const [updateMe, { isLoading: isUpdating }] = useUpdateMeMutation();
   const [email, setEmail] = useState<string>('');
@@ -28,6 +30,7 @@ export default function EmailPage() {
       await updateMe({ email }).unwrap();
     } catch (error) {
       console.error('Failed to update email:', error);
+      toast.error(t('action failed'));
     }
   };
 

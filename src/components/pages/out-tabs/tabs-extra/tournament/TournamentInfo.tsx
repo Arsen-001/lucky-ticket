@@ -31,6 +31,7 @@ import type { TicketType } from '@/types/types/ticket.types';
 import type { TournamentType } from '@/types/types/tournaments.types';
 import { TournamentBetModal } from './TournamentBetModal';
 import { TournamentResultModal } from './TournamentResultModal';
+import { TournamentJackpotNote } from './TournamentJackpotNote';
 import '@/styles/components/tournament-card.css';
 
 interface TournamentDetailsProps extends HTMLAttributes<HTMLDivElement> {
@@ -204,6 +205,8 @@ export function TournamentInfo({ id, className, ...rest }: TournamentDetailsProp
               </div>
             </div>
           </SkeletonSuspense>
+
+          {!isLoading && <TournamentJackpotNote />}
 
           {/* Row 4: Players + Tickets + Add/Join/View Result/Ended */}
           <div className="flex items-center gap-1.5 min-w-0">

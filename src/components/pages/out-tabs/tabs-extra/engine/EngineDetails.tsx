@@ -22,6 +22,7 @@ import { ConfirmModal } from '@/components/shared/modals/ConfirmModal';
 import { EngineSlotPickerModal } from '@/components/pages/tabs/home/EngineSlotPickerModal';
 import { NotEnoughStarsModal } from '@/components/pages/tabs/home/NotEnoughStarsModal';
 import { useAppTranslations } from '@/hooks/useAppTranslations';
+import { useToast } from '@/hooks/useToast';
 import { routes } from '@/constants/routes';
 import {
   chipEquipStarsCost,
@@ -50,6 +51,7 @@ export interface EngineDetailsProps {
 
 export function EngineDetails({ id }: EngineDetailsProps) {
   const t = useAppTranslations();
+  const toast = useToast();
   const { data: tickets, isLoading } = useGetTicketsQuery();
   const { data: me } = useGetMeQuery();
   const { data: inventory } = useGetInventoryQuery();
@@ -304,6 +306,8 @@ export function EngineDetails({ id }: EngineDetailsProps) {
           setPickerSlot(null);
           try {
             await equipChipMutation({ chipId: chip.id, engineId: engine.id }).unwrap();
+          } catch {
+            toast.error(t('action failed'));
           } finally {
             setPendingPick(null);
           }
@@ -317,6 +321,8 @@ export function EngineDetails({ id }: EngineDetailsProps) {
               boosterId: booster.id,
               engineId: engine.id,
             }).unwrap();
+          } catch {
+            toast.error(t('action failed'));
           } finally {
             setPendingPick(null);
           }
@@ -340,8 +346,12 @@ export function EngineDetails({ id }: EngineDetailsProps) {
         onClose={() => setChipToUnequip(null)}
         onConfirm={async () => {
           if (!chipToUnequip) return;
-          await unequipChip({ chipId: chipToUnequip.id }).unwrap();
-          setChipToUnequip(null);
+          try {
+            await unequipChip({ chipId: chipToUnequip.id }).unwrap();
+            setChipToUnequip(null);
+          } catch {
+            toast.error(t('action failed'));
+          }
         }}
       />
 

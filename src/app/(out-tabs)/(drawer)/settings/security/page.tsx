@@ -1,6 +1,7 @@
 'use client';
 
 import { useAppTranslations } from '@/hooks/useAppTranslations';
+import { useToast } from '@/hooks/useToast';
 import { SettingsMenuItem } from '@/components/pages/out-tabs/drawer/settings/SettingsMenuItem';
 import { Switch } from '@/components/shared/form-elements/Switch';
 import { ShieldAlert, ShieldCheck } from 'lucide-react';
@@ -8,6 +9,7 @@ import { useGetMeQuery, useUpdateMeMutation } from '@/api/me.api';
 
 export default function SecurityPage() {
   const t = useAppTranslations();
+  const toast = useToast();
   const { data: me, isLoading: isMeLoading } = useGetMeQuery();
   const [updateMe, { isLoading: isUpdating }] = useUpdateMeMutation();
 
@@ -18,6 +20,7 @@ export default function SecurityPage() {
       await updateMe({ twoFactorAuth: checked }).unwrap();
     } catch (error) {
       console.error('Failed to toggle 2FA:', error);
+      toast.error(t('action failed'));
     }
   };
 

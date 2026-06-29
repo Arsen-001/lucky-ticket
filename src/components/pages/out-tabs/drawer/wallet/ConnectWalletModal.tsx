@@ -3,6 +3,7 @@
 import { Modal } from '@/components/shared/modals/Modal';
 import { Button } from '@/components/shared/buttons/Button';
 import { useAppTranslations } from '@/hooks/useAppTranslations';
+import { useToast } from '@/hooks/useToast';
 import { useConnectWalletMutation, useGetSupportedWalletsQuery } from '@/api/wallet.api';
 import { useState } from 'react';
 import { ChevronRight } from 'lucide-react';
@@ -16,6 +17,7 @@ interface ConnectWalletModalProps {
 
 export function ConnectWalletModal({ open, onClose }: ConnectWalletModalProps) {
   const t = useAppTranslations();
+  const toast = useToast();
   const { data: wallets = [], isLoading } = useGetSupportedWalletsQuery();
   const [connect, { isLoading: isConnecting }] = useConnectWalletMutation();
   const [selected, setSelected] = useState<WalletProvider | null>(null);
@@ -26,7 +28,7 @@ export function ConnectWalletModal({ open, onClose }: ConnectWalletModalProps) {
       await connect({ provider }).unwrap();
       onClose();
     } catch {
-      /* surface via toast in v2 */
+      toast.error(t('action failed'));
     } finally {
       setSelected(null);
     }
