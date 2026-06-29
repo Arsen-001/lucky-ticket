@@ -25,6 +25,7 @@ import { enginesMock } from '@/mock/engines.mock';
 import { avatarsMock } from '@/mock/avatars.mock';
 import { jackpotMock } from '@/mock/jackpot.mock';
 import { promoMock } from '@/mock/promo.mock';
+import { partnersMock } from '@/mock/partners.mock';
 
 const successResponse = () => ({});
 
@@ -102,6 +103,7 @@ export const mockData = {
   ...avatarsMock,
   ...jackpotMock,
   ...promoMock,
+  ...partnersMock,
 } as const;
 
 export type MockData = typeof mockData;

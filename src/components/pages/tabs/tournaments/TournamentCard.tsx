@@ -2,6 +2,7 @@
 import type { CSSProperties, MouseEvent } from 'react';
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
+import Image from 'next/image';
 import dayjs from 'dayjs';
 import {
   CalendarDays,
@@ -9,7 +10,9 @@ import {
   Clock,
   Cpu,
   Lock,
+  Megaphone,
   MemoryStick,
+  ShieldCheck,
   Sparkles,
   Ticket,
   Users,
@@ -35,6 +38,8 @@ import type {
 import type { TournamentType } from '@/types/types/tournaments.types';
 import { TournamentBetModal } from '@/components/pages/out-tabs/tabs-extra/tournament/TournamentBetModal';
 import { TournamentResultModal } from '@/components/pages/out-tabs/tabs-extra/tournament/TournamentResultModal';
+import { TournamentSponsorHeader } from './TournamentSponsorHeader';
+import { TournamentSponsorBackground } from './TournamentSponsorBackground';
 import '@/styles/components/tournament-card.css';
 
 export type TournamentCardProps = (Tournament | PersonalTournament) & {
@@ -69,6 +74,7 @@ export function TournamentCard({
   teamSize,
   shardType,
   status,
+  sponsor,
   loading,
   participated = false,
   participatedTicketsCount,
@@ -82,6 +88,9 @@ export function TournamentCard({
   const router = useRouter();
   const { isTierUnlocked } = useUnlockedTiers();
   const isFinished = status === 'finished';
+  // A sponsored tournament the creator just submitted, awaiting review (§11.8) —
+  // shown to its creator but not joinable / navigable until approved.
+  const isModeration = status === 'moderation';
   // A tournament whose tier sits above the player's AP tier is shown but locked
   // (DOCS §5.2 tier gate / §11). Finished tournaments are never locked.
   const locked = !isFinished && !!type && !isTierUnlocked(type);
@@ -117,7 +126,7 @@ export function TournamentCard({
   };
 
   const handleCardClick = () => {
-    if (loading || !id || locked) return;
+    if (loading || !id || locked || isModeration) return;
     router.push(routes.tournaments.getById(id));
   };
 
@@ -138,180 +147,218 @@ export function TournamentCard({
         style={style}
         aria-disabled={locked || undefined}
         className={twMerge(
-          'w-full rounded-2xl flex items-stretch gap-3 p-3 transition-transform focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-white',
-          locked ? 'cursor-not-allowed' : 'active:scale-99 cursor-pointer',
+          'w-full rounded-2xl flex flex-col p-3 transition-transform focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-white',
+          locked
+            ? 'cursor-not-allowed'
+            : isModeration
+              ? 'cursor-default'
+              : 'active:scale-99 cursor-pointer',
           isFinished
             ? 'tournament-card-finished'
-            : type
-              ? tierClass[type]
-              : 'bg-background-overlay',
+            : sponsor
+              ? 'tournament-card-sponsored'
+              : type
+                ? tierClass[type]
+                : 'bg-background-overlay',
           locked && 'opacity-70 saturate-[0.55]',
           className
         )}
       >
-        {/* Medal stage — left */}
-        <div
-          className={twMerge(
-            'w-24 shrink-0 self-stretch rounded-lg relative overflow-hidden',
-            loading ? 'skeleton' : 'flex-center bg-white/8',
-            isFinished && 'opacity-80'
-          )}
-        >
-          {!loading && (
-            <Medal className="drop-shadow-xl drop-shadow-black/30" height={84} type={type} />
-          )}
-          {locked && (
-            <span className="flex-center absolute inset-0 rounded-lg bg-black/45 backdrop-blur-[1px]">
-              <Lock className="text-white/90" size={26} strokeWidth={2.4} />
-            </span>
-          )}
-        </div>
+        {/* Background — chosen banner or the default spiderweb, behind everything */}
+        {sponsor && <TournamentSponsorBackground sponsor={sponsor} />}
 
-        {/* Right column — 4 rows */}
-        <div className="flex flex-1 min-w-0 flex-col gap-1.5">
-          {/* Row 1: Name */}
-          <SkeletonSuspense
-            loading={loading}
-            skeleton={<Skeleton variant="line" textSize="sm" className="w-full max-w-40" />}
+        {/* Sponsored header strip — the dominant "this is not a game tournament" cue */}
+        {sponsor && <TournamentSponsorHeader sponsor={sponsor} />}
+
+        <div className="relative z-10 flex items-stretch gap-3">
+          {/* Medal stage — left (sponsor logo replaces the tier medal) */}
+          <div
+            className={twMerge(
+              'w-24 shrink-0 self-stretch rounded-lg relative overflow-hidden',
+              loading ? 'skeleton' : 'flex-center bg-white/8',
+              isFinished && 'opacity-80'
+            )}
           >
-            <h5 className="text-sm font-bold text-white leading-tight line-clamp-1">{name}</h5>
-          </SkeletonSuspense>
-
-          {/* Row 2: Date (full) + Countdown */}
-          <SkeletonSuspense
-            loading={loading}
-            skeleton={<Skeleton variant="rounded-rectangle" className="h-6 w-2/3" />}
-          >
-            <div className="flex items-center justify-between gap-1.5 text-[11px] leading-none min-w-0">
-              <span className="inline-flex items-center gap-1 rounded-md bg-white/5 px-1.5 py-1 leading-none shrink-0">
-                <CalendarDays className="w-3 h-3 text-pink-secondary shrink-0" />
-                <span className="font-semibold text-white/90 tabular-nums leading-none">
-                  {dayjs(startTime).format('DD/MM/YYYY · HH:mm')}
-                </span>
-              </span>
-              <span
-                className={twMerge(
-                  'inline-flex items-center gap-1 rounded-md px-1.5 py-1 leading-none text-white min-w-0',
-                  isFinished
-                    ? 'bg-white/5 text-white/65'
-                    : isStartingSoon
-                      ? 'bg-electric-pink/30'
-                      : 'bg-white/5'
-                )}
-              >
-                <Clock
-                  className={twMerge(
-                    'w-3 h-3 shrink-0',
-                    isStartingSoon ? 'text-electric-pink' : 'text-pink-secondary'
-                  )}
-                  strokeWidth={2.4}
-                />
-                <span className="font-bold tabular-nums leading-none truncate">{timeChipText}</span>
-              </span>
-            </div>
-          </SkeletonSuspense>
-
-          {/* Row 3: LC + Shards (rewards) */}
-          <SkeletonSuspense
-            loading={loading}
-            skeleton={<Skeleton variant="rounded-rectangle" className="h-7" />}
-          >
-            <div className="flex items-center gap-2 rounded-lg bg-white/5 px-2 py-1.5">
-              <div className="flex items-center gap-1.5 flex-1 min-w-0 leading-none">
-                <Sparkles className="w-3.5 h-3.5 text-pink-secondary shrink-0" />
-                <GoldenText
-                  className="inline-flex items-center gap-1 text-sm font-extrabold tabular-nums leading-none truncate"
-                  style={{ textShadow: '0 1px 4px rgba(248, 189, 62, 0.45)' }}
-                >
-                  {prizePool != null ? formatCompact(prizePool) : ''}
-                  <LcLabel size={14} />
-                </GoldenText>
-              </div>
-              <div className="h-3.5 w-px bg-white/15 shrink-0" />
-              <div className="flex items-center gap-1 shrink-0 leading-none">
-                <ShardIcon className="w-3.5 h-3.5 text-pink-secondary shrink-0" strokeWidth={2.4} />
-                <span className="text-xs font-bold text-white tabular-nums leading-none">
-                  ×{topShards}
-                </span>
-              </div>
-            </div>
-          </SkeletonSuspense>
-
-          {/* Row 4: Players + Tickets + Add/Join button */}
-          <div className="flex items-center gap-1.5 min-w-0">
-            <SkeletonSuspense
-              loading={loading}
-              skeleton={<Skeleton variant="rounded-rectangle" className="h-7 w-12" />}
-            >
-              <span className="inline-flex items-center gap-1 rounded-md bg-white/5 px-1.5 py-1.5 leading-none shrink-0 text-[11px]">
-                <Users className="w-3 h-3 text-pink-secondary shrink-0" />
-                <span className="font-semibold text-white/90 tabular-nums leading-none">
-                  {teamSize}
-                </span>
-              </span>
-            </SkeletonSuspense>
-
-            <SkeletonSuspense
-              loading={loading}
-              skeleton={<Skeleton variant="rounded-rectangle" className="h-7 w-12" />}
-            >
-              {participated && !isFinished ? (
-                <span className="inline-flex items-center gap-1 rounded-md bg-success/20 px-1.5 py-1.5 text-success font-bold text-[11px] leading-none shrink-0">
-                  <Ticket className="w-3 h-3 shrink-0" />
-                  <span className="tabular-nums leading-none">×{ticketCount}</span>
-                </span>
-              ) : null}
-            </SkeletonSuspense>
-
-            <SkeletonSuspense
-              loading={loading}
-              skeleton={<Skeleton variant="rounded-rectangle" className="h-8 w-24 ml-auto" />}
-            >
-              {isFinished && userResult ? (
-                <Button
-                  variant="purpleGradient"
-                  icon={<CheckCircle2 strokeWidth={2.6} />}
-                  iconSize={13}
-                  onClick={handleActionClick}
-                  className={twMerge(
-                    'ml-auto shrink-0 py-2 px-3 rounded-full text-[11px] font-extrabold uppercase tracking-[0.14em] leading-none',
-                    'shadow-[0_4px_14px_rgba(0,0,0,0.4),inset_0_1px_0_rgba(255,255,255,0.18)]',
-                    'transition-transform active:scale-95',
-                    hasUnseenResult && 'animate-pulse'
-                  )}
-                >
-                  <span className="leading-none">{t('result')}</span>
-                </Button>
-              ) : isFinished ? (
-                <button
-                  type="button"
-                  onClick={handleActionClick}
-                  className="ml-auto shrink-0 inline-flex items-center justify-center px-3 py-2 rounded-full bg-white/5 border border-white/10 text-[11px] font-extrabold uppercase tracking-[0.14em] text-white/65 leading-none transition-transform active:scale-95 cursor-pointer hover:bg-white/8"
-                >
-                  {t('ended')}
-                </button>
-              ) : locked ? (
-                <span className="ml-auto inline-flex shrink-0 items-center gap-1.5 rounded-full border border-white/10 bg-white/5 px-3.5 py-2 text-[11px] font-extrabold uppercase leading-none tracking-[0.14em] text-white/55">
-                  <Lock size={12} strokeWidth={2.6} />
-                  {t('locked')}
-                </span>
+            {!loading &&
+              (sponsor ? (
+                sponsor.logoUrl ? (
+                  <Image
+                    src={sponsor.logoUrl}
+                    alt={sponsor.name}
+                    fill
+                    unoptimized
+                    sizes="96px"
+                    className="object-contain p-2.5"
+                  />
+                ) : (
+                  <Megaphone className="h-10 w-10 text-white/90" strokeWidth={1.6} />
+                )
               ) : (
-                <Button
-                  data-tour={tourJoinAnchor ? 'tournament-join' : undefined}
-                  disabled={loading}
-                  onClick={handleActionClick}
+                <Medal className="drop-shadow-xl drop-shadow-black/30" height={84} type={type} />
+              ))}
+            {locked && (
+              <span className="flex-center absolute inset-0 rounded-lg bg-black/45 backdrop-blur-[1px]">
+                <Lock className="text-white/90" size={26} strokeWidth={2.4} />
+              </span>
+            )}
+          </div>
+
+          {/* Right column — 4 rows */}
+          <div className="flex flex-1 min-w-0 flex-col gap-1.5">
+            {/* Row 1: Name */}
+            <SkeletonSuspense
+              loading={loading}
+              skeleton={<Skeleton variant="line" textSize="sm" className="w-full max-w-40" />}
+            >
+              <h5 className="line-clamp-1 text-sm font-bold leading-tight text-white">{name}</h5>
+            </SkeletonSuspense>
+
+            {/* Row 2: Date (full) + Countdown */}
+            <SkeletonSuspense
+              loading={loading}
+              skeleton={<Skeleton variant="rounded-rectangle" className="h-6 w-2/3" />}
+            >
+              <div className="flex items-center justify-between gap-1.5 text-[11px] leading-none min-w-0">
+                <span className="inline-flex items-center gap-1 rounded-md bg-white/5 px-1.5 py-1 leading-none shrink-0">
+                  <CalendarDays className="w-3 h-3 text-pink-secondary shrink-0" />
+                  <span className="font-semibold text-white/90 tabular-nums leading-none">
+                    {dayjs(startTime).format('DD/MM/YYYY · HH:mm')}
+                  </span>
+                </span>
+                <span
                   className={twMerge(
-                    'ml-auto shrink-0 py-2 px-4 rounded-full text-[11px] font-extrabold uppercase tracking-[0.14em] leading-none',
-                    'shadow-[0_4px_14px_rgba(0,0,0,0.4),inset_0_1px_0_rgba(255,255,255,0.28)]',
-                    'transition-transform active:scale-95',
-                    participated && 'bg-success',
-                    !participated && isStartingSoon && 'animate-pulse'
+                    'inline-flex items-center gap-1 rounded-md px-1.5 py-1 leading-none text-white min-w-0',
+                    isFinished
+                      ? 'bg-white/5 text-white/65'
+                      : isStartingSoon
+                        ? 'bg-electric-pink/30'
+                        : 'bg-white/5'
                   )}
                 >
-                  <span className="leading-none">{t(participated ? 'add' : 'join')}</span>
-                </Button>
-              )}
+                  <Clock
+                    className={twMerge(
+                      'w-3 h-3 shrink-0',
+                      isStartingSoon ? 'text-electric-pink' : 'text-pink-secondary'
+                    )}
+                    strokeWidth={2.4}
+                  />
+                  <span className="font-bold tabular-nums leading-none truncate">
+                    {timeChipText}
+                  </span>
+                </span>
+              </div>
             </SkeletonSuspense>
+
+            {/* Row 3: LC + Shards (rewards) */}
+            <SkeletonSuspense
+              loading={loading}
+              skeleton={<Skeleton variant="rounded-rectangle" className="h-7" />}
+            >
+              <div className="flex items-center gap-2 rounded-lg bg-white/5 px-2 py-1.5">
+                <div className="flex items-center gap-1.5 flex-1 min-w-0 leading-none">
+                  <Sparkles className="w-3.5 h-3.5 text-pink-secondary shrink-0" />
+                  <GoldenText
+                    className="inline-flex items-center gap-1 text-sm font-extrabold tabular-nums leading-none truncate"
+                    style={{ textShadow: '0 1px 4px rgba(248, 189, 62, 0.45)' }}
+                  >
+                    {prizePool != null ? formatCompact(prizePool) : ''}
+                    <LcLabel size={14} />
+                  </GoldenText>
+                </div>
+                <div className="h-3.5 w-px bg-white/15 shrink-0" />
+                <div className="flex items-center gap-1 shrink-0 leading-none">
+                  <ShardIcon
+                    className="w-3.5 h-3.5 text-pink-secondary shrink-0"
+                    strokeWidth={2.4}
+                  />
+                  <span className="text-xs font-bold text-white tabular-nums leading-none">
+                    ×{topShards}
+                  </span>
+                </div>
+              </div>
+            </SkeletonSuspense>
+
+            {/* Row 4: Players + Tickets + Add/Join button */}
+            <div className="flex items-center gap-1.5 min-w-0">
+              <SkeletonSuspense
+                loading={loading}
+                skeleton={<Skeleton variant="rounded-rectangle" className="h-7 w-12" />}
+              >
+                <span className="inline-flex items-center gap-1 rounded-md bg-white/5 px-1.5 py-1.5 leading-none shrink-0 text-[11px]">
+                  <Users className="w-3 h-3 text-pink-secondary shrink-0" />
+                  <span className="font-semibold text-white/90 tabular-nums leading-none">
+                    {teamSize}
+                  </span>
+                </span>
+              </SkeletonSuspense>
+
+              <SkeletonSuspense
+                loading={loading}
+                skeleton={<Skeleton variant="rounded-rectangle" className="h-7 w-12" />}
+              >
+                {participated && !isFinished ? (
+                  <span className="inline-flex items-center gap-1 rounded-md bg-success/20 px-1.5 py-1.5 text-success font-bold text-[11px] leading-none shrink-0">
+                    <Ticket className="w-3 h-3 shrink-0" />
+                    <span className="tabular-nums leading-none">×{ticketCount}</span>
+                  </span>
+                ) : null}
+              </SkeletonSuspense>
+
+              <SkeletonSuspense
+                loading={loading}
+                skeleton={<Skeleton variant="rounded-rectangle" className="h-8 w-24 ml-auto" />}
+              >
+                {isModeration ? (
+                  <span className="text-electric-purple border-electric-purple/30 bg-electric-purple/15 ml-auto inline-flex shrink-0 items-center gap-1.5 rounded-full border px-3 py-2 text-[11px] font-extrabold uppercase leading-none tracking-[0.14em]">
+                    <ShieldCheck size={12} strokeWidth={2.6} />
+                    {t('status moderation')}
+                  </span>
+                ) : isFinished && userResult ? (
+                  <Button
+                    variant="purpleGradient"
+                    icon={<CheckCircle2 strokeWidth={2.6} />}
+                    iconSize={13}
+                    onClick={handleActionClick}
+                    className={twMerge(
+                      'ml-auto shrink-0 py-2 px-3 rounded-full text-[11px] font-extrabold uppercase tracking-[0.14em] leading-none',
+                      'shadow-[0_4px_14px_rgba(0,0,0,0.4),inset_0_1px_0_rgba(255,255,255,0.18)]',
+                      'transition-transform active:scale-95',
+                      hasUnseenResult && 'animate-pulse'
+                    )}
+                  >
+                    <span className="leading-none">{t('result')}</span>
+                  </Button>
+                ) : isFinished ? (
+                  <button
+                    type="button"
+                    onClick={handleActionClick}
+                    className="ml-auto shrink-0 inline-flex items-center justify-center px-3 py-2 rounded-full bg-white/5 border border-white/10 text-[11px] font-extrabold uppercase tracking-[0.14em] text-white/65 leading-none transition-transform active:scale-95 cursor-pointer hover:bg-white/8"
+                  >
+                    {t('ended')}
+                  </button>
+                ) : locked ? (
+                  <span className="ml-auto inline-flex shrink-0 items-center gap-1.5 rounded-full border border-white/10 bg-white/5 px-3.5 py-2 text-[11px] font-extrabold uppercase leading-none tracking-[0.14em] text-white/55">
+                    <Lock size={12} strokeWidth={2.6} />
+                    {t('locked')}
+                  </span>
+                ) : (
+                  <Button
+                    data-tour={tourJoinAnchor ? 'tournament-join' : undefined}
+                    disabled={loading}
+                    onClick={handleActionClick}
+                    className={twMerge(
+                      'ml-auto shrink-0 py-2 px-4 rounded-full text-[11px] font-extrabold uppercase tracking-[0.14em] leading-none',
+                      'shadow-[0_4px_14px_rgba(0,0,0,0.4),inset_0_1px_0_rgba(255,255,255,0.28)]',
+                      'transition-transform active:scale-95',
+                      participated && 'bg-success',
+                      !participated && isStartingSoon && 'animate-pulse'
+                    )}
+                  >
+                    <span className="leading-none">{t(participated ? 'add' : 'join')}</span>
+                  </Button>
+                )}
+              </SkeletonSuspense>
+            </div>
           </div>
         </div>
       </div>

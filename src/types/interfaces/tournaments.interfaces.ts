@@ -17,6 +17,24 @@ export interface TournamentUserResult {
   shards?: number;
 }
 
+/**
+ * Branding for a sponsored tournament — a real (joinable) tournament funded by
+ * an advertiser via the partner portal (DOCS §21). Distinct from a CPC ad
+ * campaign: this one shows in the public catalog and players actually join it.
+ */
+export interface TournamentSponsor {
+  /** Advertiser brand name shown on the card. */
+  name: string;
+  /** Optional brand logo/icon URL — replaces the tier medal on the card. */
+  logoUrl?: string;
+  /** Optional custom banner image URL — used as the card background when set. */
+  bannerUrl?: string;
+  /** Optional sponsor destination link. */
+  url?: string;
+  /** True when the current (demo) user is the advertiser who created it. */
+  createdByMe?: boolean;
+}
+
 export interface Tournament {
   id: string;
   name: string;
@@ -28,6 +46,8 @@ export interface Tournament {
   status: TournamentStatus;
   winners?: TournamentWinner[];
   places?: TournamentPlacesResponse;
+  /** Present when this tournament is sponsored (created via the partner portal). */
+  sponsor?: TournamentSponsor;
 }
 
 export interface PersonalTournament extends Tournament {
@@ -37,6 +57,34 @@ export interface PersonalTournament extends Tournament {
   userResult?: TournamentUserResult;
   /** Whether user has dismissed the result popup. */
   resultSeen?: boolean;
+}
+
+/** Payload sent when an advertiser creates a sponsored tournament (DOCS §11.8). */
+export interface CreateSponsoredTournamentPayload {
+  name: string;
+  type: TournamentType;
+  /** Prize pool, in LC. */
+  prizePool: number;
+  /** Total seats. */
+  teamSize: number;
+  shardType: InventoryChipType;
+  /** Day the tournament starts, "YYYY-MM-DD". */
+  startDate: string;
+  /** Start time of day, "HH:mm" — minutes are :00 or :30. */
+  startTime: string;
+  /** Advertiser brand shown on the card. */
+  sponsorName: string;
+  /** Optional brand logo/icon — replaces the tier medal. */
+  logoUrl?: string;
+  /** Optional custom banner — card background. */
+  bannerUrl?: string;
+  /** Optional sponsor destination link. */
+  sponsorUrl?: string;
+}
+
+export interface CreateSponsoredTournamentResponse {
+  success: boolean;
+  tournament: PersonalTournament;
 }
 
 export interface TournamentPlace {

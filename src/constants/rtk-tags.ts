@@ -24,4 +24,5 @@ export const rtkTags = {
   profileById: ':ProfileById',
   inventory: 'Inventory',
   avatars: 'Avatars',
+  partnerStats: 'PartnerStats',
 } as const;

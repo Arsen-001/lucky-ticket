@@ -15,6 +15,7 @@ import {
   CircleQuestionMark,
   Gift,
   Globe,
+  Handshake,
   Layers,
   LifeBuoy,
   Package,
@@ -219,6 +220,11 @@ export function Drawer() {
       route: routes.jackpot,
       title: t('jackpot'),
       icon: <Sparkles size={18} />,
+    },
+    {
+      route: routes.partners.index,
+      title: t('partners'),
+      icon: <Handshake size={18} />,
     },
     {
       route: routes.promo,

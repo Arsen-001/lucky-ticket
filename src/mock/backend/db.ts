@@ -13,6 +13,7 @@ import type { ActiveStake, StakeHistoryEntry } from '@/types/interfaces/stakes.i
 import type { WalletTransaction } from '@/types/interfaces/wallet.interfaces';
 import type { LcTransaction } from '@/types/interfaces/lc.interfaces';
 import { appConfig } from '@/config/app.config';
+import type { Advertiser } from '@/types/interfaces/partners.interfaces';
 
 const minutesAgo = (m: number) => new Date(Date.now() - m * 60_000).toISOString();
 const minutesFromNow = (m: number) => new Date(Date.now() + m * 60_000).toISOString();
@@ -40,6 +41,16 @@ const fresh = appConfig.account.fresh;
  * Note: the user's Stars balance lives on `user.telegramStars` only — the
  * wallet reads it from there, it is not duplicated under `wallet`.
  */
+/* ─── Partner cabinet: advertiser balance (DOCS §11.8) ───────────────────
+ * The advertiser (casino) account behind the partner cabinet. Its TON balance
+ * is debited when a sponsored tournament is created. */
+const demoAdvertiser: Advertiser = {
+  id: 'adv-demo-casino',
+  username: 'demo_casino',
+  // Fresh advertiser starts with a small promo credit; the rich demo has a top-up.
+  balanceTon: fresh ? 1_000 : 24_000,
+};
+
 export const mockDb = {
   user: {
     id: faker.string.uuid(),
@@ -444,4 +455,10 @@ export const mockDb = {
      */
     activePlayers: 1_250_000,
   },
+
+  /**
+   * The advertiser (casino) account behind the partner cabinet (DOCS §11.8).
+   * Its TON balance is debited when a sponsored tournament is created.
+   */
+  advertiser: demoAdvertiser,
 };

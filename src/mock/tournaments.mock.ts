@@ -1,4 +1,6 @@
 import type {
+  CreateSponsoredTournamentPayload,
+  CreateSponsoredTournamentResponse,
   PersonalTournament,
   Tournament,
   TournamentPlacesResponse,
@@ -9,6 +11,7 @@ import { getRandomNumber } from '@/utils/global/number.utils';
 import { mockDb } from '@/mock/backend/db';
 import { GlobalConstants, isTournamentTierActivated } from '@/constants/global.constants';
 import { applyStatusTournamentJoinApBoost } from '@/utils/global/tournament.utils';
+import { computeSponsoredTournamentCost, roundTon } from '@/utils/global/partners.utils';
 import { appConfig } from '@/config/app.config';
 
 const fresh = appConfig.account.fresh;
@@ -49,6 +52,134 @@ const sampleWinners: TournamentWinner[] = [
 ];
 
 export const tournaments: PersonalTournament[] = [
+  // A sponsored tournament the demo advertiser created via the partner cabinet
+  // (DOCS §11.8) — a real joinable tournament that carries advertiser branding.
+  // Surfaced first so the example reads.
+  {
+    id: '123e4567-e89b-12d3-a456-426655440018',
+    name: 'Aurora Bet — Player Cup',
+    startTime: getNextOccurrenceAt(20),
+    teamSize: 128,
+    prizePool: 12_000_000,
+    type: 'gold',
+    shardType: 'speed',
+    status: 'upcoming',
+    places: getMockPlacements(),
+    participated: false,
+    sponsor: {
+      name: 'Aurora Bet',
+      url: 'https://aurorabet.example.com/launch',
+      // Brand logo stand-in (local asset) → renders in the medal slot. No
+      // bannerUrl, so the card shows the default spiderweb background.
+      logoUrl: images.avatar2.src,
+      createdByMe: true,
+    },
+  },
+  // A sponsored tournament the demo user created that is still under review
+  // (DOCS §11.8) — visible only to its creator (Sponsored tab), not the public.
+  {
+    id: '123e4567-e89b-12d3-a456-426655440019',
+    name: 'Neon Spins — Launch Cup',
+    startTime: getNextOccurrenceAt(16),
+    teamSize: 64,
+    prizePool: 8_000_000,
+    type: 'silver',
+    shardType: 'capacity',
+    status: 'moderation',
+    places: getMockPlacements(),
+    participated: false,
+    sponsor: {
+      name: 'Neon Spins',
+      url: 'https://neonspins.example.com/launch',
+      createdByMe: true,
+    },
+  },
+  // Finished sponsored tournaments the demo advertiser ran — the cabinet's
+  // "History" view (DOCS §11.8). Past start times + winners.
+  {
+    id: '123e4567-e89b-12d3-a456-426655440020',
+    name: 'Aurora Bet — Winter Cup',
+    startTime: getHoursAgo(48),
+    teamSize: 128,
+    prizePool: 6_000_000,
+    type: 'gold',
+    shardType: 'speed',
+    status: 'finished',
+    winners: sampleWinners,
+    places: getMockPlacements(),
+    participated: false,
+    sponsor: { name: 'Aurora Bet', logoUrl: images.avatar2.src, createdByMe: true },
+  },
+  {
+    id: '123e4567-e89b-12d3-a456-426655440021',
+    name: 'Neon Spins — Season 1',
+    startTime: getHoursAgo(120),
+    teamSize: 64,
+    prizePool: 3_000_000,
+    type: 'silver',
+    shardType: 'capacity',
+    status: 'finished',
+    winners: sampleWinners,
+    places: getMockPlacements(),
+    participated: false,
+    sponsor: { name: 'Neon Spins', createdByMe: true },
+  },
+  {
+    id: '123e4567-e89b-12d3-a456-426655440022',
+    name: 'Aurora Bet — Launch Cup',
+    startTime: getHoursAgo(240),
+    teamSize: 256,
+    prizePool: 9_000_000,
+    type: 'platinum',
+    shardType: 'speed',
+    status: 'finished',
+    winners: sampleWinners,
+    places: getMockPlacements(),
+    participated: false,
+    sponsor: { name: 'Aurora Bet', logoUrl: images.avatar2.src, createdByMe: true },
+  },
+  {
+    id: '123e4567-e89b-12d3-a456-426655440023',
+    name: 'Spin Palace — Grand Final',
+    startTime: getHoursAgo(360),
+    teamSize: 96,
+    prizePool: 4_500_000,
+    type: 'gold',
+    shardType: 'capacity',
+    status: 'finished',
+    winners: sampleWinners,
+    places: getMockPlacements(),
+    participated: false,
+    sponsor: { name: 'Spin Palace', createdByMe: true },
+  },
+  {
+    id: '123e4567-e89b-12d3-a456-426655440024',
+    name: 'Neon Spins — Kickoff',
+    startTime: getHoursAgo(480),
+    teamSize: 64,
+    prizePool: 2_000_000,
+    type: 'bronze',
+    shardType: 'speed',
+    status: 'finished',
+    winners: sampleWinners,
+    places: getMockPlacements(),
+    participated: false,
+    sponsor: { name: 'Neon Spins', createdByMe: true },
+  },
+  {
+    id: '123e4567-e89b-12d3-a456-426655440025',
+    name: 'Aurora Bet — Diamond Cup',
+    startTime: getHoursAgo(600),
+    teamSize: 32,
+    prizePool: 12_000_000,
+    type: 'diamond',
+    shardType: 'capacity',
+    status: 'finished',
+    winners: sampleWinners,
+    places: getMockPlacements(),
+    participated: false,
+    sponsor: { name: 'Aurora Bet', logoUrl: images.avatar2.src, createdByMe: true },
+  },
   {
     id: '123e4567-e89b-12d3-a456-426655440010',
     name: 'Morning Bronze',
@@ -256,6 +387,76 @@ const joinTournament = (args: { body?: unknown }) => {
 
 const markTournamentResultSeen = () => undefined;
 
+/** Combine a "YYYY-MM-DD" day and "HH:mm" time into the tournament start Date. */
+const sponsoredStartFrom = (date?: string, time?: string): Date => {
+  const t = time && /^([01]\d|2[0-3]):(00|30)$/.test(time) ? time : '12:00';
+  if (date && /^\d{4}-\d{2}-\d{2}$/.test(date)) {
+    const combined = new Date(`${date}T${t}:00`);
+    if (Number.isFinite(combined.getTime())) return combined;
+  }
+  const [h, m] = t.split(':').map(Number);
+  const fallback = new Date();
+  fallback.setHours(h, m, 0, 0);
+  return fallback;
+};
+
+/**
+ * Advertiser launches a sponsored tournament (DOCS §11.8). The advertiser TON
+ * balance (shared `mockDb.advertiser`) is debited the launch fee + the LC prize
+ * pool priced into TON, and the new tournament is unshifted into the catalog so
+ * it shows immediately (upcoming) on the tournaments tab + home slider.
+ */
+const createSponsoredTournament = (args: { body?: unknown }) => {
+  const body = (args.body ?? {}) as Partial<CreateSponsoredTournamentPayload>;
+
+  // Recompute the price server-side — the client total is never trusted.
+  const cost = computeSponsoredTournamentCost(body.prizePool ?? 0);
+  if (mockDb.advertiser.balanceTon < cost.totalTon) {
+    return { error: { status: 402, data: 'INSUFFICIENT_FUNDS' } };
+  }
+  mockDb.advertiser.balanceTon = roundTon(mockDb.advertiser.balanceTon - cost.totalTon);
+
+  const start = sponsoredStartFrom(body.startDate, body.startTime);
+  const tournament: PersonalTournament = {
+    id: `spt-${Date.now().toString(16)}`,
+    name: body.name?.trim() || 'Sponsored tournament',
+    startTime: start.toISOString(),
+    teamSize: body.teamSize ?? appConfig.partners.sponsoredTournament.defaultTeamSize,
+    prizePool: body.prizePool ?? 0,
+    type: body.type ?? 'gold',
+    shardType: body.shardType === 'capacity' ? 'capacity' : 'speed',
+    // Mandatory moderation: a freshly-created sponsored tournament is reviewed
+    // before it goes live — hidden from the public catalog/home until approved.
+    status: 'moderation',
+    places: getMockPlacements(),
+    participated: false,
+    sponsor: {
+      name: body.sponsorName?.trim() || 'Sponsor',
+      logoUrl: body.logoUrl?.trim() || undefined,
+      bannerUrl: body.bannerUrl?.trim() || undefined,
+      url: body.sponsorUrl?.trim() || undefined,
+      createdByMe: true,
+    },
+  };
+
+  tournaments.unshift(tournament);
+  const response: CreateSponsoredTournamentResponse = { success: true, tournament };
+  return response;
+};
+
+/**
+ * Approve a sponsored tournament out of moderation (DOCS §11.8). Stands in for
+ * the admin review step — flips `moderation` → `upcoming` so it goes public.
+ */
+const approveSponsoredTournament = (args: { body?: unknown }) => {
+  const body = (args.body ?? {}) as { tournamentId?: string };
+  const tournament = tournaments.find(
+    tour => tour.id === body.tournamentId && tour.status === 'moderation'
+  );
+  if (tournament) tournament.status = 'upcoming';
+  return { success: Boolean(tournament) };
+};
+
 // Level-zero view: same upcoming catalog, but the player hasn't joined anything
 // and has no results/history. The rich demo (`tournaments`) is untouched.
 const freshTournaments: PersonalTournament[] = tournaments.map(tournament => ({
@@ -267,16 +468,24 @@ const freshTournaments: PersonalTournament[] = tournaments.map(tournament => ({
 }));
 
 const servedTournaments = fresh ? freshTournaments : tournaments;
-const servedTop = servedTournaments.filter(
-  tournament => tournament.status === 'upcoming' && !tournament.participated
-);
+
+// Sponsored tournaments (DOCS §11.8) are real joinable tournaments that carry
+// advertiser branding via a `sponsor` field; the demo seeds several above
+// (createdByMe). The partner cabinet only owns the advertiser balance now.
 
 export const tournamentsMock = {
   // `GET tournaments` (gated list) wins over the raw `tournaments` array,
   // which is kept for `tournaments/{id}` + `/places` path traversal.
   'GET tournaments': () => gateByActivation(servedTournaments),
-  topTournaments: () => gateByActivation(servedTop),
+  topTournaments: () =>
+    gateByActivation(
+      servedTournaments.filter(
+        tournament => tournament.status === 'upcoming' && !tournament.participated
+      )
+    ),
   tournaments: servedTournaments,
   'POST tournaments/join': joinTournament,
   'POST tournaments/result-seen': markTournamentResultSeen,
+  'POST tournaments/sponsored': createSponsoredTournament,
+  'POST tournaments/approve': approveSponsoredTournament,
 };

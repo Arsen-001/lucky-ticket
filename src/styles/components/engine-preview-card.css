@@ -129,3 +129,32 @@
     transparent 100%
   );
 }
+
+/* Sponsored tournament (home slider) — purple skin, distinct from the subtle
+   tier cards. Additive: does NOT touch the shared engine-preview-card-tier-*. */
+.engine-preview-card-sponsored {
+  position: relative;
+  background:
+    linear-gradient(135deg, rgba(24, 20, 48, 0.97) 0%, rgba(14, 12, 30, 0.98) 100%) padding-box,
+    linear-gradient(135deg, rgba(116, 61, 245, 0.95) 0%, rgba(222, 0, 155, 0.6) 100%) border-box;
+  border: 1.5px solid transparent;
+  box-shadow: 0 0 18px rgba(116, 61, 245, 0.3);
+}
+
+.engine-preview-card-sponsored::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 18%;
+  right: 18%;
+  height: 1px;
+  filter: blur(0.6px);
+  pointer-events: none;
+  z-index: 2;
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    rgba(116, 61, 245, 0.95) 50%,
+    transparent 100%
+  );
+}

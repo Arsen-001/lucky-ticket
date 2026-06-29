@@ -1,12 +1,12 @@
 'use client';
 
 import { type RefObject, useEffect, useLayoutEffect, useRef, useState } from 'react';
-import { Clock, History, Layers, type LucideIcon, TrendingUp } from 'lucide-react';
+import { Clock, History, Layers, type LucideIcon, Megaphone, TrendingUp } from 'lucide-react';
 import { twMerge } from 'tailwind-merge';
 import { useAppTranslations } from '@/hooks/useAppTranslations';
 import type { MessageIds } from '@/types/types/i18n.types';
 
-export type TournamentFilterKey = 'all' | 'top' | 'participated' | 'history';
+export type TournamentFilterKey = 'all' | 'sponsored' | 'top' | 'participated' | 'history';
 
 export interface TournamentFilterTab {
   key: TournamentFilterKey;
@@ -23,6 +23,7 @@ interface TournamentFiltersTabsProps {
 
 const TAB_ICON: Record<TournamentFilterKey, LucideIcon> = {
   all: Layers,
+  sponsored: Megaphone,
   top: TrendingUp,
   participated: Clock,
   history: History,
@@ -30,6 +31,7 @@ const TAB_ICON: Record<TournamentFilterKey, LucideIcon> = {
 
 const TAB_LABEL_KEY: Record<TournamentFilterKey, MessageIds> = {
   all: 'all',
+  sponsored: 'sponsored',
   top: 'top',
   participated: 'participated-filter',
   history: 'history',

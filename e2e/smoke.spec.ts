@@ -15,6 +15,8 @@ const ROUTES = [
   '/tickets',
   '/engines',
   '/jackpot',
+  '/partners',
+  '/partners/new',
   '/promo',
   '/wallet',
   '/lc',
