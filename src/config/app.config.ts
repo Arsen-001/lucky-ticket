@@ -147,6 +147,48 @@ export const appConfig = {
      */
     podiumSplitPercent: { first: 50, second: 30, third: 20 },
   },
+  partners: {
+    /**
+     * Master switch for the advertiser (sponsor) cabinet. When `false` it renders
+     * in "preview" mode: the dashboard + create form are browsable on demo data,
+     * but a "coming soon" banner sits on top and submitting surfaces a Coming Soon
+     * toast instead of creating. Flip to `true` to make it live.
+     */
+    enabled: true,
+    /** Page size for the advertiser's "my tournaments" list. */
+    listPageSize: 5,
+    /**
+     * "Create sponsored tournament" builder (DOCS §11.8) — bounds + the
+     * advertiser's cost. The advertiser pays a flat launch fee and funds the LC
+     * prize pool (priced into TON via `wallet.lcUsdRate` / `wallet.tonUsdRate`).
+     */
+    sponsoredTournament: {
+      /** Flat platform fee to launch a sponsored tournament, in TON. */
+      createFeeTon: 50,
+      /**
+       * Markup on the LC prize pool when funding a tournament — the advertiser
+       * pays this multiple of the pool's raw TON value (2 = coins cost 2× more).
+       */
+      prizeFundingMultiplier: 2,
+      /** Prize-pool bounds (in LC) the advertiser funds, stepped by `prizePoolStep`. */
+      prizePoolMin: 100_000,
+      prizePoolMax: 100_000_000,
+      prizePoolStep: 50_000,
+      defaultPrizePool: 500_000,
+      /** Team-size (seats) bounds. */
+      teamSizeMin: 8,
+      teamSizeMax: 512,
+      defaultTeamSize: 64,
+      /** Recommended image sizes (px) surfaced as hints on the branding fields. */
+      logoSize: { w: 256, h: 256 },
+      bannerSize: { w: 1200, h: 400 },
+    },
+    /** Name-length bounds for the tournament name / brand fields. */
+    form: {
+      titleMinLength: 3,
+      titleMaxLength: 60,
+    },
+  },
   account: {
     /**
      * Demo/mock master switch for the WHOLE app. When `true` every screen is

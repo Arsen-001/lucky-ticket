@@ -77,6 +77,13 @@ export const routes = {
       return (this.index + `/ready/${stakeId}`) as `/stakes/ready/${string}`;
     },
   },
+  partners: {
+    index: '/partners',
+    new: '/partners/new',
+    getById: function (id: string) {
+      return (this.index + `/${id}`) as `/partners/${string}`;
+    },
+  },
 } as const;
 
 /* eslint-disable */

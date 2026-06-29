@@ -1,0 +1,9 @@
+@import 'tailwindcss';
+
+/* Force the native date input's right-side picker icon to white on the dark theme. */
+@utility date-input-light {
+  &::-webkit-calendar-picker-indicator {
+    filter: brightness(0) invert(1);
+    cursor: pointer;
+  }
+}

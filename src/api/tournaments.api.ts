@@ -1,6 +1,8 @@
 import { api } from '@/api/index.api';
 import { rtkTags } from '@/constants/rtk-tags';
 import type {
+  CreateSponsoredTournamentPayload,
+  CreateSponsoredTournamentResponse,
   PersonalTournament,
   Tournament,
   TournamentPlacesResponse,
@@ -42,6 +44,19 @@ export const tournamentsApi = api.injectEndpoints({
       query: body => ({ url: 'tournaments/result-seen', method: 'POST', body }),
       invalidatesTags: [rtkTags.tournaments],
     }),
+    createSponsoredTournament: builder.mutation<
+      CreateSponsoredTournamentResponse,
+      CreateSponsoredTournamentPayload
+    >({
+      query: body => ({ url: 'tournaments/sponsored', method: 'POST', body }),
+      // New tournament enters the catalog; the advertiser balance is debited.
+      invalidatesTags: [rtkTags.tournaments, rtkTags.partnerStats],
+    }),
+    approveSponsoredTournament: builder.mutation<{ success: boolean }, { tournamentId: string }>({
+      query: body => ({ url: 'tournaments/approve', method: 'POST', body }),
+      // moderation → upcoming: the tournament becomes public.
+      invalidatesTags: [rtkTags.tournaments],
+    }),
   }),
 });
 
@@ -52,4 +67,6 @@ export const {
   useGetTournamentPlacesQuery,
   useJoinTournamentMutation,
   useMarkTournamentResultSeenMutation,
+  useCreateSponsoredTournamentMutation,
+  useApproveSponsoredTournamentMutation,
 } = tournamentsApi;

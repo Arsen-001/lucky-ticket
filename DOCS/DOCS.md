@@ -917,9 +917,10 @@ The popup is dismissible; once dismissed (`resultSeen: true`) it does not reappe
 
 ### 11.6 Tournament List & Filters
 
-The tournaments tab lists every Personal Tournament, filtered through 4 tabs (sliding pink-gradient indicator, identical to the Tasks category nav):
+The tournaments tab lists every Personal Tournament, filtered through 5 tabs (sliding pink-gradient indicator, identical to the Tasks category nav):
 
 - **All** — only `upcoming` tournaments. Finished tournaments are hidden from this view.
+- **Sponsored** — `upcoming` tournaments that carry a `sponsor` (§11.8). A quick way to view only sponsored tournaments; placed right after **All**.
 - **Top** — `upcoming` tournaments the user has not joined yet.
 - **Participated** — `upcoming` tournaments the user has joined (active participations).
 - **History** — `finished` tournaments the user participated in (read-only result entries).
@@ -930,22 +931,23 @@ Each tab shows a count badge of matching tournaments. Tournaments outside any ta
 
 The Tournament data model (`PersonalTournament`) is a superset of the public `Tournament` plus user-specific fields:
 
-| Field                      | Type                        | Notes                                                              |
-| :------------------------- | :-------------------------- | :----------------------------------------------------------------- |
-| `id`                       | `string`                    | UUID                                                               |
-| `name`                     | `string`                    | `<TimeOfDay> <Tier>` per 11.2.1                                    |
-| `startTime`                | `string` (ISO)              | When winners are determined                                        |
-| `teamSize`                 | `number`                    | Total seats in the tournament                                      |
-| `prizePool`                | `number`                    | LC distributed among the placement table                           |
-| `type`                     | `TournamentType`            | `bronze` / `silver` / `gold` / `platinum` / `diamond`              |
-| `shardType`                | `'speed'` / `'capacity'`    | Which chip type's shards are dropped (alternates per 11.4)         |
-| `status`                   | `'upcoming'` / `'finished'` | Lifecycle state per 11.5                                           |
-| `winners`                  | `TournamentWinner[]?`       | Top-3 with `userId` + `username` + `avatar`. Only when `finished`. |
-| `places`                   | `TournamentPlacesResponse?` | Percentage breakdown (1, 2, 3, 4–5, 6–10, …, 101–500)              |
-| `participated`             | `boolean`                   | User has joined                                                    |
-| `participatedTicketsCount` | `number?`                   | How many tickets the user has submitted                            |
-| `userResult`               | `TournamentUserResult?`     | `{ place?, lc, shards? }` — only when `finished` AND user joined   |
-| `resultSeen`               | `boolean?`                  | Whether the result popup has been dismissed                        |
+| Field                      | Type                                         | Notes                                                              |
+| :------------------------- | :------------------------------------------- | :----------------------------------------------------------------- |
+| `id`                       | `string`                                     | UUID                                                               |
+| `name`                     | `string`                                     | `<TimeOfDay> <Tier>` per 11.2.1                                    |
+| `startTime`                | `string` (ISO)                               | When winners are determined                                        |
+| `teamSize`                 | `number`                                     | Total seats in the tournament                                      |
+| `prizePool`                | `number`                                     | LC distributed among the placement table                           |
+| `type`                     | `TournamentType`                             | `bronze` / `silver` / `gold` / `platinum` / `diamond`              |
+| `shardType`                | `'speed'` / `'capacity'`                     | Which chip type's shards are dropped (alternates per 11.4)         |
+| `status`                   | `'upcoming'` / `'finished'` / `'moderation'` | Lifecycle per 11.5; `moderation` = sponsored, under review (§11.8) |
+| `winners`                  | `TournamentWinner[]?`                        | Top-3 with `userId` + `username` + `avatar`. Only when `finished`. |
+| `places`                   | `TournamentPlacesResponse?`                  | Percentage breakdown (1, 2, 3, 4–5, 6–10, …, 101–500)              |
+| `participated`             | `boolean`                                    | User has joined                                                    |
+| `participatedTicketsCount` | `number?`                                    | How many tickets the user has submitted                            |
+| `userResult`               | `TournamentUserResult?`                      | `{ place?, lc, shards? }` — only when `finished` AND user joined   |
+| `resultSeen`               | `boolean?`                                   | Whether the result popup has been dismissed                        |
+| `sponsor`                  | `TournamentSponsor?`                         | Advertiser branding for a sponsored tournament (§11.8)             |
 
 **Endpoints** (`src/api/tournaments.api.ts`):
 
@@ -959,6 +961,48 @@ The Tournament data model (`PersonalTournament`) is a superset of the public `To
 | `markTournamentResultSeen` | POST   | `tournaments/result-seen` | Submit `{ tournamentId }` so the popup doesn't auto-open again.            |
 
 All endpoints are wired through the `tournaments` cache tag (`rtk-tags.ts`). `joinTournament` additionally invalidates `me` because LC/ticket balance changes.
+
+### 11.8 Sponsored Tournaments
+
+A **sponsored tournament** is a normal, joinable Personal Tournament (tier, prize pool, places, Join flow — everything in 11.7) that additionally carries advertiser branding via an optional `sponsor` field. It is **not** a CPC ad campaign — players join and win LC exactly like any other tournament; the sponsor is attribution, not a paywall.
+
+> **Distinct from §21:** the §21 Partner Ad-Platform object (`PartnerTournament`) is a **click-through CPC ad** and never appears in this catalog. A sponsored tournament is the opposite — it lives **in** the catalog (§11.6) and is joined, not clicked.
+
+`TournamentSponsor`:
+
+| Field         | Type       | Notes                                                               |
+| :------------ | :--------- | :------------------------------------------------------------------ |
+| `name`        | `string`   | Advertiser brand name (shown via the card's `title`).               |
+| `logoUrl`     | `string?`  | Optional brand logo/icon — **replaces the tier medal** on the card. |
+| `bannerUrl`   | `string?`  | Optional custom banner — used as the **card background** when set.  |
+| `url`         | `string?`  | Optional sponsor destination link.                                  |
+| `createdByMe` | `boolean?` | True when the current (demo) user is the advertiser who created it. |
+
+**On the card:** a sponsored tournament gets a **wholly distinct skin** so it never reads as a game tournament — the tier gradient is replaced with an electric-purple→pink fill (`tournament-card-sponsored` / `engine-preview-card-sponsored`), and a **full-bleed header strip** (`TournamentSponsorHeader`) sits across the top carrying the `TournamentSponsorBadge` pill — **"Created by you"** when `createdByMe`, otherwise **"Sponsored"** (Megaphone icon) — plus the advertiser brand name.
+
+- **Background** (`TournamentSponsorBackground`, behind content at `z-0`): the chosen `bannerUrl` under a dark wash when set, otherwise the **default abstract spiderweb** ("паутина") woven from the top-right corner.
+- **Medal slot:** the `logoUrl` icon replaces the tier `Medal`; when no logo is provided it falls back to a Megaphone glyph.
+
+The same skin (background, header, logo-in-medal) is applied across the tournaments-tab card (`TournamentCard`), the home slider card (`HomeUpcomingTournamentCard`), and the **player detail hero** (`TournamentInfo`). The detail additionally shows a **"Visit {brand}"** CTA linking to `sponsor.url` when set.
+
+**Filtering:** the tournaments tab has a dedicated **Sponsored** filter tab (§11.6) to view only these.
+
+#### Creating one (partner portal)
+
+The partner "create" screen (`/partners/new`) is the sponsored-tournament builder (`NewSponsoredTournamentContent`):
+
+- **Fields:** name, tier (single-select medals), prize pool (LC), team size (seats), shard type (speed/capacity), start date + time (`:00`/`:30`); **branding** — brand name, logo URL, banner URL, sponsor link. The placement table is the standard one (11.7), not configurable.
+- **Cost** (single source of truth: `computeSponsoredTournamentCost`, debited from the advertiser's TON balance): a flat **launch fee** (`appConfig.partners.sponsoredTournament.createFeeTon`) plus **prize funding** — the LC pool priced into TON via `wallet.lcUsdRate` / `wallet.tonUsdRate`, then marked up by `prizeFundingMultiplier` (coins cost **2× more** when funding a pool). A live total + balance gate (402 → toast) keep the advertiser from overspending.
+- **API:** `createSponsoredTournament` → `POST tournaments/sponsored`, invalidates `tournaments` + `partnerStats`. The mock debits `mockDb.advertiser`, builds a `PersonalTournament` with `sponsor.createdByMe = true`, and unshifts it into the catalog. On success the creator lands back on the **cabinet** (`/partners`), where it shows under "My Tournaments" as **In Review**.
+
+**Moderation (mandatory).** A freshly-created sponsored tournament enters the new **`moderation`** status (`TournamentStatus`), not `upcoming`. While in moderation it is:
+
+- **hidden from the public** — excluded from the All / Top / Participated / History tabs and the home slider (all of which key off `upcoming`);
+- **visible only to its creator** — surfaced in the **Sponsored** tab when `sponsor.createdByMe`, rendered with an **"under review"** pill (`status moderation`), non-joinable and non-navigable.
+
+An admin approval flips it to `upcoming`. In the cabinet the creator approves it from the tournament detail (`/partners/[id]`, §21.3) via `approveSponsoredTournament` (the demo stand-in for admin review).
+
+The demo seeds eight `createdByMe` examples: **"Aurora Bet — Player Cup"** (gold, approved → `upcoming`), **"Neon Spins — Launch Cup"** (silver, still in `moderation`), and **six finished** runs (Winter Cup, Neon Spins Season 1, Aurora Launch Cup, Spin Palace Grand Final, Neon Spins Kickoff, Aurora Diamond Cup) powering the cabinet's **History** view (§21.2).
 
 ### Connections
 
@@ -1783,6 +1827,26 @@ Reached from a compact **"Jackpot" button at the top of Home** and from a **draw
 4. **Where the pot goes** — the 20% / 80% (50·30·20) split, visualised.
 5. **Recent jackpots** — a feed of past drops, headed by a lifetime **"paid out all-time"** total (`JackpotState.allTimePaidOut` — the sum of every jackpot ever dropped; a historical figure, not animated live). Each drop is then headlined by the total pot that dropped, with tier, tournament, time, and the 1st-place winner's face.
 
-## 21. Conclusion
+## 21. Partner Cabinet
+
+A B2B drawer surface (`/partners`) where **advertisers (casinos) create and manage sponsored tournaments** — real, joinable tournaments that carry the advertiser's branding. The full model, card, creation flow, and mandatory moderation live in **§11.8**. Money is denominated in **TON** (decimal), matching the wallet.
+
+> **History:** the cabinet originally ran a CPC **ad-platform** (`PartnerTournament`: click-through ads billed per unique click out of a frozen budget). That model was **removed** — the cabinet is now exclusively about sponsored tournaments. The only partner-specific server state left is the advertiser's TON **balance** (`getPartnerStats` → `{ balanceTon }`), debited when a tournament is created.
+
+### 21.1 Coming-Soon Gate
+
+The cabinet ships behind a master switch — `appConfig.partners.enabled`. When `false` it is a **preview**: the dashboard + builder render on demo data, a "Coming soon · preview" banner sits on top, and submitting the builder surfaces a Coming Soon toast instead of calling `createSponsoredTournament`. Flip to `true` to make it live.
+
+### 21.2 Dashboard
+
+1. **Stats** (4 cards): **Balance** (TON, `getPartnerStats`), **Created**, **Active** (`upcoming`), **In Review** (`moderation`). The counts derive client-side from the advertiser's own tournaments.
+2. **Create Tournament** button → the builder (`/partners/new`, §11.8).
+3. **My Tournaments** — `getTournaments` filtered to `sponsor.createdByMe` (so it includes ones still in moderation, which players can't see), split by an **Active / History** toggle: _Active_ = ongoing (`upcoming` + `moderation`), _History_ = `finished` runs. Compact cards (tier medal, name, prize pool, team size, start, status pill) link to the advertiser detail; each view is **paginated** (`appConfig.partners.listPageSize`).
+
+### 21.3 Tournament Detail (`/partners/[id]`)
+
+The advertiser-facing detail (`PartnerTournamentDetail`) shows one created tournament — branding, status, prize pool, team size, tier, start. When the tournament is in **moderation** it surfaces an **Approve** action (`approveSponsoredTournament` → `POST tournaments/approve`; the demo stand-in for admin review) that flips it `moderation → upcoming`, so it becomes public.
+
+## 22. Conclusion
 
 LuckyTicket365 is a modular, scalable product built around engagement, fairness, and real value creation. Each system reinforces the others, creating a cohesive ecosystem that rewards consistent participation and long-term loyalty. The Lucky Stars (LS) currency, fueled by both Telegram Stars and TON, bridges the internal economy with external value — giving users tangible real-world worth for their activity on the platform.

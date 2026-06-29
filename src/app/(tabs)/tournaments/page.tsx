@@ -22,6 +22,13 @@ const matchesTab = (tournament: PersonalTournament, filter: TournamentFilterType
   switch (filter) {
     case 'all':
       return tournament.status === 'upcoming';
+    case 'sponsored':
+      // Public sponsored tournaments + the creator's own ones still under review.
+      return (
+        !!tournament.sponsor &&
+        (tournament.status === 'upcoming' ||
+          (tournament.status === 'moderation' && !!tournament.sponsor.createdByMe))
+      );
     case 'top':
       return tournament.status === 'upcoming' && !tournament.participated;
     case 'participated':
@@ -54,6 +61,7 @@ export default function TournamentPage() {
   const tabCounts = useMemo(() => {
     const counts: Record<TournamentFilterType, number> = {
       all: 0,
+      sponsored: 0,
       top: 0,
       participated: 0,
       history: 0,
@@ -68,7 +76,7 @@ export default function TournamentPage() {
 
   const tabs = useMemo(
     () =>
-      (['all', 'top', 'participated', 'history'] as const).map(key => ({
+      (['all', 'sponsored', 'top', 'participated', 'history'] as const).map(key => ({
         key,
         count: tabCounts[key],
       })),
