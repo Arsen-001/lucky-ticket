@@ -24,6 +24,7 @@ import { NotEnoughStarsModal } from '@/components/pages/tabs/home/NotEnoughStars
 import { routes } from '@/constants/routes';
 import { useAppDispatch } from '@/lib/rtk/hooks';
 import { useAppTranslations } from '@/hooks/useAppTranslations';
+import { useMounted } from '@/hooks/useMounted';
 import { openDrawer } from '@/lib/rtk/features/layout.slice';
 import type { ClassNameProps } from '@/types/interfaces/component.interfcaes';
 import '@/styles/components/achievement.css';
@@ -36,6 +37,10 @@ export function Header({ className }: ClassNameProps) {
   const { data: notifications } = useGetNotificationsQuery();
   const { data: stakesData } = useGetStakesQuery();
   const [starsModalOpen, setStarsModalOpen] = useState(false);
+  // `me` is client-fetched (absent during SSR), so keep showing skeletons until
+  // mount — otherwise the server skeleton vs the hydrated content mismatch.
+  const mounted = useMounted();
+  const meLoading = !mounted || isLoading;
 
   const unreadCount = notifications?.filter(n => !n.read).length ?? 0;
   const claimableStakesCount =
@@ -76,7 +81,7 @@ export function Header({ className }: ClassNameProps) {
         className="relative z-1 flex h-[60px] w-[60px] flex-shrink-0 items-center justify-center rounded-full"
       >
         <Avatar shadow size={60} />
-        {me?.isVIP && (
+        {mounted && me?.isVIP && (
           <span
             aria-label={t('vip level', { level: me.vipLevel })}
             className="border-header text-background absolute -bottom-1 -right-1 flex h-[22px] min-w-[22px] items-center justify-center rounded-full border-2 px-1 text-[11px] font-black leading-none tabular-nums"
@@ -95,7 +100,7 @@ export function Header({ className }: ClassNameProps) {
       <div className="relative z-1 flex min-w-0 flex-1 flex-col gap-[10px]">
         <div className="flex items-center gap-1.5 overflow-hidden">
           <SkeletonSuspense
-            loading={isLoading}
+            loading={meLoading}
             skeleton={<Skeleton variant="line" className="h-6 w-32" />}
           >
             <span className={usernameClasses}>{me?.username}</span>
@@ -122,7 +127,7 @@ export function Header({ className }: ClassNameProps) {
 
         <div className="flex flex-wrap items-center gap-1.5">
           <SkeletonSuspense
-            loading={isLoading}
+            loading={meLoading}
             skeleton={<Skeleton variant="rounded-rectangle" className="h-7 w-16" />}
           >
             <HeaderStatPill
@@ -136,7 +141,7 @@ export function Header({ className }: ClassNameProps) {
             />
           </SkeletonSuspense>
           <SkeletonSuspense
-            loading={isLoading}
+            loading={meLoading}
             skeleton={<Skeleton variant="rounded-rectangle" className="h-7 w-18" />}
           >
             <HeaderStatPill
@@ -148,7 +153,7 @@ export function Header({ className }: ClassNameProps) {
             />
           </SkeletonSuspense>
           <SkeletonSuspense
-            loading={isLoading}
+            loading={meLoading}
             skeleton={<Skeleton variant="rounded-rectangle" className="h-7 w-14" />}
           >
             <HeaderStatPill

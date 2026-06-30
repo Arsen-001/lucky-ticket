@@ -1,8 +1,8 @@
 'use client';
-import { useEffect, useState } from 'react';
 import Image, { type ImageProps } from 'next/image';
 import { twMerge } from 'tailwind-merge';
 import { useGetMeQuery } from '@/api/me.api';
+import { useMounted } from '@/hooks/useMounted';
 import { Skeleton } from '@/components/shared/seleketons/Skeleton';
 import '@/styles/components/avatar.css';
 
@@ -17,8 +17,7 @@ export function Avatar({ className, size = 54, shadow = false, ...rest }: Avatar
   // render (no data → skeleton) and the first client render — a hydration
   // mismatch. Gate on mount so both render the skeleton first, then swap in the
   // real avatar after hydration.
-  const [mounted, setMounted] = useState(false);
-  useEffect(() => setMounted(true), []);
+  const mounted = useMounted();
 
   const containerClassNames = twMerge(
     'flex-center rounded-full aspect-square object-cover object-center p-0.5',

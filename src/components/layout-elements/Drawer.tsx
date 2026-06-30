@@ -45,6 +45,7 @@ import { SkeletonSuspense } from '@/components/shared/seleketons/SkeletonSuspens
 import { type Route, routes } from '@/constants/routes';
 import { useAppTranslations } from '@/hooks/useAppTranslations';
 import { useLocation } from '@/hooks/useLocation';
+import { useMounted } from '@/hooks/useMounted';
 import { closeDrawer, selectDrawerOpen } from '@/lib/rtk/features/layout.slice';
 import { useAppDispatch, useAppSelector } from '@/lib/rtk/hooks';
 import '@/styles/components/drawer.css';
@@ -68,6 +69,11 @@ export function Drawer() {
   const { data: notifications } = useGetNotificationsQuery();
   const { data: stakesData } = useGetStakesQuery();
   const location = useLocation();
+  // `me` is client-fetched (absent during SSR); the drawer is always in the DOM
+  // (just inert when closed), so gate its user content on mount to avoid a
+  // hydration mismatch between the server skeleton and the hydrated profile.
+  const mounted = useMounted();
+  const meLoading = !mounted || isLoading;
   const activePath = location.getPathPart(1);
 
   const unreadCount = notifications?.filter(n => !n.read).length ?? 0;
@@ -327,7 +333,7 @@ export function Drawer() {
           >
             <div className="relative h-14 w-14 flex-shrink-0">
               <Avatar shadow size={56} />
-              {me?.isVIP && (
+              {mounted && me?.isVIP && (
                 <span
                   className="bg-pink-gradient border-background-overlay absolute -bottom-0.5 -right-0.5 flex h-[18px] w-[18px] items-center justify-center rounded-full border-2 text-[9px] font-extrabold text-white"
                   aria-label={t('vip level', { level: me.vipLevel })}
@@ -338,7 +344,7 @@ export function Drawer() {
             </div>
             <div className="flex min-w-0 flex-1 flex-col gap-0.5">
               <SkeletonSuspense
-                loading={isLoading}
+                loading={meLoading}
                 skeleton={<Skeleton variant="line" className="h-4 w-28" />}
               >
                 <span className="truncate text-sm font-bold text-white">{me?.username}</span>
