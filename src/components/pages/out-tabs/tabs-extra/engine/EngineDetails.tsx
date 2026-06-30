@@ -150,7 +150,6 @@ export function EngineDetails({ id }: EngineDetailsProps) {
     isLuckyPlayer: isLp,
     isVip,
   });
-  const capacity = engineCapacity(engine, { capacityChip, capacityBooster });
   // Productivity is "before time-limited booster" but *with* permanent boosts
   // (engine/speed levels, chip, status) — so status must be included here too.
   const baseCycleSeconds = effectiveCycleSeconds(engine, {
@@ -167,7 +166,8 @@ export function EngineDetails({ id }: EngineDetailsProps) {
 
   const remaining = Math.max(0, cycle - elapsedSeconds);
   const instantClaimCost = Math.max(1, Math.ceil(remaining / 3600));
-  const lifetimeProduced = engineLevel * (capacity + 5) * 17;
+  // Real running total of tickets this engine has ever claimed (backend counter).
+  const lifetimeProduced = engine.lifetimeProduced ?? 0;
   const currentStars = me?.telegramStars ?? 0;
 
   const handleTopUpStars = (amount: number) => {

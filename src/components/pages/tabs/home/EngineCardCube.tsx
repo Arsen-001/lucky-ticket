@@ -73,19 +73,14 @@ export function EngineCardCube(props: EngineCardCubeProps) {
     b => b.activeOnEngineId === engine.id && b.type === 'capacity'
   );
 
-  const capacity = engineCapacity(engine, {
-    capacityChip: equippedCapacityChip,
-    capacityBooster: activeCapacityBooster,
-  });
-
   // Factory "out of the box" state — the cube's stats at engineLevel=1,
   // speedLevel=0, capacityLevel=0, no chips, no boosters. Stays constant for
   // a given tier no matter how the engine is upgraded.
   const baseCycleSeconds = engine.cycleSeconds;
   const baseCapacity = 1;
 
-  // Mock lifetime-style stats derived from current engine fields.
-  const lifetimeProduced = engineLevel * (capacity + 5) * 17;
+  // Real running total of tickets this engine has ever claimed (backend counter).
+  const lifetimeProduced = engine.lifetimeProduced ?? 0;
 
   // Status (VIP > LP) grants a flat additive engine speed boost. VIP
   // supersedes LP — higher tier wins, never stacks (DOCS §7.3).

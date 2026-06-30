@@ -31,6 +31,8 @@ export interface TicketEngine {
   speedBoostExpiresAt?: string;
   capacityUpgradeMultiplier?: number;
   instantClaimStarsCost: number;
+  /** Total tickets this engine has ever claimed (running backend counter). */
+  lifetimeProduced?: number;
   engineLevel?: number;
   speedLevel?: number;
   capacityLevel?: number;
