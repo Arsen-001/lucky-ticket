@@ -35,8 +35,6 @@ export function PartnersContainer() {
 
   // The advertiser's own tournaments — the ones they created (DOCS §11.8).
   const myTournaments = (allTournaments ?? []).filter(tour => tour.sponsor?.createdByMe);
-  const activeCount = myTournaments.filter(tour => tour.status === 'upcoming').length;
-  const moderationCount = myTournaments.filter(tour => tour.status === 'moderation').length;
 
   // Active = still ongoing (upcoming + in review); History = finished runs.
   const activeList = myTournaments.filter(tour => tour.status !== 'finished');
@@ -71,20 +69,20 @@ export function PartnersContainer() {
         <PartnerStatCard
           icon={<Trophy className="h-4 w-4" />}
           label={t('created')}
-          value={myTournaments.length}
-          loading={toursLoading}
+          value={stats?.created ?? 0}
+          loading={statsLoading}
         />
         <PartnerStatCard
           icon={<Radio className="h-4 w-4" />}
           label={t('active')}
-          value={activeCount}
-          loading={toursLoading}
+          value={stats?.active ?? 0}
+          loading={statsLoading}
         />
         <PartnerStatCard
           icon={<ShieldCheck className="h-4 w-4" />}
           label={t('status moderation')}
-          value={moderationCount}
-          loading={toursLoading}
+          value={stats?.inReview ?? 0}
+          loading={statsLoading}
         />
       </div>
 

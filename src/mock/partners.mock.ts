@@ -1,4 +1,5 @@
 import { mockDb } from '@/mock/backend/db';
+import { tournaments } from '@/mock/tournaments.mock';
 import type { PartnerStats } from '@/types/interfaces/partners.interfaces';
 
 /**
@@ -10,5 +11,13 @@ import type { PartnerStats } from '@/types/interfaces/partners.interfaces';
 const advertiser = mockDb.advertiser;
 
 export const partnersMock = {
-  'GET partners/stats': (): PartnerStats => ({ balanceTon: advertiser.balanceTon }),
+  'GET partners/stats': (): PartnerStats => {
+    const mine = tournaments.filter(tour => tour.sponsor?.createdByMe);
+    return {
+      balanceTon: advertiser.balanceTon,
+      created: mine.length,
+      active: mine.filter(tour => tour.status === 'upcoming').length,
+      inReview: mine.filter(tour => tour.status === 'moderation').length,
+    };
+  },
 };

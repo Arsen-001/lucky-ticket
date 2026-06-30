@@ -13,4 +13,8 @@ export interface Advertiser {
 export interface PartnerStats {
   /** Advertiser's current spendable balance, in TON. */
   balanceTon: number;
+  /** Authoritative DB counts of the advertiser's tournaments. */
+  created: number;
+  active: number;
+  inReview: number;
 }
