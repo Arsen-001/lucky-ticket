@@ -1312,5 +1312,7 @@
   "partners preview title": "Coming soon · preview",
   "partners preview subtitle": "Browse the partner portal on demo data. Creating tournaments goes live soon.",
   "partners coming soon toast": "Creating tournaments is coming soon.",
-  "partners preview submit hint": "Preview only — creating goes live soon."
+  "partners preview submit hint": "Preview only — creating goes live soon.",
+  "scroll left": "Scroll left",
+  "scroll right": "Scroll right"
 }

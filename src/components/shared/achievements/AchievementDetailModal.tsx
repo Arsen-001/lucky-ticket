@@ -177,6 +177,7 @@ interface ChainLadderProps {
 }
 
 function ChainLadder({ achievement }: ChainLadderProps) {
+  const t = useAppTranslations();
   if (!achievement.series) return null;
   const total = achievement.series.total;
   const currentPosition = achievement.series.position;
@@ -213,7 +214,7 @@ function ChainLadder({ achievement }: ChainLadderProps) {
             <div key={i} className="flex flex-1 items-center gap-1">
               {isComingSoon ? (
                 <span
-                  aria-label="Coming soon"
+                  aria-label={t('coming soon')}
                   className="flex h-3 w-3 flex-shrink-0 items-center justify-center rounded-full border-2 border-dashed border-white/30 text-[8px] font-extrabold text-white/45"
                 >
                   ?
