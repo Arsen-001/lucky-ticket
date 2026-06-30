@@ -1,4 +1,16 @@
 import { GlobalConstants } from '@/constants/global.constants';
+import { appConfig } from '@/config/app.config';
+
+/**
+ * Net LC a placement actually pays out: the prize pool minus the jackpot skim
+ * (DOCS §20), times the placement %, floored — mirrors the backend `finish()`
+ * distribution (the base prize, before any per-winner VIP/LP status boost).
+ */
+export const placementPrizeLc = (prizePool: number, pct: number): number => {
+  if (!prizePool) return 0;
+  const skim = Math.floor((prizePool * appConfig.jackpot.accrualPercent) / 100);
+  return Math.floor(((prizePool - skim) * pct) / 100);
+};
 
 /**
  * Returns the effective LC-reward boost % from status. VIP supersedes LP —

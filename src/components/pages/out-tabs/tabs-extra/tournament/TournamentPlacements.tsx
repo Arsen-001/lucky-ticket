@@ -5,6 +5,7 @@ import { twMerge } from 'tailwind-merge';
 import { useGetTournamentByIdQuery, useGetTournamentPlacesQuery } from '@/api/tournaments.api';
 import { useAppTranslations } from '@/hooks/useAppTranslations';
 import { formatCompact } from '@/utils/global/number.utils';
+import { placementPrizeLc } from '@/utils/global/tournament.utils';
 import {
   LeaderboardPodium,
   type PodiumPlayer,
@@ -115,7 +116,7 @@ export function TournamentPlacements({ id }: TournamentPlacementsProps) {
 
     return ([1, 2, 3] as const).map(rank => {
       const pct = top3Percentages.get(rank) ?? 0;
-      const lc = prizePool ? Math.round((prizePool * pct) / 100) : 0;
+      const lc = placementPrizeLc(prizePool ?? 0, pct);
       const winner = tournament?.winners?.find(w => w.rank === rank);
       const shards = SHARDS_BY_RANK[rank];
       return {
@@ -173,7 +174,7 @@ export function TournamentPlacements({ id }: TournamentPlacementsProps) {
               ))
             : restPlaces.map((item, index) => {
                 const displayPlace = item.to ? `${item.from}–${item.to}` : String(item.from);
-                const lc = prizePool ? Math.round((prizePool * item.percentage) / 100) : undefined;
+                const lc = prizePool ? placementPrizeLc(prizePool, item.percentage) : undefined;
                 const isMe =
                   userPlace !== undefined &&
                   userPlace >= item.from &&
