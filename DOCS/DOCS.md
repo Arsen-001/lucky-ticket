@@ -120,7 +120,7 @@ AP is earned from a data-driven **source registry** — every meaningful action 
 | Weekly task               | 2 / 3 / 4 / 5 / 6                     | by task tier (Bronze→Diamond), ~3/week                                                         |
 | One-time task             | varies                                | once per task                                                                                  |
 | Verify email              | 20                                    | one-time                                                                                       |
-| Claim                     | 1 / 2 / 3 / 4 / 5                     | per claim, by tier (Bronze→Diamond), 5×/day                                                    |
+| Claim                     | 1 / 2 / 4 / 8 / 16                     | per claim, by tier (Bronze→Diamond), 5×/day                                                    |
 | Watch a video             | 2                                     | 10×/day default · 20×/day with LP · 40×/day with VIP (daily cap = limit × 2 AP)                |
 | Send a ticket to a friend | 1                                     | 3×/day                                                                                         |
 | Like a profile            | 1                                     | 3×/day                                                                                         |
