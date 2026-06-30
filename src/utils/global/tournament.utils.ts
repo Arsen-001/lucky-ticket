@@ -10,20 +10,6 @@ export const statusTournamentLcBoostPct = (isLp: boolean, isVip: boolean): numbe
   return 0;
 };
 
-/**
- * Applies the status (VIP > LP) LC-reward boost on top of a tournament's base
- * payout. Returns the boosted amount when status is active, otherwise the base.
- */
-export const applyStatusTournamentLcBoost = (
-  baseLc: number,
-  isLp: boolean,
-  isVip: boolean
-): number => {
-  const pct = statusTournamentLcBoostPct(isLp, isVip);
-  if (pct === 0) return baseLc;
-  return Math.round(baseLc * (1 + pct / 100));
-};
-
 const statusTournamentJoinApBoostPct = (isLp: boolean, isVip: boolean): number => {
   if (isVip) return GlobalConstants.vipTournamentJoinApBoostPct;
   if (isLp) return GlobalConstants.luckyPlayerTournamentJoinApBoostPct;

@@ -12,10 +12,7 @@ import { useAppTranslations } from '@/hooks/useAppTranslations';
 import type { InventoryChipType } from '@/types/interfaces/inventory.interfaces';
 import type { TournamentUserResult } from '@/types/interfaces/tournaments.interfaces';
 import type { TournamentType } from '@/types/types/tournaments.types';
-import {
-  applyStatusTournamentLcBoost,
-  statusTournamentLcBoostPct,
-} from '@/utils/global/tournament.utils';
+import { statusTournamentLcBoostPct } from '@/utils/global/tournament.utils';
 import '@/styles/components/tournament-card.css';
 
 interface TournamentResultModalProps {
@@ -111,13 +108,13 @@ export function TournamentResultModal({
   const place = result?.place;
   const isLp = me?.isLuckyPlayer ?? false;
   const isVip = me?.isVIP ?? false;
-  // `result.lc` is the BASE placement reward; the status (VIP > LP) boost is
-  // applied here for display via the same util a backend credit path would use,
-  // so the % shown always matches the applied bonus (DOCS §7.3).
-  const baseLc = result?.lc ?? 0;
-  const lc = applyStatusTournamentLcBoost(baseLc, isLp, isVip);
-  const statusBonusLc = lc - baseLc;
+  // `result.lc` is the actual credited amount — the backend already applied the
+  // VIP/LP reward boost at finish-time (DOCS §7.3). Show it as-is; split out the
+  // status bonus only to label the badge below.
+  const lc = result?.lc ?? 0;
   const statusBoostPct = statusTournamentLcBoostPct(isLp, isVip);
+  const baseLc = statusBoostPct > 0 ? Math.round(lc / (1 + statusBoostPct / 100)) : lc;
+  const statusBonusLc = lc - baseLc;
   const statusLabelKey = isVip ? 'vip' : 'lucky player';
   const shards = result?.shards ?? 0;
 
