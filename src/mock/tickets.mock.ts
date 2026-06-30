@@ -42,6 +42,7 @@ const buildEngines = (tier: 'bronze' | 'silver' | 'gold', count: number): Ticket
       pendingCount: claimable ? 1 + (index % 3) : 0,
       instantClaimStarsCost: preset.starsCost,
       lifetimeProduced: engineLevel * 1900 + (speedLevel + capacityLevel) * 70 + index * 130,
+      createdAt: getPastIso(86_400 * (20 + index * 5)),
       engineLevel,
       speedLevel,
       capacityLevel,

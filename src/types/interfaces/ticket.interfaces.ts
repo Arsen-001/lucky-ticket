@@ -33,6 +33,8 @@ export interface TicketEngine {
   instantClaimStarsCost: number;
   /** Total tickets this engine has ever claimed (running backend counter). */
   lifetimeProduced?: number;
+  /** When the engine was first acquired (stable; unlike cycleStartedAt). */
+  createdAt?: string;
   engineLevel?: number;
   speedLevel?: number;
   capacityLevel?: number;

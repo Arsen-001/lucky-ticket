@@ -264,7 +264,7 @@ export function EngineCardCube(props: EngineCardCubeProps) {
             ticketsPerHour={ticketsPerHour}
             engineLevel={engineLevel}
             ownerName={me?.username}
-            createdAt={engine.cycleStartedAt}
+            createdAt={engine.createdAt}
             accent={tierAccent}
           />
         </div>

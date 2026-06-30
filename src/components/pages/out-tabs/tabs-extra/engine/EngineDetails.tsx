@@ -242,7 +242,7 @@ export function EngineDetails({ id }: EngineDetailsProps) {
           ticketsPerHour={ticketsPerHour}
           engineLevel={engineLevel}
           ownerName={me?.username}
-          createdAt={engine.cycleStartedAt}
+          createdAt={engine.createdAt}
           accent={tierAccent}
         />
       </CubeFaceCard>
