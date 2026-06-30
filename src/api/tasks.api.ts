@@ -50,11 +50,19 @@ export const tasksApi = api.injectEndpoints({
     }),
     claimTask: builder.mutation<ClaimTaskResponse, ClaimTaskRequest>({
       query: body => ({ url: 'tasks/claim', method: 'POST', body }),
-      invalidatesTags: [rtkTags.tasks, rtkTags.wallet, rtkTags.me],
+      // Claiming writes a TASK_REWARD LC-ledger row → refresh the LC history too.
+      invalidatesTags: [
+        rtkTags.tasks,
+        rtkTags.wallet,
+        rtkTags.me,
+        rtkTags.tickets,
+        rtkTags.lc,
+        rtkTags.lcTransactions,
+      ],
     }),
     watchAd: builder.mutation<{ adId: string; rewards: TaskReward[] }, { adId: string }>({
       query: body => ({ url: 'tasks/ads/watch', method: 'POST', body }),
-      invalidatesTags: [rtkTags.tasks, rtkTags.wallet],
+      invalidatesTags: [rtkTags.tasks, rtkTags.me, rtkTags.lc],
     }),
   }),
 });

@@ -33,7 +33,8 @@ export const profileApi = api.injectEndpoints({
 
     sendTicket: builder.mutation<SendTicketResponse, SendTicketRequest>({
       query: body => ({ url: 'profile/send-ticket', method: 'POST', body }),
-      invalidatesTags: [{ type: rtkTags.profileById, id: 'me' }, rtkTags.tickets],
+      // Sending awards the sender +AP (capped) — refresh `me` so the header AP updates.
+      invalidatesTags: [{ type: rtkTags.profileById, id: 'me' }, rtkTags.tickets, rtkTags.me],
     }),
 
     pinAchievement: builder.mutation<ProfileResponse, PinAchievementRequest>({
@@ -48,7 +49,8 @@ export const profileApi = api.injectEndpoints({
 
     buyShowcaseSlot: builder.mutation<BuySlotResponse, BuyShowcaseSlotRequest>({
       query: body => ({ url: 'profile/showcase/buy-slot', method: 'POST', body }),
-      invalidatesTags: [rtkTags.profile],
+      // Buying a slot debits Lucky Stars — refresh `me` so the header stars update.
+      invalidatesTags: [rtkTags.profile, rtkTags.me],
     }),
 
     pinCollage: builder.mutation<ProfileResponse, PinAchievementRequest>({

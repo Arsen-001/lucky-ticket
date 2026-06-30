@@ -1,4 +1,10 @@
 {
+  "no achievements yet": "Noch keine Erfolge",
+  "collage": "Collage",
+  "add to collage": "Zur Collage hinzufügen",
+  "invitation sent": "Einladung gesendet",
+  "no active tournaments": "Keine aktiven Turniere",
+  "select tournament": "Turnier auswählen",
   "+ bonuses from level {level} draw": "+ Boni aus deiner Level-{level}-Ziehung",
   "+{amount} {coin} back": "+{amount} {coin} zurück",
   "+{amount} {coin} bonus": "+{amount} {coin} Bonus",
@@ -389,6 +395,7 @@
   "instant claim": "Sofort einlösen",
   "instant claim with stars": "Sofort mit Telegram Stars einlösen",
   "insufficient balance": "Guthaben zu niedrig – zum Erstellen aufladen.",
+  "invalid credentials": "Ungültige E-Mail oder Passwort",
   "invalid email": "Ungültige E-Mail",
   "invalid phone number": "Ungültige Telefonnummer",
   "invalid ton address": "Ungültige TON-Adresse",

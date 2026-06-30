@@ -78,8 +78,12 @@ export function InventoryContainer() {
     if (animatingChipId) return;
     if (shardsAvailableFor(chip) < chip.shardsForNextLevel) return;
     setAnimatingChipId(chip.id);
-    window.setTimeout(() => {
-      levelUpChipMutation({ chipId: chip.id });
+    window.setTimeout(async () => {
+      try {
+        await levelUpChipMutation({ chipId: chip.id }).unwrap();
+      } catch {
+        toast.error(t('action failed'));
+      }
       setAnimatingChipId(undefined);
     }, 700);
   };

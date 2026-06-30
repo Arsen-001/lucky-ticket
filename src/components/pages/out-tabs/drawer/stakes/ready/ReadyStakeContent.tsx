@@ -13,6 +13,7 @@ import { LcLabel } from '@/components/shared/icons/LcLabel';
 import { GoldenText } from '@/components/shared/typography/GoldenText';
 import { routes } from '@/constants/routes';
 import { useAppTranslations } from '@/hooks/useAppTranslations';
+import { useToast } from '@/hooks/useToast';
 import { formatCompact } from '@/utils/global/number.utils';
 import {
   computeStakeAprPercent,
@@ -57,6 +58,7 @@ export interface ReadyStakeContentProps {
 
 export function ReadyStakeContent({ stakeId }: ReadyStakeContentProps) {
   const t = useAppTranslations();
+  const toast = useToast();
   const router = useRouter();
   const { data: stakes, isLoading, isError, refetch } = useGetStakesQuery();
   const { data: me } = useGetMeQuery();
@@ -128,6 +130,9 @@ export function ReadyStakeContent({ stakeId }: ReadyStakeContentProps) {
     const result = await claimStake({ stakeId: stake.id });
     if ('data' in result && result.data?.success) {
       setClaimedSnapshot({ amount: totalLC, stars: completionStars, ap: bonusAp });
+    } else {
+      // e.g. "Stake has not matured yet" (400) — never fail silently.
+      toast.error(t('action failed'));
     }
   };
 

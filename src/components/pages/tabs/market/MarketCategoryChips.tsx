@@ -1,17 +1,25 @@
 'use client';
 
 import { useEffect, useLayoutEffect, useRef, useState } from 'react';
-import { CircleStar, Cog, Gem, Palette, Sparkles } from 'lucide-react';
+import { CircleStar, Cog, Gem, Palette, Sparkles, Ticket } from 'lucide-react';
 import type { LucideIcon } from 'lucide-react';
 import { twMerge } from 'tailwind-merge';
 import { useAppTranslations } from '@/hooks/useAppTranslations';
 import type { MessageIds } from '@/types/types/i18n.types';
 
-export type MarketCategoryKey = 'all' | 'engines' | 'shards' | 'boosters' | 'cosmetics' | 'status';
+export type MarketCategoryKey =
+  | 'all'
+  | 'engines'
+  | 'tickets'
+  | 'shards'
+  | 'boosters'
+  | 'cosmetics'
+  | 'status';
 
 export const MARKET_CATEGORY_ORDER: MarketCategoryKey[] = [
   'all',
   'status',
+  'tickets',
   'boosters',
   'shards',
   'engines',
@@ -21,6 +29,7 @@ export const MARKET_CATEGORY_ORDER: MarketCategoryKey[] = [
 const CATEGORY_ICON: Record<MarketCategoryKey, LucideIcon> = {
   all: Sparkles,
   engines: Cog,
+  tickets: Ticket,
   shards: Gem,
   boosters: Sparkles,
   cosmetics: Palette,
@@ -30,6 +39,7 @@ const CATEGORY_ICON: Record<MarketCategoryKey, LucideIcon> = {
 const CATEGORY_LABEL: Record<MarketCategoryKey, MessageIds> = {
   all: 'all',
   engines: 'engines',
+  tickets: 'tickets',
   shards: 'shards title',
   boosters: 'boosters',
   cosmetics: 'cosmetics',

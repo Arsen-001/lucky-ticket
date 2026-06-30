@@ -10,6 +10,7 @@ import { LcLabel } from '@/components/shared/icons/LcLabel';
 import { icons } from '@/constants/icons';
 import { routes } from '@/constants/routes';
 import { useAppTranslations } from '@/hooks/useAppTranslations';
+import { useToast } from '@/hooks/useToast';
 import { useCountDown } from '@/hooks/useCountDown';
 import { formatCompact } from '@/utils/global/number.utils';
 import {
@@ -32,6 +33,7 @@ export interface ProgressStakeContentProps {
 
 export function ProgressStakeContent({ stakeId }: ProgressStakeContentProps) {
   const t = useAppTranslations();
+  const toast = useToast();
   const router = useRouter();
   const { data: stakes, isLoading, isError, refetch } = useGetStakesQuery();
   const { data: me } = useGetMeQuery();
@@ -72,6 +74,9 @@ export function ProgressStakeContent({ stakeId }: ProgressStakeContentProps) {
     const result = await cancelStake({ stakeId: stake.id });
     if ('data' in result && result.data?.success) {
       router.replace(routes.stakes.index);
+    } else {
+      // e.g. "Not enough Lucky Stars for the cancel fee" (400) — surface it.
+      toast.error(t('action failed'));
     }
   };
 

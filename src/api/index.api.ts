@@ -1,7 +1,15 @@
-import { createApi } from '@reduxjs/toolkit/query/react';
+import { createApi, fetchBaseQuery } from '@reduxjs/toolkit/query/react';
 import { rtkTags } from '@/constants/rtk-tags';
 import type { BaseQueryFn, FetchArgs, FetchBaseQueryError } from '@reduxjs/toolkit/query';
 import { type MockData, mockData } from '@/mock/index.mock';
+import {
+  getAccessTokenCk,
+  getRefreshTokenCk,
+  removeAccessTokenCk,
+  removeRefreshTokenCk,
+  setAccessTokenCk,
+  setRefreshTokenCk,
+} from '@/services/cookie.service';
 
 /**
  * A robust mock base query that simulates network latency and resolves data from a mock map.
@@ -92,9 +100,54 @@ export const mockBaseQuery =
     }
   };
 
+/**
+ * Real backend base query — used when `NEXT_PUBLIC_API_URL` is set. Injects the
+ * JWT bearer from cookies and transparently refreshes it once on a 401.
+ */
+const API_URL = process.env.NEXT_PUBLIC_API_URL;
+
+const rawBaseQuery = fetchBaseQuery({
+  baseUrl: API_URL ? `${API_URL.replace(/\/$/, '')}/` : '/',
+  prepareHeaders: headers => {
+    const token = getAccessTokenCk();
+    if (token) headers.set('Authorization', `Bearer ${token}`);
+    return headers;
+  },
+});
+
+const realBaseQuery: BaseQueryFn<string | FetchArgs, unknown, FetchBaseQueryError> = async (
+  args,
+  store,
+  extra
+) => {
+  let result = await rawBaseQuery(args, store, extra);
+
+  if (result.error?.status === 401) {
+    const refreshToken = getRefreshTokenCk();
+    if (refreshToken) {
+      const refresh = await rawBaseQuery(
+        { url: 'auth/refresh', method: 'POST', body: { refreshToken } },
+        store,
+        extra
+      );
+      const tokens = refresh.data as { accessToken?: string; refreshToken?: string } | undefined;
+      if (tokens?.accessToken) {
+        setAccessTokenCk(tokens.accessToken);
+        if (tokens.refreshToken) setRefreshTokenCk(tokens.refreshToken);
+        result = await rawBaseQuery(args, store, extra); // retry original
+      } else {
+        removeAccessTokenCk();
+        removeRefreshTokenCk();
+      }
+    }
+  }
+
+  return result;
+};
+
 export const api = createApi({
   tagTypes: Object.values(rtkTags),
   reducerPath: 'api',
-  baseQuery: mockBaseQuery<MockData>(mockData),
+  baseQuery: API_URL ? realBaseQuery : mockBaseQuery<MockData>(mockData),
   endpoints: () => ({}),
 });

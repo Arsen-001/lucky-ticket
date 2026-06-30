@@ -7,11 +7,12 @@ import { Input } from '@/components/shared/form-elements/inputs/Input';
 import { Button } from '@/components/shared/buttons/Button';
 import { UserPen } from 'lucide-react';
 import { useGetMeQuery, useUpdateMeMutation } from '@/api/me.api';
+import { QueryErrorState } from '@/components/shared/error/QueryErrorState';
 
 export default function UsernamePage() {
   const t = useAppTranslations();
   const toast = useToast();
-  const { data: me, isLoading: isMeLoading } = useGetMeQuery();
+  const { data: me, isLoading: isMeLoading, isError, refetch } = useGetMeQuery();
   const [updateMe, { isLoading: isUpdating }] = useUpdateMeMutation();
   const [username, setUsername] = useState('');
 
@@ -32,6 +33,10 @@ export default function UsernamePage() {
   };
 
   const isLoading = isMeLoading || isUpdating;
+
+  if (isError && !me) {
+    return <QueryErrorState onRetry={() => refetch()} />;
+  }
 
   return (
     <div className="flex flex-col gap-6">

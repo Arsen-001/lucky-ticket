@@ -15,10 +15,14 @@ import { getLoginSchema } from '@/lib/yup/auth.schemes';
 import type { LoginFormValues } from '@/types/interfaces/auth.interfaces';
 import { useRouter } from 'next/navigation';
 import { routes } from '@/constants/routes';
+import { useLoginMutation } from '@/api/auth.api';
+import { useToast } from '@/hooks/useToast';
 
 export function LoginForm() {
   const t = useAppTranslations();
   const router = useRouter();
+  const toast = useToast();
+  const [login, { isLoading }] = useLoginMutation();
 
   const loginSchema = getLoginSchema(t);
 
@@ -27,24 +31,23 @@ export function LoginForm() {
     mode: 'onBlur',
   });
 
-  const {
-    formState: { isSubmitting },
-    clearErrors,
-  } = form;
+  const { clearErrors } = form;
 
   async function onSubmit(values: LoginFormValues) {
     clearErrors();
-    console.log('Submitting form...', values);
-    await new Promise(resolve => setTimeout(resolve, 2000));
-    router.push(routes.home);
-    console.log('Form submitted successfully:', values);
+    try {
+      await login({ email: values.email, password: values.password }).unwrap();
+      router.push(routes.home);
+    } catch {
+      toast.error(t('invalid credentials'));
+    }
   }
 
   return (
     <Form form={form} onSubmit={onSubmit}>
       <div className="flex flex-col w-full">
         <FormItem name="email">
-          <Input prefix={<Mail />} placeholder={t('email or username')} autoComplete="username" />
+          <Input prefix={<Mail />} placeholder={t('email')} autoComplete="email" />
         </FormItem>
 
         <FormItem name="password">
@@ -55,7 +58,7 @@ export function LoginForm() {
           />
         </FormItem>
 
-        <Button type="submit" loading={isSubmitting} aria-busy={isSubmitting}>
+        <Button type="submit" loading={isLoading} aria-busy={isLoading}>
           {t('sign in')}
         </Button>
       </div>

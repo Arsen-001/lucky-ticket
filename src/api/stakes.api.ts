@@ -10,15 +10,26 @@ export const stakesApi = api.injectEndpoints({
     }),
     startStake: builder.mutation<{ success: boolean }, StartStakeBody>({
       query: body => ({ url: 'stakes/start', method: 'POST', body }),
-      invalidatesTags: [rtkTags.stakes, rtkTags.me],
+      // Deposits LC + a star fee → refresh stakes, balances (me) and the wallet
+      // (stars balance) so every surface that shows them updates immediately.
+      invalidatesTags: [rtkTags.stakes, rtkTags.me, rtkTags.lc, rtkTags.wallet],
     }),
     cancelStake: builder.mutation<{ success: boolean }, StakeIdBody>({
       query: body => ({ url: 'stakes/cancel', method: 'POST', body }),
-      invalidatesTags: [rtkTags.stakes, rtkTags.me],
+      // Charges a star cancel fee + returns the deposit → same balance surfaces.
+      invalidatesTags: [rtkTags.stakes, rtkTags.me, rtkTags.lc, rtkTags.wallet],
     }),
     claimStake: builder.mutation<{ success: boolean }, StakeIdBody>({
       query: body => ({ url: 'stakes/claim', method: 'POST', body }),
-      invalidatesTags: [rtkTags.stakes, rtkTags.me],
+      // Credits LC yield + writes a STAKE_REWARD LC-ledger row → also refresh the
+      // LC transaction history and the wallet.
+      invalidatesTags: [
+        rtkTags.stakes,
+        rtkTags.me,
+        rtkTags.lc,
+        rtkTags.lcTransactions,
+        rtkTags.wallet,
+      ],
     }),
   }),
 });

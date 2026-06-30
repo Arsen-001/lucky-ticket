@@ -17,6 +17,8 @@ import '@/styles/components/tournament-card.css';
 interface TournamentBetModalProps {
   open: boolean;
   onClose: () => void;
+  /** Called with the chosen ticket count when the user confirms the join. */
+  onConfirm?: (ticketsCount: number) => void;
   tournamentName: string;
   tournamentType: TournamentType;
   shardType?: InventoryChipType;
@@ -44,6 +46,7 @@ const TIER_TEXT_CLASS: Record<TournamentType, string> = {
 export function TournamentBetModal({
   open,
   onClose,
+  onConfirm,
   tournamentName,
   tournamentType,
   shardType,
@@ -93,6 +96,11 @@ export function TournamentBetModal({
     onClose();
     setIsEditing(false);
     setBetCount(1);
+  };
+
+  const handleConfirm = () => {
+    if (betCount > 0) onConfirm?.(betCount);
+    handleClose();
   };
 
   const showParticipated =
@@ -263,7 +271,7 @@ export function TournamentBetModal({
 
           {/* Action — gradient + shine */}
           <Button
-            onClick={handleClose}
+            onClick={handleConfirm}
             icon={<Plus strokeWidth={3} />}
             iconSize={14}
             className={twMerge(

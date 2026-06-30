@@ -9,12 +9,13 @@ import { BoltIcon } from '@/components/shared/icons/BoltIcon';
 import { ArrivalShine } from '@/components/shared/ArrivalShine';
 import { Mail } from 'lucide-react';
 import { useGetMeQuery, useUpdateMeMutation } from '@/api/me.api';
+import { QueryErrorState } from '@/components/shared/error/QueryErrorState';
 import { GlobalConstants } from '@/constants/global.constants';
 
 export default function EmailPage() {
   const t = useAppTranslations();
   const toast = useToast();
-  const { data: me, isLoading: isMeLoading } = useGetMeQuery();
+  const { data: me, isLoading: isMeLoading, isError, refetch } = useGetMeQuery();
   const [updateMe, { isLoading: isUpdating }] = useUpdateMeMutation();
   const [email, setEmail] = useState<string>('');
 
@@ -35,6 +36,10 @@ export default function EmailPage() {
   };
 
   const isLoading = isMeLoading || isUpdating;
+
+  if (isError && !me) {
+    return <QueryErrorState onRetry={() => refetch()} />;
+  }
 
   return (
     <div className="flex flex-col gap-6">

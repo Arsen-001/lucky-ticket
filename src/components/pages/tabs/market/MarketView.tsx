@@ -19,6 +19,7 @@ import { MarketPurchaseSuccessModal } from '@/components/pages/tabs/market/Marke
 import { NotEnoughCoinsModal } from '@/components/pages/tabs/market/NotEnoughCoinsModal';
 import { NotEnoughStarsModal } from '@/components/pages/tabs/home/NotEnoughStarsModal';
 import { MarketEngineSection } from '@/components/pages/tabs/market/sections/MarketEngineSection';
+import { MarketTicketSection } from '@/components/pages/tabs/market/sections/MarketTicketSection';
 import { MarketShardSection } from '@/components/pages/tabs/market/sections/MarketShardSection';
 import { MarketBoosterSection } from '@/components/pages/tabs/market/sections/MarketBoosterSection';
 import { MarketCosmeticSection } from '@/components/pages/tabs/market/sections/MarketCosmeticSection';
@@ -164,6 +165,9 @@ export function MarketView() {
     return {
       engines: (
         <MarketEngineSection engines={data.engines} onSelect={handleSelect} onBuy={handleBuy} />
+      ),
+      tickets: (
+        <MarketTicketSection tickets={data.tickets} onSelect={handleSelect} onBuy={handleBuy} />
       ),
       shards: <MarketShardSection shards={data.shards} onSelect={handleSelect} onBuy={handleBuy} />,
       boosters: (

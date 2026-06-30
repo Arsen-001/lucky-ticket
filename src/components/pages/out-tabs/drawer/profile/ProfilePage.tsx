@@ -1,6 +1,12 @@
 'use client';
 import { useMemo, useState } from 'react';
-import { useGetProfileQuery, useUnpinAchievementMutation } from '@/api/profile.api';
+import {
+  useBuyShowcaseSlotMutation,
+  useGetProfileQuery,
+  useUnpinAchievementMutation,
+} from '@/api/profile.api';
+import { useToast } from '@/hooks/useToast';
+import { useAppTranslations } from '@/hooks/useAppTranslations';
 import { ProfileHero } from '@/components/pages/out-tabs/drawer/profile/ProfileHero';
 import { ProfileLeaderboardCard } from '@/components/pages/out-tabs/drawer/profile/ProfileLeaderboardCard';
 import { ProfileActivityCard } from '@/components/pages/out-tabs/drawer/profile/ProfileActivityCard';
@@ -19,6 +25,9 @@ export interface ProfilePageProps {
 export function ProfilePage({ userId }: ProfilePageProps) {
   const { data: profile, isLoading, isError, refetch } = useGetProfileQuery(userId);
   const [unpinAchievement] = useUnpinAchievementMutation();
+  const [buyShowcaseSlot] = useBuyShowcaseSlotMutation();
+  const toast = useToast();
+  const t = useAppTranslations();
   const [previewMode, setPreviewMode] = useState(false);
   const [selected, setSelected] = useState<Achievement | null>(null);
 
@@ -62,6 +71,15 @@ export function ProfilePage({ userId }: ProfilePageProps) {
             isOwn={effectiveProfile.isOwn}
             onTapSlot={(_slot, ach) => ach && setSelected(ach)}
             onLongPressSlot={(slot, ach) => ach && unpinAchievement({ slot })}
+            onAddSlot={async () => {
+              try {
+                await buyShowcaseSlot({
+                  targetSlot: effectiveProfile.showcaseSlots,
+                }).unwrap();
+              } catch {
+                toast.error(t('action failed'));
+              }
+            }}
           />
 
           <ProfileQuickStats profile={effectiveProfile} loading={isLoading} />

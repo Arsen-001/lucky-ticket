@@ -41,7 +41,11 @@ export function PromoContainer() {
       setResult(res);
       setCode('');
     } catch (err) {
-      const reason = (err as { data?: PromoErrorReason }).data;
+      // The live backend returns the reason in `data.message` ({message,error,
+      // statusCode}); the mock returns the bare string in `data`. Support both so
+      // "expired"/"used" aren't all mislabeled "invalid".
+      const data = (err as { data?: PromoErrorReason | { message?: PromoErrorReason } }).data;
+      const reason = typeof data === 'string' ? data : data?.message;
       setResult(null);
       setErrorKey(ERROR_KEY[reason as PromoErrorReason] ?? ERROR_KEY.invalid);
     }

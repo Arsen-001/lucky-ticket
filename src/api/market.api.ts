@@ -38,7 +38,13 @@ export const marketApi = api.injectEndpoints({
         method: 'POST',
         body: { count, priceType },
       }),
-      invalidatesTags: [rtkTags.market, rtkTags.me, rtkTags.tickets],
+      invalidatesTags: [
+        rtkTags.market,
+        rtkTags.me,
+        rtkTags.tickets,
+        rtkTags.lc,
+        rtkTags.lcTransactions,
+      ],
     }),
 
     buyStatus: builder.mutation<void, { statusId: string; priceType: MarketPriceType }>({
@@ -47,7 +53,7 @@ export const marketApi = api.injectEndpoints({
         method: 'POST',
         body: { statusId, priceType },
       }),
-      invalidatesTags: [rtkTags.market, rtkTags.me],
+      invalidatesTags: [rtkTags.market, rtkTags.me, rtkTags.lc, rtkTags.lcTransactions],
     }),
 
     buyEngine: builder.mutation<
@@ -59,6 +65,13 @@ export const marketApi = api.injectEndpoints({
         method: 'POST',
         body: { engineId, priceType: price.type },
       }),
+      invalidatesTags: [
+        rtkTags.market,
+        rtkTags.me,
+        rtkTags.tickets,
+        rtkTags.lc,
+        rtkTags.lcTransactions,
+      ],
       async onQueryStarted({ tier, engineLevel, price }, { dispatch, queryFulfilled }) {
         const mePatch = dispatch(deductBalanceUpdater(price));
         const ticketsPatch = dispatch(
@@ -110,6 +123,13 @@ export const marketApi = api.injectEndpoints({
         method: 'POST',
         body: { shardId, priceType: price.type },
       }),
+      invalidatesTags: [
+        rtkTags.market,
+        rtkTags.me,
+        rtkTags.inventory,
+        rtkTags.lc,
+        rtkTags.lcTransactions,
+      ],
       async onQueryStarted({ shardType, quality, count, price }, { dispatch, queryFulfilled }) {
         const mePatch = dispatch(deductBalanceUpdater(price));
         const inventoryPatch = dispatch(
@@ -148,6 +168,13 @@ export const marketApi = api.injectEndpoints({
         method: 'POST',
         body: { boosterId, priceType: price.type },
       }),
+      invalidatesTags: [
+        rtkTags.market,
+        rtkTags.me,
+        rtkTags.inventory,
+        rtkTags.lc,
+        rtkTags.lcTransactions,
+      ],
       async onQueryStarted(
         { boosterType, quality, effectPct, durationHours, count, price },
         { dispatch, queryFulfilled }
@@ -181,6 +208,7 @@ export const marketApi = api.injectEndpoints({
         method: 'POST',
         body: { cosmeticId, priceType: price.type },
       }),
+      invalidatesTags: [rtkTags.market, rtkTags.me, rtkTags.lc, rtkTags.lcTransactions],
       async onQueryStarted({ price }, { dispatch, queryFulfilled }) {
         const mePatch = dispatch(deductBalanceUpdater(price));
         try {

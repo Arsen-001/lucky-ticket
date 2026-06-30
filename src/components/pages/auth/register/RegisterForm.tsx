@@ -14,9 +14,16 @@ import { FormItem } from '@/components/shared/form-elements/FormItem';
 import { getRegisterSchema } from '@/lib/yup/auth.schemes';
 import type { RegisterFormValues } from '@/types/interfaces/auth.interfaces';
 import { PhoneNumberFormItem } from '@/components/shared/form-elements/form-item-wrapped-elements/PhoneNumberFormItem';
+import { useRouter } from 'next/navigation';
+import { routes } from '@/constants/routes';
+import { useRegisterMutation } from '@/api/auth.api';
+import { useToast } from '@/hooks/useToast';
 
 export function RegisterForm() {
   const t = useAppTranslations();
+  const router = useRouter();
+  const toast = useToast();
+  const [registerUser, { isLoading }] = useRegisterMutation();
 
   const registerSchema = getRegisterSchema(t);
 
@@ -25,16 +32,20 @@ export function RegisterForm() {
     mode: 'onSubmit',
   });
 
-  const {
-    formState: { isSubmitting },
-    clearErrors,
-  } = form;
+  const { clearErrors } = form;
 
   async function onSubmit(values: RegisterFormValues) {
     clearErrors();
-    console.log('Submitting register form...', values);
-    await new Promise(resolve => setTimeout(resolve, 2000));
-    console.log('Register form submitted successfully:', values);
+    try {
+      await registerUser({
+        username: values.username,
+        email: values.email,
+        password: values.password,
+      }).unwrap();
+      router.push(routes.home);
+    } catch {
+      toast.error(t('action failed'));
+    }
   }
 
   return (
@@ -70,7 +81,7 @@ export function RegisterForm() {
           />
         </FormItem>
 
-        <Button type="submit" loading={isSubmitting} aria-busy={isSubmitting}>
+        <Button type="submit" loading={isLoading} aria-busy={isLoading}>
           {t('sign up')}
         </Button>
       </div>

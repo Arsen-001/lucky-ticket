@@ -17,7 +17,7 @@ export const referralApi = api.injectEndpoints({
         url: `referral/claim/${friendId}`,
         method: 'POST',
       }),
-      invalidatesTags: [rtkTags.referral],
+      invalidatesTags: [rtkTags.referral, rtkTags.tickets, rtkTags.me],
       async onQueryStarted({ friendId }, { dispatch, queryFulfilled }) {
         const patchResult = dispatch(
           referralApi.util.updateQueryData('getInvitedFriends', undefined, draft => {

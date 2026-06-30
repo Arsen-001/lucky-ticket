@@ -17,26 +17,29 @@ export const meApi = api.injectEndpoints({
       }),
       async onQueryStarted(body, { dispatch, queryFulfilled }) {
         const { avatar } = body;
-        try {
-          dispatch(
-            meApi.util.updateQueryData('getMe', undefined, draft => {
-              Object.assign(draft, body);
-            })
-          );
-          // The profile page renders its avatar from a separate query — keep it in sync.
-          if (avatar) {
-            dispatch(
+        const mePatch = dispatch(
+          meApi.util.updateQueryData('getMe', undefined, draft => {
+            Object.assign(draft, body);
+          })
+        );
+        // The profile page renders its avatar from a separate query — keep it in sync.
+        const profilePatch = avatar
+          ? dispatch(
               profileApi.util.updateQueryData('getProfile', undefined, draft => {
                 draft.avatar = avatar;
               })
-            );
-          }
+            )
+          : null;
+        try {
           await queryFulfilled;
         } catch {
-          // optimistic patches are kept; the mock backend never rejects
+          // The live backend DOES reject (e.g. username too short, email taken) —
+          // roll back so the cache never keeps a value the server refused.
+          mePatch.undo();
+          profilePatch?.undo();
         }
       },
-      // invalidatesTags: [rtkTags.me],
+      invalidatesTags: [rtkTags.me],
     }),
   }),
 });

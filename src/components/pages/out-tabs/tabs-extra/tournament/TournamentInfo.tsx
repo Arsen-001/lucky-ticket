@@ -19,7 +19,13 @@ import {
   Zap,
 } from 'lucide-react';
 import { twMerge } from 'tailwind-merge';
-import { useGetTournamentByIdQuery } from '@/api/tournaments.api';
+import {
+  useGetTournamentByIdQuery,
+  useJoinTournamentMutation,
+  useMarkTournamentResultSeenMutation,
+} from '@/api/tournaments.api';
+import { useGetTicketsQuery } from '@/api/tickets.api';
+import { useToast } from '@/hooks/useToast';
 import { Medal } from '@/components/shared/icons/Medal';
 import { LcLabel } from '@/components/shared/icons/LcLabel';
 import { ShardZoomButton } from '@/components/pages/out-tabs/tabs-extra/tournament/ShardZoomButton';
@@ -27,6 +33,7 @@ import { Skeleton } from '@/components/shared/seleketons/Skeleton';
 import { SkeletonSuspense } from '@/components/shared/seleketons/SkeletonSuspense';
 import { GoldenText } from '@/components/shared/typography/GoldenText';
 import { Button } from '@/components/shared/buttons/Button';
+import { QueryErrorState } from '@/components/shared/error/QueryErrorState';
 import { useAppTranslations } from '@/hooks/useAppTranslations';
 import { useCountDown } from '@/hooks/useCountDown';
 import { useUnlockedTiers } from '@/hooks/useUnlockedTiers';
@@ -64,15 +71,18 @@ const TIER_CLASS: Record<TournamentType, string> = {
 };
 
 export function TournamentInfo({ id, className, ...rest }: TournamentDetailsProps) {
-  const { data, isLoading } = useGetTournamentByIdQuery(id);
+  const { data, isLoading, isError, refetch } = useGetTournamentByIdQuery(id);
   const t = useAppTranslations();
+  const toast = useToast();
   const { isTierUnlocked } = useUnlockedTiers();
+  const { data: tickets } = useGetTicketsQuery();
+  const [joinTournament] = useJoinTournamentMutation();
+  const [markResultSeen] = useMarkTournamentResultSeenMutation();
   const [isBetModalOpen, setIsBetModalOpen] = useState(false);
   const [isResultModalOpen, setIsResultModalOpen] = useState(false);
   const [resultDismissed, setResultDismissed] = useState(false);
 
-  // TODO: replace with user ticket balance API for the given ticket type
-  const availableTickets = 15;
+  const availableTickets = tickets?.find(item => item.ticketType === data?.type)?.count ?? 0;
 
   const isFinished = data?.status === 'finished';
   const sponsor = data?.sponsor;
@@ -103,9 +113,17 @@ export function TournamentInfo({ id, className, ...rest }: TournamentDetailsProp
     setIsBetModalOpen(true);
   };
   const handleCloseBetModal = () => setIsBetModalOpen(false);
+  const handleJoin = async (ticketsCount: number) => {
+    try {
+      await joinTournament({ tournamentId: id, ticketsCount }).unwrap();
+    } catch {
+      toast.error(t('action failed'));
+    }
+  };
   const handleCloseResultModal = () => {
     setIsResultModalOpen(false);
     setResultDismissed(true);
+    if (id) markResultSeen({ tournamentId: id });
   };
 
   const timeChipText = data?.startTime
@@ -113,6 +131,12 @@ export function TournamentInfo({ id, className, ...rest }: TournamentDetailsProp
       ? formatEndedAgo(data.startTime, t)
       : leftTimeText || t('soon')
     : t('soon');
+
+  // A failed detail load must surface an error+retry, not a blank card with an
+  // empty name / "soon" countdown (the silent-empty anti-pattern).
+  if (isError && !data) {
+    return <QueryErrorState className="mt-10" onRetry={() => refetch()} />;
+  }
 
   return (
     <div className={twMerge('max-w-full overflow-hidden', className)}>
@@ -353,6 +377,7 @@ export function TournamentInfo({ id, className, ...rest }: TournamentDetailsProp
       <TournamentBetModal
         open={isBetModalOpen}
         onClose={handleCloseBetModal}
+        onConfirm={handleJoin}
         tournamentName={data?.name ?? ''}
         tournamentType={data?.type ?? 'bronze'}
         shardType={data?.shardType}

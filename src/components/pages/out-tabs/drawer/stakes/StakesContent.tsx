@@ -15,6 +15,7 @@ import {
 } from '@/constants/global.constants';
 import { routes } from '@/constants/routes';
 import { useAppTranslations } from '@/hooks/useAppTranslations';
+import { useToast } from '@/hooks/useToast';
 import { Skeleton } from '@/components/shared/seleketons/Skeleton';
 import { SkeletonSuspense } from '@/components/shared/seleketons/SkeletonSuspense';
 import { ArrivalShine } from '@/components/shared/ArrivalShine';
@@ -35,6 +36,7 @@ import { QueryErrorState } from '@/components/shared/error/QueryErrorState';
 
 export function StakesContent() {
   const t = useAppTranslations();
+  const toast = useToast();
   const { data: stakes, isLoading, isError, refetch } = useGetStakesQuery();
   const { data: me } = useGetMeQuery();
   const [claimStake, { isLoading: claimingAll }] = useClaimStakeMutation();
@@ -88,9 +90,12 @@ export function StakesContent() {
       : 100;
 
   const handleClaimAll = async () => {
+    let failed = false;
     for (const id of readyStakeIds) {
-      await claimStake({ stakeId: id });
+      const result = await claimStake({ stakeId: id });
+      if (!('data' in result && result.data?.success)) failed = true;
     }
+    if (failed) toast.error(t('action failed'));
   };
 
   return (

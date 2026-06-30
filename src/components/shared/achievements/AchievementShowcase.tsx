@@ -4,12 +4,12 @@ import { ChevronRight, Plus } from 'lucide-react';
 import { twMerge } from 'tailwind-merge';
 import Link from 'next/link';
 import { Achievement } from '@/components/shared/achievements/Achievement';
+import { AchievementAddSlot } from '@/components/shared/achievements/AchievementAddSlot';
 import { useAppTranslations } from '@/hooks/useAppTranslations';
 import { routes } from '@/constants/routes';
+import { calcShowcaseSlotPrice } from '@/constants/global.constants';
 import type { Achievement as AchievementType } from '@/types/interfaces/achievement.interfaces';
 import '@/styles/components/profile.css';
-
-const SHOWCASE_SLOTS = 3;
 
 export interface AchievementShowcaseProps {
   pinnedAchievements: AchievementType[];
@@ -20,16 +20,21 @@ export interface AchievementShowcaseProps {
   isOwn: boolean;
   onTapSlot?: (slot: number, achievement: AchievementType | null) => void;
   onLongPressSlot?: (slot: number, achievement: AchievementType | null) => void;
+  /** Called when the owner buys the next showcase slot. */
+  onAddSlot?: () => void;
   className?: string;
 }
 
 export function AchievementShowcase({
   pinnedAchievements,
+  showcaseSlots,
+  showcaseMaxSlots,
   totalEarned,
   totalAchievements,
   isOwn,
   onTapSlot,
   onLongPressSlot,
+  onAddSlot,
   className,
 }: AchievementShowcaseProps) {
   const t = useAppTranslations();
@@ -38,7 +43,9 @@ export function AchievementShowcase({
     if (a.pinnedSlot != null) slotByIndex.set(a.pinnedSlot, a);
   });
 
-  const slots = Array.from({ length: SHOWCASE_SLOTS }).map((_, i) => slotByIndex.get(i) ?? null);
+  const slotCount = Math.max(showcaseSlots || 0, 1);
+  const slots = Array.from({ length: slotCount }).map((_, i) => slotByIndex.get(i) ?? null);
+  const canBuySlot = isOwn && showcaseSlots < showcaseMaxSlots;
 
   return (
     <section className={twMerge('flex flex-col gap-3', className)}>
@@ -46,7 +53,7 @@ export function AchievementShowcase({
         <div className="flex flex-col">
           <h3 className="text-base font-extrabold text-white">{t('showcase')}</h3>
           <span className="text-[11px] text-white/50">
-            {pinnedAchievements.length} / {SHOWCASE_SLOTS} {t('pinned')}
+            {pinnedAchievements.length} / {showcaseSlots} {t('pinned')}
           </span>
         </div>
         {isOwn && (
@@ -71,6 +78,13 @@ export function AchievementShowcase({
             animationDelay={i * 80}
           />
         ))}
+        {canBuySlot && (
+          <AchievementAddSlot
+            costLs={calcShowcaseSlotPrice(showcaseSlots)}
+            onClick={onAddSlot}
+            className="aspect-square h-auto w-full"
+          />
+        )}
       </div>
     </section>
   );

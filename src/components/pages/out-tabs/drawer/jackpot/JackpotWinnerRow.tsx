@@ -44,16 +44,22 @@ export function JackpotWinnerRow({ winner, loading, className, style }: JackpotW
         loading={loading || !winner}
         skeleton={<Skeleton variant="round" className="h-9 w-9 flex-shrink-0" />}
       >
-        {winner && (
-          <Image
-            src={winner.topWinnerAvatar}
-            alt={winner.topWinnerName}
-            width={36}
-            height={36}
-            loading="lazy"
-            className="h-9 w-9 flex-shrink-0 rounded-full object-cover"
-          />
-        )}
+        {winner &&
+          (winner.topWinnerAvatar ? (
+            <Image
+              src={winner.topWinnerAvatar}
+              alt={winner.topWinnerName}
+              width={36}
+              height={36}
+              loading="lazy"
+              className="h-9 w-9 flex-shrink-0 rounded-full object-cover"
+            />
+          ) : (
+            // No avatar snapshot — show the name initial instead of an empty src.
+            <div className="flex-center bg-electric-purple/30 h-9 w-9 flex-shrink-0 rounded-full text-sm font-extrabold text-white">
+              {winner.topWinnerName.charAt(0).toUpperCase()}
+            </div>
+          ))}
       </SkeletonSuspense>
 
       <div className="flex min-w-0 flex-1 flex-col gap-0.5">

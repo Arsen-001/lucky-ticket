@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation';
 import {
   useClaimEngineMutation,
   useCompleteEngineCycleMutation,
-  useInstantClaimEngineMutation,
+  useSkipEngineCycleMutation,
   useUpgradeEngineCapacityMutation,
   useUpgradeEngineSpeedMutation,
 } from '@/api/engines.api';
@@ -18,6 +18,7 @@ import {
 import { useGetMeQuery } from '@/api/me.api';
 import { useGetTicketsQuery } from '@/api/tickets.api';
 import { EmptyDataInfo } from '@/components/shared/EmptyDataInfo';
+import { QueryErrorState } from '@/components/shared/error/QueryErrorState';
 import { ConfirmModal } from '@/components/shared/modals/ConfirmModal';
 import { EngineSlotPickerModal } from '@/components/pages/tabs/home/EngineSlotPickerModal';
 import { NotEnoughStarsModal } from '@/components/pages/tabs/home/NotEnoughStarsModal';
@@ -52,7 +53,7 @@ export interface EngineDetailsProps {
 export function EngineDetails({ id }: EngineDetailsProps) {
   const t = useAppTranslations();
   const toast = useToast();
-  const { data: tickets, isLoading } = useGetTicketsQuery();
+  const { data: tickets, isLoading, isError, refetch } = useGetTicketsQuery();
   const { data: me } = useGetMeQuery();
   const { data: inventory } = useGetInventoryQuery();
   const isLp = me?.isLuckyPlayer ?? false;
@@ -62,7 +63,7 @@ export function EngineDetails({ id }: EngineDetailsProps) {
   const [activateBoosterMutation] = useActivateBoosterMutation();
   const [unequipChip, { isLoading: unequipping }] = useUnequipChipMutation();
   const [claimEngine] = useClaimEngineMutation();
-  const [instantClaimEngine] = useInstantClaimEngineMutation();
+  const [skipEngineCycle] = useSkipEngineCycleMutation();
   const [upgradeEngineSpeed] = useUpgradeEngineSpeedMutation();
   const [upgradeEngineCapacity] = useUpgradeEngineCapacityMutation();
   const [completeEngineCycle] = useCompleteEngineCycleMutation();
@@ -125,6 +126,16 @@ export function EngineDetails({ id }: EngineDetailsProps) {
     return <div className="px-5 py-4 text-pink-secondary text-sm">{t('loading')}</div>;
   }
 
+  // A failed /tickets load must surface as an error+retry, not a misleading
+  // "engine not found" empty state.
+  if (isError && !tickets) {
+    return (
+      <div className="px-5 py-6">
+        <QueryErrorState onRetry={() => refetch()} />
+      </div>
+    );
+  }
+
   if (!engine || !tier) {
     return (
       <div className="px-5 py-6">
@@ -179,9 +190,10 @@ export function EngineDetails({ id }: EngineDetailsProps) {
   };
 
   const handleInstantClaim = () => {
+    // "Skip" charges stars + marks the cycle ready (does NOT claim). The button
+    // then flips to "Claim"; claiming awards AP. Server reconciles via invalidation.
     requireStars(instantClaimCost, () => {
-      setElapsedSeconds(0);
-      instantClaimEngine({ engineId: engine.id, cost: instantClaimCost });
+      skipEngineCycle({ engineId: engine.id, cost: instantClaimCost });
     });
   };
 

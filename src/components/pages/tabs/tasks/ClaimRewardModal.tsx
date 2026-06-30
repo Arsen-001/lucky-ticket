@@ -13,9 +13,15 @@ import { TaskRewardType } from '@/types/enums/tasks.enums';
 import type { ClaimTaskResponse, TaskReward } from '@/types/interfaces/tasks.interfaces';
 import { TaskRewardRow } from './TaskRewardRow';
 
+// Task claims return a full balance snapshot; ad-watch grants rewards only (no
+// balance), so the modal accepts a result whose `newBalance` may be absent.
+export type RewardModalResult = Omit<ClaimTaskResponse, 'newBalance'> & {
+  newBalance?: ClaimTaskResponse['newBalance'];
+};
+
 export interface ClaimRewardModalProps {
   open: boolean;
-  result?: ClaimTaskResponse | null;
+  result?: RewardModalResult | null;
   loading?: boolean;
   error?: boolean;
   onClose: () => void;
@@ -218,9 +224,9 @@ export function ClaimRewardModal({
             )}
           </div>
 
-          {/* BALANCE ROW — fixed h-16 */}
+          {/* BALANCE ROW — fixed h-16 (ad-watch has no balance snapshot → hidden) */}
           <div className="h-16 w-full flex items-center">
-            {view === 'success' && result ? (
+            {view === 'success' && result?.newBalance ? (
               <div className="flex flex-col gap-1 w-full rounded-2xl bg-white/5 p-2.5">
                 <p className="text-[10px] uppercase tracking-wider text-white/40 font-bold text-center">
                   {t('new balance')}

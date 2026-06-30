@@ -19,7 +19,15 @@ export const lcApi = api.injectEndpoints({
     }),
     convertLcToTon: builder.mutation<ConvertLcToTonResponse, ConvertLcToTonRequest>({
       query: body => ({ url: 'lc/convert-ton', method: 'POST', body }),
-      invalidatesTags: [rtkTags.lc, rtkTags.lcTransactions, rtkTags.me, rtkTags.wallet],
+      // Convert also writes a wallet DEPOSIT_TON transaction ("Converted from LC"),
+      // so the wallet history must refresh too — not just the TON balance.
+      invalidatesTags: [
+        rtkTags.lc,
+        rtkTags.lcTransactions,
+        rtkTags.me,
+        rtkTags.wallet,
+        rtkTags.walletTransactions,
+      ],
     }),
   }),
 });

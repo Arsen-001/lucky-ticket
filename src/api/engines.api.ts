@@ -4,6 +4,7 @@ import { meApi } from '@/api/me.api';
 import { ticketsApi } from '@/api/tickets.api';
 import { rtkTags } from '@/constants/rtk-tags';
 import { appConfig } from '@/config/app.config';
+import { GlobalConstants } from '@/constants/global.constants';
 import {
   MAX_BOOST_LEVEL,
   effectiveCycleSeconds,
@@ -29,6 +30,12 @@ const promoteIfMaxed = (engine: TicketEngine): TicketEngine => {
 
 const STARTER_ENGINE_ID = 'engine-bronze-starter';
 
+// Against the real backend the granted engine gets a server UUID, so the
+// optimistic phantom (STARTER_ENGINE_ID) must be reconciled away — otherwise the
+// tour's claim hits POST engines/claim with a fake id → 404. In pure mock mode
+// the grant isn't persisted, so we keep the optimistic engine (no invalidation).
+const IS_REAL_BACKEND = !!process.env.NEXT_PUBLIC_API_URL;
+
 // The free Bronze starter engine, granted once after the onboarding language
 // step. Comes with one ready ticket so the tour's claim finale has something to
 // collect (DOCS §9 / §17.5).
@@ -49,10 +56,18 @@ const buildStarterEngine = (): TicketEngine => {
 
 export const enginesApi = api.injectEndpoints({
   endpoints: builder => ({
-    claimEngine: builder.mutation<{ claimed: number }, { engineId: string }>({
+    claimEngine: builder.mutation<{ claimed: number; apGain: number }, { engineId: string }>({
       query: body => ({ url: 'engines/claim', method: 'POST', body }),
-      invalidatesTags: [rtkTags.engines],
+      // claim awards AP (header reads `me`) and advances ticket tasks/achievements
+      invalidatesTags: [
+        rtkTags.engines,
+        rtkTags.tickets,
+        rtkTags.me,
+        rtkTags.tasks,
+        rtkTags.achievements,
+      ],
       async onQueryStarted({ engineId }, { dispatch, queryFulfilled }) {
+        let claimedTier: TicketType | null = null;
         const patch = dispatch(
           ticketsApi.util.updateQueryData('getTickets', undefined, draft => {
             for (const ticket of draft) {
@@ -61,21 +76,39 @@ export const enginesApi = api.injectEndpoints({
                 ticket.count = (ticket.count ?? 0) + engine.pendingCount;
                 engine.pendingCount = 0;
                 engine.cycleStartedAt = dayjs().toISOString();
+                claimedTier = ticket.ticketType;
               }
             }
           })
         );
+        // Mirror the server's AP reward in the header immediately; the `me`
+        // invalidation reconciles it (e.g. once the daily claim cap is hit).
+        const apGain = claimedTier ? GlobalConstants.apRewards.claimByTier[claimedTier] : 0;
+        const mePatch = apGain
+          ? dispatch(
+              meApi.util.updateQueryData('getMe', undefined, draft => {
+                draft.activityPoints += apGain;
+              })
+            )
+          : null;
         try {
           await queryFulfilled;
         } catch {
           patch.undo();
+          mePatch?.undo();
         }
       },
     }),
 
     claimEnginesForTier: builder.mutation<{ claimed: number }, { tier: TicketType }>({
       query: body => ({ url: 'engines/claim-all', method: 'POST', body }),
-      invalidatesTags: [rtkTags.engines],
+      invalidatesTags: [
+        rtkTags.engines,
+        rtkTags.tickets,
+        rtkTags.me,
+        rtkTags.tasks,
+        rtkTags.achievements,
+      ],
       async onQueryStarted({ tier }, { dispatch, queryFulfilled }) {
         const patch = dispatch(
           ticketsApi.util.updateQueryData('getTickets', undefined, draft => {
@@ -105,7 +138,13 @@ export const enginesApi = api.injectEndpoints({
       { engineId: string; cost: number }
     >({
       query: body => ({ url: 'engines/instant-claim', method: 'POST', body }),
-      invalidatesTags: [rtkTags.engines, rtkTags.me],
+      invalidatesTags: [
+        rtkTags.engines,
+        rtkTags.tickets,
+        rtkTags.me,
+        rtkTags.tasks,
+        rtkTags.achievements,
+      ],
       async onQueryStarted({ engineId, cost }, { dispatch, queryFulfilled, getState }) {
         const inventory = inventoryApi.endpoints.getInventory.select()(
           getState() as Parameters<ReturnType<typeof inventoryApi.endpoints.getInventory.select>>[0]
@@ -143,7 +182,7 @@ export const enginesApi = api.injectEndpoints({
 
     upgradeEngineSpeed: builder.mutation<void, { engineId: string; cost: number }>({
       query: body => ({ url: 'engines/upgrade-speed', method: 'POST', body }),
-      invalidatesTags: [rtkTags.engines, rtkTags.me],
+      invalidatesTags: [rtkTags.engines, rtkTags.tickets, rtkTags.me],
       async onQueryStarted({ engineId, cost }, { dispatch, queryFulfilled }) {
         const ticketsPatch = dispatch(
           ticketsApi.util.updateQueryData('getTickets', undefined, draft => {
@@ -175,7 +214,7 @@ export const enginesApi = api.injectEndpoints({
 
     upgradeEngineCapacity: builder.mutation<void, { engineId: string; cost: number }>({
       query: body => ({ url: 'engines/upgrade-capacity', method: 'POST', body }),
-      invalidatesTags: [rtkTags.engines, rtkTags.me],
+      invalidatesTags: [rtkTags.engines, rtkTags.tickets, rtkTags.me],
       async onQueryStarted({ engineId, cost }, { dispatch, queryFulfilled }) {
         const ticketsPatch = dispatch(
           ticketsApi.util.updateQueryData('getTickets', undefined, draft => {
@@ -205,8 +244,31 @@ export const enginesApi = api.injectEndpoints({
       },
     }),
 
+    // Pay stars to skip the remaining cycle → engine becomes ready (button turns
+    // into "Claim"); the actual claim (and its AP) happens when the user taps Claim.
+    skipEngineCycle: builder.mutation<
+      { skipped: boolean; cost: number },
+      { engineId: string; cost: number }
+    >({
+      query: ({ engineId }) => ({ url: 'engines/skip', method: 'POST', body: { engineId } }),
+      invalidatesTags: [rtkTags.engines, rtkTags.tickets, rtkTags.me],
+      async onQueryStarted({ cost }, { dispatch, queryFulfilled }) {
+        const mePatch = dispatch(
+          meApi.util.updateQueryData('getMe', undefined, draft => {
+            draft.telegramStars = Math.max(0, draft.telegramStars - cost);
+          })
+        );
+        try {
+          await queryFulfilled;
+        } catch {
+          mePatch.undo();
+        }
+      },
+    }),
+
     completeEngineCycle: builder.mutation<void, { engineId: string }>({
       query: body => ({ url: 'engines/complete-cycle', method: 'POST', body }),
+      invalidatesTags: [rtkTags.engines, rtkTags.tickets],
       async onQueryStarted({ engineId }, { dispatch, queryFulfilled, getState }) {
         const inventory = inventoryApi.endpoints.getInventory.select()(
           getState() as Parameters<ReturnType<typeof inventoryApi.endpoints.getInventory.select>>[0]
@@ -254,6 +316,9 @@ export const enginesApi = api.injectEndpoints({
     // engine) and does not invalidate the tickets tag, so the grant persists.
     grantWelcomePack: builder.mutation<void, void>({
       query: () => ({ url: 'engines/grant-welcome', method: 'POST' }),
+      // On the real backend, refetch tickets/me so the server's real UUID engine
+      // replaces the optimistic phantom (so the tour's claim targets a valid id).
+      invalidatesTags: IS_REAL_BACKEND ? [rtkTags.tickets, rtkTags.me] : [],
       async onQueryStarted(_arg, { dispatch, queryFulfilled, getState }) {
         const tickets = ticketsApi.endpoints.getTickets.select()(
           getState() as Parameters<ReturnType<typeof ticketsApi.endpoints.getTickets.select>>[0]
@@ -292,6 +357,7 @@ export const {
   useClaimEngineMutation,
   useClaimEnginesForTierMutation,
   useInstantClaimEngineMutation,
+  useSkipEngineCycleMutation,
   useUpgradeEngineSpeedMutation,
   useUpgradeEngineCapacityMutation,
   useCompleteEngineCycleMutation,

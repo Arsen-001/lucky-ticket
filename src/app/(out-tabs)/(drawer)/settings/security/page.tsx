@@ -6,11 +6,12 @@ import { SettingsMenuItem } from '@/components/pages/out-tabs/drawer/settings/Se
 import { Switch } from '@/components/shared/form-elements/Switch';
 import { ShieldAlert, ShieldCheck } from 'lucide-react';
 import { useGetMeQuery, useUpdateMeMutation } from '@/api/me.api';
+import { QueryErrorState } from '@/components/shared/error/QueryErrorState';
 
 export default function SecurityPage() {
   const t = useAppTranslations();
   const toast = useToast();
-  const { data: me, isLoading: isMeLoading } = useGetMeQuery();
+  const { data: me, isLoading: isMeLoading, isError, refetch } = useGetMeQuery();
   const [updateMe, { isLoading: isUpdating }] = useUpdateMeMutation();
 
   const is2FAEnabled = me?.twoFactorAuth ?? false;
@@ -23,6 +24,10 @@ export default function SecurityPage() {
       toast.error(t('action failed'));
     }
   };
+
+  if (isError && !me) {
+    return <QueryErrorState onRetry={() => refetch()} />;
+  }
 
   return (
     <div className="flex flex-col gap-6">

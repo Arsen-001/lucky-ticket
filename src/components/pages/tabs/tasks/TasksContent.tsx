@@ -19,13 +19,7 @@ import type { MedalType } from '@/components/shared/icons/Medal';
 import { icons } from '@/constants/icons';
 import { useGetTasksQuery, useClaimTaskMutation, useWatchAdMutation } from '@/api/tasks.api';
 import { TaskCategory, TaskFrequency, TaskStatus } from '@/types/enums/tasks.enums';
-import type {
-  AdSlot,
-  CategoryTasks,
-  ClaimTaskResponse,
-  Task,
-  TaskSubStep,
-} from '@/types/interfaces/tasks.interfaces';
+import type { AdSlot, CategoryTasks, Task, TaskSubStep } from '@/types/interfaces/tasks.interfaces';
 import { useAppTranslations } from '@/hooks/useAppTranslations';
 import { useCountDown } from '@/hooks/useCountDown';
 import { Skeleton } from '@/components/shared/seleketons/Skeleton';
@@ -37,7 +31,7 @@ import { TournamentSubTabs, type TournamentSubTab } from './TournamentSubTabs';
 import { TournamentSlidersSkeleton } from './TournamentSlidersSkeleton';
 import { AdsSection } from './AdsSection';
 import type { TierName } from '@/types/types/tier.types';
-import { ClaimRewardModal } from './ClaimRewardModal';
+import { ClaimRewardModal, type RewardModalResult } from './ClaimRewardModal';
 import { ArrivalShine } from '@/components/shared/ArrivalShine';
 
 const triggerHaptic = (type: 'light' | 'medium' = 'light') => {
@@ -275,7 +269,7 @@ export function TasksContent() {
   const [pendingClaim, setPendingClaim] = useState<{
     id: string;
     open: boolean;
-    result?: ClaimTaskResponse | null;
+    result?: RewardModalResult | null;
   }>({ id: '', open: false, result: null });
 
   const sectionRefs = useRef<Map<TaskCategory, HTMLElement>>(new Map());
@@ -512,15 +506,13 @@ export function TasksContent() {
   const handleWatchAd = async (slot: AdSlot) => {
     triggerHaptic('medium');
     try {
-      await watchAd({ adId: slot.id }).unwrap();
+      // Show what the server actually granted (not the slot's advertised reward,
+      // which can differ) — and no fabricated balance (watchAd returns none).
+      const res = await watchAd({ adId: slot.id }).unwrap();
       setPendingClaim({
         id: slot.id,
         open: true,
-        result: {
-          id: slot.id,
-          rewards: slot.rewards,
-          newBalance: { lc: 12_345_000, tickets: 12, activityPoints: 4500 },
-        },
+        result: { id: slot.id, rewards: res.rewards },
       });
     } catch {
       setPendingClaim({ id: slot.id, open: true, result: null });

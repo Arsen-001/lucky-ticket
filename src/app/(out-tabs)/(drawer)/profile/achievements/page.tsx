@@ -1,7 +1,7 @@
 'use client';
 import { useState } from 'react';
 import { useGetAchievementsQuery } from '@/api/achievements.api';
-import { usePinAchievementMutation } from '@/api/profile.api';
+import { usePinAchievementMutation, useGetProfileQuery } from '@/api/profile.api';
 import { AchievementGrid } from '@/components/shared/achievements/AchievementGrid';
 import { AchievementDetailModal } from '@/components/shared/achievements/AchievementDetailModal';
 import { AchievementPinModal } from '@/components/shared/achievements/AchievementPinModal';
@@ -30,6 +30,7 @@ const VISIBLE_CATEGORIES: AchievementCategory[] = [
 export default function Page() {
   const t = useAppTranslations();
   const { data, isLoading, isError, refetch } = useGetAchievementsQuery();
+  const { data: profile } = useGetProfileQuery(undefined);
   const [pinAchievement] = usePinAchievementMutation();
   const [filter, setFilter] = useState<Filter>('all');
   const [category, setCategory] = useState<AchievementCategory | 'all'>('all');
@@ -54,8 +55,12 @@ export default function Page() {
   const visibleCategories =
     category === 'all' ? VISIBLE_CATEGORIES : VISIBLE_CATEGORIES.filter(c => c === category);
 
-  const pinnedSlots: (Achievement | null)[] = [0, 1, 2].map(
-    slot => allAchievements.find(a => a.isPinned && a.pinnedSlot === slot) ?? null
+  // One pin target per UNLOCKED showcase slot (was hardcoded to 3) — so slots the
+  // user paid to unlock (3+) are actually pinnable from the picker.
+  const slotCount = Math.max(profile?.showcaseSlots ?? 3, 1);
+  const pinnedSlots: (Achievement | null)[] = Array.from(
+    { length: slotCount },
+    (_, slot) => allAchievements.find(a => a.isPinned && a.pinnedSlot === slot) ?? null
   );
 
   const handlePin = async (slot: number) => {

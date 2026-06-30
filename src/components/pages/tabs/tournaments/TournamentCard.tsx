@@ -25,6 +25,12 @@ import { Skeleton } from '@/components/shared/seleketons/Skeleton';
 import { SkeletonSuspense } from '@/components/shared/seleketons/SkeletonSuspense';
 import { GoldenText } from '@/components/shared/typography/GoldenText';
 import { useAppTranslations } from '@/hooks/useAppTranslations';
+import { useToast } from '@/hooks/useToast';
+import {
+  useJoinTournamentMutation,
+  useMarkTournamentResultSeenMutation,
+} from '@/api/tournaments.api';
+import { useGetTicketsQuery } from '@/api/tickets.api';
 import { useCountDown } from '@/hooks/useCountDown';
 import { useUnlockedTiers } from '@/hooks/useUnlockedTiers';
 import { formatCompact } from '@/utils/global/number.utils';
@@ -86,7 +92,11 @@ export function TournamentCard({
 }: TournamentCardProps) {
   const t = useAppTranslations();
   const router = useRouter();
+  const toast = useToast();
   const { isTierUnlocked } = useUnlockedTiers();
+  const { data: tickets } = useGetTicketsQuery();
+  const [joinTournament] = useJoinTournamentMutation();
+  const [markResultSeen] = useMarkTournamentResultSeenMutation();
   const isFinished = status === 'finished';
   // A sponsored tournament the creator just submitted, awaiting review (§11.8) —
   // shown to its creator but not joinable / navigable until approved.
@@ -111,8 +121,21 @@ export function TournamentCard({
   const [isBetModalOpen, setIsBetModalOpen] = useState(false);
   const [isResultModalOpen, setIsResultModalOpen] = useState(false);
 
-  // TODO: replace with user ticket balance API for the given ticket type
-  const availableTickets = 15;
+  const availableTickets = tickets?.find(item => item.ticketType === type)?.count ?? 0;
+
+  const handleJoin = async (ticketsCount: number) => {
+    if (!id) return;
+    try {
+      await joinTournament({ tournamentId: id, ticketsCount }).unwrap();
+    } catch {
+      toast.error(t('action failed'));
+    }
+  };
+
+  const handleResultClose = () => {
+    setIsResultModalOpen(false);
+    if (id) markResultSeen({ tournamentId: id });
+  };
 
   const handleActionClick = (e: MouseEvent) => {
     e.preventDefault();
@@ -221,11 +244,15 @@ export function TournamentCard({
               <div className="flex items-center justify-between gap-1.5 text-[11px] leading-none min-w-0">
                 <span className="inline-flex items-center gap-1 rounded-md bg-white/5 px-1.5 py-1 leading-none shrink-0">
                   <CalendarDays className="w-3 h-3 text-pink-secondary shrink-0" />
-                  <span className="font-semibold text-white/90 tabular-nums leading-none">
+                  <span
+                    suppressHydrationWarning
+                    className="font-semibold text-white/90 tabular-nums leading-none"
+                  >
                     {dayjs(startTime).format('DD/MM/YYYY · HH:mm')}
                   </span>
                 </span>
                 <span
+                  suppressHydrationWarning
                   className={twMerge(
                     'inline-flex items-center gap-1 rounded-md px-1.5 py-1 leading-none text-white min-w-0',
                     isFinished
@@ -366,6 +393,7 @@ export function TournamentCard({
       <TournamentBetModal
         open={isBetModalOpen}
         onClose={() => setIsBetModalOpen(false)}
+        onConfirm={handleJoin}
         tournamentName={name ?? ''}
         tournamentType={type ?? 'bronze'}
         shardType={shardType}
@@ -376,7 +404,7 @@ export function TournamentCard({
 
       <TournamentResultModal
         open={isResultModalOpen}
-        onClose={() => setIsResultModalOpen(false)}
+        onClose={handleResultClose}
         tournamentName={name ?? ''}
         tournamentType={type ?? 'bronze'}
         shardType={shardType}

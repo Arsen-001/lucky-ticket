@@ -1,4 +1,5 @@
 'use client';
+import { useEffect, useState } from 'react';
 import Image, { type ImageProps } from 'next/image';
 import { twMerge } from 'tailwind-merge';
 import { useGetMeQuery } from '@/api/me.api';
@@ -12,6 +13,12 @@ export interface AvatarProps extends Omit<ImageProps, 'src' | 'alt'> {
 
 export function Avatar({ className, size = 54, shadow = false, ...rest }: AvatarProps) {
   const { data: me, isLoading } = useGetMeQuery();
+  // `me` resolves only on the client, so its avatar differs between the server
+  // render (no data → skeleton) and the first client render — a hydration
+  // mismatch. Gate on mount so both render the skeleton first, then swap in the
+  // real avatar after hydration.
+  const [mounted, setMounted] = useState(false);
+  useEffect(() => setMounted(true), []);
 
   const containerClassNames = twMerge(
     'flex-center rounded-full aspect-square object-cover object-center p-0.5',
@@ -19,7 +26,7 @@ export function Avatar({ className, size = 54, shadow = false, ...rest }: Avatar
     className
   );
   const src = me?.avatar;
-  if (isLoading) {
+  if (!mounted || isLoading) {
     return (
       <div
         style={{

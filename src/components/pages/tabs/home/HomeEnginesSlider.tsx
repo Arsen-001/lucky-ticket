@@ -12,6 +12,12 @@ import {
   useGetInventoryQuery,
   useUnequipChipMutation,
 } from '@/api/inventory.api';
+import {
+  useClaimEngineMutation,
+  useSkipEngineCycleMutation,
+  useUpgradeEngineSpeedMutation,
+  useUpgradeEngineCapacityMutation,
+} from '@/api/engines.api';
 import { useGetMeQuery } from '@/api/me.api';
 import { useGetTicketsQuery } from '@/api/tickets.api';
 import { findActiveBooster, findEquippedChip } from '@/utils/global/inventory.utils';
@@ -27,6 +33,7 @@ import { routes } from '@/constants/routes';
 import { chipEquipStarsCost } from '@/utils/global/inventory.utils';
 import type { InventoryChip } from '@/types/interfaces/inventory.interfaces';
 import { EmptyDataInfo } from '@/components/shared/EmptyDataInfo';
+import { QueryErrorState } from '@/components/shared/error/QueryErrorState';
 import { Skeleton } from '@/components/shared/seleketons/Skeleton';
 import '@/styles/components/engines-cube-dot.css';
 import {
@@ -78,7 +85,7 @@ const CORE_TIER_COLORS: Record<TicketType, { mid: string; dark: string; glow: st
 };
 
 export function HomeEnginesSlider({ className }: ClassNameProps) {
-  const { data: tickets, isLoading } = useGetTicketsQuery();
+  const { data: tickets, isLoading, isError, refetch } = useGetTicketsQuery();
   const { data: me } = useGetMeQuery();
   const t = useAppTranslations();
   const toast = useToast();
@@ -86,6 +93,10 @@ export function HomeEnginesSlider({ className }: ClassNameProps) {
   const [unequipChip, { isLoading: unequipping }] = useUnequipChipMutation();
   const [equipChipMutation] = useEquipChipMutation();
   const [activateBoosterMutation] = useActivateBoosterMutation();
+  const [claimEngine] = useClaimEngineMutation();
+  const [skipEngineCycle] = useSkipEngineCycleMutation();
+  const [upgradeEngineSpeed] = useUpgradeEngineSpeedMutation();
+  const [upgradeEngineCapacity] = useUpgradeEngineCapacityMutation();
   const [chipToUnequip, setChipToUnequip] = useState<InventoryChip | null>(null);
   const [skipConfirm, setSkipConfirm] = useState<{ engineId: string; cost: number } | null>(null);
   const [upgradeConfirm, setUpgradeConfirm] = useState<{
@@ -296,6 +307,8 @@ export function HomeEnginesSlider({ className }: ClassNameProps) {
       cycleStartedAt: dayjs().toISOString(),
     }));
     setElapsedByEngine(prev => ({ ...prev, [engineId]: 0 }));
+    // Persist to the backend so balances (tickets / AP in the header) update.
+    void claimEngine({ engineId });
   };
 
   const handleInstantClaim = (engineId: string) => {
@@ -319,20 +332,25 @@ export function HomeEnginesSlider({ className }: ClassNameProps) {
     setSkipConfirm({ engineId, cost });
   };
 
-  const fastForwardEngine = (engineId: string) => {
+  const fastForwardEngine = (engineId: string, cost: number) => {
     const engine = items.find(item => item.engine.id === engineId)?.engine;
     if (!engine) return;
     const capacityChip = findEquippedChip(inventory?.chips, engine.id, 'capacity');
     const capacityBooster = findActiveBooster(inventory?.boosters, engine.id, 'capacity');
     const fullCapacity = engineCapacity(engine, { capacityChip, capacityBooster });
+    // Skip charges stars on the server and marks the cycle ready WITHOUT claiming:
+    // optimistically fill pendingCount so the button flips to "Claim". The user then
+    // claims to receive AP. Stars in the header reconcile via the mutation's me patch.
     updateEngine(engineId, e => ({ ...e, pendingCount: fullCapacity }));
+    setElapsedByEngine(prev => ({ ...prev, [engineId]: 0 }));
+    void skipEngineCycle({ engineId, cost });
   };
 
   const confirmSkip = () => {
     if (!skipConfirm) return;
     const { engineId, cost } = skipConfirm;
     setSkipConfirm(null);
-    requireStars(cost, () => fastForwardEngine(engineId));
+    requireStars(cost, () => fastForwardEngine(engineId, cost));
   };
 
   const promoteIfMaxed = (engine: TicketEngine): TicketEngine => {
@@ -367,7 +385,7 @@ export function HomeEnginesSlider({ className }: ClassNameProps) {
     if (!upgradeConfirm) return;
     const { engineId, type, cost } = upgradeConfirm;
     setUpgradeConfirm(null);
-    requireStars(cost, () =>
+    requireStars(cost, () => {
       updateEngine(engineId, e =>
         promoteIfMaxed({
           ...e,
@@ -375,8 +393,12 @@ export function HomeEnginesSlider({ className }: ClassNameProps) {
             ? { speedLevel: Math.min(MAX_BOOST_LEVEL, (e.speedLevel ?? 0) + 1) }
             : { capacityLevel: Math.min(MAX_BOOST_LEVEL, (e.capacityLevel ?? 0) + 1) }),
         })
-      )
-    );
+      );
+      // Persist to the backend (charges stars + bumps the level) — matches
+      // EngineDetails. Without this the upgrade was optimistic-only and reverted.
+      if (type === 'speed') void upgradeEngineSpeed({ engineId, cost });
+      else void upgradeEngineCapacity({ engineId, cost });
+    });
   };
 
   if (isLoading) {
@@ -404,6 +426,10 @@ export function HomeEnginesSlider({ className }: ClassNameProps) {
         </div>
       </div>
     );
+  }
+
+  if (isError && !items.length) {
+    return <QueryErrorState className="mt-10" onRetry={() => refetch()} />;
   }
 
   if (!isLoading && !items.length) {

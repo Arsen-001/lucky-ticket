@@ -8,6 +8,7 @@ import { TicketOverlap } from '@/components/shared/icons/TicketOverlap';
 import { BoltIcon } from '@/components/shared/icons/BoltIcon';
 import { useGetProfileQuery, useSendTicketMutation } from '@/api/profile.api';
 import { useAppTranslations } from '@/hooks/useAppTranslations';
+import { useToast } from '@/hooks/useToast';
 import { GlobalConstants } from '@/constants/global.constants';
 import { TicketsEnum } from '@/types/enums/ticket.enums';
 import type { TicketType } from '@/types/types/ticket.types';
@@ -43,6 +44,7 @@ export function ProfileSendTicketModal({
   username,
 }: ProfileSendTicketModalProps) {
   const t = useAppTranslations();
+  const toast = useToast();
   const { data: me } = useGetProfileQuery(undefined);
   const [sendTicket, { isLoading }] = useSendTicketMutation();
 
@@ -75,8 +77,14 @@ export function ProfileSendTicketModal({
 
   const handleSend = async () => {
     if (!tier || !canSend) return;
-    await sendTicket({ userId, tier, quantity });
-    onClose();
+    try {
+      // Many 4xx modes (not enough tickets, daily cap, LP-only tier, self-send) —
+      // only close on success; surface failures instead of silently "succeeding".
+      await sendTicket({ userId, tier, quantity }).unwrap();
+      onClose();
+    } catch {
+      toast.error(t('action failed'));
+    }
   };
 
   return (

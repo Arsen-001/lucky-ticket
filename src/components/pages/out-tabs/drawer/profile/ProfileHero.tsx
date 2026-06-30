@@ -7,6 +7,7 @@ import Image from 'next/image';
 import { useUpdateBannerIconsMutation } from '@/api/profile.api';
 import { UserAvatar, type AvatarStatusColor } from '@/components/shared/user-elements/UserAvatar';
 import { BannerIconsLayer } from '@/components/pages/out-tabs/drawer/profile/BannerIconsLayer';
+import { ProfileCollageLayer } from '@/components/pages/out-tabs/drawer/profile/ProfileCollageLayer';
 import { ProfileAvatarEditButton } from '@/components/pages/out-tabs/drawer/profile/ProfileAvatarEditButton';
 import { ProfileShareSheet } from '@/components/pages/out-tabs/drawer/profile/ProfileShareSheet';
 import { ProfileSocialActions } from '@/components/pages/out-tabs/drawer/profile/ProfileSocialActions';
@@ -217,6 +218,14 @@ export function ProfileHero({ profile, loading, isPreview, onTogglePreview }: Pr
         >
           <h1 className={usernameClasses}>{profile?.username}</h1>
         </SkeletonSuspense>
+
+        {profile && (
+          <ProfileCollageLayer
+            collageAchievements={profile.collageAchievements}
+            isOwn={profile.isOwn}
+            isPreview={isPreview}
+          />
+        )}
 
         <div className="flex flex-wrap items-center justify-center gap-3">
           {profile?.isOwn && (

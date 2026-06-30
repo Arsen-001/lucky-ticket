@@ -1,4 +1,10 @@
 {
+  "no achievements yet": "No achievements yet",
+  "collage": "Collage",
+  "add to collage": "Add to collage",
+  "invitation sent": "Invitation sent",
+  "no active tournaments": "No active tournaments",
+  "select tournament": "Select a tournament",
   "+ bonuses from level {level} draw": "+ bonuses from your Level {level} draw",
   "+{amount} {coin} back": "+{amount} {coin} back",
   "+{amount} {coin} bonus": "+{amount} {coin} bonus",
@@ -390,6 +396,7 @@
   "instant claim": "Instant Claim",
   "instant claim with stars": "Instant claim with Telegram Stars",
   "insufficient balance": "Insufficient balance — top up to create.",
+  "invalid credentials": "Invalid email or password",
   "invalid email": "Invalid email",
   "invalid phone number": "Invalid phone number",
   "invalid ton address": "Invalid TON address",

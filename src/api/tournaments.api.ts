@@ -38,7 +38,7 @@ export const tournamentsApi = api.injectEndpoints({
     }),
     joinTournament: builder.mutation<JoinTournamentResponse, JoinTournamentRequest>({
       query: body => ({ url: 'tournaments/join', method: 'POST', body }),
-      invalidatesTags: [rtkTags.tournaments, rtkTags.me],
+      invalidatesTags: [rtkTags.tournaments, rtkTags.me, rtkTags.tickets],
     }),
     markTournamentResultSeen: builder.mutation<void, { tournamentId: string }>({
       query: body => ({ url: 'tournaments/result-seen', method: 'POST', body }),

@@ -4,6 +4,7 @@ import { useMemo, useState } from 'react';
 import { useClaimFriendMutation, useGetInvitedFriendsQuery } from '@/api/referral.api';
 import { ArrivalShine } from '@/components/shared/ArrivalShine';
 import { EmptyDataInfo } from '@/components/shared/EmptyDataInfo';
+import { QueryErrorState } from '@/components/shared/error/QueryErrorState';
 import { FriendClaimModal } from '@/components/pages/out-tabs/drawer/invite-friends/FriendClaimModal';
 import { FriendsClaimAllModal } from '@/components/pages/out-tabs/drawer/invite-friends/FriendsClaimAllModal';
 import { InvitedFriendRow } from '@/components/pages/out-tabs/drawer/invite-friends/InvitedFriendRow';
@@ -30,7 +31,7 @@ const sumClaimable = (friend: InvitedFriend) =>
 
 export const InvitedFriendsList = () => {
   const t = useAppTranslations();
-  const { data: friends = [], isLoading } = useGetInvitedFriendsQuery();
+  const { data: friends = [], isLoading, isError, refetch } = useGetInvitedFriendsQuery();
   const [claimFriend, { isLoading: isClaiming }] = useClaimFriendMutation();
   const [selectedFriend, setSelectedFriend] = useState<InvitedFriend | null>(null);
   const [cardFriend, setCardFriend] = useState<InvitedFriend | null>(null);
@@ -120,6 +121,10 @@ export const InvitedFriendsList = () => {
       setIsClaimingAll(false);
     }
   };
+
+  if (isError && !friends.length) {
+    return <QueryErrorState onRetry={() => refetch()} />;
+  }
 
   return (
     <div className="flex flex-col gap-3">

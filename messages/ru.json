@@ -1,4 +1,10 @@
 {
+  "no achievements yet": "Пока нет ачивок",
+  "collage": "Коллаж",
+  "add to collage": "Добавить в коллаж",
+  "invitation sent": "Приглашение отправлено",
+  "no active tournaments": "Нет активных турниров",
+  "select tournament": "Выберите турнир",
   "+ bonuses from level {level} draw": "+ бонусы из розыгрыша Уровня {level}",
   "+{amount} {coin} back": "+{amount} {coin} назад",
   "+{amount} {coin} bonus": "+{amount} {coin} бонус",
@@ -390,6 +396,7 @@
   "instant claim": "Мгновенное получение",
   "instant claim with stars": "Мгновенный сбор за Telegram Stars",
   "insufficient balance": "Недостаточно средств — пополните, чтобы создать.",
+  "invalid credentials": "Неверный email или пароль",
   "invalid email": "Неверный адрес электронной почты",
   "invalid phone number": "Неверный номер телефона",
   "invalid ton address": "Неверный TON-адрес",

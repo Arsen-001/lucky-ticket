@@ -83,8 +83,11 @@ export function NewSponsoredTournamentContent() {
       toast.success(t('tournament submitted'));
       router.push(routes.partners.index);
     } catch (err) {
-      const status = (err as { status?: number })?.status;
-      toast.error(status === 402 ? t('insufficient balance') : t('failed to create tournament'));
+      // Backend rejects an underfunded advertiser with 400 "Not enough TON balance"
+      // (not 402) — match the message so the specific copy actually shows.
+      const error = err as { status?: number; data?: { message?: string } };
+      const isBalance = error.data?.message === 'Not enough TON balance';
+      toast.error(isBalance ? t('insufficient balance') : t('failed to create tournament'));
     }
   };
 

@@ -1,4 +1,10 @@
 {
+  "no achievements yet": "Դեռ նվաճումներ չկան",
+  "collage": "Կոլաժ",
+  "add to collage": "Ավելացնել կոլաժին",
+  "invitation sent": "Հրավերն ուղարկվեց",
+  "no active tournaments": "Ակտիվ մրցաշարեր չկան",
+  "select tournament": "Ընտրեք մրցաշար",
   "+ bonuses from level {level} draw": "+ բոնուսներ ձեր Մակարդակ {level} վիճակահանությունից",
   "+{amount} {coin} back": "+{amount} {coin} վերադարձ",
   "+{amount} {coin} bonus": "+{amount} {coin} բոնուս",
@@ -390,6 +396,7 @@
   "instant claim": "Ակնթարթային ստացում",
   "instant claim with stars": "Ակնթարթային վերցում Telegram աստղերով",
   "insufficient balance": "Միջոցները բավարար չեն — համալրեք՝ ստեղծելու համար։",
+  "invalid credentials": "Սխալ էլ. հասցե կամ գաղտնաբառ",
   "invalid email": "Անվավեր էլ. հասցե",
   "invalid phone number": "Անվավեր հեռախոսահամար",
   "invalid ton address": "Անվավեր TON հասցե",

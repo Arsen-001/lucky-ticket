@@ -56,7 +56,18 @@ const renderAvatarIcon = (
       boxShadow: `0 0 16px color-mix(in srgb, ${accentColor} 38%, transparent)`,
     }}
   >
-    <Image src={imageUrl} alt={title} fill sizes={`${size}px`} className="object-cover" />
+    {imageUrl ? (
+      <Image src={imageUrl} alt={title} fill sizes={`${size}px`} className="object-cover" />
+    ) : (
+      // No image (e.g. a frame cosmetic) — show the name initial on the accent
+      // tile instead of passing an empty string to next/image.
+      <div
+        className="flex-center h-full w-full text-xl font-extrabold"
+        style={{ color: accentColor }}
+      >
+        {title.charAt(0).toUpperCase()}
+      </div>
+    )}
   </div>
 );
 
@@ -87,10 +98,7 @@ export function MarketHeroCarousel({ onSelect, onBuy }: MarketHeroCarouselProps)
         isNew: c.isNew,
         accent,
         accentColor,
-        renderIcon: size =>
-          c.imageUrl
-            ? renderAvatarIcon(c.imageUrl, c.name, accentColor, size)
-            : renderAvatarIcon('', c.name, accentColor, size),
+        renderIcon: size => renderAvatarIcon(c.imageUrl ?? '', c.name, accentColor, size),
         mutate: price => buyCosmetic({ cosmeticId: c.id, price }).unwrap(),
       };
     };
