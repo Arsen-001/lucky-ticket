@@ -122,14 +122,19 @@ export function ReadyStakeContent({ stakeId }: ReadyStakeContentProps) {
   );
   const ratePercent = computeStakeAprPercent(months);
   const rateLabel = ratePercent.toFixed(ratePercent % 1 === 0 ? 0 : 1);
-  const totalLC = stake.lockedAmount + yieldLC;
   const bonusAp = computeStakeCompletionBonusAp(stake.lockedAmount, months);
   const completionStars = computeStakeCompletionStars(months, levelDef);
 
   const handleClaim = async () => {
     const result = await claimStake({ stakeId: stake.id });
     if ('data' in result && result.data?.success) {
-      setClaimedSnapshot({ amount: totalLC, stars: completionStars, ap: bonusAp });
+      // Show the amounts the backend actually credited, not the client projection.
+      const r = result.data;
+      setClaimedSnapshot({
+        amount: r.principalReturned + r.yieldLC,
+        stars: r.completionStars,
+        ap: r.apBonus,
+      });
     } else {
       // e.g. "Stake has not matured yet" (400) — never fail silently.
       toast.error(t('action failed'));

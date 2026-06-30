@@ -51,3 +51,17 @@ export interface StartStakeBody {
 export interface StakeIdBody {
   stakeId: string;
 }
+
+/** Response of `POST stakes/claim` — the actual amounts credited by the backend. */
+export interface ClaimStakeResult {
+  success: boolean;
+  id: string;
+  /** Original deposit returned to the wallet. */
+  principalReturned: number;
+  /** APR yield credited in LC. */
+  yieldLC: number;
+  /** Lucky Stars credited on completion. */
+  completionStars: number;
+  /** AP completion bonus credited (base AP was credited at stake start). */
+  apBonus: number;
+}

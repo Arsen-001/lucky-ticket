@@ -1,6 +1,11 @@
 import { api } from '@/api/index.api';
 import { rtkTags } from '@/constants/rtk-tags';
-import type { StakeIdBody, StakesData, StartStakeBody } from '@/types/interfaces/stakes.interfaces';
+import type {
+  ClaimStakeResult,
+  StakeIdBody,
+  StakesData,
+  StartStakeBody,
+} from '@/types/interfaces/stakes.interfaces';
 
 export const stakesApi = api.injectEndpoints({
   endpoints: builder => ({
@@ -19,7 +24,7 @@ export const stakesApi = api.injectEndpoints({
       // Charges a star cancel fee + returns the deposit → same balance surfaces.
       invalidatesTags: [rtkTags.stakes, rtkTags.me, rtkTags.lc, rtkTags.wallet],
     }),
-    claimStake: builder.mutation<{ success: boolean }, StakeIdBody>({
+    claimStake: builder.mutation<ClaimStakeResult, StakeIdBody>({
       query: body => ({ url: 'stakes/claim', method: 'POST', body }),
       // Credits LC yield + writes a STAKE_REWARD LC-ledger row → also refresh the
       // LC transaction history and the wallet.
