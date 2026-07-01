@@ -4,6 +4,7 @@ import { Header } from '@/components/layout-elements/Header';
 import { TabBar } from '@/components/layout-elements/TabBar';
 import type { ChildrenProps } from '@/types/interfaces/component.interfcaes';
 import { Drawer } from '@/components/layout-elements/Drawer';
+import { NotificationAutoSurface } from '@/components/layout-elements/NotificationAutoSurface';
 import { usePathname } from 'next/navigation';
 
 export default function TabsLayout({ children }: ChildrenProps) {
@@ -24,6 +25,7 @@ export default function TabsLayout({ children }: ChildrenProps) {
       </main>
       <TabBar className="fixed bottom-0 left-0 right-0 z-50  shadow-xs" />
       <Drawer />
+      <NotificationAutoSurface />
     </>
   );
 }

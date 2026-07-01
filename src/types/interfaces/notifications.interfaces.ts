@@ -9,6 +9,8 @@ export type NotificationType =
   | 'leaderboard'
   | 'system';
 
+export type NotificationDisplayMode = 'feed' | 'banner' | 'modal';
+
 export interface Notification {
   id: string;
   title: string;
@@ -17,6 +19,8 @@ export interface Notification {
   date: string;
   type?: NotificationType;
   actionRoute?: Route;
+  /** How prominently the notification surfaces on app open. Defaults to 'feed'. */
+  displayMode?: NotificationDisplayMode;
 }
 
 export type NotificationChannel = 'email' | 'telegram';
