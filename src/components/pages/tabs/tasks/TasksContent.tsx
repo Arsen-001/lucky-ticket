@@ -22,6 +22,8 @@ import { TaskCategory, TaskFrequency, TaskStatus } from '@/types/enums/tasks.enu
 import type { AdSlot, CategoryTasks, Task, TaskSubStep } from '@/types/interfaces/tasks.interfaces';
 import { useAppTranslations } from '@/hooks/useAppTranslations';
 import { useCountDown } from '@/hooks/useCountDown';
+import { useToast } from '@/hooks/useToast';
+import { useRewardedAd } from '@/hooks/useRewardedAd';
 import { Skeleton } from '@/components/shared/seleketons/Skeleton';
 import { TasksFrequencyTabs } from './TasksFrequencyTabs';
 import { TasksCategoryNav, type CategoryNavItem } from './TasksCategoryNav';
@@ -148,6 +150,8 @@ export function TasksContent() {
   const { data, isLoading, isError, refetch } = useGetTasksQuery();
   const [claimTask, claimState] = useClaimTaskMutation();
   const [watchAd, watchState] = useWatchAdMutation();
+  const toast = useToast();
+  const { show: showRewardedAd, showing: adShowing } = useRewardedAd();
 
   const initialFrequency = ((): TaskFrequency => {
     const v = searchParams?.get('frequency');
@@ -506,6 +510,19 @@ export function TasksContent() {
 
   const handleWatchAd = async (slot: AdSlot) => {
     triggerHaptic('medium');
+
+    // Play the real rewarded ad first. Only a genuine completion (or the
+    // no-network dev/mock fallback) records the watch and grants the reward.
+    const outcome = await showRewardedAd();
+    if (outcome === 'skipped') {
+      toast.info(t('ad not completed'));
+      return;
+    }
+    if (outcome === 'error') {
+      toast.error(t('ad load failed'));
+      return;
+    }
+
     try {
       // Show what the server actually granted (not the slot's advertised reward,
       // which can differ) — and no fabricated balance (watchAd returns none).
@@ -575,7 +592,7 @@ export function TasksContent() {
           {showAds && data?.ads && (
             <AdsSection
               ads={data.ads}
-              loading={watchState.isLoading}
+              loading={watchState.isLoading || adShowing}
               onWatch={handleWatchAd}
               registerSection={registerSection}
               highlightToken={

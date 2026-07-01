@@ -27,6 +27,10 @@ export default async function RootLayout({ children }: ChildrenProps) {
       >
         <head>
           <Script src="https://telegram.org/js/telegram-web-app.js" strategy="beforeInteractive" />
+          {/* Adsgram rewarded-ad SDK — only loaded when a block id is configured. */}
+          {process.env.NEXT_PUBLIC_ADSGRAM_BLOCK_ID && (
+            <Script src="https://sad.adsgram.ai/js/sad.min.js" strategy="afterInteractive" />
+          )}
         </head>
         <body>
           <div id="scroll-container">

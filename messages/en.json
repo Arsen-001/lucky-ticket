@@ -35,6 +35,8 @@
   "added to balance": "added to balance",
   "all rewards added": "All rewards have been added to your balance",
   "added to your profile": "Added to your profile",
+  "ad load failed": "Couldn't load the ad. Please try again.",
+  "ad not completed": "Watch the full ad to earn the reward.",
   "ads progress": "{watched} of {total} watched today",
   "ads watched": "ads watched",
   "ads watched blurb": "Watch rewarded ads to climb the milestone chain.",

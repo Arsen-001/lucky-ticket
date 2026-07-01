@@ -35,6 +35,8 @@
   "added to balance": "zum Guthaben hinzugefügt",
   "all rewards added": "Alle Belohnungen wurden deinem Guthaben gutgeschrieben",
   "added to your profile": "Zu deinem Profil hinzugefügt",
+  "ad load failed": "Anzeige konnte nicht geladen werden. Bitte versuche es erneut.",
+  "ad not completed": "Sieh dir die Anzeige vollständig an, um die Belohnung zu erhalten.",
   "ads progress": "{watched} von {total} heute angesehen",
   "ads watched": "Werbung gesehen",
   "ads watched blurb": "Sieh dir belohnte Werbung an, um die Meilenstein-Kette zu erklimmen.",

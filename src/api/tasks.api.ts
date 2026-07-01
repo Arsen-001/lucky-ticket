@@ -41,6 +41,14 @@ import type {
  *   Server should mark the slot watched and apply the reward.
  *   Frontend invalidates `rtkTags.tasks` so the AdsSlider reflects the
  *   updated `watched` flag and the next unwatched slot becomes active.
+ *
+ *   Ad delivery: the client now plays a real Adsgram rewarded ad and only
+ *   POSTs here after a genuine completion (see `src/lib/adsgram/adsgram.ts`).
+ *   Until the account qualifies for Adsgram's server-to-server Reward URL the
+ *   watch is client-attested. Once S2S is enabled, treat the Adsgram callback
+ *   (GET ?userid=<telegramId>) as the authoritative "ad watched" signal — grant
+ *   the reward there and enforce the daily cap server-side, so a spoofed POST
+ *   without a matching callback grants nothing. See `DOCS/ADSGRAM_SETUP.md`.
  */
 export const tasksApi = api.injectEndpoints({
   endpoints: builder => ({
