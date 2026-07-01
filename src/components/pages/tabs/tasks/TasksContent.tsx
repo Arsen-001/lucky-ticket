@@ -115,7 +115,10 @@ const tasksForFrequency = (cat: CategoryTasks, frequency: TaskFrequency): Task[]
   return cat.once;
 };
 
-const ONCE_CATEGORY_ORDER: TaskCategory[] = [
+// Canonical category order for every frequency tab (daily / weekly / once).
+// Ads leads, Tournaments right after, then the rest. In the daily tab the Ads
+// block is a separate prepended section, so Tournaments is the first category.
+const CATEGORY_ORDER: TaskCategory[] = [
   TaskCategory.ADS,
   TaskCategory.TOURNAMENTS,
   TaskCategory.TICKETS,
@@ -131,9 +134,9 @@ const ONCE_CATEGORY_ORDER: TaskCategory[] = [
   TaskCategory.PARTNERS,
 ];
 
-const sortByOnceOrder = <T extends { category: TaskCategory }>(items: T[]): T[] => {
+const sortByCategoryOrder = <T extends { category: TaskCategory }>(items: T[]): T[] => {
   const rank = (c: TaskCategory) => {
-    const i = ONCE_CATEGORY_ORDER.indexOf(c);
+    const i = CATEGORY_ORDER.indexOf(c);
     return i === -1 ? Number.MAX_SAFE_INTEGER : i;
   };
   return [...items].sort((a, b) => rank(a.category) - rank(b.category));
@@ -337,9 +340,7 @@ export function TasksContent() {
       const ready = tasks.filter(t => t.status === TaskStatus.READY_TO_CLAIM).length;
       categoryItems.push({ category: cat.category, readyCount: ready });
     });
-    items.push(
-      ...(activeFrequency === TaskFrequency.ONCE ? sortByOnceOrder(categoryItems) : categoryItems)
-    );
+    items.push(...sortByCategoryOrder(categoryItems));
     return items;
   }, [data, activeFrequency]);
 
@@ -537,8 +538,7 @@ export function TasksContent() {
           c => c.category !== TaskCategory.PROFILE && c.category !== TaskCategory.PARTNERS
         )
       : filteredCategories;
-  const visibleCategories =
-    activeFrequency === TaskFrequency.ONCE ? sortByOnceOrder(onceFiltered) : onceFiltered;
+  const visibleCategories = sortByCategoryOrder(onceFiltered);
 
   const allEmpty = !showAds && visibleCategories.length === 0;
 

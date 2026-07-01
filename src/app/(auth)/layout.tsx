@@ -1,10 +1,20 @@
 'use client';
 import type { ChildrenProps } from '@/types/interfaces/component.interfcaes';
 import { GlobalConstants } from '@/constants/global.constants';
-import { usePathname } from 'next/navigation';
+import { routes } from '@/constants/routes';
+import { isTelegramEnv } from '@/lib/telegram/telegram';
+import { usePathname, useRouter } from 'next/navigation';
+import { useEffect } from 'react';
 
 export default function AuthLayout({ children }: ChildrenProps) {
   const pathname = usePathname();
+  const router = useRouter();
+
+  // Inside Telegram the session is authenticated on boot — the email-auth
+  // screens don't apply, so bounce any stray navigation back to the app.
+  useEffect(() => {
+    if (isTelegramEnv()) router.replace(routes.home);
+  }, [router]);
 
   return (
     <div className="h-full flex flex-col">

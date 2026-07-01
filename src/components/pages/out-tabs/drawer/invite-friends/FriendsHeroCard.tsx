@@ -15,6 +15,7 @@ import { TelegramStarIcon } from '@/components/shared/icons/TelegramStarIcon';
 import { GlobalConstants } from '@/constants/global.constants';
 import { useAppTranslations } from '@/hooks/useAppTranslations';
 import { getRefererLink } from '@/utils/pages/referral.utils';
+import { getTelegramWebApp, isTelegramEnv } from '@/lib/telegram/telegram';
 
 export function FriendsHeroCard() {
   const t = useAppTranslations();
@@ -38,9 +39,23 @@ export function FriendsHeroCard() {
 
   const handleShare = async () => {
     if (!link) return;
-    if (navigator.share) {
+    const text = t('invite share message');
+
+    // Inside Telegram: hand off to the native share sheet. `openTelegramLink`
+    // on a `t.me/share/url` link minimizes the Mini App and opens Telegram's
+    // "send to a chat" picker so the user forwards the invite to a contact.
+    const webApp = getTelegramWebApp();
+    if (isTelegramEnv() && webApp?.openTelegramLink) {
+      webApp.openTelegramLink(
+        `https://t.me/share/url?url=${encodeURIComponent(link)}&text=${encodeURIComponent(text)}`
+      );
+      return;
+    }
+
+    // Outside Telegram (dev browser): OS share sheet, then copy as last resort.
+    if (typeof navigator !== 'undefined' && navigator.share) {
       try {
-        await navigator.share({ url: link, title: t('invite friends') });
+        await navigator.share({ url: link, title: t('invite friends'), text });
         return;
       } catch {
         /* user cancelled */

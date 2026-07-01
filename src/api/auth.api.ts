@@ -45,6 +45,18 @@ export const authApi = api.injectEndpoints({
       },
     }),
 
+    // Telegram Mini App auth: the signed `initData` IS the credential — the
+    // backend verifies it and find-or-creates the account, so there is no
+    // registration step. Called once on boot by TelegramProvider.
+    telegramLogin: builder.mutation<AuthTokens, { initData: string }>({
+      query: body => ({ url: 'auth/telegram', method: 'POST', body }),
+      async onQueryStarted(_, { queryFulfilled, dispatch }) {
+        const { data } = await queryFulfilled;
+        persistTokens(data);
+        dispatch(api.util.invalidateTags([rtkTags.me]));
+      },
+    }),
+
     logout: builder.mutation<void, void>({
       query: () => ({
         url: 'auth/logout',
@@ -64,4 +76,9 @@ export const authApi = api.injectEndpoints({
   }),
 });
 
-export const { useLoginMutation, useRegisterMutation, useLogoutMutation } = authApi;
+export const {
+  useLoginMutation,
+  useRegisterMutation,
+  useLogoutMutation,
+  useTelegramLoginMutation,
+} = authApi;

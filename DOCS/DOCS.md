@@ -120,7 +120,7 @@ AP is earned from a data-driven **source registry** — every meaningful action 
 | Weekly task               | 2 / 3 / 4 / 5 / 6                     | by task tier (Bronze→Diamond), ~3/week                                                         |
 | One-time task             | varies                                | once per task                                                                                  |
 | Verify email              | 20                                    | one-time                                                                                       |
-| Claim                     | 1 / 2 / 4 / 8 / 16                     | per claim, by tier (Bronze→Diamond), 5×/day                                                    |
+| Claim                     | 1 / 2 / 4 / 8 / 16                    | per claim, by tier (Bronze→Diamond), 5×/day                                                    |
 | Watch a video             | 2                                     | 10×/day default · 20×/day with LP · 40×/day with VIP (daily cap = limit × 2 AP)                |
 | Send a ticket to a friend | 1                                     | 3×/day                                                                                         |
 | Like a profile            | 1                                     | 3×/day                                                                                         |
@@ -1252,7 +1252,13 @@ Encourages growth through referral rewards. Users can track their invited friend
 - Friend's Activity Points.
 - Friend's username and avatar.
 
+**How a referral is established:**
+
+Each user's invite link is a Telegram deep link — `https://t.me/<bot>?startapp=<referrerId>`. When a friend opens it, Telegram delivers `<referrerId>` as the `start_param` inside the signed `initData`. On the friend's **first** sign-in the backend records the referral (referrer → new user) and pays the inviter the signup reward below. The link is captured only at registration: a user who already has an account cannot be retro-attributed to a referrer, and each user can be referred at most once (self-referral is ignored).
+
 **Referral Benefits:**
+
+- **Signup Reward:** The moment a referred friend registers, the inviter is credited a one-off reward — **10 AP + 1 Lucky Star**, doubled to **20 AP + 2 Lucky Stars** when the invited friend is a Telegram Premium user. This is granted instantly (unlike the ticket commission below, which accumulates and must be claimed).
 
 When an invited friend claims tickets, the inviter earns a percentage of those tickets as a claimable reward — mirroring the same claim mechanic used for regular tickets:
 
