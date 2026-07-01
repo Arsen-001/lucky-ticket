@@ -116,7 +116,7 @@ export const appConfig = {
      * auto-starts — so you can test the whole app freely — but the manual
      * "replay" entry in Settings still works regardless of this flag.
      */
-    autoStart: false,
+    autoStart: true,
     /**
      * Free starter gifts granted when the player claims them after the first-run
      * language step. One Bronze engine is always part of the pack (built in
