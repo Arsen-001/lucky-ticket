@@ -19,7 +19,8 @@ interface BuyStarsModalProps {
 
 type Step = 'select' | 'success';
 
-const PRESETS = [100, 500, 1000, 5000];
+// `1` is a minimal-cost option for testing real payments; the rest are top-ups.
+const PRESETS = [1, 100, 500, 1000, 5000];
 
 export function BuyStarsModal({ open, onClose, initialStars }: BuyStarsModalProps) {
   const t = useAppTranslations();
@@ -104,7 +105,7 @@ export function BuyStarsModal({ open, onClose, initialStars }: BuyStarsModalProp
 
             <div className="relative flex flex-col gap-3">
               {/* preset amounts */}
-              <div className="grid grid-cols-4 gap-2">
+              <div className="grid grid-cols-5 gap-1.5">
                 {PRESETS.map(preset => {
                   const active = amount === preset;
                   return (
@@ -113,13 +114,13 @@ export function BuyStarsModal({ open, onClose, initialStars }: BuyStarsModalProp
                       type="button"
                       onClick={() => setInput(String(preset))}
                       className={twMerge(
-                        'flex-center gap-1 rounded-xl border py-2 text-[13px] font-extrabold tabular-nums transition-colors',
+                        'flex-center gap-0.5 rounded-xl border px-0.5 py-1.5 text-[11px] font-extrabold tabular-nums transition-colors',
                         active
                           ? 'border-gold/60 bg-gold/20 text-gold'
                           : 'border-white/10 bg-white/5 text-white/70 hover:bg-white/10'
                       )}
                     >
-                      <TelegramStarIcon size={12} />
+                      <TelegramStarIcon size={10} />
                       {formatNumber(preset)}
                     </button>
                   );
