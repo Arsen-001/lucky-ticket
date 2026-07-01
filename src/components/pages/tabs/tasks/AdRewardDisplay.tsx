@@ -67,38 +67,28 @@ export function AdRewardDisplay({ rewards, className }: AdRewardDisplayProps) {
   if (!rewards.length) return null;
 
   const count = rewards.length;
-  const iconSize = count === 1 ? 24 : count === 2 ? 20 : 17;
-  const chipPadding = count === 1 ? 'py-2.5 px-2' : count === 2 ? 'py-2 px-1.5' : 'py-1.5 px-1';
-  const amountSize = count === 1 ? 'text-sm' : count === 2 ? 'text-[12px]' : 'text-[11px]';
+  const iconSize = count >= 3 ? 12 : 14;
+  const amountSize = count >= 3 ? 'text-[10px]' : 'text-[11px]';
 
   return (
-    <div
-      className={twMerge('grid w-full gap-1.5', className)}
-      style={{ gridTemplateColumns: `repeat(${count}, minmax(0, 1fr))` }}
-    >
+    <div className={twMerge('flex items-center gap-1', className)}>
       {rewards.map((reward, i) => {
         const style = STYLE_MAP[reward.type];
         if (!style) return null;
-        const { Icon, iconClass, bgClass, glowClass, ringClass } = style;
+        const { Icon, iconClass, bgClass, ringClass } = style;
         return (
           <div
             key={`${reward.type}-${i}`}
             className={twMerge(
-              'relative flex flex-col items-center justify-center gap-1 rounded-xl border',
+              'flex min-w-0 items-center gap-0.5 rounded-md border px-1 py-0.5',
               bgClass,
-              glowClass,
-              ringClass,
-              chipPadding
+              ringClass
             )}
           >
             {Icon ? (
-              <Icon
-                size={iconSize}
-                strokeWidth={2.2}
-                className={twMerge('shrink-0 drop-shadow-[0_0_4px_currentColor]', iconClass)}
-              />
+              <Icon size={iconSize} strokeWidth={2.4} className={twMerge('shrink-0', iconClass)} />
             ) : (
-              <BoltIcon size={iconSize + 10} />
+              <BoltIcon size={iconSize + 4} />
             )}
             <span
               className={twMerge('font-extrabold tabular-nums leading-none text-white', amountSize)}

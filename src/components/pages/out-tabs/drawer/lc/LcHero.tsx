@@ -4,7 +4,9 @@ import { Skeleton } from '@/components/shared/seleketons/Skeleton';
 import { SkeletonSuspense } from '@/components/shared/seleketons/SkeletonSuspense';
 import { CoinIcon } from '@/components/shared/icons/CoinIcon';
 import { GlobalConstants } from '@/constants/global.constants';
-import { formatNumber } from '@/utils/global/number.utils';
+import { formatNumber, formatUsdPrice } from '@/utils/global/number.utils';
+import { lcToUsd } from '@/utils/global/lc.utils';
+import { useAppTranslations } from '@/hooks/useAppTranslations';
 import type { LcState } from '@/types/interfaces/lc.interfaces';
 
 export interface LcHeroProps {
@@ -13,7 +15,9 @@ export interface LcHeroProps {
 }
 
 export function LcHero({ state, loading }: LcHeroProps) {
+  const t = useAppTranslations();
   const balance = state?.balance ?? 0;
+  const coinPrice = formatUsdPrice(lcToUsd(1));
 
   return (
     <div className="card-outlined bg-purple-gradient relative overflow-hidden rounded-2xl p-5">
@@ -70,6 +74,10 @@ export function LcHero({ state, loading }: LcHeroProps) {
             </span>
           </div>
         </SkeletonSuspense>
+
+        <span className="text-pink-secondary text-[11px] font-semibold tabular-nums">
+          {t('price per coin', { coin: GlobalConstants.coinName, price: coinPrice })}
+        </span>
       </div>
     </div>
   );

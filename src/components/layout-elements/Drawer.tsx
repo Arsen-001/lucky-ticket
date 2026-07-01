@@ -18,6 +18,7 @@ import {
   Handshake,
   Layers,
   LifeBuoy,
+  LogOut,
   Package,
   Settings,
   ShieldCheck,
@@ -27,7 +28,9 @@ import {
   Wallet,
 } from 'lucide-react';
 import { twMerge } from 'tailwind-merge';
+import { useRouter } from 'next/navigation';
 
+import { useLogoutMutation } from '@/api/auth.api';
 import { useGetMeQuery } from '@/api/me.api';
 import { useGetNotificationsQuery } from '@/api/notifications.api';
 import { useGetStakesQuery } from '@/api/stakes.api';
@@ -59,6 +62,8 @@ export function Drawer() {
   const t = useAppTranslations();
   const open = useAppSelector(selectDrawerOpen);
   const dispatch = useAppDispatch();
+  const router = useRouter();
+  const [logout, { isLoading: isLoggingOut }] = useLogoutMutation();
   const { data: me, isLoading } = useGetMeQuery();
   const { data: notifications } = useGetNotificationsQuery();
   const { data: stakesData } = useGetStakesQuery();
@@ -76,6 +81,17 @@ export function Drawer() {
 
   const handleDrawerClose = () => {
     dispatch(closeDrawer());
+  };
+
+  const handleLogout = async () => {
+    try {
+      await logout().unwrap();
+    } catch {
+      // logout still clears local tokens in the mutation's onQueryStarted
+    } finally {
+      handleDrawerClose();
+      router.push(routes.login);
+    }
   };
 
   const asideRef = useRef<HTMLElement>(null);
@@ -359,6 +375,17 @@ export function Drawer() {
           </nav>
 
           <div aria-hidden className="drawer-divider mx-3 mb-3" />
+
+          <button
+            type="button"
+            onClick={handleLogout}
+            disabled={isLoggingOut}
+            tabIndex={tabIndex}
+            className="mx-3 mb-3 flex items-center gap-3 rounded-2xl px-3 py-3 text-sm font-semibold text-error transition-transform active:scale-99 disabled:opacity-60"
+          >
+            <LogOut size={18} />
+            <span>{t('logout')}</span>
+          </button>
 
           <div className="bg-background-overlay relative mx-3 mb-5 flex flex-col items-center gap-0.5 overflow-hidden rounded-2xl px-4 py-3">
             <span className="text-sm font-extrabold tracking-wide text-white">LuckyTicket365</span>

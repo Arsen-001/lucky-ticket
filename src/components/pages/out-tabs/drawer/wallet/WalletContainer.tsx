@@ -40,7 +40,8 @@ export function WalletContainer() {
     const topUpAmount = topUpRaw ? Number(topUpRaw) : NaN;
     if (!Number.isFinite(topUpAmount) || topUpAmount <= 0) return;
     setPendingTopUp(topUpAmount);
-    setModal(state?.isConnected ? 'buyStars' : 'connect');
+    // Buying stars pays with real Telegram Stars — no TON wallet needed.
+    setModal('buyStars');
     router.replace(routes.wallet, { scroll: false });
   }, [searchParams, state?.isConnected, router]);
 
@@ -52,7 +53,7 @@ export function WalletContainer() {
 
   const handleTopUp = (amount: number) => {
     setPendingTopUp(amount);
-    setModal(isConnected ? 'buyStars' : 'connect');
+    setModal('buyStars');
   };
 
   return (
@@ -69,7 +70,7 @@ export function WalletContainer() {
         disabled={isLoading}
         onDeposit={() => requireConnected('deposit')}
         onWithdraw={() => requireConnected('withdraw')}
-        onBuyStars={() => requireConnected('buyStars')}
+        onBuyStars={() => setModal('buyStars')}
       />
 
       <StarsBalanceCard
@@ -100,7 +101,6 @@ export function WalletContainer() {
           setModal(null);
           setPendingTopUp(undefined);
         }}
-        tonBalance={tonBalance}
         initialStars={pendingTopUp}
       />
       <NotEnoughStarsModal

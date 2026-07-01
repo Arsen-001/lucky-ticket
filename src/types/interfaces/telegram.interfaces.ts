@@ -36,6 +36,12 @@ export interface TelegramWebApp {
   /** Opens a `t.me/…` link inside Telegram. For a `t.me/share/url?…` link this
    *  brings up the native "share to a chat" picker (used for the invite share). */
   openTelegramLink?: (url: string) => void;
+  /** Opens a native invoice (e.g. a Telegram Stars payment). The callback
+   *  receives the final status once the payment flow closes. */
+  openInvoice?: (
+    url: string,
+    callback?: (status: 'paid' | 'cancelled' | 'failed' | 'pending') => void
+  ) => void;
   setHeaderColor?: (color: string) => void;
   setBackgroundColor?: (color: string) => void;
   disableVerticalSwipes?: () => void;

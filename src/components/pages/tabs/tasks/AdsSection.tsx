@@ -21,7 +21,7 @@ export interface AdsSectionProps {
   highlightToken?: number | null;
 }
 
-const SLIDE_WIDTH = 176;
+const SLIDE_WIDTH = 168;
 
 export function AdsSection({
   ads,
@@ -125,7 +125,7 @@ export function AdsSection({
       ) : (
         <div
           ref={scrollerRef}
-          className="scrollbar-hidden flex snap-x snap-mandatory items-center gap-3 overflow-x-auto overflow-y-visible -mx-4"
+          className="scrollbar-hidden flex snap-x snap-mandatory items-center gap-2 overflow-x-auto overflow-y-visible -mx-4"
           style={{
             scrollPaddingInline: `calc(50% - ${SLIDE_WIDTH / 2}px)`,
             paddingInline: `calc(50% - ${SLIDE_WIDTH / 2}px)`,
@@ -133,7 +133,7 @@ export function AdsSection({
         >
           {slots.map((slot, index) => {
             const isActive = index === activeIndex;
-            const sideOffset = isActive ? 0 : index < activeIndex ? 20 : -20;
+            const sideOffset = isActive ? 0 : index < activeIndex ? 12 : -12;
             const playableIndex = firstUnwatched < 0 ? -1 : firstUnwatched;
             const locked = !slot.watched && index !== playableIndex;
             const interactive = !slot.watched;

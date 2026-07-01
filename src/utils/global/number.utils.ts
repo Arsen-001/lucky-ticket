@@ -18,3 +18,14 @@ const compactPriceFormatter = new Intl.NumberFormat('en-US', {
 });
 
 export const formatCompactPrice = (value: number) => compactPriceFormatter.format(value);
+
+// USD price formatter that keeps small fractional values legible (e.g. an LC
+// unit price of $0.00001) instead of rounding them to "$0.00".
+const usdPriceFormatter = new Intl.NumberFormat('en-US', {
+  style: 'currency',
+  currency: 'USD',
+  minimumFractionDigits: 2,
+  maximumFractionDigits: 6,
+});
+
+export const formatUsdPrice = (value: number) => usdPriceFormatter.format(value);

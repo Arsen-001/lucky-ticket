@@ -50,6 +50,12 @@ export const walletApi = api.injectEndpoints({
       query: body => ({ url: 'wallet/buy-stars', method: 'POST', body }),
       invalidatesTags: [rtkTags.wallet, rtkTags.walletTransactions, rtkTags.me],
     }),
+    // Native Telegram Stars purchase: returns an invoice link the Mini App opens
+    // with `WebApp.openInvoice`. Crediting happens server-side via the payment
+    // webhook, so the balance is refreshed manually once openInvoice reports 'paid'.
+    createStarsInvoice: builder.mutation<{ link: string }, { stars: number }>({
+      query: body => ({ url: 'wallet/stars/invoice', method: 'POST', body }),
+    }),
   }),
 });
 
@@ -63,4 +69,5 @@ export const {
   useDisconnectWalletMutation,
   useWithdrawTonMutation,
   useBuyStarsMutation,
+  useCreateStarsInvoiceMutation,
 } = walletApi;

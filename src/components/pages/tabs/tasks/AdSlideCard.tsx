@@ -1,4 +1,4 @@
-import { Check, Lock, PlayCircle } from 'lucide-react';
+import { Check, Loader2, Lock, Play } from 'lucide-react';
 import { twMerge } from 'tailwind-merge';
 import type { AdSlot } from '@/types/interfaces/tasks.interfaces';
 import { useAppTranslations } from '@/hooks/useAppTranslations';
@@ -37,16 +37,23 @@ const AD_GLOW: Record<number, string> = {
   10: '',
 };
 
+/**
+ * Ultra-compact rewarded-ad slide: a single horizontal row —
+ * `#index · reward chips · mini play button` — roughly half the height of a
+ * stacked card. The watch action is an icon-only button (labelled for a11y).
+ */
 export function AdSlideCard({ slot, onWatch, loading, locked = false }: AdSlideCardProps) {
   const t = useAppTranslations();
   const watched = slot.watched;
   const playable = !watched && !locked;
   const showShine = slot.index >= 9 && playable;
 
+  const label = loading ? t('loading') : watched ? t('watched') : locked ? t('locked') : t('watch');
+
   return (
     <div
       className={twMerge(
-        'relative w-full rounded-2xl overflow-hidden bg-background-overlay flex flex-col p-3 gap-2.5',
+        'relative flex w-full items-center gap-1.5 rounded-lg overflow-hidden bg-background-overlay px-1.5 py-1.5',
         AD_FRAME[slot.index] ?? 'card-outlined',
         AD_GLOW[slot.index] ?? '',
         watched && 'opacity-60',
@@ -60,45 +67,38 @@ export function AdSlideCard({ slot, onWatch, loading, locked = false }: AdSlideC
         </span>
       )}
 
-      {/* header: index + watched check */}
-      <div className="relative flex items-center justify-between">
-        <span className="text-[10px] uppercase tracking-wider font-bold text-white/40">
-          #{slot.index}
-        </span>
-        {watched ? (
-          <div className="flex-center w-5 h-5 rounded-full bg-success/20">
-            <Check size={11} className="text-success" />
-          </div>
-        ) : locked ? (
-          <Lock size={14} className="text-white/40" />
-        ) : (
-          <PlayCircle size={18} className="text-white/60" />
-        )}
-      </div>
+      {/* index */}
+      <span className="relative shrink-0 text-[9px] font-bold tabular-nums text-white/35">
+        #{slot.index}
+      </span>
 
-      {/* rewards block — biggest visual focus */}
-      <div className="relative flex flex-col items-center gap-1.5 p-1.5 rounded-xl bg-black/20">
-        <p className="text-[10px] uppercase tracking-wider text-white/40 font-bold">
-          {t('reward')}
-        </p>
+      {/* rewards — inline chips, fill the middle */}
+      <div className="relative min-w-0 flex-1">
         <AdRewardDisplay rewards={slot.rewards} />
       </div>
 
-      {/* watch button */}
+      {/* mini watch button (icon-only; label via aria) */}
       <button
         type="button"
+        aria-label={label}
         disabled={!playable || loading}
         onClick={playable ? () => onWatch(slot) : undefined}
         className={twMerge(
-          'relative w-full rounded-full px-3 py-2.5 text-xs font-bold transition-all active:scale-95 disabled:cursor-not-allowed flex-center gap-1.5',
-          watched && 'bg-white/5 text-white/40',
+          'relative flex-center h-7 w-7 shrink-0 rounded-full transition-all active:scale-90 disabled:cursor-not-allowed',
+          watched && 'bg-success/20 text-success',
           locked && 'bg-white/5 text-white/40',
           playable && 'bg-pink-gradient text-white hover:brightness-110 animate-task-pulse'
         )}
       >
-        {playable && <PlayCircle size={14} />}
-        {locked && <Lock size={12} />}
-        {loading ? t('loading') : watched ? t('watched') : locked ? t('locked') : t('watch')}
+        {loading ? (
+          <Loader2 size={13} className="animate-spin" />
+        ) : watched ? (
+          <Check size={13} />
+        ) : locked ? (
+          <Lock size={12} />
+        ) : (
+          <Play size={12} fill="currentColor" className="translate-x-[1px]" />
+        )}
       </button>
     </div>
   );

@@ -144,4 +144,7 @@ export const walletMock = {
   'POST wallet/disconnect': disconnectWallet,
   'POST wallet/withdraw': withdrawTon,
   'POST wallet/buy-stars': buyStars,
+  // Native Stars invoice — `openInvoice` only exists inside Telegram, so in the
+  // mock/browser the flow reports 'unavailable' and never uses this link.
+  'POST wallet/stars/invoice': () => ({ link: 'https://t.me/invoice/mock' }),
 };
