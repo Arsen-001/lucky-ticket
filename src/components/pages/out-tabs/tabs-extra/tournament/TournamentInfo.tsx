@@ -99,7 +99,11 @@ export function TournamentInfo({ id, className, ...rest }: TournamentDetailsProp
   const ticketCount = data?.participatedTicketsCount ?? 0;
   const userResult = data?.userResult;
   const hasUnseenResult = isFinished && !!userResult && !data?.resultSeen && !resultDismissed;
-  const shouldShowResultModal = isFinished && !data?.resultSeen && !resultDismissed;
+  // Only a participant with a result gets the auto-popup. Non-participants who
+  // open a finished tournament (history / search / direct link) have no
+  // `userResult`, so without this guard they'd get an unprompted "tournament
+  // ended" splash on every visit. They can still open it via the "Ended" button.
+  const shouldShowResultModal = isFinished && !!userResult && !data?.resultSeen && !resultDismissed;
 
   // Auto-open result modal once after data loads
   useEffect(() => {

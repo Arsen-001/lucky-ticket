@@ -63,6 +63,10 @@ export function TournamentBetModal({
 
   const isMinReached = betCount <= 1;
   const isMaxReached = betCount >= availableTickets;
+  // Guard the join: with 0 tickets of this tier the counter still shows 1, so
+  // confirming would fire a join the backend is bound to reject. Only allow a
+  // confirm the player can actually back with owned tickets.
+  const canConfirm = betCount >= 1 && betCount <= availableTickets;
   const haloRgb = TIER_HALO_RGB[tournamentType];
   const tierTextClass = TIER_TEXT_CLASS[tournamentType];
 
@@ -99,7 +103,8 @@ export function TournamentBetModal({
   };
 
   const handleConfirm = () => {
-    if (betCount > 0) onConfirm?.(betCount);
+    if (!canConfirm) return;
+    onConfirm?.(betCount);
     handleClose();
   };
 
@@ -272,6 +277,7 @@ export function TournamentBetModal({
           {/* Action — gradient + shine */}
           <Button
             onClick={handleConfirm}
+            disabled={!canConfirm}
             icon={<Plus strokeWidth={3} />}
             iconSize={14}
             className={twMerge(

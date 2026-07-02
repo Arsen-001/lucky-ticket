@@ -12,6 +12,7 @@ import {
   type PodiumRank,
 } from '@/components/pages/out-tabs/drawer/leaderboard/LeaderboardPodium';
 import { Skeleton } from '@/components/shared/seleketons/Skeleton';
+import { QueryErrorState } from '@/components/shared/error/QueryErrorState';
 import { LcLabel } from '@/components/shared/icons/LcLabel';
 import { ShardZoomButton } from '@/components/pages/out-tabs/tabs-extra/tournament/ShardZoomButton';
 import { GlobalConstants } from '@/constants/global.constants';
@@ -93,7 +94,7 @@ interface TournamentPlacementsProps {
 }
 
 export function TournamentPlacements({ id }: TournamentPlacementsProps) {
-  const { data: places, isLoading } = useGetTournamentPlacesQuery(id);
+  const { data: places, isLoading, isError, refetch } = useGetTournamentPlacesQuery(id);
   const { data: tournament } = useGetTournamentByIdQuery(id);
   const t = useAppTranslations();
 
@@ -143,6 +144,10 @@ export function TournamentPlacements({ id }: TournamentPlacementsProps) {
   })();
 
   const restPlaces = places?.places?.filter(p => p.to || p.from > 3) ?? [];
+
+  // A failed places load must surface an error+retry, not a silently empty
+  // podium and list (the silent-empty anti-pattern). Placed after every hook.
+  if (isError) return <QueryErrorState onRetry={() => refetch()} />;
 
   return (
     <div className="flex flex-col gap-4">
