@@ -1057,19 +1057,54 @@ The **Ads** category in the **One-time** tasks tab holds a single task type — 
 - **Levels:** 7 cumulative view-count thresholds — **10, 25, 50, 100, 200, 400, 800** ads watched.
 - **Rewards per level:**
 
-  | Level | Ads watched | Reward                                     |
-  | ----- | ----------- | ------------------------------------------ |
-  | 1     | 10          | 1,000 LC, 50 AP                            |
-  | 2     | 25          | 3,000 LC, 150 AP                           |
-  | 3     | 50          | 6,000 LC, 1 ticket, 300 AP                 |
-  | 4     | 100         | 12,000 LC, 2 tickets, 600 AP               |
-  | 5     | 200         | 25,000 LC, 3 tickets, 5 Stars, 1,200 AP    |
-  | 6     | 400         | 50,000 LC, 5 tickets, 10 Stars, 2,400 AP   |
-  | 7     | 800         | 100,000 LC, 10 tickets, 20 Stars, 5,000 AP |
+  | Level | Ads watched | Reward                                 |
+  | ----- | ----------- | -------------------------------------- |
+  | 1     | 10          | 2,000 LC, 5 AP                         |
+  | 2     | 25          | 5,000 LC, 10 AP                        |
+  | 3     | 50          | 10,000 LC, 1 ticket, 15 AP             |
+  | 4     | 100         | 20,000 LC, 1 ticket, 20 AP             |
+  | 5     | 200         | 40,000 LC, 2 tickets, 30 AP            |
+  | 6     | 400         | 80,000 LC, 3 tickets, 45 AP            |
+  | 7     | 800         | 150,000 LC, 5 tickets, 15 Stars, 60 AP |
 
 - After the 7th level, the slider shows a **“Coming soon”** card — additional levels are planned.
 - Tapping a level card sends the user to the daily **Ads** block (`/tasks?frequency=daily&category=ads`), where ads are actually watched. The daily ads block (per-day slot rewards) is a separate mechanic and is unaffected.
 - The view count is **cumulative and never resets** — this is a lifetime progression chain, not a recurring task.
+
+### 12.6 One-Time Milestone Catalog (2026-07 rebalance)
+
+The one-time tab holds a curated catalog of **~120 tasks** whose reward budget is subordinated to the AP tier pacing (Section 5): milestones are a bonus on top of the daily baseline, never a highway past it.
+
+**Budget rules** (enforced by backend guardrail tests in `milestones.spec.ts`):
+
+- **Total one-time AP ≈ 2,900** — about 11% of the Diamond threshold. Early steps award 5–25 AP; legendary steps up to 150.
+- **Instant one-click actions award 0 AP** (LC/tickets only): account setup, first-claim/first-join achievements. AP lives only in time-gated goals.
+- **Paid actions award 0 AP** — VIP levels, Lucky Player, and star purchases give LC/ticket/Stars cashback (~2–5% of spend), but tiers are earned by playing, not paying.
+- **Tier-journey achievements (Reach Silver/Gold/Platinum/Diamond) award 0 AP** — awarding AP for reaching an AP threshold would be circular. They pay LC + tickets.
+- **Stars giveaways are bounded**: non-cashback Stars live only in legendary steps (top-1 all-time, 365-day streak, 100 friends…), ≤ 500 LS total across the catalog.
+
+**Milestone chains** (each rendered as a horizontal slider):
+
+| Chain                      | Steps                      | Counts               |
+| -------------------------- | -------------------------- | -------------------- |
+| Watch ads                  | 10/25/50/100/200/400/800   | lifetime ads watched |
+| Participate in tournaments | 1/5/10/25/50/100           | any tier             |
+| Take a prize place         | 1/5/10/25/50/100           | top-3 finishes       |
+| Take 1st place             | 1/5/10/25/50/100           | outright wins        |
+| Own engines                | 2/5/10/15/20/30            | engines of any tier  |
+| Collect tickets            | 250/1k/2.5k/10k/25k/50k    | lifetime produced    |
+| Start stakes               | 3/5/10/15/20/30            | stakes of any tier   |
+| Stake volume               | 100k/500k/2M/5M/20M/50M LC | lifetime locked LC   |
+| Invite friends             | 1/5/10/25/50/100           | referral joins       |
+| Leaderboard rank           | top 1000/500/100/50/10/1   | all-time board only  |
+| Purchase Stars             | 100/250/500/1k/2.5k/5k     | cashback chain, 0 AP |
+| VIP level                  | 1–10                       | cashback chain, 0 AP |
+
+Plus ~35 single achievements: onboarding (email, username, 2FA, avatar, wallet, deposit), first steps, engine mastery (tier unlocks in ascending order, parallel producer, boosts), tournament prowess (project/partner wins, all-tier winner, Platinum/Diamond winner), referrals, wallet actions, login streaks (7/30/90/365), and the tier journey.
+
+Deliberately **removed** in the rebalance (multi-dipping or stale old-economy scale): the 2nd/3rd-place chains, all per-tier tournament chains, per-tier engine/ticket/stake chains, daily/weekly/monthly leaderboard chains, the star-earn chain, the “10K/100K/1M AP” achievements (replaced by Reach Silver/Gold/Platinum), and duplicate achievements for email/wallet/deposit/status actions.
+
+The catalog is **code-canonical**: the backend upserts it on every boot (code wins over DB/admin edits to seeded tasks — same policy as market ladder prices and periodic task AP) and deletes seeded tasks that were removed from the catalog. Admin-created tasks (UUID ids) are never touched.
 
 ### Connections
 

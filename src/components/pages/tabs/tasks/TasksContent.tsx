@@ -3,7 +3,6 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { useSearchParams } from 'next/navigation';
 import {
-  ArrowDownToLine,
   BarChart3,
   Cog,
   Coins,
@@ -15,7 +14,6 @@ import {
   TrendingUp,
   Users,
 } from 'lucide-react';
-import type { MedalType } from '@/components/shared/icons/Medal';
 import { icons } from '@/constants/icons';
 import { useGetTasksQuery, useClaimTaskMutation, useWatchAdMutation } from '@/api/tasks.api';
 import { TaskCategory, TaskFrequency, TaskStatus } from '@/types/enums/tasks.enums';
@@ -29,10 +27,7 @@ import { TasksFrequencyTabs } from './TasksFrequencyTabs';
 import { TasksCategoryNav, type CategoryNavItem } from './TasksCategoryNav';
 import { TasksCategorySection } from './TasksCategorySection';
 import { TournamentMilestoneSlider } from './TournamentMilestoneSlider';
-import { TournamentSubTabs, type TournamentSubTab } from './TournamentSubTabs';
-import { TournamentSlidersSkeleton } from './TournamentSlidersSkeleton';
 import { AdsSection } from './AdsSection';
-import type { TierName } from '@/types/types/tier.types';
 import { ClaimRewardModal, type RewardModalResult } from './ClaimRewardModal';
 import { ArrivalShine } from '@/components/shared/ArrivalShine';
 
@@ -178,21 +173,6 @@ export function TasksContent() {
     nonce: number;
   } | null>(null);
   const [taskHighlight, setTaskHighlight] = useState<{ id: string; nonce: number } | null>(null);
-  const [tournamentSubTab, setTournamentSubTab] = useState<TournamentSubTab>('general');
-  const [isSubTabSwitching, setIsSubTabSwitching] = useState(false);
-  const isFirstSubTabRender = useRef(true);
-  const [ticketsSubTab, setTicketsSubTab] = useState<TournamentSubTab>('general');
-  const [isTicketsSubTabSwitching, setIsTicketsSubTabSwitching] = useState(false);
-  const isFirstTicketsSubTabRender = useRef(true);
-  const [enginesSubTab, setEnginesSubTab] = useState<TournamentSubTab>('general');
-  const [isEnginesSubTabSwitching, setIsEnginesSubTabSwitching] = useState(false);
-  const isFirstEnginesSubTabRender = useRef(true);
-  const [stakesSubTab, setStakesSubTab] = useState<TournamentSubTab>('general');
-  const [isStakesSubTabSwitching, setIsStakesSubTabSwitching] = useState(false);
-  const isFirstStakesSubTabRender = useRef(true);
-  const [leaderboardPeriodTab, setLeaderboardPeriodTab] = useState<TournamentSubTab>('daily');
-  const [isLeaderboardSubTabSwitching, setIsLeaderboardSubTabSwitching] = useState(false);
-  const isFirstLeaderboardSubTabRender = useRef(true);
 
   // Pinned tasks — user can star any number of tasks; pinned ones float to
   // the top of their status group (right after READY_TO_CLAIM).
@@ -222,57 +202,6 @@ export function TasksContent() {
     });
   };
 
-  // Show a brief skeleton when the tournament sub-tab swaps so the content
-  // change feels intentional rather than instant.
-  useEffect(() => {
-    if (isFirstSubTabRender.current) {
-      isFirstSubTabRender.current = false;
-      return;
-    }
-    setIsSubTabSwitching(true);
-    const id = window.setTimeout(() => setIsSubTabSwitching(false), 320);
-    return () => window.clearTimeout(id);
-  }, [tournamentSubTab]);
-
-  useEffect(() => {
-    if (isFirstTicketsSubTabRender.current) {
-      isFirstTicketsSubTabRender.current = false;
-      return;
-    }
-    setIsTicketsSubTabSwitching(true);
-    const id = window.setTimeout(() => setIsTicketsSubTabSwitching(false), 320);
-    return () => window.clearTimeout(id);
-  }, [ticketsSubTab]);
-
-  useEffect(() => {
-    if (isFirstEnginesSubTabRender.current) {
-      isFirstEnginesSubTabRender.current = false;
-      return;
-    }
-    setIsEnginesSubTabSwitching(true);
-    const id = window.setTimeout(() => setIsEnginesSubTabSwitching(false), 320);
-    return () => window.clearTimeout(id);
-  }, [enginesSubTab]);
-
-  useEffect(() => {
-    if (isFirstStakesSubTabRender.current) {
-      isFirstStakesSubTabRender.current = false;
-      return;
-    }
-    setIsStakesSubTabSwitching(true);
-    const id = window.setTimeout(() => setIsStakesSubTabSwitching(false), 320);
-    return () => window.clearTimeout(id);
-  }, [stakesSubTab]);
-
-  useEffect(() => {
-    if (isFirstLeaderboardSubTabRender.current) {
-      isFirstLeaderboardSubTabRender.current = false;
-      return;
-    }
-    setIsLeaderboardSubTabSwitching(true);
-    const id = window.setTimeout(() => setIsLeaderboardSubTabSwitching(false), 320);
-    return () => window.clearTimeout(id);
-  }, [leaderboardPeriodTab]);
   const [pendingClaim, setPendingClaim] = useState<{
     id: string;
     open: boolean;
@@ -610,45 +539,21 @@ export function TasksContent() {
               activeFrequency === TaskFrequency.ONCE && cat.category === TaskCategory.TOURNAMENTS;
             const isTicketsOnce =
               activeFrequency === TaskFrequency.ONCE && cat.category === TaskCategory.TICKETS;
-            const ticketCollectPrefix =
-              ticketsSubTab === 'general' ? 'ticket-collect-' : `ticket-${ticketsSubTab}-collect-`;
             const ticketCollectTasks = isTicketsOnce
-              ? allTasks.filter(task => task.id.startsWith(ticketCollectPrefix))
-              : [];
-            // Locked tier sub-tabs for tickets (tier > USER_TIER) — sourced from any ticket task in that tier.
-            const ticketsLockedTabs: TournamentSubTab[] = isTicketsOnce
-              ? (['silver', 'gold', 'platinum', 'diamond'] as const).filter(tier =>
-                  allTasks.some(
-                    task =>
-                      task.id.startsWith(`ticket-${tier}-collect-`) &&
-                      task.status === TaskStatus.LOCKED
-                  )
-                )
+              ? allTasks.filter(task => task.id.startsWith('ticket-collect-'))
               : [];
 
             const isEnginesOnce =
               activeFrequency === TaskFrequency.ONCE && cat.category === TaskCategory.ENGINES;
-            const engineCollectPrefix =
-              enginesSubTab === 'general' ? 'engine-collect-' : `engine-${enginesSubTab}-collect-`;
             const engineCollectTasks = isEnginesOnce
-              ? allTasks.filter(task => task.id.startsWith(engineCollectPrefix))
-              : [];
-            const enginesLockedTabs: TournamentSubTab[] = isEnginesOnce
-              ? (['silver', 'gold', 'platinum', 'diamond'] as const).filter(tier =>
-                  allTasks.some(
-                    task =>
-                      task.id.startsWith(`engine-${tier}-collect-`) &&
-                      task.status === TaskStatus.LOCKED
-                  )
-                )
+              ? allTasks.filter(task => task.id.startsWith('engine-collect-'))
               : [];
 
             const isLeaderboardOnce =
               activeFrequency === TaskFrequency.ONCE && cat.category === TaskCategory.LEADERBOARD;
+            // 2026-07 rebalance: one prestige chain on the all-time board.
             const leaderboardRankTasks = isLeaderboardOnce
-              ? allTasks.filter(task =>
-                  task.id.startsWith(`leaderboard-${leaderboardPeriodTab}-rank-`)
-                )
+              ? allTasks.filter(task => task.id.startsWith('leaderboard-alltime-rank-'))
               : [];
 
             const isFriendsOnce =
@@ -668,9 +573,6 @@ export function TasksContent() {
             const starPurchaseTasks = isStarsOnce
               ? allTasks.filter(task => task.id.startsWith('star-purchase-'))
               : [];
-            const starEarnTasks = isStarsOnce
-              ? allTasks.filter(task => task.id.startsWith('star-earn-'))
-              : [];
 
             const isProfileStatusOnce =
               activeFrequency === TaskFrequency.ONCE &&
@@ -681,23 +583,11 @@ export function TasksContent() {
 
             const isStakesOnce =
               activeFrequency === TaskFrequency.ONCE && cat.category === TaskCategory.STAKES;
-            const stakeCountPrefix =
-              stakesSubTab === 'general' ? 'stake-count-' : `stake-${stakesSubTab}-count-`;
-            const stakeVolumePrefix =
-              stakesSubTab === 'general' ? 'stake-volume-' : `stake-${stakesSubTab}-volume-`;
             const stakeCountTasks = isStakesOnce
-              ? allTasks.filter(task => task.id.startsWith(stakeCountPrefix))
+              ? allTasks.filter(task => task.id.startsWith('stake-count-'))
               : [];
             const stakeVolumeTasks = isStakesOnce
-              ? allTasks.filter(task => task.id.startsWith(stakeVolumePrefix))
-              : [];
-            const stakesLockedTabs: TournamentSubTab[] = isStakesOnce
-              ? (['silver', 'gold', 'platinum', 'diamond'] as const).filter(tier =>
-                  allTasks.some(
-                    task =>
-                      task.id.startsWith(`stake-${tier}-`) && task.status === TaskStatus.LOCKED
-                  )
-                )
+              ? allTasks.filter(task => task.id.startsWith('stake-volume-'))
               : [];
 
             // General sliders (tier-agnostic): podium + total participation + 1st/2nd/3rd any tier
@@ -720,56 +610,11 @@ export function TasksContent() {
                 blurb: t('place 1st blurb'),
                 unitLabel: t('place 1st'),
               },
-              {
-                prefix: 'tournament-2nd-',
-                title: t('place 2nd title'),
-                blurb: t('place 2nd blurb'),
-                unitLabel: t('place 2nd'),
-              },
-              {
-                prefix: 'tournament-3rd-',
-                title: t('place 3rd title'),
-                blurb: t('place 3rd blurb'),
-                unitLabel: t('place 3rd'),
-              },
             ];
 
-            // Per-tier sliders — built dynamically from the active tier sub-tab.
-            const buildTierSliderConfigs = (tier: TierName) => {
-              const tierName = t(tier);
-              return [
-                {
-                  prefix: `tournament-${tier}-played-`,
-                  title: t('tier participation title', { tier: tierName }),
-                  blurb: t('tier participation blurb', { tier: tierName }),
-                  unitLabel: `${tierName} · ${t('tournament participation')}`,
-                },
-                {
-                  prefix: `tournament-${tier}-1st-`,
-                  title: t('tier place title', { tier: tierName, place: t('place 1st') }),
-                  blurb: t('tier place blurb', { tier: tierName, place: t('place 1st') }),
-                  unitLabel: `${tierName} · 1st`,
-                },
-                {
-                  prefix: `tournament-${tier}-2nd-`,
-                  title: t('tier place title', { tier: tierName, place: t('place 2nd') }),
-                  blurb: t('tier place blurb', { tier: tierName, place: t('place 2nd') }),
-                  unitLabel: `${tierName} · 2nd`,
-                },
-                {
-                  prefix: `tournament-${tier}-3rd-`,
-                  title: t('tier place title', { tier: tierName, place: t('place 3rd') }),
-                  blurb: t('tier place blurb', { tier: tierName, place: t('place 3rd') }),
-                  unitLabel: `${tierName} · 3rd`,
-                },
-              ];
-            };
-
-            const activeSliderConfigs = isTournamentsOnce
-              ? tournamentSubTab === 'general'
-                ? generalSliderConfigs
-                : buildTierSliderConfigs(tournamentSubTab as TierName)
-              : [];
+            // 2026-07 rebalance: the 2nd/3rd and per-tier chains were dropped
+            // (multi-dipping the same actions), so there are no tier sub-tabs.
+            const activeSliderConfigs = isTournamentsOnce ? generalSliderConfigs : [];
 
             const sliders = activeSliderConfigs
               .map(s => ({ ...s, tasks: allTasks.filter(task => task.id.startsWith(s.prefix)) }))
@@ -799,16 +644,6 @@ export function TasksContent() {
                             : isProfileStatusOnce
                               ? allTasks.filter(task => !task.id.startsWith('vip-level-'))
                               : allTasks;
-
-            // Tabs to mark as locked (tier > USER_TIER) — sourced from any task's status in that tier group
-            const lockedTabs: TournamentSubTab[] = isTournamentsOnce
-              ? (['bronze', 'silver', 'gold', 'platinum', 'diamond'] as const).filter(tier =>
-                  allTasks.some(
-                    task =>
-                      task.id.startsWith(`tournament-${tier}-`) && task.status === TaskStatus.LOCKED
-                  )
-                )
-              : [];
 
             return (
               <TasksCategorySection
@@ -842,141 +677,61 @@ export function TasksContent() {
                 onTogglePin={cat.category === TaskCategory.ACHIEVEMENTS ? togglePin : undefined}
                 topSlot={
                   isTournamentsOnce ? (
-                    <div className="flex flex-col gap-3">
-                      <TournamentSubTabs
-                        active={tournamentSubTab}
-                        onChange={setTournamentSubTab}
-                        lockedTabs={lockedTabs}
-                      />
-                      {isSubTabSwitching ? (
-                        <TournamentSlidersSkeleton count={sliders.length || 4} />
-                      ) : (
-                        <div className="flex flex-col gap-4">
-                          {sliders.map(s => (
-                            <TournamentMilestoneSlider
-                              key={s.prefix}
-                              tasks={s.tasks}
-                              onClaim={handleClaimTask}
-                              title={s.title}
-                              blurb={s.blurb}
-                              unitLabel={s.unitLabel}
-                            />
-                          ))}
-                        </div>
-                      )}
+                    <div className="flex flex-col gap-4">
+                      {sliders.map(s => (
+                        <TournamentMilestoneSlider
+                          key={s.prefix}
+                          tasks={s.tasks}
+                          onClaim={handleClaimTask}
+                          title={s.title}
+                          blurb={s.blurb}
+                          unitLabel={s.unitLabel}
+                        />
+                      ))}
                     </div>
                   ) : isTicketsOnce ? (
-                    <div className="flex flex-col gap-3">
-                      <TournamentSubTabs
-                        active={ticketsSubTab}
-                        onChange={setTicketsSubTab}
-                        lockedTabs={ticketsLockedTabs}
-                        tabs={['general', 'silver', 'gold', 'platinum', 'diamond']}
+                    ticketCollectTasks.length > 0 ? (
+                      <TournamentMilestoneSlider
+                        tasks={ticketCollectTasks}
+                        onClaim={handleClaimTask}
+                        title={t('tickets collected title')}
+                        blurb={t('tickets collected blurb')}
+                        unitLabel={t('tickets collected')}
+                        headerIcon={Ticket}
+                        headerGradient="from-electric-pink to-pink"
+                        numberIcon={Ticket}
+                        cardIconType="bronze"
                       />
-                      {isTicketsSubTabSwitching ? (
-                        <TournamentSlidersSkeleton count={1} />
-                      ) : ticketCollectTasks.length > 0 ? (
-                        <TournamentMilestoneSlider
-                          tasks={ticketCollectTasks}
-                          onClaim={handleClaimTask}
-                          title={
-                            ticketsSubTab === 'general'
-                              ? t('tickets collected title')
-                              : t('tier tickets collected title', {
-                                  tier: t(ticketsSubTab as TierName),
-                                })
-                          }
-                          blurb={
-                            ticketsSubTab === 'general'
-                              ? t('tickets collected blurb')
-                              : t('tier tickets collected blurb', {
-                                  tier: t(ticketsSubTab as TierName),
-                                })
-                          }
-                          unitLabel={
-                            ticketsSubTab === 'general'
-                              ? t('tickets collected')
-                              : `${t(ticketsSubTab as TierName)} ${t('tickets collected')}`
-                          }
-                          headerIcon={Ticket}
-                          headerGradient="from-electric-pink to-pink"
-                          numberIcon={Ticket}
-                          cardIconType={
-                            ticketsSubTab === 'general' ? 'bronze' : (ticketsSubTab as TierName)
-                          }
-                        />
-                      ) : null}
-                    </div>
+                    ) : null
                   ) : isEnginesOnce ? (
-                    <div className="flex flex-col gap-3">
-                      <TournamentSubTabs
-                        active={enginesSubTab}
-                        onChange={setEnginesSubTab}
-                        lockedTabs={enginesLockedTabs}
-                        tabs={['general', 'silver', 'gold', 'platinum', 'diamond']}
+                    engineCollectTasks.length > 0 ? (
+                      <TournamentMilestoneSlider
+                        tasks={engineCollectTasks}
+                        onClaim={handleClaimTask}
+                        title={t('engines owned title')}
+                        blurb={t('engines owned blurb')}
+                        unitLabel={t('engines owned')}
+                        headerIcon={Cog}
+                        headerGradient="from-platinum to-electric-purple"
+                        numberIcon={Cog}
+                        cardMedalType="bronze"
                       />
-                      {isEnginesSubTabSwitching ? (
-                        <TournamentSlidersSkeleton count={1} />
-                      ) : engineCollectTasks.length > 0 ? (
-                        <TournamentMilestoneSlider
-                          tasks={engineCollectTasks}
-                          onClaim={handleClaimTask}
-                          title={
-                            enginesSubTab === 'general'
-                              ? t('engines owned title')
-                              : t('tier engines owned title', {
-                                  tier: t(enginesSubTab as TierName),
-                                })
-                          }
-                          blurb={
-                            enginesSubTab === 'general'
-                              ? t('engines owned blurb')
-                              : t('tier engines owned blurb', {
-                                  tier: t(enginesSubTab as TierName),
-                                })
-                          }
-                          unitLabel={
-                            enginesSubTab === 'general'
-                              ? t('engines owned')
-                              : `${t(enginesSubTab as TierName)} ${t('engines owned')}`
-                          }
-                          headerIcon={Cog}
-                          headerGradient="from-platinum to-electric-purple"
-                          numberIcon={Cog}
-                          cardMedalType={
-                            enginesSubTab === 'general' ? 'bronze' : (enginesSubTab as MedalType)
-                          }
-                        />
-                      ) : null}
-                    </div>
+                    ) : null
                   ) : isLeaderboardOnce ? (
-                    <div className="flex flex-col gap-3">
-                      <TournamentSubTabs
-                        active={leaderboardPeriodTab}
-                        onChange={setLeaderboardPeriodTab}
-                        tabs={['daily', 'weekly', 'monthly', 'alltime']}
+                    leaderboardRankTasks.length > 0 ? (
+                      <TournamentMilestoneSlider
+                        tasks={leaderboardRankTasks}
+                        onClaim={handleClaimTask}
+                        title={t('leaderboard rank title period', { period: t('all time') })}
+                        blurb={t('leaderboard rank blurb')}
+                        unitLabel={t('leaderboard rank')}
+                        headerIcon={BarChart3}
+                        headerGradient="from-diamond to-electric-purple"
+                        numberIcon={BarChart3}
+                        cardLucideIcon={TrendingUp}
+                        cardLucideGradient="from-diamond to-electric-purple"
                       />
-                      {isLeaderboardSubTabSwitching ? (
-                        <TournamentSlidersSkeleton count={1} />
-                      ) : leaderboardRankTasks.length > 0 ? (
-                        <TournamentMilestoneSlider
-                          tasks={leaderboardRankTasks}
-                          onClaim={handleClaimTask}
-                          title={t('leaderboard rank title period', {
-                            period: t(
-                              leaderboardPeriodTab === 'alltime' ? 'all time' : leaderboardPeriodTab
-                            ),
-                          })}
-                          blurb={t('leaderboard rank blurb')}
-                          unitLabel={t('leaderboard rank')}
-                          headerIcon={BarChart3}
-                          headerGradient="from-diamond to-electric-purple"
-                          numberIcon={BarChart3}
-                          cardLucideIcon={TrendingUp}
-                          cardLucideGradient="from-diamond to-electric-purple"
-                        />
-                      ) : null}
-                    </div>
+                    ) : null
                   ) : isFriendsOnce && friendInviteTasks.length > 0 ? (
                     <TournamentMilestoneSlider
                       tasks={friendInviteTasks}
@@ -1015,109 +770,46 @@ export function TasksContent() {
                       cardImageSrc={icons.crown}
                     />
                   ) : isStarsOnce ? (
-                    <div className="flex flex-col gap-4">
-                      {starPurchaseTasks.length > 0 && (
-                        <TournamentMilestoneSlider
-                          tasks={starPurchaseTasks}
-                          onClaim={handleClaimTask}
-                          title={t('stars purchased title')}
-                          blurb={t('stars purchased blurb')}
-                          unitLabel={t('stars purchased')}
-                          headerIcon={Star}
-                          headerGradient="from-warning to-gold"
-                          numberIcon={Star}
-                          cardImageSrc={icons.telegramStar}
-                        />
-                      )}
-                      {starEarnTasks.length > 0 && (
-                        <TournamentMilestoneSlider
-                          tasks={starEarnTasks}
-                          onClaim={handleClaimTask}
-                          title={t('stars earned title')}
-                          blurb={t('stars earned blurb')}
-                          unitLabel={t('stars earned')}
-                          headerIcon={ArrowDownToLine}
-                          headerGradient="from-electric-pink to-electric-purple"
-                          numberIcon={ArrowDownToLine}
-                          cardImageSrc={icons.telegramStar}
-                        />
-                      )}
-                    </div>
-                  ) : isStakesOnce ? (
-                    <div className="flex flex-col gap-3">
-                      <TournamentSubTabs
-                        active={stakesSubTab}
-                        onChange={setStakesSubTab}
-                        lockedTabs={stakesLockedTabs}
-                        tabs={['general', 'silver', 'gold', 'platinum', 'diamond']}
+                    starPurchaseTasks.length > 0 ? (
+                      <TournamentMilestoneSlider
+                        tasks={starPurchaseTasks}
+                        onClaim={handleClaimTask}
+                        title={t('stars purchased title')}
+                        blurb={t('stars purchased blurb')}
+                        unitLabel={t('stars purchased')}
+                        headerIcon={Star}
+                        headerGradient="from-warning to-gold"
+                        numberIcon={Star}
+                        cardImageSrc={icons.telegramStar}
                       />
-                      {isStakesSubTabSwitching ? (
-                        <TournamentSlidersSkeleton count={2} />
-                      ) : (
-                        <div className="flex flex-col gap-4">
-                          {stakeCountTasks.length > 0 && (
-                            <TournamentMilestoneSlider
-                              tasks={stakeCountTasks}
-                              onClaim={handleClaimTask}
-                              title={
-                                stakesSubTab === 'general'
-                                  ? t('stakes count title')
-                                  : t('tier stakes count title', {
-                                      tier: t(stakesSubTab as TierName),
-                                    })
-                              }
-                              blurb={
-                                stakesSubTab === 'general'
-                                  ? t('stakes count blurb')
-                                  : t('tier stakes count blurb', {
-                                      tier: t(stakesSubTab as TierName),
-                                    })
-                              }
-                              unitLabel={
-                                stakesSubTab === 'general'
-                                  ? t('stakes count')
-                                  : `${t(stakesSubTab as TierName)} ${t('stakes count')}`
-                              }
-                              headerIcon={PiggyBank}
-                              headerGradient="from-teal to-diamond"
-                              numberIcon={PiggyBank}
-                              cardMedalType={
-                                (stakesSubTab === 'general' ? 'bronze' : stakesSubTab) as MedalType
-                              }
-                            />
-                          )}
-                          {stakeVolumeTasks.length > 0 && (
-                            <TournamentMilestoneSlider
-                              tasks={stakeVolumeTasks}
-                              onClaim={handleClaimTask}
-                              title={
-                                stakesSubTab === 'general'
-                                  ? t('stakes volume title')
-                                  : t('tier stakes volume title', {
-                                      tier: t(stakesSubTab as TierName),
-                                    })
-                              }
-                              blurb={
-                                stakesSubTab === 'general'
-                                  ? t('stakes volume blurb')
-                                  : t('tier stakes volume blurb', {
-                                      tier: t(stakesSubTab as TierName),
-                                    })
-                              }
-                              unitLabel={
-                                stakesSubTab === 'general'
-                                  ? t('stakes volume')
-                                  : `${t(stakesSubTab as TierName)} ${t('stakes volume')}`
-                              }
-                              headerIcon={Coins}
-                              headerGradient="from-warning to-gold"
-                              numberIcon={Coins}
-                              cardMedalType={
-                                (stakesSubTab === 'general' ? 'bronze' : stakesSubTab) as MedalType
-                              }
-                            />
-                          )}
-                        </div>
+                    ) : null
+                  ) : isStakesOnce ? (
+                    <div className="flex flex-col gap-4">
+                      {stakeCountTasks.length > 0 && (
+                        <TournamentMilestoneSlider
+                          tasks={stakeCountTasks}
+                          onClaim={handleClaimTask}
+                          title={t('stakes count title')}
+                          blurb={t('stakes count blurb')}
+                          unitLabel={t('stakes count')}
+                          headerIcon={PiggyBank}
+                          headerGradient="from-teal to-diamond"
+                          numberIcon={PiggyBank}
+                          cardMedalType="bronze"
+                        />
+                      )}
+                      {stakeVolumeTasks.length > 0 && (
+                        <TournamentMilestoneSlider
+                          tasks={stakeVolumeTasks}
+                          onClaim={handleClaimTask}
+                          title={t('stakes volume title')}
+                          blurb={t('stakes volume blurb')}
+                          unitLabel={t('stakes volume')}
+                          headerIcon={Coins}
+                          headerGradient="from-warning to-gold"
+                          numberIcon={Coins}
+                          cardMedalType="bronze"
+                        />
                       )}
                     </div>
                   ) : undefined
