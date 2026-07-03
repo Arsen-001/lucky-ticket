@@ -2,6 +2,10 @@ import type { NextConfig } from 'next';
 import createNextIntlPlugin from 'next-intl/plugin';
 
 const nextConfig: NextConfig = {
+  // Overridable so the pre-commit verification build (.husky/pre-commit) can
+  // write to an isolated dir instead of clobbering the `.next` a running
+  // `next dev` is serving from — committing while dev runs must stay safe.
+  distDir: process.env.NEXT_DIST_DIR || '.next',
   reactStrictMode: false,
   reactCompiler: true,
   images: {

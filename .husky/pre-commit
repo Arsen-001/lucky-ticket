@@ -3,12 +3,10 @@ set -e
 
 echo "[husky] Running pre-commit checks..."
 
-# 1) Clean the project
-npm run clean
-if [ $? -ne 0 ]; then
-  echo "[husky] Cleaning project failed. Aborting commit."
-  exit 1
-fi
+# 1) Clean the ISOLATED pre-commit build dir (never `.next` itself — a
+# running `next dev` serves from it, and nuking it mid-session breaks the
+# dev server until restart).
+rm -rf .next-precommit
 
 # 2) Lint and format staged files only
 npx lint-staged
@@ -31,11 +29,13 @@ if [ $? -ne 0 ]; then
   exit 1
 fi
 
-# 5) Ensure the project builds before committing
-npm run build
+# 5) Ensure the project builds before committing — into the isolated dir,
+# so the dev server's `.next` stays untouched.
+NEXT_DIST_DIR=.next-precommit npm run build
 if [ $? -ne 0 ]; then
   echo "[husky] Build failed. Aborting commit."
   exit 1
 fi
+rm -rf .next-precommit
 
 echo "[husky] All checks passed. Proceeding with commit."
