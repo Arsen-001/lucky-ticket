@@ -506,7 +506,10 @@ export function TasksContent() {
 
   const handleClaimTask = (task: Task, bundleSubStepIds?: string[]) =>
     runClaim(task.id, bundleSubStepIds);
-  const handleClaimSubStep = (_task: Task, step: TaskSubStep) => runClaim(step.id);
+  // Per-substep claim uses the documented contract — POST /tasks/claim
+  // { id: <taskId>, subStepIds: [<stepId>] }. Sending the substep id as the
+  // task id only ever worked against the mock; the live backend 404s on it.
+  const handleClaimSubStep = (task: Task, step: TaskSubStep) => runClaim(task.id, [step.id]);
 
   const handleWatchAd = async (slot: AdSlot) => {
     triggerHaptic('medium');

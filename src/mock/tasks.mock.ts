@@ -2102,26 +2102,38 @@ const claimTaskHandler = (args: { body?: { id?: string; subStepIds?: string[] } 
   const subStepIds = args.body?.subStepIds ?? [];
   const allTasks = PROCESSED_CATEGORIES.flatMap(c => [...c.daily, ...c.weekly, ...c.once]);
   const found = allTasks.find(t => t.id === id);
-  let rewards: TaskReward[] = found?.rewards ?? [];
+  let rewards: TaskReward[] = [];
   const allSubSteps = allTasks.flatMap(t => t.subSteps ?? []);
 
   if (!found) {
+    // Legacy form: a substep id passed as the task id.
     const sub = allSubSteps.find(s => s.id === id);
     if (sub?.reward) {
       rewards = [sub.reward];
       mockState.claimedSubStepIds.add(id);
     }
-  } else {
-    mockState.claimedTaskIds.add(id);
-  }
-
-  if (subStepIds.length) {
+  } else if (subStepIds.length) {
+    // Bundle form ({ id: taskId, subStepIds }) — mirrors the live backend:
+    // the named substeps are claimed, but the MAIN task completes only when
+    // it is genuinely done (all its substeps completed), so collecting one
+    // substep never swallows the whole task.
     const bundled = subStepIds
       .map(sid => allSubSteps.find(s => s.id === sid))
       .filter(s => s?.reward)
       .map(s => s!.reward!);
-    rewards = [...rewards, ...bundled];
+    rewards = bundled;
     subStepIds.forEach(sid => mockState.claimedSubStepIds.add(sid));
+    const ownSubs = found.subSteps ?? [];
+    const mainReady =
+      found.status === TaskStatus.READY_TO_CLAIM ||
+      (ownSubs.length > 0 && ownSubs.every(s => s.completed));
+    if (mainReady && !mockState.claimedTaskIds.has(id)) {
+      mockState.claimedTaskIds.add(id);
+      rewards = [...(found.rewards ?? []), ...rewards];
+    }
+  } else {
+    mockState.claimedTaskIds.add(id);
+    rewards = found.rewards ?? [];
   }
   if (!rewards.length) rewards = [lc(1)];
 
