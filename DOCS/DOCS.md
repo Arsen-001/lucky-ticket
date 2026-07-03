@@ -98,7 +98,9 @@ A user's **tier** is derived from accumulated AP:
 | Silver   | 2,000        | ~1 month                                   |
 | Gold     | 10,000       | ~4 months                                  |
 | Platinum | 30,000       | ~10 months                                 |
-| Diamond  | 54,000       | ~16 months                                 |
+| Diamond  | 72,000       | ~21 months                                 |
+
+Thresholds are tuned so each leg takes visibly longer than the previous one at the per-tier daily baselines (§5.4): ≈29 / 89 / 180 / 320 days per leg — the pacing guardrail is asserted in `tests/economy-sim.test.ts`.
 
 The pacing describes a player who collects the full daily baseline every day. Tournaments make it faster; missed days slower.
 
@@ -181,6 +183,7 @@ LC is the internal reward currency. It is **earned only by playing** — tournam
 - LC has a fixed real-money valuation of **$0.00001 per LC**, used to price its conversion to TON.
 - LC **cannot be acquired by conversion** — there is no TON→LC or LS→LC path, and no fiat/crypto LC deposit. LC enters the economy only by playing.
 - LC reaches real money by **converting to TON** at its $0.00001 valuation; the resulting TON is withdrawn through the wallet (Section 15). A **direct LC withdrawal is coming soon**.
+- The LC→TON exit carries two backend-enforced guards (`appConfig.economy.lcConversion`): a **15% conversion fee** and a **$10/day per-account cap**. They are the hard bound on real-money outflow regardless of how the internal LC faucet is tuned (§14.2).
 
 ### 6.2 Lucky Stars (LS) — real-money currency
 
@@ -445,8 +448,8 @@ finalCycle    = max(rawCycle, floor)
 Where:
 
 - Each **engine level** above 1 contributes `+100%` (`ENGINE_LEVEL_SPEED_BOOST_PCT`).
-- Each **speed-level upgrade** contributes `+1%` (`SPEED_LEVEL_BOOST_PCT_PER_LEVEL`).
-- Each **capacity-level upgrade** contributes `+1%` to capacity (`CAPACITY_LEVEL_BOOST_PCT_PER_LEVEL`).
+- Each **speed-level upgrade** contributes `+10%` (`SPEED_LEVEL_BOOST_PCT_PER_LEVEL`) — 10 levels max, so a fully speed-upgraded engine runs its cycle **twice as fast**.
+- Each **capacity-level upgrade** contributes `+10%` to capacity (`CAPACITY_LEVEL_BOOST_PCT_PER_LEVEL`) — 10 levels max, so a fully capacity-upgraded engine mints **2 tickets per cycle**.
 - **Status boost** uses VIP value if active, otherwise LP, otherwise 0 (DOCS §7.3).
 
 **Hard speed floor.** No matter how many boosts stack, one ticket can never be minted faster than `GlobalConstants.engineMinSecondsPerTicket = 900s` (15 minutes per ticket). `effectiveCycleSeconds()` clamps the result against `capacity × 900s`.
@@ -513,6 +516,8 @@ A Capacity Upgrade increases an engine's **per-cycle output** — instead of pro
 - **Scope:** Applied to a specific engine the user owns.
 - **Tiers:** Higher-tier capacity upgrades may yield 3 or more tickets per cycle (defined by product team).
 - **Duration:** Defined by product team (permanent or time-limited per upgrade tier).
+
+**Permanent level upgrades — effect & LS cost curves** (knobs in `appConfig.economy.engineUpgrades`, helpers in `economy.utils.ts`): each engine carries a permanent **speed level** and **capacity level**, both 0–10, both paid in LS per level. Every level adds **+10%** to its additive boost stack (§9.7) — a maxed speed engine cycles 2× as fast; a maxed capacity engine mints 2 tickets per cycle. Level costs grow linearly: speed `5 + 3 × level` LS, capacity `8 + 4 × level` LS (level = current level before the upgrade).
 
 ### 10.3 Stacking Speed and Capacity
 
@@ -1109,17 +1114,24 @@ The Market is the central hub for purchasing improvements, resources, and status
 
 Tier-bound market items (engines, chips, chip builders, boosters, tier tickets) are gated by the **AP tier** (Section 5.2): an item of tier `T` is buyable only when `AP-tier ≥ T`. Cosmetics (avatars, frames, themes) are **not** gated.
 
-### 14.2 LC Price Ladder
+### 14.2 LC Price Ladder & Progression Economy
 
-The Market is the platform's main LC **sink** — the counterweight to the tournament LC faucet. Base LC prices follow a ~×3 per-tier ladder (knobs):
+The Market is the platform's main LC **sink** — the counterweight to the tournament LC faucet. All knobs below live in `appConfig.economy` (single source of truth); derivations live in `src/utils/global/economy.utils.ts`, and every rule in this section is asserted by the guardrail simulation `tests/economy-sim.test.ts`.
 
-| Item        |    Bronze |    Silver |       Gold |   Platinum |     Diamond |
-| :---------- | --------: | --------: | ---------: | ---------: | ----------: |
-| Engine      | 2,000,000 | 6,000,000 | 18,000,000 | 54,000,000 | 160,000,000 |
-| Ticket      |    60,000 |   150,000 |    375,000 |    900,000 |   2,250,000 |
-| Speed boost |   500,000 | 1,500,000 |  4,500,000 | 13,500,000 |  40,000,000 |
+Base LC prices (first engine of a tier):
 
-The ticket price equals `1.5 × prizeLcPerSeat` for its tier — always above the average LC a ticket returns in a tournament. This **house edge** keeps bought tickets from being a profitable money loop; free engine-produced tickets are the free roll.
+| Item   |    Bronze |    Silver |      Gold |   Platinum |    Diamond |
+| :----- | --------: | --------: | --------: | ---------: | ---------: |
+| Engine | 2,000,000 | 3,600,000 | 6,750,000 | 11,700,000 | 22,500,000 |
+| Ticket |    60,000 |   150,000 |   375,000 |    900,000 |  2,250,000 |
+
+**House edge.** The ticket price equals `1.5 × prizeLcPerSeat` for its tier (`tournamentHouseEdgeMultiplier`) — always above the average LC a ticket returns in a tournament. Bought tickets are never a profitable money loop; free engine-produced tickets are the free roll.
+
+**Repeat-purchase pricing (anti-inflation valve).** The n-th engine of a tier costs `base × 1.6^(n−1)` (`engineRepeatPriceGrowth`). Flat engine prices made engine-spam exponential — a Bronze engine paid for itself in ~2 days forever, so a perfect player's LC production doubled every few days. Geometric pricing turns that into logarithmic growth and produces the intended tier ladder by itself: after ~3 engines of a tier, the next tier's first engine is the rational buy.
+
+**Payback ladder.** First-engine payback (price ÷ daily LC value at perfect claims) rises gently with the tier — ≈4 / 6 / 9 / 13 / 20 days for Bronze → Diamond — so climbing tiers is always rewarding, never a trap. Simulated over a year of perfect greedy free play, production value grows ≈×5 from day 30 to day 365 (sub-exponential, bounded).
+
+**Currency parity.** Where an item is priced in both LC and Telegram Stars, the Stars price is derived at the USD anchors (`lcUsdRate` / `lsUsdRate`) — neither currency is an arbitrage on the other.
 
 **Balance rule:** total LC spent in the Market per day should be ≥ the total LC faucet per day (tournaments + tasks + ads + stake APR), keeping LC mildly deflationary so it does not lose value.
 
@@ -1161,7 +1173,7 @@ Purchase LS by spending TON. The LS amount is computed from the live TON→USD r
 
 #### 4. Convert Lucky Coin to TON
 
-LC reaches real money through **TON**. The user converts LC to TON at the fixed **$0.00001/LC** valuation (priced against the live TON→USD rate); the resulting TON lands in the wallet's TON balance and is cashed out via the TON withdrawal path above.
+LC reaches real money through **TON**. The user converts LC to TON at the fixed **$0.00001/LC** valuation (priced against the live TON→USD rate); the resulting TON lands in the wallet's TON balance and is cashed out via the TON withdrawal path above. Conversions are subject to the **15% fee** and the **$10/day cap** from §6.1 (`appConfig.economy.lcConversion`).
 
 - The withdrawal action itself handles **TON only** — LC is never withdrawn directly.
 - A **direct LC withdrawal** (LC straight to fiat/USDT, with its own minimums and commission) is **coming soon**.
@@ -1599,7 +1611,7 @@ The user picks an LC amount and a duration. The LC is locked for that period; lo
 ### 18.1 Duration & APR
 
 - **Duration:** a slider of **1 to 12 months** (the range is a knob).
-- **Yield:** `yield = deposit × rate`, where `rate` scales linearly with the chosen duration — **1% at 1 month → 5% at 12 months**. The yield is paid in LC on completion.
+- **Yield:** `yield = deposit × rate`, where `rate` scales linearly with the chosen duration — **3% at 1 month → 10% at 12 months**. The yield is paid in LC on completion. The band is tuned against the engine economy (§14.2): once a player's marginal engine payback has decayed past the early game under geometric repeat pricing, parking surplus LC in a long stake becomes the rational move.
   - _Example:_ 1,000,000 LC locked for 12 months → +50,000 LC.
 - The APR is a small LC faucet; the locked principal is a much larger velocity sink, so stakes are net anti-inflationary. The APR curve is the primary anti-inflation tuning lever.
 

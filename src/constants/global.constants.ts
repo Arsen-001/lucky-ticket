@@ -88,7 +88,9 @@ export const GlobalConstants = {
     silver: 2000,
     gold: 10000,
     platinum: 30000,
-    diamond: 54000,
+    // 72k (not 54k) so the Diamond leg takes visibly longer than Platinum's —
+    // days-to-next-tier at the per-tier daily baselines: ≈29 / 89 / 180 / 320.
+    diamond: 72000,
   },
   /**
    * Canonical AP-source rates — mirrors DOCS §5.3 "How Activity Points Are

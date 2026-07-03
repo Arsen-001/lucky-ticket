@@ -9,11 +9,22 @@ export const MAX_BOOST_LEVEL = 10;
 /** LM-style additive speed boost contributed per engine level above 1 (%). */
 export const ENGINE_LEVEL_SPEED_BOOST_PCT = 100;
 
-/** LM-style additive speed boost contributed per speed-level upgrade (%). */
-export const SPEED_LEVEL_BOOST_PCT_PER_LEVEL = 1;
+/**
+ * LM-style additive speed boost contributed per speed-level upgrade (%).
+ * 10 levels × 10% = +100% at max — a fully speed-upgraded engine runs its
+ * cycle twice as fast (DOCS §10.1).
+ */
+export const SPEED_LEVEL_BOOST_PCT_PER_LEVEL = 10;
 
-/** LM-style additive capacity boost contributed per capacity-level upgrade (%). */
-export const CAPACITY_LEVEL_BOOST_PCT_PER_LEVEL = 1;
+/**
+ * LM-style additive capacity boost contributed per capacity-level upgrade (%).
+ * 10 levels × 10% = +100% at max — a fully capacity-upgraded engine mints 2
+ * tickets per cycle instead of 1 (DOCS §10.2). The percent must be large
+ * enough that `round(baseCapacity × (1 + boost))` actually moves for a
+ * level-1 engine (base capacity 1) — at +1%/level the paid upgrade had zero
+ * effect until chips pushed it over the rounding threshold.
+ */
+export const CAPACITY_LEVEL_BOOST_PCT_PER_LEVEL = 10;
 
 /** Total speed-boost percent contributed by the engine level itself. */
 export const engineLevelBoostPct = (engineLevel: number) =>

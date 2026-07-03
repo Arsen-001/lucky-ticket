@@ -36,6 +36,7 @@ import {
   engineElapsedSeconds,
   findEngineLocation,
 } from '@/utils/global/ticket-engine.utils';
+import { speedUpgradeLsCost, capacityUpgradeLsCost } from '@/utils/global/economy.utils';
 import { EngineCard } from '@/components/pages/out-tabs/tabs-extra/ticket/EngineCard';
 import {
   DEFAULT_BADGE_DEFS,
@@ -198,14 +199,14 @@ export function EngineDetails({ id }: EngineDetailsProps) {
   };
 
   const handleUpgradeSpeed = () => {
-    const cost = 5 + speedLevel * 3;
+    const cost = speedUpgradeLsCost(speedLevel);
     requireStars(cost, () => {
       upgradeEngineSpeed({ engineId: engine.id, cost });
     });
   };
 
   const handleUpgradeCapacity = () => {
-    const cost = 8 + capacityLevel * 4;
+    const cost = capacityUpgradeLsCost(capacityLevel);
     requireStars(cost, () => {
       upgradeEngineCapacity({ engineId: engine.id, cost });
     });

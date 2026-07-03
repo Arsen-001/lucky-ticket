@@ -43,6 +43,7 @@ import {
   isEngineMaxed,
   MAX_BOOST_LEVEL,
 } from '@/utils/global/ticket-engine.utils';
+import { speedUpgradeLsCost, capacityUpgradeLsCost } from '@/utils/global/economy.utils';
 import type { ClassNameProps } from '@/types/interfaces/component.interfcaes';
 import type { TicketEngine } from '@/types/interfaces/ticket.interfaces';
 import type { TicketType } from '@/types/types/ticket.types';
@@ -368,7 +369,7 @@ export function HomeEnginesSlider({ className }: ClassNameProps) {
   const handleUpgradeSpeed = (engineId: string) => {
     const engine = items.find(item => item.engine.id === engineId)?.engine;
     if (!engine) return;
-    const cost = 5 + (engine.speedLevel ?? 0) * 3;
+    const cost = speedUpgradeLsCost(engine.speedLevel ?? 0);
     const nextLevel = Math.min(MAX_BOOST_LEVEL, (engine.speedLevel ?? 0) + 1);
     setUpgradeConfirm({ engineId, type: 'speed', cost, nextLevel });
   };
@@ -376,7 +377,7 @@ export function HomeEnginesSlider({ className }: ClassNameProps) {
   const handleUpgradeCapacity = (engineId: string) => {
     const engine = items.find(item => item.engine.id === engineId)?.engine;
     if (!engine) return;
-    const cost = 8 + (engine.capacityLevel ?? 0) * 4;
+    const cost = capacityUpgradeLsCost(engine.capacityLevel ?? 0);
     const nextLevel = Math.min(MAX_BOOST_LEVEL, (engine.capacityLevel ?? 0) + 1);
     setUpgradeConfirm({ engineId, type: 'capacity', cost, nextLevel });
   };

@@ -43,9 +43,14 @@ export const appConfig = {
     /** Bounds of the duration slider on the "new stake" screen (months). */
     durationMinMonths: 1,
     durationMaxMonths: 12,
-    /** Total-period yield rate mapped across the duration slider (percent). */
-    aprMinPercent: 1,
-    aprMaxPercent: 5,
+    /**
+     * Total-period yield rate mapped across the duration slider (percent).
+     * Tuned so parking LC in a long stake stays competitive once the player's
+     * marginal engine payback (geometric repeat pricing, DOCS §14.2) has
+     * decayed past the early game.
+     */
+    aprMinPercent: 3,
+    aprMaxPercent: 10,
     /** Divisor in the stake AP formula: `deposit × months ÷ apDivisor` (DOCS §5.3 / §18.3). */
     apDivisor: 50_000,
     /** Bonus added to the stake AP base when it completes (forfeited on cancel). */
@@ -98,6 +103,69 @@ export const appConfig = {
       diamond: 115_200, // 32h
     },
   },
+  /**
+   * Progression-economy knobs (DOCS §14.2) — the single source of truth for
+   * every LC price ladder and growth curve. The mock market and the economy
+   * guardrail simulation (`tests/economy-sim.test.ts`) both read from here;
+   * the real backend must implement the same formulas. Derivation helpers live
+   * in `src/utils/global/economy.utils.ts`.
+   */
+  economy: {
+    /**
+     * House edge on the ticket money loop: a Market ticket costs this multiple
+     * of the average LC it returns in a tournament (`EV = price ÷ multiplier`).
+     * Keeps bought tickets EV-negative; engine-produced tickets are the free roll.
+     */
+    tournamentHouseEdgeMultiplier: 1.5,
+    /** Market LC ticket prices per tier (~×2.5 ladder). */
+    ticketPriceLcByTier: {
+      bronze: 60_000,
+      silver: 150_000,
+      gold: 375_000,
+      platinum: 900_000,
+      diamond: 2_250_000,
+    },
+    /**
+     * LC price of the FIRST engine of each tier. Tuned so first-purchase
+     * payback (price ÷ daily LC value at perfect claims) rises gently with the
+     * tier: ≈4 / 6 / 9 / 13 / 20 days — progression up the tiers stays
+     * rewarding, never a trap.
+     */
+    engineBasePriceLcByTier: {
+      bronze: 2_000_000,
+      silver: 3_600_000,
+      gold: 6_750_000,
+      platinum: 11_700_000,
+      diamond: 22_500_000,
+    },
+    /**
+     * Geometric repeat-purchase pricing: the n-th engine of a tier costs
+     * `base × growth^(n-1)`. This is the core anti-inflation valve — it turns
+     * exponential engine-spam growth into logarithmic growth and makes the
+     * next tier's first engine the rational buy after ~3 repeats of the
+     * previous tier.
+     */
+    engineRepeatPriceGrowth: 1.6,
+    /**
+     * LS cost curves for the permanent per-engine upgrades (paid in Lucky
+     * Stars): `cost(level→level+1) = base + level × perLevel`.
+     */
+    engineUpgrades: {
+      speedLsBase: 5,
+      speedLsPerLevel: 3,
+      capacityLsBase: 8,
+      capacityLsPerLevel: 4,
+    },
+    /**
+     * Guards on the LC → TON exit (backend-enforced). The conversion fee and
+     * the daily withdrawal cap are the hard bound on real-money outflow no
+     * matter how the internal LC faucet is tuned.
+     */
+    lcConversion: {
+      feePercent: 15,
+      dailyCapUsd: 10,
+    },
+  },
   wallet: {
     /** TON → USD conversion rate shown in the wallet. */
     tonUsdRate: 3.42,
@@ -105,6 +173,8 @@ export const appConfig = {
     withdrawFeeTon: 0.05,
     /** USD value of one LC — used to price the LC → TON conversion (DOCS §6.1). */
     lcUsdRate: 0.00001,
+    /** USD anchor of one Lucky Star (LS) — the Stars packages are priced off it. */
+    lsUsdRate: 0.02,
     /** Wallet apps the user can connect. */
     supportedWallets,
     /** Stars purchase packages — price catalog. */

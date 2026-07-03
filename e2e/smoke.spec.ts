@@ -20,6 +20,7 @@ const ROUTES = [
   '/promo',
   '/wallet',
   '/lc',
+  '/stars',
   '/stakes',
   '/stakes/new',
   '/stakes/history',

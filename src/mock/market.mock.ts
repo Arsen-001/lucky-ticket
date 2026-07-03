@@ -8,9 +8,27 @@ import {
 } from '@/types/enums/market.enums';
 import { TicketsEnum } from '@/types/enums/ticket.enums';
 import { images } from '@/constants/images';
-import type { MarketData } from '@/types/interfaces/market.interfaces';
+import { appConfig } from '@/config/app.config';
+import { lcPriceToLsParity } from '@/utils/global/economy.utils';
+import type { MarketData, MarketPrice } from '@/types/interfaces/market.interfaces';
 
 const expiresInDays = (n: number) => dayjs().add(n, 'day').toISOString();
+
+/**
+ * LC price ladder + LS parity (DOCS §14.2). Engine and ticket LC prices come
+ * from the single economy config; the Telegram-Stars price is derived at the
+ * USD anchors so neither currency is an arbitrage on the other.
+ */
+const lcPricePair = (lcAmount: number): MarketPrice[] => [
+  { type: MarketPriceType.LC, amount: lcAmount },
+  { type: MarketPriceType.TELEGRAM_STARS, amount: lcPriceToLsParity(lcAmount) },
+];
+
+const enginePrices = (tier: TicketsEnum): MarketPrice[] =>
+  lcPricePair(appConfig.economy.engineBasePriceLcByTier[tier]);
+
+const ticketPrices = (tier: TicketsEnum): MarketPrice[] =>
+  lcPricePair(appConfig.economy.ticketPriceLcByTier[tier]);
 
 export const marketMock: MarketData = {
   bundles: [
@@ -83,10 +101,7 @@ export const marketMock: MarketData = {
       category: MarketItemCategory.ENGINE,
       ticketType: TicketsEnum.BRONZE,
       engineLevel: 1,
-      prices: [
-        { type: MarketPriceType.LC, amount: 800_000 },
-        { type: MarketPriceType.TELEGRAM_STARS, amount: 200 },
-      ],
+      prices: enginePrices(TicketsEnum.BRONZE),
     },
     {
       id: 'engine-silver',
@@ -94,10 +109,7 @@ export const marketMock: MarketData = {
       category: MarketItemCategory.ENGINE,
       ticketType: TicketsEnum.SILVER,
       engineLevel: 1,
-      prices: [
-        { type: MarketPriceType.LC, amount: 1_800_000 },
-        { type: MarketPriceType.TELEGRAM_STARS, amount: 450 },
-      ],
+      prices: enginePrices(TicketsEnum.SILVER),
     },
     {
       id: 'engine-gold',
@@ -106,10 +118,7 @@ export const marketMock: MarketData = {
       ticketType: TicketsEnum.GOLD,
       engineLevel: 1,
       remainingSupply: 24,
-      prices: [
-        { type: MarketPriceType.LC, amount: 4_500_000 },
-        { type: MarketPriceType.TELEGRAM_STARS, amount: 1100 },
-      ],
+      prices: enginePrices(TicketsEnum.GOLD),
     },
     {
       id: 'engine-platinum',
@@ -118,10 +127,7 @@ export const marketMock: MarketData = {
       ticketType: TicketsEnum.PLATINUM,
       engineLevel: 1,
       remainingSupply: 8,
-      prices: [
-        { type: MarketPriceType.LC, amount: 9_800_000 },
-        { type: MarketPriceType.TELEGRAM_STARS, amount: 1999 },
-      ],
+      prices: enginePrices(TicketsEnum.PLATINUM),
     },
     {
       id: 'engine-diamond',
@@ -131,10 +137,7 @@ export const marketMock: MarketData = {
       engineLevel: 1,
       remainingSupply: 3,
       isNew: true,
-      prices: [
-        { type: MarketPriceType.LC, amount: 19_999_000 },
-        { type: MarketPriceType.TELEGRAM_STARS, amount: 4999 },
-      ],
+      prices: enginePrices(TicketsEnum.DIAMOND),
     },
   ],
 
@@ -145,50 +148,35 @@ export const marketMock: MarketData = {
       isNew: true,
       ticketType: TicketsEnum.BRONZE,
       isAvailable: true,
-      prices: [
-        { type: MarketPriceType.LC, amount: 50_000 },
-        { type: MarketPriceType.TELEGRAM_STARS, amount: 15 },
-      ],
+      prices: ticketPrices(TicketsEnum.BRONZE),
     },
     {
       id: 't2',
       name: 'Silver Ticket',
       ticketType: TicketsEnum.SILVER,
       isAvailable: true,
-      prices: [
-        { type: MarketPriceType.LC, amount: 150_000 },
-        { type: MarketPriceType.TELEGRAM_STARS, amount: 40 },
-      ],
+      prices: ticketPrices(TicketsEnum.SILVER),
     },
     {
       id: 't3',
       name: 'Gold Ticket',
       ticketType: TicketsEnum.GOLD,
       isAvailable: false,
-      prices: [
-        { type: MarketPriceType.LC, amount: 500_000 },
-        { type: MarketPriceType.TELEGRAM_STARS, amount: 125 },
-      ],
+      prices: ticketPrices(TicketsEnum.GOLD),
     },
     {
       id: 't4',
       name: 'Platinum Ticket',
       ticketType: TicketsEnum.PLATINUM,
       isAvailable: false,
-      prices: [
-        { type: MarketPriceType.LC, amount: 1_500_000 },
-        { type: MarketPriceType.TELEGRAM_STARS, amount: 375 },
-      ],
+      prices: ticketPrices(TicketsEnum.PLATINUM),
     },
     {
       id: 't5',
       name: 'Diamond Ticket',
       ticketType: TicketsEnum.DIAMOND,
       isAvailable: false,
-      prices: [
-        { type: MarketPriceType.LC, amount: 5_000_000 },
-        { type: MarketPriceType.TELEGRAM_STARS, amount: 1250 },
-      ],
+      prices: ticketPrices(TicketsEnum.DIAMOND),
     },
   ],
 
