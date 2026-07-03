@@ -76,13 +76,17 @@ export function FriendsClaimAllModal({
                     zIndex: previewAvatars.length - index,
                   }}
                 >
-                  <Image
-                    src={friend.avatar}
-                    alt={friend.username}
-                    width={56}
-                    height={56}
-                    className="h-14 w-14 object-cover"
-                  />
+                  {friend.avatar ? (
+                    <Image
+                      src={friend.avatar}
+                      alt={friend.username}
+                      width={56}
+                      height={56}
+                      className="h-14 w-14 object-cover"
+                    />
+                  ) : (
+                    <div className="h-14 w-14 bg-white/10" />
+                  )}
                 </span>
               ))}
               {overflow > 0 && (

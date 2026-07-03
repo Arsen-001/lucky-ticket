@@ -179,6 +179,16 @@ export const appConfig = {
     supportedWallets,
     /** Stars purchase packages — price catalog. */
     starsPackages,
+    /**
+     * Public URL of the TON Connect manifest (served from `public/`). Wallets
+     * fetch it to show the app name/icon in the connect sheet. Must be an
+     * absolute HTTPS URL reachable by wallets; the manifest's own `url` field
+     * is also the domain the backend checks in `ton_proof`. Override per
+     * deployment via `NEXT_PUBLIC_TONCONNECT_MANIFEST_URL`.
+     */
+    tonConnectManifestUrl:
+      process.env.NEXT_PUBLIC_TONCONNECT_MANIFEST_URL ??
+      'https://lucky-ticket-nu.vercel.app/tonconnect-manifest.json',
   },
   onboardingTour: {
     /**

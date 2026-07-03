@@ -74,15 +74,18 @@ export function InvitedFriendRow({
             loading={loading || !friend}
             skeleton={<Skeleton variant="round" className="h-full w-full" />}
           >
-            {friend && (
-              <Image
-                src={friend.avatar}
-                alt={friend.username}
-                width={44}
-                height={44}
-                className="h-11 w-11 rounded-full object-cover"
-              />
-            )}
+            {friend &&
+              (friend.avatar ? (
+                <Image
+                  src={friend.avatar}
+                  alt={friend.username}
+                  width={44}
+                  height={44}
+                  className="h-11 w-11 rounded-full object-cover"
+                />
+              ) : (
+                <div className="h-11 w-11 rounded-full bg-white/5" />
+              ))}
           </SkeletonSuspense>
         </div>
         {friend?.isVIP && (

@@ -6,8 +6,10 @@ import type {
   ConnectWalletRequest,
   ConnectWalletResponse,
   DepositAddressResponse,
+  OnchainTransactionsResponse,
   StarsPackage,
   SupportedWallet,
+  TonProofPayloadResponse,
   WalletState,
   WalletTransaction,
   WithdrawTonRequest,
@@ -27,12 +29,22 @@ export const walletApi = api.injectEndpoints({
       query: () => ({ url: 'wallet/transactions' }),
       providesTags: [rtkTags.walletTransactions],
     }),
+    // Real on-chain history of the connected wallet, read from the TON network.
+    getOnchainTransactions: builder.query<OnchainTransactionsResponse, void>({
+      query: () => ({ url: 'wallet/onchain-transactions' }),
+    }),
     getStarsPackages: builder.query<StarsPackage[], void>({
       query: () => ({ url: 'wallet/stars-packages' }),
       providesTags: [rtkTags.starsPackages],
     }),
     getDepositAddress: builder.query<DepositAddressResponse, void>({
       query: () => ({ url: 'wallet/deposit-address' }),
+    }),
+    // Fresh one-time nonce for the TON Connect `ton_proof`. Fetched lazily right
+    // before opening the connect sheet; the wallet signs it and the backend
+    // verifies the signature in `connectWallet`.
+    getTonProofPayload: builder.query<TonProofPayloadResponse, void>({
+      query: () => ({ url: 'wallet/ton-proof/payload' }),
     }),
     connectWallet: builder.mutation<ConnectWalletResponse, ConnectWalletRequest>({
       query: body => ({ url: 'wallet/connect', method: 'POST', body }),
@@ -48,7 +60,15 @@ export const walletApi = api.injectEndpoints({
     }),
     buyStars: builder.mutation<BuyStarsResponse, BuyStarsRequest>({
       query: body => ({ url: 'wallet/buy-stars', method: 'POST', body }),
-      invalidatesTags: [rtkTags.wallet, rtkTags.walletTransactions, rtkTags.me],
+      // Exchanging TON → Stars moves the TON balance, the Stars balance, and
+      // writes to both the wallet + Stars ledgers, so refresh all of them.
+      invalidatesTags: [
+        rtkTags.wallet,
+        rtkTags.walletTransactions,
+        rtkTags.me,
+        rtkTags.stars,
+        rtkTags.starsTransactions,
+      ],
     }),
     // Native Telegram Stars purchase: returns an invoice link the Mini App opens
     // with `WebApp.openInvoice`. Crediting happens server-side via the payment
@@ -63,8 +83,10 @@ export const {
   useGetWalletStateQuery,
   useGetSupportedWalletsQuery,
   useGetWalletTransactionsQuery,
+  useGetOnchainTransactionsQuery,
   useGetStarsPackagesQuery,
   useGetDepositAddressQuery,
+  useLazyGetTonProofPayloadQuery,
   useConnectWalletMutation,
   useDisconnectWalletMutation,
   useWithdrawTonMutation,

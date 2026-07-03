@@ -3,8 +3,20 @@ import {
   WalletTransactionFilter,
   WalletTransactionType,
 } from '@/types/enums/wallet.enums';
+import { appConfig } from '@/config/app.config';
 import type { Dictionary } from '@/types/types/i18n.types';
 import type { WalletTransaction } from '@/types/interfaces/wallet.interfaces';
+
+/** USD value of one Lucky Star — mirrors the backend buy-stars pricing. */
+const STAR_USD_RATE = 0.02;
+
+/** TON cost to buy `stars` Lucky Stars from the TON balance (matches the backend). */
+export const starsToTon = (stars: number): number =>
+  Math.ceil((stars * STAR_USD_RATE * 1000) / appConfig.wallet.tonUsdRate) / 1000;
+
+/** Lucky Stars you get for `ton` TON (floored — the exchange never over-credits). */
+export const tonToStars = (ton: number): number =>
+  Math.floor((ton * appConfig.wallet.tonUsdRate) / STAR_USD_RATE);
 
 const TON_MIN_WITHDRAW = 0.1;
 const TON_NETWORK_FEE = 0.05;
@@ -42,6 +54,14 @@ export const formatUsd = (value: number): string =>
 
 export const tonScanUrl = (txHash: string) => `${TONSCAN_BASE}${txHash}`;
 
+export const tonScanAddressUrl = (address: string) => `https://tonscan.org/address/${address}`;
+
+/** TON Connect `sendTransaction` validUntil — 6 minutes out (util keeps Date.now out of render). */
+export const tonConnectValidUntil = (): number => Math.floor(Date.now() / 1000) + 360;
+
+/** Whole TON amount → nanoTON string for `sendTransaction` messages. */
+export const tonToNanoString = (ton: number): string => BigInt(Math.round(ton * 1e9)).toString();
+
 export const filterTransactions = (
   transactions: WalletTransaction[],
   filter: WalletTransactionFilter
@@ -70,6 +90,28 @@ export const formatRelativeTime = (iso: string, t: Dictionary): string => {
   const diffD = Math.floor(diffH / 24);
   return t('{n} d ago', { n: diffD });
 };
+
+/** Map a TON Connect `device.appName` to our provider enum (unknown → Telegram Wallet). */
+export const resolveWalletProvider = (appName?: string): WalletProvider => {
+  switch (appName?.toLowerCase()) {
+    case 'tonkeeper':
+      return WalletProvider.TONKEEPER;
+    case 'mytonwallet':
+      return WalletProvider.MYTONWALLET;
+    case 'tonhub':
+      return WalletProvider.TONHUB;
+    case 'telegram-wallet':
+    case 'telegramwallet':
+    case 'wallet':
+      return WalletProvider.TELEGRAM_WALLET;
+    default:
+      return WalletProvider.TELEGRAM_WALLET;
+  }
+};
+
+/** TON Connect chain id → our network label (`-3` is the testnet workchain). */
+export const chainToNetwork = (chain?: string): 'mainnet' | 'testnet' =>
+  chain === '-3' ? 'testnet' : 'mainnet';
 
 export const providerLabel = (provider?: WalletProvider): string => {
   switch (provider) {

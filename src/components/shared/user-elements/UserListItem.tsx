@@ -55,13 +55,17 @@ export const UserListItem = ({
             loading={loading}
             skeleton={<Skeleton variant="round" className="w-full h-full" />}
           >
-            <Image
-              src={avatar}
-              alt={username}
-              fill
-              sizes="100%"
-              className="rounded-full object-cover"
-            />
+            {avatar ? (
+              <Image
+                src={avatar}
+                alt={username}
+                fill
+                sizes="100%"
+                className="rounded-full object-cover"
+              />
+            ) : (
+              <div className="h-full w-full rounded-full bg-white/5" />
+            )}
           </SkeletonSuspense>
         </div>
         <div className="flex-1 flex-col-stretch gap-px min-w-0">

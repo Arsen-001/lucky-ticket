@@ -1,7 +1,6 @@
 'use client';
 
 import { useCallback, useEffect, useRef, useState } from 'react';
-import { useRouter } from 'next/navigation';
 import dayjs from 'dayjs';
 import { Plus } from 'lucide-react';
 import { twMerge } from 'tailwind-merge';
@@ -24,12 +23,11 @@ import { findActiveBooster, findEquippedChip } from '@/utils/global/inventory.ut
 import { EngineCardCube } from '@/components/pages/tabs/home/EngineCardCube';
 import { EngineSlotPickerModal } from '@/components/pages/tabs/home/EngineSlotPickerModal';
 import { HomeBuyEngineSlot } from '@/components/pages/tabs/home/HomeBuyEngineSlot';
-import { NotEnoughStarsModal } from '@/components/pages/tabs/home/NotEnoughStarsModal';
+import { StarsTopUpFlow } from '@/components/pages/tabs/home/StarsTopUpFlow';
 import { ConfirmModal } from '@/components/shared/modals/ConfirmModal';
 import { TelegramStarIcon } from '@/components/shared/icons/TelegramStarIcon';
 import { useAppTranslations } from '@/hooks/useAppTranslations';
 import { useToast } from '@/hooks/useToast';
-import { routes } from '@/constants/routes';
 import { chipEquipStarsCost } from '@/utils/global/inventory.utils';
 import type { InventoryChip } from '@/types/interfaces/inventory.interfaces';
 import { EmptyDataInfo } from '@/components/shared/EmptyDataInfo';
@@ -153,15 +151,9 @@ export function HomeEnginesSlider({ className }: ClassNameProps) {
     type: InventoryChipType;
   } | null>(null);
 
-  const router = useRouter();
   const currentStars = me?.telegramStars ?? 0;
   const isLp = me?.isLuckyPlayer ?? false;
   const isVip = me?.isVIP ?? false;
-
-  const handleTopUpStars = (amount: number) => {
-    setStarsModal(prev => ({ ...prev, open: false }));
-    router.push(`${routes.wallet}?topUp=${amount}`);
-  };
 
   const requireStars = (cost: number, onPaid: () => void) => {
     if (currentStars < cost) {
@@ -711,12 +703,11 @@ export function HomeEnginesSlider({ className }: ClassNameProps) {
         confirmText={t('confirm')}
       />
 
-      <NotEnoughStarsModal
+      <StarsTopUpFlow
         open={starsModal.open}
         onClose={() => setStarsModal(prev => ({ ...prev, open: false }))}
         requiredStars={starsModal.required}
         currentStars={currentStars}
-        onTopUp={handleTopUpStars}
       />
     </div>
   );

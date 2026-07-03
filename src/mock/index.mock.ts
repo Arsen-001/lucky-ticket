@@ -13,6 +13,7 @@ import { marketMock } from '@/mock/market.mock';
 import { stakesMock } from '@/mock/stakes.mock';
 import { walletMock } from '@/mock/wallet.mock';
 import { lcMock } from '@/mock/lc.mock';
+import { starsMock } from '@/mock/stars.mock';
 import { achievementsMock } from '@/mock/achievements.mock';
 import { profileMock, ownProfile, buildAccountOverlay } from '@/mock/profile.mock';
 import { pinState } from '@/mock/pin-state.mock';
@@ -95,6 +96,7 @@ export const mockData = {
   ...stakesMock,
   ...walletMock,
   ...lcMock,
+  ...starsMock,
   ...achievementsMock,
   ...profileMock,
   ...pinHandlers,

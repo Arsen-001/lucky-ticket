@@ -22,8 +22,8 @@ const medalSources = {
   platinum: icons.platinumMedal,
 };
 
-const BASE_WIDTH = 135;
-const BASE_HEIGHT = 130;
+const BASE_WIDTH = 620;
+const BASE_HEIGHT = 730;
 const ASPECT_RATIO = BASE_WIDTH / BASE_HEIGHT;
 
 export function Medal({
@@ -88,7 +88,7 @@ export function Medal({
         ...rest.style,
         width: hasWidth ? width : hasHeight ? 'auto' : undefined,
         height: hasHeight ? height : hasWidth ? 'auto' : undefined,
-        aspectRatio: `${BASE_WIDTH} / ${BASE_HEIGHT}`,
+        aspectRatio: `${finalWidth} / ${finalHeight}`,
       }}
       className={twMerge(rest.className, loading && 'animation-blink')}
     />

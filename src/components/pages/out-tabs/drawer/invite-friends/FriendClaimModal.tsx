@@ -82,13 +82,17 @@ export function FriendClaimModal({
           <div className="relative mx-auto flex h-20 w-20 items-center justify-center">
             <span aria-hidden className="absolute inset-0 animate-ping rounded-full bg-white/30" />
             <span className="relative h-20 w-20 overflow-hidden rounded-full border-[3px] border-white/80 shadow-[0_0_24px_rgba(255,255,255,0.45)]">
-              <Image
-                src={friend.avatar}
-                alt={friend.username}
-                width={80}
-                height={80}
-                className="h-20 w-20 object-cover"
-              />
+              {friend.avatar ? (
+                <Image
+                  src={friend.avatar}
+                  alt={friend.username}
+                  width={80}
+                  height={80}
+                  className="h-20 w-20 object-cover"
+                />
+              ) : (
+                <div className="h-20 w-20 bg-white/10" />
+              )}
             </span>
           </div>
 

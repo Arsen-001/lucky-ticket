@@ -20,7 +20,7 @@ import { LuckyPlayerIcon } from '@/components/shared/icons/LuckyPlayerIcon';
 import { BoltIcon } from '@/components/shared/icons/BoltIcon';
 import { CoinIcon } from '@/components/shared/icons/CoinIcon';
 import { TelegramStarIcon } from '@/components/shared/icons/TelegramStarIcon';
-import { NotEnoughStarsModal } from '@/components/pages/tabs/home/NotEnoughStarsModal';
+import { StarsTopUpFlow } from '@/components/pages/tabs/home/StarsTopUpFlow';
 import { routes } from '@/constants/routes';
 import { useAppDispatch } from '@/lib/rtk/hooks';
 import { useAppTranslations } from '@/hooks/useAppTranslations';
@@ -56,11 +56,6 @@ export function Header({ className }: ClassNameProps) {
 
   const handleDrawerOpen = () => {
     dispatch(openDrawer());
-  };
-
-  const handleTopUpStars = (amount: number) => {
-    setStarsModalOpen(false);
-    router.push(`${routes.wallet}?topUp=${amount}`);
   };
 
   return (
@@ -193,11 +188,10 @@ export function Header({ className }: ClassNameProps) {
         )}
       </Button>
 
-      <NotEnoughStarsModal
+      <StarsTopUpFlow
         open={starsModalOpen}
         onClose={() => setStarsModalOpen(false)}
         currentStars={me?.telegramStars ?? 0}
-        onTopUp={handleTopUpStars}
       />
     </div>
   );

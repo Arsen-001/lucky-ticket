@@ -9,14 +9,14 @@ export interface WalletActionButtonsProps {
   disabled?: boolean;
   onDeposit: () => void;
   onWithdraw: () => void;
-  onBuyStars: () => void;
+  onExchange: () => void;
 }
 
 export function WalletActionButtons({
   disabled,
   onDeposit,
   onWithdraw,
-  onBuyStars,
+  onExchange,
 }: WalletActionButtonsProps) {
   const t = useAppTranslations();
 
@@ -41,7 +41,7 @@ export function WalletActionButtons({
       <ActionButton
         Icon={ArrowDownUp}
         label={t('exchange')}
-        onClick={onBuyStars}
+        onClick={onExchange}
         disabled={disabled}
         bgClass="bg-gradient-to-br from-electric-purple/40 to-electric-pink/30 border-electric-purple/30"
         iconClass="text-electric-purple"

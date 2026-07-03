@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react';
 import { CheckCircle2, Sparkles } from 'lucide-react';
 import { twMerge } from 'tailwind-merge';
-import { Modal } from '@/components/shared/modals/Modal';
+import { BottomSheet } from '@/components/shared/modals/BottomSheet';
 import { Button } from '@/components/shared/buttons/Button';
 import { TelegramStarIcon } from '@/components/shared/icons/TelegramStarIcon';
 import { useAppTranslations } from '@/hooks/useAppTranslations';
@@ -57,8 +57,8 @@ export function BuyStarsModal({ open, onClose, initialStars }: BuyStarsModalProp
   };
 
   return (
-    <Modal open={open} onClose={onClose}>
-      <div className="card-outlined bg-purple-gradient relative flex flex-col gap-5 overflow-hidden rounded-2xl p-6">
+    <BottomSheet open={open} onClose={onClose}>
+      <div className="card-outlined bg-purple-gradient relative flex flex-col gap-5 overflow-hidden rounded-t-2xl px-6 pb-8 pt-7">
         <div
           aria-hidden
           className="pointer-events-none absolute -top-20 left-1/2 h-56 w-56 -translate-x-1/2 rounded-full"
@@ -223,6 +223,6 @@ export function BuyStarsModal({ open, onClose, initialStars }: BuyStarsModalProp
           </div>
         )}
       </div>
-    </Modal>
+    </BottomSheet>
   );
 }

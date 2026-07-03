@@ -37,19 +37,48 @@ const getWalletState = (): WalletState => ({
 /** Transaction history — fresh copies so RTK Query detects in-place mutations. */
 const getTransactions = () => mockDb.wallet.transactions.map(tx => ({ ...tx }));
 
+/** On-chain history — sample entries in the mock (no real blockchain here). */
+const getOnchainTransactions = () => ({
+  address: mockDb.wallet.address ?? null,
+  network: mockDb.wallet.network,
+  transactions: mockDb.wallet.isConnected
+    ? [
+        {
+          hash: randomHash(),
+          createdAt: new Date(Date.now() - 3_600_000).toISOString(),
+          direction: 'in',
+          amount: '2.5',
+          counterparty: 'UQD8HuDfZsU2JytXStq2TxkdlI9hSxF_PBsHfe1N02uOcZXG',
+          comment: 'Deposit',
+        },
+        {
+          hash: randomHash(),
+          createdAt: new Date(Date.now() - 2 * 86_400_000).toISOString(),
+          direction: 'out',
+          amount: '1.2',
+          counterparty: 'UQAq1cXMjGoz5fB9xoZlf0H6hHGtbS6tEIcQ3U7l_Oyk9fT2',
+          comment: null,
+        },
+      ]
+    : [],
+});
+
 const getDepositAddress = (): DepositAddressResponse => ({
   address: mockDb.wallet.address ?? '',
   network: mockDb.wallet.network,
+  // Mock has no on-chain treasury → keep the passive QR/address UI.
+  viaWalletEnabled: false,
 });
 
 /** POST wallet/connect — mark the wallet connected with the chosen provider. */
 const connectWallet = (args: FetchArgs) => {
-  const { provider } = (args.body ?? {}) as Partial<ConnectWalletRequest>;
+  const { provider, address } = (args.body ?? {}) as Partial<ConnectWalletRequest>;
   if (provider) mockDb.wallet.provider = provider;
   mockDb.wallet.isConnected = true;
-  if (!mockDb.wallet.address) {
-    mockDb.wallet.address = 'EQAbCdEfGhIjKlMnOpQrStUvWxYzAaBbCcDdEeFfGgHhIiJjKx9k2';
-  }
+  // Prefer the real TON Connect address when present; fall back to a stub so the
+  // mock still resolves in a plain browser where no wallet is available.
+  mockDb.wallet.address =
+    address ?? mockDb.wallet.address ?? 'EQAbCdEfGhIjKlMnOpQrStUvWxYzAaBbCcDdEeFfGgHhIiJjKx9k2';
   return {
     data: {
       success: true,
@@ -138,8 +167,12 @@ export const walletMock = {
   wallet: getWalletState,
   'wallet/supported': appConfig.wallet.supportedWallets,
   'wallet/transactions': getTransactions,
+  'wallet/onchain-transactions': getOnchainTransactions,
   'wallet/stars-packages': appConfig.wallet.starsPackages,
   'wallet/deposit-address': getDepositAddress,
+  // One-time ton_proof nonce — any opaque string works in the mock (no real
+  // signature is verified without a backend).
+  'wallet/ton-proof/payload': () => ({ payload: randomHash() }),
   'POST wallet/connect': connectWallet,
   'POST wallet/disconnect': disconnectWallet,
   'POST wallet/withdraw': withdrawTon,

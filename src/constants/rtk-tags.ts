@@ -19,6 +19,8 @@ export const rtkTags = {
   starsPackages: 'StarsPackages',
   lc: 'Lc',
   lcTransactions: 'LcTransactions',
+  stars: 'Stars',
+  starsTransactions: 'StarsTransactions',
   achievements: 'Achievements',
   profile: 'Profile',
   profileById: ':ProfileById',

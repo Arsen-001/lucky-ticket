@@ -4,36 +4,43 @@ import { useMemo, useState } from 'react';
 import { twMerge } from 'tailwind-merge';
 import { EmptyDataInfo } from '@/components/shared/EmptyDataInfo';
 import { useAppTranslations } from '@/hooks/useAppTranslations';
-import { WalletTransactionFilter } from '@/types/enums/wallet.enums';
-import { filterTransactions } from '@/utils/pages/wallet.utils';
-import { WalletTransactionRow } from './WalletTransactionRow';
-import type { WalletTransaction } from '@/types/interfaces/wallet.interfaces';
+import { StarsTransactionDirection, StarsTransactionFilter } from '@/types/enums/stars.enums';
+import { StarsTransactionRow } from './StarsTransactionRow';
+import type { StarsTransaction } from '@/types/interfaces/stars.interfaces';
 
-const FILTERS: WalletTransactionFilter[] = [
-  WalletTransactionFilter.ALL,
-  WalletTransactionFilter.DEPOSITS,
-  WalletTransactionFilter.WITHDRAWALS,
-  WalletTransactionFilter.STARS,
+const FILTERS: StarsTransactionFilter[] = [
+  StarsTransactionFilter.ALL,
+  StarsTransactionFilter.EARN,
+  StarsTransactionFilter.SPEND,
 ];
 
 const PAGE_SIZE = 20;
 
-export interface WalletTransactionHistoryProps {
-  transactions?: WalletTransaction[];
+const filterTransactions = (
+  transactions: StarsTransaction[],
+  filter: StarsTransactionFilter
+): StarsTransaction[] => {
+  switch (filter) {
+    case StarsTransactionFilter.EARN:
+      return transactions.filter(tx => tx.direction === StarsTransactionDirection.CREDIT);
+    case StarsTransactionFilter.SPEND:
+      return transactions.filter(tx => tx.direction === StarsTransactionDirection.DEBIT);
+    default:
+      return transactions;
+  }
+};
+
+export interface StarsTransactionHistoryProps {
+  transactions?: StarsTransaction[];
   loading?: boolean;
-  isConnected?: boolean;
-  /** Suppress the section title when embedded under a shared header. */
-  hideHeader?: boolean;
 }
 
-export function WalletTransactionHistory({
+export function StarsTransactionHistory({
   transactions = [],
   loading,
-  isConnected,
-  hideHeader,
-}: WalletTransactionHistoryProps) {
+}: StarsTransactionHistoryProps) {
   const t = useAppTranslations();
-  const [filter, setFilter] = useState<WalletTransactionFilter>(WalletTransactionFilter.ALL);
+  const [filter, setFilter] = useState<StarsTransactionFilter>(StarsTransactionFilter.ALL);
   const [page, setPage] = useState(1);
 
   const filtered = useMemo(() => filterTransactions(transactions, filter), [transactions, filter]);
@@ -42,15 +49,11 @@ export function WalletTransactionHistory({
 
   return (
     <section className="flex flex-col gap-3">
-      {!hideHeader && (
-        <div className="flex items-center justify-between gap-2">
-          <h3 className="text-sm font-extrabold uppercase tracking-wider text-white">
-            {t('recent activity')}
-          </h3>
-        </div>
-      )}
+      <h3 className="text-sm font-extrabold uppercase tracking-wider text-white">
+        {t('recent activity')}
+      </h3>
 
-      <div className="flex gap-1.5 overflow-x-auto scrollbar-hidden -mx-1 px-1">
+      <div className="scrollbar-hidden -mx-1 flex gap-1.5 overflow-x-auto px-1">
         {FILTERS.map(f => (
           <button
             key={f}
@@ -60,13 +63,13 @@ export function WalletTransactionHistory({
               setPage(1);
             }}
             className={twMerge(
-              'flex-shrink-0 rounded-full px-3 py-1.5 text-[11px] font-bold uppercase tracking-wider transition-colors',
+              'flex-shrink-0 rounded-full px-3 py-1.5 text-[11px] font-bold uppercase tracking-wider transition-colors cursor-pointer',
               filter === f
                 ? 'bg-pink-gradient text-white'
                 : 'bg-background-overlay/60 text-pink-secondary hover:text-white border border-white/5'
             )}
           >
-            {t(`wallet filter ${f}`)}
+            {t(`stars filter ${f}`)}
           </button>
         ))}
       </div>
@@ -74,7 +77,7 @@ export function WalletTransactionHistory({
       <div role="list" className="flex flex-col gap-2">
         {loading ? (
           Array.from({ length: 5 }).map((_, index) => (
-            <WalletTransactionRow
+            <StarsTransactionRow
               key={`s-${index}`}
               loading
               className="animate-slide-in-bottom"
@@ -82,12 +85,10 @@ export function WalletTransactionHistory({
             />
           ))
         ) : visible.length === 0 ? (
-          <EmptyDataInfo
-            description={isConnected ? t('no transactions yet') : t('connect wallet to start')}
-          />
+          <EmptyDataInfo description={t('no stars transactions yet')} />
         ) : (
           visible.map((tx, index) => (
-            <WalletTransactionRow
+            <StarsTransactionRow
               key={tx.id}
               transaction={tx}
               className="animate-slide-in-bottom"
@@ -101,7 +102,7 @@ export function WalletTransactionHistory({
         <button
           type="button"
           onClick={() => setPage(p => p + 1)}
-          className="bg-background-overlay/60 text-pink-secondary hover:text-white mt-1 self-center rounded-full border border-white/5 px-4 py-1.5 text-[11px] font-bold uppercase tracking-wider transition-colors"
+          className="bg-background-overlay/60 text-pink-secondary hover:text-white mt-1 self-center rounded-full border border-white/5 px-4 py-1.5 text-[11px] font-bold uppercase tracking-wider transition-colors cursor-pointer"
         >
           {t('load more')}
         </button>

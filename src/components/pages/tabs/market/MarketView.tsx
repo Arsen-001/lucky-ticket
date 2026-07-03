@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useMemo, useState, type ReactNode } from 'react';
-import { useRouter, useSearchParams } from 'next/navigation';
+import { useSearchParams } from 'next/navigation';
 import { useGetMarketDataQuery } from '@/api/market.api';
 import { useGetMeQuery } from '@/api/me.api';
 import { useAppTranslations } from '@/hooks/useAppTranslations';
@@ -17,7 +17,7 @@ import { MarketInfoModal } from '@/components/pages/tabs/market/MarketInfoModal'
 import { MarketPurchaseModal } from '@/components/pages/tabs/market/MarketPurchaseModal';
 import { MarketPurchaseSuccessModal } from '@/components/pages/tabs/market/MarketPurchaseSuccessModal';
 import { NotEnoughCoinsModal } from '@/components/pages/tabs/market/NotEnoughCoinsModal';
-import { NotEnoughStarsModal } from '@/components/pages/tabs/home/NotEnoughStarsModal';
+import { StarsTopUpFlow } from '@/components/pages/tabs/home/StarsTopUpFlow';
 import { MarketEngineSection } from '@/components/pages/tabs/market/sections/MarketEngineSection';
 import { MarketTicketSection } from '@/components/pages/tabs/market/sections/MarketTicketSection';
 import { MarketShardSection } from '@/components/pages/tabs/market/sections/MarketShardSection';
@@ -25,7 +25,6 @@ import { MarketBoosterSection } from '@/components/pages/tabs/market/sections/Ma
 import { MarketCosmeticSection } from '@/components/pages/tabs/market/sections/MarketCosmeticSection';
 import { MarketStatusSection } from '@/components/pages/tabs/market/sections/MarketStatusSection';
 import { MarketPriceType } from '@/types/enums/market.enums';
-import { routes } from '@/constants/routes';
 import type { MarketAccent, MarketPrice } from '@/types/interfaces/market.interfaces';
 import '@/styles/components/market.css';
 
@@ -59,7 +58,6 @@ interface MarketActivePurchase {
 }
 
 export function MarketView() {
-  const router = useRouter();
   const searchParams = useSearchParams();
   const tabParam = searchParams.get('tab');
   const initialTab: MarketCategoryKey =
@@ -154,12 +152,6 @@ export function MarketView() {
     }
   };
 
-  // Star top-up presets route to the wallet's buy-stars flow with the chosen amount.
-  const handleTopUpStars = (amount: number) => {
-    setInsufficientStars(null);
-    router.push(`${routes.wallet}?topUp=${amount}`);
-  };
-
   const sections = useMemo(() => {
     if (!data) return null;
     return {
@@ -224,12 +216,11 @@ export function MarketView() {
         confirmText={purchase?.confirmText}
       />
 
-      <NotEnoughStarsModal
+      <StarsTopUpFlow
         open={!!insufficientStars}
         onClose={() => setInsufficientStars(null)}
         requiredStars={insufficientStars?.required}
         currentStars={me?.telegramStars ?? 0}
-        onTopUp={handleTopUpStars}
       />
 
       <NotEnoughCoinsModal

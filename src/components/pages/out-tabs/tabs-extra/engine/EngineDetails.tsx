@@ -1,7 +1,6 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { useRouter } from 'next/navigation';
 import {
   useClaimEngineMutation,
   useCompleteEngineCycleMutation,
@@ -21,10 +20,9 @@ import { EmptyDataInfo } from '@/components/shared/EmptyDataInfo';
 import { QueryErrorState } from '@/components/shared/error/QueryErrorState';
 import { ConfirmModal } from '@/components/shared/modals/ConfirmModal';
 import { EngineSlotPickerModal } from '@/components/pages/tabs/home/EngineSlotPickerModal';
-import { NotEnoughStarsModal } from '@/components/pages/tabs/home/NotEnoughStarsModal';
+import { StarsTopUpFlow } from '@/components/pages/tabs/home/StarsTopUpFlow';
 import { useAppTranslations } from '@/hooks/useAppTranslations';
 import { useToast } from '@/hooks/useToast';
-import { routes } from '@/constants/routes';
 import {
   chipEquipStarsCost,
   findActiveBooster,
@@ -84,7 +82,6 @@ export function EngineDetails({ id }: EngineDetailsProps) {
     open: false,
     required: 0,
   });
-  const router = useRouter();
 
   const location = findEngineLocation(tickets, id);
   const engine = location?.engine ?? null;
@@ -170,11 +167,6 @@ export function EngineDetails({ id }: EngineDetailsProps) {
   // Real running total of tickets this engine has ever claimed (backend counter).
   const lifetimeProduced = engine.lifetimeProduced ?? 0;
   const currentStars = me?.telegramStars ?? 0;
-
-  const handleTopUpStars = (amount: number) => {
-    setStarsModal(prev => ({ ...prev, open: false }));
-    router.push(`${routes.wallet}?topUp=${amount}`);
-  };
 
   const requireStars = (cost: number, onPaid: () => void) => {
     if (currentStars < cost) {
@@ -368,12 +360,11 @@ export function EngineDetails({ id }: EngineDetailsProps) {
         }}
       />
 
-      <NotEnoughStarsModal
+      <StarsTopUpFlow
         open={starsModal.open}
         onClose={() => setStarsModal(prev => ({ ...prev, open: false }))}
         requiredStars={starsModal.required}
         currentStars={currentStars}
-        onTopUp={handleTopUpStars}
       />
     </div>
   );

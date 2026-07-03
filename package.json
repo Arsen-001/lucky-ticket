@@ -19,6 +19,7 @@
   "dependencies": {
     "@hookform/resolvers": "^5.2.2",
     "@reduxjs/toolkit": "^2.11.0",
+    "@tonconnect/ui-react": "^3.0.0",
     "dayjs": "^1.11.19",
     "js-cookie": "^3.0.5",
     "lucide-react": "^0.555.0",
