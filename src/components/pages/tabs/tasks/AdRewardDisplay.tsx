@@ -67,11 +67,11 @@ export function AdRewardDisplay({ rewards, className }: AdRewardDisplayProps) {
   if (!rewards.length) return null;
 
   const count = rewards.length;
-  const iconSize = count >= 3 ? 12 : 14;
-  const amountSize = count >= 3 ? 'text-[10px]' : 'text-[11px]';
+  const iconSize = count >= 3 ? 15 : 17;
+  const amountSize = count >= 3 ? 'text-[12px]' : 'text-[13px]';
 
   return (
-    <div className={twMerge('flex items-center gap-1', className)}>
+    <div className={twMerge('flex items-center gap-1.5', className)}>
       {rewards.map((reward, i) => {
         const style = STYLE_MAP[reward.type];
         if (!style) return null;
@@ -80,7 +80,7 @@ export function AdRewardDisplay({ rewards, className }: AdRewardDisplayProps) {
           <div
             key={`${reward.type}-${i}`}
             className={twMerge(
-              'flex min-w-0 items-center gap-0.5 rounded-md border px-1 py-0.5',
+              'flex min-w-0 items-center gap-1 rounded-md border px-1.5 py-1',
               bgClass,
               ringClass
             )}

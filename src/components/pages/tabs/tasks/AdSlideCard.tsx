@@ -38,9 +38,9 @@ const AD_GLOW: Record<number, string> = {
 };
 
 /**
- * Ultra-compact rewarded-ad slide: a single horizontal row —
- * `#index · reward chips · mini play button` — roughly half the height of a
- * stacked card. The watch action is an icon-only button (labelled for a11y).
+ * Rewarded-ad slide: a single horizontal row —
+ * `#index · reward chips · play button` — sized to breathe (~2× the original
+ * ultra-compact row). The watch action is an icon-only button (labelled for a11y).
  */
 export function AdSlideCard({ slot, onWatch, loading, locked = false }: AdSlideCardProps) {
   const t = useAppTranslations();
@@ -53,7 +53,7 @@ export function AdSlideCard({ slot, onWatch, loading, locked = false }: AdSlideC
   return (
     <div
       className={twMerge(
-        'relative flex w-full items-center gap-1.5 rounded-lg overflow-hidden bg-background-overlay px-1.5 py-1.5',
+        'relative flex w-full items-center gap-2.5 rounded-xl overflow-hidden bg-background-overlay px-3 py-4',
         AD_FRAME[slot.index] ?? 'card-outlined',
         AD_GLOW[slot.index] ?? '',
         watched && 'opacity-60',
@@ -68,7 +68,7 @@ export function AdSlideCard({ slot, onWatch, loading, locked = false }: AdSlideC
       )}
 
       {/* index */}
-      <span className="relative shrink-0 text-[9px] font-bold tabular-nums text-white/35">
+      <span className="relative shrink-0 text-[11px] font-bold tabular-nums text-white/35">
         #{slot.index}
       </span>
 
@@ -84,20 +84,20 @@ export function AdSlideCard({ slot, onWatch, loading, locked = false }: AdSlideC
         disabled={!playable || loading}
         onClick={playable ? () => onWatch(slot) : undefined}
         className={twMerge(
-          'relative flex-center h-7 w-7 shrink-0 rounded-full transition-all active:scale-90 disabled:cursor-not-allowed',
+          'relative flex-center h-11 w-11 shrink-0 rounded-full transition-all active:scale-90 disabled:cursor-not-allowed',
           watched && 'bg-success/20 text-success',
           locked && 'bg-white/5 text-white/40',
           playable && 'bg-pink-gradient text-white hover:brightness-110 animate-task-pulse'
         )}
       >
         {loading ? (
-          <Loader2 size={13} className="animate-spin" />
+          <Loader2 size={19} className="animate-spin" />
         ) : watched ? (
-          <Check size={13} />
+          <Check size={19} />
         ) : locked ? (
-          <Lock size={12} />
+          <Lock size={17} />
         ) : (
-          <Play size={12} fill="currentColor" className="translate-x-[1px]" />
+          <Play size={17} fill="currentColor" className="translate-x-[1px]" />
         )}
       </button>
     </div>
