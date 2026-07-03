@@ -9,11 +9,16 @@
   position: relative;
   transform-style: preserve-3d;
   transform: rotateX(-22deg) rotateY(34deg);
-  --cube-half: 10px;
+  /* Faces are absolutely inset:0 (= the dot's box), so the half-depth must be
+     exactly half the box size — any more and the six faces stop meeting at the
+     edges, leaving an "exploded" cube with detached faces poking out of the
+     dot (obvious on the empty active cube while it spins). Dot is 16px,
+     active dot 26px. */
+  --cube-half: 8px;
 }
 
 .eng-cube--active {
-  --cube-half: 15px;
+  --cube-half: 13px;
   animation: eng-cube-spin 8s linear infinite;
 }
 

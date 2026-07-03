@@ -34,6 +34,7 @@ import { EmptyDataInfo } from '@/components/shared/EmptyDataInfo';
 import { QueryErrorState } from '@/components/shared/error/QueryErrorState';
 import { Skeleton } from '@/components/shared/seleketons/Skeleton';
 import '@/styles/components/engines-cube-dot.css';
+import '@/styles/components/home-engines-slider.css';
 import {
   effectiveCycleSeconds,
   engineCapacity,
@@ -398,7 +399,7 @@ export function HomeEnginesSlider({ className }: ClassNameProps) {
     return (
       <div className={twMerge('-mt-5 mb-0 flex w-full flex-col items-stretch', className)}>
         <div
-          className="scrollbar-hidden flex snap-x items-stretch gap-3 overflow-x-auto overflow-y-visible"
+          className="scrollbar-hidden engines-slider-edge-fade flex snap-x items-stretch gap-3 overflow-x-auto overflow-y-visible"
           style={{ paddingInline: SLIDE_PADDING_CSS }}
         >
           {[0, 1].map(i => (
@@ -436,7 +437,7 @@ export function HomeEnginesSlider({ className }: ClassNameProps) {
     <div className={twMerge('-mt-5 mb-0 flex w-full flex-col items-stretch', className)}>
       <div
         ref={scrollerRef}
-        className="scrollbar-hidden flex snap-x snap-mandatory items-stretch gap-3 overflow-x-auto overflow-y-visible pt-0 pb-0"
+        className="scrollbar-hidden engines-slider-edge-fade flex snap-x snap-mandatory items-stretch gap-3 overflow-x-auto overflow-y-visible pt-0 pb-0"
         style={{
           scrollPaddingInline: SLIDE_PADDING_CSS,
           paddingInline: SLIDE_PADDING_CSS,
@@ -458,7 +459,7 @@ export function HomeEnginesSlider({ className }: ClassNameProps) {
               }}
               className={twMerge(
                 'relative flex origin-center snap-center items-center transition-all duration-[450ms] ease-[cubic-bezier(0.22,1,0.36,1)] min-h-[calc(100vw-60px)]',
-                isActive ? 'opacity-100' : 'cursor-pointer opacity-60 saturate-75'
+                isActive ? 'opacity-100' : 'cursor-pointer opacity-30 saturate-75'
               )}
             >
               <EngineCardCube
@@ -502,7 +503,7 @@ export function HomeEnginesSlider({ className }: ClassNameProps) {
           }}
           className={twMerge(
             'relative flex origin-center snap-center items-center transition-all duration-[450ms] ease-[cubic-bezier(0.22,1,0.36,1)] min-h-[calc(100vw-60px)]',
-            activeIndex === buySlotIndex ? 'opacity-100' : 'cursor-pointer opacity-60 saturate-75'
+            activeIndex === buySlotIndex ? 'opacity-100' : 'cursor-pointer opacity-30 saturate-75'
           )}
         >
           <HomeBuyEngineSlot className="w-full" />

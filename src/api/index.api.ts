@@ -115,6 +115,47 @@ const rawBaseQuery = fetchBaseQuery({
   },
 });
 
+/**
+ * Single-flight refresh. The backend rotates refresh tokens (one use each), so
+ * when several queries 401 at once — the normal case after the 15-min access
+ * token expires with a screen full of queries — they must all await ONE
+ * refresh call. Without this mutex every 401 raced its own refresh: the first
+ * won and rotated the token, the rest got "revoked" back and wiped the fresh
+ * cookies, logging the user out on the web (Telegram re-auths via initData on
+ * every open, which masked the bug there).
+ */
+let refreshInFlight: Promise<boolean> | null = null;
+
+const refreshSession = async (
+  store: Parameters<typeof rawBaseQuery>[1],
+  extra: Parameters<typeof rawBaseQuery>[2]
+): Promise<boolean> => {
+  const refreshToken = getRefreshTokenCk();
+  if (!refreshToken) return false;
+  // Detach from the triggering query's abort signal: the refresh is shared by
+  // every waiter, so one unmounting component must not cancel it (a cancelled
+  // rotation may still reach the server and revoke the token we'd retry with).
+  const refresh = await rawBaseQuery(
+    { url: 'auth/refresh', method: 'POST', body: { refreshToken } },
+    { ...store, signal: new AbortController().signal },
+    extra
+  );
+  const tokens = refresh.data as { accessToken?: string; refreshToken?: string } | undefined;
+  if (tokens?.accessToken) {
+    setAccessTokenCk(tokens.accessToken);
+    if (tokens.refreshToken) setRefreshTokenCk(tokens.refreshToken);
+    return true;
+  }
+  // Drop the session only when the backend definitively rejected the token.
+  // A network hiccup / backend restart must NOT log the user out — the token
+  // is still good and the next 401 will retry the refresh.
+  if (refresh.error?.status === 401) {
+    removeAccessTokenCk();
+    removeRefreshTokenCk();
+  }
+  return false;
+};
+
 const realBaseQuery: BaseQueryFn<string | FetchArgs, unknown, FetchBaseQueryError> = async (
   args,
   store,
@@ -123,22 +164,11 @@ const realBaseQuery: BaseQueryFn<string | FetchArgs, unknown, FetchBaseQueryErro
   let result = await rawBaseQuery(args, store, extra);
 
   if (result.error?.status === 401) {
-    const refreshToken = getRefreshTokenCk();
-    if (refreshToken) {
-      const refresh = await rawBaseQuery(
-        { url: 'auth/refresh', method: 'POST', body: { refreshToken } },
-        store,
-        extra
-      );
-      const tokens = refresh.data as { accessToken?: string; refreshToken?: string } | undefined;
-      if (tokens?.accessToken) {
-        setAccessTokenCk(tokens.accessToken);
-        if (tokens.refreshToken) setRefreshTokenCk(tokens.refreshToken);
-        result = await rawBaseQuery(args, store, extra); // retry original
-      } else {
-        removeAccessTokenCk();
-        removeRefreshTokenCk();
-      }
+    refreshInFlight ??= refreshSession(store, extra).finally(() => {
+      refreshInFlight = null;
+    });
+    if (await refreshInFlight) {
+      result = await rawBaseQuery(args, store, extra); // retry original
     }
   }
 
