@@ -2,6 +2,7 @@ import { createApi, fetchBaseQuery } from '@reduxjs/toolkit/query/react';
 import { rtkTags } from '@/constants/rtk-tags';
 import type { BaseQueryFn, FetchArgs, FetchBaseQueryError } from '@reduxjs/toolkit/query';
 import { type MockData, mockData } from '@/mock/index.mock';
+import { isTelegramEnv } from '@/lib/telegram/telegram';
 import {
   getAccessTokenCk,
   getRefreshTokenCk,
@@ -152,6 +153,15 @@ const refreshSession = async (
   if (refresh.error?.status === 401) {
     removeAccessTokenCk();
     removeRefreshTokenCk();
+    // On the web the session is unrecoverable now — take the user to the login
+    // page instead of leaving every screen stuck on "Couldn't load data".
+    // Inside Telegram re-auth happens via initData, so never redirect there.
+    if (typeof window !== 'undefined' && !isTelegramEnv()) {
+      const authPages = ['/login', '/register', '/forgot-password', '/reset-password'];
+      if (!authPages.some(p => window.location.pathname.startsWith(p))) {
+        window.location.assign('/login');
+      }
+    }
   }
   return false;
 };

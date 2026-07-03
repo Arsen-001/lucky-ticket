@@ -284,25 +284,27 @@ function ComingSoonCard({
         </div>
       </div>
 
-      {/* Big sparkly placeholder */}
-      <div className="flex items-baseline gap-1">
-        <span className="text-2xl font-extrabold leading-none bg-gradient-to-r from-white/30 to-white/10 bg-clip-text text-transparent">
-          ?
-        </span>
-        <span className="text-[10px] font-bold uppercase tracking-wider text-white/40">
-          {t('coming soon')}
-        </span>
+      {/* Middle block — centered in the spare height, mirroring MilestoneCard */}
+      <div className="my-auto flex flex-col gap-2">
+        <div className="flex items-baseline gap-1">
+          <span className="text-2xl font-extrabold leading-none bg-gradient-to-r from-white/30 to-white/10 bg-clip-text text-transparent">
+            ?
+          </span>
+          <span className="text-[10px] font-bold uppercase tracking-wider text-white/40">
+            {t('coming soon')}
+          </span>
+        </div>
+
+        <h4 className="text-[12px] font-extrabold leading-snug text-white/70 line-clamp-2">
+          {t('more milestones soon')}
+        </h4>
+        <p className="text-[10px] text-white/40 leading-tight line-clamp-2">
+          {t('more milestones soon blurb')}
+        </p>
       </div>
 
-      <h4 className="text-[12px] font-extrabold leading-snug text-white/70 line-clamp-2">
-        {t('more milestones soon')}
-      </h4>
-      <p className="text-[10px] text-white/40 leading-tight line-clamp-2">
-        {t('more milestones soon blurb')}
-      </p>
-
       {/* Footer — soon pill instead of CTA */}
-      <div className="mt-auto w-full rounded-xl py-1.5 text-[10px] font-bold uppercase tracking-wider flex-center gap-1 bg-white/5 text-white/50">
+      <div className="w-full rounded-xl py-1.5 text-[10px] font-bold uppercase tracking-wider flex-center gap-1 bg-white/5 text-white/50">
         <Sparkles size={11} />
         {t('coming soon')}
       </div>
@@ -456,38 +458,42 @@ function MilestoneCard({
         ) : null}
       </div>
 
-      {/* Number block — for asset variants only the unit label remains; otherwise show big number + label */}
-      {cardIconType || cardMedalType || cardImageSrc || CardLucideIcon ? (
-        <span className="text-[10px] font-bold uppercase tracking-wider text-white/50">
-          {unitLabel}
-        </span>
-      ) : NumberIcon ? (
-        <div className="flex flex-col gap-0.5">
-          <span className="text-2xl font-extrabold leading-none bg-gradient-to-r from-gold via-electric-pink to-electric-purple bg-clip-text text-transparent">
-            {task.progress.target}
-          </span>
+      {/* Middle block — number/unit + subtitle. `my-auto` splits the card's
+          spare height evenly above and below it, so sparse cards (no progress
+          bar, no CTA) read as centered instead of leaving one big hole between
+          the subtitle and the bottom-pinned rewards. */}
+      <div className="my-auto flex flex-col gap-2">
+        {cardIconType || cardMedalType || cardImageSrc || CardLucideIcon ? (
           <span className="text-[10px] font-bold uppercase tracking-wider text-white/50">
             {unitLabel}
           </span>
-        </div>
-      ) : (
-        <div className="flex items-baseline gap-1">
-          <span className="text-2xl font-extrabold leading-none bg-gradient-to-r from-gold via-electric-pink to-electric-purple bg-clip-text text-transparent">
-            {task.progress.target}
-          </span>
-          <span className="text-[10px] font-bold uppercase tracking-wider text-white/50">
-            {unitLabel}
-          </span>
-        </div>
-      )}
+        ) : NumberIcon ? (
+          <div className="flex flex-col gap-0.5">
+            <span className="text-2xl font-extrabold leading-none bg-gradient-to-r from-gold via-electric-pink to-electric-purple bg-clip-text text-transparent">
+              {task.progress.target}
+            </span>
+            <span className="text-[10px] font-bold uppercase tracking-wider text-white/50">
+              {unitLabel}
+            </span>
+          </div>
+        ) : (
+          <div className="flex items-baseline gap-1">
+            <span className="text-2xl font-extrabold leading-none bg-gradient-to-r from-gold via-electric-pink to-electric-purple bg-clip-text text-transparent">
+              {task.progress.target}
+            </span>
+            <span className="text-[10px] font-bold uppercase tracking-wider text-white/50">
+              {unitLabel}
+            </span>
+          </div>
+        )}
 
-      {/* Subtitle */}
-      {task.subtitle && (
-        <p className="text-[10px] text-white/50 leading-tight line-clamp-2">{task.subtitle}</p>
-      )}
+        {task.subtitle && (
+          <p className="text-[10px] text-white/50 leading-tight line-clamp-2">{task.subtitle}</p>
+        )}
+      </div>
 
       {/* Rewards */}
-      <TaskRewardRow rewards={task.rewards} size="sm" className="flex-wrap gap-1 mt-auto" />
+      <TaskRewardRow rewards={task.rewards} size="sm" className="flex-wrap gap-1" />
 
       {/* Progress */}
       {showProgress && (

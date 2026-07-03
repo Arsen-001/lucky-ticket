@@ -1,14 +1,26 @@
 'use client';
 
 import { useEffect, useState, type ReactNode } from 'react';
+import { usePathname, useRouter } from 'next/navigation';
 import { useTelegramLoginMutation } from '@/api/auth.api';
 import { getTelegramWebApp } from '@/lib/telegram/telegram';
+import { getAccessTokenCk, getRefreshTokenCk } from '@/services/cookie.service';
+import { routes } from '@/constants/routes';
 import { TelegramSplash } from '@/components/telegram/TelegramSplash';
 
 type Phase = 'pending' | 'authenticating' | 'ready' | 'error';
 
 /** App background — keeps the Telegram header/body chrome on-theme. */
 const THEME_BG = '#1b1930';
+
+/** Pages that must stay reachable without a session (the email-auth flow). */
+const AUTH_PATHS: string[] = [
+  routes.login,
+  routes.register,
+  routes.forgotPassword,
+  routes.resetPassword,
+  routes.twoFactor,
+];
 
 /**
  * Boot-time gate for the Telegram Mini App. When the app is opened inside
@@ -23,6 +35,8 @@ const THEME_BG = '#1b1930';
 export function TelegramProvider({ children }: { children: ReactNode }) {
   const [telegramLogin] = useTelegramLoginMutation();
   const [phase, setPhase] = useState<Phase>('pending');
+  const router = useRouter();
+  const pathname = usePathname();
 
   const authenticate = (initData: string) => {
     setPhase('authenticating');
@@ -36,6 +50,14 @@ export function TelegramProvider({ children }: { children: ReactNode }) {
     const tg = getTelegramWebApp();
     // Not inside Telegram → normal browser flow (email login stays available).
     if (!tg || !tg.initData) {
+      // Web against the real backend with no session at all → go to the login
+      // page instead of rendering an app where every query fails with
+      // "Couldn't load data". Mock mode (no API URL) stays freely browsable.
+      const hasSession = !!getAccessTokenCk() || !!getRefreshTokenCk();
+      const onAuthPage = AUTH_PATHS.some(p => pathname === p || pathname.startsWith(`${p}/`));
+      if (process.env.NEXT_PUBLIC_API_URL && !hasSession && !onAuthPage) {
+        router.replace(routes.login);
+      }
       setPhase('ready');
       return;
     }
