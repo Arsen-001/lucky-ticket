@@ -85,12 +85,13 @@ export const GlobalConstants = {
   decayGraceDays: 7,
   apTierThresholds: {
     bronze: 0,
-    silver: 2000,
-    gold: 10000,
-    platinum: 30000,
-    // 72k (not 54k) so the Diamond leg takes visibly longer than Platinum's —
-    // days-to-next-tier at the per-tier daily baselines: ≈29 / 89 / 180 / 320.
-    diamond: 72000,
+    // Product pacing targets (days per leg at the per-tier daily baselines):
+    // Silver in ~15 days, Gold +1 month, Platinum +3 months, Diamond +6 months
+    // → actual legs ≈15 / 33 / 90 / 183 days (~10.5 months to Diamond total).
+    silver: 1000,
+    gold: 4000,
+    platinum: 14000,
+    diamond: 38000,
   },
   /**
    * Canonical AP-source rates — mirrors DOCS §5.3 "How Activity Points Are

@@ -95,12 +95,12 @@ A user's **tier** is derived from accumulated AP:
 | Tier     | AP threshold | Reached by (perfect daily-baseline player) |
 | :------- | :----------- | :----------------------------------------- |
 | Bronze   | 0            | start                                      |
-| Silver   | 2,000        | ~1 month                                   |
-| Gold     | 10,000       | ~4 months                                  |
-| Platinum | 30,000       | ~10 months                                 |
-| Diamond  | 72,000       | ~21 months                                 |
+| Silver   | 1,000        | ~2 weeks                                   |
+| Gold     | 4,000        | ~1.5 months                                |
+| Platinum | 14,000       | ~4.5 months                                |
+| Diamond  | 38,000       | ~10.5 months                               |
 
-Thresholds are tuned so each leg takes visibly longer than the previous one at the per-tier daily baselines (§5.4): ≈29 / 89 / 180 / 320 days per leg — the pacing guardrail is asserted in `tests/economy-sim.test.ts`.
+Thresholds implement the product pacing targets — Silver in ~15 days, Gold +1 month, Platinum +3 months, Diamond +6 months. At the per-tier daily baselines (§5.4) the legs land at ≈15 / 33 / 90 / 183 days, each visibly longer than the previous one — the pacing guardrail is asserted in `tests/economy-sim.test.ts`.
 
 The pacing describes a player who collects the full daily baseline every day. Tournaments make it faster; missed days slower.
 

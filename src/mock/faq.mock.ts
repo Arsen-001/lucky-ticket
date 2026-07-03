@@ -140,10 +140,10 @@ const articles: FaqArticle[] = [
       'Progression von Bronze bis Diamond.'
     ),
     content: tx(
-      'Your tier is derived from accumulated AP: Bronze 0 AP (start), Silver 2,000 AP (~1 month), Gold 10,000 AP (~4 months), Platinum 30,000 AP (~10 months), Diamond 54,000 AP (~16 months). Pacing assumes a player who collects the full daily baseline every day — tournaments make it faster, missed days slower.',
-      'Уровень определяется накопленными AP: Bronze 0 AP (старт), Silver 2 000 AP (~1 месяц), Gold 10 000 AP (~4 месяца), Platinum 30 000 AP (~10 месяцев), Diamond 54 000 AP (~16 месяцев). Темп рассчитан на игрока, который каждый день собирает полную дневную базу — турниры ускоряют, пропуски замедляют.',
-      'Ձեր մակարդակը որոշվում է կուտակված AP-ով՝ Bronze 0 AP (մեկնարկ), Silver 2,000 AP (~1 ամիս), Gold 10,000 AP (~4 ամիս), Platinum 30,000 AP (~10 ամիս), Diamond 54,000 AP (~16 ամիս)։ Տեմպը ենթադրում է խաղացող, ով ամեն օր հավաքում է ամբողջ օրական բազան. մրցաշարերն արագացնում են, բաց թողնված օրերը՝ դանդաղեցնում։',
-      'Deine Stufe ergibt sich aus gesammelten AP: Bronze 0 AP (Start), Silber 2.000 AP (~1 Monat), Gold 10.000 AP (~4 Monate), Platin 30.000 AP (~10 Monate), Diamond 54.000 AP (~16 Monate). Das Tempo geht von einem Spieler aus, der täglich die volle Tagesbasis sammelt — Turniere beschleunigen, verpasste Tage verlangsamen.'
+      'Your tier is derived from accumulated AP: Bronze 0 AP (start), Silver 1,000 AP (~2 weeks), Gold 4,000 AP (~1.5 months), Platinum 14,000 AP (~4.5 months), Diamond 38,000 AP (~10.5 months). Pacing assumes a player who collects the full daily baseline every day — tournaments make it faster, missed days slower.',
+      'Уровень определяется накопленными AP: Bronze 0 AP (старт), Silver 1 000 AP (~2 недели), Gold 4 000 AP (~1.5 месяца), Platinum 14 000 AP (~4.5 месяца), Diamond 38 000 AP (~10.5 месяцев). Темп рассчитан на игрока, который каждый день собирает полную дневную базу — турниры ускоряют, пропуски замедляют.',
+      'Ձեր մակարդակը որոշվում է կուտակված AP-ով՝ Bronze 0 AP (մեկնարկ), Silver 1,000 AP (~2 շաբաթ), Gold 4,000 AP (~1.5 ամիս), Platinum 14,000 AP (~4.5 ամիս), Diamond 38,000 AP (~10.5 ամիս)։ Տեմպը ենթադրում է խաղացող, ով ամեն օր հավաքում է ամբողջ օրական բազան. մրցաշարերն արագացնում են, բաց թողնված օրերը՝ դանդաղեցնում։',
+      'Deine Stufe ergibt sich aus gesammelten AP: Bronze 0 AP (Start), Silber 1.000 AP (~2 Wochen), Gold 4.000 AP (~1,5 Monate), Platin 14.000 AP (~4,5 Monate), Diamond 38.000 AP (~10,5 Monate). Das Tempo geht von einem Spieler aus, der täglich die volle Tagesbasis sammelt — Turniere beschleunigen, verpasste Tage verlangsamen.'
     ),
   },
   {
