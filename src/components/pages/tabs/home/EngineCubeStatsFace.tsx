@@ -24,7 +24,11 @@ export function EngineCubeStatsFace({
   const t = useAppTranslations();
 
   const createdLabel = createdAt ? dayjs(createdAt).format('MMM D, YYYY') : null;
-  const perHour = Math.max(0, Math.round(ticketsPerHour));
+  // Sub-1 rates must keep their fraction — a base bronze engine mints 0.5 T/H
+  // and rounding it up to "1" doubles the promised output.
+  const rounded = Math.max(0, ticketsPerHour);
+  const perHour =
+    rounded >= 1 ? String(Math.round(rounded * 10) / 10) : String(Math.round(rounded * 100) / 100);
 
   return (
     <div

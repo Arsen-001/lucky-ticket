@@ -1,6 +1,7 @@
 'use client';
 
 import Image from 'next/image';
+import { twMerge } from 'tailwind-merge';
 import { Ticket } from '@/components/shared/icons/Ticket';
 import { useGetMeQuery } from '@/api/me.api';
 import { useAppTranslations } from '@/hooks/useAppTranslations';
@@ -40,7 +41,7 @@ export function TierLockedContent({ ticket, className }: TierLockedContentProps)
     threshold > 0 ? Math.min(100, Math.round((currentAp / threshold) * 100)) : 100;
 
   return (
-    <div className={`flex flex-col gap-3 ${className ?? ''}`}>
+    <div className={twMerge('flex flex-col gap-3', className)}>
       <div
         className="card-outlined rounded-2xl p-4.5 relative overflow-hidden"
         style={{
@@ -89,7 +90,7 @@ export function TierLockedContent({ ticket, className }: TierLockedContentProps)
           />
         </div>
         <span className="text-[11px] font-semibold tabular-nums text-white/55">
-          {currentAp.toLocaleString()} / {threshold.toLocaleString()} AP
+          {currentAp.toLocaleString()} / {threshold.toLocaleString()} {t('ap')}
         </span>
       </div>
     </div>

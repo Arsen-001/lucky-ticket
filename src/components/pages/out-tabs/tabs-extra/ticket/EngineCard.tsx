@@ -21,6 +21,7 @@ import {
   MAX_BOOST_LEVEL,
 } from '@/utils/global/ticket-engine.utils';
 import { findActiveBooster, findEquippedChip } from '@/utils/global/inventory.utils';
+import { speedUpgradeLsCost, capacityUpgradeLsCost } from '@/utils/global/economy.utils';
 import type { TicketEngine } from '@/types/interfaces/ticket.interfaces';
 import type { TicketType } from '@/types/types/ticket.types';
 import '@/styles/components/engine-card.css';
@@ -98,8 +99,10 @@ export function EngineCard({
   const capacityLevel = engine.capacityLevel ?? 0;
   const engineLevel = engine.engineLevel ?? 1;
 
-  const speedCost = 5 + speedLevel * 3;
-  const capacityCost = 8 + capacityLevel * 4;
+  // Displayed prices must come from the same config the charge handlers use —
+  // an inline copy of the formula diverges on the first rebalance.
+  const speedCost = speedUpgradeLsCost(speedLevel);
+  const capacityCost = capacityUpgradeLsCost(capacityLevel);
   const instantClaimCost = Math.max(1, Math.ceil(remaining / 3600));
 
   const glow = TIER_GLOW[tier];
@@ -328,7 +331,7 @@ export function EngineCard({
                   )}
                 >
                   <Clock size={compact ? 9 : 10} strokeWidth={2.4} />
-                  {formatRemainingTime(remaining)}
+                  {formatCycleTime(remaining)}
                 </span>
               </div>
             </div>
@@ -490,12 +493,4 @@ const compactFormatter = new Intl.NumberFormat('en', {
 function compactNumber(value: number): string {
   if (value < 1000) return String(value);
   return compactFormatter.format(value);
-}
-
-function formatRemainingTime(seconds: number): string {
-  const total = Math.max(0, Math.ceil(seconds));
-  const h = Math.floor(total / 3600);
-  const m = Math.floor((total % 3600) / 60);
-  const s = total % 60;
-  return `${String(h).padStart(2, '0')}:${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')}`;
 }

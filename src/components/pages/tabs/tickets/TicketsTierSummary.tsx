@@ -10,7 +10,7 @@ import {
   PARTNERS_TAB_KEY,
   type TicketsTabKey,
   type TicketsTierTab,
-} from '@/components/pages/tabs/tickets/TicketsTierTabs';
+} from '@/components/pages/tabs/tickets/tickets-tabs.constants';
 import { useAppTranslations } from '@/hooks/useAppTranslations';
 import type { ClassNameProps } from '@/types/interfaces/component.interfcaes';
 import type { TicketType } from '@/types/types/ticket.types';
@@ -105,12 +105,21 @@ export function TicketsTierSummary({
                     />
                   )}
                 </div>
+                {/* Top corner, not bottom — the bottom row belongs to the label
+                    and a badge there overlaps long names ("Platinum"). */}
                 {tab.locked && (
                   <span
-                    className="flex-center absolute bottom-0.5 right-0.5 h-[12px] w-[12px] rounded-full bg-black/80"
+                    className="flex-center absolute top-1 right-1 h-[14px] w-[14px] rounded-full bg-black/80"
                     style={{ boxShadow: '0 0 0 1px rgba(255,255,255,0.18)' }}
                   >
-                    <Lock size={7} strokeWidth={2.6} className="text-white" />
+                    <Lock size={8} strokeWidth={2.6} className="text-white" />
+                  </span>
+                )}
+                {/* Claimable-engines badge — the pull signal that tells the
+                    player which tier has tickets waiting without tab-hopping. */}
+                {!tab.locked && tab.count > 0 && (
+                  <span className="bg-success absolute top-1 right-1 flex-center h-4 min-w-4 rounded-full px-1 text-[9px] font-extrabold leading-none text-white shadow-[0_0_8px_rgba(74,222,128,0.7)]">
+                    {tab.count}
                   </span>
                 )}
                 <SkeletonSuspense

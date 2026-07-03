@@ -1,5 +1,6 @@
 'use client';
 
+import { useRouter } from 'next/navigation';
 import { Clock, Layers, Sparkles } from 'lucide-react';
 import { twMerge } from 'tailwind-merge';
 import { useGetInventoryQuery } from '@/api/inventory.api';
@@ -7,7 +8,6 @@ import { useGetMeQuery } from '@/api/me.api';
 import { ReactorDial } from '@/components/pages/out-tabs/tabs-extra/ticket/ReactorDial';
 import { EngineLevelBadge } from '@/components/pages/out-tabs/tabs-extra/ticket/EngineLevelBadge';
 import { EngineNextInFill } from '@/components/pages/out-tabs/tabs-extra/ticket/EngineNextInFill';
-import { Link } from '@/components/shared/links/Link';
 import { useAppTranslations } from '@/hooks/useAppTranslations';
 import { routes } from '@/constants/routes';
 import { findActiveBooster, findEquippedChip } from '@/utils/global/inventory.utils';
@@ -34,7 +34,8 @@ export interface EnginePreviewCardProps {
   engine: TicketEngine;
   tier: TicketType;
   index: number;
-  elapsedSeconds: number;
+  /** Undefined until the parent's first timer tick resolves the real value. */
+  elapsedSeconds?: number;
   onClaim?: () => void;
   className?: string;
 }
@@ -48,6 +49,7 @@ export function EnginePreviewCard({
   className,
 }: EnginePreviewCardProps) {
   const t = useAppTranslations();
+  const router = useRouter();
   const { data: inventory } = useGetInventoryQuery();
   const { data: me } = useGetMeQuery();
   const speedChip = findEquippedChip(inventory?.chips, engine.id, 'speed');
@@ -63,19 +65,31 @@ export function EnginePreviewCard({
   });
   const capacity = engineCapacity(engine, { capacityChip, capacityBooster });
   const pending = engine.pendingCount > 0;
-  const remaining = Math.max(0, cycle - elapsedSeconds);
+  const remaining = Math.max(0, cycle - (elapsedSeconds ?? 0));
   const tierColor = `var(--color-${tier})`;
   const glow = TIER_GLOW[tier];
   const engineLevel = engine.engineLevel ?? 1;
 
   const hasBoosts = !!speedChip || !!speedBooster || !!capacityChip || !!capacityBooster;
 
+  // A div with a role, not a <Link>: the claim button lives inside the card,
+  // and nesting a <button> in an <a> is invalid HTML with fat-finger misfires.
+  const handleCardClick = () => router.push(routes.engines.getById(engine.id));
+
   return (
-    <Link
-      href={routes.engines.getById(engine.id)}
+    <div
+      role="link"
+      tabIndex={0}
+      onClick={handleCardClick}
+      onKeyDown={e => {
+        if (e.key === 'Enter' || e.key === ' ') {
+          e.preventDefault();
+          handleCardClick();
+        }
+      }}
       style={{ ['--shine-card-accent' as string]: tierColor }}
       className={twMerge(
-        'shine-card w-full rounded-2xl flex flex-col gap-2 p-3 transition-transform active:scale-99 cursor-pointer',
+        'shine-card w-full rounded-2xl flex flex-col gap-2 p-3 transition-transform active:scale-99 cursor-pointer focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-white',
         className
       )}
     >
@@ -161,11 +175,15 @@ export function EnginePreviewCard({
           className="relative rounded-lg overflow-hidden border border-white/6 bg-white/3 flex items-center justify-between px-2 py-1.5 tabular-nums"
           style={{ ['--next-in-accent' as string]: tierColor }}
         >
-          <EngineNextInFill
-            key={engine.cycleStartedAt}
-            cycleSeconds={cycle}
-            elapsedSeconds={elapsedSeconds}
-          />
+          {/* The fill snapshots elapsed once on mount — rendering it before the
+              parent's first tick would animate from 0% on a half-done cycle. */}
+          {elapsedSeconds !== undefined && (
+            <EngineNextInFill
+              key={engine.cycleStartedAt}
+              cycleSeconds={cycle}
+              elapsedSeconds={elapsedSeconds}
+            />
+          )}
           <span className="relative z-1 text-[8px] font-bold uppercase tracking-wider text-white">
             {t('next in')}
           </span>
@@ -174,6 +192,6 @@ export function EnginePreviewCard({
           </span>
         </div>
       )}
-    </Link>
+    </div>
   );
 }

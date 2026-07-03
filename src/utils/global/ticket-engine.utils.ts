@@ -154,9 +154,15 @@ export const findEngineLocation = (
   return null;
 };
 
+/**
+ * Duration/countdown as "H:MM:SS" above an hour, "MM:SS" below — base engine
+ * cycles run 2h–32h, so a minutes-only format would read "1920:00" on diamond.
+ */
 export const formatCycleTime = (seconds: number) => {
   const total = Math.max(0, Math.ceil(seconds));
-  const minutes = Math.floor(total / 60);
+  const hours = Math.floor(total / 3600);
+  const minutes = Math.floor((total % 3600) / 60);
   const rest = total % 60;
-  return `${String(minutes).padStart(2, '0')}:${String(rest).padStart(2, '0')}`;
+  const mmss = `${String(minutes).padStart(2, '0')}:${String(rest).padStart(2, '0')}`;
+  return hours > 0 ? `${hours}:${mmss}` : mmss;
 };

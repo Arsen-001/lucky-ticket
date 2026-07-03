@@ -1,5 +1,6 @@
 'use client';
 
+import { twMerge } from 'tailwind-merge';
 import { EnginePreviewCard } from '@/components/pages/tabs/tickets/EnginePreviewCard';
 import { EmptyDataInfo } from '@/components/shared/EmptyDataInfo';
 import { useAppTranslations } from '@/hooks/useAppTranslations';
@@ -44,7 +45,7 @@ export function TierUnlockedContent({
   const inventoryCount = ticket.count ?? 0;
 
   return (
-    <div className={`flex flex-col gap-3 ${className ?? ''}`}>
+    <div className={twMerge('flex flex-col gap-3', className)}>
       <div
         className="shine-card rounded-2xl p-3.5 flex items-center gap-3"
         style={{ ['--shine-card-accent' as string]: `var(--color-${tier})` }}
@@ -127,7 +128,7 @@ export function TierUnlockedContent({
                 engine={engine}
                 tier={tier}
                 index={index}
-                elapsedSeconds={elapsedByEngine[engine.id] ?? 0}
+                elapsedSeconds={elapsedByEngine[engine.id]}
                 onClaim={onClaimEngine ? () => onClaimEngine(engine.id) : undefined}
               />
             </div>

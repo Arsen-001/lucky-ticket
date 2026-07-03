@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import {
   useClaimEngineMutation,
   useCompleteEngineCycleMutation,
@@ -99,6 +99,10 @@ export function EngineDetails({ id }: EngineDetailsProps) {
     ? findActiveBooster(inventory?.boosters, engine.id, 'capacity')
     : undefined;
 
+  // Throttles completion requests: without it a failing (or slow) backend gets
+  // re-hit on every 1s tick until the refetch flips `pendingCount`.
+  const completionAttemptAtRef = useRef(0);
+
   useEffect(() => {
     if (!engine) return;
     const tick = () => {
@@ -112,7 +116,11 @@ export function EngineDetails({ id }: EngineDetailsProps) {
         engine.pendingCount > 0 ? cycle : Math.min(cycle, engineElapsedSeconds(engine));
       setElapsedSeconds(elapsed);
       if (engine.pendingCount === 0 && elapsed >= cycle) {
-        completeEngineCycle({ engineId: engine.id });
+        const now = Date.now();
+        if (now - completionAttemptAtRef.current > 15_000) {
+          completionAttemptAtRef.current = now;
+          completeEngineCycle({ engineId: engine.id });
+        }
       }
     };
     tick();
@@ -121,7 +129,12 @@ export function EngineDetails({ id }: EngineDetailsProps) {
   }, [engine, speedChip, speedBooster, isLp, isVip, completeEngineCycle]);
 
   if (isLoading) {
-    return <div className="px-5 py-4 text-pink-secondary text-sm">{t('loading')}</div>;
+    return (
+      <div className="flex flex-col gap-4 px-5 pb-6">
+        <div className="card-outlined bg-purple-gradient h-64 animate-pulse rounded-2xl" />
+        <div className="card-outlined bg-purple-gradient h-40 animate-pulse rounded-2xl" />
+      </div>
+    );
   }
 
   // A failed /tickets load must surface as an error+retry, not a misleading
@@ -176,31 +189,48 @@ export function EngineDetails({ id }: EngineDetailsProps) {
     onPaid();
   };
 
-  const handleClaim = () => {
+  const handleClaim = async () => {
     if (engine.pendingCount <= 0) return;
     setElapsedSeconds(0);
-    claimEngine({ engineId: engine.id });
+    try {
+      await claimEngine({ engineId: engine.id }).unwrap();
+    } catch {
+      toast.error(t('action failed'));
+    }
   };
 
   const handleInstantClaim = () => {
     // "Skip" charges stars + marks the cycle ready (does NOT claim). The button
     // then flips to "Claim"; claiming awards AP. Server reconciles via invalidation.
-    requireStars(instantClaimCost, () => {
-      skipEngineCycle({ engineId: engine.id, cost: instantClaimCost });
+    // Paid action — a failure must surface, never silently refund the stars.
+    requireStars(instantClaimCost, async () => {
+      try {
+        await skipEngineCycle({ engineId: engine.id, cost: instantClaimCost }).unwrap();
+      } catch {
+        toast.error(t('action failed'));
+      }
     });
   };
 
   const handleUpgradeSpeed = () => {
     const cost = speedUpgradeLsCost(speedLevel);
-    requireStars(cost, () => {
-      upgradeEngineSpeed({ engineId: engine.id, cost });
+    requireStars(cost, async () => {
+      try {
+        await upgradeEngineSpeed({ engineId: engine.id, cost }).unwrap();
+      } catch {
+        toast.error(t('action failed'));
+      }
     });
   };
 
   const handleUpgradeCapacity = () => {
     const cost = capacityUpgradeLsCost(capacityLevel);
-    requireStars(cost, () => {
-      upgradeEngineCapacity({ engineId: engine.id, cost });
+    requireStars(cost, async () => {
+      try {
+        await upgradeEngineCapacity({ engineId: engine.id, cost }).unwrap();
+      } catch {
+        toast.error(t('action failed'));
+      }
     });
   };
 

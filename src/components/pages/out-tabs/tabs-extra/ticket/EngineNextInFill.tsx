@@ -1,5 +1,8 @@
 import { useState } from 'react';
 import type { CSSProperties } from 'react';
+// Owns `.engine-next-in-fill` — imported here, not just in EngineCard, so the
+// progress fill survives in chunks that render previews without EngineCard.
+import '@/styles/components/engine-card.css';
 
 export interface EngineNextInFillProps {
   cycleSeconds: number;

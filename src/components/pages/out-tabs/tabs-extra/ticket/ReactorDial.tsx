@@ -6,6 +6,9 @@ import { EngineIcon } from '@/components/shared/icons/EngineIcon';
 import { TicketOverlap } from '@/components/shared/icons/TicketOverlap';
 import { Ticket } from '@/components/shared/icons/Ticket';
 import type { TicketType } from '@/types/types/ticket.types';
+// Owns `.engine-tap-pulse` — imported here, not just in EngineCard, so the
+// animation survives in chunks that render the dial without EngineCard.
+import '@/styles/components/engine-card.css';
 
 export type ReactorDialVisual = 'ticket' | 'engine';
 
@@ -56,11 +59,17 @@ export function ReactorDial({
     <div
       className={twMerge('relative shrink-0', className)}
       style={{ width: containerSize, height: containerSize }}
-      onPointerDown={triggerTap}
     >
+      {/* pointer-events-none + the stable catcher below: this subtree remounts
+          (key) to restart the pulse, and remounting the event target
+          mid-gesture makes the browser swallow the click — ancestor cards
+          would never receive their navigation click. */}
       <div
         key={tapCount}
-        className={twMerge('absolute inset-0 flex-center', tapping && 'engine-tap-pulse')}
+        className={twMerge(
+          'pointer-events-none absolute inset-0 flex-center',
+          tapping && 'engine-tap-pulse'
+        )}
       >
         {visual === 'engine' ? (
           <EngineIcon tier={tier} size={engineSize} />
@@ -76,6 +85,9 @@ export function ReactorDial({
           ×{capacity}
         </div>
       )}
+
+      {/* Stable tap target — never remounts, so clicks bubble reliably. */}
+      <div aria-hidden className="absolute inset-0 z-1" onPointerDown={triggerTap} />
     </div>
   );
 }

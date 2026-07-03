@@ -100,7 +100,10 @@ export const enginesApi = api.injectEndpoints({
       },
     }),
 
-    claimEnginesForTier: builder.mutation<{ claimed: number }, { tier: TicketType }>({
+    claimEnginesForTier: builder.mutation<
+      { claimed: number; apGain: number },
+      { tier: TicketType }
+    >({
       query: body => ({ url: 'engines/claim-all', method: 'POST', body }),
       invalidatesTags: [
         rtkTags.engines,
