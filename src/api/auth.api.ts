@@ -66,6 +66,10 @@ export const authApi = api.injectEndpoints({
       async onQueryStarted(_, { queryFulfilled, dispatch }) {
         try {
           await queryFulfilled;
+        } catch {
+          // The logout call can 401 when the session is already dead (e.g. the
+          // refresh token was revoked). Swallow it — we clean up locally below
+          // regardless, and an unhandled reject here surfaces as a console error.
         } finally {
           removeAccessTokenCk();
           removeRefreshTokenCk();
