@@ -111,9 +111,14 @@ export function TournamentCard({
     platinum: 'tournament-card-tier-platinum',
     diamond: 'tournament-card-tier-diamond',
   };
-  const { leftTimeText, days, hours, minutes } = useCountDown(isFinished ? undefined : startTime);
+  const { leftTimeText, expired, days, hours, minutes } = useCountDown(
+    isFinished ? undefined : startTime
+  );
   const ticketCount = participatedTicketsCount ?? 0;
-  const isStartingSoon = !isFinished && days === 0 && hours === 0 && minutes < 60;
+  // Countdown hit zero but the backend hasn't marked it finished yet — the
+  // join window is closed, results are pending.
+  const isStarted = !isFinished && expired && !!startTime;
+  const isStartingSoon = !isFinished && !isStarted && days === 0 && hours === 0 && minutes < 60;
   const ShardIcon = shardType === 'capacity' ? MemoryStick : Cpu;
   const topShards = GlobalConstants.tournamentShardRewards.first;
   const hasUnseenResult = isFinished && !!userResult && !resultSeen;
@@ -140,7 +145,7 @@ export function TournamentCard({
   const handleActionClick = (e: MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
-    if (locked) return;
+    if (locked || isStarted) return;
     if (isFinished) {
       setIsResultModalOpen(true);
     } else {
@@ -153,7 +158,11 @@ export function TournamentCard({
     router.push(routes.tournaments.getById(id));
   };
 
-  const timeChipText = isFinished ? formatEndedAgo(startTime, t) : leftTimeText || t('soon');
+  const timeChipText = isFinished
+    ? formatEndedAgo(startTime, t)
+    : isStarted
+      ? t('started')
+      : leftTimeText || t('soon');
 
   return (
     <>
@@ -257,15 +266,21 @@ export function TournamentCard({
                     'inline-flex items-center gap-1 rounded-md px-1.5 py-1 leading-none text-white min-w-0',
                     isFinished
                       ? 'bg-white/5 text-white/65'
-                      : isStartingSoon
-                        ? 'bg-electric-pink/30'
-                        : 'bg-white/5'
+                      : isStarted
+                        ? 'bg-teal/20'
+                        : isStartingSoon
+                          ? 'bg-electric-pink/30'
+                          : 'bg-white/5'
                   )}
                 >
                   <Clock
                     className={twMerge(
                       'w-3 h-3 shrink-0',
-                      isStartingSoon ? 'text-electric-pink' : 'text-pink-secondary'
+                      isStarted
+                        ? 'text-teal'
+                        : isStartingSoon
+                          ? 'text-electric-pink'
+                          : 'text-pink-secondary'
                     )}
                     strokeWidth={2.4}
                   />
@@ -367,6 +382,11 @@ export function TournamentCard({
                   <span className="ml-auto inline-flex shrink-0 items-center gap-1.5 rounded-full border border-white/10 bg-white/5 px-3.5 py-2 text-[11px] font-extrabold uppercase leading-none tracking-[0.14em] text-white/55">
                     <Lock size={12} strokeWidth={2.6} />
                     {t('locked')}
+                  </span>
+                ) : isStarted ? (
+                  <span className="text-teal border-teal/30 bg-teal/15 ml-auto inline-flex shrink-0 items-center gap-1.5 rounded-full border px-3.5 py-2 text-[11px] font-extrabold uppercase leading-none tracking-[0.14em]">
+                    <Clock size={12} strokeWidth={2.6} />
+                    {t('started')}
                   </span>
                 ) : (
                   <Button

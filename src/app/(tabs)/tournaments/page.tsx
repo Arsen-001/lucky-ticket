@@ -17,6 +17,7 @@ import type { PersonalTournament } from '@/types/interfaces/tournaments.interfac
 import { ArrivalShine } from '@/components/shared/ArrivalShine';
 import { QueryErrorState } from '@/components/shared/error/QueryErrorState';
 import { useUnlockedTiers } from '@/hooks/useUnlockedTiers';
+import { useAppTranslations } from '@/hooks/useAppTranslations';
 
 const matchesTab = (tournament: PersonalTournament, filter: TournamentFilterType): boolean => {
   switch (filter) {
@@ -41,6 +42,7 @@ const matchesTab = (tournament: PersonalTournament, filter: TournamentFilterType
 };
 
 export default function TournamentPage() {
+  const t = useAppTranslations();
   const { data: tournamentsData, isLoading, isError, refetch } = useGetTournamentsQuery();
   const { isTierUnlocked } = useUnlockedTiers();
   const [filter, setFilter] = useState<TournamentFilterType>('all');
@@ -91,7 +93,9 @@ export default function TournamentPage() {
   const filteredTournaments =
     tournamentsData
       ?.filter(tournament => {
-        const tabPasses = searchValue ? true : matchesTab(tournament, filter);
+        // Search narrows the active tab — it must not silently mix in other
+        // statuses (finished into "All", never-joined into "History", …).
+        const tabPasses = matchesTab(tournament, filter);
         const matchesSearch = stringIncludes(tournament.name, searchValue);
         const matchesType = selectedTypes.length === 0 || selectedTypes.includes(tournament.type);
 
@@ -116,6 +120,24 @@ export default function TournamentPage() {
   const placeholderTournaments = new Array(10).fill({}) as TournamentCardProps[];
   const displayTournaments = isLoading ? placeholderTournaments : filteredTournaments;
 
+  // A genuinely empty tab explains itself; an empty search/filter result keeps
+  // the generic "not found" copy (handled by TournamentList's fallback).
+  const isNarrowedByUser = !!searchValue || selectedTypes.length > 0;
+  const emptyTitle = isNarrowedByUser
+    ? undefined
+    : filter === 'participated'
+      ? t('no joined tournaments')
+      : filter === 'history'
+        ? t('no finished tournaments')
+        : undefined;
+  const emptyDescription = isNarrowedByUser
+    ? undefined
+    : filter === 'participated'
+      ? t('no joined tournaments description')
+      : filter === 'history'
+        ? t('no finished tournaments description')
+        : undefined;
+
   if (isError) return <QueryErrorState onRetry={() => refetch()} />;
 
   return (
@@ -135,7 +157,12 @@ export default function TournamentPage() {
         key={`tournaments-${filter}-${searchValue}-${selectedTypes.join()}-${sortBy}`}
         className="animate-slide-in-bottom"
       >
-        <TournamentList tournaments={displayTournaments} isLoading={isLoading} />
+        <TournamentList
+          tournaments={displayTournaments}
+          isLoading={isLoading}
+          emptyTitle={emptyTitle}
+          emptyDescription={emptyDescription}
+        />
       </div>
       <TournamentFilterSheet
         open={isFilterSheetOpen}

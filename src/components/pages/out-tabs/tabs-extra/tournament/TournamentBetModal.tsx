@@ -1,7 +1,8 @@
 'use client';
 
 import { useState } from 'react';
-import { Minus, Plus, Sparkles } from 'lucide-react';
+import { useRouter } from 'next/navigation';
+import { Minus, Plus, Sparkles, Ticket } from 'lucide-react';
 import { twMerge } from 'tailwind-merge';
 import { Modal } from '@/components/shared/modals/Modal';
 import { Button } from '@/components/shared/buttons/Button';
@@ -9,7 +10,10 @@ import { TicketOverlap } from '@/components/shared/icons/TicketOverlap';
 import { ChipShardIcon } from '@/components/shared/icons/ChipShardIcon';
 import { BoltIcon } from '@/components/shared/icons/BoltIcon';
 import { useAppTranslations } from '@/hooks/useAppTranslations';
+import { useGetMeQuery } from '@/api/me.api';
 import { GlobalConstants } from '@/constants/global.constants';
+import { routes } from '@/constants/routes';
+import { applyStatusTournamentJoinApBoost } from '@/utils/global/tournament.utils';
 import type { InventoryChipType } from '@/types/interfaces/inventory.interfaces';
 import type { TournamentType } from '@/types/types/tournaments.types';
 import '@/styles/components/tournament-card.css';
@@ -55,11 +59,20 @@ export function TournamentBetModal({
   participatedTicketsCount,
 }: TournamentBetModalProps) {
   const t = useAppTranslations();
+  const router = useRouter();
+  const { data: me } = useGetMeQuery();
   const [betCount, setBetCount] = useState(1);
   const [isEditing, setIsEditing] = useState(false);
   const shardLabel = shardType === 'capacity' ? t('capacity') : t('time');
   const topShards = GlobalConstants.tournamentShardRewards.first;
-  const joinAp = GlobalConstants.apRewards.tournamentJoinByTier[tournamentType];
+  // Show what will actually be credited — the backend applies the VIP/LP
+  // join-AP boost, so the badge must too (DOCS §7).
+  const joinAp = applyStatusTournamentJoinApBoost(
+    GlobalConstants.apRewards.tournamentJoinByTier[tournamentType],
+    me?.isLuckyPlayer ?? false,
+    me?.isVIP ?? false
+  );
+  const hasTickets = availableTickets > 0;
 
   const isMinReached = betCount <= 1;
   const isMaxReached = betCount >= availableTickets;
@@ -106,6 +119,11 @@ export function TournamentBetModal({
     if (!canConfirm) return;
     onConfirm?.(betCount);
     handleClose();
+  };
+
+  const handleGetTickets = () => {
+    handleClose();
+    router.push(routes.market('tickets'));
   };
 
   const showParticipated =
@@ -185,113 +203,133 @@ export function TournamentBetModal({
             </div>
           )}
 
-          {/* Counter — bigger ticket-overlap + stepper */}
-          <div className="flex flex-col items-center gap-2 w-full">
-            <div
-              className="flex-center w-full gap-3 rounded-2xl bg-white/5 border border-white/10 py-3"
-              style={{ boxShadow: `inset 0 0 24px rgba(${haloRgb}, 0.10)` }}
-            >
-              <BetStepperButton
-                onClick={setMinBet}
-                disabled={isMinReached}
-                className="px-2 text-[10px] font-extrabold uppercase tracking-wider"
+          {!hasTickets ? (
+            /* Zero tickets of this tier — a dead-end stepper would be useless;
+               explain and route to the Market's ticket section instead. */
+            <div className="flex w-full flex-col items-center gap-3">
+              <p className="text-[12px] text-center text-white/65 leading-snug">
+                {t('no tickets of this type')}
+              </p>
+              <Button
+                onClick={handleGetTickets}
+                icon={<Ticket strokeWidth={2.6} />}
+                iconSize={14}
+                className="w-full py-3 rounded-2xl text-sm font-extrabold uppercase tracking-[0.16em] leading-none"
               >
-                MIN
-              </BetStepperButton>
-              <BetStepperButton onClick={decrementBet} disabled={isMinReached}>
-                <Minus size={18} className="stroke-3" />
-              </BetStepperButton>
-
-              <div
-                className="flex-center gap-2 px-2 cursor-pointer leading-none"
-                onClick={() => setIsEditing(true)}
-              >
-                <TicketOverlap type={tournamentType} width={28} height={28} />
-                {isEditing ? (
-                  <input
-                    type="number"
-                    value={betCount || ''}
-                    onChange={handleInputChange}
-                    onBlur={handleInputBlur}
-                    onKeyDown={handleKeyDown}
-                    autoFocus
-                    className="bg-transparent border-none outline-none w-14 text-white font-black text-3xl text-center tabular-nums [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
-                  />
-                ) : (
-                  <span
-                    className={twMerge(
-                      tierTextClass,
-                      'min-w-14 text-center text-3xl tabular-nums leading-none'
-                    )}
+                <span className="leading-none">{t('get tickets')}</span>
+              </Button>
+            </div>
+          ) : (
+            <>
+              {/* Counter — bigger ticket-overlap + stepper */}
+              <div className="flex flex-col items-center gap-2 w-full">
+                <div
+                  className="flex-center w-full gap-3 rounded-2xl bg-white/5 border border-white/10 py-3"
+                  style={{ boxShadow: `inset 0 0 24px rgba(${haloRgb}, 0.10)` }}
+                >
+                  <BetStepperButton
+                    onClick={setMinBet}
+                    disabled={isMinReached}
+                    className="px-2 text-[10px] font-extrabold uppercase tracking-wider"
                   >
-                    {betCount}
-                  </span>
+                    {t('min')}
+                  </BetStepperButton>
+                  <BetStepperButton onClick={decrementBet} disabled={isMinReached}>
+                    <Minus size={18} className="stroke-3" />
+                  </BetStepperButton>
+
+                  <div
+                    className="flex-center gap-2 px-2 cursor-pointer leading-none"
+                    onClick={() => setIsEditing(true)}
+                  >
+                    <TicketOverlap type={tournamentType} width={28} height={28} />
+                    {isEditing ? (
+                      <input
+                        type="number"
+                        value={betCount || ''}
+                        onChange={handleInputChange}
+                        onBlur={handleInputBlur}
+                        onKeyDown={handleKeyDown}
+                        autoFocus
+                        className="bg-transparent border-none outline-none w-14 text-white font-black text-3xl text-center tabular-nums [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+                      />
+                    ) : (
+                      <span
+                        className={twMerge(
+                          tierTextClass,
+                          'min-w-14 text-center text-3xl tabular-nums leading-none'
+                        )}
+                      >
+                        {betCount}
+                      </span>
+                    )}
+                  </div>
+
+                  <BetStepperButton onClick={incrementBet} disabled={isMaxReached}>
+                    <Plus size={18} className="stroke-3" />
+                  </BetStepperButton>
+                  <BetStepperButton
+                    onClick={setMaxBet}
+                    disabled={isMaxReached}
+                    className="px-2 text-[10px] font-extrabold uppercase tracking-wider"
+                  >
+                    {t('max')}
+                  </BetStepperButton>
+                </div>
+
+                {/* Total after bet (only when adding to existing participation) */}
+                {showParticipated && (
+                  <div className="inline-flex items-center justify-center gap-2 rounded-full bg-white/5 px-3 py-1 text-[11px] leading-none">
+                    <span className="text-white/55 font-semibold uppercase tracking-wider">
+                      {t('total')}
+                    </span>
+                    <span
+                      className={twMerge(
+                        tierTextClass,
+                        'inline-flex items-center gap-1 tabular-nums leading-none'
+                      )}
+                    >
+                      {participatedTicketsCount} + {betCount} = {newTotal}
+                    </span>
+                    <TicketOverlap type={tournamentType} width={12} height={12} />
+                  </div>
                 )}
               </div>
 
-              <BetStepperButton onClick={incrementBet} disabled={isMaxReached}>
-                <Plus size={18} className="stroke-3" />
-              </BetStepperButton>
-              <BetStepperButton
-                onClick={setMaxBet}
-                disabled={isMaxReached}
-                className="px-2 text-[10px] font-extrabold uppercase tracking-wider"
-              >
-                MAX
-              </BetStepperButton>
-            </div>
+              {/* Nudge */}
+              <p className="text-[11px] text-center text-white/55 leading-snug">
+                {t('more tickets higher chance')}
+              </p>
 
-            {/* Total after bet (only when adding to existing participation) */}
-            {showParticipated && (
-              <div className="inline-flex items-center justify-center gap-2 rounded-full bg-white/5 px-3 py-1 text-[11px] leading-none">
-                <span className="text-white/55 font-semibold uppercase tracking-wider">
-                  {t('total')}
+              {/* AP reward for joining */}
+              <div className="border-teal/30 bg-teal/12 inline-flex items-center gap-1.5 rounded-full border px-3 py-1">
+                <BoltIcon size={13} />
+                <span className="text-teal text-[11px] font-extrabold">
+                  {t('plus {n} ap', { n: joinAp })}
                 </span>
-                <span
-                  className={twMerge(
-                    tierTextClass,
-                    'inline-flex items-center gap-1 tabular-nums leading-none'
-                  )}
-                >
-                  {participatedTicketsCount} + {betCount} = {newTotal}
-                </span>
-                <TicketOverlap type={tournamentType} width={12} height={12} />
+                <span className="text-[11px] text-white/50">{t('for joining')}</span>
               </div>
-            )}
-          </div>
 
-          {/* Nudge */}
-          <p className="text-[11px] text-center text-white/55 leading-snug">
-            {t('more tickets higher chance')}
-          </p>
-
-          {/* AP reward for joining */}
-          <div className="border-teal/30 bg-teal/12 inline-flex items-center gap-1.5 rounded-full border px-3 py-1">
-            <BoltIcon size={13} />
-            <span className="text-teal text-[11px] font-extrabold">
-              {t('plus {n} ap', { n: joinAp })}
-            </span>
-            <span className="text-[11px] text-white/50">{t('for joining')}</span>
-          </div>
-
-          {/* Action — gradient + shine */}
-          <Button
-            onClick={handleConfirm}
-            disabled={!canConfirm}
-            icon={<Plus strokeWidth={3} />}
-            iconSize={14}
-            className={twMerge(
-              'w-full py-3 rounded-2xl text-sm font-extrabold uppercase tracking-[0.16em] leading-none overflow-hidden',
-              'shadow-[0_6px_18px_rgba(0,0,0,0.4),inset_0_1px_0_rgba(255,255,255,0.28)]',
-              'transition-transform active:scale-99',
-              participated && 'bg-success'
-            )}
-          >
-            <span className="pointer-events-none absolute inset-0 overflow-hidden rounded-2xl">
-              <span className="absolute -top-1/2 -left-1/2 h-[200%] w-[55%] bg-gradient-to-r from-transparent via-white/40 to-transparent animate-task-shine" />
-            </span>
-            <span className="leading-none relative">{t(participated ? 'add' : 'join')}</span>
-          </Button>
+              {/* Action — gradient + shine */}
+              <Button
+                onClick={handleConfirm}
+                disabled={!canConfirm}
+                icon={<Plus strokeWidth={3} />}
+                iconSize={14}
+                className={twMerge(
+                  'w-full py-3 rounded-2xl text-sm font-extrabold uppercase tracking-[0.16em] leading-none overflow-hidden',
+                  'shadow-[0_6px_18px_rgba(0,0,0,0.4),inset_0_1px_0_rgba(255,255,255,0.28)]',
+                  'transition-transform active:scale-99',
+                  participated && 'bg-success'
+                )}
+              >
+                <span className="pointer-events-none absolute inset-0 overflow-hidden rounded-2xl">
+                  <span className="absolute -top-1/2 -left-1/2 h-[200%] w-[55%] bg-gradient-to-r from-transparent via-white/40 to-transparent animate-task-shine" />
+                </span>
+                <span className="leading-none relative">{t(participated ? 'add' : 'join')}</span>
+              </Button>
+            </>
+          )}
         </div>
       </div>
     </Modal>

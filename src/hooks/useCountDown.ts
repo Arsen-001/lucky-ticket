@@ -39,14 +39,17 @@ export const useCountDown = (targetDate?: string | Date | number): UseCountdownR
     return () => clearInterval(timer);
   }, [targetDate]);
 
+  // Dedicated short-unit keys — deriving them from the first letter of the
+  // full word is ambiguous in de (Stunde/Sekunde both start with "S").
   const timeUnits = {
-    hours: t('hour')[0],
-    minutes: t('minute')[0],
-    seconds: t('second')[0],
+    days: t('day short'),
+    hours: t('hour short'),
+    minutes: t('minute short'),
+    seconds: t('second short'),
   };
 
   const hhmmss = `${pad(state.hours)}:${pad(state.minutes)}:${pad(state.seconds)}`;
-  const leftTime = state.days > 0 ? `${state.days}${t('day')[0]} ${hhmmss}` : hhmmss;
+  const leftTime = state.days > 0 ? `${state.days}${timeUnits.days} ${hhmmss}` : hhmmss;
   const leftTimeText = getTimeText(state, timeUnits);
 
   let leftTimeShort: string;

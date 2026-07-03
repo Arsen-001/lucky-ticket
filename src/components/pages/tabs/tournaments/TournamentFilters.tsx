@@ -64,7 +64,7 @@ export function TournamentFilters({
           <div className="flex-1 flex items-center gap-2 animate-in fade-in slide-in-from-right-4 duration-300">
             <DebouncedInput
               autoFocus
-              className="bg-purple-gradient py-1 pt1.5 px-4 h-10 border-none rounded-full"
+              className="bg-purple-gradient py-1 pt-1.5 px-4 h-10 border-none rounded-full"
               placeholder={t('search')}
               value={searchValue}
               onChange={onSearchChange}

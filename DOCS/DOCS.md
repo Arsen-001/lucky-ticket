@@ -894,6 +894,8 @@ Each tournament has a **status**:
 - **`upcoming`** — tournament has not yet reached its Start Time. Users can join with tickets; the card shows a live countdown.
 - **`finished`** — Start Time has passed; winners are selected and the tournament is closed to new entries.
 
+Between the countdown hitting zero and the scheduler's finish job flipping the status (at most one scheduler tick), the UI shows a teal **Started** chip in place of the countdown and replaces Join with a non-interactive **Started** badge — the join window is closed, results are pending.
+
 **Result distribution at finish:**
 
 When a tournament transitions to `finished`, every participant's reward is computed from the percentage table (Section 11.3) applied to the prize pool, and **rewards are auto-credited** to each participant's balance — there is no manual claim step. Top 3 also receive their chip shards (Section 11.4) automatically.
@@ -956,14 +958,14 @@ The Tournament data model (`PersonalTournament`) is a superset of the public `To
 
 **Endpoints** (`src/api/tournaments.api.ts`):
 
-| Endpoint                   | Method | Url                       | Purpose                                                                    |
-| :------------------------- | :----- | :------------------------ | :------------------------------------------------------------------------- |
-| `getTournaments`           | GET    | `tournaments`             | All personal tournaments (used by list page).                              |
-| `getTopTournaments`        | GET    | `topTournaments`          | Filtered upcoming-only feed (used by home slider).                         |
-| `getTournamentById`        | GET    | `tournaments/{id}`        | Single tournament detail.                                                  |
-| `getTournamentPlaces`      | GET    | `tournaments/{id}/places` | Percentage placement breakdown.                                            |
-| `joinTournament`           | POST   | `tournaments/join`        | Submit `{ tournamentId, ticketsCount }`. Invalidates `tournaments` + `me`. |
-| `markTournamentResultSeen` | POST   | `tournaments/result-seen` | Submit `{ tournamentId }` so the popup doesn't auto-open again.            |
+| Endpoint                   | Method | Url                       | Purpose                                                                                                                                                                                              |
+| :------------------------- | :----- | :------------------------ | :--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `getTournaments`           | GET    | `tournaments`             | All personal tournaments (used by list page).                                                                                                                                                        |
+| `getTopTournaments`        | GET    | `topTournaments`          | Filtered upcoming-only feed (used by home slider).                                                                                                                                                   |
+| `getTournamentById`        | GET    | `tournaments/{id}`        | Single tournament detail.                                                                                                                                                                            |
+| `getTournamentPlaces`      | GET    | `tournaments/{id}/places` | Percentage placement breakdown. 404s for an unknown tournament; rows are clamped to the instance's `teamSize` (places beyond the seat count don't exist). Exact places are encoded as `to === from`. |
+| `joinTournament`           | POST   | `tournaments/join`        | Submit `{ tournamentId, ticketsCount }`. Invalidates `tournaments` + `me`.                                                                                                                           |
+| `markTournamentResultSeen` | POST   | `tournaments/result-seen` | Submit `{ tournamentId }` so the popup doesn't auto-open again.                                                                                                                                      |
 
 All endpoints are wired through the `tournaments` cache tag (`rtk-tags.ts`). `joinTournament` additionally invalidates `me` because LC/ticket balance changes.
 

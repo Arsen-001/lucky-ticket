@@ -51,11 +51,22 @@ export const pad = (n: number) => String(n).padStart(2, '0');
 export const getRandomUpcomingDate = (minSeconds: number, maxSeconds: number) =>
   dayjs().add(getRandomNumber(minSeconds, maxSeconds), 'second').toISOString();
 
+/**
+ * Compact adaptive countdown: "2d 7h", "3h 1m", "12m 30s", "42s".
+ * Always exactly two units (one at the tail) so it fits a narrow chip, and
+ * returns '' once fully elapsed so callers can fall back to a status label.
+ */
 export const getTimeText = (
-  countDown: { hours: number; minutes: number; seconds: number },
-  units: { hours: string; minutes: string; seconds: string }
-) =>
-  `${countDown.hours || ''}${countDown.hours ? units.hours : ''} ${countDown.minutes || ''}${countDown.minutes ? units.minutes : ''} ${countDown.seconds}${units.seconds}`;
+  countDown: { days: number; hours: number; minutes: number; seconds: number },
+  units: { days: string; hours: string; minutes: string; seconds: string }
+) => {
+  const { days, hours, minutes, seconds } = countDown;
+  if (days > 0) return `${days}${units.days} ${hours}${units.hours}`;
+  if (hours > 0) return `${hours}${units.hours} ${minutes}${units.minutes}`;
+  if (minutes > 0) return `${minutes}${units.minutes} ${seconds}${units.seconds}`;
+  if (seconds > 0) return `${seconds}${units.seconds}`;
+  return '';
+};
 
 export const getLeftTimestamp = (targetDate?: string | Date | number) =>
   dayjs(targetDate).valueOf() - dayjs().valueOf();

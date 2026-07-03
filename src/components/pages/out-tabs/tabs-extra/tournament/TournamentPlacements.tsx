@@ -18,6 +18,8 @@ import { ShardZoomButton } from '@/components/pages/out-tabs/tabs-extra/tourname
 import { GlobalConstants } from '@/constants/global.constants';
 import type { TournamentType } from '@/types/types/tournaments.types';
 
+// Literal hexes (not var(--color-*)): ConfettiLayer builds `${color}aa`
+// drop-shadows, which needs a concatenable 6-digit hex, not a CSS variable.
 const TIER_HEX: Record<TournamentType, string> = {
   bronze: '#AC6122',
   silver: '#A8AAA4',
@@ -25,6 +27,9 @@ const TIER_HEX: Record<TournamentType, string> = {
   platinum: '#C0BEB1',
   diamond: '#178D88',
 };
+
+/** The backend encodes an exact place as `to === from`; the mock omits `to`. */
+const isExactPlace = (p: { from: number; to?: number }) => !p.to || p.to === p.from;
 
 const SHARDS_BY_RANK: Record<number, number> = {
   1: GlobalConstants.tournamentShardRewards.first,
@@ -112,7 +117,7 @@ export function TournamentPlacements({ id }: TournamentPlacementsProps) {
     if (!places?.places) return [];
     const top3Percentages = new Map<number, number>();
     places.places.forEach(p => {
-      if (!p.to && p.from <= 3) top3Percentages.set(p.from, p.percentage);
+      if (isExactPlace(p) && p.from <= 3) top3Percentages.set(p.from, p.percentage);
     });
 
     return ([1, 2, 3] as const).map(rank => {
@@ -122,7 +127,7 @@ export function TournamentPlacements({ id }: TournamentPlacementsProps) {
       const shards = SHARDS_BY_RANK[rank];
       return {
         rank: rank as PodiumRank,
-        username: winner?.username ?? `${rank === 1 ? '1st' : rank === 2 ? '2nd' : '3rd'}`,
+        username: winner?.username ?? t(rank === 1 ? '1st' : rank === 2 ? '2nd' : '3rd'),
         points: lc,
         avatarUrl: winner?.avatar,
         fallbackInitial: winner?.username?.charAt(0).toUpperCase(),
@@ -143,7 +148,8 @@ export function TournamentPlacements({ id }: TournamentPlacementsProps) {
     });
   })();
 
-  const restPlaces = places?.places?.filter(p => p.to || p.from > 3) ?? [];
+  // Everything the podium doesn't already show — ranges plus exact places > 3.
+  const restPlaces = places?.places?.filter(p => !(isExactPlace(p) && p.from <= 3)) ?? [];
 
   // A failed places load must surface an error+retry, not a silently empty
   // podium and list (the silent-empty anti-pattern). Placed after every hook.
@@ -178,7 +184,9 @@ export function TournamentPlacements({ id }: TournamentPlacementsProps) {
                 <Skeleton key={i} variant="rounded-rectangle" className="h-14" />
               ))
             : restPlaces.map((item, index) => {
-                const displayPlace = item.to ? `${item.from}–${item.to}` : String(item.from);
+                const displayPlace = isExactPlace(item)
+                  ? String(item.from)
+                  : `${item.from}–${item.to}`;
                 const lc = prizePool ? placementPrizeLc(prizePool, item.percentage) : undefined;
                 const isMe =
                   userPlace !== undefined &&

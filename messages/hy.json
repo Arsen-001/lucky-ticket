@@ -1354,5 +1354,15 @@
   "ton balance": "TON մնացորդ",
   "cost": "Արժեք",
   "exchange ton to stars": "Փոխանակեք TON-ը Lucky Stars-ի",
-  "exchanged to stars": "Փոխանակվեց {ton} TON → {stars} Stars"
+  "exchanged to stars": "Փոխանակվեց {ton} TON → {stars} Stars",
+  "day short": "օ",
+  "hour short": "ժ",
+  "minute short": "ր",
+  "second short": "վ",
+  "started": "Սկսվել է",
+  "no tickets of this type": "Դուք դեռ չունեք այս տեսակի տոմսեր",
+  "get tickets": "Ստանալ տոմսեր",
+  "no joined tournaments": "Դուք դեռ չեք մասնակցում մրցաշարերի",
+  "no joined tournaments description": "Միացեք առաջիկա մրցաշարին, և այն կհայտնվի այստեղ:",
+  "no prize description": "Այս անգամ առանց մրցանակի — վերցրեք ավելի շատ տոմսեր և փորձեք կրկին:"
 }

@@ -259,7 +259,7 @@ export function TournamentResultModal({
             )}
             {view === 'no-place' && (
               <p className="text-sm text-white/55 text-center max-w-[260px]">
-                {t('better luck next time')}
+                {t('no prize description')}
               </p>
             )}
           </div>

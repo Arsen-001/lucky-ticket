@@ -38,7 +38,9 @@ export function TabBarItem({
       <span
         className={twMerge(
           'max-w-0 whitespace-nowrap overflow-hidden h-5.5',
-          active && 'ml-1 max-w-[24vw] tab-bar-transition font-bold truncate'
+          // text-sm + wider cap so the longest label ("Tournaments") fits on a
+          // 390px viewport instead of truncating to "Tourname…".
+          active && 'ml-1 max-w-[26vw] tab-bar-transition font-bold truncate text-sm leading-5.5'
         )}
       >
         {name}

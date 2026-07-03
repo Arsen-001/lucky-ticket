@@ -1354,5 +1354,15 @@
   "ton balance": "TON-Guthaben",
   "cost": "Kosten",
   "exchange ton to stars": "TON gegen Lucky Stars tauschen",
-  "exchanged to stars": "{ton} TON → {stars} Stars getauscht"
+  "exchanged to stars": "{ton} TON → {stars} Stars getauscht",
+  "day short": "T",
+  "hour short": "h",
+  "minute short": "m",
+  "second short": "s",
+  "started": "Gestartet",
+  "no tickets of this type": "Du hast noch keine Tickets dieses Typs",
+  "get tickets": "Tickets holen",
+  "no joined tournaments": "Noch keine Turnier-Teilnahmen",
+  "no joined tournaments description": "Tritt einem anstehenden Turnier bei, und es erscheint hier.",
+  "no prize description": "Diesmal kein Gewinn — hol dir mehr Tickets und versuch es erneut!"
 }

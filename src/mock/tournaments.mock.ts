@@ -31,11 +31,14 @@ const getHoursAgo = (hours: number): string => {
   return past.toISOString();
 };
 
+// Mirrors the real backend contract: exact places come back as `to === from`
+// (not an omitted `to`) — keep the mock on the same encoding so divergence
+// can't hide UI bugs again.
 const getMockPlacements = (): TournamentPlacesResponse => ({
   places: [
-    { from: 1, percentage: 12 },
-    { from: 2, percentage: 8 },
-    { from: 3, percentage: 5 },
+    { from: 1, to: 1, percentage: 12 },
+    { from: 2, to: 2, percentage: 8 },
+    { from: 3, to: 3, percentage: 5 },
     { from: 4, to: 5, percentage: 4 },
     { from: 6, to: 10, percentage: 2 },
     { from: 11, to: 25, percentage: 1 },

@@ -90,10 +90,13 @@ export function TournamentInfo({ id, className, ...rest }: TournamentDetailsProp
   // joinable until approved (DOCS §11.8); mirrors the list-card guard.
   const isModeration = data?.status === 'moderation';
   const tierLocked = data ? !isTierUnlocked(data.type as TicketType) : false;
-  const { leftTimeText, days, hours, minutes } = useCountDown(
+  const { leftTimeText, expired, days, hours, minutes } = useCountDown(
     isFinished ? undefined : data?.startTime
   );
-  const isStartingSoon = !isFinished && days === 0 && hours === 0 && minutes < 60;
+  // Countdown hit zero but the backend hasn't marked it finished yet — the
+  // join window is closed, results are pending.
+  const isStarted = !isFinished && expired && !!data?.startTime;
+  const isStartingSoon = !isFinished && !isStarted && days === 0 && hours === 0 && minutes < 60;
   const topShards = GlobalConstants.tournamentShardRewards.first;
   const participated = !!data?.participated;
   const ticketCount = data?.participatedTicketsCount ?? 0;
@@ -113,7 +116,7 @@ export function TournamentInfo({ id, className, ...rest }: TournamentDetailsProp
   }, [shouldShowResultModal, isResultModalOpen]);
 
   const handleOpenBetModal = () => {
-    if (tierLocked || isModeration) return;
+    if (tierLocked || isModeration || isStarted) return;
     setIsBetModalOpen(true);
   };
   const handleCloseBetModal = () => setIsBetModalOpen(false);
@@ -133,7 +136,9 @@ export function TournamentInfo({ id, className, ...rest }: TournamentDetailsProp
   const timeChipText = data?.startTime
     ? isFinished
       ? formatEndedAgo(data.startTime, t)
-      : leftTimeText || t('soon')
+      : isStarted
+        ? t('started')
+        : leftTimeText || t('soon')
     : t('soon');
 
   // A failed detail load must surface an error+retry, not a blank card with an
@@ -221,15 +226,21 @@ export function TournamentInfo({ id, className, ...rest }: TournamentDetailsProp
                     'inline-flex items-center gap-1 rounded-md px-1.5 py-1 leading-none text-white min-w-0',
                     isFinished
                       ? 'bg-white/5 text-white/65'
-                      : isStartingSoon
-                        ? 'bg-electric-pink/30'
-                        : 'bg-white/5'
+                      : isStarted
+                        ? 'bg-teal/20'
+                        : isStartingSoon
+                          ? 'bg-electric-pink/30'
+                          : 'bg-white/5'
                   )}
                 >
                   <Clock
                     className={twMerge(
                       'w-3 h-3 shrink-0',
-                      isStartingSoon ? 'text-electric-pink' : 'text-pink-secondary'
+                      isStarted
+                        ? 'text-teal'
+                        : isStartingSoon
+                          ? 'text-electric-pink'
+                          : 'text-pink-secondary'
                     )}
                     strokeWidth={2.4}
                   />
@@ -328,6 +339,11 @@ export function TournamentInfo({ id, className, ...rest }: TournamentDetailsProp
                   >
                     {t('ended')}
                   </button>
+                ) : isStarted ? (
+                  <span className="text-teal border-teal/30 bg-teal/15 ml-auto inline-flex shrink-0 items-center gap-1.5 rounded-full border px-3.5 py-2 text-[11px] font-extrabold uppercase leading-none tracking-[0.14em]">
+                    <Clock size={12} strokeWidth={2.6} />
+                    {t('started')}
+                  </span>
                 ) : (
                   <Button
                     disabled={isLoading || tierLocked}

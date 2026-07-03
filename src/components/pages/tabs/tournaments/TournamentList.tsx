@@ -8,16 +8,27 @@ import { useAppTranslations } from '@/hooks/useAppTranslations';
 interface TournamentListProps {
   tournaments: TournamentCardProps[];
   isLoading: boolean;
+  /** Tab-aware empty-state copy; falls back to the generic "not found" text. */
+  emptyTitle?: string;
+  emptyDescription?: string;
 }
 
-export function TournamentList({ tournaments, isLoading }: TournamentListProps) {
+export function TournamentList({
+  tournaments,
+  isLoading,
+  emptyTitle,
+  emptyDescription,
+}: TournamentListProps) {
   const t = useAppTranslations();
 
   return (
     <div className="py-5 flex flex-col gap-3">
       {tournaments.map((tournament, index) =>
         index === 0 ? (
-          <div key={index} data-tour="tournaments">
+          // Stateful cards (modals, countdown) must be keyed by identity, not
+          // position — a refetch that reorders the list would otherwise
+          // re-attach state to the wrong tournament.
+          <div key={tournament.id ?? index} data-tour="tournaments">
             <TournamentCard
               loading={isLoading}
               {...tournament}
@@ -27,7 +38,7 @@ export function TournamentList({ tournaments, isLoading }: TournamentListProps) 
           </div>
         ) : (
           <TournamentCard
-            key={index}
+            key={tournament.id ?? index}
             loading={isLoading}
             {...tournament}
             style={{ animationDelay: `${index * 60}ms` }}
@@ -37,8 +48,8 @@ export function TournamentList({ tournaments, isLoading }: TournamentListProps) 
       {!isLoading && tournaments.length === 0 && (
         <EmptyDataInfo
           className="py-10"
-          title={t('tournaments not found')}
-          description={t('no results description')}
+          title={emptyTitle ?? t('tournaments not found')}
+          description={emptyDescription ?? t('no results description')}
         />
       )}
     </div>

@@ -1354,5 +1354,15 @@
   "ton balance": "Баланс TON",
   "cost": "Стоимость",
   "exchange ton to stars": "Обменяйте TON на Lucky Stars",
-  "exchanged to stars": "Обменяно {ton} TON → {stars} Stars"
+  "exchanged to stars": "Обменяно {ton} TON → {stars} Stars",
+  "day short": "д",
+  "hour short": "ч",
+  "minute short": "м",
+  "second short": "с",
+  "started": "Начался",
+  "no tickets of this type": "У вас пока нет билетов этого типа",
+  "get tickets": "Получить билеты",
+  "no joined tournaments": "Вы ещё не участвуете в турнирах",
+  "no joined tournaments description": "Присоединитесь к предстоящему турниру — он появится здесь.",
+  "no prize description": "В этот раз без приза — возьмите больше билетов и попробуйте снова!"
 }

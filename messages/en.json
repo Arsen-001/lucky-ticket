@@ -1354,5 +1354,15 @@
   "ton balance": "TON balance",
   "cost": "Cost",
   "exchange ton to stars": "Exchange TON for Lucky Stars",
-  "exchanged to stars": "Exchanged {ton} TON → {stars} Stars"
+  "exchanged to stars": "Exchanged {ton} TON → {stars} Stars",
+  "day short": "d",
+  "hour short": "h",
+  "minute short": "m",
+  "second short": "s",
+  "started": "Started",
+  "no tickets of this type": "You don't have any tickets of this type yet",
+  "get tickets": "Get tickets",
+  "no joined tournaments": "No joined tournaments yet",
+  "no joined tournaments description": "Join an upcoming tournament and it will show up here.",
+  "no prize description": "No prize this time — grab more tickets and try the next one!"
 }

@@ -147,10 +147,11 @@ export function TournamentFilterSheet({
             </div>
           </div>
 
-          {/* Apply button — fixed bottom */}
+          {/* Apply button — fixed bottom; safe-area inset keeps it above the
+              iOS home indicator in fullscreen Mini App mode */}
           <div className="flex-shrink-0">
             <div className="h-px bg-white/10" />
-            <div className="px-5 py-4">
+            <div className="px-5 pt-4 pb-[max(1rem,env(safe-area-inset-bottom))]">
               <Button
                 onClick={onClose}
                 className="w-full py-3 rounded-full text-xs font-extrabold uppercase tracking-[0.16em] leading-none shadow-[0_6px_18px_rgba(0,0,0,0.4),inset_0_1px_0_rgba(255,255,255,0.28)] active:scale-99 transition-transform"
