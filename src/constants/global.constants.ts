@@ -1,6 +1,68 @@
 import { defaultLocale } from '@/i18n/config';
 import { appConfig } from '@/config/app.config';
 
+const apTiers = ['bronze', 'silver', 'gold', 'platinum', 'diamond'] as const;
+
+/**
+ * Canonical AP-source rates — mirrors DOCS §5.3 "How Activity Points Are
+ * Earned". Single source of truth for every "earn AP" surface in the UI.
+ * `*ByTier` rates are keyed by ActivityTier (Bronze→Diamond). Invite rates
+ * live in `inviteActivityPoints` / `inviteTelegramPremiumActivityPoints`.
+ */
+const apRewards = {
+  dailyStreak: 3,
+  verifyEmail: 20,
+  watchVideo: 2,
+  /** Default daily ads cap. Lucky Player gets the boosted limit below. */
+  watchVideoDailyLimit: 10,
+  /** Daily ads cap for Lucky Player holders (DOCS §7.3). */
+  luckyPlayerWatchVideoDailyLimit: 20,
+  sendTicket: 1,
+  sendTicketDailyLimit: 3,
+  likeProfile: 1,
+  likeProfileDailyLimit: 3,
+  claimDailyLimit: 5,
+  /** LS spent per 1 AP from purchases — no daily cap. */
+  purchaseLsPerAp: 10,
+  /** LC spent per 1 AP from spending — no daily cap. */
+  spendLcPerAp: 25_000,
+  dailyTaskByTier: { bronze: 1, silver: 2, gold: 3, platinum: 4, diamond: 5 },
+  weeklyTaskByTier: { bronze: 2, silver: 3, gold: 4, platinum: 5, diamond: 6 },
+  claimByTier: { bronze: 1, silver: 2, gold: 4, platinum: 8, diamond: 16 },
+  tournamentJoinByTier: { bronze: 1, silver: 2, gold: 3, platinum: 4, diamond: 5 },
+  /**
+   * How many daily / weekly tasks a player of each tier can actually complete
+   * (own-tier task ladder + the social share + the profile check-in). Used to
+   * DERIVE the daily baseline below — change the counts or the rates and the
+   * baseline, decay and tier pacing follow automatically.
+   */
+  dailyTasksCountByTier: { bronze: 3, silver: 4, gold: 5, platinum: 6, diamond: 7 },
+  weeklyTasksCountByTier: { bronze: 3, silver: 4, gold: 5, platinum: 6, diamond: 7 },
+};
+
+/**
+ * DERIVED — the no-donation daily AP ceiling per tier (DOCS §5.4): the sum of
+ * every capped recurring source at that tier (streak + ads + ticket sends +
+ * likes + claims + daily tasks + weekly tasks averaged per day). Never
+ * hand-edit a baseline: tune the source rates/caps above instead, so the
+ * number shown on the AP dashboard, the decay rate and the tier pacing can
+ * never drift apart. Currently ≈38 / 49 / 67 / 97 / 150.
+ */
+const dailyBaselineApByTier = Object.fromEntries(
+  apTiers.map(tier => [
+    tier,
+    Math.round(
+      apRewards.dailyStreak +
+        apRewards.watchVideo * apRewards.watchVideoDailyLimit +
+        apRewards.sendTicket * apRewards.sendTicketDailyLimit +
+        apRewards.likeProfile * apRewards.likeProfileDailyLimit +
+        apRewards.claimDailyLimit * apRewards.claimByTier[tier] +
+        apRewards.dailyTasksCountByTier[tier] * apRewards.dailyTaskByTier[tier] +
+        (apRewards.weeklyTasksCountByTier[tier] * apRewards.weeklyTaskByTier[tier]) / 7
+    ),
+  ])
+) as Record<(typeof apTiers)[number], number>;
+
 export const GlobalConstants = {
   projectName: 'LuckyTicket365',
   minPasswordLength: 8,
@@ -73,54 +135,24 @@ export const GlobalConstants = {
   starsPerTelegramStar: 1,
   tonBonusPercentage: 5,
   maxVipLevel: 20,
-  /** Approximate daily AP a player earns at each tier without donation — decay base (DOCS §5.4). */
-  dailyBaselineApByTier: {
-    bronze: 70,
-    silver: 90,
-    gold: 111,
-    platinum: 131,
-    diamond: 152,
-  },
+  /** Derived from `apRewards` above — see the computation for the rationale. */
+  dailyBaselineApByTier,
   /** Days of inactivity before AP decay begins. */
   decayGraceDays: 7,
+  /**
+   * Product pacing targets (days per leg at the DERIVED daily baselines
+   * ≈38/49/67/97): Silver in ~15 days, Gold +1 month, Platinum +3 months,
+   * Diamond +6 months → actual legs ≈14.5 / 29.6 / 89.6 / 180.4 days
+   * (~10.5 months to Diamond total). Asserted in `tests/economy-sim.test.ts`.
+   */
   apTierThresholds: {
     bronze: 0,
-    // Product pacing targets (days per leg at the per-tier daily baselines):
-    // Silver in ~15 days, Gold +1 month, Platinum +3 months, Diamond +6 months
-    // → actual legs ≈15 / 33 / 90 / 183 days (~10.5 months to Diamond total).
-    silver: 1000,
-    gold: 4000,
-    platinum: 14000,
-    diamond: 38000,
+    silver: 550,
+    gold: 2000,
+    platinum: 8000,
+    diamond: 25500,
   },
-  /**
-   * Canonical AP-source rates — mirrors DOCS §5.3 "How Activity Points Are
-   * Earned". Single source of truth for every "earn AP" surface in the UI.
-   * `*ByTier` rates are keyed by ActivityTier (Bronze→Diamond). Invite rates
-   * live in `inviteActivityPoints` / `inviteTelegramPremiumActivityPoints`.
-   */
-  apRewards: {
-    dailyStreak: 3,
-    verifyEmail: 20,
-    watchVideo: 2,
-    /** Default daily ads cap. Lucky Player gets the boosted limit below. */
-    watchVideoDailyLimit: 10,
-    /** Daily ads cap for Lucky Player holders (DOCS §7.3). */
-    luckyPlayerWatchVideoDailyLimit: 20,
-    sendTicket: 1,
-    sendTicketDailyLimit: 3,
-    likeProfile: 1,
-    likeProfileDailyLimit: 3,
-    claimDailyLimit: 5,
-    /** LS spent per 1 AP from purchases — no daily cap. */
-    purchaseLsPerAp: 10,
-    /** LC spent per 1 AP from spending — no daily cap. */
-    spendLcPerAp: 25_000,
-    dailyTaskByTier: { bronze: 1, silver: 2, gold: 3, platinum: 4, diamond: 5 },
-    weeklyTaskByTier: { bronze: 2, silver: 3, gold: 4, platinum: 5, diamond: 6 },
-    claimByTier: { bronze: 1, silver: 2, gold: 4, platinum: 8, diamond: 16 },
-    tournamentJoinByTier: { bronze: 1, silver: 2, gold: 3, platinum: 4, diamond: 5 },
-  },
+  apRewards,
   /**
    * Max tickets sendable to one recipient per day, by tier (DOCS §17.3.3).
    * Platinum and Diamond require Lucky Player status — `default` caps them at 0.

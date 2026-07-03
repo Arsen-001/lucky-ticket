@@ -188,7 +188,7 @@ describe('economy simulation (DOCS §14.2 guardrails)', () => {
     expect(effectiveCycleSeconds(maxed)).toBe(appConfig.engines.baseCycleSecondsByTier.bronze / 2);
   });
 
-  it('AP pacing decelerates: each tier takes longer than the previous', () => {
+  it('AP pacing hits the product targets: Silver ~15d, then +1mo, +3mo, +6mo', () => {
     const t = GlobalConstants.apTierThresholds;
     const base = GlobalConstants.dailyBaselineApByTier;
     const daysPerLeg = [
@@ -197,9 +197,37 @@ describe('economy simulation (DOCS §14.2 guardrails)', () => {
       (t.platinum - t.gold) / base.gold,
       (t.diamond - t.platinum) / base.platinum,
     ];
+    // A perfect player who collects the full derived daily ceiling every day
+    // must land each leg within ±10% of the product pacing targets.
+    const targetDays = [15, 30, 90, 180];
+    daysPerLeg.forEach((leg, i) => {
+      expect(leg, `leg ${i} vs target ${targetDays[i]}d`).toBeGreaterThanOrEqual(
+        targetDays[i] * 0.9
+      );
+      expect(leg, `leg ${i} vs target ${targetDays[i]}d`).toBeLessThanOrEqual(targetDays[i] * 1.1);
+    });
+    // And pacing still decelerates: each tier takes longer than the previous.
     for (let i = 1; i < daysPerLeg.length; i++) {
       expect(daysPerLeg[i]).toBeGreaterThan(daysPerLeg[i - 1]);
     }
+  });
+
+  it('daily AP baseline is derived from the source registry (no hand-drift)', () => {
+    // Spot-check the derivation stays wired: flat sources + tiered sources.
+    const r = GlobalConstants.apRewards;
+    const flat =
+      r.dailyStreak +
+      r.watchVideo * r.watchVideoDailyLimit +
+      r.sendTicket * r.sendTicketDailyLimit +
+      r.likeProfile * r.likeProfileDailyLimit;
+    expect(GlobalConstants.dailyBaselineApByTier.bronze).toBe(
+      Math.round(
+        flat +
+          r.claimDailyLimit * r.claimByTier.bronze +
+          r.dailyTasksCountByTier.bronze * r.dailyTaskByTier.bronze +
+          (r.weeklyTasksCountByTier.bronze * r.weeklyTaskByTier.bronze) / 7
+      )
+    );
   });
 
   it('LC→TON exit is guarded: conversion fee ≥ 10% and daily cap ≤ $10', () => {

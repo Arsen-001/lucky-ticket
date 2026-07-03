@@ -95,12 +95,12 @@ A user's **tier** is derived from accumulated AP:
 | Tier     | AP threshold | Reached by (perfect daily-baseline player) |
 | :------- | :----------- | :----------------------------------------- |
 | Bronze   | 0            | start                                      |
-| Silver   | 1,000        | ~2 weeks                                   |
-| Gold     | 4,000        | ~1.5 months                                |
-| Platinum | 14,000       | ~4.5 months                                |
-| Diamond  | 38,000       | ~10.5 months                               |
+| Silver   | 550          | ~2 weeks                                   |
+| Gold     | 2,000        | ~1.5 months                                |
+| Platinum | 8,000        | ~4.5 months                                |
+| Diamond  | 25,500       | ~10.5 months                               |
 
-Thresholds implement the product pacing targets — Silver in ~15 days, Gold +1 month, Platinum +3 months, Diamond +6 months. At the per-tier daily baselines (§5.4) the legs land at ≈15 / 33 / 90 / 183 days, each visibly longer than the previous one — the pacing guardrail is asserted in `tests/economy-sim.test.ts`.
+Thresholds implement the product pacing targets — Silver in ~15 days, Gold +1 month, Platinum +3 months, Diamond +6 months — **computed against the derived daily baselines** (§5.4), i.e. against what a fully-active player can actually collect per day from every capped source. The legs land at ≈14.5 / 29.6 / 89.6 / 180.4 days, each visibly longer than the previous one — the pacing guardrail is asserted in `tests/economy-sim.test.ts`.
 
 The pacing describes a player who collects the full daily baseline every day. Tournaments make it faster; missed days slower.
 
@@ -118,8 +118,8 @@ AP is earned from a data-driven **source registry** — every meaningful action 
 | Source                    | AP                                    | Limit                                                                                          |
 | :------------------------ | :------------------------------------ | :--------------------------------------------------------------------------------------------- |
 | Daily login streak        | 3                                     | 1×/day                                                                                         |
-| Daily task                | 1 / 2 / 3 / 4 / 5                     | by task tier (Bronze→Diamond), ~15/day                                                         |
-| Weekly task               | 2 / 3 / 4 / 5 / 6                     | by task tier (Bronze→Diamond), ~3/week                                                         |
+| Daily task                | 1 / 2 / 3 / 4 / 5                     | by task tier; a tier-T player completes 3–7/day (`dailyTasksCountByTier`)                      |
+| Weekly task               | 2 / 3 / 4 / 5 / 6                     | by task tier; a tier-T player completes 3–7/week (`weeklyTasksCountByTier`)                    |
 | One-time task             | varies                                | once per task                                                                                  |
 | Verify email              | 20                                    | one-time                                                                                       |
 | Claim                     | 1 / 2 / 4 / 8 / 16                    | per claim, by tier (Bronze→Diamond), 5×/day                                                    |
@@ -136,24 +136,24 @@ Tiered sources (daily / weekly tasks, claim, tournament join) scale with the rel
 
 ### 5.4 Daily Baseline
 
-The **daily baseline** is the approximate AP a fully-active player earns per day without donation. It is **tier-dependent** — it rises as the player climbs, because daily tasks, weekly tasks and claim all scale with tier:
+The **daily baseline** is the AP a fully-active player earns per day without donation. It is **DERIVED, not hand-set**: `dailyBaselineApByTier` is computed from the source registry (§5.3) as the sum of every capped recurring source — streak + ads + ticket sends + likes + claims + daily tasks + weekly tasks averaged per day. Tune a source rate or cap and the baseline, the decay rate and the tier pacing all follow automatically. It is tier-dependent — daily tasks, weekly tasks and claim scale with tier:
 
-| Tier     | Daily baseline |
-| :------- | :------------- |
-| Bronze   | ~70            |
-| Silver   | ~90            |
-| Gold     | ~111           |
-| Platinum | ~131           |
-| Diamond  | ~152           |
+| Tier     | Daily baseline (derived) |
+| :------- | :----------------------- |
+| Bronze   | 38                       |
+| Silver   | 49                       |
+| Gold     | 67                       |
+| Platinum | 97                       |
+| Diamond  | 150                      |
 
-These figures live in `dailyBaselineApByTier`. The baseline is shown on the AP dashboard and is the basis of the decay rate (Section 5.5). One-off and on-top sources — verify-email, one-time tasks, invites, tournaments, stakes, purchases — are earned above this baseline.
+The baseline is shown on the AP dashboard and is the basis of the decay rate (Section 5.5). One-off and on-top sources — verify-email, one-time tasks, invites, tournaments, stakes, purchases — are earned above this baseline.
 
 ### 5.5 Activity Decay
 
 If the user stops opening the app, AP decays:
 
 - **Grace period:** 7 days of inactivity with no decay.
-- **After grace:** AP drops by `0.5 ×` the player's tier daily baseline per inactive day (≈ 35 AP at Bronze, ≈ 76 at Diamond). Floor: 0.
+- **After grace:** AP drops by `0.5 ×` the player's tier daily baseline per inactive day (≈ 19 AP at Bronze, ≈ 75 at Diamond). Floor: 0.
 - Any action resets the grace timer and stops the decay.
 - Decay lowers AP → lowers tier → **freezes** (makes temporarily unusable) content above the new tier. **No assets are lost** — engines, tickets, LC remain; they are frozen until AP recovers.
 - Bronze tier is 0 AP and the decay floor is 0, so a user can never fall below Bronze — Bronze content and non-gated AP sources always remain available, so a returning user can always climb back.
