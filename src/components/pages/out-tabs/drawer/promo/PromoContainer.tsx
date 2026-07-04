@@ -8,6 +8,7 @@ import { Button } from '@/components/shared/buttons/Button';
 import { useAppTranslations } from '@/hooks/useAppTranslations';
 import { GlobalConstants } from '@/constants/global.constants';
 import { useRedeemPromoCodeMutation } from '@/api/promo.api';
+import { Modal } from '@/components/shared/modals/Modal';
 import { PromoRewardReveal } from './PromoRewardReveal';
 import type { PromoErrorReason, PromoRedeemResponse } from '@/types/interfaces/promo.interfaces';
 
@@ -22,7 +23,10 @@ const ERROR_KEY: Record<PromoErrorReason, PromoErrorMessageKey> = {
 export function PromoContainer() {
   const t = useAppTranslations();
   const [code, setCode] = useState('');
+  // `result` holds the reward data; `resultOpen` drives the modal separately so
+  // the reveal stays mounted through the modal's close animation.
   const [result, setResult] = useState<PromoRedeemResponse | null>(null);
+  const [resultOpen, setResultOpen] = useState(false);
   const [errorKey, setErrorKey] = useState<PromoErrorMessageKey | null>(null);
   const [redeem, { isLoading }] = useRedeemPromoCodeMutation();
 
@@ -39,6 +43,7 @@ export function PromoContainer() {
     try {
       const res = await redeem({ code: trimmed }).unwrap();
       setResult(res);
+      setResultOpen(true);
       setCode('');
     } catch (err) {
       // The live backend returns the reason in `data.message` ({message,error,
@@ -46,6 +51,7 @@ export function PromoContainer() {
       // "expired"/"used" aren't all mislabeled "invalid".
       const data = (err as { data?: PromoErrorReason | { message?: PromoErrorReason } }).data;
       const reason = typeof data === 'string' ? data : data?.message;
+      setResultOpen(false);
       setResult(null);
       setErrorKey(ERROR_KEY[reason as PromoErrorReason] ?? ERROR_KEY.invalid);
     }
@@ -93,7 +99,9 @@ export function PromoContainer() {
         </Button>
       </div>
 
-      {result && <PromoRewardReveal key={result.code} response={result} />}
+      <Modal open={resultOpen} onClose={() => setResultOpen(false)}>
+        {result && <PromoRewardReveal key={result.code} response={result} />}
+      </Modal>
 
       <a
         href={GlobalConstants.telegramChannelUrl}
