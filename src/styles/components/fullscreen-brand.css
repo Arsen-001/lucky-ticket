@@ -21,15 +21,8 @@ html[data-tg-fullscreen='true'] .fullscreen-brand-bar {
 .fullscreen-brand-bar__inner {
   display: inline-flex;
   align-items: center;
-  gap: 5px;
   padding: 0 12px;
   animation: fullscreen-brand-in 0.5s ease-out both;
-}
-
-.fullscreen-brand-bar__spark {
-  flex-shrink: 0;
-  color: var(--color-gold);
-  filter: drop-shadow(0 0 5px rgba(248, 189, 62, 0.55));
 }
 
 .fullscreen-brand-bar__text {

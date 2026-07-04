@@ -1,6 +1,5 @@
 'use client';
 
-import { Sparkles } from 'lucide-react';
 import '@/styles/components/fullscreen-brand.css';
 
 /**
@@ -19,7 +18,6 @@ export function FullscreenBrandBar() {
   return (
     <div aria-hidden className="fullscreen-brand-bar">
       <span className="fullscreen-brand-bar__inner">
-        <Sparkles className="fullscreen-brand-bar__spark" size={13} strokeWidth={2.6} />
         <span className="fullscreen-brand-bar__text">
           LuckyTicket<span className="fullscreen-brand-bar__accent">365</span>
         </span>
