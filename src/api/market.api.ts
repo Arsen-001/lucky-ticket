@@ -1,5 +1,6 @@
 import dayjs from 'dayjs';
 import { api } from '@/api/index.api';
+import { appConfig } from '@/config/app.config';
 import { inventoryApi } from '@/api/inventory.api';
 import { meApi } from '@/api/me.api';
 import { ticketsApi } from '@/api/tickets.api';
@@ -78,16 +79,12 @@ export const marketApi = api.injectEndpoints({
           ticketsApi.util.updateQueryData('getTickets', undefined, draft => {
             const ticket = draft.find(item => item.ticketType === tier);
             if (!ticket) return;
-            const cycleByTier: Record<TicketType, number> = {
-              bronze: 18,
-              silver: 28,
-              gold: 40,
-              platinum: 60,
-              diamond: 90,
-            };
             const newEngine: TicketEngine = {
               id: `engine-${tier}-${Date.now()}`,
-              cycleSeconds: cycleByTier[tier],
+              // Real base cycle for the tier (DOCS §9.7) — the server refetch
+              // replaces this, but an optimistic value must not read as a bogus
+              // few-second cycle in the flash before it lands.
+              cycleSeconds: appConfig.engines.baseCycleSecondsByTier[tier],
               perCycleOutput: 1,
               cycleStartedAt: dayjs().toISOString(),
               pendingCount: 0,

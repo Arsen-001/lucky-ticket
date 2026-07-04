@@ -1,4 +1,3 @@
-import dayjs from 'dayjs';
 import {
   MarketCosmeticType,
   MarketItemCategory,
@@ -11,8 +10,6 @@ import { images } from '@/constants/images';
 import { appConfig } from '@/config/app.config';
 import { lcPriceToLsParity } from '@/utils/global/economy.utils';
 import type { MarketData, MarketPrice } from '@/types/interfaces/market.interfaces';
-
-const expiresInDays = (n: number) => dayjs().add(n, 'day').toISOString();
 
 /**
  * LC price ladder + LS parity (DOCS §14.2). Engine and ticket LC prices come
@@ -31,69 +28,6 @@ const ticketPrices = (tier: TicketsEnum): MarketPrice[] =>
   lcPricePair(appConfig.economy.ticketPriceLcByTier[tier]);
 
 export const marketMock: MarketData = {
-  bundles: [
-    {
-      id: 'bundle-starter',
-      name: 'Starter Pack',
-      description: 'Perfect kickstart bundle for new players',
-      category: MarketItemCategory.BUNDLE,
-      featured: true,
-      isNew: true,
-      discountPct: 35,
-      expiresAt: expiresInDays(2),
-      contents: [
-        { kind: 'ticket', amount: 5, tier: TicketsEnum.BRONZE },
-        { kind: 'stars', amount: 10 },
-        { kind: 'lc', amount: 25_000 },
-        { kind: 'booster', amount: 1, tier: TicketsEnum.BRONZE },
-      ],
-      prices: [{ type: MarketPriceType.LC, amount: 99_900, originalAmount: 149_900 }],
-    },
-    {
-      id: 'bundle-silver',
-      name: 'Silver Vault',
-      description: 'Stack silver tier rewards in one go',
-      category: MarketItemCategory.BUNDLE,
-      discountPct: 25,
-      contents: [
-        { kind: 'ticket', amount: 10, tier: TicketsEnum.SILVER },
-        { kind: 'chip', amount: 1, tier: TicketsEnum.SILVER },
-        { kind: 'stars', amount: 25 },
-      ],
-      prices: [{ type: MarketPriceType.LC, amount: 279_900, originalAmount: 369_900 }],
-    },
-    {
-      id: 'bundle-gold',
-      name: 'Gold Surge',
-      description: 'Skip the grind into gold tier',
-      category: MarketItemCategory.BUNDLE,
-      discountPct: 20,
-      contents: [
-        { kind: 'ticket', amount: 8, tier: TicketsEnum.GOLD },
-        { kind: 'engine', amount: 1, tier: TicketsEnum.GOLD },
-      ],
-      prices: [
-        { type: MarketPriceType.LC, amount: 499_900, originalAmount: 629_900 },
-        { type: MarketPriceType.TELEGRAM_STARS, amount: 150, originalAmount: 190 },
-      ],
-    },
-    {
-      id: 'bundle-diamond',
-      name: 'Diamond Mega',
-      description: 'Top-tier whale bundle, limited supply',
-      category: MarketItemCategory.BUNDLE,
-      discountPct: 15,
-      expiresAt: expiresInDays(7),
-      contents: [
-        { kind: 'ticket', amount: 5, tier: TicketsEnum.DIAMOND },
-        { kind: 'engine', amount: 1, tier: TicketsEnum.DIAMOND },
-        { kind: 'chip', amount: 2, tier: TicketsEnum.DIAMOND },
-        { kind: 'stars', amount: 250 },
-      ],
-      prices: [{ type: MarketPriceType.LC, amount: 3_999_900, originalAmount: 4_749_900 }],
-    },
-  ],
-
   engines: [
     {
       id: 'engine-bronze',
@@ -723,8 +657,8 @@ export const marketMock: MarketData = {
       statusType: MarketStatusType.LUCKY_PLAYER,
       durationDays: 30,
       prices: [
-        { type: MarketPriceType.LC, amount: 100_000 },
-        { type: MarketPriceType.TELEGRAM_STARS, amount: 25 },
+        { type: MarketPriceType.LC, amount: 8_000_000 },
+        { type: MarketPriceType.TELEGRAM_STARS, amount: 200 },
       ],
       privileges: [
         'lp engine speed boost',
@@ -746,12 +680,12 @@ export const marketMock: MarketData = {
       name: 'VIP Status',
       statusType: MarketStatusType.VIP,
       prices: [
-        { type: MarketPriceType.LC, amount: 500_000 },
-        { type: MarketPriceType.TELEGRAM_STARS, amount: 125 },
+        { type: MarketPriceType.LC, amount: 20_000_000 },
+        { type: MarketPriceType.TELEGRAM_STARS, amount: 500 },
       ],
       upgradePrices: [
-        { type: MarketPriceType.LC, amount: 250_000 },
-        { type: MarketPriceType.TELEGRAM_STARS, amount: 63 },
+        { type: MarketPriceType.LC, amount: 10_000_000 },
+        { type: MarketPriceType.TELEGRAM_STARS, amount: 250 },
       ],
       privileges: [
         'vip engine speed boost',

@@ -37,19 +37,6 @@ export interface MarketItemBase {
   expiresAt?: string;
 }
 
-export interface MarketBundleItem {
-  kind: 'ticket' | 'stars' | 'lc' | 'chip' | 'booster' | 'engine';
-  amount: number;
-  /** Tier for tier-bound items (ticket, chip, booster, engine) */
-  tier?: TicketType;
-}
-
-export interface MarketBundle extends MarketItemBase {
-  category: MarketItemCategory.BUNDLE;
-  description?: string;
-  contents: MarketBundleItem[];
-}
-
 export interface MarketBoost extends MarketItemBase {
   category?: MarketItemCategory.BOOST;
   boostPercentage: number;
@@ -119,7 +106,6 @@ export interface MarketCosmetic extends MarketItemBase {
 }
 
 export interface MarketData {
-  bundles: MarketBundle[];
   engines: MarketEngine[];
   tickets: MarketTicket[];
   boosts: MarketBoost[];

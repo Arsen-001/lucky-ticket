@@ -41,13 +41,13 @@ export function MarketStatusSection({ onSelect, onBuy }: MarketStatusSectionProp
 
   const getActivePrices = (status: MarketStatus) => {
     const isVIP = status.statusType === MarketStatusType.VIP;
-    const rawPrices =
-      isVIP && userVipLevel > 0 && status.upgradePrices ? status.upgradePrices : status.prices;
+    const isVipUpgrade = isVIP && userVipLevel > 0;
+    const rawPrices = isVipUpgrade && status.upgradePrices ? status.upgradePrices : status.prices;
     // Status discount only applies to OTHER statuses — never to LP/VIP when
-    // buying the same tier (no self-discount on LP card; no VIP discount on
-    // upgrading VIP itself).
-    const lpEligible = isLp && status.statusType !== MarketStatusType.LUCKY_PLAYER;
-    const vipEligible = isVip && status.statusType !== MarketStatusType.VIP;
+    // buying the same tier. VIP upgrades take no discount at all (the backend
+    // charges the upgrade price un-discounted — keep the shown price in sync).
+    const lpEligible = !isVipUpgrade && isLp && status.statusType !== MarketStatusType.LUCKY_PLAYER;
+    const vipEligible = !isVipUpgrade && isVip && status.statusType !== MarketStatusType.VIP;
     return applyStatusMarketDiscount(rawPrices, lpEligible, vipEligible);
   };
 
@@ -145,7 +145,7 @@ export function MarketStatusSection({ onSelect, onBuy }: MarketStatusSectionProp
                     <span style={{ color: accentVar }} className="mt-0.5">
                       ·
                     </span>
-                    <span>{t(privilege as MessageIds, { percentage: isVIP ? 100 : 50 })}</span>
+                    <span>{t(privilege as MessageIds)}</span>
                   </li>
                 ))}
               </ul>
