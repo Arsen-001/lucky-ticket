@@ -139,6 +139,16 @@ const sortByCategoryOrder = <T extends { category: TaskCategory }>(items: T[]): 
   return [...items].sort((a, b) => rank(a.category) - rank(b.category));
 };
 
+// Profile and Partners are intentionally absent from the one-time tab — Profile
+// setup lives in Settings, Partners in the advertiser cabinet. Hiding them in
+// exactly one place (here) keeps the frequency-tab badge, the category chips and
+// the section list in agreement: the "one-time" count never advertises tasks the
+// user can't actually reach in this tab.
+const HIDDEN_ONCE_CATEGORIES = new Set<TaskCategory>([TaskCategory.PROFILE, TaskCategory.PARTNERS]);
+
+const isCategoryVisibleForFrequency = (category: TaskCategory, frequency: TaskFrequency): boolean =>
+  !(frequency === TaskFrequency.ONCE && HIDDEN_ONCE_CATEGORIES.has(category));
+
 export function TasksContent() {
   const t = useAppTranslations();
   const searchParams = useSearchParams();
@@ -237,10 +247,15 @@ export function TasksContent() {
     };
     if (!data) return counts;
     const isReady = (t: Task) => t.status === TaskStatus.READY_TO_CLAIM;
+    // Count only what each tab actually renders — a category hidden from a
+    // frequency (Profile/Partners in one-time) must not inflate its badge.
     data.categories.forEach(cat => {
-      counts[TaskFrequency.DAILY] += cat.daily.filter(isReady).length;
-      counts[TaskFrequency.WEEKLY] += cat.weekly.filter(isReady).length;
-      counts[TaskFrequency.ONCE] += cat.once.filter(isReady).length;
+      if (isCategoryVisibleForFrequency(cat.category, TaskFrequency.DAILY))
+        counts[TaskFrequency.DAILY] += cat.daily.filter(isReady).length;
+      if (isCategoryVisibleForFrequency(cat.category, TaskFrequency.WEEKLY))
+        counts[TaskFrequency.WEEKLY] += cat.weekly.filter(isReady).length;
+      if (isCategoryVisibleForFrequency(cat.category, TaskFrequency.ONCE))
+        counts[TaskFrequency.ONCE] += cat.once.filter(isReady).length;
     });
     if (data.ads) {
       counts[TaskFrequency.DAILY] += data.ads.slots.filter(s => !s.watched).length;
@@ -262,12 +277,7 @@ export function TasksContent() {
     const categoryItems: CategoryNavItem[] = [];
     data.categories.forEach(cat => {
       // Hide Profile and Partners chips from the one-time tab — same as the section list.
-      if (
-        activeFrequency === TaskFrequency.ONCE &&
-        (cat.category === TaskCategory.PROFILE || cat.category === TaskCategory.PARTNERS)
-      ) {
-        return;
-      }
+      if (!isCategoryVisibleForFrequency(cat.category, activeFrequency)) return;
       const tasks = tasksForFrequency(cat, activeFrequency);
       if (!tasks.length) return;
       const ready = tasks.filter(t => t.status === TaskStatus.READY_TO_CLAIM).length;
@@ -480,14 +490,10 @@ export function TasksContent() {
   const filteredCategories =
     data?.categories.filter(c => tasksForFrequency(c, activeFrequency).length > 0) ?? [];
   // Hide Profile and Partners from the one-time tab — they live elsewhere
-  // (Profile setup is part of Settings).
-  const onceFiltered =
-    activeFrequency === TaskFrequency.ONCE
-      ? filteredCategories.filter(
-          c => c.category !== TaskCategory.PROFILE && c.category !== TaskCategory.PARTNERS
-        )
-      : filteredCategories;
-  const visibleCategories = sortByCategoryOrder(onceFiltered);
+  // (Profile setup is part of Settings). Same predicate as the chips + badge.
+  const visibleCategories = sortByCategoryOrder(
+    filteredCategories.filter(c => isCategoryVisibleForFrequency(c.category, activeFrequency))
+  );
 
   const allEmpty = !showAds && visibleCategories.length === 0;
 
