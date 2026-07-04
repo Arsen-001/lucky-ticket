@@ -119,8 +119,16 @@ export function NewStakeHero({
 
         <div className="mt-2 flex gap-1.5">
           {[
-            { label: '25%', value: Math.max(sliderMin, Math.floor(balance * 0.25)) },
-            { label: '50%', value: Math.max(sliderMin, Math.floor(balance * 0.5)) },
+            // Clamp every preset to [sliderMin, sliderMax] — the slider caps the
+            // stake at sliderMax, so a preset must never set a deposit above it.
+            {
+              label: '25%',
+              value: Math.min(sliderMax, Math.max(sliderMin, Math.floor(balance * 0.25))),
+            },
+            {
+              label: '50%',
+              value: Math.min(sliderMax, Math.max(sliderMin, Math.floor(balance * 0.5))),
+            },
             { label: t('max'), value: Math.min(sliderMax, balance) },
           ].map(preset => (
             <button

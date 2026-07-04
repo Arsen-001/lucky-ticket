@@ -91,11 +91,20 @@ export function StakesContent() {
 
   const handleClaimAll = async () => {
     let failed = false;
+    let claimed = 0;
+    let totalLc = 0;
     for (const id of readyStakeIds) {
       const result = await claimStake({ stakeId: id });
-      if (!('data' in result && result.data?.success)) failed = true;
+      if ('data' in result && result.data?.success) {
+        claimed += 1;
+        totalLc += result.data.principalReturned + result.data.yieldLC;
+      } else {
+        failed = true;
+      }
     }
     if (failed) toast.error(t('action failed'));
+    else if (claimed > 0)
+      toast.success(t('claimed {n} ready stakes', { n: claimed, lc: formatCompact(totalLc) }));
   };
 
   return (

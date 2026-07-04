@@ -33,19 +33,22 @@ export const computeStakeReturnCoins = (
 
 /**
  * Base AP credited the moment a stake starts: `deposit × months ÷ stakeApDivisor`
- * (DOCS §5.3 / §18.3). Retained even if the stake is cancelled early.
+ * (DOCS §5.3 / §18.3). Retained even if the stake is cancelled early. Floored to
+ * match the backend (`stake-math.baseAp`) so the projection equals what's credited.
  */
 export const computeStakeBaseAp = (deposit: number, months: number) =>
-  Math.round((deposit * months) / GlobalConstants.stakeApDivisor);
+  Math.floor((deposit * months) / GlobalConstants.stakeApDivisor);
 
 /**
  * Completion bonus AP granted only when the stake runs to the end —
- * `stakeApCompletionBonusPercent` of the base. Forfeited on early cancellation.
+ * `stakeApCompletionBonusPercent` of the (floored) base. Forfeited on early
+ * cancellation. Floor-of-floored-base mirrors the backend claim exactly
+ * (`floor(apAwarded × pct / 100)`), so the pre-claim projection can't drift.
  */
-export const computeStakeCompletionBonusAp = (deposit: number, months: number) => {
-  const base = (deposit * months) / GlobalConstants.stakeApDivisor;
-  return Math.round((base * GlobalConstants.stakeApCompletionBonusPercent) / 100);
-};
+export const computeStakeCompletionBonusAp = (deposit: number, months: number) =>
+  Math.floor(
+    (computeStakeBaseAp(deposit, months) * GlobalConstants.stakeApCompletionBonusPercent) / 100
+  );
 
 /** Total AP across the lifecycle = base (on start) + completion bonus (on claim). */
 export const computeStakeActivityPoints = (deposit: number, months: number) =>

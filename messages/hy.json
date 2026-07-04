@@ -237,6 +237,7 @@
   "claim tickets": "Ստանալ տոմսերը",
   "claimable tickets count": "{count, plural, =0 {0 տոմս} =1 {# տոմս} other {# տոմս}}",
   "claimed": "Ստացված է",
+  "claimed {n} ready stakes": "Ստացվեց {n} · +{lc} LC",
   "claiming": "Հավաքվում է…",
   "close": "Փակել",
   "code is required": "Կոդը պարտադիր է",

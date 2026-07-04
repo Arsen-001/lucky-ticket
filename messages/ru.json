@@ -237,6 +237,7 @@
   "claim tickets": "Получить билеты",
   "claimable tickets count": "{count, plural, =0 {0 билетов} one {# билет} few {# билета} many {# билетов} other {# билетов}}",
   "claimed": "Получено",
+  "claimed {n} ready stakes": "Забрано стейков: {n} · +{lc} LC",
   "claiming": "Сбор…",
   "close": "Закрыть",
   "code is required": "Код обязателен",
