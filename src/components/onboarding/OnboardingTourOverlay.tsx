@@ -1,6 +1,7 @@
 'use client';
 
 import '@/styles/components/onboarding-tour.css';
+import type { CSSProperties } from 'react';
 import { Pointer } from 'lucide-react';
 import { twMerge } from 'tailwind-merge';
 import { ClientPortal } from '@/components/shared/ClientPortal';
@@ -50,6 +51,16 @@ export function OnboardingTourOverlay({
   // Pin the explanatory card to the side opposite the target so it never covers it.
   const bubbleAtBottom = rect ? targetCenterY < viewportHeight * 0.52 : false;
 
+  // Keep the card (and its always-visible advance button) inside the safe area —
+  // in Telegram fullscreen a flat top-6 / bottom-6 would slip under Telegram's
+  // floating chrome or into the home-indicator gesture zone.
+  const cardPosition: CSSProperties =
+    phase === 'fallback'
+      ? { top: '50%', transform: 'translateY(-50%)' }
+      : bubbleAtBottom
+        ? { bottom: 'calc(1.5rem + var(--tg-inset-bottom))' }
+        : { top: 'calc(1.5rem + var(--tg-inset-top))' };
+
   return (
     <ClientPortal>
       <div className="fixed inset-0 z-[120]" role="dialog" aria-modal="true">
@@ -89,16 +100,7 @@ export function OnboardingTourOverlay({
         )}
 
         {phase !== 'searching' && (
-          <div
-            className={twMerge(
-              'absolute inset-x-0 flex justify-center px-4',
-              phase === 'fallback'
-                ? 'top-1/2 -translate-y-1/2'
-                : bubbleAtBottom
-                  ? 'bottom-6'
-                  : 'top-6'
-            )}
-          >
+          <div className="absolute inset-x-0 flex justify-center px-4" style={cardPosition}>
             <div className="border-electric-pink/30 bg-background-overlay/95 animate-slide-in-bottom w-full max-w-[420px] rounded-2xl border p-5 shadow-[0_18px_60px_-12px_rgba(0,0,0,0.7)] backdrop-blur-md">
               <div className="mb-3 flex items-center justify-center gap-1.5">
                 {Array.from({ length: total }).map((_, i) => (
@@ -117,15 +119,19 @@ export function OnboardingTourOverlay({
                 {t(step.bodyKey)}
               </p>
 
-              {phase === 'targeted' ? (
+              {phase === 'targeted' && (
                 <p className="text-electric-pink animation-blink mt-3 text-center text-[11px] font-bold uppercase tracking-wider">
                   {t(step.actionHintKey ?? 'tap the highlighted element')}
                 </p>
-              ) : (
-                <Button onClick={onAdvance} className="mt-4 w-full">
-                  {isLast ? t('finish') : t('got it')}
-                </Button>
               )}
+
+              {/* Always-visible advance control — the guaranteed on-screen way to
+                  proceed even when the highlighted target is off-screen or hard to
+                  tap. On realAction steps onAdvance fires the target's real click
+                  programmatically, so the action still happens. */}
+              <Button onClick={onAdvance} className="mt-4 w-full">
+                {isLast ? t('finish') : t('got it')}
+              </Button>
 
               <button
                 type="button"

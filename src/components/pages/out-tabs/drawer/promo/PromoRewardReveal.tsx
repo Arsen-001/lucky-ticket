@@ -16,7 +16,7 @@ export function PromoRewardReveal({ response }: PromoRewardRevealProps) {
   const t = useAppTranslations();
 
   return (
-    <div className="card-outlined animate-slide-in-bottom relative flex flex-col items-center gap-3 overflow-hidden rounded-2xl px-4 py-5 text-center">
+    <div className="card-outlined bg-background animate-slide-in-bottom relative flex flex-col items-center gap-3 overflow-hidden rounded-2xl px-4 py-5 text-center">
       <span
         aria-hidden
         className="bg-electric-pink/20 pointer-events-none absolute -top-12 left-1/2 h-32 w-32 -translate-x-1/2 rounded-full blur-3xl"
