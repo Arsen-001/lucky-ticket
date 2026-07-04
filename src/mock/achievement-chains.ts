@@ -57,7 +57,7 @@ const SHAPE_FALLBACK = AchievementShape.CIRCLE;
  * Numbers grow ~3x per rarity, the same geometric shape used in tasks.
  */
 const DEFAULT_REWARDS: ChainRewardConfig = {
-  lc: [0, 10_000, 50_000, 200_000, 1_000_000, 5_000_000],
+  lc: [0, 1_000, 5_000, 20_000, 100_000, 500_000],
   tickets: [0, 0, 3, 10, 40, 150],
   activityPoints: [100, 250, 600, 1500, 4000, 10000],
   ls: [0, 0, 0, 0, 25, 100],

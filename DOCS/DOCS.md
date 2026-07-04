@@ -129,10 +129,10 @@ AP is earned from a data-driven **source registry** — every meaningful action 
 | Invite a friend           | 10 (20 for a Telegram Premium friend) | per invite                                                                                     |
 | Join a tournament         | 1 / 2 / 3 / 4 / 5                     | by tournament tier (Bronze→Diamond), per join                                                  |
 | Purchase                  | 1 per 10 LS spent                     | no daily cap                                                                                   |
-| Spend LC                  | 1 per 25,000 LC spent                 | no daily cap                                                                                   |
-| Complete a stake          | `LC staked × months / 50,000`         | base credited on start (retained on cancel), +50% bonus on completion (forfeited if cancelled) |
+| Spend LC                  | 1 per 2,500 LC spent                  | no daily cap                                                                                   |
+| Complete a stake          | `LC staked × months / 5,000`          | base credited on start (retained on cancel), +50% bonus on completion (forfeited if cancelled) |
 
-Tiered sources (daily / weekly tasks, claim, tournament join) scale with the relevant tier — Bronze→Diamond — and recurring daily sources carry per-day caps. **One-off and on-top sources** — verify-email, one-time tasks, friend invites, tournament joins, stake completion — are earned above the daily baseline (Section 5.4). **Purchases are uncapped:** 1 AP per 10 LS or per 25,000 LC spent with no daily limit, so a heavy spender climbs tiers substantially faster than a free player.
+Tiered sources (daily / weekly tasks, claim, tournament join) scale with the relevant tier — Bronze→Diamond — and recurring daily sources carry per-day caps. **One-off and on-top sources** — verify-email, one-time tasks, friend invites, tournament joins, stake completion — are earned above the daily baseline (Section 5.4). **Purchases are uncapped:** 1 AP per 10 LS or per 2,500 LC spent with no daily limit, so a heavy spender climbs tiers substantially faster than a free player.
 
 ### 5.4 Daily Baseline
 
@@ -180,9 +180,9 @@ LuckyTicket365 runs on **two separate currencies**: Lucky Coin (LC), the interna
 
 LC is the internal reward currency. It is **earned only by playing** — tournament prizes, stake yield (APR), task and ad rewards — and is spent inside the platform: buying tickets, producer engines, speed boosts, and upgrading statuses.
 
-- LC has a fixed real-money valuation of **$0.00001 per LC**, used to price its conversion to TON.
+- LC has a fixed real-money valuation of **$0.000001 per LC** ($1 = 1,000,000 LC), used to price its conversion to TON.
 - LC **cannot be acquired by conversion** — there is no TON→LC or LS→LC path, and no fiat/crypto LC deposit. LC enters the economy only by playing.
-- LC reaches real money by **converting to TON** at its $0.00001 valuation; the resulting TON is withdrawn through the wallet (Section 15). A **direct LC withdrawal is coming soon**.
+- LC reaches real money by **converting to TON** at its $0.000001 valuation; the resulting TON is withdrawn through the wallet (Section 15). A **direct LC withdrawal is coming soon**.
 - The LC→TON exit carries two backend-enforced guards (`appConfig.economy.lcConversion`): a **15% conversion fee** and a **$10/day per-account cap**. They are the hard bound on real-money outflow regardless of how the internal LC faucet is tuned (§14.2).
 
 ### 6.2 Lucky Stars (LS) — real-money currency
@@ -793,11 +793,13 @@ Each tournament includes:
 
   | Tier     | LC per seat |
   | :------- | ----------: |
-  | Bronze   |      40,000 |
-  | Silver   |     100,000 |
-  | Gold     |     250,000 |
-  | Platinum |     600,000 |
-  | Diamond  |   1,500,000 |
+  | Bronze   |       4,000 |
+  | Silver   |      10,000 |
+  | Gold     |      25,000 |
+  | Platinum |      60,000 |
+  | Diamond  |     150,000 |
+
+  At the $0.000001/LC anchor a full 500-seat instance is worth **$2 / $5 / $12.5 / $30 / $75** by tier — the per-seat knob is what caps the platform's real-money faucet.
 
 - **Start Time:** The date and time when the tournament begins and winners are decided.
 - **Team Size:** The total number of seats. `teamSizeCap` = 500 per instance; when more eligible players exist than the cap, additional parallel instances of the slot are spawned.
@@ -1059,15 +1061,15 @@ The **Ads** category in the **One-time** tasks tab holds a single task type — 
 - **Levels:** 7 cumulative view-count thresholds — **10, 25, 50, 100, 200, 400, 800** ads watched.
 - **Rewards per level:**
 
-  | Level | Ads watched | Reward                                 |
-  | ----- | ----------- | -------------------------------------- |
-  | 1     | 10          | 2,000 LC, 5 AP                         |
-  | 2     | 25          | 5,000 LC, 10 AP                        |
-  | 3     | 50          | 10,000 LC, 1 ticket, 15 AP             |
-  | 4     | 100         | 20,000 LC, 1 ticket, 20 AP             |
-  | 5     | 200         | 40,000 LC, 2 tickets, 30 AP            |
-  | 6     | 400         | 80,000 LC, 3 tickets, 45 AP            |
-  | 7     | 800         | 150,000 LC, 5 tickets, 15 Stars, 60 AP |
+  | Level | Ads watched | Reward                                |
+  | ----- | ----------- | ------------------------------------- |
+  | 1     | 10          | 200 LC, 5 AP                          |
+  | 2     | 25          | 500 LC, 10 AP                         |
+  | 3     | 50          | 1,000 LC, 1 ticket, 15 AP             |
+  | 4     | 100         | 2,000 LC, 1 ticket, 20 AP             |
+  | 5     | 200         | 4,000 LC, 2 tickets, 30 AP            |
+  | 6     | 400         | 8,000 LC, 3 tickets, 45 AP            |
+  | 7     | 800         | 15,000 LC, 5 tickets, 15 Stars, 60 AP |
 
 - After the 7th level, the slider shows a **“Coming soon”** card — additional levels are planned.
 - Tapping a level card sends the user to the daily **Ads** block (`/tasks?frequency=daily&category=ads`), where ads are actually watched. The daily ads block (per-day slot rewards) is a separate mechanic and is unaffected.
@@ -1096,7 +1098,7 @@ The one-time tab holds a curated catalog of **~120 tasks** whose reward budget i
 | Own engines                | 2/5/10/15/20/30            | engines of any tier  |
 | Collect tickets            | 250/1k/2.5k/10k/25k/50k    | lifetime produced    |
 | Start stakes               | 3/5/10/15/20/30            | stakes of any tier   |
-| Stake volume               | 100k/500k/2M/5M/20M/50M LC | lifetime locked LC   |
+| Stake volume               | 10k/50k/200k/500k/2M/5M LC | lifetime locked LC   |
 | Invite friends             | 1/5/10/25/50/100           | referral joins       |
 | Leaderboard rank           | top 1000/500/100/50/10/1   | all-time board only  |
 | Purchase Stars             | 100/250/500/1k/2.5k/5k     | cashback chain, 0 AP |
@@ -1157,10 +1159,10 @@ The Market is the platform's main LC **sink** — the counterweight to the tourn
 
 Base LC prices (first engine of a tier):
 
-| Item   |    Bronze |    Silver |      Gold |   Platinum |    Diamond |
-| :----- | --------: | --------: | --------: | ---------: | ---------: |
-| Engine | 2,000,000 | 3,600,000 | 6,750,000 | 11,700,000 | 22,500,000 |
-| Ticket |    60,000 |   150,000 |   375,000 |    900,000 |  2,250,000 |
+| Item   |  Bronze |  Silver |    Gold |  Platinum |   Diamond |
+| :----- | ------: | ------: | ------: | --------: | --------: |
+| Engine | 200,000 | 360,000 | 675,000 | 1,170,000 | 2,250,000 |
+| Ticket |   6,000 |  15,000 |  37,500 |    90,000 |   225,000 |
 
 **House edge.** The ticket price equals `1.5 × prizeLcPerSeat` for its tier (`tournamentHouseEdgeMultiplier`) — always above the average LC a ticket returns in a tournament. Bought tickets are never a profitable money loop; free engine-produced tickets are the free roll.
 
@@ -1210,7 +1212,7 @@ Purchase LS by spending TON. The LS amount is computed from the live TON→USD r
 
 #### 4. Convert Lucky Coin to TON
 
-LC reaches real money through **TON**. The user converts LC to TON at the fixed **$0.00001/LC** valuation (priced against the live TON→USD rate); the resulting TON lands in the wallet's TON balance and is cashed out via the TON withdrawal path above. Conversions are subject to the **15% fee** and the **$10/day cap** from §6.1 (`appConfig.economy.lcConversion`).
+LC reaches real money through **TON**. The user converts LC to TON at the fixed **$0.000001/LC** valuation (priced against the live TON→USD rate); the resulting TON lands in the wallet's TON balance and is cashed out via the TON withdrawal path above. Conversions are subject to the **15% fee** and the **$10/day cap** from §6.1 (`appConfig.economy.lcConversion`).
 
 - The withdrawal action itself handles **TON only** — LC is never withdrawn directly.
 - A **direct LC withdrawal** (LC straight to fiat/USDT, with its own minimums and commission) is **coming soon**.
@@ -1649,7 +1651,7 @@ The user picks an LC amount and a duration. The LC is locked for that period; lo
 
 - **Duration:** a slider of **1 to 12 months** (the range is a knob).
 - **Yield:** `yield = deposit × rate`, where `rate` scales linearly with the chosen duration — **3% at 1 month → 10% at 12 months**. The yield is paid in LC on completion. The band is tuned against the engine economy (§14.2): once a player's marginal engine payback has decayed past the early game under geometric repeat pricing, parking surplus LC in a long stake becomes the rational move.
-  - _Example:_ 1,000,000 LC locked for 12 months → +50,000 LC.
+  - _Example:_ 100,000 LC locked for 12 months → +5,000 LC.
 - The APR is a small LC faucet; the locked principal is a much larger velocity sink, so stakes are net anti-inflationary. The APR curve is the primary anti-inflation tuning lever.
 
 ### 18.2 Stake Tiers (deposit thresholds)
@@ -1658,11 +1660,11 @@ Stakes have five tiers keyed to the minimum deposit. The tier is **AP-tier gated
 
 | Tier     | Minimum Deposit |
 | :------- | :-------------- |
-| Bronze   | 100,000 LC      |
-| Silver   | 500,000 LC      |
-| Gold     | 1,000,000 LC    |
-| Platinum | 2,500,000 LC    |
-| Diamond  | 5,000,000 LC    |
+| Bronze   | 10,000 LC       |
+| Silver   | 50,000 LC       |
+| Gold     | 100,000 LC      |
+| Platinum | 250,000 LC      |
+| Diamond  | 500,000 LC      |
 
 ### 18.3 Reward Structure
 
@@ -1671,7 +1673,7 @@ Every completed stake grants:
 - **Principal returned** in full.
 - **APR yield** in LC (Section 18.1). Lucky Player holders receive an additive **+20%** on top of the APR yield (`luckyPlayerStakeYieldBoostPct`); VIP holders receive **+40%** (`vipStakeYieldBoostPct`). The two never stack — the higher-tier value wins (DOCS §7.3).
 - **Completion Stars:** a guaranteed Lucky Stars payout = `months × completionStarsPerMonth`, where the per-month multiplier scales by stake tier (Bronze 2 → Silver 3 → Gold 4 → Platinum 5 → Diamond 6). Forfeited on early cancellation.
-- **AP:** the base `LC staked × months / 50,000` Activity Points is credited the moment the stake starts and is retained even if the stake is cancelled early. A **+50% completion bonus** on the base is granted only when the stake runs to the end — forfeited on early cancellation.
+- **AP:** the base `LC staked × months / 5,000` Activity Points is credited the moment the stake starts and is retained even if the stake is cancelled early. A **+50% completion bonus** on the base is granted only when the stake runs to the end — forfeited on early cancellation.
 
 ### 18.4 Cancellation & Concurrency
 
@@ -1685,7 +1687,7 @@ Both opening and cancelling a stake costs Telegram Stars. Fees scale with the lo
 **Base fee unit** (used by both):
 
 ```
-base = ceil(deposit / 100,000)   // 100,000 LC = 1 ⭐
+base = ceil(deposit / 10,000)   // 10,000 LC = 1 ⭐
 ```
 
 **Stake-start fee** — `max(1, ceil(base × (1 − totalDiscount/100)))`, where:
@@ -1693,13 +1695,13 @@ base = ceil(deposit / 100,000)   // 100,000 LC = 1 ⭐
 - `monthDiscount = months × 1%` — longer commitments pay less.
 - `volumeDiscount` — bracketed by deposit size, doubled for Lucky Player holders:
 
-  | Deposit  | Default | Lucky Player |
-  | :------- | ------: | -----------: |
-  | < 1M LC  |      0% |           0% |
-  | 1M LC+   |     10% |          20% |
-  | 2.5M LC+ |     12% |          22% |
-  | 5M LC+   |     15% |          25% |
-  | 10M LC+  |     20% |          30% |
+  | Deposit   | Default | Lucky Player |
+  | :-------- | ------: | -----------: |
+  | < 100k LC |      0% |           0% |
+  | 100k LC+  |     10% |          20% |
+  | 250k LC+  |     12% |          22% |
+  | 500k LC+  |     15% |          25% |
+  | 1M LC+    |     20% |          30% |
 
 - `totalDiscount = monthDiscount + volumeDiscount`, capped at 99%.
 - Minimum stake fee: **1 ⭐** (floor).

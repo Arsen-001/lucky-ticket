@@ -37,10 +37,11 @@ export const enginePaybackDays = (tier: TicketType, ownedCount = 0): number =>
 
 /**
  * LS price equivalent of an LC amount at the USD anchors — the no-arbitrage
- * rule: an item must cost the same real value in either currency.
+ * rule: an item must cost the same real value in either currency. Floored at
+ * 1 LS: cheap LC items must never round down to a free (0 LS) price tag.
  */
 export const lcPriceToLsParity = (lcAmount: number): number =>
-  Math.round((lcAmount * appConfig.wallet.lcUsdRate) / appConfig.wallet.lsUsdRate);
+  Math.max(1, Math.round((lcAmount * appConfig.wallet.lcUsdRate) / appConfig.wallet.lsUsdRate));
 
 /** LS cost of the speed upgrade from `level` to `level + 1` (DOCS §10.1). */
 export const speedUpgradeLsCost = (level: number): number =>

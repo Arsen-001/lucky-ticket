@@ -31,7 +31,7 @@ import { StakesWalletPill } from '@/components/pages/out-tabs/drawer/stakes/Stak
 import { Skeleton } from '@/components/shared/seleketons/Skeleton';
 import { QueryErrorState } from '@/components/shared/error/QueryErrorState';
 
-const SLIDER_CAP = 10_000_000;
+const SLIDER_CAP = 1_000_000;
 
 export function NewStakeContent() {
   const t = useAppTranslations();
@@ -191,7 +191,7 @@ export function NewStakeContent() {
         onDurationChange={setDurationMonths}
       />
 
-      {!me?.isLuckyPlayer && safeDeposit >= 1_000_000 && (
+      {!me?.isLuckyPlayer && safeDeposit >= 100_000 && (
         <Link
           href={routes.settings.luckyPlayer}
           className="border-electric-pink/35 bg-electric-pink/10 hover:bg-electric-pink/15 mt-2 flex items-center gap-2 rounded-xl border px-3 py-2 transition-colors"

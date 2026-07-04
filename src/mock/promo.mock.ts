@@ -3,11 +3,11 @@ import type { PromoReward } from '@/types/interfaces/promo.interfaces';
 
 /** Demo catalog of redeemable codes (uppercased). */
 const VALID_CODES: Record<string, PromoReward[]> = {
-  LUCKY365: [{ kind: 'lc', amount: 5_000 }],
+  LUCKY365: [{ kind: 'lc', amount: 500 }],
   WELCOME: [{ kind: 'tickets', amount: 3, tier: 'bronze' }],
   STARS50: [{ kind: 'stars', amount: 50 }],
   MEGA2026: [
-    { kind: 'lc', amount: 25_000 },
+    { kind: 'lc', amount: 2_500 },
     { kind: 'tickets', amount: 2, tier: 'silver' },
     { kind: 'stars', amount: 20 },
   ],

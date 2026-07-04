@@ -93,7 +93,7 @@ const chainConfigs: ChainConfig[] = [
     iconCode: 'vault',
     symbolMeaning: 'Vault sealed — time and coins held in trust.',
     unitLabel: 'LC staked',
-    thresholds: [1000, 10000, 100000, 500000, 2000000, 10000000],
+    thresholds: [100, 1000, 10000, 50000, 200000, 1000000],
     current: 42000,
     earnedThrough: 2,
     infinite: true,

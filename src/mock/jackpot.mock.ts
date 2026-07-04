@@ -25,11 +25,11 @@ const AVATARS = [
  * refetches, which the live odometer reconciles to.
  */
 const ACCRUAL_PER_SECOND = 92;
-const BASE_POT = 4_812_640;
-const RECORD_POT = 9_240_180;
+const BASE_POT = 481_264;
+const RECORD_POT = 924_018;
 // Lifetime sum of every jackpot ever paid out — a historical figure that only
 // moves when a jackpot detonates, so unlike `pot` it is NOT animated live.
-const ALL_TIME_PAID_OUT = 142_480_000;
+const ALL_TIME_PAID_OUT = 14_248_000;
 const startedAt = Date.now();
 
 const buildJackpotState = (): JackpotState => {
@@ -63,7 +63,7 @@ const buildWinners = (): JackpotWinner[] => {
     const hoursAgo = index * 9 + faker.number.int({ min: 1, max: 6 });
     return {
       id: faker.string.uuid(),
-      potTotal: faker.number.int({ min: 1_300, max: 8_900 }) * 1_000,
+      potTotal: faker.number.int({ min: 1_300, max: 8_900 }) * 100,
       tier,
       tournamentName: `${TIME_OF_DAY[index % TIME_OF_DAY.length]} ${titleCase(tier)}`,
       wonAt: new Date(Date.now() - hoursAgo * 60 * 60 * 1000).toISOString(),

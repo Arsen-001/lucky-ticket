@@ -25,7 +25,7 @@ const DAY_MS = 24 * HOUR_MS;
 const inHours = (h: number) => new Date(Date.now() + h * HOUR_MS).toISOString();
 
 // LC rewards are authored in design units; the ×1000 LC denomination scale (DOCS §6.1) is applied here.
-const lc = (amount: number): TaskReward => ({ type: TaskRewardType.LC, amount: amount * 1000 });
+const lc = (amount: number): TaskReward => ({ type: TaskRewardType.LC, amount: amount * 100 });
 const tickets = (amount: number): TaskReward => ({ type: TaskRewardType.TICKETS, amount });
 const ap = (amount: number): TaskReward => ({ type: TaskRewardType.ACTIVITY_POINTS, amount });
 const stars = (amount: number): TaskReward => ({ type: TaskRewardType.STARS, amount });
@@ -856,13 +856,13 @@ const STAKE_COUNT_MILESTONES: StakeMilestone[] = [
 ];
 
 const STAKE_VOLUME_MILESTONES: StakeMilestone[] = [
-  { target: 100000, rewards: [lc(5), ap(10)], rarity: TaskRarity.BRONZE },
-  { target: 500000, rewards: [lc(15), tickets(1), ap(15)], rarity: TaskRarity.SILVER },
-  { target: 2000000, rewards: [lc(40), tickets(2), ap(25)], rarity: TaskRarity.SILVER },
-  { target: 5000000, rewards: [lc(80), tickets(3), ap(35)], rarity: TaskRarity.GOLD },
-  { target: 20000000, rewards: [lc(200), tickets(5), ap(50)], rarity: TaskRarity.GOLD },
+  { target: 10000, rewards: [lc(5), ap(10)], rarity: TaskRarity.BRONZE },
+  { target: 50000, rewards: [lc(15), tickets(1), ap(15)], rarity: TaskRarity.SILVER },
+  { target: 200000, rewards: [lc(40), tickets(2), ap(25)], rarity: TaskRarity.SILVER },
+  { target: 500000, rewards: [lc(80), tickets(3), ap(35)], rarity: TaskRarity.GOLD },
+  { target: 2000000, rewards: [lc(200), tickets(5), ap(50)], rarity: TaskRarity.GOLD },
   {
-    target: 50000000,
+    target: 5000000,
     rewards: [lc(500), tickets(8), stars(20), ap(70)],
     rarity: TaskRarity.PLATINUM,
   },
