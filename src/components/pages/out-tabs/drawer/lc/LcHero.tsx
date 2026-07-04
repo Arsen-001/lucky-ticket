@@ -7,6 +7,7 @@ import { GlobalConstants } from '@/constants/global.constants';
 import { formatNumber, formatUsdPrice } from '@/utils/global/number.utils';
 import { lcToUsd } from '@/utils/global/lc.utils';
 import { useAppTranslations } from '@/hooks/useAppTranslations';
+import { useLcUsdRate } from '@/hooks/useLcUsdRate';
 import type { LcState } from '@/types/interfaces/lc.interfaces';
 
 export interface LcHeroProps {
@@ -16,8 +17,9 @@ export interface LcHeroProps {
 
 export function LcHero({ state, loading }: LcHeroProps) {
   const t = useAppTranslations();
+  const lcUsdRate = useLcUsdRate();
   const balance = state?.balance ?? 0;
-  const coinPrice = formatUsdPrice(lcToUsd(1));
+  const coinPrice = formatUsdPrice(lcToUsd(1, lcUsdRate));
 
   return (
     <div className="card-outlined bg-purple-gradient relative overflow-hidden rounded-2xl p-5">

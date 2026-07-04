@@ -9,6 +9,7 @@ import { useToast } from '@/hooks/useToast';
 import { useConvertLcToTonMutation } from '@/api/lc.api';
 import { formatNumber } from '@/utils/global/number.utils';
 import { lcToTon } from '@/utils/global/lc.utils';
+import { useLcUsdRate } from '@/hooks/useLcUsdRate';
 
 type Step = 'select' | 'success';
 
@@ -37,8 +38,9 @@ export function LcConvertTonModal({ open, onClose, balance }: LcConvertTonModalP
     }
   }, [open]);
 
+  const lcUsdRate = useLcUsdRate();
   const amount = Number(lcInput) || 0;
-  const tonOut = lcToTon(amount);
+  const tonOut = lcToTon(amount, lcUsdRate);
   const insufficient = amount > balance;
   const canSubmit = amount > 0 && !insufficient;
 

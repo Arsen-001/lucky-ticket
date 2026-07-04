@@ -27,4 +27,5 @@ export const rtkTags = {
   inventory: 'Inventory',
   avatars: 'Avatars',
   partnerStats: 'PartnerStats',
+  platformConfig: 'PlatformConfig',
 } as const;
