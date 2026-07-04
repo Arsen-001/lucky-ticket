@@ -6,6 +6,14 @@
     font-weight: 400;
     @apply select-none;
   }
+  /* Safe-area insets. Default to the CSS-native device insets (browsers, iOS
+     notch). Inside Telegram the SDK overrides these on <html> with the real
+     `safeAreaInset + contentSafeAreaInset` sum so the app clears both the
+     device chrome and Telegram's floating buttons in fullscreen. */
+  :root {
+    --tg-inset-top: env(safe-area-inset-top, 0px);
+    --tg-inset-bottom: env(safe-area-inset-bottom, 0px);
+  }
   html {
     width: 100%;
     @apply bg-background text-white;

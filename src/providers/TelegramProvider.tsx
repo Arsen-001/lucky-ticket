@@ -68,10 +68,39 @@ export function TelegramProvider({ children }: { children: ReactNode }) {
       tg.setHeaderColor?.(THEME_BG);
       tg.setBackgroundColor?.(THEME_BG);
       tg.disableVerticalSwipes?.();
+      // Immersive fullscreen (Bot API 8.0+). No-ops / emits `fullscreenFailed`
+      // on clients that don't support it — harmless, we ignore the failure.
+      tg.requestFullscreen?.();
     } catch {
       /* SDK chrome is best-effort — never block auth on it */
     }
     authenticate(tg.initData);
+  }, []);
+
+  // Mirror Telegram's safe-area + content-safe-area insets into CSS variables so
+  // the header/tab bar clear the device chrome AND Telegram's floating buttons
+  // in fullscreen. Re-syncs on every safe-area / fullscreen change.
+  useEffect(() => {
+    const tg = getTelegramWebApp();
+    if (!tg || !tg.initData) return;
+
+    const applyInsets = () => {
+      const top = (tg.safeAreaInset?.top ?? 0) + (tg.contentSafeAreaInset?.top ?? 0);
+      const bottom = (tg.safeAreaInset?.bottom ?? 0) + (tg.contentSafeAreaInset?.bottom ?? 0);
+      const root = document.documentElement.style;
+      root.setProperty('--tg-inset-top', `${top}px`);
+      root.setProperty('--tg-inset-bottom', `${bottom}px`);
+    };
+
+    applyInsets();
+    tg.onEvent?.('safeAreaChanged', applyInsets);
+    tg.onEvent?.('contentSafeAreaChanged', applyInsets);
+    tg.onEvent?.('fullscreenChanged', applyInsets);
+    return () => {
+      tg.offEvent?.('safeAreaChanged', applyInsets);
+      tg.offEvent?.('contentSafeAreaChanged', applyInsets);
+      tg.offEvent?.('fullscreenChanged', applyInsets);
+    };
   }, []);
 
   if (phase === 'ready') return <>{children}</>;

@@ -61,9 +61,15 @@ export function Header({ className }: ClassNameProps) {
   return (
     <div
       className={twMerge(
-        'bg-header relative flex h-20 w-screen items-center gap-3 overflow-hidden px-3 py-2',
+        'bg-header relative flex w-screen items-center gap-3 overflow-hidden px-3 pb-2',
         className
       )}
+      style={{
+        // Grow by the Telegram top inset and pad the content down below it, so
+        // the row never sits under Telegram's floating close/menu buttons.
+        height: 'calc(5rem + var(--tg-inset-top))',
+        paddingTop: 'calc(var(--tg-inset-top) + 0.5rem)',
+      }}
     >
       <span
         aria-hidden

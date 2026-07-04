@@ -57,9 +57,10 @@ export function TabBar({ className }: ClassNameProps) {
   return (
     <div
       className={twMerge(
-        'bg-header relative px-5 py-4 flex justify-between items-center gap-2 overflow-hidden animate-fade-in',
+        'bg-header relative px-5 pt-4 flex justify-between items-center gap-2 overflow-hidden animate-fade-in',
         className
       )}
+      style={{ paddingBottom: 'calc(1rem + var(--tg-inset-bottom))' }}
     >
       <span
         aria-hidden

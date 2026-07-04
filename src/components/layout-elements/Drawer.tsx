@@ -312,12 +312,15 @@ export function Drawer() {
           onPointerUp={handlePointerEnd}
           onPointerCancel={handlePointerEnd}
           style={
-            swipeDelta > 0
-              ? ({
-                  transform: `translateX(${swipeDelta}px)`,
-                  transition: 'none',
-                } satisfies CSSProperties)
-              : undefined
+            {
+              // Clear Telegram's floating chrome in fullscreen (the drawer is a
+              // top-to-bottom fixed panel, so its top-right corner meets the ✕).
+              paddingTop: 'var(--tg-inset-top)',
+              paddingBottom: 'var(--tg-inset-bottom)',
+              ...(swipeDelta > 0
+                ? { transform: `translateX(${swipeDelta}px)`, transition: 'none' }
+                : {}),
+            } satisfies CSSProperties
           }
           className={twMerge(
             'bg-background-overlay fixed bottom-0 right-0 top-0 z-1 flex w-[78vw] max-w-[340px] flex-col rounded-l-3xl shadow-[-12px_0_40px_rgba(0,0,0,0.45)] transition-transform duration-300 ease-out touch-pan-y',

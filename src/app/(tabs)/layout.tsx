@@ -13,7 +13,14 @@ export default function TabsLayout({ children }: ChildrenProps) {
   return (
     <>
       <Header className="fixed top-0 left-0 right-0 z-50 shadow-xs" />
-      <main className="h-full pt-20 pb-20">
+      <main
+        className="h-full"
+        style={{
+          // Match the header/tab-bar heights, both grown by the Telegram insets.
+          paddingTop: 'calc(5rem + var(--tg-inset-top))',
+          paddingBottom: 'calc(5rem + var(--tg-inset-bottom))',
+        }}
+      >
         <div className="h-full overflow-hidden inset-container-background">
           <div
             key={pathname}

@@ -16,7 +16,7 @@ export function ToastViewport() {
 
   return (
     <ClientPortal>
-      <div className="pointer-events-none fixed inset-x-0 top-0 z-[1000] flex justify-center px-4 pt-[calc(env(safe-area-inset-top)+12px)]">
+      <div className="pointer-events-none fixed inset-x-0 top-0 z-[1000] flex justify-center px-4 pt-[calc(var(--tg-inset-top)+12px)]">
         <div className="flex w-full max-w-140 flex-col gap-2">
           {toasts.map(toast => (
             <ToastItem key={toast.id} toast={toast} />

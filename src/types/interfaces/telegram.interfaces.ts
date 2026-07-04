@@ -22,6 +22,22 @@ export interface TelegramWebAppInitDataUnsafe {
   start_param?: string;
 }
 
+/** Inset object (px) returned by `safeAreaInset` / `contentSafeAreaInset`. */
+export interface TelegramInset {
+  top: number;
+  bottom: number;
+  left: number;
+  right: number;
+}
+
+/** The subset of Telegram WebApp events the app subscribes to. */
+export type TelegramEvent =
+  | 'safeAreaChanged'
+  | 'contentSafeAreaChanged'
+  | 'fullscreenChanged'
+  | 'fullscreenFailed'
+  | 'viewportChanged';
+
 export interface TelegramWebApp {
   /** Signed, URL-encoded init data — the credential the backend verifies. */
   initData: string;
@@ -45,6 +61,16 @@ export interface TelegramWebApp {
   setHeaderColor?: (color: string) => void;
   setBackgroundColor?: (color: string) => void;
   disableVerticalSwipes?: () => void;
+  /** Bot API 8.0+ — immersive fullscreen (Telegram chrome floats over the app). */
+  isFullscreen?: boolean;
+  requestFullscreen?: () => void;
+  exitFullscreen?: () => void;
+  /** Device-level insets (notch, status bar, home indicator), in px. */
+  safeAreaInset?: TelegramInset;
+  /** Insets from Telegram's own chrome (close/menu buttons) in fullscreen, in px. */
+  contentSafeAreaInset?: TelegramInset;
+  onEvent?: (event: TelegramEvent, handler: (payload?: unknown) => void) => void;
+  offEvent?: (event: TelegramEvent, handler: (payload?: unknown) => void) => void;
 }
 
 declare global {
