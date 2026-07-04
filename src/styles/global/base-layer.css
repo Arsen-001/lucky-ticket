@@ -13,6 +13,10 @@
   :root {
     --tg-inset-top: env(safe-area-inset-top, 0px);
     --tg-inset-bottom: env(safe-area-inset-bottom, 0px);
+    /* Split bands (device status bar vs. Telegram chrome strip). Only meaningful
+       inside Telegram fullscreen, where the SDK overrides them. */
+    --tg-safe-top: env(safe-area-inset-top, 0px);
+    --tg-content-top: 0px;
   }
   html {
     width: 100%;

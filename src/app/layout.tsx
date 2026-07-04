@@ -6,6 +6,7 @@ import { TonConnectProvider } from '@/providers/TonConnectProvider';
 import { Onboarding } from '@/components/onboarding/Onboarding';
 import { ToastViewport } from '@/components/shared/toast/ToastViewport';
 import { AppStatusOverlay } from '@/components/shared/status/AppStatusOverlay';
+import { FullscreenBrandBar } from '@/components/layout-elements/FullscreenBrandBar';
 import { NextIntlClientProvider } from 'next-intl';
 import { gilroy, spaceGrotesk } from '@/fonts/index.fonts';
 import { getLocale } from 'next-intl/server';
@@ -43,6 +44,7 @@ export default async function RootLayout({ children }: ChildrenProps) {
                     <Onboarding />
                   </TelegramProvider>
                 </TonConnectProvider>
+                <FullscreenBrandBar />
                 <ToastViewport />
                 <AppStatusOverlay />
               </NavigationHistoryProvider>

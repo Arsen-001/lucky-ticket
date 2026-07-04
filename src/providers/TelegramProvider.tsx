@@ -85,11 +85,18 @@ export function TelegramProvider({ children }: { children: ReactNode }) {
     if (!tg || !tg.initData) return;
 
     const applyInsets = () => {
-      const top = (tg.safeAreaInset?.top ?? 0) + (tg.contentSafeAreaInset?.top ?? 0);
-      const bottom = (tg.safeAreaInset?.bottom ?? 0) + (tg.contentSafeAreaInset?.bottom ?? 0);
-      const root = document.documentElement.style;
-      root.setProperty('--tg-inset-top', `${top}px`);
-      root.setProperty('--tg-inset-bottom', `${bottom}px`);
+      const safeTop = tg.safeAreaInset?.top ?? 0;
+      const safeBottom = tg.safeAreaInset?.bottom ?? 0;
+      const contentTop = tg.contentSafeAreaInset?.top ?? 0;
+      const contentBottom = tg.contentSafeAreaInset?.bottom ?? 0;
+      const root = document.documentElement;
+      root.style.setProperty('--tg-inset-top', `${safeTop + contentTop}px`);
+      root.style.setProperty('--tg-inset-bottom', `${safeBottom + contentBottom}px`);
+      // Individual bands so the brand bar can sit in Telegram's chrome strip
+      // (below the OS status bar, aligned with the floating close/menu buttons).
+      root.style.setProperty('--tg-safe-top', `${safeTop}px`);
+      root.style.setProperty('--tg-content-top', `${contentTop}px`);
+      root.dataset.tgFullscreen = tg.isFullscreen ? 'true' : 'false';
     };
 
     applyInsets();
