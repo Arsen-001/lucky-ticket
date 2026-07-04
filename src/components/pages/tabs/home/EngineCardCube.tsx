@@ -3,6 +3,7 @@
 import {
   type CSSProperties,
   type PointerEvent as ReactPointerEvent,
+  useEffect,
   useRef,
   useState,
 } from 'react';
@@ -124,6 +125,38 @@ export function EngineCardCube(props: EngineCardCubeProps) {
     locked: boolean;
   } | null>(null);
   const [isDragging, setIsDragging] = useState(false);
+  const cubeRef = useRef<HTMLDivElement>(null);
+  const touchStart = useRef<{ x: number; y: number } | null>(null);
+
+  // iOS (Telegram WKWebView) ignores `touch-action: pan-x` and starts a native
+  // scroll (horizontal slider pan or vertical page rubber-band) on vertical
+  // swipes, firing pointercancel — the cube never rotates. The only reliable
+  // countermeasure is preventDefault() on the first vertical-dominant touchmove,
+  // which must be a NON-passive native listener (React root listeners are
+  // passive for touchmove).
+  useEffect(() => {
+    const el = cubeRef.current;
+    if (!el) return;
+    const onTouchStart = (e: TouchEvent) => {
+      const t = e.touches[0];
+      touchStart.current = t ? { x: t.clientX, y: t.clientY } : null;
+    };
+    const onTouchMove = (e: TouchEvent) => {
+      if (!e.cancelable) return;
+      const t = e.touches[0];
+      const start = touchStart.current;
+      if (!t || !start) return;
+      const dx = Math.abs(t.clientX - start.x);
+      const dy = Math.abs(t.clientY - start.y);
+      if (dragState.current?.locked || dy > dx) e.preventDefault();
+    };
+    el.addEventListener('touchstart', onTouchStart, { passive: true });
+    el.addEventListener('touchmove', onTouchMove, { passive: false });
+    return () => {
+      el.removeEventListener('touchstart', onTouchStart);
+      el.removeEventListener('touchmove', onTouchMove);
+    };
+  }, []);
 
   const handlePointerDown = (e: ReactPointerEvent<HTMLDivElement>) => {
     if (e.pointerType === 'mouse') return;
@@ -141,7 +174,11 @@ export function EngineCardCube(props: EngineCardCubeProps) {
       if (Math.abs(dy) < SWIPE_INTENT_PX) return;
       dragState.current.locked = true;
       setIsDragging(true);
-      e.currentTarget.setPointerCapture(e.pointerId);
+      try {
+        e.currentTarget.setPointerCapture(e.pointerId);
+      } catch {
+        /* iOS throws if the pointer was already cancelled — drag still tracks via bubbling */
+      }
     }
     setDragDelta(dy);
   };
@@ -175,6 +212,7 @@ export function EngineCardCube(props: EngineCardCubeProps) {
       }
     >
       <div
+        ref={cubeRef}
         className={twMerge('engine-card-cube', isDragging && 'engine-card-cube--dragging')}
         style={{ transform: `rotateX(${-liveRotation}deg)` }}
         onPointerDown={handlePointerDown}
