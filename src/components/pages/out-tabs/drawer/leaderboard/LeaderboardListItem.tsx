@@ -2,7 +2,6 @@
 
 import Image from 'next/image';
 import Link from 'next/link';
-import { ArrowDown, ArrowUp, Minus } from 'lucide-react';
 import { twMerge } from 'tailwind-merge';
 import { BoltIcon } from '@/components/shared/icons/BoltIcon';
 import { Skeleton } from '@/components/shared/seleketons/Skeleton';
@@ -40,9 +39,6 @@ export function LeaderboardListItem({
   style,
 }: LeaderboardListItemProps) {
   const t = useAppTranslations();
-  const change = entry?.rankChange ?? 0;
-  const positive = change > 0;
-  const negative = change < 0;
 
   const handleAvatarTap = () => {
     if (!entry) return;
@@ -146,38 +142,6 @@ export function LeaderboardListItem({
           </span>
         </SkeletonSuspense>
       </div>
-
-      <SkeletonSuspense
-        loading={loading || !entry}
-        skeleton={<Skeleton variant="rounded-rectangle" className="h-6 w-10" />}
-      >
-        <span
-          aria-label={
-            positive
-              ? t('rank up by {n}', { n: change })
-              : negative
-                ? t('rank down by {n}', { n: Math.abs(change) })
-                : t('rank unchanged')
-          }
-          className={twMerge(
-            'inline-flex flex-shrink-0 items-center gap-0.5 rounded-full px-2 py-0.5 text-[10px] font-extrabold tabular-nums',
-            positive
-              ? 'bg-success/15 text-success'
-              : negative
-                ? 'bg-error/15 text-error'
-                : 'bg-white/5 text-white/55'
-          )}
-        >
-          {positive ? (
-            <ArrowUp size={10} strokeWidth={3} />
-          ) : negative ? (
-            <ArrowDown size={10} strokeWidth={3} />
-          ) : (
-            <Minus size={10} strokeWidth={3} />
-          )}
-          {Math.abs(change)}
-        </span>
-      </SkeletonSuspense>
     </div>
   );
 }

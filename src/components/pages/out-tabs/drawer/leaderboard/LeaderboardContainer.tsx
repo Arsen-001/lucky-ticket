@@ -1,48 +1,29 @@
 'use client';
 
-import { useCallback, useEffect, useMemo, useRef, useState, useTransition } from 'react';
-import { useRouter, useSearchParams } from 'next/navigation';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { twMerge } from 'tailwind-merge';
 
 import { useGetLeaderboardQuery } from '@/api/leaderboard.api';
 import { useGetMeQuery } from '@/api/me.api';
 import { useAppTranslations } from '@/hooks/useAppTranslations';
-import { useDebounce } from '@/hooks/useDebounce';
 
 import { LeaderboardCountUp } from './LeaderboardCountUp';
 import { LeaderboardEmptyState } from './LeaderboardEmptyState';
 import { LeaderboardErrorState } from './LeaderboardErrorState';
 import { LeaderboardHeroCard } from './LeaderboardHeroCard';
 import { LeaderboardListItem } from './LeaderboardListItem';
-import { LeaderboardPeriodTabs } from './LeaderboardPeriodTabs';
 import { LeaderboardPodium, type PodiumPlayer, type PodiumRank } from './LeaderboardPodium';
 import {
   PlayerQuickCard,
   type QuickCardPlayer,
 } from '@/components/shared/user-elements/PlayerQuickCard';
-import type {
-  LeaderboardEntry,
-  LeaderboardPeriod,
-} from '@/types/interfaces/leaderboard.interfaces';
+import type { LeaderboardEntry } from '@/types/interfaces/leaderboard.interfaces';
 
-const VALID_PERIODS: LeaderboardPeriod[] = ['today', 'week', 'month', 'all'];
 const COUNT_UP_PLACES = 10;
-
-const isValidPeriod = (value: string | null): value is LeaderboardPeriod =>
-  !!value && (VALID_PERIODS as string[]).includes(value);
 
 export function LeaderboardContainer() {
   const t = useAppTranslations();
-  const router = useRouter();
-  const searchParams = useSearchParams();
 
-  const initialPeriod: LeaderboardPeriod = isValidPeriod(searchParams.get('period'))
-    ? (searchParams.get('period') as LeaderboardPeriod)
-    : 'all';
-
-  const [period, setPeriod] = useState<LeaderboardPeriod>(initialPeriod);
-  const debouncedPeriod = useDebounce(period, 200);
-  const [, startTransition] = useTransition();
   const [announcement, setAnnouncement] = useState('');
   const [cardPlayer, setCardPlayer] = useState<QuickCardPlayer | null>(null);
   const [cardOpen, setCardOpen] = useState(false);
@@ -52,21 +33,10 @@ export function LeaderboardContainer() {
     setCardOpen(true);
   };
 
-  const { data, isLoading, isFetching, isError, refetch } = useGetLeaderboardQuery(debouncedPeriod);
+  // Ranking is by lifetime Activity Points (the backend tracks no period
+  // windows), so the board is a single all-time list.
+  const { data, isLoading, isFetching, isError, refetch } = useGetLeaderboardQuery('all');
   const { data: me } = useGetMeQuery();
-
-  const handlePeriodChange = useCallback(
-    (next: LeaderboardPeriod) => {
-      setPeriod(next);
-      startTransition(() => {
-        const params = new URLSearchParams(searchParams.toString());
-        if (next === 'all') params.delete('period');
-        else params.set('period', next);
-        router.replace(params.toString() ? `?${params}` : '?', { scroll: false });
-      });
-    },
-    [router, searchParams]
-  );
 
   const places = data?.places ?? [];
   const myPlace = data?.myPlace;
@@ -120,7 +90,6 @@ export function LeaderboardContainer() {
     return (
       <div className="flex flex-col gap-4 px-4 pb-6 pt-2">
         <LeaderboardHeroCard myPlace={myPlace} total={data?.total} loading={isLoading} />
-        <LeaderboardPeriodTabs active={period} onChange={handlePeriodChange} />
         <LeaderboardEmptyState />
       </div>
     );
@@ -129,7 +98,6 @@ export function LeaderboardContainer() {
   return (
     <div ref={rootRef} className="flex flex-col gap-4 px-4 pb-6 pt-2">
       <LeaderboardHeroCard myPlace={myPlace} total={data?.total} loading={isLoading} />
-      <LeaderboardPeriodTabs active={period} onChange={handlePeriodChange} />
 
       {isError ? (
         <LeaderboardErrorState onRetry={() => refetch()} loading={isFetching} />
@@ -202,9 +170,6 @@ function ListBody({ isLoading, places, total, myPlace, meId, onOpenCard }: ListB
         </span>
         <span className="text-pink-secondary flex-1 text-[10px] font-bold uppercase tracking-wider">
           {t('player')}
-        </span>
-        <span className="text-pink-secondary flex-shrink-0 text-[10px] font-bold uppercase tracking-wider">
-          {t('change')}
         </span>
       </div>
 
