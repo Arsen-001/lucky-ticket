@@ -13,6 +13,35 @@ import type { TourTargetPhase } from '@/hooks/useTourTarget';
 /** Padding added around the highlighted element when punching the spotlight hole. */
 const HOLE_PADDING = 8;
 
+/** Keep the spotlight fully on-screen (a tall union of two anchors, or an anchor
+ *  scrolled partly off-screen, must never push the ring / hit target out of the
+ *  viewport where players can't reach it). */
+const VIEWPORT_MARGIN = 6;
+
+interface Box {
+  top: number;
+  left: number;
+  width: number;
+  height: number;
+}
+
+const clampHoleToViewport = ({ top, left, width, height }: Box): Box => {
+  if (typeof window === 'undefined') return { top, left, width, height };
+  const vw = window.innerWidth;
+  const vh = window.innerHeight;
+  const w = Math.min(width, vw - VIEWPORT_MARGIN * 2);
+  const h = Math.min(height, vh - VIEWPORT_MARGIN * 2);
+  const left2 = Math.min(
+    Math.max(left, VIEWPORT_MARGIN),
+    Math.max(VIEWPORT_MARGIN, vw - VIEWPORT_MARGIN - w)
+  );
+  const top2 = Math.min(
+    Math.max(top, VIEWPORT_MARGIN),
+    Math.max(VIEWPORT_MARGIN, vh - VIEWPORT_MARGIN - h)
+  );
+  return { top: top2, left: left2, width: w, height: h };
+};
+
 export interface OnboardingTourOverlayProps {
   step: TourStep;
   stepIndex: number;
@@ -38,12 +67,12 @@ export function OnboardingTourOverlay({
   const t = useAppTranslations();
 
   const holeStyle = rect
-    ? {
+    ? clampHoleToViewport({
         top: rect.top - HOLE_PADDING,
         left: rect.left - HOLE_PADDING,
         width: rect.width + HOLE_PADDING * 2,
         height: rect.height + HOLE_PADDING * 2,
-      }
+      })
     : null;
 
   const viewportHeight = typeof window !== 'undefined' ? window.innerHeight : 800;

@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { usePathname, useRouter } from 'next/navigation';
 import type { TourStep } from '@/constants/onboarding-tour.constants';
 
@@ -38,6 +38,9 @@ export function useTourTarget(step: TourStep | null, active: boolean): TourTarge
   const pathname = usePathname();
   const [rect, setRect] = useState<DOMRect | null>(null);
   const [targetEl, setTargetEl] = useState<HTMLElement | null>(null);
+  // Mirrors the currently-anchored node so the sync loop can detect when React
+  // has swapped it out (remount) without churning the effect's deps.
+  const targetElRef = useRef<HTMLElement | null>(null);
   const [phase, setPhase] = useState<TourTargetPhase>('searching');
   const stepId = step?.id;
   const secondaryAnchor = step?.secondaryAnchor ?? null;
@@ -62,12 +65,14 @@ export function useTourTarget(step: TourStep | null, active: boolean): TourTarge
     if (!active || !step) {
       setRect(null);
       setTargetEl(null);
+      targetElRef.current = null;
       setPhase('searching');
       return;
     }
 
     setPhase('searching');
     setTargetEl(null);
+    targetElRef.current = null;
 
     const selector = `[data-tour="${step.anchor}"]`;
     let settled = false;
@@ -83,6 +88,7 @@ export function useTourTarget(step: TourStep | null, active: boolean): TourTarge
       const visible = r.top >= 0 && r.bottom <= window.innerHeight && r.left >= 0;
       if (!visible) el.scrollIntoView({ behavior: 'smooth', block: 'center' });
       raf = window.requestAnimationFrame(() => {
+        targetElRef.current = el;
         setTargetEl(el);
         setRect(measureRect(el));
         setPhase('targeted');
@@ -121,18 +127,34 @@ export function useTourTarget(step: TourStep | null, active: boolean): TourTarge
   }, [active, stepId, pathname]);
 
   // Keep the rect in sync while the step is shown (scroll / resize / layout shift).
+  // Re-query the anchor every tick instead of trusting the cached node: cards
+  // like the engine reactor (its `key` changes each production cycle) and the
+  // first tournament card (countdown / refetch) remount, which detaches the old
+  // node — measuring a detached node returns an all-zero rect and snaps the
+  // spotlight to the top-left corner. Skip zero-size rects for the same reason.
   useEffect(() => {
-    if (!active || !targetEl) return;
-    const update = () => setRect(measureRect(targetEl));
+    if (!active || phase !== 'targeted' || !step) return;
+    const selector = `[data-tour="${step.anchor}"]`;
+    const update = () => {
+      const el = document.querySelector<HTMLElement>(selector);
+      if (!el) return; // gone this frame (mid-remount) — keep the last good rect
+      const r = measureRect(el);
+      if (r.width < 1 || r.height < 1) return; // degenerate — keep the last good rect
+      if (el !== targetElRef.current) {
+        targetElRef.current = el;
+        setTargetEl(el);
+      }
+      setRect(r);
+    };
     window.addEventListener('scroll', update, true);
     window.addEventListener('resize', update);
-    const intervalId = window.setInterval(update, 400);
+    const intervalId = window.setInterval(update, 200);
     return () => {
       window.removeEventListener('scroll', update, true);
       window.removeEventListener('resize', update);
       window.clearInterval(intervalId);
     };
-  }, [active, targetEl, secondaryAnchor]);
+  }, [active, phase, stepId, secondaryAnchor]);
 
   return { rect, targetEl, phase };
 }
