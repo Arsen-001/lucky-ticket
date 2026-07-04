@@ -390,7 +390,9 @@ export function TournamentCard({
                   </span>
                 ) : (
                   <Button
-                    data-tour={tourJoinAnchor ? 'tournament-join' : undefined}
+                    // Anchor only once loaded — locking the tour onto the skeleton
+                    // card's button makes the spotlight drift when data lands.
+                    data-tour={tourJoinAnchor && !loading ? 'tournament-join' : undefined}
                     disabled={loading}
                     onClick={handleActionClick}
                     className={twMerge(

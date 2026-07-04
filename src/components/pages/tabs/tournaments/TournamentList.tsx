@@ -28,7 +28,10 @@ export function TournamentList({
           // Stateful cards (modals, countdown) must be keyed by identity, not
           // position — a refetch that reorders the list would otherwise
           // re-attach state to the wrong tournament.
-          <div key={tournament.id ?? index} data-tour="tournaments">
+          // The tour anchor only goes on a *loaded* card: skeleton placeholders
+          // remount (key index → id) when data lands, and a tour locked onto the
+          // skeleton would flicker as the entry animation replays under it.
+          <div key={tournament.id ?? index} data-tour={isLoading ? undefined : 'tournaments'}>
             <TournamentCard
               loading={isLoading}
               {...tournament}

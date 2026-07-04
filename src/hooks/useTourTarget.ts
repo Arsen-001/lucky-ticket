@@ -78,21 +78,47 @@ export function useTourTarget(step: TourStep | null, active: boolean): TourTarge
     let settled = false;
     let raf = 0;
     let timeoutId = 0;
+    let settleTimer = 0;
     let observer: MutationObserver | null = null;
 
     const lockOn = (el: HTMLElement) => {
       settled = true;
       observer?.disconnect();
       window.clearTimeout(timeoutId);
-      const r = el.getBoundingClientRect();
-      const visible = r.top >= 0 && r.bottom <= window.innerHeight && r.left >= 0;
+      const r0 = el.getBoundingClientRect();
+      const visible = r0.top >= 0 && r0.bottom <= window.innerHeight && r0.left >= 0;
       if (!visible) el.scrollIntoView({ behavior: 'smooth', block: 'center' });
-      raf = window.requestAnimationFrame(() => {
-        targetElRef.current = el;
-        setTargetEl(el);
-        setRect(measureRect(el));
-        setPhase('targeted');
-      });
+      // Don't spotlight a moving target: entry animations (slide-in-bottom) and
+      // the smooth scroll above shift the anchor for a few hundred ms after it
+      // mounts. Poll until the rect holds still for two ticks (~180ms) — the
+      // ring then appears directly at its final position instead of visibly
+      // chasing the element. Capped so a permanently-animating anchor still locks.
+      let last: DOMRect | null = null;
+      let stableTicks = 0;
+      let polls = 0;
+      const poll = () => {
+        // Survive a remount mid-settle (e.g. data landing) by re-querying.
+        const node = document.querySelector<HTMLElement>(selector) ?? el;
+        const r = node.getBoundingClientRect();
+        const still =
+          !!last &&
+          Math.abs(r.top - last.top) < 1 &&
+          Math.abs(r.left - last.left) < 1 &&
+          Math.abs(r.width - last.width) < 1 &&
+          Math.abs(r.height - last.height) < 1;
+        stableTicks = still ? stableTicks + 1 : 0;
+        last = r;
+        polls += 1;
+        if ((stableTicks >= 2 && r.width >= 1 && r.height >= 1) || polls >= 16) {
+          targetElRef.current = node;
+          setTargetEl(node);
+          setRect(measureRect(node));
+          setPhase('targeted');
+          return;
+        }
+        settleTimer = window.setTimeout(poll, 90);
+      };
+      raf = window.requestAnimationFrame(poll);
     };
 
     const tryFind = () => {
@@ -122,6 +148,7 @@ export function useTourTarget(step: TourStep | null, active: boolean): TourTarge
     return () => {
       observer?.disconnect();
       window.clearTimeout(timeoutId);
+      window.clearTimeout(settleTimer);
       window.cancelAnimationFrame(raf);
     };
   }, [active, stepId, pathname]);
@@ -144,7 +171,17 @@ export function useTourTarget(step: TourStep | null, active: boolean): TourTarge
         targetElRef.current = el;
         setTargetEl(el);
       }
-      setRect(r);
+      // Only commit meaningful moves (>1px) — re-setting an identical rect every
+      // tick re-renders the overlay for nothing and reads as shimmer.
+      setRect(prev =>
+        prev &&
+        Math.abs(prev.top - r.top) < 1 &&
+        Math.abs(prev.left - r.left) < 1 &&
+        Math.abs(prev.width - r.width) < 1 &&
+        Math.abs(prev.height - r.height) < 1
+          ? prev
+          : r
+      );
     };
     window.addEventListener('scroll', update, true);
     window.addEventListener('resize', update);
