@@ -8,28 +8,12 @@ import { Skeleton } from '@/components/shared/seleketons/Skeleton';
 import { useAppTranslations } from '@/hooks/useAppTranslations';
 import { routes } from '@/constants/routes';
 import { formatNumber } from '@/utils/global/number.utils';
-import type { ActivityBestPeriod, ProfileResponse } from '@/types/interfaces/profile.interfaces';
+import type { ProfileResponse } from '@/types/interfaces/profile.interfaces';
 
 export interface ProfileLeaderboardCardProps {
   profile?: ProfileResponse;
   loading?: boolean;
 }
-
-type PeriodLabelKey = 'today' | 'weekly' | 'monthly' | 'all time';
-
-interface PeriodCell {
-  period: ActivityBestPeriod;
-  labelKey: PeriodLabelKey;
-  points: number;
-  rank: number;
-}
-
-const buildCells = (best: ProfileResponse['activityBest']): PeriodCell[] => [
-  { period: 'day', labelKey: 'today', points: best.day, rank: best.dayRank },
-  { period: 'week', labelKey: 'weekly', points: best.week, rank: best.weekRank },
-  { period: 'month', labelKey: 'monthly', points: best.month, rank: best.monthRank },
-  { period: 'all_time', labelKey: 'all time', points: best.allTime, rank: best.allTimeRank },
-];
 
 export function ProfileLeaderboardCard({ profile, loading }: ProfileLeaderboardCardProps) {
   const t = useAppTranslations();
@@ -45,7 +29,9 @@ export function ProfileLeaderboardCard({ profile, loading }: ProfileLeaderboardC
     );
   }
 
-  const cells = buildCells(profile.activityBest);
+  // Ranking is by lifetime Activity Points (the backend tracks no period
+  // windows), so the card shows the single all-time standing.
+  const { allTime, allTimeRank } = profile.activityBest;
 
   const handleConfirm = () => {
     setOpen(false);
@@ -70,26 +56,23 @@ export function ProfileLeaderboardCard({ profile, loading }: ProfileLeaderboardC
             <BoltIcon size={80} className="m-0 p-0" />
           </div>
 
-          <div className="-ml-6 grid flex-1 grid-cols-4 items-center">
-            {cells.map((cell, index) => (
-              <div
-                key={cell.period}
-                className={twMerge(
-                  'flex flex-col items-center gap-1 px-1.5 py-1.5',
-                  index < cells.length - 1 && 'border-r border-white/8'
-                )}
-              >
-                <span className="text-[9px] font-extrabold uppercase tracking-wider text-white/45">
-                  {t(cell.labelKey)}
-                </span>
-                <span className="text-gold text-base font-black leading-none tabular-nums">
-                  {formatNumber(cell.points)}
-                </span>
-                <span className="text-[10px] font-bold tabular-nums text-white/55">
-                  {cell.rank > 0 ? `#${cell.rank}` : '—'}
-                </span>
-              </div>
-            ))}
+          <div className="-ml-4 flex flex-1 items-center justify-between py-3 pr-4">
+            <div className="flex flex-col gap-0.5">
+              <span className="text-[9px] font-extrabold uppercase tracking-wider text-white/45">
+                {t('activity points')}
+              </span>
+              <span className="text-gold text-2xl font-black leading-none tabular-nums">
+                {formatNumber(allTime)}
+              </span>
+            </div>
+            <div className="flex flex-col items-end gap-0.5">
+              <span className="text-[9px] font-extrabold uppercase tracking-wider text-white/45">
+                {t('rank')}
+              </span>
+              <span className="text-xl font-black leading-none tabular-nums text-white">
+                {allTimeRank > 0 ? `#${allTimeRank}` : '—'}
+              </span>
+            </div>
           </div>
         </button>
       </section>
