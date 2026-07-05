@@ -114,6 +114,11 @@ export const marketMock: MarketData = {
     },
   ],
 
+  // Boost LS prices are intentionally OFF strict LC↔LS parity — a deliberate
+  // ~5× premium (DOCS §14.2 "Boost pricing is LC-first"). Boosts are an LC-first
+  // sink; the LS price is a costlier fallback, not a parity-derived amount, so
+  // do NOT run these through `lcPriceToLsParity` and the parity guardrail skips
+  // them. (Engines/tickets, by contrast, are parity-derived.)
   boosts: [
     {
       id: 'b1',
@@ -124,8 +129,8 @@ export const marketMock: MarketData = {
       isNew: true,
       isAvailable: true,
       prices: [
-        { type: MarketPriceType.LC, amount: 10_000 },
-        { type: MarketPriceType.TELEGRAM_STARS, amount: 3 },
+        { type: MarketPriceType.LC, amount: 100_000 },
+        { type: MarketPriceType.TELEGRAM_STARS, amount: 300 },
       ],
     },
     {
@@ -136,8 +141,8 @@ export const marketMock: MarketData = {
       boostPercentage: 100,
       isAvailable: true,
       prices: [
-        { type: MarketPriceType.LC, amount: 15_000 },
-        { type: MarketPriceType.TELEGRAM_STARS, amount: 4 },
+        { type: MarketPriceType.LC, amount: 150_000 },
+        { type: MarketPriceType.TELEGRAM_STARS, amount: 400 },
       ],
     },
     {
@@ -148,8 +153,8 @@ export const marketMock: MarketData = {
       boostPercentage: 100,
       isAvailable: true,
       prices: [
-        { type: MarketPriceType.LC, amount: 20_000 },
-        { type: MarketPriceType.TELEGRAM_STARS, amount: 5 },
+        { type: MarketPriceType.LC, amount: 200_000 },
+        { type: MarketPriceType.TELEGRAM_STARS, amount: 500 },
       ],
     },
     {
@@ -160,8 +165,8 @@ export const marketMock: MarketData = {
       boostPercentage: 100,
       isAvailable: true,
       prices: [
-        { type: MarketPriceType.LC, amount: 25_000 },
-        { type: MarketPriceType.TELEGRAM_STARS, amount: 6 },
+        { type: MarketPriceType.LC, amount: 250_000 },
+        { type: MarketPriceType.TELEGRAM_STARS, amount: 600 },
       ],
     },
     {
@@ -172,8 +177,8 @@ export const marketMock: MarketData = {
       boostPercentage: 150,
       isAvailable: false,
       prices: [
-        { type: MarketPriceType.LC, amount: 40_000 },
-        { type: MarketPriceType.TELEGRAM_STARS, amount: 10 },
+        { type: MarketPriceType.LC, amount: 400_000 },
+        { type: MarketPriceType.TELEGRAM_STARS, amount: 1000 },
       ],
     },
     {
@@ -184,8 +189,8 @@ export const marketMock: MarketData = {
       boostPercentage: 200,
       isAvailable: false,
       prices: [
-        { type: MarketPriceType.LC, amount: 50_000 },
-        { type: MarketPriceType.TELEGRAM_STARS, amount: 13 },
+        { type: MarketPriceType.LC, amount: 500_000 },
+        { type: MarketPriceType.TELEGRAM_STARS, amount: 1300 },
       ],
     },
     {
@@ -196,8 +201,8 @@ export const marketMock: MarketData = {
       boostPercentage: 200,
       isAvailable: false,
       prices: [
-        { type: MarketPriceType.LC, amount: 80_000 },
-        { type: MarketPriceType.TELEGRAM_STARS, amount: 20 },
+        { type: MarketPriceType.LC, amount: 800_000 },
+        { type: MarketPriceType.TELEGRAM_STARS, amount: 2000 },
       ],
     },
     {
@@ -208,8 +213,8 @@ export const marketMock: MarketData = {
       boostPercentage: 300,
       isAvailable: false,
       prices: [
-        { type: MarketPriceType.LC, amount: 100_000 },
-        { type: MarketPriceType.TELEGRAM_STARS, amount: 25 },
+        { type: MarketPriceType.LC, amount: 1_000_000 },
+        { type: MarketPriceType.TELEGRAM_STARS, amount: 2500 },
       ],
     },
     {
@@ -220,8 +225,8 @@ export const marketMock: MarketData = {
       boostPercentage: 300,
       isAvailable: false,
       prices: [
-        { type: MarketPriceType.LC, amount: 150_000 },
-        { type: MarketPriceType.TELEGRAM_STARS, amount: 38 },
+        { type: MarketPriceType.LC, amount: 1_500_000 },
+        { type: MarketPriceType.TELEGRAM_STARS, amount: 3800 },
       ],
     },
     {
@@ -232,8 +237,8 @@ export const marketMock: MarketData = {
       boostPercentage: 400,
       isAvailable: false,
       prices: [
-        { type: MarketPriceType.LC, amount: 200_000 },
-        { type: MarketPriceType.TELEGRAM_STARS, amount: 50 },
+        { type: MarketPriceType.LC, amount: 2_000_000 },
+        { type: MarketPriceType.TELEGRAM_STARS, amount: 5000 },
       ],
     },
   ],

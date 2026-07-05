@@ -9,24 +9,14 @@ import {
   MAX_BOOST_LEVEL,
   effectiveCycleSeconds,
   engineCapacity,
-  isEngineMaxed,
+  promoteEngineIfMaxed,
 } from '@/utils/global/ticket-engine.utils';
 import { findActiveBooster, findEquippedChip } from '@/utils/global/inventory.utils';
+import { equippedAvatarEngineSpeedPct } from '@/utils/global/avatar.utils';
 import { inventoryApi } from '@/api/inventory.api';
+import { avatarsApi } from '@/api/avatars.api';
 import type { TicketEngine } from '@/types/interfaces/ticket.interfaces';
 import type { TicketType } from '@/types/types/ticket.types';
-
-const promoteIfMaxed = (engine: TicketEngine): TicketEngine => {
-  if (isEngineMaxed(engine)) {
-    return {
-      ...engine,
-      engineLevel: (engine.engineLevel ?? 1) + 1,
-      speedLevel: 0,
-      capacityLevel: 0,
-    };
-  }
-  return engine;
-};
 
 const STARTER_ENGINE_ID = 'engine-bronze-starter';
 
@@ -44,10 +34,8 @@ const buildStarterEngine = (): TicketEngine => {
   return {
     id: STARTER_ENGINE_ID,
     cycleSeconds,
-    perCycleOutput: 1,
     cycleStartedAt: dayjs().subtract(cycleSeconds, 'second').toISOString(),
     pendingCount: 1,
-    instantClaimStarsCost: 5,
     engineLevel: 1,
     speedLevel: 0,
     capacityLevel: 0,
@@ -58,14 +46,14 @@ export const enginesApi = api.injectEndpoints({
   endpoints: builder => ({
     claimEngine: builder.mutation<{ claimed: number; apGain: number }, { engineId: string }>({
       query: body => ({ url: 'engines/claim', method: 'POST', body }),
-      // claim awards AP (header reads `me`) and advances ticket tasks/achievements
-      invalidatesTags: [
-        rtkTags.engines,
-        rtkTags.tickets,
-        rtkTags.me,
-        rtkTags.tasks,
-        rtkTags.achievements,
-      ],
+      // No `tickets` invalidation: the onQueryStarted patch below already writes
+      // the claim result (pendingCount→0, balance, cycle restart, lifetime) into
+      // the getTickets cache, so a refetch is redundant — and on the real backend
+      // it re-fetches EVERY engine with fresh objects, visibly refreshing the
+      // whole home slider right after a claim ("renders the full cube"). Claim
+      // awards AP (header reads `me`) and advances tasks/achievements — those get
+      // their own tags, which don't touch the slider.
+      invalidatesTags: [rtkTags.engines, rtkTags.me, rtkTags.tasks, rtkTags.achievements],
       async onQueryStarted({ engineId }, { dispatch, queryFulfilled }) {
         let claimedTier: TicketType | null = null;
         const patch = dispatch(
@@ -74,6 +62,7 @@ export const enginesApi = api.injectEndpoints({
               const engine = ticket.engines?.find(item => item.id === engineId);
               if (engine && engine.pendingCount > 0) {
                 ticket.count = (ticket.count ?? 0) + engine.pendingCount;
+                engine.lifetimeProduced = (engine.lifetimeProduced ?? 0) + engine.pendingCount;
                 engine.pendingCount = 0;
                 engine.cycleStartedAt = dayjs().toISOString();
                 claimedTier = ticket.ticketType;
@@ -105,13 +94,10 @@ export const enginesApi = api.injectEndpoints({
       { tier: TicketType }
     >({
       query: body => ({ url: 'engines/claim-all', method: 'POST', body }),
-      invalidatesTags: [
-        rtkTags.engines,
-        rtkTags.tickets,
-        rtkTags.me,
-        rtkTags.tasks,
-        rtkTags.achievements,
-      ],
+      // No `tickets` invalidation (see claimEngine): the patch below fully updates
+      // the getTickets cache, so the refetch is redundant and would refresh every
+      // cube in the slider. me/tasks/achievements have their own tags.
+      invalidatesTags: [rtkTags.engines, rtkTags.me, rtkTags.tasks, rtkTags.achievements],
       async onQueryStarted({ tier }, { dispatch, queryFulfilled }) {
         const patch = dispatch(
           ticketsApi.util.updateQueryData('getTickets', undefined, draft => {
@@ -121,6 +107,7 @@ export const enginesApi = api.injectEndpoints({
             for (const engine of ticket.engines) {
               if (engine.pendingCount > 0) {
                 total += engine.pendingCount;
+                engine.lifetimeProduced = (engine.lifetimeProduced ?? 0) + engine.pendingCount;
                 engine.pendingCount = 0;
                 engine.cycleStartedAt = dayjs().toISOString();
               }
@@ -141,13 +128,10 @@ export const enginesApi = api.injectEndpoints({
       { engineId: string; cost: number }
     >({
       query: body => ({ url: 'engines/instant-claim', method: 'POST', body }),
-      invalidatesTags: [
-        rtkTags.engines,
-        rtkTags.tickets,
-        rtkTags.me,
-        rtkTags.tasks,
-        rtkTags.achievements,
-      ],
+      // No `tickets` invalidation (see claimEngine): the patch below fully updates
+      // the getTickets cache, so the refetch is redundant and would refresh every
+      // cube in the slider. me/tasks/achievements have their own tags.
+      invalidatesTags: [rtkTags.engines, rtkTags.me, rtkTags.tasks, rtkTags.achievements],
       async onQueryStarted({ engineId, cost }, { dispatch, queryFulfilled, getState }) {
         const inventory = inventoryApi.endpoints.getInventory.select()(
           getState() as Parameters<ReturnType<typeof inventoryApi.endpoints.getInventory.select>>[0]
@@ -164,6 +148,7 @@ export const enginesApi = api.injectEndpoints({
                   ? engine.pendingCount
                   : engineCapacity(engine, { capacityChip, capacityBooster });
               ticket.count = (ticket.count ?? 0) + claimAmount;
+              engine.lifetimeProduced = (engine.lifetimeProduced ?? 0) + claimAmount;
               engine.pendingCount = 0;
               engine.cycleStartedAt = dayjs().toISOString();
             }
@@ -185,7 +170,11 @@ export const enginesApi = api.injectEndpoints({
 
     upgradeEngineSpeed: builder.mutation<void, { engineId: string; cost: number }>({
       query: body => ({ url: 'engines/upgrade-speed', method: 'POST', body }),
-      invalidatesTags: [rtkTags.engines, rtkTags.tickets, rtkTags.me],
+      // No `tickets` invalidation: the onQueryStarted patch below already writes
+      // the new level into the getTickets cache, so a full refetch is redundant —
+      // and it would re-fetch EVERY engine, visibly refreshing the neighbouring
+      // cubes on the home slider. Only stars (me) is reconciled.
+      invalidatesTags: [rtkTags.engines, rtkTags.me],
       async onQueryStarted({ engineId, cost }, { dispatch, queryFulfilled }) {
         const ticketsPatch = dispatch(
           ticketsApi.util.updateQueryData('getTickets', undefined, draft => {
@@ -196,7 +185,7 @@ export const enginesApi = api.injectEndpoints({
                 ...engine,
                 speedLevel: Math.min(MAX_BOOST_LEVEL, (engine.speedLevel ?? 0) + 1),
               };
-              const promoted = promoteIfMaxed(next);
+              const promoted = promoteEngineIfMaxed(next);
               Object.assign(engine, promoted);
             }
           })
@@ -217,7 +206,9 @@ export const enginesApi = api.injectEndpoints({
 
     upgradeEngineCapacity: builder.mutation<void, { engineId: string; cost: number }>({
       query: body => ({ url: 'engines/upgrade-capacity', method: 'POST', body }),
-      invalidatesTags: [rtkTags.engines, rtkTags.tickets, rtkTags.me],
+      // See upgrade-speed: the optimistic patch keeps the cache correct, so we
+      // skip the all-engines `tickets` refetch that flickers neighbouring cubes.
+      invalidatesTags: [rtkTags.engines, rtkTags.me],
       async onQueryStarted({ engineId, cost }, { dispatch, queryFulfilled }) {
         const ticketsPatch = dispatch(
           ticketsApi.util.updateQueryData('getTickets', undefined, draft => {
@@ -228,7 +219,7 @@ export const enginesApi = api.injectEndpoints({
                 ...engine,
                 capacityLevel: Math.min(MAX_BOOST_LEVEL, (engine.capacityLevel ?? 0) + 1),
               };
-              const promoted = promoteIfMaxed(next);
+              const promoted = promoteEngineIfMaxed(next);
               Object.assign(engine, promoted);
             }
           })
@@ -254,8 +245,25 @@ export const enginesApi = api.injectEndpoints({
       { engineId: string; cost: number }
     >({
       query: ({ engineId }) => ({ url: 'engines/skip', method: 'POST', body: { engineId } }),
-      invalidatesTags: [rtkTags.engines, rtkTags.tickets, rtkTags.me],
-      async onQueryStarted({ cost }, { dispatch, queryFulfilled }) {
+      // See upgrade-speed: fill pendingCount in the cache optimistically (below)
+      // instead of refetching EVERY engine, which visibly refreshes the
+      // neighbouring cubes on the home slider. Only stars (me) is reconciled.
+      invalidatesTags: [rtkTags.engines, rtkTags.me],
+      async onQueryStarted({ engineId, cost }, { dispatch, queryFulfilled, getState }) {
+        const inventory = inventoryApi.endpoints.getInventory.select()(
+          getState() as Parameters<ReturnType<typeof inventoryApi.endpoints.getInventory.select>>[0]
+        ).data;
+        const ticketsPatch = dispatch(
+          ticketsApi.util.updateQueryData('getTickets', undefined, draft => {
+            for (const ticket of draft) {
+              const engine = ticket.engines?.find(item => item.id === engineId);
+              if (!engine || engine.pendingCount > 0) continue;
+              const capacityChip = findEquippedChip(inventory?.chips, engineId, 'capacity');
+              const capacityBooster = findActiveBooster(inventory?.boosters, engineId, 'capacity');
+              engine.pendingCount = engineCapacity(engine, { capacityChip, capacityBooster });
+            }
+          })
+        );
         const mePatch = dispatch(
           meApi.util.updateQueryData('getMe', undefined, draft => {
             draft.telegramStars = Math.max(0, draft.telegramStars - cost);
@@ -264,6 +272,7 @@ export const enginesApi = api.injectEndpoints({
         try {
           await queryFulfilled;
         } catch {
+          ticketsPatch.undo();
           mePatch.undo();
         }
       },
@@ -271,7 +280,11 @@ export const enginesApi = api.injectEndpoints({
 
     completeEngineCycle: builder.mutation<void, { engineId: string }>({
       query: body => ({ url: 'engines/complete-cycle', method: 'POST', body }),
-      invalidatesTags: [rtkTags.engines, rtkTags.tickets],
+      // No `tickets` invalidation: the onQueryStarted patch below fills
+      // pendingCount in the cache with the same math the server runs, so the
+      // all-engines refetch was pure churn — every engine finishing a cycle
+      // used to re-fetch (and visibly refresh) every other cube on screen.
+      invalidatesTags: [rtkTags.engines],
       async onQueryStarted({ engineId }, { dispatch, queryFulfilled, getState }) {
         const inventory = inventoryApi.endpoints.getInventory.select()(
           getState() as Parameters<ReturnType<typeof inventoryApi.endpoints.getInventory.select>>[0]
@@ -282,6 +295,15 @@ export const enginesApi = api.injectEndpoints({
         const me = meApi.endpoints.getMe.select()(
           getState() as Parameters<ReturnType<typeof meApi.endpoints.getMe.select>>[0]
         ).data;
+        // The equipped avatar's engine-speed boost is permanent-while-equipped,
+        // so it must move the real production cycle too (DOCS §9.7) — not just
+        // the UI — exactly like the status boost above.
+        const avatars = avatarsApi.endpoints.getAvatarInventory.select()(
+          getState() as Parameters<
+            ReturnType<typeof avatarsApi.endpoints.getAvatarInventory.select>
+          >[0]
+        ).data;
+        const avatarSpeedPct = equippedAvatarEngineSpeedPct(avatars, me?.avatarId);
         const patch = dispatch(
           ticketsApi.util.updateQueryData('getTickets', undefined, draft => {
             for (const ticket of draft) {
@@ -296,6 +318,7 @@ export const enginesApi = api.injectEndpoints({
                 speedBooster,
                 isLuckyPlayer: me?.isLuckyPlayer ?? false,
                 isVip: me?.isVIP ?? false,
+                avatarBoostPct: avatarSpeedPct,
               });
               const elapsed = dayjs().diff(dayjs(engine.cycleStartedAt), 'second');
               if (elapsed >= cycle) {

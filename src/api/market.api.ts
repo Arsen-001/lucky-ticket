@@ -85,10 +85,8 @@ export const marketApi = api.injectEndpoints({
               // replaces this, but an optimistic value must not read as a bogus
               // few-second cycle in the flash before it lands.
               cycleSeconds: appConfig.engines.baseCycleSecondsByTier[tier],
-              perCycleOutput: 1,
               cycleStartedAt: dayjs().toISOString(),
               pendingCount: 0,
-              instantClaimStarsCost: 5,
               engineLevel,
               speedLevel: 0,
               capacityLevel: 0,

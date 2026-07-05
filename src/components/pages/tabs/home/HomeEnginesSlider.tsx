@@ -13,6 +13,7 @@ import {
 } from '@/api/inventory.api';
 import {
   useClaimEngineMutation,
+  useCompleteEngineCycleMutation,
   useSkipEngineCycleMutation,
   useUpgradeEngineSpeedMutation,
   useUpgradeEngineCapacityMutation,
@@ -28,6 +29,7 @@ import { ConfirmModal } from '@/components/shared/modals/ConfirmModal';
 import { TelegramStarIcon } from '@/components/shared/icons/TelegramStarIcon';
 import { useAppTranslations } from '@/hooks/useAppTranslations';
 import { useToast } from '@/hooks/useToast';
+import { useEngineSpeedAvatarBoostPct } from '@/hooks/useEngineSpeedAvatarBoostPct';
 import { chipEquipStarsCost } from '@/utils/global/inventory.utils';
 import type { InventoryChip } from '@/types/interfaces/inventory.interfaces';
 import { EmptyDataInfo } from '@/components/shared/EmptyDataInfo';
@@ -39,7 +41,7 @@ import {
   effectiveCycleSeconds,
   engineCapacity,
   engineElapsedSeconds,
-  isEngineMaxed,
+  promoteEngineIfMaxed,
   MAX_BOOST_LEVEL,
 } from '@/utils/global/ticket-engine.utils';
 import { speedUpgradeLsCost, capacityUpgradeLsCost } from '@/utils/global/economy.utils';
@@ -47,11 +49,7 @@ import type { ClassNameProps } from '@/types/interfaces/component.interfcaes';
 import type { TicketEngine } from '@/types/interfaces/ticket.interfaces';
 import type { TicketType } from '@/types/types/ticket.types';
 import type { InventoryChipType } from '@/types/interfaces/inventory.interfaces';
-
-interface EngineWithTier {
-  engine: TicketEngine;
-  tier: TicketType;
-}
+import { mergeEngineItems, type EngineWithTier } from '@/utils/global/engine-items.utils';
 
 const SLIDE_WIDTH_CSS = 'calc((100vw - 120px) / 1.038)';
 const SLIDE_PADDING_CSS = `calc((100vw - (100vw - 120px) / 1.038) / 2)`;
@@ -94,6 +92,7 @@ export function HomeEnginesSlider({ className }: ClassNameProps) {
   const [equipChipMutation] = useEquipChipMutation();
   const [activateBoosterMutation] = useActivateBoosterMutation();
   const [claimEngine] = useClaimEngineMutation();
+  const [completeEngineCycle] = useCompleteEngineCycleMutation();
   const [skipEngineCycle] = useSkipEngineCycleMutation();
   const [upgradeEngineSpeed] = useUpgradeEngineSpeedMutation();
   const [upgradeEngineCapacity] = useUpgradeEngineCapacityMutation();
@@ -137,8 +136,18 @@ export function HomeEnginesSlider({ className }: ClassNameProps) {
   const [seededTickets, setSeededTickets] = useState(tickets);
   if (tickets !== seededTickets) {
     setSeededTickets(tickets);
-    setItems(flatFromTickets);
+    // Surgical merge, not a full rebuild: only cubes whose engine data actually
+    // changed get a new object (and re-render). On the real backend an upgrade
+    // thus updates only the one cube instead of re-rendering the whole slider.
+    setItems(prev => mergeEngineItems(prev, flatFromTickets));
   }
+
+  // Live ref so the click handlers below don't close over `items` — otherwise
+  // every `items` change (an upgrade, a 1s tick) gives them a new identity,
+  // which the React Compiler propagates to every cube as a changed prop and
+  // re-renders all 20. Reading through the ref keeps the handlers stable.
+  const itemsRef = useRef(items);
+  itemsRef.current = items;
 
   const [elapsedByEngine, setElapsedByEngine] = useState<Record<string, number>>({});
   const [starsModal, setStarsModal] = useState<{ open: boolean; required: number }>({
@@ -155,6 +164,7 @@ export function HomeEnginesSlider({ className }: ClassNameProps) {
   const currentStars = me?.telegramStars ?? 0;
   const isLp = me?.isLuckyPlayer ?? false;
   const isVip = me?.isVIP ?? false;
+  const avatarSpeedPct = useEngineSpeedAvatarBoostPct();
 
   const requireStars = (cost: number, onPaid: () => void) => {
     if (currentStars < cost) {
@@ -164,69 +174,71 @@ export function HomeEnginesSlider({ className }: ClassNameProps) {
     onPaid();
   };
 
+  // Throttles per-engine completion requests: without it a failing (or slow)
+  // backend gets re-hit on every 1s tick until the refetch flips `pendingCount`.
+  const completionAttemptAtRef = useRef<Record<string, number>>({});
+
   useEffect(() => {
     if (!items.length) return;
 
     const tick = () => {
-      setElapsedByEngine(prev => {
-        let changed = false;
-        const next = { ...prev };
-        for (const { engine } of items) {
-          const speedChip = findEquippedChip(inventory?.chips, engine.id, 'speed');
-          const speedBooster = findActiveBooster(inventory?.boosters, engine.id, 'speed');
-          const capacityChip = findEquippedChip(inventory?.chips, engine.id, 'capacity');
-          const capacityBooster = findActiveBooster(inventory?.boosters, engine.id, 'capacity');
-          const elapsed =
-            engine.pendingCount > 0
-              ? effectiveCycleSeconds(engine, {
-                  speedChip,
-                  speedBooster,
-                  capacityChip,
-                  capacityBooster,
-                  isLuckyPlayer: isLp,
-                  isVip,
-                })
-              : engineElapsedSeconds(engine);
-          if (next[engine.id] !== elapsed) {
-            next[engine.id] = elapsed;
-            changed = true;
-          }
+      // Compute everything outside the setState updaters — dispatching from
+      // inside an updater is a side effect React requires them not to have.
+      const elapsedNext: Record<string, number> = {};
+      const readyCapacity: Record<string, number> = {};
+      for (const { engine } of items) {
+        const speedChip = findEquippedChip(inventory?.chips, engine.id, 'speed');
+        const speedBooster = findActiveBooster(inventory?.boosters, engine.id, 'speed');
+        const capacityChip = findEquippedChip(inventory?.chips, engine.id, 'capacity');
+        const capacityBooster = findActiveBooster(inventory?.boosters, engine.id, 'capacity');
+        const cycle = effectiveCycleSeconds(engine, {
+          speedChip,
+          speedBooster,
+          capacityChip,
+          capacityBooster,
+          isLuckyPlayer: isLp,
+          isVip,
+          avatarBoostPct: avatarSpeedPct,
+        });
+        if (engine.pendingCount > 0) {
+          elapsedNext[engine.id] = cycle;
+          continue;
         }
-        return changed ? next : prev;
+        const elapsed = engineElapsedSeconds(engine);
+        elapsedNext[engine.id] = elapsed;
+        if (elapsed >= cycle) {
+          readyCapacity[engine.id] = engineCapacity(engine, { capacityChip, capacityBooster });
+        }
+      }
+
+      setElapsedByEngine(prev => {
+        const changed = items.some(({ engine }) => prev[engine.id] !== elapsedNext[engine.id]);
+        return changed ? { ...prev, ...elapsedNext } : prev;
       });
 
       setItems(prev => {
         let changed = false;
         const next = prev.map(item => {
-          const { engine } = item;
-          if (engine.pendingCount > 0) return item;
-          const speedChip = findEquippedChip(inventory?.chips, engine.id, 'speed');
-          const speedBooster = findActiveBooster(inventory?.boosters, engine.id, 'speed');
-          const capacityChip = findEquippedChip(inventory?.chips, engine.id, 'capacity');
-          const capacityBooster = findActiveBooster(inventory?.boosters, engine.id, 'capacity');
-          const cycle = effectiveCycleSeconds(engine, {
-            speedChip,
-            speedBooster,
-            capacityChip,
-            capacityBooster,
-            isLuckyPlayer: isLp,
-            isVip,
-          });
-          const elapsed = engineElapsedSeconds(engine);
-          if (elapsed >= cycle) {
-            changed = true;
-            return {
-              ...item,
-              engine: {
-                ...engine,
-                pendingCount: engineCapacity(engine, { capacityChip, capacityBooster }),
-              },
-            };
-          }
-          return item;
+          const capacity = readyCapacity[item.engine.id];
+          if (capacity === undefined || item.engine.pendingCount > 0) return item;
+          changed = true;
+          return { ...item, engine: { ...item.engine, pendingCount: capacity } };
         });
         return changed ? next : prev;
       });
+
+      // Persist readiness server-side (mirrors TicketsTabsView). Without this
+      // the "ready" flip lives only in local state: GET tickets keeps returning
+      // pendingCount=0, so every refetch reverts ready neighbours to a countdown
+      // for a frame until the next tick re-flips them — a visible blink across
+      // the slider whenever any other engine action triggers a refetch.
+      const now = Date.now();
+      for (const engineId of Object.keys(readyCapacity)) {
+        if (now - (completionAttemptAtRef.current[engineId] ?? 0) > 15_000) {
+          completionAttemptAtRef.current[engineId] = now;
+          void completeEngineCycle({ engineId });
+        }
+      }
     };
 
     tick();
@@ -306,7 +318,7 @@ export function HomeEnginesSlider({ className }: ClassNameProps) {
   };
 
   const handleInstantClaim = (engineId: string) => {
-    const engine = items.find(item => item.engine.id === engineId)?.engine;
+    const engine = itemsRef.current.find(item => item.engine.id === engineId)?.engine;
     if (!engine) return;
     const speedChip = findEquippedChip(inventory?.chips, engine.id, 'speed');
     const speedBooster = findActiveBooster(inventory?.boosters, engine.id, 'speed');
@@ -319,6 +331,7 @@ export function HomeEnginesSlider({ className }: ClassNameProps) {
       capacityBooster,
       isLuckyPlayer: isLp,
       isVip,
+      avatarBoostPct: avatarSpeedPct,
     });
     const elapsed = elapsedByEngine[engine.id] ?? engineElapsedSeconds(engine);
     const remaining = Math.max(0, cycle - elapsed);
@@ -327,7 +340,7 @@ export function HomeEnginesSlider({ className }: ClassNameProps) {
   };
 
   const fastForwardEngine = (engineId: string, cost: number) => {
-    const engine = items.find(item => item.engine.id === engineId)?.engine;
+    const engine = itemsRef.current.find(item => item.engine.id === engineId)?.engine;
     if (!engine) return;
     const capacityChip = findEquippedChip(inventory?.chips, engine.id, 'capacity');
     const capacityBooster = findActiveBooster(inventory?.boosters, engine.id, 'capacity');
@@ -347,20 +360,8 @@ export function HomeEnginesSlider({ className }: ClassNameProps) {
     requireStars(cost, () => fastForwardEngine(engineId, cost));
   };
 
-  const promoteIfMaxed = (engine: TicketEngine): TicketEngine => {
-    if (isEngineMaxed(engine)) {
-      return {
-        ...engine,
-        engineLevel: (engine.engineLevel ?? 1) + 1,
-        speedLevel: 0,
-        capacityLevel: 0,
-      };
-    }
-    return engine;
-  };
-
   const handleUpgradeSpeed = (engineId: string) => {
-    const engine = items.find(item => item.engine.id === engineId)?.engine;
+    const engine = itemsRef.current.find(item => item.engine.id === engineId)?.engine;
     if (!engine) return;
     const cost = speedUpgradeLsCost(engine.speedLevel ?? 0);
     const nextLevel = Math.min(MAX_BOOST_LEVEL, (engine.speedLevel ?? 0) + 1);
@@ -368,7 +369,7 @@ export function HomeEnginesSlider({ className }: ClassNameProps) {
   };
 
   const handleUpgradeCapacity = (engineId: string) => {
-    const engine = items.find(item => item.engine.id === engineId)?.engine;
+    const engine = itemsRef.current.find(item => item.engine.id === engineId)?.engine;
     if (!engine) return;
     const cost = capacityUpgradeLsCost(engine.capacityLevel ?? 0);
     const nextLevel = Math.min(MAX_BOOST_LEVEL, (engine.capacityLevel ?? 0) + 1);
@@ -381,7 +382,7 @@ export function HomeEnginesSlider({ className }: ClassNameProps) {
     setUpgradeConfirm(null);
     requireStars(cost, () => {
       updateEngine(engineId, e =>
-        promoteIfMaxed({
+        promoteEngineIfMaxed({
           ...e,
           ...(type === 'speed'
             ? { speedLevel: Math.min(MAX_BOOST_LEVEL, (e.speedLevel ?? 0) + 1) }

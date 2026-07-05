@@ -11,11 +11,11 @@ import { WalletProvider } from '@/types/enums/wallet.enums';
  */
 
 const stakeLevels: StakeLevelDefinition[] = [
-  { level: 1, minDeposit: 10_000, tier: 'bronze', completionStarsPerMonth: 2 },
-  { level: 2, minDeposit: 50_000, tier: 'silver', completionStarsPerMonth: 3 },
-  { level: 3, minDeposit: 100_000, tier: 'gold', completionStarsPerMonth: 4 },
-  { level: 4, minDeposit: 250_000, tier: 'platinum', completionStarsPerMonth: 5 },
-  { level: 5, minDeposit: 500_000, tier: 'diamond', completionStarsPerMonth: 6 },
+  { level: 1, minDeposit: 100_000, tier: 'bronze', completionStarsPerMonth: 2 },
+  { level: 2, minDeposit: 500_000, tier: 'silver', completionStarsPerMonth: 3 },
+  { level: 3, minDeposit: 1_000_000, tier: 'gold', completionStarsPerMonth: 4 },
+  { level: 4, minDeposit: 2_500_000, tier: 'platinum', completionStarsPerMonth: 5 },
+  { level: 5, minDeposit: 5_000_000, tier: 'diamond', completionStarsPerMonth: 6 },
 ];
 
 const supportedWallets: SupportedWallet[] = [
@@ -52,11 +52,11 @@ export const appConfig = {
     aprMinPercent: 3,
     aprMaxPercent: 10,
     /** Divisor in the stake AP formula: `deposit × months ÷ apDivisor` (DOCS §5.3 / §18.3). */
-    apDivisor: 5_000,
+    apDivisor: 50_000,
     /** Bonus added to the stake AP base when it completes (forfeited on cancel). */
     apCompletionBonusPercent: 50,
     /** LC required to add 1 ⭐ to the base stake fee (`base = ceil(deposit / feeStep)`). */
-    feeStep: 10_000,
+    feeStep: 100_000,
     /** Discount % per stake month — applied to the base fee. */
     feeMonthDiscountPercent: 1,
     /**
@@ -66,16 +66,16 @@ export const appConfig = {
      */
     feeVolumeDiscount: {
       default: [
-        { threshold: 100_000, percent: 10 },
-        { threshold: 250_000, percent: 12 },
-        { threshold: 500_000, percent: 15 },
-        { threshold: 1_000_000, percent: 20 },
+        { threshold: 1_000_000, percent: 10 },
+        { threshold: 2_500_000, percent: 12 },
+        { threshold: 5_000_000, percent: 15 },
+        { threshold: 10_000_000, percent: 20 },
       ],
       luckyPlayer: [
-        { threshold: 100_000, percent: 20 },
-        { threshold: 250_000, percent: 22 },
-        { threshold: 500_000, percent: 25 },
-        { threshold: 1_000_000, percent: 30 },
+        { threshold: 1_000_000, percent: 20 },
+        { threshold: 2_500_000, percent: 22 },
+        { threshold: 5_000_000, percent: 25 },
+        { threshold: 10_000_000, percent: 30 },
       ],
     },
     /** Stake fee never drops below this floor (in Stars). */
@@ -119,11 +119,11 @@ export const appConfig = {
     tournamentHouseEdgeMultiplier: 1.5,
     /** Market LC ticket prices per tier (~×2.5 ladder). */
     ticketPriceLcByTier: {
-      bronze: 6_000,
-      silver: 15_000,
-      gold: 37_500,
-      platinum: 90_000,
-      diamond: 225_000,
+      bronze: 60_000,
+      silver: 150_000,
+      gold: 375_000,
+      platinum: 900_000,
+      diamond: 2_250_000,
     },
     /**
      * LC price of the FIRST engine of each tier. Tuned so first-purchase
@@ -132,11 +132,11 @@ export const appConfig = {
      * rewarding, never a trap.
      */
     engineBasePriceLcByTier: {
-      bronze: 200_000,
-      silver: 360_000,
-      gold: 675_000,
-      platinum: 1_170_000,
-      diamond: 2_250_000,
+      bronze: 2_000_000,
+      silver: 3_600_000,
+      gold: 6_750_000,
+      platinum: 11_700_000,
+      diamond: 22_500_000,
     },
     /**
      * Geometric repeat-purchase pricing: the n-th engine of a tier costs
@@ -171,8 +171,8 @@ export const appConfig = {
     tonUsdRate: 3.42,
     /** Flat TON network fee charged on a withdrawal. */
     withdrawFeeTon: 0.05,
-    /** USD value of one LC — used to price the LC → TON conversion (DOCS §6.1): $1 = 1,000,000 LC. */
-    lcUsdRate: 0.000001,
+    /** USD value of one LC — used to price the LC → TON conversion (DOCS §6.1): $1 = 100,000 LC. */
+    lcUsdRate: 0.00001,
     /** USD anchor of one Lucky Star (LS) — the Stars packages are priced off it. */
     lsUsdRate: 0.02,
     /** Wallet apps the user can connect. */
@@ -251,10 +251,10 @@ export const appConfig = {
        */
       prizeFundingMultiplier: 2,
       /** Prize-pool bounds (in LC) the advertiser funds, stepped by `prizePoolStep`. */
-      prizePoolMin: 10_000,
-      prizePoolMax: 10_000_000,
-      prizePoolStep: 5_000,
-      defaultPrizePool: 50_000,
+      prizePoolMin: 100_000,
+      prizePoolMax: 100_000_000,
+      prizePoolStep: 50_000,
+      defaultPrizePool: 500_000,
       /** Team-size (seats) bounds. */
       teamSizeMin: 8,
       teamSizeMax: 512,

@@ -6,6 +6,14 @@ import type { Ticket, TicketType } from '@/types/types/ticket.types';
 
 export const MAX_BOOST_LEVEL = 10;
 
+/**
+ * Hard ceiling on the engine level itself — promotion stops here. Mirrors the
+ * backend's `ENGINE_FUSION.maxEngineLevel`; keep in lockstep, otherwise the
+ * optimistic upgrade path over-promotes past what the server will accept and
+ * the UI drifts from the real engine state.
+ */
+export const MAX_ENGINE_LEVEL = 5;
+
 /** LM-style additive speed boost contributed per engine level above 1 (%). */
 export const ENGINE_LEVEL_SPEED_BOOST_PCT = 100;
 
@@ -127,6 +135,25 @@ export const engineElapsedSeconds = (engine: TicketEngine) => {
 
 export const isEngineMaxed = (engine: TicketEngine) =>
   (engine.speedLevel || 0) >= MAX_BOOST_LEVEL && (engine.capacityLevel || 0) >= MAX_BOOST_LEVEL;
+
+/**
+ * Engine promotion (level-up). When an engine's speed **and** capacity
+ * sub-levels are both maxed (`isEngineMaxed`), the next paid upgrade promotes it
+ * to the next **engine level** and resets both sub-levels to 0 — a fresh
+ * 0–10 / 0–10 ladder on a stronger base (DOCS §10.2).
+ *
+ * Each engine level permanently adds `+100%` to the speed stack
+ * (`engineLevelBoostPct`) and `+10` to base per-cycle output (`baseCapacity`,
+ * `1 → 11 → 21 …`). At `MAX_ENGINE_LEVEL` the 10/10 state is terminal — the
+ * ladders stay full instead of converting into another level (matches the
+ * backend). Pure — no side effects beyond those two curves. Single source of
+ * truth for the promotion rule; the optimistic upgrade paths in `engines.api`
+ * and `HomeEnginesSlider` both call it so their math cannot drift.
+ */
+export const promoteEngineIfMaxed = (engine: TicketEngine): TicketEngine =>
+  isEngineMaxed(engine) && (engine.engineLevel ?? 1) < MAX_ENGINE_LEVEL
+    ? { ...engine, engineLevel: (engine.engineLevel ?? 1) + 1, speedLevel: 0, capacityLevel: 0 }
+    : engine;
 
 export interface EngineLocation {
   engine: TicketEngine;

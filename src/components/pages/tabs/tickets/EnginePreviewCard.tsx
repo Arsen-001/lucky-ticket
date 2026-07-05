@@ -9,6 +9,7 @@ import { ReactorDial } from '@/components/pages/out-tabs/tabs-extra/ticket/React
 import { EngineLevelBadge } from '@/components/pages/out-tabs/tabs-extra/ticket/EngineLevelBadge';
 import { EngineNextInFill } from '@/components/pages/out-tabs/tabs-extra/ticket/EngineNextInFill';
 import { useAppTranslations } from '@/hooks/useAppTranslations';
+import { useEngineSpeedAvatarBoostPct } from '@/hooks/useEngineSpeedAvatarBoostPct';
 import { routes } from '@/constants/routes';
 import { findActiveBooster, findEquippedChip } from '@/utils/global/inventory.utils';
 import {
@@ -52,6 +53,7 @@ export function EnginePreviewCard({
   const router = useRouter();
   const { data: inventory } = useGetInventoryQuery();
   const { data: me } = useGetMeQuery();
+  const avatarSpeedPct = useEngineSpeedAvatarBoostPct();
   const speedChip = findEquippedChip(inventory?.chips, engine.id, 'speed');
   const speedBooster = findActiveBooster(inventory?.boosters, engine.id, 'speed');
   const capacityChip = findEquippedChip(inventory?.chips, engine.id, 'capacity');
@@ -62,6 +64,7 @@ export function EnginePreviewCard({
     speedBooster,
     isLuckyPlayer: me?.isLuckyPlayer ?? false,
     isVip: me?.isVIP ?? false,
+    avatarBoostPct: avatarSpeedPct,
   });
   const capacity = engineCapacity(engine, { capacityChip, capacityBooster });
   const pending = engine.pendingCount > 0;
@@ -94,13 +97,10 @@ export function EnginePreviewCard({
       )}
     >
       <div className="flex items-stretch gap-2 min-w-0">
-        <ReactorDial
-          key={`${engine.id}-${pending ? 'pending' : 'producing'}-${cycle.toFixed(2)}`}
-          tier={tier}
-          capacity={capacity}
-          size={42}
-          visual="engine"
-        />
+        {/* No data-derived key: keying by the cycle/pending remounted the dial
+            (and reloaded its engine image — a visible flicker) on every upgrade
+            or skip. It renders purely from props, so let it update in place. */}
+        <ReactorDial tier={tier} capacity={capacity} size={42} visual="engine" />
         <div className="flex flex-1 min-w-0 flex-col justify-around items-start py-0.5">
           <h5 className="text-[12px] font-bold text-white leading-tight truncate w-full">
             {t('engine number', { number: index + 1 })}

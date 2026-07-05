@@ -3,6 +3,7 @@
 import {
   type CSSProperties,
   type PointerEvent as ReactPointerEvent,
+  memo,
   useEffect,
   useRef,
   useState,
@@ -14,6 +15,7 @@ import {
 } from '@/components/pages/out-tabs/tabs-extra/ticket/EngineCard';
 import { useGetInventoryQuery } from '@/api/inventory.api';
 import { useGetMeQuery } from '@/api/me.api';
+import { useEngineSpeedAvatarBoostPct } from '@/hooks/useEngineSpeedAvatarBoostPct';
 import { GlobalConstants } from '@/constants/global.constants';
 import {
   effectiveCycleSeconds,
@@ -43,7 +45,7 @@ export interface EngineCardCubeProps extends EngineCardProps {
   } | null;
 }
 
-export function EngineCardCube(props: EngineCardCubeProps) {
+function EngineCardCubeImpl(props: EngineCardCubeProps) {
   const { cubeClassName, onSlotPick, onChipUnequip, pendingSlot, ...engineCardProps } = props;
   const isSlotPending = (category: 'chip' | 'booster', type: InventoryChipType) =>
     !!pendingSlot &&
@@ -58,7 +60,16 @@ export function EngineCardCube(props: EngineCardCubeProps) {
   const engineLevel = engine.engineLevel ?? 1;
 
   const { data: inventory } = useGetInventoryQuery();
-  const { data: me } = useGetMeQuery();
+  // Scope the `me` subscription to the fields the cube actually renders — a
+  // Lucky-Stars change (every engine action) must not re-render all 20 cubes
+  // for values (status / name) that didn't change.
+  const { isLp, isVip, ownerName } = useGetMeQuery(undefined, {
+    selectFromResult: ({ data }) => ({
+      isLp: data?.isLuckyPlayer ?? false,
+      isVip: data?.isVIP ?? false,
+      ownerName: data?.username,
+    }),
+  });
   const chips = inventory?.chips ?? [];
   const boosters = inventory?.boosters ?? [];
   const equippedSpeedChip = chips.find(
@@ -85,35 +96,34 @@ export function EngineCardCube(props: EngineCardCubeProps) {
 
   // Status (VIP > LP) grants a flat additive engine speed boost. VIP
   // supersedes LP — higher tier wins, never stacks (DOCS §7.3).
-  const isLp = me?.isLuckyPlayer ?? false;
-  const isVip = me?.isVIP ?? false;
   const statusEngineSpeedBoostPct = isVip
     ? GlobalConstants.vipEngineSpeedBoostPct
     : isLp
       ? GlobalConstants.luckyPlayerEngineSpeedBoostPct
       : 0;
+  const avatarSpeedPct = useEngineSpeedAvatarBoostPct();
 
-  // Total effective cycle/capacity with chips + boosters + status applied —
-  // drives the back face's "Total" summary row.
-  const totalCycleSeconds = effectiveCycleSeconds(engine, {
+  // Passport "T/H" is the productivity baseline (DOCS §9.8): permanent boosts
+  // only — engine/speed levels, chips, status, equipped avatar — with
+  // time-limited boosters deliberately EXCLUDED, matching Engine Details so both
+  // screens print the same rate. (The booster-inclusive figure lives in the back
+  // face's TOTAL row via `totalBoostPct` below.)
+  const productivityCycleSeconds = effectiveCycleSeconds(engine, {
     speedChip: equippedSpeedChip,
-    speedBooster: activeSpeedBooster,
-    capacityChip: equippedCapacityChip,
-    capacityBooster: activeCapacityBooster,
     isLuckyPlayer: isLp,
     isVip,
+    avatarBoostPct: avatarSpeedPct,
   });
-  const totalCapacity = engineCapacity(engine, {
-    capacityChip: equippedCapacityChip,
-    capacityBooster: activeCapacityBooster,
-  });
-  const ticketsPerHour = totalCycleSeconds > 0 ? (3600 / totalCycleSeconds) * totalCapacity : 0;
+  const productivityCapacity = engineCapacity(engine, { capacityChip: equippedCapacityChip });
+  const ticketsPerHour =
+    productivityCycleSeconds > 0 ? (3600 / productivityCycleSeconds) * productivityCapacity : 0;
 
   // Aggregated additive speed boost (mirrors `effectiveCycleSeconds()`).
   const totalBoostPct =
     engineLevelBoostPct(engineLevel) +
     speedLevelBoostPct(speedLevel) +
     statusEngineSpeedBoostPct +
+    avatarSpeedPct +
     (equippedSpeedChip?.effectPct ?? 0) +
     (activeSpeedBooster?.effectPct ?? 0);
 
@@ -301,7 +311,7 @@ export function EngineCardCube(props: EngineCardCubeProps) {
             lifetimeProduced={lifetimeProduced}
             ticketsPerHour={ticketsPerHour}
             engineLevel={engineLevel}
-            ownerName={me?.username}
+            ownerName={ownerName}
             createdAt={engine.createdAt}
             accent={tierAccent}
           />
@@ -310,3 +320,24 @@ export function EngineCardCube(props: EngineCardCubeProps) {
     </div>
   );
 }
+
+/**
+ * The slider re-renders on every unrelated change (a Lucky-Stars charge, a
+ * confirm modal opening, another engine's 1s countdown tick) and re-creates all
+ * 20 cube elements. Comparing only the props a cube actually renders from — and
+ * deliberately ignoring the handler identities, which churn but are
+ * behaviourally stable — keeps each cube from re-rendering unless ITS own data
+ * changed. `engine` identity is preserved by `mergeEngineItems`, so an unchanged
+ * neighbour compares equal and is skipped entirely.
+ */
+export const EngineCardCube = memo(
+  EngineCardCubeImpl,
+  (prev, next) =>
+    prev.engine === next.engine &&
+    prev.tier === next.tier &&
+    prev.index === next.index &&
+    prev.tourAnchor === next.tourAnchor &&
+    prev.elapsedSeconds === next.elapsedSeconds &&
+    prev.pendingSlot === next.pendingSlot &&
+    prev.cubeClassName === next.cubeClassName
+);

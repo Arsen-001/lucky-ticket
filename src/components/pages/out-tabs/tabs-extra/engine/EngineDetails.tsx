@@ -23,6 +23,7 @@ import { EngineSlotPickerModal } from '@/components/pages/tabs/home/EngineSlotPi
 import { StarsTopUpFlow } from '@/components/pages/tabs/home/StarsTopUpFlow';
 import { useAppTranslations } from '@/hooks/useAppTranslations';
 import { useToast } from '@/hooks/useToast';
+import { useEngineSpeedAvatarBoostPct } from '@/hooks/useEngineSpeedAvatarBoostPct';
 import {
   chipEquipStarsCost,
   findActiveBooster,
@@ -57,6 +58,7 @@ export function EngineDetails({ id }: EngineDetailsProps) {
   const { data: inventory } = useGetInventoryQuery();
   const isLp = me?.isLuckyPlayer ?? false;
   const isVip = me?.isVIP ?? false;
+  const avatarSpeedPct = useEngineSpeedAvatarBoostPct();
 
   const [equipChipMutation] = useEquipChipMutation();
   const [activateBoosterMutation] = useActivateBoosterMutation();
@@ -111,6 +113,7 @@ export function EngineDetails({ id }: EngineDetailsProps) {
         speedBooster,
         isLuckyPlayer: isLp,
         isVip,
+        avatarBoostPct: avatarSpeedPct,
       });
       const elapsed =
         engine.pendingCount > 0 ? cycle : Math.min(cycle, engineElapsedSeconds(engine));
@@ -126,7 +129,7 @@ export function EngineDetails({ id }: EngineDetailsProps) {
     tick();
     const intervalId = window.setInterval(tick, 1000);
     return () => window.clearInterval(intervalId);
-  }, [engine, speedChip, speedBooster, isLp, isVip, completeEngineCycle]);
+  }, [engine, speedChip, speedBooster, isLp, isVip, avatarSpeedPct, completeEngineCycle]);
 
   if (isLoading) {
     return (
@@ -160,13 +163,15 @@ export function EngineDetails({ id }: EngineDetailsProps) {
     speedBooster,
     isLuckyPlayer: isLp,
     isVip,
+    avatarBoostPct: avatarSpeedPct,
   });
   // Productivity is "before time-limited booster" but *with* permanent boosts
-  // (engine/speed levels, chip, status) — so status must be included here too.
+  // (engine/speed levels, chip, status, equipped avatar) — so those are all in.
   const baseCycleSeconds = effectiveCycleSeconds(engine, {
     speedChip,
     isLuckyPlayer: isLp,
     isVip,
+    avatarBoostPct: avatarSpeedPct,
   });
   const baseCapacity = engineCapacity(engine, { capacityChip });
   const ticketsPerHour = baseCycleSeconds > 0 ? (3600 / baseCycleSeconds) * baseCapacity : 0;

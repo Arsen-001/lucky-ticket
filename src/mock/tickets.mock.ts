@@ -10,21 +10,18 @@ const getAutocollectFinishDate = () => getRandomUpcomingDate(2000, 3000);
 const getPastIso = (offsetSeconds: number) =>
   dayjs().subtract(offsetSeconds, 'second').toISOString();
 
-const getFutureIso = (offsetSeconds: number) => dayjs().add(offsetSeconds, 'second').toISOString();
-
 interface EnginePreset {
   cycleSeconds: number;
-  starsCost: number;
 }
 
 const { baseCycleSecondsByTier } = appConfig.engines;
 
 const tierPresets: Record<TicketType, EnginePreset> = {
-  bronze: { cycleSeconds: baseCycleSecondsByTier.bronze, starsCost: 5 },
-  silver: { cycleSeconds: baseCycleSecondsByTier.silver, starsCost: 10 },
-  gold: { cycleSeconds: baseCycleSecondsByTier.gold, starsCost: 15 },
-  platinum: { cycleSeconds: baseCycleSecondsByTier.platinum, starsCost: 25 },
-  diamond: { cycleSeconds: baseCycleSecondsByTier.diamond, starsCost: 40 },
+  bronze: { cycleSeconds: baseCycleSecondsByTier.bronze },
+  silver: { cycleSeconds: baseCycleSecondsByTier.silver },
+  gold: { cycleSeconds: baseCycleSecondsByTier.gold },
+  platinum: { cycleSeconds: baseCycleSecondsByTier.platinum },
+  diamond: { cycleSeconds: baseCycleSecondsByTier.diamond },
 };
 
 const buildEngines = (tier: 'bronze' | 'silver' | 'gold', count: number): TicketEngine[] => {
@@ -37,19 +34,13 @@ const buildEngines = (tier: 'bronze' | 'silver' | 'gold', count: number): Ticket
     return {
       id: `engine-${tier}-${index + 1}`,
       cycleSeconds: preset.cycleSeconds,
-      perCycleOutput: 1,
       cycleStartedAt: getPastIso(claimable ? preset.cycleSeconds : index + 2),
       pendingCount: claimable ? 1 + (index % 3) : 0,
-      instantClaimStarsCost: preset.starsCost,
       lifetimeProduced: engineLevel * 1900 + (speedLevel + capacityLevel) * 70 + index * 130,
       createdAt: getPastIso(86_400 * (20 + index * 5)),
       engineLevel,
       speedLevel,
       capacityLevel,
-      ...(index % 4 === 1
-        ? { speedBoostMultiplier: 2, speedBoostExpiresAt: getFutureIso(7200) }
-        : {}),
-      ...(index % 5 === 2 ? { capacityUpgradeMultiplier: 2 } : {}),
     } satisfies TicketEngine;
   });
 };

@@ -24,17 +24,17 @@ export interface BlockedTicketProps extends BaseTicketProps {
 export interface TicketEngine {
   id: string;
   cycleSeconds: number;
-  perCycleOutput: number;
   cycleStartedAt: string;
   pendingCount: number;
-  speedBoostMultiplier?: number;
-  speedBoostExpiresAt?: string;
-  capacityUpgradeMultiplier?: number;
-  instantClaimStarsCost: number;
   /** Total tickets this engine has ever claimed (running backend counter). */
   lifetimeProduced?: number;
   /** When the engine was first acquired (stable; unlike cycleStartedAt). */
   createdAt?: string;
+  // Production math is fully additive: per-cycle output derives from
+  // engineLevel + capacityLevel + chips (see ticket-engine.utils), and cycle
+  // speed from engineLevel + speedLevel + chips/boosters/status/avatar. There
+  // are deliberately NO multiplier/expiry fields on the engine — a backend
+  // implementer must not resurrect the old multiplicative model (audit L1).
   engineLevel?: number;
   speedLevel?: number;
   capacityLevel?: number;

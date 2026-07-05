@@ -23,6 +23,7 @@ import { PartnersComingSoon } from '@/components/pages/tabs/home/PartnersComingS
 import { useUnlockedTiers } from '@/hooks/useUnlockedTiers';
 import { useToast } from '@/hooks/useToast';
 import { useAppTranslations } from '@/hooks/useAppTranslations';
+import { useEngineSpeedAvatarBoostPct } from '@/hooks/useEngineSpeedAvatarBoostPct';
 import { TicketsEnum } from '@/types/enums/ticket.enums';
 import { findActiveBooster, findEquippedChip } from '@/utils/global/inventory.utils';
 import { effectiveCycleSeconds, engineElapsedSeconds } from '@/utils/global/ticket-engine.utils';
@@ -37,6 +38,7 @@ export function TicketsTabsView() {
   const { data: me } = useGetMeQuery();
   const isLp = me?.isLuckyPlayer ?? false;
   const isVip = me?.isVIP ?? false;
+  const avatarSpeedPct = useEngineSpeedAvatarBoostPct();
   const [claimEngine] = useClaimEngineMutation();
   const [claimEnginesForTier] = useClaimEnginesForTierMutation();
   const [completeEngineCycle] = useCompleteEngineCycleMutation();
@@ -87,6 +89,7 @@ export function TicketsTabsView() {
           speedBooster,
           isLuckyPlayer: isLp,
           isVip,
+          avatarBoostPct: avatarSpeedPct,
         });
         next[engine.id] = engine.pendingCount > 0 ? cycle : engineElapsedSeconds(engine);
         if (engine.pendingCount === 0 && next[engine.id] >= cycle) due.push(engine.id);

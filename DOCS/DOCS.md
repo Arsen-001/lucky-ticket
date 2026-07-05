@@ -180,7 +180,7 @@ LuckyTicket365 runs on **two separate currencies**: Lucky Coin (LC), the interna
 
 LC is the internal reward currency. It is **earned only by playing** — tournament prizes, stake yield (APR), task and ad rewards — and is spent inside the platform: buying tickets, producer engines, speed boosts, and upgrading statuses.
 
-- LC has a fixed real-money valuation of **$0.000001 per LC** ($1 = 1,000,000 LC), used to price its conversion to TON.
+- LC has a fixed real-money valuation of **$0.00001 per LC** ($1 = 100,000 LC), used to price its conversion to TON.
 - LC **cannot be acquired by conversion** — there is no TON→LC or LS→LC path, and no fiat/crypto LC deposit. LC enters the economy only by playing.
 - LC reaches real money by **converting to TON** at its $0.000001 valuation; the resulting TON is withdrawn through the wallet (Section 15). A **direct LC withdrawal is coming soon**.
 - The LC→TON exit carries two backend-enforced guards (`appConfig.economy.lcConversion`): a **15% conversion fee** and a **$10/day per-account cap**. They are the hard bound on real-money outflow regardless of how the internal LC faucet is tuned (§14.2).
@@ -329,7 +329,7 @@ Each engine has its own dedicated page (`/engines/[id]`). The page mirrors the f
 
 ### 8.3 Ticket Categories
 
-- **Project Tickets:** Bronze, Silver, Gold, Diamond, Platinum.
+- **Project Tickets:** Bronze, Silver, Gold, Platinum, Diamond.
 - **Partner Tickets:** Required to participate in tournaments from partners (e.g., A-partner tournament can only be joined via having an A-ticket).
 
 ### 8.4 Ticket Rarities
@@ -366,7 +366,7 @@ Ticket production in LuckyTicket365 is driven by **producer engines**. Every tic
 
 An engine is a permanent, ownable producer that:
 
-- Produces **one specific ticket type** (Bronze, Silver, Gold, Diamond, Platinum, or partner-specific).
+- Produces **one specific ticket type** (Bronze, Silver, Gold, Platinum, Diamond, or partner-specific).
 - Runs on a **production cycle** — a fixed time interval after which it outputs tickets.
 - Has a **per-cycle output** — the number of tickets generated each cycle (default: 1, increasable via a Capacity Upgrade purchased in Lucky Stars).
 - Accumulates produced tickets into a pending pool until the user claims them.
@@ -381,7 +381,7 @@ Every new user receives **one Bronze producer engine** for free — part of a **
 
 Beyond the initial gift, users obtain engines through:
 
-- **Tier unlock:** Higher-tier engines (Silver, Gold, Diamond, Platinum) become available once the user satisfies the requirements in Section 8.5.
+- **Tier unlock:** Higher-tier engines (Silver, Gold, Platinum, Diamond) become available once the user satisfies the requirements in Section 8.5.
 - **Market purchase:** Once a tier is unlocked, the user can buy as many engines of that tier as desired with **Lucky Coins (LC)**.
 - **Rewards:** Engines may be granted as task rewards, tournament prizes, or stake bonuses.
 
@@ -414,10 +414,10 @@ Users may pay **Lucky Stars (LS)** to receive an engine's next ticket immediatel
 
 Each engine has two tunable parameters:
 
-| Parameter            | Meaning                                                   | Modified By                                                                    |
-| :------------------- | :-------------------------------------------------------- | :----------------------------------------------------------------------------- |
-| **Production Speed** | Time per production cycle (e.g., 1 ticket every 2 hours). | Engine Speed Boost (Section 10.1) **+** Speed Chip (Section 10.4)              |
-| **Per-Cycle Output** | Number of tickets generated per cycle (default 1).        | Capacity Upgrade (Section 10.2, paid in LS) **+** Capacity Chip (Section 10.4) |
+| Parameter            | Meaning                                                           | Modified By                                                                                                                  |
+| :------------------- | :---------------------------------------------------------------- | :--------------------------------------------------------------------------------------------------------------------------- |
+| **Production Speed** | Time per production cycle (e.g., 1 ticket every 2 hours).         | Engine Speed Boost (Section 10.1) **+** Speed Chip (Section 10.4)                                                            |
+| **Per-Cycle Output** | Number of tickets generated per cycle (base 1 at engine level 1). | Engine level / promotion (Section 10.2) **+** Capacity Upgrade (Section 10.2, paid in LS) **+** Capacity Chip (Section 10.4) |
 
 **Base production ladder per tier** (knobs — cycle time doubles each tier, base output is 1 ticket/cycle for all tiers):
 
@@ -439,7 +439,7 @@ All speed boosts stack **additively**, then are applied as a single divisor to t
 
 ```
 totalBoostPct = engineLevelBoostPct + speedLevelBoostPct + statusEngineSpeedBoostPct
-              + speedChip.effectPct + speedBooster.effectPct
+              + avatarEngineSpeedBoostPct + speedChip.effectPct + speedBooster.effectPct
 rawCycle      = engine.cycleSeconds / (1 + totalBoostPct / 100)
 floor         = capacity × engineMinSecondsPerTicket
 finalCycle    = max(rawCycle, floor)
@@ -447,12 +447,13 @@ finalCycle    = max(rawCycle, floor)
 
 Where:
 
-- Each **engine level** above 1 contributes `+100%` (`ENGINE_LEVEL_SPEED_BOOST_PCT`).
+- Each **engine level** above 1 contributes `+100%` speed (`ENGINE_LEVEL_SPEED_BOOST_PCT`) **and** raises the engine's **base per-cycle output** by `+10` (`baseCapacity = 1 + (engineLevel − 1) × 10`: base `1 → 11 → 21 …`). Engine level is reached by **promotion** — see Section 10.2.
 - Each **speed-level upgrade** contributes `+10%` (`SPEED_LEVEL_BOOST_PCT_PER_LEVEL`) — 10 levels max, so a fully speed-upgraded engine runs its cycle **twice as fast**.
-- Each **capacity-level upgrade** contributes `+10%` to capacity (`CAPACITY_LEVEL_BOOST_PCT_PER_LEVEL`) — 10 levels max, so a fully capacity-upgraded engine mints **2 tickets per cycle**.
+- Each **capacity-level upgrade** contributes `+10%` to capacity (`CAPACITY_LEVEL_BOOST_PCT_PER_LEVEL`) — 10 levels max, so a fully capacity-upgraded engine mints **2 tickets per cycle** _at engine level 1_ (base 1 → 2). At higher levels the same `+100%` is applied to the bigger base, e.g. a level-2 engine's maxed capacity mints `round(11 × 2) = 22`.
 - **Status boost** uses VIP value if active, otherwise LP, otherwise 0 (DOCS §7.3).
+- **Equipped-avatar boost** contributes the currently-equipped avatar's `engineSpeed` boost `pct` (0 if the equipped avatar has no speed boost). Like the status boost it is permanent-while-equipped, so it applies to the real production cycle, not just the UI (§14 cosmetics).
 
-**Hard speed floor.** No matter how many boosts stack, one ticket can never be minted faster than `GlobalConstants.engineMinSecondsPerTicket = 900s` (15 minutes per ticket). `effectiveCycleSeconds()` clamps the result against `capacity × 900s`.
+**Hard speed floor.** No matter how many boosts stack, one ticket can never be minted faster than `GlobalConstants.engineMinSecondsPerTicket = 900s` (15 minutes per ticket). `effectiveCycleSeconds()` clamps the result against `capacity × 900s`. Because a promoted engine's base capacity is larger, that per-cycle floor rises with it — so promotion is felt as a **bigger batch per cycle at the 900s/ticket floor**, not a proportionally shorter cycle (e.g. a level-2 Bronze engine mints its 11-ticket batch in `11 × 900s`, i.e. 900s per ticket, rather than halving the 2 h cycle).
 
 ### 9.8 Productivity Metric
 
@@ -517,7 +518,16 @@ A Capacity Upgrade increases an engine's **per-cycle output** — instead of pro
 - **Tiers:** Higher-tier capacity upgrades may yield 3 or more tickets per cycle (defined by product team).
 - **Duration:** Defined by product team (permanent or time-limited per upgrade tier).
 
-**Permanent level upgrades — effect & LS cost curves** (knobs in `appConfig.economy.engineUpgrades`, helpers in `economy.utils.ts`): each engine carries a permanent **speed level** and **capacity level**, both 0–10, both paid in LS per level. Every level adds **+10%** to its additive boost stack (§9.7) — a maxed speed engine cycles 2× as fast; a maxed capacity engine mints 2 tickets per cycle. Level costs grow linearly: speed `5 + 3 × level` LS, capacity `8 + 4 × level` LS (level = current level before the upgrade).
+**Permanent level upgrades — effect & LS cost curves** (knobs in `appConfig.economy.engineUpgrades`, helpers in `economy.utils.ts`): each engine carries a permanent **speed level** and **capacity level**, both 0–10, both paid in LS per level. Every level adds **+10%** to its additive boost stack (§9.7) — a maxed speed engine cycles 2× as fast; a maxed capacity engine mints 2 tickets per cycle _at engine level 1_. Level costs grow linearly: speed `5 + 3 × level` LS, capacity `8 + 4 × level` LS (level = current level before the upgrade).
+
+**Engine promotion (level-up).** Speed level and capacity level each cap at 10. When **both** reach 10, the next paid upgrade **promotes** the engine to the next **engine level** and resets both sub-levels back to 0 — a fresh `0–10 / 0–10` ladder on a stronger base (`promoteEngineIfMaxed`, `ticket-engine.utils.ts`). Each engine level permanently:
+
+- adds **+100%** to the speed stack (§9.7), and
+- raises **base per-cycle output** by **+10** (`baseCapacity = 1 + (engineLevel − 1) × 10`: base `1 → 11 → 21 …`).
+
+Because the per-ticket time is already at the 900 s hard floor (§9.7), the net effect of a promotion is felt as a **much bigger batch per cycle** (base 1 → 11 → 21) rather than a shorter cycle. Reaching the next engine level therefore costs a **full 10 speed + 10 capacity = 20 Lucky-Star upgrades**, making promotion a real-money **LS sink**, not a free multiplier (see the economic framing in §14.2).
+
+**Engine-level cap.** The engine level itself is capped at **5** (`MAX_ENGINE_LEVEL`, mirroring the backend's `ENGINE_FUSION.maxEngineLevel`). At the cap the 10/10 sub-level state is **terminal** — the ladders stay full and no further promotion occurs.
 
 ### 10.3 Stacking Speed and Capacity
 
@@ -793,13 +803,13 @@ Each tournament includes:
 
   | Tier     | LC per seat |
   | :------- | ----------: |
-  | Bronze   |       4,000 |
-  | Silver   |      10,000 |
-  | Gold     |      25,000 |
-  | Platinum |      60,000 |
-  | Diamond  |     150,000 |
+  | Bronze   |      40,000 |
+  | Silver   |     100,000 |
+  | Gold     |     250,000 |
+  | Platinum |     600,000 |
+  | Diamond  |   1,500,000 |
 
-  At the $0.000001/LC anchor a full 500-seat instance is worth **$2 / $5 / $12.5 / $30 / $75** by tier — the per-seat knob is what caps the platform's real-money faucet.
+  At the $0.00001/LC anchor a full 500-seat instance is worth **$200 / $500 / $1,250 / $3,000 / $7,500** by tier — the per-seat knob is what caps the platform's real-money faucet.
 
 - **Start Time:** The date and time when the tournament begins and winners are decided.
 - **Team Size:** The total number of seats. `teamSizeCap` = 500 per instance; when more eligible players exist than the cap, additional parallel instances of the slot are spawned.
@@ -1159,10 +1169,10 @@ The Market is the platform's main LC **sink** — the counterweight to the tourn
 
 Base LC prices (first engine of a tier):
 
-| Item   |  Bronze |  Silver |    Gold |  Platinum |   Diamond |
-| :----- | ------: | ------: | ------: | --------: | --------: |
-| Engine | 200,000 | 360,000 | 675,000 | 1,170,000 | 2,250,000 |
-| Ticket |   6,000 |  15,000 |  37,500 |    90,000 |   225,000 |
+| Item   |    Bronze |    Silver |      Gold |   Platinum |    Diamond |
+| :----- | --------: | --------: | --------: | ---------: | ---------: |
+| Engine | 2,000,000 | 3,600,000 | 6,750,000 | 11,700,000 | 22,500,000 |
+| Ticket |    60,000 |   150,000 |   375,000 |    900,000 |  2,250,000 |
 
 **House edge.** The ticket price equals `1.5 × prizeLcPerSeat` for its tier (`tournamentHouseEdgeMultiplier`) — always above the average LC a ticket returns in a tournament. Bought tickets are never a profitable money loop; free engine-produced tickets are the free roll.
 
@@ -1170,7 +1180,11 @@ Base LC prices (first engine of a tier):
 
 **Payback ladder.** First-engine payback (price ÷ daily LC value at perfect claims) rises gently with the tier — ≈4 / 6 / 9 / 13 / 20 days for Bronze → Diamond — so climbing tiers is always rewarding, never a trap. Simulated over a year of perfect greedy free play, production value grows ≈×5 from day 30 to day 365 (sub-exponential, bounded).
 
-**Currency parity.** Where an item is priced in both LC and Telegram Stars, the Stars price is derived at the USD anchors (`lcUsdRate` / `lsUsdRate`) — neither currency is an arbitrage on the other.
+**Engine promotion is an LS sink, not an LC printer.** Beyond buying more engines, a player deepens one via 10 speed + 10 capacity levels; the 20th upgrade **promotes** it (+100% speed, +10 base output — §10.2) and reopens the ladder. Every one of those 20 steps is priced in **Lucky Stars**, so promotion drains premium currency rather than inflating the LC faucet — which is why the greedy free-play bound above (LC-only reinvestment) can ignore it. The promotion gate and its base-capacity/speed curves are pinned by `tests/economy-sim.test.ts` ("engine-level promotion & base-capacity scaling").
+
+**Currency parity.** Where an item is priced in both LC and Telegram Stars, the Stars price is derived at the USD anchors (`lcUsdRate` / `lsUsdRate`) — neither currency is an arbitrage on the other. This parity is enforced by the guardrail simulation for **engines and tickets** (the two dual-priced items that are core to the loop).
+
+**Boost pricing is LC-first (deliberate LS premium).** Engine **Speed / Collect Boosts** (§10.1) are the one exception to strict parity: they are primarily an **LC** sink (the farmable currency), and their **LS** alternative is set independently at a deliberate premium — roughly **5× parity** across the ladder. LS is intentionally _not_ the economical way to buy a farmable consumable boost; the LS option exists only as a fallback for players out of LC. This is why the parity guardrail covers engines/tickets but **not** boosts.
 
 **Balance rule:** total LC spent in the Market per day should be ≥ the total LC faucet per day (tournaments + tasks + ads + stake APR), keeping LC mildly deflationary so it does not lose value.
 
@@ -1458,7 +1472,7 @@ Badges are organized into themed categories. Final list and per-category counts 
 
 - **Status:** Verified, Lucky Player active, VIP I/V/X/XX/…
 - **Stakes:** Completed Level 1/2/3/4, total stakes completed, no-cancel streaks
-- **Tickets:** Claimed thresholds per tier (e.g., 100 / 1k / 10k Bronze, Silver, Gold, Diamond, Platinum)
+- **Tickets:** Claimed thresholds per tier (e.g., 100 / 1k / 10k Bronze, Silver, Gold, Platinum, Diamond)
 - **Engines:** Own all five tiers, own N engines, first Capacity Upgrade installed, total Speed Boosts used
 - **Tournaments:** Participated in N tournaments, won 1 / 5 / 25, first partner tournament win
 - **Streaks:** 7 / 30 / 100 / 365 consecutive days in app
