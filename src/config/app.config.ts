@@ -147,14 +147,20 @@ export const appConfig = {
      */
     engineRepeatPriceGrowth: 1.6,
     /**
-     * LS cost curves for the permanent per-engine upgrades (paid in Lucky
-     * Stars): `cost(level→level+1) = base + level × perLevel`.
+     * LS cost of the permanent per-engine upgrades (paid in Lucky Stars). Cost
+     * rises with the boost sub-level AND the engine level — each engine level
+     * adds `perEngineLevel` to every price:
+     *   speed    = speedBase    + subLevel × perSubLevel + (engineLevel − 1) × perEngineLevel
+     *   capacity = capacityBase + subLevel × perSubLevel + (engineLevel − 1) × perEngineLevel
+     * At the default knobs: level-1 engine → speed 1…10, capacity 2…11; level-5
+     * engine → speed 5…14, capacity 6…15. Full max of one engine (all 5 levels,
+     * 100 upgrades) = 800 LS.
      */
     engineUpgrades: {
-      speedLsBase: 5,
-      speedLsPerLevel: 3,
-      capacityLsBase: 8,
-      capacityLsPerLevel: 4,
+      speedBase: 1,
+      capacityBase: 2,
+      perSubLevel: 1,
+      perEngineLevel: 1,
     },
     /**
      * Guards on the LC → TON exit (backend-enforced). The conversion fee and

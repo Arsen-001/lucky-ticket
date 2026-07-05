@@ -16,6 +16,7 @@
 # next.js
 /.next/
 /.next-precommit/
+/.next-repro/
 /out/
 
 # production

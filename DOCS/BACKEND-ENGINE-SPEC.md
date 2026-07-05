@@ -66,7 +66,7 @@ Engine {
 | `baseCycleSecondsByTier`             | bronze 7200, silver 14400, gold 28800, platinum 57600, diamond 115200        | app.config engines  |
 | `engineBasePriceLcByTier`            | bronze 200000, silver 360000, gold 675000, platinum 1170000, diamond 2250000 | app.config economy  |
 | `engineRepeatPriceGrowth`            | `1.6`                                                                        | app.config economy  |
-| `engineUpgrades`                     | speedLsBase 5, speedLsPerLevel 3, capacityLsBase 8, capacityLsPerLevel 4     | app.config economy  |
+| `engineUpgrades`                     | speedBase 1, capacityBase 2, perSubLevel 1, perEngineLevel 1                 | app.config economy  |
 | `lcUsdRate` / `lsUsdRate`            | `0.000001` / `0.02` → паритет `max(1, round(lc/20000))`                      | app.config wallet   |
 | `ticketPriceLcByTier`                | bronze 6000, silver 15000, gold 37500, platinum 90000, diamond 225000        | app.config economy  |
 | `tournamentHouseEdgeMultiplier`      | `1.5`                                                                        | app.config economy  |
@@ -144,8 +144,12 @@ equippedAvatarEngineSpeedPct(user):
 **Стоимость уровней (LS, сервер пересчитывает от текущего уровня):**
 
 ```
-speedUpgradeLsCost(level)    = 5 + level * 3      // level = текущий ДО апгрейда
-capacityUpgradeLsCost(level) = 8 + level * 4
+// level = под-уровень ДО апгрейда (0..9); engineLevel = 1..5.
+// Каждый engine-level поднимает цену каждой прокачки на perEngineLevel (=1).
+speedUpgradeLsCost(level, engineLevel)    = 1 + level + (engineLevel - 1)   // = level + engineLevel
+capacityUpgradeLsCost(level, engineLevel) = 2 + level + (engineLevel - 1)   // = level + engineLevel + 1
+// level 1 движок: speed 1..10, capacity 2..11; level 5: speed 5..14, capacity 6..15.
+// Полный макс одного движка (все 5 уровней, 100 апгрейдов) = 800 LS.
 ```
 
 **Один апгрейд:**
@@ -197,8 +201,8 @@ engineLevel = ровно 10 speed + 10 capacity = **20 LS-апгрейдов**; 
 | `POST engines/claim-all`        | `{tier}`                | `{claimed, apGain}`                 | Клейм всех готовых движков тира; `claimed` — сумма пачек.                                                                                                                |
 | `POST engines/instant-claim`    | `{engineId, cost}`      | `{claimed, cost}`                   | Пропустить остаток цикла за LS. **Сервер пересчитывает** `cost = max(1, ceil(remaining/3600))`, списывает LS, выдаёт полную пачку `engineCapacity`, стартует новый цикл. |
 | `POST engines/skip`             | `{engineId}`            | `{skipped, cost}`                   | Fast-forward цикла за LS (аналог instant-claim по сути; сохранить текущее поведение фронта). Сервер пересчитывает cost.                                                  |
-| `POST engines/upgrade-speed`    | `{engineId, cost}`      | `204`                               | §5: пересчитать `speedUpgradeLsCost(speedLevel)`, списать LS, `speedLevel+1`, промоут.                                                                                   |
-| `POST engines/upgrade-capacity` | `{engineId, cost}`      | `204`                               | §5: пересчитать `capacityUpgradeLsCost(capacityLevel)`, списать LS, `capacityLevel+1`, промоут.                                                                          |
+| `POST engines/upgrade-speed`    | `{engineId, cost}`      | `204`                               | §5: пересчитать `speedUpgradeLsCost(speedLevel, engineLevel)`, списать LS, `speedLevel+1`, промоут.                                                                      |
+| `POST engines/upgrade-capacity` | `{engineId, cost}`      | `204`                               | §5: пересчитать `capacityUpgradeLsCost(capacityLevel, engineLevel)`, списать LS, `capacityLevel+1`, промоут.                                                             |
 | `POST engines/complete-cycle`   | `{engineId}`            | `204`                               | Идемпотентно доначислить `pendingCount` если цикл истёк (§6). Считать цикл с учётом статуса+аватара.                                                                     |
 | `POST engines/grant-welcome`    | —                       | `204`                               | Идемпотентно (ключ — наличие стартового движка). Выдать: бесплатный Bronze-движок (1 готовый тикет), welcome-pack `5 bronze tickets + 1 AP`.                             |
 | `POST market/engines/buy`       | `{engineId, priceType}` | `{engine}`                          | **H1:** цена = §8. Списать LC/LS по `priceType`, создать движок тира на `engineLevel` из каталога (обычно 1), `speedLevel=0, capacityLevel=0`.                           |

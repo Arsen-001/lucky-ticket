@@ -363,7 +363,7 @@ export function HomeEnginesSlider({ className }: ClassNameProps) {
   const handleUpgradeSpeed = (engineId: string) => {
     const engine = itemsRef.current.find(item => item.engine.id === engineId)?.engine;
     if (!engine) return;
-    const cost = speedUpgradeLsCost(engine.speedLevel ?? 0);
+    const cost = speedUpgradeLsCost(engine.speedLevel ?? 0, engine.engineLevel ?? 1);
     const nextLevel = Math.min(MAX_BOOST_LEVEL, (engine.speedLevel ?? 0) + 1);
     setUpgradeConfirm({ engineId, type: 'speed', cost, nextLevel });
   };
@@ -371,7 +371,7 @@ export function HomeEnginesSlider({ className }: ClassNameProps) {
   const handleUpgradeCapacity = (engineId: string) => {
     const engine = itemsRef.current.find(item => item.engine.id === engineId)?.engine;
     if (!engine) return;
-    const cost = capacityUpgradeLsCost(engine.capacityLevel ?? 0);
+    const cost = capacityUpgradeLsCost(engine.capacityLevel ?? 0, engine.engineLevel ?? 1);
     const nextLevel = Math.min(MAX_BOOST_LEVEL, (engine.capacityLevel ?? 0) + 1);
     setUpgradeConfirm({ engineId, type: 'capacity', cost, nextLevel });
   };

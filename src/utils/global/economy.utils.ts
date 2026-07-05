@@ -43,12 +43,23 @@ export const enginePaybackDays = (tier: TicketType, ownedCount = 0): number =>
 export const lcPriceToLsParity = (lcAmount: number): number =>
   Math.max(1, Math.round((lcAmount * appConfig.wallet.lcUsdRate) / appConfig.wallet.lsUsdRate));
 
-/** LS cost of the speed upgrade from `level` to `level + 1` (DOCS §10.1). */
-export const speedUpgradeLsCost = (level: number): number =>
-  appConfig.economy.engineUpgrades.speedLsBase +
-  level * appConfig.economy.engineUpgrades.speedLsPerLevel;
+/**
+ * LS cost of the speed upgrade from sub-`level` to `level + 1` on an engine at
+ * `engineLevel` (DOCS §10.1). Each engine level adds `perEngineLevel` to every
+ * price → `level + engineLevel` at the default knobs: 1…10 at engine level 1,
+ * 5…14 at level 5.
+ */
+export const speedUpgradeLsCost = (level: number, engineLevel: number): number =>
+  appConfig.economy.engineUpgrades.speedBase +
+  level * appConfig.economy.engineUpgrades.perSubLevel +
+  Math.max(0, engineLevel - 1) * appConfig.economy.engineUpgrades.perEngineLevel;
 
-/** LS cost of the capacity upgrade from `level` to `level + 1` (DOCS §10.2). */
-export const capacityUpgradeLsCost = (level: number): number =>
-  appConfig.economy.engineUpgrades.capacityLsBase +
-  level * appConfig.economy.engineUpgrades.capacityLsPerLevel;
+/**
+ * LS cost of the capacity upgrade from sub-`level` to `level + 1` on an engine at
+ * `engineLevel` (DOCS §10.2). `level + engineLevel + 1` at the default knobs:
+ * 2…11 at engine level 1, 6…15 at level 5.
+ */
+export const capacityUpgradeLsCost = (level: number, engineLevel: number): number =>
+  appConfig.economy.engineUpgrades.capacityBase +
+  level * appConfig.economy.engineUpgrades.perSubLevel +
+  Math.max(0, engineLevel - 1) * appConfig.economy.engineUpgrades.perEngineLevel;

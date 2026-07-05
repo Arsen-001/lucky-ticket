@@ -97,8 +97,8 @@ export function EngineCard({
 
   // Displayed prices must come from the same config the charge handlers use —
   // an inline copy of the formula diverges on the first rebalance.
-  const speedCost = speedUpgradeLsCost(speedLevel);
-  const capacityCost = capacityUpgradeLsCost(capacityLevel);
+  const speedCost = speedUpgradeLsCost(speedLevel, engineLevel);
+  const capacityCost = capacityUpgradeLsCost(capacityLevel, engineLevel);
   const instantClaimCost = Math.max(1, Math.ceil(remaining / 3600));
 
   const glow = TIER_GLOW[tier];
