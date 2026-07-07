@@ -1,7 +1,10 @@
+'use client';
+
 import type { ReactNode } from 'react';
-import { ChevronRight } from 'lucide-react';
+import { ChevronRight, Lock } from 'lucide-react';
 import { twMerge } from 'tailwind-merge';
 import { Link } from '@/components/shared/links/Link';
+import { useAppTranslations } from '@/hooks/useAppTranslations';
 import type { Route } from '@/constants/routes';
 
 export interface DrawerItemProps {
@@ -10,6 +13,8 @@ export interface DrawerItemProps {
   icon: ReactNode;
   badge?: number;
   active?: boolean;
+  /** Feature not launched yet — renders non-navigable with a lock + Coming Soon badge. */
+  locked?: boolean;
   tabIndex?: number;
   onNavigate?: () => void;
 }
@@ -20,10 +25,36 @@ export function DrawerItem({
   icon,
   badge,
   active = false,
+  locked = false,
   tabIndex,
   onNavigate,
 }: DrawerItemProps) {
-  const showBadge = !!badge && badge > 0;
+  const t = useAppTranslations();
+  const showBadge = !locked && !!badge && badge > 0;
+
+  if (locked) {
+    return (
+      <li>
+        <div
+          aria-disabled="true"
+          className="relative flex select-none items-center gap-3 overflow-hidden rounded-xl px-2.5 py-2.5"
+        >
+          <span className="flex-center text-white-secondary relative h-8 w-8 flex-shrink-0 rounded-lg bg-white/5 opacity-55">
+            {icon}
+          </span>
+          <span className="text-white-secondary relative flex-1 truncate text-sm font-semibold opacity-55">
+            {title}
+          </span>
+          <span className="drawer-coming-soon border-electric-purple/40 bg-electric-purple/15 relative flex-shrink-0 rounded-full border px-2 py-1 text-[9px] font-extrabold uppercase leading-none tracking-[0.14em]">
+            <span className="from-electric-pink to-electric-purple via-white bg-gradient-to-r bg-clip-text text-transparent">
+              {t('coming soon')}
+            </span>
+          </span>
+          <Lock size={14} className="flex-shrink-0 text-white/35" />
+        </div>
+      </li>
+    );
+  }
 
   return (
     <li>

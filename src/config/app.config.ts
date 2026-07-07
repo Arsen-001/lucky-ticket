@@ -267,7 +267,7 @@ export const appConfig = {
      * but a "coming soon" banner sits on top and submitting surfaces a Coming Soon
      * toast instead of creating. Flip to `true` to make it live.
      */
-    enabled: true,
+    enabled: false,
     /** Page size for the advertiser's "my tournaments" list. */
     listPageSize: 5,
     /**

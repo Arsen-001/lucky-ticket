@@ -33,6 +33,34 @@
   }
 }
 
+.drawer-coming-soon {
+  position: relative;
+  overflow: hidden;
+}
+
+.drawer-coming-soon::after {
+  content: '';
+  position: absolute;
+  top: -50%;
+  bottom: -50%;
+  left: 0;
+  width: 40%;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.35), transparent);
+  transform: translateX(-150%) skewX(-18deg);
+  animation: drawer-coming-soon-sweep 2.8s ease-in-out infinite;
+  pointer-events: none;
+}
+
+@keyframes drawer-coming-soon-sweep {
+  0% {
+    transform: translateX(-150%) skewX(-18deg);
+  }
+  55%,
+  100% {
+    transform: translateX(400%) skewX(-18deg);
+  }
+}
+
 .drawer-profile-card {
   position: relative;
 }

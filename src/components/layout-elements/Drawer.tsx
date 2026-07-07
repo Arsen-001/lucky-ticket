@@ -31,6 +31,7 @@ import { twMerge } from 'tailwind-merge';
 import { useRouter } from 'next/navigation';
 
 import { useLogoutMutation } from '@/api/auth.api';
+import { appConfig } from '@/config/app.config';
 import { useGetMeQuery } from '@/api/me.api';
 import { useGetNotificationsQuery } from '@/api/notifications.api';
 import { useGetStakesQuery } from '@/api/stakes.api';
@@ -56,6 +57,7 @@ interface DrawerSectionItem {
   title: string;
   icon: ReactNode;
   badge?: number;
+  locked?: boolean;
 }
 
 export function Drawer() {
@@ -247,6 +249,9 @@ export function Drawer() {
       route: routes.partners.index,
       title: t('partners'),
       icon: <Handshake size={18} />,
+      // Follows the cabinet's master switch (§21.1) — flipping it live unlocks
+      // the drawer entry together with the page itself.
+      locked: !appConfig.partners.enabled,
     },
     {
       route: routes.promo,
@@ -370,6 +375,7 @@ export function Drawer() {
                   icon={item.icon}
                   badge={item.badge}
                   active={isItemActive(item.route)}
+                  locked={item.locked}
                   tabIndex={tabIndex}
                   onNavigate={handleDrawerClose}
                 />
