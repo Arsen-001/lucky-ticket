@@ -43,7 +43,13 @@ export interface MarketSelectedItem {
   accent?: MarketAccent;
   /** Confirm-button label for this item (e.g. "Upgrade" for VIP). Defaults to "Buy". */
   confirmText?: string;
-  mutate: (price: MarketPrice) => Promise<unknown>;
+  /** Per-order quantity cap; omit for single-purchase items (status, cosmetics…). */
+  maxQuantity?: number;
+  /** How many of this item the player already owns (tickets of the tier, same shards…). */
+  ownedCount?: number;
+  /** Small icon for the owned pill (the big `iconNode` doesn't fit there). */
+  ownedIconNode?: ReactNode;
+  mutate: (price: MarketPrice, count: number) => Promise<unknown>;
 }
 
 interface MarketActivePurchase {
@@ -53,7 +59,10 @@ interface MarketActivePurchase {
   iconNode: ReactNode;
   price: MarketPrice;
   confirmText?: string;
-  mutate: () => Promise<unknown>;
+  maxQuantity?: number;
+  ownedCount?: number;
+  ownedIconNode?: ReactNode;
+  mutate: (count: number) => Promise<unknown>;
 }
 
 export function MarketView() {
@@ -116,6 +125,19 @@ export function MarketView() {
         return;
       }
     }
+    // Cap the quantity stepper by what the balance can actually cover, so the
+    // MAX button can never arm a confirm the backend is bound to reject.
+    let maxQuantity: number | undefined;
+    if (item.maxQuantity && item.maxQuantity > 1) {
+      const balance =
+        price.type === MarketPriceType.LC
+          ? (me?.coins ?? 0)
+          : price.type === MarketPriceType.TELEGRAM_STARS
+            ? (me?.telegramStars ?? 0)
+            : 0;
+      const affordable = price.amount > 0 ? Math.floor(balance / price.amount) : item.maxQuantity;
+      maxQuantity = Math.max(1, Math.min(item.maxQuantity, affordable));
+    }
     setPurchase({
       id: item.id,
       name: item.name,
@@ -123,7 +145,10 @@ export function MarketView() {
       iconNode: item.iconNode,
       price,
       confirmText: item.confirmText,
-      mutate: () => item.mutate(price),
+      maxQuantity,
+      ownedCount: item.ownedCount,
+      ownedIconNode: item.ownedIconNode,
+      mutate: (count: number) => item.mutate(price, count),
     });
   };
 
@@ -132,13 +157,13 @@ export function MarketView() {
     handleBuy(infoItem, price);
   };
 
-  const handleConfirm = async () => {
+  const handleConfirm = async (count: number) => {
     if (!purchase) return;
     setConfirming(true);
     try {
-      await purchase.mutate();
+      await purchase.mutate(count);
       setSuccess({
-        name: purchase.name,
+        name: count > 1 ? `${purchase.name} ×${count}` : purchase.name,
         description: purchase.description,
         iconNode: purchase.iconNode,
       });
@@ -210,6 +235,9 @@ export function MarketView() {
         iconNode={purchase?.iconNode}
         price={purchase?.price}
         confirmText={purchase?.confirmText}
+        maxQuantity={purchase?.maxQuantity}
+        ownedCount={purchase?.ownedCount}
+        ownedIconNode={purchase?.ownedIconNode}
       />
 
       <StarsTopUpFlow

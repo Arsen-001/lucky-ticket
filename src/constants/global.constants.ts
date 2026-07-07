@@ -120,6 +120,13 @@ export const GlobalConstants = {
   stakeCancelFeeMinStars: appConfig.stakes.cancelFeeMinStars,
   stakeCancelFeeMultiplier: appConfig.stakes.cancelFeeMultiplier,
   stakeBronzeFreeStartCount: appConfig.stakes.bronzeFreeStartCount,
+  /** Max units of a countable Market item (tickets) purchasable in one order. */
+  marketMaxPurchaseQuantity: 999,
+  /**
+   * Shards are bought one request per unit (the backend buy DTO has no count
+   * field), so the per-order cap keeps the client-side request loop short.
+   */
+  marketMaxShardPurchaseQuantity: 10,
   telegramBotUrl: 'https://t.me/luckyticket365_bot',
   telegramSupportUrl: 'https://t.me/luckyticket365_support',
   telegramChannelUrl: 'https://t.me/luckyticket365_channel',

@@ -4,10 +4,12 @@ import { Ticket as TicketLucide } from 'lucide-react';
 import type { ReactNode } from 'react';
 import { useBuyTicketMutation } from '@/api/market.api';
 import { useGetMeQuery } from '@/api/me.api';
+import { useGetTicketsQuery } from '@/api/tickets.api';
 import { MarketSectionGrid } from '@/components/pages/tabs/market/MarketSectionGrid';
 import { MarketUniversalCard } from '@/components/pages/tabs/market/MarketUniversalCard';
 import type { MarketSelectedItem } from '@/components/pages/tabs/market/MarketView';
 import { Ticket } from '@/components/shared/icons/Ticket';
+import { GlobalConstants } from '@/constants/global.constants';
 import { useAppTranslations } from '@/hooks/useAppTranslations';
 import { useUnlockedTiers } from '@/hooks/useUnlockedTiers';
 import type { MarketPrice, MarketTicket } from '@/types/interfaces/market.interfaces';
@@ -24,6 +26,7 @@ export function MarketTicketSection({ tickets, onSelect, onBuy }: MarketTicketSe
   const { isTierUnlocked } = useUnlockedTiers();
   const [buyTicket] = useBuyTicketMutation();
   const { data: me } = useGetMeQuery();
+  const { data: myTickets } = useGetTicketsQuery();
   const isLp = me?.isLuckyPlayer ?? false;
   const isVip = me?.isVIP ?? false;
   if (!tickets.length) return null;
@@ -44,8 +47,11 @@ export function MarketTicketSection({ tickets, onSelect, onBuy }: MarketTicketSe
           isNew: ticket.isNew,
           discountPct: ticket.discountPct,
           accent: ticket.ticketType,
-          mutate: price =>
-            buyTicket({ ticketId: ticket.id, count: 1, priceType: price.type }).unwrap(),
+          maxQuantity: GlobalConstants.marketMaxPurchaseQuantity,
+          ownedCount: myTickets?.find(t => t.ticketType === ticket.ticketType)?.count ?? 0,
+          ownedIconNode: <Ticket type={ticket.ticketType} width={18} height={18} />,
+          mutate: (price, count) =>
+            buyTicket({ ticketId: ticket.id, count, priceType: price.type }).unwrap(),
         };
         return (
           <MarketUniversalCard

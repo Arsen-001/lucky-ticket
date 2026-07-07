@@ -3,11 +3,13 @@
 import { Gem } from 'lucide-react';
 import type { ReactNode } from 'react';
 import { useBuyShardMutation } from '@/api/market.api';
+import { useGetInventoryQuery } from '@/api/inventory.api';
 import { useGetMeQuery } from '@/api/me.api';
 import { MarketSectionGrid } from '@/components/pages/tabs/market/MarketSectionGrid';
 import { MarketUniversalCard } from '@/components/pages/tabs/market/MarketUniversalCard';
 import type { MarketSelectedItem } from '@/components/pages/tabs/market/MarketView';
 import { ChipShardIcon } from '@/components/shared/icons/ChipShardIcon';
+import { GlobalConstants } from '@/constants/global.constants';
 import { useAppTranslations } from '@/hooks/useAppTranslations';
 import { useUnlockedTiers } from '@/hooks/useUnlockedTiers';
 import type { MarketPrice, MarketShard } from '@/types/interfaces/market.interfaces';
@@ -24,6 +26,7 @@ export function MarketShardSection({ shards, onSelect, onBuy }: MarketShardSecti
   const { isTierUnlocked } = useUnlockedTiers();
   const [buyShard] = useBuyShardMutation();
   const { data: me } = useGetMeQuery();
+  const { data: inventory } = useGetInventoryQuery();
   const isLp = me?.isLuckyPlayer ?? false;
   const isVip = me?.isVIP ?? false;
   if (!shards.length) return null;
@@ -49,14 +52,24 @@ export function MarketShardSection({ shards, onSelect, onBuy }: MarketShardSecti
           isNew: shard.isNew,
           discountPct: shard.discountPct,
           accent: shard.quality,
-          mutate: price =>
-            buyShard({
-              shardId: shard.id,
-              shardType: shard.type,
-              quality: shard.quality,
-              count: shard.count,
-              price,
-            }).unwrap(),
+          maxQuantity: GlobalConstants.marketMaxShardPurchaseQuantity,
+          ownedCount:
+            inventory?.shards.find(s => s.type === shard.type && s.quality === shard.quality)
+              ?.count ?? 0,
+          ownedIconNode: <ChipShardIcon type={shard.type} tier={shard.quality} size={14} />,
+          // The shards/buy DTO rejects a count field — buy sequentially, one
+          // request per unit (the per-order cap keeps this loop short).
+          mutate: async (price, count) => {
+            for (let i = 0; i < count; i += 1) {
+              await buyShard({
+                shardId: shard.id,
+                shardType: shard.type,
+                quality: shard.quality,
+                count: shard.count,
+                price,
+              }).unwrap();
+            }
+          },
         };
         return (
           <MarketUniversalCard
