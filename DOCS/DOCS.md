@@ -1692,11 +1692,11 @@ Every completed stake grants:
 - **Principal returned** in full.
 - **APR yield** in LC (Section 18.1). Lucky Player holders receive an additive **+20%** on top of the APR yield (`luckyPlayerStakeYieldBoostPct`); VIP holders receive **+40%** (`vipStakeYieldBoostPct`). The two never stack — the higher-tier value wins (DOCS §7.3).
 - **Completion Stars:** a guaranteed Lucky Stars payout = `months × completionStarsPerMonth`, where the per-month multiplier scales by stake tier (Bronze 2 → Silver 3 → Gold 4 → Platinum 5 → Diamond 6). Forfeited on early cancellation.
-- **AP:** the base `LC staked × months / 5,000` Activity Points is credited the moment the stake starts and is retained even if the stake is cancelled early. A **+50% completion bonus** on the base is granted only when the stake runs to the end — forfeited on early cancellation.
+- **AP:** the base `LC staked × months / 5,000` Activity Points is credited the moment the stake starts, but is **revoked on early cancellation** (floored so AP decay in between can't take the balance below zero). A **+50% completion bonus** on the base is granted only when the stake runs to the end. Rationale: with the AP retained, open→cancel was a near-free infinite AP loop (the deposit returns in full, only the Stars fee is spent) — it was farmed in the wild and closed on 2026-07-07.
 
 ### 18.4 Cancellation & Concurrency
 
-- **Early cancellation:** the principal is returned in full and the base AP credited at start is retained; the APR yield, the +50% AP completion bonus, and the completion Stars are forfeited; a Stars cancellation penalty applies (see Section 18.5).
+- **Early cancellation:** the principal is returned in full; **everything else is forfeited** — the APR yield, the base AP credited at start (revoked), the +50% AP completion bonus, and the completion Stars; a Stars cancellation penalty applies (see Section 18.5).
 - **Multiple concurrent stakes** are allowed — the player may run several stakes at once.
 
 ### 18.5 Fees (Stars)
