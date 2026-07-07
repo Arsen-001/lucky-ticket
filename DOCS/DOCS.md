@@ -1888,6 +1888,8 @@ When the charged instance finishes, the **entire pot** is paid out **on top of**
 ### 20.4 Rounding, Reset & Carry-Forward
 
 - Shares are floored to whole LC. Any **indivisible rounding remainder** (at most a few hundred LC, mostly from the equal 20% split across up to 500 participants) is **carried forward** as the seed of the next round rather than being lost or created.
+- **Unfilled podium places stay in the pot.** In a tiny charged field (1–2 players) the 2nd/3rd podium shares have no recipient — they are carried forward exactly like rounding dust, keeping the drop EV-neutral.
+- **A charged instance nobody joined does not drop.** The tournament finishes empty, the pot keeps accruing, and the operator can charge another instance.
 - After a drop the pot **resets to ≈0** (carrying only that remainder) and immediately begins accruing again. The live odometer on the jackpot page makes the renewed climb visible.
 
 ### 20.5 The "Jackpot Ticket"
