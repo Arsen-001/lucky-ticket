@@ -43,6 +43,11 @@ export const QUALITY_TIERS: TicketType[] = ['bronze', 'silver', 'gold', 'platinu
 export const CHIP_EFFECT_PER_LEVEL = 0.5;
 export const CHIP_MAX_LEVEL = 200;
 
+/**
+ * Shards consumed to mint a fresh Lvl-1 chip of that tier — mirrors the
+ * backend `CHIP_MINT_SHARD_COST` (DOCS §10.4). Lower tiers drop shards far
+ * more often, so their mint is priced higher; no other cost applies.
+ */
 export const CHIP_MINT_SHARD_COST: Record<TicketType, number> = {
   bronze: 10,
   silver: 8,

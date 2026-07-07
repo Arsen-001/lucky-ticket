@@ -553,7 +553,7 @@ Each chip is a leveled item with effect that grows linearly with level:
 
 - **Effect per level:** **+0.5%** of the chip's parameter (cumulative).
 - **Maximum effect:** **+100%** of the parameter, reached at the final level (`100% / 0.5% = 200` total levels).
-- **Level 1 is granted by the very first shard the user collects** for a given chip — the chip enters the user's inventory at Level 1 with +0.5% effect.
+- **Level 1 is granted by minting** — the user spends the tier's shard price in the inventory's Mint modal and the chip enters the inventory at Level 1 with +0.5% effect.
 
 #### Multiple Chips per Type & Quality
 
@@ -561,34 +561,25 @@ A user is **not limited to one chip per type or one chip per quality**. Each chi
 
 A typical user might end up holding, for example, eight Bronze Speed Chips at various levels, three Silver Speed Chips, and one Diamond Speed Chip — all coexisting in the inventory and ready to be slotted onto different engines.
 
-#### Minting Chips — First Free, Then Chip Builders
+#### Minting Chips — Flat Shard Price per Tier
 
-The very **first chip** a user creates of any given (type, quality) combination is **free** — the system mints it automatically when the user receives their first matching shard. There is no cost or extra step for that initial mint.
+Every chip is minted through the inventory's **Mint modal** for a flat, tier-specific shard price — no free mints, no auxiliary crafting items. The price falls with tier because lower-tier tournaments run (and drop shards) far more often:
 
-Every **additional chip** of the same (type, quality) combination — for example, a second Bronze Speed Chip on top of an existing one, typically because the user wants to dedicate a new chip to a newly-bought Bronze engine — requires a **Chip Builder**.
+| Chip tier | Shards to mint (`CHIP_MINT_SHARD_COST`) |
+| :-------- | :-------------------------------------- |
+| Bronze    | **10**                                  |
+| Silver    | **8**                                   |
+| Gold      | **6**                                   |
+| Platinum  | **4**                                   |
+| Diamond   | **2**                                   |
 
-| Mint scenario                               | Cost                                                  |
-| :------------------------------------------ | :---------------------------------------------------- |
-| First chip of a (type, quality)             | **Free** (auto-mint on first shard)                   |
-| Subsequent chip of the same (type, quality) | **1 Chip Builder of that quality** + 1 matching shard |
-
-#### Chip Builders
-
-A **Chip Builder** is a one-shot crafting item the user spends to start assembling a new chip alongside any existing chips of the same type and quality. Chip Builders are themselves **quality-tagged** — there is one Chip Builder variant per tier (Bronze, Silver, Gold, Platinum, Diamond), and each variant can only be used to mint chips of that exact tier.
-
-- **Acquisition:** Purchased in the LuckyTicket365 Shop (Section 19.2) with Lucky Stars. The Shop sells five Chip Builder SKUs (Bronze Chip Builder, Silver Chip Builder, …). Higher-tier Chip Builders cost more Stars.
-- **Consumption:** A Chip Builder of quality X is consumed when the user confirms a new mint of a chip at quality X. It is paired with one matching shard (also quality X) to bootstrap a fresh Lvl 1 chip.
-- **Scope:** Chip Builders are tier-locked but type-agnostic — a Bronze Chip Builder can mint either a Bronze Speed Chip or a Bronze Capacity Chip (the user chooses), but cannot mint anything Silver or higher.
-- **Inventory:** Owned Chip Builders are tracked per tier in the Boost Inventory. The tier-filter chips show a small badge with the Chip Builder count for that tier.
-
-This pricing rule prevents low-effort chip duplication while still letting dedicated players grow a fleet of chips for a fleet of engines.
+The price applies to every mint equally — the first Bronze Speed Chip and the fifth cost the same 10 Bronze Speed shards. A freshly minted chip always starts at **Lvl 1** (+0.5%). This flat pricing (mirrored by the backend and the frontend constant `CHIP_MINT_SHARD_COST`) is the only mint cost; the previously documented **Chip Builder** item is removed from the design.
 
 #### Chip Shards — How Levels Are Earned
 
-Chips are not handed out at a finished level. Instead, each tournament awards **chip shards** — fragments that the user accumulates and consumes to level up an existing chip (or to mint a new chip at Level 1 if they choose).
+Chips are not handed out at a finished level. Instead, each tournament awards **chip shards** — fragments that the user accumulates and spends either on minting new chips (table above) or on levelling up existing ones.
 
-- The first shard of a given type the user receives mints a fresh chip at Lvl 1.
-- Subsequent shards may be either spent to upgrade an existing chip one level at a time, or — at the user's discretion — saved up to mint a brand-new chip at Lvl 1 (so the user can deliberately choose to grow many small chips or one big chip).
+- Shards may be spent to upgrade an existing chip one level at a time, or — at the user's discretion — saved up to mint a brand-new chip at Lvl 1 (so the user can deliberately choose to grow many small chips or one big chip).
 - The **shard cost per level rises with the target level** — higher levels demand more shards. The progression is non-linear:
 
 | Target level | Shards required for THIS upgrade |
@@ -1822,10 +1813,11 @@ The Market opens with a **Hero card** showing the current featured deal (with co
 **Purchase flow:**
 
 - Tapping a price button checks the matching balance.
-- If the user has enough — opens a centered **purchase confirmation modal** with the item's icon, name, description, and price.
+- If the user has enough — opens a centered **purchase confirmation modal** with the item's icon, name, description, and price, plus a pill row showing the **available balance** of the currency being spent (compact-formatted) and — for tickets/shards — how many of that item the player **already owns**.
 - If Lucky Stars are insufficient — opens the **Not-enough-Stars bottom sheet** (with top-up presets).
 - If LC are insufficient — opens the **Not-enough-LC modal**.
-- Confirming dispatches the corresponding RTK mutation (`buyEngine`, `buyTicket`, `buyStatus`, `buyShard`, `buyCosmetic`). Mutations apply optimistic updates: the cost is deducted from `me.coins` / `me.telegramStars`, and the granted item is appended to the relevant cache (engines → ticket-tier engines, shards → inventory, tickets → ticket balance, status → `me`). On error, all patches are rolled back.
+- **Quantity selection** — countable items (tickets, shards) show a tournament-bet-style stepper (MIN / − / tap-to-type value / + / MAX) in the confirmation modal; the price row switches to the order **total** with a `unit × N` breakdown, and the Stars-purchase AP preview scales with the total. MAX is capped by what the balance covers and by a per-order cap (`marketMaxPurchaseQuantity` = 999 for tickets; `marketMaxShardPurchaseQuantity` = 10 for shards, whose backend endpoint buys one unit per request, so the client loops). Single-purchase items (engines, cosmetics, statuses) show no stepper.
+- Confirming dispatches the corresponding RTK mutation (`buyEngine`, `buyTicket`, `buyStatus`, `buyShard`, `buyCosmetic`); `buyTicket` sends the chosen `count` natively. Mutations apply optimistic updates: the cost is deducted from `me.coins` / `me.telegramStars`, and the granted item is appended to the relevant cache (engines → ticket-tier engines, shards → inventory, tickets → ticket balance, status → `me`). On error, all patches are rolled back.
 
 **Card-body tap:** tapping a card's body (not its price buttons) opens an item **info sheet** — except **Status** cards (Lucky Player / VIP), whose body links to the status's dedicated page (`/settings/lucky-player`, `/settings/vip` — the single canonical route used everywhere: header pills, profile, stakes, market) where it can be reviewed, bought, or extended. This link stays active even when the status is already owned (the in-card buy buttons lock, the body still navigates). Price buttons always buy in place.
 
@@ -1917,7 +1909,7 @@ A B2B drawer surface (`/partners`) where **advertisers (casinos) create and mana
 
 ### 21.1 Coming-Soon Gate
 
-The cabinet ships behind a master switch — `appConfig.partners.enabled`. When `false` it is a **preview**: the dashboard + builder render on demo data, a "Coming soon · preview" banner sits on top, and submitting the builder surfaces a Coming Soon toast instead of calling `createSponsoredTournament`. Flip to `true` to make it live.
+The cabinet ships behind a master switch — `appConfig.partners.enabled`. When `false` it is a **preview**: the dashboard + builder render on demo data, a "Coming soon · preview" banner sits on top, and submitting the builder surfaces a Coming Soon toast instead of calling `createSponsoredTournament`. The **drawer entry is locked** by the same switch — dimmed, non-navigable, with a lock icon and an animated "Coming Soon" badge. Flip to `true` to make both live.
 
 ### 21.2 Dashboard
 
