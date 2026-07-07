@@ -12,6 +12,7 @@ import { useAppTranslations } from '@/hooks/useAppTranslations';
 import { MarketPriceType } from '@/types/enums/market.enums';
 import type { MarketAccent, MarketPrice } from '@/types/interfaces/market.interfaces';
 import { formatCompactPrice } from '@/utils/global/number.utils';
+import { orderMarketPrices } from '@/utils/global/market.utils';
 
 const ACCENT_COLOR: Record<MarketAccent, string> = {
   bronze: '#E08A3A',
@@ -132,7 +133,7 @@ export function MarketUniversalCard({
             </div>
           ) : prices && prices.length > 0 ? (
             <div className="flex gap-1.5">
-              {prices.map((price, index) => (
+              {orderMarketPrices(prices).map((price, index) => (
                 <PriceButton
                   key={index}
                   price={price}
@@ -168,7 +169,7 @@ function PriceButton({ price, accent, onClick, fullWidth }: PriceButtonProps) {
         onClick();
       }}
       className={twMerge(
-        'flex-center relative gap-1 overflow-hidden whitespace-nowrap rounded-lg px-2 py-2 text-xs font-semibold text-white transition-transform active:scale-[0.97] hover:brightness-110',
+        'flex-center relative gap-0.5 overflow-hidden whitespace-nowrap rounded-lg px-1.5 py-2 text-xs font-semibold text-white transition-transform active:scale-[0.97] hover:brightness-110',
         fullWidth ? 'w-full' : 'min-w-0 flex-1'
       )}
       style={{
@@ -176,16 +177,16 @@ function PriceButton({ price, accent, onClick, fullWidth }: PriceButtonProps) {
         border: `1px solid color-mix(in srgb, ${accent} 35%, transparent)`,
       }}
     >
-      {isStars && <TelegramStarIcon size={14} />}
-      <span className="inline-flex items-baseline gap-1 tabular-nums">
+      {isStars && <TelegramStarIcon size={13} className="shrink-0" />}
+      <span className="inline-flex min-w-0 items-baseline gap-0.5 tabular-nums">
         {price.originalAmount && (
           <span className="text-[10px] text-white/55 line-through">
             {formatCompactPrice(price.originalAmount)}
           </span>
         )}
-        <span className="text-sm">{formatCompactPrice(price.amount)}</span>
+        <span className="text-[13px]">{formatCompactPrice(price.amount)}</span>
       </span>
-      {isLc && <LcLabel size={12} interactive={false} />}
+      {isLc && <LcLabel size={11} interactive={false} className="shrink-0" />}
     </button>
   );
 }

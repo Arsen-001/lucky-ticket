@@ -1,8 +1,3 @@
-export enum TicketBoostType {
-  SPEED = 'SPEED',
-  COLLECT_TIME = 'COLLECT_TIME',
-}
-
 export enum MarketPriceType {
   USDT = 'USDT',
   LC = 'LC',

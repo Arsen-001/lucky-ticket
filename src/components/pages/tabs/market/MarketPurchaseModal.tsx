@@ -4,6 +4,7 @@ import type { ReactNode } from 'react';
 import { ConfirmModal } from '@/components/shared/modals/ConfirmModal';
 import { TelegramStarIcon } from '@/components/shared/icons/TelegramStarIcon';
 import { LcLabel } from '@/components/shared/icons/LcLabel';
+import { formatNumber } from '@/utils/global/number.utils';
 import { BoltIcon } from '@/components/shared/icons/BoltIcon';
 import { useAppTranslations } from '@/hooks/useAppTranslations';
 import { GlobalConstants } from '@/constants/global.constants';
@@ -66,7 +67,9 @@ export function MarketPurchaseModal({
                 {t('price')}
               </span>
               <div className="flex items-center gap-1.5">
-                <span className="text-lg font-bold tabular-nums text-white">{price.amount}</span>
+                <span className="text-lg font-bold tabular-nums text-white">
+                  {formatNumber(price.amount)}
+                </span>
                 {price.type === MarketPriceType.LC && <LcLabel size={16} interactive={false} />}
                 {price.type === MarketPriceType.TELEGRAM_STARS && <TelegramStarIcon size={18} />}
               </div>

@@ -11,11 +11,11 @@ import { WalletProvider } from '@/types/enums/wallet.enums';
  */
 
 const stakeLevels: StakeLevelDefinition[] = [
-  { level: 1, minDeposit: 100_000, tier: 'bronze', completionStarsPerMonth: 2 },
-  { level: 2, minDeposit: 500_000, tier: 'silver', completionStarsPerMonth: 3 },
-  { level: 3, minDeposit: 1_000_000, tier: 'gold', completionStarsPerMonth: 4 },
-  { level: 4, minDeposit: 2_500_000, tier: 'platinum', completionStarsPerMonth: 5 },
-  { level: 5, minDeposit: 5_000_000, tier: 'diamond', completionStarsPerMonth: 6 },
+  { level: 1, minDeposit: 10_000, tier: 'bronze', completionStarsPerMonth: 2 },
+  { level: 2, minDeposit: 50_000, tier: 'silver', completionStarsPerMonth: 3 },
+  { level: 3, minDeposit: 100_000, tier: 'gold', completionStarsPerMonth: 4 },
+  { level: 4, minDeposit: 250_000, tier: 'platinum', completionStarsPerMonth: 5 },
+  { level: 5, minDeposit: 500_000, tier: 'diamond', completionStarsPerMonth: 6 },
 ];
 
 const supportedWallets: SupportedWallet[] = [
@@ -52,11 +52,11 @@ export const appConfig = {
     aprMinPercent: 3,
     aprMaxPercent: 10,
     /** Divisor in the stake AP formula: `deposit × months ÷ apDivisor` (DOCS §5.3 / §18.3). */
-    apDivisor: 50_000,
+    apDivisor: 5_000,
     /** Bonus added to the stake AP base when it completes (forfeited on cancel). */
     apCompletionBonusPercent: 50,
     /** LC required to add 1 ⭐ to the base stake fee (`base = ceil(deposit / feeStep)`). */
-    feeStep: 100_000,
+    feeStep: 10_000,
     /** Discount % per stake month — applied to the base fee. */
     feeMonthDiscountPercent: 1,
     /**
@@ -66,16 +66,16 @@ export const appConfig = {
      */
     feeVolumeDiscount: {
       default: [
-        { threshold: 1_000_000, percent: 10 },
-        { threshold: 2_500_000, percent: 12 },
-        { threshold: 5_000_000, percent: 15 },
-        { threshold: 10_000_000, percent: 20 },
+        { threshold: 100_000, percent: 10 },
+        { threshold: 250_000, percent: 12 },
+        { threshold: 500_000, percent: 15 },
+        { threshold: 1_000_000, percent: 20 },
       ],
       luckyPlayer: [
-        { threshold: 1_000_000, percent: 20 },
-        { threshold: 2_500_000, percent: 22 },
-        { threshold: 5_000_000, percent: 25 },
-        { threshold: 10_000_000, percent: 30 },
+        { threshold: 100_000, percent: 20 },
+        { threshold: 250_000, percent: 22 },
+        { threshold: 500_000, percent: 25 },
+        { threshold: 1_000_000, percent: 30 },
       ],
     },
     /** Stake fee never drops below this floor (in Stars). */
@@ -119,11 +119,24 @@ export const appConfig = {
     tournamentHouseEdgeMultiplier: 1.5,
     /** Market LC ticket prices per tier (~×2.5 ladder). */
     ticketPriceLcByTier: {
-      bronze: 60_000,
-      silver: 150_000,
-      gold: 375_000,
-      platinum: 900_000,
-      diamond: 2_250_000,
+      bronze: 6_000,
+      silver: 15_000,
+      gold: 37_500,
+      platinum: 90_000,
+      diamond: 225_000,
+    },
+    /**
+     * Fixed Lucky-Stars ticket prices — a flat 1⭐→5⭐ by-tier ladder,
+     * deliberately OFF LC parity (product decision). Tickets keep their LC
+     * economy price; only the Stars alternative is this fixed ladder. Mirrors
+     * the backend `MARKET_TICKET_STAR_PRICES`. (Engines stay on LS parity.)
+     */
+    ticketPriceStarsByTier: {
+      bronze: 1,
+      silver: 2,
+      gold: 3,
+      platinum: 4,
+      diamond: 5,
     },
     /**
      * LC price of the FIRST engine of each tier. Tuned so first-purchase
@@ -132,11 +145,11 @@ export const appConfig = {
      * rewarding, never a trap.
      */
     engineBasePriceLcByTier: {
-      bronze: 2_000_000,
-      silver: 3_600_000,
-      gold: 6_750_000,
-      platinum: 11_700_000,
-      diamond: 22_500_000,
+      bronze: 200_000,
+      silver: 360_000,
+      gold: 675_000,
+      platinum: 1_170_000,
+      diamond: 2_250_000,
     },
     /**
      * Geometric repeat-purchase pricing: the n-th engine of a tier costs
@@ -148,19 +161,33 @@ export const appConfig = {
     engineRepeatPriceGrowth: 1.6,
     /**
      * LS cost of the permanent per-engine upgrades (paid in Lucky Stars). Cost
-     * rises with the boost sub-level AND the engine level — each engine level
-     * adds `perEngineLevel` to every price:
-     *   speed    = speedBase    + subLevel × perSubLevel + (engineLevel − 1) × perEngineLevel
-     *   capacity = capacityBase + subLevel × perSubLevel + (engineLevel − 1) × perEngineLevel
-     * At the default knobs: level-1 engine → speed 1…10, capacity 2…11; level-5
-     * engine → speed 5…14, capacity 6…15. Full max of one engine (all 5 levels,
-     * 100 upgrades) = 800 LS.
+     * rises with the boost sub-level AND the engine level, then scales by tier —
+     * each engine level adds `perEngineLevel` to every price, and the whole cost
+     * is multiplied by `tierCostMultiplier[tier]`:
+     *   speed    = (speedBase    + subLevel × perSubLevel + (engineLevel − 1) × perEngineLevel) × tierMult
+     *   capacity = (capacityBase + subLevel × perSubLevel + (engineLevel − 1) × perEngineLevel) × tierMult
+     * Bronze (mult 1) at the default knobs: level-1 engine → speed 1…10,
+     * capacity 2…11; level-5 engine → speed 5…14, capacity 6…15. Full max of one
+     * Bronze engine (all 5 levels, 100 upgrades) = 800 LS; higher tiers cost that
+     * × their multiplier (Silver 1,600 / Gold 2,400 / Platinum 3,200 / Diamond 4,000 LS).
      */
     engineUpgrades: {
       speedBase: 1,
       capacityBase: 2,
       perSubLevel: 1,
       perEngineLevel: 1,
+      /**
+       * Per-tier cost multiplier on the whole upgrade price — leveling a higher
+       * tier engine is proportionally more expensive than Bronze (product rule):
+       * Silver ×2, Gold ×3, Platinum ×4, Diamond ×5 the Bronze cost.
+       */
+      tierCostMultiplier: {
+        bronze: 1,
+        silver: 2,
+        gold: 3,
+        platinum: 4,
+        diamond: 5,
+      },
     },
     /**
      * Guards on the LC → TON exit (backend-enforced). The conversion fee and
@@ -177,8 +204,8 @@ export const appConfig = {
     tonUsdRate: 3.42,
     /** Flat TON network fee charged on a withdrawal. */
     withdrawFeeTon: 0.05,
-    /** USD value of one LC — used to price the LC → TON conversion (DOCS §6.1): $1 = 100,000 LC. */
-    lcUsdRate: 0.00001,
+    /** USD value of one LC — used to price the LC → TON conversion (DOCS §6.1): $1 = 1,000,000 LC. */
+    lcUsdRate: 0.000001,
     /** USD anchor of one Lucky Star (LS) — the Stars packages are priced off it. */
     lsUsdRate: 0.02,
     /** Wallet apps the user can connect. */
@@ -257,10 +284,10 @@ export const appConfig = {
        */
       prizeFundingMultiplier: 2,
       /** Prize-pool bounds (in LC) the advertiser funds, stepped by `prizePoolStep`. */
-      prizePoolMin: 100_000,
-      prizePoolMax: 100_000_000,
-      prizePoolStep: 50_000,
-      defaultPrizePool: 500_000,
+      prizePoolMin: 10_000,
+      prizePoolMax: 10_000_000,
+      prizePoolStep: 5_000,
+      defaultPrizePool: 50_000,
       /** Team-size (seats) bounds. */
       teamSizeMin: 8,
       teamSizeMax: 512,

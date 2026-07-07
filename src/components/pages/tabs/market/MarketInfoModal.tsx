@@ -5,6 +5,8 @@ import { twMerge } from 'tailwind-merge';
 import { Modal } from '@/components/shared/modals/Modal';
 import { TelegramStarIcon } from '@/components/shared/icons/TelegramStarIcon';
 import { LcLabel } from '@/components/shared/icons/LcLabel';
+import { formatCompactPrice } from '@/utils/global/number.utils';
+import { orderMarketPrices } from '@/utils/global/market.utils';
 import { useAppTranslations } from '@/hooks/useAppTranslations';
 import { useCountDown } from '@/hooks/useCountDown';
 import { MarketPriceType } from '@/types/enums/market.enums';
@@ -95,7 +97,7 @@ export function MarketInfoModal({ open, item, onClose, onBuy }: MarketInfoModalP
         )}
 
         <div className="flex flex-col gap-2">
-          {item.prices.map((price, index) => (
+          {orderMarketPrices(item.prices).map((price, index) => (
             <PriceButton key={index} price={price} accent={accent} onClick={() => onBuy(price)} />
           ))}
         </div>
@@ -130,9 +132,11 @@ function PriceButton({ price, accent, onClick }: PriceButtonProps) {
       {isStars && <TelegramStarIcon size={16} />}
       <span className="inline-flex items-baseline gap-1 tabular-nums">
         {price.originalAmount && (
-          <span className="text-[12px] text-white/55 line-through">{price.originalAmount}</span>
+          <span className="text-[12px] text-white/55 line-through">
+            {formatCompactPrice(price.originalAmount)}
+          </span>
         )}
-        <span>{price.amount}</span>
+        <span>{formatCompactPrice(price.amount)}</span>
       </span>
       {isLc && <LcLabel size={14} interactive={false} />}
     </button>

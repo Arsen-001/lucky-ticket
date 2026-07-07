@@ -34,7 +34,12 @@ export default async function RootLayout({ children }: ChildrenProps) {
             <Script src="https://sad.adsgram.ai/js/sad.min.js" strategy="afterInteractive" />
           )}
         </head>
-        <body>
+        {/* The Telegram client / iOS Safari inject `ontouchstart=""` onto <body>
+            before hydration (to enable :active on touch), which won't match
+            React's server render. Suppress the warning for the <body>'s own
+            attributes — this is shallow and does not affect children, so real
+            hydration bugs in the app content still surface. */}
+        <body suppressHydrationWarning>
           <div id="scroll-container">
             <NextIntlClientProvider>
               <NavigationHistoryProvider>

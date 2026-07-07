@@ -25,7 +25,7 @@ const apRewards = {
   /** LS spent per 1 AP from purchases — no daily cap. */
   purchaseLsPerAp: 10,
   /** LC spent per 1 AP from spending — no daily cap. */
-  spendLcPerAp: 25_000,
+  spendLcPerAp: 2_500,
   dailyTaskByTier: { bronze: 1, silver: 2, gold: 3, platinum: 4, diamond: 5 },
   weeklyTaskByTier: { bronze: 2, silver: 3, gold: 4, platinum: 5, diamond: 6 },
   claimByTier: { bronze: 1, silver: 2, gold: 4, platinum: 8, diamond: 16 },

@@ -931,10 +931,10 @@ const articles: FaqArticle[] = [
       'Die Mega-Markt-Kategorien.'
     ),
     content: tx(
-      'The Market is the unified shop, paid in LC or Lucky Stars (no fiat). Categories include Status (Lucky Player/VIP), Boosters, Chips, Chip Builders, Engines, Cosmetics (avatars, frames, themes) and Passes (Auto-Claim, Ad-Free, +25% LC, Tournament). Engine Capacity Upgrades are sold only in the Shop, with Lucky Stars.',
-      'Маркет — единый магазин, оплата в LC или Lucky Stars (без фиата). Категории: Статусы (Lucky Player/VIP), Бустеры, Чипы, Chip Builder, Движки, Косметика (аватары, рамки, темы) и Пассы (Авто-сбор, Без рекламы, +25% LC, Турнирный). Улучшения ёмкости движков продаются только в Шопе за Lucky Stars.',
-      'Շուկան միասնական խանութ է, վճարումը LC-ով կամ Lucky Stars-ով (առանց ֆիատի)։ Կատեգորիաները ներառում են՝ Կարգավիճակներ (Lucky Player/VIP), Բուստերներ, Չիպեր, Chip Builder-ներ, Շարժիչներ, Կոսմետիկա (ավատարներ, շրջանակներ, թեմաներ) և Փասեր (Ավտո-վերցնում, Առանց գովազդի, +25% LC, Մրցաշարային)։ Շարժիչի ծավալի բարելավումները վաճառվում են միայն Խանութում՝ Lucky Stars-ով։',
-      'Der Markt ist der einheitliche Shop, bezahlt in LC oder Lucky Stars (kein Fiat). Kategorien umfassen Status (Lucky Player/VIP), Booster, Chips, Chip-Builder, Engines, Kosmetik (Avatare, Rahmen, Themes) und Pässe (Auto-Einlösen, Werbefrei, +25% LC, Turnier). Engine-Kapazitäts-Upgrades werden nur im Shop mit Lucky Stars verkauft.'
+      'The Market is the unified shop, paid in LC or Lucky Stars (no fiat). Categories include Status (Lucky Player/VIP), Boosters, Chips, Chip Builders, Engines, Cosmetics (avatars, themes) and Passes (Auto-Claim, Ad-Free, +25% LC, Tournament). Engine Capacity Upgrades are sold only in the Shop, with Lucky Stars.',
+      'Маркет — единый магазин, оплата в LC или Lucky Stars (без фиата). Категории: Статусы (Lucky Player/VIP), Бустеры, Чипы, Chip Builder, Движки, Косметика (аватары, темы) и Пассы (Авто-сбор, Без рекламы, +25% LC, Турнирный). Улучшения ёмкости движков продаются только в Шопе за Lucky Stars.',
+      'Շուկան միասնական խանութ է, վճարումը LC-ով կամ Lucky Stars-ով (առանց ֆիատի)։ Կատեգորիաները ներառում են՝ Կարգավիճակներ (Lucky Player/VIP), Բուստերներ, Չիպեր, Chip Builder-ներ, Շարժիչներ, Կոսմետիկա (ավատարներ, թեմաներ) և Փասեր (Ավտո-վերցնում, Առանց գովազդի, +25% LC, Մրցաշարային)։ Շարժիչի ծավալի բարելավումները վաճառվում են միայն Խանութում՝ Lucky Stars-ով։',
+      'Der Markt ist der einheitliche Shop, bezahlt in LC oder Lucky Stars (kein Fiat). Kategorien umfassen Status (Lucky Player/VIP), Booster, Chips, Chip-Builder, Engines, Kosmetik (Avatare, Themes) und Pässe (Auto-Einlösen, Werbefrei, +25% LC, Turnier). Engine-Kapazitäts-Upgrades werden nur im Shop mit Lucky Stars verkauft.'
     ),
   },
   {

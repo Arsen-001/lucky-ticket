@@ -13,7 +13,7 @@ import {
   useGetMarketDataQuery,
 } from '@/api/market.api';
 import { useGetMeQuery } from '@/api/me.api';
-import { applyStatusMarketDiscount } from '@/utils/global/market.utils';
+import { applyStatusMarketDiscount, orderMarketPrices } from '@/utils/global/market.utils';
 import '@/styles/components/tasks.css';
 import { ChipShardIcon } from '@/components/shared/icons/ChipShardIcon';
 import { TelegramStarIcon } from '@/components/shared/icons/TelegramStarIcon';
@@ -59,7 +59,7 @@ const renderAvatarIcon = (
     {imageUrl ? (
       <Image src={imageUrl} alt={title} fill sizes={`${size}px`} className="object-cover" />
     ) : (
-      // No image (e.g. a frame cosmetic) — show the name initial on the accent
+      // No image (e.g. a badge/theme cosmetic) — show the name initial on the accent
       // tile instead of passing an empty string to next/image.
       <div
         className="flex-center h-full w-full text-xl font-extrabold"
@@ -92,7 +92,7 @@ export function MarketHeroCarousel({ onSelect, onBuy }: MarketHeroCarouselProps)
         id: c.id,
         title: c.name,
         description: c.description ?? '',
-        prices: applyStatusMarketDiscount(c.prices, isLp, isVip),
+        prices: orderMarketPrices(applyStatusMarketDiscount(c.prices, isLp, isVip)),
         expiresAt: c.expiresAt,
         discountPct: c.discountPct,
         isNew: c.isNew,
@@ -107,7 +107,7 @@ export function MarketHeroCarousel({ onSelect, onBuy }: MarketHeroCarouselProps)
       id: s.id,
       title: s.name,
       description: `+${s.count} ${t('shards')}`,
-      prices: applyStatusMarketDiscount(s.prices, isLp, isVip),
+      prices: orderMarketPrices(applyStatusMarketDiscount(s.prices, isLp, isVip)),
       discountPct: s.discountPct,
       isNew: s.isNew,
       accent: s.quality,

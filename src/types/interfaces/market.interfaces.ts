@@ -4,7 +4,6 @@ import {
   MarketItemRequirementType,
   MarketPriceType,
   MarketStatusType,
-  TicketBoostType,
 } from '@/types/enums/market.enums';
 import type { AvatarBoost, AvatarDailyReward } from '@/types/interfaces/avatars.interfaces';
 import type { InventoryChipType } from '@/types/interfaces/inventory.interfaces';
@@ -35,14 +34,6 @@ export interface MarketItemBase {
   discountPct?: number;
   /** ISO date when offer expires (for limited deals/passes) */
   expiresAt?: string;
-}
-
-export interface MarketBoost extends MarketItemBase {
-  category?: MarketItemCategory.BOOST;
-  boostPercentage: number;
-  type: TicketBoostType;
-  ticketType: TicketType;
-  isAvailable?: boolean;
 }
 
 export interface MarketTicket extends MarketItemBase {
@@ -77,16 +68,6 @@ export interface MarketShard extends MarketItemBase {
   count: number;
 }
 
-export interface MarketBooster extends MarketItemBase {
-  category: MarketItemCategory.BOOSTER;
-  type: InventoryChipType;
-  quality: TicketType;
-  effectPct: number;
-  durationHours: number;
-  /** Pack size (some listings grant multiple boosters at once) */
-  count: number;
-}
-
 export interface MarketCosmetic extends MarketItemBase {
   category: MarketItemCategory.COSMETIC;
   cosmeticType: MarketCosmeticType;
@@ -108,9 +89,7 @@ export interface MarketCosmetic extends MarketItemBase {
 export interface MarketData {
   engines: MarketEngine[];
   tickets: MarketTicket[];
-  boosts: MarketBoost[];
   shards: MarketShard[];
-  boosters: MarketBooster[];
   cosmetics: MarketCosmetic[];
   statuses: MarketStatus[];
 }

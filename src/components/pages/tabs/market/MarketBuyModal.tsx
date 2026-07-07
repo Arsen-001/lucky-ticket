@@ -7,6 +7,7 @@ import { useAppTranslations } from '@/hooks/useAppTranslations';
 import { MarketPrice } from '@/types/interfaces/market.interfaces';
 import { MarketPriceType } from '@/types/enums/market.enums';
 import { LcLabel } from '@/components/shared/icons/LcLabel';
+import { formatNumber } from '@/utils/global/number.utils';
 import { icons } from '@/constants/icons';
 
 interface MarketBuyModalProps {
@@ -66,7 +67,9 @@ export function MarketBuyModal({
                 {priceLabel || t('price')}
               </span>
               <div className="flex items-center gap-1.5">
-                <span className="text-lg font-bold text-white">{price.amount}</span>
+                <span className="text-lg font-bold tabular-nums text-white">
+                  {formatNumber(price.amount)}
+                </span>
                 {price.type === MarketPriceType.LC && <LcLabel size={16} interactive={false} />}
                 {price.type === MarketPriceType.USDT && (
                   <span className="text-sm font-black text-emerald-400">USDT</span>

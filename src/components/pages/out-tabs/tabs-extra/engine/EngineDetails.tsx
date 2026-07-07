@@ -218,7 +218,7 @@ export function EngineDetails({ id }: EngineDetailsProps) {
   };
 
   const handleUpgradeSpeed = () => {
-    const cost = speedUpgradeLsCost(speedLevel, engineLevel);
+    const cost = speedUpgradeLsCost(speedLevel, engineLevel, tier);
     requireStars(cost, async () => {
       try {
         await upgradeEngineSpeed({ engineId: engine.id, cost }).unwrap();
@@ -229,7 +229,7 @@ export function EngineDetails({ id }: EngineDetailsProps) {
   };
 
   const handleUpgradeCapacity = () => {
-    const cost = capacityUpgradeLsCost(capacityLevel, engineLevel);
+    const cost = capacityUpgradeLsCost(capacityLevel, engineLevel, tier);
     requireStars(cost, async () => {
       try {
         await upgradeEngineCapacity({ engineId: engine.id, cost }).unwrap();

@@ -120,11 +120,11 @@ const configuredKnobs = (): SimKnobs => ({
  */
 const legacyFlatKnobs = (): SimKnobs => ({
   basePriceByTier: {
-    bronze: 8_000_000,
-    silver: 18_000_000,
-    gold: 45_000_000,
-    platinum: 98_000_000,
-    diamond: 199_990_000,
+    bronze: 800_000,
+    silver: 1_800_000,
+    gold: 4_500_000,
+    platinum: 9_800_000,
+    diamond: 19_999_000,
   },
   repeatGrowth: 1,
   dailyValueByTier: configuredKnobs().dailyValueByTier,
@@ -193,10 +193,10 @@ describe('economy simulation (DOCS §14.2 guardrails)', () => {
     const p30 = productionByDay[29];
     const p365 = productionByDay[364];
     // Sub-exponential growth: the whole back-335-days multiple stays small.
-    // (At the shipped knobs the sim lands at ≈×5 — ≈4.7M → ≈23.7M LC/day.)
+    // (At the shipped knobs the sim lands at ≈×5 — ≈470k → ≈2.37M LC/day.)
     expect(p365 / p30).toBeLessThanOrEqual(25);
     // Absolute faucet bound: even a perfect player mints a bounded LC value
-    // (≈$237/day at the shipped scale — real withdrawal is separately capped at
+    // (≈$2.37/day at the shipped scale — real withdrawal is separately capped at
     // $10/day, DOCS §14.2). Bound is a loose sanity ceiling, not a tight target.
     expect(p365 * appConfig.wallet.lcUsdRate).toBeLessThanOrEqual(50_000);
   });
@@ -267,13 +267,28 @@ describe('economy simulation (DOCS §14.2 guardrails)', () => {
     expect(appConfig.economy.lcConversion.dailyCapUsd).toBeLessThanOrEqual(10);
   });
 
-  it('market LS prices sit at LC parity — no cross-currency arbitrage', () => {
-    const items = [...marketMock.engines, ...marketMock.tickets];
-    for (const item of items) {
+  it('engine LS prices sit at LC parity — no cross-currency arbitrage', () => {
+    // Engines are the parity-locked dual-priced item. Tickets are intentionally
+    // OFF parity (fixed 1–5⭐ ladder, asserted in the next test).
+    for (const item of marketMock.engines) {
       const lc = item.prices.find(p => p.type === MarketPriceType.LC);
       const stars = item.prices.find(p => p.type === MarketPriceType.TELEGRAM_STARS);
       if (!lc || !stars) continue;
       expect(stars.amount, item.id).toBe(lcPriceToLsParity(lc.amount));
+    }
+  });
+
+  it('tickets use a fixed 1→5⭐ by-tier Stars ladder (off LC parity)', () => {
+    const expected: Record<string, number> = {
+      bronze: 1,
+      silver: 2,
+      gold: 3,
+      platinum: 4,
+      diamond: 5,
+    };
+    for (const ticket of marketMock.tickets) {
+      const stars = ticket.prices.find(p => p.type === MarketPriceType.TELEGRAM_STARS);
+      expect(stars?.amount, ticket.ticketType).toBe(expected[ticket.ticketType]);
     }
   });
 

@@ -21,7 +21,6 @@ import { StarsTopUpFlow } from '@/components/pages/tabs/home/StarsTopUpFlow';
 import { MarketEngineSection } from '@/components/pages/tabs/market/sections/MarketEngineSection';
 import { MarketTicketSection } from '@/components/pages/tabs/market/sections/MarketTicketSection';
 import { MarketShardSection } from '@/components/pages/tabs/market/sections/MarketShardSection';
-import { MarketBoosterSection } from '@/components/pages/tabs/market/sections/MarketBoosterSection';
 import { MarketCosmeticSection } from '@/components/pages/tabs/market/sections/MarketCosmeticSection';
 import { MarketStatusSection } from '@/components/pages/tabs/market/sections/MarketStatusSection';
 import { MarketPriceType } from '@/types/enums/market.enums';
@@ -162,9 +161,6 @@ export function MarketView() {
         <MarketTicketSection tickets={data.tickets} onSelect={handleSelect} onBuy={handleBuy} />
       ),
       shards: <MarketShardSection shards={data.shards} onSelect={handleSelect} onBuy={handleBuy} />,
-      boosters: (
-        <MarketBoosterSection boosters={data.boosters} onSelect={handleSelect} onBuy={handleBuy} />
-      ),
       cosmetics: (
         <MarketCosmeticSection
           cosmetics={data.cosmetics}

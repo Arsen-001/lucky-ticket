@@ -7,20 +7,12 @@ import { twMerge } from 'tailwind-merge';
 import { useAppTranslations } from '@/hooks/useAppTranslations';
 import type { MessageIds } from '@/types/types/i18n.types';
 
-export type MarketCategoryKey =
-  | 'all'
-  | 'engines'
-  | 'tickets'
-  | 'shards'
-  | 'boosters'
-  | 'cosmetics'
-  | 'status';
+export type MarketCategoryKey = 'all' | 'engines' | 'tickets' | 'shards' | 'cosmetics' | 'status';
 
 export const MARKET_CATEGORY_ORDER: MarketCategoryKey[] = [
   'all',
   'status',
   'tickets',
-  'boosters',
   'shards',
   'engines',
   'cosmetics',
@@ -31,7 +23,6 @@ const CATEGORY_ICON: Record<MarketCategoryKey, LucideIcon> = {
   engines: Cog,
   tickets: Ticket,
   shards: Gem,
-  boosters: Sparkles,
   cosmetics: Palette,
   status: CircleStar,
 };
@@ -41,7 +32,6 @@ const CATEGORY_LABEL: Record<MarketCategoryKey, MessageIds> = {
   engines: 'engines',
   tickets: 'tickets',
   shards: 'shards title',
-  boosters: 'boosters',
   cosmetics: 'cosmetics',
   status: 'status',
 };

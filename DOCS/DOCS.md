@@ -178,9 +178,9 @@ LuckyTicket365 runs on **two separate currencies**: Lucky Coin (LC), the interna
 
 ### 6.1 Lucky Coin (LC) — internal reward currency
 
-LC is the internal reward currency. It is **earned only by playing** — tournament prizes, stake yield (APR), task and ad rewards — and is spent inside the platform: buying tickets, producer engines, speed boosts, and upgrading statuses.
+LC is the internal reward currency. It is **earned only by playing** — tournament prizes, stake yield (APR), task and ad rewards — and is spent inside the platform: buying tickets, producer engines, and upgrading statuses. (Engine speed/capacity upgrades are paid in **LS**, not LC — §10.2.)
 
-- LC has a fixed real-money valuation of **$0.00001 per LC** ($1 = 100,000 LC), used to price its conversion to TON.
+- LC has a fixed real-money valuation of **$0.000001 per LC** ($1 = 1,000,000 LC), used to price its conversion to TON.
 - LC **cannot be acquired by conversion** — there is no TON→LC or LS→LC path, and no fiat/crypto LC deposit. LC enters the economy only by playing.
 - LC reaches real money by **converting to TON** at its $0.000001 valuation; the resulting TON is withdrawn through the wallet (Section 15). A **direct LC withdrawal is coming soon**.
 - The LC→TON exit carries two backend-enforced guards (`appConfig.economy.lcConversion`): a **15% conversion fee** and a **$10/day per-account cap**. They are the hard bound on real-money outflow regardless of how the internal LC faucet is tuned (§14.2).
@@ -212,7 +212,7 @@ Statuses reward trust, loyalty, and engagement while enabling monetization. Stat
 ### 7.2 Status Acquisition
 
 - **Verified:** Identity confirmed via email or phone confirmation. Free.
-- **Lucky Player:** A paid, time-limited subscription (monthly), purchased via the Market with Lucky Coins (LC) or Lucky Stars (LS).
+- **Lucky Player:** A paid, time-limited **weekly** subscription (7 days), purchased via the Market with Lucky Coins (LC) or Lucky Stars (LS) — **100⭐ ($2) / 2,000,000 LC ($2)** per week, priced at parity (the week costs the same $2 in either currency; no grind premium — unlike VIP).
 - **VIP:** Unlocked and upgraded via the Market. No Activity Points requirement. Detailed rules in Section 7.4.
 
 ### 7.3 Status Benefits
@@ -502,10 +502,9 @@ A Speed Boost reduces an engine's production cycle time, increasing how often it
 
 **Example:** A Bronze engine that normally produces 1 ticket every 2 hours, with a 2× speed boost active, produces 1 ticket every 1 hour — doubling the production rate.
 
-- **Acquisition:** Market purchase (LC) or status-based privilege (see Section 7.3).
+- **Acquisition:** The engine's permanent **speed level** (0–10, paid in **LS** per level — §10.2) or a **status** privilege (§7.3). _(A standalone Market-purchased LC Speed Boost previously existed but was **retired** — engine speed now lives on the engine's speed level, not a separate market item.)_
 - **Scope:** Applied to a specific engine the user owns.
-- **Duration:** Time-limited (defined by product team).
-- **Stacking:** Multiple speed boosts may stack within product-defined limits.
+- **Stacking:** Speed sources stack **additively** into one divisor on the base cycle (§9.7 / §10.3), down to the 900 s per-ticket floor.
 
 ### 10.2 Capacity Upgrade (Lucky Stars)
 
@@ -518,7 +517,7 @@ A Capacity Upgrade increases an engine's **per-cycle output** — instead of pro
 - **Tiers:** Higher-tier capacity upgrades may yield 3 or more tickets per cycle (defined by product team).
 - **Duration:** Defined by product team (permanent or time-limited per upgrade tier).
 
-**Permanent level upgrades — effect & LS cost curves** (knobs in `appConfig.economy.engineUpgrades`, helpers in `economy.utils.ts`): each engine carries a permanent **speed level** and **capacity level**, both 0–10, both paid in LS per level. Every level adds **+10%** to its additive boost stack (§9.7) — a maxed speed engine cycles 2× as fast; a maxed capacity engine mints 2 tickets per cycle _at engine level 1_. Level costs grow with **both** the sub-level **and** the engine level — each engine level adds +1 LS to every price: speed `level + engineLevel` LS, capacity `level + engineLevel + 1` LS (level = current sub-level 0–9 before the upgrade). So a level-1 engine pays speed **1…10** / capacity **2…11** across its ladder; a level-5 engine pays speed **5…14** / capacity **6…15**. Fully maxing one engine across all 5 levels (100 upgrades) totals **800 LS**.
+**Permanent level upgrades — effect & LS cost curves** (knobs in `appConfig.economy.engineUpgrades`, helpers in `economy.utils.ts`): each engine carries a permanent **speed level** and **capacity level**, both 0–10, both paid in LS per level. Every level adds **+10%** to its additive boost stack (§9.7) — a maxed speed engine cycles 2× as fast; a maxed capacity engine mints 2 tickets per cycle _at engine level 1_. Level costs grow with **both** the sub-level **and** the engine level — each engine level adds +1 LS to every price: speed `level + engineLevel` LS, capacity `level + engineLevel + 1` LS (level = current sub-level 0–9 before the upgrade). The whole price then **scales by tier** (`tierCostMultiplier`): **Bronze ×1, Silver ×2, Gold ×3, Platinum ×4, Diamond ×5** — leveling a higher-tier engine is proportionally more expensive. So a **Bronze** level-1 engine pays speed **1…10** / capacity **2…11** across its ladder; a level-5 engine pays speed **5…14** / capacity **6…15**. Fully maxing one **Bronze** engine across all 5 levels (100 upgrades) totals **800 LS**; the same on higher tiers costs that × their multiplier — **Silver 1,600 / Gold 2,400 / Platinum 3,200 / Diamond 4,000 LS**.
 
 **Engine promotion (level-up).** Speed level and capacity level each cap at 10. When **both** reach 10, the next paid upgrade **promotes** the engine to the next **engine level** and resets both sub-levels back to 0 — a fresh `0–10 / 0–10` ladder on a stronger base (`promoteEngineIfMaxed`, `ticket-engine.utils.ts`). Each engine level permanently:
 
@@ -537,7 +536,7 @@ Speed Boosts and Capacity Upgrades target independent engine parameters and may 
 
 ### 10.4 Chip Boosts (Tournament Rewards)
 
-In addition to the Market-purchased Speed Boost (10.1) and the Lucky-Stars Capacity Upgrade (10.2), engines support a third boost layer: **Chip Boosts**. Chips are big inventory items earned exclusively from tournaments (Section 11) and equipped onto engines through dedicated chip slots. Chips are assembled from **shards** — small fragments dropped by tournaments — that the user collects and spends to grow each chip's level.
+In addition to the per-engine-level Speed (10.1) and Capacity (10.2) upgrades, engines support a third boost layer: **Chip Boosts**. Chips are big inventory items earned exclusively from tournaments (Section 11) and equipped onto engines through dedicated chip slots. Chips are assembled from **shards** — small fragments dropped by tournaments — that the user collects and spends to grow each chip's level.
 
 #### Chip Types
 
@@ -678,7 +677,7 @@ The **Boost Inventory** is the user's storage for every owned-but-not-yet-equipp
 
 The inventory is a unified view across all boost categories defined in this section:
 
-- **Speed Boosts** (Section 10.1) — Market-purchased or status-granted.
+- **Speed Boosts** (Section 10.1) — from the engine's speed level (LS) or status-granted.
 - **Capacity Upgrades** (Section 10.2) — purchased with Lucky Stars in the Shop.
 - **Speed Chips** and **Capacity Chips** (Section 10.4) — built up from tournament-won shards.
 - **Chip Shards** (Section 10.4) — uncommitted fragments waiting to be spent on a level-up.
@@ -775,7 +774,7 @@ Booster effects stack on top of base parameters and any equipped Chip Boosts. Th
 
 ### Connections
 
-Boosts and upgrades connect engines to the Market (LC speed boosts), the Lucky Stars system (capacity upgrades — Section 19), the Status system (boost privileges), the Tournament system (chip shards + boosters — Section 11), the Task system (booster drops — Section 12), the Boost Inventory (Section 10.5), and the LC and LS currency systems.
+Boosts and upgrades connect engines to the Lucky Stars system (speed/capacity level upgrades — Section 19), the Status system (boost privileges), the Tournament system (chip shards + boosters — Section 11), the Task system (booster drops — Section 12), the Boost Inventory (Section 10.5), and the LC and LS currency systems.
 
 ---
 
@@ -803,13 +802,13 @@ Each tournament includes:
 
   | Tier     | LC per seat |
   | :------- | ----------: |
-  | Bronze   |      40,000 |
-  | Silver   |     100,000 |
-  | Gold     |     250,000 |
-  | Platinum |     600,000 |
-  | Diamond  |   1,500,000 |
+  | Bronze   |       4,000 |
+  | Silver   |      10,000 |
+  | Gold     |      25,000 |
+  | Platinum |      60,000 |
+  | Diamond  |     150,000 |
 
-  At the $0.00001/LC anchor a full 500-seat instance is worth **$200 / $500 / $1,250 / $3,000 / $7,500** by tier — the per-seat knob is what caps the platform's real-money faucet.
+  At the $0.000001/LC anchor a full 500-seat instance is worth **$2 / $5 / $12.50 / $30 / $75** by tier — the per-seat knob is what caps the platform's real-money faucet.
 
 - **Start Time:** The date and time when the tournament begins and winners are decided.
 - **Team Size:** The total number of seats. `teamSizeCap` = 500 per instance; when more eligible players exist than the cap, additional parallel instances of the slot are spawned.
@@ -1152,16 +1151,17 @@ The Market is the central hub for purchasing improvements, resources, and status
 ### Sections
 
 - **Engines:** Purchase additional producer engines for any unlocked tier with LC.
-- **Boosts:** Engine Speed Boosts that reduce an engine's production cycle time (Section 10.1).
 - **Tickets:** Purchase project or partner tickets directly with LC.
+- **Shards:** chip fragments collected to build chips, paid in LS (Section 10.4).
 - **Statuses:** Lucky Player subscription and VIP unlock/upgrade (LC or LS — Section 7).
-- Premium items (chips, chip builders, higher-tier boosters, passes) are paid in LS.
+- **Cosmetics:** avatars, badges, themes (Section 16.1) — not tier-gated.
+- Premium items (pre-built chips, chip builders, passes) are defined in the model but **not currently surfaced** — see Section 19.3 for the implemented-vs-deferred category list. (The legacy LC market **Speed Boost** was retired — engine speed is deepened via the engine's speed level, §10.2.)
 
 > Engine **Capacity Upgrades** are not sold here — they are exclusive to the LuckyTicket365 Shop, paid only with LS (Section 19.3).
 
 ### 14.1 AP Tier Gate
 
-Tier-bound market items (engines, chips, chip builders, boosters, tier tickets) are gated by the **AP tier** (Section 5.2): an item of tier `T` is buyable only when `AP-tier ≥ T`. Cosmetics (avatars, frames, themes) are **not** gated.
+Tier-bound market items (engines, chips, chip builders, boosters, tier tickets) are gated by the **AP tier** (Section 5.2): an item of tier `T` is buyable only when `AP-tier ≥ T`. Cosmetics (avatars, badges, themes) are **not** gated.
 
 ### 14.2 LC Price Ladder & Progression Economy
 
@@ -1169,10 +1169,10 @@ The Market is the platform's main LC **sink** — the counterweight to the tourn
 
 Base LC prices (first engine of a tier):
 
-| Item   |    Bronze |    Silver |      Gold |   Platinum |    Diamond |
-| :----- | --------: | --------: | --------: | ---------: | ---------: |
-| Engine | 2,000,000 | 3,600,000 | 6,750,000 | 11,700,000 | 22,500,000 |
-| Ticket |    60,000 |   150,000 |   375,000 |    900,000 |  2,250,000 |
+| Item   |  Bronze |  Silver |    Gold |  Platinum |   Diamond |
+| :----- | ------: | ------: | ------: | --------: | --------: |
+| Engine | 200,000 | 360,000 | 675,000 | 1,170,000 | 2,250,000 |
+| Ticket |   6,000 |  15,000 |  37,500 |    90,000 |   225,000 |
 
 **House edge.** The ticket price equals `1.5 × prizeLcPerSeat` for its tier (`tournamentHouseEdgeMultiplier`) — always above the average LC a ticket returns in a tournament. Bought tickets are never a profitable money loop; free engine-produced tickets are the free roll.
 
@@ -1182,9 +1182,11 @@ Base LC prices (first engine of a tier):
 
 **Engine promotion is an LS sink, not an LC printer.** Beyond buying more engines, a player deepens one via 10 speed + 10 capacity levels; the 20th upgrade **promotes** it (+100% speed, +10 base output — §10.2) and reopens the ladder. Every one of those 20 steps is priced in **Lucky Stars**, so promotion drains premium currency rather than inflating the LC faucet — which is why the greedy free-play bound above (LC-only reinvestment) can ignore it. The promotion gate and its base-capacity/speed curves are pinned by `tests/economy-sim.test.ts` ("engine-level promotion & base-capacity scaling").
 
-**Currency parity.** Where an item is priced in both LC and Telegram Stars, the Stars price is derived at the USD anchors (`lcUsdRate` / `lsUsdRate`) — neither currency is an arbitrage on the other. This parity is enforced by the guardrail simulation for **engines and tickets** (the two dual-priced items that are core to the loop).
+**Currency parity (engines).** For **engines**, the Stars price is derived at the USD anchors (`lcUsdRate` / `lsUsdRate`) — neither currency is an arbitrage on the other; this parity is enforced by the guardrail simulation.
 
-**Boost pricing is LC-first (deliberate LS premium).** Engine **Speed / Collect Boosts** (§10.1) are the one exception to strict parity: they are primarily an **LC** sink (the farmable currency), and their **LS** alternative is set independently at a deliberate premium — roughly **5× parity** across the ladder. LS is intentionally _not_ the economical way to buy a farmable consumable boost; the LS option exists only as a fallback for players out of LC. This is why the parity guardrail covers engines/tickets but **not** boosts.
+**Ticket Stars ladder.** **Tickets** keep their LC economy price (the house-edge / faucet number below), but their **Stars** alternative is a **fixed 1⭐ → 5⭐ by-tier ladder** (Bronze 1 · Silver 2 · Gold 3 · Platinum 4 · Diamond 5), deliberately **off parity** — a flat, legible real-money price per ticket (`MARKET_TICKET_STAR_PRICES` / `appConfig.economy.ticketPriceStarsByTier`).
+
+**Speed Boost retired.** The standalone LC market **Speed Boost** (§10.1) was retired — engine speed is now the engine's per-level **LS** upgrade (§10.2), not a market item. The currency-parity guardrail therefore covers **engines** only (tickets price Stars on a fixed by-tier ladder — see "Ticket Stars ladder" above).
 
 **Balance rule:** total LC spent in the Market per day should be ≥ the total LC faucet per day (tournaments + tasks + ads + stake APR), keeping LC mildly deflationary so it does not lose value.
 
@@ -1793,20 +1795,24 @@ In addition to earning, users may buy Lucky Stars from the Wallet page (see Sect
 
 The Market (Mega Market) is the unified shop. **All purchases are paid in either Lucky Coin (LC) or Lucky Stars (LS) — no fiat / USDT / TON.** Items that already _grant_ Lucky Stars (bundles containing stars) are LC-only — users cannot pay stars to receive stars.
 
-The Market opens with a **Hero card** showing the current featured deal (with countdown if limited) and a horizontal **filter chip strip** with the following 8 categories, in priority order:
+The Market opens with a **Hero card** showing the current featured deal (with countdown if limited) and a horizontal **filter chip strip**. The **implemented** categories, in priority order:
 
 1. **All** — vertically stacked render of every other category.
-2. **Status** — PRIME and VIP subscriptions (see Section 7).
-3. **Boosters** — 10 SKUs (5 tiers × {speed, capacity}, all 4-hour duration). Effect scales by tier: Bronze +25% → Diamond +100%. Locks for tiers above the user's max unlocked tier (lock icon replaces the price button).
-4. **Chips** — 10 SKUs (5 tiers × {speed, capacity}). Sold pre-built at level 1 / +0.5%; same tier-lock rule as Boosters.
-5. **Chip Builders** — 5 SKUs (1× Bronze, ×3 Silver, ×5 Gold, ×7 Platinum, ×10 Diamond). Tier-locked.
-6. **Engines** — 5 SKUs (one per tier, all level 1, with limited remaining-supply for higher tiers). Tier-locked.
-7. **Cosmetics** — Avatars, avatar frames, badges, themes (mix of tier-themed and brand-themed accents). Always available regardless of tier. **Avatars are a two-tier sub-category** — free avatars (granted by default, cosmetic only) and paid avatars (purchased here; each paid SKU carries a bound boost — see Section 16.1).
-8. **Passes** — Time-limited subscriptions:
-   - **Auto-Claim Pass** — auto-claim every cycle. Sold in 4 durations: 1 day, 7 days, 15 days, 30 days.
-   - **Ad-Free Pass** — removes ads while keeping ad-task rewards.
-   - **+25% LC Pass** — +25% LC on every claim.
-   - **Tournament Pass** — free tournament entry, priority matchmaking, exclusive chip drop.
+2. **Status** — Lucky Player and VIP subscriptions (see Section 7). The card body links to the status's dedicated page; the in-card price buttons buy in place.
+3. **Tickets** — buy tier tickets directly with LC (Section 14). Tier-locked.
+4. **Shards** — chip fragments ({speed, capacity} per tier) collected and spent to build chips in the inventory (Section 10.4). Tier-locked; currently seeded for Bronze + Silver.
+5. **Engines** — one producer engine per tier, level 1, priced with geometric repeat pricing (Section 14.2). Tier-locked.
+6. **Cosmetics** — Avatars, badges, themes (mix of tier-themed and brand-themed accents). Always available regardless of tier. **Avatars are a two-tier sub-category** — free avatars (granted by default, cosmetic only) and paid avatars (purchased here; each paid SKU carries a bound boost — see Section 16.1).
+
+**Deferred categories** — defined in the data model / roadmap but **not currently surfaced** as their own tab:
+
+- **Chips** (pre-built, sold at level 1) and **Chip Builders** — today chips are assembled from **Shards** (above), not sold pre-built.
+- **Passes** — time-limited subscriptions (Auto-Claim, Ad-Free, +25% LC, Tournament).
+- **Bundles** — combo packs (see the Bundles note below).
+- **Engine limited supply** — the `stock` / remaining-supply field exists on a market item (`MarketItem.stock`, FE `remainingSupply`) but is **not yet enforced or surfaced**; engines are currently unlimited.
+- **Speed / Collect Boosts** (Section 10.1) — **retired.** The standalone LC market boost category (`MarketItemCategory.BOOST`) was removed from the seed, the catalog response, and the FE contract, and legacy DB rows are pruned on boot. Engine speed/capacity is deepened via per-engine-level LS upgrades (the engine cube, Section 10.2).
+- **Boosters** — **retired from the storefront.** The market Booster listing (`MarketItemCategory.BOOSTER`, `buyBooster`) was removed from the seed, catalog response, and FE contract, and legacy DB rows are pruned on boot. Boosters remain an **inventory** item — earned from tournaments/tasks and equipped onto engines (Section 10.4 / §12); only the market _sale_ of boosters was removed (the `InventoryBooster` model is unaffected).
+- **Avatar frames** (`AVATAR_FRAME` cosmetic) — **retired from the storefront.** No longer seeded; existing frame rows are pruned on boot (by `cosmeticType`, so avatars/badges/themes in the same COSMETIC category stay). The `MarketCosmeticType.AVATAR_FRAME` value is kept in the taxonomy but nothing is sold under it.
 
 **Card visual language:** every Market item card shares the same template — a neutral `bg-background-overlay` card with a tier-accent bottom shine line, a 14×14 rounded-2xl icon stage with tier-tinted border + inset glow, the item name, a meta line (e.g. level / duration / contents), and 1–2 price buttons (LC and/or Lucky Stars), arranged 2 per row.
 
@@ -1816,7 +1822,7 @@ The Market opens with a **Hero card** showing the current featured deal (with co
 - If the user has enough — opens a centered **purchase confirmation modal** with the item's icon, name, description, and price.
 - If Lucky Stars are insufficient — opens the **Not-enough-Stars bottom sheet** (with top-up presets).
 - If LC are insufficient — opens the **Not-enough-LC modal**.
-- Confirming dispatches the corresponding RTK mutation (`buyEngine`, `buyChip`, `buyBuilder`, `buyBooster`, `buyCosmetic`, `buyPass`, `buyStatus`). Mutations apply optimistic updates: the cost is deducted from `me.coins` / `me.telegramStars`, and the granted item is appended to the relevant cache (engines → ticket-tier engines, chips/boosters → inventory, builders → inventory.builders[tier]). On error, all patches are rolled back.
+- Confirming dispatches the corresponding RTK mutation (`buyEngine`, `buyTicket`, `buyStatus`, `buyShard`, `buyCosmetic`). Mutations apply optimistic updates: the cost is deducted from `me.coins` / `me.telegramStars`, and the granted item is appended to the relevant cache (engines → ticket-tier engines, shards → inventory, tickets → ticket balance, status → `me`). On error, all patches are rolled back.
 
 **Card-body tap:** tapping a card's body (not its price buttons) opens an item **info sheet** — except **Status** cards (Lucky Player / VIP), whose body links to the status's dedicated page (`/settings/lucky-player`, `/settings/vip` — the single canonical route used everywhere: header pills, profile, stakes, market) where it can be reviewed, bought, or extended. This link stays active even when the status is already owned (the in-card buy buttons lock, the body still navigates). Price buttons always buy in place.
 

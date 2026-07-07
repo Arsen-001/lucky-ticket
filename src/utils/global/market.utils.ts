@@ -35,6 +35,17 @@ export const applyStatusMarketDiscount = (
   }));
 };
 
+const marketPriceRank = (type: MarketPriceType): number =>
+  type === MarketPriceType.TELEGRAM_STARS ? 0 : type === MarketPriceType.LC ? 1 : 2;
+
+/**
+ * Display order for a Market item's price buttons: **Lucky Stars first** (the
+ * real-money anchor), then Lucky Coins, then anything else. Pure display
+ * ordering — the catalog may return prices in any order.
+ */
+export const orderMarketPrices = (prices: MarketPrice[]): MarketPrice[] =>
+  [...prices].sort((a, b) => marketPriceRank(a.type) - marketPriceRank(b.type));
+
 /**
  * Full price pair (LC + parity LS) for a player's **next** engine of a tier,
  * with the status discount applied — the single source the Market uses to price

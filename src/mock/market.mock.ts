@@ -3,7 +3,6 @@ import {
   MarketItemCategory,
   MarketPriceType,
   MarketStatusType,
-  TicketBoostType,
 } from '@/types/enums/market.enums';
 import { TicketsEnum } from '@/types/enums/ticket.enums';
 import { images } from '@/constants/images';
@@ -24,8 +23,15 @@ const lcPricePair = (lcAmount: number): MarketPrice[] => [
 const enginePrices = (tier: TicketsEnum): MarketPrice[] =>
   lcPricePair(appConfig.economy.engineBasePriceLcByTier[tier]);
 
-const ticketPrices = (tier: TicketsEnum): MarketPrice[] =>
-  lcPricePair(appConfig.economy.ticketPriceLcByTier[tier]);
+// Tickets keep their LC economy price but use a FIXED 1⭐→5⭐ by-tier Stars
+// ladder (off parity, unlike engines) — mirrors backend `MARKET_TICKET_STAR_PRICES`.
+const ticketPrices = (tier: TicketsEnum): MarketPrice[] => [
+  { type: MarketPriceType.LC, amount: appConfig.economy.ticketPriceLcByTier[tier] },
+  {
+    type: MarketPriceType.TELEGRAM_STARS,
+    amount: appConfig.economy.ticketPriceStarsByTier[tier],
+  },
+];
 
 export const marketMock: MarketData = {
   engines: [
@@ -111,135 +117,6 @@ export const marketMock: MarketData = {
       ticketType: TicketsEnum.DIAMOND,
       isAvailable: false,
       prices: ticketPrices(TicketsEnum.DIAMOND),
-    },
-  ],
-
-  // Boost LS prices are intentionally OFF strict LC↔LS parity — a deliberate
-  // ~5× premium (DOCS §14.2 "Boost pricing is LC-first"). Boosts are an LC-first
-  // sink; the LS price is a costlier fallback, not a parity-derived amount, so
-  // do NOT run these through `lcPriceToLsParity` and the parity guardrail skips
-  // them. (Engines/tickets, by contrast, are parity-derived.)
-  boosts: [
-    {
-      id: 'b1',
-      name: 'Bronze Speed 50%',
-      type: TicketBoostType.SPEED,
-      ticketType: TicketsEnum.BRONZE,
-      boostPercentage: 50,
-      isNew: true,
-      isAvailable: true,
-      prices: [
-        { type: MarketPriceType.LC, amount: 100_000 },
-        { type: MarketPriceType.TELEGRAM_STARS, amount: 300 },
-      ],
-    },
-    {
-      id: 'b2',
-      name: 'Bronze Collect 2x',
-      type: TicketBoostType.COLLECT_TIME,
-      ticketType: TicketsEnum.BRONZE,
-      boostPercentage: 100,
-      isAvailable: true,
-      prices: [
-        { type: MarketPriceType.LC, amount: 150_000 },
-        { type: MarketPriceType.TELEGRAM_STARS, amount: 400 },
-      ],
-    },
-    {
-      id: 'b3',
-      name: 'Silver Speed 100%',
-      type: TicketBoostType.SPEED,
-      ticketType: TicketsEnum.SILVER,
-      boostPercentage: 100,
-      isAvailable: true,
-      prices: [
-        { type: MarketPriceType.LC, amount: 200_000 },
-        { type: MarketPriceType.TELEGRAM_STARS, amount: 500 },
-      ],
-    },
-    {
-      id: 'b4',
-      name: 'Silver Collect 2x',
-      type: TicketBoostType.COLLECT_TIME,
-      ticketType: TicketsEnum.SILVER,
-      boostPercentage: 100,
-      isAvailable: true,
-      prices: [
-        { type: MarketPriceType.LC, amount: 250_000 },
-        { type: MarketPriceType.TELEGRAM_STARS, amount: 600 },
-      ],
-    },
-    {
-      id: 'b5',
-      name: 'Gold Speed 150%',
-      type: TicketBoostType.SPEED,
-      ticketType: TicketsEnum.GOLD,
-      boostPercentage: 150,
-      isAvailable: false,
-      prices: [
-        { type: MarketPriceType.LC, amount: 400_000 },
-        { type: MarketPriceType.TELEGRAM_STARS, amount: 1000 },
-      ],
-    },
-    {
-      id: 'b6',
-      name: 'Gold Collect 3x',
-      type: TicketBoostType.COLLECT_TIME,
-      ticketType: TicketsEnum.GOLD,
-      boostPercentage: 200,
-      isAvailable: false,
-      prices: [
-        { type: MarketPriceType.LC, amount: 500_000 },
-        { type: MarketPriceType.TELEGRAM_STARS, amount: 1300 },
-      ],
-    },
-    {
-      id: 'b7',
-      name: 'Platinum Speed 200%',
-      type: TicketBoostType.SPEED,
-      ticketType: TicketsEnum.PLATINUM,
-      boostPercentage: 200,
-      isAvailable: false,
-      prices: [
-        { type: MarketPriceType.LC, amount: 800_000 },
-        { type: MarketPriceType.TELEGRAM_STARS, amount: 2000 },
-      ],
-    },
-    {
-      id: 'b8',
-      name: 'Platinum Collect 4x',
-      type: TicketBoostType.COLLECT_TIME,
-      ticketType: TicketsEnum.PLATINUM,
-      boostPercentage: 300,
-      isAvailable: false,
-      prices: [
-        { type: MarketPriceType.LC, amount: 1_000_000 },
-        { type: MarketPriceType.TELEGRAM_STARS, amount: 2500 },
-      ],
-    },
-    {
-      id: 'b9',
-      name: 'Diamond Speed 300%',
-      type: TicketBoostType.SPEED,
-      ticketType: TicketsEnum.DIAMOND,
-      boostPercentage: 300,
-      isAvailable: false,
-      prices: [
-        { type: MarketPriceType.LC, amount: 1_500_000 },
-        { type: MarketPriceType.TELEGRAM_STARS, amount: 3800 },
-      ],
-    },
-    {
-      id: 'b10',
-      name: 'Diamond Collect 5x',
-      type: TicketBoostType.COLLECT_TIME,
-      ticketType: TicketsEnum.DIAMOND,
-      boostPercentage: 400,
-      isAvailable: false,
-      prices: [
-        { type: MarketPriceType.LC, amount: 2_000_000 },
-        { type: MarketPriceType.TELEGRAM_STARS, amount: 5000 },
-      ],
     },
   ],
 
@@ -366,151 +243,6 @@ export const marketMock: MarketData = {
       prices: [
         { type: MarketPriceType.LC, amount: 65_000 },
         { type: MarketPriceType.TELEGRAM_STARS, amount: 11 },
-      ],
-    },
-  ],
-
-  boosters: [
-    {
-      id: 'booster-bronze-speed-4h',
-      name: 'Bronze Speed Booster',
-      category: MarketItemCategory.BOOSTER,
-      type: 'speed',
-      quality: TicketsEnum.BRONZE,
-      effectPct: 25,
-      durationHours: 4,
-      count: 1,
-      prices: [
-        { type: MarketPriceType.LC, amount: 12_000 },
-        { type: MarketPriceType.TELEGRAM_STARS, amount: 3 },
-      ],
-    },
-    {
-      id: 'booster-bronze-cap-4h',
-      name: 'Bronze Capacity Booster',
-      category: MarketItemCategory.BOOSTER,
-      type: 'capacity',
-      quality: TicketsEnum.BRONZE,
-      effectPct: 25,
-      durationHours: 4,
-      count: 1,
-      prices: [
-        { type: MarketPriceType.LC, amount: 12_000 },
-        { type: MarketPriceType.TELEGRAM_STARS, amount: 3 },
-      ],
-    },
-    {
-      id: 'booster-silver-speed-4h',
-      name: 'Silver Speed Booster',
-      category: MarketItemCategory.BOOSTER,
-      type: 'speed',
-      quality: TicketsEnum.SILVER,
-      effectPct: 35,
-      durationHours: 4,
-      count: 1,
-      prices: [
-        { type: MarketPriceType.LC, amount: 24_000 },
-        { type: MarketPriceType.TELEGRAM_STARS, amount: 6 },
-      ],
-    },
-    {
-      id: 'booster-silver-cap-4h',
-      name: 'Silver Capacity Booster',
-      category: MarketItemCategory.BOOSTER,
-      type: 'capacity',
-      quality: TicketsEnum.SILVER,
-      effectPct: 35,
-      durationHours: 4,
-      count: 1,
-      prices: [
-        { type: MarketPriceType.LC, amount: 24_000 },
-        { type: MarketPriceType.TELEGRAM_STARS, amount: 6 },
-      ],
-    },
-    {
-      id: 'booster-gold-speed-4h',
-      name: 'Gold Speed Booster',
-      category: MarketItemCategory.BOOSTER,
-      type: 'speed',
-      quality: TicketsEnum.GOLD,
-      effectPct: 50,
-      durationHours: 4,
-      count: 1,
-      prices: [
-        { type: MarketPriceType.LC, amount: 48_000 },
-        { type: MarketPriceType.TELEGRAM_STARS, amount: 12 },
-      ],
-    },
-    {
-      id: 'booster-gold-cap-4h',
-      name: 'Gold Capacity Booster',
-      category: MarketItemCategory.BOOSTER,
-      type: 'capacity',
-      quality: TicketsEnum.GOLD,
-      effectPct: 50,
-      durationHours: 4,
-      count: 1,
-      prices: [
-        { type: MarketPriceType.LC, amount: 48_000 },
-        { type: MarketPriceType.TELEGRAM_STARS, amount: 12 },
-      ],
-    },
-    {
-      id: 'booster-platinum-speed-4h',
-      name: 'Platinum Speed Booster',
-      category: MarketItemCategory.BOOSTER,
-      type: 'speed',
-      quality: TicketsEnum.PLATINUM,
-      effectPct: 75,
-      durationHours: 4,
-      count: 1,
-      prices: [
-        { type: MarketPriceType.LC, amount: 96_000 },
-        { type: MarketPriceType.TELEGRAM_STARS, amount: 24 },
-      ],
-    },
-    {
-      id: 'booster-platinum-cap-4h',
-      name: 'Platinum Capacity Booster',
-      category: MarketItemCategory.BOOSTER,
-      type: 'capacity',
-      quality: TicketsEnum.PLATINUM,
-      effectPct: 75,
-      durationHours: 4,
-      count: 1,
-      prices: [
-        { type: MarketPriceType.LC, amount: 96_000 },
-        { type: MarketPriceType.TELEGRAM_STARS, amount: 24 },
-      ],
-    },
-    {
-      id: 'booster-diamond-speed-4h',
-      name: 'Diamond Speed Booster',
-      category: MarketItemCategory.BOOSTER,
-      type: 'speed',
-      quality: TicketsEnum.DIAMOND,
-      effectPct: 100,
-      durationHours: 4,
-      count: 1,
-      isNew: true,
-      prices: [
-        { type: MarketPriceType.LC, amount: 200_000 },
-        { type: MarketPriceType.TELEGRAM_STARS, amount: 50 },
-      ],
-    },
-    {
-      id: 'booster-diamond-cap-4h',
-      name: 'Diamond Capacity Booster',
-      category: MarketItemCategory.BOOSTER,
-      type: 'capacity',
-      quality: TicketsEnum.DIAMOND,
-      effectPct: 100,
-      durationHours: 4,
-      count: 1,
-      isNew: true,
-      prices: [
-        { type: MarketPriceType.LC, amount: 200_000 },
-        { type: MarketPriceType.TELEGRAM_STARS, amount: 50 },
       ],
     },
   ],
@@ -660,10 +392,10 @@ export const marketMock: MarketData = {
       name: 'Lucky Player',
       isNew: true,
       statusType: MarketStatusType.LUCKY_PLAYER,
-      durationDays: 30,
+      durationDays: 7,
       prices: [
-        { type: MarketPriceType.LC, amount: 8_000_000 },
-        { type: MarketPriceType.TELEGRAM_STARS, amount: 200 },
+        { type: MarketPriceType.LC, amount: 2_000_000 },
+        { type: MarketPriceType.TELEGRAM_STARS, amount: 100 },
       ],
       privileges: [
         'lp engine speed boost',

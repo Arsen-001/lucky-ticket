@@ -6,10 +6,7 @@ import { meApi } from '@/api/me.api';
 import { ticketsApi } from '@/api/tickets.api';
 import { rtkTags } from '@/constants/rtk-tags';
 import { MarketPriceType } from '@/types/enums/market.enums';
-import type {
-  InventoryBoosterDuration,
-  InventoryChipType,
-} from '@/types/interfaces/inventory.interfaces';
+import type { InventoryChipType } from '@/types/interfaces/inventory.interfaces';
 import type { MarketData, MarketPrice } from '@/types/interfaces/market.interfaces';
 import type { TicketEngine } from '@/types/interfaces/ticket.interfaces';
 import type { TicketType } from '@/types/types/ticket.types';
@@ -146,57 +143,6 @@ export const marketApi = api.injectEndpoints({
       },
     }),
 
-    buyBooster: builder.mutation<
-      void,
-      {
-        boosterId: string;
-        boosterType: InventoryChipType;
-        quality: TicketType;
-        effectPct: number;
-        durationHours: InventoryBoosterDuration;
-        count: number;
-        price: MarketPrice;
-      }
-    >({
-      query: ({ boosterId, price }) => ({
-        url: 'market/boosters/buy',
-        method: 'POST',
-        body: { boosterId, priceType: price.type },
-      }),
-      invalidatesTags: [
-        rtkTags.market,
-        rtkTags.me,
-        rtkTags.inventory,
-        rtkTags.lc,
-        rtkTags.lcTransactions,
-      ],
-      async onQueryStarted(
-        { boosterType, quality, effectPct, durationHours, count, price },
-        { dispatch, queryFulfilled }
-      ) {
-        const mePatch = dispatch(deductBalanceUpdater(price));
-        const inventoryPatch = dispatch(
-          inventoryApi.util.updateQueryData('getInventory', undefined, draft => {
-            const newBoosters = Array.from({ length: count }).map((_, i) => ({
-              id: `booster-${quality}-${boosterType}-${Date.now()}-${i}`,
-              type: boosterType,
-              quality,
-              effectPct,
-              durationHours,
-              source: 'shop' as const,
-            }));
-            draft.boosters = [...draft.boosters, ...newBoosters];
-          })
-        );
-        try {
-          await queryFulfilled;
-        } catch {
-          mePatch.undo();
-          inventoryPatch.undo();
-        }
-      },
-    }),
-
     buyCosmetic: builder.mutation<void, { cosmeticId: string; price: MarketPrice }>({
       query: ({ cosmeticId, price }) => ({
         url: 'market/cosmetics/buy',
@@ -222,6 +168,5 @@ export const {
   useBuyStatusMutation,
   useBuyEngineMutation,
   useBuyShardMutation,
-  useBuyBoosterMutation,
   useBuyCosmeticMutation,
 } = marketApi;
