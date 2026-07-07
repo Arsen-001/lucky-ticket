@@ -15,6 +15,11 @@ export interface TournamentUserResult {
   lc: number;
   /** Shards awarded — only for top-3 placements. */
   shards?: number;
+  /**
+   * LC from the jackpot drop when this tournament was the secretly-charged
+   * one (DOCS §20.3) — shown as a distinct JACKPOT block, separate from `lc`.
+   */
+  jackpotLc?: number;
 }
 
 /**

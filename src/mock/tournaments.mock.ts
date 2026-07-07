@@ -296,8 +296,10 @@ export const tournaments: PersonalTournament[] = [
     places: getMockPlacements(),
     participated: true,
     participatedTicketsCount: 12,
-    // user took 1st place — top reward (LC + shards)
-    userResult: { place: 1, lc: 200_000, shards: 3 },
+    // user took 1st place — top reward (LC + shards); this instance was the
+    // secretly-charged one, so the jackpot detonated here (DOCS §20):
+    // 1st place = 20% consolation share + 40% podium share of the pot.
+    userResult: { place: 1, lc: 200_000, shards: 3, jackpotLc: 310_000 },
     resultSeen: false,
   },
   {

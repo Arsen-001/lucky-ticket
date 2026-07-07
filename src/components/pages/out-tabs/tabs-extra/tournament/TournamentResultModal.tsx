@@ -117,6 +117,10 @@ export function TournamentResultModal({
   const statusBonusLc = lc - baseLc;
   const statusLabelKey = isVip ? 'vip' : 'lucky player';
   const shards = result?.shards ?? 0;
+  // Jackpot drop payout (DOCS §20.4) — every participant of the charged
+  // tournament gets at least the consolation share, so it can arrive with any
+  // placement, including one that pays no regular prize.
+  const jackpotLc = result?.jackpotLc ?? 0;
 
   const view: ResultView =
     result === undefined
@@ -128,6 +132,7 @@ export function TournamentResultModal({
           : 'no-place';
 
   const counter = useCounter(view === 'top-three' || view === 'mid-place' ? lc : 0);
+  const jackpotCounter = useCounter(jackpotLc);
   const placeLabel = view === 'top-three' && place ? t(PLACE_LABEL[place]) : undefined;
 
   // Per-rank colors: 1st=gold, 2nd=silver, 3rd=bronze; mid-place uses pink/purple
@@ -139,10 +144,10 @@ export function TournamentResultModal({
       : RANK_TEXT_CLASS[1];
 
   useEffect(() => {
-    if (open && (view === 'top-three' || view === 'mid-place')) {
+    if (open && (view === 'top-three' || view === 'mid-place' || jackpotLc > 0)) {
       triggerHaptic('success');
     }
-  }, [open, view]);
+  }, [open, view, jackpotLc]);
 
   const titleByView: Record<ResultView, string> = {
     'top-three': `${t('you won')}!`,
@@ -150,6 +155,9 @@ export function TournamentResultModal({
     'no-place': t('better luck next time'),
     'not-played': t('tournament ended'),
   };
+  // A jackpot consolation with no placement prize is still a win — don't greet
+  // the player with "better luck next time" over a windfall.
+  const title = view === 'no-place' && jackpotLc > 0 ? `${t('jackpot')}!` : titleByView[view];
 
   return (
     <Modal open={open} onClose={onClose} hideCloseButton>
@@ -207,9 +215,7 @@ export function TournamentResultModal({
 
           {/* TITLE BLOCK */}
           <div className="flex flex-col items-center justify-center gap-1 w-full">
-            <h2 className="text-2xl font-extrabold leading-tight text-center">
-              {titleByView[view]}
-            </h2>
+            <h2 className="text-2xl font-extrabold leading-tight text-center">{title}</h2>
             <p className="text-xs text-white-secondary text-center max-w-[280px] line-clamp-2">
               {placeLabel ? `${placeLabel} · ` : ''}
               {tournamentName}
@@ -257,10 +263,31 @@ export function TournamentResultModal({
                 )}
               </>
             )}
-            {view === 'no-place' && (
+            {view === 'no-place' && jackpotLc === 0 && (
               <p className="text-sm text-white/55 text-center max-w-[260px]">
                 {t('no prize description')}
               </p>
+            )}
+            {jackpotLc > 0 && (
+              <div
+                className="w-full flex flex-col items-center gap-1.5 rounded-xl border border-gold/45 px-4 py-3"
+                style={{
+                  background:
+                    'radial-gradient(circle at 50% 0%, rgba(248, 189, 62, 0.22) 0%, rgba(248, 189, 62, 0.08) 55%, transparent 100%)',
+                  boxShadow:
+                    '0 0 0 4px rgba(248, 189, 62, 0.08), 0 0 22px rgba(248, 189, 62, 0.25), inset 0 0 18px rgba(248, 189, 62, 0.12)',
+                }}
+              >
+                <span className="text-[10px] font-extrabold uppercase tracking-[0.3em] text-gold">
+                  {t('jackpot')}
+                </span>
+                <div className="inline-flex items-baseline gap-2 leading-none">
+                  <LcLabel size={22} className="self-center" />
+                  <span className="tournament-rank-text tournament-rank-text--gold text-3xl tabular-nums leading-none">
+                    {jackpotCounter}
+                  </span>
+                </div>
+              </div>
             )}
           </div>
 
