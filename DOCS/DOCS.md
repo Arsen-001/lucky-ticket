@@ -1152,7 +1152,7 @@ The Market is the central hub for purchasing improvements, resources, and status
 
 - **Engines:** Purchase additional producer engines for any unlocked tier with LC.
 - **Tickets:** Purchase project or partner tickets directly with LC.
-- **Shards:** chip fragments collected to build chips, paid in LS (Section 10.4).
+- **Shards:** chip fragments collected to build chips (Section 10.4). The **full tier ladder is listed** (Bronze → Diamond, both chip types, one shard per purchase, LC or LS) but the purchase is AP-tier-gated (14.1) — a player buys shards **of their own tier and below**; higher tiers show locked.
 - **Statuses:** Lucky Player subscription and VIP unlock/upgrade (LC or LS — Section 7).
 - **Cosmetics:** avatars, badges, themes (Section 16.1) — not tier-gated.
 - Premium items (pre-built chips, chip builders, passes) are defined in the model but **not currently surfaced** — see Section 19.3 for the implemented-vs-deferred category list. (The legacy LC market **Speed Boost** was retired — engine speed is deepened via the engine's speed level, §10.2.)
@@ -1173,6 +1173,9 @@ Base LC prices (first engine of a tier):
 | :----- | ------: | ------: | ------: | --------: | --------: |
 | Engine | 200,000 | 360,000 | 675,000 | 1,170,000 | 2,250,000 |
 | Ticket |   6,000 |  15,000 |  37,500 |    90,000 |   225,000 |
+| Shard  |   3,000 |   7,000 |  15,000 |    32,000 |    65,000 |
+
+Shards also carry a flat by-tier **LS ladder** (1 / 1 / 3 / 6 / 11 ⭐ per shard), mirroring the ticket LS ladder's off-parity design. Both shard price rows are re-synced from the code constants on every backend boot (`syncShardLadder`), like the other ladders.
 
 **House edge.** The ticket price equals `1.5 × prizeLcPerSeat` for its tier (`tournamentHouseEdgeMultiplier`) — always above the average LC a ticket returns in a tournament. Bought tickets are never a profitable money loop; free engine-produced tickets are the free roll.
 
