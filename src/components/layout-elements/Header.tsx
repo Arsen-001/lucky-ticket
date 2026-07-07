@@ -126,7 +126,9 @@ export function Header({ className }: ClassNameProps) {
           </SkeletonSuspense>
         </div>
 
-        <div className="flex flex-wrap items-center gap-1.5">
+        {/* Nowrap + hidden-scrollbar overflow: the fixed-height header clips a wrapped
+            second row, so pills must never wrap. py/-my keep pill glows unclipped. */}
+        <div className="scrollbar-hidden -my-2 flex items-center gap-1.5 overflow-x-auto py-2">
           <SkeletonSuspense
             loading={meLoading}
             skeleton={<Skeleton variant="rounded-rectangle" className="h-7 w-16" />}
@@ -160,7 +162,7 @@ export function Header({ className }: ClassNameProps) {
             <HeaderStatPill
               accent="purple"
               icon={<TelegramStarIcon size={18} />}
-              value={me?.telegramStars ?? 0}
+              value={formatCompact(me?.telegramStars ?? 0)}
               onClick={() => setStarsModalOpen(true)}
               ariaLabel={t('add stars')}
             />
