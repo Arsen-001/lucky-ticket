@@ -24,8 +24,17 @@ interface ShowPromiseResult {
   error: boolean;
 }
 
+/**
+ * SDK events we subscribe to. Registering a listener for an event makes the
+ * SDK emit it INSTEAD of showing its own native Telegram alert (its internal
+ * `_invokeAlertOrEvent` prefers listeners over `showAlert`) — that's how the
+ * app replaces the stock "AdsgramError" popups with its own modal.
+ */
+type AdsgramEventName = 'onBannerNotFound' | 'onNonStopShow' | 'onTooLongSession' | 'onError';
+
 interface AdController {
   show: () => Promise<ShowPromiseResult>;
+  addEventListener: (event: AdsgramEventName, handler: () => void) => void;
 }
 
 interface AdsgramSDK {
@@ -46,11 +55,19 @@ declare global {
  * Normalized outcome of a rewarded-ad attempt:
  * - `completed`   — user watched the ad to the end → grant the reward.
  * - `skipped`     — user closed the ad early → no reward.
+ * - `noAd`        — no fill: Adsgram has no ad to serve right now → try later.
+ * - `tooFast`     — a new ad was requested too soon after the previous one.
  * - `error`       — network is configured but the ad failed to load/show → no reward.
  * - `unavailable` — no ad network configured (dev / plain browser / e2e) → fall
  *                   back to the mock flow and let the backend decide the reward.
  */
-export type RewardedAdOutcome = 'completed' | 'skipped' | 'error' | 'unavailable';
+export type RewardedAdOutcome =
+  | 'completed'
+  | 'skipped'
+  | 'noAd'
+  | 'tooFast'
+  | 'error'
+  | 'unavailable';
 
 /** The configured Adsgram block id, or `undefined` when no network is wired. */
 function getBlockId(): string | undefined {
@@ -66,11 +83,20 @@ export function isAdsgramEnabled(): boolean {
 // a repeated init, but memoizing avoids re-entering the SDK on every watch.
 let controller: AdController | null = null;
 
+// Reason captured from SDK events during the current show() attempt. The SDK
+// emits the event synchronously before rejecting the show() promise, so the
+// catch below reads the value of the attempt that just failed.
+let lastFailure: Extract<RewardedAdOutcome, 'noAd' | 'tooFast' | 'error'> | null = null;
+
 function getController(): AdController | null {
   if (controller) return controller;
   const blockId = getBlockId();
   if (typeof window === 'undefined' || !blockId || !window.Adsgram) return null;
   controller = window.Adsgram.init({ blockId, debug: Env.adsgramDebug });
+  controller.addEventListener('onBannerNotFound', () => (lastFailure = 'noAd'));
+  controller.addEventListener('onNonStopShow', () => (lastFailure = 'tooFast'));
+  controller.addEventListener('onTooLongSession', () => (lastFailure = 'error'));
+  controller.addEventListener('onError', () => (lastFailure = 'error'));
   return controller;
 }
 
@@ -86,11 +112,13 @@ export async function showRewardedAd(): Promise<RewardedAdOutcome> {
   // Configured but the SDK script hasn't loaded — do NOT credit a free reward.
   if (!ctrl) return 'error';
 
+  lastFailure = null;
   try {
     const result = await ctrl.show();
-    return result.done && !result.error ? 'completed' : 'skipped';
+    return result.done && !result.error ? 'completed' : (lastFailure ?? 'skipped');
   } catch {
-    // Adsgram rejects with a ShowPromiseResult-shaped object on skip/error.
-    return 'skipped';
+    // Adsgram rejects with a ShowPromiseResult-shaped object on skip/error;
+    // a captured event narrows the reason, otherwise the user closed it early.
+    return lastFailure ?? 'skipped';
   }
 }

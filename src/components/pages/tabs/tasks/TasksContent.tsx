@@ -28,6 +28,7 @@ import { TasksCategoryNav, type CategoryNavItem } from './TasksCategoryNav';
 import { TasksCategorySection } from './TasksCategorySection';
 import { TournamentMilestoneSlider } from './TournamentMilestoneSlider';
 import { AdsSection } from './AdsSection';
+import { AdUnavailableModal, type AdUnavailableReason } from './AdUnavailableModal';
 import { ClaimRewardModal, type RewardModalResult } from './ClaimRewardModal';
 import { ArrivalShine } from '@/components/shared/ArrivalShine';
 
@@ -217,6 +218,13 @@ export function TasksContent() {
     open: boolean;
     result?: RewardModalResult | null;
   }>({ id: '', open: false, result: null });
+
+  // Rewarded-ad failure modal (replaces the SDK's native Telegram alert).
+  // `reason` survives close so the content doesn't flicker mid exit animation.
+  const [adIssue, setAdIssue] = useState<{ open: boolean; reason: AdUnavailableReason | null }>({
+    open: false,
+    reason: null,
+  });
 
   const sectionRefs = useRef<Map<TaskCategory, HTMLElement>>(new Map());
   const scrollLockUntilRef = useRef(0);
@@ -460,8 +468,8 @@ export function TasksContent() {
       toast.info(t('ad not completed'));
       return;
     }
-    if (outcome === 'error') {
-      toast.error(t('ad load failed'));
+    if (outcome === 'noAd' || outcome === 'tooFast' || outcome === 'error') {
+      setAdIssue({ open: true, reason: outcome });
       return;
     }
 
@@ -827,6 +835,12 @@ export function TasksContent() {
           <div className="h-12" />
         </div>
       )}
+
+      <AdUnavailableModal
+        open={adIssue.open}
+        reason={adIssue.reason}
+        onClose={() => setAdIssue(prev => ({ ...prev, open: false }))}
+      />
 
       <ClaimRewardModal
         open={pendingClaim.open}

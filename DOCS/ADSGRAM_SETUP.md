@@ -51,7 +51,10 @@ NEXT_PUBLIC_ADSGRAM_DEBUG=false       # "true" to serve TEST ads while integrati
   `completed` / `skipped` / `error` / `unavailable`.
 - `handleWatchAd` (`src/components/pages/tabs/tasks/TasksContent.tsx`) plays the
   ad first; it only calls `POST /tasks/ads/watch` on `completed` (or `unavailable`
-  = the no-network dev fallback). `skipped`/`error` show a toast and grant nothing.
+  = the no-network dev fallback). `skipped` shows a toast; `noAd`/`tooFast`/`error`
+  open `AdUnavailableModal` and grant nothing. The app subscribes to the SDK's
+  error events (`onBannerNotFound` etc.), which suppresses Adsgram's own native
+  Telegram alerts in favor of that modal.
 
 ---
 
@@ -102,8 +105,14 @@ context. The callback does **not** fire in debug mode.
 
 ## Checklist
 
-- [ ] Block id created & unit approved by Adsgram moderation
-- [ ] `NEXT_PUBLIC_ADSGRAM_BLOCK_ID` set (local + Vercel) — frontend
-- [ ] Daily cap enforced server-side on `POST /tasks/ads/watch` — ✅ implemented
+- [x] Block id created (`35479`, **Test platform** with app url = `https://lucky-ticket-nu.vercel.app`).
+      NB: the platform's app url must exactly match the deployed Mini App URL AND the ad unit
+      must be attached to the right platform in the dropdown, or the SDK throws `AdsgramError`
+      / the API returns `Wrong referer` (blocks 35472 and 35475 died on this)
+- [ ] Production platform: a Test platform serves ads but its events are NOT counted (no revenue).
+      Create a regular platform with the same URL, pass moderation (@adsgramsupport: platform
+      link + forwarded BotFather message), then swap the block id (env var + redeploy)
+- [x] `NEXT_PUBLIC_ADSGRAM_BLOCK_ID` set (local `.env.local` + Vercel production) — frontend
+- [x] Daily cap enforced server-side on `POST /tasks/ads/watch`
 - [ ] (When eligible) `ADSGRAM_REWARD_SECRET` set + Reward URL configured →
       S2S endpoint becomes the source of truth (`watchAd` auto-switches to UI-sync)
