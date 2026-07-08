@@ -164,7 +164,7 @@ export function StakesContent() {
         </button>
       )}
 
-      {bronzeFreeRemaining > 0 && (
+      {stakes?.enabled !== false && bronzeFreeRemaining > 0 && (
         <Link
           href={routes.stakes.new}
           className="border-bronze/35 bg-bronze/10 hover:bg-bronze/15 flex items-center gap-2.5 rounded-2xl border px-3.5 py-2.5 transition-colors"
@@ -259,7 +259,7 @@ export function StakesContent() {
         </SkeletonSuspense>
       </div>
 
-      <StakesNewStakeFab />
+      {stakes?.enabled !== false && <StakesNewStakeFab />}
     </div>
   );
 }

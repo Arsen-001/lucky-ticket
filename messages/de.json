@@ -1369,5 +1369,6 @@
   "get tickets": "Tickets holen",
   "no joined tournaments": "Noch keine Turnier-Teilnahmen",
   "no joined tournaments description": "Tritt einem anstehenden Turnier bei, und es erscheint hier.",
-  "no prize description": "Diesmal kein Gewinn — hol dir mehr Tickets und versuch es erneut!"
+  "no prize description": "Diesmal kein Gewinn — hol dir mehr Tickets und versuch es erneut!",
+  "stakes disabled": "Staking ist vorübergehend nicht verfügbar."
 }

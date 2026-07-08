@@ -36,7 +36,20 @@ export interface StakeHistoryEntry {
   completedAt: string;
 }
 
+/** Live economy knobs served with GET /stakes — mirrors the admin config. */
+export interface StakesRuntimeConfig {
+  aprMinPercent: number;
+  aprMaxPercent: number;
+  durationMinMonths: number;
+  durationMaxMonths: number;
+  apDivisor: number;
+  apCompletionBonusPercent: number;
+}
+
 export interface StakesData {
+  /** Admin kill switch — when false the new-stake flow must not render. */
+  enabled: boolean;
+  config: StakesRuntimeConfig;
   levels: StakeLevelDefinition[];
   activeStakes: ActiveStake[];
   history: StakeHistoryEntry[];

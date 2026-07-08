@@ -21,6 +21,15 @@ const nowIso = () => new Date().toISOString();
  * `mockDb` in place (identical array refs would be skipped by structural sharing).
  */
 const getStakes = (): StakesData => ({
+  enabled: true,
+  config: {
+    aprMinPercent: appConfig.stakes.aprMinPercent,
+    aprMaxPercent: appConfig.stakes.aprMaxPercent,
+    durationMinMonths: appConfig.stakes.durationMinMonths,
+    durationMaxMonths: appConfig.stakes.durationMaxMonths,
+    apDivisor: appConfig.stakes.apDivisor,
+    apCompletionBonusPercent: appConfig.stakes.apCompletionBonusPercent,
+  },
   levels: appConfig.stakes.levels,
   activeStakes: mockDb.stakes.activeStakes.map(s => ({ ...s })),
   history: mockDb.stakes.history.map(h => ({ ...h })),

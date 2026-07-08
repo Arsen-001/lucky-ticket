@@ -63,6 +63,16 @@ export function NewStakeContent() {
 
   if (isError) return <QueryErrorState onRetry={() => refetch()} />;
 
+  // Admin kill switch — the whole new-stake flow is off (deep links included).
+  if (stakes && stakes.enabled === false) {
+    return (
+      <div className="flex flex-col items-center gap-3 px-6 py-16 text-center">
+        <Info size={28} className="text-white/30" />
+        <p className="text-sm text-white/60">{t('stakes disabled')}</p>
+      </div>
+    );
+  }
+
   if (stakesLoading || meLoading || levels.length === 0) {
     return (
       <div className="flex flex-col gap-4">
