@@ -8,38 +8,31 @@ import '@/styles/components/jackpot.css';
 interface JackpotPotCounterProps {
   /** Server pot value (base). The displayed value never goes below this. */
   value: number;
-  /** Approx LC/sec the pot grows — sizes the periodic "+X" bumps. */
-  accrualPerSecond: number;
   /** Applied to the number text (e.g. size + `jackpot-glow`). */
   className?: string;
 }
 
 /**
- * Live odometer for the hero pot. The number creeps upward on its own (periodic
- * bumps simulate tournaments feeding the pot in the mock), each bump flashing a
- * rising "+X". It tweens smoothly between values via rAF and never ticks
- * backwards when the server value reconciles on refetch.
+ * Live number for the hero pot. The pot only grows when a tournament finishes
+ * (its 10% skim), so there is NO fake creep: the number tweens (via rAF) to
+ * the real server value when it increases, flashing the actual "+X" gain, and
+ * never ticks backwards when the value reconciles on refetch.
  */
-export function JackpotPotCounter({ value, accrualPerSecond, className }: JackpotPotCounterProps) {
+export function JackpotPotCounter({ value, className }: JackpotPotCounterProps) {
   const [display, setDisplay] = useState(value);
   const [pop, setPop] = useState<{ amount: number; key: number } | null>(null);
   const targetRef = useRef(value);
 
-  // Reconcile with the server value without ever going backwards.
+  // Reconcile with the server value: an actual increase tweens the number up
+  // and pops the real gain; first load snaps into place.
   useEffect(() => {
-    if (value > targetRef.current) targetRef.current = value;
-    setDisplay(prev => (value > prev ? value : prev));
+    if (value <= targetRef.current) return;
+    const wasLoaded = targetRef.current > 0;
+    const gain = value - targetRef.current;
+    targetRef.current = value;
+    if (wasLoaded) setPop({ amount: gain, key: Date.now() });
+    else setDisplay(value);
   }, [value]);
-
-  // Periodic bumps = tournaments dripping their 10% into the pot.
-  useEffect(() => {
-    const id = window.setInterval(() => {
-      const bump = Math.round(accrualPerSecond * (2 + Math.random() * 4));
-      targetRef.current += bump;
-      setPop({ amount: bump, key: Date.now() });
-    }, 2800);
-    return () => window.clearInterval(id);
-  }, [accrualPerSecond]);
 
   // Smoothly chase the target each frame; settle exactly when close.
   useEffect(() => {

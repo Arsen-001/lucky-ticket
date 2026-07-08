@@ -11,7 +11,11 @@ import { JackpotWinnersFeed } from './JackpotWinnersFeed';
 
 export function JackpotContainer() {
   const t = useAppTranslations();
-  const { data, isLoading, isError, refetch } = useGetJackpotQuery();
+  // The pot only moves when a tournament finishes — poll to pick up real
+  // skims (the scheduler finishes due tournaments about once a minute).
+  const { data, isLoading, isError, refetch } = useGetJackpotQuery(undefined, {
+    pollingInterval: 60_000,
+  });
   const { data: winners, isLoading: winnersLoading } = useGetJackpotWinnersQuery();
 
   if (isError) {

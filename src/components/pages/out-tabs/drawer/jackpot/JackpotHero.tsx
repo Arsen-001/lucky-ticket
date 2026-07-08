@@ -41,7 +41,6 @@ export function JackpotHero({ data, loading }: JackpotHeroProps) {
           <span className="relative flex items-end justify-center gap-1.5">
             <JackpotPotCounter
               value={data.pot}
-              accrualPerSecond={data.accrualPerSecond}
               className="jackpot-glow text-[40px] font-black leading-none text-white sm:text-5xl"
             />
             <span className="text-pink-secondary mb-1 text-sm font-extrabold">
