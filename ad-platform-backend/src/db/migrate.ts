@@ -12,7 +12,7 @@ import { pool } from './pool';
 async function migrate(): Promise<void> {
   const sql = readFileSync(join(__dirname, 'schema.sql'), 'utf8');
   await pool.query(sql);
-  // eslint-disable-next-line no-console
+
   console.log('✅ Schema applied');
 
   // Dev seed: one casino advertiser funded with $1,000.00 (100_000 cents).
@@ -23,7 +23,7 @@ async function migrate(): Promise<void> {
      RETURNING id`,
     ['demo_casino', 100_000]
   );
-  // eslint-disable-next-line no-console
+
   console.log(
     seed.rowCount
       ? `✅ Seed: created advertiser "demo_casino" (id=${seed.rows[0].id}, balance=$1000.00)`
@@ -34,7 +34,6 @@ async function migrate(): Promise<void> {
 }
 
 migrate().catch(err => {
-  // eslint-disable-next-line no-console
   console.error('❌ Migration failed:', err);
   process.exit(1);
 });

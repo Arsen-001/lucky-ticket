@@ -11,7 +11,7 @@ export const pool = new Pool({ connectionString: env.DATABASE_URL });
 
 pool.on('error', err => {
   // A pooled client errored while idle — log, don't crash the process.
-  // eslint-disable-next-line no-console
+
   console.error('Unexpected PG pool error:', err);
 });
 

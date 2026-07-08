@@ -13,17 +13,14 @@ export function startExpiryCron(): void {
     try {
       const { completed, refundedCents } = await sweepExpiredTournaments();
       if (completed > 0) {
-        // eslint-disable-next-line no-console
         console.log(
           `⏱️  Expiry sweep: closed ${completed} tournament(s), refunded ${refundedCents} cents`
         );
       }
     } catch (err) {
-      // eslint-disable-next-line no-console
       console.error('Expiry sweep failed:', err);
     }
   });
 
-  // eslint-disable-next-line no-console
   console.log(`⏱️  Expiry cron scheduled: "${env.EXPIRY_CRON}"`);
 }

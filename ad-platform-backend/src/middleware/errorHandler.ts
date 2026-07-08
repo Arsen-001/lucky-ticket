@@ -13,7 +13,7 @@ export const errorHandler: ErrorRequestHandler = (err, _req, res, _next) => {
   }
 
   // Unknown / programmer error — log the real thing, return a safe message.
-  // eslint-disable-next-line no-console
+
   console.error('Unhandled error:', err);
   res.status(500).json({ error: { code: 'INTERNAL_ERROR', message: 'Internal server error' } });
 };
