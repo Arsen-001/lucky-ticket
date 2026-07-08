@@ -4,7 +4,6 @@ import { meApi } from '@/api/me.api';
 import { ticketsApi } from '@/api/tickets.api';
 import { rtkTags } from '@/constants/rtk-tags';
 import { appConfig } from '@/config/app.config';
-import { GlobalConstants } from '@/constants/global.constants';
 import {
   MAX_BOOST_LEVEL,
   effectiveCycleSeconds,
@@ -55,7 +54,6 @@ export const enginesApi = api.injectEndpoints({
       // their own tags, which don't touch the slider.
       invalidatesTags: [rtkTags.engines, rtkTags.me, rtkTags.tasks, rtkTags.achievements],
       async onQueryStarted({ engineId }, { dispatch, queryFulfilled }) {
-        let claimedTier: TicketType | null = null;
         const patch = dispatch(
           ticketsApi.util.updateQueryData('getTickets', undefined, draft => {
             for (const ticket of draft) {
@@ -65,26 +63,24 @@ export const enginesApi = api.injectEndpoints({
                 engine.lifetimeProduced = (engine.lifetimeProduced ?? 0) + engine.pendingCount;
                 engine.pendingCount = 0;
                 engine.cycleStartedAt = dayjs().toISOString();
-                claimedTier = ticket.ticketType;
               }
             }
           })
         );
-        // Mirror the server's AP reward in the header immediately; the `me`
-        // invalidation reconciles it (e.g. once the daily claim cap is hit).
-        const apGain = claimedTier ? GlobalConstants.apRewards.claimByTier[claimedTier] : 0;
-        const mePatch = apGain
-          ? dispatch(
-              meApi.util.updateQueryData('getMe', undefined, draft => {
-                draft.activityPoints += apGain;
-              })
-            )
-          : null;
         try {
-          await queryFulfilled;
+          // Mirror the SERVER-confirmed AP in the header — never guess it
+          // optimistically: past the daily claim cap the server awards 0, and a
+          // guessed +N would visibly roll back once `me` refetches (+1 → −1).
+          const { data } = await queryFulfilled;
+          if (data?.apGain) {
+            dispatch(
+              meApi.util.updateQueryData('getMe', undefined, draft => {
+                draft.activityPoints += data.apGain;
+              })
+            );
+          }
         } catch {
           patch.undo();
-          mePatch?.undo();
         }
       },
     }),
@@ -116,7 +112,15 @@ export const enginesApi = api.injectEndpoints({
           })
         );
         try {
-          await queryFulfilled;
+          // Same as claimEngine: apply the server-confirmed AP (0 once capped).
+          const { data } = await queryFulfilled;
+          if (data?.apGain) {
+            dispatch(
+              meApi.util.updateQueryData('getMe', undefined, draft => {
+                draft.activityPoints += data.apGain;
+              })
+            );
+          }
         } catch {
           patch.undo();
         }
