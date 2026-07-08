@@ -70,8 +70,6 @@ Engine {
 | `lcUsdRate` / `lsUsdRate`            | `0.000001` / `0.02` → паритет `max(1, round(lc/20000))`                      | app.config wallet   |
 | `ticketPriceLcByTier`                | bronze 6000, silver 15000, gold 37500, platinum 90000, diamond 225000        | app.config economy  |
 | `tournamentHouseEdgeMultiplier`      | `1.5`                                                                        | app.config economy  |
-| `apRewards.claimByTier`              | bronze 1, silver 2, gold 4, platinum 8, diamond 16                           | global.constants    |
-| `apRewards.claimDailyLimit`          | `5` (клеймов/день, зачитываемых в AP)                                        | global.constants    |
 
 ---
 
@@ -184,8 +182,7 @@ engineLevel = ровно 10 speed + 10 capacity = **20 LS-апгрейдов**; 
   чтении): если `pendingCount === 0` и `elapsed = now - cycleStartedAt ≥ effectiveCycleSeconds`,
   то `pendingCount = engineCapacity(...)` (вся пачка за раз).
 - Клейм: `claimed = pendingCount`; `pendingCount = 0`; `cycleStartedAt = now`; `lifetimeProduced += claimed`.
-- **AP за клейм:** `apGain = apRewards.claimByTier[tier]`, но зачитывается в AP не более
-  `claimDailyLimit = 5` клеймов в день (сверх лимита — тикеты выдаются, AP не растёт).
+- **AP за клейм не начисляется** (продуктовое решение: клейм платит только тикетами).
 
 ---
 
@@ -197,8 +194,8 @@ engineLevel = ровно 10 speed + 10 capacity = **20 LS-апгрейдов**; 
 | Метод · путь                    | Тело                    | Ответ                               | Логика сервера                                                                                                                                                           |
 | :------------------------------ | :---------------------- | :---------------------------------- | :----------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `GET tickets`                   | —                       | `Ticket[]` c вложенными `engines[]` | Отдать тикеты тира + движки владельца; при чтении можно лениво доначислить `pendingCount` (§6).                                                                          |
-| `POST engines/claim`            | `{engineId}`            | `{claimed, apGain}`                 | Клейм одного движка (§6). Инвалидация фронта: engines, tickets, me, tasks, achievements.                                                                                 |
-| `POST engines/claim-all`        | `{tier}`                | `{claimed, apGain}`                 | Клейм всех готовых движков тира; `claimed` — сумма пачек.                                                                                                                |
+| `POST engines/claim`            | `{engineId}`            | `{claimed}`                         | Клейм одного движка (§6), AP не начисляется. Инвалидация фронта: engines, tasks, achievements.                                                                           |
+| `POST engines/claim-all`        | `{tier}`                | `{claimed}`                         | Клейм всех готовых движков тира; `claimed` — сумма пачек. AP не начисляется.                                                                                             |
 | `POST engines/instant-claim`    | `{engineId, cost}`      | `{claimed, cost}`                   | Пропустить остаток цикла за LS. **Сервер пересчитывает** `cost = max(1, ceil(remaining/3600))`, списывает LS, выдаёт полную пачку `engineCapacity`, стартует новый цикл. |
 | `POST engines/skip`             | `{engineId}`            | `{skipped, cost}`                   | Fast-forward цикла за LS (аналог instant-claim по сути; сохранить текущее поведение фронта). Сервер пересчитывает cost.                                                  |
 | `POST engines/upgrade-speed`    | `{engineId, cost}`      | `204`                               | §5: пересчитать `speedUpgradeLsCost(speedLevel, engineLevel)`, списать LS, `speedLevel+1`, промоут.                                                                      |

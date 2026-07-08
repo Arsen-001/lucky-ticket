@@ -4,7 +4,6 @@ import { useEffect, useRef, useState, type CSSProperties } from 'react';
 import { twMerge } from 'tailwind-merge';
 import { Clock } from 'lucide-react';
 import { TelegramStarIcon } from '@/components/shared/icons/TelegramStarIcon';
-import { BoltIcon } from '@/components/shared/icons/BoltIcon';
 import { TicketOverlap } from '@/components/shared/icons/TicketOverlap';
 import { ClientPortal } from '@/components/shared/ClientPortal';
 import { formatCycleTime } from '@/utils/global/ticket-engine.utils';
@@ -31,7 +30,6 @@ export interface EngineCardCycleRowProps {
   pending: boolean;
   compact: boolean;
   instantClaimCost: number;
-  pendingApReward: number;
   glow: string;
   onClaim: (engineId: string) => void;
   onInstantClaim: (engineId: string) => void;
@@ -62,19 +60,14 @@ export function EngineCardCycleRow({
   pending,
   compact,
   instantClaimCost,
-  pendingApReward,
   glow,
   onClaim,
   onInstantClaim,
 }: EngineCardCycleRowProps) {
   const t = useAppTranslations();
 
-  const [flightData, setFlightData] = useState<{
-    tickets: FlightItem;
-    ap: FlightItem;
-  } | null>(null);
+  const [flightData, setFlightData] = useState<{ tickets: FlightItem } | null>(null);
   const ticketsGroupRef = useRef<HTMLDivElement>(null);
-  const apGroupRef = useRef<HTMLDivElement>(null);
   const flyTimerRef = useRef<number | null>(null);
 
   useEffect(() => {
@@ -86,8 +79,7 @@ export function EngineCardCycleRow({
   const handleClaim = () => {
     if (!pending || flightData) return;
     const ticketsEl = ticketsGroupRef.current;
-    const apEl = apGroupRef.current;
-    if (!ticketsEl || !apEl) {
+    if (!ticketsEl) {
       onClaim(engineId);
       return;
     }
@@ -116,7 +108,6 @@ export function EngineCardCycleRow({
 
     setFlightData({
       tickets: computeFlight(ticketsEl, '[data-flight-target="tickets"]', window.innerHeight - 40),
-      ap: computeFlight(apEl, '[data-flight-target="ap"]', 40),
     });
 
     flyTimerRef.current = window.setTimeout(() => {
@@ -158,22 +149,6 @@ export function EngineCardCycleRow({
             }}
           >
             ×{pendingCount}
-          </span>
-        </div>
-        <div ref={apGroupRef} className="flex items-center gap-1.5">
-          <BoltIcon size={24} className="shrink-0" />
-          <span
-            className={twMerge(
-              'font-extrabold tabular-nums rounded-full',
-              compact ? 'text-[10px] px-1.5 py-px' : 'text-[11px] px-2 py-0.5'
-            )}
-            style={{
-              color: 'var(--color-teal)',
-              background: 'color-mix(in srgb, var(--color-teal) 18%, transparent)',
-              border: '1px solid color-mix(in srgb, var(--color-teal) 35%, transparent)',
-            }}
-          >
-            +{pendingApReward}
           </span>
         </div>
       </div>
@@ -273,35 +248,6 @@ export function EngineCardCycleRow({
               }}
             >
               ×{pendingCount}
-            </span>
-          </div>
-          <div
-            aria-hidden
-            className="engine-claim-fly pointer-events-none fixed z-[200] flex items-center gap-1.5"
-            style={
-              {
-                top: flightData.ap.top,
-                left: flightData.ap.left,
-                width: flightData.ap.width,
-                height: flightData.ap.height,
-                '--fly-dx': `${flightData.ap.dx}px`,
-                '--fly-dy': `${flightData.ap.dy}px`,
-              } as CSSProperties
-            }
-          >
-            <BoltIcon size={24} className="shrink-0" />
-            <span
-              className={twMerge(
-                'font-extrabold tabular-nums rounded-full',
-                compact ? 'text-[10px] px-1.5 py-px' : 'text-[11px] px-2 py-0.5'
-              )}
-              style={{
-                color: 'var(--color-teal)',
-                background: 'color-mix(in srgb, var(--color-teal) 18%, transparent)',
-                border: '1px solid color-mix(in srgb, var(--color-teal) 35%, transparent)',
-              }}
-            >
-              +{pendingApReward}
             </span>
           </div>
         </ClientPortal>

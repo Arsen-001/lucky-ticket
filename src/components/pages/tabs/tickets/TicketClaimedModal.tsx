@@ -5,9 +5,7 @@ import { twMerge } from 'tailwind-merge';
 import { Modal } from '@/components/shared/modals/Modal';
 import { Button } from '@/components/shared/buttons/Button';
 import { TicketOverlap } from '@/components/shared/icons/TicketOverlap';
-import { BoltIcon } from '@/components/shared/icons/BoltIcon';
 import { useAppTranslations } from '@/hooks/useAppTranslations';
-import { GlobalConstants } from '@/constants/global.constants';
 import type { TicketType } from '@/types/types/ticket.types';
 import type { MessageIds } from '@/types/types/i18n.types';
 
@@ -31,11 +29,6 @@ export interface TicketClaimedModalProps {
   open: boolean;
   tier: TicketType;
   count: number;
-  /**
-   * AP actually credited by the server for this claim. Falls back to the
-   * per-tier base when omitted; 0 hides the badge (daily claim-AP cap hit).
-   */
-  ap?: number;
   onClose: () => void;
 }
 
@@ -68,12 +61,11 @@ const useCounter = (target: number, durationMs = 700) => {
   return value;
 };
 
-export function TicketClaimedModal({ open, tier, count, ap, onClose }: TicketClaimedModalProps) {
+export function TicketClaimedModal({ open, tier, count, onClose }: TicketClaimedModalProps) {
   const t = useAppTranslations();
   const counter = useCounter(open ? count : 0);
   const glow = TIER_GLOW[tier];
   const tierColor = `var(--color-${tier})`;
-  const claimAp = ap ?? GlobalConstants.apRewards.claimByTier[tier];
 
   return (
     <Modal open={open} onClose={onClose} hideCloseButton>
@@ -112,15 +104,6 @@ export function TicketClaimedModal({ open, tier, count, ap, onClose }: TicketCla
             {count === 1 ? t('ticket added to inventory') : t('tickets added to inventory')}
           </span>
         </div>
-
-        {claimAp > 0 && (
-          <div className="border-teal/35 bg-teal/12 relative flex items-center gap-1.5 rounded-full border px-3 py-1.5">
-            <BoltIcon size={15} />
-            <span className="text-teal text-[12px] font-extrabold">
-              {t('plus {n} ap', { n: claimAp })}
-            </span>
-          </div>
-        )}
 
         <Button onClick={onClose} className="relative w-full mt-2">
           {t('continue')}

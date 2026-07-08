@@ -21,14 +21,12 @@ const apRewards = {
   sendTicketDailyLimit: 3,
   likeProfile: 1,
   likeProfileDailyLimit: 3,
-  claimDailyLimit: 5,
   /** LS spent per 1 AP from purchases — no daily cap. */
   purchaseLsPerAp: 10,
   /** LC spent per 1 AP from spending — no daily cap. */
   spendLcPerAp: 2_500,
   dailyTaskByTier: { bronze: 1, silver: 2, gold: 3, platinum: 4, diamond: 5 },
   weeklyTaskByTier: { bronze: 2, silver: 3, gold: 4, platinum: 5, diamond: 6 },
-  claimByTier: { bronze: 1, silver: 2, gold: 4, platinum: 8, diamond: 16 },
   tournamentJoinByTier: { bronze: 1, silver: 2, gold: 3, platinum: 4, diamond: 5 },
   /**
    * How many daily / weekly tasks a player of each tier can actually complete
@@ -43,10 +41,11 @@ const apRewards = {
 /**
  * DERIVED — the no-donation daily AP ceiling per tier (DOCS §5.4): the sum of
  * every capped recurring source at that tier (streak + ads + ticket sends +
- * likes + claims + daily tasks + weekly tasks averaged per day). Never
- * hand-edit a baseline: tune the source rates/caps above instead, so the
- * number shown on the AP dashboard, the decay rate and the tier pacing can
- * never drift apart. Currently ≈38 / 49 / 67 / 97 / 150.
+ * likes + daily tasks + weekly tasks averaged per day). Engine claims award
+ * no AP (product decision — claims pay in tickets only). Never hand-edit a
+ * baseline: tune the source rates/caps above instead, so the number shown on
+ * the AP dashboard, the decay rate and the tier pacing can never drift apart.
+ * Currently ≈33 / 39 / 47 / 57 / 70.
  */
 const dailyBaselineApByTier = Object.fromEntries(
   apTiers.map(tier => [
@@ -56,7 +55,6 @@ const dailyBaselineApByTier = Object.fromEntries(
         apRewards.watchVideo * apRewards.watchVideoDailyLimit +
         apRewards.sendTicket * apRewards.sendTicketDailyLimit +
         apRewards.likeProfile * apRewards.likeProfileDailyLimit +
-        apRewards.claimDailyLimit * apRewards.claimByTier[tier] +
         apRewards.dailyTasksCountByTier[tier] * apRewards.dailyTaskByTier[tier] +
         (apRewards.weeklyTasksCountByTier[tier] * apRewards.weeklyTaskByTier[tier]) / 7
     ),
@@ -148,16 +146,18 @@ export const GlobalConstants = {
   decayGraceDays: 7,
   /**
    * Product pacing targets (days per leg at the DERIVED daily baselines
-   * ≈38/49/67/97): Silver in ~15 days, Gold +1 month, Platinum +3 months,
-   * Diamond +6 months → actual legs ≈14.5 / 29.6 / 89.6 / 180.4 days
-   * (~10.5 months to Diamond total). Asserted in `tests/economy-sim.test.ts`.
+   * ≈33/39/47/57): Silver in ~15 days, Gold +1 month, Platinum +3 months,
+   * Diamond +6 months → actual legs ≈15.2 / 29.5 / 90.4 / 177.2 days
+   * (~10.3 months to Diamond total). Asserted in `tests/economy-sim.test.ts`.
+   * Retuned when engine-claim AP was removed (baselines dropped) so the
+   * pacing targets held.
    */
   apTierThresholds: {
     bronze: 0,
-    silver: 550,
-    gold: 2000,
-    platinum: 8000,
-    diamond: 25500,
+    silver: 500,
+    gold: 1650,
+    platinum: 5900,
+    diamond: 16000,
   },
   apRewards,
   /**

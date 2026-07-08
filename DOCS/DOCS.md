@@ -95,12 +95,12 @@ A user's **tier** is derived from accumulated AP:
 | Tier     | AP threshold | Reached by (perfect daily-baseline player) |
 | :------- | :----------- | :----------------------------------------- |
 | Bronze   | 0            | start                                      |
-| Silver   | 550          | ~2 weeks                                   |
-| Gold     | 2,000        | ~1.5 months                                |
-| Platinum | 8,000        | ~4.5 months                                |
-| Diamond  | 25,500       | ~10.5 months                               |
+| Silver   | 500          | ~2 weeks                                   |
+| Gold     | 1,650        | ~1.5 months                                |
+| Platinum | 5,900        | ~4.5 months                                |
+| Diamond  | 16,000       | ~10.3 months                               |
 
-Thresholds implement the product pacing targets — Silver in ~15 days, Gold +1 month, Platinum +3 months, Diamond +6 months — **computed against the derived daily baselines** (§5.4), i.e. against what a fully-active player can actually collect per day from every capped source. The legs land at ≈14.5 / 29.6 / 89.6 / 180.4 days, each visibly longer than the previous one — the pacing guardrail is asserted in `tests/economy-sim.test.ts`.
+Thresholds implement the product pacing targets — Silver in ~15 days, Gold +1 month, Platinum +3 months, Diamond +6 months — **computed against the derived daily baselines** (§5.4), i.e. against what a fully-active player can actually collect per day from every capped source. The legs land at ≈15.2 / 29.5 / 90.4 / 177.2 days, each visibly longer than the previous one — the pacing guardrail is asserted in `tests/economy-sim.test.ts`. (Thresholds were retuned down when engine-claim AP was removed from the source registry, so the pacing targets held.)
 
 The pacing describes a player who collects the full daily baseline every day. Tournaments make it faster; missed days slower.
 
@@ -122,7 +122,6 @@ AP is earned from a data-driven **source registry** — every meaningful action 
 | Weekly task               | 2 / 3 / 4 / 5 / 6                     | by task tier; a tier-T player completes 3–7/week (`weeklyTasksCountByTier`)                    |
 | One-time task             | varies                                | once per task                                                                                  |
 | Verify email              | 20                                    | one-time                                                                                       |
-| Claim                     | 1 / 2 / 4 / 8 / 16                    | per claim, by tier (Bronze→Diamond), 5×/day                                                    |
 | Watch a video             | 2                                     | 10×/day default · 20×/day with LP · 40×/day with VIP (daily cap = limit × 2 AP)                |
 | Send a ticket to a friend | 1                                     | 3×/day                                                                                         |
 | Like a profile            | 1                                     | 3×/day                                                                                         |
@@ -132,19 +131,19 @@ AP is earned from a data-driven **source registry** — every meaningful action 
 | Spend LC                  | 1 per 2,500 LC spent                  | no daily cap                                                                                   |
 | Complete a stake          | `LC staked × months / 5,000`          | base credited on start (retained on cancel), +50% bonus on completion (forfeited if cancelled) |
 
-Tiered sources (daily / weekly tasks, claim, tournament join) scale with the relevant tier — Bronze→Diamond — and recurring daily sources carry per-day caps. **One-off and on-top sources** — verify-email, one-time tasks, friend invites, tournament joins, stake completion — are earned above the daily baseline (Section 5.4). **Purchases are uncapped:** 1 AP per 10 LS or per 2,500 LC spent with no daily limit, so a heavy spender climbs tiers substantially faster than a free player.
+Tiered sources (daily / weekly tasks, tournament join) scale with the relevant tier — Bronze→Diamond — and recurring daily sources carry per-day caps. **Claiming engine output awards no AP** — claims pay in tickets only, so farming the claim button cannot drive progression. **One-off and on-top sources** — verify-email, one-time tasks, friend invites, tournament joins, stake completion — are earned above the daily baseline (Section 5.4). **Purchases are uncapped:** 1 AP per 10 LS or per 2,500 LC spent with no daily limit, so a heavy spender climbs tiers substantially faster than a free player.
 
 ### 5.4 Daily Baseline
 
-The **daily baseline** is the AP a fully-active player earns per day without donation. It is **DERIVED, not hand-set**: `dailyBaselineApByTier` is computed from the source registry (§5.3) as the sum of every capped recurring source — streak + ads + ticket sends + likes + claims + daily tasks + weekly tasks averaged per day. Tune a source rate or cap and the baseline, the decay rate and the tier pacing all follow automatically. It is tier-dependent — daily tasks, weekly tasks and claim scale with tier:
+The **daily baseline** is the AP a fully-active player earns per day without donation. It is **DERIVED, not hand-set**: `dailyBaselineApByTier` is computed from the source registry (§5.3) as the sum of every capped recurring source — streak + ads + ticket sends + likes + daily tasks + weekly tasks averaged per day. Tune a source rate or cap and the baseline, the decay rate and the tier pacing all follow automatically. It is tier-dependent — daily and weekly tasks scale with tier:
 
 | Tier     | Daily baseline (derived) |
 | :------- | :----------------------- |
-| Bronze   | 38                       |
-| Silver   | 49                       |
-| Gold     | 67                       |
-| Platinum | 97                       |
-| Diamond  | 150                      |
+| Bronze   | 33                       |
+| Silver   | 39                       |
+| Gold     | 47                       |
+| Platinum | 57                       |
+| Diamond  | 70                       |
 
 The baseline is shown on the AP dashboard and is the basis of the decay rate (Section 5.5). One-off and on-top sources — verify-email, one-time tasks, invites, tournaments, stakes, purchases — are earned above this baseline.
 
@@ -153,7 +152,7 @@ The baseline is shown on the AP dashboard and is the basis of the decay rate (Se
 If the user stops opening the app, AP decays:
 
 - **Grace period:** 7 days of inactivity with no decay.
-- **After grace:** AP drops by `0.5 ×` the player's tier daily baseline per inactive day (≈ 19 AP at Bronze, ≈ 75 at Diamond). Floor: 0.
+- **After grace:** AP drops by `0.5 ×` the player's tier daily baseline per inactive day (≈ 17 AP at Bronze, ≈ 35 at Diamond). Floor: 0.
 - Any action resets the grace timer and stops the decay.
 - Decay lowers AP → lowers tier → **freezes** (makes temporarily unusable) content above the new tier. **No assets are lost** — engines, tickets, LC remain; they are frozen until AP recovers.
 - Bronze tier is 0 AP and the decay floor is 0, so a user can never fall below Bronze — Bronze content and non-gated AP sources always remain available, so a returning user can always climb back.
@@ -162,7 +161,7 @@ If the user stops opening the app, AP decays:
 
 AP has a dedicated dashboard screen, opened by tapping the AP count on the profile. It shows current AP, tier, progress to the next tier, decay status, the full breakdown of AP sources with the no-donation daily ceiling, and which tournaments the current tier unlocks.
 
-Every row in the AP-source breakdown is a **deep link** to the screen where that action is performed. On arrival the relevant target briefly **shines** — and scrolls into view if it is off-screen — so the player sees exactly where to earn the AP. A source that points at a whole screen (claim, like a profile, join a tournament, purchase) glows the page; a source that points at a specific block (verify email, watch a video, invite a friend, send a ticket, complete a stake, daily login streak) glows that block's heading. Task sources additionally open the correct frequency tab (daily / weekly / one-time).
+Every row in the AP-source breakdown is a **deep link** to the screen where that action is performed. On arrival the relevant target briefly **shines** — and scrolls into view if it is off-screen — so the player sees exactly where to earn the AP. A source that points at a whole screen (like a profile, join a tournament, purchase) glows the page; a source that points at a specific block (verify email, watch a video, invite a friend, send a ticket, complete a stake, daily login streak) glows that block's heading. Task sources additionally open the correct frequency tab (daily / weekly / one-time).
 
 ### Connections
 
@@ -344,7 +343,7 @@ Each engine has its own dedicated page (`/engines/[id]`). The page mirrors the f
 
 At first, only the Bronze engine is available (gifted on first launch). Higher-tier **producer engines** are gated by the **AP tier** (Section 5.2): an engine of tier `T` can be acquired and used only when the user's `AP-tier ≥ T`.
 
-This replaces the former per-engine requirement checklist. The AP system already aggregates every engagement action (claiming tickets, inviting friends, playing tournaments, daily activity, completing tasks) into a single number — so the AP-tier gate **is** that checklist, unified into one metric.
+This replaces the former per-engine requirement checklist. The AP system already aggregates every engagement action (inviting friends, playing tournaments, daily activity, completing tasks) into a single number — so the AP-tier gate **is** that checklist, unified into one metric.
 
 - Reaching Silver AP unlocks Silver engines, Gold AP unlocks Gold engines, and so on.
 - Once a tier is unlocked, the user may acquire as many engines of that tier as desired (see Section 9).

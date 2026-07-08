@@ -4,7 +4,6 @@ import { twMerge } from 'tailwind-merge';
 import { useGetInventoryQuery } from '@/api/inventory.api';
 import { useGetMeQuery } from '@/api/me.api';
 import { useEngineSpeedAvatarBoostPct } from '@/hooks/useEngineSpeedAvatarBoostPct';
-import { GlobalConstants } from '@/constants/global.constants';
 import { EngineCardStatsHeader } from '@/components/pages/out-tabs/tabs-extra/ticket/EngineCardStatsHeader';
 import { EngineCardCycleRow } from '@/components/pages/out-tabs/tabs-extra/ticket/EngineCardCycleRow';
 import { EngineCardBoostControls } from '@/components/pages/out-tabs/tabs-extra/ticket/EngineCardBoostControls';
@@ -102,7 +101,6 @@ export function EngineCard({
   const instantClaimCost = Math.max(1, Math.ceil(remaining / 3600));
 
   const glow = TIER_GLOW[tier];
-  const pendingApReward = GlobalConstants.apRewards.claimByTier[tier];
 
   return (
     <div
@@ -135,7 +133,6 @@ export function EngineCard({
           pending={pending}
           compact={compact}
           instantClaimCost={instantClaimCost}
-          pendingApReward={pendingApReward}
           glow={glow}
           onClaim={onClaim}
           onInstantClaim={onInstantClaim}

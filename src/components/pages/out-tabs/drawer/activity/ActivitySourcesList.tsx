@@ -14,7 +14,6 @@ import {
   Send,
   ShoppingBag,
   Swords,
-  Ticket,
   TrendingUp,
   UserPlus,
 } from 'lucide-react';
@@ -106,16 +105,6 @@ const SOURCES: ApSource[] = [
     ap: `+${apRewards.verifyEmail}`,
     hintKey: 'one-time',
     route: routes.settings.email,
-  },
-  {
-    id: 'claim',
-    category: 'base',
-    Icon: Ticket,
-    labelKey: 'ap source claim',
-    ap: tierRange(apRewards.claimByTier),
-    hintKey: 'up to {n} per day',
-    hintParams: { n: apRewards.claimDailyLimit },
-    route: routes.tickets.index,
   },
   {
     id: 'watchVideo',

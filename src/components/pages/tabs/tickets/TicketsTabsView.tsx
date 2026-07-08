@@ -50,7 +50,6 @@ export function TicketsTabsView() {
     open: boolean;
     tier: TicketType;
     count: number;
-    ap?: number;
   }>({ open: false, tier: TicketsEnum.BRONZE, count: 0 });
 
   const enginesByTier = useMemo(() => {
@@ -138,7 +137,7 @@ export function TicketsTabsView() {
     const total = engines.reduce((sum, engine) => sum + (engine.pendingCount || 0), 0);
     if (total === 0) return;
     try {
-      const result = await claimEnginesForTier({ tier }).unwrap();
+      await claimEnginesForTier({ tier }).unwrap();
       setElapsedByEngine(prev => {
         const next = { ...prev };
         for (const engine of engines) {
@@ -146,7 +145,7 @@ export function TicketsTabsView() {
         }
         return next;
       });
-      setClaimedModal({ open: true, tier, count: total, ap: result?.apGain });
+      setClaimedModal({ open: true, tier, count: total });
     } catch {
       toast.error(t('claim failed'));
     }
@@ -157,9 +156,9 @@ export function TicketsTabsView() {
     if (!engine || engine.pendingCount <= 0) return;
     const claimed = engine.pendingCount;
     try {
-      const result = await claimEngine({ engineId }).unwrap();
+      await claimEngine({ engineId }).unwrap();
       setElapsedByEngine(prev => ({ ...prev, [engineId]: 0 }));
-      setClaimedModal({ open: true, tier, count: claimed, ap: result?.apGain });
+      setClaimedModal({ open: true, tier, count: claimed });
     } catch {
       toast.error(t('claim failed'));
     }
@@ -225,7 +224,6 @@ export function TicketsTabsView() {
         open={claimedModal.open}
         tier={claimedModal.tier}
         count={claimedModal.count}
-        ap={claimedModal.ap}
         onClose={() => setClaimedModal(prev => ({ ...prev, open: false }))}
       />
     </div>

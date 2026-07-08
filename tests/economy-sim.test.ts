@@ -255,7 +255,6 @@ describe('economy simulation (DOCS §14.2 guardrails)', () => {
     expect(GlobalConstants.dailyBaselineApByTier.bronze).toBe(
       Math.round(
         flat +
-          r.claimDailyLimit * r.claimByTier.bronze +
           r.dailyTasksCountByTier.bronze * r.dailyTaskByTier.bronze +
           (r.weeklyTasksCountByTier.bronze * r.weeklyTaskByTier.bronze) / 7
       )

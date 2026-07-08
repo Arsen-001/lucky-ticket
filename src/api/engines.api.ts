@@ -43,16 +43,16 @@ const buildStarterEngine = (): TicketEngine => {
 
 export const enginesApi = api.injectEndpoints({
   endpoints: builder => ({
-    claimEngine: builder.mutation<{ claimed: number; apGain: number }, { engineId: string }>({
+    claimEngine: builder.mutation<{ claimed: number }, { engineId: string }>({
       query: body => ({ url: 'engines/claim', method: 'POST', body }),
       // No `tickets` invalidation: the onQueryStarted patch below already writes
       // the claim result (pendingCount→0, balance, cycle restart, lifetime) into
       // the getTickets cache, so a refetch is redundant — and on the real backend
       // it re-fetches EVERY engine with fresh objects, visibly refreshing the
-      // whole home slider right after a claim ("renders the full cube"). Claim
-      // awards AP (header reads `me`) and advances tasks/achievements — those get
+      // whole home slider right after a claim ("renders the full cube"). Claims
+      // award no AP (`me` untouched) but advance tasks/achievements — those get
       // their own tags, which don't touch the slider.
-      invalidatesTags: [rtkTags.engines, rtkTags.me, rtkTags.tasks, rtkTags.achievements],
+      invalidatesTags: [rtkTags.engines, rtkTags.tasks, rtkTags.achievements],
       async onQueryStarted({ engineId }, { dispatch, queryFulfilled }) {
         const patch = dispatch(
           ticketsApi.util.updateQueryData('getTickets', undefined, draft => {
@@ -68,32 +68,19 @@ export const enginesApi = api.injectEndpoints({
           })
         );
         try {
-          // Mirror the SERVER-confirmed AP in the header — never guess it
-          // optimistically: past the daily claim cap the server awards 0, and a
-          // guessed +N would visibly roll back once `me` refetches (+1 → −1).
-          const { data } = await queryFulfilled;
-          if (data?.apGain) {
-            dispatch(
-              meApi.util.updateQueryData('getMe', undefined, draft => {
-                draft.activityPoints += data.apGain;
-              })
-            );
-          }
+          await queryFulfilled;
         } catch {
           patch.undo();
         }
       },
     }),
 
-    claimEnginesForTier: builder.mutation<
-      { claimed: number; apGain: number },
-      { tier: TicketType }
-    >({
+    claimEnginesForTier: builder.mutation<{ claimed: number }, { tier: TicketType }>({
       query: body => ({ url: 'engines/claim-all', method: 'POST', body }),
       // No `tickets` invalidation (see claimEngine): the patch below fully updates
       // the getTickets cache, so the refetch is redundant and would refresh every
-      // cube in the slider. me/tasks/achievements have their own tags.
-      invalidatesTags: [rtkTags.engines, rtkTags.me, rtkTags.tasks, rtkTags.achievements],
+      // cube in the slider. tasks/achievements have their own tags.
+      invalidatesTags: [rtkTags.engines, rtkTags.tasks, rtkTags.achievements],
       async onQueryStarted({ tier }, { dispatch, queryFulfilled }) {
         const patch = dispatch(
           ticketsApi.util.updateQueryData('getTickets', undefined, draft => {
@@ -112,15 +99,7 @@ export const enginesApi = api.injectEndpoints({
           })
         );
         try {
-          // Same as claimEngine: apply the server-confirmed AP (0 once capped).
-          const { data } = await queryFulfilled;
-          if (data?.apGain) {
-            dispatch(
-              meApi.util.updateQueryData('getMe', undefined, draft => {
-                draft.activityPoints += data.apGain;
-              })
-            );
-          }
+          await queryFulfilled;
         } catch {
           patch.undo();
         }
