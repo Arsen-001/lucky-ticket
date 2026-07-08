@@ -10,6 +10,7 @@ const getPublicConfig = (): PublicConfig => ({
   lcUsdRate: appConfig.wallet.lcUsdRate,
   tonUsdRate: appConfig.wallet.tonUsdRate,
   lsUsdRate: appConfig.wallet.lsUsdRate,
+  adsEnabled: true,
 });
 
 export const configMock = {

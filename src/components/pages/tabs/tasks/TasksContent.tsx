@@ -265,7 +265,7 @@ export function TasksContent() {
       if (isCategoryVisibleForFrequency(cat.category, TaskFrequency.ONCE))
         counts[TaskFrequency.ONCE] += cat.once.filter(isReady).length;
     });
-    if (data.ads) {
+    if (data.ads && data.ads.enabled !== false) {
       counts[TaskFrequency.DAILY] += data.ads.slots.filter(s => !s.watched).length;
     }
     return counts;
@@ -276,7 +276,12 @@ export function TasksContent() {
     const items: CategoryNavItem[] = [];
     if (!data) return items;
 
-    if (activeFrequency === TaskFrequency.DAILY && data.ads && data.ads.slots.length) {
+    if (
+      activeFrequency === TaskFrequency.DAILY &&
+      data.ads &&
+      data.ads.enabled !== false &&
+      data.ads.slots.length
+    ) {
       items.push({
         category: TaskCategory.ADS,
         readyCount: data.ads.slots.filter(s => !s.watched).length,
@@ -494,7 +499,11 @@ export function TasksContent() {
   if (isLoading) return <TasksSkeleton />;
   if (isError || !data) return <TasksLoadError onRetry={refetch} />;
 
-  const showAds = activeFrequency === TaskFrequency.DAILY && !!data?.ads?.slots.length;
+  // The admin kill switch (`ads.enabled`) hides the whole rewarded-ads surface.
+  const showAds =
+    activeFrequency === TaskFrequency.DAILY &&
+    data?.ads?.enabled !== false &&
+    !!data?.ads?.slots.length;
   const filteredCategories =
     data?.categories.filter(c => tasksForFrequency(c, activeFrequency).length > 0) ?? [];
   // Hide Profile and Partners from the one-time tab — they live elsewhere

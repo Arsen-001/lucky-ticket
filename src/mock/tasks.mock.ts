@@ -223,6 +223,7 @@ const getAdRewards = (index: number): TaskReward[] => {
 };
 
 const buildAds = (): AdsBlock => ({
+  enabled: true,
   total: ADS_CONFIG.total,
   watchedToday: ADS_CONFIG.watchedToday,
   resetAt: inHours(ADS_CONFIG.resetHours),

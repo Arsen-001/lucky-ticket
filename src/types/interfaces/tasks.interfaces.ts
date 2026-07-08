@@ -72,6 +72,8 @@ export interface AdSlot {
 }
 
 export interface AdsBlock {
+  /** Admin kill switch — when false the rewarded-ads UI must not render. */
+  enabled: boolean;
   total: number;
   watchedToday: number;
   resetAt: string;

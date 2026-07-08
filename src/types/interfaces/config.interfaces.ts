@@ -10,4 +10,6 @@ export interface PublicConfig {
   tonUsdRate: number;
   /** USD value of one Lucky Star. */
   lsUsdRate: number;
+  /** Admin kill switch for rewarded ads — hides every ad surface when false. */
+  adsEnabled: boolean;
 }
