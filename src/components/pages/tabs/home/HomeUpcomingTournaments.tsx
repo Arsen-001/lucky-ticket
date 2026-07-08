@@ -35,7 +35,7 @@ export function HomeUpcomingTournaments({ className }: ClassNameProps) {
         watchOverflow
         loop={!isLoading && (tournaments?.length ?? 0) > 2}
         slidesPerView="auto"
-        spaceBetween={20}
+        spaceBetween={14}
         autoplay={{
           delay: 2000,
           disableOnInteraction: false,
@@ -43,7 +43,7 @@ export function HomeUpcomingTournaments({ className }: ClassNameProps) {
         }}
       >
         {items.map((tournament, index) => (
-          <SwiperSlide key={tournament.id ?? index} className="w-72! overflow-visible py-[14px]">
+          <SwiperSlide key={tournament.id ?? index} className="w-64! overflow-visible py-[10px]">
             <HomeUpcomingTournamentCard {...tournament} loading={isLoading} />
           </SwiperSlide>
         ))}
