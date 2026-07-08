@@ -226,7 +226,7 @@ export function Drawer() {
     { route: routes.wallet, title: t('wallet'), icon: <Wallet size={18} /> },
     {
       route: routes.inventory,
-      title: t('boost inventory'),
+      title: t('chip inventory'),
       icon: <Package size={18} />,
     },
     {
