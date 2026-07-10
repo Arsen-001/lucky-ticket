@@ -1377,7 +1377,6 @@ The Profile page is built to run inside a **Telegram WebApp** when available, wi
 | Email / phone / 2FA / Settings entry                                                        |    ✅    |     ❌      |
 | Edit avatar / username / banner                                                             |    ✅    |     ❌      |
 | Pin / Replace / Unpin badge menu                                                            |    ✅    |     ❌      |
-| Buy showcase slot expansion                                                                 |    ✅    |     ❌      |
 | Share own profile                                                                           |    ✅    |      —      |
 | **Send Ticket / Invite to Tournament / Like** the profile owner                             |    —     |     ✅      |
 | **Share** this profile                                                                      |    —     |     ✅      |
@@ -1394,7 +1393,7 @@ The Profile page is built to run inside a **Telegram WebApp** when available, wi
 
 2. **Quick Stats Row** — four pill cards with count-up animation on first render: Activity Points, LC, LS, TON.
 
-3. **Badge Showcase** — pinned badges (default 5 slots, expandable up to 20) with the animated "add slot" container and a "View all" entry to the full badge grid (see Section 17.4).
+3. **Badge Showcase** — pinned badges (3 slots) with a "View all" entry to the full badge grid (see Section 17.4).
 
 4. **Recent Achievements** — a horizontal carousel of the last 3–5 unlocked badges.
 
@@ -1425,7 +1424,6 @@ When viewing one's own profile, the following actions are available:
 - **Pin / Replace / Unpin badges** — managed via the showcase long-press menu (see Section 17.4.7).
 - **Pin / Replace decorative collage badges** — same long-press menu pattern, but on the three background-collage slots in the hero header.
 - **Arrange banner icons** — drag the decorative banner icons (crown / star / gem) to reposition them on the cover banner; positions save automatically and are shown publicly. Icons cannot be placed over the avatar (see Section 17.3.1a).
-- **Buy showcase slot expansion** — via the animated "+slot" container next to the showcase (see Section 17.4.8).
 - **Preview as visitor** — a toggle button (typically in the top-right of the hero) that switches the page into the **Public view** of the user's own profile. While in preview, the page renders exactly as another user would see it — private balances, edit affordances, and Settings entry are hidden; social actions (Send Ticket, Invite to Tournament, Share, Like) appear on the action row but are non-functional (visual only). A persistent "Exit preview" button returns to Own view. Preview never modifies any data.
 - **Share own profile** — copy link or share via Telegram.
 - **Open Settings** — entry to the Settings & Security page (Section 16).
@@ -1544,14 +1542,8 @@ The Profile page presents badges in two layers:
 
 Users actively choose which badges appear in their showcase by pinning them into slots:
 
-- **5 free slots** are granted to every user.
-- Up to **20 total slots** can be unlocked through one-time purchases.
-- Each additional slot beyond the 5th costs **more than the previous one** — pricing is progressive (slot 6 cheapest, slot 20 most expensive).
-- Slot expansions are paid **exclusively in Lucky Stars (LS)** — consistent with the platform's monetization principle that premium in-game purchases route through the LS channel (see Section 19.4).
-- An **animated "add slot" container** is displayed adjacent to the showcase, inviting users to expand their lineup. The animation is intentionally eye-catching to drive monetization.
-- A purchased slot is **permanent** — once unlocked it is the user's forever.
-
-> Exact LS price per slot (and the progression curve from slot 6 → slot 20) is defined by the product team.
+- The showcase has **exactly 3 slots**, granted to every user for free.
+- Paid slot expansion is **disabled** (`showcaseMaxSlots` equals the free count). The buy-slot flow (endpoint, mock, "+slot" UI, and the progressive LS price curve in `calcShowcaseSlotPrice`) remains in the codebase in a dormant state and reactivates by raising `showcaseMaxSlots` in `global.constants.ts`.
 
 #### 17.4.9 Other-User Profile View
 
@@ -1573,7 +1565,7 @@ Each badge in the system carries the following fields (delivered by the backend 
 - `progress?: { current: number, target: number }` — for locked badges with measurable progress
 - `holdersPercentage: number` — share of all users who own the badge (drives the rarity-perception UI)
 - `isPinned: boolean` — currently in the showcase
-- `pinnedSlot?: number` — slot index (0–19) if pinned
+- `pinnedSlot?: number` — slot index (0–2) if pinned
 - `tier?: { current: number, max: number, thresholds: number[] }` — tier inside a single badge that levels up (e.g., one "Bronze Claimer" badge that progresses through 100 / 1k / 10k claims rather than three separate badges)
 - `series?: { id: string, name: string, position: number, total: number }` — group of related badges (e.g., "Stake Master Level 1–4" all share a series)
 - `hidden: boolean` — secret badge: invisible in the full grid until earned (used for exclusives, Easter-eggs, OG/limited badges)
@@ -1846,7 +1838,7 @@ LuckyTicket365 integrates the **Telegram Stars** purchase flow via the **Telegra
 
 ### Connections
 
-Lucky Stars connect: the Stakes system, Task system, Invite Friends system, Engine system (Capacity Upgrades and Instant Claims), the LuckyTicket365 Shop, the Wallet (Telegram Stars and TON purchase paths), and the Profile showcase (slot expansions — Section 17.4). Telegram Stars (XTR) and TON serve as bridges between external value and the LuckyTicket365 internal economy.
+Lucky Stars connect: the Stakes system, Task system, Invite Friends system, Engine system (Capacity Upgrades and Instant Claims), the LuckyTicket365 Shop, and the Wallet (Telegram Stars and TON purchase paths). Telegram Stars (XTR) and TON serve as bridges between external value and the LuckyTicket365 internal economy.
 
 ---
 

@@ -18,6 +18,9 @@ interface ShareOption {
 export interface ProfileShareSheetProps {
   open: boolean;
   onClose: () => void;
+  /** Path or absolute URL to share. Without it the current location is shared —
+   * wrong for the own-profile route (`/profile`), which for any recipient is
+   * THEIR profile; callers should pass the canonical `/profile/<id>` path. */
   url?: string;
   username?: string;
 }
@@ -32,7 +35,10 @@ export function ProfileShareSheet({ open, onClose, url, username }: ProfileShare
     }
   }, [open]);
 
-  const shareUrl = url ?? (typeof window !== 'undefined' ? window.location.href : '');
+  const shareUrl =
+    typeof window === 'undefined'
+      ? ''
+      : new URL(url ?? window.location.href, window.location.origin).toString();
   const shareText = username
     ? `${username} — ${GlobalConstants.projectName}`
     : GlobalConstants.projectName;

@@ -8,9 +8,8 @@ import { Achievement } from '@/components/shared/achievements/Achievement';
 import { Modal } from '@/components/shared/modals/Modal';
 import { useAppTranslations } from '@/hooks/useAppTranslations';
 import { useToast } from '@/hooks/useToast';
+import { GlobalConstants } from '@/constants/global.constants';
 import type { Achievement as AchievementType } from '@/types/interfaces/achievement.interfaces';
-
-const COLLAGE_SLOTS = 3;
 
 export interface ProfileCollageLayerProps {
   collageAchievements: AchievementType[];
@@ -39,7 +38,9 @@ export function ProfileCollageLayer({
   collageAchievements.forEach(a => {
     if (a.collageSlot != null) bySlot.set(a.collageSlot, a);
   });
-  const slots = Array.from({ length: COLLAGE_SLOTS }).map((_, i) => bySlot.get(i) ?? null);
+  const slots = Array.from({ length: GlobalConstants.collageMaxSlots }).map(
+    (_, i) => bySlot.get(i) ?? null
+  );
 
   const handleRemove = async (slot: number) => {
     try {

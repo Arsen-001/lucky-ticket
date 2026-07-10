@@ -131,8 +131,11 @@ export const GlobalConstants = {
 
   starName: 'LS',
   tonName: 'TON',
-  showcaseFreeSlots: 5,
-  showcaseMaxSlots: 20,
+  // Showcase is fixed at 3 slots — paid expansion is disabled (max == free).
+  // The buy-slot flow (API/mocks/UI) stays dormant and reactivates by raising
+  // `showcaseMaxSlots`; the price curve below only applies to paid slots.
+  showcaseFreeSlots: 3,
+  showcaseMaxSlots: 3,
   showcaseFirstPaidSlotPriceLs: 50,
   showcaseSlotPriceMultiplier: 1.4,
   collageMaxSlots: 3,

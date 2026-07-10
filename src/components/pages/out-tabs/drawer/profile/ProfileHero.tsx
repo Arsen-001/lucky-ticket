@@ -12,6 +12,7 @@ import { ProfileAvatarEditButton } from '@/components/pages/out-tabs/drawer/prof
 import { ProfileShareSheet } from '@/components/pages/out-tabs/drawer/profile/ProfileShareSheet';
 import { ProfileSocialActions } from '@/components/pages/out-tabs/drawer/profile/ProfileSocialActions';
 import { ProfileStatusIconButton } from '@/components/pages/out-tabs/drawer/profile/ProfileStatusIconButton';
+import { ProfileTooltipWrap } from '@/components/pages/out-tabs/drawer/profile/ProfileTooltipWrap';
 import { Skeleton } from '@/components/shared/seleketons/Skeleton';
 import { SkeletonSuspense } from '@/components/shared/seleketons/SkeletonSuspense';
 import { LuckyPlayerIcon } from '@/components/shared/icons/LuckyPlayerIcon';
@@ -97,24 +98,28 @@ export function ProfileHero({ profile, loading, isPreview, onTogglePreview }: Pr
         ? 'verified'
         : 'plain';
 
+  // Deliberately brightened glow variants of the tier palette — the theme
+  // tokens are too dark to read as a shine around the avatar (gold matches
+  // the token exactly, so it uses it).
   const tierShineColor: Record<ActivityTier, string> = {
     bronze: 'rgba(214, 138, 77, 1)',
     silver: 'rgba(200, 202, 196, 1)',
-    gold: 'rgba(248, 189, 62, 1)',
+    gold: 'var(--color-gold)',
     platinum: 'rgba(212, 210, 197, 1)',
     diamond: 'rgba(95, 200, 194, 1)',
   };
 
   const shineColors = profile
     ? [
-        profile.isVIP && 'rgba(248, 189, 62, 1)',
+        profile.isVIP && 'var(--color-gold)',
         profile.isLuckyPlayer && 'rgba(139, 92, 246, 1)',
         profile.isVerified && 'rgba(56, 189, 248, 1)',
         tierShineColor[computeActivityTier(profile.activityPoints)],
       ].filter((c): c is string => Boolean(c))
     : undefined;
 
-  const primaryShineColor = shineColors?.[0] ?? 'rgba(116, 61, 245, 0.5)';
+  const primaryShineColor =
+    shineColors?.[0] ?? 'color-mix(in srgb, var(--color-electric-purple) 50%, transparent)';
   const podiumOuterGradient =
     shineColors && shineColors.length > 0
       ? `conic-gradient(from 0deg, ${shineColors.concat(shineColors[0]).join(', ')})`
@@ -229,7 +234,7 @@ export function ProfileHero({ profile, loading, isPreview, onTogglePreview }: Pr
 
         <div className="flex flex-wrap items-center justify-center gap-3">
           {profile?.isOwn && (
-            <TooltipWrap
+            <ProfileTooltipWrap
               active={tooltip?.key === 'verified'}
               tooltipText={tooltip?.key === 'verified' ? tooltip.text : undefined}
             >
@@ -240,7 +245,7 @@ export function ProfileHero({ profile, loading, isPreview, onTogglePreview }: Pr
                 ariaLabel={profile.isVerified ? t('email verified') : t('verify your email')}
                 onClick={handleVerifiedClick}
               />
-            </TooltipWrap>
+            </ProfileTooltipWrap>
           )}
           {!profile?.isOwn && profile?.isVerified && (
             <ProfileStatusIconButton
@@ -251,7 +256,7 @@ export function ProfileHero({ profile, loading, isPreview, onTogglePreview }: Pr
           )}
 
           {profile?.isOwn && (
-            <TooltipWrap
+            <ProfileTooltipWrap
               active={tooltip?.key === 'vip'}
               tooltipText={tooltip?.key === 'vip' ? tooltip.text : undefined}
             >
@@ -269,7 +274,7 @@ export function ProfileHero({ profile, loading, isPreview, onTogglePreview }: Pr
                 }
                 onClick={handleVipClick}
               />
-            </TooltipWrap>
+            </ProfileTooltipWrap>
           )}
           {!profile?.isOwn && profile?.isVIP && (
             <ProfileStatusIconButton
@@ -281,7 +286,7 @@ export function ProfileHero({ profile, loading, isPreview, onTogglePreview }: Pr
           )}
 
           {profile?.isOwn && (
-            <TooltipWrap
+            <ProfileTooltipWrap
               active={tooltip?.key === 'lucky-player'}
               tooltipText={tooltip?.key === 'lucky-player' ? tooltip.text : undefined}
             >
@@ -294,7 +299,7 @@ export function ProfileHero({ profile, loading, isPreview, onTogglePreview }: Pr
                 ariaLabel={profile.isLuckyPlayer ? t('lucky player active') : t('lucky player get')}
                 onClick={handleLuckyPlayerClick}
               />
-            </TooltipWrap>
+            </ProfileTooltipWrap>
           )}
           {!profile?.isOwn && profile?.isLuckyPlayer && (
             <ProfileStatusIconButton
@@ -313,6 +318,7 @@ export function ProfileHero({ profile, loading, isPreview, onTogglePreview }: Pr
       <ProfileShareSheet
         open={shareOpen}
         onClose={() => setShareOpen(false)}
+        url={profile ? routes.profile.getByUserId(profile.id) : undefined}
         username={profile?.username}
       />
 
@@ -332,27 +338,5 @@ export function ProfileHero({ profile, loading, isPreview, onTogglePreview }: Pr
         confirmText={t('upgrade vip')}
       />
     </div>
-  );
-}
-
-interface TooltipWrapProps {
-  active: boolean;
-  tooltipText?: string;
-  children: React.ReactNode;
-}
-
-function TooltipWrap({ active, tooltipText, children }: TooltipWrapProps) {
-  return (
-    <span className="relative">
-      {children}
-      {active && tooltipText && (
-        <span
-          role="status"
-          className="profile-badge-tooltip animate-fade-in pointer-events-none absolute left-1/2 top-full z-20 mt-1.5 -translate-x-1/2 whitespace-nowrap rounded-md border border-white/12 bg-black/85 px-2.5 py-1.5 text-[10px] font-semibold text-white shadow-lg backdrop-blur-md"
-        >
-          {tooltipText}
-        </span>
-      )}
-    </span>
   );
 }

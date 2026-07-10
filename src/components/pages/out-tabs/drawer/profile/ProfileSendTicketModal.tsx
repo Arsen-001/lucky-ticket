@@ -4,6 +4,7 @@ import { Lock, Minus, Plus } from 'lucide-react';
 import { twMerge } from 'tailwind-merge';
 import { Modal } from '@/components/shared/modals/Modal';
 import { Button } from '@/components/shared/buttons/Button';
+import { QuantityStepperButton } from '@/components/pages/out-tabs/drawer/profile/QuantityStepperButton';
 import { TicketOverlap } from '@/components/shared/icons/TicketOverlap';
 import { BoltIcon } from '@/components/shared/icons/BoltIcon';
 import { useGetProfileQuery, useSendTicketMutation } from '@/api/profile.api';
@@ -159,21 +160,21 @@ export function ProfileSendTicketModal({
                 )}
               </div>
               <div className="flex items-center gap-3">
-                <StepperButton
+                <QuantityStepperButton
                   onClick={() => setQuantity(q => Math.max(1, q - 1))}
                   disabled={!tier || quantity <= 1}
                 >
                   <Minus size={16} />
-                </StepperButton>
+                </QuantityStepperButton>
                 <span className="min-w-8 text-center text-lg font-extrabold tabular-nums text-white">
                   {tier ? quantity : '—'}
                 </span>
-                <StepperButton
+                <QuantityStepperButton
                   onClick={() => setQuantity(q => Math.min(maxQty, q + 1))}
                   disabled={!tier || quantity >= maxQty}
                 >
                   <Plus size={16} />
-                </StepperButton>
+                </QuantityStepperButton>
               </div>
             </div>
 
@@ -197,22 +198,5 @@ export function ProfileSendTicketModal({
         </div>
       </div>
     </Modal>
-  );
-}
-
-type StepperButtonProps = React.ButtonHTMLAttributes<HTMLButtonElement>;
-
-function StepperButton({ className, children, ...rest }: StepperButtonProps) {
-  return (
-    <button
-      type="button"
-      {...rest}
-      className={twMerge(
-        'flex-center h-8 w-8 rounded-lg bg-white/8 text-white transition-all hover:bg-white/15 active:scale-95 disabled:opacity-30',
-        className
-      )}
-    >
-      {children}
-    </button>
   );
 }

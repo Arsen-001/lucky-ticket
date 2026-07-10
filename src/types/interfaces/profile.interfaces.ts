@@ -21,7 +21,7 @@ export interface ProfilePrivateStats {
   lc: number;
   ls: number;
   ton: number;
-  ticketsByTier: Partial<Record<string, number>>;
+  ticketsByTier: Partial<Record<TicketType, number>>;
 }
 
 export interface ProfileFriendPreview {

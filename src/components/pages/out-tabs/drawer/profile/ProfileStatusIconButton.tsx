@@ -88,8 +88,9 @@ export function ProfileStatusIconButton({
         <span
           className="absolute -bottom-1.5 -right-1.5 flex h-7 min-w-[28px] items-center justify-center rounded-full border-2 border-background px-1.5 text-xs font-black leading-none tabular-nums text-background"
           style={{
-            background: 'linear-gradient(135deg, #fff5d9 0%, #f8bd3e 50%, #b8860b 100%)',
-            boxShadow: '0 3px 10px rgba(248,189,62,0.65)',
+            // Light/dark stops are custom sheen shades around the gold token.
+            background: 'linear-gradient(135deg, #fff5d9 0%, var(--color-gold) 50%, #b8860b 100%)',
+            boxShadow: '0 3px 10px color-mix(in srgb, var(--color-gold) 65%, transparent)',
           }}
         >
           {level}

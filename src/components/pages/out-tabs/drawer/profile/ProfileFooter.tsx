@@ -1,26 +1,40 @@
 'use client';
 import { useState } from 'react';
+import { useRouter } from 'next/navigation';
 import { LogOut } from 'lucide-react';
 import dayjs from 'dayjs';
+import { useLogoutMutation } from '@/api/auth.api';
 import { ConfirmModal } from '@/components/shared/modals/ConfirmModal';
 import { ProfileSupportIds } from '@/components/pages/out-tabs/drawer/profile/ProfileSupportIds';
 import { useAppTranslations } from '@/hooks/useAppTranslations';
+import { routes } from '@/constants/routes';
+import type { MessageIds } from '@/types/types/i18n.types';
 
 export interface ProfileFooterProps {
   isOwn: boolean;
   memberSince: string;
   userId: string;
-  onSignOut?: () => void;
 }
 
-export function ProfileFooter({ isOwn, memberSince, userId, onSignOut }: ProfileFooterProps) {
+export function ProfileFooter({ isOwn, memberSince, userId }: ProfileFooterProps) {
   const t = useAppTranslations();
+  const router = useRouter();
+  const [logout] = useLogoutMutation();
   const [signOutOpen, setSignOutOpen] = useState(false);
-  const formattedDate = dayjs(memberSince).format('MMM D, YYYY');
 
-  const handleSignOutConfirm = () => {
-    setSignOutOpen(false);
-    onSignOut?.();
+  const memberDate = dayjs(memberSince);
+  const monthKey = memberDate.format('MMMM').toLowerCase() as MessageIds;
+  const formattedDate = `${memberDate.format('DD')} ${t(monthKey)} ${memberDate.format('YYYY')}`;
+
+  const handleSignOutConfirm = async () => {
+    try {
+      await logout().unwrap();
+    } catch {
+      // logout still clears local tokens in the mutation's onQueryStarted
+    } finally {
+      setSignOutOpen(false);
+      router.push(routes.login);
+    }
   };
 
   return (

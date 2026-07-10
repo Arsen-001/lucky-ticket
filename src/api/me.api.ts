@@ -39,7 +39,9 @@ export const meApi = api.injectEndpoints({
           profilePatch?.undo();
         }
       },
-      invalidatesTags: [rtkTags.me],
+      // `profile` too: the optimistic patch above only syncs `avatar`; other
+      // edited fields (username, email) must refetch the profile screen.
+      invalidatesTags: [rtkTags.me, rtkTags.profile],
     }),
   }),
 });

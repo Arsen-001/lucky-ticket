@@ -51,7 +51,15 @@ export const marketApi = api.injectEndpoints({
         method: 'POST',
         body: { statusId, priceType },
       }),
-      invalidatesTags: [rtkTags.market, rtkTags.me, rtkTags.lc, rtkTags.lcTransactions],
+      // `profile` too: the profile hero renders isVIP/isLuckyPlayer/vipLevel
+      // from its own query — without it the badges stay stale after a purchase.
+      invalidatesTags: [
+        rtkTags.market,
+        rtkTags.me,
+        rtkTags.profile,
+        rtkTags.lc,
+        rtkTags.lcTransactions,
+      ],
     }),
 
     buyEngine: builder.mutation<

@@ -1,5 +1,5 @@
 'use client';
-import { useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { Check, Copy } from 'lucide-react';
 import { useAppTranslations } from '@/hooks/useAppTranslations';
 
@@ -16,6 +16,13 @@ interface SupportIdRow {
 export function ProfileSupportIds({ userId }: ProfileSupportIdsProps) {
   const t = useAppTranslations();
   const [copiedKey, setCopiedKey] = useState<string | null>(null);
+  const copiedTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  useEffect(() => {
+    return () => {
+      if (copiedTimerRef.current) clearTimeout(copiedTimerRef.current);
+    };
+  }, []);
 
   const rows: SupportIdRow[] = [{ key: 'user', label: t('user id'), value: userId }];
 
@@ -23,7 +30,8 @@ export function ProfileSupportIds({ userId }: ProfileSupportIdsProps) {
     try {
       await navigator.clipboard?.writeText(row.value);
       setCopiedKey(row.key);
-      setTimeout(() => setCopiedKey(null), 2000);
+      if (copiedTimerRef.current) clearTimeout(copiedTimerRef.current);
+      copiedTimerRef.current = setTimeout(() => setCopiedKey(null), 2000);
     } catch {
       /* clipboard unavailable */
     }

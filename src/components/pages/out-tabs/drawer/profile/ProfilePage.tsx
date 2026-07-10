@@ -1,5 +1,5 @@
 'use client';
-import { useMemo, useState } from 'react';
+import { useState } from 'react';
 import {
   useBuyShowcaseSlotMutation,
   useGetProfileQuery,
@@ -31,17 +31,11 @@ export function ProfilePage({ userId }: ProfilePageProps) {
   const [previewMode, setPreviewMode] = useState(false);
   const [selected, setSelected] = useState<Achievement | null>(null);
 
-  const effectiveProfile: ProfileResponse | undefined = useMemo(() => {
-    if (!profile) return undefined;
-    if (previewMode && profile.isOwn) {
-      return {
-        ...profile,
-        isOwn: false,
-        privateStats: undefined,
-      };
-    }
-    return profile;
-  }, [profile, previewMode]);
+  // "Preview as visitor" strips the owner-only fields (React Compiler memoizes).
+  const effectiveProfile: ProfileResponse | undefined =
+    profile && previewMode && profile.isOwn
+      ? { ...profile, isOwn: false, privateStats: undefined }
+      : profile;
 
   if (isError) return <QueryErrorState onRetry={() => refetch()} />;
 

@@ -2,18 +2,36 @@ import { images } from '@/constants/images';
 import { faker } from '@faker-js/faker';
 import type { FetchArgs } from '@reduxjs/toolkit/query';
 import { achievements } from '@/mock/achievements.mock';
-import { GlobalConstants } from '@/constants/global.constants';
+import { GlobalConstants, calcShowcaseSlotPrice } from '@/constants/global.constants';
 import { mockDb } from '@/mock/backend/db';
 import type { ProfileResponse } from '@/types/interfaces/profile.interfaces';
 import type { TicketType } from '@/types/types/ticket.types';
+import type {
+  Achievement,
+  BuySlotResponse,
+  PinAchievementRequest,
+  UnpinAchievementRequest,
+} from '@/types/interfaces/achievement.interfaces';
 
 const pinned = achievements
   .filter(a => a.isPinned)
   .sort((a, b) => (a.pinnedSlot ?? 0) - (b.pinnedSlot ?? 0));
 
-const collage = achievements
-  .filter(a => a.isCollagePinned)
-  .sort((a, b) => (a.collageSlot ?? 0) - (b.collageSlot ?? 0));
+// Collage pins live in-memory (the showcase uses `pinState` because the full
+// badge grid reads the same pins; the collage has no other consumer).
+const collagePins = new Map<number, string>(
+  achievements
+    .filter(a => a.isCollagePinned && a.collageSlot != null)
+    .map(a => [a.collageSlot as number, a.id])
+);
+
+const getCollageAchievements = (): Achievement[] =>
+  [...collagePins.entries()]
+    .sort(([slotA], [slotB]) => slotA - slotB)
+    .flatMap(([slot, id]) => {
+      const ach = achievements.find(a => a.id === id);
+      return ach ? [{ ...ach, isCollagePinned: true, collageSlot: slot }] : [];
+    });
 
 const recent = achievements
   .filter(a => a.earned)
@@ -27,7 +45,9 @@ const friendsPreview = Array.from({ length: 12 }).map((_, i) => ({
 }));
 
 export const ownProfile: ProfileResponse = {
-  id: 'me',
+  // A real id (not 'me'): the id is user-facing — share links build
+  // `/profile/<id>` from it and the support block displays it.
+  id: 'user-1',
   username: 'Arsen 001',
   avatar: images.avatar.src,
   banner: undefined,
@@ -43,10 +63,10 @@ export const ownProfile: ProfileResponse = {
   ticketsEarned: mockDb.accountStats.ticketsEarned,
   memberSince: '2024-09-12',
   streak: mockDb.accountStats.streak,
-  showcaseSlots: 3,
-  showcaseMaxSlots: 3,
+  showcaseSlots: GlobalConstants.showcaseFreeSlots,
+  showcaseMaxSlots: GlobalConstants.showcaseMaxSlots,
   pinnedAchievements: pinned,
-  collageAchievements: collage,
+  collageAchievements: getCollageAchievements(),
   friendsPreview: friendsPreview.slice(0, mockDb.accountStats.friendsCount),
   publicStats: {
     tournamentsPlayed: mockDb.accountStats.tournamentsPlayed,
@@ -144,7 +164,9 @@ const likeProfileHandler = (args: FetchArgs) => {
     likesReceived: target.publicStats.likesReceived + 1,
   };
   target.liked = true;
-  target.canLikeAt = new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString();
+  target.canLikeAt = new Date(
+    Date.now() + GlobalConstants.likeIntervalHours * 60 * 60 * 1000
+  ).toISOString();
   mockDb.user.activityPoints += 1;
   return {
     likesReceived: target.publicStats.likesReceived,
@@ -173,6 +195,59 @@ const sendTicketHandler = (args: FetchArgs) => {
   return { success: true };
 };
 
+// Slot expansions are one-time purchases paid in Lucky Stars, priced by the
+// progressive curve in `calcShowcaseSlotPrice` (DOCS §17.4.8).
+const buyShowcaseSlotHandler = (args: FetchArgs) => {
+  const { targetSlot } = (args.body ?? {}) as { targetSlot?: number };
+  if (ownProfile.showcaseSlots >= GlobalConstants.showcaseMaxSlots) {
+    return { error: { status: 400, data: 'All showcase slots already unlocked' } };
+  }
+  const slot = targetSlot ?? ownProfile.showcaseSlots;
+  const costLs = calcShowcaseSlotPrice(slot);
+  if (mockDb.user.telegramStars < costLs) {
+    return { error: { status: 402, data: 'Not enough Lucky Stars' } };
+  }
+  mockDb.user.telegramStars -= costLs;
+  ownProfile.showcaseSlots += 1;
+  const response: BuySlotResponse = {
+    slot,
+    costLs,
+    newTotalSlots: ownProfile.showcaseSlots,
+    remainingLs: mockDb.user.telegramStars,
+  };
+  return response;
+};
+
+const collagePinHandler = (args: FetchArgs) => {
+  const { achievementId, slot } = (args.body ?? {}) as Partial<PinAchievementRequest>;
+  if (!achievementId || slot == null || slot < 0 || slot >= GlobalConstants.collageMaxSlots) {
+    return { error: { status: 400, data: 'Invalid collage slot' } };
+  }
+  // One badge can occupy only one slot — re-pinning moves it.
+  for (const [s, id] of collagePins) {
+    if (id === achievementId) collagePins.delete(s);
+  }
+  collagePins.set(slot, achievementId);
+  ownProfile.collageAchievements = getCollageAchievements();
+  return { ...ownProfile, ...buildAccountOverlay() };
+};
+
+const collageUnpinHandler = (args: FetchArgs) => {
+  const { slot } = (args.body ?? {}) as Partial<UnpinAchievementRequest>;
+  if (slot == null) return { error: { status: 400, data: 'Slot is required' } };
+  collagePins.delete(slot);
+  ownProfile.collageAchievements = getCollageAchievements();
+  return { ...ownProfile, ...buildAccountOverlay() };
+};
+
+// Nothing cached changes for the sender — the invitation lands on the other
+// user's side.
+const inviteToTournamentHandler = (args: FetchArgs) => {
+  const { tournamentId } = (args.body ?? {}) as { tournamentId?: string };
+  if (!tournamentId) return { error: { status: 400, data: 'Tournament is required' } };
+  return { success: true, invitationId: `inv-${Date.now()}` };
+};
+
 // Persist the owner's banner collage layout — last write wins.
 const updateBannerIconsHandler = (args: FetchArgs) => {
   const { positions } = (args.body ?? {}) as {
@@ -188,9 +263,14 @@ const updateBannerIconsHandler = (args: FetchArgs) => {
 export const profileMock = {
   profile: {
     me: ownProfile,
+    'user-1': ownProfile,
     'user-2': otherProfile,
   },
   'POST profile/like': likeProfileHandler,
   'POST profile/send-ticket': sendTicketHandler,
+  'POST profile/showcase/buy-slot': buyShowcaseSlotHandler,
+  'POST profile/collage/pin': collagePinHandler,
+  'POST profile/collage/unpin': collageUnpinHandler,
+  'POST profile/invite-tournament': inviteToTournamentHandler,
   'PATCH profile/banner-icons': updateBannerIconsHandler,
 };

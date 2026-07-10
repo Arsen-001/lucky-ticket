@@ -28,7 +28,11 @@ export const profileApi = api.injectEndpoints({
 
     likeProfile: builder.mutation<LikeProfileResponse, string>({
       query: userId => ({ url: 'profile/like', method: 'POST', body: { userId } }),
-      invalidatesTags: (_result, _error, userId) => [{ type: rtkTags.profileById, id: userId }],
+      // Liking grants the liker +1 AP — refresh `me` so the header AP updates.
+      invalidatesTags: (_result, _error, userId) => [
+        { type: rtkTags.profileById, id: userId },
+        rtkTags.me,
+      ],
     }),
 
     sendTicket: builder.mutation<SendTicketResponse, SendTicketRequest>({

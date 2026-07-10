@@ -5,14 +5,18 @@ import { usePinAchievementMutation, useGetProfileQuery } from '@/api/profile.api
 import { AchievementGrid } from '@/components/shared/achievements/AchievementGrid';
 import { AchievementDetailModal } from '@/components/shared/achievements/AchievementDetailModal';
 import { AchievementPinModal } from '@/components/shared/achievements/AchievementPinModal';
+import { CategorySection } from '@/components/pages/out-tabs/drawer/profile/achievements/CategorySection';
+import { CategorySectionSkeleton } from '@/components/pages/out-tabs/drawer/profile/achievements/CategorySectionSkeleton';
+import { FilterPills } from '@/components/pages/out-tabs/drawer/profile/achievements/FilterPills';
+import { TournamentSection } from '@/components/pages/out-tabs/drawer/profile/achievements/TournamentSection';
 import { useAppTranslations } from '@/hooks/useAppTranslations';
-import { Skeleton } from '@/components/shared/seleketons/Skeleton';
+import { useToast } from '@/hooks/useToast';
+import { GlobalConstants } from '@/constants/global.constants';
 import { AchievementCategory, AchievementRarity } from '@/types/enums/achievement.enums';
 import {
   categoryLabelKey,
   rarityLabelKey,
 } from '@/components/shared/achievements/achievement.utils';
-import { twMerge } from 'tailwind-merge';
 import type { Achievement } from '@/types/interfaces/achievement.interfaces';
 import { QueryErrorState } from '@/components/shared/error/QueryErrorState';
 
@@ -29,6 +33,7 @@ const VISIBLE_CATEGORIES: AchievementCategory[] = [
 
 export default function Page() {
   const t = useAppTranslations();
+  const toast = useToast();
   const { data, isLoading, isError, refetch } = useGetAchievementsQuery();
   const { data: profile } = useGetProfileQuery(undefined);
   const [pinAchievement] = usePinAchievementMutation();
@@ -55,9 +60,10 @@ export default function Page() {
   const visibleCategories =
     category === 'all' ? VISIBLE_CATEGORIES : VISIBLE_CATEGORIES.filter(c => c === category);
 
-  // One pin target per UNLOCKED showcase slot (was hardcoded to 3) — so slots the
-  // user paid to unlock (3+) are actually pinnable from the picker.
-  const slotCount = Math.max(profile?.showcaseSlots ?? 3, 1);
+  // One pin target per showcase slot the profile actually has — follows the
+  // backend value instead of hardcoding, so a future slot-expansion re-enable
+  // (raising showcaseMaxSlots) needs no change here.
+  const slotCount = Math.max(profile?.showcaseSlots ?? GlobalConstants.showcaseFreeSlots, 1);
   const pinnedSlots: (Achievement | null)[] = Array.from(
     { length: slotCount },
     (_, slot) => allAchievements.find(a => a.isPinned && a.pinnedSlot === slot) ?? null
@@ -65,8 +71,12 @@ export default function Page() {
 
   const handlePin = async (slot: number) => {
     if (!pinTarget) return;
-    await pinAchievement({ achievementId: pinTarget.id, slot });
-    setPinTarget(null);
+    try {
+      await pinAchievement({ achievementId: pinTarget.id, slot }).unwrap();
+      setPinTarget(null);
+    } catch {
+      toast.error(t('action failed'));
+    }
   };
 
   return (
@@ -164,140 +174,6 @@ export default function Page() {
         onClose={() => setPinTarget(null)}
         onPin={handlePin}
       />
-    </div>
-  );
-}
-
-const PLACE_TABS = [
-  { id: 'first-place', label: '1st' },
-  { id: 'second-place', label: '2nd' },
-  { id: 'third-place', label: '3rd' },
-  { id: 'tournaments-played', label: 'Played' },
-] as const;
-
-interface TournamentSectionProps {
-  items: Achievement[];
-  allItems: Achievement[];
-  onSelect: (a: Achievement) => void;
-  onPin: (a: Achievement) => void;
-}
-
-function TournamentSection({ items, allItems, onSelect, onPin }: TournamentSectionProps) {
-  const t = useAppTranslations();
-  const [activeTab, setActiveTab] = useState<string>(PLACE_TABS[0].id);
-
-  const earnedCount = items.filter(a => a.earned).length;
-  const totalCount = allItems.length;
-
-  const tabItems = items.filter(a => a.series?.id === activeTab);
-
-  return (
-    <section className="flex flex-col gap-2">
-      <div className="flex items-baseline gap-2 px-5">
-        <h2 className="text-xs font-extrabold uppercase tracking-widest text-white/60">
-          {t(categoryLabelKey(AchievementCategory.TOURNAMENTS))}
-        </h2>
-        <span className="text-[11px] font-bold tabular-nums text-white/30">
-          {earnedCount}/{totalCount}
-        </span>
-      </div>
-
-      <div className="px-4 flex flex-col gap-3">
-        <div className="flex gap-1 rounded-xl border border-white/8 bg-white/[0.03] p-1">
-          {PLACE_TABS.map(tab => (
-            <button
-              key={tab.id}
-              type="button"
-              onClick={() => setActiveTab(tab.id)}
-              className={twMerge(
-                'flex-1 rounded-lg py-1.5 text-xs font-extrabold uppercase tracking-wider transition-all',
-                activeTab === tab.id
-                  ? 'bg-electric-pink/20 text-electric-pink border border-electric-pink/40'
-                  : 'text-white/45 hover:text-white/70'
-              )}
-            >
-              {tab.label}
-            </button>
-          ))}
-        </div>
-
-        {tabItems.length > 0 && (
-          <AchievementGrid
-            achievements={tabItems}
-            onClick={onSelect}
-            onPin={a => (a.earned ? onPin(a) : undefined)}
-          />
-        )}
-      </div>
-    </section>
-  );
-}
-
-interface CategorySectionProps {
-  label: string;
-  count: number;
-  total: number;
-  children: React.ReactNode;
-}
-
-function CategorySection({ label, count, total, children }: CategorySectionProps) {
-  return (
-    <section className="flex flex-col gap-2">
-      <div className="flex items-baseline gap-2 px-5">
-        <h2 className="text-xs font-extrabold uppercase tracking-widest text-white/60">{label}</h2>
-        <span className="text-[11px] font-bold tabular-nums text-white/30">
-          {count}/{total}
-        </span>
-      </div>
-      <div className="px-4">{children}</div>
-    </section>
-  );
-}
-
-function CategorySectionSkeleton() {
-  return (
-    <div className="flex flex-col gap-2">
-      <div className="flex items-baseline gap-2 px-5">
-        <div className="h-3 w-20 rounded-full bg-white/10" />
-        <div className="h-2.5 w-8 rounded-full bg-white/8" />
-      </div>
-      <div className="px-4">
-        <div className="grid grid-cols-3 gap-3">
-          {Array.from({ length: 6 }).map((_, i) => (
-            <Skeleton key={i} variant="rounded-rectangle" className="h-28" />
-          ))}
-        </div>
-      </div>
-    </div>
-  );
-}
-
-interface FilterPillsProps {
-  options: { value: string; label: string }[];
-  value: string;
-  onChange: (v: string) => void;
-}
-
-function FilterPills({ options, value, onChange }: FilterPillsProps) {
-  return (
-    <div className="-mx-5 overflow-x-auto px-5 scrollbar-hidden">
-      <div className="flex w-max gap-2 pr-3">
-        {options.map(opt => (
-          <button
-            key={opt.value}
-            type="button"
-            onClick={() => onChange(opt.value)}
-            className={twMerge(
-              'rounded-full border px-3 py-1.5 text-xs font-bold uppercase tracking-wider transition-all',
-              value === opt.value
-                ? 'border-electric-pink bg-electric-pink/20 text-electric-pink'
-                : 'border-white/10 bg-white/5 text-white/65 hover:bg-white/10'
-            )}
-          >
-            {opt.label}
-          </button>
-        ))}
-      </div>
     </div>
   );
 }
