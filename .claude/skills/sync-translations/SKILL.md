@@ -38,8 +38,8 @@ Keep `messages/en.json`, `messages/hy.json`, and `messages/ru.json` in lockstep.
 ```bash
 node -e "
 const en = Object.keys(require('./messages/en.json'));
-const hy = Object.keys(require('./messages/hy.json'));
-const ru = Object.keys(require('./messages/ru.json'));
+#const hy = Object.keys(require('./messages/hy.json'));
+#const ru = Object.keys(require('./messages/ru.json'));
 const missing = (target, name) => en.filter(k => !target.includes(k)).map(k => name + ': ' + k);
 const extra = (target, name) => target.filter(k => !en.includes(k)).map(k => name + ' (extra): ' + k);
 console.log([...missing(hy, 'hy'), ...missing(ru, 'ru'), ...extra(hy, 'hy'), ...extra(ru, 'ru')].join('\n') || 'in sync');
