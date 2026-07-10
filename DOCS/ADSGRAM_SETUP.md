@@ -105,15 +105,23 @@ context. The callback does **not** fire in debug mode.
 
 ## Checklist
 
-- [x] Block id created (`35479`, **regular platform** — no Test badge, so impressions count
-      toward revenue; app url = `https://lucky-ticket-nu.vercel.app`).
-      NB: the platform's app url must exactly match the deployed Mini App URL AND the ad unit
-      must be attached to the right platform in the dropdown, or the SDK throws `AdsgramError`
-      / the API returns `Wrong referer` (blocks 35472 and 35475 died on this)
+- [x] Block id created (`37750`, block type **Reward**, attached to the regular platform —
+      no Test badge, so impressions count toward revenue; app url =
+      `https://lucky-ticket-nu.vercel.app`).
+      NB 1: a **platform id is not a block id** — the SDK init'd with a platform id (35479)
+      returns `onBannerNotFound` ("no ads to display") on every request instead of a hard
+      error. Always copy the Block ID from the ad unit's **Show code** snippet.
+      NB 2: the platform's app url must exactly match the deployed Mini App URL AND the ad
+      unit must be attached to the right platform in the dropdown, or the SDK throws
+      `AdsgramError` / the API returns `Wrong referer` (blocks 35472 and 35475 died on this)
 - [ ] Monetization sanity check: watch one ad inside the real Mini App, then confirm
       impressions grow in partner.adsgram.ai → Statistics. Ads showing while the counter
       stays at zero would mean a test/unmoderated platform
 - [x] `NEXT_PUBLIC_ADSGRAM_BLOCK_ID` set (local `.env.local` + Vercel production) — frontend
 - [x] Daily cap enforced server-side on `POST /tasks/ads/watch`
-- [ ] (When eligible) `ADSGRAM_REWARD_SECRET` set + Reward URL configured →
-      S2S endpoint becomes the source of truth (`watchAd` auto-switches to UI-sync)
+- [x] Reward URL configured in the Adsgram block form (block `37750`; the create-block form
+      now requires it — no DAU gate). Format:
+      `https://lucky-ticket-backend-production.up.railway.app/tasks/ads/adsgram/reward?key=<ADSGRAM_REWARD_SECRET>&userid=[userId]`
+      (endpoint verified live — returns 401 on a wrong key)
+- [ ] `ADSGRAM_REWARD_SECRET` set in Railway → Variables (same value as `key=` in the Reward
+      URL) → S2S endpoint becomes the source of truth (`watchAd` auto-switches to UI-sync)

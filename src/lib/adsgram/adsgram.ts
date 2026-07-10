@@ -116,9 +116,18 @@ export async function showRewardedAd(): Promise<RewardedAdOutcome> {
   try {
     const result = await ctrl.show();
     return result.done && !result.error ? 'completed' : (lastFailure ?? 'skipped');
-  } catch {
-    // Adsgram rejects with a ShowPromiseResult-shaped object on skip/error;
-    // a captured event narrows the reason, otherwise the user closed it early.
-    return lastFailure ?? 'skipped';
+  } catch (reason) {
+    // A captured SDK event narrows the reason first.
+    if (lastFailure) return lastFailure;
+    // Adsgram rejects with a ShowPromiseResult-shaped object when the ad was
+    // shown but not completed: error=true is a playback failure, error=false
+    // means the user closed it early. Config-class failures (inactive block,
+    // unknown blockId, wrong referer, …) reject with an AdsgramError instance
+    // instead — treat those as 'error' so the app surfaces its own modal
+    // rather than the misleading "ad not completed" toast.
+    if (reason && typeof reason === 'object' && 'done' in reason) {
+      return (reason as ShowPromiseResult).error ? 'error' : 'skipped';
+    }
+    return 'error';
   }
 }
