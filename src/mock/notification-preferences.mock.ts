@@ -6,12 +6,14 @@ const preferences: NotificationPreferences = {
     tournamentEnd: true,
     stake: true,
     system: true,
+    gifts: true,
   },
   telegram: {
     tournamentStart: true,
     tournamentEnd: true,
     stake: true,
     system: true,
+    gifts: true,
   },
 };
 

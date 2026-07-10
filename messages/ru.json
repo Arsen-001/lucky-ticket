@@ -1091,6 +1091,8 @@
   "tournament end description": "После распределения мест",
   "staking ready": "Стейкинг готов",
   "staking ready description": "Когда стейк готов забрать",
+  "gifts": "Подарки",
+  "gifts description": "Когда кто-то отправляет вам билеты",
   "change avatar": "Сменить аватар",
   "change avatar description": "Выберите новую фотографию профиля. Её увидят другие игроки.",
   "change avatar picker description": "Выберите аватар из своей коллекции. Платные аватары дают активный буст, пока надеты.",

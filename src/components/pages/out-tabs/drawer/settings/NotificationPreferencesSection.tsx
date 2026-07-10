@@ -1,6 +1,6 @@
 'use client';
 
-import { Bell, Flag, Layers, Mail, TrophyIcon, type LucideIcon } from 'lucide-react';
+import { Bell, Flag, Gift, Layers, Mail, TrophyIcon, type LucideIcon } from 'lucide-react';
 import {
   useGetNotificationPreferencesQuery,
   useUpdateNotificationPreferencesMutation,
@@ -50,6 +50,14 @@ const CATEGORIES: CategoryDef[] = [
     accent: 'purple',
     labelKey: 'staking ready',
     descriptionKey: 'staking ready description',
+  },
+  {
+    key: 'gifts',
+    icon: Gift,
+    fg: 'text-pink',
+    accent: 'pink',
+    labelKey: 'gifts',
+    descriptionKey: 'gifts description',
   },
   {
     key: 'system',

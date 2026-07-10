@@ -1091,6 +1091,8 @@
   "tournament end description": "After final places are announced",
   "staking ready": "Staking ready",
   "staking ready description": "When your staking pool is ready to claim",
+  "gifts": "Gifts",
+  "gifts description": "When someone sends you tickets",
   "change avatar": "Change Avatar",
   "change avatar description": "Pick a new profile picture. It will be visible to other players.",
   "change avatar picker description": "Pick from your owned avatars. Paid avatars grant an active boost while equipped.",

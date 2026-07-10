@@ -25,7 +25,12 @@ export interface Notification {
 
 export type NotificationChannel = 'email' | 'telegram';
 
-export type NotificationPreferenceKey = 'tournamentStart' | 'tournamentEnd' | 'stake' | 'system';
+export type NotificationPreferenceKey =
+  | 'tournamentStart'
+  | 'tournamentEnd'
+  | 'stake'
+  | 'system'
+  | 'gifts';
 
 export type NotificationPreferences = Record<
   NotificationChannel,
