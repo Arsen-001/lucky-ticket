@@ -24,6 +24,22 @@ const DAY_MS = 24 * HOUR_MS;
 
 const inHours = (h: number) => new Date(Date.now() + h * HOUR_MS).toISOString();
 
+// Real period boundaries, mirroring the backend: daily tasks reset at the
+// next UTC midnight, weekly tasks at the next Monday 00:00 UTC.
+const nextUtcMidnight = (): string => {
+  const now = new Date();
+  return new Date(
+    Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate() + 1)
+  ).toISOString();
+};
+
+const nextWeekStartUtc = (): string => {
+  const now = new Date();
+  const midnight = Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate());
+  const daysSinceMonday = (new Date(midnight).getUTCDay() + 6) % 7;
+  return new Date(midnight + (7 - daysSinceMonday) * DAY_MS).toISOString();
+};
+
 // LC rewards are authored in design units; the ×1000 LC denomination scale (DOCS §6.1) is applied here.
 const lc = (amount: number): TaskReward => ({ type: TaskRewardType.LC, amount: amount * 100 });
 const tickets = (amount: number): TaskReward => ({ type: TaskRewardType.TICKETS, amount });
@@ -157,16 +173,15 @@ const baseTask = (override: Partial<Task>): Task => {
 // ============================================================
 // GENERIC CATEGORY BUILDER
 // One blueprint shape for any category. Removes the need to repeat
-// `category` and `frequency` on every task; default reset hours are
-// auto-applied per frequency. Pass `Task` directly (already-built)
-// to opt out of the wrapper for special cases (e.g. tier-bound).
+// `category` and `frequency` on every task; the real period boundary
+// (UTC midnight / next Monday) is auto-applied per frequency. Pass
+// `Task` directly (already-built) to opt out of the wrapper for
+// special cases (e.g. tier-bound).
 // ============================================================
 type TaskBlueprint = Omit<Partial<Task>, 'category' | 'frequency'>;
 
 interface CategoryBlueprint {
   category: TaskCategory;
-  dailyResetHours?: number;
-  weeklyResetHours?: number;
   daily?: (TaskBlueprint | Task)[];
   weekly?: (TaskBlueprint | Task)[];
   once?: (TaskBlueprint | Task)[];
@@ -175,26 +190,28 @@ interface CategoryBlueprint {
 const isBuiltTask = (t: TaskBlueprint | Task): t is Task =>
   typeof (t as Task).id === 'string' && typeof (t as Task).category === 'string';
 
+const defaultResetAt = (frequency: TaskFrequency): string | undefined => {
+  if (frequency === TaskFrequency.DAILY) return nextUtcMidnight();
+  if (frequency === TaskFrequency.WEEKLY) return nextWeekStartUtc();
+  return undefined;
+};
+
 const buildCategory = (bp: CategoryBlueprint): CategoryTasks => {
-  const stamp = (
-    items: (TaskBlueprint | Task)[] | undefined,
-    frequency: TaskFrequency,
-    resetHours?: number
-  ): Task[] =>
+  const stamp = (items: (TaskBlueprint | Task)[] | undefined, frequency: TaskFrequency): Task[] =>
     (items ?? []).map(item => {
       if (isBuiltTask(item)) return item;
       return baseTask({
         category: bp.category,
         frequency,
-        resetAt: item.resetAt ?? (resetHours !== undefined ? inHours(resetHours) : undefined),
+        resetAt: item.resetAt ?? defaultResetAt(frequency),
         ...item,
       });
     });
 
   return {
     category: bp.category,
-    daily: stamp(bp.daily, TaskFrequency.DAILY, bp.dailyResetHours),
-    weekly: stamp(bp.weekly, TaskFrequency.WEEKLY, bp.weeklyResetHours),
+    daily: stamp(bp.daily, TaskFrequency.DAILY),
+    weekly: stamp(bp.weekly, TaskFrequency.WEEKLY),
     once: stamp(bp.once, TaskFrequency.ONCE),
   };
 };
@@ -205,14 +222,12 @@ const buildCategory = (bp: CategoryBlueprint): CategoryTasks => {
 interface AdsConfig {
   total: number;
   watchedToday: number;
-  resetHours: number;
   rewardTiers: { upTo: number; rewards: TaskReward[] }[];
 }
 
 const ADS_CONFIG: AdsConfig = {
   total: 20,
   watchedToday: 3,
-  resetHours: 8,
   // Every ad/video grants a flat AP reward — DOCS §5.3 "Watch a video".
   rewardTiers: [{ upTo: 20, rewards: [ap(GlobalConstants.apRewards.watchVideo)] }],
 };
@@ -226,7 +241,7 @@ const buildAds = (): AdsBlock => ({
   enabled: true,
   total: ADS_CONFIG.total,
   watchedToday: ADS_CONFIG.watchedToday,
-  resetAt: inHours(ADS_CONFIG.resetHours),
+  resetAt: nextUtcMidnight(),
   slots: Array.from({ length: ADS_CONFIG.total }, (_, i) => ({
     id: nextId('ad'),
     index: i + 1,
@@ -455,7 +470,7 @@ const buildDailyTierTask = (cfg: TierTournamentConfig): Task => {
     subtitle: cfg.daily.subtitle,
     rewards: cfg.daily.rewards,
     progress: cfg.daily.progress,
-    resetAt: inHours(8),
+    resetAt: nextUtcMidnight(),
     deeplink: '/tournaments',
     rarity: cfg.daily.rarity,
     tier: cfg.tier,
@@ -483,7 +498,7 @@ const buildWeeklyTierTask = (cfg: TierTournamentConfig): Task => {
     subtitle,
     rewards: cfg.weekly.rewards,
     progress: cfg.weekly.progress,
-    resetAt: inHours(72),
+    resetAt: nextWeekStartUtc(),
     deeplink: `/tasks?frequency=daily&category=tournaments&task=task-daily-${cfg.tier}`,
     rarity: cfg.weekly.rarity,
     tier: cfg.tier,
@@ -582,8 +597,6 @@ const buildPlaceMilestones = (place: PlaceKey): TaskBlueprint[] =>
 // ───────────────── CATEGORY TASKS ─────────────────
 const TOURNAMENTS = buildCategory({
   category: TaskCategory.TOURNAMENTS,
-  dailyResetHours: 8,
-  weeklyResetHours: 72,
   daily: [
     ...TIER_CONFIGS.map(buildDailyTierTask),
     {
@@ -688,7 +701,6 @@ const SOCIAL_PLATFORMS = [
 
 const SOCIAL = buildCategory({
   category: TaskCategory.SOCIAL,
-  dailyResetHours: 8,
   daily: [
     {
       title: 'Share your daily result',
@@ -709,8 +721,6 @@ const SOCIAL = buildCategory({
 // ───────────────── PROFILE ─────────────────
 const PROFILE = buildCategory({
   category: TaskCategory.PROFILE,
-  dailyResetHours: 8,
-  weeklyResetHours: 72,
   daily: [
     {
       title: 'Daily check-in',

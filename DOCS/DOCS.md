@@ -1039,6 +1039,8 @@ Each task contains:
 - **Reward:** The prize awarded upon completion (tickets, coins, boosts).
 - **Activity Points:** A fixed number of Activity Points granted to the user upon completing the task.
 
+**Reset timing & countdowns.** Daily tasks reset at **00:00 UTC**; weekly tasks reset **Monday 00:00 UTC**; the rewarded-ads block resets with the daily boundary. The backend stamps every daily/weekly task (and the ads block) with `resetAt` — the exact period boundary — and the UI renders live countdowns from it: a small timer on each task card/row (kept on completed tasks to show when they re-open), a period-level "Next reset in …" line under the Daily/Weekly frequency tabs, and the ads-section timer. One-time tasks never reset and show no countdown.
+
 ### 12.3 Task Examples
 
 Tasks guide user behavior and include actions such as:

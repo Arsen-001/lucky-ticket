@@ -368,11 +368,12 @@ export function TaskItemCard({
     >
       <SectionShine token={highlightToken ?? null} />
 
-      {/* Top-right cluster: countdown + pin button (pin hidden for ready-to-claim — they're already on top) */}
-      {(task.resetAt && !isCompleted && !isLocked && !expired) ||
+      {/* Top-right cluster: countdown + pin button (pin hidden for ready-to-claim — they're already on top).
+          The countdown stays visible on completed periodic tasks — it tells when the task re-opens. */}
+      {(task.resetAt && !isLocked && !expired) ||
       (onTogglePin && !isCompleted && !isLocked && !isReady) ? (
         <div className="absolute top-1.5 right-1.5 z-[3] flex items-center gap-1.5">
-          {task.resetAt && !isCompleted && !isLocked && !expired && (
+          {task.resetAt && !isLocked && !expired && (
             <span className="pointer-events-none flex items-center gap-1 text-[10px] text-white/40 font-medium tabular-nums">
               <Clock3 size={10} />
               {leftTime}

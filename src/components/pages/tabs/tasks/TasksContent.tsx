@@ -24,6 +24,7 @@ import { useToast } from '@/hooks/useToast';
 import { useRewardedAd } from '@/hooks/useRewardedAd';
 import { Skeleton } from '@/components/shared/seleketons/Skeleton';
 import { TasksFrequencyTabs } from './TasksFrequencyTabs';
+import { TasksResetCountdown } from './TasksResetCountdown';
 import { TasksCategoryNav, type CategoryNavItem } from './TasksCategoryNav';
 import { TasksCategorySection } from './TasksCategorySection';
 import { TournamentMilestoneSlider } from './TournamentMilestoneSlider';
@@ -270,6 +271,20 @@ export function TasksContent() {
     }
     return counts;
   }, [data]);
+
+  // Earliest period boundary across the active tab's tasks — drives the reset
+  // countdown under the frequency tabs. Daily/weekly only; one-time never resets.
+  const periodResetAt = useMemo<string | undefined>(() => {
+    if (!data || activeFrequency === TaskFrequency.ONCE) return undefined;
+    const times = data.categories
+      .flatMap(cat => tasksForFrequency(cat, activeFrequency))
+      .map(task => task.resetAt)
+      .filter((v): v is string => !!v);
+    if (activeFrequency === TaskFrequency.DAILY && data.ads?.resetAt) {
+      times.push(data.ads.resetAt);
+    }
+    return times.length ? times.reduce((a, b) => (a < b ? a : b)) : undefined;
+  }, [data, activeFrequency]);
 
   // Visible categories + their ready counts for the current frequency
   const navItems: CategoryNavItem[] = useMemo(() => {
@@ -529,6 +544,9 @@ export function TasksContent() {
         </ArrivalShine>
       </div>
 
+      {/* Period reset countdown — the empty state renders its own line, so skip it there */}
+      {!allEmpty && <TasksResetCountdown resetAt={periodResetAt} className="-mt-1 pb-2" />}
+
       <TasksCategoryNav
         items={navItems}
         activeCategory={activeCategory}
@@ -538,10 +556,7 @@ export function TasksContent() {
       />
 
       {allEmpty ? (
-        <EmptyAllDone
-          frequency={activeFrequency}
-          resetAt={activeFrequency === TaskFrequency.DAILY ? data?.ads?.resetAt : undefined}
-        />
+        <EmptyAllDone frequency={activeFrequency} resetAt={periodResetAt} />
       ) : (
         <div key={activeFrequency} className="flex flex-col">
           {showAds && data?.ads && (

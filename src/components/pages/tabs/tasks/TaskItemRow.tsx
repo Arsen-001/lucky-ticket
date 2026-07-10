@@ -2,9 +2,10 @@
 
 import { type CSSProperties } from 'react';
 import { useRouter } from 'next/navigation';
-import { Check, ChevronRight, Gift, Lock } from 'lucide-react';
+import { Check, ChevronRight, Clock3, Gift, Lock } from 'lucide-react';
 import { twMerge } from 'tailwind-merge';
 import { useAppTranslations } from '@/hooks/useAppTranslations';
+import { useCountDown } from '@/hooks/useCountDown';
 import { Button } from '@/components/shared/buttons/Button';
 import { TaskRarity, TaskStatus } from '@/types/enums/tasks.enums';
 import type { Task } from '@/types/interfaces/tasks.interfaces';
@@ -37,6 +38,7 @@ export interface TaskItemRowProps {
 export function TaskItemRow({ task, onClaim, highlightToken, className, style }: TaskItemRowProps) {
   const t = useAppTranslations();
   const router = useRouter();
+  const { leftTime, expired } = useCountDown(task.resetAt);
 
   const isReady = task.status === TaskStatus.READY_TO_CLAIM;
   const isLocked = task.status === TaskStatus.LOCKED;
@@ -86,6 +88,13 @@ export function TaskItemRow({ task, onClaim, highlightToken, className, style }:
       <h4 className="min-w-0 flex-1 truncate text-[13px] font-extrabold leading-tight">
         {task.title}
       </h4>
+
+      {task.resetAt && !isLocked && !expired && (
+        <span className="pointer-events-none flex shrink-0 items-center gap-1 text-[10px] font-medium text-white/40 tabular-nums">
+          <Clock3 size={10} />
+          {leftTime}
+        </span>
+      )}
 
       <TaskRewardRow rewards={task.rewards} size="sm" className="shrink-0 gap-1" />
 
