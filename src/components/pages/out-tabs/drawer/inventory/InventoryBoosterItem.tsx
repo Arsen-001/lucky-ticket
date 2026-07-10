@@ -1,8 +1,11 @@
+'use client';
+
 import { Timer } from 'lucide-react';
 import { twMerge } from 'tailwind-merge';
 import { Button } from '@/components/shared/buttons/Button';
 import { BoosterIcon } from '@/components/shared/icons/BoosterIcon';
 import { useAppTranslations } from '@/hooks/useAppTranslations';
+import { useCountDown } from '@/hooks/useCountDown';
 import { CHIP_TYPE_ICON, QUALITY_ACCENT } from '@/utils/global/inventory.utils';
 import type { InventoryBooster } from '@/types/interfaces/inventory.interfaces';
 import type { Dictionary } from '@/types/types/i18n.types';
@@ -15,9 +18,12 @@ export interface InventoryBoosterItemProps {
 
 export function InventoryBoosterItem({ booster, index, onActivate }: InventoryBoosterItemProps) {
   const t = useAppTranslations();
+  const { leftTime, expired } = useCountDown(booster.expiresAt);
   const TypeMarker = CHIP_TYPE_ICON[booster.type];
   const accent = QUALITY_ACCENT[booster.quality];
   const typeLabel = booster.type === 'speed' ? t('time') : t('capacity');
+  // An expired active booster (backend hasn't swept it yet) renders as inactive.
+  const isActive = !!booster.activeOnEngineId && !!booster.expiresAt && !expired;
 
   return (
     <div
@@ -50,10 +56,21 @@ export function InventoryBoosterItem({ booster, index, onActivate }: InventoryBo
           <span className="flex items-center gap-1 text-[10px] font-extrabold uppercase tracking-wider text-white/70">
             <TypeMarker size={11} stroke="currentColor" strokeWidth={2.4} />+{booster.effectPct}%
           </span>
+          {isActive && (
+            <span className="rounded-full border border-success/40 bg-success/15 px-1.5 py-0.5 text-[8px] font-extrabold uppercase tracking-wider text-success">
+              {t('active')}
+            </span>
+          )}
         </div>
         <span className="mt-0.5 flex items-center gap-1 text-[10px] font-bold uppercase tracking-wider text-white/55">
           <Timer size={11} strokeWidth={2.4} />
-          {t('{n}h duration', { n: booster.durationHours })}
+          {isActive ? (
+            <span className="tabular-nums" style={{ color: accent }}>
+              {leftTime}
+            </span>
+          ) : (
+            t('{n}h duration', { n: booster.durationHours })
+          )}
         </span>
       </div>
 
