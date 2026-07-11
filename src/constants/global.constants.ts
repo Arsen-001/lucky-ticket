@@ -64,6 +64,11 @@ const dailyBaselineApByTier = Object.fromEntries(
 export const GlobalConstants = {
   projectName: 'LuckyTicket365',
   minPasswordLength: 8,
+  /** Username limits mirror the backend's shared rule (src/common/username.rules.ts):
+   *  3–32 chars, max matching Telegram's own handle limit. */
+  usernameMinLength: 3,
+  usernameMaxLength: 32,
+  usernamePattern: /^[A-Za-z0-9._-]+$/,
   coinName: 'LC',
   defaultLanguage: defaultLocale,
   referralPercentage: 5,

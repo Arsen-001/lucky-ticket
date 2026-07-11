@@ -1251,7 +1251,7 @@ Settings provide control, security, and personalization for the user's account.
 
 - **Two-Factor Authentication (2FA):** Enable extra security for the account.
 - **Email Confirmation:** Confirm or change the linked email address.
-- **Change Username:** Update the public display name.
+- **Change Username:** Update the public display name. Available from Settings and directly on the own-profile screen (pencil next to the name). 3–32 characters, letters/digits/dots/dashes/underscores only, must be unique; the same rule applies to registration and admin edits.
 - **Change Avatar:** Pick a profile picture from the user's owned avatar inventory. The picker lists every avatar the user owns — both the default free avatars and any paid avatars purchased in the Market. New avatars are acquired exclusively through the Market (see Section 16.1).
 - **Notification Preferences:** Per-channel (Email / Telegram bot) toggles for which notification categories the user receives. See Section 16.2.
 - **Sign Out:** Securely log out of the application.

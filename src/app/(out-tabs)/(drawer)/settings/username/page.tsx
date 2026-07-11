@@ -8,6 +8,7 @@ import { Button } from '@/components/shared/buttons/Button';
 import { UserPen } from 'lucide-react';
 import { useGetMeQuery, useUpdateMeMutation } from '@/api/me.api';
 import { QueryErrorState } from '@/components/shared/error/QueryErrorState';
+import { GlobalConstants } from '@/constants/global.constants';
 
 export default function UsernamePage() {
   const t = useAppTranslations();
@@ -23,12 +24,18 @@ export default function UsernamePage() {
   }, [me]);
 
   const handleSave = async () => {
-    if (!username || username === me?.username) return;
+    const next = username.trim();
+    if (!next || next === me?.username) return;
+    if (!GlobalConstants.usernamePattern.test(next)) {
+      toast.error(t('invalid username characters'));
+      return;
+    }
     try {
-      await updateMe({ username }).unwrap();
+      await updateMe({ username: next }).unwrap();
+      toast.success(t('username updated'));
     } catch (error) {
-      console.error('Failed to update username:', error);
-      toast.error(t('action failed'));
+      const status = (error as { status?: number })?.status;
+      toast.error(status === 409 ? t('username already taken') : t('action failed'));
     }
   };
 
@@ -49,6 +56,7 @@ export default function UsernamePage() {
           prefix={<UserPen size={18} className="text-gray-secondary" />}
           disabled={isLoading}
           loading={isLoading}
+          maxLength={GlobalConstants.usernameMaxLength}
         />
       </div>
       <Button

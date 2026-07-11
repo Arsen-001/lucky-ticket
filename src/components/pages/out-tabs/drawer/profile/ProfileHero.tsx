@@ -9,6 +9,7 @@ import { UserAvatar, type AvatarStatusColor } from '@/components/shared/user-ele
 import { BannerIconsLayer } from '@/components/pages/out-tabs/drawer/profile/BannerIconsLayer';
 import { ProfileCollageLayer } from '@/components/pages/out-tabs/drawer/profile/ProfileCollageLayer';
 import { ProfileAvatarEditButton } from '@/components/pages/out-tabs/drawer/profile/ProfileAvatarEditButton';
+import { ProfileUsernameEditButton } from '@/components/pages/out-tabs/drawer/profile/ProfileUsernameEditButton';
 import { ProfileShareSheet } from '@/components/pages/out-tabs/drawer/profile/ProfileShareSheet';
 import { ProfileSocialActions } from '@/components/pages/out-tabs/drawer/profile/ProfileSocialActions';
 import { ProfileStatusIconButton } from '@/components/pages/out-tabs/drawer/profile/ProfileStatusIconButton';
@@ -221,7 +222,10 @@ export function ProfileHero({ profile, loading, isPreview, onTogglePreview }: Pr
           loading={loading || !profile}
           skeleton={<Skeleton variant="line" textSize="3xl" className="h-9 w-48" />}
         >
-          <h1 className={usernameClasses}>{profile?.username}</h1>
+          <div className="flex items-center justify-center gap-2">
+            <h1 className={usernameClasses}>{profile?.username}</h1>
+            {profile?.isOwn && !isPreview && <ProfileUsernameEditButton />}
+          </div>
         </SkeletonSuspense>
 
         {profile && (

@@ -16,8 +16,9 @@ export const getRegisterSchema = (t: Dictionary) =>
     username: yup
       .string()
       .required(t('username required'))
-      .min(3, t('too short'))
-      .max(30, t('too long')),
+      .min(GlobalConstants.usernameMinLength, t('too short'))
+      .max(GlobalConstants.usernameMaxLength, t('too long'))
+      .matches(GlobalConstants.usernamePattern, t('invalid username characters')),
     phone: yup.string().required(t('phone number required')).min(6, t('invalid phone number')),
     password: yup
       .string()

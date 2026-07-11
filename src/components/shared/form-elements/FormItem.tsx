@@ -1,6 +1,6 @@
 'use client';
 
-import { type RegisterOptions, useFormContext } from 'react-hook-form';
+import { type RegisterOptions, useFormContext, useFormState } from 'react-hook-form';
 import { cloneElement, type ReactElement } from 'react';
 import { twMerge } from 'tailwind-merge';
 
@@ -30,10 +30,11 @@ export function FormItem({
   noStyle,
   classNames,
 }: FormItemProps) {
-  const {
-    register,
-    formState: { errors },
-  } = useFormContext();
+  const { register } = useFormContext();
+  // Subscribe to this field's errors with a local `useFormState` subscription:
+  // reading `formState.errors` off the context is invisible to the React
+  // Compiler's memoization, so error changes never re-rendered the item.
+  const { errors } = useFormState({ name });
 
   const error = errors[name]?.message as string | undefined;
 

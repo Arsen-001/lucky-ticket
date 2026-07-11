@@ -97,6 +97,7 @@ export const ownProfile: ProfileResponse = {
  * no duplicated hardcoded values to keep in sync.
  */
 export const buildAccountOverlay = (): Partial<ProfileResponse> => ({
+  username: mockDb.user.username,
   isVerified: mockDb.user.isVerified ?? false,
   isLuckyPlayer: mockDb.user.isLuckyPlayer,
   isVIP: mockDb.user.isVIP,
