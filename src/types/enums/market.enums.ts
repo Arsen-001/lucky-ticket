@@ -23,6 +23,9 @@ export enum MarketItemCategory {
   BOOSTER = 'BOOSTER',
   COSMETIC = 'COSMETIC',
   STATUS = 'STATUS',
+  CHIP = 'CHIP',
+  CHIP_BUILDER = 'CHIP_BUILDER',
+  PASS = 'PASS',
 }
 
 export enum MarketCosmeticType {

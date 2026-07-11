@@ -430,7 +430,7 @@ Run `type-check` before committing non-trivial changes.
 
 **Testing**
 
-- **Vitest** (`npm test`) runs the unit + guardrail suite in `tests/` — economy math (jackpot/stakes), i18n en/ru/hy/de parity, RTK 3-place wiring, and DOCS↔constants drift. Fast, node-only, no browser.
+- **Vitest** (`npm test`) runs the unit + guardrail suite in `tests/` — economy math (jackpot/stakes), i18n en/ru/hy/de parity, RTK 3-place wiring, DOCS↔constants drift, and backend-Prisma↔frontend enum parity (needs `../lucky-ticket-backend` checked out; auto-skipped otherwise). Fast, node-only, no browser.
 - **Playwright** (`npm run test:e2e`) runs a smoke in `e2e/` over every static route from `routes.ts` **plus key detail pages** (tournament / profile / support / stake / engine by id) — each screen must render without runtime crashes or leaked i18n placeholders. Auto-starts the dev server (mock backend); shared assertion lives in `e2e/helpers.ts`.
 - type-check + lint remain the first-line safety nets.
 
