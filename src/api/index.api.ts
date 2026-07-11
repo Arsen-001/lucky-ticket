@@ -3,6 +3,7 @@ import { rtkTags } from '@/constants/rtk-tags';
 import type { BaseQueryFn, FetchArgs, FetchBaseQueryError } from '@reduxjs/toolkit/query';
 import { type MockData, mockData } from '@/mock/index.mock';
 import { isTelegramEnv } from '@/lib/telegram/telegram';
+import { setBanned } from '@/lib/rtk/features/ban.slice';
 import { setServerMaintenance } from '@/lib/rtk/features/maintenance.slice';
 import {
   getAccessTokenCk,
@@ -128,6 +129,15 @@ const rawBaseQuery = fetchBaseQuery({
  */
 let refreshInFlight: Promise<boolean> | null = null;
 
+/**
+ * The backend answers 403 with the literal 'BANNED' message (login, refresh
+ * and every guarded route) when the account is banned — the contract that
+ * triggers the blocking BannedOverlay.
+ */
+const isBannedError = (error: FetchBaseQueryError | undefined): boolean =>
+  error?.status === 403 &&
+  (error.data as { message?: string } | null | undefined)?.message === 'BANNED';
+
 const refreshSession = async (
   store: Parameters<typeof rawBaseQuery>[1],
   extra: Parameters<typeof rawBaseQuery>[2]
@@ -142,6 +152,10 @@ const refreshSession = async (
     { ...store, signal: new AbortController().signal },
     extra
   );
+  // A banned user whose access token already expired never reaches the
+  // strategy's 403 — only the refresh endpoint reports the ban. Surface it
+  // from here too, or the app would sit on silent 401s with no overlay.
+  if (isBannedError(refresh.error)) store.dispatch(setBanned(true));
   const tokens = refresh.data as { accessToken?: string; refreshToken?: string } | undefined;
   if (tokens?.accessToken) {
     setAccessTokenCk(tokens.accessToken);
@@ -181,6 +195,14 @@ const realBaseQuery: BaseQueryFn<string | FetchArgs, unknown, FetchBaseQueryErro
     if (await refreshInFlight) {
       result = await rawBaseQuery(args, store, extra); // retry original
     }
+  }
+
+  // Server-driven ban: any 403 'BANNED' (login included) raises the blocking
+  // overlay. One-way — unlike maintenance it never resets on a later success;
+  // an unban takes effect on the next app open.
+  if (isBannedError(result.error)) {
+    const banned = (store.getState() as { ban?: { banned: boolean } }).ban?.banned;
+    if (!banned) store.dispatch(setBanned(true));
   }
 
   // Server-driven maintenance mode: the backend's MaintenanceGuard answers 503

@@ -1,6 +1,7 @@
 import type { Action, ThunkAction } from '@reduxjs/toolkit';
 import { combineSlices, configureStore } from '@reduxjs/toolkit';
 import { api } from '@/api/index.api';
+import { banSlice } from '@/lib/rtk/features/ban.slice';
 import { layoutSlice } from '@/lib/rtk/features/layout.slice';
 import { maintenanceSlice } from '@/lib/rtk/features/maintenance.slice';
 import { onboardingTourSlice } from '@/lib/rtk/features/onboarding-tour.slice';
@@ -10,6 +11,7 @@ import { toastsSlice } from '@/lib/rtk/features/toasts.slice';
 // their `reducerPath`s, therefore, we no longer need to call `combineReducers`.
 const rootReducer = combineSlices(
   api,
+  banSlice,
   layoutSlice,
   maintenanceSlice,
   onboardingTourSlice,

@@ -1017,6 +1017,8 @@
   "check connection and retry": "Check your connection and try again",
   "under maintenance": "Under maintenance",
   "maintenance description": "We are improving the app and will be back shortly. Please try again later.",
+  "account blocked": "Account blocked",
+  "account blocked description": "Your account has been blocked for violating the platform rules. If you believe this is a mistake, please contact support.",
   "faq": "FAQ",
   "privacy policy": "Privacy Policy",
   "last updated {date}": "Last updated {date}",

@@ -80,6 +80,17 @@ The profile represents the user publicly and internally. It contains:
 
 The profile connects to the leaderboard, tournaments, Market, and social features.
 
+### 4.3 Account Ban
+
+An admin can **ban / unban** any account from the admin panel (user card → «Забанить», with confirmation; the action is audit-logged). A ban takes effect **immediately and everywhere**:
+
+- **Live sessions die instantly** — every authenticated request re-checks the flag (JWT strategy) and answers **403 `BANNED`**, so a valid access token stops working the moment the ban lands.
+- **No way back in** — the Telegram Mini App sign-in, the web password login, and the token-refresh endpoint all refuse banned accounts with the same 403 `BANNED`.
+- **The Mini App shows a blocking "Account blocked" screen** (`BannedOverlay`) — opaque, full-screen, no dismiss action, localized in all four languages. It triggers on the first 403 `BANNED` from any request (the login itself included) and never clears within the session; the banned user can see nothing else of the app.
+- **Unban** is the same admin toggle; the user gets back in on the next app open (banned state is never cached client-side).
+
+The literal `BANNED` message on a 403 response is the backend↔frontend contract for this flow. Admin accounts are subject to the same check — a banned admin also loses panel access.
+
 ---
 
 ## 5. Activity Points System
