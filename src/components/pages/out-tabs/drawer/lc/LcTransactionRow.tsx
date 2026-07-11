@@ -1,6 +1,19 @@
 'use client';
 
-import { ArrowDownUp, Cpu, Gift, ShoppingCart, Sparkles, Store, Trophy, Users } from 'lucide-react';
+import {
+  ArrowDownUp,
+  Coins,
+  Cpu,
+  Crown,
+  Gift,
+  ShoppingCart,
+  SlidersHorizontal,
+  Sparkles,
+  Store,
+  Tag,
+  Trophy,
+  Users,
+} from 'lucide-react';
 import { twMerge } from 'tailwind-merge';
 import { Skeleton } from '@/components/shared/seleketons/Skeleton';
 import { useAppTranslations } from '@/hooks/useAppTranslations';
@@ -76,6 +89,30 @@ const TYPE_META: Record<LcTransactionType, TypeMeta> = {
     iconClass: 'text-teal',
     iconBg: 'bg-teal/15',
   },
+  [LcTransactionType.JACKPOT]: {
+    Icon: Crown,
+    iconClass: 'text-gold',
+    iconBg: 'bg-gold/15',
+  },
+  [LcTransactionType.PROMO]: {
+    Icon: Tag,
+    iconClass: 'text-teal',
+    iconBg: 'bg-teal/15',
+  },
+  [LcTransactionType.ADMIN_ADJUST]: {
+    Icon: SlidersHorizontal,
+    iconClass: 'text-white/70',
+    iconBg: 'bg-white/10',
+  },
+};
+
+// A transaction type the client doesn't know yet (backend enum grew) must
+// degrade to a generic coin row — never crash the whole page (that is exactly
+// what happened when JACKPOT/PROMO/ADMIN_ADJUST appeared server-side).
+const FALLBACK_META: TypeMeta = {
+  Icon: Coins,
+  iconClass: 'text-gold',
+  iconBg: 'bg-gold/15',
 };
 
 export function LcTransactionRow({
@@ -105,7 +142,7 @@ export function LcTransactionRow({
     );
   }
 
-  const meta = TYPE_META[transaction.type];
+  const meta = TYPE_META[transaction.type] ?? FALLBACK_META;
   const isCredit = transaction.direction === LcTransactionDirection.CREDIT;
   const amountClass = isCredit ? 'text-success' : 'text-error';
   const sign = isCredit ? '+' : '−';

@@ -9,6 +9,9 @@ export enum LcTransactionType {
   CONVERT_FROM_STARS = 'convert_from_stars',
   CONVERT_TO_STARS = 'convert_to_stars',
   CONVERT_TO_TON = 'convert_to_ton',
+  JACKPOT = 'jackpot',
+  PROMO = 'promo',
+  ADMIN_ADJUST = 'admin_adjust',
 }
 
 export enum LcTransactionDirection {
