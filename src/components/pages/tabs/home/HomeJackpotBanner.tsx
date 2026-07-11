@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useRef, useState } from 'react';
+import { Sparkles, Trophy } from 'lucide-react';
 import { Link } from '@/components/shared/links/Link';
 import { LcLabel } from '@/components/shared/icons/LcLabel';
 import { Skeleton } from '@/components/shared/seleketons/Skeleton';
@@ -54,13 +55,25 @@ export function HomeJackpotBanner() {
     return () => window.clearInterval(id);
   }, []);
 
+  const record = jackpot?.record ?? 0;
+
   return (
     <div className="flex justify-center px-4">
       <Link
         href={routes.jackpot}
         aria-label={t('jackpot')}
-        className="card-outlined bg-purple-gradient jackpot-banner-glow relative flex w-full max-w-[340px] flex-col items-center rounded-2xl px-5 py-3.5 transition-transform active:scale-[0.98]"
+        className="jackpot-plaque relative flex w-full max-w-[340px] flex-col items-center gap-1.5 rounded-2xl px-5 pb-2.5 pt-3 transition-transform active:scale-[0.98]"
       >
+        <span aria-hidden className="jackpot-plaque-shine" />
+
+        <span className="relative flex items-center gap-2">
+          <Sparkles size={12} className="text-gold/70" aria-hidden />
+          <span className="jackpot-title text-[11px] font-black uppercase leading-none tracking-[0.34em]">
+            {t('jackpot')}
+          </span>
+          <Sparkles size={12} className="text-gold/70" aria-hidden />
+        </span>
+
         <SkeletonSuspense
           loading={isLoading}
           skeleton={<Skeleton variant="line" textSize="lg" className="h-8 w-48" />}
@@ -68,7 +81,7 @@ export function HomeJackpotBanner() {
           <span className="relative inline-flex items-center gap-2">
             <JackpotOdometer
               value={display}
-              className="jackpot-glow text-gold text-[26px] font-extrabold leading-none"
+              className="jackpot-glow text-gold text-[27px] font-extrabold leading-none"
             />
             <LcLabel size={20} />
             {pop && (
@@ -82,6 +95,14 @@ export function HomeJackpotBanner() {
             )}
           </span>
         </SkeletonSuspense>
+
+        {record > 0 && (
+          <span className="relative flex items-center gap-1.5 text-[11px] font-semibold text-white/45">
+            <Trophy size={11} className="text-gold/60" aria-hidden />
+            {t('record')} {formatNumber(record)}
+            <LcLabel size={12} />
+          </span>
+        )}
       </Link>
     </div>
   );
