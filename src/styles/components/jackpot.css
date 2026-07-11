@@ -18,38 +18,77 @@
   animation: jackpot-pop 1.5s ease-out forwards;
 }
 
-/* Gold casino plaque: gradient hairline frame over a tinted glass body,
-   with a breathing amber halo. Replaces the generic purple card on Home. */
-.jackpot-plaque {
-  border: 1px solid transparent;
+/* ---------------------------------------------------------------------------
+   Premium jackpot capsule: a polished graphite metal ring with a gold neon
+   hairline wraps a glassmorphic inner capsule glowing purple-gold ("liquid
+   gold on cosmic dust"). Two layers:
+     .jackpot-capsule       — the outer metal ring (padding = ring thickness)
+     .jackpot-capsule-glass — the inner glass body with bevel + inner glow
+--------------------------------------------------------------------------- */
+
+.jackpot-capsule {
+  /* Brushed graphite: vertical polish + a faint horizontal sheen. */
   background:
-    linear-gradient(180deg, rgba(36, 27, 58, 0.94), rgba(20, 15, 38, 0.97)) padding-box,
     linear-gradient(
-        140deg,
-        color-mix(in srgb, var(--color-gold) 85%, transparent),
-        color-mix(in srgb, var(--color-gold) 18%, transparent) 38%,
-        color-mix(in srgb, var(--color-electric-pink) 35%, transparent) 72%,
-        color-mix(in srgb, var(--color-gold) 70%, transparent)
-      )
-      border-box;
-  animation: jackpot-plaque-glow 2.8s ease-in-out infinite;
+      90deg,
+      rgba(255, 255, 255, 0.05),
+      transparent 30%,
+      transparent 70%,
+      rgba(255, 255, 255, 0.05)
+    ),
+    linear-gradient(180deg, #4a4a58 0%, #232330 28%, #101018 52%, #1d1d28 76%, #3b3b49 100%);
+  animation: jackpot-capsule-glow 3s ease-in-out infinite;
 }
 
-@keyframes jackpot-plaque-glow {
+@keyframes jackpot-capsule-glow {
   0%,
   100% {
     box-shadow:
-      0 0 16px color-mix(in srgb, var(--color-gold) 18%, transparent),
-      inset 0 0 22px rgba(248, 189, 62, 0.05);
+      0 0 0 1px color-mix(in srgb, var(--color-gold) 45%, transparent),
+      0 0 22px color-mix(in srgb, var(--color-gold) 14%, transparent),
+      0 10px 28px rgba(0, 0, 0, 0.55),
+      inset 0 1px 0 rgba(255, 255, 255, 0.22),
+      inset 0 -1px 1px rgba(0, 0, 0, 0.6);
   }
   50% {
     box-shadow:
-      0 0 30px color-mix(in srgb, var(--color-gold) 36%, transparent),
-      inset 0 0 26px rgba(248, 189, 62, 0.09);
+      0 0 0 1px color-mix(in srgb, var(--color-gold) 70%, transparent),
+      0 0 34px color-mix(in srgb, var(--color-gold) 30%, transparent),
+      0 10px 28px rgba(0, 0, 0, 0.55),
+      inset 0 1px 0 rgba(255, 255, 255, 0.22),
+      inset 0 -1px 1px rgba(0, 0, 0, 0.6);
   }
 }
 
-/* Diagonal light sweep that crosses the plaque every few seconds. */
+.jackpot-capsule-glass {
+  border: 1px solid color-mix(in srgb, var(--color-gold) 30%, transparent);
+  background:
+    /* liquid-gold pool bottom-left */
+    radial-gradient(
+      130% 150% at 18% 100%,
+      color-mix(in srgb, var(--color-gold) 20%, transparent),
+      transparent 45%
+    ),
+    /* cosmic purple bloom top-right */
+    radial-gradient(
+        120% 160% at 85% 0%,
+        color-mix(in srgb, var(--color-electric-purple) 38%, transparent),
+        transparent 55%
+      ),
+    /* deep purple glass base */
+    linear-gradient(180deg, rgba(38, 26, 66, 0.92), rgba(16, 11, 34, 0.96));
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  box-shadow:
+    /* 3D glass bevel: lit top rim, shaded lower rim */
+    inset 0 1.5px 0 rgba(255, 255, 255, 0.14),
+    inset 0 -2px 4px rgba(0, 0, 0, 0.5),
+    /* inner purple-gold atmosphere */ inset 0 0 24px
+      color-mix(in srgb, var(--color-electric-purple) 22%, transparent),
+    inset 0 -8px 20px color-mix(in srgb, var(--color-gold) 8%, transparent);
+}
+
+/* Diagonal light sweep that crosses the glass every few seconds. */
 .jackpot-plaque-shine {
   position: absolute;
   inset: 0;
@@ -88,6 +127,34 @@
   background-clip: text;
   color: transparent;
   filter: drop-shadow(0 0 8px rgba(248, 189, 62, 0.35));
+}
+
+/* Thin neon underline beneath the wordmark — the "gold line" accent. */
+.jackpot-title-rule {
+  width: 100%;
+  height: 1px;
+  background: linear-gradient(
+    90deg,
+    color-mix(in srgb, var(--color-gold) 80%, transparent),
+    transparent
+  );
+  box-shadow: 0 0 6px color-mix(in srgb, var(--color-gold) 50%, transparent);
+}
+
+/* Gold coin medallion on the right of the capsule. */
+.jackpot-coin {
+  background:
+    radial-gradient(
+      100% 100% at 30% 25%,
+      color-mix(in srgb, var(--color-gold) 28%, transparent),
+      transparent 70%
+    ),
+    linear-gradient(180deg, rgba(255, 255, 255, 0.08), rgba(0, 0, 0, 0.35));
+  border: 1px solid color-mix(in srgb, var(--color-gold) 40%, transparent);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.18),
+    inset 0 -2px 4px rgba(0, 0, 0, 0.45),
+    0 0 12px color-mix(in srgb, var(--color-gold) 25%, transparent);
 }
 
 /* Soft electric-pink glow that breathes under the hero pot number. */
