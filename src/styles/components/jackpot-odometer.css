@@ -34,18 +34,3 @@
   line-height: 1.2em;
   text-align: center;
 }
-
-/* Breathing electric-pink halo around the whole banner plaque. */
-@keyframes jackpot-banner-glow {
-  0%,
-  100% {
-    box-shadow: 0 0 18px color-mix(in srgb, var(--color-electric-pink) 22%, transparent);
-  }
-  50% {
-    box-shadow: 0 0 34px color-mix(in srgb, var(--color-electric-pink) 45%, transparent);
-  }
-}
-
-.jackpot-banner-glow {
-  animation: jackpot-banner-glow 2.6s ease-in-out infinite;
-}
