@@ -17,7 +17,8 @@ import type { CSSProperties } from 'react';
 export interface InvitedFriendRowProps {
   friend?: InvitedFriend;
   onClaim?: (friend: InvitedFriend) => void;
-  /** Tapping the avatar opens the shared player quick-card. */
+  /** Opens the shared player quick-card — the avatar always, and the whole
+   *  row when there's nothing to claim (a claimable row's click claims). */
   onOpenCard?: (friend: InvitedFriend) => void;
   loading?: boolean;
   className?: string;
@@ -37,18 +38,27 @@ export function InvitedFriendRow({
   const claimableAmount =
     friend?.claimableTickets.reduce((sum, ticket) => sum + ticket.amount, 0) ?? 0;
 
-  const Wrapper: 'button' | 'div' = claimable && onClaim ? 'button' : 'div';
+  const rowAction = !friend
+    ? undefined
+    : claimable && onClaim
+      ? () => onClaim(friend)
+      : onOpenCard
+        ? () => onOpenCard(friend)
+        : undefined;
+
+  const Wrapper: 'button' | 'div' = rowAction ? 'button' : 'div';
 
   return (
     <Wrapper
       type={Wrapper === 'button' ? 'button' : undefined}
-      onClick={claimable && friend && onClaim ? () => onClaim(friend) : undefined}
+      onClick={rowAction}
       style={style}
       className={twMerge(
         'group relative flex items-center gap-3 rounded-2xl border p-2.5 text-left transition-all',
         claimable
           ? 'border-gold/15 bg-gold/3 hover:bg-gold/8 cursor-pointer shadow-[0_0_10px_rgba(248,189,62,0.10)] active:scale-99'
           : 'bg-background-overlay/50 border-white/5',
+        !claimable && rowAction && 'active:scale-99 cursor-pointer hover:bg-white/5',
         className
       )}
     >
