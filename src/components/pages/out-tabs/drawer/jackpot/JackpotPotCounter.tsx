@@ -2,28 +2,30 @@
 
 import { useEffect, useRef, useState } from 'react';
 import { twMerge } from 'tailwind-merge';
+import { JackpotOdometer } from '@/components/pages/tabs/home/JackpotOdometer';
 import { formatNumber } from '@/utils/global/number.utils';
 import '@/styles/components/jackpot.css';
 
 interface JackpotPotCounterProps {
   /** Server pot value (base). The displayed value never goes below this. */
   value: number;
-  /** Applied to the number text (e.g. size + `jackpot-glow`). */
+  /** Applied to the number text (e.g. size + `jackpot-glow-gold`). */
   className?: string;
 }
 
 /**
- * Live number for the hero pot. The pot only grows when a tournament finishes
- * (its 10% skim), so there is NO fake creep: the number tweens (via rAF) to
- * the real server value when it increases, flashing the actual "+X" gain, and
- * never ticks backwards when the value reconciles on refetch.
+ * Live slot-reel number for the hero pot. The pot only grows when a tournament
+ * finishes (its 10% skim), so there is NO fake creep: on a real increase the
+ * odometer reels roll to the server value in discrete steps (each step visibly
+ * spins the reels — same cadence as the Home capsule), flashing the actual
+ * "+X" gain, and never tick backwards when the value reconciles on refetch.
  */
 export function JackpotPotCounter({ value, className }: JackpotPotCounterProps) {
   const [display, setDisplay] = useState(value);
   const [pop, setPop] = useState<{ amount: number; key: number } | null>(null);
   const targetRef = useRef(value);
 
-  // Reconcile with the server value: an actual increase tweens the number up
+  // Reconcile with the server value: an actual increase rolls the reels up
   // and pops the real gain; first load snaps into place.
   useEffect(() => {
     if (value <= targetRef.current) return;
@@ -34,26 +36,21 @@ export function JackpotPotCounter({ value, className }: JackpotPotCounterProps) 
     else setDisplay(value);
   }, [value]);
 
-  // Smoothly chase the target each frame; settle exactly when close.
+  // Discrete steps toward the target — each one visibly rolls the reels.
   useEffect(() => {
-    let frame = 0;
-    const tick = () => {
+    const id = window.setInterval(() => {
       setDisplay(prev => {
         const diff = targetRef.current - prev;
-        if (Math.abs(diff) < 1) return targetRef.current;
-        return prev + Math.max(1, diff * 0.08);
+        if (diff <= 0) return prev;
+        return diff <= 2 ? targetRef.current : prev + Math.max(1, Math.round(diff * 0.35));
       });
-      frame = requestAnimationFrame(tick);
-    };
-    frame = requestAnimationFrame(tick);
-    return () => cancelAnimationFrame(frame);
+    }, 450);
+    return () => window.clearInterval(id);
   }, []);
 
   return (
     <span className="relative inline-flex flex-col items-center">
-      <span className={twMerge('tabular-nums', className)}>
-        {formatNumber(Math.floor(display))}
-      </span>
+      <JackpotOdometer value={display} className={twMerge('tabular-nums', className)} />
       {pop && (
         <span
           key={pop.key}
