@@ -43,7 +43,14 @@ const matchesTab = (tournament: PersonalTournament, filter: TournamentFilterType
 
 export default function TournamentPage() {
   const t = useAppTranslations();
-  const { data: tournamentsData, isLoading, isError, refetch } = useGetTournamentsQuery();
+  const {
+    data: tournamentsData,
+    isLoading,
+    isError,
+    refetch,
+    // Cached data older than 30s renders instantly while a background refetch
+    // brings it up to date — revisits never fall back to the skeleton screen.
+  } = useGetTournamentsQuery(undefined, { refetchOnMountOrArgChange: 30 });
   const { isTierUnlocked } = useUnlockedTiers();
   const [filter, setFilter] = useState<TournamentFilterType>('all');
   const [searchValue, setSearchValue] = useState('');
@@ -154,7 +161,10 @@ export default function TournamentPage() {
         tabs={tabs}
       />
       <div
-        key={`tournaments-${filter}-${searchValue}-${selectedTypes.join()}-${sortBy}`}
+        // Replay the entry animation only on tab change. Search / type / sort
+        // narrowing must update in place (cards are keyed by id) — remounting
+        // on every debounced keystroke made the whole list blink.
+        key={`tournaments-${filter}`}
         className="animate-slide-in-bottom"
       >
         <TournamentList
