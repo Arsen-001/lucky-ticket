@@ -33,7 +33,7 @@ export function PromoCouponCard({
 
   return (
     <div
-      className="shine-card relative overflow-hidden rounded-3xl p-5"
+      className="shine-card-bottom relative overflow-hidden rounded-3xl p-5"
       style={{ ['--shine-card-accent' as string]: 'var(--color-electric-pink)' }}
     >
       <span

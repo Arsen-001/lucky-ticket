@@ -16,7 +16,17 @@
     0 4px 16px -8px color-mix(in srgb, var(--shine-card-accent) 30%, transparent);
 }
 
-.shine-card::after {
+/* Borderless variant: same overlay fill and bottom glow, but the only stroke
+   is a soft accent hairline along the bottom edge — no ring around the card. */
+@utility shine-card-bottom {
+  position: relative;
+  background: var(--color-background-overlay);
+  border-bottom: 1px solid color-mix(in srgb, var(--shine-card-accent) 35%, transparent);
+  box-shadow: 0 4px 16px -8px color-mix(in srgb, var(--shine-card-accent) 30%, transparent);
+}
+
+.shine-card::after,
+.shine-card-bottom::after {
   content: '';
   position: absolute;
   bottom: 0;
