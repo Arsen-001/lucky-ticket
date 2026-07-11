@@ -2,12 +2,19 @@ import type { Action, ThunkAction } from '@reduxjs/toolkit';
 import { combineSlices, configureStore } from '@reduxjs/toolkit';
 import { api } from '@/api/index.api';
 import { layoutSlice } from '@/lib/rtk/features/layout.slice';
+import { maintenanceSlice } from '@/lib/rtk/features/maintenance.slice';
 import { onboardingTourSlice } from '@/lib/rtk/features/onboarding-tour.slice';
 import { toastsSlice } from '@/lib/rtk/features/toasts.slice';
 
 // `combineSlices` automatically combines the reducers using
 // their `reducerPath`s, therefore, we no longer need to call `combineReducers`.
-const rootReducer = combineSlices(api, layoutSlice, onboardingTourSlice, toastsSlice);
+const rootReducer = combineSlices(
+  api,
+  layoutSlice,
+  maintenanceSlice,
+  onboardingTourSlice,
+  toastsSlice
+);
 // Infer the `RootState` type from the root reducer
 export type RootState = ReturnType<typeof rootReducer>;
 

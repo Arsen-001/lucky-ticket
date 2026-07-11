@@ -306,6 +306,8 @@ export function TasksContent() {
     data.categories.forEach(cat => {
       // Hide Profile and Partners chips from the one-time tab — same as the section list.
       if (!isCategoryVisibleForFrequency(cat.category, activeFrequency)) return;
+      // Ads chips follow the admin ads kill switch — same as the section list.
+      if (cat.category === TaskCategory.ADS && data.ads?.enabled === false) return;
       const tasks = tasksForFrequency(cat, activeFrequency);
       if (!tasks.length) return;
       const ready = tasks.filter(t => t.status === TaskStatus.READY_TO_CLAIM).length;
@@ -515,16 +517,21 @@ export function TasksContent() {
   if (isError || !data) return <TasksLoadError onRetry={refetch} />;
 
   // The admin kill switch (`ads.enabled`) hides the whole rewarded-ads surface.
+  const adsEnabled = data?.ads?.enabled !== false;
   const showAds =
-    activeFrequency === TaskFrequency.DAILY &&
-    data?.ads?.enabled !== false &&
-    !!data?.ads?.slots.length;
+    activeFrequency === TaskFrequency.DAILY && adsEnabled && !!data?.ads?.slots.length;
   const filteredCategories =
     data?.categories.filter(c => tasksForFrequency(c, activeFrequency).length > 0) ?? [];
   // Hide Profile and Partners from the one-time tab — they live elsewhere
   // (Profile setup is part of Settings). Same predicate as the chips + badge.
+  // The Ads category (once-tab watch milestones) follows the same admin kill
+  // switch as the daily rewarded slots — no ad surface survives it.
   const visibleCategories = sortByCategoryOrder(
-    filteredCategories.filter(c => isCategoryVisibleForFrequency(c.category, activeFrequency))
+    filteredCategories.filter(
+      c =>
+        isCategoryVisibleForFrequency(c.category, activeFrequency) &&
+        (adsEnabled || c.category !== TaskCategory.ADS)
+    )
   );
 
   const allEmpty = !showAds && visibleCategories.length === 0;

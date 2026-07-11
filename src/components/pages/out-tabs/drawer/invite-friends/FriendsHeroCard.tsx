@@ -13,8 +13,8 @@ import { Skeleton } from '@/components/shared/seleketons/Skeleton';
 import { SkeletonSuspense } from '@/components/shared/seleketons/SkeletonSuspense';
 import { ArrivalShine } from '@/components/shared/ArrivalShine';
 import { TelegramStarIcon } from '@/components/shared/icons/TelegramStarIcon';
-import { GlobalConstants } from '@/constants/global.constants';
 import { useAppTranslations } from '@/hooks/useAppTranslations';
+import { useInviteRewards } from '@/hooks/useInviteRewards';
 import { getRefererLink } from '@/utils/pages/referral.utils';
 import { getTelegramWebApp, isTelegramEnv } from '@/lib/telegram/telegram';
 import type { LocaleType } from '@/types/types/locale.types';
@@ -25,6 +25,7 @@ export function FriendsHeroCard() {
   const { data: me, isLoading: isMeLoading } = useGetMeQuery();
   const { data: stats, isLoading: isStatsLoading } = useGetReferralStatsQuery();
   const [prepareShareMessage] = usePrepareShareMessageMutation();
+  const rewards = useInviteRewards();
   const [copied, setCopied] = useState(false);
 
   const link = getRefererLink(me?.id);
@@ -113,31 +114,46 @@ export function FriendsHeroCard() {
       </div>
 
       <div className="relative mt-2.5 flex flex-col rounded-xl bg-black/25 p-1.5">
-        <div className="mb-1 flex items-center justify-between px-2 pt-1.5">
-          <span className="text-[9px] font-bold uppercase tracking-wider text-white/60">
-            {t('per invite')}
-          </span>
-          <span className="text-gold inline-flex items-center gap-0.5 text-[9px] font-bold uppercase tracking-wider">
-            <Star size={9} className="fill-gold" />
-            {t('telegram premium')} ×2
-          </span>
-        </div>
-        <RewardRow
-          label={t('regular')}
-          icon={<UserPlus size={12} className="text-white" strokeWidth={2.4} />}
-          iconWrapClass="bg-white/15"
-          activityPoints={GlobalConstants.inviteActivityPoints}
-          stars={GlobalConstants.inviteStars}
-        />
-        <span className="mx-2 my-0.5 h-px bg-white/10" />
-        <RewardRow
-          label={t('telegram premium')}
-          icon={<Star size={12} className="fill-gold text-gold" />}
-          iconWrapClass="bg-gold/20"
-          activityPoints={GlobalConstants.inviteTelegramPremiumActivityPoints}
-          stars={GlobalConstants.inviteTelegramPremiumStars}
-          highlight
-        />
+        {rewards.hasRewardLadder ? (
+          // Admin ladder active: the N-th invite pays ladder entry N, so flat
+          // numbers (and the Premium ×2) would be a lie — show a neutral note.
+          <div className="flex items-center gap-2 rounded-lg px-2 py-2">
+            <div className="bg-gold/20 flex-center h-6 w-6 flex-shrink-0 rounded-md">
+              <Star size={12} className="fill-gold text-gold" />
+            </div>
+            <span className="text-[11px] font-semibold leading-snug text-white/85">
+              {t('invite rewards vary')}
+            </span>
+          </div>
+        ) : (
+          <>
+            <div className="mb-1 flex items-center justify-between px-2 pt-1.5">
+              <span className="text-[9px] font-bold uppercase tracking-wider text-white/60">
+                {t('per invite')}
+              </span>
+              <span className="text-gold inline-flex items-center gap-0.5 text-[9px] font-bold uppercase tracking-wider">
+                <Star size={9} className="fill-gold" />
+                {t('telegram premium')} ×2
+              </span>
+            </div>
+            <RewardRow
+              label={t('regular')}
+              icon={<UserPlus size={12} className="text-white" strokeWidth={2.4} />}
+              iconWrapClass="bg-white/15"
+              activityPoints={rewards.ap}
+              stars={rewards.stars}
+            />
+            <span className="mx-2 my-0.5 h-px bg-white/10" />
+            <RewardRow
+              label={t('telegram premium')}
+              icon={<Star size={12} className="fill-gold text-gold" />}
+              iconWrapClass="bg-gold/20"
+              activityPoints={rewards.premiumAp}
+              stars={rewards.premiumStars}
+              highlight
+            />
+          </>
+        )}
       </div>
 
       <div className="relative mt-2.5 flex gap-2">

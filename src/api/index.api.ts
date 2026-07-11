@@ -3,6 +3,7 @@ import { rtkTags } from '@/constants/rtk-tags';
 import type { BaseQueryFn, FetchArgs, FetchBaseQueryError } from '@reduxjs/toolkit/query';
 import { type MockData, mockData } from '@/mock/index.mock';
 import { isTelegramEnv } from '@/lib/telegram/telegram';
+import { setServerMaintenance } from '@/lib/rtk/features/maintenance.slice';
 import {
   getAccessTokenCk,
   getRefreshTokenCk,
@@ -180,6 +181,19 @@ const realBaseQuery: BaseQueryFn<string | FetchArgs, unknown, FetchBaseQueryErro
     if (await refreshInFlight) {
       result = await rawBaseQuery(args, store, extra); // retry original
     }
+  }
+
+  // Server-driven maintenance mode: the backend's MaintenanceGuard answers 503
+  // on every player route while maintenance is on. Flip the blocking overlay
+  // on the first 503 and back off on the first success — mounted polling
+  // queries (jackpot, notifications) keep running under the overlay, so the
+  // app recovers by itself when the backend comes back.
+  const serverDown = (store.getState() as { maintenance?: { serverDown: boolean } }).maintenance
+    ?.serverDown;
+  if (result.error?.status === 503) {
+    if (!serverDown) store.dispatch(setServerMaintenance(true));
+  } else if (!result.error && serverDown) {
+    store.dispatch(setServerMaintenance(false));
   }
 
   return result;

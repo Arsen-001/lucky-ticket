@@ -3,7 +3,7 @@
 import type { ReactNode } from 'react';
 import { Coins, Crosshair, PartyPopper } from 'lucide-react';
 import { useAppTranslations } from '@/hooks/useAppTranslations';
-import { appConfig } from '@/config/app.config';
+import { useJackpotDisplayConfig } from '@/hooks/useJackpotDisplayConfig';
 
 interface Step {
   icon: ReactNode;
@@ -13,12 +13,13 @@ interface Step {
 
 export function JackpotHowItWorks() {
   const t = useAppTranslations();
+  const jackpot = useJackpotDisplayConfig();
 
   const steps: Step[] = [
     {
       icon: <Coins size={18} />,
       title: t('jackpot step grow title'),
-      text: t('jackpot step grow text', { percent: appConfig.jackpot.accrualPercent }),
+      text: t('jackpot step grow text', { percent: jackpot.accrualPercent }),
     },
     {
       icon: <Crosshair size={18} />,

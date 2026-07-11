@@ -3,17 +3,18 @@
 import { ChevronRight, Sparkles } from 'lucide-react';
 import { Link } from '@/components/shared/links/Link';
 import { useAppTranslations } from '@/hooks/useAppTranslations';
-import { appConfig } from '@/config/app.config';
+import { useJackpotDisplayConfig } from '@/hooks/useJackpotDisplayConfig';
 import { routes } from '@/constants/routes';
 
 /**
  * Compact teaser on the tournament detail view: surfaces that part of this
  * tournament's prize pool feeds the single global Jackpot (DOCS §20), and links
- * straight to the jackpot page. The percentage is read from config, never
- * hardcoded.
+ * straight to the jackpot page. The percentage comes from the live server
+ * config (admin-editable), never hardcoded.
  */
 export function TournamentJackpotNote() {
   const t = useAppTranslations();
+  const jackpot = useJackpotDisplayConfig();
 
   return (
     <Link
@@ -23,7 +24,7 @@ export function TournamentJackpotNote() {
       <Sparkles className="text-electric-pink h-3.5 w-3.5 shrink-0" strokeWidth={2.4} />
       <span className="text-electric-pink flex-1 text-[11px] font-bold leading-none">
         {t('{percent}% of the pool feeds the jackpot', {
-          percent: appConfig.jackpot.accrualPercent,
+          percent: jackpot.accrualPercent,
         })}
       </span>
       <ChevronRight className="text-electric-pink/70 h-3.5 w-3.5 shrink-0" />
