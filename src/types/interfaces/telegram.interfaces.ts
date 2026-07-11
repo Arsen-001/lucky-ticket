@@ -52,6 +52,10 @@ export interface TelegramWebApp {
   /** Opens a `t.me/…` link inside Telegram. For a `t.me/share/url?…` link this
    *  brings up the native "share to a chat" picker (used for the invite share). */
   openTelegramLink?: (url: string) => void;
+  /** Bot API 8.0+ — sends a message prepared server-side via
+   *  `savePreparedInlineMessage` to a chat the user picks (rich invite card
+   *  with an image). The callback reports whether it was actually sent. */
+  shareMessage?: (msgId: string, callback?: (sent: boolean) => void) => void;
   /** Opens a native invoice (e.g. a Telegram Stars payment). The callback
    *  receives the final status once the payment flow closes. */
   openInvoice?: (

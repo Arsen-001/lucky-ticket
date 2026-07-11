@@ -1,5 +1,9 @@
 import { images } from '@/constants/images';
-import { InvitedFriend, ReferralStats } from '@/types/interfaces/referral.interfaces';
+import {
+  InvitedFriend,
+  PreparedShareMessage,
+  ReferralStats,
+} from '@/types/interfaces/referral.interfaces';
 import { appConfig } from '@/config/app.config';
 
 const LOCAL_AVATARS = [
@@ -114,7 +118,12 @@ export const referralStatsMock: ReferralStats = {
   totalInvited: invitedFriendsMock.length,
 };
 
+export const preparedShareMessageMock: PreparedShareMessage = {
+  id: 'mock-prepared-message-id',
+};
+
 export const referralMock = {
   'referral/friends': invitedFriendsMock,
   'referral/stats': referralStatsMock,
+  'POST referral/prepare-share': preparedShareMessageMock,
 };

@@ -5,8 +5,9 @@ import { BoltIcon } from '@/components/shared/icons/BoltIcon';
 import type { ReactNode } from 'react';
 import { useState } from 'react';
 import { twMerge } from 'tailwind-merge';
+import { useLocale } from 'next-intl';
 import { useGetMeQuery } from '@/api/me.api';
-import { useGetReferralStatsQuery } from '@/api/referral.api';
+import { useGetReferralStatsQuery, usePrepareShareMessageMutation } from '@/api/referral.api';
 import { Button } from '@/components/shared/buttons/Button';
 import { Skeleton } from '@/components/shared/seleketons/Skeleton';
 import { SkeletonSuspense } from '@/components/shared/seleketons/SkeletonSuspense';
@@ -16,11 +17,14 @@ import { GlobalConstants } from '@/constants/global.constants';
 import { useAppTranslations } from '@/hooks/useAppTranslations';
 import { getRefererLink } from '@/utils/pages/referral.utils';
 import { getTelegramWebApp, isTelegramEnv } from '@/lib/telegram/telegram';
+import type { LocaleType } from '@/types/types/locale.types';
 
 export function FriendsHeroCard() {
   const t = useAppTranslations();
+  const locale = useLocale() as LocaleType;
   const { data: me, isLoading: isMeLoading } = useGetMeQuery();
   const { data: stats, isLoading: isStatsLoading } = useGetReferralStatsQuery();
+  const [prepareShareMessage] = usePrepareShareMessageMutation();
   const [copied, setCopied] = useState(false);
 
   const link = getRefererLink(me?.id);
@@ -40,16 +44,31 @@ export function FriendsHeroCard() {
   const handleShare = async () => {
     if (!link) return;
     const text = t('invite share message');
-
-    // Inside Telegram: hand off to the native share sheet. `openTelegramLink`
-    // on a `t.me/share/url` link minimizes the Mini App and opens Telegram's
-    // "send to a chat" picker so the user forwards the invite to a contact.
     const webApp = getTelegramWebApp();
-    if (isTelegramEnv() && webApp?.openTelegramLink) {
-      webApp.openTelegramLink(
-        `https://t.me/share/url?url=${encodeURIComponent(link)}&text=${encodeURIComponent(text)}`
-      );
-      return;
+
+    if (isTelegramEnv() && webApp) {
+      // Preferred (Bot API 8.0+): a rich card — image + caption + "Play"
+      // button — prepared by the backend via savePreparedInlineMessage and
+      // forwarded through the native chat picker. On any failure we fall
+      // through to the plain-link share below, so the tap never dead-ends.
+      if (webApp.shareMessage) {
+        try {
+          const { id } = await prepareShareMessage({ lang: locale }).unwrap();
+          webApp.shareMessage(id);
+          return;
+        } catch {
+          /* fall back to the plain t.me/share/url flow */
+        }
+      }
+
+      // Fallback: `openTelegramLink` on a `t.me/share/url` link minimizes the
+      // Mini App and opens Telegram's "send to a chat" picker with a bare link.
+      if (webApp.openTelegramLink) {
+        webApp.openTelegramLink(
+          `https://t.me/share/url?url=${encodeURIComponent(link)}&text=${encodeURIComponent(text)}`
+        );
+        return;
+      }
     }
 
     // Outside Telegram (dev browser): OS share sheet, then copy as last resort.

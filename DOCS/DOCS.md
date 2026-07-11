@@ -1320,6 +1320,8 @@ Encourages growth through referral rewards. Users can track their invited friend
 
 Each user's invite link is a Telegram deep link — `https://t.me/<bot>?startapp=<referrerId>`. When a friend opens it, Telegram delivers `<referrerId>` as the `start_param` inside the signed `initData`. On the friend's **first** sign-in the backend records the referral (referrer → new user) and pays the inviter the signup reward below. The link is captured only at registration: a user who already has an account cannot be retro-attributed to a referrer, and each user can be referred at most once (self-referral is ignored).
 
+**Share flow:** On Telegram clients with Bot API 8.0+, tapping **Share invite** sends a **rich invite card** instead of a bare link — a branded 1280×720 image with a localized caption and a "Play" button carrying the `?startapp=<referrerId>` deep link. The backend prepares it per tap (`POST referral/prepare-share`, one-time-use message via Bot API `savePreparedInlineMessage`), and the Mini App forwards it through the native chat picker (`WebApp.shareMessage`). On older clients — or if preparation fails — the flow falls back to the plain `t.me/share/url` link share; outside Telegram it uses the OS share sheet or copies the link.
+
 **Referral Benefits:**
 
 - **Signup Reward:** The moment a referred friend registers, the inviter is credited a one-off reward — **10 AP + 1 Lucky Star**, doubled to **20 AP + 2 Lucky Stars** when the invited friend is a Telegram Premium user. This is granted instantly (unlike the ticket commission below, which accumulates and must be claimed).

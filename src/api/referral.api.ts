@@ -1,6 +1,11 @@
 import { api } from '@/api/index.api';
 import { rtkTags } from '@/constants/rtk-tags';
-import type { InvitedFriend, ReferralStats } from '@/types/interfaces/referral.interfaces';
+import type {
+  InvitedFriend,
+  PreparedShareMessage,
+  ReferralStats,
+} from '@/types/interfaces/referral.interfaces';
+import type { LocaleType } from '@/types/types/locale.types';
 
 export const referralApi = api.injectEndpoints({
   endpoints: builder => ({
@@ -11,6 +16,15 @@ export const referralApi = api.injectEndpoints({
     getReferralStats: builder.query<ReferralStats, void>({
       query: () => ({ url: 'referral/stats' }),
       providesTags: [rtkTags.referral],
+    }),
+    // No cache tags: the prepared message is single-use and cache-irrelevant —
+    // a fresh one is created on every share tap.
+    prepareShareMessage: builder.mutation<PreparedShareMessage, { lang: LocaleType }>({
+      query: ({ lang }) => ({
+        url: 'referral/prepare-share',
+        method: 'POST',
+        body: { lang },
+      }),
     }),
     claimFriend: builder.mutation<void, { friendId: string }>({
       query: ({ friendId }) => ({
@@ -37,5 +51,9 @@ export const referralApi = api.injectEndpoints({
   }),
 });
 
-export const { useGetInvitedFriendsQuery, useGetReferralStatsQuery, useClaimFriendMutation } =
-  referralApi;
+export const {
+  useGetInvitedFriendsQuery,
+  useGetReferralStatsQuery,
+  useClaimFriendMutation,
+  usePrepareShareMessageMutation,
+} = referralApi;

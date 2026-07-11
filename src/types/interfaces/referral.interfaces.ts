@@ -22,3 +22,9 @@ export interface InvitedFriend {
 export interface ReferralStats {
   totalInvited: number;
 }
+
+/** Server-prepared rich invite message (image + caption + button), created via
+ *  Bot API `savePreparedInlineMessage` and sent with `WebApp.shareMessage(id)`. */
+export interface PreparedShareMessage {
+  id: string;
+}
