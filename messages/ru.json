@@ -1115,5 +1115,8 @@
   "stakes disabled": "Стейки временно недоступны.",
   "and invite {n} friends": "…и пригласите {n} друзей",
   "and invite {n} more friends": "И пригласите ещё {n} друзей",
-  "need {n} friends": "Нужно {n} друзей"
+  "need {n} friends": "Нужно {n} друзей",
+  "friends unlock tiers": "Друзья открывают тиры",
+  "each tier also needs its ap threshold": "Каждому тиру нужен ещё и его порог AP",
+  "all friend requirements met": "Все требования по друзьям выполнены"
 }

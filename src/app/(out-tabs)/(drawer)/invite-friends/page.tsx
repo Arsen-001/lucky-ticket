@@ -1,4 +1,5 @@
 import { FriendsHeroCard } from '@/components/pages/out-tabs/drawer/invite-friends/FriendsHeroCard';
+import { FriendsTierLadderCard } from '@/components/pages/out-tabs/drawer/invite-friends/FriendsTierLadderCard';
 import { ReferralInfoSection } from '@/components/pages/out-tabs/drawer/invite-friends/ReferralInfoSection';
 import { InvitedFriendsList } from '@/components/pages/out-tabs/drawer/invite-friends/InvitedFriendsList';
 
@@ -8,6 +9,7 @@ export default function InviteFriendsPage() {
       <div data-tour="referrals">
         <FriendsHeroCard />
       </div>
+      <FriendsTierLadderCard />
       <ReferralInfoSection />
       <InvitedFriendsList />
     </div>

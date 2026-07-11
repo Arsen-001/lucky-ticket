@@ -1,5 +1,6 @@
 'use client';
 
+import { UserPlus } from 'lucide-react';
 import { twMerge } from 'tailwind-merge';
 import { useAppTranslations } from '@/hooks/useAppTranslations';
 import {
@@ -157,6 +158,18 @@ export function ActivityHeroCard({
                 >
                   {threshold === 0 ? '0' : formatCompact(threshold)}
                 </span>
+                {GlobalConstants.tierReferralRequirements[stopTier] > 0 && (
+                  <span
+                    className={twMerge(
+                      'flex items-center gap-0.5 text-[9px] leading-none tabular-nums',
+                      isCurrent && 'font-bold'
+                    )}
+                    style={{ color: isCurrent ? stopAccent : 'rgba(255,255,255,0.42)' }}
+                  >
+                    <UserPlus size={8} strokeWidth={2.5} />
+                    {GlobalConstants.tierReferralRequirements[stopTier]}
+                  </span>
+                )}
               </div>
             );
           })}

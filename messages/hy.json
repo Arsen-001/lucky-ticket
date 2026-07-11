@@ -1115,5 +1115,8 @@
   "stakes disabled": "Սթեյքինգը ժամանակավորապես հասանելի չէ։",
   "and invite {n} friends": "…և հրավիրեք {n} ընկեր",
   "and invite {n} more friends": "Եվ հրավիրեք ևս {n} ընկեր",
-  "need {n} friends": "Պետք է {n} ընկեր"
+  "need {n} friends": "Պետք է {n} ընկեր",
+  "friends unlock tiers": "Ընկերները բացում են տիրերը",
+  "each tier also needs its ap threshold": "Յուրաքանչյուր տիրի համար պետք է նաև նրա AP շեմը",
+  "all friend requirements met": "Ընկերների բոլոր պահանջները կատարված են"
 }

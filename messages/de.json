@@ -1115,5 +1115,8 @@
   "stakes disabled": "Staking ist vorübergehend nicht verfügbar.",
   "and invite {n} friends": "…und lade {n} Freunde ein",
   "and invite {n} more friends": "Und lade noch {n} Freunde ein",
-  "need {n} friends": "{n} Freunde nötig"
+  "need {n} friends": "{n} Freunde nötig",
+  "friends unlock tiers": "Freunde schalten Stufen frei",
+  "each tier also needs its ap threshold": "Jede Stufe braucht zusätzlich ihre AP-Schwelle",
+  "all friend requirements met": "Alle Freunde-Anforderungen erfüllt"
 }
