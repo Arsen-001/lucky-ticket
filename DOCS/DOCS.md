@@ -1076,6 +1076,8 @@ The **Ads** category in the **One-time** tasks tab holds a single task type — 
 - Tapping a level card sends the user to the daily **Ads** block (`/tasks?frequency=daily&category=ads`), where ads are actually watched. The daily ads block (per-day slot rewards) is a separate mechanic and is unaffected.
 - The view count is **cumulative and never resets** — this is a lifetime progression chain, not a recurring task.
 
+**Per-view rewards (admin-controlled).** Each verified view in the daily ads block grants the admin-configured reward. By default that is the flat per-view knobs (AP per view, default 2; optional LC, default 0). The admin can instead set a **per-view reward ladder** (panel → Настройки → Задания и реклама): view N of the day grants ladder entry N — any mix of AP, LC, Stars, and tickets of a chosen tier — cycling back to the first entry once views outrun the ladder. Every slot in the Mini App ads block advertises exactly what that specific view pays; views past the daily cap grant nothing. Clearing the ladder restores the flat AP/LC behaviour.
+
 ### 12.6 One-Time Milestone Catalog (2026-07 rebalance)
 
 The one-time tab holds a curated catalog of **~120 tasks** whose reward budget is subordinated to the AP tier pacing (Section 5): milestones are a bonus on top of the daily baseline, never a highway past it.
