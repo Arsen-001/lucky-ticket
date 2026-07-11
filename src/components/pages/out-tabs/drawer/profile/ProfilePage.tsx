@@ -51,7 +51,10 @@ export function ProfilePage({ userId }: ProfilePageProps) {
       {effectiveProfile && (
         <div className="flex flex-col gap-5">
           {effectiveProfile.isOwn && (
-            <ProfileActivityCard activityPoints={effectiveProfile.activityPoints} />
+            <ProfileActivityCard
+              activityPoints={effectiveProfile.activityPoints}
+              referralsCount={effectiveProfile.referralsCount}
+            />
           )}
 
           <ProfileLeaderboardCard profile={effectiveProfile} loading={isLoading} />

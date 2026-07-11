@@ -59,6 +59,7 @@ export const ownProfile: ProfileResponse = {
   isVIP: mockDb.user.isVIP,
   vipLevel: mockDb.user.vipLevel,
   activityPoints: mockDb.user.activityPoints,
+  referralsCount: mockDb.user.referralsCount,
   activityBest: mockDb.accountStats.activityBest,
   ticketsEarned: mockDb.accountStats.ticketsEarned,
   memberSince: '2024-09-12',
@@ -103,6 +104,7 @@ export const buildAccountOverlay = (): Partial<ProfileResponse> => ({
   isVIP: mockDb.user.isVIP,
   vipLevel: mockDb.user.vipLevel,
   activityPoints: mockDb.user.activityPoints,
+  referralsCount: mockDb.user.referralsCount,
   privateStats: ownProfile.privateStats && {
     ...ownProfile.privateStats,
     lc: mockDb.user.coins,
@@ -122,6 +124,7 @@ export const otherProfile: ProfileResponse = {
   isVIP: true,
   vipLevel: 5,
   activityPoints: 42_000,
+  referralsCount: 26,
   ticketsEarned: 480,
   streak: { days: 12, active: true },
   activityBest: {

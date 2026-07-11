@@ -14,10 +14,18 @@ export function ActivityContent() {
 
   return (
     <div className="flex flex-col gap-4 pb-10">
-      <ActivityHeroCard activityPoints={me?.activityPoints} loading={isLoading} />
-      <ActivityDecayCard lastActivityAt={me?.lastActivityAt} activityPoints={me?.activityPoints} />
+      <ActivityHeroCard
+        activityPoints={me?.activityPoints}
+        referralsCount={me?.referralsCount}
+        loading={isLoading}
+      />
+      <ActivityDecayCard
+        lastActivityAt={me?.lastActivityAt}
+        activityPoints={me?.activityPoints}
+        referralsCount={me?.referralsCount}
+      />
       <ActivitySourcesList activityPoints={me?.activityPoints} />
-      <ActivityTierPerks activityPoints={me?.activityPoints} />
+      <ActivityTierPerks activityPoints={me?.activityPoints} referralsCount={me?.referralsCount} />
     </div>
   );
 }

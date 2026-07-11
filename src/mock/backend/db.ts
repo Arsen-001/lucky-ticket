@@ -70,6 +70,9 @@ export const mockDb = {
     phoneNumber: '+37411111111',
     twoFactorAuth: true,
     activityPoints: fresh ? 0 : 18_500,
+    // Keep in sync with referral.mock.ts invitedFriendsMock (7 rich-demo
+    // friends): the demo account caps at Gold under the referral tier gate.
+    referralsCount: fresh ? 0 : 7,
     telegramStars: fresh ? 0 : 10_000,
     lastActivityAt: new Date(Date.now() - 2 * 24 * 3_600_000).toISOString(),
     // Lifetime count of Bronze-tier stakes opened — gates "first 10 Bronze free" (DOCS §18.4).

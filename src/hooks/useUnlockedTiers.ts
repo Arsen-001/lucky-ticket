@@ -23,7 +23,10 @@ export interface UseUnlockedTiersResult {
  */
 export function useUnlockedTiers(): UseUnlockedTiersResult {
   const { data: me } = useGetMeQuery();
-  const apTier = computeActivityTier(me?.activityPoints ?? 0) as TicketType;
+  const apTier = computeActivityTier(
+    me?.activityPoints ?? 0,
+    me?.referralsCount ?? 0
+  ) as TicketType;
   const maxRank = TIER_RANK[apTier];
 
   const unlockedTiers = activityTierOrder.filter(

@@ -1,24 +1,32 @@
 'use client';
 
-import { Lock, Unlock } from 'lucide-react';
+import Link from 'next/link';
+import { Lock, Unlock, UserPlus } from 'lucide-react';
 import { useAppTranslations } from '@/hooks/useAppTranslations';
 import {
   activityTierOrder,
   computeActivityTier,
+  computeNextTierReferralGap,
   computeNextTierThreshold,
 } from '@/constants/global.constants';
+import { routes } from '@/constants/routes';
 
 export interface ActivityTierPerksProps {
   activityPoints?: number;
+  referralsCount?: number;
 }
 
-export function ActivityTierPerks({ activityPoints = 0 }: ActivityTierPerksProps) {
+export function ActivityTierPerks({
+  activityPoints = 0,
+  referralsCount = 0,
+}: ActivityTierPerksProps) {
   const t = useAppTranslations();
-  const tier = computeActivityTier(activityPoints);
+  const tier = computeActivityTier(activityPoints, referralsCount);
   const accent = `var(--color-${tier})`;
-  const nextThreshold = computeNextTierThreshold(activityPoints);
+  const nextThreshold = computeNextTierThreshold(activityPoints, referralsCount);
   const nextTier =
     nextThreshold !== null ? activityTierOrder[activityTierOrder.indexOf(tier) + 1] : null;
+  const referralGap = computeNextTierReferralGap(activityPoints, referralsCount);
 
   return (
     <section className="flex flex-col gap-2">
@@ -48,6 +56,20 @@ export function ActivityTierPerks({ activityPoints = 0 }: ActivityTierPerksProps
             {t('reach tier to unlock more', { tier: t(nextTier) })}
           </span>
         </div>
+      )}
+
+      {nextTier && referralGap > 0 && (
+        <Link
+          href={routes.inviteFriends}
+          className="flex items-center gap-3 rounded-xl border border-white/8 p-3.5"
+        >
+          <div className="flex-center bg-pink/15 text-pink h-9 w-9 shrink-0 rounded-lg">
+            <UserPlus size={16} strokeWidth={2.2} />
+          </div>
+          <span className="text-white-secondary text-[12px]">
+            {t('and invite {n} more friends', { n: referralGap })}
+          </span>
+        </Link>
       )}
     </section>
   );

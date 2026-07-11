@@ -46,6 +46,7 @@ export function NewStakeLevelPicker({
   const { isTierUnlocked } = useUnlockedTiers();
   const { data: me } = useGetMeQuery();
   const currentAp = me?.activityPoints ?? 0;
+  const currentRefs = me?.referralsCount ?? 0;
 
   return (
     <div
@@ -58,6 +59,12 @@ export function NewStakeLevelPicker({
         const isActive = activeLevel === lv.level;
         const apGap = !tierUnlocked
           ? Math.max(0, GlobalConstants.apTierThresholds[lv.tier as ActivityTier] - currentAp)
+          : 0;
+        const refGap = !tierUnlocked
+          ? Math.max(
+              0,
+              GlobalConstants.tierReferralRequirements[lv.tier as ActivityTier] - currentRefs
+            )
           : 0;
         const stateClass = !reachable
           ? 'cursor-not-allowed border-white/5 bg-white/[0.02] text-disabled'
@@ -92,6 +99,11 @@ export function NewStakeLevelPicker({
             {!tierUnlocked && apGap > 0 && (
               <span className="text-error/75 mt-0.5 text-[8px] font-bold tabular-nums">
                 {t('need {n} ap', { n: formatCompact(apGap) })}
+              </span>
+            )}
+            {!tierUnlocked && refGap > 0 && (
+              <span className="text-error/75 mt-0.5 text-[8px] font-bold tabular-nums">
+                {t('need {n} friends', { n: refGap })}
               </span>
             )}
           </button>

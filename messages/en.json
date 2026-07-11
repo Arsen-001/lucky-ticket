@@ -1112,5 +1112,8 @@
   "no joined tournaments": "No joined tournaments yet",
   "no joined tournaments description": "Join an upcoming tournament and it will show up here.",
   "no prize description": "No prize this time — grab more tickets and try the next one!",
-  "stakes disabled": "Staking is temporarily unavailable."
+  "stakes disabled": "Staking is temporarily unavailable.",
+  "and invite {n} friends": "…and invite {n} friends",
+  "and invite {n} more friends": "And invite {n} more friends",
+  "need {n} friends": "Need {n} friends"
 }

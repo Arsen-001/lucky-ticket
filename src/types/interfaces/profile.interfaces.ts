@@ -59,6 +59,8 @@ export interface ProfileResponse {
   isVIP: boolean;
   vipLevel: number;
   activityPoints: number;
+  /** Activated referrals (cumulative) — second half of the tier gate (DOCS §5.1). */
+  referralsCount?: number;
   activityBest: ActivityBest;
   ticketsEarned: number;
   memberSince: string;

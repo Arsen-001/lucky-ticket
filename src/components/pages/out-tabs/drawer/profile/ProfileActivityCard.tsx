@@ -6,6 +6,7 @@ import { useAppTranslations } from '@/hooks/useAppTranslations';
 import {
   activityTierOrder,
   computeActivityTier,
+  computeNextTierReferralGap,
   computeNextTierThreshold,
 } from '@/constants/global.constants';
 import { routes } from '@/constants/routes';
@@ -13,16 +14,21 @@ import { Medal } from '@/components/shared/icons/Medal';
 
 export interface ProfileActivityCardProps {
   activityPoints: number;
+  referralsCount?: number;
 }
 
-export function ProfileActivityCard({ activityPoints }: ProfileActivityCardProps) {
+export function ProfileActivityCard({
+  activityPoints,
+  referralsCount = 0,
+}: ProfileActivityCardProps) {
   const t = useAppTranslations();
-  const tier = computeActivityTier(activityPoints);
+  const tier = computeActivityTier(activityPoints, referralsCount);
   const accent = `var(--color-${tier})`;
-  const nextThreshold = computeNextTierThreshold(activityPoints);
+  const nextThreshold = computeNextTierThreshold(activityPoints, referralsCount);
   const nextTier =
     nextThreshold !== null ? activityTierOrder[activityTierOrder.indexOf(tier) + 1] : null;
-  const toNextTier = nextThreshold !== null ? nextThreshold - activityPoints : 0;
+  const toNextTier = nextThreshold !== null ? Math.max(0, nextThreshold - activityPoints) : 0;
+  const referralGap = computeNextTierReferralGap(activityPoints, referralsCount);
 
   return (
     <Link
@@ -47,6 +53,11 @@ export function ProfileActivityCard({ activityPoints }: ProfileActivityCardProps
             ? t('{n} AP to {tier}', { n: toNextTier.toLocaleString(), tier: t(nextTier) })
             : t('max tier reached')}
         </span>
+        {nextTier && referralGap > 0 && (
+          <span className="text-white-secondary text-[10px] font-semibold">
+            {t('and invite {n} more friends', { n: referralGap })}
+          </span>
+        )}
       </div>
       <ChevronRight size={22} className="shrink-0 text-white/35" />
     </Link>

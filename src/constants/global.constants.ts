@@ -167,6 +167,20 @@ export const GlobalConstants = {
     platinum: 5900,
     diamond: 16000,
   },
+  /**
+   * Second half of the tier gate (DOCS §5.1): a tier unlocks only when the
+   * player has BOTH the AP threshold above AND this many invited friends
+   * (cumulative activated referrals, `MeResponse.referralsCount`). Must stay
+   * monotonically non-decreasing Bronze→Diamond. Mirrors the backend
+   * `TIER_REFERRAL_REQUIREMENTS`.
+   */
+  tierReferralRequirements: {
+    bronze: 0,
+    silver: 2,
+    gold: 5,
+    platinum: 10,
+    diamond: 20,
+  },
   apRewards,
   /**
    * Max tickets sendable to one recipient per day, by tier (DOCS §17.3.3).
@@ -205,25 +219,52 @@ export const activityTierOrder: ActivityTier[] = [
   'diamond',
 ];
 
-export const computeActivityTier = (activityPoints: number): ActivityTier => {
+/**
+ * Highest tier the player qualifies for (DOCS §5.1): needs BOTH the AP
+ * threshold AND the referral requirement (invited-friends count from
+ * `MeResponse.referralsCount` / `ProfileResponse.referralsCount`).
+ */
+export const computeActivityTier = (
+  activityPoints: number,
+  referralsCount: number
+): ActivityTier => {
   const t = GlobalConstants.apTierThresholds;
-  if (activityPoints >= t.diamond) return 'diamond';
-  if (activityPoints >= t.platinum) return 'platinum';
-  if (activityPoints >= t.gold) return 'gold';
-  if (activityPoints >= t.silver) return 'silver';
-  return 'bronze';
+  const r = GlobalConstants.tierReferralRequirements;
+  let tier: ActivityTier = 'bronze';
+  for (const candidate of activityTierOrder) {
+    if (activityPoints >= t[candidate] && referralsCount >= r[candidate]) tier = candidate;
+  }
+  return tier;
 };
 
 /** Approximate daily AP for the player's current tier without donation — decay base (DOCS §5.4). */
-export const computeDailyBaselineAp = (activityPoints: number): number =>
-  GlobalConstants.dailyBaselineApByTier[computeActivityTier(activityPoints)];
+export const computeDailyBaselineAp = (activityPoints: number, referralsCount: number): number =>
+  GlobalConstants.dailyBaselineApByTier[computeActivityTier(activityPoints, referralsCount)];
 
-export const computeNextTierThreshold = (activityPoints: number): number | null => {
-  const tier = computeActivityTier(activityPoints);
+export const computeNextTierThreshold = (
+  activityPoints: number,
+  referralsCount: number
+): number | null => {
+  const tier = computeActivityTier(activityPoints, referralsCount);
   const idx = activityTierOrder.indexOf(tier);
   if (idx === activityTierOrder.length - 1) return null;
   const nextTier = activityTierOrder[idx + 1];
   return GlobalConstants.apTierThresholds[nextTier];
+};
+
+/**
+ * How many MORE friends the player must invite to satisfy the next tier's
+ * referral requirement (0 = the referral half of the gate is already met).
+ */
+export const computeNextTierReferralGap = (
+  activityPoints: number,
+  referralsCount: number
+): number => {
+  const tier = computeActivityTier(activityPoints, referralsCount);
+  const idx = activityTierOrder.indexOf(tier);
+  if (idx === activityTierOrder.length - 1) return 0;
+  const nextTier = activityTierOrder[idx + 1];
+  return Math.max(0, GlobalConstants.tierReferralRequirements[nextTier] - referralsCount);
 };
 
 /**

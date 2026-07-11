@@ -115,7 +115,7 @@ export function ProfileHero({ profile, loading, isPreview, onTogglePreview }: Pr
         profile.isVIP && 'var(--color-gold)',
         profile.isLuckyPlayer && 'rgba(139, 92, 246, 1)',
         profile.isVerified && 'rgba(56, 189, 248, 1)',
-        tierShineColor[computeActivityTier(profile.activityPoints)],
+        tierShineColor[computeActivityTier(profile.activityPoints, profile.referralsCount ?? 0)],
       ].filter((c): c is string => Boolean(c))
     : undefined;
 

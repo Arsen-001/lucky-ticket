@@ -8,10 +8,15 @@ import {
 
 /**
  * Whether a tier-gated item is unlocked for the player.
- * A tier-`T` item requires the player's AP-tier to be `T` or higher.
+ * A tier-`T` item requires the player's tier (AP + referrals gate) to be `T`
+ * or higher.
  */
-export const isTierUnlocked = (activityPoints: number, itemTier: ActivityTier): boolean =>
-  activityTierOrder.indexOf(computeActivityTier(activityPoints)) >=
+export const isTierUnlocked = (
+  activityPoints: number,
+  referralsCount: number,
+  itemTier: ActivityTier
+): boolean =>
+  activityTierOrder.indexOf(computeActivityTier(activityPoints, referralsCount)) >=
   activityTierOrder.indexOf(itemTier);
 
 export type ApDecayState = 'active' | 'grace' | 'decaying';
@@ -33,9 +38,10 @@ export interface ApDecayInfo {
 export const computeApDecay = (
   lastActivityAt?: string,
   activityPoints = 0,
+  referralsCount = 0,
   now = Date.now()
 ): ApDecayInfo => {
-  const decayPerDay = Math.round(computeDailyBaselineAp(activityPoints) / 2);
+  const decayPerDay = Math.round(computeDailyBaselineAp(activityPoints, referralsCount) / 2);
   const grace = GlobalConstants.decayGraceDays;
 
   if (!lastActivityAt) {

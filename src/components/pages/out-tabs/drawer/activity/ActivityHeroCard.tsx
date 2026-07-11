@@ -6,6 +6,7 @@ import {
   GlobalConstants,
   activityTierOrder,
   computeActivityTier,
+  computeNextTierReferralGap,
   computeNextTierThreshold,
 } from '@/constants/global.constants';
 import { Medal } from '@/components/shared/icons/Medal';
@@ -15,17 +16,23 @@ import { formatCompact } from '@/utils/global/number.utils';
 
 export interface ActivityHeroCardProps {
   activityPoints?: number;
+  referralsCount?: number;
   loading?: boolean;
 }
 
-export function ActivityHeroCard({ activityPoints = 0, loading }: ActivityHeroCardProps) {
+export function ActivityHeroCard({
+  activityPoints = 0,
+  referralsCount = 0,
+  loading,
+}: ActivityHeroCardProps) {
   const t = useAppTranslations();
-  const tier = computeActivityTier(activityPoints);
+  const tier = computeActivityTier(activityPoints, referralsCount);
   const accent = `var(--color-${tier})`;
   const tierIdx = activityTierOrder.indexOf(tier);
-  const nextThreshold = computeNextTierThreshold(activityPoints);
+  const nextThreshold = computeNextTierThreshold(activityPoints, referralsCount);
   const nextTier = nextThreshold !== null ? activityTierOrder[tierIdx + 1] : null;
-  const remainingToNext = nextThreshold !== null ? nextThreshold - activityPoints : 0;
+  const remainingToNext = nextThreshold !== null ? Math.max(0, nextThreshold - activityPoints) : 0;
+  const referralGap = computeNextTierReferralGap(activityPoints, referralsCount);
 
   // Each tier sits in the centre of one of 5 equal columns (space-around),
   // so medal centres land at 10/30/50/70/90 %. The bar fill is interpolated
@@ -39,7 +46,12 @@ export function ActivityHeroCard({ activityPoints = 0, loading }: ActivityHeroCa
     const floor = GlobalConstants.apTierThresholds[tier];
     const currentPos = columnCenterPercent(tierIdx);
     const nextPos = columnCenterPercent(tierIdx + 1);
-    const segmentProgress = (activityPoints - floor) / (nextThreshold - floor);
+    // Clamp: with the referral gate a player can hold more AP than the next
+    // threshold while still locked — the bar must not overshoot the medal.
+    const segmentProgress = Math.min(
+      1,
+      Math.max(0, (activityPoints - floor) / (nextThreshold - floor))
+    );
     fillPercent = currentPos + segmentProgress * (nextPos - currentPos);
   }
 
@@ -152,11 +164,21 @@ export function ActivityHeroCard({ activityPoints = 0, loading }: ActivityHeroCa
       </div>
 
       {nextThreshold !== null && nextTier ? (
-        <div className="text-center text-[11px] font-bold" style={{ color: accent }}>
-          {t('{n} AP to {tier}', {
-            n: remainingToNext.toLocaleString(),
-            tier: t(nextTier),
-          })}
+        <div
+          className="flex flex-col gap-0.5 text-center text-[11px] font-bold"
+          style={{ color: accent }}
+        >
+          <span>
+            {t('{n} AP to {tier}', {
+              n: remainingToNext.toLocaleString(),
+              tier: t(nextTier),
+            })}
+          </span>
+          {referralGap > 0 && (
+            <span className="text-white-secondary font-semibold">
+              {t('and invite {n} more friends', { n: referralGap })}
+            </span>
+          )}
         </div>
       ) : (
         <div className="text-center text-[12px] font-bold" style={{ color: accent }}>

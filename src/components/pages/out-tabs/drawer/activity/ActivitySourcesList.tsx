@@ -202,7 +202,7 @@ export interface ActivitySourcesListProps {
 export function ActivitySourcesList({ activityPoints = 0 }: ActivitySourcesListProps) {
   const t = useAppTranslations();
   const { data: me } = useGetMeQuery();
-  const dailyBaseline = computeDailyBaselineAp(activityPoints);
+  const dailyBaseline = computeDailyBaselineAp(activityPoints, me?.referralsCount ?? 0);
   // VIP supersedes LP — highest tier wins.
   const watchVideoLimit = me?.isVIP
     ? GlobalConstants.vipWatchVideoDailyLimit

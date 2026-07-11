@@ -1,4 +1,6 @@
 import { describe, it, expect } from 'vitest';
+import { existsSync, readFileSync } from 'node:fs';
+import { resolve } from 'node:path';
 import { appConfig } from '@/config/app.config';
 import {
   GlobalConstants,
@@ -78,8 +80,11 @@ const simulateGreedyYear = (knobs: SimKnobs, days = 365): SimResult => {
     lc += production();
     // Free-play AP pace: the per-tier daily baseline (DOCS §5.4) gates when
     // higher-tier engines become buyable at all (AP tier gate, DOCS §14.1).
-    ap += GlobalConstants.dailyBaselineApByTier[computeActivityTier(ap)];
-    const unlockedIdx = activityTierOrder.indexOf(computeActivityTier(ap));
+    // The sim models the AP half of the gate only — assume the player has
+    // invited enough friends to satisfy every referral requirement.
+    const AMPLE_REFERRALS = 1_000;
+    ap += GlobalConstants.dailyBaselineApByTier[computeActivityTier(ap, AMPLE_REFERRALS)];
+    const unlockedIdx = activityTierOrder.indexOf(computeActivityTier(ap, AMPLE_REFERRALS));
 
     // Greedy reinvestment: buy the fastest-payback affordable engine, as long
     // as it still pays itself back within the sim horizon.
@@ -241,6 +246,41 @@ describe('economy simulation (DOCS §14.2 guardrails)', () => {
     // And pacing still decelerates: each tier takes longer than the previous.
     for (let i = 1; i < daysPerLeg.length; i++) {
       expect(daysPerLeg[i]).toBeGreaterThan(daysPerLeg[i - 1]);
+    }
+  });
+
+  it('referral tier gate: requirements pinned, monotone, and enforced (DOCS §5.1)', () => {
+    const r = GlobalConstants.tierReferralRequirements;
+    // Pin the product numbers — a silent change here is a business-rule change.
+    expect(activityTierOrder.map(tier => r[tier])).toEqual([0, 2, 5, 10, 20]);
+    // The gate math assumes higher tiers are never easier on referrals.
+    for (let i = 1; i < activityTierOrder.length; i++) {
+      expect(r[activityTierOrder[i]]).toBeGreaterThanOrEqual(r[activityTierOrder[i - 1]]);
+    }
+    // Both halves are required: a whale with no friends stays Bronze…
+    expect(computeActivityTier(1_000_000, 0)).toBe('bronze');
+    expect(computeActivityTier(1_000_000, 5)).toBe('gold');
+    expect(computeActivityTier(1_000_000, 20)).toBe('diamond');
+    // …and friends alone never unlock a tier without the AP.
+    expect(computeActivityTier(0, 20)).toBe('bronze');
+    expect(computeActivityTier(GlobalConstants.apTierThresholds.silver, 20)).toBe('silver');
+  });
+
+  it('referral tier requirements mirror the backend constants (parity)', () => {
+    // Same pattern as enum-parity: needs the backend repo checked out beside
+    // this one; silently skipped otherwise.
+    const backendPath = resolve(
+      process.cwd(),
+      '../lucky-ticket-backend/src/common/economy.constants.ts'
+    );
+    if (!existsSync(backendPath)) return;
+    const src = readFileSync(backendPath, 'utf8');
+    const block = src.match(/TIER_REFERRAL_REQUIREMENTS[^{]*\{([^}]*)\}/)?.[1];
+    expect(block, 'TIER_REFERRAL_REQUIREMENTS not found in backend').toBeTruthy();
+    for (const tier of activityTierOrder) {
+      const m = block!.match(new RegExp(`${tier.toUpperCase()}:\\s*([\\d_]+)`));
+      expect(m, `backend missing ${tier}`).toBeTruthy();
+      expect(Number(m![1].replace(/_/g, ''))).toBe(GlobalConstants.tierReferralRequirements[tier]);
     }
   });
 

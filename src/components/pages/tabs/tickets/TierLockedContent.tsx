@@ -1,11 +1,13 @@
 'use client';
 
 import Image from 'next/image';
+import Link from 'next/link';
 import { twMerge } from 'tailwind-merge';
 import { Ticket } from '@/components/shared/icons/Ticket';
 import { useGetMeQuery } from '@/api/me.api';
 import { useAppTranslations } from '@/hooks/useAppTranslations';
 import { GlobalConstants } from '@/constants/global.constants';
+import { routes } from '@/constants/routes';
 import { icons } from '@/constants/icons';
 import type { Ticket as TicketModel, TicketType } from '@/types/types/ticket.types';
 import type { MessageIds } from '@/types/types/i18n.types';
@@ -36,9 +38,15 @@ export function TierLockedContent({ ticket, className }: TierLockedContentProps)
   const { data: me } = useGetMeQuery();
   const tierColor = `var(--color-${ticket.ticketType})`;
   const threshold = GlobalConstants.apTierThresholds[ticket.ticketType];
+  const referralsRequired = GlobalConstants.tierReferralRequirements[ticket.ticketType];
   const currentAp = me?.activityPoints ?? 0;
+  const currentRefs = me?.referralsCount ?? 0;
   const progressPct =
     threshold > 0 ? Math.min(100, Math.round((currentAp / threshold) * 100)) : 100;
+  const referralProgressPct =
+    referralsRequired > 0
+      ? Math.min(100, Math.round((currentRefs / referralsRequired) * 100))
+      : 100;
 
   return (
     <div className={twMerge('flex flex-col gap-3', className)}>
@@ -92,6 +100,33 @@ export function TierLockedContent({ ticket, className }: TierLockedContentProps)
         <span className="text-[11px] font-semibold tabular-nums text-white/55">
           {currentAp.toLocaleString()} / {threshold.toLocaleString()} {t('ap')}
         </span>
+
+        {referralsRequired > 0 && (
+          <>
+            <p className="text-white-secondary text-[12px] leading-snug">
+              {t('and invite {n} friends', { n: referralsRequired })}
+            </p>
+            <div className="h-2 overflow-hidden rounded-full bg-white/8">
+              <div
+                className="h-full rounded-full transition-[width] duration-500"
+                style={{ width: `${referralProgressPct}%`, background: tierColor }}
+              />
+            </div>
+            <div className="flex items-center justify-between">
+              <span className="text-[11px] font-semibold tabular-nums text-white/55">
+                {currentRefs.toLocaleString()} / {referralsRequired.toLocaleString()} {t('friends')}
+              </span>
+              {currentRefs < referralsRequired && (
+                <Link
+                  href={routes.inviteFriends}
+                  className="text-pink text-[11px] font-bold underline underline-offset-2"
+                >
+                  {t('invite friends')}
+                </Link>
+              )}
+            </div>
+          </>
+        )}
       </div>
     </div>
   );

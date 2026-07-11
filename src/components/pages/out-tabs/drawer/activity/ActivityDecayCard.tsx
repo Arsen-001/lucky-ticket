@@ -7,11 +7,16 @@ import { computeApDecay } from '@/utils/global/activity.utils';
 export interface ActivityDecayCardProps {
   lastActivityAt?: string;
   activityPoints?: number;
+  referralsCount?: number;
 }
 
-export function ActivityDecayCard({ lastActivityAt, activityPoints }: ActivityDecayCardProps) {
+export function ActivityDecayCard({
+  lastActivityAt,
+  activityPoints,
+  referralsCount,
+}: ActivityDecayCardProps) {
   const t = useAppTranslations();
-  const decay = computeApDecay(lastActivityAt, activityPoints);
+  const decay = computeApDecay(lastActivityAt, activityPoints, referralsCount);
 
   const { Icon, color, title, sub } = {
     active: {

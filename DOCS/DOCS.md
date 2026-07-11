@@ -90,26 +90,28 @@ Activity Points (AP) are the **single progression metric** of LuckyTicket365. Th
 
 ### 5.1 Tiers
 
-A user's **tier** is derived from accumulated AP:
+A user's **tier** is derived from accumulated AP **and** invited friends. A tier unlocks only when BOTH conditions hold: the AP threshold is reached AND the required number of friends has been invited (cumulative count of activated referrals — friends who actually opened the Mini App via the link, §19):
 
-| Tier     | AP threshold | Reached by (perfect daily-baseline player) |
-| :------- | :----------- | :----------------------------------------- |
-| Bronze   | 0            | start                                      |
-| Silver   | 500          | ~2 weeks                                   |
-| Gold     | 1,650        | ~1.5 months                                |
-| Platinum | 5,900        | ~4.5 months                                |
-| Diamond  | 16,000       | ~10.3 months                               |
+| Tier     | AP threshold | Referrals required | Reached by (perfect daily-baseline player) |
+| :------- | :----------- | :----------------- | :----------------------------------------- |
+| Bronze   | 0            | 0                  | start                                      |
+| Silver   | 500          | 2                  | ~2 weeks                                   |
+| Gold     | 1,650        | 5                  | ~1.5 months                                |
+| Platinum | 5,900        | 10                 | ~4.5 months                                |
+| Diamond  | 16,000       | 20                 | ~10.3 months                               |
 
-Thresholds implement the product pacing targets — Silver in ~15 days, Gold +1 month, Platinum +3 months, Diamond +6 months — **computed against the derived daily baselines** (§5.4), i.e. against what a fully-active player can actually collect per day from every capped source. The legs land at ≈15.2 / 29.5 / 90.4 / 177.2 days, each visibly longer than the previous one — the pacing guardrail is asserted in `tests/economy-sim.test.ts`. (Thresholds were retuned down when engine-claim AP was removed from the source registry, so the pacing targets held.)
+AP thresholds implement the product pacing targets — Silver in ~15 days, Gold +1 month, Platinum +3 months, Diamond +6 months — **computed against the derived daily baselines** (§5.4), i.e. against what a fully-active player can actually collect per day from every capped source. The legs land at ≈15.2 / 29.5 / 90.4 / 177.2 days, each visibly longer than the previous one — the pacing guardrail is asserted in `tests/economy-sim.test.ts`. (Thresholds were retuned down when engine-claim AP was removed from the source registry, so the pacing targets held.)
 
-The pacing describes a player who collects the full daily baseline every day. Tournaments make it faster; missed days slower.
+The pacing describes a player who collects the full daily baseline every day **and keeps the referral requirement satisfied**. Tournaments make it faster; missed days and missing invites slower. A player who out-earns the AP threshold but lacks the invites stays capped at the lower tier (and earns/decays at that tier's baseline) until they invite enough friends.
 
-### 5.2 The AP Tier Gate
+The referral requirements (0 / 2 / 5 / 10 / 20, cumulative and monotonically non-decreasing) live in `tierReferralRequirements` (frontend) / `TIER_REFERRAL_REQUIREMENTS` (backend) and are admin-tunable live via `referralConfig.tierRequirements`. Both the AP and referral halves are asserted in `tests/economy-sim.test.ts` (with a backend parity check).
 
-AP-tier is the universal gate. A feature of tier `T` requires `AP-tier ≥ T`; the user can always use their own tier and every lower tier.
+### 5.2 The Tier Gate (AP + referrals)
+
+The tier (§5.1) is the universal gate. A feature of tier `T` requires `tier ≥ T`; the user can always use their own tier and every lower tier.
 
 - **Tier-gated:** producer engines, tournaments, stakes, tier-bound market items.
-- **Not gated:** avatars, statuses / VIP, referral.
+- **Not gated:** avatars, statuses / VIP, the referral/invite screen itself (inviting must never be locked — it is a tier requirement).
 
 ### 5.3 How Activity Points Are Earned
 

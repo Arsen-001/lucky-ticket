@@ -14,6 +14,8 @@ export interface MeResponse {
   phoneNumber?: string;
   twoFactorAuth?: boolean;
   activityPoints: number;
+  /** Activated referrals (cumulative) — second half of the tier gate (DOCS §5.1). */
+  referralsCount: number;
   telegramStars: number;
   /** ISO timestamp of the user's last AP-earning action — drives the decay status. */
   lastActivityAt?: string;

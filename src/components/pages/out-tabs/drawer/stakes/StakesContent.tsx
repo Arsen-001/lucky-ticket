@@ -74,10 +74,11 @@ export function StakesContent() {
     : undefined;
 
   const currentAp = me?.activityPoints ?? 0;
-  const currentTier = computeActivityTier(currentAp);
-  const nextThreshold = computeNextTierThreshold(currentAp);
+  const currentRefs = me?.referralsCount ?? 0;
+  const currentTier = computeActivityTier(currentAp, currentRefs);
+  const nextThreshold = computeNextTierThreshold(currentAp, currentRefs);
   const currentTierThreshold = GlobalConstants.apTierThresholds[currentTier];
-  const nextTierApGap = nextThreshold !== null ? nextThreshold - currentAp : undefined;
+  const nextTierApGap = nextThreshold !== null ? Math.max(0, nextThreshold - currentAp) : undefined;
   const tierProgressPercent =
     nextThreshold !== null && nextThreshold > currentTierThreshold
       ? Math.max(
