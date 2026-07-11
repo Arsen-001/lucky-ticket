@@ -1,12 +1,27 @@
 import { mockDb } from '@/mock/backend/db';
 import type { FetchArgs } from '@reduxjs/toolkit/query';
-import type { MeResponse } from '@/types/interfaces/user.interfaces';
+import type { EmailVerifyReward, MeResponse } from '@/types/interfaces/user.interfaces';
 
 /**
  * Canonical user object — lives in the shared mock backend (`mockDb.user`).
  * Other mocks import this directly to read the live balance / status.
  */
 export const me: MeResponse = mockDb.user;
+
+/** Any 6-char code except this one is rejected — lets dev test both paths. */
+const MOCK_EMAIL_CODE = 'ABC123';
+/** Mirrors PlatformConfig.emailConfig defaults on the real backend. */
+const MOCK_EMAIL_REWARD: EmailVerifyReward = {
+  ap: 20,
+  lc: 0,
+  stars: 0,
+  tickets: 0,
+  ticketTier: 'BRONZE',
+};
+
+// The rich demo account starts verified — its one-off gift reads as claimed.
+let emailRewardClaimed = mockDb.user.isVerified;
+let pendingEmail: string | null = null;
 
 /**
  * `me` query handler — returns a fresh shallow copy each call so RTK Query
@@ -19,6 +34,39 @@ const meMock = {
   'PATCH me': (args: FetchArgs) => {
     Object.assign(mockDb.user, (args.body ?? {}) as Partial<MeResponse>);
     return { ...mockDb.user };
+  },
+  // ── Change-email flow (mirrors the backend EmailVerificationService) ──
+  'GET me/email/reward': () => ({
+    enabled: true,
+    claimed: emailRewardClaimed,
+    verified: mockDb.user.isVerified,
+    reward: { ...MOCK_EMAIL_REWARD },
+  }),
+  'POST me/email/request-code': (args: FetchArgs) => {
+    const email = ((args.body as { email?: string })?.email ?? '').trim().toLowerCase();
+    // Reserved address to exercise the 409 path in dev.
+    if (email === 'taken@luckyticket.com') return { error: { status: 409, data: 'email-taken' } };
+    pendingEmail = email;
+    return { sent: true, email, expiresInSec: 600, cooldownSec: 60 };
+  },
+  'POST me/email/confirm': (args: FetchArgs) => {
+    const code = ((args.body as { code?: string })?.code ?? '').trim().toUpperCase();
+    if (!pendingEmail) return { error: { status: 400, data: 'code-expired' } };
+    if (code !== MOCK_EMAIL_CODE) return { error: { status: 400, data: 'code-invalid' } };
+
+    mockDb.user.email = pendingEmail;
+    mockDb.user.isVerified = true;
+    pendingEmail = null;
+
+    const reward = emailRewardClaimed ? null : { ...MOCK_EMAIL_REWARD };
+    if (reward) {
+      emailRewardClaimed = true;
+      mockDb.user.activityPoints += reward.ap;
+      mockDb.user.points += reward.ap;
+      mockDb.user.coins += reward.lc;
+      mockDb.user.telegramStars += reward.stars;
+    }
+    return { email: mockDb.user.email, verified: true, reward };
   },
 };
 export default meMock;

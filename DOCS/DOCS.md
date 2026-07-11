@@ -134,7 +134,7 @@ AP is earned from a data-driven **source registry** — every meaningful action 
 | Daily task                | 1 / 2 / 3 / 4 / 5                     | by task tier; a tier-T player completes 3–7/day (`dailyTasksCountByTier`)                      |
 | Weekly task               | 2 / 3 / 4 / 5 / 6                     | by task tier; a tier-T player completes 3–7/week (`weeklyTasksCountByTier`)                    |
 | One-time task             | varies                                | once per task                                                                                  |
-| Verify email              | 20                                    | one-time                                                                                       |
+| Verify email              | 20 (admin-configurable gift, §16.3)   | one-time                                                                                       |
 | Watch a video             | 2                                     | 10×/day default · 20×/day with LP · 40×/day with VIP (daily cap = limit × 2 AP)                |
 | Send a ticket to a friend | 1                                     | 3×/day                                                                                         |
 | Like a profile            | 1                                     | 3×/day                                                                                         |
@@ -1265,7 +1265,7 @@ Settings provide control, security, and personalization for the user's account.
 ### Available Options
 
 - **Two-Factor Authentication (2FA):** Enable extra security for the account.
-- **Email Confirmation:** Confirm or change the linked email address.
+- **Email Confirmation:** Confirm or change the linked email address — see Section 16.3.
 - **Change Username:** Update the public display name. Available from Settings and directly on the own-profile screen (pencil next to the name). 3–32 characters, letters/digits/dots/dashes/underscores only, must be unique; the same rule applies to registration and admin edits.
 - **Change Avatar:** Pick a profile picture from the user's owned avatar inventory. The picker lists every avatar the user owns — both the default free avatars and any paid avatars purchased in the Market. New avatars are acquired exclusively through the Market (see Section 16.1).
 - **Notification Preferences:** Per-channel (Email / Telegram bot) toggles for which notification categories the user receives. See Section 16.2.
@@ -1311,6 +1311,18 @@ Two channels are supported: **Email** and **Telegram bot**. Each channel has its
 Toggles are saved instantly (no submit button). Categories not listed here are not exposed as user-toggleable preferences.
 
 ---
+
+### 16.3 Email Confirmation & Verification Gift
+
+Changing (or first linking) an email address always goes through a confirmation code:
+
+1. The user enters the address in Settings → Email and requests a code.
+2. The backend emails a **6-character code** (A–Z / digits, ambiguous glyphs excluded) valid for **10 minutes**.
+3. The user types the code back; on match the address is written and the account is marked **verified**.
+
+**Anti-abuse rules:** resend is throttled to **1/minute**, code requests to **10/day**, and a code dies after **5 wrong attempts**. An address already used by another account is rejected at both request and confirm time. The email cannot be changed any other way — the legacy direct save (`PATCH /me` with `email`) is accepted but ignored.
+
+**Verification gift.** The **first** successful confirmation grants a one-off gift. Its composition is **admin-configured** (Admin Panel → Настройки → Email): any mix of AP / LC / Lucky Stars / tickets of a chosen tier, plus an on/off switch. Default: **20 AP** (the "Verify email" AP source in Section 5.3). The gift is granted once per account ever — changing the address later re-runs the confirmation flow but never re-grants the gift. The settings screen shows the currently configured gift next to the email field; a confirmation that granted the gift celebrates with a reward reveal.
 
 ## 17. Additional Features
 

@@ -1124,5 +1124,16 @@
   "need {n} friends": "{n} Freunde nötig",
   "friends unlock tiers": "Freunde schalten Stufen frei",
   "each tier also needs its ap threshold": "Jede Stufe braucht zusätzlich ihre AP-Schwelle",
-  "all friend requirements met": "Alle Freunde-Anforderungen erfüllt"
+  "all friend requirements met": "Alle Freunde-Anforderungen erfüllt",
+  "code expired request a new one": "Der Code ist abgelaufen — fordere einen neuen an",
+  "code sent to {email}": "Wir haben einen 6-stelligen Code an {email} gesendet",
+  "email already in use": "Diese E-Mail wird bereits verwendet",
+  "email already verified": "Diese E-Mail ist bereits bestätigt",
+  "email confirmed": "E-Mail bestätigt!",
+  "email sending unavailable": "E-Mail-Versand ist vorübergehend nicht verfügbar, versuche es später",
+  "invalid code": "Ungültiger Code",
+  "resend in {n}s": "Erneut senden in {n}s",
+  "send code": "Code senden",
+  "too many attempts try later": "Zu viele Versuche — versuche es später erneut",
+  "wait before resending": "Bitte warte eine Minute vor dem erneuten Senden"
 }

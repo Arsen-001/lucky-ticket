@@ -1124,5 +1124,16 @@
   "need {n} friends": "Нужно {n} друзей",
   "friends unlock tiers": "Друзья открывают тиры",
   "each tier also needs its ap threshold": "Каждому тиру нужен ещё и его порог AP",
-  "all friend requirements met": "Все требования по друзьям выполнены"
+  "all friend requirements met": "Все требования по друзьям выполнены",
+  "code expired request a new one": "Код истёк — запросите новый",
+  "code sent to {email}": "Мы отправили код из 6 символов на {email}",
+  "email already in use": "Этот email уже занят",
+  "email already verified": "Этот email уже подтверждён",
+  "email confirmed": "Email подтверждён!",
+  "email sending unavailable": "Отправка почты временно недоступна, попробуйте позже",
+  "invalid code": "Неверный код",
+  "resend in {n}s": "Отправить снова через {n} с",
+  "send code": "Отправить код",
+  "too many attempts try later": "Слишком много попыток — попробуйте позже",
+  "wait before resending": "Подождите минуту перед повторной отправкой"
 }

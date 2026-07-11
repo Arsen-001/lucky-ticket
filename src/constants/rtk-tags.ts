@@ -28,4 +28,5 @@ export const rtkTags = {
   avatars: 'Avatars',
   partnerStats: 'PartnerStats',
   platformConfig: 'PlatformConfig',
+  emailReward: 'EmailReward',
 } as const;

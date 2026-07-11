@@ -1,7 +1,12 @@
 import { api } from '@/api/index.api';
 import { profileApi } from '@/api/profile.api';
 import { rtkTags } from '@/constants/rtk-tags';
-import type { MeResponse } from '@/types/interfaces/user.interfaces';
+import type {
+  ConfirmEmailResponse,
+  EmailRewardInfo,
+  MeResponse,
+  RequestEmailCodeResponse,
+} from '@/types/interfaces/user.interfaces';
 
 export const meApi = api.injectEndpoints({
   endpoints: builder => ({
@@ -43,7 +48,37 @@ export const meApi = api.injectEndpoints({
       // edited fields (username, email) must refetch the profile screen.
       invalidatesTags: [rtkTags.me, rtkTags.profile],
     }),
+    // The gift composition is admin-configured — the settings screen reads it
+    // from the backend instead of a hardcoded constant.
+    getEmailReward: builder.query<EmailRewardInfo, void>({
+      query: () => ({ url: 'me/email/reward' }),
+      providesTags: [rtkTags.emailReward],
+    }),
+    requestEmailCode: builder.mutation<RequestEmailCodeResponse, { email: string }>({
+      query: body => ({ url: 'me/email/request-code', method: 'POST', body }),
+    }),
+    confirmEmail: builder.mutation<ConfirmEmailResponse, { code: string }>({
+      query: body => ({ url: 'me/email/confirm', method: 'POST', body }),
+      // Confirming writes the address AND may credit the gift — refresh every
+      // balance it can touch (same set as the promo redeem).
+      invalidatesTags: [
+        rtkTags.me,
+        rtkTags.profile,
+        rtkTags.emailReward,
+        rtkTags.lc,
+        rtkTags.lcTransactions,
+        rtkTags.tickets,
+        rtkTags.stars,
+        rtkTags.starsTransactions,
+      ],
+    }),
   }),
 });
 
-export const { useGetMeQuery, useUpdateMeMutation } = meApi;
+export const {
+  useGetMeQuery,
+  useUpdateMeMutation,
+  useGetEmailRewardQuery,
+  useRequestEmailCodeMutation,
+  useConfirmEmailMutation,
+} = meApi;

@@ -1124,5 +1124,16 @@
   "need {n} friends": "Need {n} friends",
   "friends unlock tiers": "Friends unlock tiers",
   "each tier also needs its ap threshold": "Each tier also needs its AP threshold",
-  "all friend requirements met": "All friend requirements met"
+  "all friend requirements met": "All friend requirements met",
+  "code expired request a new one": "The code expired — request a new one",
+  "code sent to {email}": "We sent a 6-character code to {email}",
+  "email already in use": "This email is already in use",
+  "email already verified": "This email is already verified",
+  "email confirmed": "Email confirmed!",
+  "email sending unavailable": "Email sending is temporarily unavailable, try again later",
+  "invalid code": "Invalid code",
+  "resend in {n}s": "Resend in {n}s",
+  "send code": "Send code",
+  "too many attempts try later": "Too many attempts — try again later",
+  "wait before resending": "Please wait a minute before resending"
 }
