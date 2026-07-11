@@ -1323,6 +1323,7 @@ Each user's invite link is a Telegram deep link — `https://t.me/<bot>?startapp
 **Referral Benefits:**
 
 - **Signup Reward:** The moment a referred friend registers, the inviter is credited a one-off reward — **10 AP + 1 Lucky Star**, doubled to **20 AP + 2 Lucky Stars** when the invited friend is a Telegram Premium user. This is granted instantly (unlike the ticket commission below, which accumulates and must be claimed).
+- **Per-invite reward ladder (admin-controlled):** the admin can replace the flat signup reward with a ladder (panel → Настройки → Рефералка → «Награды по номеру друга»): the N-th invited friend grants ladder entry N — any mix of AP, LC, Stars, and tickets of a chosen tier — cycling back to the first entry once invites outrun the ladder. While a ladder is set it applies to all invitees (the Premium doubling does not apply); clearing the ladder restores the flat signup reward.
 
 When an invited friend claims tickets, the inviter earns a percentage of those tickets as a claimable reward — mirroring the same claim mechanic used for regular tickets:
 
