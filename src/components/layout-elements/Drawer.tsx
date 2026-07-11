@@ -31,7 +31,6 @@ import { twMerge } from 'tailwind-merge';
 import { useRouter } from 'next/navigation';
 
 import { useLogoutMutation } from '@/api/auth.api';
-import { appConfig } from '@/config/app.config';
 import { useGetMeQuery } from '@/api/me.api';
 import { useGetNotificationsQuery } from '@/api/notifications.api';
 import { useGetStakesQuery } from '@/api/stakes.api';
@@ -44,6 +43,7 @@ import { Skeleton } from '@/components/shared/seleketons/Skeleton';
 import { SkeletonSuspense } from '@/components/shared/seleketons/SkeletonSuspense';
 import { type Route, routes } from '@/constants/routes';
 import { useAppTranslations } from '@/hooks/useAppTranslations';
+import { usePartnersEnabled } from '@/hooks/usePartnersEnabled';
 import { useLocation } from '@/hooks/useLocation';
 import { useMounted } from '@/hooks/useMounted';
 import { closeDrawer, selectDrawerOpen } from '@/lib/rtk/features/layout.slice';
@@ -62,6 +62,7 @@ interface DrawerSectionItem {
 
 export function Drawer() {
   const t = useAppTranslations();
+  const partnersEnabled = usePartnersEnabled();
   const open = useAppSelector(selectDrawerOpen);
   const dispatch = useAppDispatch();
   const router = useRouter();
@@ -251,7 +252,7 @@ export function Drawer() {
       icon: <Handshake size={18} />,
       // Follows the cabinet's master switch (§21.1) — flipping it live unlocks
       // the drawer entry together with the page itself.
-      locked: !appConfig.partners.enabled,
+      locked: !partnersEnabled,
     },
     {
       route: routes.promo,

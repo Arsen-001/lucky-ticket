@@ -10,6 +10,7 @@ import { BoltIcon } from '@/components/shared/icons/BoltIcon';
 import { icons } from '@/constants/icons';
 import { routes } from '@/constants/routes';
 import { useAppTranslations } from '@/hooks/useAppTranslations';
+import { useStakesDisplayConfig } from '@/hooks/useStakesDisplayConfig';
 import { useCountDown } from '@/hooks/useCountDown';
 import { formatCompact } from '@/utils/global/number.utils';
 import {
@@ -31,6 +32,7 @@ export interface StakesActiveStakeCardProps {
 export function StakesActiveStakeCard({ stake, levelDef }: StakesActiveStakeCardProps) {
   const t = useAppTranslations();
   const { data: me } = useGetMeQuery();
+  const stakeKnobs = useStakesDisplayConfig();
   const countdown = useCountDown(stake.endDate);
   const ready = countdown.expired || isStakeReady(stake.endDate);
   const months = computeStakeMonths(stake.startDate, stake.endDate);
@@ -38,9 +40,10 @@ export function StakesActiveStakeCard({ stake, levelDef }: StakesActiveStakeCard
     stake.lockedAmount,
     months,
     me?.isLuckyPlayer ?? false,
-    me?.isVIP ?? false
+    me?.isVIP ?? false,
+    stakeKnobs
   );
-  const stakeBonusAp = computeStakeCompletionBonusAp(stake.lockedAmount, months);
+  const stakeBonusAp = computeStakeCompletionBonusAp(stake.lockedAmount, months, stakeKnobs);
   const completionStars = computeStakeCompletionStars(months, levelDef);
 
   return (

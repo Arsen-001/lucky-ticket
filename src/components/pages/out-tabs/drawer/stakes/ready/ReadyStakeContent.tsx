@@ -13,6 +13,7 @@ import { LcLabel } from '@/components/shared/icons/LcLabel';
 import { GoldenText } from '@/components/shared/typography/GoldenText';
 import { routes } from '@/constants/routes';
 import { useAppTranslations } from '@/hooks/useAppTranslations';
+import { useStakesDisplayConfig } from '@/hooks/useStakesDisplayConfig';
 import { useToast } from '@/hooks/useToast';
 import { formatCompact } from '@/utils/global/number.utils';
 import {
@@ -62,6 +63,7 @@ export function ReadyStakeContent({ stakeId }: ReadyStakeContentProps) {
   const router = useRouter();
   const { data: stakes, isLoading, isError, refetch } = useGetStakesQuery();
   const { data: me } = useGetMeQuery();
+  const stakeKnobs = useStakesDisplayConfig();
   const [claimStake, { isLoading: claiming }] = useClaimStakeMutation();
 
   const stake = stakes?.activeStakes.find(s => s.id === stakeId);
@@ -118,11 +120,12 @@ export function ReadyStakeContent({ stakeId }: ReadyStakeContentProps) {
     stake.lockedAmount,
     months,
     me?.isLuckyPlayer ?? false,
-    me?.isVIP ?? false
+    me?.isVIP ?? false,
+    stakeKnobs
   );
-  const ratePercent = computeStakeAprPercent(months);
+  const ratePercent = computeStakeAprPercent(months, stakeKnobs);
   const rateLabel = ratePercent.toFixed(ratePercent % 1 === 0 ? 0 : 1);
-  const bonusAp = computeStakeCompletionBonusAp(stake.lockedAmount, months);
+  const bonusAp = computeStakeCompletionBonusAp(stake.lockedAmount, months, stakeKnobs);
   const completionStars = computeStakeCompletionStars(months, levelDef);
 
   const handleClaim = async () => {

@@ -15,6 +15,7 @@ import {
 } from '@/constants/global.constants';
 import { routes } from '@/constants/routes';
 import { useAppTranslations } from '@/hooks/useAppTranslations';
+import { useStakesDisplayConfig } from '@/hooks/useStakesDisplayConfig';
 import { useToast } from '@/hooks/useToast';
 import { Skeleton } from '@/components/shared/seleketons/Skeleton';
 import { SkeletonSuspense } from '@/components/shared/seleketons/SkeletonSuspense';
@@ -39,6 +40,7 @@ export function StakesContent() {
   const toast = useToast();
   const { data: stakes, isLoading, isError, refetch } = useGetStakesQuery();
   const { data: me } = useGetMeQuery();
+  const stakeCfg = useStakesDisplayConfig();
   const [claimStake, { isLoading: claimingAll }] = useClaimStakeMutation();
 
   if (isError) return <QueryErrorState onRetry={() => refetch()} />;
@@ -55,7 +57,7 @@ export function StakesContent() {
     .reduce((sum, h) => sum + h.yieldLC, 0);
   const bronzeFreeRemaining = Math.max(
     0,
-    GlobalConstants.stakeBronzeFreeStartCount - (me?.bronzeStakesOpened ?? 0)
+    stakeCfg.bronzeFreeStartCount - (me?.bronzeStakesOpened ?? 0)
   );
 
   const readyStakeIds = activeStakes.filter(s => isStakeReady(s.endDate)).map(s => s.id);
@@ -178,7 +180,7 @@ export function StakesContent() {
                 {t('{n} free bronze stakes left', { n: bronzeFreeRemaining })}
               </div>
               <span className="text-bronze rounded-full bg-bronze/15 px-1.5 py-0.5 text-[9px] font-bold tabular-nums">
-                {me?.bronzeStakesOpened ?? 0}/{GlobalConstants.stakeBronzeFreeStartCount}
+                {me?.bronzeStakesOpened ?? 0}/{stakeCfg.bronzeFreeStartCount}
               </span>
             </div>
             <div className="text-white-secondary mt-0.5 text-[10px]">

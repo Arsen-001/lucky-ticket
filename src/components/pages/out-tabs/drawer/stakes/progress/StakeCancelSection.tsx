@@ -9,6 +9,7 @@ import { BoltIcon } from '@/components/shared/icons/BoltIcon';
 import { icons } from '@/constants/icons';
 import { GlobalConstants } from '@/constants/global.constants';
 import { useAppTranslations } from '@/hooks/useAppTranslations';
+import { useStakesDisplayConfig } from '@/hooks/useStakesDisplayConfig';
 import {
   computeStakeBaseAp,
   computeStakeCancelFee,
@@ -32,9 +33,10 @@ export function StakeCancelSection({
 }: StakeCancelSectionProps) {
   const t = useAppTranslations();
   const [open, setOpen] = useState(false);
+  const stakeKnobs = useStakesDisplayConfig();
   const cancelFee = computeStakeCancelFee(lockedAmount);
-  const baseAp = computeStakeBaseAp(lockedAmount, durationMonths);
-  const bonusAp = computeStakeCompletionBonusAp(lockedAmount, durationMonths);
+  const baseAp = computeStakeBaseAp(lockedAmount, durationMonths, stakeKnobs);
+  const bonusAp = computeStakeCompletionBonusAp(lockedAmount, durationMonths, stakeKnobs);
 
   return (
     <>

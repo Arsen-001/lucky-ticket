@@ -18,6 +18,7 @@ import { useGetPartnerStatsQuery } from '@/api/partners.api';
 import { appConfig } from '@/config/app.config';
 import { routes } from '@/constants/routes';
 import { useAppTranslations } from '@/hooks/useAppTranslations';
+import { usePartnersEnabled } from '@/hooks/usePartnersEnabled';
 import { useToast } from '@/hooks/useToast';
 import { getCreateSponsoredTournamentSchema } from '@/lib/yup/partners.schemes';
 import { computeSponsoredTournamentCost } from '@/utils/global/partners.utils';
@@ -34,6 +35,7 @@ const toDateInputValue = (d: Date) =>
 
 export function NewSponsoredTournamentContent() {
   const t = useAppTranslations();
+  const partnersEnabled = usePartnersEnabled();
   const router = useRouter();
   const toast = useToast();
   const [createTournament, { isLoading }] = useCreateSponsoredTournamentMutation();
@@ -72,7 +74,7 @@ export function NewSponsoredTournamentContent() {
 
   const onSubmit = async (values: CreateSponsoredTournamentPayload) => {
     // Portal is gated → don't create, just surface the Coming Soon notice.
-    if (!appConfig.partners.enabled) {
+    if (!partnersEnabled) {
       toast.info(t('partners coming soon toast'));
       return;
     }
@@ -246,7 +248,7 @@ export function NewSponsoredTournamentContent() {
             {t('create tournament')}
           </Button>
         </div>
-        {!appConfig.partners.enabled && (
+        {!partnersEnabled && (
           <p className="text-white-secondary/60 mt-2 text-center text-[11px] font-medium">
             {t('partners preview submit hint')}
           </p>

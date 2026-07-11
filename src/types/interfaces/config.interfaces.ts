@@ -15,6 +15,8 @@ export interface PublicConfig {
   lsUsdRate: number;
   /** Admin kill switch for rewarded ads — hides every ad surface when false. */
   adsEnabled: boolean;
+  /** Advertiser (partners) cabinet master switch — false = coming-soon preview. */
+  partnersEnabled?: boolean;
   /** Invite reward display values (admin-editable, DOCS §17). */
   referral?: {
     signup: {
@@ -31,5 +33,15 @@ export interface PublicConfig {
     accrualPercent: number;
     participantsSharePercent: number;
     podiumSplitPercent: { first: number; second: number; third: number };
+  };
+  /** Stake builder display knobs (admin-editable, DOCS §18). */
+  stakes?: {
+    durationMinMonths: number;
+    durationMaxMonths: number;
+    aprMinPercent: number;
+    aprMaxPercent: number;
+    apDivisor: number;
+    apCompletionBonusPercent: number;
+    bronzeFreeStartCount: number;
   };
 }

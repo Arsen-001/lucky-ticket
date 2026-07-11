@@ -2,13 +2,39 @@ import { GlobalConstants } from '@/constants/global.constants';
 import type { StakeHistoryEntry, StakeLevelDefinition } from '@/types/interfaces/stakes.interfaces';
 import type { Dictionary } from '@/types/types/i18n.types';
 
-export const computeStakeAprPercent = (months: number) => {
+/**
+ * Admin-tunable inputs of the stake projections. Components pass the live
+ * server values (`useStakesDisplayConfig`); the bundled constants below are
+ * the default for mocks/tests and the loading fallback.
+ */
+export interface StakeMathKnobs {
+  durationMinMonths: number;
+  durationMaxMonths: number;
+  aprMinPercent: number;
+  aprMaxPercent: number;
+  apDivisor: number;
+  apCompletionBonusPercent: number;
+}
+
+export const defaultStakeKnobs: StakeMathKnobs = {
+  durationMinMonths: GlobalConstants.stakeDurationMinMonths,
+  durationMaxMonths: GlobalConstants.stakeDurationMaxMonths,
+  aprMinPercent: GlobalConstants.stakeAprMinPercent,
+  aprMaxPercent: GlobalConstants.stakeAprMaxPercent,
+  apDivisor: GlobalConstants.stakeApDivisor,
+  apCompletionBonusPercent: GlobalConstants.stakeApCompletionBonusPercent,
+};
+
+export const computeStakeAprPercent = (
+  months: number,
+  knobs: StakeMathKnobs = defaultStakeKnobs
+) => {
   const {
-    stakeDurationMinMonths: minM,
-    stakeDurationMaxMonths: maxM,
-    stakeAprMinPercent: minApr,
-    stakeAprMaxPercent: maxApr,
-  } = GlobalConstants;
+    durationMinMonths: minM,
+    durationMaxMonths: maxM,
+    aprMinPercent: minApr,
+    aprMaxPercent: maxApr,
+  } = knobs;
   const clamped = Math.min(Math.max(months, minM), maxM);
   const ratio = (clamped - minM) / (maxM - minM);
   return minApr + ratio * (maxApr - minApr);
@@ -18,9 +44,10 @@ export const computeStakeReturnCoins = (
   deposit: number,
   months: number,
   isLuckyPlayer = false,
-  isVip = false
+  isVip = false,
+  knobs: StakeMathKnobs = defaultStakeKnobs
 ) => {
-  const ratePercent = computeStakeAprPercent(months);
+  const ratePercent = computeStakeAprPercent(months, knobs);
   const base = (deposit * ratePercent) / 100;
   // VIP supersedes LP — the higher-tier yield boost wins, never stacks.
   const statusBoostPct = isVip
@@ -32,27 +59,37 @@ export const computeStakeReturnCoins = (
 };
 
 /**
- * Base AP credited the moment a stake starts: `deposit × months ÷ stakeApDivisor`
+ * Base AP credited the moment a stake starts: `deposit × months ÷ apDivisor`
  * (DOCS §5.3 / §18.3). Retained even if the stake is cancelled early. Floored to
  * match the backend (`stake-math.baseAp`) so the projection equals what's credited.
  */
-export const computeStakeBaseAp = (deposit: number, months: number) =>
-  Math.floor((deposit * months) / GlobalConstants.stakeApDivisor);
+export const computeStakeBaseAp = (
+  deposit: number,
+  months: number,
+  knobs: StakeMathKnobs = defaultStakeKnobs
+) => Math.floor((deposit * months) / knobs.apDivisor);
 
 /**
  * Completion bonus AP granted only when the stake runs to the end —
- * `stakeApCompletionBonusPercent` of the (floored) base. Forfeited on early
+ * `apCompletionBonusPercent` of the (floored) base. Forfeited on early
  * cancellation. Floor-of-floored-base mirrors the backend claim exactly
  * (`floor(apAwarded × pct / 100)`), so the pre-claim projection can't drift.
  */
-export const computeStakeCompletionBonusAp = (deposit: number, months: number) =>
-  Math.floor(
-    (computeStakeBaseAp(deposit, months) * GlobalConstants.stakeApCompletionBonusPercent) / 100
-  );
+export const computeStakeCompletionBonusAp = (
+  deposit: number,
+  months: number,
+  knobs: StakeMathKnobs = defaultStakeKnobs
+) =>
+  Math.floor((computeStakeBaseAp(deposit, months, knobs) * knobs.apCompletionBonusPercent) / 100);
 
 /** Total AP across the lifecycle = base (on start) + completion bonus (on claim). */
-export const computeStakeActivityPoints = (deposit: number, months: number) =>
-  computeStakeBaseAp(deposit, months) + computeStakeCompletionBonusAp(deposit, months);
+export const computeStakeActivityPoints = (
+  deposit: number,
+  months: number,
+  knobs: StakeMathKnobs = defaultStakeKnobs
+) =>
+  computeStakeBaseAp(deposit, months, knobs) +
+  computeStakeCompletionBonusAp(deposit, months, knobs);
 
 /** Guaranteed Stars paid out on full completion (forfeited on cancel). */
 export const computeStakeCompletionStars = (months: number, levelDef: StakeLevelDefinition) =>

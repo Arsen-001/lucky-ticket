@@ -5,6 +5,7 @@ import { useState } from 'react';
 import { Star } from 'lucide-react';
 import { GlobalConstants } from '@/constants/global.constants';
 import { useAppTranslations } from '@/hooks/useAppTranslations';
+import { useStakesDisplayConfig } from '@/hooks/useStakesDisplayConfig';
 import { formatCompact } from '@/utils/global/number.utils';
 import { GoldenText } from '@/components/shared/typography/GoldenText';
 import { LcLabel } from '@/components/shared/icons/LcLabel';
@@ -16,9 +17,6 @@ import {
   findNextLevelOver,
 } from '@/utils/global/stakes.utils';
 import type { StakeLevelDefinition } from '@/types/interfaces/stakes.interfaces';
-
-const DURATION_MIN = GlobalConstants.stakeDurationMinMonths;
-const DURATION_MAX = GlobalConstants.stakeDurationMaxMonths;
 
 export interface NewStakeHeroProps {
   levels: StakeLevelDefinition[];
@@ -44,6 +42,9 @@ export function NewStakeHero({
   onDurationChange,
 }: NewStakeHeroProps) {
   const t = useAppTranslations();
+  const stakeKnobs = useStakesDisplayConfig();
+  const DURATION_MIN = stakeKnobs.durationMinMonths;
+  const DURATION_MAX = stakeKnobs.durationMaxMonths;
   const [depositTooltip, setDepositTooltip] = useState(false);
   const [durationTooltip, setDurationTooltip] = useState(false);
   const next = findNextLevelOver(levels, deposit);
@@ -52,8 +53,14 @@ export function NewStakeHero({
   const sliderProgress = ((clampedDeposit - sliderMin) / sliderRange) * 100;
   const clampedDuration = Math.min(Math.max(durationMonths, DURATION_MIN), DURATION_MAX);
   const durationProgress = ((clampedDuration - DURATION_MIN) / (DURATION_MAX - DURATION_MIN)) * 100;
-  const aprPercent = computeStakeAprPercent(clampedDuration);
-  const aprReturn = computeStakeReturnCoins(clampedDeposit, clampedDuration);
+  const aprPercent = computeStakeAprPercent(clampedDuration, stakeKnobs);
+  const aprReturn = computeStakeReturnCoins(
+    clampedDeposit,
+    clampedDuration,
+    false,
+    false,
+    stakeKnobs
+  );
   const aprLabel = aprPercent.toFixed(aprPercent % 1 === 0 ? 0 : 1);
 
   return (
@@ -188,12 +195,11 @@ export function NewStakeHero({
         <div className="mt-3 flex items-end justify-between gap-0.5">
           {Array.from({ length: DURATION_MAX - DURATION_MIN + 1 }, (_, i) => {
             const month = DURATION_MIN + i;
-            const apr = computeStakeAprPercent(month);
+            const apr = computeStakeAprPercent(month, stakeKnobs);
             const minHeight = 6;
             const maxHeight = 26;
-            const aprRange =
-              GlobalConstants.stakeAprMaxPercent - GlobalConstants.stakeAprMinPercent;
-            const ratio = aprRange > 0 ? (apr - GlobalConstants.stakeAprMinPercent) / aprRange : 0;
+            const aprRange = stakeKnobs.aprMaxPercent - stakeKnobs.aprMinPercent;
+            const ratio = aprRange > 0 ? (apr - stakeKnobs.aprMinPercent) / aprRange : 0;
             const heightPx = minHeight + ratio * (maxHeight - minHeight);
             const isActive = month === clampedDuration;
             return (
@@ -237,8 +243,8 @@ export function NewStakeHero({
               </div>
               <div className="text-gold text-[10px] font-semibold">
                 {t('apr range {min}–{max}%', {
-                  min: GlobalConstants.stakeAprMinPercent,
-                  max: GlobalConstants.stakeAprMaxPercent,
+                  min: stakeKnobs.aprMinPercent,
+                  max: stakeKnobs.aprMaxPercent,
                 })}
               </div>
             </div>

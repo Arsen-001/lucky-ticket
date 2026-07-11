@@ -6,9 +6,13 @@ import { appConfig } from '@/config/app.config';
  * (DOCS §20), times the placement %, floored — mirrors the backend `finish()`
  * distribution (the base prize, before any per-winner VIP/LP status boost).
  */
-export const placementPrizeLc = (prizePool: number, pct: number): number => {
+export const placementPrizeLc = (
+  prizePool: number,
+  pct: number,
+  accrualPercent: number = appConfig.jackpot.accrualPercent
+): number => {
   if (!prizePool) return 0;
-  const skim = Math.floor((prizePool * appConfig.jackpot.accrualPercent) / 100);
+  const skim = Math.floor((prizePool * accrualPercent) / 100);
   return Math.floor(((prizePool - skim) * pct) / 100);
 };
 

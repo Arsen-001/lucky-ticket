@@ -4,7 +4,6 @@ import { useState } from 'react';
 import { History, Radio, ShieldCheck, Trophy, Wallet } from 'lucide-react';
 import { useGetPartnerStatsQuery } from '@/api/partners.api';
 import { useGetTournamentsQuery } from '@/api/tournaments.api';
-import { appConfig } from '@/config/app.config';
 import { QueryErrorState } from '@/components/shared/error/QueryErrorState';
 import { SegmentToggle } from '@/components/shared/form-elements/SegmentToggle';
 import { TonAmount } from '@/components/shared/icons/TonAmount';
@@ -13,6 +12,7 @@ import { PartnerReleaseButton } from './PartnerReleaseButton';
 import { PartnersComingSoonBanner } from './PartnersComingSoonBanner';
 import { PartnerMyTournamentsList } from './PartnerMyTournamentsList';
 import { useAppTranslations } from '@/hooks/useAppTranslations';
+import { usePartnersEnabled } from '@/hooks/usePartnersEnabled';
 
 type CabinetView = 'active' | 'history';
 
@@ -41,7 +41,7 @@ export function PartnersContainer() {
   const historyList = myTournaments.filter(tour => tour.status === 'finished');
   const visible = view === 'active' ? activeList : historyList;
 
-  const portalEnabled = appConfig.partners.enabled;
+  const portalEnabled = usePartnersEnabled();
 
   if (statsError || toursError) {
     return (

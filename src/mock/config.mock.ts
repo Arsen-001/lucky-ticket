@@ -12,6 +12,7 @@ const getPublicConfig = (): PublicConfig => ({
   tonUsdRate: appConfig.wallet.tonUsdRate,
   lsUsdRate: appConfig.wallet.lsUsdRate,
   adsEnabled: true,
+  partnersEnabled: appConfig.partners.enabled,
   referral: {
     signup: {
       ap: GlobalConstants.inviteActivityPoints,
@@ -25,6 +26,15 @@ const getPublicConfig = (): PublicConfig => ({
     accrualPercent: appConfig.jackpot.accrualPercent,
     participantsSharePercent: appConfig.jackpot.participantsSharePercent,
     podiumSplitPercent: appConfig.jackpot.podiumSplitPercent,
+  },
+  stakes: {
+    durationMinMonths: GlobalConstants.stakeDurationMinMonths,
+    durationMaxMonths: GlobalConstants.stakeDurationMaxMonths,
+    aprMinPercent: GlobalConstants.stakeAprMinPercent,
+    aprMaxPercent: GlobalConstants.stakeAprMaxPercent,
+    apDivisor: GlobalConstants.stakeApDivisor,
+    apCompletionBonusPercent: GlobalConstants.stakeApCompletionBonusPercent,
+    bronzeFreeStartCount: GlobalConstants.stakeBronzeFreeStartCount,
   },
 });
 

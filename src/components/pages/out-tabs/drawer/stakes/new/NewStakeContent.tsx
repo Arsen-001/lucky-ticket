@@ -12,6 +12,7 @@ import { useGetMeQuery } from '@/api/me.api';
 import { useGetStakesQuery, useStartStakeMutation } from '@/api/stakes.api';
 import { routes } from '@/constants/routes';
 import { useAppTranslations } from '@/hooks/useAppTranslations';
+import { useStakesDisplayConfig } from '@/hooks/useStakesDisplayConfig';
 import {
   computeStakeActivityPoints,
   computeStakeFee,
@@ -39,6 +40,7 @@ export function NewStakeContent() {
   const searchParams = useSearchParams();
   const { data: stakes, isLoading: stakesLoading, isError, refetch } = useGetStakesQuery();
   const { data: me, isLoading: meLoading } = useGetMeQuery();
+  const stakeCfg = useStakesDisplayConfig();
   const [startStake, { isLoading: starting }] = useStartStakeMutation();
   const { isTierUnlocked } = useUnlockedTiers();
 
@@ -96,24 +98,26 @@ export function NewStakeContent() {
   );
   const bronzeFreeRemaining = Math.max(
     0,
-    GlobalConstants.stakeBronzeFreeStartCount - (me?.bronzeStakesOpened ?? 0)
+    stakeCfg.bronzeFreeStartCount - (me?.bronzeStakesOpened ?? 0)
   );
 
-  const maxMonths = GlobalConstants.stakeDurationMaxMonths;
-  const apAtMax = computeStakeActivityPoints(safeDeposit, maxMonths);
-  const apNow = computeStakeActivityPoints(safeDeposit, durationMonths);
+  const maxMonths = stakeCfg.durationMaxMonths;
+  const apAtMax = computeStakeActivityPoints(safeDeposit, maxMonths, stakeCfg);
+  const apNow = computeStakeActivityPoints(safeDeposit, durationMonths, stakeCfg);
   const apDelta = apAtMax - apNow;
   const lcAtMax = computeStakeReturnCoins(
     safeDeposit,
     maxMonths,
     me?.isLuckyPlayer ?? false,
-    me?.isVIP ?? false
+    me?.isVIP ?? false,
+    stakeCfg
   );
   const lcNow = computeStakeReturnCoins(
     safeDeposit,
     durationMonths,
     me?.isLuckyPlayer ?? false,
-    me?.isVIP ?? false
+    me?.isVIP ?? false,
+    stakeCfg
   );
   const lcDelta = lcAtMax - lcNow;
   const ctaHint =

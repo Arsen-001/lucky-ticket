@@ -8,6 +8,7 @@ import { LcLabel } from '@/components/shared/icons/LcLabel';
 import { BoltIcon } from '@/components/shared/icons/BoltIcon';
 import { useGetMeQuery } from '@/api/me.api';
 import { useAppTranslations } from '@/hooks/useAppTranslations';
+import { useStakesDisplayConfig } from '@/hooks/useStakesDisplayConfig';
 import {
   computeStakeBaseAp,
   computeStakeCompletionBonusAp,
@@ -30,15 +31,17 @@ export function StakesRewardsPreviewCard({
 }: StakesRewardsPreviewCardProps) {
   const t = useAppTranslations();
   const { data: me } = useGetMeQuery();
-  const ratePercent = computeStakeAprPercent(durationMonths);
+  const stakeKnobs = useStakesDisplayConfig();
+  const ratePercent = computeStakeAprPercent(durationMonths, stakeKnobs);
   const yieldLC = computeStakeReturnCoins(
     deposit,
     durationMonths,
     me?.isLuckyPlayer ?? false,
-    me?.isVIP ?? false
+    me?.isVIP ?? false,
+    stakeKnobs
   );
-  const stakeBaseAp = computeStakeBaseAp(deposit, durationMonths);
-  const stakeBonusAp = computeStakeCompletionBonusAp(deposit, durationMonths);
+  const stakeBaseAp = computeStakeBaseAp(deposit, durationMonths, stakeKnobs);
+  const stakeBonusAp = computeStakeCompletionBonusAp(deposit, durationMonths, stakeKnobs);
   const completionStars = computeStakeCompletionStars(durationMonths, levelDef);
   const rateLabel = ratePercent.toFixed(ratePercent % 1 === 0 ? 0 : 1);
 

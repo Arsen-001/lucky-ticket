@@ -5,6 +5,7 @@ import Image from 'next/image';
 import { Loader2 } from 'lucide-react';
 import { icons } from '@/constants/icons';
 import { useAppTranslations } from '@/hooks/useAppTranslations';
+import { useStakesDisplayConfig } from '@/hooks/useStakesDisplayConfig';
 import { GlobalConstants } from '@/constants/global.constants';
 import { twMerge } from 'tailwind-merge';
 
@@ -40,6 +41,7 @@ export function NewStakeStickyCta({
   onConfirm,
 }: NewStakeStickyCtaProps) {
   const t = useAppTranslations();
+  const stakeCfg = useStakesDisplayConfig();
   const belowMin = amount < minDeposit;
   const insufficient = amount > balance;
   const valid = !belowMin && !insufficient && !tierLocked;
@@ -76,7 +78,7 @@ export function NewStakeStickyCta({
             <span className="relative z-10 inline-flex items-center gap-1.5 text-[12px] font-extrabold uppercase tracking-wider text-white">
               <span className="leading-none">{t('free')}</span>
               <span className="text-bronze inline-flex items-center rounded-full bg-bronze/20 px-1.5 py-0.5 text-[9px] font-bold leading-none tabular-nums">
-                {bronzeFreeRemaining}/{GlobalConstants.stakeBronzeFreeStartCount}
+                {bronzeFreeRemaining}/{stakeCfg.bronzeFreeStartCount}
               </span>
             </span>
           ) : (

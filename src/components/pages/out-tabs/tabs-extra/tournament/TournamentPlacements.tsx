@@ -6,6 +6,7 @@ import { useGetTournamentByIdQuery, useGetTournamentPlacesQuery } from '@/api/to
 import { useAppTranslations } from '@/hooks/useAppTranslations';
 import { formatCompact } from '@/utils/global/number.utils';
 import { placementPrizeLc } from '@/utils/global/tournament.utils';
+import { useJackpotDisplayConfig } from '@/hooks/useJackpotDisplayConfig';
 import {
   LeaderboardPodium,
   type PodiumPlayer,
@@ -102,6 +103,7 @@ export function TournamentPlacements({ id }: TournamentPlacementsProps) {
   const { data: places, isLoading, isError, refetch } = useGetTournamentPlacesQuery(id);
   const { data: tournament } = useGetTournamentByIdQuery(id);
   const t = useAppTranslations();
+  const { accrualPercent } = useJackpotDisplayConfig();
 
   const prizePool = tournament?.prizePool;
   const userPlace = tournament?.userResult?.place;
@@ -122,7 +124,7 @@ export function TournamentPlacements({ id }: TournamentPlacementsProps) {
 
     return ([1, 2, 3] as const).map(rank => {
       const pct = top3Percentages.get(rank) ?? 0;
-      const lc = placementPrizeLc(prizePool ?? 0, pct);
+      const lc = placementPrizeLc(prizePool ?? 0, pct, accrualPercent);
       const winner = tournament?.winners?.find(w => w.rank === rank);
       const shards = SHARDS_BY_RANK[rank];
       return {
@@ -187,7 +189,9 @@ export function TournamentPlacements({ id }: TournamentPlacementsProps) {
                 const displayPlace = isExactPlace(item)
                   ? String(item.from)
                   : `${item.from}–${item.to}`;
-                const lc = prizePool ? placementPrizeLc(prizePool, item.percentage) : undefined;
+                const lc = prizePool
+                  ? placementPrizeLc(prizePool, item.percentage, accrualPercent)
+                  : undefined;
                 const isMe =
                   userPlace !== undefined &&
                   userPlace >= item.from &&
