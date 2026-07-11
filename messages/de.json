@@ -73,6 +73,8 @@
   "chip slot picker hint": "In diesen Motor passen nur {tier}-Chips — Chips sind tier-gebunden.",
   "booster slot picker hint": "Hier passen nur {tier}-Booster — Booster sind tier-gebunden.",
   "no eligible chips": "Keine passenden Chips. Erstelle oder levle einen im Inventar.",
+  "mint in inventory": "Chip im Inventar erstellen",
+  "buy shards": "Fragmente kaufen",
   "no eligible boosters": "Noch keine Booster dieses Tiers. Verdiene in Turnieren, Aufgaben oder im Shop.",
   "chip inventory": "Chip-Inventar",
   "boosts": "Boosts",

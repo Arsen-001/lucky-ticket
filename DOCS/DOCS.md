@@ -587,6 +587,8 @@ Every chip is minted through the inventory's **Mint modal** for a flat, tier-spe
 
 The price applies to every mint equally — the first Bronze Speed Chip and the fifth cost the same 10 Bronze Speed shards. A freshly minted chip always starts at **Lvl 1** (+0.5%). This flat pricing (mirrored by the backend and the frontend constant `CHIP_MINT_SHARD_COST`) is the only mint cost; the previously documented **Chip Builder** item is removed from the design.
 
+**Dead-end redirects.** The UI never leaves the user stranded on an empty chip flow: when an engine's chip-slot picker has no eligible chips, it shows the matching shard balance vs. the mint price and a CTA — to the **Inventory** mint modal if the user already holds enough matching shards, otherwise straight to the **Shop's Shards tab**. Likewise, the Mint modal itself swaps its Mint button for a **Buy shards** shortcut (→ Shop Shards tab) whenever the selected type/tier combination lacks shards.
+
 #### Chip Shards — How Levels Are Earned
 
 Chips are not handed out at a finished level. Instead, each tournament awards **chip shards** — fragments that the user accumulates and spends either on minting new chips (table above) or on levelling up existing ones.

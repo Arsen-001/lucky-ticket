@@ -1,12 +1,14 @@
 'use client';
 
 import { useState } from 'react';
+import { useRouter } from 'next/navigation';
 import { twMerge } from 'tailwind-merge';
 import { Button } from '@/components/shared/buttons/Button';
 import { ChipIcon } from '@/components/shared/icons/ChipIcon';
 import { ChipShardIcon } from '@/components/shared/icons/ChipShardIcon';
 import { Modal } from '@/components/shared/modals/Modal';
 import { useAppTranslations } from '@/hooks/useAppTranslations';
+import { routes } from '@/constants/routes';
 import {
   CHIP_MINT_SHARD_COST,
   QUALITY_ACCENT,
@@ -37,6 +39,7 @@ export function ChipMintModal({
   shards,
 }: ChipMintModalProps) {
   const t = useAppTranslations();
+  const router = useRouter();
   const [type, setType] = useState<InventoryChipType>('speed');
   const [quality, setQuality] = useState<TicketType>('bronze');
 
@@ -129,14 +132,26 @@ export function ChipMintModal({
           />
         </section>
 
-        <Button
-          onClick={() => onConfirm({ type, quality })}
-          disabled={!hasShards || loading}
-          loading={loading}
-          className="w-full py-3 text-[13px]"
-        >
-          {t('mint')}
-        </Button>
+        {hasShards ? (
+          <Button
+            onClick={() => onConfirm({ type, quality })}
+            disabled={loading}
+            loading={loading}
+            className="w-full py-3 text-[13px]"
+          >
+            {t('mint')}
+          </Button>
+        ) : (
+          <Button
+            onClick={() => {
+              onClose();
+              router.push(routes.market('shards'));
+            }}
+            className="w-full py-3 text-[13px]"
+          >
+            {t('buy shards')}
+          </Button>
+        )}
       </div>
     </Modal>
   );

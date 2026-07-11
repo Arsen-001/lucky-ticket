@@ -73,6 +73,8 @@
   "chip slot picker hint": "Only {tier} chips fit this engine — chips are tier-locked.",
   "booster slot picker hint": "Only {tier} boosters fit this engine — boosters are tier-locked.",
   "no eligible chips": "No chips ready for this slot. Mint or level up in inventory.",
+  "mint in inventory": "Mint a chip in inventory",
+  "buy shards": "Buy shards",
   "no eligible boosters": "No boosters of this tier yet. Earn in tournaments, tasks or shop.",
   "chip inventory": "Chip Inventory",
   "boosts": "Boosts",

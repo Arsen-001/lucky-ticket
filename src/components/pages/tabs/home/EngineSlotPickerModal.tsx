@@ -1,13 +1,19 @@
 'use client';
 
 import { Loader2, Sparkles, Timer } from 'lucide-react';
+import { useRouter } from 'next/navigation';
+import { twMerge } from 'tailwind-merge';
 import { useGetInventoryQuery } from '@/api/inventory.api';
+import { Button } from '@/components/shared/buttons/Button';
 import { Modal } from '@/components/shared/modals/Modal';
 import { BoosterIcon } from '@/components/shared/icons/BoosterIcon';
 import { ChipIcon } from '@/components/shared/icons/ChipIcon';
+import { ChipShardIcon } from '@/components/shared/icons/ChipShardIcon';
 import { TelegramStarIcon } from '@/components/shared/icons/TelegramStarIcon';
 import { useAppTranslations } from '@/hooks/useAppTranslations';
+import { routes } from '@/constants/routes';
 import {
+  CHIP_MINT_SHARD_COST,
   CHIP_TYPE_ICON,
   QUALITY_ACCENT,
   canEquipChipOnTier,
@@ -46,10 +52,12 @@ export function EngineSlotPickerModal({
   onPickBooster,
 }: EngineSlotPickerModalProps) {
   const t = useAppTranslations();
+  const router = useRouter();
   const { data: inventory } = useGetInventoryQuery();
 
   const chips = inventory?.chips ?? [];
   const boosters = inventory?.boosters ?? [];
+  const shards = inventory?.shards ?? [];
 
   const eligibleChips =
     category === 'chip'
@@ -80,6 +88,17 @@ export function EngineSlotPickerModal({
 
   const empty = category === 'chip' ? eligibleChips.length === 0 : eligibleBoosters.length === 0;
 
+  // Chips are tier-locked, so a new one can only come from minting a chip of
+  // the engine's own tier: enough matching shards → inventory, otherwise → shop.
+  const ownedShards = shards.find(s => s.type === type && s.quality === engineTier)?.count ?? 0;
+  const requiredShards = CHIP_MINT_SHARD_COST[engineTier];
+  const canMint = ownedShards >= requiredShards;
+
+  const handleEmptyChipsCta = () => {
+    onClose();
+    router.push(canMint ? routes.inventory : routes.market('shards'));
+  };
+
   return (
     <Modal open={open} onClose={onClose}>
       <div className="card-outlined bg-purple-gradient flex flex-col gap-3 rounded-2xl p-5">
@@ -106,6 +125,22 @@ export function EngineSlotPickerModal({
             <p className="text-xs text-white/65">
               {category === 'chip' ? t('no eligible chips') : t('no eligible boosters')}
             </p>
+            {category === 'chip' && (
+              <>
+                <span className="flex items-center gap-1.5 text-[11px] font-extrabold">
+                  <ChipShardIcon type={type} tier={engineTier} size={28} />
+                  <span className="text-white/65 uppercase tracking-wider">
+                    {t('matching shard')}
+                  </span>
+                  <span className={twMerge('tabular-nums', canMint ? 'text-white' : 'text-error')}>
+                    {ownedShards}/{requiredShards}
+                  </span>
+                </span>
+                <Button onClick={handleEmptyChipsCta} className="mt-1 w-full py-2.5 text-[12px]">
+                  {canMint ? t('mint in inventory') : t('buy shards')}
+                </Button>
+              </>
+            )}
           </div>
         ) : category === 'chip' ? (
           <div className="flex max-h-[55vh] flex-col gap-2 overflow-y-auto">
