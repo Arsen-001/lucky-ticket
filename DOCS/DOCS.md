@@ -1768,15 +1768,19 @@ Completing tasks from any category (Daily, Weekly, Monthly) gives a **chance** t
 
 #### Friend Invitations
 
-After reaching a specific number of invited friends, the user receives a **guaranteed** Lucky Stars bonus — no draw, no chance. Every defined milestone triggers an automatic LS payout:
+Invite milestones are implemented as the one-time **Friends** task chain (claimed from the Tasks screen). The steps **2 / 5 / 10 / 20 deliberately mirror the tier referral requirements (§5.1)** — every mandatory invite threshold doubles as a reward checkpoint; 50 and 100 are stretch goals beyond the gate. Guaranteed rewards per step:
 
-| Friends Invited | Guaranteed Lucky Stars |
-| :-------------- | :--------------------- |
-| Milestone 1     | TBD                    |
-| Milestone 2     | TBD                    |
-| Milestone N     | TBD                    |
+| Friends Invited | Reward                                  |
+| :-------------- | :-------------------------------------- |
+| 1               | 500 LC + 5 AP                           |
+| 2               | 800 LC + 10 AP                          |
+| 5               | 2,000 LC + 1 ticket + 20 AP             |
+| 10              | 5,000 LC + 2 tickets + 5 LS + 30 AP     |
+| 20              | 12,000 LC + 4 tickets + 10 LS + 50 AP   |
+| 50              | 30,000 LC + 8 tickets + 20 LS + 75 AP   |
+| 100             | 60,000 LC + 15 tickets + 40 LS + 100 AP |
 
-> Exact milestones and LS amounts are defined by the product team. LS are awarded automatically upon reaching the threshold — the user does not need to claim them manually.
+> Progress is computed live from the actual referral count (no manual tracking); the user claims each reached step from the Tasks screen. Amounts live in `milestones.data.ts` (backend, code-wins boot sync) and are mirrored in the frontend mock.
 
 ### 19.2 Buying Lucky Stars
 

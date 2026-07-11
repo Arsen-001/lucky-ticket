@@ -802,11 +802,14 @@ const PROFILE = buildCategory({
 // Single milestone chain — drives the "Invite N friends" horizontal slider.
 type FriendMilestone = { target: number; rewards: TaskReward[]; rarity: TaskRarity };
 
+// Steps 2/5/10/20 mirror tierReferralRequirements (DOCS §5.1) — every
+// mandatory invite threshold doubles as a milestone reward checkpoint.
 const FRIEND_INVITE_MILESTONES: FriendMilestone[] = [
   { target: 1, rewards: [lc(5), ap(5)], rarity: TaskRarity.BRONZE },
+  { target: 2, rewards: [lc(8), ap(10)], rarity: TaskRarity.BRONZE },
   { target: 5, rewards: [lc(20), tickets(1), ap(20)], rarity: TaskRarity.SILVER },
   { target: 10, rewards: [lc(50), tickets(2), stars(5), ap(30)], rarity: TaskRarity.SILVER },
-  { target: 25, rewards: [lc(120), tickets(4), stars(10), ap(50)], rarity: TaskRarity.GOLD },
+  { target: 20, rewards: [lc(120), tickets(4), stars(10), ap(50)], rarity: TaskRarity.GOLD },
   { target: 50, rewards: [lc(300), tickets(8), stars(20), ap(75)], rarity: TaskRarity.GOLD },
   { target: 100, rewards: [lc(600), tickets(15), stars(40), ap(100)], rarity: TaskRarity.PLATINUM },
 ];
