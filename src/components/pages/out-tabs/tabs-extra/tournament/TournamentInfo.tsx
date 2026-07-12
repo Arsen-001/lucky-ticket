@@ -1,7 +1,7 @@
 'use client';
 
 import type { HTMLAttributes } from 'react';
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import Image from 'next/image';
 import dayjs from 'dayjs';
 import {
@@ -96,6 +96,12 @@ export function TournamentInfo({ id, className, ...rest }: TournamentDetailsProp
   const { leftTimeText, expired, days, hours, minutes } = useCountDown(
     isFinished ? undefined : data?.startTime
   );
+  // Reverse countdown for the 5-min "results pending" window (deferred draw).
+  const pendingCountdown = useCountDown(
+    !isFinished && data?.startTime
+      ? new Date(new Date(data.startTime).getTime() + 5 * 60 * 1000)
+      : undefined
+  );
   // Countdown hit zero but the backend hasn't marked it finished yet — the
   // join window is closed, results are pending.
   const isStarted = !isFinished && expired && !!data?.startTime;
@@ -111,14 +117,9 @@ export function TournamentInfo({ id, className, ...rest }: TournamentDetailsProp
   // open a finished tournament (history / search / direct link) have no
   // `userResult`, so without this guard they'd get an unprompted "tournament
   // ended" splash on every visit. They can still open it via the "Ended" button.
-  const shouldShowResultModal = isFinished && !!userResult && !data?.resultSeen && !resultDismissed;
-
-  // Auto-open result modal once after data loads
-  useEffect(() => {
-    if (shouldShowResultModal && !isResultModalOpen) {
-      setIsResultModalOpen(true);
-    }
-  }, [shouldShowResultModal, isResultModalOpen]);
+  // Auto-open is handled app-wide by TournamentResultWatcher (root layout), so
+  // the result pops wherever the user is; here we keep only the manual
+  // "Результат" button and the unseen-result pulse (hasUnseenResult).
 
   const handleOpenBetModal = () => {
     if (tierLocked || isModeration || isStarted) return;
@@ -142,7 +143,9 @@ export function TournamentInfo({ id, className, ...rest }: TournamentDetailsProp
     ? isFinished
       ? formatEndedAgo(data.startTime, t)
       : isStarted
-        ? t('started')
+        ? pendingCountdown.expired
+          ? t('started')
+          : pendingCountdown.leftTimeShort
         : leftTimeText || t('soon')
     : t('soon');
 

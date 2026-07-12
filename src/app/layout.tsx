@@ -4,6 +4,7 @@ import { NavigationHistoryProvider } from '@/providers/NavigationHistoryProvider
 import { TelegramProvider } from '@/providers/TelegramProvider';
 import { TonConnectProvider } from '@/providers/TonConnectProvider';
 import { Onboarding } from '@/components/onboarding/Onboarding';
+import { TournamentResultWatcher } from '@/components/pages/tabs/tournaments/TournamentResultWatcher';
 import { ToastViewport } from '@/components/shared/toast/ToastViewport';
 import { AppStatusOverlay } from '@/components/shared/status/AppStatusOverlay';
 import { FullscreenBrandBar } from '@/components/layout-elements/FullscreenBrandBar';
@@ -49,6 +50,7 @@ export default async function RootLayout({ children }: ChildrenProps) {
                       {children}
                     </div>
                     <Onboarding />
+                    <TournamentResultWatcher />
                   </TelegramProvider>
                 </TonConnectProvider>
                 <FullscreenBrandBar />

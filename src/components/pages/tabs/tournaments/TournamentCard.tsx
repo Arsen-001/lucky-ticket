@@ -120,6 +120,11 @@ export function TournamentCard({
   const { leftTimeText, expired, days, hours, minutes } = useCountDown(
     isFinished ? undefined : startTime
   );
+  // "Results pending" 5-min window after the tournament ends (deferred draw) —
+  // a reverse countdown to the payout, shown instead of a static "started".
+  const pendingCountdown = useCountDown(
+    !isFinished && startTime ? new Date(new Date(startTime).getTime() + 5 * 60 * 1000) : undefined
+  );
   const ticketCount = participatedTicketsCount ?? 0;
   // Countdown hit zero but the backend hasn't marked it finished yet — the
   // join window is closed, results are pending.
@@ -172,7 +177,9 @@ export function TournamentCard({
   const timeChipText = isFinished
     ? formatEndedAgo(startTime, t)
     : isStarted
-      ? t('started')
+      ? pendingCountdown.expired
+        ? t('started')
+        : pendingCountdown.leftTimeShort
       : leftTimeText || t('soon');
 
   return (

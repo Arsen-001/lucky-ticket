@@ -109,6 +109,14 @@ export default function TournamentPage() {
         return tabPasses && matchesSearch && matchesType;
       })
       .sort((a, b) => {
+        // History tab is ordered by participation time (newest join first).
+        if (filter === 'history') {
+          return (
+            new Date(b.participatedAt ?? b.startTime).getTime() -
+            new Date(a.participatedAt ?? a.startTime).getTime()
+          );
+        }
+
         const lockedDelta = Number(isTournamentLocked(a)) - Number(isTournamentLocked(b));
         if (lockedDelta !== 0) return lockedDelta;
 

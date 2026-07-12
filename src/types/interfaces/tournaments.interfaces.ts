@@ -65,6 +65,8 @@ export interface Tournament {
 export interface PersonalTournament extends Tournament {
   participated: boolean;
   participatedTicketsCount?: number;
+  /** When the viewer joined — History is ordered by this (newest first). */
+  participatedAt?: string;
   /** Present only when status='finished' AND user participated. */
   userResult?: TournamentUserResult;
   /** Whether user has dismissed the result popup. */
