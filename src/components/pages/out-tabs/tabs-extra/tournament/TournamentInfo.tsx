@@ -37,7 +37,7 @@ import { QueryErrorState } from '@/components/shared/error/QueryErrorState';
 import { useAppTranslations } from '@/hooks/useAppTranslations';
 import { useCountDown } from '@/hooks/useCountDown';
 import { useUnlockedTiers } from '@/hooks/useUnlockedTiers';
-import { GlobalConstants } from '@/constants/global.constants';
+import { useTournamentConfig } from '@/hooks/useTournamentConfig';
 import type { TicketType } from '@/types/types/ticket.types';
 import type { TournamentType } from '@/types/types/tournaments.types';
 import { TournamentBetModal } from './TournamentBetModal';
@@ -75,6 +75,7 @@ export function TournamentInfo({ id, className, ...rest }: TournamentDetailsProp
   const t = useAppTranslations();
   const toast = useToast();
   const { isTierUnlocked } = useUnlockedTiers();
+  const { shardRewards } = useTournamentConfig();
   const { data: tickets } = useGetTicketsQuery();
   const [joinTournament] = useJoinTournamentMutation();
   const [markResultSeen] = useMarkTournamentResultSeenMutation();
@@ -97,7 +98,7 @@ export function TournamentInfo({ id, className, ...rest }: TournamentDetailsProp
   // join window is closed, results are pending.
   const isStarted = !isFinished && expired && !!data?.startTime;
   const isStartingSoon = !isFinished && !isStarted && days === 0 && hours === 0 && minutes < 60;
-  const topShards = data?.shardsFirst ?? GlobalConstants.tournamentShardRewards.first;
+  const topShards = data?.shardsFirst ?? shardRewards.first;
   const participated = !!data?.participated;
   const ticketCount = data?.participatedTicketsCount ?? 0;
   const userResult = data?.userResult;

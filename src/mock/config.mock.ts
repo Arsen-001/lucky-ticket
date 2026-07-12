@@ -27,6 +27,10 @@ const getPublicConfig = (): PublicConfig => ({
     participantsSharePercent: appConfig.jackpot.participantsSharePercent,
     podiumSplitPercent: appConfig.jackpot.podiumSplitPercent,
   },
+  tournaments: {
+    shardRewards: GlobalConstants.tournamentShardRewards,
+    joinApByTier: GlobalConstants.apRewards.tournamentJoinByTier,
+  },
   stakes: {
     durationMinMonths: GlobalConstants.stakeDurationMinMonths,
     durationMaxMonths: GlobalConstants.stakeDurationMaxMonths,

@@ -34,7 +34,7 @@ import { useGetTicketsQuery } from '@/api/tickets.api';
 import { useCountDown } from '@/hooks/useCountDown';
 import { useUnlockedTiers } from '@/hooks/useUnlockedTiers';
 import { formatCompact } from '@/utils/global/number.utils';
-import { GlobalConstants } from '@/constants/global.constants';
+import { useTournamentConfig } from '@/hooks/useTournamentConfig';
 import { routes } from '@/constants/routes';
 import type {
   PersonalTournament,
@@ -95,6 +95,7 @@ export function TournamentCard({
   const router = useRouter();
   const toast = useToast();
   const { isTierUnlocked } = useUnlockedTiers();
+  const { shardRewards } = useTournamentConfig();
   const { data: tickets } = useGetTicketsQuery();
   const [joinTournament] = useJoinTournamentMutation();
   const [markResultSeen] = useMarkTournamentResultSeenMutation();
@@ -121,7 +122,7 @@ export function TournamentCard({
   const isStarted = !isFinished && expired && !!startTime;
   const isStartingSoon = !isFinished && !isStarted && days === 0 && hours === 0 && minutes < 60;
   const ShardIcon = shardType === 'capacity' ? MemoryStick : Cpu;
-  const topShards = shardsFirst ?? GlobalConstants.tournamentShardRewards.first;
+  const topShards = shardsFirst ?? shardRewards.first;
   const hasUnseenResult = isFinished && !!userResult && !resultSeen;
 
   const [isBetModalOpen, setIsBetModalOpen] = useState(false);

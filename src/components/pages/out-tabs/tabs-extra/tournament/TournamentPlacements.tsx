@@ -16,7 +16,7 @@ import { Skeleton } from '@/components/shared/seleketons/Skeleton';
 import { QueryErrorState } from '@/components/shared/error/QueryErrorState';
 import { LcLabel } from '@/components/shared/icons/LcLabel';
 import { ShardZoomButton } from '@/components/pages/out-tabs/tabs-extra/tournament/ShardZoomButton';
-import { GlobalConstants } from '@/constants/global.constants';
+import { useTournamentConfig } from '@/hooks/useTournamentConfig';
 import type { TournamentType } from '@/types/types/tournaments.types';
 
 // Literal hexes (not var(--color-*)): ConfettiLayer builds `${color}aa`
@@ -31,12 +31,6 @@ const TIER_HEX: Record<TournamentType, string> = {
 
 /** The backend encodes an exact place as `to === from`; the mock omits `to`. */
 const isExactPlace = (p: { from: number; to?: number }) => !p.to || p.to === p.from;
-
-const SHARDS_BY_RANK: Record<number, number> = {
-  1: GlobalConstants.tournamentShardRewards.first,
-  2: GlobalConstants.tournamentShardRewards.second,
-  3: GlobalConstants.tournamentShardRewards.third,
-};
 
 interface TierRowProps {
   place: string;
@@ -104,6 +98,7 @@ export function TournamentPlacements({ id }: TournamentPlacementsProps) {
   const { data: tournament } = useGetTournamentByIdQuery(id);
   const t = useAppTranslations();
   const { accrualPercent } = useJackpotDisplayConfig();
+  const { shardRewards } = useTournamentConfig();
 
   const prizePool = tournament?.prizePool;
   const userPlace = tournament?.userResult?.place;
@@ -126,7 +121,14 @@ export function TournamentPlacements({ id }: TournamentPlacementsProps) {
       const pct = top3Percentages.get(rank) ?? 0;
       const lc = placementPrizeLc(prizePool ?? 0, pct, accrualPercent);
       const winner = tournament?.winners?.find(w => w.rank === rank);
-      const shards = SHARDS_BY_RANK[rank];
+      // Per-tournament shard override wins; fall back to the admin-set default.
+      const shards =
+        (rank === 1
+          ? tournament?.shardsFirst
+          : rank === 2
+            ? tournament?.shardsSecond
+            : tournament?.shardsThird) ??
+        (rank === 1 ? shardRewards.first : rank === 2 ? shardRewards.second : shardRewards.third);
       return {
         rank: rank as PodiumRank,
         username: winner?.username ?? t(rank === 1 ? '1st' : rank === 2 ? '2nd' : '3rd'),

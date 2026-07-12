@@ -34,6 +34,13 @@ export interface PublicConfig {
     participantsSharePercent: number;
     podiumSplitPercent: { first: number; second: number; third: number };
   };
+  /** Tournament reward display values (admin-editable, DOCS §11). */
+  tournaments?: {
+    /** Default top-3 shard rewards (per-tournament overrides win over these). */
+    shardRewards: { first: number; second: number; third: number };
+    /** AP granted for joining, by tier (before the LP/VIP boost). */
+    joinApByTier: Record<string, number>;
+  };
   /** Stake builder display knobs (admin-editable, DOCS §18). */
   stakes?: {
     durationMinMonths: number;

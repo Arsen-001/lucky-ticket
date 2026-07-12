@@ -11,7 +11,7 @@ import { ChipShardIcon } from '@/components/shared/icons/ChipShardIcon';
 import { BoltIcon } from '@/components/shared/icons/BoltIcon';
 import { useAppTranslations } from '@/hooks/useAppTranslations';
 import { useGetMeQuery } from '@/api/me.api';
-import { GlobalConstants } from '@/constants/global.constants';
+import { useTournamentConfig } from '@/hooks/useTournamentConfig';
 import { routes } from '@/constants/routes';
 import { applyStatusTournamentJoinApBoost } from '@/utils/global/tournament.utils';
 import type { InventoryChipType } from '@/types/interfaces/inventory.interfaces';
@@ -64,14 +64,15 @@ export function TournamentBetModal({
   const t = useAppTranslations();
   const router = useRouter();
   const { data: me } = useGetMeQuery();
+  const { shardRewards, joinApByTier } = useTournamentConfig();
   const [betCount, setBetCount] = useState(1);
   const [isEditing, setIsEditing] = useState(false);
   const shardLabel = shardType === 'capacity' ? t('capacity') : t('time');
-  const topShards = topShardsProp ?? GlobalConstants.tournamentShardRewards.first;
+  const topShards = topShardsProp ?? shardRewards.first;
   // Show what will actually be credited — the backend applies the VIP/LP
   // join-AP boost, so the badge must too (DOCS §7).
   const joinAp = applyStatusTournamentJoinApBoost(
-    GlobalConstants.apRewards.tournamentJoinByTier[tournamentType],
+    joinApByTier[tournamentType],
     me?.isLuckyPlayer ?? false,
     me?.isVIP ?? false
   );
