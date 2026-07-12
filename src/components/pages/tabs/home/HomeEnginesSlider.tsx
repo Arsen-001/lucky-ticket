@@ -51,8 +51,17 @@ import type { TicketType } from '@/types/types/ticket.types';
 import type { InventoryChipType } from '@/types/interfaces/inventory.interfaces';
 import { mergeEngineItems, type EngineWithTier } from '@/utils/global/engine-items.utils';
 
-const SLIDE_WIDTH_CSS = 'calc((100vw - 120px) / 1.038)';
-const SLIDE_PADDING_CSS = `calc((100vw - (100vw - 120px) / 1.038) / 2)`;
+// The whole app is centered and capped at `max-w-140` (35rem / 560px) in the root
+// layout, so the slider's real usable width is `min(100vw, 35rem)` — NOT raw 100vw.
+// Sizing the coverflow off 100vw made every slide wider than the 560px container on
+// a wide / Telegram-Desktop-fullscreen viewport, so the centered engine got pushed
+// clean off the container ("engines fly off, not visible"). Clamping to the cap
+// keeps the active engine centered at any viewport width; the phone case (100vw <
+// 35rem) is unchanged.
+const APP_VW_CSS = 'min(100vw, 35rem)';
+const SLIDE_WIDTH_CSS = `calc((${APP_VW_CSS} - 120px) / 1.038)`;
+const SLIDE_PADDING_CSS = `calc((${APP_VW_CSS} - (${APP_VW_CSS} - 120px) / 1.038) / 2)`;
+const SLIDE_MIN_H_CSS = `calc(${APP_VW_CSS} - 60px)`;
 
 const CORE_TIER_COLORS: Record<TicketType, { mid: string; dark: string; glow: string }> = {
   bronze: {
@@ -410,14 +419,19 @@ export function HomeEnginesSlider({ className }: ClassNameProps) {
               key={i}
               style={{
                 flex: `0 0 ${SLIDE_WIDTH_CSS}`,
+                minHeight: SLIDE_MIN_H_CSS,
                 transform: `scale(${i === 0 ? 1 : 0.78})`,
               }}
               className={twMerge(
-                'relative flex origin-center items-center min-h-[calc(100vw-60px)]',
+                'relative flex origin-center items-center',
                 i !== 0 && 'opacity-60 saturate-75'
               )}
             >
-              <Skeleton variant="card" className="h-[calc(100vw-120px)] w-full rounded-3xl" />
+              <Skeleton
+                variant="card"
+                style={{ height: `calc(${APP_VW_CSS} - 120px)` }}
+                className="w-full rounded-3xl"
+              />
             </div>
           ))}
         </div>
@@ -457,11 +471,12 @@ export function HomeEnginesSlider({ className }: ClassNameProps) {
               onClick={!isActive ? () => scrollToIndex(index) : undefined}
               style={{
                 flex: `0 0 ${SLIDE_WIDTH_CSS}`,
+                minHeight: SLIDE_MIN_H_CSS,
                 transform: `translateX(${sideOffset}px) scale(${isActive ? 1 : 0.78})`,
                 zIndex: isActive ? 10 : 1,
               }}
               className={twMerge(
-                'relative flex origin-center snap-center items-center transition-all duration-[450ms] ease-[cubic-bezier(0.22,1,0.36,1)] min-h-[calc(100vw-60px)]',
+                'relative flex origin-center snap-center items-center transition-all duration-[450ms] ease-[cubic-bezier(0.22,1,0.36,1)]',
                 isActive ? 'opacity-100' : 'cursor-pointer opacity-30 saturate-75'
               )}
             >
@@ -499,13 +514,14 @@ export function HomeEnginesSlider({ className }: ClassNameProps) {
           onClick={activeIndex !== buySlotIndex ? () => scrollToIndex(buySlotIndex) : undefined}
           style={{
             flex: `0 0 ${SLIDE_WIDTH_CSS}`,
+            minHeight: SLIDE_MIN_H_CSS,
             transform: `translateX(${
               activeIndex === buySlotIndex ? 0 : buySlotIndex < activeIndex ? 35 : -35
             }px) scale(${activeIndex === buySlotIndex ? 1 : 0.78})`,
             zIndex: activeIndex === buySlotIndex ? 10 : 1,
           }}
           className={twMerge(
-            'relative flex origin-center snap-center items-center transition-all duration-[450ms] ease-[cubic-bezier(0.22,1,0.36,1)] min-h-[calc(100vw-60px)]',
+            'relative flex origin-center snap-center items-center transition-all duration-[450ms] ease-[cubic-bezier(0.22,1,0.36,1)]',
             activeIndex === buySlotIndex ? 'opacity-100' : 'cursor-pointer opacity-30 saturate-75'
           )}
         >
