@@ -61,7 +61,7 @@ export function Header({ className }: ClassNameProps) {
   return (
     <div
       className={twMerge(
-        'bg-header relative flex w-screen items-center gap-3 overflow-hidden px-3 pb-2',
+        'bg-header relative flex items-center gap-3 overflow-hidden px-3 pb-2',
         className
       )}
       style={{

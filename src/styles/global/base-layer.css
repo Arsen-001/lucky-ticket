@@ -17,6 +17,13 @@
        inside Telegram fullscreen, where the SDK overrides them. */
     --tg-safe-top: env(safe-area-inset-top, 0px);
     --tg-content-top: 0px;
+    /* Mobile-frame width. The app is a phone-shaped column at ANY viewport size:
+       it fills narrow screens and caps here on wider ones (tablet / desktop /
+       Telegram-Desktop), so it always reads as a mobile app. `--app-gutter` is the
+       empty margin on each side once the viewport exceeds the frame — used to pin
+       the fixed chrome (header, tab bar, drawer) flush to the centered column. */
+    --app-max-w: 430px;
+    --app-gutter: max(0px, calc((100vw - var(--app-max-w)) / 2));
   }
   html {
     width: 100%;

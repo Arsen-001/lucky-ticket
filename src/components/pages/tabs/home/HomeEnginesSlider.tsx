@@ -51,17 +51,20 @@ import type { TicketType } from '@/types/types/ticket.types';
 import type { InventoryChipType } from '@/types/interfaces/inventory.interfaces';
 import { mergeEngineItems, type EngineWithTier } from '@/utils/global/engine-items.utils';
 
-// The whole app is centered and capped at `max-w-140` (35rem / 560px) in the root
-// layout, so the slider's real usable width is `min(100vw, 35rem)` — NOT raw 100vw.
-// Sizing the coverflow off 100vw made every slide wider than the 560px container on
-// a wide / Telegram-Desktop-fullscreen viewport, so the centered engine got pushed
-// clean off the container ("engines fly off, not visible"). Clamping to the cap
-// keeps the active engine centered at any viewport width; the phone case (100vw <
-// 35rem) is unchanged.
-const APP_VW_CSS = 'min(100vw, 35rem)';
-const SLIDE_WIDTH_CSS = `calc((${APP_VW_CSS} - 120px) / 1.038)`;
-const SLIDE_PADDING_CSS = `calc((${APP_VW_CSS} - (${APP_VW_CSS} - 120px) / 1.038) / 2)`;
-const SLIDE_MIN_H_CSS = `calc(${APP_VW_CSS} - 60px)`;
+// The square engine cube is capped at a fixed max so it never balloons on a wide
+// / Telegram-Desktop-fullscreen viewport. Below the cap it grows with the viewport
+// (phone unchanged); past it the cube stays MAX_ENGINE_PX and only its side padding
+// grows. `SCROLLER_W_CSS` is the app's real usable width — the whole app is a
+// centered phone-width column (`--app-max-w`), so raw 100vw over-measured and the
+// active engine flew off the column. Centering padding is derived from the real
+// scroller width MINUS the (capped) slide width, so the active slide stays centered
+// at every viewport width. MAX_ENGINE_PX must match EngineCardCube's copy and
+// HomeBuyEngineSlot's height class.
+const MAX_ENGINE_PX = 300;
+const SCROLLER_W_CSS = 'min(100vw, var(--app-max-w))';
+const SLIDE_WIDTH_CSS = `min((100vw - 120px) / 1.038, ${MAX_ENGINE_PX}px)`;
+const SLIDE_PADDING_CSS = `calc((${SCROLLER_W_CSS} - ${SLIDE_WIDTH_CSS}) / 2)`;
+const SLIDE_MIN_H_CSS = `min(100vw - 60px, ${MAX_ENGINE_PX + 70}px)`;
 
 const CORE_TIER_COLORS: Record<TicketType, { mid: string; dark: string; glow: string }> = {
   bronze: {
@@ -429,7 +432,7 @@ export function HomeEnginesSlider({ className }: ClassNameProps) {
             >
               <Skeleton
                 variant="card"
-                style={{ height: `calc(${APP_VW_CSS} - 120px)` }}
+                style={{ height: SLIDE_WIDTH_CSS }}
                 className="w-full rounded-3xl"
               />
             </div>

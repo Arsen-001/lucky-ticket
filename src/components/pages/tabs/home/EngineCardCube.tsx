@@ -29,13 +29,12 @@ import { EngineCubeSlot } from './EngineCubeSlot';
 import { EngineCubeStatsFace } from './EngineCubeStatsFace';
 import '@/styles/components/engine-card-cube.css';
 
-// Must track HomeEnginesSlider's SLIDE_WIDTH_CSS: the app is capped at `max-w-140`
-// (35rem / 560px), so the cube is sized off `min(100vw, 35rem)`, not raw 100vw.
-// Using 100vw here made the 3D cube overflow its slide on a wide / fullscreen
-// viewport, compounding the "engine flies off screen" bug.
-const APP_VW_CSS = 'min(100vw, 35rem)';
-const FACE_SIZE = `calc((${APP_VW_CSS} - 120px) / 1.038)`;
-const FACE_HALF_DEPTH = `calc((${APP_VW_CSS} - 120px) / 2.076 + 15px)`;
+// Square cube, sized to match HomeEnginesSlider's SLIDE_WIDTH_CSS: it grows with the
+// viewport but is capped at MAX_ENGINE_PX so it never balloons on a wide / fullscreen
+// screen. Keep MAX_ENGINE_PX in sync with the slider's copy (and HomeBuyEngineSlot).
+const MAX_ENGINE_PX = 300;
+const FACE_SIZE = `min((100vw - 120px) / 1.038, ${MAX_ENGINE_PX}px)`;
+const FACE_HALF_DEPTH = `calc(min((100vw - 120px) / 1.038, ${MAX_ENGINE_PX}px) / 2 + 15px)`;
 const SWIPE_INTENT_PX = 8;
 const DRAG_DEGREES_PER_PX = 0.5;
 

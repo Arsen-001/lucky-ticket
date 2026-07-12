@@ -53,7 +53,7 @@ export function BottomSheet({
 
         <div
           className={twMerge(
-            'max-w-140 scrollbar-hidden relative max-h-[90vh] w-full overflow-y-auto transition-transform duration-300 ease-out',
+            'max-w-[var(--app-max-w)] scrollbar-hidden relative max-h-[90vh] w-full overflow-y-auto transition-transform duration-300 ease-out',
             open ? 'translate-y-0' : 'translate-y-full',
             className
           )}

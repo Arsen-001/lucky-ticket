@@ -45,7 +45,9 @@ export default async function RootLayout({ children }: ChildrenProps) {
               <NavigationHistoryProvider>
                 <TonConnectProvider>
                   <TelegramProvider>
-                    <div className="max-w-140 m-auto h-full overflow-hidden">{children}</div>
+                    <div className="max-w-[var(--app-max-w)] m-auto h-full overflow-hidden">
+                      {children}
+                    </div>
                     <Onboarding />
                   </TelegramProvider>
                 </TonConnectProvider>
