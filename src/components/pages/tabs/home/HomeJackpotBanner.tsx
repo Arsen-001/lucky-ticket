@@ -14,10 +14,10 @@ import '@/styles/components/jackpot.css';
 import '@/styles/components/jackpot-odometer.css';
 
 /**
- * Premium capsule jackpot counter at the top of Home — graphite metal ring,
- * gold neon hairline, glassmorphic inner with a purple-gold glow; JACKPOT
- * wordmark, slot-machine digit reels (JackpotOdometer) and the LC coin on the
- * right. Links to the jackpot page.
+ * Premium capsule jackpot counter at the top of Home — brushed platinum ring,
+ * glassmorphic inner with a cool electric-pink bloom; white JACKPOT wordmark,
+ * slot-machine digit reels (JackpotOdometer) and the gold LC coin on the
+ * right (the only gold accent). Links to the jackpot page.
  * The pot only grows when a tournament finishes (its 10% skim), so there is NO
  * fake creep: the query polls and the reels roll (with a "+X" pop) only when
  * the server value actually increased. Never rolls backwards.
@@ -80,7 +80,7 @@ export function HomeJackpotBanner() {
             <span className="relative flex min-w-0 flex-1 items-center justify-center">
               <JackpotOdometer
                 value={display}
-                className="jackpot-glow text-gold text-[22px] font-extrabold leading-none"
+                className="jackpot-glow text-[22px] font-extrabold leading-none text-white"
               />
               {pop && (
                 <span

@@ -19,24 +19,25 @@
 }
 
 /* ---------------------------------------------------------------------------
-   Premium jackpot capsule: a polished graphite metal ring with a gold neon
-   hairline wraps a glassmorphic inner capsule glowing purple-gold ("liquid
-   gold on cosmic dust"). Two layers:
+   Premium jackpot capsule: a polished platinum/graphite metal ring wraps a
+   glassmorphic inner capsule with a cool electric-pink bloom (matches the
+   app's tab-bar / header pink). Gold is intentionally reserved for the LC
+   coin medallion only. Two layers:
      .jackpot-capsule       — the outer metal ring (padding = ring thickness)
      .jackpot-capsule-glass — the inner glass body with bevel + inner glow
 --------------------------------------------------------------------------- */
 
 .jackpot-capsule {
-  /* Brushed graphite: vertical polish + a faint horizontal sheen. */
+  /* Brushed platinum: vertical polish + a faint horizontal sheen. */
   background:
     linear-gradient(
       90deg,
-      rgba(255, 255, 255, 0.05),
+      rgba(255, 255, 255, 0.06),
       transparent 30%,
       transparent 70%,
-      rgba(255, 255, 255, 0.05)
+      rgba(255, 255, 255, 0.06)
     ),
-    linear-gradient(180deg, #4a4a58 0%, #232330 28%, #101018 52%, #1d1d28 76%, #3b3b49 100%);
+    linear-gradient(180deg, #5a5a63 0%, #2c2c34 30%, #16161c 55%, #242430 78%, #43434e 100%);
   animation: jackpot-capsule-glow 3s ease-in-out infinite;
 }
 
@@ -44,16 +45,16 @@
   0%,
   100% {
     box-shadow:
-      0 0 0 1px color-mix(in srgb, var(--color-gold) 45%, transparent),
-      0 0 22px color-mix(in srgb, var(--color-gold) 14%, transparent),
+      0 0 0 1px rgba(210, 210, 222, 0.18),
+      0 0 18px color-mix(in srgb, var(--color-electric-pink) 10%, transparent),
       0 10px 28px rgba(0, 0, 0, 0.55),
       inset 0 1px 0 rgba(255, 255, 255, 0.22),
       inset 0 -1px 1px rgba(0, 0, 0, 0.6);
   }
   50% {
     box-shadow:
-      0 0 0 1px color-mix(in srgb, var(--color-gold) 70%, transparent),
-      0 0 34px color-mix(in srgb, var(--color-gold) 30%, transparent),
+      0 0 0 1px rgba(210, 210, 222, 0.26),
+      0 0 30px color-mix(in srgb, var(--color-electric-pink) 24%, transparent),
       0 10px 28px rgba(0, 0, 0, 0.55),
       inset 0 1px 0 rgba(255, 255, 255, 0.22),
       inset 0 -1px 1px rgba(0, 0, 0, 0.6);
@@ -61,31 +62,24 @@
 }
 
 .jackpot-capsule-glass {
-  border: 1px solid color-mix(in srgb, var(--color-gold) 30%, transparent);
+  border: 1px solid rgba(200, 200, 215, 0.16);
   background:
-    /* liquid-gold pool bottom-left */
+    /* electric-pink bloom top-right */
     radial-gradient(
-      130% 150% at 18% 100%,
-      color-mix(in srgb, var(--color-gold) 20%, transparent),
-      transparent 45%
+      120% 150% at 82% 0%,
+      color-mix(in srgb, var(--color-electric-pink) 26%, transparent),
+      transparent 55%
     ),
-    /* cosmic purple bloom top-right */
-    radial-gradient(
-        120% 160% at 85% 0%,
-        color-mix(in srgb, var(--color-electric-purple) 38%, transparent),
-        transparent 55%
-      ),
-    /* deep purple glass base */
-    linear-gradient(180deg, rgba(38, 26, 66, 0.92), rgba(16, 11, 34, 0.96));
+    /* deep neutral glass base */
+    linear-gradient(180deg, rgba(32, 28, 50, 0.94), rgba(14, 12, 26, 0.96));
   backdrop-filter: blur(10px);
   -webkit-backdrop-filter: blur(10px);
   box-shadow:
     /* 3D glass bevel: lit top rim, shaded lower rim */
     inset 0 1.5px 0 rgba(255, 255, 255, 0.14),
     inset 0 -2px 4px rgba(0, 0, 0, 0.5),
-    /* inner purple-gold atmosphere */ inset 0 0 24px
-      color-mix(in srgb, var(--color-electric-purple) 22%, transparent),
-    inset 0 -8px 20px color-mix(in srgb, var(--color-gold) 8%, transparent);
+    /* inner pink atmosphere */ inset 0 0 20px
+      color-mix(in srgb, var(--color-electric-pink) 14%, transparent);
 }
 
 /* Diagonal light sweep that crosses the glass every few seconds. */
@@ -120,7 +114,7 @@
   }
 }
 
-/* Gold-gradient lettering for the JACKPOT wordmark. */
+/* Gold-gradient lettering for the JACKPOT wordmark (jackpot-page hero). */
 .jackpot-title {
   background: linear-gradient(180deg, #ffe9b0 8%, var(--color-gold) 55%, #b07d1f 96%);
   -webkit-background-clip: text;
@@ -129,16 +123,25 @@
   filter: drop-shadow(0 0 8px rgba(248, 189, 62, 0.35));
 }
 
-/* Thin neon underline beneath the wordmark — the "gold line" accent. */
+/* Home capsule keeps the wordmark cool platinum-white, not gold. */
+.jackpot-capsule .jackpot-title {
+  background: linear-gradient(180deg, #ffffff 10%, #c9c7d6 96%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  filter: drop-shadow(0 0 6px rgba(255, 255, 255, 0.22));
+}
+
+/* Thin neon underline beneath the wordmark — electric-pink accent. */
 .jackpot-title-rule {
   width: 100%;
   height: 1px;
   background: linear-gradient(
     90deg,
-    color-mix(in srgb, var(--color-gold) 80%, transparent),
+    color-mix(in srgb, var(--color-electric-pink) 85%, transparent),
     transparent
   );
-  box-shadow: 0 0 6px color-mix(in srgb, var(--color-gold) 50%, transparent);
+  box-shadow: 0 0 6px color-mix(in srgb, var(--color-electric-pink) 45%, transparent);
 }
 
 /* Gold coin medallion on the right of the capsule. */
