@@ -9,6 +9,7 @@ export const rtkTags = {
   jackpot: 'Jackpot',
   faq: 'Faq',
   privacy: 'Privacy',
+  terms: 'Terms',
   notifications: 'Notifications',
   notificationPreferences: 'NotificationPreferences',
   referral: 'Referral',

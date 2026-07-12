@@ -53,6 +53,7 @@ export const routes = {
     },
   },
   privacy: '/privacy',
+  termsOfUse: '/terms-of-use',
   support: {
     index: '/support',
   },

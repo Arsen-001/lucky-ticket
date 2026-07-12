@@ -6,6 +6,7 @@ import { tasksMock } from '@/mock/tasks.mock';
 import { leaderboardMock } from '@/mock/leaderboard.mock';
 import { faqMock } from '@/mock/faq.mock';
 import { privacyMock } from '@/mock/privacy.mock';
+import { termsMock } from '@/mock/terms.mock';
 import { notificationsMock } from '@/mock/notifications.mock';
 import { notificationPreferencesMock } from '@/mock/notification-preferences.mock';
 import { referralMock } from '@/mock/referral.mock';
@@ -88,6 +89,7 @@ export const mockData = {
   ...leaderboardMock,
   ...faqMock,
   ...privacyMock,
+  ...termsMock,
   ...notificationsMock,
   ...notificationPreferencesMock,
   ...referralMock,

@@ -20,6 +20,7 @@ import {
   LifeBuoy,
   LogOut,
   Package,
+  ScrollText,
   Settings,
   ShieldCheck,
   Sparkles,
@@ -285,6 +286,11 @@ export function Drawer() {
       route: routes.privacy,
       title: t('privacy policy'),
       icon: <ShieldCheck size={18} />,
+    },
+    {
+      route: routes.termsOfUse,
+      title: t('terms of use'),
+      icon: <ScrollText size={18} />,
     },
     { route: routes.languages, title: t('languages'), icon: <Globe size={18} /> },
   ];
