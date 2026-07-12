@@ -46,6 +46,8 @@ export interface Tournament {
   startTime: string;
   /** Total seats; null = unlimited (∞). */
   teamSize: number | null;
+  /** Players joined (real + cosmetic ramp); shown as "joined / capacity". */
+  participantsCount?: number;
   prizePool: number;
   type: TournamentType;
   shardType: InventoryChipType;
