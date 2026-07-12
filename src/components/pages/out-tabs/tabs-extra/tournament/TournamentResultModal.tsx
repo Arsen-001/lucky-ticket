@@ -22,6 +22,8 @@ interface TournamentResultModalProps {
   tournamentType: TournamentType;
   shardType?: InventoryChipType;
   result?: TournamentUserResult;
+  /** Displayed field size (real + cosmetic count) — shown as "place / total". */
+  total?: number;
 }
 
 type ResultView = 'top-three' | 'mid-place' | 'no-place' | 'not-played';
@@ -101,6 +103,7 @@ export function TournamentResultModal({
   tournamentType,
   shardType,
   result,
+  total,
 }: TournamentResultModalProps) {
   const t = useAppTranslations();
   const { data: me } = useGetMeQuery();
@@ -134,6 +137,12 @@ export function TournamentResultModal({
   const counter = useCounter(view === 'top-three' || view === 'mid-place' ? lc : 0);
   const jackpotCounter = useCounter(jackpotLc);
   const placeLabel = view === 'top-three' && place ? t(PLACE_LABEL[place]) : undefined;
+  // Subtitle place prefix: podium → "1st ·"; a placed non-podium player → "N / total ·".
+  const placePrefix = placeLabel
+    ? `${placeLabel} · `
+    : place && place > 3
+      ? `${place}${total ? ` / ${total}` : ''} · `
+      : '';
 
   // Per-rank colors: 1st=gold, 2nd=silver, 3rd=bronze; mid-place uses pink/purple
   const rank = view === 'top-three' && place ? (place as 1 | 2 | 3) : null;
@@ -197,7 +206,7 @@ export function TournamentResultModal({
                     <span
                       className={`${MID_TEXT_CLASS} text-[13px] tabular-nums uppercase tracking-[0.2em] leading-none`}
                     >
-                      {t('place')}
+                      {total ? `/ ${total}` : t('place')}
                     </span>
                   </div>
                 </div>
@@ -217,7 +226,7 @@ export function TournamentResultModal({
           <div className="flex flex-col items-center justify-center gap-1 w-full">
             <h2 className="text-2xl font-extrabold leading-tight text-center">{title}</h2>
             <p className="text-xs text-white-secondary text-center max-w-[280px] line-clamp-2">
-              {placeLabel ? `${placeLabel} · ` : ''}
+              {placePrefix}
               {tournamentName}
             </p>
           </div>

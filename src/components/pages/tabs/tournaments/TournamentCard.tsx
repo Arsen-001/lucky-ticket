@@ -454,6 +454,7 @@ export function TournamentCard({
         tournamentType={type ?? 'bronze'}
         shardType={shardType}
         result={userResult}
+        total={participantsCount}
       />
     </>
   );

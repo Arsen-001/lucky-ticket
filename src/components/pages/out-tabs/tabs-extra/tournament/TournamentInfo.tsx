@@ -428,6 +428,7 @@ export function TournamentInfo({ id, className, ...rest }: TournamentDetailsProp
         tournamentType={data?.type ?? 'bronze'}
         shardType={data?.shardType}
         result={userResult}
+        total={data?.participantsCount}
       />
     </div>
   );
