@@ -38,6 +38,7 @@ import { useAppTranslations } from '@/hooks/useAppTranslations';
 import { useCountDown } from '@/hooks/useCountDown';
 import { useUnlockedTiers } from '@/hooks/useUnlockedTiers';
 import { useTournamentConfig } from '@/hooks/useTournamentConfig';
+import { resolveShardRewards } from '@/utils/global/tournament.utils';
 import type { TicketType } from '@/types/types/ticket.types';
 import type { TournamentType } from '@/types/types/tournaments.types';
 import { TournamentBetModal } from './TournamentBetModal';
@@ -98,7 +99,9 @@ export function TournamentInfo({ id, className, ...rest }: TournamentDetailsProp
   // join window is closed, results are pending.
   const isStarted = !isFinished && expired && !!data?.startTime;
   const isStartingSoon = !isFinished && !isStarted && days === 0 && hours === 0 && minutes < 60;
-  const topShards = data?.shardsFirst ?? shardRewards.first;
+  // Header pairs with the total prize pool → show total shards; the bet modal
+  // (labeled "1st") gets the winner's take.
+  const { first: firstShards, total: totalShards } = resolveShardRewards(data, shardRewards);
   const participated = !!data?.participated;
   const ticketCount = data?.participatedTicketsCount ?? 0;
   const userResult = data?.userResult;
@@ -274,7 +277,7 @@ export function TournamentInfo({ id, className, ...rest }: TournamentDetailsProp
                     <ShardZoomButton type={data.shardType} tier={data.type} size={16} />
                   )}
                   <span className="text-xs font-bold text-white tabular-nums leading-none">
-                    ×{topShards}
+                    ×{totalShards}
                   </span>
                 </div>
               </div>
@@ -402,7 +405,7 @@ export function TournamentInfo({ id, className, ...rest }: TournamentDetailsProp
         tournamentName={data?.name ?? ''}
         tournamentType={data?.type ?? 'bronze'}
         shardType={data?.shardType}
-        topShards={topShards}
+        topShards={firstShards}
         availableTickets={availableTickets}
         participated={data?.participated}
         participatedTicketsCount={data?.participatedTicketsCount}

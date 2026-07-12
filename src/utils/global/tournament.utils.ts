@@ -17,6 +17,23 @@ export const placementPrizeLc = (
 };
 
 /**
+ * Resolves a tournament's top-3 shard rewards: per-tournament overrides win,
+ * otherwise the (admin-tunable) default. `total` is the sum of all three — the
+ * total shards a tournament distributes, shown on cards next to the prize pool.
+ */
+export const resolveShardRewards = (
+  tournament:
+    | { shardsFirst?: number | null; shardsSecond?: number | null; shardsThird?: number | null }
+    | undefined,
+  defaults: { first: number; second: number; third: number }
+): { first: number; second: number; third: number; total: number } => {
+  const first = tournament?.shardsFirst ?? defaults.first;
+  const second = tournament?.shardsSecond ?? defaults.second;
+  const third = tournament?.shardsThird ?? defaults.third;
+  return { first, second, third, total: first + second + third };
+};
+
+/**
  * Returns the effective LC-reward boost % from status. VIP supersedes LP —
  * the higher-tier value wins, the two never stack.
  */

@@ -35,6 +35,7 @@ import { useCountDown } from '@/hooks/useCountDown';
 import { useUnlockedTiers } from '@/hooks/useUnlockedTiers';
 import { formatCompact } from '@/utils/global/number.utils';
 import { useTournamentConfig } from '@/hooks/useTournamentConfig';
+import { resolveShardRewards } from '@/utils/global/tournament.utils';
 import { routes } from '@/constants/routes';
 import type {
   PersonalTournament,
@@ -80,6 +81,8 @@ export function TournamentCard({
   teamSize,
   shardType,
   shardsFirst,
+  shardsSecond,
+  shardsThird,
   status,
   sponsor,
   loading,
@@ -122,7 +125,12 @@ export function TournamentCard({
   const isStarted = !isFinished && expired && !!startTime;
   const isStartingSoon = !isFinished && !isStarted && days === 0 && hours === 0 && minutes < 60;
   const ShardIcon = shardType === 'capacity' ? MemoryStick : Cpu;
-  const topShards = shardsFirst ?? shardRewards.first;
+  // Card headline pairs with the total prize pool, so it shows the TOTAL shards
+  // across the top-3; the bet modal (labeled "1st") still gets the winner's take.
+  const { first: firstShards, total: totalShards } = resolveShardRewards(
+    { shardsFirst, shardsSecond, shardsThird },
+    shardRewards
+  );
   const hasUnseenResult = isFinished && !!userResult && !resultSeen;
 
   const [isBetModalOpen, setIsBetModalOpen] = useState(false);
@@ -316,7 +324,7 @@ export function TournamentCard({
                     strokeWidth={2.4}
                   />
                   <span className="text-xs font-bold text-white tabular-nums leading-none">
-                    ×{topShards}
+                    ×{totalShards}
                   </span>
                 </div>
               </div>
@@ -421,7 +429,7 @@ export function TournamentCard({
         tournamentName={name ?? ''}
         tournamentType={type ?? 'bronze'}
         shardType={shardType}
-        topShards={topShards}
+        topShards={firstShards}
         availableTickets={availableTickets}
         participated={participated}
         participatedTicketsCount={participatedTicketsCount}
