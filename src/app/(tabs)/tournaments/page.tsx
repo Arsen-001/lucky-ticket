@@ -118,7 +118,8 @@ export default function TournamentPage() {
           case 'soonest':
             return new Date(a.startTime).getTime() - new Date(b.startTime).getTime();
           case 'team-size':
-            return a.teamSize - b.teamSize;
+            // unlimited (∞) sorts last
+            return (a.teamSize ?? Infinity) - (b.teamSize ?? Infinity);
           default:
             return 0;
         }

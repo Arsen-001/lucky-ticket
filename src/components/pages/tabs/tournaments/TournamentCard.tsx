@@ -329,7 +329,7 @@ export function TournamentCard({
                 <span className="inline-flex items-center gap-1 rounded-md bg-white/5 px-1.5 py-1.5 leading-none shrink-0 text-[11px]">
                   <Users className="w-3 h-3 text-pink-secondary shrink-0" />
                   <span className="font-semibold text-white/90 tabular-nums leading-none">
-                    {teamSize}
+                    {teamSize == null ? '∞' : teamSize}
                   </span>
                 </span>
               </SkeletonSuspense>

@@ -629,7 +629,7 @@ The default placement-based shard distribution is:
 | 3rd place | 1              |
 | 4th+      | 0              |
 
-Shard quality is fixed by the tournament's tier (see above).
+Shard quality is fixed by the tournament's tier (see above). Admins can **override the top-3 shard counts per tournament** in the panel; a tournament with custom values awards those instead of the 3/2/1 default, and any field left blank falls back to the global default.
 
 #### Type Rotation — One Chip Type per Tournament
 
@@ -816,7 +816,7 @@ Each tournament includes:
   At the $0.000001/LC anchor a full 500-seat instance is worth **$2 / $5 / $12.50 / $30 / $75** by tier — the per-seat knob is what caps the platform's real-money faucet.
 
 - **Start Time:** The date and time when the tournament begins and winners are decided.
-- **Team Size:** The total number of seats. `teamSizeCap` = 500 per instance; when more eligible players exist than the cap, additional parallel instances of the slot are spawned.
+- **Team Size:** The total number of seats. `teamSizeCap` = 500 per instance; when more eligible players exist than the cap, additional parallel instances of the slot are spawned. For **admin-created project tournaments** the panel sets this seat count explicitly and it is enforced as a hard cap at join time — a full tournament rejects new entrants (already-joined players may still add tickets). Leaving the field blank creates an **unlimited (∞)** tournament with no seat cap.
 
 The prize pool is the platform's main LC faucet; it scales with the player base because more players spawn more tournament instances.
 
@@ -898,6 +898,8 @@ The top three placements in every tournament receive **chip shards** (see Sectio
 | 1st place | 3              |
 | 2nd place | 2              |
 | 3rd place | 1              |
+
+The 3/2/1 counts are the platform default; an admin may set custom top-3 shard rewards per tournament in the panel (blank fields fall back to the default).
 
 Each individual tournament awards shards of **only one chip type** — Speed **or** Capacity. Consecutive tournaments alternate the awarded type (Speed → Capacity → Speed → …) so both chips grow over time. The awarded type and shard quality are visible on the tournament card before it starts.
 

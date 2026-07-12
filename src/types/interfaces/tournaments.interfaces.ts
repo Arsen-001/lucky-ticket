@@ -44,7 +44,8 @@ export interface Tournament {
   id: string;
   name: string;
   startTime: string;
-  teamSize: number;
+  /** Total seats; null = unlimited (∞). */
+  teamSize: number | null;
   prizePool: number;
   type: TournamentType;
   shardType: InventoryChipType;
