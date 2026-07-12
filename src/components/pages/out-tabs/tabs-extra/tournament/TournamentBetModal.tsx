@@ -26,6 +26,8 @@ interface TournamentBetModalProps {
   tournamentName: string;
   tournamentType: TournamentType;
   shardType?: InventoryChipType;
+  /** First-place shard reward for this tournament; falls back to the global default. */
+  topShards?: number;
   availableTickets: number;
   participated?: boolean;
   participatedTicketsCount?: number;
@@ -54,6 +56,7 @@ export function TournamentBetModal({
   tournamentName,
   tournamentType,
   shardType,
+  topShards: topShardsProp,
   availableTickets,
   participated,
   participatedTicketsCount,
@@ -64,7 +67,7 @@ export function TournamentBetModal({
   const [betCount, setBetCount] = useState(1);
   const [isEditing, setIsEditing] = useState(false);
   const shardLabel = shardType === 'capacity' ? t('capacity') : t('time');
-  const topShards = GlobalConstants.tournamentShardRewards.first;
+  const topShards = topShardsProp ?? GlobalConstants.tournamentShardRewards.first;
   // Show what will actually be credited — the backend applies the VIP/LP
   // join-AP boost, so the badge must too (DOCS §7).
   const joinAp = applyStatusTournamentJoinApBoost(

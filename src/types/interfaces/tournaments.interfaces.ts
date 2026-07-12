@@ -49,6 +49,10 @@ export interface Tournament {
   prizePool: number;
   type: TournamentType;
   shardType: InventoryChipType;
+  /** Per-tournament top-3 shard rewards; null/absent = global default (3/2/1). */
+  shardsFirst?: number | null;
+  shardsSecond?: number | null;
+  shardsThird?: number | null;
   status: TournamentStatus;
   winners?: TournamentWinner[];
   places?: TournamentPlacesResponse;

@@ -97,7 +97,7 @@ export function TournamentInfo({ id, className, ...rest }: TournamentDetailsProp
   // join window is closed, results are pending.
   const isStarted = !isFinished && expired && !!data?.startTime;
   const isStartingSoon = !isFinished && !isStarted && days === 0 && hours === 0 && minutes < 60;
-  const topShards = GlobalConstants.tournamentShardRewards.first;
+  const topShards = data?.shardsFirst ?? GlobalConstants.tournamentShardRewards.first;
   const participated = !!data?.participated;
   const ticketCount = data?.participatedTicketsCount ?? 0;
   const userResult = data?.userResult;
@@ -401,6 +401,7 @@ export function TournamentInfo({ id, className, ...rest }: TournamentDetailsProp
         tournamentName={data?.name ?? ''}
         tournamentType={data?.type ?? 'bronze'}
         shardType={data?.shardType}
+        topShards={topShards}
         availableTickets={availableTickets}
         participated={data?.participated}
         participatedTicketsCount={data?.participatedTicketsCount}

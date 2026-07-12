@@ -79,6 +79,7 @@ export function TournamentCard({
   prizePool,
   teamSize,
   shardType,
+  shardsFirst,
   status,
   sponsor,
   loading,
@@ -120,7 +121,7 @@ export function TournamentCard({
   const isStarted = !isFinished && expired && !!startTime;
   const isStartingSoon = !isFinished && !isStarted && days === 0 && hours === 0 && minutes < 60;
   const ShardIcon = shardType === 'capacity' ? MemoryStick : Cpu;
-  const topShards = GlobalConstants.tournamentShardRewards.first;
+  const topShards = shardsFirst ?? GlobalConstants.tournamentShardRewards.first;
   const hasUnseenResult = isFinished && !!userResult && !resultSeen;
 
   const [isBetModalOpen, setIsBetModalOpen] = useState(false);
@@ -419,6 +420,7 @@ export function TournamentCard({
         tournamentName={name ?? ''}
         tournamentType={type ?? 'bronze'}
         shardType={shardType}
+        topShards={topShards}
         availableTickets={availableTickets}
         participated={participated}
         participatedTicketsCount={participatedTicketsCount}
