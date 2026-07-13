@@ -922,6 +922,8 @@ When a tournament transitions to `finished`, every participant's reward is compu
 - Place **501+** (if more participants exist than the percentage table covers) receive nothing.
 - Top 3 additionally receive shards (3 / 2 / 1).
 
+**How places are decided:** by default the finishing order is a **weighted random draw** — each participant's odds scale with their ticket count (more tickets → better expected place). From the admin panel ("Назначение мест") the admin may instead **fix a subset of players at explicit places** (the winners); everyone left unfixed is then **scattered across the free slots of the visible field** — the real roster plus the cosmetic fake-join padding — by that same ticket-weighted draw. So a non-selected real player lands at a believable deep rank (e.g. "347 / 500") rather than packing right behind the fixed winners. A fixed place may exceed the real roster size (a real player deliberately buried inside the fake field); the payout is by the ladder for that exact place (outside the prize bracket → 0).
+
 **Notification & result popup:**
 
 When a tournament finishes, every participant receives an in-app notification with their final placement and reward. When the user opens the finished tournament's detail page, a **result popup** auto-appears once:
