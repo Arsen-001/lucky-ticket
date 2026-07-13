@@ -69,6 +69,16 @@ export function Header({ className }: ClassNameProps) {
         // the row never sits under Telegram's floating close/menu buttons.
         height: 'calc(5rem + var(--tg-inset-top))',
         paddingTop: 'calc(var(--tg-inset-top) + 0.5rem)',
+        // Telegram reports safe-area/fullscreen insets in a burst on open (and
+        // they can bounce mid-animation). Ease the height/padding instead of
+        // snapping so the header settles smoothly rather than blinking.
+        transition: 'height 220ms ease-out, padding-top 220ms ease-out',
+        // Pin this fixed bar to its own compositor layer: WKWebView (Telegram
+        // iOS) re-rasterizes fixed elements during big content relayouts —
+        // e.g. the tournament list remounting on a tab switch — which shows
+        // up as the whole header flickering.
+        transform: 'translateZ(0)',
+        willChange: 'transform',
       }}
     >
       <span

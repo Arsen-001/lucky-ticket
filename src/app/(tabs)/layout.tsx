@@ -19,6 +19,9 @@ export default function TabsLayout({ children }: ChildrenProps) {
           // Match the header/tab-bar heights, both grown by the Telegram insets.
           paddingTop: 'calc(5rem + var(--tg-inset-top))',
           paddingBottom: 'calc(5rem + var(--tg-inset-bottom))',
+          // Ease the padding as Telegram's insets settle on open — snapping in
+          // lockstep with the header made the whole page appear to blink.
+          transition: 'padding 220ms ease-out',
         }}
       >
         <div className="h-full overflow-hidden inset-container-background">

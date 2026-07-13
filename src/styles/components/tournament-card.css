@@ -193,6 +193,8 @@
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   animation: tournament-rank-text-shift 7s ease-in-out infinite;
+  /* Same WKWebView clip-text flicker guard as .ach-status-username. */
+  transform: translateZ(0);
 }
 
 .tournament-rank-text--gold {

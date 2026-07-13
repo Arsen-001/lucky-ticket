@@ -15,6 +15,7 @@
 
 # next.js
 /.next/
+/.next-mock/
 /.next-precommit/
 /.next-repro/
 /out/

@@ -252,6 +252,9 @@
   -webkit-text-fill-color: transparent;
   filter: drop-shadow(0 2px 8px rgba(0, 0, 0, 0.45));
   animation: liquid-metal-shift 7s ease-in-out infinite;
+  /* Animated clip-text + filter flickers in WKWebView unless promoted to its
+     own layer (classic iOS background-clip:text repaint bug). */
+  transform: translateZ(0);
 
   /* Base: cool silver liquid metal */
   background-image: linear-gradient(

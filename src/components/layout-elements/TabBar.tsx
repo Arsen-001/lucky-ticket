@@ -60,7 +60,15 @@ export function TabBar({ className }: ClassNameProps) {
         'bg-header relative px-5 pt-4 flex justify-between items-center gap-2 overflow-hidden animate-fade-in',
         className
       )}
-      style={{ paddingBottom: 'calc(1rem + var(--tg-inset-bottom))' }}
+      // Ease the bottom inset as Telegram settles it on open (see Header).
+      style={{
+        paddingBottom: 'calc(1rem + var(--tg-inset-bottom))',
+        transition: 'padding-bottom 220ms ease-out',
+        // Own compositor layer — see Header: fixed bars flicker in WKWebView
+        // during heavy content relayouts without this.
+        transform: 'translateZ(0)',
+        willChange: 'transform',
+      }}
     >
       <span
         aria-hidden
