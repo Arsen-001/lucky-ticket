@@ -132,7 +132,7 @@ export const GlobalConstants = {
   marketMaxShardPurchaseQuantity: 10,
   telegramBotUrl: 'https://t.me/luckyticket365_bot',
   telegramSupportUrl: 'https://t.me/luckyticket365_support',
-  telegramChannelUrl: 'https://t.me/luckyticket365_channel',
+  telegramChannelUrl: 'https://t.me/luckyticket365',
 
   starName: 'LS',
   tonName: 'TON',

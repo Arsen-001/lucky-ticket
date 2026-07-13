@@ -683,7 +683,7 @@ const SOCIAL_PLATFORMS = [
   {
     title: 'Follow our Telegram channel',
     rewards: [lc(1), ap(50)],
-    url: 'https://t.me/luckyticket365_channel',
+    url: 'https://t.me/luckyticket365',
     completed: true,
   },
   {
@@ -706,7 +706,7 @@ const SOCIAL = buildCategory({
       title: 'Share your daily result',
       rewards: [ap(15)],
       progress: { current: 0, target: 1 },
-      externalLink: 'https://t.me/luckyticket365_channel',
+      externalLink: 'https://t.me/luckyticket365',
     },
   ],
   once: SOCIAL_PLATFORMS.map(p => ({
