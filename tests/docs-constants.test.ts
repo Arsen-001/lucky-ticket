@@ -14,7 +14,7 @@ describe('DOCS ↔ constants (no drift)', () => {
 
   it('jackpot whole-pot split matches the documented §20.3 table', () => {
     const split = getJackpotWholePotSplit();
-    expect(split).toEqual({ participants: 20, first: 40, second: 24, third: 16 });
+    expect(split).toEqual({ participants: 0, first: 50, second: 30, third: 20 });
     // The table prints each whole-pot share in bold (e.g. "**40%**").
     for (const value of [split.participants, split.first, split.second, split.third]) {
       expect(docs, `whole-pot ${value}% in DOCS`).toContain(`**${value}%**`);

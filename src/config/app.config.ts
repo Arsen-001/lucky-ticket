@@ -246,17 +246,20 @@ export const appConfig = {
      */
     accrualPercent: 10,
     /**
-     * When the pot drops on the secretly-charged tournament instance, this
-     * percent is split EQUALLY among ALL of that instance's participants
-     * (consolation — nobody walks away with a jackpot-zero).
+     * When the pot drops, this percent is split EQUALLY among ALL participants
+     * as a consolation. **0 by default** — the jackpot pays the top-3 ONLY, so a
+     * real player parked deep in the fake field (267/500) can't win it. Mirrors
+     * the backend `JACKPOT.participantsSharePercent`; raising it (admin-tunable)
+     * re-enables the consolation spread. Display-only anchor — the backend
+     * `GET /config` value is authoritative.
      */
-    participantsSharePercent: 20,
+    participantsSharePercent: 0,
     /** The remaining percent of the dropped pot, paid to the top-3 podium. */
-    podiumSharePercent: 80,
+    podiumSharePercent: 100,
     /**
      * How the podium share splits across 1st / 2nd / 3rd (percent OF the podium
-     * share). Whole-pot equivalents (via `getJackpotWholePotSplit`): 1st 40%,
-     * 2nd 24%, 3rd 16%.
+     * share). Whole-pot equivalents (via `getJackpotWholePotSplit`) at the
+     * default: 1st 50%, 2nd 30%, 3rd 20%.
      */
     podiumSplitPercent: { first: 50, second: 30, third: 20 },
   },

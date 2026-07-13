@@ -2,9 +2,9 @@ import { describe, it, expect } from 'vitest';
 import { getJackpotWholePotSplit, getTimeAgo } from '@/utils/global/jackpot.utils';
 
 describe('getJackpotWholePotSplit', () => {
-  it('is 20 / 40 / 24 / 16 and sums to 100', () => {
+  it('is top-3 only by default — 0 / 50 / 30 / 20 and sums to 100', () => {
     const split = getJackpotWholePotSplit();
-    expect(split).toEqual({ participants: 20, first: 40, second: 24, third: 16 });
+    expect(split).toEqual({ participants: 0, first: 50, second: 30, third: 20 });
     expect(split.participants + split.first + split.second + split.third).toBe(100);
   });
 });

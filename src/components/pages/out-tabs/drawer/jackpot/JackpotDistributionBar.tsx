@@ -9,6 +9,8 @@ export function JackpotDistributionBar() {
   const split = getJackpotWholePotSplit();
 
   // Podium places read in medal colors; the community share stays purple.
+  // Zero-width shares (e.g. the consolation slice when it's off) are dropped so
+  // the bar never shows an empty "all players 0%" segment.
   const segments = [
     { label: `${t('1st')} ${split.first}%`, width: split.first, className: 'bg-gold' },
     { label: `${t('2nd')} ${split.second}%`, width: split.second, className: 'bg-silver' },
@@ -18,7 +20,7 @@ export function JackpotDistributionBar() {
       width: split.participants,
       className: 'bg-electric-purple/70',
     },
-  ];
+  ].filter(segment => segment.width > 0);
 
   return (
     <section className="flex flex-col gap-3">

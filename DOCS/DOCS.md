@@ -1902,20 +1902,23 @@ The **Jackpot** is a single, platform-wide progressive prize pool that grows fro
 
 When the charged instance finishes, the **entire pot** is paid out **on top of** the normal Section 11.3 prize (which is unaffected):
 
-| Recipient        | Share of pot | Notes                                                        |
-| :--------------- | -----------: | :----------------------------------------------------------- |
-| All participants |      **20%** | Split **equally** among every player in the charged instance |
-| 1st place        |      **40%** | 50% of the 80% podium share                                  |
-| 2nd place        |      **24%** | 30% of the podium share                                      |
-| 3rd place        |      **16%** | 20% of the podium share                                      |
+By **default the jackpot pays the top-3 only** — the podium splits the whole pot 50/30/20 and no one else receives anything:
 
-- Config: `appConfig.jackpot.participantsSharePercent` (20), `podiumSharePercent` (80), `podiumSplitPercent` (50/30/20). The whole-pot figures above are derived by `getJackpotWholePotSplit`.
-- The **20% consolation** guarantees nobody in the charged tournament walks away with a jackpot-zero; the **80% podium** delivers the headline payout. A pure winner-takes-all model was rejected in favour of this spread.
+| Recipient     | Share of pot | Notes                          |
+| :------------ | -----------: | :----------------------------- |
+| 1st place     |      **50%** | Podium split, of the whole pot |
+| 2nd place     |      **30%** |                                |
+| 3rd place     |      **20%** |                                |
+| Everyone else |       **0%** | No consolation share (default) |
+
+- Config (admin-tunable, `appConfig.jackpot` / `platformConfig.tournaments`): `participantsSharePercent` (**0** by default), `podiumSharePercent` (derived `100 − participants`), `podiumSplitPercent` (50/30/20).
+- **Raising `participantsSharePercent`** carves out an equal **consolation share for every participant** and the podium splits the remainder — e.g. `20` → 20% shared equally among all players, 80% to the podium (40/24/16 of the whole pot). At the default `0` the podium takes everything.
+- **Why top-3 only:** the jackpot is a headline win for the podium. A real player deliberately parked deep in the fake field (e.g. **267 / 500**) must not walk away with a jackpot payout — which the old "20% to everyone" consolation would have handed them. The consolation model stays available via the knob but is off by default.
 - The jackpot win is surfaced to recipients **inside the existing tournament result popup** (`TournamentResultModal`, Section 11.5) as a distinct "JACKPOT" block, shown separately from the normal placement prize so the windfall is unmistakable.
 
 ### 20.4 Rounding, Reset & Carry-Forward
 
-- Shares are floored to whole LC. Any **indivisible rounding remainder** (at most a few hundred LC, mostly from the equal 20% split across up to 500 participants) is **carried forward** as the seed of the next round rather than being lost or created.
+- Shares are floored to whole LC. Any **indivisible rounding remainder** (a few LC from flooring the podium split — or, when the consolation knob is raised, from the equal split across up to 500 participants) is **carried forward** as the seed of the next round rather than being lost or created.
 - **Unfilled podium places stay in the pot.** In a tiny charged field (1–2 players) the 2nd/3rd podium shares have no recipient — they are carried forward exactly like rounding dust, keeping the drop EV-neutral.
 - **A charged instance nobody joined does not drop.** The tournament finishes empty, the pot keeps accruing, and the operator can charge another instance.
 - After a drop the pot **resets to ≈0** (carrying only that remainder) and immediately begins accruing again. The live odometer on the jackpot page makes the renewed climb visible.
