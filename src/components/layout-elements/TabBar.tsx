@@ -1,7 +1,7 @@
 'use client';
 import { twMerge } from 'tailwind-merge';
 import type { ClassNameProps } from '@/types/interfaces/component.interfcaes';
-import { type ReactElement, type ReactNode } from 'react';
+import { type ReactElement, type ReactNode, useEffect, useState, useTransition } from 'react';
 import { TabBarItem } from '@/components/layout-elements/TabBarItem';
 import { type Route, routes } from '@/constants/routes';
 import { useAppTranslations } from '@/hooks/useAppTranslations';
@@ -20,8 +20,35 @@ export function TabBar({ className }: ClassNameProps) {
 
   const location = useLocation();
   const router = useRouter();
+  const [, startTransition] = useTransition();
 
+  // First path segment (e.g. "/market"). Drives the active tab once a
+  // navigation has committed.
   const activePath = location.getPathPart(1);
+
+  // Optimistic target: set the instant a tab is tapped so the chip moves
+  // immediately, before the RSC navigation commits. Cleared as soon as the
+  // real pathname catches up.
+  const [pendingRoute, setPendingRoute] = useState<string | null>(null);
+  useEffect(() => {
+    setPendingRoute(null);
+  }, [activePath]);
+
+  // The tab bar is always mounted, so warm the RSC payload of every tab up
+  // front — a tap then commits from cache instead of a cold round-trip.
+  // (router.prefetch is a no-op in dev; only effective in production builds.)
+  useEffect(() => {
+    const tabRoutes = [
+      routes.tickets.index,
+      routes.tournaments.index,
+      routes.home,
+      routes.market(),
+      routes.tasks,
+    ];
+    tabRoutes.forEach(route => router.prefetch(route));
+  }, [router]);
+
+  const activeRoute = pendingRoute ?? activePath;
 
   const tabs: Tab[] = [
     {
@@ -52,7 +79,13 @@ export function TabBar({ className }: ClassNameProps) {
   ] as const;
 
   const handleTabClick = (route: string) => {
-    router.push(route);
+    if (route === activeRoute) return;
+    // Move the chip immediately (optimistic), then run the actual navigation
+    // as a transition so the current page stays interactive while it commits.
+    setPendingRoute(route);
+    startTransition(() => {
+      router.push(route);
+    });
   };
   return (
     <div
@@ -80,7 +113,7 @@ export function TabBar({ className }: ClassNameProps) {
           icon={icon as ReactElement<LucideProps>}
           name={name}
           onClick={() => handleTabClick(route)}
-          active={activePath === route}
+          active={activeRoute === route}
           flightTarget={route === routes.tickets.index ? 'tickets' : undefined}
           className="relative z-1 animate-slide-in-bottom"
           style={{
