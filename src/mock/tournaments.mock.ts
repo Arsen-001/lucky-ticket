@@ -391,7 +391,15 @@ const joinTournament = (args: { body?: unknown }) => {
   };
 };
 
-const markTournamentResultSeen = () => undefined;
+// Persist the flag on the served list so refetches keep it, and return a
+// non-undefined body — `undefined` reads as "no mock" (404) in the base query,
+// which undid the optimistic patch and re-opened the result popup every boot.
+const markTournamentResultSeen = (args: { body?: unknown }) => {
+  const body = (args.body ?? {}) as { tournamentId?: string };
+  const tournament = servedTournaments.find(tour => tour.id === body.tournamentId);
+  if (tournament) tournament.resultSeen = true;
+  return {};
+};
 
 /** Combine a "YYYY-MM-DD" day and "HH:mm" time into the tournament start Date. */
 const sponsoredStartFrom = (date?: string, time?: string): Date => {
