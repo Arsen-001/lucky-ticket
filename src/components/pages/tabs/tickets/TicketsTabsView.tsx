@@ -39,6 +39,9 @@ export function TicketsTabsView() {
   const { data: me } = useGetMeQuery();
   const isLp = me?.isLuckyPlayer ?? false;
   const isVip = me?.isVIP ?? false;
+  // Server-resolved bulk-claim capability (VIP > LP, admin-tunable). Older API
+  // without statusPerks → LP-only, matching the historical hardcoded gate.
+  const canBulkClaim = me?.statusPerks ? me.statusPerks.bulkClaimEnabled : isLp;
   const avatarSpeedPct = useEngineSpeedAvatarBoostPct();
   const { tables } = useEngineConfig();
   const [claimEngine] = useClaimEngineMutation();
@@ -198,9 +201,10 @@ export function TicketsTabsView() {
         tier={activeTab}
         engines={enginesByTier[activeTab] ?? []}
         elapsedByEngine={elapsedByEngine}
-        // "Claim all" is a Lucky Player–only perk; without it the prop is omitted
-        // so the button isn't rendered (DOCS §7.3 / §8.4).
-        onClaimAll={isLp ? () => handleClaimAllForTier(activeTab) : undefined}
+        // "Claim all" is an admin-tunable status perk (LP-only by default). Read
+        // the backend-resolved capability from me.statusPerks so the button
+        // matches what the server enforces; fall back to LP-only on an older API.
+        onClaimAll={canBulkClaim ? () => handleClaimAllForTier(activeTab) : undefined}
         onClaimEngine={engineId => handleClaimEngine(activeTab, engineId)}
       />
     );

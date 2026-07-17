@@ -1,3 +1,21 @@
+/**
+ * Effective status perks for the current user (VIP per-level / LP), resolved by
+ * the backend so the UI shows exactly what the server enforces. `undefined`
+ * (older backend) → fall back to the code constants.
+ */
+export interface StatusPerks {
+  engineSpeedBoostPct: number;
+  stakeYieldBoostPct: number;
+  tournamentRewardBoostPct: number;
+  tournamentJoinApBoostPct: number;
+  marketDiscountPct: number;
+  referralPct: number;
+  adsDailyLimit: number;
+  ticketSendDailyLimits: Record<string, number>;
+  /** Bulk "Claim all" per tier on the Tickets page (DOCS §8.4). LP-only by default. */
+  bulkClaimEnabled: boolean;
+}
+
 export interface MeResponse {
   id: string;
   username: string;
@@ -6,6 +24,8 @@ export interface MeResponse {
   luckyPlayerExpiresAt?: string;
   isVIP: boolean;
   vipLevel: number;
+  /** Effective per-level status perks (market discount, referral %, …). */
+  statusPerks?: StatusPerks;
   isVerified: boolean;
   avatar: string;
   avatarId?: string;
