@@ -253,8 +253,16 @@
   filter: drop-shadow(0 2px 8px rgba(0, 0, 0, 0.45));
   animation: liquid-metal-shift 7s ease-in-out infinite;
   /* Animated clip-text + filter flickers in WKWebView unless promoted to its
-     own layer (classic iOS background-clip:text repaint bug). */
+     own layer (classic iOS background-clip:text repaint bug). But translateZ
+     alone gives an *opportunistic* layer: WKWebView tears it down and
+     re-rasterizes the gradient text at a new sub-pixel origin during a heavy
+     relayout (the tournament list remounting on a tab switch), so the name
+     visibly jumps ~1px sideways. `will-change` + `backface-visibility` pin it
+     to a *persistent* backing store that is GPU-composited (moved), never
+     re-snapped — so the text stays put through the relayout. */
   transform: translateZ(0);
+  backface-visibility: hidden;
+  will-change: transform;
 
   /* Base: cool silver liquid metal */
   background-image: linear-gradient(
