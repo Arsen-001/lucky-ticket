@@ -1,6 +1,7 @@
 import { Package, Zap } from 'lucide-react';
 import { twMerge } from 'tailwind-merge';
 import { useAppTranslations } from '@/hooks/useAppTranslations';
+import { useEngineConfig } from '@/hooks/useEngineConfig';
 import { capacityLevelBoostPct, speedLevelBoostPct } from '@/utils/global/ticket-engine.utils';
 import type { InventoryBooster, InventoryChip } from '@/types/interfaces/inventory.interfaces';
 import '@/styles/components/engine-cube-faces.css';
@@ -91,13 +92,14 @@ export function EngineCubeBackFace({
   accent = 'var(--color-electric-pink)',
 }: EngineCubeBackFaceProps) {
   const t = useAppTranslations();
+  const { tables } = useEngineConfig();
   const lvl = t('lvl');
   // LM-style additive sum of capacity-boost % — mirrors `engineCapacity()`,
   // which scales the capacity level by ×10 (`capacityLevelBoostPct`), not the
   // raw level. Using the raw level here understated the TOTAL by 10× on the
   // level component (audit finding M3).
   const totalCapacityBoostPct =
-    capacityLevelBoostPct(capacityLevel) +
+    capacityLevelBoostPct(capacityLevel, tables) +
     (capacityChip?.effectPct ?? 0) +
     (capacityBooster?.effectPct ?? 0);
 
@@ -142,12 +144,12 @@ export function EngineCubeBackFace({
         <StatRow label={t('engine')}>
           <InlineStat
             icon={<Zap size={11} stroke={SPEED_ACCENT} strokeWidth={2.6} />}
-            text={`+${speedLevelBoostPct(speedLevel)}%`}
+            text={`+${speedLevelBoostPct(speedLevel, tables)}%`}
             dim={speedLevel === 0}
           />
           <InlineStat
             icon={<Package size={11} stroke={CAPACITY_ACCENT} strokeWidth={2.6} />}
-            text={`+${capacityLevelBoostPct(capacityLevel)}%`}
+            text={`+${capacityLevelBoostPct(capacityLevel, tables)}%`}
             dim={capacityLevel === 0}
           />
         </StatRow>

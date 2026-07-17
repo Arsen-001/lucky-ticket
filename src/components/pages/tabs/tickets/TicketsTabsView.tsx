@@ -24,6 +24,7 @@ import { useUnlockedTiers } from '@/hooks/useUnlockedTiers';
 import { useToast } from '@/hooks/useToast';
 import { useAppTranslations } from '@/hooks/useAppTranslations';
 import { useEngineSpeedAvatarBoostPct } from '@/hooks/useEngineSpeedAvatarBoostPct';
+import { useEngineConfig } from '@/hooks/useEngineConfig';
 import { TicketsEnum } from '@/types/enums/ticket.enums';
 import { findActiveBooster, findEquippedChip } from '@/utils/global/inventory.utils';
 import { effectiveCycleSeconds, engineElapsedSeconds } from '@/utils/global/ticket-engine.utils';
@@ -39,6 +40,7 @@ export function TicketsTabsView() {
   const isLp = me?.isLuckyPlayer ?? false;
   const isVip = me?.isVIP ?? false;
   const avatarSpeedPct = useEngineSpeedAvatarBoostPct();
+  const { tables } = useEngineConfig();
   const [claimEngine] = useClaimEngineMutation();
   const [claimEnginesForTier] = useClaimEnginesForTierMutation();
   const [completeEngineCycle] = useCompleteEngineCycleMutation();
@@ -89,6 +91,7 @@ export function TicketsTabsView() {
           isLuckyPlayer: isLp,
           isVip,
           avatarBoostPct: avatarSpeedPct,
+          tables,
         });
         next[engine.id] = engine.pendingCount > 0 ? cycle : engineElapsedSeconds(engine);
         if (engine.pendingCount === 0 && next[engine.id] >= cycle) due.push(engine.id);

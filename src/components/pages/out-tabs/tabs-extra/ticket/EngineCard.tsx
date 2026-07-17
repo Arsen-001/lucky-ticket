@@ -4,6 +4,7 @@ import { twMerge } from 'tailwind-merge';
 import { useGetInventoryQuery } from '@/api/inventory.api';
 import { useGetMeQuery } from '@/api/me.api';
 import { useEngineSpeedAvatarBoostPct } from '@/hooks/useEngineSpeedAvatarBoostPct';
+import { useEngineConfig } from '@/hooks/useEngineConfig';
 import { EngineCardStatsHeader } from '@/components/pages/out-tabs/tabs-extra/ticket/EngineCardStatsHeader';
 import { EngineCardCycleRow } from '@/components/pages/out-tabs/tabs-extra/ticket/EngineCardCycleRow';
 import { EngineCardBoostControls } from '@/components/pages/out-tabs/tabs-extra/ticket/EngineCardBoostControls';
@@ -73,6 +74,7 @@ export function EngineCard({
     }),
   });
   const avatarSpeedPct = useEngineSpeedAvatarBoostPct();
+  const { tables, upgrade } = useEngineConfig();
   const speedChip = findEquippedChip(inventory?.chips, engine.id, 'speed');
   const speedBooster = findActiveBooster(inventory?.boosters, engine.id, 'speed');
   const capacityChip = findEquippedChip(inventory?.chips, engine.id, 'capacity');
@@ -85,8 +87,9 @@ export function EngineCard({
     isLuckyPlayer: isLp,
     isVip,
     avatarBoostPct: avatarSpeedPct,
+    tables,
   });
-  const capacity = engineCapacity(engine, { capacityChip, capacityBooster });
+  const capacity = engineCapacity(engine, { capacityChip, capacityBooster, tables });
   const pending = engine.pendingCount > 0;
   const remaining = Math.max(0, cycle - elapsedSeconds);
 
@@ -96,8 +99,8 @@ export function EngineCard({
 
   // Displayed prices must come from the same config the charge handlers use —
   // an inline copy of the formula diverges on the first rebalance.
-  const speedCost = speedUpgradeLsCost(speedLevel, engineLevel, tier);
-  const capacityCost = capacityUpgradeLsCost(capacityLevel, engineLevel, tier);
+  const speedCost = speedUpgradeLsCost(speedLevel, engineLevel, tier, upgrade);
+  const capacityCost = capacityUpgradeLsCost(capacityLevel, engineLevel, tier, upgrade);
   const instantClaimCost = Math.max(1, Math.ceil(remaining / 3600));
 
   const glow = TIER_GLOW[tier];

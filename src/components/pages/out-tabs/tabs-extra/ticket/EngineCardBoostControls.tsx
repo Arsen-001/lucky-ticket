@@ -6,10 +6,11 @@ import { Package, Zap } from 'lucide-react';
 import { BoostRow } from '@/components/pages/out-tabs/tabs-extra/ticket/BoostRow';
 import {
   capacityLevelBoostPct,
+  maxBoostLevel,
   speedLevelBoostPct,
-  MAX_BOOST_LEVEL,
 } from '@/utils/global/ticket-engine.utils';
 import { useAppTranslations } from '@/hooks/useAppTranslations';
+import { useEngineConfig } from '@/hooks/useEngineConfig';
 
 const SPEED_ACCENT = '#C5B0F8';
 const CAPACITY_ACCENT = '#FFE08A';
@@ -43,14 +44,15 @@ function EngineCardBoostControlsImpl({
   onUpgradeCapacity,
 }: EngineCardBoostControlsProps) {
   const t = useAppTranslations();
+  const { tables } = useEngineConfig();
 
   return (
     <div className={twMerge('flex flex-col', compact ? 'gap-1' : 'mt-1 gap-1.5')}>
       <BoostRow
         label={t('speed')}
-        valueText={`+${speedLevelBoostPct(speedLevel)}%`}
+        valueText={`+${speedLevelBoostPct(speedLevel, tables)}%`}
         level={speedLevel}
-        max={MAX_BOOST_LEVEL}
+        max={maxBoostLevel(tables)}
         accent={SPEED_ACCENT}
         costStars={speedCost}
         onUpgrade={() => onUpgradeSpeed(engineId)}
@@ -67,9 +69,9 @@ function EngineCardBoostControlsImpl({
       />
       <BoostRow
         label={t('capacity')}
-        valueText={`+${capacityLevelBoostPct(capacityLevel)}%`}
+        valueText={`+${capacityLevelBoostPct(capacityLevel, tables)}%`}
         level={capacityLevel}
-        max={MAX_BOOST_LEVEL}
+        max={maxBoostLevel(tables)}
         accent={CAPACITY_ACCENT}
         costStars={capacityCost}
         onUpgrade={() => onUpgradeCapacity(engineId)}

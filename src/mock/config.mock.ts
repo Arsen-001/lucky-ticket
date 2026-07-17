@@ -1,5 +1,6 @@
 import { appConfig } from '@/config/app.config';
 import { GlobalConstants } from '@/constants/global.constants';
+import { DEFAULT_ENGINE_LEVEL_TABLES } from '@/utils/global/ticket-engine.utils';
 import type { PublicConfig } from '@/types/interfaces/config.interfaces';
 
 /**
@@ -30,6 +31,15 @@ const getPublicConfig = (): PublicConfig => ({
   tournaments: {
     shardRewards: GlobalConstants.tournamentShardRewards,
     joinApByTier: GlobalConstants.apRewards.tournamentJoinByTier,
+  },
+  engines: {
+    upgrade: appConfig.economy.engineUpgrades,
+    levelTables: {
+      speedLevelBoostPct: [...DEFAULT_ENGINE_LEVEL_TABLES.speedLevelBoostPct],
+      capacityLevelBoostPct: [...DEFAULT_ENGINE_LEVEL_TABLES.capacityLevelBoostPct],
+      engineLevelSpeedBoostPct: [...DEFAULT_ENGINE_LEVEL_TABLES.engineLevelSpeedBoostPct],
+      engineLevelBaseCapacity: [...DEFAULT_ENGINE_LEVEL_TABLES.engineLevelBaseCapacity],
+    },
   },
   stakes: {
     durationMinMonths: GlobalConstants.stakeDurationMinMonths,

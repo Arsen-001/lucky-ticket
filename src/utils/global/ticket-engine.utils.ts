@@ -62,42 +62,84 @@ export const ENGINE_LEVEL_BASE_CAPACITY_TABLE: readonly number[] = [
   1, 1, 11, 21, 31, 41,
 ];
 
+/**
+ * The four curves as one value — the admin-tunable shape served by
+ * `GET /config` (`engines.levelTables`, hook `useEngineConfig`). Every helper
+ * below takes an optional `tables` and falls back to the bundled defaults, so
+ * admin edits reach the UI math without a redeploy while plain calls (tests,
+ * mocks, legacy code) keep working on the defaults.
+ */
+export interface EngineLevelTables {
+  speedLevelBoostPct: readonly number[];
+  capacityLevelBoostPct: readonly number[];
+  engineLevelSpeedBoostPct: readonly number[];
+  engineLevelBaseCapacity: readonly number[];
+}
+
+export const DEFAULT_ENGINE_LEVEL_TABLES: EngineLevelTables = {
+  speedLevelBoostPct: SPEED_LEVEL_BOOST_PCT_TABLE,
+  capacityLevelBoostPct: CAPACITY_LEVEL_BOOST_PCT_TABLE,
+  engineLevelSpeedBoostPct: ENGINE_LEVEL_SPEED_BOOST_PCT_TABLE,
+  engineLevelBaseCapacity: ENGINE_LEVEL_BASE_CAPACITY_TABLE,
+};
+
 /** Max SPEED / CAPACITY sub-level — derived from the ladder table length (0…10). */
 export const MAX_BOOST_LEVEL = SPEED_LEVEL_BOOST_PCT_TABLE.length - 1;
 
 /**
  * Hard ceiling on the engine level itself — derived from the engine-level table
- * length. Mirrors the backend's `MAX_ENGINE_LEVEL` (economy.constants.ts); keep
- * the two in lockstep, otherwise the optimistic upgrade path over-promotes past
- * what the server will accept and the UI drifts from the real engine state.
- * `tests/engine-table-parity.test.ts` diffs the tables against the backend.
+ * length. Mirrors the backend (economy.constants.ts); keep the two in lockstep,
+ * otherwise the optimistic upgrade path over-promotes past what the server will
+ * accept and the UI drifts from the real engine state.
+ * `tests/engine-table-parity.test.ts` diffs the default tables against the backend.
  */
 export const MAX_ENGINE_LEVEL = ENGINE_LEVEL_BASE_CAPACITY_TABLE.length - 1;
 
-/** Clamp a (possibly out-of-range / fractional) level to a valid table index. */
-const clampLevel = (value: number, max: number) => Math.min(max, Math.max(0, Math.floor(value)));
+/**
+ * Live ceilings for a (possibly admin-overridden) table set. `min` of the pair
+ * keeps a malformed override safe — the shorter ladder wins (mirrors the
+ * backend's maxBoostLevel/maxEngineLevel in economy.util.ts).
+ */
+export const maxBoostLevel = (t: EngineLevelTables = DEFAULT_ENGINE_LEVEL_TABLES) =>
+  Math.min(t.speedLevelBoostPct.length, t.capacityLevelBoostPct.length) - 1;
+
+export const maxEngineLevel = (t: EngineLevelTables = DEFAULT_ENGINE_LEVEL_TABLES) =>
+  Math.min(t.engineLevelSpeedBoostPct.length, t.engineLevelBaseCapacity.length) - 1;
+
+/** Table lookup with the level clamped into the table's own index range. */
+const cell = (table: readonly number[], level: number) =>
+  table[Math.min(table.length - 1, Math.max(0, Math.floor(level)))];
 
 /** Total speed-boost percent contributed by the engine level itself. */
-export const engineLevelBoostPct = (engineLevel: number) =>
-  ENGINE_LEVEL_SPEED_BOOST_PCT_TABLE[clampLevel(engineLevel || 1, MAX_ENGINE_LEVEL)];
+export const engineLevelBoostPct = (
+  engineLevel: number,
+  tables: EngineLevelTables = DEFAULT_ENGINE_LEVEL_TABLES
+) => cell(tables.engineLevelSpeedBoostPct, engineLevel || 1);
 
 /** Total speed-boost percent contributed by the speed-level upgrade. */
-export const speedLevelBoostPct = (level: number) =>
-  SPEED_LEVEL_BOOST_PCT_TABLE[clampLevel(level, MAX_BOOST_LEVEL)];
+export const speedLevelBoostPct = (
+  level: number,
+  tables: EngineLevelTables = DEFAULT_ENGINE_LEVEL_TABLES
+) => cell(tables.speedLevelBoostPct, level);
 
 /** Total capacity-boost percent contributed by the capacity-level upgrade. */
-export const capacityLevelBoostPct = (level: number) =>
-  CAPACITY_LEVEL_BOOST_PCT_TABLE[clampLevel(level, MAX_BOOST_LEVEL)];
+export const capacityLevelBoostPct = (
+  level: number,
+  tables: EngineLevelTables = DEFAULT_ENGINE_LEVEL_TABLES
+) => cell(tables.capacityLevelBoostPct, level);
 
 /**
  * @deprecated Kept for legacy UI labels. Returns the equivalent cycle-time
  * multiplier (0..1) derived from the additive boost — i.e. `1 / (1 + boost%)`.
  */
-export const speedMultiplier = (level: number) => 1 / (1 + speedLevelBoostPct(level) / 100);
+export const speedMultiplier = (level: number, tables?: EngineLevelTables) =>
+  1 / (1 + speedLevelBoostPct(level, tables) / 100);
 
 /** BASE per-cycle output (before % capacity boost) at this engine level. */
-export const baseCapacity = (engineLevel: number) =>
-  ENGINE_LEVEL_BASE_CAPACITY_TABLE[clampLevel(engineLevel || 1, MAX_ENGINE_LEVEL)];
+export const baseCapacity = (
+  engineLevel: number,
+  tables: EngineLevelTables = DEFAULT_ENGINE_LEVEL_TABLES
+) => cell(tables.engineLevelBaseCapacity, engineLevel || 1);
 
 const isBoosterAlive = (booster: InventoryBooster) => {
   if (!booster.expiresAt) return true;
@@ -122,6 +164,7 @@ export const effectiveCycleSeconds = (
     isLuckyPlayer?: boolean;
     isVip?: boolean;
     avatarBoostPct?: number;
+    tables?: EngineLevelTables;
   }
 ) => {
   // VIP supersedes LP — higher-tier engine speed boost wins, no stacking.
@@ -132,8 +175,8 @@ export const effectiveCycleSeconds = (
       : 0;
 
   let totalBoostPct =
-    engineLevelBoostPct(engine.engineLevel || 1) +
-    speedLevelBoostPct(engine.speedLevel || 0) +
+    engineLevelBoostPct(engine.engineLevel || 1, options?.tables) +
+    speedLevelBoostPct(engine.speedLevel || 0, options?.tables) +
     statusBoostPct +
     (options?.avatarBoostPct ?? 0);
 
@@ -149,6 +192,7 @@ export const effectiveCycleSeconds = (
   const capacity = engineCapacity(engine, {
     capacityChip: options?.capacityChip,
     capacityBooster: options?.capacityBooster,
+    tables: options?.tables,
   });
   const floor = capacity * GlobalConstants.engineMinSecondsPerTicket;
   return Math.max(rawCycle, floor);
@@ -161,14 +205,21 @@ export const effectiveCycleSeconds = (
  */
 export const engineCapacity = (
   engine: TicketEngine,
-  options?: { capacityChip?: InventoryChip; capacityBooster?: InventoryBooster }
+  options?: {
+    capacityChip?: InventoryChip;
+    capacityBooster?: InventoryBooster;
+    tables?: EngineLevelTables;
+  }
 ) => {
-  let totalBoostPct = capacityLevelBoostPct(engine.capacityLevel || 0);
+  let totalBoostPct = capacityLevelBoostPct(engine.capacityLevel || 0, options?.tables);
   if (options?.capacityChip) totalBoostPct += options.capacityChip.effectPct;
   if (options?.capacityBooster && isBoosterAlive(options.capacityBooster)) {
     totalBoostPct += options.capacityBooster.effectPct;
   }
-  return Math.max(1, Math.round(baseCapacity(engine.engineLevel || 1) * (1 + totalBoostPct / 100)));
+  return Math.max(
+    1,
+    Math.round(baseCapacity(engine.engineLevel || 1, options?.tables) * (1 + totalBoostPct / 100))
+  );
 };
 
 export const engineElapsedSeconds = (engine: TicketEngine) => {
@@ -177,8 +228,9 @@ export const engineElapsedSeconds = (engine: TicketEngine) => {
   return Math.max(0, now.diff(started, 'second'));
 };
 
-export const isEngineMaxed = (engine: TicketEngine) =>
-  (engine.speedLevel || 0) >= MAX_BOOST_LEVEL && (engine.capacityLevel || 0) >= MAX_BOOST_LEVEL;
+export const isEngineMaxed = (engine: TicketEngine, tables?: EngineLevelTables) =>
+  (engine.speedLevel || 0) >= maxBoostLevel(tables) &&
+  (engine.capacityLevel || 0) >= maxBoostLevel(tables);
 
 /**
  * Engine promotion (level-up). When an engine's speed **and** capacity
@@ -194,8 +246,11 @@ export const isEngineMaxed = (engine: TicketEngine) =>
  * truth for the promotion rule; the optimistic upgrade paths in `engines.api`
  * and `HomeEnginesSlider` both call it so their math cannot drift.
  */
-export const promoteEngineIfMaxed = (engine: TicketEngine): TicketEngine =>
-  isEngineMaxed(engine) && (engine.engineLevel ?? 1) < MAX_ENGINE_LEVEL
+export const promoteEngineIfMaxed = (
+  engine: TicketEngine,
+  tables?: EngineLevelTables
+): TicketEngine =>
+  isEngineMaxed(engine, tables) && (engine.engineLevel ?? 1) < maxEngineLevel(tables)
     ? { ...engine, engineLevel: (engine.engineLevel ?? 1) + 1, speedLevel: 0, capacityLevel: 0 }
     : engine;
 

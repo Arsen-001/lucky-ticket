@@ -24,6 +24,7 @@ import { StarsTopUpFlow } from '@/components/pages/tabs/home/StarsTopUpFlow';
 import { useAppTranslations } from '@/hooks/useAppTranslations';
 import { useToast } from '@/hooks/useToast';
 import { useEngineSpeedAvatarBoostPct } from '@/hooks/useEngineSpeedAvatarBoostPct';
+import { useEngineConfig } from '@/hooks/useEngineConfig';
 import {
   chipEquipStarsCost,
   findActiveBooster,
@@ -59,6 +60,7 @@ export function EngineDetails({ id }: EngineDetailsProps) {
   const isLp = me?.isLuckyPlayer ?? false;
   const isVip = me?.isVIP ?? false;
   const avatarSpeedPct = useEngineSpeedAvatarBoostPct();
+  const { tables, upgrade } = useEngineConfig();
 
   const [equipChipMutation] = useEquipChipMutation();
   const [activateBoosterMutation] = useActivateBoosterMutation();
@@ -114,6 +116,7 @@ export function EngineDetails({ id }: EngineDetailsProps) {
         isLuckyPlayer: isLp,
         isVip,
         avatarBoostPct: avatarSpeedPct,
+        tables,
       });
       const elapsed =
         engine.pendingCount > 0 ? cycle : Math.min(cycle, engineElapsedSeconds(engine));
@@ -129,7 +132,7 @@ export function EngineDetails({ id }: EngineDetailsProps) {
     tick();
     const intervalId = window.setInterval(tick, 1000);
     return () => window.clearInterval(intervalId);
-  }, [engine, speedChip, speedBooster, isLp, isVip, avatarSpeedPct, completeEngineCycle]);
+  }, [engine, speedChip, speedBooster, isLp, isVip, avatarSpeedPct, tables, completeEngineCycle]);
 
   if (isLoading) {
     return (
@@ -164,6 +167,7 @@ export function EngineDetails({ id }: EngineDetailsProps) {
     isLuckyPlayer: isLp,
     isVip,
     avatarBoostPct: avatarSpeedPct,
+    tables,
   });
   // Productivity is "before time-limited booster" but *with* permanent boosts
   // (engine/speed levels, chip, status, equipped avatar) — so those are all in.
@@ -172,8 +176,9 @@ export function EngineDetails({ id }: EngineDetailsProps) {
     isLuckyPlayer: isLp,
     isVip,
     avatarBoostPct: avatarSpeedPct,
+    tables,
   });
-  const baseCapacity = engineCapacity(engine, { capacityChip });
+  const baseCapacity = engineCapacity(engine, { capacityChip, tables });
   const ticketsPerHour = baseCycleSeconds > 0 ? (3600 / baseCycleSeconds) * baseCapacity : 0;
 
   const speedLevel = engine.speedLevel ?? 0;
@@ -218,7 +223,7 @@ export function EngineDetails({ id }: EngineDetailsProps) {
   };
 
   const handleUpgradeSpeed = () => {
-    const cost = speedUpgradeLsCost(speedLevel, engineLevel, tier);
+    const cost = speedUpgradeLsCost(speedLevel, engineLevel, tier, upgrade);
     requireStars(cost, async () => {
       try {
         await upgradeEngineSpeed({ engineId: engine.id, cost }).unwrap();
@@ -229,7 +234,7 @@ export function EngineDetails({ id }: EngineDetailsProps) {
   };
 
   const handleUpgradeCapacity = () => {
-    const cost = capacityUpgradeLsCost(capacityLevel, engineLevel, tier);
+    const cost = capacityUpgradeLsCost(capacityLevel, engineLevel, tier, upgrade);
     requireStars(cost, async () => {
       try {
         await upgradeEngineCapacity({ engineId: engine.id, cost }).unwrap();

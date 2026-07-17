@@ -41,9 +41,10 @@ import {
   effectiveCycleSeconds,
   engineCapacity,
   engineElapsedSeconds,
+  maxBoostLevel,
   promoteEngineIfMaxed,
-  MAX_BOOST_LEVEL,
 } from '@/utils/global/ticket-engine.utils';
+import { useEngineConfig } from '@/hooks/useEngineConfig';
 import { speedUpgradeLsCost, capacityUpgradeLsCost } from '@/utils/global/economy.utils';
 import type { ClassNameProps } from '@/types/interfaces/component.interfcaes';
 import type { TicketEngine } from '@/types/interfaces/ticket.interfaces';
@@ -177,6 +178,7 @@ export function HomeEnginesSlider({ className }: ClassNameProps) {
   const isLp = me?.isLuckyPlayer ?? false;
   const isVip = me?.isVIP ?? false;
   const avatarSpeedPct = useEngineSpeedAvatarBoostPct();
+  const { tables, upgrade } = useEngineConfig();
 
   const requireStars = (cost: number, onPaid: () => void) => {
     if (currentStars < cost) {
@@ -211,6 +213,7 @@ export function HomeEnginesSlider({ className }: ClassNameProps) {
           isLuckyPlayer: isLp,
           isVip,
           avatarBoostPct: avatarSpeedPct,
+          tables,
         });
         if (engine.pendingCount > 0) {
           elapsedNext[engine.id] = cycle;
@@ -219,7 +222,11 @@ export function HomeEnginesSlider({ className }: ClassNameProps) {
         const elapsed = engineElapsedSeconds(engine);
         elapsedNext[engine.id] = elapsed;
         if (elapsed >= cycle) {
-          readyCapacity[engine.id] = engineCapacity(engine, { capacityChip, capacityBooster });
+          readyCapacity[engine.id] = engineCapacity(engine, {
+            capacityChip,
+            capacityBooster,
+            tables,
+          });
         }
       }
 
@@ -344,6 +351,7 @@ export function HomeEnginesSlider({ className }: ClassNameProps) {
       isLuckyPlayer: isLp,
       isVip,
       avatarBoostPct: avatarSpeedPct,
+      tables,
     });
     const elapsed = elapsedByEngine[engine.id] ?? engineElapsedSeconds(engine);
     const remaining = Math.max(0, cycle - elapsed);
@@ -356,7 +364,7 @@ export function HomeEnginesSlider({ className }: ClassNameProps) {
     if (!engine) return;
     const capacityChip = findEquippedChip(inventory?.chips, engine.id, 'capacity');
     const capacityBooster = findActiveBooster(inventory?.boosters, engine.id, 'capacity');
-    const fullCapacity = engineCapacity(engine, { capacityChip, capacityBooster });
+    const fullCapacity = engineCapacity(engine, { capacityChip, capacityBooster, tables });
     // Skip charges stars on the server and marks the cycle ready WITHOUT claiming:
     // optimistically fill pendingCount so the button flips to "Claim". The user then
     // claims to receive AP. Stars in the header reconcile via the mutation's me patch.
@@ -376,8 +384,8 @@ export function HomeEnginesSlider({ className }: ClassNameProps) {
     const item = itemsRef.current.find(item => item.engine.id === engineId);
     if (!item) return;
     const { engine, tier } = item;
-    const cost = speedUpgradeLsCost(engine.speedLevel ?? 0, engine.engineLevel ?? 1, tier);
-    const nextLevel = Math.min(MAX_BOOST_LEVEL, (engine.speedLevel ?? 0) + 1);
+    const cost = speedUpgradeLsCost(engine.speedLevel ?? 0, engine.engineLevel ?? 1, tier, upgrade);
+    const nextLevel = Math.min(maxBoostLevel(tables), (engine.speedLevel ?? 0) + 1);
     setUpgradeConfirm({ engineId, type: 'speed', cost, nextLevel });
   };
 
@@ -385,8 +393,13 @@ export function HomeEnginesSlider({ className }: ClassNameProps) {
     const item = itemsRef.current.find(item => item.engine.id === engineId);
     if (!item) return;
     const { engine, tier } = item;
-    const cost = capacityUpgradeLsCost(engine.capacityLevel ?? 0, engine.engineLevel ?? 1, tier);
-    const nextLevel = Math.min(MAX_BOOST_LEVEL, (engine.capacityLevel ?? 0) + 1);
+    const cost = capacityUpgradeLsCost(
+      engine.capacityLevel ?? 0,
+      engine.engineLevel ?? 1,
+      tier,
+      upgrade
+    );
+    const nextLevel = Math.min(maxBoostLevel(tables), (engine.capacityLevel ?? 0) + 1);
     setUpgradeConfirm({ engineId, type: 'capacity', cost, nextLevel });
   };
 
@@ -396,12 +409,15 @@ export function HomeEnginesSlider({ className }: ClassNameProps) {
     setUpgradeConfirm(null);
     requireStars(cost, () => {
       updateEngine(engineId, e =>
-        promoteEngineIfMaxed({
-          ...e,
-          ...(type === 'speed'
-            ? { speedLevel: Math.min(MAX_BOOST_LEVEL, (e.speedLevel ?? 0) + 1) }
-            : { capacityLevel: Math.min(MAX_BOOST_LEVEL, (e.capacityLevel ?? 0) + 1) }),
-        })
+        promoteEngineIfMaxed(
+          {
+            ...e,
+            ...(type === 'speed'
+              ? { speedLevel: Math.min(maxBoostLevel(tables), (e.speedLevel ?? 0) + 1) }
+              : { capacityLevel: Math.min(maxBoostLevel(tables), (e.capacityLevel ?? 0) + 1) }),
+          },
+          tables
+        )
       );
       // Persist to the backend (charges stars + bumps the level) — matches
       // EngineDetails. Without this the upgrade was optimistic-only and reverted.

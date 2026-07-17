@@ -16,6 +16,7 @@ import {
 import { useGetInventoryQuery } from '@/api/inventory.api';
 import { useGetMeQuery } from '@/api/me.api';
 import { useEngineSpeedAvatarBoostPct } from '@/hooks/useEngineSpeedAvatarBoostPct';
+import { useEngineConfig } from '@/hooks/useEngineConfig';
 import { GlobalConstants } from '@/constants/global.constants';
 import {
   effectiveCycleSeconds,
@@ -106,6 +107,7 @@ function EngineCardCubeImpl(props: EngineCardCubeProps) {
       ? GlobalConstants.luckyPlayerEngineSpeedBoostPct
       : 0;
   const avatarSpeedPct = useEngineSpeedAvatarBoostPct();
+  const { tables } = useEngineConfig();
 
   // Passport "T/H" is the productivity baseline (DOCS §9.8): permanent boosts
   // only — engine/speed levels, chips, status, equipped avatar — with
@@ -117,15 +119,19 @@ function EngineCardCubeImpl(props: EngineCardCubeProps) {
     isLuckyPlayer: isLp,
     isVip,
     avatarBoostPct: avatarSpeedPct,
+    tables,
   });
-  const productivityCapacity = engineCapacity(engine, { capacityChip: equippedCapacityChip });
+  const productivityCapacity = engineCapacity(engine, {
+    capacityChip: equippedCapacityChip,
+    tables,
+  });
   const ticketsPerHour =
     productivityCycleSeconds > 0 ? (3600 / productivityCycleSeconds) * productivityCapacity : 0;
 
   // Aggregated additive speed boost (mirrors `effectiveCycleSeconds()`).
   const totalBoostPct =
-    engineLevelBoostPct(engineLevel) +
-    speedLevelBoostPct(speedLevel) +
+    engineLevelBoostPct(engineLevel, tables) +
+    speedLevelBoostPct(speedLevel, tables) +
     statusEngineSpeedBoostPct +
     avatarSpeedPct +
     (equippedSpeedChip?.effectPct ?? 0) +

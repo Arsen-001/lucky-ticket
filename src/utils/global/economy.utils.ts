@@ -44,18 +44,31 @@ export const lcPriceToLsParity = (lcAmount: number): number =>
   Math.max(1, Math.round((lcAmount * appConfig.wallet.lcUsdRate) / appConfig.wallet.lsUsdRate));
 
 /**
+ * Upgrade-price formula knobs — the admin-tunable shape served by `GET /config`
+ * (`engines.upgrade`, hook `useEngineConfig`). Defaults to the bundled
+ * `appConfig.economy.engineUpgrades` so plain calls (tests, mocks) keep working;
+ * the server charges its own config-derived price regardless.
+ */
+export type EngineUpgradeKnobs = typeof appConfig.economy.engineUpgrades;
+
+/**
  * LS cost of the speed upgrade from sub-`level` to `level + 1` on an engine of
  * `tier` at `engineLevel` (DOCS §10.1). Each engine level adds `perEngineLevel`
  * to the base price, then the whole cost scales by the tier multiplier
  * (Bronze ×1, Silver ×2, Gold ×3, Platinum ×4, Diamond ×5). For Bronze at the
  * default knobs → `level + engineLevel`: 1…10 at engine level 1, 5…14 at level 5.
  */
-export const speedUpgradeLsCost = (level: number, engineLevel: number, tier: TicketType): number =>
+export const speedUpgradeLsCost = (
+  level: number,
+  engineLevel: number,
+  tier: TicketType,
+  knobs: EngineUpgradeKnobs = appConfig.economy.engineUpgrades
+): number =>
   Math.round(
-    (appConfig.economy.engineUpgrades.speedBase +
-      level * appConfig.economy.engineUpgrades.perSubLevel +
-      Math.max(0, engineLevel - 1) * appConfig.economy.engineUpgrades.perEngineLevel) *
-      appConfig.economy.engineUpgrades.tierCostMultiplier[tier]
+    (knobs.speedBase +
+      level * knobs.perSubLevel +
+      Math.max(0, engineLevel - 1) * knobs.perEngineLevel) *
+      knobs.tierCostMultiplier[tier]
   );
 
 /**
@@ -68,11 +81,12 @@ export const speedUpgradeLsCost = (level: number, engineLevel: number, tier: Tic
 export const capacityUpgradeLsCost = (
   level: number,
   engineLevel: number,
-  tier: TicketType
+  tier: TicketType,
+  knobs: EngineUpgradeKnobs = appConfig.economy.engineUpgrades
 ): number =>
   Math.round(
-    (appConfig.economy.engineUpgrades.capacityBase +
-      level * appConfig.economy.engineUpgrades.perSubLevel +
-      Math.max(0, engineLevel - 1) * appConfig.economy.engineUpgrades.perEngineLevel) *
-      appConfig.economy.engineUpgrades.tierCostMultiplier[tier]
+    (knobs.capacityBase +
+      level * knobs.perSubLevel +
+      Math.max(0, engineLevel - 1) * knobs.perEngineLevel) *
+      knobs.tierCostMultiplier[tier]
   );

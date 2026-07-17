@@ -10,6 +10,7 @@ import { EngineLevelBadge } from '@/components/pages/out-tabs/tabs-extra/ticket/
 import { EngineNextInFill } from '@/components/pages/out-tabs/tabs-extra/ticket/EngineNextInFill';
 import { useAppTranslations } from '@/hooks/useAppTranslations';
 import { useEngineSpeedAvatarBoostPct } from '@/hooks/useEngineSpeedAvatarBoostPct';
+import { useEngineConfig } from '@/hooks/useEngineConfig';
 import { routes } from '@/constants/routes';
 import { findActiveBooster, findEquippedChip } from '@/utils/global/inventory.utils';
 import {
@@ -54,6 +55,7 @@ export function EnginePreviewCard({
   const { data: inventory } = useGetInventoryQuery();
   const { data: me } = useGetMeQuery();
   const avatarSpeedPct = useEngineSpeedAvatarBoostPct();
+  const { tables } = useEngineConfig();
   const speedChip = findEquippedChip(inventory?.chips, engine.id, 'speed');
   const speedBooster = findActiveBooster(inventory?.boosters, engine.id, 'speed');
   const capacityChip = findEquippedChip(inventory?.chips, engine.id, 'capacity');
@@ -65,8 +67,9 @@ export function EnginePreviewCard({
     isLuckyPlayer: me?.isLuckyPlayer ?? false,
     isVip: me?.isVIP ?? false,
     avatarBoostPct: avatarSpeedPct,
+    tables,
   });
-  const capacity = engineCapacity(engine, { capacityChip, capacityBooster });
+  const capacity = engineCapacity(engine, { capacityChip, capacityBooster, tables });
   const pending = engine.pendingCount > 0;
   const remaining = Math.max(0, cycle - (elapsedSeconds ?? 0));
   const tierColor = `var(--color-${tier})`;

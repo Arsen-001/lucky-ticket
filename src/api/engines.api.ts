@@ -1,14 +1,17 @@
 import dayjs from 'dayjs';
 import { api } from '@/api/index.api';
+import { configApi } from '@/api/config.api';
 import { meApi } from '@/api/me.api';
 import { ticketsApi } from '@/api/tickets.api';
 import { rtkTags } from '@/constants/rtk-tags';
 import { appConfig } from '@/config/app.config';
+import { resolveEngineConfig } from '@/hooks/useEngineConfig';
 import {
-  MAX_BOOST_LEVEL,
   effectiveCycleSeconds,
   engineCapacity,
+  maxBoostLevel,
   promoteEngineIfMaxed,
+  type EngineLevelTables,
 } from '@/utils/global/ticket-engine.utils';
 import { findActiveBooster, findEquippedChip } from '@/utils/global/inventory.utils';
 import { equippedAvatarEngineSpeedPct } from '@/utils/global/avatar.utils';
@@ -18,6 +21,19 @@ import type { TicketEngine } from '@/types/interfaces/ticket.interfaces';
 import type { TicketType } from '@/types/types/ticket.types';
 
 const STARTER_ENGINE_ID = 'engine-bronze-starter';
+
+/**
+ * Admin-tunable level tables for the non-React optimistic paths — read from the
+ * cached `GET /config` in the store (same resolution as `useEngineConfig`), so
+ * the optimistic math matches what the components rendered and what the server
+ * will actually do. Falls back to bundled defaults when config isn't loaded.
+ */
+const levelTablesFromState = (state: unknown): EngineLevelTables =>
+  resolveEngineConfig(
+    configApi.endpoints.getPublicConfig.select()(
+      state as Parameters<ReturnType<typeof configApi.endpoints.getPublicConfig.select>>[0]
+    ).data
+  ).tables;
 
 // Against the real backend the granted engine gets a server UUID, so the
 // optimistic phantom (STARTER_ENGINE_ID) must be reconciled away — otherwise the
@@ -119,6 +135,7 @@ export const enginesApi = api.injectEndpoints({
         const inventory = inventoryApi.endpoints.getInventory.select()(
           getState() as Parameters<ReturnType<typeof inventoryApi.endpoints.getInventory.select>>[0]
         ).data;
+        const tables = levelTablesFromState(getState());
         const ticketsPatch = dispatch(
           ticketsApi.util.updateQueryData('getTickets', undefined, draft => {
             for (const ticket of draft) {
@@ -129,7 +146,7 @@ export const enginesApi = api.injectEndpoints({
               const claimAmount =
                 engine.pendingCount > 0
                   ? engine.pendingCount
-                  : engineCapacity(engine, { capacityChip, capacityBooster });
+                  : engineCapacity(engine, { capacityChip, capacityBooster, tables });
               ticket.count = (ticket.count ?? 0) + claimAmount;
               engine.lifetimeProduced = (engine.lifetimeProduced ?? 0) + claimAmount;
               engine.pendingCount = 0;
@@ -158,7 +175,8 @@ export const enginesApi = api.injectEndpoints({
       // and it would re-fetch EVERY engine, visibly refreshing the neighbouring
       // cubes on the home slider. Only stars (me) is reconciled.
       invalidatesTags: [rtkTags.engines, rtkTags.me],
-      async onQueryStarted({ engineId, cost }, { dispatch, queryFulfilled }) {
+      async onQueryStarted({ engineId, cost }, { dispatch, queryFulfilled, getState }) {
+        const tables = levelTablesFromState(getState());
         const ticketsPatch = dispatch(
           ticketsApi.util.updateQueryData('getTickets', undefined, draft => {
             for (const ticket of draft) {
@@ -166,9 +184,9 @@ export const enginesApi = api.injectEndpoints({
               if (!engine) continue;
               const next = {
                 ...engine,
-                speedLevel: Math.min(MAX_BOOST_LEVEL, (engine.speedLevel ?? 0) + 1),
+                speedLevel: Math.min(maxBoostLevel(tables), (engine.speedLevel ?? 0) + 1),
               };
-              const promoted = promoteEngineIfMaxed(next);
+              const promoted = promoteEngineIfMaxed(next, tables);
               Object.assign(engine, promoted);
             }
           })
@@ -192,7 +210,8 @@ export const enginesApi = api.injectEndpoints({
       // See upgrade-speed: the optimistic patch keeps the cache correct, so we
       // skip the all-engines `tickets` refetch that flickers neighbouring cubes.
       invalidatesTags: [rtkTags.engines, rtkTags.me],
-      async onQueryStarted({ engineId, cost }, { dispatch, queryFulfilled }) {
+      async onQueryStarted({ engineId, cost }, { dispatch, queryFulfilled, getState }) {
+        const tables = levelTablesFromState(getState());
         const ticketsPatch = dispatch(
           ticketsApi.util.updateQueryData('getTickets', undefined, draft => {
             for (const ticket of draft) {
@@ -200,9 +219,9 @@ export const enginesApi = api.injectEndpoints({
               if (!engine) continue;
               const next = {
                 ...engine,
-                capacityLevel: Math.min(MAX_BOOST_LEVEL, (engine.capacityLevel ?? 0) + 1),
+                capacityLevel: Math.min(maxBoostLevel(tables), (engine.capacityLevel ?? 0) + 1),
               };
-              const promoted = promoteEngineIfMaxed(next);
+              const promoted = promoteEngineIfMaxed(next, tables);
               Object.assign(engine, promoted);
             }
           })
@@ -236,6 +255,7 @@ export const enginesApi = api.injectEndpoints({
         const inventory = inventoryApi.endpoints.getInventory.select()(
           getState() as Parameters<ReturnType<typeof inventoryApi.endpoints.getInventory.select>>[0]
         ).data;
+        const tables = levelTablesFromState(getState());
         const ticketsPatch = dispatch(
           ticketsApi.util.updateQueryData('getTickets', undefined, draft => {
             for (const ticket of draft) {
@@ -243,7 +263,11 @@ export const enginesApi = api.injectEndpoints({
               if (!engine || engine.pendingCount > 0) continue;
               const capacityChip = findEquippedChip(inventory?.chips, engineId, 'capacity');
               const capacityBooster = findActiveBooster(inventory?.boosters, engineId, 'capacity');
-              engine.pendingCount = engineCapacity(engine, { capacityChip, capacityBooster });
+              engine.pendingCount = engineCapacity(engine, {
+                capacityChip,
+                capacityBooster,
+                tables,
+              });
             }
           })
         );
@@ -287,6 +311,7 @@ export const enginesApi = api.injectEndpoints({
           >[0]
         ).data;
         const avatarSpeedPct = equippedAvatarEngineSpeedPct(avatars, me?.avatarId);
+        const tables = levelTablesFromState(getState());
         const patch = dispatch(
           ticketsApi.util.updateQueryData('getTickets', undefined, draft => {
             for (const ticket of draft) {
@@ -302,10 +327,15 @@ export const enginesApi = api.injectEndpoints({
                 isLuckyPlayer: me?.isLuckyPlayer ?? false,
                 isVip: me?.isVIP ?? false,
                 avatarBoostPct: avatarSpeedPct,
+                tables,
               });
               const elapsed = dayjs().diff(dayjs(engine.cycleStartedAt), 'second');
               if (elapsed >= cycle) {
-                engine.pendingCount = engineCapacity(engine, { capacityChip, capacityBooster });
+                engine.pendingCount = engineCapacity(engine, {
+                  capacityChip,
+                  capacityBooster,
+                  tables,
+                });
               }
             }
           })

@@ -41,6 +41,27 @@ export interface PublicConfig {
     /** AP granted for joining, by tier (before the LP/VIP boost). */
     joinApByTier: Record<string, number>;
   };
+  /**
+   * Engine development knobs (admin-editable, DOCS §9.7/§10): the upgrade-price
+   * formula and the level-curve tables. The server charges/grants from the same
+   * config, so rendering these keeps the shown prices and curves honest.
+   */
+  engines?: {
+    upgrade: {
+      speedBase: number;
+      capacityBase: number;
+      perSubLevel: number;
+      perEngineLevel: number;
+      /** Lowercased tier keys ('bronze'…'diamond'). */
+      tierCostMultiplier: Record<string, number>;
+    };
+    levelTables: {
+      speedLevelBoostPct: number[];
+      capacityLevelBoostPct: number[];
+      engineLevelSpeedBoostPct: number[];
+      engineLevelBaseCapacity: number[];
+    };
+  };
   /** Stake builder display knobs (admin-editable, DOCS §18). */
   stakes?: {
     durationMinMonths: number;
