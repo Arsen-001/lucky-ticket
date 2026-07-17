@@ -1137,5 +1137,8 @@
   "send code": "Отправить код",
   "too many attempts try later": "Слишком много попыток — попробуйте позже",
   "wait before resending": "Подождите минуту перед повторной отправкой",
-  "do not ask again": "Больше не спрашивать"
+  "do not ask again": "Больше не спрашивать",
+  "gameplay": "Игровой процесс",
+  "ask before boost upgrade": "Спрашивать перед апгрейдом буста",
+  "confirm every paid engine upgrade": "Подтверждать каждый платный апгрейд куба"
 }

@@ -1137,5 +1137,8 @@
   "send code": "Code senden",
   "too many attempts try later": "Zu viele Versuche — versuche es später erneut",
   "wait before resending": "Bitte warte eine Minute vor dem erneuten Senden",
-  "do not ask again": "Nicht mehr fragen"
+  "do not ask again": "Nicht mehr fragen",
+  "gameplay": "Spielablauf",
+  "ask before boost upgrade": "Vor Boost-Upgrade fragen",
+  "confirm every paid engine upgrade": "Jedes bezahlte Engine-Upgrade bestätigen"
 }

@@ -1137,5 +1137,8 @@
   "send code": "Ուղարկել կոդը",
   "too many attempts try later": "Չափազանց շատ փորձեր․ փորձեք ավելի ուշ",
   "wait before resending": "Խնդրում ենք սպասել մեկ րոպե կրկին ուղարկելուց առաջ",
-  "do not ask again": "Այլևս չհարցնել"
+  "do not ask again": "Այլևս չհարցնել",
+  "gameplay": "Խաղընթաց",
+  "ask before boost upgrade": "Հարցնել բուսթի ապգրեյդից առաջ",
+  "confirm every paid engine upgrade": "Հաստատել շարժիչի ամեն վճարովի ապգրեյդը"
 }

@@ -46,6 +46,7 @@ import {
   promoteEngineIfMaxed,
 } from '@/utils/global/ticket-engine.utils';
 import { useEngineConfig } from '@/hooks/useEngineConfig';
+import { useSkipUpgradePrompt } from '@/hooks/useSkipUpgradePrompt';
 import { speedUpgradeLsCost, capacityUpgradeLsCost } from '@/utils/global/economy.utils';
 import type { ClassNameProps } from '@/types/interfaces/component.interfcaes';
 import type { TicketEngine } from '@/types/interfaces/ticket.interfaces';
@@ -63,7 +64,6 @@ import { mergeEngineItems, type EngineWithTier } from '@/utils/global/engine-ite
 // at every viewport width. MAX_ENGINE_PX must match EngineCardCube's copy and
 // HomeBuyEngineSlot's height class.
 const MAX_ENGINE_PX = 300;
-const SKIP_UPGRADE_PROMPT_STORAGE_KEY = 'engines-skip-upgrade-prompt';
 const SCROLLER_W_CSS = 'min(100vw, var(--app-max-w))';
 const SLIDE_WIDTH_CSS = `min((100vw - 120px) / 1.038, ${MAX_ENGINE_PX}px)`;
 const SLIDE_PADDING_CSS = `calc((${SCROLLER_W_CSS} - ${SLIDE_WIDTH_CSS}) / 2)`;
@@ -121,24 +121,8 @@ export function HomeEnginesSlider({ className }: ClassNameProps) {
   } | null>(null);
   // "Don't ask again" for the paid boost-upgrade confirm: once opted in, a tap
   // upgrades immediately (stars top-up flow still interrupts when balance is
-  // short). Persisted so the choice survives reloads.
-  const [skipUpgradePrompt, setSkipUpgradePrompt] = useState(() => {
-    if (typeof window === 'undefined') return false;
-    try {
-      return window.localStorage.getItem(SKIP_UPGRADE_PROMPT_STORAGE_KEY) === '1';
-    } catch {
-      return false;
-    }
-  });
-  const toggleSkipUpgradePrompt = (next: boolean) => {
-    setSkipUpgradePrompt(next);
-    try {
-      if (next) window.localStorage.setItem(SKIP_UPGRADE_PROMPT_STORAGE_KEY, '1');
-      else window.localStorage.removeItem(SKIP_UPGRADE_PROMPT_STORAGE_KEY);
-    } catch {
-      /* storage unavailable — the toggle still applies for this session */
-    }
-  };
+  // short). The profile settings row can turn the question back on.
+  const [skipUpgradePrompt, toggleSkipUpgradePrompt] = useSkipUpgradePrompt();
   const [pendingPick, setPendingPick] = useState<{
     engineId: string;
     category: 'chip' | 'booster';

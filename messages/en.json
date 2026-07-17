@@ -1137,5 +1137,8 @@
   "send code": "Send code",
   "too many attempts try later": "Too many attempts — try again later",
   "wait before resending": "Please wait a minute before resending",
-  "do not ask again": "Don't ask again"
+  "do not ask again": "Don't ask again",
+  "gameplay": "Gameplay",
+  "ask before boost upgrade": "Ask before boost upgrade",
+  "confirm every paid engine upgrade": "Confirm every paid engine upgrade"
 }

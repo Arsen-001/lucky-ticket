@@ -8,6 +8,7 @@ import { SettingsMenuItem } from '@/components/pages/out-tabs/drawer/settings/Se
 import type { SettingsMenuAccent } from '@/components/pages/out-tabs/drawer/settings/SettingsMenuItem';
 import { SettingsSignOut } from '@/components/pages/out-tabs/drawer/settings/SettingsSignOut';
 import { SettingsTourRow } from '@/components/pages/out-tabs/drawer/settings/SettingsTourRow';
+import { SettingsUpgradePromptRow } from '@/components/pages/out-tabs/drawer/settings/SettingsUpgradePromptRow';
 import { routes } from '@/constants/routes';
 import { useAppTranslations } from '@/hooks/useAppTranslations';
 
@@ -78,6 +79,16 @@ export default function SettingsPage() {
         style={{ animationDelay: `${(sections.length + 1) * 80}ms` }}
       >
         <h2 className="text-gray-secondary text-sm font-bold uppercase tracking-wider px-1">
+          {t('gameplay')}
+        </h2>
+        <SettingsUpgradePromptRow />
+      </div>
+
+      <div
+        className="animate-slide-in-bottom flex flex-col gap-2"
+        style={{ animationDelay: `${(sections.length + 2) * 80}ms` }}
+      >
+        <h2 className="text-gray-secondary text-sm font-bold uppercase tracking-wider px-1">
           {t('app tour')}
         </h2>
         <SettingsTourRow />
@@ -85,7 +96,7 @@ export default function SettingsPage() {
 
       <div
         className="animate-slide-in-bottom mt-4"
-        style={{ animationDelay: `${(sections.length + 2) * 80}ms` }}
+        style={{ animationDelay: `${(sections.length + 3) * 80}ms` }}
       >
         <SettingsSignOut />
       </div>
