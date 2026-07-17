@@ -213,10 +213,11 @@ describe('economy simulation (DOCS §14.2 guardrails)', () => {
     expect(p365 / p30).toBeGreaterThan(1_000_000); // unmistakably exponential
   });
 
-  it('paid capacity levels actually change output: maxed = 2 tickets/cycle', () => {
+  it('paid capacity levels add +1 ticket each: maxed = 11 tickets/cycle at level 1', () => {
     const maxed = baseEngine({ capacityLevel: MAX_BOOST_LEVEL });
-    expect(engineCapacity(maxed)).toBe(2);
-    // The old +1%/level curve rounded back to 1 even at max — pay-for-nothing.
+    expect(engineCapacity(maxed)).toBe(1 + MAX_BOOST_LEVEL);
+    // Every single tap must move output (absolute +1, no rounding traps).
+    expect(engineCapacity(baseEngine({ capacityLevel: 1 }))).toBe(2);
     expect(engineCapacity(maxed)).toBeGreaterThan(engineCapacity(baseEngine({})));
   });
 
@@ -421,13 +422,12 @@ describe('engine-level promotion & base-capacity scaling (audit finding H3)', ()
     expect(cycle / capacity).toBe(GlobalConstants.engineMinSecondsPerTicket); // 900s per ticket
   });
 
-  it('"maxed capacity = 2 tickets/cycle" holds only at engine level 1', () => {
-    // The DOCS §9.7/§10.2 headline is a level-1 statement (base 1 × 2 = 2)…
-    expect(engineCapacity(baseEngine({ capacityLevel: MAX_BOOST_LEVEL }))).toBe(2);
-    // …but a level-2 engine's base is 11, so its maxed capacity mints 22, not 2.
-    // This is exactly what the demo ships (level-2 engines, base 11) yet neither
-    // DOCS §14.2 nor this sim modelled before the fix.
-    expect(engineCapacity(baseEngine({ engineLevel: 2, capacityLevel: MAX_BOOST_LEVEL }))).toBe(22);
+  it('capacity sub-level adds the same absolute +1 at every engine level', () => {
+    // Level 1: base 1 + 10 taps = 11 per cycle…
+    expect(engineCapacity(baseEngine({ capacityLevel: MAX_BOOST_LEVEL }))).toBe(11);
+    // …level 2: base 11 + the same 10 = 21 (absolute bonus, NOT a multiplier —
+    // the old % model would have doubled the bigger base to 22).
+    expect(engineCapacity(baseEngine({ engineLevel: 2, capacityLevel: MAX_BOOST_LEVEL }))).toBe(21);
   });
 
   it('promotion fires only when BOTH sub-levels are maxed, then resets them', () => {

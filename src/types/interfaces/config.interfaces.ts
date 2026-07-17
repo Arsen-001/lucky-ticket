@@ -57,7 +57,8 @@ export interface PublicConfig {
     };
     levelTables: {
       speedLevelBoostPct: number[];
-      capacityLevelBoostPct: number[];
+      /** ABSOLUTE tickets added per capacity sub-level (default +1/level). */
+      capacityLevelBonusTickets: number[];
       engineLevelSpeedBoostPct: number[];
       engineLevelBaseCapacity: number[];
     };

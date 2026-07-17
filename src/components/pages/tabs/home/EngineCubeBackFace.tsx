@@ -2,7 +2,7 @@ import { Package, Zap } from 'lucide-react';
 import { twMerge } from 'tailwind-merge';
 import { useAppTranslations } from '@/hooks/useAppTranslations';
 import { useEngineConfig } from '@/hooks/useEngineConfig';
-import { capacityLevelBoostPct, speedLevelBoostPct } from '@/utils/global/ticket-engine.utils';
+import { capacityLevelBonusTickets, speedLevelBoostPct } from '@/utils/global/ticket-engine.utils';
 import type { InventoryBooster, InventoryChip } from '@/types/interfaces/inventory.interfaces';
 import '@/styles/components/engine-cube-faces.css';
 
@@ -94,14 +94,16 @@ export function EngineCubeBackFace({
   const t = useAppTranslations();
   const { tables } = useEngineConfig();
   const lvl = t('lvl');
-  // LM-style additive sum of capacity-boost % — mirrors `engineCapacity()`,
-  // which scales the capacity level by ×10 (`capacityLevelBoostPct`), not the
-  // raw level. Using the raw level here understated the TOTAL by 10× on the
-  // level component (audit finding M3).
-  const totalCapacityBoostPct =
-    capacityLevelBoostPct(capacityLevel, tables) +
-    (capacityChip?.effectPct ?? 0) +
-    (capacityBooster?.effectPct ?? 0);
+  // Mirrors `engineCapacity()`: the capacity sub-level adds ABSOLUTE tickets
+  // (+1 per paid tap by default) on top of the engine-level base, then the
+  // chip/booster % scales the whole batch. TOTAL shows the resulting
+  // per-cycle output, matching the "×N" language of the base row.
+  const capacityBonus = capacityLevelBonusTickets(capacityLevel, tables);
+  const capacityChipPct = (capacityChip?.effectPct ?? 0) + (capacityBooster?.effectPct ?? 0);
+  const totalCapacity = Math.max(
+    1,
+    Math.round((baseCapacity + capacityBonus) * (1 + capacityChipPct / 100))
+  );
 
   return (
     <div
@@ -149,7 +151,7 @@ export function EngineCubeBackFace({
           />
           <InlineStat
             icon={<Package size={11} stroke={CAPACITY_ACCENT} strokeWidth={2.6} />}
-            text={`+${capacityLevelBoostPct(capacityLevel, tables)}%`}
+            text={`+${capacityBonus}`}
             dim={capacityLevel === 0}
           />
         </StatRow>
@@ -212,7 +214,7 @@ export function EngineCubeBackFace({
             />
             <InlineStat
               icon={<Package size={11} stroke={CAPACITY_ACCENT} strokeWidth={2.6} />}
-              text={`+${Math.round(totalCapacityBoostPct)}%`}
+              text={`×${totalCapacity}`}
             />
           </div>
         </div>

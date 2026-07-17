@@ -2,7 +2,7 @@ import { describe, it, expect } from 'vitest';
 import { existsSync, readFileSync } from 'node:fs';
 import { resolve } from 'node:path';
 import {
-  CAPACITY_LEVEL_BOOST_PCT_TABLE,
+  CAPACITY_LEVEL_BONUS_TICKETS_TABLE,
   ENGINE_LEVEL_BASE_CAPACITY_TABLE,
   ENGINE_LEVEL_SPEED_BOOST_PCT_TABLE,
   SPEED_LEVEL_BOOST_PCT_TABLE,
@@ -44,7 +44,7 @@ describe.skipIf(!hasBackend)('backend ↔ frontend engine table parity', () => {
 
   const PAIRS: [string, readonly number[]][] = [
     ['SPEED_LEVEL_BOOST_PCT_TABLE', SPEED_LEVEL_BOOST_PCT_TABLE],
-    ['CAPACITY_LEVEL_BOOST_PCT_TABLE', CAPACITY_LEVEL_BOOST_PCT_TABLE],
+    ['CAPACITY_LEVEL_BONUS_TICKETS_TABLE', CAPACITY_LEVEL_BONUS_TICKETS_TABLE],
     ['ENGINE_LEVEL_SPEED_BOOST_PCT_TABLE', ENGINE_LEVEL_SPEED_BOOST_PCT_TABLE],
     ['ENGINE_LEVEL_BASE_CAPACITY_TABLE', ENGINE_LEVEL_BASE_CAPACITY_TABLE],
   ];

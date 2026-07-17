@@ -36,7 +36,7 @@ const getPublicConfig = (): PublicConfig => ({
     upgrade: appConfig.economy.engineUpgrades,
     levelTables: {
       speedLevelBoostPct: [...DEFAULT_ENGINE_LEVEL_TABLES.speedLevelBoostPct],
-      capacityLevelBoostPct: [...DEFAULT_ENGINE_LEVEL_TABLES.capacityLevelBoostPct],
+      capacityLevelBonusTickets: [...DEFAULT_ENGINE_LEVEL_TABLES.capacityLevelBonusTickets],
       engineLevelSpeedBoostPct: [...DEFAULT_ENGINE_LEVEL_TABLES.engineLevelSpeedBoostPct],
       engineLevelBaseCapacity: [...DEFAULT_ENGINE_LEVEL_TABLES.engineLevelBaseCapacity],
     },

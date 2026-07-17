@@ -30,15 +30,16 @@ export const SPEED_LEVEL_BOOST_PCT_TABLE: readonly number[] = [
 ];
 
 /**
- * Capacity-boost **%** contributed by the engine's CAPACITY sub-level.
- * Index = `capacityLevel` (0 = no upgrade). Keep the SAME length as the speed
- * table — both sub-ladders share the `0…MAX_BOOST_LEVEL` range.
- * Default: linear +10 % / level → 0…100 %. (Must stay big enough that
- * `round(baseCapacity × (1 + boost%))` actually moves at base capacity 1.)
+ * **Absolute** per-cycle ticket bonus contributed by the engine's CAPACITY
+ * sub-level — every paid tap simply adds tickets (default **+1 per level**),
+ * the same +1 at every engine level. Index = `capacityLevel` (0 = no upgrade).
+ * Keep the SAME length as the speed table — both sub-ladders share the
+ * `0…MAX_BOOST_LEVEL` range. (Chips/boosters stay percentage-based and apply
+ * on top of `base + bonus` — see `engineCapacity`.)
  */
-export const CAPACITY_LEVEL_BOOST_PCT_TABLE: readonly number[] = [
+export const CAPACITY_LEVEL_BONUS_TICKETS_TABLE: readonly number[] = [
   //  lvl0  lvl1  lvl2  lvl3  lvl4  lvl5  lvl6  lvl7  lvl8  lvl9  lvl10
-  0, 10, 20, 30, 40, 50, 60, 70, 80, 90, 100,
+  0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10,
 ];
 
 /**
@@ -71,14 +72,14 @@ export const ENGINE_LEVEL_BASE_CAPACITY_TABLE: readonly number[] = [
  */
 export interface EngineLevelTables {
   speedLevelBoostPct: readonly number[];
-  capacityLevelBoostPct: readonly number[];
+  capacityLevelBonusTickets: readonly number[];
   engineLevelSpeedBoostPct: readonly number[];
   engineLevelBaseCapacity: readonly number[];
 }
 
 export const DEFAULT_ENGINE_LEVEL_TABLES: EngineLevelTables = {
   speedLevelBoostPct: SPEED_LEVEL_BOOST_PCT_TABLE,
-  capacityLevelBoostPct: CAPACITY_LEVEL_BOOST_PCT_TABLE,
+  capacityLevelBonusTickets: CAPACITY_LEVEL_BONUS_TICKETS_TABLE,
   engineLevelSpeedBoostPct: ENGINE_LEVEL_SPEED_BOOST_PCT_TABLE,
   engineLevelBaseCapacity: ENGINE_LEVEL_BASE_CAPACITY_TABLE,
 };
@@ -101,7 +102,7 @@ export const MAX_ENGINE_LEVEL = ENGINE_LEVEL_BASE_CAPACITY_TABLE.length - 1;
  * backend's maxBoostLevel/maxEngineLevel in economy.util.ts).
  */
 export const maxBoostLevel = (t: EngineLevelTables = DEFAULT_ENGINE_LEVEL_TABLES) =>
-  Math.min(t.speedLevelBoostPct.length, t.capacityLevelBoostPct.length) - 1;
+  Math.min(t.speedLevelBoostPct.length, t.capacityLevelBonusTickets.length) - 1;
 
 export const maxEngineLevel = (t: EngineLevelTables = DEFAULT_ENGINE_LEVEL_TABLES) =>
   Math.min(t.engineLevelSpeedBoostPct.length, t.engineLevelBaseCapacity.length) - 1;
@@ -122,11 +123,11 @@ export const speedLevelBoostPct = (
   tables: EngineLevelTables = DEFAULT_ENGINE_LEVEL_TABLES
 ) => cell(tables.speedLevelBoostPct, level);
 
-/** Total capacity-boost percent contributed by the capacity-level upgrade. */
-export const capacityLevelBoostPct = (
+/** Absolute per-cycle ticket bonus contributed by the capacity-level upgrade. */
+export const capacityLevelBonusTickets = (
   level: number,
   tables: EngineLevelTables = DEFAULT_ENGINE_LEVEL_TABLES
-) => cell(tables.capacityLevelBoostPct, level);
+) => cell(tables.capacityLevelBonusTickets, level);
 
 /**
  * @deprecated Kept for legacy UI labels. Returns the equivalent cycle-time
@@ -199,9 +200,10 @@ export const effectiveCycleSeconds = (
 };
 
 /**
- * LM-style additive capacity boost — `baseCapacity × (1 + totalBoost%)`.
- * Every capacity-level upgrade contributes +1% to the additive stack, matching
- * how speed-level upgrades work on the speed side.
+ * Per-cycle output: `(baseCapacity + capacity-level bonus) × (1 + chips%)`.
+ * The capacity sub-level adds **absolute tickets** (default +1 per paid tap —
+ * the same +1 at every engine level); chips/boosters stay percentage-based
+ * and scale the whole batch.
  */
 export const engineCapacity = (
   engine: TicketEngine,
@@ -211,15 +213,15 @@ export const engineCapacity = (
     tables?: EngineLevelTables;
   }
 ) => {
-  let totalBoostPct = capacityLevelBoostPct(engine.capacityLevel || 0, options?.tables);
-  if (options?.capacityChip) totalBoostPct += options.capacityChip.effectPct;
+  let chipBoostPct = 0;
+  if (options?.capacityChip) chipBoostPct += options.capacityChip.effectPct;
   if (options?.capacityBooster && isBoosterAlive(options.capacityBooster)) {
-    totalBoostPct += options.capacityBooster.effectPct;
+    chipBoostPct += options.capacityBooster.effectPct;
   }
-  return Math.max(
-    1,
-    Math.round(baseCapacity(engine.engineLevel || 1, options?.tables) * (1 + totalBoostPct / 100))
-  );
+  const batch =
+    baseCapacity(engine.engineLevel || 1, options?.tables) +
+    capacityLevelBonusTickets(engine.capacityLevel || 0, options?.tables);
+  return Math.max(1, Math.round(batch * (1 + chipBoostPct / 100)));
 };
 
 export const engineElapsedSeconds = (engine: TicketEngine) => {

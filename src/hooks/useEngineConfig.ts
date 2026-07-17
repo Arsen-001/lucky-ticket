@@ -26,8 +26,24 @@ export const resolveEngineConfig = (config?: PublicConfig): EngineConfig => {
   if (!served) {
     return { tables: DEFAULT_ENGINE_LEVEL_TABLES, upgrade: appConfig.economy.engineUpgrades };
   }
+  // Per-table fallback: a backend serving an older/newer levelTables shape
+  // (missing or renamed key) must degrade to that table's bundled default,
+  // not crash every engine surface on an undefined lookup.
+  const servedTables = served.levelTables as Partial<EngineLevelTables> | undefined;
   return {
-    tables: served.levelTables,
+    tables: {
+      speedLevelBoostPct:
+        servedTables?.speedLevelBoostPct ?? DEFAULT_ENGINE_LEVEL_TABLES.speedLevelBoostPct,
+      capacityLevelBonusTickets:
+        servedTables?.capacityLevelBonusTickets ??
+        DEFAULT_ENGINE_LEVEL_TABLES.capacityLevelBonusTickets,
+      engineLevelSpeedBoostPct:
+        servedTables?.engineLevelSpeedBoostPct ??
+        DEFAULT_ENGINE_LEVEL_TABLES.engineLevelSpeedBoostPct,
+      engineLevelBaseCapacity:
+        servedTables?.engineLevelBaseCapacity ??
+        DEFAULT_ENGINE_LEVEL_TABLES.engineLevelBaseCapacity,
+    },
     upgrade: {
       ...served.upgrade,
       tierCostMultiplier: {

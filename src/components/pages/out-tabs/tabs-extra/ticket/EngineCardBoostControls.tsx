@@ -5,7 +5,7 @@ import { twMerge } from 'tailwind-merge';
 import { Package, Zap } from 'lucide-react';
 import { BoostRow } from '@/components/pages/out-tabs/tabs-extra/ticket/BoostRow';
 import {
-  capacityLevelBoostPct,
+  capacityLevelBonusTickets,
   maxBoostLevel,
   speedLevelBoostPct,
 } from '@/utils/global/ticket-engine.utils';
@@ -69,7 +69,7 @@ function EngineCardBoostControlsImpl({
       />
       <BoostRow
         label={t('capacity')}
-        valueText={`+${capacityLevelBoostPct(capacityLevel, tables)}%`}
+        valueText={`+${capacityLevelBonusTickets(capacityLevel, tables)}`}
         level={capacityLevel}
         max={maxBoostLevel(tables)}
         accent={CAPACITY_ACCENT}
