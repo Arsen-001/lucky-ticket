@@ -443,7 +443,7 @@ describe('engine-level promotion & base-capacity scaling (audit finding H3)', ()
   });
 
   it('promotion stops at the engine-level cap — terminal 10/10, mirrors the backend', () => {
-    // Backend gates promotion behind ENGINE_FUSION.maxEngineLevel; if the
+    // Backend gates promotion behind MAX_ENGINE_LEVEL (economy.constants.ts); if the
     // optimistic path promoted past it, the UI would show a level the server
     // rejects and drift until the next refetch.
     const atCap = baseEngine({

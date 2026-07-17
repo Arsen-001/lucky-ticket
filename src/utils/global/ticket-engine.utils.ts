@@ -4,47 +4,90 @@ import type { InventoryBooster, InventoryChip } from '@/types/interfaces/invento
 import type { TicketEngine } from '@/types/interfaces/ticket.interfaces';
 import type { Ticket, TicketType } from '@/types/types/ticket.types';
 
-export const MAX_BOOST_LEVEL = 10;
+/* ────────────────────────────────────────────────────────────────────────────
+ *  ⚙️  ENGINE LEVEL TABLES — «сколько даёт каждый уровень» (скорость / объём)
+ *
+ *  ЕДИНСТВЕННЫЙ источник правды для того, что даёт каждый уровень куба.
+ *  Правь ЯЧЕЙКИ этих четырёх таблиц — всё остальное (UI кубов, апгрейды,
+ *  промоушен, потолки, экономический guardrail-тест, бэкенд-зеркало) считает
+ *  отсюда. Кривая может быть любой — не обязана быть линейной.
+ *
+ *  Значения ниже = текущая линейная кривая, поведение 1-в-1 как раньше. Меняй
+ *  числа под нужный баланс; длину таблиц (число уровней) тоже можно менять —
+ *  потолки `MAX_BOOST_LEVEL` / `MAX_ENGINE_LEVEL` выводятся из длины.
+ *
+ *  ⚠️  Бэкенд должен зеркалить те же таблицы (audit L1) — синхронь после правок.
+ * ──────────────────────────────────────────────────────────────────────────── */
 
 /**
- * Hard ceiling on the engine level itself — promotion stops here. Mirrors the
- * backend's `ENGINE_FUSION.maxEngineLevel`; keep in lockstep, otherwise the
- * optimistic upgrade path over-promotes past what the server will accept and
- * the UI drifts from the real engine state.
+ * Speed-boost **%** contributed by the engine's SPEED sub-level.
+ * Index = `speedLevel` (0 = no upgrade). Table length ⇒ `MAX_BOOST_LEVEL`.
+ * Default: linear +10 % / level → 0…100 %.
  */
-export const MAX_ENGINE_LEVEL = 5;
-
-/** LM-style additive speed boost contributed per engine level above 1 (%). */
-export const ENGINE_LEVEL_SPEED_BOOST_PCT = 100;
-
-/**
- * LM-style additive speed boost contributed per speed-level upgrade (%).
- * 10 levels × 10% = +100% at max — a fully speed-upgraded engine runs its
- * cycle twice as fast (DOCS §10.1).
- */
-export const SPEED_LEVEL_BOOST_PCT_PER_LEVEL = 10;
+export const SPEED_LEVEL_BOOST_PCT_TABLE: readonly number[] = [
+  //  lvl0  lvl1  lvl2  lvl3  lvl4  lvl5  lvl6  lvl7  lvl8  lvl9  lvl10
+  0, 10, 20, 30, 40, 50, 60, 70, 80, 90, 100,
+];
 
 /**
- * LM-style additive capacity boost contributed per capacity-level upgrade (%).
- * 10 levels × 10% = +100% at max — a fully capacity-upgraded engine mints 2
- * tickets per cycle instead of 1 (DOCS §10.2). The percent must be large
- * enough that `round(baseCapacity × (1 + boost))` actually moves for a
- * level-1 engine (base capacity 1) — at +1%/level the paid upgrade had zero
- * effect until chips pushed it over the rounding threshold.
+ * Capacity-boost **%** contributed by the engine's CAPACITY sub-level.
+ * Index = `capacityLevel` (0 = no upgrade). Keep the SAME length as the speed
+ * table — both sub-ladders share the `0…MAX_BOOST_LEVEL` range.
+ * Default: linear +10 % / level → 0…100 %. (Must stay big enough that
+ * `round(baseCapacity × (1 + boost%))` actually moves at base capacity 1.)
  */
-export const CAPACITY_LEVEL_BOOST_PCT_PER_LEVEL = 10;
+export const CAPACITY_LEVEL_BOOST_PCT_TABLE: readonly number[] = [
+  //  lvl0  lvl1  lvl2  lvl3  lvl4  lvl5  lvl6  lvl7  lvl8  lvl9  lvl10
+  0, 10, 20, 30, 40, 50, 60, 70, 80, 90, 100,
+];
+
+/**
+ * Speed-boost **%** contributed by the engine LEVEL itself (reached by
+ * promotion — §10.2). Indexed by `engineLevel` DIRECTLY (1…`MAX_ENGINE_LEVEL`);
+ * index 0 mirrors level 1 so an absent/falsy level reads as level 1.
+ * Default: +100 % / level above 1 → 0 / 100 / 200 / 300 / 400.
+ */
+export const ENGINE_LEVEL_SPEED_BOOST_PCT_TABLE: readonly number[] = [
+  //  (lvl0) lvl1  lvl2  lvl3  lvl4  lvl5
+  0, 0, 100, 200, 300, 400,
+];
+
+/**
+ * BASE per-cycle output — **absolute** ticket count before any % capacity boost —
+ * at each engine LEVEL. Indexed by `engineLevel` DIRECTLY (1…`MAX_ENGINE_LEVEL`);
+ * index 0 mirrors level 1. Default: 1 → 11 → 21 → 31 → 41.
+ */
+export const ENGINE_LEVEL_BASE_CAPACITY_TABLE: readonly number[] = [
+  //  (lvl0) lvl1  lvl2  lvl3  lvl4  lvl5
+  1, 1, 11, 21, 31, 41,
+];
+
+/** Max SPEED / CAPACITY sub-level — derived from the ladder table length (0…10). */
+export const MAX_BOOST_LEVEL = SPEED_LEVEL_BOOST_PCT_TABLE.length - 1;
+
+/**
+ * Hard ceiling on the engine level itself — derived from the engine-level table
+ * length. Mirrors the backend's `MAX_ENGINE_LEVEL` (economy.constants.ts); keep
+ * the two in lockstep, otherwise the optimistic upgrade path over-promotes past
+ * what the server will accept and the UI drifts from the real engine state.
+ * `tests/engine-table-parity.test.ts` diffs the tables against the backend.
+ */
+export const MAX_ENGINE_LEVEL = ENGINE_LEVEL_BASE_CAPACITY_TABLE.length - 1;
+
+/** Clamp a (possibly out-of-range / fractional) level to a valid table index. */
+const clampLevel = (value: number, max: number) => Math.min(max, Math.max(0, Math.floor(value)));
 
 /** Total speed-boost percent contributed by the engine level itself. */
 export const engineLevelBoostPct = (engineLevel: number) =>
-  Math.max(0, (engineLevel || 1) - 1) * ENGINE_LEVEL_SPEED_BOOST_PCT;
+  ENGINE_LEVEL_SPEED_BOOST_PCT_TABLE[clampLevel(engineLevel || 1, MAX_ENGINE_LEVEL)];
 
 /** Total speed-boost percent contributed by the speed-level upgrade. */
 export const speedLevelBoostPct = (level: number) =>
-  Math.min(MAX_BOOST_LEVEL, Math.max(0, level)) * SPEED_LEVEL_BOOST_PCT_PER_LEVEL;
+  SPEED_LEVEL_BOOST_PCT_TABLE[clampLevel(level, MAX_BOOST_LEVEL)];
 
 /** Total capacity-boost percent contributed by the capacity-level upgrade. */
 export const capacityLevelBoostPct = (level: number) =>
-  Math.min(MAX_BOOST_LEVEL, Math.max(0, level)) * CAPACITY_LEVEL_BOOST_PCT_PER_LEVEL;
+  CAPACITY_LEVEL_BOOST_PCT_TABLE[clampLevel(level, MAX_BOOST_LEVEL)];
 
 /**
  * @deprecated Kept for legacy UI labels. Returns the equivalent cycle-time
@@ -52,8 +95,9 @@ export const capacityLevelBoostPct = (level: number) =>
  */
 export const speedMultiplier = (level: number) => 1 / (1 + speedLevelBoostPct(level) / 100);
 
+/** BASE per-cycle output (before % capacity boost) at this engine level. */
 export const baseCapacity = (engineLevel: number) =>
-  1 + Math.max(0, (engineLevel || 1) - 1) * MAX_BOOST_LEVEL;
+  ENGINE_LEVEL_BASE_CAPACITY_TABLE[clampLevel(engineLevel || 1, MAX_ENGINE_LEVEL)];
 
 const isBoosterAlive = (booster: InventoryBooster) => {
   if (!booster.expiresAt) return true;
