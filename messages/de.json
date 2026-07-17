@@ -1136,5 +1136,6 @@
   "resend in {n}s": "Erneut senden in {n}s",
   "send code": "Code senden",
   "too many attempts try later": "Zu viele Versuche — versuche es später erneut",
-  "wait before resending": "Bitte warte eine Minute vor dem erneuten Senden"
+  "wait before resending": "Bitte warte eine Minute vor dem erneuten Senden",
+  "do not ask again": "Nicht mehr fragen"
 }

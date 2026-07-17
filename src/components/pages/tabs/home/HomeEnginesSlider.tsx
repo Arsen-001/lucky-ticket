@@ -26,6 +26,7 @@ import { EngineSlotPickerModal } from '@/components/pages/tabs/home/EngineSlotPi
 import { HomeBuyEngineSlot } from '@/components/pages/tabs/home/HomeBuyEngineSlot';
 import { StarsTopUpFlow } from '@/components/pages/tabs/home/StarsTopUpFlow';
 import { ConfirmModal } from '@/components/shared/modals/ConfirmModal';
+import { Switch } from '@/components/shared/form-elements/Switch';
 import { TelegramStarIcon } from '@/components/shared/icons/TelegramStarIcon';
 import { useAppTranslations } from '@/hooks/useAppTranslations';
 import { useToast } from '@/hooks/useToast';
@@ -62,6 +63,7 @@ import { mergeEngineItems, type EngineWithTier } from '@/utils/global/engine-ite
 // at every viewport width. MAX_ENGINE_PX must match EngineCardCube's copy and
 // HomeBuyEngineSlot's height class.
 const MAX_ENGINE_PX = 300;
+const SKIP_UPGRADE_PROMPT_STORAGE_KEY = 'engines-skip-upgrade-prompt';
 const SCROLLER_W_CSS = 'min(100vw, var(--app-max-w))';
 const SLIDE_WIDTH_CSS = `min((100vw - 120px) / 1.038, ${MAX_ENGINE_PX}px)`;
 const SLIDE_PADDING_CSS = `calc((${SCROLLER_W_CSS} - ${SLIDE_WIDTH_CSS}) / 2)`;
@@ -117,6 +119,26 @@ export function HomeEnginesSlider({ className }: ClassNameProps) {
     cost: number;
     nextLevel: number;
   } | null>(null);
+  // "Don't ask again" for the paid boost-upgrade confirm: once opted in, a tap
+  // upgrades immediately (stars top-up flow still interrupts when balance is
+  // short). Persisted so the choice survives reloads.
+  const [skipUpgradePrompt, setSkipUpgradePrompt] = useState(() => {
+    if (typeof window === 'undefined') return false;
+    try {
+      return window.localStorage.getItem(SKIP_UPGRADE_PROMPT_STORAGE_KEY) === '1';
+    } catch {
+      return false;
+    }
+  });
+  const toggleSkipUpgradePrompt = (next: boolean) => {
+    setSkipUpgradePrompt(next);
+    try {
+      if (next) window.localStorage.setItem(SKIP_UPGRADE_PROMPT_STORAGE_KEY, '1');
+      else window.localStorage.removeItem(SKIP_UPGRADE_PROMPT_STORAGE_KEY);
+    } catch {
+      /* storage unavailable — the toggle still applies for this session */
+    }
+  };
   const [pendingPick, setPendingPick] = useState<{
     engineId: string;
     category: 'chip' | 'booster';
@@ -380,33 +402,7 @@ export function HomeEnginesSlider({ className }: ClassNameProps) {
     requireStars(cost, () => fastForwardEngine(engineId, cost));
   };
 
-  const handleUpgradeSpeed = (engineId: string) => {
-    const item = itemsRef.current.find(item => item.engine.id === engineId);
-    if (!item) return;
-    const { engine, tier } = item;
-    const cost = speedUpgradeLsCost(engine.speedLevel ?? 0, engine.engineLevel ?? 1, tier, upgrade);
-    const nextLevel = Math.min(maxBoostLevel(tables), (engine.speedLevel ?? 0) + 1);
-    setUpgradeConfirm({ engineId, type: 'speed', cost, nextLevel });
-  };
-
-  const handleUpgradeCapacity = (engineId: string) => {
-    const item = itemsRef.current.find(item => item.engine.id === engineId);
-    if (!item) return;
-    const { engine, tier } = item;
-    const cost = capacityUpgradeLsCost(
-      engine.capacityLevel ?? 0,
-      engine.engineLevel ?? 1,
-      tier,
-      upgrade
-    );
-    const nextLevel = Math.min(maxBoostLevel(tables), (engine.capacityLevel ?? 0) + 1);
-    setUpgradeConfirm({ engineId, type: 'capacity', cost, nextLevel });
-  };
-
-  const confirmUpgrade = () => {
-    if (!upgradeConfirm) return;
-    const { engineId, type, cost } = upgradeConfirm;
-    setUpgradeConfirm(null);
+  const performUpgrade = (engineId: string, type: 'speed' | 'capacity', cost: number) => {
     requireStars(cost, () => {
       updateEngine(engineId, e =>
         promoteEngineIfMaxed(
@@ -424,6 +420,44 @@ export function HomeEnginesSlider({ className }: ClassNameProps) {
       if (type === 'speed') void upgradeEngineSpeed({ engineId, cost });
       else void upgradeEngineCapacity({ engineId, cost });
     });
+  };
+
+  const handleUpgradeSpeed = (engineId: string) => {
+    const item = itemsRef.current.find(item => item.engine.id === engineId);
+    if (!item) return;
+    const { engine, tier } = item;
+    const cost = speedUpgradeLsCost(engine.speedLevel ?? 0, engine.engineLevel ?? 1, tier, upgrade);
+    if (skipUpgradePrompt) {
+      performUpgrade(engineId, 'speed', cost);
+      return;
+    }
+    const nextLevel = Math.min(maxBoostLevel(tables), (engine.speedLevel ?? 0) + 1);
+    setUpgradeConfirm({ engineId, type: 'speed', cost, nextLevel });
+  };
+
+  const handleUpgradeCapacity = (engineId: string) => {
+    const item = itemsRef.current.find(item => item.engine.id === engineId);
+    if (!item) return;
+    const { engine, tier } = item;
+    const cost = capacityUpgradeLsCost(
+      engine.capacityLevel ?? 0,
+      engine.engineLevel ?? 1,
+      tier,
+      upgrade
+    );
+    if (skipUpgradePrompt) {
+      performUpgrade(engineId, 'capacity', cost);
+      return;
+    }
+    const nextLevel = Math.min(maxBoostLevel(tables), (engine.capacityLevel ?? 0) + 1);
+    setUpgradeConfirm({ engineId, type: 'capacity', cost, nextLevel });
+  };
+
+  const confirmUpgrade = () => {
+    if (!upgradeConfirm) return;
+    const { engineId, type, cost } = upgradeConfirm;
+    setUpgradeConfirm(null);
+    performUpgrade(engineId, type, cost);
   };
 
   if (isLoading) {
@@ -736,6 +770,14 @@ export function HomeEnginesSlider({ className }: ClassNameProps) {
                 <TelegramStarIcon size={14} />
                 {upgradeConfirm.cost}
               </div>
+              <label className="mt-1 flex cursor-pointer items-center gap-2.5">
+                <Switch
+                  checked={skipUpgradePrompt}
+                  onChange={toggleSkipUpgradePrompt}
+                  className="scale-90"
+                />
+                <span className="text-pink-secondary text-xs">{t('do not ask again')}</span>
+              </label>
             </div>
           ) : null
         }
