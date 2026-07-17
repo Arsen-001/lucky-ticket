@@ -109,7 +109,12 @@ export function BoostRow({
           <span>{t('max')}</span>
         ) : (
           <>
-            <TelegramStarIcon size={compact ? 10 : 11} />
+            {/* Dark halo so the gold star stays readable on the gold-tinted
+                capacity button — without it the icon melts into the accent. */}
+            <TelegramStarIcon
+              size={compact ? 10 : 11}
+              className="drop-shadow-[0_0_2px_rgba(0,0,0,0.85)]"
+            />
             <span className="tabular-nums">{costStars}</span>
           </>
         )}
