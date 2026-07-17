@@ -56,11 +56,15 @@ export const ENGINE_LEVEL_SPEED_BOOST_PCT_TABLE: readonly number[] = [
 /**
  * BASE per-cycle output — **absolute** ticket count before any % capacity boost —
  * at each engine LEVEL. Indexed by `engineLevel` DIRECTLY (1…`MAX_ENGINE_LEVEL`);
- * index 0 mirrors level 1. Default: 1 → 11 → 21 → 31 → 41.
+ * index 0 mirrors level 1. Default: 1 → 22 → 43 → 64 → 86, tuned so a FULL-maxed
+ * engine (level 5, both ladders 10/10 → batch 86 + 10 = 96) hits the 900 s/ticket
+ * floor at exactly 96 × 900 s = 24 h — one big batch per day. Daily throughput is
+ * unchanged (the floor caps it at 4 tickets/hour regardless); only the collect
+ * cadence stretches toward once-a-day as the engine matures.
  */
 export const ENGINE_LEVEL_BASE_CAPACITY_TABLE: readonly number[] = [
   //  (lvl0) lvl1  lvl2  lvl3  lvl4  lvl5
-  1, 1, 11, 21, 31, 41,
+  1, 1, 22, 43, 64, 86,
 ];
 
 /**

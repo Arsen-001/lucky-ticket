@@ -394,15 +394,29 @@ describe('equipped-avatar engine-speed boost (audit finding H2)', () => {
 describe('engine-level promotion & base-capacity scaling (audit finding H3)', () => {
   // The promotion loop was a large, undocumented economic lever invisible to
   // the guardrail: maxing both sub-levels promotes the engine, which permanently
-  // lifts base per-cycle output by +10 and speed by +100%. These tests pin both
-  // curves and the promotion gate to the exact code the live upgrade paths run.
+  // lifts base per-cycle output (1 → 22 → 43 → 64 → 86) and speed by +100%. These
+  // tests pin both curves and the promotion gate to the exact code the live
+  // upgrade paths run.
 
-  it('base per-cycle output scales +10 per engine level (1 → 11 → 21 …)', () => {
+  it('base per-cycle output follows the level table (1 → 22 → 43 → 64 → 86)', () => {
     expect(baseCapacity(1)).toBe(1);
-    expect(baseCapacity(2)).toBe(11);
-    expect(baseCapacity(3)).toBe(21);
+    expect(baseCapacity(2)).toBe(22);
+    expect(baseCapacity(3)).toBe(43);
     // A falsy/absent level is treated as level 1 — no phantom capacity.
     expect(baseCapacity(0)).toBe(1);
+  });
+
+  it('design target: a FULL-maxed engine cycles exactly once a day', () => {
+    // Level 5, both ladders 10/10 → batch 86 + 10 = 96; the 900s/ticket floor
+    // makes the cycle 96 × 900s = 86 400s = 24h. Daily throughput is capped at
+    // 4 tickets/hour by the same floor, so this only sets the collect cadence.
+    const fullMax = baseEngine({
+      engineLevel: MAX_ENGINE_LEVEL,
+      speedLevel: MAX_BOOST_LEVEL,
+      capacityLevel: MAX_BOOST_LEVEL,
+    });
+    expect(engineCapacity(fullMax)).toBe(96);
+    expect(effectiveCycleSeconds(fullMax)).toBe(24 * 3600);
   });
 
   it('each engine level adds +100% to the speed stack, but per-ticket time floors at the 900s cap', () => {
@@ -416,7 +430,7 @@ describe('engine-level promotion & base-capacity scaling (audit finding H3)', ()
     // per-ticket time bottoms out at the 900s cap. This floor↔capacity coupling
     // is the subtle bit H3 makes explicit.
     const lvl2 = baseEngine({ engineLevel: 2 });
-    const capacity = engineCapacity(lvl2); // baseCapacity(2) = 11
+    const capacity = engineCapacity(lvl2); // baseCapacity(2) = 22
     const cycle = effectiveCycleSeconds(lvl2);
     expect(cycle).toBe(capacity * GlobalConstants.engineMinSecondsPerTicket); // floored, not cyc/2
     expect(cycle / capacity).toBe(GlobalConstants.engineMinSecondsPerTicket); // 900s per ticket
@@ -425,9 +439,8 @@ describe('engine-level promotion & base-capacity scaling (audit finding H3)', ()
   it('capacity sub-level adds the same absolute +1 at every engine level', () => {
     // Level 1: base 1 + 10 taps = 11 per cycle…
     expect(engineCapacity(baseEngine({ capacityLevel: MAX_BOOST_LEVEL }))).toBe(11);
-    // …level 2: base 11 + the same 10 = 21 (absolute bonus, NOT a multiplier —
-    // the old % model would have doubled the bigger base to 22).
-    expect(engineCapacity(baseEngine({ engineLevel: 2, capacityLevel: MAX_BOOST_LEVEL }))).toBe(21);
+    // …level 2: base 22 + the same 10 = 32 (absolute bonus, NOT a multiplier).
+    expect(engineCapacity(baseEngine({ engineLevel: 2, capacityLevel: MAX_BOOST_LEVEL }))).toBe(32);
   });
 
   it('promotion fires only when BOTH sub-levels are maxed, then resets them', () => {
@@ -479,9 +492,10 @@ describe('engine-level promotion & base-capacity scaling (audit finding H3)', ()
     }
     expect(paidUpgrades).toBe(20); // 10 speed + 10 capacity, every step paid in LS
     expect(engine.engineLevel).toBe(2);
-    // Payoff of that spend: base output leaps 1 → 11, minting the whole batch at
-    // the 900s/ticket hard floor — an ~8× productivity jump per promotion.
-    expect(baseCapacity(engine.engineLevel ?? 1)).toBe(11);
+    // Payoff of that spend: base output leaps 1 → 22, minting the whole batch at
+    // the 900s/ticket hard floor — the collect cadence stretches toward the
+    // once-a-day full-max target (96 × 900s = 24h).
+    expect(baseCapacity(engine.engineLevel ?? 1)).toBe(22);
     expect(effectiveCycleSeconds(engine) / engineCapacity(engine)).toBe(
       GlobalConstants.engineMinSecondsPerTicket
     );
