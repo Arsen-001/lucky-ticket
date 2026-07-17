@@ -55,7 +55,7 @@ export type EngineUpgradeKnobs = typeof appConfig.economy.engineUpgrades;
  * LS cost of the speed upgrade from sub-`level` to `level + 1` on an engine of
  * `tier` at `engineLevel` (DOCS §10.1). Each engine level adds `perEngineLevel`
  * to the base price, then the whole cost scales by the tier multiplier
- * (Bronze ×1, Silver ×2, Gold ×3, Platinum ×4, Diamond ×5). For Bronze at the
+ * (each tier double the previous: ×1/×2/×4/×8/×16). For Bronze at the
  * default knobs → `level + engineLevel`: 1…10 at engine level 1, 5…14 at level 5.
  */
 export const speedUpgradeLsCost = (
@@ -75,7 +75,7 @@ export const speedUpgradeLsCost = (
  * LS cost of the capacity upgrade from sub-`level` to `level + 1` on an engine of
  * `tier` at `engineLevel` (DOCS §10.2). Each engine level adds `perEngineLevel`
  * to the base price, then the whole cost scales by the tier multiplier
- * (Bronze ×1, Silver ×2, Gold ×3, Platinum ×4, Diamond ×5). For Bronze at the
+ * (each tier double the previous: ×1/×2/×4/×8/×16). For Bronze at the
  * default knobs → `level + engineLevel + 1`: 2…11 at engine level 1, 6…15 at level 5.
  */
 export const capacityUpgradeLsCost = (

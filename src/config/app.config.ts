@@ -169,7 +169,7 @@ export const appConfig = {
      * Bronze (mult 1) at the default knobs: level-1 engine → speed 1…10,
      * capacity 2…11; level-5 engine → speed 5…14, capacity 6…15. Full max of one
      * Bronze engine (all 5 levels, 100 upgrades) = 800 LS; higher tiers cost that
-     * × their multiplier (Silver 1,600 / Gold 2,400 / Platinum 3,200 / Diamond 4,000 LS).
+     * × their multiplier (Silver 1,600 / Gold 3,200 / Platinum 6,400 / Diamond 12,800 LS).
      */
     engineUpgrades: {
       speedBase: 1,
@@ -177,16 +177,16 @@ export const appConfig = {
       perSubLevel: 1,
       perEngineLevel: 1,
       /**
-       * Per-tier cost multiplier on the whole upgrade price — leveling a higher
-       * tier engine is proportionally more expensive than Bronze (product rule):
-       * Silver ×2, Gold ×3, Platinum ×4, Diamond ×5 the Bronze cost.
+       * Per-tier cost multiplier on the whole upgrade price — every tier is
+       * DOUBLE the previous one (product rule): Silver ×2 Bronze, Gold ×2
+       * Silver, Platinum ×2 Gold, Diamond ×2 Platinum → 1/2/4/8/16.
        */
       tierCostMultiplier: {
         bronze: 1,
         silver: 2,
-        gold: 3,
-        platinum: 4,
-        diamond: 5,
+        gold: 4,
+        platinum: 8,
+        diamond: 16,
       },
     },
     /**
