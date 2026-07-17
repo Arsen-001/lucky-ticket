@@ -247,7 +247,7 @@ All perk magnitudes live in `src/constants/global.constants.ts` and can be tuned
 | Referral percentage             | 15%                       | `luckyPlayerReferralPercentage`                  |
 | Higher ticket send daily limits | B5/S4/G3/P2/D1            | `ticketSendDailyLimits.luckyPlayer`              |
 | Send Platinum/Diamond tickets   | allowed                   | `ticketSendDailyLimits.default = 0` for P/D      |
-| Bulk "Claim all" per tier       | enabled                   | n/a (UI gate, LP only)                           |
+| Bulk "Claim all" per tier       | enabled                   | n/a (UI gate, LP or VIP)                         |
 | Profile badge                   | LP icon + glow            | n/a (visual)                                     |
 
 #### VIP perks
@@ -266,6 +266,7 @@ VIP is the high-tier permanent status; values exceed Lucky Player at every categ
 | Referral percentage             | 25%                           | `vipReferralPercentage`                          |
 | Higher ticket send daily limits | inherits LP table             | `ticketSendDailyLimits.luckyPlayer`              |
 | Send Platinum/Diamond tickets   | allowed                       | (same gate as LP)                                |
+| Bulk "Claim all" per tier       | enabled                       | n/a (UI gate, LP or VIP)                         |
 | Profile badge                   | Animated VIP-level            | n/a (visual)                                     |
 | Dedicated support               | yes                           | n/a (operations)                                 |
 
@@ -323,7 +324,7 @@ The Tickets page is structured as a tier-tabs view:
 - **Summary row (top):** A 5-tile grid (Bronze · Silver · Gold · Platinum · Diamond) showing the user's current inventory count for each tier. Tapping a tile switches the active tier tab.
 - **Tab strip:** Six pill-style chips — five tier tabs (Bronze → Diamond) plus a **Partners** tab. Locked tiers render with a lock icon. The active tab carries a tier-color dot/icon plus a `×N` ready-to-claim badge in white.
 - **Tab content per tier:**
-  - **Unlocked tier:** A summary card (`X tickets in inventory · Y engines active`), a `{count} tickets ready · Claim all` callout (when any engine has pending output **and** the player holds **Lucky Player** — otherwise each engine is claimed individually; see Section 7), and a 2-column grid of engine preview cards. Each card opens that engine's dedicated page.
+  - **Unlocked tier:** A summary card (`X tickets in inventory · Y engines active`), a `{count} tickets ready · Claim all` callout (when any engine has pending output **and** the player holds **Lucky Player or VIP** — otherwise each engine is claimed individually; see Section 7), and a 2-column grid of engine preview cards. Each card opens that engine's dedicated page.
   - **Locked tier:** A locked-state hero plus the requirements list (Section 8.5).
 - **Partners tab:** Reserved for partner-ticket integrations — currently shows a "Coming soon" placeholder.
 

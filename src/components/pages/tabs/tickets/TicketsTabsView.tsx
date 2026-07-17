@@ -198,9 +198,9 @@ export function TicketsTabsView() {
         tier={activeTab}
         engines={enginesByTier[activeTab] ?? []}
         elapsedByEngine={elapsedByEngine}
-        // "Claim all" is a Lucky Player–only perk; without it the prop is omitted
-        // so the button isn't rendered (DOCS §7.3 / §8.4).
-        onClaimAll={isLp ? () => handleClaimAllForTier(activeTab) : undefined}
+        // "Claim all" is a status perk (Lucky Player or VIP); without one the
+        // prop is omitted so the button isn't rendered (DOCS §7.3 / §8.4).
+        onClaimAll={isLp || isVip ? () => handleClaimAllForTier(activeTab) : undefined}
         onClaimEngine={engineId => handleClaimEngine(activeTab, engineId)}
       />
     );
