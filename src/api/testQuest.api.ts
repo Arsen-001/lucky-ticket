@@ -1,0 +1,46 @@
+import { api } from '@/api/index.api';
+import { rtkTags } from '@/constants/rtk-tags';
+import type {
+  ClaimTestQuestResponse,
+  TestQuestLeaderboard,
+  TestQuestState,
+} from '@/types/interfaces/testQuest.interfaces';
+
+/**
+ * Test-Quest API — the pinned launch-quest card on the Tasks screen.
+ *
+ * GET /test-quest        → current level / task / reward / claimable-today.
+ * POST /test-quest/claim → takes the current level, credits the drop, advances
+ *                          one step. The one-claim-per-day gate is enforced
+ *                          server-side; claiming writes LC/Stars ledger rows, so
+ *                          the wallet/me/tickets/lc caches are invalidated too.
+ */
+export const testQuestApi = api.injectEndpoints({
+  endpoints: builder => ({
+    getTestQuest: builder.query<TestQuestState, void>({
+      query: () => ({ url: 'test-quest' }),
+      providesTags: [rtkTags.testQuest],
+    }),
+    getTestQuestLeaderboard: builder.query<TestQuestLeaderboard, void>({
+      query: () => ({ url: 'test-quest/leaderboard' }),
+      providesTags: [rtkTags.testQuest],
+    }),
+    claimTestQuestLevel: builder.mutation<ClaimTestQuestResponse, void>({
+      query: () => ({ url: 'test-quest/claim', method: 'POST' }),
+      invalidatesTags: [
+        rtkTags.testQuest,
+        rtkTags.wallet,
+        rtkTags.me,
+        rtkTags.tickets,
+        rtkTags.lc,
+        rtkTags.lcTransactions,
+      ],
+    }),
+  }),
+});
+
+export const {
+  useGetTestQuestQuery,
+  useGetTestQuestLeaderboardQuery,
+  useClaimTestQuestLevelMutation,
+} = testQuestApi;

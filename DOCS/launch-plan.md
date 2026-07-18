@@ -102,8 +102,11 @@ On-screen copy deliberately avoids the word "beta" — it uses **ТЕСТ / те
 
 ### 2.1 Concept
 
-At launch the product runs a **1-month test (beta) period**. Activity during the
-beta is tracked and, when the beta ends, converts into **exclusive early-adopter
+At launch the product runs a **31-day test (beta) period** (decided: **31 days,
+not 30** — note the RU grammar consequence: on-screen copy is «31 ДЕНЬ»
+singular, not «ДНЕЙ»; the already-rendered video still says «30 ДНЕЙ» and must be
+re-cut to «31 ДЕНЬ» on the next render — see §1.5). Activity during the beta is
+tracked and, when the beta ends, converts into **exclusive early-adopter
 rewards** scaled to how much each player achieved. The exclusivity is the point:
 some rewards (especially the badge) can **never** be obtained again after the
 beta closes — a limited-time "founder" moment to drive activity and retention.
@@ -156,6 +159,60 @@ not just a brand intro.
 - **Anti-abuse** — guard against fake/self referrals inflating tiers.
 - **Surfaces** — how progress shows in the UI during the beta and in the admin
   panel; how the grant is executed at beta end.
+
+### 2.7 REJECTED direction — the FP ladder (kept for history)
+
+> ⚠️ **Superseded 2026-07-18.** The composite-FP / 5-rung battle-pass ladder below
+> was rejected as too generic — it "reads like someone else's mechanic." The new
+> direction is the **Founder Draw** (on-brand raffle) — see §2.8. This section is
+> kept only as a record of what was tried, and of the calls that may still carry
+> over: referrals as the main lever, ads double-counting, the exclusive
+> never-again seal, and engine-speed as a permanent boost.
+
+**Decided:**
+
+- **One composite scale**, not per-axis tracks. All four §2.2 axes fold into a
+  single **Founder Points (FP)** count → one progress bar, one ladder of 5 rungs.
+  Everyone has a path up (referrer, grinder, ad-watcher).
+- **31-day** window (see §2.1). At launch everyone starts at AP = 0, so "beta AP"
+  = the player's whole AP — no separate beta-only counter needed.
+- **Top rungs (IV–V) are rich**: permanent Founder boosts **+ real VIP level + LS**
+  (**CONFIRMED** — one-time grant, tiny top-player population, max FOMO).
+- **The Founder seal/badge is the only permanent, never-reissued reward**; LC /
+  LS / status-days / boosts are the scaling bundle.
+- **The permanent Founder boost is an engine-speed multiplier** — a **third
+  stacking layer** (like a chip) on top of `luckyPlayerEngineSpeedBoostPct` /
+  `vipEngineSpeedBoostPct`. Small %s per rung (3 → 12%, per the table). The
+  **referral-%** boost is a _secondary_ perk only at rungs IV–V (social players
+  only, so never the primary boost).
+
+**FP accrual (draft):** `+1 FP` per AP earned · **`+100 FP` per activated
+referral** (main growth lever — one friend ≈ ~a week of solo play; on top of
+invite AP) · flat chunks for "development" milestones (first engine,
+first stake, first tournament win, email verified, each tier reached) ·
+**`+1 FP` per ad watched — ads double-count** toward FP (**CONFIRMED** — revenue
+incentive during the test).
+
+**5-rung ladder (DRAFT magnitudes — the main thing left to nail down):**
+
+| Rung | Seal (exclusive)  | FP     | LC         | Lucky Player   | Permanent boost                       | Premium                         |
+| ---- | ----------------- | ------ | ---------- | -------------- | ------------------------------------- | ------------------------------- |
+| I    | Bronze Founder    | 300    | 500,000    | 3 d            | —                                     | 5 tickets                       |
+| II   | Silver Founder    | 800    | 2,000,000  | 7 d            | +3% engine speed                      | 15 tickets                      |
+| III  | Gold Founder      | 1,800  | 6,000,000  | 14 d           | +5% engine speed                      | 1 free engine + 50 LS           |
+| IV   | Platinum Founder  | 3,500  | 15,000,000 | 30 d           | +8% speed, +5% referral               | VIP 1 + 150 LS                  |
+| V    | Diamond / Genesis | 6,000+ | 40,000,000 | (VIP replaces) | +12% speed, +10% referral, +10% stake | VIP 3 + 500 LS + Founders' Hall |
+
+Player receives the bundle of their **highest reached rung** (each rung strictly
+supersedes the one below). Anti-abuse: referral FP counts only for **activated**
+referrals (friend reached a tier), reusing the existing `referralsCount` gate.
+
+**Still open (the "всё нужно обсудить" list):**
+
+- Exact reward magnitudes per rung (LC / LS / LP-days / VIP levels) and the
+  engine-speed boost %s (draft 3/5/8/12).
+- Rung **naming** (metals Bronze→Diamond Founder · Genesis/Pioneer/OG · RU names) —
+  not yet chosen.
 
 ---
 

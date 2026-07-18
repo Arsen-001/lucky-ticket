@@ -36,6 +36,7 @@ const CATEGORY_LABEL_KEY: Record<TaskCategory, MessageIds> = {
   [TaskCategory.STARS]: 'category stars',
   [TaskCategory.PROFILE_STATUS]: 'category profile-status',
   [TaskCategory.ACHIEVEMENTS]: 'category achievements',
+  [TaskCategory.TEST_QUEST]: 'category test-quest',
   [TaskCategory.PARTNERS]: 'category partners',
 };
 

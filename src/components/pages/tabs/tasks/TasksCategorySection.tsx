@@ -74,6 +74,7 @@ const CATEGORY_LABEL_KEY: Record<TaskCategory, MessageIds> = {
   [TaskCategory.STARS]: 'category stars',
   [TaskCategory.PROFILE_STATUS]: 'category profile-status',
   [TaskCategory.ACHIEVEMENTS]: 'category achievements',
+  [TaskCategory.TEST_QUEST]: 'category test-quest',
   [TaskCategory.PARTNERS]: 'category partners',
 };
 
@@ -91,6 +92,7 @@ const CATEGORY_BLURB_KEY: Record<TaskCategory, MessageIds> = {
   [TaskCategory.STARS]: 'category stars blurb',
   [TaskCategory.PROFILE_STATUS]: 'category profile-status blurb',
   [TaskCategory.ACHIEVEMENTS]: 'category achievements blurb',
+  [TaskCategory.TEST_QUEST]: 'category test-quest blurb',
   [TaskCategory.PARTNERS]: 'category partners blurb',
 };
 

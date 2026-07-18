@@ -3,6 +3,7 @@ import { tournamentsMock } from '@/mock/tournaments.mock';
 import { ticketsMock } from '@/mock/tickets.mock';
 import type { FetchArgs } from '@reduxjs/toolkit/query';
 import { tasksMock } from '@/mock/tasks.mock';
+import { testQuestMock } from '@/mock/testQuest.mock';
 import { leaderboardMock } from '@/mock/leaderboard.mock';
 import { faqMock } from '@/mock/faq.mock';
 import { privacyMock } from '@/mock/privacy.mock';
@@ -86,6 +87,7 @@ export const mockData = {
   ...tournamentsMock,
   ...ticketsMock,
   ...tasksMock,
+  ...testQuestMock,
   ...leaderboardMock,
   ...faqMock,
   ...privacyMock,

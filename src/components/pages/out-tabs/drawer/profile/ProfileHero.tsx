@@ -13,6 +13,7 @@ import { ProfileUsernameEditButton } from '@/components/pages/out-tabs/drawer/pr
 import { ProfileShareSheet } from '@/components/pages/out-tabs/drawer/profile/ProfileShareSheet';
 import { ProfileSocialActions } from '@/components/pages/out-tabs/drawer/profile/ProfileSocialActions';
 import { ProfileStatusIconButton } from '@/components/pages/out-tabs/drawer/profile/ProfileStatusIconButton';
+import { ProfileTestQuestBadge } from '@/components/pages/out-tabs/drawer/profile/ProfileTestQuestBadge';
 import { ProfileTooltipWrap } from '@/components/pages/out-tabs/drawer/profile/ProfileTooltipWrap';
 import { Skeleton } from '@/components/shared/seleketons/Skeleton';
 import { SkeletonSuspense } from '@/components/shared/seleketons/SkeletonSuspense';
@@ -313,6 +314,8 @@ export function ProfileHero({ profile, loading, isPreview, onTogglePreview }: Pr
             />
           )}
         </div>
+
+        {profile?.isOwn && <ProfileTestQuestBadge />}
 
         {profile && !profile.isOwn && (
           <ProfileSocialActions profile={profile} isPreview={isPreview} />
