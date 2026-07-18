@@ -2,7 +2,7 @@ import { describe, it, expect } from 'vitest';
 import { readFileSync } from 'node:fs';
 import { resolve } from 'node:path';
 
-const LOCALES = ['en', 'ru', 'hy', 'de'] as const;
+const LOCALES = ['en', 'ru', 'de'] as const;
 
 const load = (locale: string): Record<string, string> =>
   JSON.parse(readFileSync(resolve(process.cwd(), `messages/${locale}.json`), 'utf8'));

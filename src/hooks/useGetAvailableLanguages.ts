@@ -24,12 +24,6 @@ export function useGetAvailableLanguages() {
       flag: flags.unitedKingdom,
     },
     {
-      code: Locale.ARMENIAN,
-      name: t('armenian'),
-      nativeName: 'Հայերեն',
-      flag: flags.armenia,
-    },
-    {
       code: Locale.RUSSIAN,
       name: t('russian'),
       nativeName: 'Русский',

@@ -94,10 +94,10 @@ const articles: FaqArticle[] = [
       'Lokalisierung und Zugriff.'
     ),
     content: tx(
-      'LuckyTicket365 is a web app that runs as a Telegram Mini App and also in a regular browser. The interface, tasks, support articles and notifications are available in multiple languages (English, Russian, Armenian, German). You can switch language any time in Settings.',
-      'LuckyTicket365 — это веб-приложение, которое работает как Telegram Mini App и в обычном браузере. Интерфейс, задания, статьи поддержки и уведомления доступны на нескольких языках (английский, русский, армянский, немецкий). Язык можно сменить в любой момент в Настройках.',
+      'LuckyTicket365 is a web app that runs as a Telegram Mini App and also in a regular browser. The interface, tasks, support articles and notifications are available in multiple languages (English, Russian, German). You can switch language any time in Settings.',
+      'LuckyTicket365 — это веб-приложение, которое работает как Telegram Mini App и в обычном браузере. Интерфейс, задания, статьи поддержки и уведомления доступны на нескольких языках (английский, русский, немецкий). Язык можно сменить в любой момент в Настройках.',
       'LuckyTicket365-ը վեբ հավելված է, որն աշխատում է որպես Telegram Mini App, ինչպես նաև սովորական բրաուզերում։ Ինտերֆեյսը, առաջադրանքները, աջակցության հոդվածները և ծանուցումները հասանելի են մի քանի լեզուներով (անգլերեն, ռուսերեն, հայերեն, գերմաներեն)։ Կարող եք ցանկացած պահի փոխել լեզուն Կարգավորումներում։',
-      'LuckyTicket365 ist eine Web-App, die als Telegram Mini App und auch in einem normalen Browser läuft. Oberfläche, Aufgaben, Hilfeartikel und Benachrichtigungen sind in mehreren Sprachen verfügbar (Englisch, Russisch, Armenisch, Deutsch). Du kannst die Sprache jederzeit in den Einstellungen wechseln.'
+      'LuckyTicket365 ist eine Web-App, die als Telegram Mini App und auch in einem normalen Browser läuft. Oberfläche, Aufgaben, Hilfeartikel und Benachrichtigungen sind in mehreren Sprachen verfügbar (Englisch, Russisch, Deutsch). Du kannst die Sprache jederzeit in den Einstellungen wechseln.'
     ),
   },
 
