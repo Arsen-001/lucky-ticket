@@ -1675,6 +1675,7 @@ Operator-issued **promo codes** let players redeem rewards from a dedicated page
 
 - A code grants one or more rewards — any mix of **LC**, **tickets** (of a given tier), or **Lucky Stars**.
 - Codes are single-use per account: redeeming the same code twice returns "already used"; invalid and expired codes return their own messages.
+- **Channel-subscription gate:** redeeming a code requires the player to be subscribed to the official Telegram channel (`TELEGRAM_CHANNEL_ID`, default `@luckyticket365`). The backend performs a live `getChatMember` check at redemption time and rejects a non-subscriber with a "join the channel" message before any reward is granted. The gate blocks only a **positive** "not a member" — if membership can't be determined (bot unconfigured, a synthetic/seed account, or a transient Bot-API failure) the redemption is allowed, so a lookup hiccup never locks a legitimate player out. This makes promo rewards a subscriber perk and keeps players on the channel where fresh codes are published.
 - Codes are created and managed operator-side (admin/backend); the catalog is never exposed to the client. Players discover codes through distribution channels such as the Telegram channel.
 
 ## 18. Stakes System

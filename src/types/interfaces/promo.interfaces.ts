@@ -16,5 +16,8 @@ export interface PromoRedeemResponse {
   rewards: PromoReward[];
 }
 
-/** Reason a redemption failed, surfaced to the user as a localized message. */
-export type PromoErrorReason = 'invalid' | 'expired' | 'used';
+/**
+ * Reason a redemption failed, surfaced to the user as a localized message.
+ * `channel` — the player must be subscribed to the official Telegram channel.
+ */
+export type PromoErrorReason = 'invalid' | 'expired' | 'used' | 'channel';

@@ -1009,6 +1009,7 @@
   "promo invalid": "This code isn't valid. Check it and try again.",
   "promo expired": "This code has expired.",
   "promo used": "You've already redeemed this code.",
+  "promo need channel": "Join our Telegram channel to redeem codes.",
   "find codes on channel": "Find fresh codes on our channel",
   "promo possible rewards": "Possible rewards",
   "promo channel blurb": "New codes drop there first — don't miss out.",

@@ -11,12 +11,13 @@ import { PromoChannelCard } from './PromoChannelCard';
 import { PromoRewardReveal } from './PromoRewardReveal';
 import type { PromoErrorReason, PromoRedeemResponse } from '@/types/interfaces/promo.interfaces';
 
-type PromoErrorMessageKey = 'promo invalid' | 'promo expired' | 'promo used';
+type PromoErrorMessageKey = 'promo invalid' | 'promo expired' | 'promo used' | 'promo need channel';
 
 const ERROR_KEY: Record<PromoErrorReason, PromoErrorMessageKey> = {
   invalid: 'promo invalid',
   expired: 'promo expired',
   used: 'promo used',
+  channel: 'promo need channel',
 };
 
 export function PromoContainer() {

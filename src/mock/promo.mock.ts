@@ -14,6 +14,8 @@ const VALID_CODES: Record<string, PromoReward[]> = {
 };
 
 const EXPIRED_CODES = new Set(['EXPIRED', 'SUMMER24']);
+/** Codes that require an (un-met) channel subscription — returns "subscribe first". */
+const CHANNEL_LOCKED_CODES = new Set(['SUBSCRIBE', 'CHANNEL']);
 /** Codes redeemed this session — a second attempt returns "already used". */
 const usedCodes = new Set<string>();
 
@@ -24,6 +26,7 @@ export const promoMock = {
 
     if (!code) return { error: { status: 400, data: 'invalid' } };
     if (EXPIRED_CODES.has(code)) return { error: { status: 410, data: 'expired' } };
+    if (CHANNEL_LOCKED_CODES.has(code)) return { error: { status: 403, data: 'channel' } };
     if (usedCodes.has(code)) return { error: { status: 409, data: 'used' } };
 
     const rewards = VALID_CODES[code];
