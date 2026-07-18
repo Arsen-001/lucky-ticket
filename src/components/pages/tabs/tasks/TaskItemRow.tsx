@@ -1,6 +1,6 @@
 'use client';
 
-import { type CSSProperties, useEffect, useRef, useState } from 'react';
+import { type CSSProperties, useEffect, useLayoutEffect, useRef, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { Check, ChevronDown, ChevronRight, Clock3, Gift, Lock } from 'lucide-react';
 import { twMerge } from 'tailwind-merge';
@@ -13,6 +13,10 @@ import { type Route } from '@/constants/routes';
 import { TaskCategoryIcon } from './TaskCategoryIcon';
 import { TaskRewardRow } from './TaskRewardRow';
 import { SectionShine } from './SectionShine';
+
+// useLayoutEffect warns during SSR; fall back to useEffect on the server. The
+// row only ever animates in response to a client-side tap, so this is safe.
+const useIsomorphicLayoutEffect = typeof window !== 'undefined' ? useLayoutEffect : useEffect;
 
 const RARITY_FRAME: Record<TaskRarity, string> = {
   [TaskRarity.BRONZE]: 'task-card-default',
@@ -85,6 +89,57 @@ export function TaskItemRow({ task, onClaim, highlightToken, className, style }:
   const isExpandable = !isReady && (hasDetail || isTruncated || expanded);
   const isInteractive = isReady || isExpandable;
 
+  // Smoothly grow/shrink the row between its collapsed and expanded heights.
+  // `height: auto` can't be transitioned in CSS, so FLIP it: measure the height
+  // the body is leaving from (captures a mid-flight value on a fast re-tap) and
+  // the new natural height, pin the old one, then transition to the new one and
+  // release back to auto so later reflows stay natural. `overflow-hidden` on the
+  // body clips the not-yet-revealed lines while the height animates.
+  const bodyRef = useRef<HTMLDivElement>(null);
+  const didMountRef = useRef(false);
+  useIsomorphicLayoutEffect(() => {
+    const el = bodyRef.current;
+    if (!el) return;
+
+    const from = el.getBoundingClientRect().height;
+    el.style.transition = 'none';
+    el.style.height = 'auto';
+    const to = el.scrollHeight;
+
+    const reduceMotion = window.matchMedia?.('(prefers-reduced-motion: reduce)').matches;
+    if (!didMountRef.current || reduceMotion || Math.abs(from - to) < 1) {
+      didMountRef.current = true;
+      el.style.height = '';
+      el.style.transition = '';
+      return;
+    }
+
+    el.style.height = `${from}px`;
+    void el.offsetHeight; // reflow so the browser registers the start height
+    el.style.transition = 'height 200ms ease-out';
+    el.style.height = `${to}px`;
+
+    let settled = false;
+    const settle = () => {
+      if (settled) return;
+      settled = true;
+      el.style.transition = '';
+      el.style.height = '';
+      el.removeEventListener('transitionend', onEnd);
+      window.clearTimeout(timer);
+    };
+    const onEnd = (e: TransitionEvent) => {
+      if (e.target === el && e.propertyName === 'height') settle();
+    };
+    el.addEventListener('transitionend', onEnd);
+    const timer = window.setTimeout(settle, 280); // fallback if transitionend is missed
+
+    return () => {
+      el.removeEventListener('transitionend', onEnd);
+      window.clearTimeout(timer);
+    };
+  }, [expanded]);
+
   const navigate = () => {
     if (task.deeplink) {
       router.push(task.deeplink as Route);
@@ -123,7 +178,7 @@ export function TaskItemRow({ task, onClaim, highlightToken, className, style }:
 
       <TaskCategoryIcon category={task.category} size={16} />
 
-      <div className="flex min-w-0 flex-1 flex-col gap-0.5">
+      <div ref={bodyRef} className="flex min-w-0 flex-1 flex-col gap-0.5 overflow-hidden">
         <h4
           ref={titleRef}
           className={twMerge(
