@@ -7,13 +7,14 @@ import { useGetMeQuery } from '@/api/me.api';
 import { useGetTicketsQuery } from '@/api/tickets.api';
 import { MarketSectionGrid } from '@/components/pages/tabs/market/MarketSectionGrid';
 import { MarketUniversalCard } from '@/components/pages/tabs/market/MarketUniversalCard';
+import { MarketItemImage } from '@/components/pages/tabs/market/MarketItemImage';
 import type { MarketSelectedItem } from '@/components/pages/tabs/market/MarketView';
 import { Ticket } from '@/components/shared/icons/Ticket';
 import { GlobalConstants } from '@/constants/global.constants';
 import { useAppTranslations } from '@/hooks/useAppTranslations';
 import { useUnlockedTiers } from '@/hooks/useUnlockedTiers';
 import type { MarketPrice, MarketTicket } from '@/types/interfaces/market.interfaces';
-import { applyStatusMarketDiscount } from '@/utils/global/market.utils';
+import { applyStatusMarketDiscount, effectiveMarketDiscountPct } from '@/utils/global/market.utils';
 
 export interface MarketTicketSectionProps {
   tickets: MarketTicket[];
@@ -29,6 +30,7 @@ export function MarketTicketSection({ tickets, onSelect, onBuy }: MarketTicketSe
   const { data: myTickets } = useGetTicketsQuery();
   const isLp = me?.isLuckyPlayer ?? false;
   const isVip = me?.isVIP ?? false;
+  const discountPct = effectiveMarketDiscountPct(isLp, isVip, me?.statusPerks);
   if (!tickets.length) return null;
 
   return (
@@ -37,12 +39,16 @@ export function MarketTicketSection({ tickets, onSelect, onBuy }: MarketTicketSe
         const isLocked = !isTierUnlocked(ticket.ticketType) || ticket.isAvailable === false;
         const cardIcon: ReactNode = <Ticket type={ticket.ticketType} width={104} height={104} />;
         const modalIcon: ReactNode = <Ticket type={ticket.ticketType} width={140} height={140} />;
-        const discountedPrices = applyStatusMarketDiscount(ticket.prices, isLp, isVip);
+        const discountedPrices = applyStatusMarketDiscount(ticket.prices, discountPct);
         const item: MarketSelectedItem = {
           id: ticket.id,
           name: ticket.name,
           description: t(ticket.ticketType),
-          iconNode: modalIcon,
+          iconNode: ticket.imageUrl ? (
+            <MarketItemImage src={ticket.imageUrl} alt={ticket.name} size={140} />
+          ) : (
+            modalIcon
+          ),
           prices: discountedPrices,
           isNew: ticket.isNew,
           discountPct: ticket.discountPct,
@@ -62,6 +68,7 @@ export function MarketTicketSection({ tickets, onSelect, onBuy }: MarketTicketSe
             discountPct={ticket.discountPct}
             disabled={isLocked}
             iconStage={cardIcon}
+            imageUrl={ticket.imageUrl}
             iconStageClassName="h-28"
             prices={discountedPrices}
             onClick={() => onSelect(item)}

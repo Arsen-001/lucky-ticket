@@ -8,16 +8,21 @@ import { useBuyStatusMutation, useGetMarketDataQuery } from '@/api/market.api';
 import { useGetMeQuery } from '@/api/me.api';
 import { MarketSectionGrid } from '@/components/pages/tabs/market/MarketSectionGrid';
 import { MarketUniversalCard } from '@/components/pages/tabs/market/MarketUniversalCard';
+import { MarketItemImage } from '@/components/pages/tabs/market/MarketItemImage';
 import type { MarketSelectedItem } from '@/components/pages/tabs/market/MarketView';
 import { LuckyPlayerIcon } from '@/components/shared/icons/LuckyPlayerIcon';
 import { VipIcon } from '@/components/shared/icons/VipIcon';
 import { GlobalConstants } from '@/constants/global.constants';
 import { routes, type Route } from '@/constants/routes';
 import { useAppTranslations } from '@/hooks/useAppTranslations';
-import { MarketItemRequirementType, MarketStatusType } from '@/types/enums/market.enums';
+import {
+  MarketItemRequirementType,
+  MarketPriceType,
+  MarketStatusType,
+} from '@/types/enums/market.enums';
 import type { MarketPrice, MarketStatus } from '@/types/interfaces/market.interfaces';
 import type { MessageIds } from '@/types/types/i18n.types';
-import { applyStatusMarketDiscount } from '@/utils/global/market.utils';
+import { applyStatusMarketDiscount, effectiveMarketDiscountPct } from '@/utils/global/market.utils';
 
 export interface MarketStatusSectionProps {
   onSelect: (item: MarketSelectedItem) => void;
@@ -42,13 +47,29 @@ export function MarketStatusSection({ onSelect, onBuy }: MarketStatusSectionProp
   const getActivePrices = (status: MarketStatus) => {
     const isVIP = status.statusType === MarketStatusType.VIP;
     const isVipUpgrade = isVIP && userVipLevel > 0;
-    const rawPrices = isVipUpgrade && status.upgradePrices ? status.upgradePrices : status.prices;
+    // Per-level upgrade price (admin-tunable): the cost to REACH the NEXT level.
+    // Falls back to the flat upgradePrices, then the base prices.
+    const nextLevelPrice = isVipUpgrade
+      ? status.levelPrices?.find(l => l.level === userVipLevel + 1)
+      : undefined;
+    const rawPrices: MarketPrice[] = nextLevelPrice
+      ? [
+          { type: MarketPriceType.LC, amount: nextLevelPrice.lc },
+          { type: MarketPriceType.TELEGRAM_STARS, amount: nextLevelPrice.ls },
+        ]
+      : isVipUpgrade && status.upgradePrices
+        ? status.upgradePrices
+        : status.prices;
     // Status discount only applies to OTHER statuses — never to LP/VIP when
     // buying the same tier. VIP upgrades take no discount at all (the backend
     // charges the upgrade price un-discounted — keep the shown price in sync).
     const lpEligible = !isVipUpgrade && isLp && status.statusType !== MarketStatusType.LUCKY_PLAYER;
     const vipEligible = !isVipUpgrade && isVip && status.statusType !== MarketStatusType.VIP;
-    return applyStatusMarketDiscount(rawPrices, lpEligible, vipEligible);
+    // The discount that applies is the user's own effective status perk (VIP
+    // supersedes LP); eligibility only decides WHETHER it applies (no self-discount).
+    const pct =
+      lpEligible || vipEligible ? effectiveMarketDiscountPct(isLp, isVip, me?.statusPerks) : 0;
+    return applyStatusMarketDiscount(rawPrices, pct);
   };
 
   if (!isLoading && !statuses.length) return null;
@@ -67,7 +88,8 @@ export function MarketStatusSection({ onSelect, onBuy }: MarketStatusSectionProp
         //    is true the card is locked; expires automatically on the backend.
         //  • VIP → can only be upgraded. At max VIP level the card is locked.
         const lpActive = isLuckyPlayer && (me?.isLuckyPlayer ?? false);
-        const vipAtMax = isVIP && userVipLevel >= GlobalConstants.maxVipLevel;
+        const vipMaxLevel = status.maxLevel ?? GlobalConstants.maxVipLevel;
+        const vipAtMax = isVIP && userVipLevel >= vipMaxLevel;
         const isOwned = lpActive || vipAtMax;
 
         const activityRequirement = !isVIP
@@ -132,7 +154,11 @@ export function MarketStatusSection({ onSelect, onBuy }: MarketStatusSectionProp
           id: status.id,
           name: displayName,
           description: durationLabel,
-          iconNode: renderIcon(160),
+          iconNode: status.imageUrl ? (
+            <MarketItemImage src={status.imageUrl} alt={status.name} size={160} />
+          ) : (
+            renderIcon(160)
+          ),
           prices: activePrices,
           isNew: status.isNew,
           accent,
@@ -177,6 +203,7 @@ export function MarketStatusSection({ onSelect, onBuy }: MarketStatusSectionProp
             disabled={isDisabled}
             badge={ownershipBadge}
             iconStage={renderIcon(75)}
+            imageUrl={status.imageUrl}
             iconStageClassName="h-24"
             prices={activePrices}
             onClick={() => (statusPage ? router.push(statusPage) : onSelect(item))}

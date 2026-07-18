@@ -30,6 +30,8 @@ const accentValue = (a?: MarketAccent): string =>
 export interface MarketUniversalCardProps {
   name: ReactNode;
   iconStage: ReactNode;
+  /** Admin-set photo — when present it fills the icon stage instead of `iconStage`. */
+  imageUrl?: string;
   iconStageClassName?: string;
   badge?: ReactNode;
   accent?: MarketAccent;
@@ -48,6 +50,7 @@ export interface MarketUniversalCardProps {
 export function MarketUniversalCard({
   name,
   iconStage,
+  imageUrl,
   iconStageClassName,
   badge,
   accent,
@@ -114,7 +117,18 @@ export function MarketUniversalCard({
             backgroundColor: `color-mix(in srgb, ${accentColor} 12%, transparent)`,
           }}
         >
-          {iconStage}
+          {imageUrl ? (
+            // Admin-provided URL (Blob upload or pasted) — plain <img> avoids
+            // the next/image host allow-list.
+            // eslint-disable-next-line @next/next/no-img-element
+            <img
+              src={imageUrl}
+              alt={typeof name === 'string' ? name : ''}
+              className="h-full w-full object-cover"
+            />
+          ) : (
+            iconStage
+          )}
         </div>
       </SkeletonSuspense>
 

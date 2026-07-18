@@ -88,6 +88,9 @@ export const marketMock: MarketData = {
       isNew: true,
       ticketType: TicketsEnum.BRONZE,
       isAvailable: true,
+      // Exercises the admin-photo (MarketItemImage) render path in dev + the
+      // Playwright smoke; real items get their imageUrl from the backend.
+      imageUrl: images.avatar1.src,
       prices: ticketPrices(TicketsEnum.BRONZE),
     },
     {
@@ -424,6 +427,17 @@ export const marketMock: MarketData = {
         { type: MarketPriceType.LC, amount: 10_000_000 },
         { type: MarketPriceType.TELEGRAM_STARS, amount: 250 },
       ],
+      maxLevel: 20,
+      // Per-level price ladder (mirrors the backend STATUS_CONFIG_DEFAULTS): L1 =
+      // first unlock, L2+ = the upgrade to reach that level.
+      levelPrices: Array.from({ length: 20 }, (_, i) => {
+        const level = i + 1;
+        return {
+          level,
+          lc: level === 1 ? 20_000_000 : 10_000_000,
+          ls: level === 1 ? 500 : 250,
+        };
+      }),
       privileges: [
         'vip engine speed boost',
         'vip stake yield boost',

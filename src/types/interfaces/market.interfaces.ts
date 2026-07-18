@@ -34,6 +34,8 @@ export interface MarketItemBase {
   discountPct?: number;
   /** ISO date when offer expires (for limited deals/passes) */
   expiresAt?: string;
+  /** Admin-set storefront photo; when present the card shows it instead of the icon. */
+  imageUrl?: string;
 }
 
 export interface MarketTicket extends MarketItemBase {
@@ -42,13 +44,25 @@ export interface MarketTicket extends MarketItemBase {
   isAvailable: boolean;
 }
 
+/** One VIP level's price (LC + Lucky Stars) — the cost to REACH that level. */
+export interface VipLevelPrice {
+  level: number;
+  lc: number;
+  ls: number;
+}
+
 export interface MarketStatus extends MarketItemBase {
   category?: MarketItemCategory.STATUS;
   statusType: MarketStatusType;
   privileges: string[];
   requirements?: MarketRequirement[];
   durationDays?: number;
+  /** Flat upgrade price (level-2 cost) — back-compat fallback for `levelPrices`. */
   upgradePrices?: MarketPrice[];
+  /** Per-level VIP price ladder (admin-tunable). Picks the NEXT-level price. */
+  levelPrices?: VipLevelPrice[];
+  /** VIP level ceiling (admin-tunable). */
+  maxLevel?: number;
 }
 
 export interface MarketEngine extends MarketItemBase {

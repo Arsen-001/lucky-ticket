@@ -7,13 +7,14 @@ import { useGetMeQuery } from '@/api/me.api';
 import { useGetTicketsQuery } from '@/api/tickets.api';
 import { MarketSectionGrid } from '@/components/pages/tabs/market/MarketSectionGrid';
 import { MarketUniversalCard } from '@/components/pages/tabs/market/MarketUniversalCard';
+import { MarketItemImage } from '@/components/pages/tabs/market/MarketItemImage';
 import type { MarketSelectedItem } from '@/components/pages/tabs/market/MarketView';
 import { EngineIcon } from '@/components/shared/icons/EngineIcon';
 import { useAppTranslations } from '@/hooks/useAppTranslations';
 import { useUnlockedTiers } from '@/hooks/useUnlockedTiers';
 import type { MarketEngine, MarketPrice } from '@/types/interfaces/market.interfaces';
 import type { TicketType } from '@/types/types/ticket.types';
-import { engineNextPurchasePrices } from '@/utils/global/market.utils';
+import { effectiveMarketDiscountPct, engineNextPurchasePrices } from '@/utils/global/market.utils';
 
 export interface MarketEngineSectionProps {
   engines: MarketEngine[];
@@ -29,6 +30,7 @@ export function MarketEngineSection({ engines, onSelect, onBuy }: MarketEngineSe
   const { data: tickets } = useGetTicketsQuery();
   const isLp = me?.isLuckyPlayer ?? false;
   const isVip = me?.isVIP ?? false;
+  const discountPct = effectiveMarketDiscountPct(isLp, isVip, me?.statusPerks);
   if (!engines.length) return null;
 
   // Engines already owned of a tier — drives the geometric repeat-purchase
@@ -50,14 +52,17 @@ export function MarketEngineSection({ engines, onSelect, onBuy }: MarketEngineSe
         const discountedPrices = engineNextPurchasePrices(
           engine.ticketType,
           ownedOfTier(engine.ticketType),
-          isLp,
-          isVip
+          discountPct
         );
         const item: MarketSelectedItem = {
           id: engine.id,
           name: engine.name,
           description,
-          iconNode: modalIcon,
+          iconNode: engine.imageUrl ? (
+            <MarketItemImage src={engine.imageUrl} alt={engine.name} size={156} />
+          ) : (
+            modalIcon
+          ),
           prices: discountedPrices,
           remainingSupply: engine.remainingSupply,
           isNew: engine.isNew,
@@ -80,6 +85,7 @@ export function MarketEngineSection({ engines, onSelect, onBuy }: MarketEngineSe
             discountPct={engine.discountPct}
             disabled={isLocked}
             iconStage={cardIcon}
+            imageUrl={engine.imageUrl}
             iconStageClassName="h-40"
             prices={discountedPrices}
             onClick={() => onSelect(item)}

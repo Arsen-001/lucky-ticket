@@ -3,7 +3,6 @@
 import 'swiper/css';
 import 'swiper/css/autoplay';
 
-import Image from 'next/image';
 import { useMemo, type ReactNode } from 'react';
 import { Autoplay } from 'swiper/modules';
 import { Swiper, SwiperSlide } from 'swiper/react';
@@ -13,7 +12,11 @@ import {
   useGetMarketDataQuery,
 } from '@/api/market.api';
 import { useGetMeQuery } from '@/api/me.api';
-import { applyStatusMarketDiscount, orderMarketPrices } from '@/utils/global/market.utils';
+import {
+  applyStatusMarketDiscount,
+  effectiveMarketDiscountPct,
+  orderMarketPrices,
+} from '@/utils/global/market.utils';
 import '@/styles/components/tasks.css';
 import { ChipShardIcon } from '@/components/shared/icons/ChipShardIcon';
 import { TelegramStarIcon } from '@/components/shared/icons/TelegramStarIcon';
@@ -43,12 +46,7 @@ interface FeaturedItem {
   mutate: (price: MarketPrice) => Promise<unknown>;
 }
 
-const renderAvatarIcon = (
-  imageUrl: string,
-  title: string,
-  accentColor: string,
-  size: number
-): ReactNode => (
+const renderAvatarIcon = (imageUrl: string, title: string, accentColor: string): ReactNode => (
   <div
     className="relative h-full w-full overflow-hidden rounded-xl border-2"
     style={{
@@ -57,7 +55,10 @@ const renderAvatarIcon = (
     }}
   >
     {imageUrl ? (
-      <Image src={imageUrl} alt={title} fill sizes={`${size}px`} className="object-cover" />
+      // Admin-provided URL (Blob upload or pasted) — plain <img> avoids the
+      // next/image host allow-list, matching the cards / MarketItemImage.
+      // eslint-disable-next-line @next/next/no-img-element
+      <img src={imageUrl} alt={title} className="h-full w-full object-cover" />
     ) : (
       // No image (e.g. a badge/theme cosmetic) — show the name initial on the accent
       // tile instead of passing an empty string to next/image.
@@ -77,6 +78,7 @@ export function MarketHeroCarousel({ onSelect, onBuy }: MarketHeroCarouselProps)
   const { data: me } = useGetMeQuery();
   const isLp = me?.isLuckyPlayer ?? false;
   const isVip = me?.isVIP ?? false;
+  const discountPct = effectiveMarketDiscountPct(isLp, isVip, me?.statusPerks);
   const [buyCosmetic] = useBuyCosmeticMutation();
   const [buyShard] = useBuyShardMutation();
 
@@ -92,13 +94,13 @@ export function MarketHeroCarousel({ onSelect, onBuy }: MarketHeroCarouselProps)
         id: c.id,
         title: c.name,
         description: c.description ?? '',
-        prices: orderMarketPrices(applyStatusMarketDiscount(c.prices, isLp, isVip)),
+        prices: orderMarketPrices(applyStatusMarketDiscount(c.prices, discountPct)),
         expiresAt: c.expiresAt,
         discountPct: c.discountPct,
         isNew: c.isNew,
         accent,
         accentColor,
-        renderIcon: size => renderAvatarIcon(c.imageUrl ?? '', c.name, accentColor, size),
+        renderIcon: () => renderAvatarIcon(c.imageUrl ?? '', c.name, accentColor),
         mutate: price => buyCosmetic({ cosmeticId: c.id, price }).unwrap(),
       };
     };
@@ -107,7 +109,7 @@ export function MarketHeroCarousel({ onSelect, onBuy }: MarketHeroCarouselProps)
       id: s.id,
       title: s.name,
       description: `+${s.count} ${t('shards')}`,
-      prices: orderMarketPrices(applyStatusMarketDiscount(s.prices, isLp, isVip)),
+      prices: orderMarketPrices(applyStatusMarketDiscount(s.prices, discountPct)),
       discountPct: s.discountPct,
       isNew: s.isNew,
       accent: s.quality,
@@ -157,7 +159,7 @@ export function MarketHeroCarousel({ onSelect, onBuy }: MarketHeroCarouselProps)
     }
 
     return list;
-  }, [data, buyCosmetic, buyShard, t, isLp, isVip]);
+  }, [data, buyCosmetic, buyShard, t, discountPct]);
 
   if (isLoading) {
     return (

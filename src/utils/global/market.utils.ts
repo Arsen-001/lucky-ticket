@@ -5,8 +5,9 @@ import type { TicketType } from '@/types/types/ticket.types';
 import { engineMarketPriceLc, lcPriceToLsParity } from '@/utils/global/economy.utils';
 
 /**
- * Effective status (VIP > LP) discount percent applied to Market prices.
- * VIP supersedes LP — the higher-tier value wins, no stacking.
+ * Fallback status (VIP > LP) discount percent from the code constants. Used only
+ * when the backend didn't send `me.statusPerks` (older API); otherwise the
+ * per-level value from `effectiveMarketDiscountPct` wins.
  */
 export const statusMarketDiscountPct = (isLp: boolean, isVip: boolean): number => {
   if (isVip) return GlobalConstants.vipMarketDiscountPct;
@@ -15,23 +16,34 @@ export const statusMarketDiscountPct = (isLp: boolean, isVip: boolean): number =
 };
 
 /**
- * Applies the status discount on top of any existing sale. Each price gets its
- * `amount` reduced by `statusMarketDiscountPct(...)`, with the pre-discount
- * value preserved in `originalAmount` so the UI can render a strike-through.
- *
- * Returns the original array unchanged when no status is active.
+ * The market discount % the server will actually charge for this user: the
+ * backend-resolved per-level perk (`me.statusPerks.marketDiscountPct`) when
+ * present, else the code-constant fallback. Keeping this in lockstep with the
+ * server is what guarantees the shown price equals the charged price.
+ */
+export const effectiveMarketDiscountPct = (
+  isLp: boolean,
+  isVip: boolean,
+  perks?: { marketDiscountPct: number }
+): number =>
+  perks && Number.isFinite(perks.marketDiscountPct)
+    ? perks.marketDiscountPct
+    : statusMarketDiscountPct(isLp, isVip);
+
+/**
+ * Applies a `discountPct` on top of any existing sale. Each price gets its
+ * `amount` reduced, with the pre-discount value preserved in `originalAmount`
+ * so the UI can render a strike-through. Returns the array unchanged at 0%.
  */
 export const applyStatusMarketDiscount = (
   prices: MarketPrice[],
-  isLp: boolean,
-  isVip: boolean
+  discountPct: number
 ): MarketPrice[] => {
-  const pct = statusMarketDiscountPct(isLp, isVip);
-  if (pct <= 0) return prices;
+  if (discountPct <= 0) return prices;
   return prices.map(p => ({
     ...p,
     originalAmount: p.originalAmount ?? p.amount,
-    amount: Math.max(1, Math.round(p.amount * (1 - pct / 100))),
+    amount: Math.max(1, Math.round(p.amount * (1 - discountPct / 100))),
   }));
 };
 
@@ -59,13 +71,12 @@ export const orderMarketPrices = (prices: MarketPrice[]): MarketPrice[] =>
 export const engineNextPurchasePrices = (
   tier: TicketType,
   owned: number,
-  isLp: boolean,
-  isVip: boolean
+  discountPct: number
 ): MarketPrice[] => {
   const lc = engineMarketPriceLc(tier, owned);
   const base: MarketPrice[] = [
     { type: MarketPriceType.LC, amount: lc },
     { type: MarketPriceType.TELEGRAM_STARS, amount: lcPriceToLsParity(lc) },
   ];
-  return applyStatusMarketDiscount(base, isLp, isVip);
+  return applyStatusMarketDiscount(base, discountPct);
 };

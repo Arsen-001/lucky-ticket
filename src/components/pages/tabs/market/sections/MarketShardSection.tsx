@@ -7,13 +7,14 @@ import { useGetInventoryQuery } from '@/api/inventory.api';
 import { useGetMeQuery } from '@/api/me.api';
 import { MarketSectionGrid } from '@/components/pages/tabs/market/MarketSectionGrid';
 import { MarketUniversalCard } from '@/components/pages/tabs/market/MarketUniversalCard';
+import { MarketItemImage } from '@/components/pages/tabs/market/MarketItemImage';
 import type { MarketSelectedItem } from '@/components/pages/tabs/market/MarketView';
 import { ChipShardIcon } from '@/components/shared/icons/ChipShardIcon';
 import { GlobalConstants } from '@/constants/global.constants';
 import { useAppTranslations } from '@/hooks/useAppTranslations';
 import { useUnlockedTiers } from '@/hooks/useUnlockedTiers';
 import type { MarketPrice, MarketShard } from '@/types/interfaces/market.interfaces';
-import { applyStatusMarketDiscount } from '@/utils/global/market.utils';
+import { applyStatusMarketDiscount, effectiveMarketDiscountPct } from '@/utils/global/market.utils';
 
 export interface MarketShardSectionProps {
   shards: MarketShard[];
@@ -29,6 +30,7 @@ export function MarketShardSection({ shards, onSelect, onBuy }: MarketShardSecti
   const { data: inventory } = useGetInventoryQuery();
   const isLp = me?.isLuckyPlayer ?? false;
   const isVip = me?.isVIP ?? false;
+  const discountPct = effectiveMarketDiscountPct(isLp, isVip, me?.statusPerks);
   if (!shards.length) return null;
 
   return (
@@ -42,12 +44,16 @@ export function MarketShardSection({ shards, onSelect, onBuy }: MarketShardSecti
           <ChipShardIcon type={shard.type} tier={shard.quality} size={140} />
         );
         const description = `+${shard.count} ${t('shards')}`;
-        const discountedPrices = applyStatusMarketDiscount(shard.prices, isLp, isVip);
+        const discountedPrices = applyStatusMarketDiscount(shard.prices, discountPct);
         const item: MarketSelectedItem = {
           id: shard.id,
           name: shard.name,
           description,
-          iconNode: modalIcon,
+          iconNode: shard.imageUrl ? (
+            <MarketItemImage src={shard.imageUrl} alt={shard.name} size={140} />
+          ) : (
+            modalIcon
+          ),
           prices: discountedPrices,
           isNew: shard.isNew,
           discountPct: shard.discountPct,
@@ -80,6 +86,7 @@ export function MarketShardSection({ shards, onSelect, onBuy }: MarketShardSecti
             discountPct={shard.discountPct}
             disabled={isLocked}
             iconStage={cardIcon}
+            imageUrl={shard.imageUrl}
             iconStageClassName="h-28"
             prices={discountedPrices}
             onClick={() => onSelect(item)}

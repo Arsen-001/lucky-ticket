@@ -179,14 +179,12 @@ describe('economy simulation (DOCS §14.2 guardrails)', () => {
     const growth = appConfig.economy.engineRepeatPriceGrowth;
     for (const tier of TIERS) {
       const lcAt = (owned: number) =>
-        engineNextPurchasePrices(tier, owned, false, false).find(
-          p => p.type === MarketPriceType.LC
-        )!.amount;
+        engineNextPurchasePrices(tier, owned, 0).find(p => p.type === MarketPriceType.LC)!.amount;
       // First engine == the catalog base; third engine == base × growth².
       expect(lcAt(0), `${tier} first`).toBe(appConfig.economy.engineBasePriceLcByTier[tier]);
       expect(lcAt(2) / lcAt(0), `${tier} 3rd/1st`).toBeCloseTo(growth ** 2, 0);
       // LS tracks the repeat LC amount at USD parity — no cross-currency arb.
-      const third = engineNextPurchasePrices(tier, 2, false, false);
+      const third = engineNextPurchasePrices(tier, 2, 0);
       const thirdLc = third.find(p => p.type === MarketPriceType.LC)!.amount;
       const thirdLs = third.find(p => p.type === MarketPriceType.TELEGRAM_STARS)!.amount;
       expect(thirdLs, `${tier} LS parity`).toBe(lcPriceToLsParity(thirdLc));

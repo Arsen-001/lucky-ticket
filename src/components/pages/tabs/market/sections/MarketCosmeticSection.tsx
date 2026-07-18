@@ -1,6 +1,5 @@
 'use client';
 
-import Image from 'next/image';
 import { Gift, Sparkles, Star, UserRound, Zap } from 'lucide-react';
 import type { ReactNode } from 'react';
 import { useBuyCosmeticMutation } from '@/api/market.api';
@@ -18,7 +17,7 @@ import type {
   MarketCosmetic,
   MarketPrice,
 } from '@/types/interfaces/market.interfaces';
-import { applyStatusMarketDiscount } from '@/utils/global/market.utils';
+import { applyStatusMarketDiscount, effectiveMarketDiscountPct } from '@/utils/global/market.utils';
 
 export interface MarketCosmeticSectionProps {
   cosmetics: MarketCosmetic[];
@@ -32,6 +31,7 @@ export function MarketCosmeticSection({ cosmetics, onSelect, onBuy }: MarketCosm
   const { data: me } = useGetMeQuery();
   const isLp = me?.isLuckyPlayer ?? false;
   const isVip = me?.isVIP ?? false;
+  const discountPct = effectiveMarketDiscountPct(isLp, isVip, me?.statusPerks);
 
   const avatars = cosmetics.filter(c => c.cosmeticType === MarketCosmeticType.AVATAR);
   if (!avatars.length) return null;
@@ -55,12 +55,12 @@ export function MarketCosmeticSection({ cosmetics, onSelect, onBuy }: MarketCosm
                   boxShadow: `0 0 16px color-mix(in srgb, ${accentValue} 35%, transparent)`,
                 }}
               >
-                <Image
+                {/* Admin-provided URL (Blob/pasted) — plain <img> avoids the next/image host allow-list. */}
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img
                   src={avatar.imageUrl}
                   alt={avatar.name}
-                  fill
-                  sizes={`${size}px`}
-                  className="object-cover"
+                  className="absolute inset-0 h-full w-full object-cover"
                 />
               </div>
               {avatar.avatarLevel !== undefined && (
@@ -87,7 +87,7 @@ export function MarketCosmeticSection({ cosmetics, onSelect, onBuy }: MarketCosm
             </div>
           );
 
-        const discountedPrices = applyStatusMarketDiscount(avatar.prices, isLp, isVip);
+        const discountedPrices = applyStatusMarketDiscount(avatar.prices, discountPct);
         const item: MarketSelectedItem = {
           id: avatar.id,
           name: avatar.name,

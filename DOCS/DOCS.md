@@ -235,6 +235,8 @@ All perk magnitudes live in `src/constants/global.constants.ts` and can be tuned
 
 #### Lucky Player perks
 
+**Every** Lucky Player perk is **admin-tunable** in one place (Admin → Настройки → Статусы): price (LC + LS), duration (days), and the full perk set — engine speed, stake yield, tournament reward, tournament join-AP, **market discount %, referral %, daily ads cap, and per-tier ticket-send limits**. The backend resolves these into `me.statusPerks` so the Mini App shows exactly what the server enforces. Admins can also set/extend a specific player's LP expiry from the user editor.
+
 | Perk                            | Value                     | Source constant                                  |
 | :------------------------------ | :------------------------ | :----------------------------------------------- |
 | Engine speed boost (additive)   | +10%                      | `luckyPlayerEngineSpeedBoostPct`                 |
@@ -252,7 +254,7 @@ All perk magnitudes live in `src/constants/global.constants.ts` and can be tuned
 
 #### VIP perks
 
-VIP is the high-tier permanent status; values exceed Lucky Player at every category and apply regardless of VIP level (no per-level scaling).
+VIP is the high-tier permanent status; by default its values exceed Lucky Player at every category. **Every VIP perk is admin-tunable per level** (Admin → Настройки → Статусы) — engine speed, stake yield, tournament reward, tournament join-AP, **market discount %, referral %, daily ads cap, and per-tier ticket-send limits**, plus the per-level price. Defaults are uniform (the values below apply to every level), but an admin can make higher levels grant stronger perks. The market / referral / tasks sections keep only the NON-status values (base market prices, referral regular/premium %, default ads cap); the VIP/LP values moved to Статусы and the backend reads them from there (single source of truth, surfaced to the client via `me.statusPerks`).
 
 | Perk                            | Value                         | Source constant                                  |
 | :------------------------------ | :---------------------------- | :----------------------------------------------- |
@@ -287,22 +289,24 @@ VIP can be purchased and upgraded with either **Lucky Coins (LC)** or **Lucky St
 
 #### Pricing Model
 
-| Action            | Cost                             | Notes                                                          |
-| :---------------- | :------------------------------- | :------------------------------------------------------------- |
-| **First unlock**  | ~500 LS (or LC equivalent)       | Higher one-time barrier to entry                               |
-| **Level upgrade** | ~100 × 1.15^(n−1) LS for level n | Grows per level; cheaper than the initial unlock at low levels |
+VIP pricing is **per level and admin-tunable** (Admin → Настройки → Статусы). Each level 1…`maxLevel` has its own LC + LS price: **level 1 is the first unlock**, and **levels 2+ are the cost to upgrade to that level**. Both the price ceiling (`maxLevel`) and every per-level price are knobs.
 
-> Exact LC and LS prices per level are knobs and may be tuned by the product team.
+| Action            | Default cost           | Notes                                           |
+| :---------------- | :--------------------- | :---------------------------------------------- |
+| **First unlock**  | 20,000,000 LC / 500 LS | Level 1 — higher one-time barrier to entry      |
+| **Level upgrade** | 10,000,000 LC / 250 LS | Levels 2+ — flat by default, editable per level |
+
+> The catalog carries the full per-level ladder in `attrs.levelPrices`; the Mini App shows the price to reach the player's next level. The backend charges the exact per-level price server-side (`market.buyStatus`). Defaults reproduce the previous flat unlock + flat upgrade model, so nothing changes until an admin edits.
 
 #### Rules
 
-- The first purchase (unlock) costs more than the first few subsequent upgrades.
+- The first purchase (unlock) costs more than the subsequent upgrades by default.
 - VIP level is permanent: it cannot decrease, expire, or be lost through inactivity.
-- Higher VIP levels grant incrementally stronger game benefits, up to level 20.
+- Higher VIP levels grant incrementally stronger game benefits when an admin sets per-level boosts (uniform by default), up to `maxLevel`.
 
 #### VIP Benefits
 
-The full list of VIP perks (engine speed, stake yield, market discount, tournament boosts, ads cap, referral %, send limits, profile badge, dedicated support) and their concrete magnitudes are documented in **Section 7.3 — Status Benefits → VIP perks table**. Values currently apply uniformly to every VIP level (no per-level scaling); the leveling system is reserved for future cosmetic / social differentiation. Stacking and self-discount rules from §7.3 apply.
+The full list of VIP perks (engine speed, stake yield, market discount, tournament boosts, ads cap, referral %, send limits, profile badge, dedicated support) and their concrete magnitudes are documented in **Section 7.3 — Status Benefits → VIP perks table**. The four game boosts are **admin-tunable per VIP level** (defaults uniform); price is per level; the other perks are shared across levels (their own admin sections). Stacking and self-discount rules from §7.3 apply.
 
 ### Connections
 
