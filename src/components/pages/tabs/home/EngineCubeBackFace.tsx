@@ -2,7 +2,11 @@ import { Package, Zap } from 'lucide-react';
 import { twMerge } from 'tailwind-merge';
 import { useAppTranslations } from '@/hooks/useAppTranslations';
 import { useEngineConfig } from '@/hooks/useEngineConfig';
-import { capacityLevelBonusTickets, speedLevelBoostPct } from '@/utils/global/ticket-engine.utils';
+import {
+  capacityLevelBonusTickets,
+  engineLevelBoostPct,
+  speedLevelBoostPct,
+} from '@/utils/global/ticket-engine.utils';
 import type { InventoryBooster, InventoryChip } from '@/types/interfaces/inventory.interfaces';
 import '@/styles/components/engine-cube-faces.css';
 
@@ -18,6 +22,8 @@ export interface EngineCubeBackFaceProps {
   luckyPlayerBoostPct?: number;
   /** Short status label for the boost row (e.g. "LP", "VIP"). Defaults to "LP". */
   statusLabel?: string;
+  /** Speed-boost % from the equipped avatar (0 if none) — its own row when > 0. */
+  avatarBoostPct?: number;
   speedChip?: InventoryChip;
   capacityChip?: InventoryChip;
   speedBooster?: InventoryBooster;
@@ -85,6 +91,7 @@ export function EngineCubeBackFace({
   totalBoostPct,
   luckyPlayerBoostPct = 0,
   statusLabel,
+  avatarBoostPct = 0,
   speedChip,
   capacityChip,
   speedBooster,
@@ -99,6 +106,12 @@ export function EngineCubeBackFace({
   // chip/booster % scales the whole batch. TOTAL shows the resulting
   // per-cycle output, matching the "×N" language of the base row.
   const capacityBonus = capacityLevelBonusTickets(capacityLevel, tables);
+  // The engine's own speed contribution = promotion-level boost (+100 %/level,
+  // §10.2) PLUS the speed sub-level. Folding both under "engine" keeps TOTAL
+  // reconcilable — the promotion boost was previously summed into TOTAL with no
+  // row of its own, so a promoted engine's rows no longer added up.
+  const engineSpeedBoost =
+    engineLevelBoostPct(engineLevel, tables) + speedLevelBoostPct(speedLevel, tables);
   const capacityChipPct = (capacityChip?.effectPct ?? 0) + (capacityBooster?.effectPct ?? 0);
   const totalCapacity = Math.max(
     1,
@@ -146,8 +159,8 @@ export function EngineCubeBackFace({
         <StatRow label={t('engine')}>
           <InlineStat
             icon={<Zap size={11} stroke={SPEED_ACCENT} strokeWidth={2.6} />}
-            text={`+${speedLevelBoostPct(speedLevel, tables)}%`}
-            dim={speedLevel === 0}
+            text={`+${engineSpeedBoost}%`}
+            dim={engineSpeedBoost === 0}
           />
           <InlineStat
             icon={<Package size={11} stroke={CAPACITY_ACCENT} strokeWidth={2.6} />}
@@ -194,6 +207,20 @@ export function EngineCubeBackFace({
             dim
           />
         </StatRow>
+
+        {avatarBoostPct > 0 && (
+          <StatRow label={t('avatar')}>
+            <InlineStat
+              icon={<Zap size={11} stroke={SPEED_ACCENT} strokeWidth={2.6} />}
+              text={`+${avatarBoostPct}%`}
+            />
+            <InlineStat
+              icon={<Package size={11} stroke={CAPACITY_ACCENT} strokeWidth={2.6} />}
+              text="—"
+              dim
+            />
+          </StatRow>
+        )}
 
         <div className="cube-hud-scanline" />
 

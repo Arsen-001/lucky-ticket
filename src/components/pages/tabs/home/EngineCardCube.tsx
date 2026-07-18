@@ -68,10 +68,11 @@ function EngineCardCubeImpl(props: EngineCardCubeProps) {
   // Scope the `me` subscription to the fields the cube actually renders — a
   // Lucky-Stars change (every engine action) must not re-render all 20 cubes
   // for values (status / name) that didn't change.
-  const { isLp, isVip, ownerName } = useGetMeQuery(undefined, {
+  const { isLp, isVip, vipLevel, ownerName } = useGetMeQuery(undefined, {
     selectFromResult: ({ data }) => ({
       isLp: data?.isLuckyPlayer ?? false,
       isVip: data?.isVIP ?? false,
+      vipLevel: data?.vipLevel ?? 0,
       ownerName: data?.username,
     }),
   });
@@ -136,6 +137,12 @@ function EngineCardCubeImpl(props: EngineCardCubeProps) {
     avatarSpeedPct +
     (equippedSpeedChip?.effectPct ?? 0) +
     (activeSpeedBooster?.effectPct ?? 0);
+
+  // Premium status — surfaced on the stats face (its speed-boost row) and as the
+  // passport identity badge. VIP supersedes LP (never stacks); the level is a
+  // VIP-only concept, so LP carries none.
+  const statusLabel = isVip ? 'VIP' : isLp ? 'LP' : undefined;
+  const statusLevel = isVip ? vipLevel : undefined;
 
   const [rotation, setRotation] = useState(0);
   const [dragDelta, setDragDelta] = useState(0);
@@ -264,7 +271,8 @@ function EngineCardCubeImpl(props: EngineCardCubeProps) {
             baseCapacity={baseCapacity}
             totalBoostPct={totalBoostPct}
             luckyPlayerBoostPct={statusEngineSpeedBoostPct}
-            statusLabel={isVip ? 'VIP' : isLp ? 'LP' : undefined}
+            statusLabel={statusLabel}
+            avatarBoostPct={avatarSpeedPct}
             speedChip={equippedSpeedChip}
             capacityChip={equippedCapacityChip}
             speedBooster={activeSpeedBooster}
@@ -323,6 +331,8 @@ function EngineCardCubeImpl(props: EngineCardCubeProps) {
             engineLevel={engineLevel}
             ownerName={ownerName}
             createdAt={engine.createdAt}
+            statusLabel={statusLabel}
+            statusLevel={statusLevel}
             accent={tierAccent}
           />
         </div>

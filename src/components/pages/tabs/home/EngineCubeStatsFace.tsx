@@ -1,5 +1,5 @@
 import dayjs from 'dayjs';
-import { CalendarDays, TrendingUp, UserRound } from 'lucide-react';
+import { CalendarDays, Crown, Sparkles, TrendingUp, UserRound } from 'lucide-react';
 import { useAppTranslations } from '@/hooks/useAppTranslations';
 import { formatCompact } from '@/utils/global/number.utils';
 import '@/styles/components/engine-cube-faces.css';
@@ -10,6 +10,10 @@ export interface EngineCubeStatsFaceProps {
   engineLevel: number;
   ownerName?: string;
   createdAt?: string;
+  /** Premium status of the owner ("VIP" / "LP"); omitted for a plain account. */
+  statusLabel?: string;
+  /** VIP level (VIP-only concept); shown inside the status badge. */
+  statusLevel?: number;
   accent?: string;
 }
 
@@ -19,9 +23,12 @@ export function EngineCubeStatsFace({
   engineLevel,
   ownerName,
   createdAt,
+  statusLabel,
+  statusLevel,
   accent = 'var(--color-electric-pink)',
 }: EngineCubeStatsFaceProps) {
   const t = useAppTranslations();
+  const isVipStatus = statusLabel === 'VIP';
 
   const createdLabel = createdAt ? dayjs(createdAt).format('MMM D, YYYY') : null;
   // Sub-1 rates must keep their fraction — a base bronze engine mints 0.5 T/H
@@ -83,6 +90,37 @@ export function EngineCubeStatsFace({
       <div className="cube-hud-scanline" />
 
       <div className="mt-auto flex flex-col gap-0.5 text-[9px] font-bold uppercase tracking-[0.14em]">
+        {statusLabel && (
+          <div className="flex items-center justify-between gap-2 text-white/55">
+            <span className="flex items-center gap-1">
+              {isVipStatus ? (
+                <Crown size={10} stroke="#f8bd3e" strokeWidth={2.4} />
+              ) : (
+                <Sparkles size={10} stroke="var(--color-teal)" strokeWidth={2.4} />
+              )}
+              {t('status')}
+            </span>
+            <span
+              className="rounded-full px-1.5 py-0.5 text-[9px] font-black leading-none"
+              style={
+                isVipStatus
+                  ? {
+                      background: 'linear-gradient(135deg, #fff5d9 0%, #f8bd3e 45%, #b8860b 100%)',
+                      color: 'var(--color-background)',
+                      textShadow: '0 1px 0 rgba(255,255,255,0.35)',
+                    }
+                  : {
+                      color: 'var(--color-teal)',
+                      borderWidth: 1,
+                      borderColor: 'color-mix(in srgb, var(--color-teal) 60%, transparent)',
+                      backgroundColor: 'color-mix(in srgb, var(--color-teal) 18%, transparent)',
+                    }
+              }
+            >
+              {isVipStatus ? t('vip level', { level: statusLevel ?? 0 }) : statusLabel}
+            </span>
+          </div>
+        )}
         {ownerName && (
           <div className="flex items-center justify-between gap-2 text-white/55">
             <span className="flex items-center gap-1">
