@@ -1,0 +1,53 @@
+/* Branded launch splash for the Telegram Mini App. See TelegramSplash. */
+
+/* Wordmark rendered with the app's pink text-stroke shimmer (same identity as
+   the in-app ProjectNameLoader), scaled responsively so "LuckyTicket365" never
+   overflows on narrow phones. The gradient sweeps across the glyphs as it
+   authenticates. */
+.tg-splash__wordmark {
+  width: fit-content;
+  max-width: 100%;
+  font-family: var(--font-display), ui-sans-serif, sans-serif;
+  font-weight: 800;
+  font-size: clamp(30px, 9vw, 46px);
+  line-height: 1;
+  letter-spacing: 0.01em;
+  white-space: nowrap;
+  color: transparent;
+  -webkit-text-stroke: 1px var(--color-gradient-darkpink);
+  background: linear-gradient(
+      90deg,
+      transparent 33%,
+      var(--color-gradient-darkpink) 50%,
+      var(--color-gradient-lightpink) 67%,
+      transparent 0
+    )
+    0 / 300% 100% no-repeat text;
+  animation: fill 1.9s linear infinite;
+}
+
+/* Thin sweeping progress line beneath the subtitle. */
+.tg-splash__bar {
+  position: relative;
+  height: 2px;
+  width: 132px;
+  overflow: hidden;
+  border-radius: 9999px;
+  background: rgba(255, 255, 255, 0.08);
+}
+
+.tg-splash__bar::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  background: linear-gradient(90deg, transparent, var(--color-electric-pink), transparent);
+  transform: translateX(-100%);
+  animation: tg-splash-sweep 1.4s ease-in-out infinite;
+}
+
+@keyframes tg-splash-sweep {
+  to {
+    transform: translateX(100%);
+  }
+}
