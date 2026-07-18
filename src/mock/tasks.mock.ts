@@ -723,11 +723,12 @@ const PROFILE = buildCategory({
   category: TaskCategory.PROFILE,
   daily: [
     {
-      title: 'Daily check-in',
-      subtitle: 'Open the app and tap to claim.',
+      title: 'Daily channel check-in',
+      subtitle: 'Stay subscribed to our channel to claim.',
       rewards: [ap(10)],
-      progress: { current: 1, target: 1 },
-      status: TaskStatus.READY_TO_CLAIM,
+      progress: { current: 0, target: 1 },
+      status: TaskStatus.IN_PROGRESS,
+      externalLink: 'https://t.me/luckyticket365',
     },
   ],
   weekly: [

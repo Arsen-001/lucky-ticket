@@ -1071,6 +1071,8 @@ Tasks guide user behavior and include actions such as:
 - Sharing content on social media.
 - Daily/Weekly/Monthly check-ins.
 
+**Daily channel check-in (subscription-gated).** The daily check-in task is completed by **staying subscribed to the official Telegram channel** (`TELEGRAM_CHANNEL_ID`, default `@luckyticket365`) rather than a bare tap. The backend drives its progress from a live `getChatMember` check (exposed as the `channel_subscribed` 0/1 counter), cached ~60s per player so the tasks screen never fires a live lookup on every fetch. While the player is not subscribed the task shows **in-progress** with an "open channel" affordance; once subscribed it becomes claimable and grants its Activity Point like any daily task, re-opening at the next 00:00 UTC reset. The check is **fail-open**: if membership can't be determined (bot unconfigured, a synthetic/seed account, or a transient Bot-API failure) it counts as subscribed, so a lookup hiccup never hides an earned reward. Shares the channel-membership infrastructure with the promo-code gate (§17.6).
+
 ### 12.4 All-Tasks Completion Bonus
 
 When a user completes **all tasks** within a given category (Daily, Weekly, or Monthly), they receive an extra gift in addition to the individual task rewards. This bonus is separate from the per-task rewards and is awarded automatically upon finishing the last task in the set.
