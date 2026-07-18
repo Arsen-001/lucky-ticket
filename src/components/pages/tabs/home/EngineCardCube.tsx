@@ -19,7 +19,6 @@ import { useEngineSpeedAvatarBoostPct } from '@/hooks/useEngineSpeedAvatarBoostP
 import { useEngineConfig } from '@/hooks/useEngineConfig';
 import { GlobalConstants } from '@/constants/global.constants';
 import {
-  baseCapacity as engineBaseCapacity,
   effectiveCycleSeconds,
   engineCapacity,
   engineLevelBoostPct,
@@ -105,18 +104,14 @@ function EngineCardCubeImpl(props: EngineCardCubeProps) {
   const avatarSpeedPct = useEngineSpeedAvatarBoostPct();
   const { tables } = useEngineConfig();
 
-  // Factory baseline shown on the stats face's BASE row — raw per-cycle output
-  // before any sub-level / chip / booster. The base CAPACITY scales with the
-  // engine LEVEL (1 → 22 → 43 → 64 → 86). The base CYCLE is the tier constant but
-  // FLOORED by that batch, exactly like effectiveCycleSeconds — a batch can't
-  // mint faster than capacity × the 15-min/ticket floor. Without the floor a
-  // maxed engine printed the impossible "2h · ×86"; floored it reads an honest
-  // "21h 30m · ×86". (The engine LEVEL's speed gain is a % boost in the ENGINE row.)
-  const baseCapacity = engineBaseCapacity(engineLevel, tables);
-  const baseCycleSeconds = Math.max(
-    engine.cycleSeconds,
-    baseCapacity * GlobalConstants.engineMinSecondsPerTicket
-  );
+  // BASE row on the stats face = the engine's factory starting point: exactly
+  // ONE ticket over the tier's base cycle ("1 ticket per Xh"). Everything the
+  // player built on top belongs to the ENGINE row — both the speed the level +
+  // sub-level added AND the extra ticket "slots" the level + capacity upgrades
+  // unlocked. So base stays 1 × the base cycle; the back face derives the added
+  // slots from engineLevel / capacityLevel itself.
+  const baseCapacity = 1;
+  const baseCycleSeconds = engine.cycleSeconds;
 
   // Passport "T/H" is the productivity baseline (DOCS §9.8): permanent boosts
   // only — engine/speed levels, chips, status, equipped avatar — with
@@ -341,6 +336,7 @@ function EngineCardCubeImpl(props: EngineCardCubeProps) {
             createdAt={engine.createdAt}
             statusLabel={statusLabel}
             statusLevel={statusLevel}
+            statusSpeedBoostPct={statusEngineSpeedBoostPct}
             accent={tierAccent}
           />
         </div>

@@ -3,6 +3,7 @@ import { twMerge } from 'tailwind-merge';
 import { useAppTranslations } from '@/hooks/useAppTranslations';
 import { useEngineConfig } from '@/hooks/useEngineConfig';
 import {
+  baseCapacity as engineBaseCapacity,
   capacityLevelBonusTickets,
   engineLevelBoostPct,
   speedLevelBoostPct,
@@ -101,21 +102,23 @@ export function EngineCubeBackFace({
   const t = useAppTranslations();
   const { tables } = useEngineConfig();
   const lvl = t('lvl');
-  // Mirrors `engineCapacity()`: the capacity sub-level adds ABSOLUTE tickets
-  // (+1 per paid tap by default) on top of the engine-level base, then the
-  // chip/booster % scales the whole batch. TOTAL shows the resulting
-  // per-cycle output, matching the "×N" language of the base row.
+  // BASE = 1 factory ticket. The ENGINE row shows what the player built onto it:
+  //  • speed — the promotion-LEVEL boost (+100 %/level, §10.2) PLUS the speed
+  //    sub-level ("how much the cycle time was pumped down"), and
+  //  • capacity — the extra ticket "slots" unlocked: the engine LEVEL's bigger
+  //    base batch (1 → 22 → 43 …) beyond the factory 1, PLUS the capacity
+  //    sub-level bonus.
+  // Chips / boosters then scale the whole batch (%), and TOTAL is the resulting
+  // per-cycle output — matching `engineCapacity()` and the front face's ×N.
+  const levelBase = engineBaseCapacity(engineLevel, tables);
   const capacityBonus = capacityLevelBonusTickets(capacityLevel, tables);
-  // The engine's own speed contribution = promotion-level boost (+100 %/level,
-  // §10.2) PLUS the speed sub-level. Folding both under "engine" keeps TOTAL
-  // reconcilable — the promotion boost was previously summed into TOTAL with no
-  // row of its own, so a promoted engine's rows no longer added up.
   const engineSpeedBoost =
     engineLevelBoostPct(engineLevel, tables) + speedLevelBoostPct(speedLevel, tables);
+  const engineCapacityAdded = levelBase - baseCapacity + capacityBonus;
   const capacityChipPct = (capacityChip?.effectPct ?? 0) + (capacityBooster?.effectPct ?? 0);
   const totalCapacity = Math.max(
     1,
-    Math.round((baseCapacity + capacityBonus) * (1 + capacityChipPct / 100))
+    Math.round((levelBase + capacityBonus) * (1 + capacityChipPct / 100))
   );
 
   return (
@@ -164,8 +167,8 @@ export function EngineCubeBackFace({
           />
           <InlineStat
             icon={<Package size={11} stroke={CAPACITY_ACCENT} strokeWidth={2.6} />}
-            text={`+${capacityBonus}`}
-            dim={capacityLevel === 0}
+            text={`+${engineCapacityAdded}`}
+            dim={engineCapacityAdded === 0}
           />
         </StatRow>
 

@@ -1,5 +1,5 @@
 import dayjs from 'dayjs';
-import { CalendarDays, Crown, Sparkles, TrendingUp, UserRound } from 'lucide-react';
+import { CalendarDays, Crown, Sparkles, TrendingUp, UserRound, Zap } from 'lucide-react';
 import { useAppTranslations } from '@/hooks/useAppTranslations';
 import { formatCompact } from '@/utils/global/number.utils';
 import '@/styles/components/engine-cube-faces.css';
@@ -14,6 +14,8 @@ export interface EngineCubeStatsFaceProps {
   statusLabel?: string;
   /** VIP level (VIP-only concept); shown inside the status badge. */
   statusLevel?: number;
+  /** Engine-speed % this status grants (VIP 25 / LP 10) — the "what VIP gives" line. */
+  statusSpeedBoostPct?: number;
   accent?: string;
 }
 
@@ -25,10 +27,12 @@ export function EngineCubeStatsFace({
   createdAt,
   statusLabel,
   statusLevel,
+  statusSpeedBoostPct = 0,
   accent = 'var(--color-electric-pink)',
 }: EngineCubeStatsFaceProps) {
   const t = useAppTranslations();
   const isVipStatus = statusLabel === 'VIP';
+  const statusColor = isVipStatus ? '#f8bd3e' : 'var(--color-teal)';
 
   const createdLabel = createdAt ? dayjs(createdAt).format('MMM D, YYYY') : null;
   // Sub-1 rates must keep their fraction — a base bronze engine mints 0.5 T/H
@@ -137,6 +141,22 @@ export function EngineCubeStatsFace({
               {t('created')}
             </span>
             <span className="text-white tabular-nums">{createdLabel}</span>
+          </div>
+        )}
+        {/* What the owner's status actively grants THIS engine — the VIP (or LP)
+            permanent engine-speed boost, called out at the bottom in its accent. */}
+        {statusLabel && statusSpeedBoostPct > 0 && (
+          <div
+            className="mt-1 flex items-center justify-between gap-2 rounded-md px-1.5 py-1"
+            style={{ backgroundColor: `color-mix(in srgb, ${statusColor} 14%, transparent)` }}
+          >
+            <span className="flex items-center gap-1" style={{ color: statusColor }}>
+              <Zap size={10} stroke={statusColor} strokeWidth={2.6} />
+              {statusLabel} {t('speed')}
+            </span>
+            <span className="font-black tabular-nums" style={{ color: statusColor }}>
+              +{statusSpeedBoostPct}%
+            </span>
           </div>
         )}
       </div>
