@@ -147,7 +147,7 @@ export function EngineCubeBackFace({
 
       <div className="cube-hud-scanline" />
 
-      <div className="flex flex-col gap-2.5">
+      <div className="flex flex-col gap-1.5">
         <StatRow label={t('base')}>
           <InlineStat
             icon={<Zap size={11} stroke={SPEED_ACCENT} strokeWidth={2.6} />}

@@ -246,6 +246,15 @@
   margin-block: 2px;
 }
 
+/* The breakdown face is the densest — BASE + ENGINE + CHIP + BOOST + VIP
+   (+ AVATAR) + TOTAL. On narrow phones the fixed cube-face height clipped the
+   bottom rows (VIP / TOTAL) under `overflow: hidden`, so tighten padding + gap
+   to guarantee every row — VIP and TOTAL included — always fits. */
+.cube-hud--bare {
+  padding: 14px 18px;
+  gap: 9px;
+}
+
 .cube-hud--bare::before,
 .cube-hud--bare::after {
   display: none;
