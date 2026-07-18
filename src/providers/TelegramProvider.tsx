@@ -137,28 +137,34 @@ export function TelegramProvider({ children }: { children: ReactNode }) {
   // overlay. Keep it up until the first route commits — detected by the absence
   // of the route-level loader (`.loader`, rendered only by ProjectNameLoader in
   // loading.tsx) — then fade the splash out. A min hold lets the route mount and
-  // suspend first; a max cap guarantees the overlay never gets stuck.
+  // suspend first; a hard cap guarantees the overlay is always dismissed.
+  //
+  // Uses timers, not requestAnimationFrame: rAF is *paused* while the tab is
+  // hidden, which would leave the overlay stuck if the user backgrounds the
+  // Mini App mid-boot. Timers only throttle (never pause) when hidden, so the
+  // cap still fires and the splash always clears.
   useEffect(() => {
     if (phase !== 'ready' || !isTelegramBoot.current || booted) return;
-    let raf = 0;
-    let done = false;
     const startedAt = Date.now();
-    const step = () => {
-      if (done) return;
+    let dismissed = false;
+    const dismiss = () => {
+      if (dismissed) return;
+      dismissed = true;
+      clearInterval(poll);
+      clearTimeout(cap);
+      setFading(true);
+      window.setTimeout(() => setBooted(true), OVERLAY_FADE_MS);
+    };
+    const poll = window.setInterval(() => {
       const elapsed = Date.now() - startedAt;
       const routeStillLoading = !!document.querySelector('.loader');
-      if ((elapsed >= OVERLAY_MIN_MS && !routeStillLoading) || elapsed >= OVERLAY_MAX_MS) {
-        done = true;
-        setFading(true);
-        window.setTimeout(() => setBooted(true), OVERLAY_FADE_MS);
-        return;
-      }
-      raf = requestAnimationFrame(step);
-    };
-    raf = requestAnimationFrame(step);
+      if (elapsed >= OVERLAY_MIN_MS && !routeStillLoading) dismiss();
+    }, 120);
+    // Independent hard cap — fires even if the poll interval is throttled.
+    const cap = window.setTimeout(dismiss, OVERLAY_MAX_MS);
     return () => {
-      done = true;
-      cancelAnimationFrame(raf);
+      clearInterval(poll);
+      clearTimeout(cap);
     };
   }, [phase, booted]);
 
