@@ -1,8 +1,8 @@
 'use client';
 
-import { type CSSProperties } from 'react';
+import { type CSSProperties, useEffect, useRef, useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { Check, ChevronRight, Clock3, Gift, Lock } from 'lucide-react';
+import { Check, ChevronDown, ChevronRight, Clock3, Gift, Lock } from 'lucide-react';
 import { twMerge } from 'tailwind-merge';
 import { useAppTranslations } from '@/hooks/useAppTranslations';
 import { useCountDown } from '@/hooks/useCountDown';
@@ -34,11 +34,18 @@ export interface TaskItemRowProps {
  * hairline progress fill along the bottom edge for multi-step tasks. Used by
  * lightweight categories (Social / Profile) where the full card and the
  * vertical compact tile are both too heavy.
+ *
+ * Tapping the row toggles an expanded state that un-truncates the title and
+ * reveals the subtitle / unlock hint, so the full copy is always readable even
+ * though the collapsed row stays compact. Navigation (deeplink / external link)
+ * lives on the explicit chevron button, so a tap reads instead of leaving.
  */
 export function TaskItemRow({ task, onClaim, highlightToken, className, style }: TaskItemRowProps) {
   const t = useAppTranslations();
   const router = useRouter();
   const { leftTime, expired } = useCountDown(task.resetAt);
+
+  const [expanded, setExpanded] = useState(false);
 
   const isReady = task.status === TaskStatus.READY_TO_CLAIM;
   const isLocked = task.status === TaskStatus.LOCKED;
@@ -51,12 +58,34 @@ export function TaskItemRow({ task, onClaim, highlightToken, className, style }:
       ? Math.min(100, Math.round((task.progress.current / task.progress.target) * 100))
       : 0;
 
-  const handleClick = () => {
-    if (isLocked || isCompleted) return;
-    if (isReady) {
-      onClaim(task);
-      return;
-    }
+  // Full copy that the collapsed row can't show: the subtitle (or, when locked,
+  // the reason it's locked).
+  const detailText = isLocked && task.unlockHint ? task.unlockHint : task.subtitle;
+  const hasDetail = !!detailText;
+
+  // The collapsed row truncates the title to one line — detect when it's
+  // actually clipped so the row only offers a tap-to-open affordance when there
+  // is something hidden to reveal (a clipped title or a subtitle). Measured only
+  // while collapsed; `|| expanded` keeps an open row interactive so it can
+  // always be collapsed again even if a resize re-measures it as un-clipped.
+  const titleRef = useRef<HTMLHeadingElement>(null);
+  const [isTruncated, setIsTruncated] = useState(false);
+  useEffect(() => {
+    const el = titleRef.current;
+    if (!el || expanded) return;
+    const measure = () => setIsTruncated(el.scrollWidth > el.clientWidth + 1);
+    measure();
+    const ro = new ResizeObserver(measure);
+    ro.observe(el);
+    return () => ro.disconnect();
+  }, [expanded, task.title]);
+
+  // A tap only "opens" something when there's hidden copy to reveal. Ready rows
+  // claim on tap, so they never expand.
+  const isExpandable = !isReady && (hasDetail || isTruncated || expanded);
+  const isInteractive = isReady || isExpandable;
+
+  const navigate = () => {
     if (task.deeplink) {
       router.push(task.deeplink as Route);
       return;
@@ -64,6 +93,14 @@ export function TaskItemRow({ task, onClaim, highlightToken, className, style }:
     if (task.externalLink) {
       window.open(task.externalLink, '_blank', 'noopener,noreferrer');
     }
+  };
+
+  const handleClick = () => {
+    if (isReady) {
+      onClaim(task);
+      return;
+    }
+    if (isExpandable) setExpanded(prev => !prev);
   };
 
   return (
@@ -74,20 +111,34 @@ export function TaskItemRow({ task, onClaim, highlightToken, className, style }:
         RARITY_FRAME[task.rarity],
         isLocked && 'opacity-60',
         isCompleted && 'opacity-80',
-        !isLocked && !isCompleted && 'cursor-pointer active:scale-[0.99]',
+        isInteractive && 'cursor-pointer active:scale-[0.99]',
         className
       )}
-      onClick={handleClick}
-      role="button"
-      aria-disabled={isLocked || isCompleted}
+      onClick={isInteractive ? handleClick : undefined}
+      role={isInteractive ? 'button' : undefined}
+      aria-disabled={!isInteractive}
+      aria-expanded={isExpandable ? expanded : undefined}
     >
       <SectionShine token={highlightToken ?? null} />
 
       <TaskCategoryIcon category={task.category} size={16} />
 
-      <h4 className="min-w-0 flex-1 truncate text-[13px] font-extrabold leading-tight">
-        {task.title}
-      </h4>
+      <div className="flex min-w-0 flex-1 flex-col gap-0.5">
+        <h4
+          ref={titleRef}
+          className={twMerge(
+            'text-[13px] font-extrabold leading-tight',
+            expanded ? 'whitespace-normal break-words' : 'truncate'
+          )}
+        >
+          {task.title}
+        </h4>
+        {expanded && hasDetail && (
+          <p className="text-[11px] leading-snug text-white/50 whitespace-normal break-words">
+            {detailText}
+          </p>
+        )}
+      </div>
 
       {task.resetAt && !isLocked && !expired && (
         <span className="pointer-events-none flex shrink-0 items-center gap-1 text-[10px] font-medium text-white/40 tabular-nums">
@@ -118,8 +169,25 @@ export function TaskItemRow({ task, onClaim, highlightToken, className, style }:
           <Lock size={13} className="text-white/40" />
         </div>
       ) : canNavigate ? (
-        <div className="flex-center border-electric-pink/30 bg-electric-pink/15 h-7 w-7 shrink-0 rounded-full border">
+        <button
+          type="button"
+          aria-label={t('open')}
+          onClick={e => {
+            e.stopPropagation();
+            navigate();
+          }}
+          className="flex-center border-electric-pink/30 bg-electric-pink/15 hover:bg-electric-pink/25 h-7 w-7 shrink-0 rounded-full border transition-colors active:scale-95"
+        >
           <ChevronRight size={13} className="text-electric-pink" strokeWidth={2.5} />
+        </button>
+      ) : isExpandable ? (
+        <div
+          className={twMerge(
+            'flex-center h-7 w-7 shrink-0 rounded-full bg-white/5 transition-transform',
+            expanded && 'rotate-180'
+          )}
+        >
+          <ChevronDown size={13} className="text-white/40" />
         </div>
       ) : null}
 

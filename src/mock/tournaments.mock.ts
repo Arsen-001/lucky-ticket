@@ -394,10 +394,20 @@ const joinTournament = (args: { body?: unknown }) => {
 // Persist the flag on the served list so refetches keep it, and return a
 // non-undefined body — `undefined` reads as "no mock" (404) in the base query,
 // which undid the optimistic patch and re-opened the result popup every boot.
+//
+// Once served, each tournament object is deep-frozen by Immer's auto-freeze as
+// it enters the RTK store, so assigning `resultSeen` in place throws
+// ("Cannot assign to read only property 'resultSeen'"). That rejection made the
+// POST 500, which undid the optimistic patch — the exact popup-replay this was
+// meant to prevent. Swap the array slot for a fresh (unfrozen) copy instead: the
+// list handler and the by-id detail traversal share this array reference, so
+// both pick up the change on their next refetch.
 const markTournamentResultSeen = (args: { body?: unknown }) => {
   const body = (args.body ?? {}) as { tournamentId?: string };
-  const tournament = servedTournaments.find(tour => tour.id === body.tournamentId);
-  if (tournament) tournament.resultSeen = true;
+  const index = servedTournaments.findIndex(tour => tour.id === body.tournamentId);
+  if (index !== -1) {
+    servedTournaments[index] = { ...servedTournaments[index], resultSeen: true };
+  }
   return {};
 };
 
