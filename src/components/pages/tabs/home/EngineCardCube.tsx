@@ -19,6 +19,7 @@ import { useEngineSpeedAvatarBoostPct } from '@/hooks/useEngineSpeedAvatarBoostP
 import { useEngineConfig } from '@/hooks/useEngineConfig';
 import { GlobalConstants } from '@/constants/global.constants';
 import {
+  baseCapacity as engineBaseCapacity,
   effectiveCycleSeconds,
   engineCapacity,
   engineLevelBoostPct,
@@ -91,11 +92,13 @@ function EngineCardCubeImpl(props: EngineCardCubeProps) {
     b => b.activeOnEngineId === engine.id && b.type === 'capacity'
   );
 
-  // Factory "out of the box" state — the cube's stats at engineLevel=1,
-  // speedLevel=0, capacityLevel=0, no chips, no boosters. Stays constant for
-  // a given tier no matter how the engine is upgraded.
+  // Factory baseline — the engine's raw stats before any sub-level / chip /
+  // booster. The base CYCLE is a tier constant (the engine LEVEL adds a speed %
+  // instead, shown in the ENGINE row). The base CAPACITY, however, scales with
+  // the engine LEVEL (1 → 22 → 43 …), so it's read from the level table — not a
+  // hardcoded 1, which made the stats face print ×1 for a promoted engine while
+  // the front face (and reality) showed ×22.
   const baseCycleSeconds = engine.cycleSeconds;
-  const baseCapacity = 1;
 
   // Real running total of tickets this engine has ever claimed (backend counter).
   const lifetimeProduced = engine.lifetimeProduced ?? 0;
@@ -109,6 +112,7 @@ function EngineCardCubeImpl(props: EngineCardCubeProps) {
       : 0;
   const avatarSpeedPct = useEngineSpeedAvatarBoostPct();
   const { tables } = useEngineConfig();
+  const baseCapacity = engineBaseCapacity(engineLevel, tables);
 
   // Passport "T/H" is the productivity baseline (DOCS §9.8): permanent boosts
   // only — engine/speed levels, chips, status, equipped avatar — with
