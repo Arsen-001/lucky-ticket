@@ -92,14 +92,6 @@ function EngineCardCubeImpl(props: EngineCardCubeProps) {
     b => b.activeOnEngineId === engine.id && b.type === 'capacity'
   );
 
-  // Factory baseline — the engine's raw stats before any sub-level / chip /
-  // booster. The base CYCLE is a tier constant (the engine LEVEL adds a speed %
-  // instead, shown in the ENGINE row). The base CAPACITY, however, scales with
-  // the engine LEVEL (1 → 22 → 43 …), so it's read from the level table — not a
-  // hardcoded 1, which made the stats face print ×1 for a promoted engine while
-  // the front face (and reality) showed ×22.
-  const baseCycleSeconds = engine.cycleSeconds;
-
   // Real running total of tickets this engine has ever claimed (backend counter).
   const lifetimeProduced = engine.lifetimeProduced ?? 0;
 
@@ -112,7 +104,19 @@ function EngineCardCubeImpl(props: EngineCardCubeProps) {
       : 0;
   const avatarSpeedPct = useEngineSpeedAvatarBoostPct();
   const { tables } = useEngineConfig();
+
+  // Factory baseline shown on the stats face's BASE row — raw per-cycle output
+  // before any sub-level / chip / booster. The base CAPACITY scales with the
+  // engine LEVEL (1 → 22 → 43 → 64 → 86). The base CYCLE is the tier constant but
+  // FLOORED by that batch, exactly like effectiveCycleSeconds — a batch can't
+  // mint faster than capacity × the 15-min/ticket floor. Without the floor a
+  // maxed engine printed the impossible "2h · ×86"; floored it reads an honest
+  // "21h 30m · ×86". (The engine LEVEL's speed gain is a % boost in the ENGINE row.)
   const baseCapacity = engineBaseCapacity(engineLevel, tables);
+  const baseCycleSeconds = Math.max(
+    engine.cycleSeconds,
+    baseCapacity * GlobalConstants.engineMinSecondsPerTicket
+  );
 
   // Passport "T/H" is the productivity baseline (DOCS §9.8): permanent boosts
   // only — engine/speed levels, chips, status, equipped avatar — with
