@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useRef } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { Check, Clock3, Crown, FlaskConical, Gift, Lock } from 'lucide-react';
 import { twMerge } from 'tailwind-merge';
 import { useAppTranslations } from '@/hooks/useAppTranslations';
@@ -14,6 +14,8 @@ import { TestQuestBadge } from './TestQuestBadge';
 
 type LevelKind = 'claimed' | 'ready' | 'waiting' | 'locked' | 'crown';
 
+const SLIDE_WIDTH = 176;
+
 export interface TestQuestChainProps {
   registerSection?: (category: TaskCategory, el: HTMLElement | null) => void;
   className?: string;
@@ -22,8 +24,13 @@ export interface TestQuestChainProps {
 /**
  * "Тест-квест" milestone chain — the launch quest as a horizontal card chain
  * (31 → 1), first category in the One-Time tab. Levels 31 → 4 are the daily
- * ladder (one claim per day); levels 3 → 1 are the competitive crown, assigned
- * by the Founders leaderboard (rendered below), never daily-claimed.
+ * ladder (one claim per day); levels 3 → 1 are the competitive crown (rendered
+ * below, leaderboard-assigned).
+ *
+ * Uses the same snap-focus carousel UX as {@link TournamentMilestoneSlider} and
+ * the daily ads slider: the leftmost-visible card is the "active" one, rendered
+ * at full scale/opacity while its neighbours shrink, dim, and pull inward. Tap a
+ * side card to bring it into focus; the current daily level auto-focuses on mount.
  */
 export function TestQuestChain({ registerSection, className }: TestQuestChainProps) {
   const t = useAppTranslations();
@@ -35,26 +42,60 @@ export function TestQuestChain({ registerSection, className }: TestQuestChainPro
   const claimableToday = data?.claimableToday ?? true;
   const crownLevel = data?.crownLevel ?? null;
 
+  const levels = [...testQuestLadder].sort((a, b) => b.level - a.level); // 31 → 1
+
   const scrollerRef = useRef<HTMLDivElement>(null);
-  const currentRef = useRef<HTMLDivElement>(null);
+  const [activeIndex, setActiveIndex] = useState(0);
+
+  // Left-anchored active tracking — the leftmost-visible card is the active one
+  // (mirrors TournamentMilestoneSlider so both chains feel identical).
+  const recomputeActive = useCallback(() => {
+    const scroller = scrollerRef.current;
+    if (!scroller) return;
+    const probe = scroller.scrollLeft + 16; // small offset from the left edge
+    const slides = scroller.querySelectorAll<HTMLDivElement>('[data-tq-slide]');
+    let bestIdx = 0;
+    let bestDist = Infinity;
+    slides.forEach(el => {
+      const idx = Number(el.dataset.tqIndex);
+      const dist = Math.abs(el.offsetLeft - probe);
+      if (dist < bestDist) {
+        bestDist = dist;
+        bestIdx = idx;
+      }
+    });
+    setActiveIndex(bestIdx);
+  }, []);
+
+  const scrollToIndex = useCallback((index: number, behavior: ScrollBehavior = 'smooth') => {
+    const scroller = scrollerRef.current;
+    if (!scroller) return;
+    const el = scroller.querySelector<HTMLDivElement>(`[data-tq-index="${index}"]`);
+    if (!el) return;
+    // Align the card to the LEFT edge — scroll the slider only, never
+    // scrollIntoView (which would tug the Tasks page's vertical scroller).
+    scroller.scrollTo({ left: Math.max(0, el.offsetLeft - 16), behavior });
+  }, []);
 
   useEffect(() => {
-    const id = window.setTimeout(() => {
-      const scroller = scrollerRef.current;
-      const card = currentRef.current;
-      if (!scroller || !card) return;
-      // Center the active card inside the slider only. `scrollIntoView` would
-      // walk every scrollable ancestor and tug the Tasks page's vertical
-      // scroller too (fighting its scroll-lock) — so scroll the slider itself.
-      const sRect = scroller.getBoundingClientRect();
-      const cRect = card.getBoundingClientRect();
-      const delta = cRect.left - sRect.left - (sRect.width - cRect.width) / 2;
-      scroller.scrollBy({ left: delta });
-    }, 60);
-    return () => window.clearTimeout(id);
-  }, [currentLevel]);
+    recomputeActive();
+    const scroller = scrollerRef.current;
+    if (!scroller) return;
+    scroller.addEventListener('scroll', recomputeActive, { passive: true });
+    window.addEventListener('resize', recomputeActive);
+    return () => {
+      scroller.removeEventListener('scroll', recomputeActive);
+      window.removeEventListener('resize', recomputeActive);
+    };
+  }, [recomputeActive]);
 
-  const levels = [...testQuestLadder].sort((a, b) => b.level - a.level); // 31 → 1
+  // Auto-focus the current daily level on mount / when it advances.
+  const currentIndex = levels.findIndex(l => l.level === currentLevel);
+  useEffect(() => {
+    if (currentIndex < 0) return;
+    const id = window.setTimeout(() => scrollToIndex(currentIndex, 'smooth'), 50);
+    return () => window.clearTimeout(id);
+  }, [currentIndex, scrollToIndex]);
 
   const kindOf = (level: number, zone: string): LevelKind => {
     if (zone === 'crown') return 'crown';
@@ -104,119 +145,138 @@ export function TestQuestChain({ registerSection, className }: TestQuestChainPro
 
       <div
         ref={scrollerRef}
-        className="scrollbar-hidden -mx-4 flex snap-x snap-mandatory gap-3 overflow-x-auto px-4 py-1"
+        className="scrollbar-hidden -mx-4 flex snap-x snap-mandatory items-center gap-[27px] overflow-x-auto overflow-y-visible px-4"
+        style={{ scrollPaddingInline: '16px' }}
       >
-        {levels.map(level => {
+        {levels.map((level, index) => {
           const kind = kindOf(level.level, level.zone);
-          const isCurrent = kind === 'ready' || kind === 'waiting';
           const isCrown = kind === 'crown';
           const isMyCrown = isCrown && crownLevel === level.level;
+          const isActive = index === activeIndex;
+          // Left-anchored: active card stays put, side cards pull toward it.
+          const sideOffset = isActive ? 0 : index < activeIndex ? 20 : -20;
           return (
             <div
               key={level.level}
-              ref={isCurrent ? currentRef : undefined}
+              data-tq-slide
+              data-tq-index={index}
+              onClick={!isActive ? () => scrollToIndex(index) : undefined}
+              style={{
+                flex: `0 0 ${SLIDE_WIDTH}px`,
+                transform: `translateX(${sideOffset}px) scale(${isActive ? 1 : 0.88})`,
+                transformOrigin: 'left center',
+              }}
               className={twMerge(
-                'flex w-[168px] shrink-0 snap-start flex-col gap-2 rounded-2xl border bg-background-overlay p-3',
-                'min-h-[200px] transition-all',
-                kind === 'ready' && 'border-electric-pink/50 shadow-lg shadow-electric-purple/15',
-                kind === 'waiting' && 'border-white/10',
-                kind === 'claimed' && 'border-success/25 opacity-80',
-                kind === 'locked' && 'border-white/5 opacity-55 saturate-50',
-                isCrown && 'border-gold/40 bg-gradient-to-b from-gold/10 to-transparent',
-                isMyCrown && 'border-gold/70 shadow-lg shadow-gold/20'
+                'snap-start transition-all duration-[450ms] ease-[cubic-bezier(0.22,1,0.36,1)]',
+                isActive ? 'opacity-100' : 'cursor-pointer opacity-65 saturate-75'
               )}
             >
-              <div className="flex items-start justify-between">
-                <div>
-                  <div
-                    className={twMerge(
-                      'text-[10px] font-bold uppercase tracking-[0.14em]',
-                      isCrown ? 'text-gold/80' : 'text-white/50'
-                    )}
-                  >
-                    {isCrown ? t('crown') : t('level')}
+              <div
+                className={twMerge(
+                  'flex h-full min-h-[200px] flex-col gap-2 rounded-2xl border bg-background-overlay p-3',
+                  kind === 'ready' && 'border-electric-pink/50 shadow-lg shadow-electric-purple/15',
+                  kind === 'waiting' && 'border-white/10',
+                  kind === 'claimed' && 'border-success/25 opacity-80',
+                  kind === 'locked' && 'border-white/5 opacity-55 saturate-50',
+                  isCrown && 'border-gold/40 bg-gradient-to-b from-gold/10 to-transparent',
+                  isMyCrown && 'border-gold/70 shadow-lg shadow-gold/20'
+                )}
+              >
+                <div className="flex items-start justify-between">
+                  <div>
+                    <div
+                      className={twMerge(
+                        'text-[10px] font-bold uppercase tracking-[0.14em]',
+                        isCrown ? 'text-gold/80' : 'text-white/50'
+                      )}
+                    >
+                      {isCrown ? t('crown') : t('level')}
+                    </div>
+                    <div
+                      className={twMerge(
+                        'bg-clip-text text-4xl font-extrabold leading-none tabular-nums text-transparent',
+                        isCrown
+                          ? 'bg-gradient-to-br from-warning to-gold'
+                          : 'bg-gradient-to-br from-electric-pink to-electric-purple'
+                      )}
+                    >
+                      {level.level}
+                    </div>
                   </div>
-                  <div
-                    className={twMerge(
-                      'bg-clip-text text-4xl font-extrabold leading-none tabular-nums text-transparent',
-                      isCrown
-                        ? 'bg-gradient-to-br from-warning to-gold'
-                        : 'bg-gradient-to-br from-electric-pink to-electric-purple'
-                    )}
-                  >
-                    {level.level}
-                  </div>
+                  {kind === 'claimed' ? (
+                    <span className="flex-center h-6 w-6 shrink-0 rounded-full bg-success/20">
+                      <Check size={12} className="text-success" />
+                    </span>
+                  ) : kind === 'locked' ? (
+                    <span className="flex-center h-6 w-6 shrink-0 rounded-full bg-white/5">
+                      <Lock size={12} className="text-white/40" />
+                    </span>
+                  ) : kind === 'waiting' ? (
+                    <span className="flex-center h-6 w-6 shrink-0 rounded-full bg-white/5">
+                      <Clock3 size={12} className="text-white/50" />
+                    </span>
+                  ) : isCrown ? (
+                    <span
+                      className={twMerge(
+                        'flex-center h-6 w-6 shrink-0 rounded-full',
+                        isMyCrown ? 'bg-gold/25' : 'bg-white/5'
+                      )}
+                    >
+                      <Crown size={12} className={isMyCrown ? 'text-gold' : 'text-white/40'} />
+                    </span>
+                  ) : null}
                 </div>
-                {kind === 'claimed' ? (
-                  <span className="flex-center h-6 w-6 shrink-0 rounded-full bg-success/20">
-                    <Check size={12} className="text-success" />
-                  </span>
-                ) : kind === 'locked' ? (
-                  <span className="flex-center h-6 w-6 shrink-0 rounded-full bg-white/5">
-                    <Lock size={12} className="text-white/40" />
-                  </span>
-                ) : kind === 'waiting' ? (
-                  <span className="flex-center h-6 w-6 shrink-0 rounded-full bg-white/5">
-                    <Clock3 size={12} className="text-white/50" />
-                  </span>
-                ) : isCrown ? (
-                  <span
+
+                <p className="my-auto line-clamp-2 text-[12px] font-semibold leading-snug text-white/80">
+                  {level.task}
+                </p>
+                <p className="line-clamp-2 text-[10px] leading-tight text-white-secondary tabular-nums">
+                  {level.drop}
+                </p>
+
+                {kind === 'ready' && (
+                  <Button
+                    className="flex-center w-full gap-1 rounded-xl py-2 text-xs font-bold animate-task-pulse"
+                    loading={claiming}
+                    onClick={e => {
+                      e.stopPropagation();
+                      handleClaim();
+                    }}
+                  >
+                    <Gift size={12} />
+                    {t('claim')}
+                  </Button>
+                )}
+                {kind === 'waiting' && (
+                  <div className="flex-center w-full gap-1 rounded-xl bg-white/5 py-1.5 text-[10px] font-bold uppercase tracking-wider text-white/50">
+                    <Clock3 size={11} />
+                    {t('come back tomorrow')}
+                  </div>
+                )}
+                {kind === 'claimed' && (
+                  <div className="flex-center w-full gap-1 rounded-xl bg-success/15 py-1.5 text-[10px] font-bold uppercase tracking-wider text-success">
+                    <Check size={11} />
+                    {t('claimed')}
+                  </div>
+                )}
+                {kind === 'locked' && (
+                  <div className="flex-center w-full gap-1 rounded-xl bg-white/5 py-1.5 text-[10px] font-bold uppercase tracking-wider text-white/40">
+                    <Lock size={11} />
+                    {t('locked')}
+                  </div>
+                )}
+                {isCrown && (
+                  <div
                     className={twMerge(
-                      'flex-center h-6 w-6 shrink-0 rounded-full',
-                      isMyCrown ? 'bg-gold/25' : 'bg-white/5'
+                      'flex-center w-full gap-1 rounded-xl py-1.5 text-[10px] font-bold uppercase tracking-wider',
+                      isMyCrown ? 'bg-gold/20 text-gold' : 'border border-gold/30 text-gold/80'
                     )}
                   >
-                    <Crown size={12} className={isMyCrown ? 'text-gold' : 'text-white/40'} />
-                  </span>
-                ) : null}
+                    <Crown size={11} />
+                    {isMyCrown ? t('your crown') : t('by leaderboard')}
+                  </div>
+                )}
               </div>
-
-              <p className="my-auto line-clamp-2 text-[12px] font-semibold leading-snug text-white/80">
-                {level.task}
-              </p>
-              <p className="line-clamp-2 text-[10px] leading-tight text-white-secondary tabular-nums">
-                {level.drop}
-              </p>
-
-              {kind === 'ready' && (
-                <Button
-                  className="flex-center w-full gap-1 rounded-xl py-2 text-xs font-bold animate-task-pulse"
-                  loading={claiming}
-                  onClick={handleClaim}
-                >
-                  <Gift size={12} />
-                  {t('claim')}
-                </Button>
-              )}
-              {kind === 'waiting' && (
-                <div className="flex-center w-full gap-1 rounded-xl bg-white/5 py-1.5 text-[10px] font-bold uppercase tracking-wider text-white/50">
-                  <Clock3 size={11} />
-                  {t('come back tomorrow')}
-                </div>
-              )}
-              {kind === 'claimed' && (
-                <div className="flex-center w-full gap-1 rounded-xl bg-success/15 py-1.5 text-[10px] font-bold uppercase tracking-wider text-success">
-                  <Check size={11} />
-                  {t('claimed')}
-                </div>
-              )}
-              {kind === 'locked' && (
-                <div className="flex-center w-full gap-1 rounded-xl bg-white/5 py-1.5 text-[10px] font-bold uppercase tracking-wider text-white/40">
-                  <Lock size={11} />
-                  {t('locked')}
-                </div>
-              )}
-              {isCrown && (
-                <div
-                  className={twMerge(
-                    'flex-center w-full gap-1 rounded-xl py-1.5 text-[10px] font-bold uppercase tracking-wider',
-                    isMyCrown ? 'bg-gold/20 text-gold' : 'border border-gold/30 text-gold/80'
-                  )}
-                >
-                  <Crown size={11} />
-                  {isMyCrown ? t('your crown') : t('by leaderboard')}
-                </div>
-              )}
             </div>
           );
         })}
