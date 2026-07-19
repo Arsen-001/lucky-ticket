@@ -1,7 +1,7 @@
 'use client';
 
 import { useCallback, useEffect, useRef, useState } from 'react';
-import { Check, Clock3, Crown, FlaskConical, Gift, Lock } from 'lucide-react';
+import { Check, Clock3, Crown, FlaskConical, Gift, Lock, Target } from 'lucide-react';
 import { twMerge } from 'tailwind-merge';
 import { useAppTranslations } from '@/hooks/useAppTranslations';
 import { useToast } from '@/hooks/useToast';
@@ -13,7 +13,10 @@ import { TestQuestBadge } from './TestQuestBadge';
 
 type LevelKind = 'claimed' | 'ready' | 'waiting' | 'locked' | 'crown';
 
-const SLIDE_WIDTH = 176;
+const SLIDE_WIDTH = 178;
+// Centering padding so the first / last card can sit dead-centre. The scroller
+// bleeds to the app column edges (-mx-4), so its width is the app column width.
+const CENTER_PAD = `max(20px, calc((min(100vw, var(--app-max-w)) - ${SLIDE_WIDTH}px) / 2))`;
 
 // The ladder is a static constant, so its display order (31 → 1) never changes.
 // Sort once at module load instead of re-sorting on every render.
@@ -24,15 +27,16 @@ export interface TestQuestChainProps {
 }
 
 /**
- * "Тест-квест" milestone chain — the launch quest as a horizontal card chain
+ * "Тест-квест" milestone chain — the launch quest as a horizontal card carousel
  * (31 → 1), the core of the dedicated Test-Quest screen. Levels 31 → 4 are the
  * daily ladder (one claim per day); levels 3 → 1 are the competitive crown
  * (rendered below, leaderboard-assigned).
  *
- * Uses the same snap-focus carousel UX as {@link TournamentMilestoneSlider} and
- * the daily ads slider: the leftmost-visible card is the "active" one, rendered
- * at full scale/opacity while its neighbours shrink, dim, and pull inward. Tap a
- * side card to bring it into focus; the current daily level auto-focuses on mount.
+ * Centre-anchored snap-focus carousel (same feel as the Home engine slider): the
+ * centred card is the "active" one, at full scale/opacity while its neighbours
+ * shrink and dim. Each card shows the reward you win and, at the bottom, the goal
+ * you must complete to advance to the next level. Tap a side card to focus it;
+ * the current daily level auto-focuses on mount.
  */
 export function TestQuestChain({ className }: TestQuestChainProps) {
   const t = useAppTranslations();
@@ -64,18 +68,18 @@ export function TestQuestChain({ className }: TestQuestChainProps) {
   const scrollerRef = useRef<HTMLDivElement>(null);
   const [activeIndex, setActiveIndex] = useState(0);
 
-  // Left-anchored active tracking — the leftmost-visible card is the active one
-  // (mirrors TournamentMilestoneSlider so both chains feel identical).
+  // Centre-anchored active tracking — the card nearest the viewport centre is active.
   const recomputeActive = useCallback(() => {
     const scroller = scrollerRef.current;
     if (!scroller) return;
-    const probe = scroller.scrollLeft + 16; // small offset from the left edge
+    const center = scroller.scrollLeft + scroller.clientWidth / 2;
     const slides = scroller.querySelectorAll<HTMLDivElement>('[data-tq-slide]');
     let bestIdx = 0;
     let bestDist = Infinity;
     slides.forEach(el => {
       const idx = Number(el.dataset.tqIndex);
-      const dist = Math.abs(el.offsetLeft - probe);
+      const slideCenter = el.offsetLeft + el.offsetWidth / 2;
+      const dist = Math.abs(slideCenter - center);
       if (dist < bestDist) {
         bestDist = dist;
         bestIdx = idx;
@@ -89,9 +93,10 @@ export function TestQuestChain({ className }: TestQuestChainProps) {
     if (!scroller) return;
     const el = scroller.querySelector<HTMLDivElement>(`[data-tq-index="${index}"]`);
     if (!el) return;
-    // Align the card to the LEFT edge — scroll the slider only, never
-    // scrollIntoView (which would tug the Tasks page's vertical scroller).
-    scroller.scrollTo({ left: Math.max(0, el.offsetLeft - 16), behavior });
+    // Centre the card within the slider — scroll the slider only, never
+    // scrollIntoView (which would tug the page's vertical scroller).
+    const target = el.offsetLeft + el.offsetWidth / 2 - scroller.clientWidth / 2;
+    scroller.scrollTo({ left: Math.max(0, target), behavior });
   }, []);
 
   useEffect(() => {
@@ -178,16 +183,14 @@ export function TestQuestChain({ className }: TestQuestChainProps) {
 
       <div
         ref={scrollerRef}
-        className="scrollbar-hidden -mx-4 flex snap-x snap-mandatory items-center gap-[27px] overflow-x-auto overflow-y-visible px-4"
-        style={{ scrollPaddingInline: '16px' }}
+        className="scrollbar-hidden -mx-4 flex snap-x snap-mandatory items-stretch gap-3 overflow-x-auto overflow-y-visible py-2"
+        style={{ paddingInline: CENTER_PAD, scrollPaddingInline: CENTER_PAD }}
       >
         {cards.map((card, index) => {
           const kind = kindOf(card.level, card.crown);
           const isCrown = kind === 'crown';
           const isMyCrown = isCrown && crownLevel === card.level;
           const isActive = index === activeIndex;
-          // Left-anchored: active card stays put, side cards pull toward it.
-          const sideOffset = isActive ? 0 : index < activeIndex ? 20 : -20;
           return (
             <div
               key={card.level}
@@ -196,38 +199,39 @@ export function TestQuestChain({ className }: TestQuestChainProps) {
               onClick={!isActive ? () => scrollToIndex(index) : undefined}
               style={{
                 flex: `0 0 ${SLIDE_WIDTH}px`,
-                transform: `translateX(${sideOffset}px) scale(${isActive ? 1 : 0.88})`,
-                transformOrigin: 'left center',
+                transform: `scale(${isActive ? 1 : 0.9})`,
+                transformOrigin: 'center',
               }}
               className={twMerge(
-                'snap-start transition-all duration-[450ms] ease-[cubic-bezier(0.22,1,0.36,1)]',
-                isActive ? 'opacity-100' : 'cursor-pointer opacity-65 saturate-75'
+                'snap-center transition-all duration-[450ms] ease-[cubic-bezier(0.22,1,0.36,1)]',
+                isActive ? 'opacity-100' : 'cursor-pointer opacity-55 saturate-[.6]'
               )}
             >
               <div
                 className={twMerge(
-                  'flex h-full min-h-[200px] flex-col gap-2 rounded-2xl border bg-background-overlay p-3',
-                  kind === 'ready' && 'border-electric-pink/50 shadow-lg shadow-electric-purple/15',
+                  'flex h-full min-h-[224px] flex-col gap-2.5 rounded-2xl border bg-background-overlay p-3.5',
+                  kind === 'ready' && 'border-electric-pink/50 shadow-lg shadow-electric-purple/20',
                   kind === 'waiting' && 'border-white/10',
-                  kind === 'claimed' && 'border-success/25 opacity-80',
-                  kind === 'locked' && 'border-white/5 opacity-55 saturate-50',
+                  kind === 'claimed' && 'border-success/25',
+                  kind === 'locked' && 'border-white/5',
                   isCrown && 'border-gold/40 bg-gradient-to-b from-gold/10 to-transparent',
-                  isMyCrown && 'border-gold/70 shadow-lg shadow-gold/20'
+                  isMyCrown && 'border-gold/70 shadow-lg shadow-gold/25'
                 )}
               >
+                {/* Header — level number + status */}
                 <div className="flex items-start justify-between">
                   <div>
                     <div
                       className={twMerge(
-                        'text-[10px] font-bold uppercase tracking-[0.14em]',
-                        isCrown ? 'text-gold/80' : 'text-white/50'
+                        'text-[9px] font-bold uppercase tracking-[0.18em]',
+                        isCrown ? 'text-gold/80' : 'text-white/45'
                       )}
                     >
                       {isCrown ? t('crown') : t('level')}
                     </div>
                     <div
                       className={twMerge(
-                        'bg-clip-text text-4xl font-extrabold leading-none tabular-nums text-transparent',
+                        'bg-clip-text text-[40px] font-extrabold leading-none tabular-nums text-transparent',
                         isCrown
                           ? 'bg-gradient-to-br from-warning to-gold'
                           : 'bg-gradient-to-br from-electric-pink to-electric-purple'
@@ -260,13 +264,41 @@ export function TestQuestChain({ className }: TestQuestChainProps) {
                   ) : null}
                 </div>
 
-                <p className="my-auto line-clamp-2 text-[12px] font-semibold leading-snug text-white/80">
-                  {card.task}
-                </p>
-                <p className="line-clamp-2 text-[10px] leading-tight text-white-secondary tabular-nums">
-                  {card.drop}
-                </p>
+                {/* Reward — what you win */}
+                <div
+                  className={twMerge(
+                    'rounded-xl border px-2.5 py-2',
+                    isCrown
+                      ? 'border-gold/20 bg-gold/[0.06]'
+                      : 'border-white/[0.07] bg-white/[0.04]'
+                  )}
+                >
+                  <div className="flex items-center gap-1 text-[8.5px] font-bold uppercase tracking-wider text-white/40">
+                    <Gift size={9} className={isCrown ? 'text-gold' : 'text-electric-pink'} />
+                    {t('reward')}
+                  </div>
+                  <p className="mt-1 line-clamp-2 text-[11px] font-semibold leading-snug tabular-nums text-white/90">
+                    {card.drop}
+                  </p>
+                </div>
 
+                {/* Goal — what to complete to advance to the next level */}
+                <div className="mt-auto flex flex-col gap-1">
+                  <div
+                    className={twMerge(
+                      'flex items-center gap-1 text-[8.5px] font-bold uppercase tracking-wider',
+                      isCrown ? 'text-gold/70' : 'text-electric-pink/70'
+                    )}
+                  >
+                    <Target size={9} />
+                    {isCrown ? t('crown condition') : t('to advance')}
+                  </div>
+                  <p className="line-clamp-2 text-[11px] font-medium leading-snug text-white/70">
+                    {card.task}
+                  </p>
+                </div>
+
+                {/* CTA — per-state action / status pill */}
                 {kind === 'ready' && (
                   <Button
                     className="flex-center w-full gap-1 rounded-xl py-2 text-xs font-bold animate-task-pulse"
