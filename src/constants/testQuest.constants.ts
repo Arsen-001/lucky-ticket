@@ -107,7 +107,7 @@ export const testQuestLadder: TestQuestLevel[] = [
     level: 20,
     day: 11,
     task: 'Достигни Silver',
-    drop: '750k LC · 15 билетов · 50 LS',
+    drop: '750k LC · 15 билетов · 1 движок',
     zone: 'wall',
   },
   {
@@ -157,7 +157,7 @@ export const testQuestLadder: TestQuestLevel[] = [
     level: 12,
     day: 19,
     task: '7 друзей суммарно',
-    drop: '1.2M LC · 25 билетов · 60 LS',
+    drop: '1.2M LC · 25 билетов · 1 движок',
     zone: 'wall',
   },
   {
@@ -199,7 +199,7 @@ export const testQuestLadder: TestQuestLevel[] = [
     level: 6,
     day: 25,
     task: '300 реклам суммарно',
-    drop: '1.5M LC · 25 билетов · 150 LS',
+    drop: '1.5M LC · 25 билетов · 150 LS · 1 движок',
     zone: 'ladder',
   },
   {
