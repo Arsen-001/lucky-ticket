@@ -6,7 +6,6 @@ import { twMerge } from 'tailwind-merge';
 import { useAppTranslations } from '@/hooks/useAppTranslations';
 import { useToast } from '@/hooks/useToast';
 import { Button } from '@/components/shared/buttons/Button';
-import { TaskCategory } from '@/types/enums/tasks.enums';
 import { useClaimTestQuestLevelMutation, useGetTestQuestQuery } from '@/api/testQuest.api';
 import { TEST_QUEST_START_LEVEL, testQuestLadder } from '@/constants/testQuest.constants';
 import { TestQuestLeaderboard } from './TestQuestLeaderboard';
@@ -16,23 +15,26 @@ type LevelKind = 'claimed' | 'ready' | 'waiting' | 'locked' | 'crown';
 
 const SLIDE_WIDTH = 176;
 
+// The ladder is a static constant, so its display order (31 → 1) never changes.
+// Sort once at module load instead of re-sorting on every render.
+const LEVELS = [...testQuestLadder].sort((a, b) => b.level - a.level);
+
 export interface TestQuestChainProps {
-  registerSection?: (category: TaskCategory, el: HTMLElement | null) => void;
   className?: string;
 }
 
 /**
  * "Тест-квест" milestone chain — the launch quest as a horizontal card chain
- * (31 → 1), first category in the One-Time tab. Levels 31 → 4 are the daily
- * ladder (one claim per day); levels 3 → 1 are the competitive crown (rendered
- * below, leaderboard-assigned).
+ * (31 → 1), the core of the dedicated Test-Quest screen. Levels 31 → 4 are the
+ * daily ladder (one claim per day); levels 3 → 1 are the competitive crown
+ * (rendered below, leaderboard-assigned).
  *
  * Uses the same snap-focus carousel UX as {@link TournamentMilestoneSlider} and
  * the daily ads slider: the leftmost-visible card is the "active" one, rendered
  * at full scale/opacity while its neighbours shrink, dim, and pull inward. Tap a
  * side card to bring it into focus; the current daily level auto-focuses on mount.
  */
-export function TestQuestChain({ registerSection, className }: TestQuestChainProps) {
+export function TestQuestChain({ className }: TestQuestChainProps) {
   const t = useAppTranslations();
   const toast = useToast();
   const { data } = useGetTestQuestQuery();
@@ -41,8 +43,6 @@ export function TestQuestChain({ registerSection, className }: TestQuestChainPro
   const currentLevel = data?.level ?? TEST_QUEST_START_LEVEL; // daily current (31 → 4)
   const claimableToday = data?.claimableToday ?? true;
   const crownLevel = data?.crownLevel ?? null;
-
-  const levels = [...testQuestLadder].sort((a, b) => b.level - a.level); // 31 → 1
 
   const scrollerRef = useRef<HTMLDivElement>(null);
   const [activeIndex, setActiveIndex] = useState(0);
@@ -90,7 +90,7 @@ export function TestQuestChain({ registerSection, className }: TestQuestChainPro
   }, [recomputeActive]);
 
   // Auto-focus the current daily level on mount / when it advances.
-  const currentIndex = levels.findIndex(l => l.level === currentLevel);
+  const currentIndex = LEVELS.findIndex(l => l.level === currentLevel);
   useEffect(() => {
     if (currentIndex < 0) return;
     const id = window.setTimeout(() => scrollToIndex(currentIndex, 'smooth'), 50);
@@ -114,10 +114,7 @@ export function TestQuestChain({ registerSection, className }: TestQuestChainPro
   };
 
   return (
-    <section
-      ref={el => registerSection?.(TaskCategory.TEST_QUEST, el)}
-      className={twMerge('flex flex-col gap-2 px-4 pt-4', className)}
-    >
+    <section className={twMerge('flex flex-col gap-2 px-4 pt-4', className)}>
       <div className="flex items-center gap-2">
         <div className="flex-center h-7 w-7 rounded-lg bg-gradient-to-br from-electric-pink to-electric-purple shadow-md shadow-black/30">
           <FlaskConical size={14} className="text-white" />
@@ -132,6 +129,25 @@ export function TestQuestChain({ registerSection, className }: TestQuestChainPro
           <TestQuestBadge level={data.badgeLevel} className="shrink-0" />
         )}
       </div>
+
+      {!data?.frozen && data && (
+        <div className="flex flex-col gap-1">
+          <div className="flex items-center justify-between text-[11px] font-semibold">
+            <span className="text-white-secondary">
+              {t('level')} <span className="tabular-nums text-white">{data.level}</span>
+            </span>
+            <span className="tabular-nums text-white/80">
+              {data.climbed}/{data.totalLevels}
+            </span>
+          </div>
+          <div className="h-1.5 w-full overflow-hidden rounded-full bg-white/10">
+            <div
+              className="h-full rounded-full bg-gradient-to-r from-electric-pink to-electric-purple transition-[width] duration-500"
+              style={{ width: `${data.progress}%` }}
+            />
+          </div>
+        </div>
+      )}
 
       {data?.frozen && (
         <div className="flex items-center gap-1.5 text-[11px] text-white-secondary">
@@ -148,7 +164,7 @@ export function TestQuestChain({ registerSection, className }: TestQuestChainPro
         className="scrollbar-hidden -mx-4 flex snap-x snap-mandatory items-center gap-[27px] overflow-x-auto overflow-y-visible px-4"
         style={{ scrollPaddingInline: '16px' }}
       >
-        {levels.map((level, index) => {
+        {LEVELS.map((level, index) => {
           const kind = kindOf(level.level, level.zone);
           const isCrown = kind === 'crown';
           const isMyCrown = isCrown && crownLevel === level.level;

@@ -16,7 +16,6 @@ import {
 } from 'lucide-react';
 import { icons } from '@/constants/icons';
 import { useGetTasksQuery, useClaimTaskMutation, useWatchAdMutation } from '@/api/tasks.api';
-import { useGetTestQuestQuery } from '@/api/testQuest.api';
 import { TaskCategory, TaskFrequency, TaskStatus } from '@/types/enums/tasks.enums';
 import type { AdSlot, CategoryTasks, Task, TaskSubStep } from '@/types/interfaces/tasks.interfaces';
 import { useAppTranslations } from '@/hooks/useAppTranslations';
@@ -30,7 +29,6 @@ import { TasksCategoryNav, type CategoryNavItem } from './TasksCategoryNav';
 import { TasksCategorySection } from './TasksCategorySection';
 import { TournamentMilestoneSlider } from './TournamentMilestoneSlider';
 import { AdsSection } from './AdsSection';
-import { TestQuestChain } from './TestQuestChain';
 import { AdUnavailableModal, type AdUnavailableReason } from './AdUnavailableModal';
 import { ClaimRewardModal, type RewardModalResult } from './ClaimRewardModal';
 import { ArrivalShine } from '@/components/shared/ArrivalShine';
@@ -120,7 +118,6 @@ const tasksForFrequency = (cat: CategoryTasks, frequency: TaskFrequency): Task[]
 // Ads leads, Tournaments right after, then the rest. In the daily tab the Ads
 // block is a separate prepended section, so Tournaments is the first category.
 const CATEGORY_ORDER: TaskCategory[] = [
-  TaskCategory.TEST_QUEST,
   TaskCategory.ADS,
   TaskCategory.TOURNAMENTS,
   TaskCategory.TICKETS,
@@ -158,7 +155,6 @@ export function TasksContent() {
   const t = useAppTranslations();
   const searchParams = useSearchParams();
   const { data, isLoading, isError, refetch } = useGetTasksQuery();
-  const { data: testQuest } = useGetTestQuestQuery();
   const [claimTask, claimState] = useClaimTaskMutation();
   const [watchAd, watchState] = useWatchAdMutation();
   const toast = useToast();
@@ -273,9 +269,8 @@ export function TasksContent() {
     if (data.ads && data.ads.enabled !== false) {
       counts[TaskFrequency.DAILY] += data.ads.slots.filter(s => !s.watched).length;
     }
-    if (testQuest?.claimableToday) counts[TaskFrequency.ONCE] += 1;
     return counts;
-  }, [data, testQuest]);
+  }, [data]);
 
   // Earliest period boundary across the active tab's tasks — drives the reset
   // countdown under the frequency tabs. Daily/weekly only; one-time never resets.
@@ -307,12 +302,6 @@ export function TasksContent() {
         readyCount: data.ads.slots.filter(s => !s.watched).length,
       });
     }
-    if (activeFrequency === TaskFrequency.ONCE) {
-      items.push({
-        category: TaskCategory.TEST_QUEST,
-        readyCount: testQuest?.claimableToday ? 1 : 0,
-      });
-    }
     const categoryItems: CategoryNavItem[] = [];
     data.categories.forEach(cat => {
       // Hide Profile and Partners chips from the one-time tab — same as the section list.
@@ -326,7 +315,7 @@ export function TasksContent() {
     });
     items.push(...sortByCategoryOrder(categoryItems));
     return items;
-  }, [data, activeFrequency, testQuest]);
+  }, [data, activeFrequency]);
 
   // Reset highlighted chip when frequency changes
   useEffect(() => {
@@ -545,8 +534,7 @@ export function TasksContent() {
     )
   );
 
-  const showTestQuest = activeFrequency === TaskFrequency.ONCE;
-  const allEmpty = !showAds && !showTestQuest && visibleCategories.length === 0;
+  const allEmpty = !showAds && visibleCategories.length === 0;
 
   return (
     <div className="flex flex-col pt-3">
@@ -578,8 +566,6 @@ export function TasksContent() {
         <EmptyAllDone frequency={activeFrequency} resetAt={periodResetAt} />
       ) : (
         <div key={activeFrequency} className="flex flex-col">
-          {showTestQuest && <TestQuestChain registerSection={registerSection} />}
-
           {showAds && data?.ads && (
             <AdsSection
               ads={data.ads}

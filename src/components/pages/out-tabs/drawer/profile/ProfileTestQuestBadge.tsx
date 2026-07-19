@@ -1,7 +1,7 @@
 'use client';
 
 import { useGetTestQuestQuery } from '@/api/testQuest.api';
-import { TestQuestBadge } from '@/components/pages/tabs/tasks/TestQuestBadge';
+import { TestQuestBadge } from '@/components/pages/out-tabs/drawer/test-quest/TestQuestBadge';
 
 /**
  * Own-profile Test-Quest badge — shows the permanent "Тестировщик · N" mark once
