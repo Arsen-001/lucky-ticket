@@ -7,11 +7,21 @@ export interface TestQuestReward {
   lpDays?: number;
 }
 
+/** One ladder card (31 → 1), server-provided so admin reward edits render live. */
+export interface TestQuestLadderEntry {
+  level: number;
+  task: string;
+  /** Already-formatted drop, e.g. "300k LC · 8 билетов · LP 2д". */
+  rewardLabel: string;
+}
+
 /** GET /test-quest — the current state of the pinned Test-Quest card. */
 export interface TestQuestState {
   /** Countdown level: 31 (entry) → 1 (Genesis crown). */
   level: number;
   totalLevels: number;
+  /** Full ladder text (31 → 1) from the admin-editable config; falls back to the local prototype when absent. */
+  ladder?: TestQuestLadderEntry[];
   /** Levels claimed so far (0 → 31). */
   climbed: number;
   /** 0–100, drives the card progress bar. */

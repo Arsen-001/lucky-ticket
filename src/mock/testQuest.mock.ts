@@ -28,6 +28,9 @@ const view = () => {
     task: def?.task ?? '',
     reward: {},
     rewardLabel: def?.drop ?? '',
+    ladder: [...testQuestLadder]
+      .sort((a, b) => b.level - a.level)
+      .map(l => ({ level: l.level, task: l.task, rewardLabel: l.drop })),
     claimableToday: !qualified,
     qualified,
     crownLevel: null,

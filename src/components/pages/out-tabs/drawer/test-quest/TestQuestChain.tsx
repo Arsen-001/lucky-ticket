@@ -44,6 +44,23 @@ export function TestQuestChain({ className }: TestQuestChainProps) {
   const claimableToday = data?.claimableToday ?? true;
   const crownLevel = data?.crownLevel ?? null;
 
+  // Prefer the live ladder from the server (reflects admin-editable rewards);
+  // fall back to the bundled prototype text until the response arrives.
+  const dailyTop = data?.dailyTopLevel ?? 4;
+  const cards = data?.ladder?.length
+    ? data.ladder.map(l => ({
+        level: l.level,
+        task: l.task,
+        drop: l.rewardLabel,
+        crown: l.level < dailyTop,
+      }))
+    : LEVELS.map(l => ({
+        level: l.level,
+        task: l.task,
+        drop: l.drop,
+        crown: l.zone === 'crown',
+      }));
+
   const scrollerRef = useRef<HTMLDivElement>(null);
   const [activeIndex, setActiveIndex] = useState(0);
 
@@ -90,15 +107,15 @@ export function TestQuestChain({ className }: TestQuestChainProps) {
   }, [recomputeActive]);
 
   // Auto-focus the current daily level on mount / when it advances.
-  const currentIndex = LEVELS.findIndex(l => l.level === currentLevel);
+  const currentIndex = cards.findIndex(c => c.level === currentLevel);
   useEffect(() => {
     if (currentIndex < 0) return;
     const id = window.setTimeout(() => scrollToIndex(currentIndex, 'smooth'), 50);
     return () => window.clearTimeout(id);
   }, [currentIndex, scrollToIndex]);
 
-  const kindOf = (level: number, zone: string): LevelKind => {
-    if (zone === 'crown') return 'crown';
+  const kindOf = (level: number, crown: boolean): LevelKind => {
+    if (crown) return 'crown';
     if (level > currentLevel) return 'claimed';
     if (level === currentLevel) return claimableToday ? 'ready' : 'waiting';
     return 'locked';
@@ -164,16 +181,16 @@ export function TestQuestChain({ className }: TestQuestChainProps) {
         className="scrollbar-hidden -mx-4 flex snap-x snap-mandatory items-center gap-[27px] overflow-x-auto overflow-y-visible px-4"
         style={{ scrollPaddingInline: '16px' }}
       >
-        {LEVELS.map((level, index) => {
-          const kind = kindOf(level.level, level.zone);
+        {cards.map((card, index) => {
+          const kind = kindOf(card.level, card.crown);
           const isCrown = kind === 'crown';
-          const isMyCrown = isCrown && crownLevel === level.level;
+          const isMyCrown = isCrown && crownLevel === card.level;
           const isActive = index === activeIndex;
           // Left-anchored: active card stays put, side cards pull toward it.
           const sideOffset = isActive ? 0 : index < activeIndex ? 20 : -20;
           return (
             <div
-              key={level.level}
+              key={card.level}
               data-tq-slide
               data-tq-index={index}
               onClick={!isActive ? () => scrollToIndex(index) : undefined}
@@ -216,7 +233,7 @@ export function TestQuestChain({ className }: TestQuestChainProps) {
                           : 'bg-gradient-to-br from-electric-pink to-electric-purple'
                       )}
                     >
-                      {level.level}
+                      {card.level}
                     </div>
                   </div>
                   {kind === 'claimed' ? (
@@ -244,10 +261,10 @@ export function TestQuestChain({ className }: TestQuestChainProps) {
                 </div>
 
                 <p className="my-auto line-clamp-2 text-[12px] font-semibold leading-snug text-white/80">
-                  {level.task}
+                  {card.task}
                 </p>
                 <p className="line-clamp-2 text-[10px] leading-tight text-white-secondary tabular-nums">
-                  {level.drop}
+                  {card.drop}
                 </p>
 
                 {kind === 'ready' && (
