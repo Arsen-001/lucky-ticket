@@ -40,7 +40,16 @@ export function TestQuestChain({ registerSection, className }: TestQuestChainPro
 
   useEffect(() => {
     const id = window.setTimeout(() => {
-      currentRef.current?.scrollIntoView({ inline: 'center', block: 'nearest' });
+      const scroller = scrollerRef.current;
+      const card = currentRef.current;
+      if (!scroller || !card) return;
+      // Center the active card inside the slider only. `scrollIntoView` would
+      // walk every scrollable ancestor and tug the Tasks page's vertical
+      // scroller too (fighting its scroll-lock) — so scroll the slider itself.
+      const sRect = scroller.getBoundingClientRect();
+      const cRect = card.getBoundingClientRect();
+      const delta = cRect.left - sRect.left - (sRect.width - cRect.width) / 2;
+      scroller.scrollBy({ left: delta });
     }, 60);
     return () => window.clearTimeout(id);
   }, [currentLevel]);
