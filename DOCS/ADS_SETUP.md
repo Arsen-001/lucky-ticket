@@ -42,12 +42,23 @@ daily quota.
 `watchAd` POSTs the serving `provider` to the backend, which uses it to pick
 the grant path (client-attested vs waiting for that network's callback).
 
-⚠️ **It is not stored.** `AdWatchProgress` keeps counters only — there is no
-per-view row, so the app cannot answer "how many views came from Monetag vs the
-house ad", nor sum Monetag's `estimated_price`. Every view that happens before
-a per-view table exists is unrecoverable. Until then the only sources are the
-Railway logs (`ad watch:` / `postback:` lines, current deploy only) and each
-network's own dashboard.
+Every view is stored as an **`AdView`** row: `provider`, `outcome`
+(granted / capped / duplicate / s2s-pending), `ap`, `estimatedPrice`, `ymid`,
+plus `source` — `client` (the app reported a finished view) or `callback` (the
+network's authoritative postback). Writes are best-effort so analytics can
+never fail a reward.
+
+Keeping both sources is the point: a `client` row with no matching `callback`
+row is exactly the "the network reports 1 impression but I watched 5" case —
+the network capped the user and the waterfall fell through to the house ad.
+Answerable with a query instead of guesswork.
+
+`estimatedPrice` comes from Monetag's `{estimated_price}` macro, so revenue is
+computable from our own data rather than waiting on their dashboard. It only
+arrives if that macro is in the postback URL — see above.
+
+Runtime logs cover the same events (`ad watch:` / `postback:` lines) but only
+for the current deploy.
 
 ---
 
