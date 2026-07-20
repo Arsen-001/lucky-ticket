@@ -39,9 +39,15 @@ show. The reward unlocks only after `houseAdDurationSeconds` (10s), matching a
 typical network video so the house ad can't become the cheaper way to farm the
 daily quota.
 
-`watchAd` POSTs the serving `provider` to the backend — a house impression is
-unpaid and may be priced differently, and per-network attribution is the only
-honest way to compare real eCPM later.
+`watchAd` POSTs the serving `provider` to the backend, which uses it to pick
+the grant path (client-attested vs waiting for that network's callback).
+
+⚠️ **It is not stored.** `AdWatchProgress` keeps counters only — there is no
+per-view row, so the app cannot answer "how many views came from Monetag vs the
+house ad", nor sum Monetag's `estimated_price`. Every view that happens before
+a per-view table exists is unrecoverable. Until then the only sources are the
+Railway logs (`ad watch:` / `postback:` lines, current deploy only) and each
+network's own dashboard.
 
 ---
 
