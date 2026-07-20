@@ -34,8 +34,12 @@ export function HouseAdOverlay() {
           new Promise<'completed' | 'skipped'>(resolve => {
             resolveRef.current = resolve;
             // Rotate so a player working through the daily quota doesn't see
-            // the same promo every time.
-            setPromoIndex(shownCountRef.current++ % houseAdPromos.length);
+            // the same promo every time. Read then advance as two statements:
+            // a `count++` side effect inside the expression did not survive the
+            // compiler intact and silently skipped the first promo.
+            const next = shownCountRef.current % houseAdPromos.length;
+            shownCountRef.current = next + 1;
+            setPromoIndex(next);
             setSecondsLeft(houseAdDurationSeconds);
             setOpen(true);
           })
