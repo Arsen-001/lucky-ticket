@@ -17,8 +17,8 @@ const rankColor = (rank: number): string => {
 };
 
 /**
- * Founders leaderboard — the live referral race that decides the crown (levels
- * 3 → 1). Rendered under the Test-Quest chain in the One-Time tab.
+ * Friends leaderboard ("Топ по друзьям") — the live referral race that decides
+ * the crown (levels 3 → 1). Rendered under the Test-Quest slider.
  */
 export function TestQuestLeaderboard({ className }: TestQuestLeaderboardProps) {
   const t = useAppTranslations();

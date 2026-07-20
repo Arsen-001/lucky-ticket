@@ -16,7 +16,7 @@ import { routes, type Route } from '@/constants/routes';
 export type TestQuestZone = 'entry' | 'ladder' | 'wall' | 'crown';
 
 export interface TestQuestLevel {
-  /** Badge level. 31 = entry, 1 = Genesis crown. */
+  /** Badge level. 31 = entry, 1 = top crown. */
   level: number;
   /** Day of the test the level maps to (null for entry / crown). */
   day: number | null;
@@ -32,7 +32,7 @@ export const TEST_QUEST_TOTAL_LEVELS = 31;
 /** Demo: the level the pinned card starts on in the running app. */
 export const TEST_QUEST_START_LEVEL = 27;
 
-/** Full ladder, level 31 (entry) down to level 1 (Genesis). */
+/** Full ladder, level 31 (entry) down to level 1 (top crown). */
 export const testQuestLadder: TestQuestLevel[] = [
   {
     level: 31,
@@ -235,8 +235,8 @@ export const testQuestLadder: TestQuestLevel[] = [
   {
     level: 1,
     day: null,
-    task: 'Корона · #1 Genesis',
-    drop: '5M LC · 50 билетов · 500 LS · VIP 3 · печать Genesis',
+    task: 'Корона · #1',
+    drop: '5M LC · 50 билетов · 500 LS · VIP 3 · именная печать',
     zone: 'crown',
   },
 ];

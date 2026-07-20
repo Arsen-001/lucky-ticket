@@ -7,13 +7,13 @@ import { useGetTestQuestQuery } from '@/api/testQuest.api';
 import { useAppTranslations } from '@/hooks/useAppTranslations';
 
 /**
- * Compact Home tile — shares the top row with the jackpot capsule and links to
- * the dedicated Test-Quest screen (the flagship launch quest). The flask icon
- * carries the quest identity; the tile shows the current climb level, and swaps
- * to a pulsing gift badge when a daily level is ready to claim (the full
- * "claim" CTA lives on the destination screen — a text pill would widen the
- * tile and clip the jackpot number beside it). Always renders (even pre-data)
- * so the entry point is stable, and keeps a constant width across states.
+ * Home entry into the dedicated Test-Quest screen (the flagship launch quest).
+ * Shares the top row with the compact jackpot chip and takes the remaining
+ * width, so it carries the title + blurb and the current climb level. When a
+ * daily level is ready it swaps to a pulsing gift badge (icon-only — a text
+ * "claim" pill would crowd the title on a phone row; the full CTA lives on the
+ * destination). Always renders (even pre-data) so the entry point is stable.
+ * Links to {@link routes.testQuest}.
  */
 export function HomeTestQuestCard() {
   const t = useAppTranslations();
@@ -26,22 +26,31 @@ export function HomeTestQuestCard() {
     <Link
       href={routes.testQuest}
       aria-label={t('test quest chain title')}
-      className="relative flex shrink-0 items-center gap-2 overflow-hidden rounded-3xl border border-electric-pink/30 bg-gradient-to-br from-electric-purple/25 to-electric-pink/10 px-3 transition-transform active:scale-[0.98]"
+      className="relative flex min-w-0 flex-1 items-center gap-2.5 overflow-hidden rounded-3xl border border-electric-pink/30 bg-gradient-to-r from-electric-purple/15 to-electric-pink/10 p-2.5 transition-transform active:scale-[0.98]"
     >
-      <span className="flex-center h-9 w-9 shrink-0 rounded-xl bg-gradient-to-br from-electric-pink to-electric-purple shadow-md shadow-black/30">
-        <FlaskConical size={18} className="text-white" />
+      <span className="flex-center h-10 w-10 shrink-0 rounded-xl bg-gradient-to-br from-electric-pink to-electric-purple shadow-md shadow-black/30">
+        <FlaskConical size={19} className="text-white" />
+      </span>
+
+      <span className="flex min-w-0 flex-1 flex-col">
+        <span className="truncate text-[13px] font-extrabold leading-tight">
+          {t('test quest chain title')}
+        </span>
+        <span className="truncate text-[10px] leading-tight text-pink-secondary">
+          {t('test quest chain blurb')}
+        </span>
       </span>
 
       {claimable ? (
-        <span className="flex-center h-6 w-6 shrink-0 rounded-full bg-pink-gradient text-white animate-task-pulse">
-          <Gift size={13} />
+        <span className="flex-center h-7 w-7 shrink-0 rounded-full bg-pink-gradient text-white animate-task-pulse">
+          <Gift size={14} />
         </span>
       ) : level != null ? (
-        <span className="flex shrink-0 flex-col items-center pr-0.5 leading-none">
+        <span className="flex-center shrink-0 flex-col rounded-lg bg-white/5 px-2 py-1 leading-none">
           <span className="text-[8px] font-bold uppercase tracking-wider text-white/50">
             {t('level')}
           </span>
-          <span className="text-base font-extrabold tabular-nums text-white">{level}</span>
+          <span className="text-sm font-extrabold tabular-nums">{level}</span>
         </span>
       ) : null}
     </Link>

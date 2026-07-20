@@ -17,7 +17,7 @@ export interface TestQuestLadderEntry {
 
 /** GET /test-quest — the current state of the pinned Test-Quest card. */
 export interface TestQuestState {
-  /** Countdown level: 31 (entry) → 1 (Genesis crown). */
+  /** Countdown level: 31 (entry) → 1 (top crown). */
   level: number;
   totalLevels: number;
   /** Full ladder text (31 → 1) from the admin-editable config; falls back to the local prototype when absent. */
@@ -54,7 +54,7 @@ export interface ClaimTestQuestResponse extends TestQuestState {
   newBalance: { lc: number; tickets: number; activityPoints: number };
 }
 
-/** One row of the Founders leaderboard (the referral race for the crown). */
+/** One row of the friends leaderboard (the referral race for the crown). */
 export interface TestQuestLeaderboardEntry {
   rank: number;
   username: string;
@@ -64,7 +64,7 @@ export interface TestQuestLeaderboardEntry {
   isMe: boolean;
 }
 
-/** GET /test-quest/leaderboard — live Founders standings + the caller's rank. */
+/** GET /test-quest/leaderboard — live friends standings + the caller's rank. */
 export interface TestQuestLeaderboard {
   total: number;
   myRank: number | null;

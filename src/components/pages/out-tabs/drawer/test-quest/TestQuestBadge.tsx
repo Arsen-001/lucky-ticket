@@ -10,7 +10,7 @@ export interface TestQuestBadgeProps {
 
 /**
  * Permanent "Тестировщик · N" badge, minted when the test ends. Crown levels
- * (1–3) get the gold Genesis treatment; everything else the pink-purple seal.
+ * (1–3) get the gold crown treatment; everything else the pink-purple seal.
  * Never issued again after the test — the founder mark.
  */
 export function TestQuestBadge({ level, className }: TestQuestBadgeProps) {

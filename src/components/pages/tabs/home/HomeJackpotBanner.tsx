@@ -14,10 +14,11 @@ import '@/styles/components/jackpot.css';
 import '@/styles/components/jackpot-odometer.css';
 
 /**
- * Premium capsule jackpot counter at the top of Home — brushed platinum ring,
- * glassmorphic inner with a cool electric-pink bloom; white JACKPOT wordmark,
- * slot-machine digit reels (JackpotOdometer) and the gold LC coin on the
- * right (the only gold accent). Links to the jackpot page.
+ * Compact jackpot chip at the top of Home — a small brushed-platinum ring over
+ * a glassmorphic inner with a cool electric-pink bloom; tiny JACKPOT wordmark
+ * stacked over the slot-machine digit reels (JackpotOdometer) and a small gold
+ * LC coin beside them (the only gold accent). Sits shrink-to-content next to
+ * the wider Test-Quest card and links to the jackpot page.
  * The pot only grows when a tournament finishes (its 10% skim), so there is NO
  * fake creep: the query polls and the reels roll (with a "+X" pop) only when
  * the server value actually increased. Never rolls backwards.
@@ -60,42 +61,38 @@ export function HomeJackpotBanner() {
     <Link
       href={routes.jackpot}
       aria-label={t('jackpot')}
-      className="jackpot-capsule relative flex min-w-0 flex-1 rounded-full p-[5px] transition-transform active:scale-[0.98]"
+      className="jackpot-capsule relative flex shrink-0 rounded-2xl p-[3px] transition-transform active:scale-[0.98]"
     >
-      <span className="jackpot-capsule-glass relative flex min-w-0 flex-1 items-center gap-2 rounded-full py-2 pl-4 pr-2.5">
+      <span className="jackpot-capsule-glass relative flex flex-1 flex-col items-center justify-center gap-0.5 rounded-[13px] px-2.5 py-1.5">
         <span aria-hidden className="jackpot-plaque-shine" />
 
-        <span className="relative flex flex-shrink-0 flex-col items-start gap-1">
-          <span className="jackpot-title text-[10px] font-black uppercase leading-none tracking-[0.18em]">
-            {t('jackpot')}
-          </span>
-          <span aria-hidden className="jackpot-title-rule" />
+        <span className="jackpot-title text-[7px] font-black uppercase leading-none tracking-[0.14em]">
+          {t('jackpot')}
         </span>
 
         <SkeletonSuspense
           loading={isLoading}
-          skeleton={<Skeleton variant="line" textSize="lg" className="h-6 w-24" />}
+          skeleton={<Skeleton variant="line" className="h-4 w-16" />}
         >
-          <span className="relative flex min-w-0 flex-1 items-center justify-center">
+          <span className="relative flex items-center justify-center gap-1">
             <JackpotOdometer
               value={display}
-              className="jackpot-glow text-[20px] font-extrabold leading-none text-white"
+              className="jackpot-glow text-[15px] font-extrabold leading-none text-white"
             />
+            <span className="jackpot-coin flex-center h-[18px] w-[18px] shrink-0 rounded-full">
+              <LcLabel size={11} />
+            </span>
             {pop && (
               <span
                 key={pop.key}
                 aria-hidden
-                className="jackpot-pop text-electric-pink absolute left-1/2 top-0 text-sm font-extrabold tabular-nums"
+                className="jackpot-pop text-electric-pink absolute -top-1 left-1/2 text-[11px] font-extrabold tabular-nums"
               >
                 +{formatNumber(pop.amount)}
               </span>
             )}
           </span>
         </SkeletonSuspense>
-
-        <span className="jackpot-coin flex-center h-9 w-9 flex-shrink-0 rounded-full">
-          <LcLabel size={22} />
-        </span>
       </span>
     </Link>
   );
