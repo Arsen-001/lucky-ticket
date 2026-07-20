@@ -14,6 +14,18 @@ import { getLocale } from 'next-intl/server';
 import type { ChildrenProps } from '@/types/interfaces/component.interfcaes';
 import '@/styles/index.css';
 
+/**
+ * Which ad networks the waterfall may use — mirrors `NEXT_PUBLIC_AD_PROVIDERS`
+ * (see `src/lib/ads/index.ts`). Read here too so dropping a network from that
+ * list also stops its SDK from loading: otherwise a disabled network keeps
+ * costing every page load a third-party script that is never called.
+ */
+function isProviderEnabled(id: string): boolean {
+  const raw = process.env.NEXT_PUBLIC_AD_PROVIDERS?.trim();
+  if (!raw) return true; // unset → default order, every configured network runs
+  return raw.split(',').some(part => part.trim() === id);
+}
+
 export default async function RootLayout({ children }: ChildrenProps) {
   const locale = await getLocale();
 
@@ -33,10 +45,10 @@ export default async function RootLayout({ children }: ChildrenProps) {
           {/* Rewarded-ad SDKs — each loads only when its network is configured,
               so an unused network costs nothing. Order here is irrelevant; the
               waterfall order lives in NEXT_PUBLIC_AD_PROVIDERS. */}
-          {process.env.NEXT_PUBLIC_ADSGRAM_BLOCK_ID && (
+          {process.env.NEXT_PUBLIC_ADSGRAM_BLOCK_ID && isProviderEnabled('adsgram') && (
             <Script src="https://sad.adsgram.ai/js/sad.min.js" strategy="afterInteractive" />
           )}
-          {process.env.NEXT_PUBLIC_MONETAG_ZONE_ID && (
+          {process.env.NEXT_PUBLIC_MONETAG_ZONE_ID && isProviderEnabled('monetag') && (
             <Script
               src="https://libtl.com/sdk.js"
               data-zone={process.env.NEXT_PUBLIC_MONETAG_ZONE_ID}

@@ -60,8 +60,15 @@ NEXT_PUBLIC_AD_PROVIDERS=
 ```
 
 Set them in `.env.local` for local testing and in **Vercel → Settings →
-Environment Variables** for production. A network with no id is skipped and its
-SDK script is not even loaded. **Reordering the waterfall is an env change, not
+Environment Variables** for production. A network is skipped — and its SDK
+script is not even loaded — when it has no id OR when it is absent from
+`NEXT_PUBLIC_AD_PROVIDERS`. That list is the single source of truth: dropping a
+network from it costs nothing at runtime, and putting it back needs no code
+change.
+
+**Currently `monetag,house`** — Adsgram is out of the rotation (block 37750 is
+live but has never filled), while its block id and code stay in place so it can
+be re-added by editing the list. **Reordering the waterfall is an env change, not
 a code change** — once real per-network eCPM is known, put the better payer
 first.
 
@@ -241,7 +248,7 @@ enabling Adsgram's callback does not affect Monetag or the house ad.
       field _Your backend URL_ (2048 chars), then _Save settings_
 - [x] `MONETAG_REWARD_SECRET` set in Railway → Variables, container redeployed;
       verified live: the endpoint went 401 → `200 {"status":"ignored",
-  "reason":"unknown-user"}`
+"reason":"unknown-user"}`
 - [x] End-to-end verified in the real Mini App (2026-07-20): ad watched, AP
       credited. With the secret set, `watchAd` no longer grants for Monetag —
       so the AP arriving proves the callback fired and `ymid` attribution works
