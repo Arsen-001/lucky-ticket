@@ -168,8 +168,25 @@ so a spoofed POST with no matching callback grants nothing. The callback does
 this as the zone's postback URL in the Monetag dashboard:
 
 ```
-https://<your-backend>/tasks/ads/monetag/reward?key=<MONETAG_REWARD_SECRET>&ymid={ymid}&telegram_id={telegram_id}&event_type={event_type}&reward_event_type={reward_event_type}
+https://<your-backend>/tasks/ads/monetag/reward/<MONETAG_REWARD_SECRET>?ymid={ymid}&event_type={event_type}
 ```
+
+**The secret goes in the PATH, not in `?key=`.** The dashboard validates the URL
+by requiring every query parameter to look like `name={macro}`, so a literal
+`key=<secret>` makes it reject the whole thing as "url not valid". Both routes
+exist on the backend; the path form is the one that saves.
+
+Only `ymid` and `event_type` are needed — the other macros (`telegram_id`,
+`zone_id`, `estimated_price`, …) are accepted and ignored. Attribution comes
+from the `ymid` prefix.
+
+⚠️ When copying the URL out of a chat or doc, make sure the secret does not get
+broken by a line wrap. A URL with whitespace inside is rejected as invalid —
+that, not the format, was what blocked this for an hour.
+
+(`telegram_id` and the other macros are optional — the `ymid` prefix already
+carries the user id, and adding macros the dashboard rejects only makes the
+URL harder to save.)
 
 `TasksService.rewardFromMonetag` mirrors the Adsgram endpoint (public,
 secret-guarded, idempotent, cap-aware, acks unknown users with 200) with two
@@ -177,8 +194,10 @@ Monetag-specific rules:
 
 - Monetag posts back for **clicks as well as impressions**, so only
   `event_type=impression` grants — otherwise one view could pay twice.
-- A `non_valued` (unmonetized) event still rewards the player. They watched the
-  ad; whether the impression was paid is our problem, not theirs.
+- `reward_event_type` (`yes`/`no` — was the impression paid) is deliberately
+  not checked. The player watched the ad; whether we got paid is our problem,
+  not theirs. NB: Monetag's own docs call these values `valued`/`non_valued`,
+  but the dashboard's macro reference says `yes`/`no` — trust the dashboard.
 
 The client mints a unique `ymid` per view (`<telegramId>.<unique>`), which is
 both the idempotency key and the attribution fallback when the `{telegram_id}`
@@ -217,9 +236,14 @@ enabling Adsgram's callback does not affect Monetag or the house ad.
 - [x] Verified live in the real Mini App: Adsgram returned no fill, Monetag
       served a real rewarded video
 - [x] S2S postback endpoint implemented (`GET /tasks/ads/monetag/reward`)
-- [ ] Postback URL configured on the zone in the Monetag dashboard
-- [ ] `MONETAG_REWARD_SECRET` set in Railway → Variables (only AFTER the URL is
-      configured — see the order note above)
+- [x] Postback URL saved in the dashboard —
+      **publishers.monetag.com → Telegram Mini Apps → the app → Postback**,
+      field _Your backend URL_ (2048 chars), then _Save settings_
+- [x] `MONETAG_REWARD_SECRET` set in Railway → Variables, container redeployed;
+      verified live: the endpoint went 401 → `200 {"status":"ignored",
+    "reason":"unknown-user"}`
+- [ ] End-to-end check: watch one ad in the real Mini App and confirm the AP
+      lands (the grant now comes from the callback, not the client)
 - [ ] Property URL switched from the bot link to the Mini App direct link
       (`https://t.me/LuckyTicket365_Bot/lottery`)
 
