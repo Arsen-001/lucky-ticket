@@ -37,7 +37,7 @@ export const testQuestLadder: TestQuestLevel[] = [
   {
     level: 31,
     day: null,
-    task: '— (вход в тест)',
+    task: 'Старт: собери набор новичка',
     drop: '500k LC · 10 билетов · LP 3д · 10 LS',
     zone: 'entry',
   },
@@ -221,7 +221,7 @@ export const testQuestLadder: TestQuestLevel[] = [
   {
     level: 3,
     day: null,
-    task: 'Корона · топ-50 по рефералам',
+    task: 'Корона · топ-50 по друзьям',
     drop: '4M LC · 45 билетов · 300 LS',
     zone: 'crown',
   },
@@ -275,9 +275,71 @@ const STEP_HREF_RULES: { match: RegExp; href: Route }[] = [
 const hrefForStep = (text: string): Route | undefined =>
   STEP_HREF_RULES.find(r => r.match.test(text))?.href;
 
-// A few levels get an authored, multi-step breakdown (to showcase dropdowns);
-// every other level is derived by splitting its one-line task (see resolver).
+// Authored checklist per level (31 → 1). Every step maps to a real in-app
+// action with a deep-link; steps with `detail`/`subSteps` expand into how-to
+// dropdowns. Front-end prototype — the backend will own these once it ships
+// real per-step data. `resolveTestQuestSteps` falls back to splitting the task
+// line for any level that has no override here.
 const TEST_QUEST_STEP_OVERRIDES: Record<number, TestQuestStep[]> = {
+  // 31 · entry — a rich onboarding bundle (profile · engine · ad · first invite)
+  31: [
+    {
+      text: 'Оформи профиль — аватар и никнейм',
+      href: routes.profile.index,
+      detail: 'Профиль → изменить фото и имя.',
+    },
+    { text: 'Запусти движок и забери первый билет', href: routes.home },
+    { text: 'Посмотри первую рекламу за награду', href: routes.tasks },
+    {
+      text: 'Отправь ссылку-приглашение другу',
+      href: routes.inviteFriends,
+      subSteps: ['Открой «Пригласить»', 'Отправь ссылку в Telegram', 'Друг заходит в игру'],
+    },
+  ],
+  // 30 → 27 · warm-up
+  30: [
+    { text: 'Открой главную — блок движков', href: routes.home },
+    {
+      text: 'Забери готовый билет с движка',
+      detail: 'Движок печатает билеты со временем — как готов, забирай.',
+    },
+  ],
+  29: [
+    {
+      text: 'Открой рекламу в задачах',
+      href: routes.tasks,
+      detail: 'Задачи → Реклама, до 10 роликов в день.',
+    },
+    { text: 'Досмотри 3 ролика до конца', detail: 'Награда — только за полный просмотр.' },
+  ],
+  28: [
+    { text: 'Поставь лайк на профиле', href: routes.profile.index },
+    { text: 'Подари билет другу', href: routes.tickets.index, detail: 'Билеты → отправить другу.' },
+  ],
+  27: [
+    { text: 'Забирай билеты с движков за день', href: routes.home },
+    { text: 'Не хватает до 5 — докупи в маркете', href: routes.market() },
+  ],
+  // 26 → 21 · first of each mechanic
+  26: [
+    { text: 'Открой «Пригласить друзей»', href: routes.inviteFriends },
+    {
+      text: 'Отправь личную ссылку',
+      subSteps: [
+        'Скопируй ссылку или карточку',
+        'Отправь другу в Telegram',
+        'Друг открывает Mini App',
+      ],
+    },
+    {
+      text: 'Друг активируется — входит в игру',
+      detail: 'Засчитывается активированный друг, не просто клик по ссылке.',
+    },
+  ],
+  25: [
+    { text: 'Открой Маркет → свой движок', href: routes.market() },
+    { text: 'Прокачай уровень движка', detail: 'Апгрейд ускоряет печать билетов.' },
+  ],
   24: [
     {
       text: 'Открой смену почты',
@@ -289,13 +351,119 @@ const TEST_QUEST_STEP_OVERRIDES: Record<number, TestQuestStep[]> = {
       detail: 'На новый адрес придёт код из 6 символов — введи его в течение 15 минут.',
     },
   ],
+  23: [
+    { text: 'Открой турниры и выбери свой тир', href: routes.tournaments.index },
+    { text: 'Купи билет и вступи в турнир', detail: 'Дождись финиша — награда по месту.' },
+  ],
+  22: [
+    { text: 'Открой рекламу в задачах', href: routes.tasks },
+    { text: 'Досмотри 10 роликов', detail: 'До 10 в день — можно собрать за один заход.' },
+  ],
   21: [
+    { text: 'Открой Стейки → «Новый»', href: routes.stakes.new },
     {
-      text: 'Открой первый стейк',
-      href: routes.stakes.new,
-      subSteps: ['Стейки → «Новый»', 'Выбери сумму LC и срок', 'Подтверди — AP начислится сразу'],
+      text: 'Запусти первый стейк',
+      subSteps: ['Выбери сумму LC и срок', 'Подтверди', 'AP начислится сразу'],
     },
   ],
+  // 20 → 11 · scaling walls
+  20: [
+    {
+      text: 'Открой свой статус',
+      href: routes.settings.vip,
+      detail: 'Статус растёт от активности и AP.',
+    },
+    { text: 'Добери активность до Silver' },
+  ],
+  19: [
+    { text: 'Открой «Пригласить друзей»', href: routes.inviteFriends },
+    {
+      text: 'Доведи число активных друзей до 3',
+      detail: 'Считаются активированные с начала теста.',
+    },
+  ],
+  18: [
+    { text: 'Вступи в турнир по силам', href: routes.tournaments.index },
+    { text: 'Финишируй в топ-3', detail: 'Награда — за место 1–3.' },
+  ],
+  17: [
+    { text: 'Забирай билеты с движков', href: routes.home },
+    { text: 'Ускорься апгрейдом или вторым движком', href: routes.market() },
+    { text: 'Собери 20 билетов' },
+  ],
+  16: [
+    { text: 'Открой «Пригласить друзей»', href: routes.inviteFriends },
+    { text: 'Доведи активных друзей до 5' },
+  ],
+  15: [
+    { text: 'Открой свой статус', href: routes.settings.vip },
+    { text: 'Добери активность до Gold' },
+  ],
+  14: [
+    { text: 'Играй турниры своего тира', href: routes.tournaments.index },
+    { text: 'Набери 3 победы за тест' },
+  ],
+  13: [
+    { text: 'Смотри рекламу каждый день', href: routes.tasks, detail: 'До 10/день — держи темп.' },
+    { text: 'Добей до 200 просмотров суммарно' },
+  ],
+  12: [
+    { text: 'Открой «Пригласить друзей»', href: routes.inviteFriends },
+    { text: 'Доведи активных друзей до 7' },
+  ],
+  11: [
+    { text: 'Открой Стейки → «Новый»', href: routes.stakes.new },
+    {
+      text: 'Держи 2 активных стейка одновременно',
+      detail: 'Оба должны быть активны в один момент.',
+    },
+  ],
+  // 10 → 4 · endgame
+  10: [
+    { text: 'Открой «Пригласить друзей»', href: routes.inviteFriends },
+    { text: 'Доведи активных друзей до 10' },
+  ],
+  9: [
+    { text: 'Держи статус Gold', href: routes.settings.vip },
+    { text: 'Выиграй турнир Gold-тира', href: routes.tournaments.index },
+  ],
+  8: [
+    { text: 'Вступи в крупный турнир', href: routes.tournaments.index },
+    { text: 'Финишируй в топ-10' },
+  ],
+  7: [
+    { text: 'Открой «Пригласить друзей»', href: routes.inviteFriends },
+    { text: 'Доведи активных друзей до 15' },
+  ],
+  6: [
+    { text: 'Смотри рекламу ежедневно', href: routes.tasks },
+    { text: 'Добей до 300 просмотров суммарно' },
+  ],
+  5: [
+    { text: 'Открой «Пригласить друзей»', href: routes.inviteFriends },
+    { text: 'Доведи активных друзей до 18' },
+  ],
+  4: [
+    {
+      text: 'Прокачай статус до Platinum',
+      href: routes.settings.vip,
+      detail: 'Platinum — порог квалификации на корону.',
+    },
+    {
+      text: 'Квалификация на корону открыта',
+      detail: 'Дальше корону 3 → 1 решает «Топ по друзьям».',
+    },
+  ],
+  // 3 → 1 · crown (provisional — decided by the friends leaderboard at test end)
+  3: [
+    {
+      text: 'Войди в топ-50 «Топ по друзьям»',
+      href: routes.inviteFriends,
+      detail: 'Корона присуждается в конце теста по числу активированных друзей.',
+    },
+  ],
+  2: [{ text: 'Войди в топ-10 «Топ по друзьям»', href: routes.inviteFriends }],
+  1: [{ text: 'Стань #1 в «Топ по друзьям»', href: routes.inviteFriends }],
 };
 
 /**
