@@ -8,6 +8,87 @@ networks as a waterfall** plus its own promo as the final fallback.
 
 ---
 
+---
+
+## Where things stand (2026-07-20)
+
+|                         |                                                                     |
+| ----------------------- | ------------------------------------------------------------------- |
+| Waterfall in production | `monetag,house` — Adsgram integrated but **out of rotation**        |
+| Monetag                 | zone `11355872`, live and filling, S2S postback granting            |
+| Adsgram                 | block `37750` active but **never filled a single request**          |
+| House ad                | last in the chain, always fills                                     |
+| Reward authority        | server callback for both networks; client-attested for the house ad |
+| Per-view storage        | `AdView` table (provider, source, outcome, AP, revenue, ymid)       |
+| Admin panel             | section **Реклама** → table «Откуда пришла реклама»                 |
+| Revenue to date         | fractions of a cent — a handful of views total                      |
+
+Verified end-to-end in the real Mini App: ad served → network callback → AP
+credited → row stored → visible in the panel.
+
+## Decisions, and why
+
+- **Several networks, not one.** A single network is a single point of failure
+  whose failure is invisible: the task just says "no ads". Adsgram sat live but
+  unfilled for days without anyone noticing.
+- **Order lives in env, not code.** Re-prioritising after real eCPM data is a
+  variable change plus a redeploy. The list also gates SDK loading, so a
+  disabled network costs nothing per page load.
+- **A skip stops the chain.** Falling through to the next source when the
+  player closes an ad would make "close the ad" a second chance at a reward.
+- **The house ad exists because fill is never guaranteed.** It earns nothing;
+  it keeps the feature honest at zero fill and at zero traffic.
+- **House pays the same as a paid view.** See DOCS §12.5 — the daily cap bounds
+  it and the AP baseline assumes a full day of views.
+- **`reward_event_type` is never checked.** The player watched the ad; whether
+  the impression was monetised is our problem, not theirs.
+- **Only `event_type=impression` grants.** Monetag also posts back on clicks,
+  which would pay a single view twice.
+- **Rewarded Interstitial, not Rewarded Popup**, despite Popup paying 2–3× more
+  — it navigates the player out of the Mini App.
+- **Storage shipped before the dashboard.** A dashboard can be built any time;
+  views not recorded today are gone forever.
+
+## Not done / open
+
+- **Adsgram** — out of rotation. To retry: set
+  `NEXT_PUBLIC_AD_PROVIDERS=adsgram,monetag,house` (or put it second, so it is
+  only asked when Monetag is empty) and watch `AdView.provider` for a week.
+- **GigaPub** as a third source — an auction across networks, worth a
+  conversation once traffic justifies it. No account, no integration yet.
+- **Per-day chart** in the admin section — only totals over 30 days today.
+- **Compare our numbers against the networks' dashboards** once volume makes
+  the comparison meaningful.
+- **Monetag stats lag** — their panel showed 1 impression against 5 watched
+  ads; no capping was observed in our logs, so this looked like reporting
+  delay. Unconfirmed; recheck with real volume.
+
+## Traps this cost time on
+
+- **A line-wrapped secret.** The postback URL was rejected as "url not valid"
+  for an hour. The format was fine — copying the long secret out of a chat
+  broke it across a line, and a URL containing whitespace is invalid. Check for
+  whitespace before theorising.
+- **`?key=<secret>` is rejected.** The dashboard validates a postback URL by
+  requiring every query parameter to be `name={macro}`. The secret goes in the
+  path.
+- **The dashboard's macro hint is wrong** about `reward_event_type`: it claims
+  `yes`/`no`, live postbacks send `valued`.
+- **The callback arrives ~18s BEFORE the client's watch report** — Monetag
+  fires on render, the client reports on completion. A trailing `ad watch` log
+  line with no postback after it is a paired view, not a lost reward.
+- **Mock data cannot validate the admin section.** Three separate bugs
+  (a metric that could only grow, an idle network vanishing from the table, and
+  real sub-cent revenue rendered as `$0.0000`) were all invisible until the
+  panel was pointed at production numbers.
+- **Nest does not log inbound GETs** — the callbacks were unobservable until
+  logging was added explicitly.
+- **The admin repo sits on branch `feat/test-quest`** with a stale local
+  `main`, so `git push origin main` pushes the wrong branch. Use
+  `git push origin HEAD:refs/heads/main`.
+
+---
+
 ## How it works
 
 `showRewardedAd()` (`src/lib/ads/index.ts`) plays **one** ad per user action. It

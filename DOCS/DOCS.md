@@ -1102,7 +1102,21 @@ The **Ads** category in the **One-time** tasks tab holds a single task type — 
 - Tapping a level card sends the user to the daily **Ads** block (`/tasks?frequency=daily&category=ads`), where ads are actually watched. The daily ads block (per-day slot rewards) is a separate mechanic and is unaffected.
 - The view count is **cumulative and never resets** — this is a lifetime progression chain, not a recurring task.
 
+**Where the ads come from (waterfall).** The app is not tied to one ad network. A view is served by the first source that has inventory, tried in order:
+
+1. **Monetag** — the paid network currently carrying all inventory.
+2. **Adsgram** — integrated but **out of the rotation** (its block is live yet has never filled). Re-enabled by editing one env variable, no code change.
+3. **House ad** — the app's own promo (channel / invite / Market), shown when every network is empty. It earns nothing but keeps the task working, so "watch an ad" never dead-ends on a "no ads right now" modal.
+
+Exactly one ad plays per tap. The next source is asked only if the previous returned nothing; if the player closes an ad themselves, the chain stops and no reward is granted — otherwise closing an ad would become a second chance at one.
+
+**House-ad reward parity.** A house view pays the same as a paid one. The daily cap already bounds it, and the AP baseline (Section 5.4) assumes a full day of ad views — paying less would quietly cut a player's baseline whenever ad demand dries up, i.e. punish them for our lack of fill.
+
+**Reward authority.** When a network's server-to-server callback is configured (Monetag and Adsgram both are), that callback is the only thing that grants — the client's "I finished watching" merely syncs the UI, so a spoofed request pays nothing. A source without a callback (the house ad) still grants client-side, bounded by the same daily cap.
+
 **Per-view rewards (admin-controlled).** Each verified view in the daily ads block grants the admin-configured reward. By default that is the flat per-view knobs (AP per view, default 2; optional LC, default 0). The admin can instead set a **per-view reward ladder** (panel → Настройки → Задания и реклама): view N of the day grants ladder entry N — any mix of AP, LC, Stars, and tickets of a chosen tier — cycling back to the first entry once views outrun the ladder. Every slot in the Mini App ads block advertises exactly what that specific view pays; views past the daily cap grant nothing. Clearing the ladder restores the flat AP/LC behaviour.
+
+**Admin visibility.** Panel → **Реклама** shows, per source (Monetag / Adsgram / Своя реклама), views over the last 30 days, share, views today, AP granted, revenue, cap hits, and views a network never confirmed. Setup, callbacks and operational traps live in [`ADS_SETUP.md`](ADS_SETUP.md).
 
 ### 12.6 One-Time Milestone Catalog (2026-07 rebalance)
 
