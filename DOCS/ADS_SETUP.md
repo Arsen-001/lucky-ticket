@@ -241,9 +241,10 @@ enabling Adsgram's callback does not affect Monetag or the house ad.
       field _Your backend URL_ (2048 chars), then _Save settings_
 - [x] `MONETAG_REWARD_SECRET` set in Railway → Variables, container redeployed;
       verified live: the endpoint went 401 → `200 {"status":"ignored",
-    "reason":"unknown-user"}`
-- [ ] End-to-end check: watch one ad in the real Mini App and confirm the AP
-      lands (the grant now comes from the callback, not the client)
+  "reason":"unknown-user"}`
+- [x] End-to-end verified in the real Mini App (2026-07-20): ad watched, AP
+      credited. With the secret set, `watchAd` no longer grants for Monetag —
+      so the AP arriving proves the callback fired and `ymid` attribution works
 - [ ] Property URL switched from the bot link to the Mini App direct link
       (`https://t.me/LuckyTicket365_Bot/lottery`)
 
