@@ -37,9 +37,10 @@ const REASON_DESCRIPTION_KEY: Record<AdUnavailableReason, MessageIds> = {
 
 /**
  * Shown when a rewarded ad can't be played (no fill / requested too fast /
- * load error). Replaces the Adsgram SDK's native Telegram alert — the SDK
- * suppresses it once the app subscribes to its error events (see
- * `src/lib/adsgram/adsgram.ts`).
+ * load error) — i.e. every provider in the waterfall came up empty, house ad
+ * included. Also replaces the Adsgram SDK's native Telegram alert, which the
+ * SDK suppresses once the app subscribes to its error events (see
+ * `src/lib/ads/adsgram.provider.ts`).
  */
 export function AdUnavailableModal({ open, reason, onClose }: AdUnavailableModalProps) {
   const t = useAppTranslations();

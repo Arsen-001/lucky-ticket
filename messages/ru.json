@@ -196,7 +196,7 @@
   "choose your language": "Выберите язык",
   "claim": "Забрать",
   "claim all": "Забрать все",
-  "claim failed": "Не удалось забрать",
+  "claim failed": "Не удалось забрать награду",
   "claim failed description": "Сервер недоступен. Нажмите «Повторить», чтобы попробовать снова.",
   "claim from {count} friends": "Забрать у {count, plural, one {# друга} few {# друзей} many {# друзей} other {# друзей}}",
   "claim locked steps remaining": "Осталось {remaining} шагов",
@@ -804,7 +804,6 @@
   "test quest title": "Тест-квест · 31 день",
   "tester": "Тестировщик",
   "task of the day": "Задача дня",
-  "claim failed": "Не удалось забрать награду",
   "category test-quest": "Тест-квест",
   "test quest chain title": "Тест-квест · 31 день",
   "test quest chain blurb": "Поднимайся 31 → 1, забирай награду каждый день",
@@ -1164,5 +1163,14 @@
   "do not ask again": "Больше не спрашивать",
   "gameplay": "Игровой процесс",
   "ask before boost upgrade": "Спрашивать перед апгрейдом буста",
-  "confirm every paid engine upgrade": "Подтверждать каждый платный апгрейд куба"
+  "confirm every paid engine upgrade": "Подтверждать каждый платный апгрейд куба",
+  "house ad badge": "От LuckyTicket365",
+  "house ad channel title": "Подпишись на канал",
+  "house ad channel description": "Турниры, дропы и обновления — первым делом в нашем Telegram-канале.",
+  "house ad channel cta": "Открыть канал",
+  "house ad invite title": "Позови друга",
+  "house ad invite description": "Получай долю с каждого билета, который заберут твои друзья.",
+  "house ad market title": "Загляни в Маркет",
+  "house ad market description": "Движки, бустеры и чипы — трать LC там, где это окупается.",
+  "reward in seconds": "Награда через {sec} с"
 }

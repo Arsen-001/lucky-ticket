@@ -195,7 +195,7 @@
   "choose your language": "Wähle deine Sprache",
   "claim": "Einlösen",
   "claim all": "Alle einlösen",
-  "claim failed": "Abholen fehlgeschlagen",
+  "claim failed": "Belohnung konnte nicht eingelöst werden",
   "claim failed description": "Server nicht erreichbar. Tippe „Wiederholen\" zum erneuten Versuchen.",
   "claim from {count} friends": "Von {count, plural, =1 {# Freund} other {# Freunden}} einlösen",
   "claim locked steps remaining": "Noch {remaining} Schritte",
@@ -803,7 +803,6 @@
   "test quest title": "Test-Quest · 31 Tage",
   "tester": "Tester",
   "task of the day": "Aufgabe des Tages",
-  "claim failed": "Belohnung konnte nicht eingelöst werden",
   "category test-quest": "Test-Quest",
   "test quest chain title": "Test-Quest · 31 Tage",
   "test quest chain blurb": "Steige 31 → 1 auf, hol dir jeden Tag eine Belohnung",
@@ -1164,5 +1163,14 @@
   "do not ask again": "Nicht mehr fragen",
   "gameplay": "Spielablauf",
   "ask before boost upgrade": "Vor Boost-Upgrade fragen",
-  "confirm every paid engine upgrade": "Jedes bezahlte Engine-Upgrade bestätigen"
+  "confirm every paid engine upgrade": "Jedes bezahlte Engine-Upgrade bestätigen",
+  "house ad badge": "Von LuckyTicket365",
+  "house ad channel title": "Folge unserem Kanal",
+  "house ad channel description": "Turniere, Drops und Updates — direkt aus unserem Telegram-Kanal.",
+  "house ad channel cta": "Kanal öffnen",
+  "house ad invite title": "Lade einen Freund ein",
+  "house ad invite description": "Verdiene an jedem Ticket, das deine Freunde einlösen.",
+  "house ad market title": "Schau in den Markt",
+  "house ad market description": "Engines, Booster und Chips — gib deine LC dort aus, wo es sich lohnt.",
+  "reward in seconds": "Belohnung in {sec}s"
 }

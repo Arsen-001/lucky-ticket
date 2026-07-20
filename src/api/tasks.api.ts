@@ -6,6 +6,7 @@ import type {
   TaskReward,
   TasksResponse,
 } from '@/types/interfaces/tasks.interfaces';
+import type { AdProviderId } from '@/lib/ads/types';
 
 /**
  * Tasks API — endpoints consumed by the Tasks page.
@@ -42,13 +43,17 @@ import type {
  *   Frontend invalidates `rtkTags.tasks` so the AdsSlider reflects the
  *   updated `watched` flag and the next unwatched slot becomes active.
  *
- *   Ad delivery: the client now plays a real Adsgram rewarded ad and only
- *   POSTs here after a genuine completion (see `src/lib/adsgram/adsgram.ts`).
- *   Until the account qualifies for Adsgram's server-to-server Reward URL the
- *   watch is client-attested. Once S2S is enabled, treat the Adsgram callback
- *   (GET ?userid=<telegramId>) as the authoritative "ad watched" signal — grant
- *   the reward there and enforce the daily cap server-side, so a spoofed POST
- *   without a matching callback grants nothing. See `DOCS/ADSGRAM_SETUP.md`.
+ *   Ad delivery: the client plays a real rewarded ad through the provider
+ *   waterfall and only POSTs here after a genuine completion (see
+ *   `src/lib/ads/`). `provider` reports which network served it — including
+ *   `house`, the app's own promo shown when every network was empty, which is
+ *   unpaid and may carry a different reward.
+ *   Until an account qualifies for a network's server-to-server reward
+ *   callback the watch is client-attested. Once S2S is enabled, treat that
+ *   callback (Adsgram: GET ?userid=<telegramId>; Monetag: postback with
+ *   `ymid`) as the authoritative "ad watched" signal — grant the reward there
+ *   and enforce the daily cap server-side, so a spoofed POST without a
+ *   matching callback grants nothing. See `DOCS/ADS_SETUP.md`.
  */
 export const tasksApi = api.injectEndpoints({
   endpoints: builder => ({
@@ -68,7 +73,13 @@ export const tasksApi = api.injectEndpoints({
         rtkTags.lcTransactions,
       ],
     }),
-    watchAd: builder.mutation<{ adId: string; rewards: TaskReward[] }, { adId: string }>({
+    watchAd: builder.mutation<
+      { adId: string; rewards: TaskReward[] },
+      // `provider` tells the backend which network served the impression —
+      // it prices a house ad differently and attributes revenue per network.
+      // Optional so an older client (or the dev mock flow) still works.
+      { adId: string; provider?: AdProviderId }
+    >({
       query: body => ({ url: 'tasks/ads/watch', method: 'POST', body }),
       invalidatesTags: [rtkTags.tasks, rtkTags.me, rtkTags.lc],
     }),

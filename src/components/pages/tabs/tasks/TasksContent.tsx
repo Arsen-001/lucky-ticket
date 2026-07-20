@@ -30,6 +30,7 @@ import { TasksCategorySection } from './TasksCategorySection';
 import { TournamentMilestoneSlider } from './TournamentMilestoneSlider';
 import { AdsSection } from './AdsSection';
 import { AdUnavailableModal, type AdUnavailableReason } from './AdUnavailableModal';
+import { HouseAdOverlay } from './HouseAdOverlay';
 import { ClaimRewardModal, type RewardModalResult } from './ClaimRewardModal';
 import { ArrivalShine } from '@/components/shared/ArrivalShine';
 
@@ -483,9 +484,10 @@ export function TasksContent() {
   const handleWatchAd = async (slot: AdSlot) => {
     triggerHaptic('medium');
 
-    // Play the real rewarded ad first. Only a genuine completion (or the
-    // no-network dev/mock fallback) records the watch and grants the reward.
-    const outcome = await showRewardedAd();
+    // Play the real rewarded ad first — the waterfall tries each configured
+    // network in turn and falls back to the house ad. Only a genuine
+    // completion (or the no-network dev/mock fallback) records the watch.
+    const { outcome, provider } = await showRewardedAd();
     if (outcome === 'skipped') {
       toast.info(t('ad not completed'));
       return;
@@ -498,7 +500,7 @@ export function TasksContent() {
     try {
       // Show what the server actually granted (not the slot's advertised reward,
       // which can differ) — and no fabricated balance (watchAd returns none).
-      const res = await watchAd({ adId: slot.id }).unwrap();
+      const res = await watchAd({ adId: slot.id, provider: provider ?? undefined }).unwrap();
       setPendingClaim({
         id: slot.id,
         open: true,
@@ -866,6 +868,10 @@ export function TasksContent() {
           <div className="h-12" />
         </div>
       )}
+
+      {/* Mounting this registers the `house` provider — the last step of the
+          rewarded-ad waterfall, so an empty network never dead-ends the task. */}
+      <HouseAdOverlay />
 
       <AdUnavailableModal
         open={adIssue.open}

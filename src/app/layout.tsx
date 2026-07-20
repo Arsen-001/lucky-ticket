@@ -30,9 +30,19 @@ export default async function RootLayout({ children }: ChildrenProps) {
       >
         <head>
           <Script src="https://telegram.org/js/telegram-web-app.js" strategy="beforeInteractive" />
-          {/* Adsgram rewarded-ad SDK — only loaded when a block id is configured. */}
+          {/* Rewarded-ad SDKs — each loads only when its network is configured,
+              so an unused network costs nothing. Order here is irrelevant; the
+              waterfall order lives in NEXT_PUBLIC_AD_PROVIDERS. */}
           {process.env.NEXT_PUBLIC_ADSGRAM_BLOCK_ID && (
             <Script src="https://sad.adsgram.ai/js/sad.min.js" strategy="afterInteractive" />
+          )}
+          {process.env.NEXT_PUBLIC_MONETAG_ZONE_ID && (
+            <Script
+              src="https://libtl.com/sdk.js"
+              data-zone={process.env.NEXT_PUBLIC_MONETAG_ZONE_ID}
+              data-sdk={`show_${process.env.NEXT_PUBLIC_MONETAG_ZONE_ID}`}
+              strategy="afterInteractive"
+            />
           )}
         </head>
         {/* The Telegram client / iOS Safari inject `ontouchstart=""` onto <body>

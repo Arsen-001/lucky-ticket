@@ -196,7 +196,7 @@
   "choose your language": "Choose your language",
   "claim": "Claim",
   "claim all": "Claim all",
-  "claim failed": "Claim failed",
+  "claim failed": "Couldn't claim reward",
   "claim failed description": "Couldn't reach the server. Tap retry to try again.",
   "claim from {count} friends": "Claim from {count, plural, =1 {# friend} other {# friends}}",
   "claim locked steps remaining": "{remaining} steps left",
@@ -804,7 +804,6 @@
   "test quest title": "Test quest · 31 days",
   "tester": "Tester",
   "task of the day": "Task of the day",
-  "claim failed": "Couldn't claim reward",
   "category test-quest": "Test Quest",
   "test quest chain title": "Test Quest · 31 days",
   "test quest chain blurb": "Climb 31 → 1, claim a reward every day",
@@ -1164,5 +1163,14 @@
   "do not ask again": "Don't ask again",
   "gameplay": "Gameplay",
   "ask before boost upgrade": "Ask before boost upgrade",
-  "confirm every paid engine upgrade": "Confirm every paid engine upgrade"
+  "confirm every paid engine upgrade": "Confirm every paid engine upgrade",
+  "house ad badge": "From LuckyTicket365",
+  "house ad channel title": "Join our channel",
+  "house ad channel description": "Tournaments, drops and updates — straight from our Telegram channel.",
+  "house ad channel cta": "Open channel",
+  "house ad invite title": "Invite a friend",
+  "house ad invite description": "Earn a share of every ticket your friends claim.",
+  "house ad market title": "Check the Market",
+  "house ad market description": "Engines, boosters and chips — spend your LC where it pays back.",
+  "reward in seconds": "Reward in {sec}s"
 }
