@@ -1,3 +1,5 @@
+import { routes, type Route } from '@/constants/routes';
+
 /**
  * Test-Quest ladder — the 31-day launch quest ("Тестировщик 31 → 1").
  *
@@ -238,3 +240,75 @@ export const testQuestLadder: TestQuestLevel[] = [
     zone: 'crown',
   },
 ];
+
+/**
+ * One actionable step toward completing a level's task, shown in the checklist
+ * under the slider on the Test-Quest screen. A step with `detail` or `subSteps`
+ * renders as an expandable dropdown; a plain step is a single row with an
+ * optional "go there" deep-link.
+ */
+export interface TestQuestStep {
+  /** Short imperative line, e.g. "Посмотри 3 рекламы". */
+  text: string;
+  /** Where the action is performed — rendered as a "Перейти" deep-link. */
+  href?: Route;
+  /** Optional how-to line; its presence turns the row into a dropdown. */
+  detail?: string;
+  /** Optional sub-checklist; its presence turns the row into a dropdown. */
+  subSteps?: string[];
+}
+
+// Keyword → the screen where that action is performed. First match wins.
+const STEP_HREF_RULES: { match: RegExp; href: Route }[] = [
+  { match: /реклам/i, href: routes.tasks },
+  { match: /(пригласи|друг|рефер)/i, href: routes.inviteFriends },
+  { match: /стейк/i, href: routes.stakes.index },
+  { match: /турнир/i, href: routes.tournaments.index },
+  { match: /билет/i, href: routes.tickets.index },
+  { match: /(движ|двигател|апгрейд)/i, href: routes.market() },
+  { match: /почт/i, href: routes.settings.email },
+  { match: /(профил|лайк)/i, href: routes.profile.index },
+  { match: /(звёзд|звезд|stars)/i, href: routes.stars },
+  { match: /(silver|gold|platinum|diamond|vip|статус)/i, href: routes.settings.vip },
+];
+
+const hrefForStep = (text: string): Route | undefined =>
+  STEP_HREF_RULES.find(r => r.match.test(text))?.href;
+
+// A few levels get an authored, multi-step breakdown (to showcase dropdowns);
+// every other level is derived by splitting its one-line task (see resolver).
+const TEST_QUEST_STEP_OVERRIDES: Record<number, TestQuestStep[]> = {
+  24: [
+    {
+      text: 'Открой смену почты',
+      href: routes.settings.email,
+      detail: 'Профиль → Настройки → Почта.',
+    },
+    {
+      text: 'Подтверди адрес кодом',
+      detail: 'На новый адрес придёт код из 6 символов — введи его в течение 15 минут.',
+    },
+  ],
+  21: [
+    {
+      text: 'Открой первый стейк',
+      href: routes.stakes.new,
+      subSteps: ['Стейки → «Новый»', 'Выбери сумму LC и срок', 'Подтверди — AP начислится сразу'],
+    },
+  ],
+};
+
+/**
+ * Resolve the checklist for a level. Prefers an authored override; otherwise
+ * splits the one-line `task` into steps on " · " / " + " and attaches a
+ * deep-link by keyword. Front-end prototype until the backend ships real steps.
+ */
+export const resolveTestQuestSteps = (level: number, task: string): TestQuestStep[] => {
+  const override = TEST_QUEST_STEP_OVERRIDES[level];
+  if (override) return override;
+  return task
+    .split(/\s*[·+]\s*/)
+    .map(s => s.trim())
+    .filter(Boolean)
+    .map(text => ({ text, href: hrefForStep(text) }));
+};

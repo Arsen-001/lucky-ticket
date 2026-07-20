@@ -6,8 +6,11 @@ import { HomeTestQuestCard } from '@/components/pages/tabs/home/HomeTestQuestCar
 export default function HomePage() {
   return (
     <div className="flex flex-col gap-5 pt-3 pb-6">
-      <HomeJackpotBanner />
-      <HomeTestQuestCard />
+      <section className="flex items-stretch gap-3 px-4">
+        <HomeJackpotBanner />
+        <HomeTestQuestCard />
+      </section>
+
       <HomeUpcomingTournaments />
 
       <section className="flex flex-col gap-2">

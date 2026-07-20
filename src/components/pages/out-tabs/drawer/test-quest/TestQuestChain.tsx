@@ -5,11 +5,11 @@ import { Check, Clock3, Crown, FlaskConical, Gift, Lock, Target } from 'lucide-r
 import { twMerge } from 'tailwind-merge';
 import { useAppTranslations } from '@/hooks/useAppTranslations';
 import { useToast } from '@/hooks/useToast';
-import { Button } from '@/components/shared/buttons/Button';
 import { useClaimTestQuestLevelMutation, useGetTestQuestQuery } from '@/api/testQuest.api';
 import { TEST_QUEST_START_LEVEL, testQuestLadder } from '@/constants/testQuest.constants';
 import { TestQuestLeaderboard } from './TestQuestLeaderboard';
 import { TestQuestBadge } from './TestQuestBadge';
+import { TestQuestSteps } from './TestQuestSteps';
 
 type LevelKind = 'claimed' | 'ready' | 'waiting' | 'locked' | 'crown';
 
@@ -134,6 +134,10 @@ export function TestQuestChain({ className }: TestQuestChainProps) {
       toast.error(t('claim failed'));
     }
   };
+
+  // The centred card drives the checklist panel below the slider.
+  const activeCard = cards[Math.min(activeIndex, cards.length - 1)];
+  const activeKind = activeCard ? kindOf(activeCard.level, activeCard.crown) : 'locked';
 
   return (
     <section className={twMerge('flex flex-col gap-2 px-4 pt-4', className)}>
@@ -298,19 +302,12 @@ export function TestQuestChain({ className }: TestQuestChainProps) {
                   </p>
                 </div>
 
-                {/* CTA — per-state action / status pill */}
+                {/* Status pill — the claim action lives in the checklist below */}
                 {kind === 'ready' && (
-                  <Button
-                    className="flex-center w-full gap-1 rounded-xl py-2 text-xs font-bold animate-task-pulse"
-                    loading={claiming}
-                    onClick={e => {
-                      e.stopPropagation();
-                      handleClaim();
-                    }}
-                  >
-                    <Gift size={12} />
-                    {t('claim')}
-                  </Button>
+                  <div className="flex-center w-full gap-1 rounded-xl bg-electric-pink/15 py-1.5 text-[10px] font-bold uppercase tracking-wider text-electric-pink">
+                    <Gift size={11} />
+                    {t('ready to claim')}
+                  </div>
                 )}
                 {kind === 'waiting' && (
                   <div className="flex-center w-full gap-1 rounded-xl bg-white/5 py-1.5 text-[10px] font-bold uppercase tracking-wider text-white/50">
@@ -346,6 +343,17 @@ export function TestQuestChain({ className }: TestQuestChainProps) {
           );
         })}
       </div>
+
+      {activeCard && (
+        <TestQuestSteps
+          level={activeCard.level}
+          task={activeCard.task}
+          claimed={activeKind === 'claimed'}
+          ready={activeKind === 'ready'}
+          claiming={claiming}
+          onClaim={handleClaim}
+        />
+      )}
 
       <TestQuestLeaderboard />
     </section>
