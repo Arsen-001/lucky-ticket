@@ -164,8 +164,32 @@ grant, no cap consumed — just reports the expected reward for the claim modal)
 so a spoofed POST with no matching callback grants nothing. The callback does
 **not** fire in debug mode.
 
-**Monetag.** Same shape, keyed by `ymid` (the Telegram user id the provider
-sends). Not wired yet — see the checklist.
+**Monetag.** Set `MONETAG_REWARD_SECRET` in the backend env, then configure
+this as the zone's postback URL in the Monetag dashboard:
+
+```
+https://<your-backend>/tasks/ads/monetag/reward?key=<MONETAG_REWARD_SECRET>&ymid={ymid}&telegram_id={telegram_id}&event_type={event_type}&reward_event_type={reward_event_type}
+```
+
+`TasksService.rewardFromMonetag` mirrors the Adsgram endpoint (public,
+secret-guarded, idempotent, cap-aware, acks unknown users with 200) with two
+Monetag-specific rules:
+
+- Monetag posts back for **clicks as well as impressions**, so only
+  `event_type=impression` grants — otherwise one view could pay twice.
+- A `non_valued` (unmonetized) event still rewards the player. They watched the
+  ad; whether the impression was paid is our problem, not theirs.
+
+The client mints a unique `ymid` per view (`<telegramId>.<unique>`), which is
+both the idempotency key and the attribution fallback when the `{telegram_id}`
+macro arrives empty. Reusing one id would make every view after the first look
+like a retry.
+
+**Order matters when enabling:** configure the postback URL in Monetag FIRST,
+then set `MONETAG_REWARD_SECRET`. The moment the secret exists, `watchAd` stops
+granting for Monetag views and waits for the callback — if the URL isn't set
+yet, players watch ads for nothing. Each provider's switch is independent:
+enabling Adsgram's callback does not affect Monetag or the house ad.
 
 ---
 
@@ -186,15 +210,28 @@ sends). Not wired yet — see the checklist.
 
 ### Monetag
 
-- [ ] Publisher account registered (country = Armenia, not the default Andorra)
-- [ ] Rewarded Interstitial zone created, zone id copied
-- [ ] `NEXT_PUBLIC_MONETAG_ZONE_ID` set (local + Vercel production)
-- [ ] S2S postback endpoint implemented on the backend and configured in Monetag
+- [x] Publisher account registered (country = Armenia, not the default Andorra)
+- [x] Mini App added as a property; SDK tag generated (`< > Get SDK` on the
+      **Telegram Mini Apps** tab — there is no separate "create zone" step)
+- [x] `NEXT_PUBLIC_MONETAG_ZONE_ID=11355872` set (local + Vercel production)
+- [x] Verified live in the real Mini App: Adsgram returned no fill, Monetag
+      served a real rewarded video
+- [x] S2S postback endpoint implemented (`GET /tasks/ads/monetag/reward`)
+- [ ] Postback URL configured on the zone in the Monetag dashboard
+- [ ] `MONETAG_REWARD_SECRET` set in Railway → Variables (only AFTER the URL is
+      configured — see the order note above)
+- [ ] Property URL switched from the bot link to the Mini App direct link
+      (`https://t.me/LuckyTicket365_Bot/lottery`)
 
 ### House ad
 
 - [x] `HouseAdOverlay` mounted in Tasks; promos + duration in
       `src/constants/house-ads.constants.ts`
 - [x] Daily cap shared with network ads (server-side)
-- [ ] Decide whether a house impression should reward less than a paid one
-      (currently identical) — backend-side, keyed off `provider: 'house'`
+- [x] Reward parity with a paid view — deliberate. The daily cap (10/20/40)
+      already bounds it, and the economy's AP baseline assumes a full day of ad
+      views (`dailyBaselineApByTier` sums `watchVideo * watchVideoDailyLimit`).
+      Paying less for a house view would quietly cut the baseline every time
+      fill drops, i.e. punish the player for our lack of demand. Revisit only
+      if house views ever dominate the mix — `provider: 'house'` is recorded on
+      every watch, so the split is measurable.

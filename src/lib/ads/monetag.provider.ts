@@ -41,10 +41,24 @@ function getShowFn(): MonetagShow | null {
   return typeof fn === 'function' ? (fn as MonetagShow) : null;
 }
 
-/** Telegram user id, used as Monetag's `ymid` so the postback can attribute it. */
-function getYmid(): string | undefined {
+// Distinguishes two views inside the same millisecond.
+let viewCounter = 0;
+
+/**
+ * Monetag's `ymid`, echoed back in the S2S postback: `<telegramId>.<unique>`.
+ *
+ * Monetag asks for a UNIQUE value per ad event, and the backend uses it as the
+ * idempotency key — reusing one id would make every view after the first look
+ * like a retry and silently drop the reward. The telegram id stays as a prefix
+ * so the backend can still attribute the view if the `{telegram_id}` macro
+ * arrives empty.
+ */
+function nextYmid(): string | undefined {
   const id = window.Telegram?.WebApp?.initDataUnsafe?.user?.id;
-  return id ? String(id) : undefined;
+  if (!id) return undefined;
+  const seq = viewCounter;
+  viewCounter = seq + 1;
+  return `${id}.${Date.now().toString(36)}${seq.toString(36)}`;
 }
 
 async function show(): Promise<Exclude<RewardedAdOutcome, 'unavailable'>> {
@@ -54,7 +68,7 @@ async function show(): Promise<Exclude<RewardedAdOutcome, 'unavailable'>> {
 
   const startedAt = performance.now();
   try {
-    await showAd({ ymid: getYmid() });
+    await showAd({ ymid: nextYmid() });
     return 'completed';
   } catch {
     // The SDK rejects without a reason code; see NO_FILL_REJECT_MS.
@@ -64,8 +78,9 @@ async function show(): Promise<Exclude<RewardedAdOutcome, 'unavailable'>> {
 
 function preload(): void {
   const showAd = getShowFn();
-  // Fire-and-forget: a failed warm-up must not surface anywhere.
-  void showAd?.({ type: 'preload', ymid: getYmid() }).catch(() => {});
+  // Fire-and-forget: a failed warm-up must not surface anywhere. No ymid — a
+  // warm-up is not a view, and minting an id here would burn one.
+  void showAd?.({ type: 'preload' }).catch(() => {});
 }
 
 export const monetagProvider: AdProvider = {
