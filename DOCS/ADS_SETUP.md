@@ -109,8 +109,9 @@ Gotchas learned the hard way:
 
 1. Register at <https://monetag.com> (publisher). Country must match reality —
    it drives payout methods and is checked against payment details.
-2. Add the Telegram Mini App as a property (needs the direct link from
-   BotFather). **No moderation gate and no minimum DAU.**
+2. **Telegram Mini Apps** tab → **Add app**. **No moderation gate and no
+   minimum DAU.** Monetag keys the app off the bot name plus its own id — it
+   stores no URL, so nothing here needs to match the deployed origin.
 3. Create a zone of type **Rewarded Interstitial** and copy the **zone id** from
    _Getting SDK tag_.
 
@@ -252,8 +253,10 @@ enabling Adsgram's callback does not affect Monetag or the house ad.
 - [x] End-to-end verified in the real Mini App (2026-07-20): ad watched, AP
       credited. With the secret set, `watchAd` no longer grants for Monetag —
       so the AP arriving proves the callback fired and `ymid` attribution works
-- [ ] Property URL switched from the bot link to the Mini App direct link
-      (`https://t.me/LuckyTicket365_Bot/lottery`)
+- [x] N/A — Monetag stores no property URL. An app is identified by its bot
+      name and Monetag's own id (`3416586`); the dashboard offers no URL field
+      and no edit action. Unlike Adsgram, there is nothing to match against the
+      running origin, so a wrong link cannot break serving here.
 
 ### House ad
 
