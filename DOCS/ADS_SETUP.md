@@ -219,10 +219,16 @@ Monetag-specific rules:
 
 - Monetag posts back for **clicks as well as impressions**, so only
   `event_type=impression` grants — otherwise one view could pay twice.
-- `reward_event_type` (`yes`/`no` — was the impression paid) is deliberately
-  not checked. The player watched the ad; whether we got paid is our problem,
-  not theirs. NB: Monetag's own docs call these values `valued`/`non_valued`,
-  but the dashboard's macro reference says `yes`/`no` — trust the dashboard.
+- `reward_event_type` (`valued` / `non_valued` — was the impression paid) is
+  deliberately not checked. The player watched the ad; whether we got paid is
+  our problem, not theirs. NB: the dashboard's macro hint claims the values are
+  `yes`/`no`. Live postbacks send `valued` — the docs are right, the hint is
+  wrong.
+
+**Event order, observed in production:** Monetag fires the postback when the ad
+_renders_, and the client reports its finished view ~18s later. So a `callback`
+row normally precedes its `client` row — a trailing `ad watch` line with no
+postback after it is the tail of an already-paired view, not a lost reward.
 
 The client mints a unique `ymid` per view (`<telegramId>.<unique>`), which is
 both the idempotency key and the attribution fallback when the `{telegram_id}`
