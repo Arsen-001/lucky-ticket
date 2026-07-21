@@ -19,11 +19,19 @@ import '@/styles/index.css';
  * (see `src/lib/ads/index.ts`). Read here too so dropping a network from that
  * list also stops its SDK from loading: otherwise a disabled network keeps
  * costing every page load a third-party script that is never called.
+ *
+ * Parsed once at module level — the value is fixed for the process, so there
+ * is no reason to re-split it on every render.
  */
-function isProviderEnabled(id: string): boolean {
+const ENABLED_AD_PROVIDERS: Set<string> | null = (() => {
   const raw = process.env.NEXT_PUBLIC_AD_PROVIDERS?.trim();
-  if (!raw) return true; // unset → default order, every configured network runs
-  return raw.split(',').some(part => part.trim() === id);
+  // Unset → default order, every configured network runs.
+  if (!raw) return null;
+  return new Set(raw.split(',').map(part => part.trim()));
+})();
+
+function isProviderEnabled(id: string): boolean {
+  return ENABLED_AD_PROVIDERS === null || ENABLED_AD_PROVIDERS.has(id);
 }
 
 export default async function RootLayout({ children }: ChildrenProps) {
