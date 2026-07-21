@@ -5,23 +5,22 @@ import { Link } from '@/components/shared/links/Link';
 import { LcLabel } from '@/components/shared/icons/LcLabel';
 import { Skeleton } from '@/components/shared/seleketons/Skeleton';
 import { SkeletonSuspense } from '@/components/shared/seleketons/SkeletonSuspense';
-import { JackpotOdometer } from '@/components/pages/tabs/home/JackpotOdometer';
 import { useGetJackpotQuery } from '@/api/jackpot.api';
 import { useAppTranslations } from '@/hooks/useAppTranslations';
 import { formatNumber } from '@/utils/global/number.utils';
 import { routes } from '@/constants/routes';
 import '@/styles/components/jackpot.css';
-import '@/styles/components/jackpot-odometer.css';
 
 /**
- * Compact jackpot chip at the top of Home — a small brushed-platinum ring over
- * a glassmorphic inner with a cool electric-pink bloom; tiny JACKPOT wordmark
- * stacked over the slot-machine digit reels (JackpotOdometer) and a small gold
- * LC coin beside them (the only gold accent). Sits shrink-to-content next to
- * the wider Test-Quest card and links to the jackpot page.
+ * Compact jackpot chip at the top of Home — a sibling of the Test-Quest card in
+ * the app's own card language (rounded-3xl, electric-purple→pink gradient,
+ * electric-pink hairline border). The gold LC coin is the only gold accent, per
+ * the design rule. A small JACKPOT caption sits over the live pot number, which
+ * ticks up as the server value grows (with a "+X" pop). Shrink-to-content, so
+ * it stays small beside the wider Test-Quest card, and links to the jackpot page.
  * The pot only grows when a tournament finishes (its 10% skim), so there is NO
- * fake creep: the query polls and the reels roll (with a "+X" pop) only when
- * the server value actually increased. Never rolls backwards.
+ * fake creep: the query polls and the number moves only when the server value
+ * actually increased. Never rolls backwards.
  */
 export function HomeJackpotBanner() {
   const t = useAppTranslations();
@@ -34,7 +33,7 @@ export function HomeJackpotBanner() {
   const targetRef = useRef(0);
 
   // Chase the real server pot: first load snaps into place, a later increase
-  // rolls the reels and pops the actual "+skim".
+  // ticks the number and pops the actual "+skim".
   useEffect(() => {
     const pot = jackpot?.pot ?? 0;
     if (pot <= targetRef.current) return;
@@ -45,7 +44,7 @@ export function HomeJackpotBanner() {
     else setDisplay(pot);
   }, [jackpot?.pot]);
 
-  // Discrete steps toward the target — each one visibly rolls the reels.
+  // Discrete steps toward the target — each one visibly advances the counter.
   useEffect(() => {
     const id = window.setInterval(() => {
       setDisplay(prev => {
@@ -61,39 +60,34 @@ export function HomeJackpotBanner() {
     <Link
       href={routes.jackpot}
       aria-label={t('jackpot')}
-      className="jackpot-capsule relative flex shrink-0 rounded-2xl p-[3px] transition-transform active:scale-[0.98]"
+      className="relative flex shrink-0 flex-col items-center justify-center gap-1 overflow-hidden rounded-3xl border border-electric-pink/30 bg-gradient-to-br from-electric-purple/20 to-electric-pink/10 px-3.5 py-2 transition-transform active:scale-[0.98]"
     >
-      <span className="jackpot-capsule-glass relative flex flex-1 flex-col items-center justify-center gap-0.5 rounded-[13px] px-2.5 py-1.5">
-        <span aria-hidden className="jackpot-plaque-shine" />
-
-        <span className="jackpot-title text-[7px] font-black uppercase leading-none tracking-[0.14em]">
-          {t('jackpot')}
-        </span>
-
-        <SkeletonSuspense
-          loading={isLoading}
-          skeleton={<Skeleton variant="line" className="h-4 w-16" />}
-        >
-          <span className="relative flex items-center justify-center gap-1">
-            <JackpotOdometer
-              value={display}
-              className="jackpot-glow text-[15px] font-extrabold leading-none text-white"
-            />
-            <span className="jackpot-coin flex-center h-[18px] w-[18px] shrink-0 rounded-full">
-              <LcLabel size={11} />
-            </span>
-            {pop && (
-              <span
-                key={pop.key}
-                aria-hidden
-                className="jackpot-pop text-electric-pink absolute -top-1 left-1/2 text-[11px] font-extrabold tabular-nums"
-              >
-                +{formatNumber(pop.amount)}
-              </span>
-            )}
-          </span>
-        </SkeletonSuspense>
+      <span className="text-[8px] font-black uppercase leading-none tracking-[0.16em] text-white/60">
+        {t('jackpot')}
       </span>
+
+      <SkeletonSuspense
+        loading={isLoading}
+        skeleton={<Skeleton variant="line" className="h-4 w-16" />}
+      >
+        <span className="relative flex items-center gap-1.5">
+          <span className="flex-center h-5 w-5 shrink-0 rounded-full bg-white/10">
+            <LcLabel size={12} />
+          </span>
+          <span className="text-[15px] font-extrabold leading-none tabular-nums text-white">
+            {formatNumber(display)}
+          </span>
+          {pop && (
+            <span
+              key={pop.key}
+              aria-hidden
+              className="jackpot-pop text-electric-pink absolute -top-3 left-1/2 text-[11px] font-extrabold tabular-nums"
+            >
+              +{formatNumber(pop.amount)}
+            </span>
+          )}
+        </span>
+      </SkeletonSuspense>
     </Link>
   );
 }
