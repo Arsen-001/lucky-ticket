@@ -26,6 +26,38 @@ networks as a waterfall** plus its own promo as the final fallback.
 Verified end-to-end in the real Mini App: ad served → network callback → AP
 credited → row stored → visible in the panel.
 
+### Correction, 2026-07-21 — Adsgram was never dead
+
+On 20 Jul this doc said Adsgram "has never filled a single request" and it was
+removed from the waterfall. **That was wrong.** Its own dashboard showed 50
+impressions and $0.21 earned over 14–21 Jul — it had been serving real players
+in Telegram the whole time.
+
+The false conclusion came from two indirect observations: a `curl` from a
+laptop (outside Telegram, so of course no fill) and a single live test in which
+Monetag happened to answer first. Neither is evidence about a week of traffic.
+**The network's own dashboard was never opened.**
+
+Measured CPM over the same window: **Adsgram ≈ $4.20**, Monetag **$1.43** — so
+Adsgram is now first. Treat the 3× gap as unconfirmed: 50 impressions from one
+or two viewers, and 2 clicks that may account for most of the $0.21.
+
+**Rule this cost us:** never conclude "no fill" — or switch off any revenue
+source — from a snapshot or a proxy. Open the network's panel and look at a
+period.
+
+### Per-viewer diminishing returns
+
+Repeat views by the same person are worth progressively less: advertisers
+frequency-cap their campaigns, so the expensive demand for that viewer is
+exhausted and later impressions are filled with cheap or unpaid
+(`non_valued`) inventory. Visible in Monetag's own numbers — 20 Jul: 25 views
+at $1.58 CPM; 21 Jul: 3 views at $0.00.
+
+Consequence: **no per-network conclusion is trustworthy until impressions come
+from hundreds of different people.** Everything measured so far is essentially
+one viewer.
+
 ## Decisions, and why
 
 - **Several networks, not one.** A single network is a single point of failure
@@ -51,9 +83,8 @@ credited → row stored → visible in the panel.
 
 ## Not done / open
 
-- **Adsgram** — out of rotation. To retry: set
-  `NEXT_PUBLIC_AD_PROVIDERS=adsgram,monetag,house` (or put it second, so it is
-  only asked when Monetag is empty) and watch `AdView.provider` for a week.
+- **Re-measure the network comparison** once traffic is real. Today's ranking
+  rests on ~78 impressions from one or two viewers.
 - **GigaPub** as a third source — an auction across networks, worth a
   conversation once traffic justifies it. No account, no integration yet.
 - **Per-day chart** in the admin section — only totals over 30 days today.

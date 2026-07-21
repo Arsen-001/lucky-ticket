@@ -1104,8 +1104,8 @@ The **Ads** category in the **One-time** tasks tab holds a single task type — 
 
 **Where the ads come from (waterfall).** The app is not tied to one ad network. A view is served by the first source that has inventory, tried in order:
 
-1. **Monetag** — the paid network currently carrying all inventory.
-2. **Adsgram** — integrated but **out of the rotation** (its block is live yet has never filled). Re-enabled by editing one env variable, no code change.
+1. **Adsgram** — first, as it measured the higher revenue per view.
+2. **Monetag** — takes the view whenever Adsgram has nothing to serve.
 3. **House ad** — the app's own promo (channel / invite / Market), shown when every network is empty. It earns nothing but keeps the task working, so "watch an ad" never dead-ends on a "no ads right now" modal.
 
 Exactly one ad plays per tap. The next source is asked only if the previous returned nothing; if the player closes an ad themselves, the chain stops and no reward is granted — otherwise closing an ad would become a second chance at one.
