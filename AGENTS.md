@@ -436,6 +436,55 @@ Run `type-check` before committing non-trivial changes.
 
 ---
 
+## Evidence Rules (earned the hard way)
+
+These exist because confident, wrong advice cost real money and a day of work.
+They are about **how conclusions are stated and acted on**, not about code
+style.
+
+**Label every claim.** Say which it is:
+
+- **verified** — and by what exactly ("their dashboard shows 50 impressions")
+- **inferred** — a conclusion from indirect signals
+- **guess** — say so plainly; a guess must never be phrased like a fact
+
+**Before any advice that changes production, state what was NOT checked.**
+"I did not open the network's panel" is the sentence that prevents the whole
+class of mistakes below.
+
+**A proxy is not evidence about someone else's system.** `curl` from a laptop,
+local logs, this file, previous session memory, and mock data are all proxies.
+For anything living in a third-party system — an ad network, a payment
+provider, Telegram — open its own panel (the Chrome extension can read the
+user's logged-in dashboards) or ask the user for the numbers.
+
+**Never switch off something that works from a snapshot.** A revenue source, an
+integration, a feature: require a time series, not one observation. Prefer
+adding a fallback over removing a source — the cost is asymmetric. Keeping an
+unused provider in a waterfall is nearly free; removing a paying one guarantees
+zero.
+
+**State the sample size with any money or performance conclusion**, and draw
+none from a handful of events by one or two people. Ad networks in particular
+frequency-cap per viewer, so repeat views by the same person are worth
+progressively less and make small samples actively misleading.
+
+**Verify UI on production data, not mocks.** Mock fixtures are authored to look
+right, so they validate nothing. Metrics that can only grow, empty rows that
+vanish, and rounding that hides real values all survive mocks and die instantly
+on real numbers.
+
+**Memory and docs go stale.** A recorded fact is a point-in-time observation. If
+a decision depends on it, re-verify it first — especially anything about an
+external service's state.
+
+> Worked example: Adsgram was declared "never fills" and removed from the ad
+> waterfall on the strength of one `curl` outside Telegram and a single live
+> test. Its own dashboard showed a week of impressions and the highest revenue
+> per view of any network. See `DOCS/ADS_SETUP.md`.
+
+---
+
 ## Business Logic Documentation
 
 Full product and business logic documentation is located in [`documentation.md`](DOCS/DOCS.md). It covers all platform systems: tickets, tournaments, tasks, stakes, leaderboard, market, wallet, statuses, Telegram Stars, and referral mechanics.
