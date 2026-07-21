@@ -126,4 +126,8 @@ export const referralMock = {
   'referral/friends': invitedFriendsMock,
   'referral/stats': referralStatsMock,
   'POST referral/prepare-share': preparedShareMessageMock,
+  'POST referral/shared': () => {
+    console.log('[mock] referral/shared — player sent a referral share');
+    return { ok: true };
+  },
 };

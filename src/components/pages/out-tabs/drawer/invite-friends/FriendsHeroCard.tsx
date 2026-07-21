@@ -7,7 +7,11 @@ import { useState } from 'react';
 import { twMerge } from 'tailwind-merge';
 import { useLocale } from 'next-intl';
 import { useGetMeQuery } from '@/api/me.api';
-import { useGetReferralStatsQuery, usePrepareShareMessageMutation } from '@/api/referral.api';
+import {
+  useGetReferralStatsQuery,
+  useMarkShareSentMutation,
+  usePrepareShareMessageMutation,
+} from '@/api/referral.api';
 import { Button } from '@/components/shared/buttons/Button';
 import { Skeleton } from '@/components/shared/seleketons/Skeleton';
 import { SkeletonSuspense } from '@/components/shared/seleketons/SkeletonSuspense';
@@ -25,6 +29,7 @@ export function FriendsHeroCard() {
   const { data: me, isLoading: isMeLoading } = useGetMeQuery();
   const { data: stats, isLoading: isStatsLoading } = useGetReferralStatsQuery();
   const [prepareShareMessage] = usePrepareShareMessageMutation();
+  const [markShareSent] = useMarkShareSentMutation();
   const rewards = useInviteRewards();
   const [copied, setCopied] = useState(false);
 
@@ -55,7 +60,11 @@ export function FriendsHeroCard() {
       if (webApp.shareMessage) {
         try {
           const { id } = await prepareShareMessage({ lang: locale }).unwrap();
-          webApp.shareMessage(id);
+          // The callback fires with sent=true only if the user actually forwarded
+          // the card — that's the reliable "did they share" signal.
+          webApp.shareMessage(id, sent => {
+            if (sent) markShareSent({ confirmed: true });
+          });
           return;
         } catch {
           /* fall back to the plain t.me/share/url flow */
@@ -68,6 +77,8 @@ export function FriendsHeroCard() {
         webApp.openTelegramLink(
           `https://t.me/share/url?url=${encodeURIComponent(link)}&text=${encodeURIComponent(text)}`
         );
+        // This path gives no delivery callback — record optimistically.
+        markShareSent({ confirmed: false });
         return;
       }
     }
@@ -76,6 +87,7 @@ export function FriendsHeroCard() {
     if (typeof navigator !== 'undefined' && navigator.share) {
       try {
         await navigator.share({ url: link, title: t('invite friends'), text });
+        markShareSent({ confirmed: true });
         return;
       } catch {
         /* user cancelled */

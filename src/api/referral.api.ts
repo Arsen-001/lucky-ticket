@@ -26,6 +26,18 @@ export const referralApi = api.injectEndpoints({
         body: { lang },
       }),
     }),
+    // Records that the user actually SENT a referral share (not just opened the
+    // picker). `confirmed` = Telegram `shareMessage` reported sent=true (or the
+    // OS share sheet resolved); false = optimistic, from a fallback path that
+    // gives no delivery signal. Fire-and-forget — served by POST /referral/shared on the backend.
+    markShareSent: builder.mutation<{ ok: boolean }, { confirmed: boolean }>({
+      query: ({ confirmed }) => ({
+        url: 'referral/shared',
+        method: 'POST',
+        body: { confirmed },
+      }),
+      invalidatesTags: [rtkTags.referral],
+    }),
     claimFriend: builder.mutation<void, { friendId: string }>({
       query: ({ friendId }) => ({
         url: `referral/claim/${friendId}`,
@@ -56,4 +68,5 @@ export const {
   useGetReferralStatsQuery,
   useClaimFriendMutation,
   usePrepareShareMessageMutation,
+  useMarkShareSentMutation,
 } = referralApi;
