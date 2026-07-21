@@ -37,20 +37,20 @@ export function TestQuestSteps({
   if (!steps.length) return null;
 
   return (
-    <div className="flex flex-col gap-2 rounded-2xl border border-white/10 bg-background-overlay p-3">
+    <div className="flex flex-col gap-1.5 rounded-2xl border border-white/10 bg-background-overlay p-2.5">
       <div className="flex items-center gap-2">
-        <div className="flex-center h-7 w-7 rounded-lg bg-gradient-to-br from-electric-pink to-electric-purple shadow-md shadow-black/30">
-          <ListChecks size={14} className="text-white" />
+        <div className="flex-center h-6 w-6 rounded-lg bg-gradient-to-br from-electric-pink to-electric-purple shadow-md shadow-black/30">
+          <ListChecks size={13} className="text-white" />
         </div>
         <div className="min-w-0 flex-1">
-          <h3 className="text-sm font-extrabold leading-tight">
+          <h3 className="text-[13px] font-extrabold leading-tight">
             {t('steps for level {level}', { level })}
           </h3>
-          <p className="line-clamp-1 text-[11px] text-pink-secondary">{t('steps blurb')}</p>
+          <p className="line-clamp-1 text-[10px] text-pink-secondary">{t('steps blurb')}</p>
         </div>
       </div>
 
-      <div className="flex flex-col gap-1.5">
+      <div className="flex flex-col gap-1">
         {steps.map((step, i) => (
           <TestQuestStepRow key={i} step={step} done={claimed} />
         ))}
@@ -58,7 +58,7 @@ export function TestQuestSteps({
 
       {ready && (
         <Button
-          className="flex-center animate-task-pulse mt-1 w-full gap-1.5 rounded-xl py-2.5 text-sm font-bold"
+          className="flex-center animate-task-pulse mt-0.5 w-full gap-1.5 rounded-xl py-2 text-[13px] font-bold"
           loading={claiming}
           onClick={onClaim}
         >

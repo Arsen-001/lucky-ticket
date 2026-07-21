@@ -13,7 +13,7 @@ import { TestQuestSteps } from './TestQuestSteps';
 
 type LevelKind = 'claimed' | 'ready' | 'waiting' | 'locked' | 'crown';
 
-const SLIDE_WIDTH = 178;
+const SLIDE_WIDTH = 256;
 // Centering padding so the first / last card can sit dead-centre. The scroller
 // bleeds to the app column edges (-mx-4), so its width is the app column width.
 const CENTER_PAD = `max(20px, calc((min(100vw, var(--app-max-w)) - ${SLIDE_WIDTH}px) / 2))`;
@@ -213,7 +213,7 @@ export function TestQuestChain({ className }: TestQuestChainProps) {
             >
               <div
                 className={twMerge(
-                  'flex h-full min-h-[224px] flex-col gap-2.5 rounded-2xl border bg-background-overlay p-3.5',
+                  'flex h-full min-h-[288px] flex-col gap-3 rounded-2xl border bg-background-overlay p-4',
                   kind === 'ready' && 'border-electric-pink/50 shadow-lg shadow-electric-purple/20',
                   kind === 'waiting' && 'border-white/10',
                   kind === 'claimed' && 'border-success/25',
@@ -227,7 +227,7 @@ export function TestQuestChain({ className }: TestQuestChainProps) {
                   <div>
                     <div
                       className={twMerge(
-                        'text-[9px] font-bold uppercase tracking-[0.18em]',
+                        'text-[10px] font-bold uppercase tracking-[0.18em]',
                         isCrown ? 'text-gold/80' : 'text-white/45'
                       )}
                     >
@@ -235,7 +235,7 @@ export function TestQuestChain({ className }: TestQuestChainProps) {
                     </div>
                     <div
                       className={twMerge(
-                        'bg-clip-text text-[40px] font-extrabold leading-none tabular-nums text-transparent',
+                        'bg-clip-text text-[54px] font-extrabold leading-none tabular-nums text-transparent',
                         isCrown
                           ? 'bg-gradient-to-br from-warning to-gold'
                           : 'bg-gradient-to-br from-electric-pink to-electric-purple'
@@ -277,11 +277,11 @@ export function TestQuestChain({ className }: TestQuestChainProps) {
                       : 'border-white/[0.07] bg-white/[0.04]'
                   )}
                 >
-                  <div className="flex items-center gap-1 text-[8.5px] font-bold uppercase tracking-wider text-white/40">
+                  <div className="flex items-center gap-1 text-[10px] font-bold uppercase tracking-wider text-white/40">
                     <Gift size={9} className={isCrown ? 'text-gold' : 'text-electric-pink'} />
                     {t('reward')}
                   </div>
-                  <p className="mt-1 line-clamp-2 text-[11px] font-semibold leading-snug tabular-nums text-white/90">
+                  <p className="mt-1 line-clamp-2 text-[12.5px] font-semibold leading-snug tabular-nums text-white/90">
                     {card.drop}
                   </p>
                 </div>
@@ -290,14 +290,14 @@ export function TestQuestChain({ className }: TestQuestChainProps) {
                 <div className="mt-auto flex flex-col gap-1">
                   <div
                     className={twMerge(
-                      'flex items-center gap-1 text-[8.5px] font-bold uppercase tracking-wider',
+                      'flex items-center gap-1 text-[10px] font-bold uppercase tracking-wider',
                       isCrown ? 'text-gold/70' : 'text-electric-pink/70'
                     )}
                   >
                     <Target size={9} />
                     {isCrown ? t('crown condition') : t('to advance')}
                   </div>
-                  <p className="line-clamp-2 text-[11px] font-medium leading-snug text-white/70">
+                  <p className="line-clamp-2 text-[12.5px] font-medium leading-snug text-white/70">
                     {card.task}
                   </p>
                 </div>

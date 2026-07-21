@@ -1,5 +1,3 @@
-import { routes, type Route } from '@/constants/routes';
-
 /**
  * Test-Quest ladder — the 31-day launch quest ("Тестировщик 31 → 1").
  *
@@ -30,42 +28,42 @@ export interface TestQuestLevel {
 export const TEST_QUEST_TOTAL_LEVELS = 31;
 
 /** Demo: the level the pinned card starts on in the running app. */
-export const TEST_QUEST_START_LEVEL = 27;
+export const TEST_QUEST_START_LEVEL = 31;
 
 /** Full ladder, level 31 (entry) down to level 1 (top crown). */
 export const testQuestLadder: TestQuestLevel[] = [
   {
     level: 31,
     day: null,
-    task: 'Старт: собери набор новичка',
+    task: 'Старт',
     drop: '500k LC · 10 билетов · LP 3д · 10 LS',
     zone: 'entry',
   },
   {
     level: 30,
     day: 1,
-    task: 'Забери билет с движка',
+    task: 'Раскачай движок',
     drop: '200k LC · 5 билетов · +10 AP',
     zone: 'ladder',
   },
   {
     level: 29,
     day: 2,
-    task: 'Посмотри 3 рекламы',
+    task: 'Реклама и билеты',
     drop: '200k LC · 5 билетов · 5 LS',
     zone: 'ladder',
   },
   {
     level: 28,
     day: 3,
-    task: 'Лайк профилю + отправь билет другу',
+    task: 'Движок и профиль',
     drop: '250k LC · 5 билетов · +15 AP',
     zone: 'ladder',
   },
   {
     level: 27,
     day: 4,
-    task: 'Собери 5 билетов за день',
+    task: 'Собери 8 билетов',
     drop: '300k LC · 8 билетов · LP 2д',
     zone: 'ladder',
   },
@@ -83,7 +81,7 @@ export const testQuestLadder: TestQuestLevel[] = [
     drop: '400k LC · 10 билетов · +20 AP',
     zone: 'ladder',
   },
-  { level: 24, day: 7, task: 'Подтверди почту', drop: '300k LC · 30 LS · +20 AP', zone: 'ladder' },
+  { level: 24, day: 7, task: 'Кошелёк и звёзды', drop: '300k LC · 30 LS · +20 AP', zone: 'ladder' },
   {
     level: 23,
     day: 8,
@@ -243,233 +241,317 @@ export const testQuestLadder: TestQuestLevel[] = [
 
 /**
  * One actionable step toward completing a level's task, shown in the checklist
- * under the slider on the Test-Quest screen. A step with `detail` or `subSteps`
- * renders as an expandable dropdown; a plain step is a single row with an
- * optional "go there" deep-link.
+ * under the slider on the Test-Quest screen. Purely informational — no
+ * navigation, so tapping a step never leaves the quest screen. A step with
+ * `detail` or `subSteps` renders as an expandable how-to dropdown; a plain step
+ * is a single row.
  */
 export interface TestQuestStep {
   /** Short imperative line, e.g. "Посмотри 3 рекламы". */
   text: string;
-  /** Where the action is performed — rendered as a "Перейти" deep-link. */
-  href?: Route;
   /** Optional how-to line; its presence turns the row into a dropdown. */
   detail?: string;
   /** Optional sub-checklist; its presence turns the row into a dropdown. */
   subSteps?: string[];
 }
 
-// Keyword → the screen where that action is performed. First match wins.
-const STEP_HREF_RULES: { match: RegExp; href: Route }[] = [
-  { match: /реклам/i, href: routes.tasks },
-  { match: /(пригласи|друг|рефер)/i, href: routes.inviteFriends },
-  { match: /стейк/i, href: routes.stakes.index },
-  { match: /турнир/i, href: routes.tournaments.index },
-  { match: /билет/i, href: routes.tickets.index },
-  { match: /(движ|двигател|апгрейд)/i, href: routes.market() },
-  { match: /почт/i, href: routes.settings.email },
-  { match: /(профил|лайк)/i, href: routes.profile.index },
-  { match: /(звёзд|звезд|stars)/i, href: routes.stars },
-  { match: /(silver|gold|platinum|diamond|vip|статус)/i, href: routes.settings.vip },
-];
+// The daily channel check-in closes almost every level — one shared step.
+const CHECKIN: TestQuestStep = {
+  text: 'Сделай дневной чек-ин',
+  detail: 'Каждый день проверяется подписка на канал @luckyticket365.',
+};
 
-const hrefForStep = (text: string): Route | undefined =>
-  STEP_HREF_RULES.find(r => r.match.test(text))?.href;
-
-// Authored checklist per level (31 → 1). Every step maps to a real in-app
-// action with a deep-link; steps with `detail`/`subSteps` expand into how-to
-// dropdowns. Front-end prototype — the backend will own these once it ships
-// real per-step data. `resolveTestQuestSteps` falls back to splitting the task
-// line for any level that has no override here.
+// Authored, real-only checklist per level (31 → 1). Every step is a working
+// in-app action; steps with `detail`/`subSteps` expand into how-to dropdowns.
+// Difficulty escalates toward level 1. Front-end prototype until the backend
+// owns per-step data. 31/30 are user-dictated; 29 → 1 authored here.
 const TEST_QUEST_STEP_OVERRIDES: Record<number, TestQuestStep[]> = {
-  // 31 · entry — a rich onboarding bundle (profile · engine · ad · first invite)
+  // 31 · entry
   31: [
+    { text: 'Забери 1 билет с движка' },
+    { text: 'Вступи в 1 турнир' },
+    { text: 'Посмотри 1 рекламу' },
     {
-      text: 'Оформи профиль — аватар и никнейм',
-      href: routes.profile.index,
-      detail: 'Профиль → изменить фото и имя.',
-    },
-    { text: 'Запусти движок и забери первый билет', href: routes.home },
-    { text: 'Посмотри первую рекламу за награду', href: routes.tasks },
-    {
-      text: 'Отправь ссылку-приглашение другу',
-      href: routes.inviteFriends,
-      subSteps: ['Открой «Пригласить»', 'Отправь ссылку в Telegram', 'Друг заходит в игру'],
+      text: 'Поделись с друзьями',
+      detail: 'Засчитывается сам факт отправки (не обязательно, чтобы друг зашёл).',
     },
   ],
-  // 30 → 27 · warm-up
+  // 30 · day 1 — ticket · engine upgrade (LS-priced — grant the stars, never force
+  // a purchase) · 2+ ads · daily check-in · share
   30: [
-    { text: 'Открой главную — блок движков', href: routes.home },
+    { text: 'Забери билет с движка' },
     {
-      text: 'Забери готовый билет с движка',
-      detail: 'Движок печатает билеты со временем — как готов, забирай.',
+      text: 'Апгрейдни движок',
+      detail: 'Открой движок на главной → апгрейд скорости или вместимости (за LS).',
+    },
+    { text: 'Посмотри минимум 2 рекламы' },
+    CHECKIN,
+    {
+      text: 'Поделись с друзьями',
+      subSteps: ['Открой «Пригласить»', 'Отправь ссылку в Telegram'],
     },
   ],
+  // 29 · day 2
   29: [
+    { text: 'Посмотри 3 рекламы' },
+    { text: 'Забери 2 билета с движков' },
     {
-      text: 'Открой рекламу в задачах',
-      href: routes.tasks,
-      detail: 'Задачи → Реклама, до 10 роликов в день.',
+      text: 'Собери 5 билетов за день',
+      detail: 'Забирай с движков; не хватает — докупи в маркете.',
     },
-    { text: 'Досмотри 3 ролика до конца', detail: 'Награда — только за полный просмотр.' },
-  ],
-  28: [
-    { text: 'Поставь лайк на профиле', href: routes.profile.index },
-    { text: 'Подари билет другу', href: routes.tickets.index, detail: 'Билеты → отправить другу.' },
-  ],
-  27: [
-    { text: 'Забирай билеты с движков за день', href: routes.home },
-    { text: 'Не хватает до 5 — докупи в маркете', href: routes.market() },
-  ],
-  // 26 → 21 · first of each mechanic
-  26: [
-    { text: 'Открой «Пригласить друзей»', href: routes.inviteFriends },
     {
-      text: 'Отправь личную ссылку',
+      text: 'Пригласи 1 друга',
+      subSteps: ['Открой «Пригласить»', 'Отправь ссылку в Telegram', 'Друг заходит и активируется'],
+    },
+    CHECKIN,
+  ],
+  // 28 · day 3
+  28: [
+    {
+      text: 'Апгрейдни вместимость движка',
+      detail: 'Открой движок на главной → +вместимость (за LS).',
+    },
+    { text: 'Забери 3 билета за день' },
+    { text: 'Посмотри 3 рекламы' },
+    { text: 'Оформи профиль — аватар и никнейм', detail: 'Профиль → фото и имя.' },
+    CHECKIN,
+  ],
+  // 27 · day 4
+  27: [
+    {
+      text: 'Собери 8 билетов за день',
+      detail: 'Забирай с движков + докупи недостающие в маркете.',
+    },
+    { text: 'Апгрейдни скорость движка' },
+    { text: 'Посмотри 4 рекламы' },
+    { text: 'Сыграй ещё один турнир' },
+    CHECKIN,
+  ],
+  // 26 · day 5 — first-friend wall
+  26: [
+    {
+      text: 'Пригласи 1 активного друга',
       subSteps: [
         'Скопируй ссылку или карточку',
         'Отправь другу в Telegram',
-        'Друг открывает Mini App',
+        'Друг заходит и активируется',
       ],
     },
-    {
-      text: 'Друг активируется — входит в игру',
-      detail: 'Засчитывается активированный друг, не просто клик по ссылке.',
-    },
+    { text: 'Посмотри 5 реклам' },
+    { text: 'Собери 10 билетов за день' },
+    { text: 'Вступи в турнир и дождись результата' },
+    CHECKIN,
   ],
+  // 25 · day 6
   25: [
-    { text: 'Открой Маркет → свой движок', href: routes.market() },
-    { text: 'Прокачай уровень движка', detail: 'Апгрейд ускоряет печать билетов.' },
+    { text: 'Прокачай движок ещё на уровень', detail: 'Скорость или вместимость (за LS).' },
+    { text: 'Собери 10 билетов за день' },
+    { text: 'Посмотри 5 реклам' },
+    {
+      text: 'Заработай 500 очков активности (AP)',
+      detail: 'AP капают за движки, турниры, друзей и награды.',
+    },
+    CHECKIN,
   ],
+  // 24 · day 7 — a week in
   24: [
-    {
-      text: 'Открой смену почты',
-      href: routes.settings.email,
-      detail: 'Профиль → Настройки → Почта.',
-    },
-    {
-      text: 'Подтверди адрес кодом',
-      detail: 'На новый адрес придёт код из 6 символов — введи его в течение 15 минут.',
-    },
+    { text: 'Подключи TON-кошелёк', detail: 'Кошелёк → подключить TON.' },
+    { text: 'Обменяй TON в Lucky Stars', detail: 'Кошелёк → обмен: TON → Lucky Stars.' },
+    { text: 'Собери 12 билетов за день' },
+    { text: 'Посмотри 6 реклам' },
+    CHECKIN,
   ],
+  // 23 · day 8
   23: [
-    { text: 'Открой турниры и выбери свой тир', href: routes.tournaments.index },
-    { text: 'Купи билет и вступи в турнир', detail: 'Дождись финиша — награда по месту.' },
+    { text: 'Сыграй турнир', detail: 'Выбери тир, поставь билет, дождись финиша.' },
+    { text: 'Доведи активных друзей до 2' },
+    { text: 'Собери 10 билетов за день' },
+    { text: 'Посмотри 6 реклам' },
+    CHECKIN,
   ],
+  // 22 · day 9
   22: [
-    { text: 'Открой рекламу в задачах', href: routes.tasks },
-    { text: 'Досмотри 10 роликов', detail: 'До 10 в день — можно собрать за один заход.' },
+    { text: 'Посмотри 10 реклам', detail: 'До 10 в день — можно за один заход.' },
+    { text: 'Собери 10 билетов за день' },
+    { text: 'Сыграй ещё турнир' },
+    { text: 'Заработай 800 AP суммарно' },
+    CHECKIN,
   ],
+  // 21 · day 10 — first stake
   21: [
-    { text: 'Открой Стейки → «Новый»', href: routes.stakes.new },
     {
-      text: 'Запусти первый стейк',
-      subSteps: ['Выбери сумму LC и срок', 'Подтверди', 'AP начислится сразу'],
+      text: 'Сделай первый стейк',
+      subSteps: ['Стейки → «Новый»', 'Выбери сумму LC и срок', 'Подтверди — AP начислится сразу'],
     },
+    { text: 'Собери 15 билетов за день' },
+    { text: 'Посмотри 7 реклам' },
+    { text: 'Пригласи ещё друга' },
+    CHECKIN,
   ],
-  // 20 → 11 · scaling walls
+  // 20 · day 11 — Silver wall
   20: [
-    {
-      text: 'Открой свой статус',
-      href: routes.settings.vip,
-      detail: 'Статус растёт от активности и AP.',
-    },
-    { text: 'Добери активность до Silver' },
+    { text: 'Достигни статуса Silver', detail: 'Статус растёт от активности и AP.' },
+    { text: 'Собери 15 билетов за день' },
+    { text: 'Посмотри 7 реклам' },
+    { text: 'Сыграй турнир' },
+    CHECKIN,
   ],
+  // 19 · day 12 — 3 friends
   19: [
-    { text: 'Открой «Пригласить друзей»', href: routes.inviteFriends },
-    {
-      text: 'Доведи число активных друзей до 3',
-      detail: 'Считаются активированные с начала теста.',
-    },
+    { text: 'Доведи активных друзей до 3', detail: 'Считаются активированные с начала теста.' },
+    { text: 'Посмотри 8 реклам' },
+    { text: 'Собери 15 билетов за день' },
+    { text: 'Сыграй турнир своего тира' },
+    CHECKIN,
   ],
+  // 18 · day 13 — podium
   18: [
-    { text: 'Вступи в турнир по силам', href: routes.tournaments.index },
-    { text: 'Финишируй в топ-3', detail: 'Награда — за место 1–3.' },
+    { text: 'Займи топ-3 в турнире', detail: 'Награда — за место 1–3.' },
+    { text: 'Собери 15 билетов за день' },
+    { text: 'Посмотри 8 реклам' },
+    { text: 'Пригласи ещё друга' },
+    CHECKIN,
   ],
+  // 17 · day 14
   17: [
-    { text: 'Забирай билеты с движков', href: routes.home },
-    { text: 'Ускорься апгрейдом или вторым движком', href: routes.market() },
-    { text: 'Собери 20 билетов' },
+    { text: 'Собери 20 билетов за день', detail: 'Ускорься апгрейдом или вторым движком.' },
+    { text: 'Посмотри 8 реклам' },
+    { text: 'Сыграй турнир' },
+    { text: 'Заработай 1000 AP суммарно' },
+    CHECKIN,
   ],
+  // 16 · day 15 — 5 friends
   16: [
-    { text: 'Открой «Пригласить друзей»', href: routes.inviteFriends },
     { text: 'Доведи активных друзей до 5' },
+    { text: 'Собери 20 билетов за день' },
+    { text: 'Посмотри 9 реклам' },
+    { text: 'Сыграй турнир своего тира' },
+    CHECKIN,
   ],
+  // 15 · day 16 — Gold wall
   15: [
-    { text: 'Открой свой статус', href: routes.settings.vip },
-    { text: 'Добери активность до Gold' },
+    { text: 'Достигни статуса Gold', detail: 'Статус растёт от активности и AP.' },
+    { text: 'Собери 20 билетов за день' },
+    { text: 'Посмотри 9 реклам' },
+    { text: 'Держи активный стейк' },
+    CHECKIN,
   ],
+  // 14 · day 17
   14: [
-    { text: 'Играй турниры своего тира', href: routes.tournaments.index },
-    { text: 'Набери 3 победы за тест' },
+    { text: 'Набери 3 победы в турнирах за тест' },
+    { text: 'Собери 20 билетов за день' },
+    { text: 'Посмотри 9 реклам' },
+    { text: 'Пригласи ещё друга' },
+    CHECKIN,
   ],
+  // 13 · day 18 — 200 ads total
   13: [
-    { text: 'Смотри рекламу каждый день', href: routes.tasks, detail: 'До 10/день — держи темп.' },
-    { text: 'Добей до 200 просмотров суммарно' },
+    {
+      text: 'Доведи суммарные просмотры рекламы до 200',
+      detail: 'Смотри до 10/день — держи темп.',
+    },
+    { text: 'Собери 15 билетов за день' },
+    { text: 'Сыграй турнир' },
+    { text: 'Заработай 1500 AP суммарно' },
+    CHECKIN,
   ],
+  // 12 · day 19 — 7 friends
   12: [
-    { text: 'Открой «Пригласить друзей»', href: routes.inviteFriends },
     { text: 'Доведи активных друзей до 7' },
+    { text: 'Собери 25 билетов за день' },
+    { text: 'Посмотри 10 реклам' },
+    { text: 'Запусти новый движок', detail: 'Награда уровня даёт движок — запусти его в работу.' },
+    CHECKIN,
   ],
+  // 11 · day 20 — two stakes
   11: [
-    { text: 'Открой Стейки → «Новый»', href: routes.stakes.new },
-    {
-      text: 'Держи 2 активных стейка одновременно',
-      detail: 'Оба должны быть активны в один момент.',
-    },
+    { text: 'Держи 2 активных стейка одновременно', detail: 'Оба активны в один момент.' },
+    { text: 'Собери 20 билетов за день' },
+    { text: 'Посмотри 10 реклам' },
+    { text: 'Сыграй турнир' },
+    CHECKIN,
   ],
-  // 10 → 4 · endgame
+  // 10 · day 21 — 10 friends
   10: [
-    { text: 'Открой «Пригласить друзей»', href: routes.inviteFriends },
     { text: 'Доведи активных друзей до 10' },
+    { text: 'Собери 25 билетов за день' },
+    { text: 'Посмотри 10 реклам' },
+    { text: 'Займи топ-3 в турнире' },
+    CHECKIN,
   ],
+  // 9 · day 22
   9: [
-    { text: 'Держи статус Gold', href: routes.settings.vip },
-    { text: 'Выиграй турнир Gold-тира', href: routes.tournaments.index },
+    { text: 'Выиграй турнир Gold-тира', detail: 'Держи Gold и возьми первое место.' },
+    { text: 'Держи статус Gold' },
+    { text: 'Собери 25 билетов за день' },
+    { text: 'Посмотри 10 реклам' },
+    CHECKIN,
   ],
+  // 8 · day 23
   8: [
-    { text: 'Вступи в крупный турнир', href: routes.tournaments.index },
-    { text: 'Финишируй в топ-10' },
+    { text: 'Войди в топ-10 крупного турнира' },
+    { text: 'Собери 25 билетов за день' },
+    { text: 'Посмотри 10 реклам' },
+    { text: 'Держи активный стейк' },
+    CHECKIN,
   ],
+  // 7 · day 24 — 15 friends
   7: [
-    { text: 'Открой «Пригласить друзей»', href: routes.inviteFriends },
     { text: 'Доведи активных друзей до 15' },
+    { text: 'Собери 30 билетов за день' },
+    { text: 'Посмотри 10 реклам' },
+    { text: 'Сыграй турнир высокого тира' },
+    CHECKIN,
   ],
+  // 6 · day 25 — 300 ads total
   6: [
-    { text: 'Смотри рекламу ежедневно', href: routes.tasks },
-    { text: 'Добей до 300 просмотров суммарно' },
+    { text: 'Доведи суммарные просмотры рекламы до 300' },
+    { text: 'Запусти ещё один движок', detail: 'Награда уровня даёт движок.' },
+    { text: 'Собери 25 билетов за день' },
+    { text: 'Пригласи ещё друга' },
+    CHECKIN,
   ],
+  // 5 · day 26 — 18 friends
   5: [
-    { text: 'Открой «Пригласить друзей»', href: routes.inviteFriends },
     { text: 'Доведи активных друзей до 18' },
+    { text: 'Собери 40 билетов за день' },
+    { text: 'Посмотри 10 реклам' },
+    { text: 'Выиграй турнир' },
+    CHECKIN,
   ],
+  // 4 · day 27 — Platinum + qualification
   4: [
-    {
-      text: 'Прокачай статус до Platinum',
-      href: routes.settings.vip,
-      detail: 'Platinum — порог квалификации на корону.',
-    },
+    { text: 'Прокачай статус до Platinum', detail: 'Platinum — порог квалификации на корону.' },
+    { text: 'Собери 40 билетов за день' },
+    { text: 'Держи 2 активных стейка' },
+    { text: 'Заверши все дневные задания за день' },
     {
       text: 'Квалификация на корону открыта',
       detail: 'Дальше корону 3 → 1 решает «Топ по друзьям».',
     },
   ],
-  // 3 → 1 · crown (provisional — decided by the friends leaderboard at test end)
+  // 3 → 1 · crown — decided by the friends leaderboard (activated referrals) at test end
   3: [
     {
       text: 'Войди в топ-50 «Топ по друзьям»',
-      href: routes.inviteFriends,
       detail: 'Корона присуждается в конце теста по числу активированных друзей.',
     },
+    { text: 'Приглашай активных друзей каждый день' },
   ],
-  2: [{ text: 'Войди в топ-10 «Топ по друзьям»', href: routes.inviteFriends }],
-  1: [{ text: 'Стань #1 в «Топ по друзьям»', href: routes.inviteFriends }],
+  2: [
+    { text: 'Войди в топ-10 «Топ по друзьям»' },
+    { text: 'Гонка решается в последний день теста — держи темп' },
+  ],
+  1: [
+    { text: 'Стань #1 в «Топ по друзьям»' },
+    { text: '#1 по активированным друзьям на момент заморозки берёт корону' },
+  ],
 };
 
 /**
  * Resolve the checklist for a level. Prefers an authored override; otherwise
- * splits the one-line `task` into steps on " · " / " + " and attaches a
- * deep-link by keyword. Front-end prototype until the backend ships real steps.
+ * splits the one-line `task` into plain steps on " · " / " + ". Front-end
+ * prototype until the backend ships real per-step data.
  */
 export const resolveTestQuestSteps = (level: number, task: string): TestQuestStep[] => {
   const override = TEST_QUEST_STEP_OVERRIDES[level];
@@ -478,5 +560,5 @@ export const resolveTestQuestSteps = (level: number, task: string): TestQuestSte
     .split(/\s*[·+]\s*/)
     .map(s => s.trim())
     .filter(Boolean)
-    .map(text => ({ text, href: hrefForStep(text) }));
+    .map(text => ({ text }));
 };
