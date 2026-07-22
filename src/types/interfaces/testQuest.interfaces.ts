@@ -31,6 +31,9 @@ export interface TestQuestState {
   /** Human label derived server-side, e.g. "300k LC · 8 билетов · LP 2д". */
   rewardLabel: string;
   claimableToday: boolean;
+  /** Subscribed to the official channel @luckyticket365. Required to claim ANY
+   *  level's reward — read live (getChatMember) server-side. */
+  channelSubscribed: boolean;
   finished: boolean;
   /** Daily ladder tops out here (4); levels 3 → 1 are the crown. */
   dailyTopLevel: number;

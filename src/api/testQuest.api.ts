@@ -36,6 +36,12 @@ export const testQuestApi = api.injectEndpoints({
         rtkTags.lcTransactions,
       ],
     }),
+    // Re-reads the caller's live channel membership (getChatMember) — called
+    // after the player taps "subscribe" so the gate can unlock without a reload.
+    recheckChannelSubscription: builder.mutation<TestQuestState, void>({
+      query: () => ({ url: 'test-quest/check-channel', method: 'POST' }),
+      invalidatesTags: [rtkTags.testQuest],
+    }),
   }),
 });
 
@@ -43,4 +49,5 @@ export const {
   useGetTestQuestQuery,
   useGetTestQuestLeaderboardQuery,
   useClaimTestQuestLevelMutation,
+  useRecheckChannelSubscriptionMutation,
 } = testQuestApi;

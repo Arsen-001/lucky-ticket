@@ -1,56 +1,74 @@
 'use client';
 
-import { useCallback, useEffect, useRef, useState } from 'react';
-import { Check, Clock3, Crown, FlaskConical, Gift, Lock, Target } from 'lucide-react';
+import { useState } from 'react';
+import { CornerUpLeft, FlaskConical, Gift } from 'lucide-react';
 import { twMerge } from 'tailwind-merge';
 import { useAppTranslations } from '@/hooks/useAppTranslations';
 import { useToast } from '@/hooks/useToast';
-import { useClaimTestQuestLevelMutation, useGetTestQuestQuery } from '@/api/testQuest.api';
-import { TEST_QUEST_START_LEVEL, testQuestLadder } from '@/constants/testQuest.constants';
-import { TestQuestLeaderboard } from './TestQuestLeaderboard';
+import {
+  useClaimTestQuestLevelMutation,
+  useGetTestQuestQuery,
+  useRecheckChannelSubscriptionMutation,
+} from '@/api/testQuest.api';
+import { getTelegramWebApp } from '@/lib/telegram/telegram';
+import {
+  TEST_QUEST_CHANNEL_URL,
+  TEST_QUEST_START_LEVEL,
+  testQuestLadder,
+} from '@/constants/testQuest.constants';
 import { TestQuestBadge } from './TestQuestBadge';
 import { TestQuestSteps } from './TestQuestSteps';
+import { TestQuestRewardChips } from './TestQuestRewardChips';
+import { TestQuestClaimBurst } from './TestQuestClaimBurst';
+import { TestQuestPyramid } from './TestQuestPyramid';
 
-type LevelKind = 'claimed' | 'ready' | 'waiting' | 'locked' | 'crown';
-
-const SLIDE_WIDTH = 256;
-// Centering padding so the first / last card can sit dead-centre. The scroller
-// bleeds to the app column edges (-mx-4), so its width is the app column width.
-const CENTER_PAD = `max(20px, calc((min(100vw, var(--app-max-w)) - ${SLIDE_WIDTH}px) / 2))`;
-
-// The ladder is a static constant, so its display order (31 → 1) never changes.
-// Sort once at module load instead of re-sorting on every render.
+// The ladder is a static constant (31 → 1), so sort once at module load.
 const LEVELS = [...testQuestLadder].sort((a, b) => b.level - a.level);
+
+// Success haptic on claim — a no-op outside Telegram.
+const claimHaptic = () => {
+  if (typeof window === 'undefined') return;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const haptic = (window as any).Telegram?.WebApp?.HapticFeedback;
+  try {
+    haptic?.notificationOccurred?.('success');
+  } catch {
+    /* noop */
+  }
+};
 
 export interface TestQuestChainProps {
   className?: string;
 }
 
 /**
- * "Тест-квест" milestone chain — the launch quest as a horizontal card carousel
- * (31 → 1), the core of the dedicated Test-Quest screen. Levels 31 → 4 are the
- * daily ladder (one claim per day); levels 3 → 1 are the competitive crown
- * (rendered below, leaderboard-assigned).
- *
- * Centre-anchored snap-focus carousel (same feel as the Home engine slider): the
- * centred card is the "active" one, at full scale/opacity while its neighbours
- * shrink and dim. Each card shows the reward you win and, at the bottom, the goal
- * you must complete to advance to the next level. Tap a side card to focus it;
- * the current daily level auto-focuses on mount.
+ * "Тест-квест" launch quest — the 31 → 1 climb as a **pyramid map** (apex = level
+ * 1 = the crown; numbers grow down to 31 at the base) plus a checklist panel
+ * below. Tapping a pyramid level drives the reward + "what to do" checklist to
+ * that level (a "back to today" chip returns); the claim only shows for today's
+ * level and, on success, advances the marker up the pyramid. Levels 31 → 4 are
+ * the daily ladder; 3 → 1 are the competitive crown, shown at the apex.
  */
 export function TestQuestChain({ className }: TestQuestChainProps) {
   const t = useAppTranslations();
   const toast = useToast();
   const { data } = useGetTestQuestQuery();
   const [claim, { isLoading: claiming }] = useClaimTestQuestLevelMutation();
+  const [recheckChannel, { isLoading: verifyingChannel }] = useRecheckChannelSubscriptionMutation();
+
+  // Bumped on each successful claim to replay the coin burst over the today panel.
+  const [burstId, setBurstId] = useState(0);
+  // Level tapped on the pyramid (drives the checklist below); null = follow today.
+  const [selectedLevel, setSelectedLevel] = useState<number | null>(null);
 
   const currentLevel = data?.level ?? TEST_QUEST_START_LEVEL; // daily current (31 → 4)
   const claimableToday = data?.claimableToday ?? true;
-  const crownLevel = data?.crownLevel ?? null;
+  // Missing field (older backend) ⇒ don't gate — default to satisfied.
+  const channelSubscribed = data?.channelSubscribed ?? true;
+  const dailyTop = data?.dailyTopLevel ?? 4;
 
   // Prefer the live ladder from the server (reflects admin-editable rewards);
   // fall back to the bundled prototype text until the response arrives.
-  const dailyTop = data?.dailyTopLevel ?? 4;
   const cards = data?.ladder?.length
     ? data.ladder.map(l => ({
         level: l.level,
@@ -65,79 +83,32 @@ export function TestQuestChain({ className }: TestQuestChainProps) {
         crown: l.zone === 'crown',
       }));
 
-  const scrollerRef = useRef<HTMLDivElement>(null);
-  const [activeIndex, setActiveIndex] = useState(0);
-
-  // Centre-anchored active tracking — the card nearest the viewport centre is active.
-  const recomputeActive = useCallback(() => {
-    const scroller = scrollerRef.current;
-    if (!scroller) return;
-    const center = scroller.scrollLeft + scroller.clientWidth / 2;
-    const slides = scroller.querySelectorAll<HTMLDivElement>('[data-tq-slide]');
-    let bestIdx = 0;
-    let bestDist = Infinity;
-    slides.forEach(el => {
-      const idx = Number(el.dataset.tqIndex);
-      const slideCenter = el.offsetLeft + el.offsetWidth / 2;
-      const dist = Math.abs(slideCenter - center);
-      if (dist < bestDist) {
-        bestDist = dist;
-        bestIdx = idx;
-      }
-    });
-    setActiveIndex(bestIdx);
-  }, []);
-
-  const scrollToIndex = useCallback((index: number, behavior: ScrollBehavior = 'smooth') => {
-    const scroller = scrollerRef.current;
-    if (!scroller) return;
-    const el = scroller.querySelector<HTMLDivElement>(`[data-tq-index="${index}"]`);
-    if (!el) return;
-    // Centre the card within the slider — scroll the slider only, never
-    // scrollIntoView (which would tug the page's vertical scroller).
-    const target = el.offsetLeft + el.offsetWidth / 2 - scroller.clientWidth / 2;
-    scroller.scrollTo({ left: Math.max(0, target), behavior });
-  }, []);
-
-  useEffect(() => {
-    recomputeActive();
-    const scroller = scrollerRef.current;
-    if (!scroller) return;
-    scroller.addEventListener('scroll', recomputeActive, { passive: true });
-    window.addEventListener('resize', recomputeActive);
-    return () => {
-      scroller.removeEventListener('scroll', recomputeActive);
-      window.removeEventListener('resize', recomputeActive);
-    };
-  }, [recomputeActive]);
-
-  // Auto-focus the current daily level on mount / when it advances.
-  const currentIndex = cards.findIndex(c => c.level === currentLevel);
-  useEffect(() => {
-    if (currentIndex < 0) return;
-    const id = window.setTimeout(() => scrollToIndex(currentIndex, 'smooth'), 50);
-    return () => window.clearTimeout(id);
-  }, [currentIndex, scrollToIndex]);
-
-  const kindOf = (level: number, crown: boolean): LevelKind => {
-    if (crown) return 'crown';
-    if (level > currentLevel) return 'claimed';
-    if (level === currentLevel) return claimableToday ? 'ready' : 'waiting';
-    return 'locked';
-  };
+  // The checklist below shows the tapped pyramid level; defaults to today.
+  const activeLevel = selectedLevel ?? currentLevel;
+  const activeCard = cards.find(c => c.level === activeLevel);
+  const isToday = activeLevel === currentLevel;
 
   const handleClaim = async () => {
-    if (!claimableToday || claiming) return;
+    // The channel-subscription gate blocks advancing until the player subscribes.
+    if (!claimableToday || claiming || !channelSubscribed) return;
     try {
       await claim().unwrap();
+      setBurstId(id => id + 1);
+      setSelectedLevel(null); // follow the new current level after advancing
+      claimHaptic();
+      toast.success(t('level taken'));
     } catch {
       toast.error(t('claim failed'));
     }
   };
 
-  // The centred card drives the checklist panel below the slider.
-  const activeCard = cards[Math.min(activeIndex, cards.length - 1)];
-  const activeKind = activeCard ? kindOf(activeCard.level, activeCard.crown) : 'locked';
+  // Gate action: open the channel, then re-check membership so the lock lifts
+  // without a reload (the re-check reads the live subscription server-side).
+  const handleVerifyChannel = () => {
+    if (verifyingChannel) return;
+    getTelegramWebApp()?.openTelegramLink?.(TEST_QUEST_CHANNEL_URL);
+    void recheckChannel();
+  };
 
   return (
     <section className={twMerge('flex flex-col gap-2 px-4 pt-4', className)}>
@@ -157,21 +128,13 @@ export function TestQuestChain({ className }: TestQuestChainProps) {
       </div>
 
       {!data?.frozen && data && (
-        <div className="flex flex-col gap-1">
-          <div className="flex items-center justify-between text-[11px] font-semibold">
-            <span className="text-white-secondary">
-              {t('level')} <span className="tabular-nums text-white">{data.level}</span>
-            </span>
-            <span className="tabular-nums text-white/80">
-              {data.climbed}/{data.totalLevels}
-            </span>
-          </div>
-          <div className="h-1.5 w-full overflow-hidden rounded-full bg-white/10">
-            <div
-              className="h-full rounded-full bg-gradient-to-r from-electric-pink to-electric-purple transition-[width] duration-500"
-              style={{ width: `${data.progress}%` }}
-            />
-          </div>
+        <div className="flex items-center justify-between text-[11px] font-semibold">
+          <span className="text-white-secondary">
+            {t('level')} <span className="tabular-nums text-white">{data.level}</span>
+          </span>
+          <span className="tabular-nums text-white/80">
+            {data.climbed}/{data.totalLevels}
+          </span>
         </div>
       )}
 
@@ -185,177 +148,52 @@ export function TestQuestChain({ className }: TestQuestChainProps) {
         </div>
       )}
 
-      <div
-        ref={scrollerRef}
-        className="scrollbar-hidden -mx-4 flex snap-x snap-mandatory items-stretch gap-3 overflow-x-auto overflow-y-visible py-2"
-        style={{ paddingInline: CENTER_PAD, scrollPaddingInline: CENTER_PAD }}
-      >
-        {cards.map((card, index) => {
-          const kind = kindOf(card.level, card.crown);
-          const isCrown = kind === 'crown';
-          const isMyCrown = isCrown && crownLevel === card.level;
-          const isActive = index === activeIndex;
-          return (
-            <div
-              key={card.level}
-              data-tq-slide
-              data-tq-index={index}
-              onClick={!isActive ? () => scrollToIndex(index) : undefined}
-              style={{
-                flex: `0 0 ${SLIDE_WIDTH}px`,
-                transform: `scale(${isActive ? 1 : 0.9})`,
-                transformOrigin: 'center',
-              }}
-              className={twMerge(
-                'snap-center transition-all duration-[450ms] ease-[cubic-bezier(0.22,1,0.36,1)]',
-                isActive ? 'opacity-100' : 'cursor-pointer opacity-55 saturate-[.6]'
-              )}
-            >
-              <div
-                className={twMerge(
-                  'flex h-full min-h-[288px] flex-col gap-3 rounded-2xl border bg-background-overlay p-4',
-                  kind === 'ready' && 'border-electric-pink/50 shadow-lg shadow-electric-purple/20',
-                  kind === 'waiting' && 'border-white/10',
-                  kind === 'claimed' && 'border-success/25',
-                  kind === 'locked' && 'border-white/5',
-                  isCrown && 'border-gold/40 bg-gradient-to-b from-gold/10 to-transparent',
-                  isMyCrown && 'border-gold/70 shadow-lg shadow-gold/25'
-                )}
-              >
-                {/* Header — level number + status */}
-                <div className="flex items-start justify-between">
-                  <div>
-                    <div
-                      className={twMerge(
-                        'text-[10px] font-bold uppercase tracking-[0.18em]',
-                        isCrown ? 'text-gold/80' : 'text-white/45'
-                      )}
-                    >
-                      {isCrown ? t('crown') : t('level')}
-                    </div>
-                    <div
-                      className={twMerge(
-                        'bg-clip-text text-[54px] font-extrabold leading-none tabular-nums text-transparent',
-                        isCrown
-                          ? 'bg-gradient-to-br from-warning to-gold'
-                          : 'bg-gradient-to-br from-electric-pink to-electric-purple'
-                      )}
-                    >
-                      {card.level}
-                    </div>
-                  </div>
-                  {kind === 'claimed' ? (
-                    <span className="flex-center h-6 w-6 shrink-0 rounded-full bg-success/20">
-                      <Check size={12} className="text-success" />
-                    </span>
-                  ) : kind === 'locked' ? (
-                    <span className="flex-center h-6 w-6 shrink-0 rounded-full bg-white/5">
-                      <Lock size={12} className="text-white/40" />
-                    </span>
-                  ) : kind === 'waiting' ? (
-                    <span className="flex-center h-6 w-6 shrink-0 rounded-full bg-white/5">
-                      <Clock3 size={12} className="text-white/50" />
-                    </span>
-                  ) : isCrown ? (
-                    <span
-                      className={twMerge(
-                        'flex-center h-6 w-6 shrink-0 rounded-full',
-                        isMyCrown ? 'bg-gold/25' : 'bg-white/5'
-                      )}
-                    >
-                      <Crown size={12} className={isMyCrown ? 'text-gold' : 'text-white/40'} />
-                    </span>
-                  ) : null}
-                </div>
-
-                {/* Reward — what you win */}
-                <div
-                  className={twMerge(
-                    'rounded-xl border px-2.5 py-2',
-                    isCrown
-                      ? 'border-gold/20 bg-gold/[0.06]'
-                      : 'border-white/[0.07] bg-white/[0.04]'
-                  )}
-                >
-                  <div className="flex items-center gap-1 text-[10px] font-bold uppercase tracking-wider text-white/40">
-                    <Gift size={9} className={isCrown ? 'text-gold' : 'text-electric-pink'} />
-                    {t('reward')}
-                  </div>
-                  <p className="mt-1 line-clamp-2 text-[12.5px] font-semibold leading-snug tabular-nums text-white/90">
-                    {card.drop}
-                  </p>
-                </div>
-
-                {/* Goal — what to complete to advance to the next level */}
-                <div className="mt-auto flex flex-col gap-1">
-                  <div
-                    className={twMerge(
-                      'flex items-center gap-1 text-[10px] font-bold uppercase tracking-wider',
-                      isCrown ? 'text-gold/70' : 'text-electric-pink/70'
-                    )}
-                  >
-                    <Target size={9} />
-                    {isCrown ? t('crown condition') : t('to advance')}
-                  </div>
-                  <p className="line-clamp-2 text-[12.5px] font-medium leading-snug text-white/70">
-                    {card.task}
-                  </p>
-                </div>
-
-                {/* Status pill — the claim action lives in the checklist below */}
-                {kind === 'ready' && (
-                  <div className="flex-center w-full gap-1 rounded-xl bg-electric-pink/15 py-1.5 text-[10px] font-bold uppercase tracking-wider text-electric-pink">
-                    <Gift size={11} />
-                    {t('ready to claim')}
-                  </div>
-                )}
-                {kind === 'waiting' && (
-                  <div className="flex-center w-full gap-1 rounded-xl bg-white/5 py-1.5 text-[10px] font-bold uppercase tracking-wider text-white/50">
-                    <Clock3 size={11} />
-                    {t('come back tomorrow')}
-                  </div>
-                )}
-                {kind === 'claimed' && (
-                  <div className="flex-center w-full gap-1 rounded-xl bg-success/15 py-1.5 text-[10px] font-bold uppercase tracking-wider text-success">
-                    <Check size={11} />
-                    {t('claimed')}
-                  </div>
-                )}
-                {kind === 'locked' && (
-                  <div className="flex-center w-full gap-1 rounded-xl bg-white/5 py-1.5 text-[10px] font-bold uppercase tracking-wider text-white/40">
-                    <Lock size={11} />
-                    {t('locked')}
-                  </div>
-                )}
-                {isCrown && (
-                  <div
-                    className={twMerge(
-                      'flex-center w-full gap-1 rounded-xl py-1.5 text-[10px] font-bold uppercase tracking-wider',
-                      isMyCrown ? 'bg-gold/20 text-gold' : 'border border-gold/30 text-gold/80'
-                    )}
-                  >
-                    <Crown size={11} />
-                    {isMyCrown ? t('your crown') : t('by leaderboard')}
-                  </div>
-                )}
-              </div>
-            </div>
-          );
-        })}
-      </div>
-
-      {activeCard && (
-        <TestQuestSteps
-          level={activeCard.level}
-          task={activeCard.task}
-          claimed={activeKind === 'claimed'}
-          ready={activeKind === 'ready'}
-          claiming={claiming}
-          onClaim={handleClaim}
+      {!data?.frozen && data && (
+        <TestQuestPyramid
+          currentLevel={data.level}
+          selectedLevel={activeLevel}
+          onSelect={setSelectedLevel}
         />
       )}
 
-      <TestQuestLeaderboard />
+      {activeCard && !data?.frozen && (
+        <div className="relative flex flex-col gap-2">
+          {burstId > 0 && <TestQuestClaimBurst key={burstId} />}
+
+          <div className="flex flex-col gap-1.5 rounded-2xl border border-white/10 bg-background-overlay p-2.5">
+            <div className="flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-wider text-white/40">
+              <Gift size={10} className={activeCard.crown ? 'text-gold' : 'text-electric-pink'} />
+              {t('reward')} ·
+              <span className="tabular-nums text-white/70">
+                {t('level')} {activeCard.level}
+              </span>
+              {!isToday && (
+                <button
+                  type="button"
+                  onClick={() => setSelectedLevel(null)}
+                  className="flex-center ml-auto gap-1 rounded-full bg-electric-pink/15 px-2 py-0.5 text-[9px] font-bold uppercase tracking-wider text-electric-pink active:scale-95"
+                >
+                  <CornerUpLeft size={10} />
+                  {t('today')}
+                </button>
+              )}
+            </div>
+            <TestQuestRewardChips label={activeCard.drop} crown={activeCard.crown} />
+          </div>
+
+          <TestQuestSteps
+            level={activeCard.level}
+            task={activeCard.task}
+            claimed={activeLevel > currentLevel}
+            ready={isToday && claimableToday}
+            claiming={claiming}
+            onClaim={handleClaim}
+            channelSubscribed={channelSubscribed}
+            onVerifyChannel={handleVerifyChannel}
+            verifyingChannel={verifyingChannel}
+          />
+        </div>
+      )}
     </section>
   );
 }

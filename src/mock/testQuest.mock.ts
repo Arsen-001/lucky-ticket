@@ -11,6 +11,10 @@ import {
  * the whole ladder is walkable in a single session.
  */
 let climbed = TEST_QUEST_TOTAL_LEVELS - TEST_QUEST_START_LEVEL;
+// Channel-subscription gate: starts unsatisfied so the gate is visible in the
+// demo. Tapping "subscribe" hits POST test-quest/check-channel, which flips it
+// (mock stand-in for a live getChatMember). A page reload resets it.
+let channelSubscribed = false;
 
 const DAILY_TOP_LEVEL = 4;
 const QUALIFIED_CLIMBED = TEST_QUEST_TOTAL_LEVELS - DAILY_TOP_LEVEL + 1; // 28
@@ -32,6 +36,7 @@ const view = () => {
       .sort((a, b) => b.level - a.level)
       .map(l => ({ level: l.level, task: l.task, rewardLabel: l.drop })),
     claimableToday: !qualified,
+    channelSubscribed,
     qualified,
     crownLevel: null,
     badgeLevel: null,
@@ -46,13 +51,19 @@ export const testQuestMock = {
   'test-quest': () => view(),
   'POST test-quest/claim': () => {
     const before = view();
-    if (!before.finished) climbed += 1;
+    // Mirror the server gate: no advance without a channel subscription.
+    if (!before.finished && channelSubscribed) climbed += 1;
     return {
       ...view(),
       granted: {},
       grantedLabel: before.rewardLabel,
       newBalance: { lc: 0, tickets: 0, activityPoints: 0 },
     };
+  },
+  'POST test-quest/check-channel': () => {
+    // Mock stand-in for a live getChatMember re-check after the player subscribes.
+    channelSubscribed = true;
+    return view();
   },
   'test-quest/leaderboard': () => ({
     total: 128,

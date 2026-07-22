@@ -1,6 +1,6 @@
 'use client';
 
-import { Gift, ListChecks } from 'lucide-react';
+import { Gift, ListChecks, Lock, Send } from 'lucide-react';
 import { Button } from '@/components/shared/buttons/Button';
 import { useAppTranslations } from '@/hooks/useAppTranslations';
 import { resolveTestQuestSteps } from '@/constants/testQuest.constants';
@@ -17,6 +17,12 @@ export interface TestQuestStepsProps {
   ready?: boolean;
   claiming?: boolean;
   onClaim?: () => void;
+  /** Live channel-subscription status — drives the gate step's done-state and
+   *  locks the claim CTA until satisfied. */
+  channelSubscribed?: boolean;
+  /** Open the channel + re-check membership, unlocking the gate. */
+  onVerifyChannel?: () => void;
+  verifyingChannel?: boolean;
 }
 
 /**
@@ -31,10 +37,16 @@ export function TestQuestSteps({
   ready,
   claiming,
   onClaim,
+  channelSubscribed = true,
+  onVerifyChannel,
+  verifyingChannel,
 }: TestQuestStepsProps) {
   const t = useAppTranslations();
   const steps = resolveTestQuestSteps(level, task);
   if (!steps.length) return null;
+
+  // The channel gate blocks the claim until the player is subscribed.
+  const gateBlocked = steps.some(s => s.gate === 'channel') && !channelSubscribed;
 
   return (
     <div className="flex flex-col gap-1.5 rounded-2xl border border-white/10 bg-background-overlay p-2.5">
@@ -52,20 +64,40 @@ export function TestQuestSteps({
 
       <div className="flex flex-col gap-1">
         {steps.map((step, i) => (
-          <TestQuestStepRow key={i} step={step} done={claimed} />
+          <TestQuestStepRow
+            key={i}
+            step={step}
+            done={claimed || (step.gate === 'channel' && channelSubscribed)}
+          />
         ))}
       </div>
 
-      {ready && (
-        <Button
-          className="flex-center animate-task-pulse mt-0.5 w-full gap-1.5 rounded-xl py-2 text-[13px] font-bold"
-          loading={claiming}
-          onClick={onClaim}
-        >
-          <Gift size={14} />
-          {t('claim reward')}
-        </Button>
-      )}
+      {ready &&
+        (gateBlocked ? (
+          <div className="mt-0.5 flex flex-col gap-1">
+            <Button
+              className="flex-center w-full gap-1.5 rounded-xl py-2 text-[13px] font-bold"
+              loading={verifyingChannel}
+              onClick={onVerifyChannel}
+            >
+              <Send size={14} />
+              {t('subscribe to channel')}
+            </Button>
+            <p className="flex-center gap-1 px-1 text-center text-[10px] leading-snug text-white/45">
+              <Lock size={10} className="shrink-0" />
+              {t('subscribe to claim hint')}
+            </p>
+          </div>
+        ) : (
+          <Button
+            className="flex-center animate-task-pulse mt-0.5 w-full gap-1.5 rounded-xl py-2 text-[13px] font-bold"
+            loading={claiming}
+            onClick={onClaim}
+          >
+            <Gift size={14} />
+            {t('claim reward')}
+          </Button>
+        ))}
     </div>
   );
 }
