@@ -310,7 +310,7 @@ const TEST_QUEST_STEP_OVERRIDES: Record<number, TestQuestStep[]> = {
   ],
   // 30 · day 1 — engine-upgrade special (LS-priced — grant the stars, never force a purchase)
   30: [
-    { text: 'Потрать 6 билетов' },
+    { text: 'Потрать 10 билетов' },
     { text: 'Посмотри 2 рекламы' },
     { text: 'Поделись с друзьями 2 раза' },
     { text: 'Апгрейдни движок 1 раз' },
@@ -318,7 +318,7 @@ const TEST_QUEST_STEP_OVERRIDES: Record<number, TestQuestStep[]> = {
   ],
   // 29 · day 2 — 30's set, escalated. All targets are cumulative over the whole test.
   29: [
-    { text: 'Потрать 11 билетов' },
+    { text: 'Потрать 18 билетов' },
     { text: 'Посмотри 5 реклам' },
     { text: 'Поделись с друзьями 3 раза' },
     { text: 'Купи билет в магазине' },
@@ -327,7 +327,7 @@ const TEST_QUEST_STEP_OVERRIDES: Record<number, TestQuestStep[]> = {
   ],
   // 28 · day 3 — engine-capacity upgrade + profile
   28: [
-    { text: 'Потрать 16 билетов' },
+    { text: 'Потрать 27 билетов' },
     { text: 'Посмотри 10 реклам' },
     { text: 'Поделись с друзьями 5 раз' },
     { text: 'Заведи 1 реферала' },
@@ -337,7 +337,7 @@ const TEST_QUEST_STEP_OVERRIDES: Record<number, TestQuestStep[]> = {
   ],
   // 27 · day 4 — engine-speed upgrade
   27: [
-    { text: 'Потрать 21 билет' },
+    { text: 'Потрать 35 билетов' },
     { text: 'Посмотри 15 реклам' },
     { text: 'Поделись с друзьями 6 раз' },
     { text: 'Апгрейдни движок 4 раза' },
@@ -345,7 +345,7 @@ const TEST_QUEST_STEP_OVERRIDES: Record<number, TestQuestStep[]> = {
   ],
   // 26 · day 5
   26: [
-    { text: 'Потрать 26 билетов' },
+    { text: 'Потрать 43 билетов' },
     { text: 'Посмотри 22 реклам' },
     { text: 'Поделись с друзьями 8 раз' },
     { text: 'Апгрейдни движок 5 раз' },
@@ -353,7 +353,7 @@ const TEST_QUEST_STEP_OVERRIDES: Record<number, TestQuestStep[]> = {
   ],
   // 25 · day 6
   25: [
-    { text: 'Потрать 31 билетов' },
+    { text: 'Потрать 52 билетов' },
     { text: 'Посмотри 29 реклам' },
     { text: 'Поделись с друзьями 9 раз' },
     { text: 'Апгрейдни движок 6 раз' },
@@ -361,7 +361,7 @@ const TEST_QUEST_STEP_OVERRIDES: Record<number, TestQuestStep[]> = {
   ],
   // 24 · day 7 — wallet + stars
   24: [
-    { text: 'Потрать 36 билетов' },
+    { text: 'Потрать 60 билетов' },
     { text: 'Посмотри 36 реклам' },
     { text: 'Поделись с друзьями 11 раз' },
     { text: 'Апгрейдни движок 7 раз' },
@@ -371,7 +371,7 @@ const TEST_QUEST_STEP_OVERRIDES: Record<number, TestQuestStep[]> = {
   ],
   // 23 · day 8
   23: [
-    { text: 'Потрать 41 билетов' },
+    { text: 'Потрать 68 билетов' },
     { text: 'Посмотри 43 реклам' },
     { text: 'Поделись с друзьями 12 раз' },
     { text: 'Апгрейдни движок 8 раз' },
@@ -380,7 +380,7 @@ const TEST_QUEST_STEP_OVERRIDES: Record<number, TestQuestStep[]> = {
   ],
   // 22 · day 9
   22: [
-    { text: 'Потрать 46 билетов' },
+    { text: 'Потрать 77 билетов' },
     { text: 'Посмотри 51 реклам' },
     { text: 'Поделись с друзьями 14 раз' },
     { text: 'Заведи 2 реферала' },
@@ -389,7 +389,7 @@ const TEST_QUEST_STEP_OVERRIDES: Record<number, TestQuestStep[]> = {
   ],
   // 21 · day 10 — first stake
   21: [
-    { text: 'Потрать 51 билетов' },
+    { text: 'Потрать 85 билетов' },
     { text: 'Посмотри 58 реклам' },
     { text: 'Поделись с друзьями 15 раз' },
     { text: 'Апгрейдни движок 10 раз' },
@@ -398,7 +398,7 @@ const TEST_QUEST_STEP_OVERRIDES: Record<number, TestQuestStep[]> = {
   ],
   // 20 · day 11 — Silver wall
   20: [
-    { text: 'Потрать 56 билетов' },
+    { text: 'Потрать 93 билетов' },
     { text: 'Посмотри 65 реклам' },
     { text: 'Поделись с друзьями 17 раз' },
     { text: 'Апгрейдни движок 11 раз' },
@@ -408,7 +408,7 @@ const TEST_QUEST_STEP_OVERRIDES: Record<number, TestQuestStep[]> = {
   ],
   // 19 · day 12
   19: [
-    { text: 'Потрать 61 билетов' },
+    { text: 'Потрать 102 билетов' },
     { text: 'Посмотри 72 реклам' },
     { text: 'Поделись с друзьями 18 раз' },
     { text: 'Апгрейдни движок 12 раз' },
@@ -416,7 +416,7 @@ const TEST_QUEST_STEP_OVERRIDES: Record<number, TestQuestStep[]> = {
   ],
   // 18 · day 13
   18: [
-    { text: 'Потрать 66 билетов' },
+    { text: 'Потрать 110 билетов' },
     { text: 'Посмотри 79 реклам' },
     { text: 'Поделись с друзьями 20 раз' },
     { text: 'Апгрейдни движок 13 раз' },
@@ -424,7 +424,7 @@ const TEST_QUEST_STEP_OVERRIDES: Record<number, TestQuestStep[]> = {
   ],
   // 17 · day 14
   17: [
-    { text: 'Потрать 71 билетов' },
+    { text: 'Потрать 118 билетов' },
     { text: 'Посмотри 86 реклам' },
     { text: 'Поделись с друзьями 21 раз' },
     { text: 'Заведи 3 реферала' },
@@ -433,7 +433,7 @@ const TEST_QUEST_STEP_OVERRIDES: Record<number, TestQuestStep[]> = {
   ],
   // 16 · day 15
   16: [
-    { text: 'Потрать 76 билетов' },
+    { text: 'Потрать 127 билетов' },
     { text: 'Посмотри 93 реклам' },
     { text: 'Поделись с друзьями 23 раз' },
     { text: 'Апгрейдни движок 15 раз' },
@@ -442,7 +442,7 @@ const TEST_QUEST_STEP_OVERRIDES: Record<number, TestQuestStep[]> = {
   ],
   // 15 · day 16 — Gold wall
   15: [
-    { text: 'Потрать 81 билетов' },
+    { text: 'Потрать 135 билетов' },
     { text: 'Посмотри 100 реклам' },
     { text: 'Поделись с друзьями 24 раз' },
     { text: 'Апгрейдни движок 16 раз' },
@@ -452,7 +452,7 @@ const TEST_QUEST_STEP_OVERRIDES: Record<number, TestQuestStep[]> = {
   ],
   // 14 · day 17
   14: [
-    { text: 'Потрать 86 билетов' },
+    { text: 'Потрать 143 билетов' },
     { text: 'Посмотри 108 реклам' },
     { text: 'Поделись с друзьями 26 раз' },
     { text: 'Апгрейдни движок 17 раз' },
@@ -460,7 +460,7 @@ const TEST_QUEST_STEP_OVERRIDES: Record<number, TestQuestStep[]> = {
   ],
   // 13 · day 18
   13: [
-    { text: 'Потрать 91 билетов' },
+    { text: 'Потрать 152 билетов' },
     { text: 'Посмотри 115 реклам' },
     { text: 'Поделись с друзьями 27 раз' },
     { text: 'Апгрейдни движок 18 раз' },
@@ -468,7 +468,7 @@ const TEST_QUEST_STEP_OVERRIDES: Record<number, TestQuestStep[]> = {
   ],
   // 12 · day 19 — new engine
   12: [
-    { text: 'Потрать 96 билетов' },
+    { text: 'Потрать 160 билетов' },
     { text: 'Посмотри 122 реклам' },
     { text: 'Поделись с друзьями 29 раз' },
     { text: 'Апгрейдни движок 19 раз' },
@@ -477,7 +477,7 @@ const TEST_QUEST_STEP_OVERRIDES: Record<number, TestQuestStep[]> = {
   ],
   // 11 · day 20 — two stakes
   11: [
-    { text: 'Потрать 101 билетов' },
+    { text: 'Потрать 168 билетов' },
     { text: 'Посмотри 129 реклам' },
     { text: 'Поделись с друзьями 30 раз' },
     { text: 'Заведи 4 реферала' },
@@ -487,7 +487,7 @@ const TEST_QUEST_STEP_OVERRIDES: Record<number, TestQuestStep[]> = {
   ],
   // 10 · day 21
   10: [
-    { text: 'Потрать 106 билетов' },
+    { text: 'Потрать 177 билетов' },
     { text: 'Посмотри 136 реклам' },
     { text: 'Поделись с друзьями 32 раз' },
     { text: 'Апгрейдни движок 21 раз' },
@@ -495,7 +495,7 @@ const TEST_QUEST_STEP_OVERRIDES: Record<number, TestQuestStep[]> = {
   ],
   // 9 · day 22 — Gold
   9: [
-    { text: 'Потрать 111 билетов' },
+    { text: 'Потрать 185 билетов' },
     { text: 'Посмотри 143 реклам' },
     { text: 'Поделись с друзьями 33 раз' },
     { text: 'Апгрейдни движок 22 раза' },
@@ -505,7 +505,7 @@ const TEST_QUEST_STEP_OVERRIDES: Record<number, TestQuestStep[]> = {
   ],
   // 8 · day 23
   8: [
-    { text: 'Потрать 116 билетов' },
+    { text: 'Потрать 193 билетов' },
     { text: 'Посмотри 150 реклам' },
     { text: 'Поделись с друзьями 35 раз' },
     { text: 'Апгрейдни движок 23 раза' },
@@ -514,7 +514,7 @@ const TEST_QUEST_STEP_OVERRIDES: Record<number, TestQuestStep[]> = {
   ],
   // 7 · day 24
   7: [
-    { text: 'Потрать 121 билетов' },
+    { text: 'Потрать 202 билетов' },
     { text: 'Посмотри 157 реклам' },
     { text: 'Поделись с друзьями 36 раз' },
     { text: 'Апгрейдни движок 24 раза' },
@@ -522,7 +522,7 @@ const TEST_QUEST_STEP_OVERRIDES: Record<number, TestQuestStep[]> = {
   ],
   // 6 · day 25 — new engine
   6: [
-    { text: 'Потрать 126 билетов' },
+    { text: 'Потрать 210 билетов' },
     { text: 'Посмотри 164 реклам' },
     { text: 'Поделись с друзьями 38 раз' },
     { text: 'Апгрейдни движок 25 раз' },
@@ -531,7 +531,7 @@ const TEST_QUEST_STEP_OVERRIDES: Record<number, TestQuestStep[]> = {
   ],
   // 5 · day 26
   5: [
-    { text: 'Потрать 131 билетов' },
+    { text: 'Потрать 218 билетов' },
     { text: 'Посмотри 172 реклам' },
     { text: 'Поделись с друзьями 39 раз' },
     { text: 'Заведи 5 рефералов' },
@@ -540,7 +540,7 @@ const TEST_QUEST_STEP_OVERRIDES: Record<number, TestQuestStep[]> = {
   ],
   // 4 · day 27 — Platinum + qualification
   4: [
-    { text: 'Потрать 136 билетов' },
+    { text: 'Потрать 227 билетов' },
     { text: 'Посмотри 179 реклам' },
     { text: 'Поделись с друзьями 41 раз' },
     { text: 'Апгрейдни движок 27 раз' },
@@ -551,7 +551,7 @@ const TEST_QUEST_STEP_OVERRIDES: Record<number, TestQuestStep[]> = {
   // 3 → 1 · crown — the base still counts daily; the crown itself is the
   // competitive top (topmost climbers), decided at test end.
   3: [
-    { text: 'Потрать 141 билетов' },
+    { text: 'Потрать 235 билетов' },
     { text: 'Посмотри 186 реклам' },
     { text: 'Поделись с друзьями 42 раз' },
     { text: 'Апгрейдни движок 28 раз' },
@@ -559,7 +559,7 @@ const TEST_QUEST_STEP_OVERRIDES: Record<number, TestQuestStep[]> = {
     CHANNEL_GATE,
   ],
   2: [
-    { text: 'Потрать 146 билетов' },
+    { text: 'Потрать 243 билетов' },
     { text: 'Посмотри 193 реклам' },
     { text: 'Поделись с друзьями 44 раз' },
     { text: 'Апгрейдни движок 29 раз' },
@@ -567,7 +567,7 @@ const TEST_QUEST_STEP_OVERRIDES: Record<number, TestQuestStep[]> = {
     CHANNEL_GATE,
   ],
   1: [
-    { text: 'Потрать 150 билетов' },
+    { text: 'Потрать 250 билетов' },
     { text: 'Посмотри 200 реклам' },
     { text: 'Поделись с друзьями 45 раз' },
     { text: 'Апгрейдни движок 30 раз' },
