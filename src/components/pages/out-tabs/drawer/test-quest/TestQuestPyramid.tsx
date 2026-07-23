@@ -36,8 +36,8 @@ const nodeClasses = (level: number, currentLevel: number): string => {
   const current = level === currentLevel;
 
   return twMerge(
-    'relative flex-center rounded-md text-[9px] font-extrabold tabular-nums transition-all active:scale-95',
-    isApex ? 'h-7 w-10 text-[12px]' : 'h-[22px] w-[30px]',
+    'relative flex-center rounded-lg text-[11px] font-extrabold tabular-nums transition-all active:scale-95',
+    isApex ? 'h-9 w-12 text-[15px]' : 'h-7 w-9',
     // ladder
     !isCrown &&
       !isWall &&
@@ -76,9 +76,9 @@ export function TestQuestPyramid({
 
   return (
     <div
-      className={twMerge('rounded-2xl border border-white/10 bg-background-overlay p-3', className)}
+      className={twMerge('rounded-2xl border border-white/10 bg-background-overlay p-2', className)}
     >
-      <div className="flex flex-col items-center gap-1 pt-3">
+      <div className="flex flex-col items-center gap-1.5 pt-3">
         {ROWS.map((row, ri) => (
           <div key={ri} className="flex justify-center gap-1">
             {row.map(level => (
@@ -95,14 +95,14 @@ export function TestQuestPyramid({
               >
                 {level === 1 && (
                   <Crown
-                    size={13}
-                    className="absolute -top-4 left-1/2 -translate-x-1/2 text-gold drop-shadow"
+                    size={16}
+                    className="absolute -top-[18px] left-1/2 -translate-x-1/2 text-gold drop-shadow"
                   />
                 )}
                 {level === currentLevel && (
                   <ChevronDown
-                    size={12}
-                    className="absolute -top-3 left-1/2 -translate-x-1/2 text-white drop-shadow"
+                    size={14}
+                    className="absolute -top-3.5 left-1/2 -translate-x-1/2 text-white drop-shadow"
                   />
                 )}
                 {level}

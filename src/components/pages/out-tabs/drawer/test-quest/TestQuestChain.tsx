@@ -111,7 +111,7 @@ export function TestQuestChain({ className }: TestQuestChainProps) {
   };
 
   return (
-    <section className={twMerge('flex flex-col gap-2 px-4 pt-4', className)}>
+    <section className={twMerge('flex flex-col gap-2 px-2.5 pt-3', className)}>
       <div className="flex items-center gap-2">
         <div className="flex-center h-7 w-7 rounded-lg bg-gradient-to-br from-electric-pink to-electric-purple shadow-md shadow-black/30">
           <FlaskConical size={14} className="text-white" />
