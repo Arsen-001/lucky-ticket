@@ -1876,7 +1876,7 @@ The Market opens with a **Hero card** showing the current featured deal (with co
 
 **Card-body tap:** tapping a card's body (not its price buttons) opens an item **info sheet** — except **Status** cards (Lucky Player / VIP), whose body links to the status's dedicated page (`/settings/lucky-player`, `/settings/vip` — the single canonical route used everywhere: header pills, profile, stakes, market) where it can be reviewed, bought, or extended. This link stays active even when the status is already owned (the in-card buy buttons lock, the body still navigates). Price buttons always buy in place.
 
-**Discount mechanics:** Items can carry a `discountPct` and an `originalAmount` per price tier; the original is rendered with strikethrough beside the discounted amount. Featured deals can also carry an `expiresAt` rendered as a countdown.
+**Discount mechanics:** Items can carry a `discountPct` and an `originalAmount` per price tier; the original is rendered with strikethrough beside the discounted amount. Featured deals can also carry an `expiresAt` rendered as a countdown. For the storefront categories the admin panel manages (chip / booster / cosmetic / bundle / shard), the sale is set directly in **Admin → Маркет → item editor**: a **Скидка, %** field (the `−N%` badge) plus **Старая цена (LC / XTR)** fields (the struck-through `originalAmount`), validated so the old price must exceed the current one. The editor shows a live storefront preview of the resulting card.
 
 **Bundles (deferred):** A bundle category is defined in the data model (combo packs of tickets + stars + LC + boosters + engines + chips) but is not currently surfaced as its own tab. Bundle SKUs that include Lucky Stars in their contents are priced in LC only.
 
