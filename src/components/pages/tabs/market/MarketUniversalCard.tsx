@@ -120,11 +120,13 @@ export function MarketUniversalCard({
           {imageUrl ? (
             // Admin-provided URL (Blob upload or pasted) — plain <img> avoids
             // the next/image host allow-list.
+            // contain (not cover) so the whole product art fits the stage
+            // instead of being cropped — the catalog serves square per-tier icons.
             // eslint-disable-next-line @next/next/no-img-element
             <img
               src={imageUrl}
               alt={typeof name === 'string' ? name : ''}
-              className="h-full w-full object-cover"
+              className="h-full w-full object-contain p-2"
             />
           ) : (
             iconStage
