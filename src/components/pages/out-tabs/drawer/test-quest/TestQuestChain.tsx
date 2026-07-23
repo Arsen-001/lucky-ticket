@@ -52,7 +52,9 @@ export interface TestQuestChainProps {
 export function TestQuestChain({ className }: TestQuestChainProps) {
   const t = useAppTranslations();
   const toast = useToast();
-  const { data } = useGetTestQuestQuery();
+  // Refetch on every mount so the checklist progress reflects actions taken on
+  // other screens (spending tickets, watching ads…) since the last visit.
+  const { data } = useGetTestQuestQuery(undefined, { refetchOnMountOrArgChange: true });
   const [claim, { isLoading: claiming }] = useClaimTestQuestLevelMutation();
   const [recheckChannel, { isLoading: verifyingChannel }] = useRecheckChannelSubscriptionMutation();
 
@@ -191,6 +193,7 @@ export function TestQuestChain({ className }: TestQuestChainProps) {
             channelSubscribed={channelSubscribed}
             onVerifyChannel={handleVerifyChannel}
             verifyingChannel={verifyingChannel}
+            progress={data?.stepProgress}
           />
         </div>
       )}

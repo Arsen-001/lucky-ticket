@@ -44,6 +44,16 @@ const view = () => {
     chestsPaid: 0,
     chestsTotal: 6,
     finished: qualified,
+    // Cumulative-since-enrollment progress. Scaled off `climbed` so the current
+    // level's countable steps read as partially done (e.g. tickets 5/6) and past
+    // levels read fully done — enough to see the live badges move in mock mode.
+    stepProgress: {
+      ticketsSpent: 5 * climbed,
+      adsWatched: 7 * climbed,
+      shares: 2 * climbed,
+      referrals: Math.floor(climbed / 3),
+      engineUpgrades: climbed,
+    },
   };
 };
 

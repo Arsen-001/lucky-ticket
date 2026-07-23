@@ -4,6 +4,7 @@ import { Gift, ListChecks, Lock, Send } from 'lucide-react';
 import { Button } from '@/components/shared/buttons/Button';
 import { useAppTranslations } from '@/hooks/useAppTranslations';
 import { resolveTestQuestSteps } from '@/constants/testQuest.constants';
+import type { TestQuestProgress } from '@/types/interfaces/testQuest.interfaces';
 import { TestQuestStepRow } from './TestQuestStepRow';
 
 export interface TestQuestStepsProps {
@@ -23,6 +24,8 @@ export interface TestQuestStepsProps {
   /** Open the channel + re-check membership, unlocking the gate. */
   onVerifyChannel?: () => void;
   verifyingChannel?: boolean;
+  /** Live cumulative progress → fills the countable steps' badges (display-only). */
+  progress?: TestQuestProgress;
 }
 
 /**
@@ -40,6 +43,7 @@ export function TestQuestSteps({
   channelSubscribed = true,
   onVerifyChannel,
   verifyingChannel,
+  progress,
 }: TestQuestStepsProps) {
   const t = useAppTranslations();
   const steps = resolveTestQuestSteps(level, task);
@@ -68,6 +72,7 @@ export function TestQuestSteps({
             key={i}
             step={step}
             done={claimed || (step.gate === 'channel' && channelSubscribed)}
+            count={step.action ? progress?.[step.action] : undefined}
           />
         ))}
       </div>

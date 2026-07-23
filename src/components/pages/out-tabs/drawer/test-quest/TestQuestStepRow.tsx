@@ -27,6 +27,10 @@ export interface TestQuestStepRowProps {
   step: TestQuestStep;
   /** Level already claimed → the step reads as done (checked marker, dimmed). */
   done?: boolean;
+  /** Live cumulative count for this step's action (from TestQuestProgress). When
+   *  provided for a countable step, the badge shows real progress and the row
+   *  checks off once it reaches the target — independent of the claimed state. */
+  count?: number;
 }
 
 // Task-type marker (icon + tint) resolved from the step text — first match wins.
@@ -67,12 +71,21 @@ const visualFor = (text: string) => STEP_VISUALS.find(v => v.re.test(text)) ?? D
  * button. The channel gate is styled as a dashed-gold "sealed" row that opens the
  * official channel. Steps with `detail`/`subSteps` still expand into a how-to.
  */
-export function TestQuestStepRow({ step, done = false }: TestQuestStepRowProps) {
+export function TestQuestStepRow({ step, done = false, count }: TestQuestStepRowProps) {
   const isChannelGate = step.gate === 'channel';
   const expandable = !isChannelGate && !!(step.detail || step.subSteps?.length);
   const [open, setOpen] = useState(false);
 
   const { Icon, tint } = visualFor(step.text);
+
+  // Live cumulative progress toward a countable step's target. A claimed level
+  // reads fully done; otherwise the real counter decides, so the badge moves as
+  // the player acts even before the level is claimed.
+  const hasLive = step.target != null && count != null;
+  const reached = hasLive && count >= step.target!;
+  const isDone = done || reached;
+  const shownCount =
+    step.target == null ? null : isDone ? step.target : hasLive ? Math.min(count, step.target) : 0;
 
   const openChannel = () => {
     const webApp = getTelegramWebApp();
@@ -87,7 +100,7 @@ export function TestQuestStepRow({ step, done = false }: TestQuestStepRowProps) 
         isChannelGate
           ? twMerge(
               'border border-dashed border-gold/40 bg-gold/[0.04]',
-              done && 'border-solid border-success/40 bg-success/[0.06]'
+              isDone && 'border-solid border-success/40 bg-success/[0.06]'
             )
           : 'bg-white/[0.03]'
       )}
@@ -114,16 +127,20 @@ export function TestQuestStepRow({ step, done = false }: TestQuestStepRowProps) 
         <span
           className={twMerge(
             'flex-center h-7 w-7 shrink-0 rounded-lg transition-colors',
-            done ? 'bg-success/15 text-success' : isChannelGate ? 'bg-gold/[0.16] text-gold' : tint
+            isDone
+              ? 'bg-success/15 text-success'
+              : isChannelGate
+                ? 'bg-gold/[0.16] text-gold'
+                : tint
           )}
         >
-          {done ? <Check size={15} /> : isChannelGate ? <Lock size={14} /> : <Icon size={14} />}
+          {isDone ? <Check size={15} /> : isChannelGate ? <Lock size={14} /> : <Icon size={14} />}
         </span>
 
         <span
           className={twMerge(
             'min-w-0 flex-1 text-[12px] font-semibold leading-snug',
-            done ? 'text-white/40' : 'text-white/85'
+            isDone ? 'text-white/40' : 'text-white/85'
           )}
         >
           {step.text}
@@ -133,10 +150,10 @@ export function TestQuestStepRow({ step, done = false }: TestQuestStepRowProps) 
           <span
             className={twMerge(
               'flex-center shrink-0 rounded-md px-1.5 py-0.5 text-[10.5px] font-extrabold tabular-nums',
-              done ? 'bg-success/15 text-success' : 'bg-white/[0.05] text-white/45'
+              isDone ? 'bg-success/15 text-success' : 'bg-white/[0.05] text-white/45'
             )}
           >
-            {done ? step.target : 0}/{step.target}
+            {shownCount}/{step.target}
           </span>
         )}
 

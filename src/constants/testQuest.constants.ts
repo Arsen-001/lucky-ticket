@@ -1,4 +1,5 @@
 import { routes, type Route } from '@/constants/routes';
+import type { TestQuestAction } from '@/types/interfaces/testQuest.interfaces';
 
 /**
  * Test-Quest ladder — the 31-day launch quest ("Тестировщик 31 → 1").
@@ -276,6 +277,9 @@ export interface TestQuestStep {
   /** Target count for a countable step (e.g. 90 ads). Rendered as a "done / target"
    *  progress badge at the row's end; the number-less action lives in `text`. */
   target?: number;
+  /** Which live counter (from {@link TestQuestProgress}) fills this step's badge.
+   *  Absent ⇒ the step has no live source and falls back to the claimed done-state. */
+  action?: TestQuestAction;
   /** Marks the channel-subscription gate. Its done-state follows the live
    *  subscription status (not the level's claimed state), and while unsatisfied
    *  it blocks the level's reward claim. */
@@ -593,25 +597,32 @@ const hrefForStep = (text: string): Route | undefined =>
 // Pull the count out of a core "verb N unit" step → { label (number-less), target }.
 // The target renders as a "done / target" progress badge at the row's end. Ranks
 // (топ-N, #1) and one-off actions carry no count and keep their text unchanged.
-const COUNT_RULES: { re: RegExp; label: string }[] = [
-  { re: /^Потрать\s+(\d+)\s+билет/i, label: 'Потрать билеты' },
-  { re: /^Посмотри\s+(\d+)\s+реклам/i, label: 'Посмотри рекламу' },
-  { re: /^Поделись с друзьями\s+(\d+)\s+раз/i, label: 'Поделись с друзьями' },
-  { re: /^Заведи\s+(\d+)\s+реферал/i, label: 'Заведи рефералов' },
+const COUNT_RULES: { re: RegExp; label: string; action?: TestQuestAction }[] = [
+  { re: /^Потрать\s+(\d+)\s+билет/i, label: 'Потрать билеты', action: 'ticketsSpent' },
+  { re: /^Посмотри\s+(\d+)\s+реклам/i, label: 'Посмотри рекламу', action: 'adsWatched' },
+  { re: /^Поделись с друзьями\s+(\d+)\s+раз/i, label: 'Поделись с друзьями', action: 'shares' },
+  { re: /^Заведи\s+(\d+)\s+реферал/i, label: 'Заведи рефералов', action: 'referrals' },
   { re: /^Забери\s+(\d+)\s+билет\w*\s+с движка/i, label: 'Забери билеты с движка' },
 ];
 
-const parseCount = (text: string): { label: string; target?: number } => {
-  for (const { re, label } of COUNT_RULES) {
+const parseCount = (text: string): { label: string; target?: number; action?: TestQuestAction } => {
+  for (const { re, label, action } of COUNT_RULES) {
     const m = re.exec(text);
-    if (m) return { label, target: Number(m[1]) };
+    if (m) return { label, target: Number(m[1]), action };
   }
-  // "Держи N … стейк…" → hold-count.
+  // "Держи N … стейк…" → hold-count (point-in-time gauge, no cumulative counter).
   const stake = /^Держи\s+(\d+)\s+.*стейк/i.exec(text);
   if (stake) return { label: 'Держи активные стейки', target: Number(stake[1]) };
-  // Trailing "… N раз(а)" (e.g. engine-upgrade repeats) → strip the count.
+  // Trailing "… N раз(а)" (e.g. engine-upgrade repeats) → strip the count. Only the
+  // engine-upgrade repeat has a live counter; other rep-steps fall back.
   const rep = /^(.+?)\s+(\d+)\s+раза?$/i.exec(text);
-  if (rep) return { label: rep[1], target: Number(rep[2]) };
+  if (rep) {
+    const label = rep[1];
+    const action: TestQuestAction | undefined = /движок|прокач|скорост|вместимост/i.test(label)
+      ? 'engineUpgrades'
+      : undefined;
+    return { label, target: Number(rep[2]), action };
+  }
   return { label: text };
 };
 
@@ -633,7 +644,7 @@ export const resolveTestQuestSteps = (level: number, task: string): TestQuestSte
       .map(text => ({ text }));
   return steps.map(step => {
     if (step.gate === 'channel') return step;
-    const { label, target } = parseCount(step.text);
-    return { ...step, text: label, target, href: step.href ?? hrefForStep(label) };
+    const { label, target, action } = parseCount(step.text);
+    return { ...step, text: label, target, action, href: step.href ?? hrefForStep(label) };
   });
 };

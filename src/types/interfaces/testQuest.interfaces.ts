@@ -15,6 +15,29 @@ export interface TestQuestLadderEntry {
   rewardLabel: string;
 }
 
+/**
+ * Live, cumulative-since-enrollment progress for the countable checklist steps
+ * (display-only — it never gates the daily claim). Each field is the running
+ * total of that action over the whole test; a step renders `min(count, target)`
+ * against its own target. Absent on older backends ⇒ the checklist falls back to
+ * the claimed-based done-state.
+ */
+export interface TestQuestProgress {
+  /** Tickets spent (tournaments, market, sends…). */
+  ticketsSpent: number;
+  /** Rewarded ads watched. */
+  adsWatched: number;
+  /** Invites shared / sent. */
+  shares: number;
+  /** Referrals activated (friends who joined via the player). */
+  referrals: number;
+  /** Engine upgrades performed (speed + capacity). */
+  engineUpgrades: number;
+}
+
+/** The countable checklist actions that {@link TestQuestProgress} tracks. */
+export type TestQuestAction = keyof TestQuestProgress;
+
 /** GET /test-quest — the current state of the pinned Test-Quest card. */
 export interface TestQuestState {
   /** Countdown level: 31 (entry) → 1 (top crown). */
@@ -48,6 +71,9 @@ export interface TestQuestState {
   /** Monthly badge chests paid so far (of chestsTotal), post-freeze. */
   chestsPaid: number;
   chestsTotal: number;
+  /** Live cumulative progress for the countable checklist steps (display-only).
+   *  Named `stepProgress` to avoid colliding with the scalar `progress` climb-%. */
+  stepProgress?: TestQuestProgress;
 }
 
 /** POST /test-quest/claim — new state plus what was granted. */
