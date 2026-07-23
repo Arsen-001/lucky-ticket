@@ -12,10 +12,12 @@ import {
 } from '@/api/testQuest.api';
 import { getTelegramWebApp } from '@/lib/telegram/telegram';
 import {
+  resolveTestQuestSteps,
   TEST_QUEST_CHANNEL_URL,
   TEST_QUEST_START_LEVEL,
   testQuestLadder,
 } from '@/constants/testQuest.constants';
+import type { TestQuestAction } from '@/types/interfaces/testQuest.interfaces';
 import { TestQuestBadge } from './TestQuestBadge';
 import { TestQuestSteps } from './TestQuestSteps';
 import { TestQuestRewardChips } from './TestQuestRewardChips';
@@ -89,6 +91,20 @@ export function TestQuestChain({ className }: TestQuestChainProps) {
   const activeLevel = selectedLevel ?? currentLevel;
   const activeCard = cards.find(c => c.level === activeLevel);
   const isToday = activeLevel === currentLevel;
+
+  // What the already-claimed levels (higher numbers = climbed past) have banked
+  // per action — the highest cumulative target reached. Seeds every level's
+  // badges so progress carries over (e.g. after level 29's "spend 11", level 28
+  // starts at 11/16) instead of resetting to 0 when the live counter is behind.
+  const baselines: Partial<Record<TestQuestAction, number>> = {};
+  for (const card of cards) {
+    if (card.level <= currentLevel) continue; // only claimed levels
+    for (const step of resolveTestQuestSteps(card.level, card.task)) {
+      if (step.action && step.target != null) {
+        baselines[step.action] = Math.max(baselines[step.action] ?? 0, step.target);
+      }
+    }
+  }
 
   const handleClaim = async () => {
     // The channel-subscription gate blocks advancing until the player subscribes.
@@ -194,6 +210,7 @@ export function TestQuestChain({ className }: TestQuestChainProps) {
             onVerifyChannel={handleVerifyChannel}
             verifyingChannel={verifyingChannel}
             progress={data?.stepProgress}
+            baselines={baselines}
           />
         </div>
       )}

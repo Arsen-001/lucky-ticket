@@ -4,7 +4,7 @@ import { Gift, ListChecks, Lock, Send } from 'lucide-react';
 import { Button } from '@/components/shared/buttons/Button';
 import { useAppTranslations } from '@/hooks/useAppTranslations';
 import { resolveTestQuestSteps } from '@/constants/testQuest.constants';
-import type { TestQuestProgress } from '@/types/interfaces/testQuest.interfaces';
+import type { TestQuestAction, TestQuestProgress } from '@/types/interfaces/testQuest.interfaces';
 import { TestQuestStepRow } from './TestQuestStepRow';
 
 export interface TestQuestStepsProps {
@@ -26,6 +26,10 @@ export interface TestQuestStepsProps {
   verifyingChannel?: boolean;
   /** Live cumulative progress → fills the countable steps' badges (display-only). */
   progress?: TestQuestProgress;
+  /** Per-action floor already banked from claimed levels, so a level's badge
+   *  carries over the prior levels' cumulative targets (e.g. after level 29's
+   *  "spend 11", level 28 starts at 11/16 instead of 0/16). */
+  baselines?: Partial<Record<TestQuestAction, number>>;
 }
 
 /**
@@ -44,10 +48,21 @@ export function TestQuestSteps({
   onVerifyChannel,
   verifyingChannel,
   progress,
+  baselines,
 }: TestQuestStepsProps) {
   const t = useAppTranslations();
   const steps = resolveTestQuestSteps(level, task);
   if (!steps.length) return null;
+
+  // Effective count for a countable step: the live counter, floored by what the
+  // claimed levels already banked, so progress continues across levels instead
+  // of resetting. `undefined` when the step has no live source at all.
+  const countFor = (action?: TestQuestAction): number | undefined => {
+    if (!action) return undefined;
+    const live = progress?.[action];
+    const floor = baselines?.[action];
+    return live != null || floor != null ? Math.max(live ?? 0, floor ?? 0) : undefined;
+  };
 
   // The channel gate blocks the claim until the player is subscribed.
   const gateBlocked = steps.some(s => s.gate === 'channel') && !channelSubscribed;
@@ -72,7 +87,7 @@ export function TestQuestSteps({
             key={i}
             step={step}
             done={claimed || (step.gate === 'channel' && channelSubscribed)}
-            count={step.action ? progress?.[step.action] : undefined}
+            count={countFor(step.action)}
           />
         ))}
       </div>
