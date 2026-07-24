@@ -196,7 +196,6 @@
   "choose your language": "Choose your language",
   "claim": "Claim",
   "claim all": "Claim all",
-  "claim failed": "Claim failed",
   "claim failed description": "Couldn't reach the server. Tap retry to try again.",
   "claim from {count} friends": "Claim from {count, plural, =1 {# friend} other {# friends}}",
   "claim locked steps remaining": "{remaining} steps left",

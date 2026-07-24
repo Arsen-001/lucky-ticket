@@ -196,7 +196,6 @@
   "choose your language": "Выберите язык",
   "claim": "Забрать",
   "claim all": "Забрать все",
-  "claim failed": "Не удалось забрать",
   "claim failed description": "Сервер недоступен. Нажмите «Повторить», чтобы попробовать снова.",
   "claim from {count} friends": "Забрать у {count, plural, one {# друга} few {# друзей} many {# друзей} other {# друзей}}",
   "claim locked steps remaining": "Осталось {remaining} шагов",
