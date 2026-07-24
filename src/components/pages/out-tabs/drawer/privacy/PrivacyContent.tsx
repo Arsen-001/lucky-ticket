@@ -2,6 +2,7 @@
 
 import dayjs from 'dayjs';
 import { ShieldCheck } from 'lucide-react';
+import { useLocale } from 'next-intl';
 import { useGetPrivacyPolicyQuery } from '@/api/privacy.api';
 import { QueryErrorState } from '@/components/shared/error/QueryErrorState';
 import { Skeleton } from '@/components/shared/seleketons/Skeleton';
@@ -14,6 +15,7 @@ const SKELETON_SECTIONS = new Array(5).fill(undefined) as (PrivacySection | unde
 
 export function PrivacyContent() {
   const t = useAppTranslations();
+  const locale = useLocale();
   const { data, isLoading, isError, refetch } = useGetPrivacyPolicyQuery();
 
   if (isError) return <QueryErrorState onRetry={() => refetch()} />;
@@ -52,6 +54,7 @@ export function PrivacyContent() {
             section={section}
             loading={isLoading}
             index={index}
+            locale={locale}
           />
         ))}
       </div>

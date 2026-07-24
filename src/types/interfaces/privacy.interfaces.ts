@@ -1,7 +1,9 @@
+import type { LocalizedText } from '@/types/interfaces/faq.interfaces';
+
 export interface PrivacySection {
   id: string;
-  title: string;
-  body: string;
+  title: LocalizedText;
+  body: LocalizedText;
 }
 
 export interface PrivacyPolicy {

@@ -2,6 +2,7 @@
 
 import dayjs from 'dayjs';
 import { ScrollText } from 'lucide-react';
+import { useLocale } from 'next-intl';
 import { useGetTermsOfUseQuery } from '@/api/terms.api';
 import { QueryErrorState } from '@/components/shared/error/QueryErrorState';
 import { Skeleton } from '@/components/shared/seleketons/Skeleton';
@@ -14,6 +15,7 @@ const SKELETON_SECTIONS = new Array(6).fill(undefined) as (TermsSection | undefi
 
 export function TermsContent() {
   const t = useAppTranslations();
+  const locale = useLocale();
   const { data, isLoading, isError, refetch } = useGetTermsOfUseQuery();
 
   if (isError) return <QueryErrorState onRetry={() => refetch()} />;
@@ -50,6 +52,7 @@ export function TermsContent() {
             section={section}
             loading={isLoading}
             index={index}
+            locale={locale}
           />
         ))}
       </div>
