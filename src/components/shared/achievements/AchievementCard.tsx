@@ -85,8 +85,8 @@ export function AchievementCard({
   const rarityLabel =
     achievement.rarity === AchievementRarity.DIAMOND_PLUS && achievement.tier
       ? achievement.tier.max === 0
-        ? `Diamond+ · Lv ${achievement.tier.current} · ∞`
-        : `Diamond+ · Lv ${achievement.tier.current}/${achievement.tier.max}`
+        ? `${t(rarityLabelKey(achievement.rarity))} · ${t('level short')} ${achievement.tier.current} · ∞`
+        : `${t(rarityLabelKey(achievement.rarity))} · ${t('level short')} ${achievement.tier.current}/${achievement.tier.max}`
       : t(rarityLabelKey(achievement.rarity));
 
   return (
@@ -112,7 +112,7 @@ export function AchievementCard({
       ) : onPin ? (
         <span
           role="button"
-          aria-label="pin"
+          aria-label={t('pin')}
           tabIndex={0}
           onPointerDown={e => e.stopPropagation()}
           onClick={e => {

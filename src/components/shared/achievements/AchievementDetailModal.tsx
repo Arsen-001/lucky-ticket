@@ -55,8 +55,8 @@ export function AchievementDetailModal({ achievement, onClose }: AchievementDeta
               <span className="font-bold" style={{ color: rarityDot[achievement.rarity] }}>
                 {achievement.rarity === AchievementRarity.DIAMOND_PLUS && achievement.tier
                   ? achievement.tier.max === 0
-                    ? `Diamond+ · Lv ${achievement.tier.current} · ∞`
-                    : `Diamond+ · Lv ${achievement.tier.current}/${achievement.tier.max}`
+                    ? `${t(rarityLabelKey(achievement.rarity))} · ${t('level short')} ${achievement.tier.current} · ∞`
+                    : `${t(rarityLabelKey(achievement.rarity))} · ${t('level short')} ${achievement.tier.current}/${achievement.tier.max}`
                   : t(rarityLabelKey(achievement.rarity))}
               </span>
               <span className="text-white/30">·</span>
@@ -67,7 +67,7 @@ export function AchievementDetailModal({ achievement, onClose }: AchievementDeta
           {achievement.symbolMeaning && (
             <div className="w-full rounded-xl border border-white/8 bg-white/[0.03] p-3 text-center">
               <span className="block text-[10px] font-bold uppercase tracking-wider text-white/45">
-                Symbol meaning
+                {t('symbol meaning')}
               </span>
               <p className="mt-1 text-xs text-white/80">{achievement.symbolMeaning}</p>
             </div>
@@ -134,9 +134,14 @@ interface ChainRewardCardProps {
 }
 
 function ChainRewardCard({ reward, earned }: ChainRewardCardProps) {
+  const t = useAppTranslations();
   const chips = [
     reward.tickets
-      ? { icon: TicketCheck, label: `+${reward.tickets} tickets`, color: '#4DB85F' }
+      ? {
+          icon: TicketCheck,
+          label: t('+{count} tickets', { count: reward.tickets }),
+          color: '#4DB85F',
+        }
       : null,
     reward.activityPoints
       ? { icon: null, label: `+${reward.activityPoints} AP`, color: '#FF5FC8' }
@@ -150,7 +155,7 @@ function ChainRewardCard({ reward, earned }: ChainRewardCardProps) {
   return (
     <div className="flex w-full flex-col gap-2 rounded-xl border border-white/8 bg-white/[0.03] p-3">
       <span className="text-[10px] font-bold uppercase tracking-wider text-white/45">
-        {earned ? 'Earned reward' : 'Reward on unlock'}
+        {earned ? t('earned reward') : t('reward on unlock')}
       </span>
       <div className="flex flex-wrap items-center gap-1.5">
         {chips.map((chip, i) => (
@@ -246,7 +251,7 @@ function ChainLadder({ achievement }: ChainLadderProps) {
       </div>
       {comingSoonPosition && (
         <div className="text-center text-[9px] uppercase tracking-wider text-white/35">
-          {total - lastVisible} more {total - lastVisible === 1 ? 'tier' : 'tiers'} after
+          {t('{count} more tiers after', { count: total - lastVisible })}
         </div>
       )}
 
@@ -254,10 +259,10 @@ function ChainLadder({ achievement }: ChainLadderProps) {
         <div className="mt-2 flex flex-col gap-1.5">
           <div className="flex items-center justify-between">
             <span className="text-[9px] font-bold uppercase tracking-wider text-[#FFD700]">
-              Mythic+ progression · endless
+              {t('mythic progression')} · {t('endless')}
             </span>
             <span className="text-[10px] font-bold tabular-nums text-[#FFD700]">
-              Lv {subTier.current} · ∞
+              {t('level short')} {subTier.current} · ∞
             </span>
           </div>
           <div className="relative flex h-1.5 w-full overflow-hidden rounded-full bg-white/8">
@@ -277,10 +282,10 @@ function ChainLadder({ achievement }: ChainLadderProps) {
         <div className="mt-2 flex flex-col gap-1.5">
           <div className="flex items-center justify-between">
             <span className="text-[9px] font-bold uppercase tracking-wider text-[#FFD700]">
-              Mythic+ progression
+              {t('mythic progression')}
             </span>
             <span className="text-[10px] font-bold tabular-nums text-[#FFD700]">
-              Lv {subTier.current}/{subTier.max}
+              {t('level short')} {subTier.current}/{subTier.max}
             </span>
           </div>
           <div className="flex h-1.5 w-full overflow-hidden rounded-full bg-white/8">
