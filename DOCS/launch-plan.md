@@ -7,7 +7,9 @@
 > program is actually implemented, its rules graduate into `DOCS/DOCS.md` and the
 > corresponding section here is trimmed to a pointer.
 >
-> Last updated: 2026-07-18.
+> Last updated: 2026-07-24 — **§2.8 Founder Draw drafted** (the implementable
+> spec; supersedes the rejected §2.7 ladder). §2.8 has a "Decisions needed"
+> block at its end — those must be signed off before build.
 
 ---
 
@@ -216,10 +218,129 @@ referrals (friend reached a tier), reusing the existing `referralsCount` gate.
 
 ---
 
+## 2.8 Founder Draw — the implementable spec (supersedes §2.7)
+
+> **Status: DRAFT for sign-off.** This is the concrete, buildable version of the
+> Beta Early-Adopter Program. It replaces the §2.7 FP-ladder (rejected as too
+> generic). Magnitudes below are **anchored to the current economy** — not the
+> §2.7 table, which was written pre-rebalance and is ~30–40× out of scale (it
+> listed 40M LC / 500 LS; the whole 31-day Test-Quest now tops out at ~1.1M LC /
+> 200 LS for the single L1 winner). Nothing here is built yet.
+
+### 2.8.1 The core idea — the product's own mechanic, turned on its founders
+
+LuckyTicket365 **is** a lucky-ticket-and-draw app. So the on-brand beta reward is
+itself a draw: the founding cohort's activity mints an **exclusive Founder Ticket**
+(чеканится только в эти 31 день — never issued again), and at beta close a
+**Founder Draw** is held. This is what §2.7 lacked — it reads as _our_ mechanic,
+not a generic battle pass.
+
+Two layers, so effort is never purely random:
+
+1. **Guaranteed (deterministic) — the Founder Seal.** Every participant keeps a
+   permanent **Founder Seal** whose tier is set by how far they climbed, plus a
+   one-time bundle. Grind always pays.
+2. **Draw (probabilistic) — the FOMO upside.** Every Founder Ticket is one entry
+   in a raffle for a short list of **headline prizes**. More activity → more
+   entries → better odds, but anyone with ≥1 ticket can win.
+
+### 2.8.2 Reuse what already exists — no new tracking
+
+The **Test-Quest ("Тестировщик 31 → 1") is already the live beta activity ladder**
+(deployed; per-level drops; competitive crown decided at test end; step progress =
+lifetime profile totals, backend `b39312a`). The Founder Draw is the **finale
+layered on top of it**, not a parallel system:
+
+- **Seal tier = the Test-Quest level band the player reached.** No new "Founder
+  Points" counter (that was §2.7's generic move). The four Test-Quest zones map
+  1:1 to four seals.
+- **Draw entries = the same counters the Test-Quest already tracks** — `referrals`,
+  `adsWatched`, `ticketsSpent`, `engineUpgrades`, level reached. The backend
+  already has this data, so accrual is a derivation, not new instrumentation.
+
+### 2.8.3 Founder Seal bands (guaranteed, one-time, permanent seal)
+
+Keyed to the highest Test-Quest level reached. Bundles are **deliberately modest**
+next to the Test-Quest's own drops — the value is the _permanent_ perk + the
+never-again seal + the draw entry, not a second LC firehose. Each band supersedes
+the one below (you get your highest only).
+
+| Seal (permanent, never re-issued) | Reached            | One-time gift                    | Permanent perk (stacks as a 3rd engine-speed layer) |
+| --------------------------------- | ------------------ | -------------------------------- | --------------------------------------------------- |
+| **Bronze Founder**                | L20 (Silver wall)  | 25k LC · 10 LS · LP 2d           | — (seal only)                                       |
+| **Silver Founder**                | L15 (Gold wall)    | 75k LC · 25 LS · LP 5d           | +3% engine speed                                    |
+| **Gold Founder**                  | L4 (Platinum wall) | 150k LC · 50 LS · LP 10d · 1 ENG | +5% engine speed                                    |
+| **Diamond Founder**               | crown L3–L1        | 300k LC · 100 LS · VIP 14d       | +8% engine speed · +5% referral                     |
+
+- Engine-speed % stacks on top of `luckyPlayerEngineSpeedBoostPct` (10) /
+  `vipEngineSpeedBoostPct` (25), bounded by the existing 900s/ticket floor.
+- +5% referral only at Diamond (social players), on top of the 5/10/15/25% base
+  ladder — never the primary perk.
+
+### 2.8.4 Founder Ticket accrual (draw entries) — referrals are the lever
+
+| Source                 | Entries | Note                                                                                  |
+| ---------------------- | ------- | ------------------------------------------------------------------------------------- |
+| Test-Quest level taken | +2 each | up to ~60 for a full climb                                                            |
+| **Activated referral** | **+25** | the main growth lever; **activated only** (friend reached a tier)                     |
+| Ad watched during beta | +1 each | **double-counts** (revenue incentive); already daily-capped                           |
+| Development milestone  | +10     | first engine · first stake · first tournament win · email verified · each new AP tier |
+
+Per-person entry **cap** (anti-whale) so no single account sweeps the draw —
+draft **1500**.
+
+### 2.8.5 The Founder Draw (headline prizes, drawn at beta close)
+
+A handful of prizes, each Founder Ticket = one weighted entry. Everyone Bronze+
+keeps their guaranteed seal + bundle **regardless** of the draw outcome — the draw
+is pure upside.
+
+| Prize     | Count | Contents (DRAFT)                                                                             |
+| --------- | ----- | -------------------------------------------------------------------------------------------- |
+| **Grand** | 1     | **[real-money TON — amount TBD, see decisions]** + 1-of-1 **Genesis** seal + permanent VIP 5 |
+| **Major** | 3     | permanent VIP 3 · 100 LS                                                                     |
+| **Minor** | 10    | 1 premium engine · 50 LS                                                                     |
+
+### 2.8.6 Anti-abuse, timing, surfaces
+
+- **Anti-abuse:** referral entries only for **activated** referrals (reuse
+  `referralsCount` gate + existing self-referral guards); ads bounded by the live
+  `watchVideoDailyLimit`; per-person entry cap (§2.8.4); draw seed logged for
+  auditability.
+- **Timing:** 31-day window (§2.1). Draw executes at `end + curation window` (same
+  pattern as the tournament deferred-draw). Start/end are **absolute dates — TBD**.
+- **Surfaces:** _during_ beta — a "Founder" strip on the Test-Quest screen
+  (entries earned · current seal band · rough draw odds); _admin_ — entry
+  leaderboard, band distribution, prize config + a **draw-execution button**
+  (money-critical → same atomic compare-and-swap discipline as tournament
+  `finish()`, PR #1); _at close_ — a reveal animation for the draw + seal grant.
+
+### 2.8.7 Decisions needed from you (blockers before build)
+
+1. **Real money?** Does the Grand prize pay **TON**? If yes — how much, and note
+   the treasury: TON deposit/withdraw is built but **INERT** until
+   `TON_TREASURY_MNEMONIC`/`TON_API_KEY` are set and it's funded (see the
+   TON-Connect status). Alternative: an all-in-app Grand (huge LC + VIP + Genesis)
+   with no real-money dependency.
+2. **Exact beta start & end dates** (absolute) — drives the draw execution date.
+3. **Sign off / adjust the DRAFT magnitudes** in §2.8.3–2.8.5.
+4. **Naming:** metals (Bronze→Diamond Founder) for the bands + **Genesis** reserved
+   for the 1-of-1 Grand seal? Or Pioneer / OG / RU names?
+5. **Axis split** confirm: seal = level reached, draw = activity entries (my
+   proposal) — or fold everything into one entry count?
+
+Once 1–5 are answered these rules graduate into `DOCS/DOCS.md` and the build is:
+BE (Founder entry derivation + seal grant + atomic draw endpoint + admin config) →
+FE (Founder strip + reveal) → admin (config + draw button). Est. similar surface
+to the Test-Quest feature.
+
+---
+
 ## 3. Next steps
 
 1. Finalize the video hook, length, CTA link, and languages (§1.5).
 2. Decide whether the promo leads with the beta FOMO (§2.5).
 3. On "создавай" — build/update the Remotion video accordingly.
-4. Separately, spec the beta program mechanics (§2.6) for implementation; once
-   built, move its rules into `DOCS/DOCS.md`.
+4. Beta program is now spec'd — **§2.8 Founder Draw**. Blocked on the
+   **§2.8.7 decisions** (real-money TON? dates? magnitudes? naming?). Answer
+   those → build (BE → FE → admin) → graduate rules into `DOCS/DOCS.md`.
