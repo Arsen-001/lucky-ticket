@@ -2,9 +2,22 @@ import { stringIncludes } from '@/utils/global/string.utils';
 import type { LocaleType } from '@/types/types/locale.types';
 import type { FaqSection, LocalizedText } from '@/types/interfaces/faq.interfaces';
 
-/** Pick the text for the active locale, falling back to English. */
-export const getLocalizedText = (text: LocalizedText | undefined, locale: string): string =>
-  text?.[locale as LocaleType] ?? text?.en ?? '';
+/**
+ * Pick the text for the active locale, falling back to English.
+ *
+ * Resilient to a plain string: some backends (e.g. the legacy `/privacy`
+ * endpoint) still serve unlocalized `string` fields instead of a
+ * `LocalizedText` map. In that case the string is returned as-is rather than
+ * rendering empty, so the screen degrades to unlocalized copy instead of blank.
+ */
+export const getLocalizedText = (
+  text: LocalizedText | string | undefined,
+  locale: string
+): string => {
+  if (text == null) return '';
+  if (typeof text === 'string') return text;
+  return text[locale as LocaleType] ?? text.en ?? '';
+};
 
 export const filterSections = (sections: FaqSection[], searchValue: string, locale: string) => {
   return sections
