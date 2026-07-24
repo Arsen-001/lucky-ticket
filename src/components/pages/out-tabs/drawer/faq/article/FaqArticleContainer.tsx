@@ -3,7 +3,7 @@
 import { useLocale } from 'next-intl';
 import { useGetFaqArticleByIdQuery } from '@/api/faq.api';
 import { QueryErrorState } from '@/components/shared/error/QueryErrorState';
-import { Term } from '@/components/shared/term/Term';
+import { FaqArticleBody } from './FaqArticleBody';
 import { getLocalizedText } from '@/utils/pages/faq.utils';
 
 interface FaqArticleContainerProps {
@@ -17,6 +17,10 @@ export function FaqArticleContainer({ id }: FaqArticleContainerProps) {
   if (isError) return <QueryErrorState onRetry={() => refetch()} />;
 
   return (
-    <Term loading={isLoading}>{data ? getLocalizedText(data.content, locale) : undefined}</Term>
+    <FaqArticleBody
+      loading={isLoading}
+      lead={data ? getLocalizedText(data.description, locale) : undefined}
+      content={data ? getLocalizedText(data.content, locale) : undefined}
+    />
   );
 }
