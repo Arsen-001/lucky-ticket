@@ -29,12 +29,14 @@ const view = () => {
     dailyTopLevel: DAILY_TOP_LEVEL,
     climbed,
     progress: Math.round((Math.min(climbed, QUALIFIED_CLIMBED) / QUALIFIED_CLIMBED) * 100),
-    task: def?.task ?? '',
+    // `task` (the one-line daily label) is no longer rendered — the checklist is
+    // keyed per level and localized — so the mock leaves it empty.
+    task: '',
     reward: {},
     rewardLabel: def?.drop ?? '',
     ladder: [...testQuestLadder]
       .sort((a, b) => b.level - a.level)
-      .map(l => ({ level: l.level, task: l.task, rewardLabel: l.drop })),
+      .map(l => ({ level: l.level, task: '', rewardLabel: l.drop })),
     claimableToday: !qualified,
     channelSubscribed,
     qualified,

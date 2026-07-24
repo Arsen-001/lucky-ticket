@@ -12,7 +12,7 @@ import {
 } from '@/api/testQuest.api';
 import { getTelegramWebApp } from '@/lib/telegram/telegram';
 import {
-  resolveTestQuestSteps,
+  getTestQuestSteps,
   TEST_QUEST_CHANNEL_URL,
   TEST_QUEST_START_LEVEL,
   testQuestLadder,
@@ -76,13 +76,11 @@ export function TestQuestChain({ className }: TestQuestChainProps) {
   const cards = data?.ladder?.length
     ? data.ladder.map(l => ({
         level: l.level,
-        task: l.task,
         drop: l.rewardLabel,
         crown: l.level < dailyTop,
       }))
     : LEVELS.map(l => ({
         level: l.level,
-        task: l.task,
         drop: l.drop,
         crown: l.zone === 'crown',
       }));
@@ -99,7 +97,7 @@ export function TestQuestChain({ className }: TestQuestChainProps) {
   const baselines: Partial<Record<TestQuestAction, number>> = {};
   for (const card of cards) {
     if (card.level <= currentLevel) continue; // only claimed levels
-    for (const step of resolveTestQuestSteps(card.level, card.task)) {
+    for (const step of getTestQuestSteps(card.level)) {
       if (step.action && step.target != null) {
         baselines[step.action] = Math.max(baselines[step.action] ?? 0, step.target);
       }
@@ -201,7 +199,6 @@ export function TestQuestChain({ className }: TestQuestChainProps) {
 
           <TestQuestSteps
             level={activeCard.level}
-            task={activeCard.task}
             claimed={activeLevel > currentLevel}
             ready={isToday && claimableToday}
             claiming={claiming}
