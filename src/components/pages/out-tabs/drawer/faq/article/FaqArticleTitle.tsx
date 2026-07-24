@@ -6,10 +6,9 @@ import { useGetFaqArticleByIdQuery } from '@/api/faq.api';
 import { SkeletonSuspense } from '@/components/shared/seleketons/SkeletonSuspense';
 import { Skeleton } from '@/components/shared/seleketons/Skeleton';
 import type { HTMLAttributes } from 'react';
-import { CopyButton } from '@/components/shared/buttons/CopyButton';
+import { FaqShareButton } from './FaqShareButton';
 import { routes } from '@/constants/routes';
 import { getLocalizedText } from '@/utils/pages/faq.utils';
-import { Share } from 'lucide-react';
 
 interface FaqArticleTitleProps extends HTMLAttributes<HTMLDivElement> {
   id: string;
@@ -24,16 +23,11 @@ export function FaqArticleTitle({ id, ...props }: FaqArticleTitleProps) {
       {...props}
       backRoute={routes.faq.index}
       extra={
-        //TODO: handle copy action
-        <CopyButton
+        <FaqShareButton
+          id={id}
+          title={data ? getLocalizedText(data.title, locale) : undefined}
           loading={isLoading}
-          value={'Some Text'}
-          variant="secondary"
-          className="p-2 text-sm"
-          iconSize={18}
-        >
-          <Share size={18} />
-        </CopyButton>
+        />
       }
       title={
         <SkeletonSuspense

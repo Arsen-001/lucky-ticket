@@ -168,6 +168,18 @@ export function TelegramProvider({ children }: { children: ReactNode }) {
     };
   }, [phase, booted]);
 
+  // Deep link: a shared FAQ article opens the app via `t.me/<bot>?startapp=faq-<id>`,
+  // which arrives as `start_param`. Once the app is up, jump to that article. A
+  // non-`faq-` param (e.g. a referral id) is left untouched for the backend.
+  const deepLinkHandled = useRef(false);
+  useEffect(() => {
+    if (!booted || deepLinkHandled.current) return;
+    deepLinkHandled.current = true;
+    const startParam = getTelegramWebApp()?.initDataUnsafe?.start_param;
+    const match = startParam?.match(/^faq[-_](.+)$/);
+    if (match) router.push(routes.faq.getById(match[1]));
+  }, [booted]);
+
   const retry = () => {
     const tg = getTelegramWebApp();
     if (tg?.initData) authenticate(tg.initData);
