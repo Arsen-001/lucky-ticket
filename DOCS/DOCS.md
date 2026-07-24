@@ -1316,6 +1316,16 @@ Avatars are a marketable cosmetic category with **two tiers** and a **10-level p
 
 Exact boost percentages per SKU are defined by the product team; the table above describes the **progression shape**, not fixed numbers.
 
+**Current paid avatar line-up** (the `AVATAR_CATALOG` `tier: 'paid'` entries, sold as Market cosmetics):
+
+| Avatar   | Level | Bound boost            | Daily reward | Price                   |
+| :------- | :---- | :--------------------- | :----------- | :---------------------- |
+| Champion | 6     | +5% engine speed       | +100 LC      | 500 000 LC / 250 ⭐     |
+| Legend   | 9     | +10% tournament reward | +5 ⭐        | 1 000 000 LC / 500 ⭐   |
+| Mythic   | 15    | +8% engine speed       | +8 ⭐        | 2 500 000 LC / 1 000 ⭐ |
+
+Buying one **charges once and grants permanent ownership** (a `UserAvatar` row): `GET /avatars` then reports it `owned`, and equipping a paid avatar is **gated on ownership** (`PATCH /me` rejects an unowned paid avatar). Re-buying an owned avatar is blocked. The listings are code-canonical (re-synced from the catalog on every boot), so admin price edits reset on restart — change prices in `avatars.catalog.ts`.
+
 **Rules:**
 
 - Avatar ownership is **permanent** — once acquired, the avatar stays in the user's inventory and the bound boost remains available whenever that avatar is equipped.

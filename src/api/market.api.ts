@@ -157,7 +157,13 @@ export const marketApi = api.injectEndpoints({
         method: 'POST',
         body: { cosmeticId, priceType: price.type },
       }),
-      invalidatesTags: [rtkTags.market, rtkTags.me, rtkTags.lc, rtkTags.lcTransactions],
+      invalidatesTags: [
+        rtkTags.market,
+        rtkTags.me,
+        rtkTags.avatars,
+        rtkTags.lc,
+        rtkTags.lcTransactions,
+      ],
       async onQueryStarted({ price }, { dispatch, queryFulfilled }) {
         const mePatch = dispatch(deductBalanceUpdater(price));
         try {
