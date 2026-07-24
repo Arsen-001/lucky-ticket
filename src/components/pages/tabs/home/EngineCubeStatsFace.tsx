@@ -32,7 +32,7 @@ export function EngineCubeStatsFace({
 }: EngineCubeStatsFaceProps) {
   const t = useAppTranslations();
   const isVipStatus = statusLabel === 'VIP';
-  const statusColor = isVipStatus ? '#f8bd3e' : 'var(--color-teal)';
+  const statusColor = isVipStatus ? 'var(--color-gold)' : 'var(--color-teal)';
 
   const createdLabel = createdAt ? dayjs(createdAt).format('MMM D, YYYY') : null;
   // Sub-1 rates must keep their fraction — a base bronze engine mints 0.5 T/H
@@ -98,7 +98,7 @@ export function EngineCubeStatsFace({
           <div className="flex items-center justify-between gap-2 text-white/55">
             <span className="flex items-center gap-1">
               {isVipStatus ? (
-                <Crown size={10} stroke="#f8bd3e" strokeWidth={2.4} />
+                <Crown size={10} stroke="var(--color-gold)" strokeWidth={2.4} />
               ) : (
                 <Sparkles size={10} stroke="var(--color-teal)" strokeWidth={2.4} />
               )}

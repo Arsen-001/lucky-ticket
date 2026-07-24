@@ -145,7 +145,7 @@ export function MarketUniversalCard({
         <SkeletonSuspense loading={loading} skeleton={<Skeleton variant="card" className="h-9" />}>
           {disabled ? (
             <div className="flex-center w-full gap-1 rounded-lg p-2 text-xs font-semibold bg-white/5 border border-white/8">
-              <Image src={icons.lock} alt="lock" className="h-4 w-auto object-contain" />
+              <Image src={icons.lock} alt="" className="h-4 w-auto object-contain" />
             </div>
           ) : prices && prices.length > 0 ? (
             <div className="flex gap-1.5">

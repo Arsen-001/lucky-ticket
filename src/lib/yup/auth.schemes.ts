@@ -43,7 +43,10 @@ export const getResetPasswordSchema = (t: Dictionary) =>
     password: yup
       .string()
       .required(t('password is required'))
-      .min(8, t('min length is {num}', { num: GlobalConstants.minPasswordLength })),
+      .min(
+        GlobalConstants.minPasswordLength,
+        t('min length is {num}', { num: GlobalConstants.minPasswordLength })
+      ),
     confirmPassword: yup
       .string()
       .oneOf([yup.ref('password')], t('passwords must match'))
