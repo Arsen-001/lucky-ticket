@@ -25,6 +25,8 @@ export interface EngineCubeBackFaceProps {
   statusLabel?: string;
   /** Speed-boost % from the equipped avatar (0 if none) — its own row when > 0. */
   avatarBoostPct?: number;
+  /** Speed-boost % from the frozen Test-Quest badge (0 if none) — its own row when > 0. */
+  badgeBoostPct?: number;
   speedChip?: InventoryChip;
   capacityChip?: InventoryChip;
   speedBooster?: InventoryBooster;
@@ -93,6 +95,7 @@ export function EngineCubeBackFace({
   luckyPlayerBoostPct = 0,
   statusLabel,
   avatarBoostPct = 0,
+  badgeBoostPct = 0,
   speedChip,
   capacityChip,
   speedBooster,
@@ -216,6 +219,20 @@ export function EngineCubeBackFace({
             <InlineStat
               icon={<Zap size={11} stroke={SPEED_ACCENT} strokeWidth={2.6} />}
               text={`+${avatarBoostPct}%`}
+            />
+            <InlineStat
+              icon={<Package size={11} stroke={CAPACITY_ACCENT} strokeWidth={2.6} />}
+              text="—"
+              dim
+            />
+          </StatRow>
+        )}
+
+        {badgeBoostPct > 0 && (
+          <StatRow label={t('badge')}>
+            <InlineStat
+              icon={<Zap size={11} stroke={SPEED_ACCENT} strokeWidth={2.6} />}
+              text={`+${badgeBoostPct}%`}
             />
             <InlineStat
               icon={<Package size={11} stroke={CAPACITY_ACCENT} strokeWidth={2.6} />}

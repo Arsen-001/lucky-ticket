@@ -169,6 +169,13 @@ export const effectiveCycleSeconds = (
     isLuckyPlayer?: boolean;
     isVip?: boolean;
     avatarBoostPct?: number;
+    /**
+     * Permanent Test-Quest ("Тестировщик") badge speed boost % — a third
+     * additive layer on top of the status/avatar boosts (see
+     * `testBadgeSpeedBoostPct`). Must be passed wherever the backend applies it
+     * (it does, in `computeEngineState`) or a badge holder's cycle drifts.
+     */
+    badgeBoostPct?: number;
     tables?: EngineLevelTables;
   }
 ) => {
@@ -183,7 +190,8 @@ export const effectiveCycleSeconds = (
     engineLevelBoostPct(engine.engineLevel || 1, options?.tables) +
     speedLevelBoostPct(engine.speedLevel || 0, options?.tables) +
     statusBoostPct +
-    (options?.avatarBoostPct ?? 0);
+    (options?.avatarBoostPct ?? 0) +
+    (options?.badgeBoostPct ?? 0);
 
   if (options?.speedChip) totalBoostPct += options.speedChip.effectPct;
   if (options?.speedBooster && isBoosterAlive(options.speedBooster)) {

@@ -24,6 +24,7 @@ import { useUnlockedTiers } from '@/hooks/useUnlockedTiers';
 import { useToast } from '@/hooks/useToast';
 import { useAppTranslations } from '@/hooks/useAppTranslations';
 import { useEngineSpeedAvatarBoostPct } from '@/hooks/useEngineSpeedAvatarBoostPct';
+import { useTestBadgeSpeedBoostPct } from '@/hooks/useTestBadgeSpeedBoostPct';
 import { useEngineConfig } from '@/hooks/useEngineConfig';
 import { TicketsEnum } from '@/types/enums/ticket.enums';
 import { findActiveBooster, findEquippedChip } from '@/utils/global/inventory.utils';
@@ -43,6 +44,7 @@ export function TicketsTabsView() {
   // without statusPerks → LP-only, matching the historical hardcoded gate.
   const canBulkClaim = me?.statusPerks ? me.statusPerks.bulkClaimEnabled : isLp;
   const avatarSpeedPct = useEngineSpeedAvatarBoostPct();
+  const badgeSpeedPct = useTestBadgeSpeedBoostPct();
   const { tables } = useEngineConfig();
   const [claimEngine] = useClaimEngineMutation();
   const [claimEnginesForTier] = useClaimEnginesForTierMutation();
@@ -94,6 +96,7 @@ export function TicketsTabsView() {
           isLuckyPlayer: isLp,
           isVip,
           avatarBoostPct: avatarSpeedPct,
+          badgeBoostPct: badgeSpeedPct,
           tables,
         });
         next[engine.id] = engine.pendingCount > 0 ? cycle : engineElapsedSeconds(engine);

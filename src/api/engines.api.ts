@@ -15,8 +15,10 @@ import {
 } from '@/utils/global/ticket-engine.utils';
 import { findActiveBooster, findEquippedChip } from '@/utils/global/inventory.utils';
 import { equippedAvatarEngineSpeedPct } from '@/utils/global/avatar.utils';
+import { testBadgeSpeedBoostPct } from '@/utils/global/testQuest.utils';
 import { inventoryApi } from '@/api/inventory.api';
 import { avatarsApi } from '@/api/avatars.api';
+import { testQuestApi } from '@/api/testQuest.api';
 import type { TicketEngine } from '@/types/interfaces/ticket.interfaces';
 import type { TicketType } from '@/types/types/ticket.types';
 
@@ -311,6 +313,14 @@ export const enginesApi = api.injectEndpoints({
           >[0]
         ).data;
         const avatarSpeedPct = equippedAvatarEngineSpeedPct(avatars, me?.avatarId);
+        // The frozen Test-Quest badge's engine-speed boost is permanent too, and
+        // the backend applies it to the real cycle (computeEngineState) — so the
+        // optimistic completion math must match, or a badge holder's engine shows
+        // a longer cycle than the server mints and skip/instant costs drift.
+        const testQuest = testQuestApi.endpoints.getTestQuest.select()(
+          getState() as Parameters<ReturnType<typeof testQuestApi.endpoints.getTestQuest.select>>[0]
+        ).data;
+        const badgeSpeedPct = testBadgeSpeedBoostPct(testQuest?.badgeLevel);
         const tables = levelTablesFromState(getState());
         const patch = dispatch(
           ticketsApi.util.updateQueryData('getTickets', undefined, draft => {
@@ -327,6 +337,7 @@ export const enginesApi = api.injectEndpoints({
                 isLuckyPlayer: me?.isLuckyPlayer ?? false,
                 isVip: me?.isVIP ?? false,
                 avatarBoostPct: avatarSpeedPct,
+                badgeBoostPct: badgeSpeedPct,
                 tables,
               });
               const elapsed = dayjs().diff(dayjs(engine.cycleStartedAt), 'second');

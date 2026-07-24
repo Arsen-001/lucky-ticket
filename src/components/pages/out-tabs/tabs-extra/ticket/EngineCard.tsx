@@ -4,6 +4,7 @@ import { twMerge } from 'tailwind-merge';
 import { useGetInventoryQuery } from '@/api/inventory.api';
 import { useGetMeQuery } from '@/api/me.api';
 import { useEngineSpeedAvatarBoostPct } from '@/hooks/useEngineSpeedAvatarBoostPct';
+import { useTestBadgeSpeedBoostPct } from '@/hooks/useTestBadgeSpeedBoostPct';
 import { useEngineConfig } from '@/hooks/useEngineConfig';
 import { EngineCardStatsHeader } from '@/components/pages/out-tabs/tabs-extra/ticket/EngineCardStatsHeader';
 import { EngineCardCycleRow } from '@/components/pages/out-tabs/tabs-extra/ticket/EngineCardCycleRow';
@@ -74,6 +75,7 @@ export function EngineCard({
     }),
   });
   const avatarSpeedPct = useEngineSpeedAvatarBoostPct();
+  const badgeSpeedPct = useTestBadgeSpeedBoostPct();
   const { tables, upgrade } = useEngineConfig();
   const speedChip = findEquippedChip(inventory?.chips, engine.id, 'speed');
   const speedBooster = findActiveBooster(inventory?.boosters, engine.id, 'speed');
@@ -87,6 +89,7 @@ export function EngineCard({
     isLuckyPlayer: isLp,
     isVip,
     avatarBoostPct: avatarSpeedPct,
+    badgeBoostPct: badgeSpeedPct,
     tables,
   });
   const capacity = engineCapacity(engine, { capacityChip, capacityBooster, tables });

@@ -31,6 +31,7 @@ import { TelegramStarIcon } from '@/components/shared/icons/TelegramStarIcon';
 import { useAppTranslations } from '@/hooks/useAppTranslations';
 import { useToast } from '@/hooks/useToast';
 import { useEngineSpeedAvatarBoostPct } from '@/hooks/useEngineSpeedAvatarBoostPct';
+import { useTestBadgeSpeedBoostPct } from '@/hooks/useTestBadgeSpeedBoostPct';
 import { chipEquipStarsCost } from '@/utils/global/inventory.utils';
 import type { InventoryChip } from '@/types/interfaces/inventory.interfaces';
 import { EmptyDataInfo } from '@/components/shared/EmptyDataInfo';
@@ -184,6 +185,7 @@ export function HomeEnginesSlider({ className }: ClassNameProps) {
   const isLp = me?.isLuckyPlayer ?? false;
   const isVip = me?.isVIP ?? false;
   const avatarSpeedPct = useEngineSpeedAvatarBoostPct();
+  const badgeSpeedPct = useTestBadgeSpeedBoostPct();
   const { tables, upgrade } = useEngineConfig();
 
   const requireStars = (cost: number, onPaid: () => void) => {
@@ -219,6 +221,7 @@ export function HomeEnginesSlider({ className }: ClassNameProps) {
           isLuckyPlayer: isLp,
           isVip,
           avatarBoostPct: avatarSpeedPct,
+          badgeBoostPct: badgeSpeedPct,
           tables,
         });
         if (engine.pendingCount > 0) {
@@ -357,6 +360,7 @@ export function HomeEnginesSlider({ className }: ClassNameProps) {
       isLuckyPlayer: isLp,
       isVip,
       avatarBoostPct: avatarSpeedPct,
+      badgeBoostPct: badgeSpeedPct,
       tables,
     });
     const elapsed = elapsedByEngine[engine.id] ?? engineElapsedSeconds(engine);

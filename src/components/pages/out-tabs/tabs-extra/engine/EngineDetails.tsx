@@ -24,6 +24,7 @@ import { StarsTopUpFlow } from '@/components/pages/tabs/home/StarsTopUpFlow';
 import { useAppTranslations } from '@/hooks/useAppTranslations';
 import { useToast } from '@/hooks/useToast';
 import { useEngineSpeedAvatarBoostPct } from '@/hooks/useEngineSpeedAvatarBoostPct';
+import { useTestBadgeSpeedBoostPct } from '@/hooks/useTestBadgeSpeedBoostPct';
 import { useEngineConfig } from '@/hooks/useEngineConfig';
 import {
   chipEquipStarsCost,
@@ -60,6 +61,7 @@ export function EngineDetails({ id }: EngineDetailsProps) {
   const isLp = me?.isLuckyPlayer ?? false;
   const isVip = me?.isVIP ?? false;
   const avatarSpeedPct = useEngineSpeedAvatarBoostPct();
+  const badgeSpeedPct = useTestBadgeSpeedBoostPct();
   const { tables, upgrade } = useEngineConfig();
 
   const [equipChipMutation] = useEquipChipMutation();
@@ -116,6 +118,7 @@ export function EngineDetails({ id }: EngineDetailsProps) {
         isLuckyPlayer: isLp,
         isVip,
         avatarBoostPct: avatarSpeedPct,
+        badgeBoostPct: badgeSpeedPct,
         tables,
       });
       const elapsed =
@@ -132,7 +135,17 @@ export function EngineDetails({ id }: EngineDetailsProps) {
     tick();
     const intervalId = window.setInterval(tick, 1000);
     return () => window.clearInterval(intervalId);
-  }, [engine, speedChip, speedBooster, isLp, isVip, avatarSpeedPct, tables, completeEngineCycle]);
+  }, [
+    engine,
+    speedChip,
+    speedBooster,
+    isLp,
+    isVip,
+    avatarSpeedPct,
+    badgeSpeedPct,
+    tables,
+    completeEngineCycle,
+  ]);
 
   if (isLoading) {
     return (
@@ -167,6 +180,7 @@ export function EngineDetails({ id }: EngineDetailsProps) {
     isLuckyPlayer: isLp,
     isVip,
     avatarBoostPct: avatarSpeedPct,
+    badgeBoostPct: badgeSpeedPct,
     tables,
   });
   // Productivity is "before time-limited booster" but *with* permanent boosts
@@ -176,6 +190,7 @@ export function EngineDetails({ id }: EngineDetailsProps) {
     isLuckyPlayer: isLp,
     isVip,
     avatarBoostPct: avatarSpeedPct,
+    badgeBoostPct: badgeSpeedPct,
     tables,
   });
   const baseCapacity = engineCapacity(engine, { capacityChip, tables });

@@ -10,6 +10,7 @@ import { EngineLevelBadge } from '@/components/pages/out-tabs/tabs-extra/ticket/
 import { EngineNextInFill } from '@/components/pages/out-tabs/tabs-extra/ticket/EngineNextInFill';
 import { useAppTranslations } from '@/hooks/useAppTranslations';
 import { useEngineSpeedAvatarBoostPct } from '@/hooks/useEngineSpeedAvatarBoostPct';
+import { useTestBadgeSpeedBoostPct } from '@/hooks/useTestBadgeSpeedBoostPct';
 import { useEngineConfig } from '@/hooks/useEngineConfig';
 import { routes } from '@/constants/routes';
 import { findActiveBooster, findEquippedChip } from '@/utils/global/inventory.utils';
@@ -55,6 +56,7 @@ export function EnginePreviewCard({
   const { data: inventory } = useGetInventoryQuery();
   const { data: me } = useGetMeQuery();
   const avatarSpeedPct = useEngineSpeedAvatarBoostPct();
+  const badgeSpeedPct = useTestBadgeSpeedBoostPct();
   const { tables } = useEngineConfig();
   const speedChip = findEquippedChip(inventory?.chips, engine.id, 'speed');
   const speedBooster = findActiveBooster(inventory?.boosters, engine.id, 'speed');
@@ -67,6 +69,7 @@ export function EnginePreviewCard({
     isLuckyPlayer: me?.isLuckyPlayer ?? false,
     isVip: me?.isVIP ?? false,
     avatarBoostPct: avatarSpeedPct,
+    badgeBoostPct: badgeSpeedPct,
     tables,
   });
   const capacity = engineCapacity(engine, { capacityChip, capacityBooster, tables });

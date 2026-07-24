@@ -16,6 +16,7 @@ import {
 import { useGetInventoryQuery } from '@/api/inventory.api';
 import { useGetMeQuery } from '@/api/me.api';
 import { useEngineSpeedAvatarBoostPct } from '@/hooks/useEngineSpeedAvatarBoostPct';
+import { useTestBadgeSpeedBoostPct } from '@/hooks/useTestBadgeSpeedBoostPct';
 import { useEngineConfig } from '@/hooks/useEngineConfig';
 import { GlobalConstants } from '@/constants/global.constants';
 import {
@@ -102,6 +103,7 @@ function EngineCardCubeImpl(props: EngineCardCubeProps) {
       ? GlobalConstants.luckyPlayerEngineSpeedBoostPct
       : 0;
   const avatarSpeedPct = useEngineSpeedAvatarBoostPct();
+  const badgeSpeedPct = useTestBadgeSpeedBoostPct();
   const { tables } = useEngineConfig();
 
   // BASE row on the stats face = the engine's factory starting point: exactly
@@ -123,6 +125,7 @@ function EngineCardCubeImpl(props: EngineCardCubeProps) {
     isLuckyPlayer: isLp,
     isVip,
     avatarBoostPct: avatarSpeedPct,
+    badgeBoostPct: badgeSpeedPct,
     tables,
   });
   const productivityCapacity = engineCapacity(engine, {
@@ -138,6 +141,7 @@ function EngineCardCubeImpl(props: EngineCardCubeProps) {
     speedLevelBoostPct(speedLevel, tables) +
     statusEngineSpeedBoostPct +
     avatarSpeedPct +
+    badgeSpeedPct +
     (equippedSpeedChip?.effectPct ?? 0) +
     (activeSpeedBooster?.effectPct ?? 0);
 
@@ -276,6 +280,7 @@ function EngineCardCubeImpl(props: EngineCardCubeProps) {
             luckyPlayerBoostPct={statusEngineSpeedBoostPct}
             statusLabel={statusLabel}
             avatarBoostPct={avatarSpeedPct}
+            badgeBoostPct={badgeSpeedPct}
             speedChip={equippedSpeedChip}
             capacityChip={equippedCapacityChip}
             speedBooster={activeSpeedBooster}
