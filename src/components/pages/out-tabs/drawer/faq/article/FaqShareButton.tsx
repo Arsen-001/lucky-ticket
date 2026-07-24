@@ -7,6 +7,7 @@ import { getTelegramWebApp } from '@/lib/telegram/telegram';
 import { useToast } from '@/hooks/useToast';
 import { useAppTranslations } from '@/hooks/useAppTranslations';
 import { GlobalConstants } from '@/constants/global.constants';
+import { buildDeepLinkParam } from '@/utils/global/deep-link.utils';
 
 interface FaqShareButtonProps {
   id: string;
@@ -22,7 +23,7 @@ export function FaqShareButton({ id, title, loading }: FaqShareButtonProps) {
   // Deep link that reopens the Mini App straight to this article — the
   // `faq-<id>` `start_param` is parsed on boot in TelegramProvider. A plain web
   // URL can't carry `start_param`, so this must go through the bot link.
-  const link = `${GlobalConstants.telegramBotUrl}?startapp=faq-${id}`;
+  const link = `${GlobalConstants.telegramBotUrl}?startapp=${buildDeepLinkParam('faq', id)}`;
 
   const handleShare = async () => {
     const text = title ?? t('faq');

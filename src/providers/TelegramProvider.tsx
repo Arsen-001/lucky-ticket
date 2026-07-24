@@ -7,6 +7,7 @@ import { useTelegramLoginMutation } from '@/api/auth.api';
 import { getTelegramWebApp } from '@/lib/telegram/telegram';
 import { getAccessTokenCk, getRefreshTokenCk } from '@/services/cookie.service';
 import { routes } from '@/constants/routes';
+import { resolveStartParamRoute } from '@/utils/global/deep-link.utils';
 import { TelegramSplash } from '@/components/telegram/TelegramSplash';
 
 type Phase = 'pending' | 'authenticating' | 'ready' | 'error';
@@ -168,16 +169,16 @@ export function TelegramProvider({ children }: { children: ReactNode }) {
     };
   }, [phase, booted]);
 
-  // Deep link: a shared FAQ article opens the app via `t.me/<bot>?startapp=faq-<id>`,
-  // which arrives as `start_param`. Once the app is up, jump to that article. A
-  // non-`faq-` param (e.g. a referral id) is left untouched for the backend.
+  // Deep link: a shared in-app link opens the app via `t.me/<bot>?startapp=<param>`,
+  // which arrives as `start_param`. Once the app is up, route to the target it
+  // names. A non-deep-link param (e.g. a referral id) resolves to null and is
+  // left untouched for the backend. New targets are added in `deep-link.utils`.
   const deepLinkHandled = useRef(false);
   useEffect(() => {
     if (!booted || deepLinkHandled.current) return;
     deepLinkHandled.current = true;
-    const startParam = getTelegramWebApp()?.initDataUnsafe?.start_param;
-    const match = startParam?.match(/^faq[-_](.+)$/);
-    if (match) router.push(routes.faq.getById(match[1]));
+    const route = resolveStartParamRoute(getTelegramWebApp()?.initDataUnsafe?.start_param);
+    if (route) router.push(route);
   }, [booted]);
 
   const retry = () => {
