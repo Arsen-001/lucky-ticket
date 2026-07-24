@@ -195,7 +195,6 @@
   "choose your language": "Wähle deine Sprache",
   "claim": "Einlösen",
   "claim all": "Alle einlösen",
-  "claim failed": "Abholen fehlgeschlagen",
   "claim failed description": "Server nicht erreichbar. Tippe „Wiederholen\" zum erneuten Versuchen.",
   "claim from {count} friends": "Von {count, plural, =1 {# Freund} other {# Freunden}} einlösen",
   "claim locked steps remaining": "Noch {remaining} Schritte",
