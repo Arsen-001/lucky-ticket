@@ -1,5 +1,6 @@
 import Script from 'next/script';
 import { StoreProvider } from '@/providers/StoreProvider';
+import { AppLifecycleProvider } from '@/providers/AppLifecycleProvider';
 import { NavigationHistoryProvider } from '@/providers/NavigationHistoryProvider';
 import { TelegramProvider } from '@/providers/TelegramProvider';
 import { TonConnectProvider } from '@/providers/TonConnectProvider';
@@ -72,6 +73,7 @@ export default async function RootLayout({ children }: ChildrenProps) {
             hydration bugs in the app content still surface. */}
         <body suppressHydrationWarning>
           <div id="scroll-container">
+            <AppLifecycleProvider />
             <NextIntlClientProvider>
               <NavigationHistoryProvider>
                 <TonConnectProvider>

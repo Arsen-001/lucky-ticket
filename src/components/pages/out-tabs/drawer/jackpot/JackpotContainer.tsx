@@ -15,6 +15,8 @@ export function JackpotContainer() {
   // skims (the scheduler finishes due tournaments about once a minute).
   const { data, isLoading, isError, refetch } = useGetJackpotQuery(undefined, {
     pollingInterval: 60_000,
+    // Don't keep polling a backgrounded Mini App — resumes on refocus.
+    skipPollingIfUnfocused: true,
   });
   const { data: winners, isLoading: winnersLoading } = useGetJackpotWinnersQuery();
 

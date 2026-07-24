@@ -44,3 +44,14 @@
     @apply scrollbar-hidden;
   }
 }
+
+/* Long-session resilience — see AppLifecycleProvider. While the Mini App is
+   backgrounded (`data-app-hidden` set on <html>), pause every running animation
+   so a hidden tab isn't burning the compositor on infinite shine/blink/spin
+   loops the whole time it's away. Unlayered + !important so it overrides the
+   per-utility animation declarations regardless of cascade-layer order. */
+html[data-app-hidden='true'] *,
+html[data-app-hidden='true'] *::before,
+html[data-app-hidden='true'] *::after {
+  animation-play-state: paused !important;
+}

@@ -36,7 +36,11 @@ export type TelegramEvent =
   | 'contentSafeAreaChanged'
   | 'fullscreenChanged'
   | 'fullscreenFailed'
-  | 'viewportChanged';
+  | 'viewportChanged'
+  // Bot API 8.0+ — Mini App moved to the fore/background inside the Telegram
+  // client. Used by AppLifecycleProvider; harmless no-ops on older clients.
+  | 'activated'
+  | 'deactivated';
 
 export interface TelegramWebApp {
   /** Signed, URL-encoded init data — the credential the backend verifies. */

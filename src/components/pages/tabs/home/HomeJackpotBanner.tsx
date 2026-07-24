@@ -26,6 +26,8 @@ export function HomeJackpotBanner() {
   const t = useAppTranslations();
   const { data: jackpot, isLoading } = useGetJackpotQuery(undefined, {
     pollingInterval: 60_000,
+    // Don't keep polling a backgrounded Mini App — resumes on refocus.
+    skipPollingIfUnfocused: true,
   });
 
   const [display, setDisplay] = useState(0);
