@@ -1282,6 +1282,10 @@ The two on-chain money paths only exist when the backend has a **treasury wallet
 
 Independently of the treasury, withdrawals and LC→TON conversion also honour the admin kill switch `withdrawalsEnabled`, the live `minWithdrawalLc` minimum, and the §6.1 fee/daily cap.
 
+**`TON_API_KEY` is required in practice, not optional.** A single withdrawal costs one `getSeqno`, the broadcast, up to 20 confirmation polls (one every 2 s) and a final transaction read — roughly 0.5 req/s for up to 40 s, on top of the deposit watcher's 40 s cycle. Unauthenticated Toncenter allows about 1 req/s per IP, so without a key the broadcast reliably fails with HTTP 429 (verified on a testnet dry run, 2026-07-25). Keys are network-bound: a testnet key answers `Network not allowed` on mainnet, and Toncenter accepts the key **only as the `X-API-Key` header** — a `?api_key=` query parameter is rejected as "API key does not exist".
+
+A treasury-side failure never silently eats a balance: the withdrawal reserves the amount, and if the broadcast throws it refunds the reservation and writes no transaction (verified across three consecutive induced failures). An unreachable TON API surfaces as **503** `ton-api-unavailable` rather than a raw 500.
+
 ### Note on conversions
 
 LC and LS do not convert into each other, and LS cannot be withdrawn. There is no LC deposit — LC is obtained only by playing, and leaves the economy by converting to TON (Action Section 4).
