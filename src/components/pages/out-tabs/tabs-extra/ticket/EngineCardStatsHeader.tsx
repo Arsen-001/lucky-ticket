@@ -14,19 +14,16 @@ const CAPACITY_ACCENT = '#FFE08A';
 
 export interface EngineCardStatsHeaderProps {
   tier: TicketType;
-  index: number;
   engineLevel: number;
   cycle: number;
   capacity: number;
   compact: boolean;
   reactorVisual: 'ticket' | 'engine';
   tourAnchor: boolean;
-  /** False where the screen already names the engine in its page header. */
-  showName: boolean;
 }
 
 /**
- * The engine's identity row — reactor visual, level badge, name and the
+ * The engine's identity row — reactor visual, level badge and the
  * cycle/capacity stat pills. Its inputs (tier, level, cycle, capacity) change
  * only on an UPGRADE, never on a claim/skip/countdown tick, so `memo` keeps this
  * subtree — including the reactor image — from re-rendering while the cycle row
@@ -35,14 +32,12 @@ export interface EngineCardStatsHeaderProps {
  */
 function EngineCardStatsHeaderImpl({
   tier,
-  index,
   engineLevel,
   cycle,
   capacity,
   compact,
   reactorVisual,
   tourAnchor,
-  showName,
 }: EngineCardStatsHeaderProps) {
   const t = useAppTranslations();
 
@@ -72,16 +67,6 @@ function EngineCardStatsHeaderImpl({
           )}
         >
           <EngineLevelBadge level={engineLevel} tier={tier} />
-          {showName && (
-            <span
-              className={twMerge(
-                'font-extrabold text-white leading-tight',
-                compact ? 'text-[13px]' : 'text-sm ml-0'
-              )}
-            >
-              {t('engine number', { number: index + 1 })}
-            </span>
-          )}
         </div>
         <div
           className={twMerge(
