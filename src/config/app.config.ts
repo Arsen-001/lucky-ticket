@@ -209,6 +209,12 @@ export const appConfig = {
     tonUsdRate: 1.5,
     /** Flat TON network fee charged on a withdrawal. */
     withdrawFeeTon: 0.05,
+    /**
+     * Fallback minimum for an LC→TON conversion. The live value is served by
+     * `GET /config` (see `useWalletLimits`) — the backend rejects anything
+     * below it, so the form must validate against the same number.
+     */
+    minWithdrawLc: 10_000,
     /** USD value of one LC — used to price the LC → TON conversion (DOCS §6.1): $1 = 1,000,000 LC. */
     lcUsdRate: 0.000001,
     /** USD anchor of one Lucky Star (LS) — the Stars packages are priced off it. */

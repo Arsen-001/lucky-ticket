@@ -427,6 +427,7 @@
   "min {amount} {coin}": "Мин {amount} {coin}",
   "minimum withdrawal": "Минимум для вывода",
   "minimum withdrawal {n} ton": "Минимум для вывода — {n} TON",
+  "minimum conversion {n} lc": "Минимальная конвертация — {n} LC",
   "minute": "минута",
   "minutes": "минут",
   "monthly": "Ежемесячно",

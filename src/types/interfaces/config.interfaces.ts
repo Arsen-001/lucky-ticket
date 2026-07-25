@@ -63,6 +63,18 @@ export interface PublicConfig {
       engineLevelBaseCapacity: number[];
     };
   };
+  /**
+   * Withdrawal limits the wallet forms validate against (admin-editable). The
+   * server enforces exactly these, so a form built on them can't invite an
+   * amount the API then rejects.
+   */
+  wallet?: {
+    /** Flat fee charged ON TOP of a withdrawal — the recipient gets the amount. */
+    withdrawFeeTon: number;
+    minWithdrawTon: number;
+    /** Minimum LC per LC→TON conversion. */
+    minWithdrawLc: number;
+  };
   /** Stake builder display knobs (admin-editable, DOCS §18). */
   stakes?: {
     durationMinMonths: number;

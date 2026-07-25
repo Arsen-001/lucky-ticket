@@ -7,12 +7,8 @@ import { Input } from '@/components/shared/form-elements/inputs/Input';
 import { useAppTranslations } from '@/hooks/useAppTranslations';
 import { useToast } from '@/hooks/useToast';
 import { useWithdrawTonMutation } from '@/api/wallet.api';
-import {
-  isValidTonAddress,
-  walletConstants,
-  formatTon,
-  tonScanUrl,
-} from '@/utils/pages/wallet.utils';
+import { isValidTonAddress, formatTon, tonScanUrl } from '@/utils/pages/wallet.utils';
+import { useWalletLimits } from '@/hooks/useWalletLimits';
 import { CheckCircle2, ExternalLink } from 'lucide-react';
 import { WithdrawSummaryRow } from './WithdrawSummaryRow';
 import type { TonNetwork } from '@/types/interfaces/wallet.interfaces';
@@ -39,21 +35,21 @@ export function WithdrawTonModal({ open, onClose, tonBalance, network }: Withdra
   // The backend sends `amount` to the recipient and debits `amount + fee`, so
   // the entered number is what ARRIVES. This used to render "you will receive"
   // as amount − fee, quoting the fee twice and understating the payout.
-  const fee = walletConstants.TON_NETWORK_FEE;
+  // Fee and minimum come from the server, which enforces exactly these.
+  const { withdrawFeeTon: fee, minWithdrawTon } = useWalletLimits();
   const totalDebited = numericAmount > 0 ? numericAmount + fee : 0;
 
   const error = useMemo<string | null>(() => {
     if (!toAddress) return null;
     if (!isValidTonAddress(toAddress)) return t('invalid ton address');
     if (numericAmount <= 0) return null;
-    if (numericAmount < walletConstants.TON_MIN_WITHDRAW)
-      return t('minimum withdrawal {n} ton', { n: walletConstants.TON_MIN_WITHDRAW });
+    if (numericAmount < minWithdrawTon)
+      return t('minimum withdrawal {n} ton', { n: minWithdrawTon });
     if (numericAmount + fee > tonBalance) return t('insufficient balance');
     return null;
-  }, [toAddress, numericAmount, fee, tonBalance, t]);
+  }, [toAddress, numericAmount, fee, minWithdrawTon, tonBalance, t]);
 
-  const canSubmit =
-    !error && isValidTonAddress(toAddress) && numericAmount >= walletConstants.TON_MIN_WITHDRAW;
+  const canSubmit = !error && isValidTonAddress(toAddress) && numericAmount >= minWithdrawTon;
 
   const handleClose = () => {
     setStep('form');
@@ -134,7 +130,7 @@ export function WithdrawTonModal({ open, onClose, tonBalance, network }: Withdra
               />
               <WithdrawSummaryRow
                 label={t('minimum withdrawal')}
-                value={`${formatTon(walletConstants.TON_MIN_WITHDRAW, 4)} TON`}
+                value={`${formatTon(minWithdrawTon, 4)} TON`}
               />
             </div>
 

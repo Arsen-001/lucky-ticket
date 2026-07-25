@@ -11,6 +11,7 @@ import { formatNumber } from '@/utils/global/number.utils';
 import { lcToTon } from '@/utils/global/lc.utils';
 import { useLcUsdRate } from '@/hooks/useLcUsdRate';
 import { useTonUsdRate } from '@/hooks/useTonUsdRate';
+import { useWalletLimits } from '@/hooks/useWalletLimits';
 
 type Step = 'select' | 'success';
 
@@ -43,10 +44,14 @@ export function LcConvertTonModal({ open, onClose, balance }: LcConvertTonModalP
   // what the backend credits — TON's price is a market feed, not a constant.
   const lcUsdRate = useLcUsdRate();
   const tonUsdRate = useTonUsdRate();
+  const { minWithdrawLc } = useWalletLimits();
   const amount = Number(lcInput) || 0;
   const tonOut = lcToTon(amount, lcUsdRate, tonUsdRate);
   const insufficient = amount > balance;
-  const canSubmit = amount > 0 && !insufficient;
+  // The backend rejects anything under the minimum with a 400. Without this the
+  // form happily submitted it and the player got a generic "action failed".
+  const belowMinimum = amount > 0 && amount < minWithdrawLc;
+  const canSubmit = amount > 0 && !insufficient && !belowMinimum;
 
   const handleMax = () => setLcInput(String(balance));
 
@@ -162,6 +167,11 @@ export function LcConvertTonModal({ open, onClose, balance }: LcConvertTonModalP
 
             {insufficient && (
               <p className="text-error text-[11px] font-semibold">{t('insufficient lc balance')}</p>
+            )}
+            {!insufficient && belowMinimum && (
+              <p className="text-error text-[11px] font-semibold">
+                {t('minimum conversion {n} lc', { n: formatNumber(minWithdrawLc) })}
+              </p>
             )}
 
             <button

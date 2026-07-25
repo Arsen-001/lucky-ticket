@@ -12,6 +12,11 @@ const getPublicConfig = (): PublicConfig => ({
   lcUsdRate: appConfig.wallet.lcUsdRate,
   tonUsdRate: appConfig.wallet.tonUsdRate,
   lsUsdRate: appConfig.wallet.lsUsdRate,
+  wallet: {
+    withdrawFeeTon: appConfig.wallet.withdrawFeeTon,
+    minWithdrawTon: 0.1,
+    minWithdrawLc: appConfig.wallet.minWithdrawLc,
+  },
   adsEnabled: true,
   partnersEnabled: appConfig.partners.enabled,
   referral: {

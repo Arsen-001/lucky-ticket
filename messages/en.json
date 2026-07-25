@@ -427,6 +427,7 @@
   "min {amount} {coin}": "Min {amount} {coin}",
   "minimum withdrawal": "Minimum withdrawal",
   "minimum withdrawal {n} ton": "Minimum withdrawal is {n} TON",
+  "minimum conversion {n} lc": "Minimum conversion is {n} LC",
   "minute": "minute",
   "minutes": "minutes",
   "monthly": "Monthly",
