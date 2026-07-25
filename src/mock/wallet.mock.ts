@@ -63,11 +63,16 @@ const getOnchainTransactions = () => ({
     : [],
 });
 
+// Mirrors a backend whose treasury IS configured, so the full deposit flow
+// (send-from-wallet + QR + attribution comment) is developable locally. A real
+// deployment without a treasury returns `depositsEnabled: false` and no address.
 const getDepositAddress = (): DepositAddressResponse => ({
   address: mockDb.wallet.address ?? '',
   network: mockDb.wallet.network,
-  // Mock has no on-chain treasury → keep the passive QR/address UI.
-  viaWalletEnabled: false,
+  comment: 'mock-user-id',
+  payloadBase64: 'te6ccgEBAQEADgAAGAAAAABtb2NrLXVzZXI=',
+  viaWalletEnabled: true,
+  depositsEnabled: true,
 });
 
 /** POST wallet/connect — mark the wallet connected with the chosen provider. */

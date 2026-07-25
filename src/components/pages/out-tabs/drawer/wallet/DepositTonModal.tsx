@@ -10,6 +10,7 @@ import { Input } from '@/components/shared/form-elements/inputs/Input';
 import { useAppTranslations } from '@/hooks/useAppTranslations';
 import { useToast } from '@/hooks/useToast';
 import { useGetDepositAddressQuery } from '@/api/wallet.api';
+import { DepositUnavailableNotice } from '@/components/pages/out-tabs/drawer/wallet/DepositUnavailableNotice';
 import { tonConnectValidUntil, tonToNanoString } from '@/utils/pages/wallet.utils';
 
 interface DepositTonModalProps {
@@ -32,6 +33,10 @@ export function DepositTonModal({ open, onClose, onDeposited }: DepositTonModalP
   const address = data?.address ?? '';
   const comment = data?.comment;
   const viaWallet = !!data?.viaWalletEnabled && !!address && !!data?.payloadBase64;
+  // No treasury on the backend → no address to send to. Never render a QR in
+  // this state: the old fallback handed out the player's own (or a synthetic)
+  // address, so a real transfer went nowhere and was never credited.
+  const depositsUnavailable = !isLoading && (data?.depositsEnabled === false || !address);
   const numericAmount = Number(amount) || 0;
   const canSend = viaWallet && numericAmount > 0 && !sending;
 
@@ -124,39 +129,45 @@ export function DepositTonModal({ open, onClose, onDeposited }: DepositTonModalP
           </div>
         )}
 
-        <div className="flex-center bg-background-overlay rounded-2xl p-3">
-          {isLoading || !qrSrc ? (
-            <div className="bg-background-overlay/60 h-[240px] w-[240px] animate-pulse rounded-xl" />
-          ) : (
-            <Image
-              src={qrSrc}
-              alt={t('deposit ton')}
-              width={240}
-              height={240}
-              unoptimized
-              className="rounded-xl"
-            />
-          )}
-        </div>
+        {depositsUnavailable ? (
+          <DepositUnavailableNotice />
+        ) : (
+          <>
+            <div className="flex-center bg-background-overlay rounded-2xl p-3">
+              {isLoading || !qrSrc ? (
+                <div className="bg-background-overlay/60 h-[240px] w-[240px] animate-pulse rounded-xl" />
+              ) : (
+                <Image
+                  src={qrSrc}
+                  alt={t('deposit ton')}
+                  width={240}
+                  height={240}
+                  unoptimized
+                  className="rounded-xl"
+                />
+              )}
+            </div>
 
-        <div className="bg-background-overlay flex items-center gap-2 rounded-xl p-3">
-          <span className="text-pink-secondary flex-1 break-all font-mono text-[11px]">
-            {address || '—'}
-          </span>
-          <button
-            type="button"
-            onClick={() => copy(address, setCopied)}
-            disabled={!address}
-            className="text-pink-secondary hover:text-white disabled:opacity-50"
-            aria-label={t('copy address')}
-          >
-            {copied ? (
-              <Check size={16} className="text-success" strokeWidth={3} />
-            ) : (
-              <Copy size={16} />
-            )}
-          </button>
-        </div>
+            <div className="bg-background-overlay flex items-center gap-2 rounded-xl p-3">
+              <span className="text-pink-secondary flex-1 break-all font-mono text-[11px]">
+                {address || '—'}
+              </span>
+              <button
+                type="button"
+                onClick={() => copy(address, setCopied)}
+                disabled={!address}
+                className="text-pink-secondary hover:text-white disabled:opacity-50"
+                aria-label={t('copy address')}
+              >
+                {copied ? (
+                  <Check size={16} className="text-success" strokeWidth={3} />
+                ) : (
+                  <Copy size={16} />
+                )}
+              </button>
+            </div>
+          </>
+        )}
 
         {comment && (
           <>
@@ -191,10 +202,14 @@ export function DepositTonModal({ open, onClose, onDeposited }: DepositTonModalP
           </>
         )}
 
-        <div className="bg-warning/10 text-warning flex items-start gap-2 rounded-xl border border-warning/30 p-3">
-          <ShieldAlert size={14} className="mt-0.5 flex-shrink-0" strokeWidth={2.4} />
-          <p className="text-[11px] font-semibold leading-snug">{t('deposit warning ton only')}</p>
-        </div>
+        {!depositsUnavailable && (
+          <div className="bg-warning/10 text-warning flex items-start gap-2 rounded-xl border border-warning/30 p-3">
+            <ShieldAlert size={14} className="mt-0.5 flex-shrink-0" strokeWidth={2.4} />
+            <p className="text-[11px] font-semibold leading-snug">
+              {t('deposit warning ton only')}
+            </p>
+          </div>
+        )}
 
         <Button variant="secondary" onClick={handleClose} className="rounded-full px-4 py-2">
           {t('close')}

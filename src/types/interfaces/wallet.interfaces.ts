@@ -63,6 +63,12 @@ export interface DepositAddressResponse {
   payloadBase64?: string;
   /** True when the backend treasury is configured — enables send-from-wallet. */
   viaWalletEnabled?: boolean;
+  /**
+   * False when no treasury is configured: the backend then returns no address at
+   * all, because a transfer sent anywhere else could never be credited. The UI
+   * must show an "unavailable" state instead of a QR to send to.
+   */
+  depositsEnabled?: boolean;
 }
 
 export interface WithdrawTonRequest {

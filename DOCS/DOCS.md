@@ -1271,6 +1271,17 @@ LC reaches real money through **TON**. The user converts LC to TON at the fixed 
 - A **direct LC withdrawal** (LC straight to fiat/USDT, with its own minimums and commission) is **coming soon**.
 - LC cannot be bought with real money (no deposit); it enters the economy solely through play and leaves it only by conversion to TON.
 
+### On-chain deposits & withdrawals are treasury-gated
+
+The two on-chain money paths only exist when the backend has a **treasury wallet** configured (`TON_TREASURY_MNEMONIC`, plus `TON_API_KEY` / `TON_NETWORK`). Everything else on this page — connect, Telegram-Stars purchase, TON→LS exchange, LC→TON conversion, both histories — works regardless.
+
+- **Treasury configured:** deposits are watched and credited by comment attribution (~40–80 s), and a withdrawal really broadcasts from the treasury, recording the on-chain hash.
+- **No treasury:** `GET /wallet/deposit-address` returns **no address at all** and `depositsEnabled: false`; the deposit modal shows a "deposits are paused" notice. `POST /wallet/withdraw` returns **503** and the modal says withdrawals are paused.
+
+> The no-treasury state must never fake success. Until 2026-07-25 a withdrawal without a treasury debited the balance and wrote a `COMPLETED` row with a synthetic hash while nothing moved on-chain, and the deposit modal offered the player's own (or a synthetic) address to send to. Both were removed — an unavailable money path fails loudly.
+
+Independently of the treasury, withdrawals and LC→TON conversion also honour the admin kill switch `withdrawalsEnabled`, the live `minWithdrawalLc` minimum, and the §6.1 fee/daily cap.
+
 ### Note on conversions
 
 LC and LS do not convert into each other, and LS cannot be withdrawn. There is no LC deposit — LC is obtained only by playing, and leaves the economy by converting to TON (Action Section 4).

@@ -61,8 +61,11 @@ export function WithdrawTonModal({ open, onClose, tonBalance }: WithdrawTonModal
     try {
       await withdraw({ toAddress, amount: numericAmount }).unwrap();
       setStep('success');
-    } catch {
-      toast.error(t('action failed'));
+    } catch (error) {
+      // 503 = the backend has no treasury configured, so nothing can be sent
+      // on-chain. Say that plainly instead of a generic failure.
+      const status = (error as { status?: number })?.status;
+      toast.error(status === 503 ? t('withdrawals unavailable') : t('action failed'));
     }
   };
 
