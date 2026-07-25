@@ -7,6 +7,7 @@ import { Modal } from '@/components/shared/modals/Modal';
 import { TelegramStarIcon } from '@/components/shared/icons/TelegramStarIcon';
 import { useAppTranslations } from '@/hooks/useAppTranslations';
 import { useToast } from '@/hooks/useToast';
+import { useTonUsdRate } from '@/hooks/useTonUsdRate';
 import { useBuyStarsMutation } from '@/api/wallet.api';
 import { formatNumber } from '@/utils/global/number.utils';
 import { formatTon, starsToTon, tonToStars } from '@/utils/pages/wallet.utils';
@@ -29,6 +30,7 @@ export function ExchangeTonStarsModal({
 }: ExchangeTonStarsModalProps) {
   const t = useAppTranslations();
   const toast = useToast();
+  const tonUsdRate = useTonUsdRate();
   const [exchange, { isLoading }] = useBuyStarsMutation();
   const [step, setStep] = useState<Step>('select');
   const [input, setInput] = useState('');
@@ -43,8 +45,8 @@ export function ExchangeTonStarsModal({
   }, [open]);
 
   const tonAmount = Number(input) || 0;
-  const stars = tonToStars(tonAmount);
-  const cost = starsToTon(stars); // exact TON that will be charged
+  const stars = tonToStars(tonAmount, tonUsdRate);
+  const cost = starsToTon(stars, tonUsdRate); // exact TON that will be charged
   const insufficient = tonAmount > 0 && cost > tonBalance;
   const canSubmit = isConnected && stars >= 1 && !insufficient && !isLoading;
 

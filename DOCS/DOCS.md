@@ -1261,11 +1261,13 @@ Purchase LS with **Telegram Stars (XTR)** at a fixed **1:1 rate** — 1 Telegram
 
 #### 3. Buy Lucky Stars with TON
 
-Purchase LS by spending TON. The LS amount is computed from the live TON→USD rate against the $0.02/LS anchor, with a **volume bonus** on larger packages (e.g. +0% / +5% / +10% / +15%). This is a one-directional purchase path — LS is not converted back to TON.
+Purchase LS by spending TON. The LS amount is computed from the TON→USD rate against the $0.02/LS anchor, with a **volume bonus** on larger packages (e.g. +0% / +5% / +10% / +15%). This is a one-directional purchase path — LS is not converted back to TON.
+
+> **The TON→USD rate is a fixed constant, not a market feed.** `WALLET.tonUsdRate` (currently **3.42**) is a hardcoded backend value, served to the Mini App through `GET /config` and used for every TON-denominated price: this purchase, the LC→TON conversion, sponsored-tournament funding and the wallet's USD readout. Nothing polls an exchange. While TON's market price drifts from it, the platform sells LS and pays out LC conversions at the stale rate — in the platform's favour when TON falls, against it when TON rises. Changing it is a code change (one constant), and the Mini App picks it up automatically. Adding a real price feed is an open product decision.
 
 #### 4. Convert Lucky Coin to TON
 
-LC reaches real money through **TON**. The user converts LC to TON at the fixed **$0.000001/LC** valuation (priced against the live TON→USD rate); the resulting TON lands in the wallet's TON balance and is cashed out via the TON withdrawal path above. Conversions are subject to the **15% fee** and the **$10/day cap** from §6.1 (`appConfig.economy.lcConversion`).
+LC reaches real money through **TON**. The user converts LC to TON at the fixed **$0.000001/LC** valuation (priced against the TON→USD constant above); the resulting TON lands in the wallet's TON balance and is cashed out via the TON withdrawal path above. Conversions are subject to the **15% fee** and the **$10/day cap** from §6.1 (`appConfig.economy.lcConversion`).
 
 - The withdrawal action itself handles **TON only** — LC is never withdrawn directly.
 - A **direct LC withdrawal** (LC straight to fiat/USDT, with its own minimums and commission) is **coming soon**.

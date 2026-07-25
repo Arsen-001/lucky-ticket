@@ -14,16 +14,20 @@ import {
   tonScanUrl,
 } from '@/utils/pages/wallet.utils';
 import { CheckCircle2, ExternalLink } from 'lucide-react';
+import { WithdrawSummaryRow } from './WithdrawSummaryRow';
+import type { TonNetwork } from '@/types/interfaces/wallet.interfaces';
 
 interface WithdrawTonModalProps {
   open: boolean;
   onClose: () => void;
   tonBalance: number;
+  /** Chain the backend broadcasts on — decides which tonscan the receipt links to. */
+  network?: TonNetwork;
 }
 
 type Step = 'form' | 'confirm' | 'success';
 
-export function WithdrawTonModal({ open, onClose, tonBalance }: WithdrawTonModalProps) {
+export function WithdrawTonModal({ open, onClose, tonBalance, network }: WithdrawTonModalProps) {
   const t = useAppTranslations();
   const toast = useToast();
   const [withdraw, { isLoading, data: result }] = useWithdrawTonMutation();
@@ -32,8 +36,11 @@ export function WithdrawTonModal({ open, onClose, tonBalance }: WithdrawTonModal
   const [amount, setAmount] = useState('');
 
   const numericAmount = Number(amount) || 0;
+  // The backend sends `amount` to the recipient and debits `amount + fee`, so
+  // the entered number is what ARRIVES. This used to render "you will receive"
+  // as amount − fee, quoting the fee twice and understating the payout.
   const fee = walletConstants.TON_NETWORK_FEE;
-  const net = Math.max(0, numericAmount - fee);
+  const totalDebited = numericAmount > 0 ? numericAmount + fee : 0;
 
   const error = useMemo<string | null>(() => {
     if (!toAddress) return null;
@@ -115,9 +122,17 @@ export function WithdrawTonModal({ open, onClose, tonBalance }: WithdrawTonModal
             </div>
 
             <div className="bg-background-overlay/60 flex flex-col gap-1.5 rounded-xl p-3 text-[12px]">
-              <Row label={t('network fee')} value={`${formatTon(fee, 4)} TON`} />
-              <Row label={t('you will receive')} value={`${formatTon(net, 4)} TON`} emphasis />
-              <Row
+              <WithdrawSummaryRow
+                label={t('you will receive')}
+                value={`${formatTon(numericAmount, 4)} TON`}
+                emphasis
+              />
+              <WithdrawSummaryRow label={t('network fee')} value={`${formatTon(fee, 4)} TON`} />
+              <WithdrawSummaryRow
+                label={t('total debited')}
+                value={`${formatTon(totalDebited, 4)} TON`}
+              />
+              <WithdrawSummaryRow
                 label={t('minimum withdrawal')}
                 value={`${formatTon(walletConstants.TON_MIN_WITHDRAW, 4)} TON`}
               />
@@ -175,7 +190,7 @@ export function WithdrawTonModal({ open, onClose, tonBalance }: WithdrawTonModal
               {t('arrives in approximately {n} sec', { n: result.estimatedArrivalSec })}
             </p>
             <a
-              href={tonScanUrl(result.txHash)}
+              href={tonScanUrl(result.txHash, network)}
               target="_blank"
               rel="noopener noreferrer"
               className="text-electric-purple inline-flex items-center gap-1 text-[12px] font-bold"
@@ -190,22 +205,5 @@ export function WithdrawTonModal({ open, onClose, tonBalance }: WithdrawTonModal
         )}
       </div>
     </Modal>
-  );
-}
-
-function Row({ label, value, emphasis }: { label: string; value: string; emphasis?: boolean }) {
-  return (
-    <div className="flex items-center justify-between gap-2">
-      <span className="text-pink-secondary">{label}</span>
-      <span
-        className={
-          emphasis
-            ? 'text-gold font-extrabold tabular-nums'
-            : 'text-white font-semibold tabular-nums'
-        }
-      >
-        {value}
-      </span>
-    </div>
   );
 }

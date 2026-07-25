@@ -31,6 +31,7 @@ export function WalletContainer() {
   const {
     data: transactions,
     isLoading: isTxLoading,
+    isError: isTxError,
     refetch: refetchTransactions,
   } = useGetWalletTransactionsQuery();
   const { data: lcState } = useGetLcStateQuery();
@@ -38,6 +39,9 @@ export function WalletContainer() {
   const [modal, setModal] = useState<WalletModal>(null);
   const [pendingTopUp, setPendingTopUp] = useState<number | undefined>(undefined);
   const [historyTab, setHistoryTab] = useState<'app' | 'onchain'>('app');
+  const [depositWatch, setDepositWatch] = useState<{ polls: number; fromBalance: number } | null>(
+    null
+  );
 
   const isConnected = !!state?.isConnected;
   const tonBalance = state?.tonBalance ?? 0;
@@ -52,6 +56,24 @@ export function WalletContainer() {
     router.replace(routes.wallet, { scroll: false });
   }, [searchParams, router]);
 
+  // A real deposit is credited by the backend watcher (~40–80 s after it lands),
+  // so poll for a couple of minutes rather than firing one blind refetch on a
+  // timer that nothing cancels when the screen closes. Stops as soon as the
+  // balance moves, and on unmount.
+  useEffect(() => {
+    if (!depositWatch) return;
+    if (tonBalance > depositWatch.fromBalance || depositWatch.polls <= 0) {
+      setDepositWatch(null);
+      return;
+    }
+    const timer = setTimeout(() => {
+      refetch();
+      refetchTransactions();
+      setDepositWatch(watch => (watch ? { ...watch, polls: watch.polls - 1 } : null));
+    }, 15_000);
+    return () => clearTimeout(timer);
+  }, [depositWatch, tonBalance, refetch, refetchTransactions]);
+
   if (isError) return <QueryErrorState onRetry={() => refetch()} />;
 
   // TON-only actions (deposit / withdraw) require a connected wallet — open the
@@ -61,14 +83,7 @@ export function WalletContainer() {
     else void connect();
   };
 
-  // A real deposit is credited by the backend watcher within ~a minute — refresh
-  // the balance + history shortly after it's broadcast.
-  const handleDeposited = () => {
-    setTimeout(() => {
-      refetch();
-      refetchTransactions();
-    }, 45_000);
-  };
+  const handleDeposited = () => setDepositWatch({ polls: 8, fromBalance: tonBalance });
 
   return (
     <div className="flex flex-col gap-4 px-4 pb-8 pt-2">
@@ -119,12 +134,19 @@ export function WalletContainer() {
         </div>
 
         {historyTab === 'app' ? (
-          <WalletTransactionHistory
-            transactions={transactions}
-            loading={isTxLoading}
-            isConnected={isConnected}
-            hideHeader
-          />
+          // A failed history query must not read as "no transactions yet" —
+          // that is indistinguishable from a lost payment to the user.
+          isTxError ? (
+            <QueryErrorState onRetry={() => refetchTransactions()} className="pt-6" />
+          ) : (
+            <WalletTransactionHistory
+              transactions={transactions}
+              loading={isTxLoading}
+              isConnected={isConnected}
+              network={state?.network}
+              hideHeader
+            />
+          )
         ) : (
           <WalletOnchainHistory isConnected={isConnected} />
         )}
@@ -139,6 +161,7 @@ export function WalletContainer() {
         open={modal === 'withdraw'}
         onClose={() => setModal(null)}
         tonBalance={tonBalance}
+        network={state?.network}
       />
       <BuyStarsModal
         open={modal === 'buyStars'}

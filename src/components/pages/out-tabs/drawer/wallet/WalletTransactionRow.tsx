@@ -22,11 +22,13 @@ import { formatTon, formatRelativeTime, tonScanUrl } from '@/utils/pages/wallet.
 import { formatNumber } from '@/utils/global/number.utils';
 import type { CSSProperties } from 'react';
 import type { LucideIcon } from 'lucide-react';
-import type { WalletTransaction } from '@/types/interfaces/wallet.interfaces';
+import type { TonNetwork, WalletTransaction } from '@/types/interfaces/wallet.interfaces';
 
 export interface WalletTransactionRowProps {
   transaction?: WalletTransaction;
   loading?: boolean;
+  /** Chain the hash belongs to — a testnet hash 404s on mainnet tonscan. */
+  network?: TonNetwork;
   style?: CSSProperties;
   className?: string;
 }
@@ -78,6 +80,7 @@ const STATUS_CLASS: Record<WalletTransactionStatus, string> = {
 export function WalletTransactionRow({
   transaction,
   loading,
+  network,
   style,
   className,
 }: WalletTransactionRowProps) {
@@ -159,7 +162,7 @@ export function WalletTransactionRow({
         </SkeletonSuspense>
         {transaction.txHash && (
           <a
-            href={tonScanUrl(transaction.txHash)}
+            href={tonScanUrl(transaction.txHash, network)}
             target="_blank"
             rel="noopener noreferrer"
             className="text-pink-secondary hover:text-white inline-flex items-center gap-0.5 text-[10px] font-semibold transition-colors"

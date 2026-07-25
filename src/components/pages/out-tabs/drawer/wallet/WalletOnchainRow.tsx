@@ -11,11 +11,13 @@ import {
   truncateAddress,
 } from '@/utils/pages/wallet.utils';
 import type { CSSProperties } from 'react';
-import type { OnchainTransaction } from '@/types/interfaces/wallet.interfaces';
+import type { OnchainTransaction, TonNetwork } from '@/types/interfaces/wallet.interfaces';
 
 export interface WalletOnchainRowProps {
   transaction?: OnchainTransaction;
   loading?: boolean;
+  /** Chain the hash belongs to — a testnet hash 404s on mainnet tonscan. */
+  network?: TonNetwork;
   style?: CSSProperties;
   className?: string;
 }
@@ -23,6 +25,7 @@ export interface WalletOnchainRowProps {
 export function WalletOnchainRow({
   transaction,
   loading,
+  network,
   style,
   className,
 }: WalletOnchainRowProps) {
@@ -93,7 +96,7 @@ export function WalletOnchainRow({
           <span className="text-pink-secondary ml-1 text-[10px] font-bold uppercase">TON</span>
         </span>
         <a
-          href={tonScanUrl(transaction.hash)}
+          href={tonScanUrl(transaction.hash, network)}
           target="_blank"
           rel="noopener noreferrer"
           className="text-pink-secondary hover:text-white inline-flex items-center gap-0.5 text-[10px] font-semibold transition-colors"

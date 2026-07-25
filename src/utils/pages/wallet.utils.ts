@@ -5,28 +5,32 @@ import {
 } from '@/types/enums/wallet.enums';
 import { appConfig } from '@/config/app.config';
 import type { Dictionary } from '@/types/types/i18n.types';
-import type { WalletTransaction } from '@/types/interfaces/wallet.interfaces';
+import type { TonNetwork, WalletTransaction } from '@/types/interfaces/wallet.interfaces';
 
 /** USD value of one Lucky Star — mirrors the backend buy-stars pricing. */
 const STAR_USD_RATE = 0.02;
 
-/** TON cost to buy `stars` Lucky Stars from the TON balance (matches the backend). */
-export const starsToTon = (stars: number): number =>
-  Math.ceil((stars * STAR_USD_RATE * 1000) / appConfig.wallet.tonUsdRate) / 1000;
+/**
+ * Both directions take the TON→USD rate explicitly so a screen can pass the
+ * live one from `GET /config` (see `useTonUsdRate`). The bundled anchor is only
+ * a fallback: the backend prices the charge with its own rate, and a preview
+ * computed from a stale copy would quote a number it then doesn't honour.
+ */
+export const starsToTon = (stars: number, tonUsdRate = appConfig.wallet.tonUsdRate): number =>
+  Math.ceil((stars * STAR_USD_RATE * 1000) / tonUsdRate) / 1000;
 
 /** Lucky Stars you get for `ton` TON (floored — the exchange never over-credits). */
-export const tonToStars = (ton: number): number =>
-  Math.floor((ton * appConfig.wallet.tonUsdRate) / STAR_USD_RATE);
+export const tonToStars = (ton: number, tonUsdRate = appConfig.wallet.tonUsdRate): number =>
+  Math.floor((ton * tonUsdRate) / STAR_USD_RATE);
 
 const TON_MIN_WITHDRAW = 0.1;
 const TON_NETWORK_FEE = 0.05;
-const TONSCAN_BASE = 'https://tonscan.org/tx/';
 const TON_ADDRESS_REGEX = /^(EQ|UQ|kQ|0Q)[A-Za-z0-9_-]{46}$/;
 
 export const walletConstants = {
   TON_MIN_WITHDRAW,
+  /** Mirrors the backend's `WALLET.withdrawFeeTon` — charged ON TOP of the amount sent. */
   TON_NETWORK_FEE,
-  TONSCAN_BASE,
 };
 
 export const truncateAddress = (address?: string): string => {
@@ -52,9 +56,18 @@ export const formatUsd = (value: number): string =>
     maximumFractionDigits: 2,
   });
 
-export const tonScanUrl = (txHash: string) => `${TONSCAN_BASE}${txHash}`;
+/**
+ * Explorer links must follow the chain the backend is on — a testnet hash on
+ * mainnet tonscan renders a "not found" page.
+ */
+const tonScanBase = (network?: TonNetwork) =>
+  network === 'testnet' ? 'https://testnet.tonscan.org' : 'https://tonscan.org';
 
-export const tonScanAddressUrl = (address: string) => `https://tonscan.org/address/${address}`;
+export const tonScanUrl = (txHash: string, network?: TonNetwork) =>
+  `${tonScanBase(network)}/tx/${txHash}`;
+
+export const tonScanAddressUrl = (address: string, network?: TonNetwork) =>
+  `${tonScanBase(network)}/address/${address}`;
 
 /** TON Connect `sendTransaction` validUntil — 6 minutes out (util keeps Date.now out of render). */
 export const tonConnectValidUntil = (): number => Math.floor(Date.now() / 1000) + 360;

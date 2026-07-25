@@ -33,7 +33,7 @@ export function WalletOnchainHistory({ isConnected }: WalletOnchainHistoryProps)
     <div className="flex flex-col gap-2">
       {data?.address && (
         <a
-          href={tonScanAddressUrl(data.address)}
+          href={tonScanAddressUrl(data.address, data.network)}
           target="_blank"
           rel="noopener noreferrer"
           className="text-pink-secondary hover:text-white inline-flex items-center gap-1 self-start text-[11px] font-semibold transition-colors"
@@ -60,6 +60,7 @@ export function WalletOnchainHistory({ isConnected }: WalletOnchainHistoryProps)
             <WalletOnchainRow
               key={tx.hash}
               transaction={tx}
+              network={data?.network}
               className="animate-slide-in-bottom"
               style={{ animationDelay: `${Math.min(index, 8) * 50}ms` }}
             />

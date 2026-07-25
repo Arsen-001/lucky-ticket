@@ -7,7 +7,7 @@ import { useAppTranslations } from '@/hooks/useAppTranslations';
 import { WalletTransactionFilter } from '@/types/enums/wallet.enums';
 import { filterTransactions } from '@/utils/pages/wallet.utils';
 import { WalletTransactionRow } from './WalletTransactionRow';
-import type { WalletTransaction } from '@/types/interfaces/wallet.interfaces';
+import type { TonNetwork, WalletTransaction } from '@/types/interfaces/wallet.interfaces';
 
 const FILTERS: WalletTransactionFilter[] = [
   WalletTransactionFilter.ALL,
@@ -24,6 +24,8 @@ export interface WalletTransactionHistoryProps {
   isConnected?: boolean;
   /** Suppress the section title when embedded under a shared header. */
   hideHeader?: boolean;
+  /** Chain the on-chain hashes belong to — decides which tonscan a row links to. */
+  network?: TonNetwork;
 }
 
 export function WalletTransactionHistory({
@@ -31,6 +33,7 @@ export function WalletTransactionHistory({
   loading,
   isConnected,
   hideHeader,
+  network,
 }: WalletTransactionHistoryProps) {
   const t = useAppTranslations();
   const [filter, setFilter] = useState<WalletTransactionFilter>(WalletTransactionFilter.ALL);
@@ -90,6 +93,7 @@ export function WalletTransactionHistory({
             <WalletTransactionRow
               key={tx.id}
               transaction={tx}
+              network={network}
               className="animate-slide-in-bottom"
               style={{ animationDelay: `${Math.min(index, 8) * 50}ms` }}
             />

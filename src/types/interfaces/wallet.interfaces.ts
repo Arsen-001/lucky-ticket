@@ -5,6 +5,9 @@ import type {
   WalletTransactionType,
 } from '@/types/enums/wallet.enums';
 
+/** The TON chain the backend talks to — decides explorer links and address forms. */
+export type TonNetwork = 'mainnet' | 'testnet';
+
 export interface WalletState {
   isConnected: boolean;
   address?: string;
@@ -12,7 +15,7 @@ export interface WalletState {
   tonBalance: number;
   starsBalance: number;
   usdRate: number;
-  network: 'mainnet' | 'testnet';
+  network: TonNetwork;
 }
 
 export interface WalletTransaction {
@@ -41,7 +44,7 @@ export interface OnchainTransaction {
 
 export interface OnchainTransactionsResponse {
   address: string | null;
-  network: 'mainnet' | 'testnet';
+  network: TonNetwork;
   transactions: OnchainTransaction[];
 }
 
@@ -54,7 +57,7 @@ export interface SupportedWallet {
 
 export interface DepositAddressResponse {
   address: string;
-  network: 'mainnet' | 'testnet';
+  network: TonNetwork;
   memo?: string;
   expiresAt?: string;
   /** Text comment (= userId) the deposit must carry so the backend attributes it. */
@@ -123,7 +126,7 @@ export interface ConnectWalletRequest {
   /** Base64 wallet `stateInit` — binds the public key to the address. */
   walletStateInit?: string;
   /** Derived from the TON Connect chain id (`-239` → mainnet, `-3` → testnet). */
-  network?: 'mainnet' | 'testnet';
+  network?: TonNetwork;
   /** Signed ownership proof; present on a fresh connect, absent on the mock path. */
   proof?: TonProof;
 }
