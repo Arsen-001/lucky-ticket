@@ -30,13 +30,31 @@ const supportedWallets: SupportedWallet[] = [
   { provider: WalletProvider.TONHUB, name: 'Tonhub', iconBg: '#7C5CFF', emoji: 'TH' },
 ];
 
-// LS packages anchored to 1 LS = $0.02 at tonUsdRate, with a single volume bonus.
-const starsPackages: StarsPackage[] = [
-  { id: 'pkg_171', stars: 171, tonCost: 1 },
-  { id: 'pkg_898', stars: 898, tonCost: 5, bonusPercent: 5, popular: true },
-  { id: 'pkg_1881', stars: 1881, tonCost: 10, bonusPercent: 10 },
-  { id: 'pkg_9833', stars: 9833, tonCost: 50, bonusPercent: 15 },
-];
+/** Bundled TON→USD anchor — a fallback only; the live rate comes from `GET /config`. */
+const FALLBACK_TON_USD_RATE = 1.5;
+
+/**
+ * Fallback catalog for the mock layer — the real one comes from
+ * `GET /wallet/stars-packages`, priced off the live TON feed. The TON cost is
+ * the fixed attribute (hence the ids); the stars are derived here the same way
+ * the backend derives them, so the mock can't drift into quoting a count no
+ * rate produces. Ids used to be `pkg_171`… — the star counts at the retired
+ * 3.42 anchor.
+ */
+const STARS_USD_ANCHOR = 0.02;
+const starsPackages: StarsPackage[] = (
+  [
+    { id: 'pkg_ton_1', tonCost: 1 },
+    { id: 'pkg_ton_5', tonCost: 5, bonusPercent: 5, popular: true },
+    { id: 'pkg_ton_10', tonCost: 10, bonusPercent: 10 },
+    { id: 'pkg_ton_50', tonCost: 50, bonusPercent: 15 },
+  ] as Omit<StarsPackage, 'stars'>[]
+).map(pkg => ({
+  ...pkg,
+  stars: Math.round(
+    ((pkg.tonCost * FALLBACK_TON_USD_RATE) / STARS_USD_ANCHOR) * (1 + (pkg.bonusPercent ?? 0) / 100)
+  ),
+}));
 
 export const appConfig = {
   stakes: {
@@ -206,7 +224,7 @@ export const appConfig = {
      * before that query resolves or if it fails, so it tracks the market
      * loosely rather than being authoritative.
      */
-    tonUsdRate: 1.5,
+    tonUsdRate: FALLBACK_TON_USD_RATE,
     /** Flat TON network fee charged on a withdrawal. */
     withdrawFeeTon: 0.05,
     /**

@@ -1272,6 +1272,8 @@ Purchase LS by spending TON. The LS amount is computed from the TON→USD rate a
 - **Manual pin:** `walletConfig.tonUsdRateOverride` (admin) overrides the feed entirely — the escape hatch when a feed misprices, and the way back to a fixed rate without a deploy. `null` = the feed prices.
 
 > **The Stars packages follow the rate.** A package's **TON cost is fixed** (1 / 5 / 10 / 50 TON) and the Lucky Stars it grants are derived (`starsForTon`), so a package is always worth its USD value. At the historical 3.42 anchor this reproduces the old hardcoded catalog exactly (171 / 898 / 1881 / 9833); at TON ≈ $1.50 the same packages grant 75 / 394 / 825 / 4313.
+>
+> Because the cost is the stable attribute, the SKU ids are keyed on it — `pkg_ton_1`, `pkg_ton_5`, `pkg_ton_10`, `pkg_ton_50`. They were `pkg_171`…`pkg_9833` (the star counts at 3.42) and began lying the moment the feed went in; the old ids are still accepted on purchase (`WALLET.legacyStarsPackageIds`) so a client holding a pre-rename catalog isn't broken. Package ids are never persisted — no historical row references them.
 
 > **History:** until 2026-07-25 the rate was the hardcoded constant **3.42**, written when TON traded there. TON had since fallen to ≈ **$1.50**, so the platform was selling Stars for TON at ~44% of their intended price and paying LC→TON cash-outs at ~44% of what the $0.000001/LC valuation promised. Switching to the feed corrects both.
 
