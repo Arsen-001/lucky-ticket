@@ -1,10 +1,17 @@
 'use client';
 
+import type { CSSProperties } from 'react';
 import { ExternalLink, Send } from 'lucide-react';
+import { twMerge } from 'tailwind-merge';
 import { useAppTranslations } from '@/hooks/useAppTranslations';
 import { GlobalConstants } from '@/constants/global.constants';
 
-export function SupportTelegramCard() {
+export interface SupportTelegramCardProps {
+  className?: string;
+  style?: CSSProperties;
+}
+
+export function SupportTelegramCard({ className, style }: SupportTelegramCardProps) {
   const t = useAppTranslations();
 
   return (
@@ -12,10 +19,14 @@ export function SupportTelegramCard() {
       href={GlobalConstants.telegramSupportUrl}
       target="_blank"
       rel="noopener noreferrer"
-      className="bg-pink-gradient relative flex items-center gap-3 overflow-hidden rounded-2xl p-4 transition-transform active:scale-99"
+      className={twMerge(
+        'bg-pink-gradient relative flex items-center gap-3 overflow-hidden rounded-2xl p-4 transition-transform active:scale-99',
+        className
+      )}
       style={{
         boxShadow:
           'inset 0 1px 0 rgba(255,255,255,0.15), 0 4px 16px -8px color-mix(in srgb, var(--color-electric-pink) 40%, transparent)',
+        ...style,
       }}
     >
       <span
@@ -40,7 +51,7 @@ export function SupportTelegramCard() {
           {t('chat with us description')}
         </span>
       </div>
-      <span className="text-electric-pink relative inline-flex items-center gap-1 rounded-full bg-white px-3 py-1.5 text-[11px] font-extrabold uppercase tracking-wide">
+      <span className="text-electric-pink relative inline-flex flex-shrink-0 items-center gap-1 rounded-full bg-white px-3 py-1.5 text-[11px] font-extrabold uppercase tracking-wide">
         {t('open chat')}
         <ExternalLink size={12} strokeWidth={2.4} />
       </span>

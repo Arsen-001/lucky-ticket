@@ -1,16 +1,27 @@
 'use client';
 
+import type { CSSProperties } from 'react';
 import { LifeBuoy } from 'lucide-react';
+import { twMerge } from 'tailwind-merge';
 import { useAppTranslations } from '@/hooks/useAppTranslations';
 
-export function SupportHeroCard() {
+export interface SupportHeroCardProps {
+  className?: string;
+  style?: CSSProperties;
+}
+
+export function SupportHeroCard({ className, style }: SupportHeroCardProps) {
   const t = useAppTranslations();
   return (
     <div
-      className="bg-purple-gradient card-outlined relative overflow-hidden rounded-2xl p-4"
+      className={twMerge(
+        'bg-purple-gradient card-outlined relative overflow-hidden rounded-2xl p-4',
+        className
+      )}
       style={{
         boxShadow:
           'inset 0 1px 0 rgba(255,255,255,0.05), 0 4px 16px -8px color-mix(in srgb, var(--color-electric-pink) 30%, transparent)',
+        ...style,
       }}
     >
       <span
