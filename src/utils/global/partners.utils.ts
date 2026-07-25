@@ -33,9 +33,13 @@ export interface SponsoredTournamentCost {
  * a flat launch fee plus the LC prize pool converted to TON (LC → USD → TON) and
  * marked up by `prizeFundingMultiplier` (coins cost more when funding a pool).
  */
-export function computeSponsoredTournamentCost(prizePool: number): SponsoredTournamentCost {
+export function computeSponsoredTournamentCost(
+  prizePool: number,
+  /** Live TON→USD from `GET /config` — the bundled anchor is only a fallback. */
+  tonUsdRate: number = appConfig.wallet.tonUsdRate
+): SponsoredTournamentCost {
   const { createFeeTon, prizeFundingMultiplier } = appConfig.partners.sponsoredTournament;
-  const { lcUsdRate, tonUsdRate } = appConfig.wallet;
+  const { lcUsdRate } = appConfig.wallet;
 
   const lc = Number.isFinite(prizePool) && prizePool > 0 ? Math.floor(prizePool) : 0;
   const prizeTon = roundTon(((lc * lcUsdRate) / tonUsdRate) * prizeFundingMultiplier);

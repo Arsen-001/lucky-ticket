@@ -10,6 +10,7 @@ import { useConvertLcToTonMutation } from '@/api/lc.api';
 import { formatNumber } from '@/utils/global/number.utils';
 import { lcToTon } from '@/utils/global/lc.utils';
 import { useLcUsdRate } from '@/hooks/useLcUsdRate';
+import { useTonUsdRate } from '@/hooks/useTonUsdRate';
 
 type Step = 'select' | 'success';
 
@@ -38,9 +39,12 @@ export function LcConvertTonModal({ open, onClose, balance }: LcConvertTonModalP
     }
   }, [open]);
 
+  // Both sides of the quote come from the live config so the preview matches
+  // what the backend credits — TON's price is a market feed, not a constant.
   const lcUsdRate = useLcUsdRate();
+  const tonUsdRate = useTonUsdRate();
   const amount = Number(lcInput) || 0;
-  const tonOut = lcToTon(amount, lcUsdRate);
+  const tonOut = lcToTon(amount, lcUsdRate, tonUsdRate);
   const insufficient = amount > balance;
   const canSubmit = amount > 0 && !insufficient;
 

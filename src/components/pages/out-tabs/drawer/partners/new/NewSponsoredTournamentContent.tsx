@@ -19,6 +19,7 @@ import { appConfig } from '@/config/app.config';
 import { routes } from '@/constants/routes';
 import { useAppTranslations } from '@/hooks/useAppTranslations';
 import { usePartnersEnabled } from '@/hooks/usePartnersEnabled';
+import { useTonUsdRate } from '@/hooks/useTonUsdRate';
 import { useToast } from '@/hooks/useToast';
 import { getCreateSponsoredTournamentSchema } from '@/lib/yup/partners.schemes';
 import { computeSponsoredTournamentCost } from '@/utils/global/partners.utils';
@@ -67,9 +68,11 @@ export function NewSponsoredTournamentContent() {
   const type = useWatch({ control, name: 'type' });
   const prizePool = useWatch({ control, name: 'prizePool' });
   const startTime = useWatch({ control, name: 'startTime' });
+  const tonUsdRate = useTonUsdRate();
 
-  // Live cost preview — mirrors the server-side recompute on create.
-  const cost = computeSponsoredTournamentCost(Number(prizePool) || 0);
+  // Live cost preview — mirrors the server-side recompute on create, including
+  // the TON price it converts the prize pool at.
+  const cost = computeSponsoredTournamentCost(Number(prizePool) || 0, tonUsdRate);
   const insufficient = stats?.balanceTon != null && stats.balanceTon < cost.totalTon;
 
   const onSubmit = async (values: CreateSponsoredTournamentPayload) => {

@@ -200,8 +200,13 @@ export const appConfig = {
     },
   },
   wallet: {
-    /** TON → USD conversion rate shown in the wallet. */
-    tonUsdRate: 3.42,
+    /**
+     * Fallback TON→USD anchor. The live value comes from `GET /config`
+     * (`useTonUsdRate`), which the backend prices with; this is only used
+     * before that query resolves or if it fails, so it tracks the market
+     * loosely rather than being authoritative.
+     */
+    tonUsdRate: 1.5,
     /** Flat TON network fee charged on a withdrawal. */
     withdrawFeeTon: 0.05,
     /** USD value of one LC — used to price the LC → TON conversion (DOCS §6.1): $1 = 1,000,000 LC. */

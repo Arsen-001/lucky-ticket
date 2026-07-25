@@ -1263,7 +1263,17 @@ Purchase LS with **Telegram Stars (XTR)** at a fixed **1:1 rate** — 1 Telegram
 
 Purchase LS by spending TON. The LS amount is computed from the TON→USD rate against the $0.02/LS anchor, with a **volume bonus** on larger packages (e.g. +0% / +5% / +10% / +15%). This is a one-directional purchase path — LS is not converted back to TON.
 
-> **The TON→USD rate is a fixed constant, not a market feed.** `WALLET.tonUsdRate` (currently **3.42**) is a hardcoded backend value, served to the Mini App through `GET /config` and used for every TON-denominated price: this purchase, the LC→TON conversion, sponsored-tournament funding and the wallet's USD readout. Nothing polls an exchange. While TON's market price drifts from it, the platform sells LS and pays out LC conversions at the stale rate — in the platform's favour when TON falls, against it when TON rises. Changing it is a code change (one constant), and the Mini App picks it up automatically. Adding a real price feed is an open product decision.
+**The TON→USD rate is a live price feed** (`TonRateService`). It drives every TON-denominated price: this purchase, the LC→TON cash-out, sponsored-tournament funding and the wallet's USD readout, and it is served to the Mini App through `GET /config` so a client preview always quotes what the server will charge.
+
+- **Sources:** CoinGecko, then Coinbase as fallback — both free and keyless. (Binance is deliberately absent: it answers 451 to US-hosted callers, and the backend runs in Railway's SFO region.)
+- **Cache:** 5 minutes in Redis, so pricing calls never wait on an exchange.
+- **Guards, because this value moves real money:** a quote is accepted only inside a **$0.5–$100** sanity band **and** within **40%** of the last known good one. A rejected quote is logged as an error and the old rate stands.
+- **Degradation:** feed → last known good (up to 24 h) → the bundled `WALLET.tonUsdRate` anchor. It never throws and never returns zero.
+- **Manual pin:** `walletConfig.tonUsdRateOverride` (admin) overrides the feed entirely — the escape hatch when a feed misprices, and the way back to a fixed rate without a deploy. `null` = the feed prices.
+
+> **The Stars packages follow the rate.** A package's **TON cost is fixed** (1 / 5 / 10 / 50 TON) and the Lucky Stars it grants are derived (`starsForTon`), so a package is always worth its USD value. At the historical 3.42 anchor this reproduces the old hardcoded catalog exactly (171 / 898 / 1881 / 9833); at TON ≈ $1.50 the same packages grant 75 / 394 / 825 / 4313.
+
+> **History:** until 2026-07-25 the rate was the hardcoded constant **3.42**, written when TON traded there. TON had since fallen to ≈ **$1.50**, so the platform was selling Stars for TON at ~44% of their intended price and paying LC→TON cash-outs at ~44% of what the $0.000001/LC valuation promised. Switching to the feed corrects both.
 
 #### 4. Convert Lucky Coin to TON
 
