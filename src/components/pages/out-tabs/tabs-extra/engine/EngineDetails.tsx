@@ -282,6 +282,8 @@ export function EngineDetails({ id }: EngineDetailsProps) {
         onUpgradeSpeed={() => handleUpgradeSpeed()}
         onUpgradeCapacity={() => handleUpgradeCapacity()}
         reactorVisual="engine"
+        // The page header already reads "Engine #N" — don't repeat it below it.
+        showName={false}
       />
 
       <CubeFaceCard accent={tierAccent} aspect="4/3">

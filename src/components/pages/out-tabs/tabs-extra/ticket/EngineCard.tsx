@@ -38,6 +38,8 @@ export interface EngineCardProps {
   reactorVisual?: 'ticket' | 'engine';
   /** When true, marks the reactor dial as the onboarding-tour "engine" anchor. */
   tourAnchor?: boolean;
+  /** False where the screen already names the engine in its page header. */
+  showName?: boolean;
   className?: string;
 }
 
@@ -63,6 +65,7 @@ export function EngineCard({
   compact = false,
   reactorVisual = 'ticket',
   tourAnchor = false,
+  showName = true,
   className,
 }: EngineCardProps) {
   const { data: inventory } = useGetInventoryQuery();
@@ -127,6 +130,7 @@ export function EngineCard({
         compact={compact}
         reactorVisual={reactorVisual}
         tourAnchor={tourAnchor}
+        showName={showName}
       />
 
       <div className={twMerge('flex flex-col', compact ? 'gap-1.5' : 'mt-3 gap-2')}>

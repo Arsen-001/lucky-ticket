@@ -21,6 +21,8 @@ export interface EngineCardStatsHeaderProps {
   compact: boolean;
   reactorVisual: 'ticket' | 'engine';
   tourAnchor: boolean;
+  /** False where the screen already names the engine in its page header. */
+  showName: boolean;
 }
 
 /**
@@ -40,6 +42,7 @@ function EngineCardStatsHeaderImpl({
   compact,
   reactorVisual,
   tourAnchor,
+  showName,
 }: EngineCardStatsHeaderProps) {
   const t = useAppTranslations();
 
@@ -69,14 +72,16 @@ function EngineCardStatsHeaderImpl({
           )}
         >
           <EngineLevelBadge level={engineLevel} tier={tier} />
-          <span
-            className={twMerge(
-              'font-extrabold text-white leading-tight',
-              compact ? 'text-[13px]' : 'text-sm ml-0'
-            )}
-          >
-            {t('engine number', { number: index + 1 })}
-          </span>
+          {showName && (
+            <span
+              className={twMerge(
+                'font-extrabold text-white leading-tight',
+                compact ? 'text-[13px]' : 'text-sm ml-0'
+              )}
+            >
+              {t('engine number', { number: index + 1 })}
+            </span>
+          )}
         </div>
         <div
           className={twMerge(
