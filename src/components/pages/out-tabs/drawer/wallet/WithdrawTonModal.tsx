@@ -36,7 +36,7 @@ export function WithdrawTonModal({ open, onClose, tonBalance, network }: Withdra
   // the entered number is what ARRIVES. This used to render "you will receive"
   // as amount − fee, quoting the fee twice and understating the payout.
   // Fee and minimum come from the server, which enforces exactly these.
-  const { withdrawFeeTon: fee, minWithdrawTon } = useWalletLimits();
+  const { withdrawFeeTon: fee, minWithdrawTon, maxWithdrawTon } = useWalletLimits();
   const totalDebited = numericAmount > 0 ? numericAmount + fee : 0;
 
   const error = useMemo<string | null>(() => {
@@ -45,11 +45,19 @@ export function WithdrawTonModal({ open, onClose, tonBalance, network }: Withdra
     if (numericAmount <= 0) return null;
     if (numericAmount < minWithdrawTon)
       return t('minimum withdrawal {n} ton', { n: minWithdrawTon });
+    // The server refuses anything above the ceiling, so say so here instead of
+    // letting the form submit into a rejection.
+    if (numericAmount > maxWithdrawTon)
+      return t('maximum withdrawal {n} ton', { n: maxWithdrawTon });
     if (numericAmount + fee > tonBalance) return t('insufficient balance');
     return null;
-  }, [toAddress, numericAmount, fee, minWithdrawTon, tonBalance, t]);
+  }, [toAddress, numericAmount, fee, minWithdrawTon, maxWithdrawTon, tonBalance, t]);
 
-  const canSubmit = !error && isValidTonAddress(toAddress) && numericAmount >= minWithdrawTon;
+  const canSubmit =
+    !error &&
+    isValidTonAddress(toAddress) &&
+    numericAmount >= minWithdrawTon &&
+    numericAmount <= maxWithdrawTon;
 
   const handleClose = () => {
     setStep('form');

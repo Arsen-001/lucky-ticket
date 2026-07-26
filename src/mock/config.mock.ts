@@ -1,6 +1,7 @@
 import { appConfig } from '@/config/app.config';
 import { GlobalConstants } from '@/constants/global.constants';
 import { DEFAULT_ENGINE_LEVEL_TABLES } from '@/utils/global/ticket-engine.utils';
+import { walletConstants } from '@/utils/pages/wallet.utils';
 import type { PublicConfig } from '@/types/interfaces/config.interfaces';
 
 /**
@@ -15,6 +16,7 @@ const getPublicConfig = (): PublicConfig => ({
   wallet: {
     withdrawFeeTon: appConfig.wallet.withdrawFeeTon,
     minWithdrawTon: 0.1,
+    maxWithdrawTon: walletConstants.TON_MAX_WITHDRAW,
     minWithdrawLc: appConfig.wallet.minWithdrawLc,
   },
   adsEnabled: true,

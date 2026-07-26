@@ -24,11 +24,14 @@ export const tonToStars = (ton: number, tonUsdRate = appConfig.wallet.tonUsdRate
   Math.floor((ton * tonUsdRate) / STAR_USD_RATE);
 
 const TON_MIN_WITHDRAW = 0.1;
+const TON_MAX_WITHDRAW = 5;
 const TON_NETWORK_FEE = 0.05;
 const TON_ADDRESS_REGEX = /^(EQ|UQ|kQ|0Q)[A-Za-z0-9_-]{46}$/;
 
 export const walletConstants = {
   TON_MIN_WITHDRAW,
+  /** Mirrors the backend's `WALLET_CONFIG_DEFAULTS.maxWithdrawTon` ceiling. */
+  TON_MAX_WITHDRAW,
   /** Mirrors the backend's `WALLET.withdrawFeeTon` — charged ON TOP of the amount sent. */
   TON_NETWORK_FEE,
 };

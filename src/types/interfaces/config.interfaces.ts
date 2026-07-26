@@ -72,6 +72,8 @@ export interface PublicConfig {
     /** Flat fee charged ON TOP of a withdrawal — the recipient gets the amount. */
     withdrawFeeTon: number;
     minWithdrawTon: number;
+    /** Ceiling on a single withdrawal — the treasury signs these automatically. */
+    maxWithdrawTon: number;
     /** Minimum LC per LC→TON conversion. */
     minWithdrawLc: number;
   };
