@@ -23,6 +23,7 @@ import { TelegramStarIcon } from '@/components/shared/icons/TelegramStarIcon';
 import type { MarketSelectedItem } from '@/components/pages/tabs/market/MarketView';
 import { LcLabel } from '@/components/shared/icons/LcLabel';
 import { useAppTranslations } from '@/hooks/useAppTranslations';
+import { marketShardName } from '@/utils/pages/market-name.utils';
 import { MarketPriceType } from '@/types/enums/market.enums';
 import type { MarketAccent, MarketPrice } from '@/types/interfaces/market.interfaces';
 import { formatCompactPrice } from '@/utils/global/number.utils';
@@ -107,7 +108,7 @@ export function MarketHeroCarousel({ onSelect, onBuy }: MarketHeroCarouselProps)
 
     const shardToItem = (s: (typeof data.shards)[number]): FeaturedItem => ({
       id: s.id,
-      title: s.name,
+      title: marketShardName(s, t),
       description: `+${s.count} ${t('shards')}`,
       prices: orderMarketPrices(applyStatusMarketDiscount(s.prices, discountPct)),
       discountPct: s.discountPct,

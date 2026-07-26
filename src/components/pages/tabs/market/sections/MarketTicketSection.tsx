@@ -12,6 +12,7 @@ import type { MarketSelectedItem } from '@/components/pages/tabs/market/MarketVi
 import { Ticket } from '@/components/shared/icons/Ticket';
 import { GlobalConstants } from '@/constants/global.constants';
 import { useAppTranslations } from '@/hooks/useAppTranslations';
+import { marketTicketName } from '@/utils/pages/market-name.utils';
 import { useUnlockedTiers } from '@/hooks/useUnlockedTiers';
 import type { MarketPrice, MarketTicket } from '@/types/interfaces/market.interfaces';
 import { applyStatusMarketDiscount, effectiveMarketDiscountPct } from '@/utils/global/market.utils';
@@ -62,7 +63,7 @@ export function MarketTicketSection({ tickets, onSelect, onBuy }: MarketTicketSe
         return (
           <MarketUniversalCard
             key={ticket.id}
-            name={ticket.name}
+            name={marketTicketName(ticket, t)}
             accent={ticket.ticketType}
             isNew={ticket.isNew}
             discountPct={ticket.discountPct}

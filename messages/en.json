@@ -1118,5 +1118,9 @@
   "house ad invite description": "Earn a share of every ticket your friends claim.",
   "house ad market title": "Check the Market",
   "house ad market description": "Engines, boosters and chips — spend your LC where it pays back.",
-  "reward in seconds": "Reward in {sec}s"
+  "reward in seconds": "Reward in {sec}s",
+  "market engine name": "{tier} Engine",
+  "market ticket name": "{tier} Ticket",
+  "market speed shard name": "{tier} Time Shard",
+  "market capacity shard name": "{tier} Capacity Shard"
 }

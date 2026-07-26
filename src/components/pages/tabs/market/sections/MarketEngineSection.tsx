@@ -11,6 +11,7 @@ import { MarketItemImage } from '@/components/pages/tabs/market/MarketItemImage'
 import type { MarketSelectedItem } from '@/components/pages/tabs/market/MarketView';
 import { EngineIcon } from '@/components/shared/icons/EngineIcon';
 import { useAppTranslations } from '@/hooks/useAppTranslations';
+import { marketEngineName } from '@/utils/pages/market-name.utils';
 import { useUnlockedTiers } from '@/hooks/useUnlockedTiers';
 import type { MarketEngine, MarketPrice } from '@/types/interfaces/market.interfaces';
 import type { TicketType } from '@/types/types/ticket.types';
@@ -79,7 +80,7 @@ export function MarketEngineSection({ engines, onSelect, onBuy }: MarketEngineSe
         return (
           <MarketUniversalCard
             key={engine.id}
-            name={engine.name}
+            name={marketEngineName(engine, t)}
             accent={engine.ticketType}
             isNew={engine.isNew}
             discountPct={engine.discountPct}

@@ -1118,5 +1118,9 @@
   "house ad invite description": "Получай долю с каждого билета, который заберут твои друзья.",
   "house ad market title": "Загляни в Маркет",
   "house ad market description": "Движки, бустеры и чипы — трать LC там, где это окупается.",
-  "reward in seconds": "Награда через {sec} с"
+  "reward in seconds": "Награда через {sec} с",
+  "market engine name": "Движок {tier}",
+  "market ticket name": "Билет {tier}",
+  "market speed shard name": "Осколок скорости {tier}",
+  "market capacity shard name": "Осколок вместимости {tier}"
 }

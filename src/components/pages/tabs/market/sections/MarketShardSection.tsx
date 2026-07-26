@@ -12,6 +12,7 @@ import type { MarketSelectedItem } from '@/components/pages/tabs/market/MarketVi
 import { ChipShardIcon } from '@/components/shared/icons/ChipShardIcon';
 import { GlobalConstants } from '@/constants/global.constants';
 import { useAppTranslations } from '@/hooks/useAppTranslations';
+import { marketShardName } from '@/utils/pages/market-name.utils';
 import { useUnlockedTiers } from '@/hooks/useUnlockedTiers';
 import type { MarketPrice, MarketShard } from '@/types/interfaces/market.interfaces';
 import { applyStatusMarketDiscount, effectiveMarketDiscountPct } from '@/utils/global/market.utils';
@@ -80,7 +81,7 @@ export function MarketShardSection({ shards, onSelect, onBuy }: MarketShardSecti
         return (
           <MarketUniversalCard
             key={shard.id}
-            name={shard.name}
+            name={marketShardName(shard, t)}
             accent={shard.quality}
             isNew={shard.isNew}
             discountPct={shard.discountPct}
