@@ -29,6 +29,7 @@ export const routes = {
       return ('/profile/' + userId) as `/profile/${string}`;
     },
     achievements: '/profile/achievements',
+    stats: '/profile/stats',
   },
   notifications: '/notifications',
   leaderboard: '/leaderboard',

@@ -113,3 +113,36 @@ export interface SendTicketResponse {
 export interface UpdateBannerIconsRequest {
   positions: Record<string, BannerIconPosition>;
 }
+
+/**
+ * Lifetime numbers for the player's own stats screen (`GET /profile/stats`).
+ *
+ * All-time on purpose: the profile already shows the current picture, so what
+ * it cannot answer is "how far have I come". `bestPlace` and `winRate` are null
+ * until there is a finished tournament to speak of — a best place of 0 is
+ * nonsense, and an empty history deserves a dash, not a zero.
+ */
+export interface PlayerStats {
+  /** Registration timestamp, ISO. */
+  since: string;
+  activity: {
+    daysActive: number;
+    currentStreak: number;
+    longestStreak: number;
+    activityPoints: number;
+  };
+  tournaments: {
+    played: number;
+    /** Top-3 finishes. */
+    won: number;
+    bestPlace: number | null;
+    winRate: number | null;
+    lcWon: number;
+  };
+  lifetime: {
+    ticketsClaimed: number;
+    lcEarned: number;
+    starsSpent: number;
+    referrals: number;
+  };
+}

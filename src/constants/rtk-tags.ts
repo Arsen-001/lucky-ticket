@@ -24,6 +24,7 @@ export const rtkTags = {
   starsTransactions: 'StarsTransactions',
   achievements: 'Achievements',
   profile: 'Profile',
+  playerStats: 'PlayerStats',
   profileById: ':ProfileById',
   inventory: 'Inventory',
   avatars: 'Avatars',

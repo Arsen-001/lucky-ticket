@@ -11,6 +11,7 @@ import { ProfileHero } from '@/components/pages/out-tabs/drawer/profile/ProfileH
 import { ProfileLeaderboardCard } from '@/components/pages/out-tabs/drawer/profile/ProfileLeaderboardCard';
 import { ProfileActivityCard } from '@/components/pages/out-tabs/drawer/profile/ProfileActivityCard';
 import { ProfileQuickStats } from '@/components/pages/out-tabs/drawer/profile/ProfileQuickStats';
+import { ProfileStatsLink } from '@/components/pages/out-tabs/drawer/profile/ProfileStatsLink';
 import { ProfileFooter } from '@/components/pages/out-tabs/drawer/profile/ProfileFooter';
 import { AchievementShowcase } from '@/components/shared/achievements/AchievementShowcase';
 import { AchievementDetailModal } from '@/components/shared/achievements/AchievementDetailModal';
@@ -80,6 +81,8 @@ export function ProfilePage({ userId }: ProfilePageProps) {
           />
 
           <ProfileQuickStats profile={effectiveProfile} loading={isLoading} />
+
+          {effectiveProfile.isOwn && <ProfileStatsLink />}
 
           <ProfileFooter
             isOwn={effectiveProfile.isOwn}

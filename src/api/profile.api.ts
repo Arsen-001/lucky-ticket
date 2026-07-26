@@ -1,6 +1,7 @@
 import { api } from '@/api/index.api';
 import { rtkTags } from '@/constants/rtk-tags';
 import type {
+  PlayerStats,
   BuyShowcaseSlotRequest,
   InviteToTournamentRequest,
   InviteToTournamentResponse,
@@ -18,6 +19,10 @@ import type {
 
 export const profileApi = api.injectEndpoints({
   endpoints: builder => ({
+    getPlayerStats: builder.query<PlayerStats, void>({
+      query: () => ({ url: 'profile/stats' }),
+      providesTags: [rtkTags.playerStats],
+    }),
     getProfile: builder.query<ProfileResponse, string | undefined>({
       query: userId => ({ url: `profile/${userId ?? 'me'}` }),
       providesTags: (_result, _error, userId) => [
@@ -93,6 +98,7 @@ export const profileApi = api.injectEndpoints({
 });
 
 export const {
+  useGetPlayerStatsQuery,
   useGetProfileQuery,
   useLikeProfileMutation,
   useSendTicketMutation,

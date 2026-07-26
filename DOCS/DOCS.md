@@ -2114,6 +2114,18 @@ The cabinet ships behind a master switch — `appConfig.partners.enabled`. When 
 
 The advertiser-facing detail (`PartnerTournamentDetail`) shows one created tournament — branding, status, prize pool, team size, tier, start. When the tournament is in **moderation** it surfaces an **Approve** action (`approveSponsoredTournament` → `POST tournaments/approve`; the demo stand-in for admin review) that flips it `moderation → upcoming`, so it becomes public.
 
+## 21.4 Analytics & player stats
+
+Two audiences read the same underlying events.
+
+**Operators — `GET /admin/analytics`, the panel's «Аналитика» section.** Day-1/7/30 retention with weekly signup cohorts, the signup → first ticket → first tournament → first payment funnel, every revenue source (Stars, TON deposits, ads) in one place with ARPU/ARPPU and payer share, and the test-quest level distribution. It is its own grantable section rather than part of the dashboard, because it carries per-source revenue.
+
+Two rules hold everywhere on that page. A rate whose denominator is empty renders as **"нет данных", never 0%** — a product launched yesterday has no day-7 cohort, and showing that as zero retention reads like a catastrophe. And **every rate is displayed with the counts behind it**: at this scale "50%" is routinely three people, and the counts are what stop a number that small from being read as a trend.
+
+**Players — `GET /profile/stats`, the «Моя статистика» screen off their own profile.** Lifetime figures the profile itself does not answer: days in game, active days, current and longest streak, tournaments played, top-3 finishes, best place, win rate, LC won and earned, tickets claimed, friends invited. Best place and win rate are `null` until a tournament actually finishes — an empty history renders a dash, not a zero.
+
+Both rest on **`UserActivityDay`**, one row per player per UTC day, written by a global interceptor on authenticated requests (Redis-guarded to one INSERT per player per day, admin traffic excluded). `User.lastActivityAt` is overwritten on every action and can only answer "when were they last here", which is why per-day active counts, retention and streaks were impossible before it existed. The migration that created it backfilled from every table that already timestamps a user action, so the history did not start empty.
+
 ## 22. Conclusion
 
 LuckyTicket365 is a modular, scalable product built around engagement, fairness, and real value creation. Each system reinforces the others, creating a cohesive ecosystem that rewards consistent participation and long-term loyalty. The Lucky Stars (LS) currency, fueled by both Telegram Stars and TON, bridges the internal economy with external value — giving users tangible real-world worth for their activity on the platform.

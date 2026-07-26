@@ -1122,5 +1122,16 @@
   "market engine name": "{tier} Engine",
   "market ticket name": "{tier} Ticket",
   "market speed shard name": "{tier} Time Shard",
-  "market capacity shard name": "{tier} Capacity Shard"
+  "market capacity shard name": "{tier} Capacity Shard",
+  "my stats": "My stats",
+  "days in game": "Days in game",
+  "active days": "Active days",
+  "current streak": "Current streak",
+  "longest streak": "Longest streak",
+  "tournaments played": "Tournaments played",
+  "top 3 finishes": "Top-3 finishes",
+  "best place": "Best place",
+  "win rate": "Win rate",
+  "earned in tournaments": "Won in tournaments",
+  "tickets claimed": "Tickets claimed"
 }

@@ -1122,5 +1122,16 @@
   "market engine name": "{tier}-Engine",
   "market ticket name": "{tier}-Ticket",
   "market speed shard name": "{tier}-Zeitfragment",
-  "market capacity shard name": "{tier}-Kapazitätsfragment"
+  "market capacity shard name": "{tier}-Kapazitätsfragment",
+  "my stats": "Meine Statistik",
+  "days in game": "Tage im Spiel",
+  "active days": "Aktive Tage",
+  "current streak": "Aktuelle Serie",
+  "longest streak": "Längste Serie",
+  "tournaments played": "Turniere gespielt",
+  "top 3 finishes": "Top-3-Platzierungen",
+  "best place": "Beste Platzierung",
+  "win rate": "Trefferquote",
+  "earned in tournaments": "In Turnieren gewonnen",
+  "tickets claimed": "Tickets eingesammelt"
 }

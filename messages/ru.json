@@ -1122,5 +1122,16 @@
   "market engine name": "Движок {tier}",
   "market ticket name": "Билет {tier}",
   "market speed shard name": "Осколок скорости {tier}",
-  "market capacity shard name": "Осколок вместимости {tier}"
+  "market capacity shard name": "Осколок вместимости {tier}",
+  "my stats": "Моя статистика",
+  "days in game": "Дней в игре",
+  "active days": "Активных дней",
+  "current streak": "Серия подряд",
+  "longest streak": "Лучшая серия",
+  "tournaments played": "Сыграно турниров",
+  "top 3 finishes": "Призовых мест",
+  "best place": "Лучшее место",
+  "win rate": "Доля призовых",
+  "earned in tournaments": "Выиграно в турнирах",
+  "tickets claimed": "Собрано билетов"
 }

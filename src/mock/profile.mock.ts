@@ -4,7 +4,7 @@ import type { FetchArgs } from '@reduxjs/toolkit/query';
 import { achievements } from '@/mock/achievements.mock';
 import { GlobalConstants, calcShowcaseSlotPrice } from '@/constants/global.constants';
 import { mockDb } from '@/mock/backend/db';
-import type { ProfileResponse } from '@/types/interfaces/profile.interfaces';
+import type { PlayerStats, ProfileResponse } from '@/types/interfaces/profile.interfaces';
 import type { TicketType } from '@/types/types/ticket.types';
 import type {
   Achievement,
@@ -264,7 +264,36 @@ const updateBannerIconsHandler = (args: FetchArgs) => {
   return { ...ownProfile };
 };
 
+/**
+ * Lifetime stats for the own-profile screen. Written to look like a real
+ * mid-game account rather than round numbers: an unfinished-tournament player
+ * would carry nulls, and the screen must be developed against both shapes.
+ */
+const playerStats: PlayerStats = {
+  since: new Date(Date.now() - 63 * 24 * 60 * 60 * 1000).toISOString(),
+  activity: {
+    daysActive: 41,
+    currentStreak: 6,
+    longestStreak: 14,
+    activityPoints: 2870,
+  },
+  tournaments: {
+    played: 37,
+    won: 9,
+    bestPlace: 1,
+    winRate: 24.3,
+    lcWon: 1_284_500,
+  },
+  lifetime: {
+    ticketsClaimed: 412,
+    lcEarned: 4_918_300,
+    starsSpent: 1_640,
+    referrals: 7,
+  },
+};
+
 export const profileMock = {
+  'GET profile/stats': () => playerStats,
   profile: {
     me: ownProfile,
     'user-1': ownProfile,
