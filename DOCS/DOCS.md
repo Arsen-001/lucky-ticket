@@ -2114,7 +2114,17 @@ The cabinet ships behind a master switch — `appConfig.partners.enabled`. When 
 
 The advertiser-facing detail (`PartnerTournamentDetail`) shows one created tournament — branding, status, prize pool, team size, tier, start. When the tournament is in **moderation** it surfaces an **Approve** action (`approveSponsoredTournament` → `POST tournaments/approve`; the demo stand-in for admin review) that flips it `moderation → upcoming`, so it becomes public.
 
-## 21.4 Analytics & player stats
+## 21.4 The admin money feed
+
+`GET /admin/transactions` merges **all three ledgers**: LC (`LcTransaction`), Lucky Stars (`StarsTransaction`) and the wallet (`WalletTransaction` — Stars purchases plus TON deposits and withdrawals). It previously read only the first and the BUY_STARS slice of the third, so every LS reward and spend, and every real TON movement in or out of the platform, was invisible on the transactions screen.
+
+Each row carries both a coarse `type` (for badges and grouping) and the **exact ledger reason** in `kind` (`TOURNAMENT_PRIZE`, `ENGINE_SKIP`, `WITHDRAW_TON`…), plus `source`, a signed `amount` and its `currency`. `type` buckets a dozen reasons under one label — fine for skimming a feed, useless for finding one specific movement, which is what `kind` is for.
+
+Filters: user / free text, date window, status, coarse type, exact `kind`, `currency` (LC/LS/TON), `source`, `direction` (credit/debit), amount bounds and sort. Amount bounds and the amount sorts compare **|amount| in each row's own currency** — LC, LS and TON are not converted into one another, and the question being asked is "biggest movements", not "biggest number". A currency filter that rules out a ledger skips querying it at all.
+
+**On-chain history per player: `GET /admin/users/:id/onchain`.** Reads the TON wallet the player connected, through the same service the Mini App uses, and renders in the user card next to our own rows. The distinction is the point: our ledger records what we credited, the chain records what actually moved — including transfers that have nothing to do with us. It is the only view that can settle "I sent it and it never arrived". An unreachable TON node surfaces as an explicit failure, never as an empty history.
+
+## 21.5 Analytics & player stats
 
 Two audiences read the same underlying events.
 
