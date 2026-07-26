@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import { Check, ChevronDown, ChevronRight, Clock3, Gift, Lock } from 'lucide-react';
 import { twMerge } from 'tailwind-merge';
 import { useAppTranslations } from '@/hooks/useAppTranslations';
+import { useLocalized } from '@/hooks/useLocalized';
 import { useCountDown } from '@/hooks/useCountDown';
 import { Button } from '@/components/shared/buttons/Button';
 import { TaskRarity, TaskStatus } from '@/types/enums/tasks.enums';
@@ -46,6 +47,7 @@ export interface TaskItemRowProps {
  */
 export function TaskItemRow({ task, onClaim, highlightToken, className, style }: TaskItemRowProps) {
   const t = useAppTranslations();
+  const localized = useLocalized();
   const router = useRouter();
   const { leftTime, expired } = useCountDown(task.resetAt);
 
@@ -64,7 +66,7 @@ export function TaskItemRow({ task, onClaim, highlightToken, className, style }:
 
   // Full copy that the collapsed row can't show: the subtitle (or, when locked,
   // the reason it's locked).
-  const detailText = isLocked && task.unlockHint ? task.unlockHint : task.subtitle;
+  const detailText = localized(isLocked && task.unlockHint ? task.unlockHint : task.subtitle);
   const hasDetail = !!detailText;
 
   // The collapsed row truncates the title to one line — detect when it's
@@ -186,7 +188,7 @@ export function TaskItemRow({ task, onClaim, highlightToken, className, style }:
             expanded ? 'whitespace-normal break-words' : 'truncate'
           )}
         >
-          {task.title}
+          {localized(task.title)}
         </h4>
         {expanded && hasDetail && (
           <p className="text-[11px] leading-snug text-white/50 whitespace-normal break-words">

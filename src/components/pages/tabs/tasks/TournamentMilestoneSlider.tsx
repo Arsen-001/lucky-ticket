@@ -15,6 +15,7 @@ import {
 } from 'lucide-react';
 import { twMerge } from 'tailwind-merge';
 import { useAppTranslations } from '@/hooks/useAppTranslations';
+import { useLocalized } from '@/hooks/useLocalized';
 import { Button } from '@/components/shared/buttons/Button';
 import { Progress } from '@/components/shared/Progress';
 import Image, { type StaticImageData } from 'next/image';
@@ -336,6 +337,7 @@ function MilestoneCard({
   cardLucideGradient?: string;
 }) {
   const t = useAppTranslations();
+  const localized = useLocalized();
   const router = useRouter();
 
   const isReady = task.status === TaskStatus.READY_TO_CLAIM;
@@ -488,7 +490,9 @@ function MilestoneCard({
         )}
 
         {task.subtitle && (
-          <p className="text-[10px] text-white/50 leading-tight line-clamp-2">{task.subtitle}</p>
+          <p className="text-[10px] text-white/50 leading-tight line-clamp-2">
+            {localized(task.subtitle)}
+          </p>
         )}
       </div>
 

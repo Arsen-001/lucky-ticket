@@ -273,8 +273,22 @@ const ADS = buildCategory({
   category: TaskCategory.ADS,
   once: ADS_WATCH_MILESTONES.map(m => ({
     id: `ads-watch-${m.target}`,
-    title: `Watch ${m.target} ads`,
-    subtitle: 'Watch rewarded ads — any ad counts.',
+    // Localized, unlike the rest of this mock: the backend now serves task copy
+    // as {en,hy,ru,de}, and leaving every fixture a bare string would mean dev
+    // never exercises the shape production actually sends. The plain strings
+    // below are deliberate too — legacy rows still look like that.
+    title: {
+      en: `Watch ${m.target} ads`,
+      hy: `Watch ${m.target} ads`,
+      ru: `Посмотри ${m.target} реклам`,
+      de: `Sieh dir ${m.target} Werbevideos an`,
+    },
+    subtitle: {
+      en: 'Watch rewarded ads — any ad counts.',
+      hy: 'Watch rewarded ads — any ad counts.',
+      ru: 'Смотри рекламу за награду — считается любая.',
+      de: 'Sieh dir Belohnungsvideos an — jedes zählt.',
+    },
     rewards: m.rewards,
     progress: { current: Math.min(ADS_WATCHED_TOTAL, m.target), target: m.target },
     deeplink: '/tasks?frequency=daily&category=ads',

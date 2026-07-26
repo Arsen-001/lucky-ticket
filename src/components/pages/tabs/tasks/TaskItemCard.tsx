@@ -23,6 +23,7 @@ import {
 } from 'lucide-react';
 import { twMerge } from 'tailwind-merge';
 import { useAppTranslations } from '@/hooks/useAppTranslations';
+import { useLocalized } from '@/hooks/useLocalized';
 import { useCountDown } from '@/hooks/useCountDown';
 import { Progress } from '@/components/shared/Progress';
 import { Button } from '@/components/shared/buttons/Button';
@@ -213,6 +214,7 @@ export function TaskItemCard({
   onTogglePin,
 }: TaskItemCardProps) {
   const t = useAppTranslations();
+  const localized = useLocalized();
   const router = useRouter();
   const { leftTime, expired } = useCountDown(task.resetAt);
 
@@ -493,7 +495,7 @@ export function TaskItemCard({
               expanded ? 'whitespace-normal break-words' : 'truncate w-max max-w-full'
             )}
           >
-            {task.title}
+            {localized(task.title)}
           </h4>
 
           {((isCompactRow && showSubtitleInCompact) || !isCompactRow) &&
@@ -505,7 +507,7 @@ export function TaskItemCard({
                   expanded ? 'whitespace-normal break-words' : 'line-clamp-1'
                 )}
               >
-                {isLocked && task.unlockHint ? task.unlockHint : task.subtitle}
+                {localized(isLocked && task.unlockHint ? task.unlockHint : task.subtitle)}
               </p>
             )}
 

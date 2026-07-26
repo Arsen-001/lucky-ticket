@@ -7,6 +7,7 @@ import {
 } from '@/types/enums/tasks.enums';
 import type { Route } from '@/constants/routes';
 import type { TicketsEnum } from '@/types/enums/ticket.enums';
+import type { LocalizedText } from '@/types/interfaces/faq.interfaces';
 
 export interface TaskReward {
   type: TaskRewardType;
@@ -33,12 +34,18 @@ export interface Task {
   frequency: TaskFrequency;
   status: TaskStatus;
   rarity: TaskRarity;
-  title: string;
-  subtitle?: string;
+  /**
+   * Server-authored copy, not an i18n key — tasks are editable in the admin
+   * panel, so their text ships without a deploy. `string` stays in the union
+   * for rows written before the column was localized; render with
+   * `useLocalized()`, never directly.
+   */
+  title: LocalizedText | string;
+  subtitle?: LocalizedText | string;
   rewards: TaskReward[];
   progress: { current: number; target: number };
   resetAt?: string;
-  unlockHint?: string;
+  unlockHint?: LocalizedText | string;
   deeplink?: Route | string;
   externalLink?: string;
   subSteps?: TaskSubStep[];

@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import { Check, ChevronRight, Gift, Lock, Pin, PinOff } from 'lucide-react';
 import { twMerge } from 'tailwind-merge';
 import { useAppTranslations } from '@/hooks/useAppTranslations';
+import { useLocalized } from '@/hooks/useLocalized';
 import { Button } from '@/components/shared/buttons/Button';
 import { Progress } from '@/components/shared/Progress';
 import { TaskRarity, TaskStatus } from '@/types/enums/tasks.enums';
@@ -48,6 +49,7 @@ export function TaskItemCardCompact({
   onTogglePin,
 }: TaskItemCardCompactProps) {
   const t = useAppTranslations();
+  const localized = useLocalized();
   const router = useRouter();
 
   const isReady = task.status === TaskStatus.READY_TO_CLAIM;
@@ -145,10 +147,12 @@ export function TaskItemCardCompact({
       {/* Title + subtitle */}
       <div className="flex flex-col gap-1">
         <h4 className="text-[13px] font-extrabold leading-snug line-clamp-2 break-words">
-          {task.title}
+          {localized(task.title)}
         </h4>
         {task.subtitle && (
-          <p className="text-[10px] text-white/50 leading-tight line-clamp-2">{task.subtitle}</p>
+          <p className="text-[10px] text-white/50 leading-tight line-clamp-2">
+            {localized(task.subtitle)}
+          </p>
         )}
       </div>
 

@@ -1063,6 +1063,24 @@ Each task contains:
 - **Reward:** The prize awarded upon completion (tickets, coins, boosts).
 - **Activity Points:** A fixed number of Activity Points granted to the user upon completing the task.
 
+**Task copy is localized data, not an i18n key.** Title, subtitle and unlock hint
+are stored on the row as `{en, hy, ru, de}` JSON — the same shape the FAQ, privacy
+and terms content uses — and the app picks the active language at render time.
+Keys in `messages/*.json` were not an option: tasks are authored through the
+admin API, so a new task must be able to carry its own copy without a deploy.
+
+- The 133-task **code catalog** (`milestones.data.ts`) holds the translations and
+  re-syncs **code-wins** on every boot, so a catalog task's copy is owned by the
+  repo; unit tests reject a catalog entry that is a bare string or whose `ru`/`de`
+  merely repeat `en`.
+- A **bare string is still accepted** everywhere — from an older admin client, or
+  a row written before the column was localized — and is folded into every
+  language rather than rendering blank. `hy` mirrors `en` throughout, since
+  Armenian is not a selectable app language.
+
+Before this, every task title and subtitle rendered in English regardless of the
+chosen language, because the strings went from the database straight into the UI.
+
 **Reset timing & countdowns.** Daily tasks reset at **00:00 UTC**; weekly tasks reset **Monday 00:00 UTC**; the rewarded-ads block resets with the daily boundary. The backend stamps every daily/weekly task (and the ads block) with `resetAt` — the exact period boundary — and the UI renders live countdowns from it: a small timer on each task card/row (kept on completed tasks to show when they re-open), a period-level "Next reset in …" line under the Daily/Weekly frequency tabs, and the ads-section timer. One-time tasks never reset and show no countdown.
 
 ### 12.3 Task Examples
