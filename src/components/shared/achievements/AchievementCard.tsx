@@ -7,6 +7,8 @@ import { AchievementRarity } from '@/types/enums/achievement.enums';
 import type { Achievement as AchievementType } from '@/types/interfaces/achievement.interfaces';
 import { useAppTranslations } from '@/hooks/useAppTranslations';
 import { rarityLabelKey } from '@/components/shared/achievements/achievement.utils';
+import { getLocalizedText } from '@/utils/pages/faq.utils';
+import { useLocale } from 'next-intl';
 
 const rarityColor: Record<AchievementRarity, string> = {
   [AchievementRarity.BRONZE]: '#E08A3A',
@@ -82,6 +84,7 @@ export function AchievementCard({
   const isLocked = !achievement.earned;
   const c = rarityColor[achievement.rarity];
 
+  const locale = useLocale();
   const rarityLabel =
     achievement.rarity === AchievementRarity.DIAMOND_PLUS && achievement.tier
       ? achievement.tier.max === 0
@@ -151,7 +154,7 @@ export function AchievementCard({
       </div>
 
       <span className="line-clamp-2 w-full text-center text-[11px] font-bold leading-tight text-white/90">
-        {achievement.name}
+        {getLocalizedText(achievement.name, locale)}
       </span>
     </button>
   );

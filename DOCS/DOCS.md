@@ -1618,6 +1618,18 @@ Badges and Achievements add a long-term collection meta-game on top of the core 
 
 LuckyTicket365 ships with a deep collection of **100+ badges and achievements** spread across many categories. Every meaningful action in the platform contributes to one or more badges. Badges are non-tradeable — they are tied to the account that earned them.
 
+#### 17.4.0 Where badges come from — the one-time milestones
+
+The badge catalog is **not authored separately**. It is a projection of the one-time milestone catalog (Section 12.6): **a badge is a milestone, re-presented as a collectible** — same target, same counter, same copy in all four languages. The current catalog is **118 badges** — 85 arranged into 14 chains, plus 33 singles — built in code by `achievements.catalog.ts`.
+
+Three rules fall out of that, and guardrail tests hold them:
+
+- **Badges pay nothing.** The milestone behind the badge already paid; a second reward here would be exactly the multi-dipping the 2026-07 rebalance removed.
+- **No counter, no badge.** Milestones with no honest data source (manual "share your result", partner follows) are skipped rather than shown with a progress bar nobody can verify.
+- **Earned is derived, never granted.** A badge is earned when the player's live counter reaches the target, evaluated the same way the task screen evaluates progress. The stored row records the unlock date and the showcase pin; it is a record of the fact, not its source. (Until this shipped, one ticket claim marked the **entire** Tickets category earned, regardless of any threshold.)
+
+Rarity climbs with the step inside a chain (Bronze → Silver → Gold → Platinum → Diamond → Diamond+), so a chain reads as a collection; singles keep the rarity of the milestone they mirror. The catalog is code-canonical and re-synced on every boot, like the task and market catalogs — badges dropped from the catalog are deleted, and the profile rows pointing at them cascade away.
+
 #### 17.4.1 Categories
 
 Badges are organized into themed categories. Final list and per-category counts are defined by the product team; representative categories include:

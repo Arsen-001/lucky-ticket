@@ -4,6 +4,8 @@ import { Modal } from '@/components/shared/modals/Modal';
 import { Achievement } from '@/components/shared/achievements/Achievement';
 import { useAppTranslations } from '@/hooks/useAppTranslations';
 import type { Achievement as AchievementType } from '@/types/interfaces/achievement.interfaces';
+import { getLocalizedText } from '@/utils/pages/faq.utils';
+import { useLocale } from 'next-intl';
 
 export interface AchievementPinModalProps {
   achievement: AchievementType | null;
@@ -19,6 +21,7 @@ export function AchievementPinModal({
   onPin,
 }: AchievementPinModalProps) {
   const t = useAppTranslations();
+  const locale = useLocale();
 
   return (
     <Modal open={!!achievement} onClose={onClose}>
@@ -26,7 +29,9 @@ export function AchievementPinModal({
         <div className="flex flex-col gap-6 rounded-3xl border border-white/10 bg-background-overlay p-5">
           <div className="flex flex-col items-center gap-2">
             <Achievement achievement={achievement} size="lg" />
-            <h3 className="text-base font-extrabold text-white">{achievement.name}</h3>
+            <h3 className="text-base font-extrabold text-white">
+              {getLocalizedText(achievement.name, locale)}
+            </h3>
             <p className="text-xs text-white/45">{t('pin to profile')}</p>
           </div>
 

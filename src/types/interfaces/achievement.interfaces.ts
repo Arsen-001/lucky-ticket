@@ -5,6 +5,7 @@ import type {
   AchievementShape,
 } from '@/types/enums/achievement.enums';
 import type { TicketsEnum } from '@/types/enums/ticket.enums';
+import type { LocalizedText } from '@/types/interfaces/faq.interfaces';
 
 export interface AchievementProgress {
   current: number;
@@ -19,7 +20,7 @@ export interface AchievementTier {
 
 export interface AchievementSeries {
   id: string;
-  name: string;
+  name: LocalizedText | string;
   position: number;
   total: number;
 }
@@ -44,8 +45,14 @@ export interface AchievementRelatedTo {
 
 export interface Achievement {
   id: string;
-  name: string;
-  description: string;
+  /**
+   * Player-facing copy in every app language. A badge mirrors a milestone, so
+   * it carries the milestone's own localized text — resolve it at render with
+   * `getLocalizedText`, exactly like tasks and the FAQ. Legacy/mock rows may
+   * still send a bare string.
+   */
+  name: LocalizedText | string;
+  description: LocalizedText | string;
   category: AchievementCategory;
   rarity: AchievementRarity;
   shape: AchievementShape;

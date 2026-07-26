@@ -16,6 +16,8 @@ import type {
   Achievement as AchievementType,
   AchievementChainReward,
 } from '@/types/interfaces/achievement.interfaces';
+import { getLocalizedText } from '@/utils/pages/faq.utils';
+import { useLocale } from 'next-intl';
 
 export interface AchievementDetailModalProps {
   achievement: AchievementType | null;
@@ -42,6 +44,7 @@ const rarityDot: Record<AchievementRarity, string> = {
 
 export function AchievementDetailModal({ achievement, onClose }: AchievementDetailModalProps) {
   const t = useAppTranslations();
+  const locale = useLocale();
   const open = !!achievement;
 
   return (
@@ -50,7 +53,9 @@ export function AchievementDetailModal({ achievement, onClose }: AchievementDeta
         <div className="bg-background-overlay flex flex-col items-center gap-4 rounded-3xl border border-white/10 p-6">
           <Achievement achievement={achievement} size="xl" />
           <div className="flex flex-col items-center gap-1 text-center">
-            <h2 className="text-xl font-extrabold text-white">{achievement.name}</h2>
+            <h2 className="text-xl font-extrabold text-white">
+              {getLocalizedText(achievement.name, locale)}
+            </h2>
             <div className="flex items-center gap-1.5 text-[11px] uppercase tracking-wider">
               <span className="font-bold" style={{ color: rarityDot[achievement.rarity] }}>
                 {achievement.rarity === AchievementRarity.DIAMOND_PLUS && achievement.tier
@@ -74,7 +79,7 @@ export function AchievementDetailModal({ achievement, onClose }: AchievementDeta
           )}
 
           <p className="text-center text-sm leading-relaxed text-white/70">
-            {achievement.description}
+            {getLocalizedText(achievement.description, locale)}
           </p>
 
           {!achievement.earned && achievement.progress && (
@@ -185,6 +190,7 @@ interface ChainLadderProps {
 
 function ChainLadder({ achievement }: ChainLadderProps) {
   const t = useAppTranslations();
+  const locale = useLocale();
   if (!achievement.series) return null;
   const total = achievement.series.total;
   const currentPosition = achievement.series.position;
@@ -200,7 +206,7 @@ function ChainLadder({ achievement }: ChainLadderProps) {
     <div className="flex w-full flex-col gap-2 rounded-xl border border-white/8 bg-white/[0.03] p-3">
       <div className="flex items-center justify-between">
         <span className="text-[10px] font-bold uppercase tracking-wider text-white/45">
-          {achievement.series.name}
+          {getLocalizedText(achievement.series.name, locale)}
         </span>
         <span className="text-[10px] font-bold tabular-nums text-white/65">
           {currentPosition}/{total}

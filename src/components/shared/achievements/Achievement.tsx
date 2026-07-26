@@ -49,6 +49,8 @@ import { twMerge } from 'tailwind-merge';
 import { AchievementCategory, AchievementRarity } from '@/types/enums/achievement.enums';
 import type { Achievement as AchievementType } from '@/types/interfaces/achievement.interfaces';
 import '@/styles/components/achievement.css';
+import { getLocalizedText } from '@/utils/pages/faq.utils';
+import { useLocale } from 'next-intl';
 
 const iconMap: Record<string, LucideIcon> = {
   'shield-check': ShieldCheck,
@@ -191,6 +193,7 @@ export function Achievement({
   overlay,
   style,
 }: AchievementProps) {
+  const locale = useLocale();
   const isLocked = !achievement.earned;
   const badgeSrc = resolveBadgeSrc(achievement);
   const Icon: LucideIcon =
@@ -208,7 +211,7 @@ export function Achievement({
       {badgeSrc ? (
         <Image
           src={badgeSrc}
-          alt={achievement.name}
+          alt={getLocalizedText(achievement.name, locale)}
           width={120}
           height={120}
           className={twMerge('relative z-1 w-30 h-30 object-contain', classNames?.icon)}
