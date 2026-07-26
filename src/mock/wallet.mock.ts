@@ -69,7 +69,9 @@ const getOnchainTransactions = () => ({
 const getDepositAddress = (): DepositAddressResponse => ({
   address: mockDb.wallet.address ?? '',
   network: mockDb.wallet.network,
-  comment: 'mock-user-id',
+  // Opaque tag, not a user id: the comment is public on-chain forever, so the
+  // real backend mints a random one per deposit session (DOCS §15).
+  comment: '9f2c41ab77e0d3b5',
   payloadBase64: 'te6ccgEBAQEADgAAGAAAAABtb2NrLXVzZXI=',
   viaWalletEnabled: true,
   depositsEnabled: true,
