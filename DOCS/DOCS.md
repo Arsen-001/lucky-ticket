@@ -1075,7 +1075,9 @@ Tasks guide user behavior and include actions such as:
 - Sharing content on social media.
 - Daily/Weekly/Monthly check-ins.
 
-**Daily channel check-in (subscription-gated).** The daily check-in task is completed by **staying subscribed to the official Telegram channel** (`TELEGRAM_CHANNEL_ID`, default `@luckyticket365`) rather than a bare tap. The backend drives its progress from a live `getChatMember` check (exposed as the `channel_subscribed` 0/1 counter), cached ~60s per player so the tasks screen never fires a live lookup on every fetch. While the player is not subscribed the task shows **in-progress** with an "open channel" affordance; once subscribed it becomes claimable and grants its Activity Point like any daily task, re-opening at the next 00:00 UTC reset. The check is **fail-open**: if membership can't be determined (bot unconfigured, a synthetic/seed account, or a transient Bot-API failure) it counts as subscribed, so a lookup hiccup never hides an earned reward. Shares the channel-membership infrastructure with the promo-code gate (§17.6).
+**Daily channel check-in (subscription-gated).** The daily check-in task is completed by **staying subscribed to the official Telegram channel** (`TELEGRAM_CHANNEL_ID`, default `@luckyticket365`) rather than a bare tap. The backend drives its progress from a live `getChatMember` check (exposed as the `channel_subscribed` 0/1 counter), cached ~60s per player so the tasks screen never fires a live lookup on every fetch. While the player is not subscribed the task shows **in-progress** with an "open channel" affordance; once subscribed it becomes claimable and grants its Activity Point like any daily task, re-opening at the next 00:00 UTC reset. The check is **fail-open**: if membership can't be determined (bot unconfigured, a synthetic/seed account, or a transient Bot-API failure) it counts as subscribed, so a lookup hiccup never hides an earned reward.
+
+The cached lookup lives in one place (`ChannelMembershipService`) and is shared by every channel gate — this check-in, the promo-code gate (§17.6), and the beta Test-Quest daily claim. One shared answer means the gates cannot disagree inside the cache window, a single screen refresh fires at most one `getChatMember`, and the Test-Quest's "I subscribed, check again" button opens all of them at once.
 
 ### 12.4 All-Tasks Completion Bonus
 
@@ -1898,6 +1900,39 @@ Invite milestones are implemented as the one-time **Friends** task chain (claime
 | 100             | 60,000 LC + 15 tickets + 40 LS + 100 AP |
 
 > Progress is computed live from the actual referral count (no manual tracking); the user claims each reached step from the Tasks screen. Amounts live in `milestones.data.ts` (backend, code-wins boot sync) and are mirrored in the frontend mock.
+
+#### Test-window faucets (beta only, off by default)
+
+A fourth, **temporary** source exists for the 31-day Test-Quest beta. The quest's
+level ladder drops 200 LS while the quest itself demands roughly that much back
+in engine upgrades, so without extra income an active tester cannot finish
+without buying stars. The faucets add ≈100 LS across the window:
+
+| Faucet                        | Default rate      | Over 31 days |
+| :---------------------------- | :---------------- | :----------- |
+| Ad views                      | 1 LS per 10 views | ≈31 LS       |
+| Completing the daily task set | 1 LS              | ≈31 LS       |
+| Completing the weekly set     | 10 LS             | ≈40 LS       |
+
+Because this mints hard currency (the same Lucky Stars the app sells), it is
+fenced on three sides:
+
+- **Off by default.** The rates and the window live in
+  `PlatformConfig.testQuestConfig.lsFaucets` and are switched on from the admin
+  panel's Test-Quest tab, which shows the projected per-player cost next to the
+  switch.
+- **Participants only.** A player with no `TestQuestState` — or one whose badge
+  is already frozen, meaning their test is over — earns nothing extra.
+- **Once per period.** Every payout writes a `TestQuestFaucetGrant` row whose
+  `(userId, kind, periodKey)` unique key is the idempotency guard, so a repeated
+  request or a flushed cache cannot double-pay. The same rows are the audit
+  trail for what the test economy cost.
+
+An optional `endsAt` stops the payouts on its own, so the faucets cannot outlive
+the beta if nobody remembers to switch them off. The set-completion faucets fire
+when the player has claimed as many periodic tasks this period as their tier can
+complete (`AP_REWARDS.dailyTasksCountByTier` / `weeklyTasksCountByTier` — the
+same counts the AP baseline in §5.4 is derived from).
 
 ### 19.2 Buying Lucky Stars
 

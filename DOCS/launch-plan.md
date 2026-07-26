@@ -251,6 +251,18 @@ The **Test-Quest ("Тестировщик 31 → 1") is already the live beta ac
 lifetime profile totals, backend `b39312a`). The Founder Draw is the **finale
 layered on top of it**, not a parallel system:
 
+> **Channel gate (enforced server-side since 2026-07-26).** Taking the daily
+> level requires the player to be subscribed to the official Telegram channel
+> (`TELEGRAM_CHANNEL_ID`, default `@luckyticket365`). `GET /test-quest` returns
+> `channelSubscribed`, `POST /test-quest/check-channel` re-reads it live after
+> the player subscribes, and `POST /test-quest/claim` rejects a confirmed
+> non-member with `403 channel-subscription-required`. Like the daily check-in
+> and promo gates it is **fail-open** — an undeterminable membership counts as
+> subscribed — and all three now share one cached lookup
+> (`ChannelMembershipService`, DOCS §5.x / §17.6), so the "check again" button
+> opens every gate at once. Before this the field was mock-only and the
+> frontend defaulted it to `true`, i.e. the gate did nothing in production.
+
 - **Seal tier = the Test-Quest level band the player reached.** No new "Founder
   Points" counter (that was §2.7's generic move). The four Test-Quest zones map
   1:1 to four seals.
