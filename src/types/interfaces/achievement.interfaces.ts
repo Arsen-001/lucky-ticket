@@ -54,7 +54,12 @@ export interface Achievement {
   earned: boolean;
   earnedAt?: string;
   progress?: AchievementProgress;
-  holdersPercentage: number;
+  /**
+   * Share of players holding this badge, counted live on the server.
+   * `null` while the player base is too small for a percentage to mean
+   * anything — render nothing rather than a figure nobody can stand behind.
+   */
+  holdersPercentage: number | null;
   isPinned: boolean;
   pinnedSlot?: number;
   isCollagePinned?: boolean;

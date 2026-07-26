@@ -101,11 +101,13 @@ export function AchievementDetailModal({ achievement, onClose }: AchievementDeta
                   : t('locked')
               }
             />
-            <DetailRow
-              icon={Users}
-              label={t('holders')}
-              value={`${achievement.holdersPercentage}%`}
-            />
+            {achievement.holdersPercentage != null && (
+              <DetailRow
+                icon={Users}
+                label={t('holders')}
+                value={`${achievement.holdersPercentage}%`}
+              />
+            )}
             {achievement.expiresAt && (
               <DetailRow
                 icon={Calendar}
