@@ -275,13 +275,20 @@ export function TournamentCard({
                     suppressHydrationWarning
                     className="font-semibold text-white/90 tabular-nums leading-none"
                   >
-                    {dayjs(startTime).format('DD/MM/YYYY · HH:mm')}
+                    {/* No year: this row is exactly full at 390px, and the
+                        countdown beside it is the number that decides whether
+                        to join. Tournaments run within days, so the year was
+                        costing ~30px to say nothing. */}
+                    {dayjs(startTime).format('DD/MM · HH:mm')}
                   </span>
                 </span>
                 <span
                   suppressHydrationWarning
                   className={twMerge(
-                    'inline-flex items-center gap-1 rounded-md px-1.5 py-1 leading-none text-white min-w-0',
+                    // shrink-0, not min-w-0: the date chip beside it never
+                    // shrinks, so this one absorbed every squeeze and silently
+                    // ate the trailing "m" of any two-digit-hour countdown.
+                    'inline-flex items-center gap-1 rounded-md px-1.5 py-1 leading-none text-white shrink-0',
                     isFinished
                       ? 'bg-white/5 text-white/65'
                       : isStarted
