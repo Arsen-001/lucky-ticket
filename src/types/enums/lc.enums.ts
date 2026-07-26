@@ -11,6 +11,7 @@ export enum LcTransactionType {
   CONVERT_TO_TON = 'convert_to_ton',
   JACKPOT = 'jackpot',
   PROMO = 'promo',
+  AVATAR_REWARD = 'avatar_reward',
   ADMIN_ADJUST = 'admin_adjust',
 }
 

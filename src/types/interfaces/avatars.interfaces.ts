@@ -23,6 +23,29 @@ export interface AvatarDailyReward {
   tier?: TicketType;
 }
 
+/**
+ * Accrued-but-uncollected daily reward of the equipped avatar (DOCS §16.1).
+ * The pile never expires, so `pendingLc`/`pendingStars` grow until claimed —
+ * and both can be non-zero at once if the player switched avatars mid-accrual,
+ * which is why `daysAccrued` is reported rather than derived from an amount.
+ */
+export interface AvatarDailyRewardState {
+  avatarId: string | null;
+  avatarName: string | null;
+  ratePerDay: { kind: 'lc' | 'stars'; amount: number } | null;
+  pendingLc: number;
+  pendingStars: number;
+  daysAccrued: number;
+  canClaim: boolean;
+  lastClaimedAt: string | null;
+}
+
+export interface ClaimAvatarDailyRewardResponse {
+  grantedLc: number;
+  grantedStars: number;
+  days: number;
+}
+
 export interface UserAvatar {
   id: string;
   src: string;

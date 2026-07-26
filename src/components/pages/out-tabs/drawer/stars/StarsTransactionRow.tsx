@@ -83,6 +83,11 @@ const TYPE_META: Record<StarsTransactionType, TypeMeta> = {
     iconClass: 'text-electric-pink',
     iconBg: 'bg-electric-pink/15',
   },
+  [StarsTransactionType.AVATAR_REWARD]: {
+    Icon: Gift,
+    iconClass: 'text-gold',
+    iconBg: 'bg-gold/15',
+  },
   [StarsTransactionType.ADMIN_ADJUST]: {
     Icon: Settings,
     iconClass: 'text-pink-secondary',

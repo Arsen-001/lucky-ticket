@@ -27,6 +27,7 @@ export const rtkTags = {
   profileById: ':ProfileById',
   inventory: 'Inventory',
   avatars: 'Avatars',
+  avatarDailyReward: 'AvatarDailyReward',
   partnerStats: 'PartnerStats',
   platformConfig: 'PlatformConfig',
   emailReward: 'EmailReward',

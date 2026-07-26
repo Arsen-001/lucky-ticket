@@ -1349,11 +1349,20 @@ Exact boost percentages per SKU are defined by the product team; the table above
 
 **Current paid avatar line-up** (the `AVATAR_CATALOG` `tier: 'paid'` entries, sold as Market cosmetics):
 
-| Avatar   | Level | Bound boost            | Daily reward | Price                   |
-| :------- | :---- | :--------------------- | :----------- | :---------------------- |
-| Champion | 6     | +5% engine speed       | +100 LC      | 500 000 LC / 250 ⭐     |
-| Legend   | 9     | +10% tournament reward | +5 ⭐        | 1 000 000 LC / 500 ⭐   |
-| Mythic   | 15    | +8% engine speed       | +8 ⭐        | 2 500 000 LC / 1 000 ⭐ |
+| Avatar   | Level | Bound boost            | Daily reward | Price               |
+| :------- | :---- | :--------------------- | :----------- | :------------------ |
+| Champion | 6     | +5% engine speed       | +100 LC      | 500 000 LC / 250 ⭐ |
+| Legend   | 9     | +10% tournament reward | +5 ⭐        | 500 ⭐ only         |
+| Mythic   | 15    | +8% engine speed       | +8 ⭐        | 1 000 ⭐ only       |
+
+**Why the two stars-paying avatars cannot be bought with coins:** LC is soft
+currency the platform mints freely (a single tournament pays out over a
+million), Lucky Stars are hard currency sold for money, and the economy has
+**no LC→stars conversion anywhere** — stars buy coins, never the reverse.
+Pricing a stars-paying avatar in LC would open exactly that valve: a one-off
+soft-currency purchase turning into a perpetual hard-currency income. Champion
+keeps its dual price because it pays in LC. Enforced by a unit test on the
+catalog.
 
 Buying one **charges once and grants permanent ownership** (a `UserAvatar` row): `GET /avatars` then reports it `owned`, and equipping a paid avatar is **gated on ownership** (`PATCH /me` rejects an unowned paid avatar). Re-buying an owned avatar is blocked. The listings are code-canonical (re-synced from the catalog on every boot), so admin price edits reset on restart — change prices in `avatars.catalog.ts`.
 
@@ -1364,6 +1373,22 @@ Buying one **charges once and grants permanent ownership** (a `UserAvatar` row):
 - Equipping is performed from the Settings → Change Avatar picker. Switching avatars is free and instantaneous.
 - Avatar boosts **stack with status (Lucky Player/VIP) boosts** and with engine chips/boosters according to their respective rules.
 - The picker renders avatars in level order, with a level badge and tier-coloured ring per tile. Level 10 carries an animated rainbow ring/badge to mark it as the apex avatar.
+
+**Daily reward — accrual & collection:**
+
+The daily reward of the **equipped** avatar accrues once per UTC day and **never
+expires**: it piles up until the player collects it, and the whole pile is
+granted in one action. The Home screen shows a collect card whenever something
+is pending (and nothing at all otherwise, since most players wear a free
+avatar); the amounts also appear as `avatar_reward` rows in the LC / Lucky Stars
+histories.
+
+- `GET /avatars/daily-reward` → `{ avatarId, avatarName, ratePerDay, pendingLc, pendingStars, daysAccrued, canClaim, lastClaimedAt }`. Reading settles first, so the figure is always current.
+- `POST /avatars/daily-reward/claim` → credits the balances, zeroes the pile, writes the ledger rows (one transaction; 400 `nothing-to-claim` when empty).
+- **Only an owned avatar pays.** A paid avatar that is equipped but not owned accrues nothing — the same "equipped **and** owned" rule the engine-speed and tournament-reward boosts use.
+- **No back-pay.** The accrual row is created the first time a player touches the feature and starts counting from that day, so avatars bought before the mechanism existed do not pay retroactively.
+- **Days pay at the rate of the avatar actually worn.** Swapping avatars settles the accrual against the avatar being taken off first, so idling in a cheap avatar and switching to an expensive one before collecting does not upgrade the accrued days.
+- Because a swap can settle LC and Lucky Stars into the same pile, both currencies can be pending at once, and the day count is tracked rather than derived from an amount.
 
 ### 16.2 Notification Preferences
 

@@ -10,6 +10,7 @@ export enum StarsTransactionType {
   STAKE_CANCEL_FEE = 'stake_cancel_fee',
   SHOWCASE_SLOT = 'showcase_slot',
   MARKET_PURCHASE = 'market_purchase',
+  AVATAR_REWARD = 'avatar_reward',
   ADMIN_ADJUST = 'admin_adjust',
 }
 

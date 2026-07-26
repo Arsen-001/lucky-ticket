@@ -346,10 +346,9 @@ export const marketMock: MarketData = {
       avatarBoost: { type: 'engineSpeed', pct: 15 },
       avatarDailyReward: { kind: 'stars', amount: 1 },
       featured: true,
-      prices: [
-        { type: MarketPriceType.LC, amount: 220_000 },
-        { type: MarketPriceType.TELEGRAM_STARS, amount: 55 },
-      ],
+      // Stars-only: an avatar paying a stars daily reward must not be buyable
+      // with coins (DOCS §16.1) — mirrors the backend catalog.
+      prices: [{ type: MarketPriceType.TELEGRAM_STARS, amount: 55 }],
     },
     {
       id: 'avatar-9',
@@ -364,10 +363,8 @@ export const marketMock: MarketData = {
       avatarBoost: { type: 'marketDiscount', pct: 18 },
       avatarDailyReward: { kind: 'stars', amount: 1 },
       featured: true,
-      prices: [
-        { type: MarketPriceType.LC, amount: 350_000 },
-        { type: MarketPriceType.TELEGRAM_STARS, amount: 88 },
-      ],
+      // Stars-only — see avatar-8 above.
+      prices: [{ type: MarketPriceType.TELEGRAM_STARS, amount: 88 }],
     },
     {
       id: 'avatar-10',

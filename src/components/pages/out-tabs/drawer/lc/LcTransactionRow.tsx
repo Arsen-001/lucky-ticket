@@ -99,6 +99,11 @@ const TYPE_META: Record<LcTransactionType, TypeMeta> = {
     iconClass: 'text-teal',
     iconBg: 'bg-teal/15',
   },
+  [LcTransactionType.AVATAR_REWARD]: {
+    Icon: Gift,
+    iconClass: 'text-gold',
+    iconBg: 'bg-gold/15',
+  },
   [LcTransactionType.ADMIN_ADJUST]: {
     Icon: SlidersHorizontal,
     iconClass: 'text-white/70',

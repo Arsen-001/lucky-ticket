@@ -97,6 +97,39 @@ const avatars: UserAvatar[] = [
   },
 ];
 
+/**
+ * Daily-reward accrual, stateful so the claim flow can actually be exercised in
+ * dev: claiming empties the pile and the card disappears, exactly as in prod.
+ *
+ * Amounts mirror the BACKEND catalog (`avatars.catalog.ts` — Champion 100 LC/day)
+ * rather than the inflated figures in the mock avatar list above, so what the
+ * card renders here matches what a real player sees.
+ */
+const dailyRewardState = {
+  avatarId: 'champion',
+  avatarName: 'Champion',
+  ratePerDay: { kind: 'lc' as const, amount: 100 },
+  pendingLc: 400,
+  pendingStars: 0,
+  daysAccrued: 4,
+  canClaim: true,
+  lastClaimedAt: null as string | null,
+};
+
 export const avatarsMock = {
   avatars,
+  'GET avatars/daily-reward': () => ({ ...dailyRewardState }),
+  'POST avatars/daily-reward/claim': () => {
+    const granted = {
+      grantedLc: dailyRewardState.pendingLc,
+      grantedStars: dailyRewardState.pendingStars,
+      days: dailyRewardState.daysAccrued,
+    };
+    dailyRewardState.pendingLc = 0;
+    dailyRewardState.pendingStars = 0;
+    dailyRewardState.daysAccrued = 0;
+    dailyRewardState.canClaim = false;
+    dailyRewardState.lastClaimedAt = new Date().toISOString();
+    return granted;
+  },
 };
