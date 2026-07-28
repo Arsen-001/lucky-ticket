@@ -2136,6 +2136,8 @@ Filters: user / free text, date window, status, coarse type, exact `kind`, `curr
 
 **On-chain history per player: `GET /admin/users/:id/onchain`.** Reads the TON wallet the player connected, through the same service the Mini App uses, and renders in the user card next to our own rows. The distinction is the point: our ledger records what we credited, the chain records what actually moved — including transfers that have nothing to do with us. It is the only view that can settle "I sent it and it never arrived". An unreachable TON node surfaces as an explicit failure, never as an empty history.
 
+**A stored address that isn't a TON address is its own state, not a failure.** Wallet connects made before `ton_proof` verification landed (2026-07-02) fell back to a mock that saved a synthetic `EQ<uuid>` — 34 characters where a real address is 48. Those rows still read as connected, so the card linked them to an explorer page that does not exist and the history call returned **503**, which is the same signal as a TON outage: it invited a retry that can never succeed. The endpoint now parses the address first and answers `addressValid: false` with an empty history, and the panel says the address is not on-chain and the player must reconnect. `npm run wallets:audit` in the backend lists every such row (`-- --apply` resets them to disconnected, leaving `tonBalance` alone — that is real ledger money, and payouts go to an address typed at withdrawal time, never to this column).
+
 ## 21.5 Analytics & player stats
 
 Two audiences read the same underlying events.
