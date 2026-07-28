@@ -3,6 +3,7 @@
 import '@/styles/components/stakes.css';
 import { useState } from 'react';
 import { Star } from 'lucide-react';
+import { useGetMeQuery } from '@/api/me.api';
 import { GlobalConstants } from '@/constants/global.constants';
 import { useAppTranslations } from '@/hooks/useAppTranslations';
 import { useStakesDisplayConfig } from '@/hooks/useStakesDisplayConfig';
@@ -42,6 +43,7 @@ export function NewStakeHero({
   onDurationChange,
 }: NewStakeHeroProps) {
   const t = useAppTranslations();
+  const { data: me } = useGetMeQuery();
   const stakeKnobs = useStakesDisplayConfig();
   const DURATION_MIN = stakeKnobs.durationMinMonths;
   const DURATION_MAX = stakeKnobs.durationMaxMonths;
@@ -54,11 +56,13 @@ export function NewStakeHero({
   const clampedDuration = Math.min(Math.max(durationMonths, DURATION_MIN), DURATION_MAX);
   const durationProgress = ((clampedDuration - DURATION_MIN) / (DURATION_MAX - DURATION_MIN)) * 100;
   const aprPercent = computeStakeAprPercent(clampedDuration, stakeKnobs);
+  // Same status flags the rewards preview below uses — computing the yield
+  // without them made this card quote a different number for the same stake.
   const aprReturn = computeStakeReturnCoins(
     clampedDeposit,
     clampedDuration,
-    false,
-    false,
+    me?.isLuckyPlayer ?? false,
+    me?.isVIP ?? false,
     stakeKnobs
   );
   const aprLabel = aprPercent.toFixed(aprPercent % 1 === 0 ? 0 : 1);
