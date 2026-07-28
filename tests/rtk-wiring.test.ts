@@ -1,9 +1,76 @@
 import { describe, it, expect } from 'vitest';
 import { readFileSync, readdirSync } from 'node:fs';
 import { resolve } from 'node:path';
+import { mockData } from '@/mock/index.mock';
 
 const root = process.cwd();
 const read = (p: string) => readFileSync(resolve(root, p), 'utf8');
+
+const apiFiles = readdirSync(resolve(root, 'src/api')).filter(f => f.endsWith('.api.ts'));
+
+const MUTATION_METHODS = new Set(['POST', 'PUT', 'PATCH', 'DELETE']);
+
+/**
+ * Every `{ url, method }` a file's query builders produce. `method` sits right
+ * next to `url` in every endpoint, so the search window stops at whatever comes
+ * first — the next `url:` or the next `builder.` — and never borrows the method
+ * of the endpoint below.
+ */
+function extractRequests(source: string) {
+  const requests: { url: string; method: string }[] = [];
+  for (const match of source.matchAll(/url:\s*(['"`])([^'"`]+)\1/g)) {
+    const from = match.index + match[0].length;
+    const stops = [source.indexOf('url:', from), source.indexOf('builder.', from)].filter(
+      i => i !== -1
+    );
+    const window = source.slice(from, stops.length ? Math.min(...stops) : source.length);
+    requests.push({ url: match[2], method: window.match(/method:\s*'([A-Z]+)'/)?.[1] ?? 'GET' });
+  }
+  return requests;
+}
+
+/** `market/tickets/${ticketId}/buy` → ['market', 'tickets', '*', 'buy']. */
+const toSegments = (url: string) =>
+  url
+    .split('?')[0]
+    .replace(/^\/|\/$/g, '')
+    .split('/')
+    .filter(Boolean)
+    .map(segment => (segment.includes('${') ? '*' : segment));
+
+/**
+ * Mirrors `mockBaseQuery`'s three-step lookup (method-prefixed key → exact path
+ * key → segment traversal, finding array items by id), with a template hole
+ * standing for any single segment.
+ */
+function hasMockHandler(url: string, method: string) {
+  const segments = toSegments(url);
+  const pathRe = segments
+    .map(s => (s === '*' ? '[^/]+' : s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')))
+    .join('/');
+  const keyRe = new RegExp(`^(?:${method} )?${pathRe}$`);
+  if (Object.keys(mockData).some(key => keyRe.test(key))) return true;
+
+  let current: unknown = mockData;
+  for (const segment of segments) {
+    if (!current) return false;
+    if (Array.isArray(current)) {
+      current =
+        segment === '*'
+          ? current[0]
+          : current.find(item => {
+              const record = item as Record<string, unknown> | null;
+              return !!record && (record.id === segment || record.uuid === segment);
+            });
+    } else if (typeof current === 'object') {
+      const record = current as Record<string, unknown>;
+      if (segment === '*') current = Object.values(record)[0];
+      else if (segment in record) current = record[segment];
+      else return false;
+    } else return false;
+  }
+  return current !== undefined;
+}
 
 describe('RTK Query wiring (3-place rule)', () => {
   it('every src/mock/*.mock.ts is imported into index.mock.ts', () => {
@@ -22,11 +89,32 @@ describe('RTK Query wiring (3-place rule)', () => {
     );
 
     const referenced = new Set<string>();
-    for (const file of readdirSync(resolve(root, 'src/api')).filter(f => f.endsWith('.api.ts'))) {
+    for (const file of apiFiles) {
       for (const m of read(`src/api/${file}`).matchAll(/rtkTags\.(\w+)/g)) referenced.add(m[1]);
     }
 
     const orphaned = [...referenced].filter(tag => !registered.has(tag));
     expect(orphaned, 'rtkTags referenced but not registered').toEqual([]);
+  });
+
+  // A mutation whose URL no mock key matches fails on the dev layer with a 404
+  // behind a "something went wrong" toast — invisible until someone clicks that
+  // exact button. `market/tickets/:ticketId/buy` shipped that way: the mock was
+  // registered on the static `market/tickets/buy`, so no ticket could be bought
+  // in dev at all.
+  it('every mutation URL in *.api.ts resolves to a mock handler', () => {
+    const unmocked: string[] = [];
+
+    // index.api.ts is the base query itself, not an endpoint file: its lone
+    // `auth/refresh` call is issued by the real base query, which never reaches
+    // the mock map.
+    for (const file of apiFiles.filter(f => f !== 'index.api.ts')) {
+      for (const { url, method } of extractRequests(read(`src/api/${file}`))) {
+        if (!MUTATION_METHODS.has(method)) continue;
+        if (!hasMockHandler(url, method)) unmocked.push(`${method} ${url} (${file})`);
+      }
+    }
+
+    expect(unmocked, 'mutations with no mock handler').toEqual([]);
   });
 });
