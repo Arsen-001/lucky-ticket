@@ -1,10 +1,12 @@
 import { describe, it, expect } from 'vitest';
 import { readFileSync } from 'node:fs';
 import { resolve } from 'node:path';
+import { AchievementCategory, AchievementRarity } from '@/types/enums/achievement.enums';
 import { LcTransactionFilter } from '@/types/enums/lc.enums';
 import { StarsTransactionFilter } from '@/types/enums/stars.enums';
 import { TicketsEnum } from '@/types/enums/ticket.enums';
 import { WalletTransactionFilter, WalletTransactionStatus } from '@/types/enums/wallet.enums';
+import { marketMock } from '@/mock/market.mock';
 
 const LOCALES = ['en', 'ru', 'de'] as const;
 
@@ -52,16 +54,50 @@ describe('i18n message parity', () => {
  * without its copy fails here instead of in production.
  */
 describe('i18n runtime-built keys', () => {
+  const MONTHS = [
+    'january',
+    'february',
+    'march',
+    'april',
+    'may',
+    'june',
+    'july',
+    'august',
+    'september',
+    'october',
+    'november',
+    'december',
+  ];
+
   const families: Record<string, string[]> = {
     '<tier> ticket': Object.values(TicketsEnum).map(tier => `${tier} ticket`),
     'lc filter <f>': Object.values(LcTransactionFilter).map(f => `lc filter ${f}`),
     'stars filter <f>': Object.values(StarsTransactionFilter).map(f => `stars filter ${f}`),
     'wallet filter <f>': Object.values(WalletTransactionFilter).map(f => `wallet filter ${f}`),
     'wallet status <s>': Object.values(WalletTransactionStatus).map(s => `wallet status ${s}`),
+    'rarity <r>': Object.values(AchievementRarity).map(r => `rarity ${r}`),
+    'category <c>': Object.values(AchievementCategory).map(c => `category ${c}`),
+    // `dayjs().format('MMMM').toLowerCase()` — profile "member since", notifications
+    '<month>': MONTHS,
+    // Market cosmetics render `avatar boost ${type}`; the mock mirrors the
+    // backend's avatars catalog, so a new boost type lands here first.
+    'avatar boost <t>': [
+      ...new Set(
+        marketMock.cosmetics.flatMap(c =>
+          c.avatarBoost ? [`avatar boost ${c.avatarBoost.type}`] : []
+        )
+      ),
+    ],
+    // Status perk rows call t(privilege) on raw strings the backend sends —
+    // nothing type-checks these, so they need the same explicit guard.
+    'status privilege': [...new Set(marketMock.statuses.flatMap(s => s.privileges ?? []))],
   };
 
   for (const [family, keys] of Object.entries(families)) {
     it(`en resolves every ${family} key`, () => {
+      // A family that collapsed to [] would pass the membership check while
+      // guarding nothing — the mock-derived ones can do exactly that.
+      expect(keys.length).toBeGreaterThan(0);
       expect(keys.filter(k => !(k in messages.en))).toEqual([]);
     });
   }
