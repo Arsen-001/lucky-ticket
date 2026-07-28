@@ -2,7 +2,6 @@ import { HomeEnginesSlider } from '@/components/pages/tabs/home/HomeEnginesSlide
 import { HomeUpcomingTournaments } from '@/components/pages/tabs/home/HomeUpcomingTournaments';
 import { HomeJackpotBanner } from '@/components/pages/tabs/home/HomeJackpotBanner';
 import { HomeTestQuestCard } from '@/components/pages/tabs/home/HomeTestQuestCard';
-import { HomeAvatarRewardCard } from '@/components/pages/tabs/home/HomeAvatarRewardCard';
 
 export default function HomePage() {
   return (
@@ -11,8 +10,6 @@ export default function HomePage() {
         <HomeJackpotBanner />
         <HomeTestQuestCard />
       </section>
-
-      <HomeAvatarRewardCard />
 
       <HomeUpcomingTournaments />
 

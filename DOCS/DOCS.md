@@ -1422,10 +1422,10 @@ Buying one **charges once and grants permanent ownership** (a `UserAvatar` row):
 
 The daily reward of the **equipped** avatar accrues once per UTC day and **never
 expires**: it piles up until the player collects it, and the whole pile is
-granted in one action. The Home screen shows a collect card whenever something
-is pending (and nothing at all otherwise, since most players wear a free
-avatar); the amounts also appear as `avatar_reward` rows in the LC / Lucky Stars
-histories.
+granted in one action. The Tasks screen shows a collect card above the frequency
+tabs whenever something is pending (and nothing at all otherwise, since most
+players wear a free avatar); the amounts also appear as `avatar_reward` rows in
+the LC / Lucky Stars histories.
 
 - `GET /avatars/daily-reward` → `{ avatarId, avatarName, ratePerDay, pendingLc, pendingStars, daysAccrued, canClaim, lastClaimedAt }`. Reading settles first, so the figure is always current.
 - `POST /avatars/daily-reward/claim` → credits the balances, zeroes the pile, writes the ledger rows (one transaction; 400 `nothing-to-claim` when empty).
