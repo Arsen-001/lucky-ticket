@@ -33,18 +33,7 @@ import { AdUnavailableModal, type AdUnavailableReason } from './AdUnavailableMod
 import { HouseAdOverlay } from './HouseAdOverlay';
 import { ClaimRewardModal, type RewardModalResult } from './ClaimRewardModal';
 import { ArrivalShine } from '@/components/shared/ArrivalShine';
-
-const triggerHaptic = (type: 'light' | 'medium' = 'light') => {
-  if (typeof window === 'undefined') return;
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const tg: any = (window as any).Telegram?.WebApp?.HapticFeedback;
-  if (!tg) return;
-  try {
-    tg.impactOccurred(type);
-  } catch {
-    /* noop */
-  }
-};
+import { triggerHaptic } from '@/utils/global/haptic.utils';
 
 function TasksSkeleton() {
   return (

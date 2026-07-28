@@ -14,6 +14,7 @@ import type { TournamentUserResult } from '@/types/interfaces/tournaments.interf
 import type { TournamentType } from '@/types/types/tournaments.types';
 import { statusTournamentLcBoostPct } from '@/utils/global/tournament.utils';
 import '@/styles/components/tournament-card.css';
+import { triggerHaptic } from '@/utils/global/haptic.utils';
 
 interface TournamentResultModalProps {
   open: boolean;
@@ -81,19 +82,6 @@ const useCounter = (target: number, durationMs = 900) => {
   }, [target, durationMs]);
 
   return value;
-};
-
-const triggerHaptic = (style: 'light' | 'medium' | 'heavy' | 'success' = 'success') => {
-  if (typeof window === 'undefined') return;
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const tg: any = (window as any).Telegram?.WebApp?.HapticFeedback;
-  if (!tg) return;
-  try {
-    if (style === 'success') tg.notificationOccurred('success');
-    else tg.impactOccurred(style);
-  } catch {
-    /* noop */
-  }
 };
 
 export function TournamentResultModal({

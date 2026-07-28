@@ -11,6 +11,7 @@ import { BoltIcon } from '@/components/shared/icons/BoltIcon';
 import { LcLabel } from '@/components/shared/icons/LcLabel';
 import { TaskRewardType } from '@/types/enums/tasks.enums';
 import type { ClaimTaskResponse, TaskReward } from '@/types/interfaces/tasks.interfaces';
+import { triggerHaptic } from '@/utils/global/haptic.utils';
 import { TaskRewardRow } from './TaskRewardRow';
 
 // Task claims return a full balance snapshot; ad-watch grants rewards only (no
@@ -73,19 +74,6 @@ const useCounter = (target: number, durationMs = 900) => {
   }, [target, durationMs]);
 
   return value;
-};
-
-const triggerHaptic = (style: 'light' | 'medium' | 'heavy' | 'success' = 'success') => {
-  if (typeof window === 'undefined') return;
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const tg: any = (window as any).Telegram?.WebApp?.HapticFeedback;
-  if (!tg) return;
-  try {
-    if (style === 'success') tg.notificationOccurred('success');
-    else tg.impactOccurred(style);
-  } catch {
-    /* noop */
-  }
 };
 
 const buildParticles = () =>

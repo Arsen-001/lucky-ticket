@@ -18,6 +18,7 @@ import {
   testQuestLadder,
 } from '@/constants/testQuest.constants';
 import type { TestQuestAction } from '@/types/interfaces/testQuest.interfaces';
+import { triggerHaptic } from '@/utils/global/haptic.utils';
 import { TestQuestBadge } from './TestQuestBadge';
 import { TestQuestSteps } from './TestQuestSteps';
 import { TestQuestRewardChips } from './TestQuestRewardChips';
@@ -26,18 +27,6 @@ import { TestQuestPyramid } from './TestQuestPyramid';
 
 // The ladder is a static constant (31 → 1), so sort once at module load.
 const LEVELS = [...testQuestLadder].sort((a, b) => b.level - a.level);
-
-// Success haptic on claim — a no-op outside Telegram.
-const claimHaptic = () => {
-  if (typeof window === 'undefined') return;
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const haptic = (window as any).Telegram?.WebApp?.HapticFeedback;
-  try {
-    haptic?.notificationOccurred?.('success');
-  } catch {
-    /* noop */
-  }
-};
 
 export interface TestQuestChainProps {
   className?: string;
@@ -111,7 +100,7 @@ export function TestQuestChain({ className }: TestQuestChainProps) {
       await claim().unwrap();
       setBurstId(id => id + 1);
       setSelectedLevel(null); // follow the new current level after advancing
-      claimHaptic();
+      triggerHaptic();
       toast.success(t('level taken'));
     } catch {
       toast.error(t('claim failed'));

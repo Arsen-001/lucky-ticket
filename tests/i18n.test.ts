@@ -1,6 +1,10 @@
 import { describe, it, expect } from 'vitest';
 import { readFileSync } from 'node:fs';
 import { resolve } from 'node:path';
+import { LcTransactionFilter } from '@/types/enums/lc.enums';
+import { StarsTransactionFilter } from '@/types/enums/stars.enums';
+import { TicketsEnum } from '@/types/enums/ticket.enums';
+import { WalletTransactionFilter, WalletTransactionStatus } from '@/types/enums/wallet.enums';
 
 const LOCALES = ['en', 'ru', 'de'] as const;
 
@@ -35,6 +39,30 @@ describe('i18n message parity', () => {
         .filter(([, v]) => typeof v !== 'string' || v.trim() === '')
         .map(([k]) => k);
       expect(empties).toEqual([]);
+    });
+  }
+});
+
+/**
+ * Keys the UI builds at runtime (`t(\`${tier} ticket\`)`, `t(\`lc filter ${f}\`)`…)
+ * are invisible to a grep over the source, so a dead-key sweep happily deletes
+ * them and the app then renders a raw MISSING_MESSAGE at runtime — which is
+ * exactly how the five `<tier> ticket` keys disappeared in `501fa9b`. Each family
+ * is enumerated from the enum that feeds it, so adding a tier / filter value
+ * without its copy fails here instead of in production.
+ */
+describe('i18n runtime-built keys', () => {
+  const families: Record<string, string[]> = {
+    '<tier> ticket': Object.values(TicketsEnum).map(tier => `${tier} ticket`),
+    'lc filter <f>': Object.values(LcTransactionFilter).map(f => `lc filter ${f}`),
+    'stars filter <f>': Object.values(StarsTransactionFilter).map(f => `stars filter ${f}`),
+    'wallet filter <f>': Object.values(WalletTransactionFilter).map(f => `wallet filter ${f}`),
+    'wallet status <s>': Object.values(WalletTransactionStatus).map(s => `wallet status ${s}`),
+  };
+
+  for (const [family, keys] of Object.entries(families)) {
+    it(`en resolves every ${family} key`, () => {
+      expect(keys.filter(k => !(k in messages.en))).toEqual([]);
     });
   }
 });
