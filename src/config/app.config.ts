@@ -237,6 +237,14 @@ export const appConfig = {
     lcUsdRate: 0.000001,
     /** USD anchor of one Lucky Star (LS) — the Stars packages are priced off it. */
     lsUsdRate: 0.02,
+    /**
+     * Fallback invite gate on binding a wallet: how many friends a player must
+     * have invited before TON Connect is offered. The live value is served with
+     * the wallet state (`walletConfig.connectMinReferrals`, admin-editable) and
+     * the backend enforces it — this only feeds the mock layer and the copy
+     * shown before that query resolves.
+     */
+    connectMinReferrals: 3,
     /** Wallet apps the user can connect. */
     supportedWallets,
     /** Stars purchase packages — price catalog. */

@@ -16,6 +16,20 @@ export interface WalletState {
   starsBalance: number;
   usdRate: number;
   network: TonNetwork;
+  /**
+   * Invited friends required before a wallet may be bound (admin-editable,
+   * `walletConfig.connectMinReferrals`; 0 = no gate). Optional because an older
+   * backend doesn't serve it — the UI then treats the wallet as open.
+   */
+  connectMinReferrals?: number;
+  /** Friends this player has invited — the gate's progress. */
+  referralsCount?: number;
+  /**
+   * Server's verdict on the gate: false = `POST /wallet/connect` will 403.
+   * A wallet bound before the gate stays connectable, so this is not simply
+   * `referralsCount >= connectMinReferrals`.
+   */
+  canConnect?: boolean;
 }
 
 export interface WalletTransaction {

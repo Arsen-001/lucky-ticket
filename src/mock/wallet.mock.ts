@@ -32,7 +32,19 @@ const getWalletState = (): WalletState => ({
   starsBalance: mockDb.user.telegramStars,
   usdRate: appConfig.wallet.tonUsdRate,
   network: mockDb.wallet.network,
+  connectMinReferrals: appConfig.wallet.connectMinReferrals,
+  referralsCount: mockDb.user.referralsCount,
+  canConnect: canConnectWallet(),
 });
+
+/**
+ * The invite gate the real backend enforces on `POST /wallet/connect`: enough
+ * invited friends, or an address bound before the gate existed (grandfathered,
+ * because withdrawing needs an active connection).
+ */
+const canConnectWallet = () =>
+  mockDb.user.referralsCount >= appConfig.wallet.connectMinReferrals ||
+  Boolean(mockDb.wallet.address);
 
 /** Transaction history — fresh copies so RTK Query detects in-place mutations. */
 const getTransactions = () => mockDb.wallet.transactions.map(tx => ({ ...tx }));
@@ -80,6 +92,19 @@ const getDepositAddress = (): DepositAddressResponse => ({
 /** POST wallet/connect — mark the wallet connected with the chosen provider. */
 const connectWallet = (args: FetchArgs) => {
   const { provider, address } = (args.body ?? {}) as Partial<ConnectWalletRequest>;
+  // Same 403 the backend answers when the invite gate isn't met, so the gated
+  // UI is developable against the mock layer.
+  if (!canConnectWallet())
+    return {
+      error: {
+        status: 403,
+        data: {
+          error: 'referrals-required',
+          required: appConfig.wallet.connectMinReferrals,
+          current: mockDb.user.referralsCount,
+        },
+      },
+    };
   if (provider) mockDb.wallet.provider = provider;
   mockDb.wallet.isConnected = true;
   // Prefer the real TON Connect address when present; fall back to a stub so the

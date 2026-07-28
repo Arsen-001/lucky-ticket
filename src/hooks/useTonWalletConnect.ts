@@ -9,7 +9,11 @@ import {
 } from '@/api/wallet.api';
 import { useAppTranslations } from '@/hooks/useAppTranslations';
 import { useToast } from '@/hooks/useToast';
-import { chainToNetwork, resolveWalletProvider } from '@/utils/pages/wallet.utils';
+import {
+  chainToNetwork,
+  readReferralGateError,
+  resolveWalletProvider,
+} from '@/utils/pages/wallet.utils';
 
 /**
  * Drives real TON wallet connection through TON Connect + backend `ton_proof`.
@@ -74,11 +78,18 @@ export function useTonWalletConnect() {
           },
         }).unwrap();
         toast.success(t('wallet connected'));
-      } catch {
+      } catch (error) {
         // Signature rejected (or network error) — drop the wallet session so the
         // UI and backend stay in sync and the user can retry cleanly.
         syncedAddress.current = null;
-        toast.error(t('wallet connect failed'));
+        // The invite gate answers 403 with the requirement; "connect failed"
+        // would send the player back to retry something that cannot succeed.
+        const gate = readReferralGateError(error);
+        toast.error(
+          gate
+            ? t('invite {num} friends to connect a wallet', { num: gate.required })
+            : t('wallet connect failed')
+        );
         void tonConnectUI.disconnect();
       }
     });

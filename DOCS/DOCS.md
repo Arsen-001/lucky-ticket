@@ -1283,6 +1283,12 @@ The Wallet shows three balances:
 
 Links an external TON wallet — required for the TON purchase path.
 
+**Binding a wallet is gated on invited friends.** `POST /wallet/connect` answers **403** (`{ error: 'referrals-required', required, current }`) until the player has invited **`walletConfig.connectMinReferrals`** friends — **3** by default, admin-editable in the panel's Кошелёк tab, `0` disables the gate. The wallet is the only door out to real money, so the cheapest possible account — register, connect, cash out — has to pay for that door in referrals first.
+
+- **The requirement travels with the state.** `GET /wallet` carries `connectMinReferrals`, `referralsCount` and the server's own verdict `canConnect`, so the Mini App renders a locked hero card with the progress (`1/3`) and an "invite friends" CTA instead of opening a TON Connect sheet the API is about to reject. Deposit / withdraw / exchange buttons say the same thing in a toast rather than starting a connect.
+- **A wallet bound before the gate stays reconnectable** (`canConnect` is true whenever an address was ever stored, which is why it is not simply `referralsCount >= connectMinReferrals`). Withdrawing requires an _active_ connection, so without that grandfathering a disconnect — or a gate raised afterwards — would strand real TON on the account.
+- **The gate is on binding only.** Buying Lucky Stars with Telegram Stars, earning, and LC→TON conversion are untouched; converted TON still needs a connected wallet to leave, which is the point.
+
 #### 2. Buy Lucky Stars with Telegram Stars
 
 Purchase LS with **Telegram Stars (XTR)** at a fixed **1:1 rate** — 1 Telegram Star = 1 LS. Powered by the Telegram Bot Payments API.

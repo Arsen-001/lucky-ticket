@@ -7,6 +7,7 @@ import { Skeleton } from '@/components/shared/seleketons/Skeleton';
 import { SkeletonSuspense } from '@/components/shared/seleketons/SkeletonSuspense';
 import { useAppTranslations } from '@/hooks/useAppTranslations';
 import { formatTon, formatUsd, providerLabel, truncateAddress } from '@/utils/pages/wallet.utils';
+import { TonWalletLocked } from './TonWalletLocked';
 import type { WalletState } from '@/types/interfaces/wallet.interfaces';
 
 export interface TonWalletHeroProps {
@@ -34,6 +35,18 @@ export function TonWalletHero({
       >
         <Skeleton variant="rounded-rectangle" className="h-32 w-full" />
       </div>
+    );
+  }
+
+  // Invite gate (admin-editable, enforced by the backend): show what it takes
+  // to unlock the wallet rather than a connect button that 403s. `canConnect`
+  // is the server's verdict — an older backend omits it and nothing is gated.
+  if (!isConnected && state?.canConnect === false) {
+    return (
+      <TonWalletLocked
+        required={state.connectMinReferrals ?? 0}
+        current={state.referralsCount ?? 0}
+      />
     );
   }
 

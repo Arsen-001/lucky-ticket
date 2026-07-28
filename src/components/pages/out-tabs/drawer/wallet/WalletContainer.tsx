@@ -7,6 +7,7 @@ import { useAppTranslations } from '@/hooks/useAppTranslations';
 import { useGetWalletStateQuery, useGetWalletTransactionsQuery } from '@/api/wallet.api';
 import { useGetLcStateQuery } from '@/api/lc.api';
 import { routes } from '@/constants/routes';
+import { useToast } from '@/hooks/useToast';
 import { useTonWalletConnect } from '@/hooks/useTonWalletConnect';
 import { TonWalletHero } from './TonWalletHero';
 import { WalletActionButtons } from './WalletActionButtons';
@@ -25,6 +26,7 @@ type WalletModal = 'deposit' | 'withdraw' | 'buyStars' | 'convertLc' | 'exchange
 
 export function WalletContainer() {
   const t = useAppTranslations();
+  const toast = useToast();
   const router = useRouter();
   const searchParams = useSearchParams();
   const { data: state, isLoading, isError, refetch } = useGetWalletStateQuery();
@@ -45,6 +47,10 @@ export function WalletContainer() {
 
   const isConnected = !!state?.isConnected;
   const tonBalance = state?.tonBalance ?? 0;
+  // Invite gate on binding a wallet (`walletConfig.connectMinReferrals`), the
+  // server's own verdict — an older backend omits it and nothing is gated.
+  const isGated = state?.canConnect === false && !isConnected;
+  const required = state?.connectMinReferrals ?? 0;
 
   useEffect(() => {
     const topUpRaw = searchParams.get('topUp');
@@ -77,9 +83,12 @@ export function WalletContainer() {
   if (isError) return <QueryErrorState onRetry={() => refetch()} />;
 
   // TON-only actions (deposit / withdraw) require a connected wallet — open the
-  // TON Connect sheet first when there isn't one.
+  // TON Connect sheet first when there isn't one. While the invite gate is
+  // unmet the backend rejects that connect, so say what's missing instead of
+  // opening a sheet whose only outcome is an error.
   const requireConnected = (next: WalletModal) => {
     if (isConnected) setModal(next);
+    else if (isGated) toast.info(t('invite {num} friends to connect a wallet', { num: required }));
     else void connect();
   };
 

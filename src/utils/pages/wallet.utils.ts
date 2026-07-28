@@ -129,6 +129,22 @@ export const resolveWalletProvider = (appName?: string): WalletProvider => {
 export const chainToNetwork = (chain?: string): 'mainnet' | 'testnet' =>
   chain === '-3' ? 'testnet' : 'mainnet';
 
+/**
+ * Reads the invite gate out of a failed `POST /wallet/connect`: the backend
+ * answers 403 `{ error: 'referrals-required', required, current }` when the
+ * player hasn't invited enough friends yet. Returns null for every other
+ * failure so the caller keeps its generic message.
+ */
+export const readReferralGateError = (
+  error: unknown
+): { required: number; current: number } | null => {
+  const data = (error as { status?: number; data?: unknown } | undefined)?.data;
+  if (!data || typeof data !== 'object') return null;
+  const body = data as { error?: string; required?: number; current?: number };
+  if (body.error !== 'referrals-required') return null;
+  return { required: body.required ?? 0, current: body.current ?? 0 };
+};
+
 export const providerLabel = (provider?: WalletProvider): string => {
   switch (provider) {
     case WalletProvider.TONKEEPER:
