@@ -14,6 +14,7 @@ import { gilroy, spaceGrotesk } from '@/fonts/index.fonts';
 import { getLocale } from 'next-intl/server';
 import { getAppTranslations } from '@/i18n/getAppTranslations';
 import { GlobalConstants } from '@/constants/global.constants';
+import { appConfig } from '@/config/app.config';
 import type { Metadata } from 'next';
 import type { ChildrenProps } from '@/types/interfaces/component.interfcaes';
 import '@/styles/index.css';
@@ -49,6 +50,10 @@ export async function generateMetadata(): Promise<Metadata> {
   const t = await getAppTranslations();
 
   return {
+    // Without this the social-card and icon URLs resolve against
+    // `http://localhost:3000` in a production build — the tags ship, the
+    // images 404 for everyone but the machine that built them.
+    metadataBase: new URL(appConfig.publicOrigin),
     title: GlobalConstants.projectName,
     description: t('app description'),
     applicationName: GlobalConstants.projectName,

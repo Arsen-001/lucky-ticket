@@ -56,7 +56,32 @@ const starsPackages: StarsPackage[] = (
   ),
 }));
 
+/**
+ * Where this deployment is reachable from the outside — the origin every
+ * absolute URL the app hands to a third party is built on (social-card and
+ * icon URLs in `metadata`, the TON Connect manifest a wallet fetches). Relative
+ * paths are not an option there: the consumer is not a browser on our page.
+ *
+ * Vercel exposes the production domain at build time; the explicit env var
+ * wins so a custom domain can be pointed at without a code change, and the
+ * literal is the last resort for a plain `next build` outside Vercel.
+ */
+const publicOrigin = (() => {
+  // `??` is not enough: a var declared-but-empty in `.env` reads as `''`, and
+  // `new URL('')` throws — an empty value has to mean "unset", not "no origin".
+  const explicit = process.env.NEXT_PUBLIC_SITE_URL?.trim();
+  if (explicit) return explicit;
+
+  const vercel = process.env.VERCEL_PROJECT_PRODUCTION_URL?.trim();
+  if (vercel) return `https://${vercel}`;
+
+  return 'https://lucky-ticket-nu.vercel.app';
+})();
+
 export const appConfig = {
+  /** @see publicOrigin */
+  publicOrigin,
+
   stakes: {
     /** Bounds of the duration slider on the "new stake" screen (months). */
     durationMinMonths: 1,
@@ -257,8 +282,7 @@ export const appConfig = {
      * deployment via `NEXT_PUBLIC_TONCONNECT_MANIFEST_URL`.
      */
     tonConnectManifestUrl:
-      process.env.NEXT_PUBLIC_TONCONNECT_MANIFEST_URL ??
-      'https://lucky-ticket-nu.vercel.app/tonconnect-manifest.json',
+      process.env.NEXT_PUBLIC_TONCONNECT_MANIFEST_URL ?? `${publicOrigin}/tonconnect-manifest.json`,
   },
   onboardingTour: {
     /**
