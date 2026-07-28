@@ -1190,9 +1190,19 @@ The leaderboard provides social comparison and competitive motivation.
 - Global ranking based on Activity Points.
 - Displays top users.
 
+### 13.1 Master switch — the board opens after the test period
+
+The whole board sits behind an admin toggle (`GET /config` → `leaderboardEnabled`, panel: **Настройки → Система → Таблица лидеров**). While it is **off**:
+
+- the drawer entry renders locked ("Скоро", same treatment as the partners cabinet);
+- the profile's Leaderboard card still shows **the player's own** Activity Points and rank, but leads nowhere and carries an "opens after the test period" note;
+- `/leaderboard` renders the locked screen instead of the standings, and the leaderboard query is **not fired at all**.
+
+Rationale: during the closed beta the standings cover a handful of testers, so publishing them would read as the real ranking. Ranking keeps accruing throughout — only the display waits. The switch defaults to **off**; flipping it on is an admin action, not a redeploy.
+
 ### Connections
 
-Leaderboard ranking depends on activity, tasks, and tournaments.
+Leaderboard ranking depends on activity, tasks, and tournaments. Activity Points earned by liking profiles (§17) are collected on the board, so that source is effectively paused while the board is locked.
 
 ---
 

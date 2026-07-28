@@ -328,6 +328,8 @@
   "lc wallet": "LC Wallet",
   "lc wallet subtitle": "Tap to view your $LC balance, earnings and history.",
   "leaderboard": "Leaderboard",
+  "leaderboard locked description": "The board opens once the test period ends — keep earning activity points, they already decide your place.",
+  "leaderboard locked title": "Opens after the test period",
   "leaderboard rank": "top rank reached",
   "leaderboard rank blurb": "Climb the standings to unlock bigger rewards.",
   "leaderboard rank title period": "Reach top ranks ({period})",

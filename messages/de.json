@@ -327,6 +327,8 @@
   "lc wallet": "LC-Wallet",
   "lc wallet subtitle": "Tippe, um dein $LC-Guthaben, deine Einnahmen und den Verlauf anzusehen.",
   "leaderboard": "Bestenliste",
+  "leaderboard locked description": "Die Bestenliste öffnet nach der Testphase — sammle weiter Aktivitätspunkte, sie bestimmen jetzt schon deinen Platz.",
+  "leaderboard locked title": "Öffnet nach der Testphase",
   "leaderboard rank": "erreichter Rang",
   "leaderboard rank blurb": "Steige in der Bestenliste auf und sichere dir größere Belohnungen.",
   "leaderboard rank title period": "Top-Ränge erreichen ({period})",

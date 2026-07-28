@@ -21,6 +21,7 @@ const getPublicConfig = (): PublicConfig => ({
   },
   adsEnabled: true,
   partnersEnabled: appConfig.partners.enabled,
+  leaderboardEnabled: appConfig.leaderboard.enabled,
   referral: {
     signup: {
       ap: GlobalConstants.inviteActivityPoints,

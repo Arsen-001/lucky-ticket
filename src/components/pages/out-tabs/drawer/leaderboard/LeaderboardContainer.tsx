@@ -6,12 +6,14 @@ import { twMerge } from 'tailwind-merge';
 import { useGetLeaderboardQuery } from '@/api/leaderboard.api';
 import { useGetMeQuery } from '@/api/me.api';
 import { useAppTranslations } from '@/hooks/useAppTranslations';
+import { useLeaderboardEnabled } from '@/hooks/useLeaderboardEnabled';
 
 import { LeaderboardCountUp } from './LeaderboardCountUp';
 import { LeaderboardEmptyState } from './LeaderboardEmptyState';
 import { LeaderboardErrorState } from './LeaderboardErrorState';
 import { LeaderboardHeroCard } from './LeaderboardHeroCard';
 import { LeaderboardListItem } from './LeaderboardListItem';
+import { LeaderboardLockedState } from './LeaderboardLockedState';
 import { LeaderboardPodium, type PodiumPlayer, type PodiumRank } from './LeaderboardPodium';
 import {
   PlayerQuickCard,
@@ -33,9 +35,15 @@ export function LeaderboardContainer() {
     setCardOpen(true);
   };
 
+  // Master switch (§16.4): while it is off the board is locked, so the query
+  // never fires — no standings are fetched, let alone rendered.
+  const leaderboardEnabled = useLeaderboardEnabled();
+
   // Ranking is by lifetime Activity Points (the backend tracks no period
   // windows), so the board is a single all-time list.
-  const { data, isLoading, isFetching, isError, refetch } = useGetLeaderboardQuery('all');
+  const { data, isLoading, isFetching, isError, refetch } = useGetLeaderboardQuery('all', {
+    skip: !leaderboardEnabled,
+  });
   const { data: me } = useGetMeQuery();
 
   const places = data?.places ?? [];
@@ -85,6 +93,9 @@ export function LeaderboardContainer() {
     if (!data) return;
     setAnnouncement(t('top {n}', { n: places.length }));
   }, [data, places.length, t]);
+
+  // After every hook (rules-of-hooks), before any board markup.
+  if (!leaderboardEnabled) return <LeaderboardLockedState />;
 
   if (!isLoading && !isError && places.length === 0) {
     return (

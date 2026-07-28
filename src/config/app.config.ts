@@ -292,6 +292,16 @@ export const appConfig = {
      */
     podiumSplitPercent: { first: 50, second: 30, third: 20 },
   },
+  leaderboard: {
+    /**
+     * Master switch for the public leaderboard (DOCS §16). When `false` the drawer
+     * entry, the profile card and the board itself render locked ("opens after the
+     * test period") — a ranking over a handful of closed-beta testers would read as
+     * the real standings. Bundled fallback only: `GET /config`'s `leaderboardEnabled`
+     * wins, so the launch is an admin toggle, not a redeploy.
+     */
+    enabled: false,
+  },
   partners: {
     /**
      * Master switch for the advertiser (sponsor) cabinet. When `false` it renders

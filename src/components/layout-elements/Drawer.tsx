@@ -44,6 +44,7 @@ import { Skeleton } from '@/components/shared/seleketons/Skeleton';
 import { SkeletonSuspense } from '@/components/shared/seleketons/SkeletonSuspense';
 import { type Route, routes } from '@/constants/routes';
 import { useAppTranslations } from '@/hooks/useAppTranslations';
+import { useLeaderboardEnabled } from '@/hooks/useLeaderboardEnabled';
 import { usePartnersEnabled } from '@/hooks/usePartnersEnabled';
 import { useLocation } from '@/hooks/useLocation';
 import { useMounted } from '@/hooks/useMounted';
@@ -64,6 +65,7 @@ interface DrawerSectionItem {
 export function Drawer() {
   const t = useAppTranslations();
   const partnersEnabled = usePartnersEnabled();
+  const leaderboardEnabled = useLeaderboardEnabled();
   const open = useAppSelector(selectDrawerOpen);
   const dispatch = useAppDispatch();
   const router = useRouter();
@@ -241,6 +243,9 @@ export function Drawer() {
       route: routes.leaderboard,
       title: t('leaderboard'),
       icon: <ChartNoAxesColumnIncreasing size={18} />,
+      // Board opens once the test period ends (§16.4) — same admin switch the
+      // page itself reads, so unlocking is one toggle, not a redeploy.
+      locked: !leaderboardEnabled,
     },
     {
       route: routes.jackpot,

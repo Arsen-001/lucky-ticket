@@ -1,12 +1,14 @@
 'use client';
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
+import { Lock } from 'lucide-react';
 import { twMerge } from 'tailwind-merge';
 import { BoltIcon } from '@/components/shared/icons/BoltIcon';
 import { ConfirmModal } from '@/components/shared/modals/ConfirmModal';
 import { Skeleton } from '@/components/shared/seleketons/Skeleton';
 import { SkeletonSuspense } from '@/components/shared/seleketons/SkeletonSuspense';
 import { useAppTranslations } from '@/hooks/useAppTranslations';
+import { useLeaderboardEnabled } from '@/hooks/useLeaderboardEnabled';
 import { routes } from '@/constants/routes';
 import { formatNumber } from '@/utils/global/number.utils';
 import type { ProfileResponse } from '@/types/interfaces/profile.interfaces';
@@ -20,6 +22,9 @@ export function ProfileLeaderboardCard({ profile, loading }: ProfileLeaderboardC
   const t = useAppTranslations();
   const router = useRouter();
   const [open, setOpen] = useState(false);
+  // Board still shut for the test period (§16.4): the player's own AP and rank
+  // stay visible, but the card leads nowhere until the leaderboard opens.
+  const leaderboardEnabled = useLeaderboardEnabled();
 
   const showSkeleton = loading || !profile;
   // Ranking is by lifetime Activity Points (the backend tracks no period
@@ -39,11 +44,11 @@ export function ProfileLeaderboardCard({ profile, loading }: ProfileLeaderboardC
         <button
           type="button"
           onClick={() => setOpen(true)}
-          disabled={showSkeleton}
-          aria-label={t('view leaderboard')}
+          disabled={showSkeleton || !leaderboardEnabled}
+          aria-label={leaderboardEnabled ? t('view leaderboard') : t('leaderboard locked title')}
           className={twMerge(
             'bg-background-overlay relative flex items-center gap-2.5 rounded-2xl p-0 text-left transition-all',
-            !showSkeleton && 'cursor-pointer active:scale-99 hover:bg-white/4'
+            !showSkeleton && leaderboardEnabled && 'cursor-pointer active:scale-99 hover:bg-white/4'
           )}
         >
           <div className="flex-center shrink-0 overflow-hidden">
@@ -79,6 +84,13 @@ export function ProfileLeaderboardCard({ profile, loading }: ProfileLeaderboardC
             </div>
           </div>
         </button>
+
+        {!leaderboardEnabled && (
+          <p className="text-white-secondary/60 flex items-center gap-1.5 px-1 text-[11px] font-medium leading-snug">
+            <Lock size={11} className="shrink-0 text-white/35" />
+            {t('leaderboard locked description')}
+          </p>
+        )}
       </section>
 
       <ConfirmModal

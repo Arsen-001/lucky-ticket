@@ -328,6 +328,8 @@
   "lc wallet": "LC-кошелёк",
   "lc wallet subtitle": "Откройте, чтобы увидеть баланс $LC, доход и историю.",
   "leaderboard": "Таблица лидеров",
+  "leaderboard locked description": "Таблица откроется после тестового периода — продолжайте зарабатывать баллы активности: они уже определяют ваше место.",
+  "leaderboard locked title": "Откроется после тестового периода",
   "leaderboard rank": "достигнутая позиция",
   "leaderboard rank blurb": "Поднимайтесь в таблице ради больших наград.",
   "leaderboard rank title period": "Достигайте топ-позиций ({period})",

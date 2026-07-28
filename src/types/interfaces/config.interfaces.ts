@@ -17,6 +17,13 @@ export interface PublicConfig {
   adsEnabled: boolean;
   /** Advertiser (partners) cabinet master switch — false = coming-soon preview. */
   partnersEnabled?: boolean;
+  /**
+   * Public leaderboard master switch — false locks the board behind the "opens
+   * after the test period" screen. Standings over a closed beta of a few
+   * testers would read as the real ranking, so the board stays shut until the
+   * test ends and an admin flips this on.
+   */
+  leaderboardEnabled?: boolean;
   /** Invite reward display values (admin-editable, DOCS §17). */
   referral?: {
     signup: {
