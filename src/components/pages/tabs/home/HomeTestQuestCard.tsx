@@ -1,6 +1,6 @@
 'use client';
 
-import { FlaskConical, Gift } from 'lucide-react';
+import { Gift } from 'lucide-react';
 import { Link } from '@/components/shared/links/Link';
 import { routes } from '@/constants/routes';
 import { useGetTestQuestQuery } from '@/api/testQuest.api';
@@ -28,10 +28,6 @@ export function HomeTestQuestCard() {
       aria-label={t('test quest chain title')}
       className="relative flex min-w-0 flex-1 items-center gap-2.5 overflow-hidden rounded-3xl border border-electric-pink/30 bg-gradient-to-r from-electric-purple/15 to-electric-pink/10 p-2.5 transition-transform active:scale-[0.98]"
     >
-      <span className="flex-center h-10 w-10 shrink-0 rounded-xl bg-gradient-to-br from-electric-pink to-electric-purple shadow-md shadow-black/30">
-        <FlaskConical size={19} className="text-white" />
-      </span>
-
       <span className="flex min-w-0 flex-1 flex-col">
         <span className="truncate text-[13px] font-extrabold leading-tight">
           {t('test quest chain title')}
