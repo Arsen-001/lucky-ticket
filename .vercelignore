@@ -82,5 +82,10 @@ tmp/
 # ── GSD baseline (auto-generated) ──
 .mcp.json
 
+# Logo generation workspace (scripts, fonts, source art ~23MB). The app ships
+# the outputs — /assets/images/logo.png plus the icons in src/app — and nothing
+# references this folder, so it has no business being publicly downloadable.
+/public/assets/images/logo/
+
 # vercel upload safety: never ship local build dirs
 .next*
