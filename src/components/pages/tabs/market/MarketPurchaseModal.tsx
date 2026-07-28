@@ -88,10 +88,12 @@ export function MarketPurchaseModal({
                 half the row on a 390px screen and wraps the name onto three
                 lines, so it is boxed down here too — bigger than the receipt row
                 in the success modal, since this is the item being bought. Size is
-                forced because those nodes carry inline width/height; every
-                variant is square, so filling the box keeps the aspect. */}
+                forced because those nodes carry inline width/height, and the
+                image is contained rather than cropped: an admin photo arrives at
+                whatever aspect ratio was uploaded, and a buyer confirming a
+                purchase has to see the whole product, not its middle third. */}
             {iconNode && (
-              <div className="flex-center size-20 shrink-0 overflow-hidden rounded-2xl [&>*]:size-full! [&_img]:size-full! [&_img]:object-cover">
+              <div className="flex-center size-20 shrink-0 overflow-hidden rounded-2xl [&>*]:size-full! [&_img]:size-full! [&_img]:object-contain">
                 {iconNode}
               </div>
             )}

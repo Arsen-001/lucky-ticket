@@ -19,8 +19,11 @@ export function MarketItemImage({ src, alt, size, className }: MarketItemImagePr
       className={twMerge('relative overflow-hidden rounded-2xl', className)}
       style={size ? { width: size, height: size } : undefined}
     >
+      {/* Contained, not cropped, like the grid card: the box is square but an
+          admin uploads any aspect ratio, and `cover` on a 16:9 banner shows its
+          middle third only. */}
       {/* eslint-disable-next-line @next/next/no-img-element */}
-      <img src={src} alt={alt} className="h-full w-full object-cover" />
+      <img src={src} alt={alt} className="h-full w-full object-contain" />
     </div>
   );
 }

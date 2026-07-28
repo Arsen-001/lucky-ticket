@@ -46,11 +46,14 @@ export function MarketPurchaseSuccessModal({
         <div className="flex w-full items-center gap-3 rounded-xl border border-white/10 bg-black/25 p-3.5">
           {/* Callers hand over the same icon they render in the confirm modal — a
               140–165px hero. This row is a receipt line, not a stage, so the node
-              is boxed down to a thumbnail. Every variant is square (a sized <div>
-              or a bare <img>), so filling the box keeps the aspect; the size is
-              forced because those nodes carry inline width/height. */}
+              is boxed down to a thumbnail; the size is forced because those nodes
+              carry inline width/height. The image is contained, not cropped: an
+              admin photo comes in at whatever aspect ratio was uploaded (a 16:9
+              banner in a square box shows a third of itself under `cover`), and
+              the receipt has to show what was actually bought. Square variants —
+              the avatar tile with its tier ring, the VIP crown — are unaffected. */}
           {itemIcon && (
-            <div className="flex-center size-14 shrink-0 overflow-hidden rounded-xl [&>*]:size-full! [&_img]:size-full! [&_img]:object-cover">
+            <div className="flex-center size-14 shrink-0 overflow-hidden rounded-xl [&>*]:size-full! [&_img]:size-full! [&_img]:object-contain">
               {itemIcon}
             </div>
           )}
