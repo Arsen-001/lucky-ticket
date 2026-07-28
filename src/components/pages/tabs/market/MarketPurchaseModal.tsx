@@ -84,8 +84,18 @@ export function MarketPurchaseModal({
       content={
         <div className="mt-2 flex flex-col gap-4 text-center text-white/80">
           <div className="flex items-center gap-4 rounded-xl bg-white/5 p-4">
-            {iconNode && <div className="flex-center shrink-0">{iconNode}</div>}
-            <div className="flex flex-col gap-1 text-left">
+            {/* Sections hand over a 140–165px node. Left at its own size it eats
+                half the row on a 390px screen and wraps the name onto three
+                lines, so it is boxed down here too — bigger than the receipt row
+                in the success modal, since this is the item being bought. Size is
+                forced because those nodes carry inline width/height; every
+                variant is square, so filling the box keeps the aspect. */}
+            {iconNode && (
+              <div className="flex-center size-20 shrink-0 overflow-hidden rounded-2xl [&>*]:size-full! [&_img]:size-full! [&_img]:object-cover">
+                {iconNode}
+              </div>
+            )}
+            <div className="flex min-w-0 flex-1 flex-col gap-1 text-left">
               <span className="text-sm font-bold text-white leading-tight">{title}</span>
               {description && (
                 <span className="text-[12px] leading-snug text-white/60">{description}</span>

@@ -44,7 +44,16 @@ export function MarketPurchaseSuccessModal({
         </div>
 
         <div className="flex w-full items-center gap-3 rounded-xl border border-white/10 bg-black/25 p-3.5">
-          {itemIcon && <div className="flex-center shrink-0">{itemIcon}</div>}
+          {/* Callers hand over the same icon they render in the confirm modal — a
+              140–165px hero. This row is a receipt line, not a stage, so the node
+              is boxed down to a thumbnail. Every variant is square (a sized <div>
+              or a bare <img>), so filling the box keeps the aspect; the size is
+              forced because those nodes carry inline width/height. */}
+          {itemIcon && (
+            <div className="flex-center size-14 shrink-0 overflow-hidden rounded-xl [&>*]:size-full! [&_img]:size-full! [&_img]:object-cover">
+              {itemIcon}
+            </div>
+          )}
           <div className="flex min-w-0 flex-1 flex-col gap-0.5 text-left">
             {itemName && (
               <span className="text-[14px] font-extrabold leading-tight text-white">
