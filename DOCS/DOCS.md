@@ -1492,6 +1492,8 @@ Each user's invite link is a Telegram deep link — `https://t.me/<bot>?startapp
 
 **Editing the card:** the image, the caption and the button label are admin-controlled — panel → **Настройки → Рефералка**, with a live mock of how the card lands in a chat. They live in the referral config (`PlatformConfig.referralConfig.share`), and any field left empty falls back to the copy built into the backend, so a half-filled form never ships a card with holes in it. The **link itself is deliberately not editable**: it carries the `?startapp=<referrerId>` of whoever is sharing, so an admin-typed URL would silently break attribution for every invite sent. The plain-link fallback text is Mini App i18n, not a panel setting.
 
+**Picture:** one shared banner (`share.imageUrl`) plus an optional per-language override (`share.images[locale]`). Empty means "use the shared one", so a single banner stays a single field and a language only diverges when someone gives it its own. Ladder per send: this language's picture → the shared one → `INVITE_SHARE_IMAGE_URL` → the built-in banner.
+
 **Caption mode** (`share.captionMode`) picks where the copy comes from:
 
 | Режим                   | Что уходит                                                                                                                              |
