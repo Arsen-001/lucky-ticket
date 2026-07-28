@@ -12,6 +12,9 @@ import { FullscreenBrandBar } from '@/components/layout-elements/FullscreenBrand
 import { NextIntlClientProvider } from 'next-intl';
 import { gilroy, spaceGrotesk } from '@/fonts/index.fonts';
 import { getLocale } from 'next-intl/server';
+import { getAppTranslations } from '@/i18n/getAppTranslations';
+import { GlobalConstants } from '@/constants/global.constants';
+import type { Metadata } from 'next';
 import type { ChildrenProps } from '@/types/interfaces/component.interfcaes';
 import '@/styles/index.css';
 
@@ -33,6 +36,30 @@ const ENABLED_AD_PROVIDERS: Set<string> | null = (() => {
 
 function isProviderEnabled(id: string): boolean {
   return ENABLED_AD_PROVIDERS === null || ENABLED_AD_PROVIDERS.has(id);
+}
+
+/**
+ * The app runs inside Telegram, but its URL still gets pasted into chats and
+ * browsers — without this the document had no title at all and previewed as a
+ * bare vercel.app link. The artwork itself is file-based metadata:
+ * `icon.png`, `apple-icon.png` and `opengraph-image.png` sit next to this file
+ * and Next attaches them automatically, so only the copy is declared here.
+ */
+export async function generateMetadata(): Promise<Metadata> {
+  const t = await getAppTranslations();
+
+  return {
+    title: GlobalConstants.projectName,
+    description: t('app description'),
+    applicationName: GlobalConstants.projectName,
+    openGraph: {
+      type: 'website',
+      siteName: GlobalConstants.projectName,
+      title: GlobalConstants.projectName,
+      description: t('app description'),
+    },
+    twitter: { card: 'summary_large_image' },
+  };
 }
 
 export default async function RootLayout({ children }: ChildrenProps) {
