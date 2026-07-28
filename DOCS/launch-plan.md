@@ -61,8 +61,18 @@
   stakes + how-to-earn + CTA without rushing.
 - **CTA (LOCKED):** button "Играть в Telegram" → **`t.me/luckyticket365_bot`**.
 - **Language (LOCKED):** **RU only** — single version.
-- **Badge (LOCKED):** design an exclusive founder "seal" from scratch (no
-  supplied asset).
+- **Badge — REVERSED 2026-07-27:** the from-scratch founder "seal" (gold
+  medallion, rays, «ОСНОВАТЕЛЬ» arc) is **dropped from all creative**. Two
+  reasons, both found by looking at the rendered material next to the app: it
+  depicted a badge **that does not exist in the product yet**, i.e. promised
+  specific unbuilt art; and award-seal skeuomorphism **does not match the
+  product's design language** — the app speaks rounded pills, electric
+  pink→purple gradients, hairline borders and Lucide glyphs
+  (`TestQuestBadge.tsx`). Creative now shows the **app's own Test-Quest badge
+  with the level concealed** («ТЕСТИРОВЩИК / Уровень ?»), which is honest and a
+  stronger hook — a mystery reward beats a known one. Component:
+  `SecretBadge.tsx`; `lucide-react` is pinned to the app's `0.555.0` so the glyph
+  is the same artwork, not a lookalike.
 - **Logo (LOCKED):** typed wordmark `LuckyTicket365` (Space Grotesk / Montserrat);
   no supplied logo file.
 - **Music:** Pixabay "Play Time" (fassounds) — Pixabay Content License, free for
@@ -84,16 +94,30 @@ H.264 + AAC). Scenes: BetaHook → BetaRewards → HowToEarn → BrandCta.
 > evergreen intro).
 
 On-screen copy deliberately avoids the word "beta" — it uses **ТЕСТ / тестовый**
-("ТЕСТ · 30 ДНЕЙ" pill, "ТЕСТ" seal ribbon, "Забери за тест", "Успей в тестовый
+("ТЕСТ · 31 ДЕНЬ" pill, "ТЕСТ" seal ribbon, "Забери за тест", "Успей в тестовый
 период"). Music level held at 0.6. (Internal naming in this doc still says
 "beta"; only the rendered copy changed.)
+
+**Re-cut 2026-07-26** (`out/lucky-ticket-promo.mp4`, 15.06s / 1080×1920 /
+H.264+AAC): the day-count pill went «30 ДНЕЙ» → **«31 ДЕНЬ»** (matches §2.1 and
+`TEST_QUEST_TOTAL_LEVELS = 31`), and the third reward pill went "Эксклюзивный
+badge" → **«Эксклюзивный значок»** — the creative is RU-only, and the app's own
+RU copy says «Значок» (`messages/ru.json`).
+
+**Re-cut again 2026-07-27** — scene 2 rebuilt around the badge reversal above:
+the founder medallion is replaced by `SecretBadge`, the "Эксклюзивный значок"
+reward row is **removed** (naming it there *and* showing it below turned the
+scene into four identical stacked pills with nothing reading as the payoff — the
+badge is now the hero alone), and the tagline is «секретный значок / больше
+невозможно получить» — **the same sentence as the referral banner**, so the clip
+and the invite make one claim in one wording.
 
 ### 1.6 15-second beat sheet (draft, per §1.3 + beta hook)
 
 - **0–3s — Hook:** "Тестовый месяц уже идёт" / "Успей войти первым", large,
   over the signature background.
 - **3–8s — Stakes:** what you keep for beta activity — **усиления · подарки ·
-  badge, который больше не выдадут** (three reward beats).
+  значок, который больше не выдадут** (three reward beats).
 - **8–12s — How to earn:** зови друзей · проходи уровни · смотри рекламу · играй
   (reuse ticket/coin scenes).
 - **12–15s — Brand + CTA:** `LuckyTicket365` + "Играть в Telegram".
@@ -106,8 +130,8 @@ On-screen copy deliberately avoids the word "beta" — it uses **ТЕСТ / те
 
 At launch the product runs a **31-day test (beta) period** (decided: **31 days,
 not 30** — note the RU grammar consequence: on-screen copy is «31 ДЕНЬ»
-singular, not «ДНЕЙ»; the already-rendered video still says «30 ДНЕЙ» and must be
-re-cut to «31 ДЕНЬ» on the next render — see §1.5). Activity during the beta is
+singular, not «ДНЕЙ»; the rendered video was re-cut to «31 ДЕНЬ» on 2026-07-26 —
+see §1.5). Activity during the beta is
 tracked and, when the beta ends, converts into **exclusive early-adopter
 rewards** scaled to how much each player achieved. The exclusivity is the point:
 some rewards (especially the badge) can **never** be obtained again after the
