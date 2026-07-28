@@ -59,6 +59,12 @@ export interface StakesSummaryCardProps {
   topTier?: TicketType;
   /** AP gap to the next AP-tier — undefined when already at max tier. */
   nextTierAp?: number;
+  /**
+   * Friends still missing for the next tier. The AP-tier gate has two halves
+   * (DOCS §5.1) — with the AP half already met, AP alone reads as "0 AP left"
+   * while the tier stays locked, so the friend half is what to show.
+   */
+  nextTierFriends?: number;
   /** Percent progress towards the next tier (0..100). */
   tierProgressPercent?: number;
 }
@@ -70,6 +76,7 @@ export function StakesSummaryCard({
   lifetimeEarned,
   topTier,
   nextTierAp,
+  nextTierFriends = 0,
   tierProgressPercent = 0,
 }: StakesSummaryCardProps) {
   const t = useAppTranslations();
@@ -85,7 +92,11 @@ export function StakesSummaryCard({
       }}
     >
       <div className="relative grid grid-cols-3 gap-2.5">
-        <Stat label={t('active')} value={String(activeCount)} sub={t('stakes')} />
+        <Stat
+          label={t('active')}
+          value={String(activeCount)}
+          sub={t('stakes noun {n}', { n: activeCount })}
+        />
         <Stat
           label={t('locked')}
           value={formatCompact(lockedAmount)}
@@ -115,7 +126,11 @@ export function StakesSummaryCard({
               <span className="text-pink-secondary uppercase tracking-wider">
                 {t('next tier in')}
               </span>
-              <span className="text-electric-pink">{formatCompact(nextTierAp)} AP</span>
+              <span className="text-electric-pink">
+                {nextTierAp > 0
+                  ? `${formatCompact(nextTierAp)} AP`
+                  : t('need {n} friends', { n: nextTierFriends })}
+              </span>
             </div>
             <div className="bg-background-overlay/60 mt-1 h-0.5 overflow-hidden rounded-full">
               <div

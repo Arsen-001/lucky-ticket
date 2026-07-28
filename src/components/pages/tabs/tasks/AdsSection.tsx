@@ -111,8 +111,9 @@ export function AdsSection({
           <p className="text-[11px] text-pink-secondary">{t('ads progress', { watched, total })}</p>
         </div>
         {ads?.resetAt && !expired && (
-          <span className="rounded-full bg-white/5 px-2.5 py-1 text-[10px] font-bold text-white/60 tabular-nums">
-            {leftTime}
+          <span className="flex-center shrink-0 gap-1 rounded-full bg-white/5 px-2.5 py-1 text-[10px] font-bold text-white/60">
+            {t('resets in')}
+            <span className="tabular-nums">{leftTime}</span>
           </span>
         )}
       </header>

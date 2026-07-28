@@ -12,6 +12,7 @@ import { routes } from '@/constants/routes';
 import { useAppTranslations } from '@/hooks/useAppTranslations';
 import { useToast } from '@/hooks/useToast';
 import { useCountDown } from '@/hooks/useCountDown';
+import { formatDate } from '@/utils/global/date.utils';
 import { formatCompact } from '@/utils/global/number.utils';
 import {
   computeStakeCancelFee,
@@ -124,12 +125,14 @@ export function ProgressStakeContent({ stakeId }: ProgressStakeContentProps) {
                 </span>
               </div>
             </div>
+            {/* The ring already carries the percentage — this tile answers the
+                other half of "when do I get it back": the unlock date. */}
             <div className="rounded-xl border border-white/5 bg-black/30 px-3 py-2.5">
               <div className="text-pink-secondary text-[9px] font-bold uppercase tracking-wider">
-                {t('progress')}
+                {t('ends on')}
               </div>
               <div className="mt-0.5 text-[16px] font-extrabold leading-none text-white tabular-nums">
-                {progress}%
+                {formatDate(stake.endDate, 'DD.MM.YY')}
               </div>
             </div>
           </div>

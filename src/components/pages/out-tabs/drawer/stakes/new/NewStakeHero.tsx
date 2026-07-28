@@ -7,8 +7,8 @@ import { GlobalConstants } from '@/constants/global.constants';
 import { useAppTranslations } from '@/hooks/useAppTranslations';
 import { useStakesDisplayConfig } from '@/hooks/useStakesDisplayConfig';
 import { formatCompact } from '@/utils/global/number.utils';
-import { GoldenText } from '@/components/shared/typography/GoldenText';
 import { LcLabel } from '@/components/shared/icons/LcLabel';
+import { NewStakeAmountField } from '@/components/pages/out-tabs/drawer/stakes/new/NewStakeAmountField';
 import { NewStakeLevelPicker } from '@/components/pages/out-tabs/drawer/stakes/new/NewStakeLevelPicker';
 import { StakesLevelChip } from '@/components/pages/out-tabs/drawer/stakes/StakesLevelChip';
 import {
@@ -75,9 +75,7 @@ export function NewStakeHero({
             {t('you will lock')}
           </div>
           <div className="mt-1 flex items-center justify-center gap-1.5">
-            <GoldenText className="text-[38px] font-extrabold leading-none tabular-nums tracking-tight">
-              {deposit.toLocaleString()}
-            </GoldenText>
+            <NewStakeAmountField value={deposit} max={balance} onChange={onDepositChange} />
             <LcLabel size={20} />
           </div>
           <div className="text-white-secondary mt-1 text-[11px]">
@@ -233,7 +231,7 @@ export function NewStakeHero({
         </div>
 
         <div className="border-gold/30 bg-gold/10 mt-4 flex items-center justify-between rounded-xl border px-3 py-2.5">
-          <div className="flex items-center gap-2 text-left">
+          <div className="flex min-w-0 items-center gap-2 text-left">
             <div className="flex-center border-gold/40 bg-gold/20 h-7 w-7 rounded-full border">
               <Star size={12} className="text-gold" fill="currentColor" strokeWidth={0} />
             </div>
@@ -249,9 +247,9 @@ export function NewStakeHero({
               </div>
             </div>
           </div>
-          <div className="text-right leading-tight">
+          <div className="shrink-0 text-right leading-tight">
             <div className="text-gold text-[15px] font-extrabold tabular-nums">{aprLabel}%</div>
-            <div className="text-white-secondary text-[10px] font-semibold tabular-nums">
+            <div className="text-white-secondary whitespace-nowrap text-[10px] font-semibold tabular-nums">
               {t('+{amount} {coin} back', {
                 amount: aprReturn.toLocaleString(),
                 coin: GlobalConstants.coinName,

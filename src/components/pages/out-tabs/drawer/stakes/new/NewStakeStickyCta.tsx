@@ -50,7 +50,10 @@ export function NewStakeStickyCta({
   if (tierLocked) {
     label = t('locked');
   } else if (belowMin) {
-    label = t('min {amount} {coin}', { amount: minDeposit, coin: GlobalConstants.coinName });
+    label = t('min {amount} {coin}', {
+      amount: minDeposit.toLocaleString(),
+      coin: GlobalConstants.coinName,
+    });
   } else if (insufficient) {
     label = t('not enough {coin}', { coin: GlobalConstants.coinName });
   } else {

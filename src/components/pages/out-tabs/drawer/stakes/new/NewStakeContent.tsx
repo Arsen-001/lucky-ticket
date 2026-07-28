@@ -32,8 +32,6 @@ import { StakesWalletPill } from '@/components/pages/out-tabs/drawer/stakes/Stak
 import { Skeleton } from '@/components/shared/seleketons/Skeleton';
 import { QueryErrorState } from '@/components/shared/error/QueryErrorState';
 
-const SLIDER_CAP = 1_000_000;
-
 export function NewStakeContent() {
   const t = useAppTranslations();
   const router = useRouter();
@@ -88,7 +86,10 @@ export function NewStakeContent() {
   const safeDeposit = deposit || minDepositOfFirst;
   const activeLevel = findLevelForDeposit(levels, safeDeposit);
   const tierLocked = !isTierUnlocked(activeLevel.tier);
-  const sliderMax = Math.min(Math.max(balance, minDepositOfFirst), SLIDER_CAP);
+  // The balance is the only ceiling the backend enforces (`StakesService.start`
+  // checks `user.coins >= amount` and nothing above it), so the slider and the
+  // MAX preset run to the full balance — a fixed UI cap used to hide the rest.
+  const sliderMax = Math.max(balance, minDepositOfFirst);
   const stakeFee = computeStakeFee(
     safeDeposit,
     durationMonths,

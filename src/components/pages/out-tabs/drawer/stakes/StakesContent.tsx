@@ -9,7 +9,9 @@ import { formatCompact } from '@/utils/global/number.utils';
 import { useClaimStakeMutation, useGetStakesQuery } from '@/api/stakes.api';
 import { useGetMeQuery } from '@/api/me.api';
 import {
+  activityTierOrder,
   computeActivityTier,
+  computeNextTierReferralGap,
   computeNextTierThreshold,
   GlobalConstants,
 } from '@/constants/global.constants';
@@ -79,18 +81,21 @@ export function StakesContent() {
   const nextThreshold = computeNextTierThreshold(currentAp, currentRefs);
   const currentTierThreshold = GlobalConstants.apTierThresholds[currentTier];
   const nextTierApGap = nextThreshold !== null ? Math.max(0, nextThreshold - currentAp) : undefined;
-  const tierProgressPercent =
+  // The tier gate has an AP half AND a friends half (DOCS §5.1). With enough AP
+  // but too few friends the AP gap is 0 while the tier stays locked, so the bar
+  // and the label have to follow whichever half is still blocking.
+  const nextTier =
+    nextThreshold !== null ? activityTierOrder[activityTierOrder.indexOf(currentTier) + 1] : null;
+  const nextTierRefRequired = nextTier ? GlobalConstants.tierReferralRequirements[nextTier] : 0;
+  const nextTierRefGap = computeNextTierReferralGap(currentAp, currentRefs);
+  const percent = (value: number) => Math.max(0, Math.min(100, Math.round(value)));
+  const apProgressPercent =
     nextThreshold !== null && nextThreshold > currentTierThreshold
-      ? Math.max(
-          0,
-          Math.min(
-            100,
-            Math.round(
-              ((currentAp - currentTierThreshold) / (nextThreshold - currentTierThreshold)) * 100
-            )
-          )
-        )
+      ? percent(((currentAp - currentTierThreshold) / (nextThreshold - currentTierThreshold)) * 100)
       : 100;
+  const refProgressPercent =
+    nextTierRefRequired > 0 ? percent((currentRefs / nextTierRefRequired) * 100) : 100;
+  const tierProgressPercent = nextTierApGap ? apProgressPercent : refProgressPercent;
 
   const handleClaimAll = async () => {
     let failed = false;
@@ -148,6 +153,7 @@ export function StakesContent() {
             lifetimeEarned={lifetimeEarned}
             topTier={topTier}
             nextTierAp={nextTierApGap}
+            nextTierFriends={nextTierRefGap}
             tierProgressPercent={tierProgressPercent}
           />
         </div>

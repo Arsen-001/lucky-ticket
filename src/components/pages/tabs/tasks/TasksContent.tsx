@@ -24,7 +24,6 @@ import { useToast } from '@/hooks/useToast';
 import { useRewardedAd } from '@/hooks/useRewardedAd';
 import { Skeleton } from '@/components/shared/seleketons/Skeleton';
 import { TasksFrequencyTabs } from './TasksFrequencyTabs';
-import { TasksResetCountdown } from './TasksResetCountdown';
 import { TasksCategoryNav, type CategoryNavItem } from './TasksCategoryNav';
 import { TasksCategorySection } from './TasksCategorySection';
 import { TournamentMilestoneSlider } from './TournamentMilestoneSlider';
@@ -541,9 +540,6 @@ export function TasksContent() {
           />
         </ArrivalShine>
       </div>
-
-      {/* Period reset countdown — the empty state renders its own line, so skip it there */}
-      {!allEmpty && <TasksResetCountdown resetAt={periodResetAt} className="-mt-1 pb-2" />}
 
       <TasksCategoryNav
         items={navItems}

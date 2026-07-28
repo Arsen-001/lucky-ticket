@@ -133,7 +133,9 @@ export function StakesHistoryContent() {
       </SkeletonSuspense>
 
       <div className="flex items-center justify-between gap-2">
-        <div className="flex gap-2 overflow-x-auto scrollbar-hidden">
+        {/* Three chips + the sort button never fit 390px, so the row scrolls —
+            the right-edge fade is what tells the user there is more to reach. */}
+        <div className="flex min-w-0 flex-1 gap-2 overflow-x-auto scrollbar-hidden [mask-image:linear-gradient(to_right,#000_calc(100%-20px),transparent)]">
           {FILTERS.map(({ id, labelKey }) => {
             const active = filter === id;
             return (
