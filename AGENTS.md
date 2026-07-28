@@ -310,6 +310,8 @@ Any prop that holds a navigation path must use the `Route` type from `src/consta
 
 ## Internationalization
 
+> **Adding or removing a language? Read [`DOCS/ADDING_A_LANGUAGE.md`](DOCS/ADDING_A_LANGUAGE.md) first.** A language lives in ~20 places across all three repos (Mini App, backend, admin panel), including two that use the OPPOSITE case (`en` vs `EN`). Missing one of them does not fail the build — it silently falls back to English, so only a player notices.
+
 **Never hardcode user-visible text** — every string rendered in the UI (labels, placeholders, error messages, button text, headings, empty states) must go through `t()`. Hardcoded English strings in JSX are a bug.
 
 Always use the custom hook, never raw `useTranslations`:
