@@ -37,8 +37,14 @@ const marketMutationHandlers = {
   'POST market/engines/buy': successResponse,
   'POST market/shards/buy': successResponse,
   'POST market/cosmetics/buy': successResponse,
-  'POST market/tickets/buy': successResponse,
   'POST market/statuses/buy': successResponse,
+  // Tickets alone are bought per id — `market/tickets/:ticketId/buy`, matching
+  // the backend route — so a single static key never matches and every ticket
+  // purchase in dev died on a 404 toast. The resolver has no wildcards, so the
+  // keys are generated from the catalog and stay in sync with it.
+  ...Object.fromEntries(
+    marketMock.tickets.map(ticket => [`POST market/tickets/${ticket.id}/buy`, successResponse])
+  ),
 };
 
 /**
