@@ -3,7 +3,6 @@
 import Image from 'next/image';
 import { Check, Globe } from 'lucide-react';
 import { useTransition } from 'react';
-import { useRouter } from 'next/navigation';
 import { twMerge } from 'tailwind-merge';
 import { useGetAvailableLanguages, type Language } from '@/hooks/useGetAvailableLanguages';
 import { useAppTranslations } from '@/hooks/useAppTranslations';
@@ -14,13 +13,18 @@ export default function LanguagesPage() {
   const t = useAppTranslations();
   const { languages, currentLocale } = useGetAvailableLanguages();
   const [isPending, startTransition] = useTransition();
-  const router = useRouter();
 
   const handleLanguageChange = (code: string) => {
     if (code === currentLocale) return;
     startTransition(async () => {
       await setAppLocale(code as LocaleType);
-      router.refresh();
+      // A full reload, not router.refresh(): refresh only re-renders the route
+      // you are standing on, while every other screen you already visited stays
+      // in the client router cache as the payload rendered under the OLD
+      // locale. Those screens then keep reading the old `useLocale()` — which
+      // is how «Пригласить друзей» could still send lang=en long after the app
+      // had been switched to German.
+      window.location.reload();
     });
   };
 

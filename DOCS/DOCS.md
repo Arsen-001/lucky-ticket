@@ -1490,6 +1490,18 @@ Each user's invite link is a Telegram deep link — `https://t.me/<bot>?startapp
 
 **Share flow:** On Telegram clients with Bot API 8.0+, tapping **Share invite** sends a **rich invite card** instead of a bare link — a branded 1280×720 image with a localized caption and a "Play" button carrying the `?startapp=<referrerId>` deep link. The backend prepares it per tap (`POST referral/prepare-share`, one-time-use message via Bot API `savePreparedInlineMessage`), and the Mini App forwards it through the native chat picker (`WebApp.shareMessage`). On older clients — or if preparation fails — the flow falls back to the plain `t.me/share/url` link share; outside Telegram it uses the OS share sheet or copies the link.
 
+**Editing the card:** the image, the caption and the button label are admin-controlled — panel → **Настройки → Рефералка**, with a live mock of how the card lands in a chat. They live in the referral config (`PlatformConfig.referralConfig.share`), and any field left empty falls back to the copy built into the backend, so a half-filled form never ships a card with holes in it. The **link itself is deliberately not editable**: it carries the `?startapp=<referrerId>` of whoever is sharing, so an admin-typed URL would silently break attribution for every invite sent. The plain-link fallback text is Mini App i18n, not a panel setting.
+
+**Caption mode** (`share.captionMode`) picks where the copy comes from:
+
+| Режим                   | Что уходит                                                                                                                              |
+| ----------------------- | --------------------------------------------------------------------------------------------------------------------------------------- |
+| `perLocale` (умолчание) | Подпись на языке **отправителя** — ru / en / de правятся отдельно; армянский идёт из кода (в мини-аппе он выключен, поля для него нет). |
+| `shared`                | Одна подпись всем отправителям, независимо от их языка.                                                                                 |
+| `none`                  | Подписи нет вообще: только картинка и кнопка.                                                                                           |
+
+The recipient's language is **not** available at any point and never can be: `savePreparedInlineMessage` fixes the card's content before the sharer picks a chat, and `WebApp.shareMessage` reports only `sent: true/false` — never who received it. So `perLocale` means "each player sends in _their own_ language", not "each friend reads it in theirs"; `none` is the only mode that cannot land in the wrong language. The Mini App the friend opens is localized for them regardless.
+
 **Referral Benefits:**
 
 - **Signup Reward:** The moment a referred friend registers, the inviter is credited a one-off reward — **10 AP + 1 Lucky Star**, doubled to **20 AP + 2 Lucky Stars** when the invited friend is a Telegram Premium user. This is granted instantly (unlike the ticket commission below, which accumulates and must be claimed).
