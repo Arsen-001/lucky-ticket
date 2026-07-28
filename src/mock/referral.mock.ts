@@ -126,6 +126,13 @@ export const referralMock = {
   'referral/friends': invitedFriendsMock,
   'referral/stats': referralStatsMock,
   'POST referral/prepare-share': preparedShareMessageMock,
+  // A friend's reward is claimed per id — `referral/claim/:friendId` — and the
+  // resolver has no wildcards, so the keys come from the roster. `baseFriends`,
+  // not `invitedFriendsMock`: the latter is empty for a fresh account, and the
+  // handler should exist either way.
+  ...Object.fromEntries(
+    baseFriends.map(friend => [`POST referral/claim/${friend.id}`, () => ({})])
+  ),
   'POST referral/shared': () => {
     console.log('[mock] referral/shared — player sent a referral share');
     return { ok: true };

@@ -132,4 +132,13 @@ const notifications = (
 // Level-zero: an empty inbox (the demo notifications stay in `notifications`).
 export const notificationsMock = {
   notifications: appConfig.account.fresh ? [] : notifications,
+  'POST notifications/mark-all-as-read': () => ({}),
+  // Read state is set per id — `notifications/:id/mark-as-read` — and the mock
+  // resolver has no wildcards, so one key per notification it can be called on.
+  ...Object.fromEntries(
+    notifications.map(notification => [
+      `POST notifications/${notification.id}/mark-as-read`,
+      () => ({}),
+    ])
+  ),
 };
