@@ -67,9 +67,12 @@ export function AdSlideCard({ slot, onWatch, loading, locked = false }: AdSlideC
         </span>
       )}
 
-      {/* index */}
+      {/* Position in the day, counted the way a person counts: the first ad is
+          #1. Only the label shifts — `slot.index` stays 0-based everywhere else
+          (frame, glow, shine threshold, and the reward ladder it indexes into),
+          and the admin's «Награды по номеру просмотра» already starts at #1. */}
       <span className="relative shrink-0 text-[11px] font-bold tabular-nums text-white/35">
-        #{slot.index}
+        #{slot.index + 1}
       </span>
 
       {/* rewards — inline chips, fill the middle */}
