@@ -1105,6 +1105,12 @@ Tasks guide user behavior and include actions such as:
 
 The cached lookup lives in one place (`ChannelMembershipService`) and is shared by every channel gate — this check-in, the promo-code gate (§17.6), and the beta Test-Quest daily claim. One shared answer means the gates cannot disagree inside the cache window, a single screen refresh fires at most one `getChatMember`, and the Test-Quest's "I subscribed, check again" button opens all of them at once.
 
+**Channel boost (one-off, Premium-only).** A separate one-off task (`t-266`, SOCIAL, Gold) pays **1 000 LC + 1 ticket** for giving the official channel a Telegram **boost** — the "отдай голос каналу" action. It sits at the top of the one-off ladder (level with the first-deposit task) because it is the scarcest thing a player can be asked for: it requires Telegram Premium and consumes one of that account's limited boost slots. Progress comes from a live `getUserChatBoosts` check (the `channel_boosted` 0/1 counter), cached ~60s per player in `ChannelBoostService`, and an expired boost stops counting.
+
+The boost check is deliberately **fail-closed**, the opposite of the subscription gate above, and the asymmetry is the point: for the check-in an unknown answer would withhold a reward earned by other means, whereas here the boost _is_ the entire condition — paying out on an unknown answer would pay every player who never boosted, on every Bot-API hiccup. Refusing costs nothing, because the task simply stays incomplete until the player taps again.
+
+A bot **cannot grant, buy or transfer a boost** — Bot API exposes no such method, only reads — so verification is the only honest mechanism, and boosts can only be collected by asking Premium subscribers to give one (the admin panel's «Собрать голоса» block publishes that call-to-action with a `t.me/<name>?boost` button). Telegram likewise never tells a bot the channel's **total** boost count or level; the panel can only list boosts it saw arrive as `chat_boost` events.
+
 ### 12.4 All-Tasks Completion Bonus
 
 When a user completes **all tasks** within a given category (Daily, Weekly, or Monthly), they receive an extra gift in addition to the individual task rewards. This bonus is separate from the per-task rewards and is awarded automatically upon finishing the last task in the set.
