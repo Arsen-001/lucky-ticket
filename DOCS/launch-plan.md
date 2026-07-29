@@ -106,7 +106,7 @@ RU copy says «Значок» (`messages/ru.json`).
 
 **Re-cut again 2026-07-27** — scene 2 rebuilt around the badge reversal above:
 the founder medallion is replaced by `SecretBadge`, the "Эксклюзивный значок"
-reward row is **removed** (naming it there *and* showing it below turned the
+reward row is **removed** (naming it there _and_ showing it below turned the
 scene into four identical stacked pills with nothing reading as the payoff — the
 badge is now the hero alone), and the tagline is «секретный значок / больше
 невозможно получить» — **the same sentence as the referral banner**, so the clip
@@ -136,6 +136,34 @@ tracked and, when the beta ends, converts into **exclusive early-adopter
 rewards** scaled to how much each player achieved. The exclusivity is the point:
 some rewards (especially the badge) can **never** be obtained again after the
 beta closes — a limited-time "founder" moment to drive activity and retention.
+
+#### When the beta actually ends — one date, set in the panel
+
+The closing date is **not** a constant in any repo. It lives in the platform
+config as `testQuestConfig.testEndsAt` and is set in the admin panel under
+**Тест-квест → «Дата конца теста»** (the date input means "the last day of the
+test", stored as the end of that day in UTC). Everything that needs the date
+reads it from there:
+
+| Reads it          | Через что                            | Что делает                                                                                                                                                               |
+| ----------------- | ------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| Landing countdown | `GET /config` → `testEndsAt`         | Public timer on luckyticket365.com; falls back to `siteConfig.testPeriodEndsAt` when the API is unreachable or no date is set                                            |
+| LS faucets        | `TestQuestFaucetsService.openWindow` | Stop paying — on the **earlier** of this date and their own `lsFaucets.endsAt` spending fence, so naming a date can only ever shorten the payout window, never extend it |
+
+Two consequences deliberately do **not** fire from the date, and the panel says
+so on the card:
+
+- **Public leaderboard** — a manual switch (Настройки → Система → Таблица
+  лидеров), because opening a board is a judgement call about whether the
+  standings read as real.
+- **Freeze** — minting permanent «Тестировщик · N» badges and crown VIP is
+  irreversible (there is no unfreeze), so it stays the admin's button.
+
+`testEndsAt` is `null` until somebody chooses. Null is a real state, not a bug:
+every reader then falls back to what it did before, so an undecided date changes
+nothing. Before this existed the end of the test was spelled out in three
+unrelated places that could not see each other, and the landing's public promise
+and the faucet window drifted 33 days apart without anything noticing.
 
 ### 2.2 Tracked during the beta
 
