@@ -18,18 +18,30 @@ export interface WalletState {
   network: TonNetwork;
   /**
    * Invited friends required before a wallet may be bound (admin-editable,
-   * `walletConfig.connectMinReferrals`; 0 = no gate). Optional because an older
+   * `walletConfig.connectMinReferrals`; 0 = no gate). Binding opens the way IN
+   * (deposit / buy), so this is the cheap gate. Optional because an older
    * backend doesn't serve it — the UI then treats the wallet as open.
    */
   connectMinReferrals?: number;
-  /** Friends this player has invited — the gate's progress. */
+  /**
+   * Invited friends required before TON may be withdrawn (`walletConfig.
+   * withdrawMinReferrals`; 0 = no gate) — the way OUT, so it costs more.
+   */
+  withdrawMinReferrals?: number;
+  /** Friends this player has invited — both gates' progress. */
   referralsCount?: number;
   /**
-   * Server's verdict on the gate: false = `POST /wallet/connect` will 403.
-   * A wallet bound before the gate stays connectable, so this is not simply
+   * Server's verdict on the connect gate: false = `POST /wallet/connect` will
+   * 403. A wallet bound before the gate stays connectable, so this is not simply
    * `referralsCount >= connectMinReferrals`.
    */
   canConnect?: boolean;
+  /**
+   * Server's verdict on the withdrawal gate: false = `POST /wallet/withdraw`
+   * will 403. Never grandfathered by an existing binding — an old wallet says
+   * nothing about invited friends.
+   */
+  canWithdraw?: boolean;
 }
 
 export interface WalletTransaction {

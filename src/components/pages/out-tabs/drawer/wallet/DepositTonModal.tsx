@@ -3,6 +3,7 @@
 import Image from 'next/image';
 import { useState } from 'react';
 import { Check, Copy, ShieldAlert } from 'lucide-react';
+import { twMerge } from 'tailwind-merge';
 import { useTonConnectUI } from '@tonconnect/ui-react';
 import { Modal } from '@/components/shared/modals/Modal';
 import { Button } from '@/components/shared/buttons/Button';
@@ -10,8 +11,9 @@ import { Input } from '@/components/shared/form-elements/inputs/Input';
 import { useAppTranslations } from '@/hooks/useAppTranslations';
 import { useToast } from '@/hooks/useToast';
 import { useGetDepositAddressQuery } from '@/api/wallet.api';
+import { useWalletLimits } from '@/hooks/useWalletLimits';
 import { DepositUnavailableNotice } from '@/components/pages/out-tabs/drawer/wallet/DepositUnavailableNotice';
-import { tonConnectValidUntil, tonToNanoString } from '@/utils/pages/wallet.utils';
+import { formatTon, tonConnectValidUntil, tonToNanoString } from '@/utils/pages/wallet.utils';
 
 interface DepositTonModalProps {
   open: boolean;
@@ -25,6 +27,7 @@ export function DepositTonModal({ open, onClose, onDeposited }: DepositTonModalP
   const toast = useToast();
   const [tonConnectUI] = useTonConnectUI();
   const { data, isLoading } = useGetDepositAddressQuery(undefined, { skip: !open });
+  const { minDepositTon } = useWalletLimits();
   const [copied, setCopied] = useState(false);
   const [copiedComment, setCopiedComment] = useState(false);
   const [amount, setAmount] = useState('');
@@ -38,7 +41,11 @@ export function DepositTonModal({ open, onClose, onDeposited }: DepositTonModalP
   // address, so a real transfer went nowhere and was never credited.
   const depositsUnavailable = !isLoading && (data?.depositsEnabled === false || !address);
   const numericAmount = Number(amount) || 0;
-  const canSend = viaWallet && numericAmount > 0 && !sending;
+  // Below the minimum the sender's own network fee is most of the transfer, so
+  // the form doesn't offer it. Deliberately advisory: whatever actually arrives
+  // on-chain is credited regardless — refusing real TON would be the worse bug.
+  const belowMinimum = numericAmount > 0 && numericAmount < minDepositTon;
+  const canSend = viaWallet && numericAmount >= minDepositTon && !sending;
 
   // Manual senders must carry the comment too, else the watcher can't attribute it.
   const transferUri = address
@@ -107,6 +114,14 @@ export function DepositTonModal({ open, onClose, onDeposited }: DepositTonModalP
               inputMode="decimal"
               suffix={<span className="text-pink-secondary text-[11px] font-extrabold">TON</span>}
             />
+            <p
+              className={twMerge(
+                'px-1 text-[11px]',
+                belowMinimum ? 'text-error font-semibold' : 'text-pink-secondary'
+              )}
+            >
+              {t('minimum deposit {n} ton', { n: formatTon(minDepositTon, 4) })}
+            </p>
             <Button
               variant="primary"
               disabled={!canSend}

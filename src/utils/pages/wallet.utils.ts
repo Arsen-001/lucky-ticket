@@ -25,6 +25,8 @@ export const tonToStars = (ton: number, tonUsdRate = appConfig.wallet.tonUsdRate
 
 const TON_MIN_WITHDRAW = 0.1;
 const TON_MAX_WITHDRAW = 5;
+const TON_WITHDRAW_DAILY_CAP = 10;
+const TON_MIN_DEPOSIT = 0.1;
 const TON_NETWORK_FEE = 0.05;
 const TON_ADDRESS_REGEX = /^(EQ|UQ|kQ|0Q)[A-Za-z0-9_-]{46}$/;
 
@@ -32,6 +34,14 @@ export const walletConstants = {
   TON_MIN_WITHDRAW,
   /** Mirrors the backend's `WALLET_CONFIG_DEFAULTS.maxWithdrawTon` ceiling. */
   TON_MAX_WITHDRAW,
+  /** Per-account daily withdrawal cap (`withdrawDailyCapTon`) — spans transactions. */
+  TON_WITHDRAW_DAILY_CAP,
+  /**
+   * Smallest deposit the send-from-wallet form offers. Advisory: a transfer that
+   * already arrived is credited whatever its size, so this only keeps the form
+   * from inviting dust the sender's own network fee eats.
+   */
+  TON_MIN_DEPOSIT,
   /** Mirrors the backend's `WALLET.withdrawFeeTon` — charged ON TOP of the amount sent. */
   TON_NETWORK_FEE,
 };

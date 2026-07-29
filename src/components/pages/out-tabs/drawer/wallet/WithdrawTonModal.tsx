@@ -7,10 +7,16 @@ import { Input } from '@/components/shared/form-elements/inputs/Input';
 import { useAppTranslations } from '@/hooks/useAppTranslations';
 import { useToast } from '@/hooks/useToast';
 import { useWithdrawTonMutation } from '@/api/wallet.api';
-import { isValidTonAddress, formatTon, tonScanUrl } from '@/utils/pages/wallet.utils';
+import {
+  isValidTonAddress,
+  formatTon,
+  readReferralGateError,
+  tonScanUrl,
+} from '@/utils/pages/wallet.utils';
 import { useWalletLimits } from '@/hooks/useWalletLimits';
 import { CheckCircle2, ExternalLink } from 'lucide-react';
 import { WithdrawSummaryRow } from './WithdrawSummaryRow';
+import { WalletReferralGate } from './WalletReferralGate';
 import type { TonNetwork } from '@/types/interfaces/wallet.interfaces';
 
 interface WithdrawTonModalProps {
@@ -19,11 +25,25 @@ interface WithdrawTonModalProps {
   tonBalance: number;
   /** Chain the backend broadcasts on — decides which tonscan the receipt links to. */
   network?: TonNetwork;
+  /** Server's verdict on the cash-out invite gate — true = `POST /wallet/withdraw` 403s. */
+  gated?: boolean;
+  /** Friends the cash-out gate asks for (`walletConfig.withdrawMinReferrals`). */
+  requiredReferrals?: number;
+  /** Friends already invited — the gate's progress. */
+  currentReferrals?: number;
 }
 
 type Step = 'form' | 'confirm' | 'success';
 
-export function WithdrawTonModal({ open, onClose, tonBalance, network }: WithdrawTonModalProps) {
+export function WithdrawTonModal({
+  open,
+  onClose,
+  tonBalance,
+  network,
+  gated = false,
+  requiredReferrals = 0,
+  currentReferrals = 0,
+}: WithdrawTonModalProps) {
   const t = useAppTranslations();
   const toast = useToast();
   const [withdraw, { isLoading, data: result }] = useWithdrawTonMutation();
@@ -35,13 +55,20 @@ export function WithdrawTonModal({ open, onClose, tonBalance, network }: Withdra
   // The backend sends `amount` to the recipient and debits `amount + fee`, so
   // the entered number is what ARRIVES. This used to render "you will receive"
   // as amount − fee, quoting the fee twice and understating the payout.
-  // Fee and minimum come from the server, which enforces exactly these.
-  const { withdrawFeeTon: fee, minWithdrawTon, maxWithdrawTon } = useWalletLimits();
+  // Fee and limits come from the server, which enforces exactly these.
+  const {
+    withdrawFeeTon: fee,
+    minWithdrawTon,
+    maxWithdrawTon,
+    withdrawDailyCapTon,
+  } = useWalletLimits();
   const totalDebited = numericAmount > 0 ? numericAmount + fee : 0;
 
   const error = useMemo<string | null>(() => {
-    if (!toAddress) return null;
-    if (!isValidTonAddress(toAddress)) return t('invalid ton address');
+    // The address and the amount are validated independently: keyed on the
+    // address alone, an out-of-range amount stayed silent until something was
+    // typed into the other field, and the disabled button explained nothing.
+    if (toAddress && !isValidTonAddress(toAddress)) return t('invalid ton address');
     if (numericAmount <= 0) return null;
     if (numericAmount < minWithdrawTon)
       return t('minimum withdrawal {n} ton', { n: minWithdrawTon });
@@ -57,7 +84,8 @@ export function WithdrawTonModal({ open, onClose, tonBalance, network }: Withdra
     !error &&
     isValidTonAddress(toAddress) &&
     numericAmount >= minWithdrawTon &&
-    numericAmount <= maxWithdrawTon;
+    numericAmount <= maxWithdrawTon &&
+    numericAmount + fee <= tonBalance;
 
   const handleClose = () => {
     setStep('form');
@@ -66,7 +94,12 @@ export function WithdrawTonModal({ open, onClose, tonBalance, network }: Withdra
     onClose();
   };
 
-  const handleMax = () => setAmount(String(Math.max(0, tonBalance - fee)));
+  // "Max" has to respect the per-transaction ceiling too — on a balance above
+  // it this filled in an amount the server was always going to reject.
+  const handleMax = () => {
+    const spendable = Math.min(maxWithdrawTon, Math.max(0, tonBalance - fee));
+    setAmount(spendable > 0 ? String(Number(spendable.toFixed(4))) : '');
+  };
 
   const handleConfirm = async () => {
     try {
@@ -76,9 +109,40 @@ export function WithdrawTonModal({ open, onClose, tonBalance, network }: Withdra
       // 503 = the backend has no treasury configured, so nothing can be sent
       // on-chain. Say that plainly instead of a generic failure.
       const status = (error as { status?: number })?.status;
+      // The cash-out gate answers 403 with the requirement — the state this
+      // modal renders as a lock, but the count can move between load and submit.
+      const referralGate = readReferralGateError(error);
+      if (referralGate) {
+        toast.error(t('invite {num} friends to withdraw', { num: referralGate.required }));
+        setStep('form');
+        return;
+      }
+      // Anything else stays on the confirm step so the same amount can be
+      // retried without retyping it.
       toast.error(status === 503 ? t('withdrawals unavailable') : t('action failed'));
     }
   };
+
+  // The cash-out gate is a state of the screen, not an error: rendering the
+  // form behind a lock would invite an address and an amount into a request
+  // the API answers 403 to.
+  if (gated) {
+    return (
+      <Modal open={open} onClose={handleClose}>
+        <div className="bg-purple-gradient flex flex-col gap-4 rounded-2xl p-6">
+          <WalletReferralGate
+            title={t('withdrawals unlock with friends')}
+            description={t('invite {num} friends to withdraw', { num: requiredReferrals })}
+            required={requiredReferrals}
+            current={currentReferrals}
+          />
+          <Button variant="secondary" onClick={handleClose} className="rounded-full px-4 py-2">
+            {t('close')}
+          </Button>
+        </div>
+      </Modal>
+    );
+  }
 
   return (
     <Modal open={open} onClose={handleClose}>
@@ -136,9 +200,21 @@ export function WithdrawTonModal({ open, onClose, tonBalance, network }: Withdra
                 label={t('total debited')}
                 value={`${formatTon(totalDebited, 4)} TON`}
               />
+              <span aria-hidden className="my-0.5 h-px bg-white/10" />
+              {/* Every ceiling the server enforces, stated up front: the
+                  per-transaction range and the daily cap that spans several
+                  withdrawals — hitting the latter otherwise reads as a bug. */}
               <WithdrawSummaryRow
                 label={t('minimum withdrawal')}
                 value={`${formatTon(minWithdrawTon, 4)} TON`}
+              />
+              <WithdrawSummaryRow
+                label={t('maximum withdrawal')}
+                value={`${formatTon(maxWithdrawTon, 4)} TON`}
+              />
+              <WithdrawSummaryRow
+                label={t('daily withdrawal limit')}
+                value={`${formatTon(withdrawDailyCapTon, 4)} TON`}
               />
             </div>
 

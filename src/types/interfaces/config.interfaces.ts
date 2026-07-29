@@ -81,6 +81,14 @@ export interface PublicConfig {
     minWithdrawTon: number;
     /** Ceiling on a single withdrawal — the treasury signs these automatically. */
     maxWithdrawTon: number;
+    /** Per-account daily withdrawal cap (UTC day) — spans transactions. */
+    withdrawDailyCapTon?: number;
+    /**
+     * Smallest deposit the send-from-wallet form offers. Advisory: whatever
+     * arrives on-chain is credited, so this only keeps the form from inviting
+     * dust the sender's own network fee eats.
+     */
+    minDepositTon?: number;
     /** Minimum LC per LC→TON conversion. */
     minWithdrawLc: number;
   };

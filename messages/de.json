@@ -307,8 +307,8 @@
   "invalid ton address": "Ungültige TON-Adresse",
   "invite": "Einladen",
   "invite friends": "Freunde einladen",
-  "invite {num} friends to connect a wallet": "Lade {num} Freunde ein, um die Wallet freizuschalten",
-  "invite {num} more friends": "Noch {num}",
+  "invite {num} friends to connect a wallet": "Lade {num, plural, =1 {1 Freund} other {# Freunde}} ein, um die Wallet freizuschalten",
+  "invite {num} more friends": "{num, plural, =0 {Geschafft} one {Noch # Freund} other {Noch # Freunde}}",
   "invite hero stat invited": "Eingeladen",
   "invite hero subtitle": "Verdiene Belohnungen für jedes Ticket, das deine Freunde einlösen.",
   "invite share message": "Komm zu LuckyTicket365 — tägliches Glück und echte Belohnungen warten! 🎟️",
@@ -1147,5 +1147,10 @@
   "best place": "Beste Platzierung",
   "win rate": "Trefferquote",
   "earned in tournaments": "In Turnieren gewonnen",
-  "tickets claimed": "Tickets eingesammelt"
+  "tickets claimed": "Tickets eingesammelt",
+  "invite {num} friends to withdraw": "Lade {num, plural, =1 {1 Freund} other {# Freunde}} ein, um TON auszuzahlen",
+  "withdrawals unlock with friends": "Freunde schalten Auszahlungen frei",
+  "maximum withdrawal": "Maximale Abhebung",
+  "daily withdrawal limit": "Tageslimit",
+  "minimum deposit {n} ton": "Mindesteinzahlung — {n} TON"
 }

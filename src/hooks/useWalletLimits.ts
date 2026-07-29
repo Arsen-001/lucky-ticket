@@ -8,6 +8,10 @@ export interface WalletLimits {
   minWithdrawTon: number;
   /** Ceiling on a single withdrawal — the treasury signs these automatically. */
   maxWithdrawTon: number;
+  /** Per-account daily withdrawal cap (UTC day) — spans transactions. */
+  withdrawDailyCapTon: number;
+  /** Smallest deposit the send-from-wallet form offers (advisory — see below). */
+  minDepositTon: number;
   /** Minimum LC per LC→TON conversion. */
   minWithdrawLc: number;
 }
@@ -26,6 +30,9 @@ export function useWalletLimits(): WalletLimits {
     withdrawFeeTon: data?.wallet?.withdrawFeeTon ?? walletConstants.TON_NETWORK_FEE,
     minWithdrawTon: data?.wallet?.minWithdrawTon ?? walletConstants.TON_MIN_WITHDRAW,
     maxWithdrawTon: data?.wallet?.maxWithdrawTon ?? walletConstants.TON_MAX_WITHDRAW,
+    withdrawDailyCapTon:
+      data?.wallet?.withdrawDailyCapTon ?? walletConstants.TON_WITHDRAW_DAILY_CAP,
+    minDepositTon: data?.wallet?.minDepositTon ?? walletConstants.TON_MIN_DEPOSIT,
     minWithdrawLc: data?.wallet?.minWithdrawLc ?? appConfig.wallet.minWithdrawLc,
   };
 }

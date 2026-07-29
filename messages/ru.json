@@ -308,8 +308,8 @@
   "invalid ton address": "Неверный TON-адрес",
   "invite": "Пригласить",
   "invite friends": "Пригласить друзей",
-  "invite {num} friends to connect a wallet": "Пригласи {num} друзей, чтобы открыть кошелёк",
-  "invite {num} more friends": "Осталось {num}",
+  "invite {num} friends to connect a wallet": "Пригласи {num, plural, one {# друга} few {# друзей} many {# друзей} other {# друзей}}, чтобы открыть кошелёк",
+  "invite {num} more friends": "{num, plural, =0 {Готово} one {Остался # друг} few {Осталось # друга} many {Осталось # друзей} other {Осталось # друзей}}",
   "invite hero stat invited": "Приглашено",
   "invite hero subtitle": "Получай бонусы за каждый билет, который заберут друзья.",
   "invite share message": "Заходи в LuckyTicket365 — ежедневная удача и реальные награды уже ждут! 🎟️",
@@ -1147,5 +1147,10 @@
   "best place": "Лучшее место",
   "win rate": "Доля призовых",
   "earned in tournaments": "Выиграно в турнирах",
-  "tickets claimed": "Собрано билетов"
+  "tickets claimed": "Собрано билетов",
+  "invite {num} friends to withdraw": "Пригласи {num, plural, one {# друга} few {# друзей} many {# друзей} other {# друзей}}, чтобы выводить TON",
+  "withdrawals unlock with friends": "Вывод открывают друзья",
+  "maximum withdrawal": "Максимум для вывода",
+  "daily withdrawal limit": "Лимит в сутки",
+  "minimum deposit {n} ton": "Минимум пополнения — {n} TON"
 }

@@ -33,8 +33,10 @@ const getWalletState = (): WalletState => ({
   usdRate: appConfig.wallet.tonUsdRate,
   network: mockDb.wallet.network,
   connectMinReferrals: appConfig.wallet.connectMinReferrals,
+  withdrawMinReferrals: appConfig.wallet.withdrawMinReferrals,
   referralsCount: mockDb.user.referralsCount,
   canConnect: canConnectWallet(),
+  canWithdraw: canWithdrawTon(),
 });
 
 /**
@@ -45,6 +47,12 @@ const getWalletState = (): WalletState => ({
 const canConnectWallet = () =>
   mockDb.user.referralsCount >= appConfig.wallet.connectMinReferrals ||
   Boolean(mockDb.wallet.address);
+
+/**
+ * The heavier gate on the way out (`POST /wallet/withdraw`). No grandfathering
+ * here — an address bound earlier says nothing about invited friends.
+ */
+const canWithdrawTon = () => mockDb.user.referralsCount >= appConfig.wallet.withdrawMinReferrals;
 
 /** Transaction history — fresh copies so RTK Query detects in-place mutations. */
 const getTransactions = () => mockDb.wallet.transactions.map(tx => ({ ...tx }));
@@ -133,6 +141,19 @@ const withdrawTon = (args: FetchArgs) => {
   const { toAddress, amount } = (args.body ?? {}) as Partial<WithdrawTonRequest>;
   const value = amount ?? 0;
   const fee = appConfig.wallet.withdrawFeeTon;
+  // Same 403 the backend answers when the cash-out gate isn't met, so the
+  // locked withdrawal state is developable against the mock layer.
+  if (!canWithdrawTon())
+    return {
+      error: {
+        status: 403,
+        data: {
+          error: 'referrals-required',
+          required: appConfig.wallet.withdrawMinReferrals,
+          current: mockDb.user.referralsCount,
+        },
+      },
+    };
   if (value <= 0 || mockDb.wallet.tonBalance < value + fee) {
     return { error: { status: 400, data: 'Insufficient TON balance' } };
   }

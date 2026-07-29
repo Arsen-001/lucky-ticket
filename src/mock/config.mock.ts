@@ -15,8 +15,10 @@ const getPublicConfig = (): PublicConfig => ({
   lsUsdRate: appConfig.wallet.lsUsdRate,
   wallet: {
     withdrawFeeTon: appConfig.wallet.withdrawFeeTon,
-    minWithdrawTon: 0.1,
+    minWithdrawTon: walletConstants.TON_MIN_WITHDRAW,
     maxWithdrawTon: walletConstants.TON_MAX_WITHDRAW,
+    withdrawDailyCapTon: walletConstants.TON_WITHDRAW_DAILY_CAP,
+    minDepositTon: walletConstants.TON_MIN_DEPOSIT,
     minWithdrawLc: appConfig.wallet.minWithdrawLc,
   },
   adsEnabled: true,

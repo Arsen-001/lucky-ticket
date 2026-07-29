@@ -264,12 +264,19 @@ export const appConfig = {
     lsUsdRate: 0.02,
     /**
      * Fallback invite gate on binding a wallet: how many friends a player must
-     * have invited before TON Connect is offered. The live value is served with
+     * have invited before TON Connect is offered. Binding only opens the way
+     * IN (deposit / buy), so it is the cheap gate. The live value is served with
      * the wallet state (`walletConfig.connectMinReferrals`, admin-editable) and
      * the backend enforces it — this only feeds the mock layer and the copy
      * shown before that query resolves.
      */
-    connectMinReferrals: 3,
+    connectMinReferrals: 1,
+    /**
+     * Fallback invite gate on withdrawing TON — the way OUT, and the one a
+     * throwaway account is actually after, so it costs more friends. Not
+     * grandfathered by an existing wallet binding (`walletConfig.withdrawMinReferrals`).
+     */
+    withdrawMinReferrals: 3,
     /** Wallet apps the user can connect. */
     supportedWallets,
     /** Stars purchase packages — price catalog. */

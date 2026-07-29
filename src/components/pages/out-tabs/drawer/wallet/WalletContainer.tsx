@@ -51,6 +51,9 @@ export function WalletContainer() {
   // server's own verdict — an older backend omits it and nothing is gated.
   const isGated = state?.canConnect === false && !isConnected;
   const required = state?.connectMinReferrals ?? 0;
+  // The second, heavier gate: money on the way OUT. Connecting a wallet only
+  // opens deposits, so this one is checked separately at withdrawal time.
+  const isWithdrawGated = state?.canWithdraw === false;
 
   useEffect(() => {
     const topUpRaw = searchParams.get('topUp');
@@ -171,6 +174,9 @@ export function WalletContainer() {
         onClose={() => setModal(null)}
         tonBalance={tonBalance}
         network={state?.network}
+        gated={isWithdrawGated}
+        requiredReferrals={state?.withdrawMinReferrals ?? 0}
+        currentReferrals={state?.referralsCount ?? 0}
       />
       <BuyStarsModal
         open={modal === 'buyStars'}

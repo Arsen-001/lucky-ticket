@@ -308,8 +308,8 @@
   "invalid ton address": "Invalid TON address",
   "invite": "Invite",
   "invite friends": "Invite Friends",
-  "invite {num} friends to connect a wallet": "Invite {num} friends to unlock the wallet",
-  "invite {num} more friends": "{num} more to go",
+  "invite {num} friends to connect a wallet": "Invite {num, plural, =1 {1 friend} other {# friends}} to unlock the wallet",
+  "invite {num} more friends": "{num, plural, =0 {All set} =1 {1 more to go} other {# more to go}}",
   "invite hero stat invited": "Invited",
   "invite hero subtitle": "Earn rewards from every ticket your friends claim.",
   "invite share message": "Join me on LuckyTicket365 — daily luck and real rewards await! 🎟️",
@@ -1147,5 +1147,10 @@
   "best place": "Best place",
   "win rate": "Win rate",
   "earned in tournaments": "Won in tournaments",
-  "tickets claimed": "Tickets claimed"
+  "tickets claimed": "Tickets claimed",
+  "invite {num} friends to withdraw": "Invite {num, plural, =1 {1 friend} other {# friends}} to withdraw TON",
+  "withdrawals unlock with friends": "Withdrawals unlock with friends",
+  "maximum withdrawal": "Maximum withdrawal",
+  "daily withdrawal limit": "Daily limit",
+  "minimum deposit {n} ton": "Minimum deposit — {n} TON"
 }
