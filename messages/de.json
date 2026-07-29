@@ -1152,5 +1152,10 @@
   "withdrawals unlock with friends": "Freunde schalten Auszahlungen frei",
   "maximum withdrawal": "Maximale Abhebung",
   "daily withdrawal limit": "Tageslimit",
-  "minimum deposit {n} ton": "Mindesteinzahlung — {n} TON"
+  "minimum deposit {n} ton": "Mindesteinzahlung — {n} TON",
+  "remove wallet": "Wallet entfernen",
+  "remove wallet note": "Dein TON-Guthaben bleibt auf dem Konto. Danach kannst du direkt eine andere Wallet verbinden.",
+  "remove": "Entfernen",
+  "wallet removed": "Wallet entfernt",
+  "ton on account": "TON auf dem Konto"
 }

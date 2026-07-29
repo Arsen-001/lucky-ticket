@@ -8,6 +8,7 @@ import { SkeletonSuspense } from '@/components/shared/seleketons/SkeletonSuspens
 import { useAppTranslations } from '@/hooks/useAppTranslations';
 import { formatTon, formatUsd, providerLabel, truncateAddress } from '@/utils/pages/wallet.utils';
 import { TonWalletLocked } from './TonWalletLocked';
+import { WalletAccountTonNote } from './WalletAccountTonNote';
 import type { WalletState } from '@/types/interfaces/wallet.interfaces';
 
 export interface TonWalletHeroProps {
@@ -46,12 +47,20 @@ export function TonWalletHero({
       <TonWalletLocked
         required={state.connectMinReferrals ?? 0}
         current={state.referralsCount ?? 0}
+        tonBalance={state.tonBalance}
+        usdRate={state.usdRate}
       />
     );
   }
 
   if (!isConnected) {
-    return <TonWalletDisconnected onConnect={onConnect} />;
+    return (
+      <TonWalletDisconnected
+        onConnect={onConnect}
+        tonBalance={state?.tonBalance ?? 0}
+        usdRate={state?.usdRate ?? 0}
+      />
+    );
   }
 
   return (
@@ -59,7 +68,14 @@ export function TonWalletHero({
   );
 }
 
-function TonWalletDisconnected({ onConnect }: { onConnect: () => void }) {
+interface TonWalletDisconnectedProps {
+  onConnect: () => void;
+  /** The account's TON — kept when a binding is removed, so it is shown here too. */
+  tonBalance: number;
+  usdRate: number;
+}
+
+function TonWalletDisconnected({ onConnect, tonBalance, usdRate }: TonWalletDisconnectedProps) {
   const t = useAppTranslations();
 
   return (
@@ -93,6 +109,7 @@ function TonWalletDisconnected({ onConnect }: { onConnect: () => void }) {
         >
           {t('connect wallet')}
         </button>
+        <WalletAccountTonNote balance={tonBalance} usdRate={usdRate} />
       </div>
     </div>
   );
@@ -170,7 +187,7 @@ function TonWalletConnected({ state, onDisconnect, disconnecting }: TonWalletCon
 
         <button
           type="button"
-          aria-label={t('disconnect wallet')}
+          aria-label={t('remove wallet')}
           onClick={onDisconnect}
           disabled={disconnecting}
           className={twMerge(

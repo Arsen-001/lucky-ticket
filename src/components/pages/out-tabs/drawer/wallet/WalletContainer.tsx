@@ -20,9 +20,17 @@ import { WithdrawTonModal } from './WithdrawTonModal';
 import { BuyStarsModal } from './BuyStarsModal';
 import { ExchangeTonStarsModal } from './ExchangeTonStarsModal';
 import { LcConvertTonModal } from '@/components/pages/out-tabs/drawer/lc/LcConvertTonModal';
+import { ConfirmModal } from '@/components/shared/modals/ConfirmModal';
 import { QueryErrorState } from '@/components/shared/error/QueryErrorState';
 
-type WalletModal = 'deposit' | 'withdraw' | 'buyStars' | 'convertLc' | 'exchange' | null;
+type WalletModal =
+  | 'deposit'
+  | 'withdraw'
+  | 'buyStars'
+  | 'convertLc'
+  | 'exchange'
+  | 'removeWallet'
+  | null;
 
 export function WalletContainer() {
   const t = useAppTranslations();
@@ -97,13 +105,21 @@ export function WalletContainer() {
 
   const handleDeposited = () => setDepositWatch({ polls: 8, fromBalance: tonBalance });
 
+  // Removing a wallet is a one-tap irreversible action on a money screen, so it
+  // asks first — and says what does NOT happen, since "remove wallet" reads like
+  // it might take the balance with it.
+  const handleRemoveWallet = async () => {
+    setModal(null);
+    await disconnect();
+  };
+
   return (
     <div className="flex flex-col gap-4 px-4 pb-8 pt-2">
       <TonWalletHero
         state={state}
         loading={isLoading}
         onConnect={() => void connect()}
-        onDisconnect={() => void disconnect()}
+        onDisconnect={() => setModal('removeWallet')}
         disconnecting={isDisconnecting}
       />
 
@@ -196,6 +212,15 @@ export function WalletContainer() {
         onClose={() => setModal(null)}
         tonBalance={tonBalance}
         isConnected={isConnected}
+      />
+      <ConfirmModal
+        open={modal === 'removeWallet'}
+        onClose={() => setModal(null)}
+        onConfirm={() => void handleRemoveWallet()}
+        title={t('remove wallet')}
+        content={<p className="text-pink-secondary text-[13px]">{t('remove wallet note')}</p>}
+        confirmText={t('remove')}
+        loading={isDisconnecting}
       />
     </div>
   );

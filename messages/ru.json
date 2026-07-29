@@ -1152,5 +1152,10 @@
   "withdrawals unlock with friends": "Вывод открывают друзья",
   "maximum withdrawal": "Максимум для вывода",
   "daily withdrawal limit": "Лимит в сутки",
-  "minimum deposit {n} ton": "Минимум пополнения — {n} TON"
+  "minimum deposit {n} ton": "Минимум пополнения — {n} TON",
+  "remove wallet": "Удалить кошелёк",
+  "remove wallet note": "Баланс TON останется на аккаунте. Сразу после этого можно подключить другой кошелёк.",
+  "remove": "Удалить",
+  "wallet removed": "Кошелёк удалён",
+  "ton on account": "TON на аккаунте"
 }

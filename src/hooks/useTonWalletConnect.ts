@@ -110,6 +110,7 @@ export function useTonWalletConnect() {
     }
     try {
       await disconnectWallet().unwrap();
+      toast.success(t('wallet removed'));
     } catch {
       toast.error(t('action failed'));
     }

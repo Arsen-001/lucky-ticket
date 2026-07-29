@@ -39,14 +39,19 @@ const getWalletState = (): WalletState => ({
   canWithdraw: canWithdrawTon(),
 });
 
+/** Set once a wallet has ever been bound — mirrors `WalletBindingHistory`. */
+let everBoundWallet = Boolean(mockDb.wallet.address);
+
 /**
  * The invite gate the real backend enforces on `POST /wallet/connect`: enough
- * invited friends, or an address bound before the gate existed (grandfathered,
- * because withdrawing needs an active connection).
+ * invited friends, or a wallet bound at some point (grandfathered, because
+ * withdrawing needs an active connection). The history counts too — removing a
+ * wallet clears the address, and the gate must not become a one-way door.
  */
 const canConnectWallet = () =>
   mockDb.user.referralsCount >= appConfig.wallet.connectMinReferrals ||
-  Boolean(mockDb.wallet.address);
+  Boolean(mockDb.wallet.address) ||
+  everBoundWallet;
 
 /**
  * The heavier gate on the way out (`POST /wallet/withdraw`). No grandfathering
@@ -115,6 +120,7 @@ const connectWallet = (args: FetchArgs) => {
     };
   if (provider) mockDb.wallet.provider = provider;
   mockDb.wallet.isConnected = true;
+  everBoundWallet = true;
   // Prefer the real TON Connect address when present; fall back to a stub so the
   // mock still resolves in a plain browser where no wallet is available.
   mockDb.wallet.address =
@@ -128,7 +134,11 @@ const connectWallet = (args: FetchArgs) => {
   };
 };
 
-/** POST wallet/disconnect — clear the connection. */
+/**
+ * POST wallet/disconnect — remove the binding. The address is cleared (the real
+ * backend archives it into `WalletBindingHistory` first), while the TON balance
+ * stays: it belongs to the account, not to the wallet.
+ */
 const disconnectWallet = () => {
   mockDb.wallet.isConnected = false;
   mockDb.wallet.address = undefined;

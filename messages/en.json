@@ -1152,5 +1152,10 @@
   "withdrawals unlock with friends": "Withdrawals unlock with friends",
   "maximum withdrawal": "Maximum withdrawal",
   "daily withdrawal limit": "Daily limit",
-  "minimum deposit {n} ton": "Minimum deposit — {n} TON"
+  "minimum deposit {n} ton": "Minimum deposit — {n} TON",
+  "remove wallet": "Remove wallet",
+  "remove wallet note": "Your TON balance stays on the account. You can connect another wallet right after.",
+  "remove": "Remove",
+  "wallet removed": "Wallet removed",
+  "ton on account": "TON on the account"
 }
