@@ -1,6 +1,8 @@
 import { api } from '@/api/index.api';
 import { rtkTags } from '@/constants/rtk-tags';
 import type {
+  BuyExtraAdViewsRequest,
+  BuyExtraAdViewsResponse,
   ClaimTaskRequest,
   ClaimTaskResponse,
   TaskReward,
@@ -83,7 +85,31 @@ export const tasksApi = api.injectEndpoints({
       query: body => ({ url: 'tasks/ads/watch', method: 'POST', body }),
       invalidatesTags: [rtkTags.tasks, rtkTags.me, rtkTags.lc],
     }),
+    /**
+     * POST /tasks/ads/extra  body: { count, currency }
+     *   Buys extra ad slots for the rest of the UTC day once the free cap is
+     *   spent. Charges LC or Lucky Stars at the admin-set price and returns the
+     *   new ceiling. Unwatched bought slots expire with the day — the UI says
+     *   so before the player pays.
+     */
+    buyExtraAdViews: builder.mutation<BuyExtraAdViewsResponse, BuyExtraAdViewsRequest>({
+      query: body => ({ url: 'tasks/ads/extra', method: 'POST', body }),
+      // Debits a balance and writes a ledger row, so the wallet views refresh
+      // alongside the ads block.
+      invalidatesTags: [
+        rtkTags.tasks,
+        rtkTags.me,
+        rtkTags.lc,
+        rtkTags.lcTransactions,
+        rtkTags.wallet,
+      ],
+    }),
   }),
 });
 
-export const { useGetTasksQuery, useClaimTaskMutation, useWatchAdMutation } = tasksApi;
+export const {
+  useGetTasksQuery,
+  useClaimTaskMutation,
+  useWatchAdMutation,
+  useBuyExtraAdViewsMutation,
+} = tasksApi;

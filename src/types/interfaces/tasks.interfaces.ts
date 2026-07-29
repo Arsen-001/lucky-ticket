@@ -76,15 +76,50 @@ export interface AdSlot {
   index: number;
   rewards: TaskReward[];
   watched: boolean;
+  /** This slot was bought — it sits past the free daily cap. */
+  paid?: boolean;
+}
+
+/** The paid-extra-views offer as the server currently prices it (DOCS §12.5). */
+export interface AdsExtraOffer {
+  enabled: boolean;
+  priceLc: number;
+  priceLs: number;
+  /** Ceiling on slots bought per day, on top of the free cap. */
+  maxPerDay: number;
+  purchasedToday: number;
+  /** How many of the bought slots have already been watched. */
+  watchedToday: number;
+  /** Still buyable today — the client must never offer more than this. */
+  remaining: number;
+  /** A bought view pays AP too. Off = everything except AP. */
+  grantsAp: boolean;
 }
 
 export interface AdsBlock {
   /** Admin kill switch — when false the rewarded-ads UI must not render. */
   enabled: boolean;
+  /** Free + bought slots; `free` is where the bought ones begin. */
   total: number;
+  free?: number;
   watchedToday: number;
   resetAt: string;
   slots: AdSlot[];
+  /** Absent on an older backend — treat as "not for sale". */
+  extra?: AdsExtraOffer;
+}
+
+export interface BuyExtraAdViewsRequest {
+  count: number;
+  currency: 'lc' | 'ls';
+}
+
+export interface BuyExtraAdViewsResponse {
+  extra: AdsExtraOffer;
+  /** The new daily ceiling: free cap + everything bought today. */
+  total: number;
+  watchedToday: number;
+  charged: { currency: 'lc' | 'ls'; amount: number };
 }
 
 export interface StreakMilestone {

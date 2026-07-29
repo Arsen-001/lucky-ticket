@@ -1157,5 +1157,15 @@
   "remove wallet note": "Баланс TON останется на аккаунте. Сразу после этого можно подключить другой кошелёк.",
   "remove": "Удалить",
   "wallet removed": "Кошелёк удалён",
-  "ton on account": "TON на аккаунте"
+  "ton on account": "TON на аккаунте",
+  "buy more ads": "Докупить показы",
+  "extra ads sold out": "На сегодня всё",
+  "extra ads back tomorrow": "Новые показы откроются после сброса дня",
+  "extra ad price": "{lc} {coin} или {ls} ⭐ за показ",
+  "extra ads explainer": "Бесплатные показы на сегодня закончились. Докупите ещё и продолжайте зарабатывать до сброса дня.",
+  "per view": "за показ",
+  "extra ads expire at reset": "Непросмотренные купленные показы сгорают при сбросе дня",
+  "extra ads bought": "Добавлено показов: {n}",
+  "extra ads purchase failed": "Не удалось купить показы",
+  "not enough balance": "Недостаточно средств"
 }

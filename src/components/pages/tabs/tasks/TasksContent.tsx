@@ -15,7 +15,12 @@ import {
   Users,
 } from 'lucide-react';
 import { icons } from '@/constants/icons';
-import { useGetTasksQuery, useClaimTaskMutation, useWatchAdMutation } from '@/api/tasks.api';
+import {
+  useGetTasksQuery,
+  useClaimTaskMutation,
+  useWatchAdMutation,
+  useBuyExtraAdViewsMutation,
+} from '@/api/tasks.api';
 import { TaskCategory, TaskFrequency, TaskStatus } from '@/types/enums/tasks.enums';
 import type { AdSlot, CategoryTasks, Task, TaskSubStep } from '@/types/interfaces/tasks.interfaces';
 import { useAppTranslations } from '@/hooks/useAppTranslations';
@@ -29,6 +34,7 @@ import { TasksCategorySection } from './TasksCategorySection';
 import { TournamentMilestoneSlider } from './TournamentMilestoneSlider';
 import { AdsSection } from './AdsSection';
 import { AdUnavailableModal, type AdUnavailableReason } from './AdUnavailableModal';
+import { BuyExtraAdsModal } from './BuyExtraAdsModal';
 import { HouseAdOverlay } from './HouseAdOverlay';
 import { ClaimRewardModal, type RewardModalResult } from './ClaimRewardModal';
 import { ArrivalShine } from '@/components/shared/ArrivalShine';
@@ -146,6 +152,8 @@ export function TasksContent() {
   const { data, isLoading, isError, refetch } = useGetTasksQuery();
   const [claimTask, claimState] = useClaimTaskMutation();
   const [watchAd, watchState] = useWatchAdMutation();
+  const [buyExtraAdViews, buyExtraState] = useBuyExtraAdViewsMutation();
+  const [buyExtraOpen, setBuyExtraOpen] = useState(false);
   const toast = useToast();
   const { show: showRewardedAd, showing: adShowing } = useRewardedAd();
 
@@ -499,6 +507,21 @@ export function TasksContent() {
     }
   };
 
+  /**
+   * Buy extra ad slots for the rest of the day. The server re-checks the price,
+   * the balance and the remaining allowance, so a stale modal can only fail —
+   * never overcharge.
+   */
+  const handleBuyExtraAds = async (count: number, currency: 'lc' | 'ls') => {
+    try {
+      await buyExtraAdViews({ count, currency }).unwrap();
+      setBuyExtraOpen(false);
+      toast.success(t('extra ads bought', { n: count }));
+    } catch {
+      toast.error(t('extra ads purchase failed'));
+    }
+  };
+
   const handleClose = () => {
     setPendingClaim(prev => ({ ...prev, open: false }));
   };
@@ -558,6 +581,7 @@ export function TasksContent() {
               ads={data.ads}
               loading={watchState.isLoading || adShowing}
               onWatch={handleWatchAd}
+              onBuyExtra={() => setBuyExtraOpen(true)}
               registerSection={registerSection}
               highlightToken={
                 highlightToken?.category === TaskCategory.ADS ? highlightToken.nonce : null
@@ -863,6 +887,16 @@ export function TasksContent() {
         reason={adIssue.reason}
         onClose={() => setAdIssue(prev => ({ ...prev, open: false }))}
       />
+
+      {data?.ads?.extra && (
+        <BuyExtraAdsModal
+          open={buyExtraOpen}
+          onClose={() => setBuyExtraOpen(false)}
+          onConfirm={handleBuyExtraAds}
+          loading={buyExtraState.isLoading}
+          extra={data.ads.extra}
+        />
+      )}
 
       <ClaimRewardModal
         open={pendingClaim.open}

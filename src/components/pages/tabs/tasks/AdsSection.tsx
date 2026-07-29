@@ -9,6 +9,7 @@ import { TaskCategory } from '@/types/enums/tasks.enums';
 import type { AdSlot, AdsBlock } from '@/types/interfaces/tasks.interfaces';
 import { TaskCategoryIcon } from './TaskCategoryIcon';
 import { AdSlideCard } from './AdSlideCard';
+import { AdBuyMoreCard } from './AdBuyMoreCard';
 import { SectionShine } from './SectionShine';
 import { ArrivalShine } from '@/components/shared/ArrivalShine';
 
@@ -16,6 +17,8 @@ export interface AdsSectionProps {
   ads?: AdsBlock;
   loading?: boolean;
   onWatch: (slot: AdSlot) => void;
+  /** Opens the buy-extra-views modal; omit to hide the offer entirely. */
+  onBuyExtra?: () => void;
   registerSection?: (category: TaskCategory, el: HTMLElement | null) => void;
   className?: string;
   highlightToken?: number | null;
@@ -27,6 +30,7 @@ export function AdsSection({
   ads,
   loading,
   onWatch,
+  onBuyExtra,
   registerSection,
   className,
   highlightToken,
@@ -40,6 +44,12 @@ export function AdsSection({
   const slots = ads?.slots ?? [];
   const watched = ads?.watchedToday ?? 0;
   const total = ads?.total ?? 0;
+  // The offer rides at the end of the carousel, and only once every slot the
+  // player already has is spent — dangling a paid slide next to unwatched free
+  // ones is just selling them something they already own.
+  const extra = ads?.extra;
+  const showBuyExtra =
+    !!onBuyExtra && !!extra?.enabled && !loading && slots.length > 0 && watched >= total;
 
   const recomputeActive = useCallback(() => {
     const scroller = scrollerRef.current;
@@ -160,6 +170,12 @@ export function AdsSection({
           })}
         </div>
       )}
+
+      {/* Full-width, under the carousel rather than as a 168px slide: the price
+          line ("5 000 LC or 1 ⭐ per view") cannot fit a slide without wrapping
+          out of its own card, and an offer the player has to scroll to the end
+          to discover is an offer most of them never see. */}
+      {showBuyExtra && extra && <AdBuyMoreCard extra={extra} onOpen={onBuyExtra} />}
     </section>
   );
 }

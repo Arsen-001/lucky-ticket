@@ -237,18 +237,43 @@ const getAdRewards = (index: number): TaskReward[] => {
   return tier?.rewards ?? ADS_CONFIG.rewardTiers[0].rewards;
 };
 
-const buildAds = (): AdsBlock => ({
-  enabled: true,
-  total: ADS_CONFIG.total,
-  watchedToday: ADS_CONFIG.watchedToday,
-  resetAt: nextUtcMidnight(),
-  slots: Array.from({ length: ADS_CONFIG.total }, (_, i) => ({
-    id: nextId('ad'),
-    index: i + 1,
-    rewards: getAdRewards(i + 1),
-    watched: i < ADS_CONFIG.watchedToday,
-  })),
-});
+/** Extra slots bought in this dev session — mirrors `AdWatchProgress`. */
+const ADS_EXTRA = {
+  priceLc: 5_000,
+  priceLs: 1,
+  maxPerDay: 20,
+  purchasedToday: 0,
+  watchedToday: 0,
+};
+
+const buildAds = (): AdsBlock => {
+  const free = ADS_CONFIG.total;
+  const total = free + ADS_EXTRA.purchasedToday;
+  return {
+    enabled: true,
+    total,
+    free,
+    watchedToday: ADS_CONFIG.watchedToday,
+    resetAt: nextUtcMidnight(),
+    slots: Array.from({ length: total }, (_, i) => ({
+      id: nextId('ad'),
+      index: i + 1,
+      rewards: getAdRewards(i + 1),
+      watched: i < ADS_CONFIG.watchedToday,
+      paid: i >= free,
+    })),
+    extra: {
+      enabled: true,
+      priceLc: ADS_EXTRA.priceLc,
+      priceLs: ADS_EXTRA.priceLs,
+      maxPerDay: ADS_EXTRA.maxPerDay,
+      purchasedToday: ADS_EXTRA.purchasedToday,
+      watchedToday: ADS_EXTRA.watchedToday,
+      remaining: Math.max(0, ADS_EXTRA.maxPerDay - ADS_EXTRA.purchasedToday),
+      grantsAp: true,
+    },
+  };
+};
 
 // ───────────────── ADS — WATCH MILESTONES ─────────────────
 // One-time milestone chain for the "watch ads" mechanic — a single task type
@@ -1624,6 +1649,29 @@ export const tasksMock = {
       if (r.type === TaskRewardType.ACTIVITY_POINTS) mockState.balance.activityPoints += r.amount;
     });
     return { adId, rewards };
+  },
+  'POST tasks/ads/extra': (args: { body?: { count?: number; currency?: 'lc' | 'ls' } }) => {
+    const count = Math.max(1, Math.trunc(args.body?.count ?? 1));
+    const currency = args.body?.currency === 'ls' ? 'ls' : 'lc';
+    const remaining = Math.max(0, ADS_EXTRA.maxPerDay - ADS_EXTRA.purchasedToday);
+    // Mirrors the server's refusals, so the dev UI meets the same walls.
+    if (remaining <= 0) throw new Error('Daily limit on extra views reached');
+    if (count > remaining) throw new Error(`Only ${remaining} extra view(s) left today`);
+
+    const amount = count * (currency === 'ls' ? ADS_EXTRA.priceLs : ADS_EXTRA.priceLc);
+    if (currency === 'lc') {
+      if (mockState.balance.lc < amount) throw new Error('Not enough LC');
+      mockState.balance.lc -= amount;
+    }
+    ADS_EXTRA.purchasedToday += count;
+
+    const ads = buildAds();
+    return {
+      extra: ads.extra!,
+      total: ads.total,
+      watchedToday: ads.watchedToday,
+      charged: { currency, amount },
+    };
   },
 };
 

@@ -1157,5 +1157,15 @@
   "remove wallet note": "Dein TON-Guthaben bleibt auf dem Konto. Danach kannst du direkt eine andere Wallet verbinden.",
   "remove": "Entfernen",
   "wallet removed": "Wallet entfernt",
-  "ton on account": "TON auf dem Konto"
+  "ton on account": "TON auf dem Konto",
+  "buy more ads": "Mehr Ansichten kaufen",
+  "extra ads sold out": "Das war's für heute",
+  "extra ads back tomorrow": "Neue Ansichten gibt es nach dem Tages-Reset",
+  "extra ad price": "{lc} {coin} oder {ls} ⭐ pro Ansicht",
+  "extra ads explainer": "Deine kostenlosen Ansichten für heute sind aufgebraucht. Kaufe weitere und verdiene bis zum Tages-Reset weiter.",
+  "per view": "pro Ansicht",
+  "extra ads expire at reset": "Nicht angesehene gekaufte Ansichten verfallen beim Tages-Reset",
+  "extra ads bought": "Ansichten hinzugefügt: {n}",
+  "extra ads purchase failed": "Ansichten konnten nicht gekauft werden",
+  "not enough balance": "Guthaben reicht nicht"
 }

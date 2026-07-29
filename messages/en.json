@@ -1157,5 +1157,15 @@
   "remove wallet note": "Your TON balance stays on the account. You can connect another wallet right after.",
   "remove": "Remove",
   "wallet removed": "Wallet removed",
-  "ton on account": "TON on the account"
+  "ton on account": "TON on the account",
+  "buy more ads": "Buy more views",
+  "extra ads sold out": "That's all for today",
+  "extra ads back tomorrow": "More views open after the daily reset",
+  "extra ad price": "{lc} {coin} or {ls} ⭐ per view",
+  "extra ads explainer": "Your free views for today are spent. Buy more and keep earning until the daily reset.",
+  "per view": "per view",
+  "extra ads expire at reset": "Unwatched bought views expire at the daily reset",
+  "extra ads bought": "{n} extra views added",
+  "extra ads purchase failed": "Couldn't buy extra views",
+  "not enough balance": "Not enough balance"
 }
