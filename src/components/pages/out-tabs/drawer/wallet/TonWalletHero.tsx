@@ -184,19 +184,6 @@ function TonWalletConnected({ state, onDisconnect, disconnecting }: TonWalletCon
             </button>
           </div>
         </div>
-
-        <button
-          type="button"
-          aria-label={t('remove wallet')}
-          onClick={onDisconnect}
-          disabled={disconnecting}
-          className={twMerge(
-            'flex-center h-8 w-8 flex-shrink-0 rounded-lg bg-white/5 text-pink-secondary transition-colors',
-            'hover:bg-white/10 hover:text-white disabled:opacity-50'
-          )}
-        >
-          <LogOut size={14} strokeWidth={2.4} />
-        </button>
       </div>
 
       <div className="relative mt-4 flex items-end gap-2">
@@ -215,9 +202,27 @@ function TonWalletConnected({ state, onDisconnect, disconnecting }: TonWalletCon
           ≈ {formatUsd(usdValue)}
         </span>
       </div>
-      <span className="text-pink-secondary mt-1 inline-block text-[10px] font-bold uppercase tracking-wider">
-        {t('ton mainnet')}
-      </span>
+      {/* Removing used to be an unlabelled door-with-an-arrow icon in the card's
+          corner — the one control on a money screen nobody could find by name.
+          It says what it does now, and sits where the eye ends up after the
+          balance rather than fighting the address for the top row. */}
+      <div className="relative mt-1 flex items-center justify-between gap-2">
+        <span className="text-pink-secondary text-[10px] font-bold uppercase tracking-wider">
+          {t('ton mainnet')}
+        </span>
+        <button
+          type="button"
+          onClick={onDisconnect}
+          disabled={disconnecting}
+          className={twMerge(
+            'flex items-center gap-1.5 rounded-lg bg-white/5 px-2.5 py-1.5 text-pink-secondary transition-colors',
+            'hover:bg-white/10 hover:text-white disabled:opacity-50'
+          )}
+        >
+          <LogOut size={12} strokeWidth={2.4} />
+          <span className="text-[11px] font-bold">{t('remove wallet')}</span>
+        </button>
+      </div>
     </div>
   );
 }
