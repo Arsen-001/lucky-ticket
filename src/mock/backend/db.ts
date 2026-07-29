@@ -477,6 +477,15 @@ export const mockDb = {
             createdAt: hoursAgo(150),
             balanceAfter: 408_000,
           },
+          {
+            id: 'lctx_012',
+            type: LcTransactionType.AD_EXTRA_VIEWS,
+            direction: LcTransactionDirection.DEBIT,
+            amount: 5_000,
+            description: 'Extra ad views · 1',
+            createdAt: hoursAgo(170),
+            balanceAfter: 398_000,
+          },
         ]) as LcTransaction[],
   },
 

@@ -2,6 +2,7 @@
 
 import {
   ArrowDownUp,
+  Clapperboard,
   Coins,
   Cpu,
   Crown,
@@ -103,6 +104,13 @@ const TYPE_META: Record<LcTransactionType, TypeMeta> = {
     Icon: Gift,
     iconClass: 'text-gold',
     iconBg: 'bg-gold/15',
+  },
+  // Same glyph the AP source list gives "watch video" — a bought view is that
+  // activity, so it should not read as a different thing in the ledger.
+  [LcTransactionType.AD_EXTRA_VIEWS]: {
+    Icon: Clapperboard,
+    iconClass: 'text-electric-purple',
+    iconBg: 'bg-electric-purple/15',
   },
   [LcTransactionType.ADMIN_ADJUST]: {
     Icon: SlidersHorizontal,

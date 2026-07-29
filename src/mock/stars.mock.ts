@@ -49,6 +49,14 @@ const buildTransactions = (): StarsTransaction[] => {
       description: 'Promo code WELCOME2026',
       createdAt: new Date(now - 5 * 24 * HOUR_MS).toISOString(),
     },
+    {
+      id: 'stx_6',
+      type: StarsTransactionType.AD_EXTRA_VIEWS,
+      direction: StarsTransactionDirection.DEBIT,
+      amount: 1,
+      description: 'Extra ad views · 1',
+      createdAt: new Date(now - 6 * 24 * HOUR_MS).toISOString(),
+    },
   ];
 
   // Walk backwards from the current balance so balanceAfter stays consistent.

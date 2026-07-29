@@ -11,6 +11,8 @@ export enum StarsTransactionType {
   SHOWCASE_SLOT = 'showcase_slot',
   MARKET_PURCHASE = 'market_purchase',
   AVATAR_REWARD = 'avatar_reward',
+  /** Paid for extra rewarded-ad views past the free daily cap. */
+  AD_EXTRA_VIEWS = 'ad_extra_views',
   ADMIN_ADJUST = 'admin_adjust',
 }
 

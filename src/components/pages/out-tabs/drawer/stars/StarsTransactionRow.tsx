@@ -1,6 +1,7 @@
 'use client';
 
 import {
+  Clapperboard,
   Cpu,
   Gift,
   LayoutGrid,
@@ -87,6 +88,13 @@ const TYPE_META: Record<StarsTransactionType, TypeMeta> = {
     Icon: Gift,
     iconClass: 'text-gold',
     iconBg: 'bg-gold/15',
+  },
+  // Same glyph the AP source list gives "watch video" — a bought view is that
+  // activity, so it should not read as a different thing in the ledger.
+  [StarsTransactionType.AD_EXTRA_VIEWS]: {
+    Icon: Clapperboard,
+    iconClass: 'text-electric-purple',
+    iconBg: 'bg-electric-purple/15',
   },
   [StarsTransactionType.ADMIN_ADJUST]: {
     Icon: Settings,

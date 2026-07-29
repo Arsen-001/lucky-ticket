@@ -12,6 +12,8 @@ export enum LcTransactionType {
   JACKPOT = 'jackpot',
   PROMO = 'promo',
   AVATAR_REWARD = 'avatar_reward',
+  /** Paid for extra rewarded-ad views past the free daily cap. */
+  AD_EXTRA_VIEWS = 'ad_extra_views',
   ADMIN_ADJUST = 'admin_adjust',
 }
 
