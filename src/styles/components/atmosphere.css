@@ -1,24 +1,17 @@
 /* ---------------------------------------------------------------------------
    Atmospheric backdrop — a deep indigo→purple radial field with god rays
    streaming from the upper-right corner, drifting dust and glowing bokeh
-   micro-points. Pure CSS on four stacked layers; only `opacity` and
-   `transform` animate, so the compositor does the work and the whole thing
-   pauses with the rest of the app when the Mini App is backgrounded
-   (see `html[data-app-hidden]` in base-layer.css).
+   micro-points. Pure CSS on four stacked layers, and deliberately STILL.
+
+   It used to drift and breathe. On a phone that cost a frame whenever the page
+   changed state around it — opening the drawer sent the screen behind back to
+   its first frame — and a bisection build with the backdrop unmounted proved
+   the backdrop was where the cost was. The key art this is drawn from is a
+   still image; the motion was never asked for, and it was the part being paid
+   for. Keep it still.
 --------------------------------------------------------------------------- */
 
 .atmosphere {
-  /* Pin the backdrop to its own compositor layer and keep its painting to
-     itself. Same medicine the Header already takes, for the same disease: a
-     fixed element gets re-rasterized when the page around it changes state —
-     opening the drawer flips `body` to `overflow: hidden` — and re-rasterizing
-     a full-screen 8px-blurred conic gradient behind a mask costs enough frames
-     to read as a blink. Nothing here animates layout, so the layer is bought
-     once and reused. */
-  transform: translateZ(0);
-  backface-visibility: hidden;
-  contain: paint;
-
   /* Base field: purple bloom hanging off the top-right corner, indigo depth
      pooling bottom-left, over the app's own background tone. */
   background:
@@ -92,17 +85,6 @@
     rgba(0, 0, 0, 0.3) 66%,
     rgba(0, 0, 0, 0) 92%
   );
-  animation: atmosphere-rays-breathe 16s ease-in-out infinite;
-}
-
-@keyframes atmosphere-rays-breathe {
-  0%,
-  100% {
-    opacity: 0.65;
-  }
-  50% {
-    opacity: 1;
-  }
 }
 
 /* --- Dust ------------------------------------------------------------------
@@ -121,7 +103,6 @@
     radial-gradient(1px 1px at 148px 46px, rgba(255, 255, 255, 0.35), transparent 62%);
   background-size: 160px 160px;
   opacity: 0.75;
-  animation: atmosphere-dust-drift 44s linear infinite;
 }
 
 .atmosphere-dust::after {
@@ -134,25 +115,6 @@
     radial-gradient(2.4px 2.4px at 120px 190px, rgba(255, 255, 255, 0.2), transparent 60%),
     radial-gradient(1.6px 1.6px at 216px 132px, rgba(238, 208, 255, 0.24), transparent 60%);
   background-size: 240px 240px;
-  animation: atmosphere-dust-drift-far 78s linear infinite;
-}
-
-@keyframes atmosphere-dust-drift {
-  from {
-    transform: translate3d(0, 0, 0);
-  }
-  to {
-    transform: translate3d(-160px, -160px, 0);
-  }
-}
-
-@keyframes atmosphere-dust-drift-far {
-  from {
-    transform: translate3d(0, 0, 0);
-  }
-  to {
-    transform: translate3d(240px, -240px, 0);
-  }
 }
 
 /* --- Bokeh -----------------------------------------------------------------
@@ -170,7 +132,6 @@
     radial-gradient(circle 3px at 22% 68%, rgba(226, 206, 255, 0.4), transparent 70%),
     radial-gradient(circle 4px at 78% 74%, rgba(198, 113, 189, 0.3), transparent 70%),
     radial-gradient(circle 2px at 46% 88%, rgba(255, 255, 255, 0.35), transparent 70%);
-  animation: atmosphere-bokeh-pulse 9s ease-in-out infinite;
 }
 
 /* Opacity only. This layer used to breathe with `transform: scale()` while
@@ -178,16 +139,6 @@
    content forces the blur to be recomputed every single frame, on every screen,
    forever. The points are radial gradients that fade to transparent, so they
    were never sharp enough to need the blur in the first place. */
-@keyframes atmosphere-bokeh-pulse {
-  0%,
-  100% {
-    opacity: 0.7;
-  }
-  50% {
-    opacity: 1;
-  }
-}
-
 /* --- Legibility layer ------------------------------------------------------
    Two jobs, one element, painted above every glowing layer and below the app.
 
@@ -217,13 +168,4 @@
       rgba(9, 8, 20, 0.28) 74%,
       rgba(9, 8, 20, 0.6) 100%
     );
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .atmosphere-rays,
-  .atmosphere-dust,
-  .atmosphere-dust::after,
-  .atmosphere-bokeh {
-    animation: none;
-  }
 }
