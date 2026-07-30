@@ -5,7 +5,6 @@ import 'swiper/css/autoplay';
 import 'swiper/css/pagination';
 
 import { useMemo, type ReactNode } from 'react';
-import { Sparkles } from 'lucide-react';
 import { Autoplay, Pagination } from 'swiper/modules';
 import { Swiper, SwiperSlide } from 'swiper/react';
 import {
@@ -188,65 +187,51 @@ export function MarketHeroCarousel({ onSelect, onBuy }: MarketHeroCarouselProps)
   });
 
   return (
-    <section className="flex flex-col gap-2.5">
-      <header className="flex items-center gap-2.5 px-6">
-        <span className="flex-center bg-electric-pink/18 h-7 w-7 shrink-0 rounded-lg">
-          <Sparkles size={14} strokeWidth={2.5} className="text-electric-pink" />
-        </span>
-        <h2 className="truncate text-base font-extrabold tracking-tight text-white">
-          {t('showcase')}
-        </h2>
-        <span className="bg-electric-pink/22 text-electric-pink rounded-full px-2 py-0.5 text-[10px] font-bold tabular-nums">
-          {items.length}
-        </span>
-      </header>
-
-      {/* The gutter belongs to this wrapper, not to Swiper: padding on the
-          Swiper itself leaves the neighbouring slide visible inside it, which
-          reads as a stray sliver at the screen edge. */}
-      <div className="px-5">
-        <Swiper
-          // Bottom padding is the dots' room — Swiper pins them to the
-          // container, so without it they sit on top of the artwork.
-          className="market-hero-swiper w-full pb-7!"
-          modules={[Autoplay, Pagination]}
-          grabCursor
-          observer
-          observeParents
-          watchOverflow
-          loop={items.length > 1}
-          slidesPerView={1}
-          spaceBetween={12}
-          pagination={{ clickable: true }}
-          // Slower than a list carousel on purpose: each slide is now a full
-          // offer to read, not a chip to glance at.
-          autoplay={{
-            delay: 4500,
-            disableOnInteraction: false,
-            pauseOnMouseEnter: true,
-          }}
-        >
-          {items.map(featured => {
-            const item = buildItem(featured);
-            return (
-              <SwiperSlide key={featured.id}>
-                <MarketHeroCard
-                  title={featured.title}
-                  description={featured.description}
-                  accentColor={featured.accentColor}
-                  price={featured.prices[0]}
-                  isNew={featured.isNew}
-                  discountPct={featured.discountPct}
-                  imageUrl={featured.imageUrl}
-                  renderIcon={featured.renderIcon}
-                  onOpen={() => onSelect(item)}
-                  onBuy={price => onBuy(item, price)}
-                />
-              </SwiperSlide>
-            );
-          })}
-        </Swiper>
-      </div>
-    </section>
+    // The gutter belongs to this wrapper, not to Swiper: padding on the Swiper
+    // itself leaves the neighbouring slide visible inside it, which reads as a
+    // stray sliver at the screen edge.
+    <div className="px-5">
+      <Swiper
+        // Bottom padding is the dots' room — Swiper pins them to the
+        // container, so without it they sit on top of the artwork.
+        className="market-hero-swiper w-full pb-7!"
+        modules={[Autoplay, Pagination]}
+        grabCursor
+        observer
+        observeParents
+        watchOverflow
+        loop={items.length > 1}
+        slidesPerView={1}
+        spaceBetween={12}
+        pagination={{ clickable: true }}
+        // Slower than a list carousel on purpose: each slide is now a full
+        // offer to read, not a chip to glance at.
+        autoplay={{
+          delay: 4500,
+          disableOnInteraction: false,
+          pauseOnMouseEnter: true,
+        }}
+      >
+        {items.map(featured => {
+          const item = buildItem(featured);
+          return (
+            <SwiperSlide key={featured.id}>
+              <MarketHeroCard
+                title={featured.title}
+                description={featured.description}
+                accentColor={featured.accentColor}
+                price={featured.prices[0]}
+                isNew={featured.isNew}
+                discountPct={featured.discountPct}
+                imageUrl={featured.imageUrl}
+                renderIcon={featured.renderIcon}
+                onOpen={() => onSelect(item)}
+                onBuy={price => onBuy(item, price)}
+              />
+            </SwiperSlide>
+          );
+        })}
+      </Swiper>
+    </div>
   );
 }
