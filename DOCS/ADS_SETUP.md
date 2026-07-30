@@ -75,6 +75,45 @@ gap isn't there and reports money three ways, never merged into one number.
 - Analytics' revenue split shows the estimated part as a separate `+≈$…`; it is
   deliberately NOT added into `totalUsd` or ARPU, which stay measured.
 
+### 270 vs 17 — most of it was a date-range mistake
+
+Written up the same day as a 16× hole. **That framing was wrong**, and the way it
+was wrong is the recurring one: two numbers from different periods put side by
+side.
+
+`AdView` only exists from **2026-07-20 17:10 UTC** (migration `20260720205500`).
+Adsgram's 270 impressions are all of July. Their own per-day data splits as:
+
+| period    | their impressions | our rows | comparable?                                                                                        |
+| --------- | ----------------- | -------- | -------------------------------------------------------------------------------------------------- |
+| 1–19 Jul  | 187               | —        | no — the table did not exist                                                                       |
+| 20 Jul    | 42                | 0        | partly — history starts 17:10 that day, and Adsgram was pulled out of the waterfall that afternoon |
+| 22–29 Jul | 41                | 14       | yes                                                                                                |
+| 30 Jul    | not reported yet  | 4        | no — their reporting lags                                                                          |
+
+So 69% of the "gap" is a period we were not counting at all, and the real,
+both-sides-counting ratio is **≈2.9×**, not 16×.
+
+**What the residual is NOT.** From `GET /admin/ads/revenue/diagnostics` on
+production: for Adsgram, client reports of finished views **18**, network
+callbacks **18**, `capped` 0, `duplicate` 0. The grant path is intact — no
+finished view went unrewarded, nothing was double-fired, nobody watched past the
+cap. Monetag: 35 client reports against 38 callbacks (callbacks lead, as
+documented — their postback fires on render, ~18s before the client reports).
+
+**What it is.** Ads Adsgram counted as rendered that never became a finished view
+on our side: the player closed the ad, or their counter moved on something our
+SDK reported as `noAd` / `error` / `tooFast`. Their own columns show the same kind
+of internal slippage — 26 Jul: `hits` 39, `wins` 12, `impressions` 12, fill 30.8%.
+
+Those attempts used to leave **no trace at all**: the waterfall toasted the player
+and returned. `POST /tasks/ads/attempt` now stores them (`skipped` / `noAd` /
+`tooFast` / `error`, `source=client`, grants nothing, consumes no cap), and the
+panel's «Куда ушли показы сети» reads the split back. **Live since 30 Jul** — so
+zeros in those columns before that date mean "not counted", not "did not happen",
+and the split of the 2.9× between "closed early" and "never really played" is
+measurable now but **not yet measured**.
+
 Still open: an **importer** for Adsgram's cabinet API. Their panel calls
 `cab.adsgram.ai/api/statistics/publisher/detailedStatistic?blockIds=…&groupBy=DAY`
 (returns per-day impressions / earned / cpm / fillRate — confirmed live from the
