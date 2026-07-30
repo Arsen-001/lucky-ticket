@@ -159,6 +159,40 @@ so on the card:
 - **Freeze** — minting permanent «Тестировщик · N» badges and crown VIP is
   irreversible (there is no unfreeze), so it stays the admin's button.
 
+##### The freeze button, and why it shows a list first
+
+`POST /admin/test-quest/freeze` does not only crown the leaders. It stamps
+`badgeLevel` on **every** participant at the level they stand on at that
+instant, and already-stamped players are skipped forever after. So a press
+before the finish leaves a player who was climbing toward level 3 as
+«Тестировщик · 25» for good, with no reward — and that damage is invisible in
+the moment of pressing.
+
+`GET /admin/test-quest/freeze/preview` runs the same computation and writes
+nothing: who gets crowned (with rank, referrals, LC/LS/tickets and VIP level),
+who merely gets stamped mid-climb, and the money totals. The panel shows those
+numbers on a «Конец теста» card and repeats the list inside the confirm dialog.
+The button also reports how many days the test still has to run — the freeze
+deliberately ignores `testEndsAt`, so "рано" is a judgement only a human makes,
+and only if something shows them the date.
+
+The two actions live at `/admin/test-quest/*` **only**. Copies used to exist on
+the player-facing `/test-quest` controller behind `AdminGuard`; they were
+removed because the audit interceptor records mutations on `Admin*` controllers
+alone, which made that pair a second, unlogged door to the one irreversible
+action the platform has.
+
+##### Monthly chests
+
+`payMonthlyChests` runs on the scheduler (BullMQ, daily at 04:00 UTC —
+**verified running on prod 2026-07-30** via the tournament spawner/finisher that
+shares the same worker). Its manual twin, `POST /admin/test-quest/pay-chests`,
+is a spare key for a missed run, not the door — and it is a guaranteed no-op
+until the test is frozen, because chests only go to badge holders. The panel
+therefore shows it inside the «Сундуки» tab next to «ждёт N · держателей N ·
+выдано N», disabled when nothing is due, and says which of the two reasons
+applies (нет держателей / никому не пора).
+
 `testEndsAt` is `null` until somebody chooses. Null is a real state, not a bug:
 every reader then falls back to what it did before, so an undecided date changes
 nothing. Before this existed the end of the test was spelled out in three
