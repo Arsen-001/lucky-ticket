@@ -52,7 +52,7 @@ export function TasksFrequencyTabs({
 
   return (
     <div className={twMerge('px-4', className)}>
-      <div className="relative flex items-stretch gap-5 border-b border-white/8">
+      <div className="relative flex items-stretch justify-center gap-7 border-b border-white/8">
         {FREQUENCY_ORDER.map(frequency => {
           const isActive = frequency === active;
           const ready = counts[frequency];
@@ -92,7 +92,12 @@ export function TasksFrequencyTabs({
         {underline && (
           <span
             aria-hidden
-            className="bg-pink-gradient shadow-electric-pink/40 pointer-events-none absolute -bottom-px h-[3px] rounded-full shadow-[0_0_10px] transition-[transform,width] duration-[400ms] ease-[cubic-bezier(0.22,1,0.36,1)]"
+            // `left-0` is load-bearing: without an explicit inset an absolutely
+            // positioned child falls back to its static position, which inside
+            // a `justify-center` flex row is the centre — so the measured
+            // offsets would be applied on top of that and the bar would sit
+            // off past the last tab.
+            className="bg-pink-gradient shadow-electric-pink/40 pointer-events-none absolute -bottom-px left-0 h-[3px] rounded-full shadow-[0_0_10px] transition-[transform,width] duration-[400ms] ease-[cubic-bezier(0.22,1,0.36,1)]"
             style={{ width: underline.width, transform: `translateX(${underline.left}px)` }}
           />
         )}
