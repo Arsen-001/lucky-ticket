@@ -51,21 +51,33 @@
       rgba(214, 188, 255, 0.07) 38deg,
       rgba(214, 188, 255, 0) 52deg
     ),
+    /* Wide, low-peak ramps: a beam that takes 2.5° to reach half its strength
+       reads as light, where a narrow bright one reads as a drawn line. This is
+       what the blur used to do for us. */
     repeating-conic-gradient(
-      from 176deg at 88% -6%,
-      rgba(232, 214, 255, 0) 0deg,
-      rgba(232, 214, 255, 0.16) 1.6deg,
-      rgba(232, 214, 255, 0) 4.2deg,
-      rgba(232, 214, 255, 0) 8.4deg
-    ),
+        from 176deg at 88% -6%,
+        rgba(232, 214, 255, 0) 0deg,
+        rgba(232, 214, 255, 0.06) 1.4deg,
+        rgba(232, 214, 255, 0.11) 2.9deg,
+        rgba(232, 214, 255, 0.05) 4.6deg,
+        rgba(232, 214, 255, 0) 7deg,
+        rgba(232, 214, 255, 0) 10.5deg
+      ),
     repeating-conic-gradient(
       from 183deg at 88% -6%,
       rgba(255, 255, 255, 0) 0deg,
-      rgba(255, 255, 255, 0.1) 2.8deg,
-      rgba(255, 255, 255, 0) 6.4deg,
-      rgba(255, 255, 255, 0) 15deg
+      rgba(255, 255, 255, 0.04) 2.2deg,
+      rgba(255, 255, 255, 0.07) 4.4deg,
+      rgba(255, 255, 255, 0.03) 7deg,
+      rgba(255, 255, 255, 0) 10deg,
+      rgba(255, 255, 255, 0) 17deg
     );
-  filter: blur(8px);
+  /* No `filter: blur()` here, on purpose. A blur over a full-screen layer has
+     to be re-rasterized every time something makes the browser repaint it —
+     opening the drawer was enough — and on a phone that costs a visible frame,
+     which read as the screen behind snapping back to its first one. Every stop
+     above already ramps transparent → lit → transparent, so the beams are soft
+     by construction instead of by post-processing. */
   -webkit-mask-image: radial-gradient(
     105% 100% at 88% -6%,
     rgba(0, 0, 0, 1) 0%,
@@ -158,19 +170,21 @@
     radial-gradient(circle 3px at 22% 68%, rgba(226, 206, 255, 0.4), transparent 70%),
     radial-gradient(circle 4px at 78% 74%, rgba(198, 113, 189, 0.3), transparent 70%),
     radial-gradient(circle 2px at 46% 88%, rgba(255, 255, 255, 0.35), transparent 70%);
-  filter: blur(1.4px);
   animation: atmosphere-bokeh-pulse 9s ease-in-out infinite;
 }
 
+/* Opacity only. This layer used to breathe with `transform: scale()` while
+   carrying a blur, which is the worst pairing there is: scaling filtered
+   content forces the blur to be recomputed every single frame, on every screen,
+   forever. The points are radial gradients that fade to transparent, so they
+   were never sharp enough to need the blur in the first place. */
 @keyframes atmosphere-bokeh-pulse {
   0%,
   100% {
     opacity: 0.7;
-    transform: scale(1);
   }
   50% {
     opacity: 1;
-    transform: scale(1.03);
   }
 }
 
