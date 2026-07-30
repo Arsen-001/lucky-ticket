@@ -1,0 +1,22 @@
+/* ---------------------------------------------------------------------------
+   Chrome for /atmosphere — the backdrop viewer. Nothing here describes the
+   backdrop itself; every design value lives in atmosphere.css, which the page
+   renders through the real component so the two can never disagree.
+--------------------------------------------------------------------------- */
+
+.atmosphere-preview[data-motion='off'] *,
+.atmosphere-preview[data-motion='off'] *::before,
+.atmosphere-preview[data-motion='off'] *::after {
+  animation-play-state: paused !important;
+}
+
+.atmosphere-preview-rail button {
+  font-family: ui-monospace, 'SF Mono', SFMono-Regular, Menlo, monospace;
+  font-size: 10px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  transition:
+    color 160ms ease,
+    background-color 160ms ease,
+    border-color 160ms ease;
+}
