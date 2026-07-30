@@ -1650,6 +1650,9 @@ export const tasksMock = {
     });
     return { adId, rewards };
   },
+  // Telemetry for an attempt that paid nothing. Grants nothing and touches no
+  // mock state on purpose — that is exactly what the real endpoint does.
+  'POST tasks/ads/attempt': () => ({ status: 'recorded' }),
   'POST tasks/ads/extra': (args: { body?: { count?: number; currency?: 'lc' | 'ls' } }) => {
     const count = Math.max(1, Math.trunc(args.body?.count ?? 1));
     const currency = args.body?.currency === 'ls' ? 'ls' : 'lc';

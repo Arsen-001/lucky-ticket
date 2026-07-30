@@ -19,6 +19,7 @@ import {
   useGetTasksQuery,
   useClaimTaskMutation,
   useWatchAdMutation,
+  useReportAdAttemptMutation,
   useBuyExtraAdViewsMutation,
 } from '@/api/tasks.api';
 import { TaskCategory, TaskFrequency, TaskStatus } from '@/types/enums/tasks.enums';
@@ -152,6 +153,8 @@ export function TasksContent() {
   const { data, isLoading, isError, refetch } = useGetTasksQuery();
   const [claimTask, claimState] = useClaimTaskMutation();
   const [watchAd, watchState] = useWatchAdMutation();
+  // Telemetry only — never awaited, never surfaced to the player.
+  const [reportAdAttempt] = useReportAdAttemptMutation();
   const [buyExtraAdViews, buyExtraState] = useBuyExtraAdViewsMutation();
   const [buyExtraOpen, setBuyExtraOpen] = useState(false);
   const toast = useToast();
@@ -484,6 +487,14 @@ export function TasksContent() {
     // network in turn and falls back to the house ad. Only a genuine
     // completion (or the no-network dev/mock fallback) records the watch.
     const { outcome, provider } = await showRewardedAd();
+    // An attempt that pays nothing still happened, and to the network that
+    // showed the ad it counts as an impression. Reported fire-and-forget: it
+    // grants nothing, so a failed report must not bother a player who already
+    // got no reward — but without it the network's count and ours diverge with
+    // no stored reason (see DOCS/ADS_SETUP.md).
+    if (outcome !== 'completed' && outcome !== 'unavailable' && provider) {
+      reportAdAttempt({ provider, outcome });
+    }
     if (outcome === 'skipped') {
       toast.info(t('ad not completed'));
       return;

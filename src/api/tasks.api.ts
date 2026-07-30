@@ -86,6 +86,23 @@ export const tasksApi = api.injectEndpoints({
       invalidatesTags: [rtkTags.tasks, rtkTags.me, rtkTags.lc],
     }),
     /**
+     * POST /tasks/ads/attempt  body: { provider, outcome, adId? }
+     *   Telemetry for an attempt that paid nothing — the player closed the ad
+     *   early, no network had one, or playback failed. Grants nothing and
+     *   consumes no daily slot, so it invalidates no cache: fire and forget.
+     *
+     *   It exists because a network counts an impression the moment its ad
+     *   renders. A closed ad is still an impression to them and used to be
+     *   nothing at all to us, which is why their impression count runs ahead of
+     *   ours with no stored reason. See `DOCS/ADS_SETUP.md`.
+     */
+    reportAdAttempt: builder.mutation<
+      { status: string },
+      { provider: AdProviderId; outcome: 'skipped' | 'noAd' | 'tooFast' | 'error' }
+    >({
+      query: body => ({ url: 'tasks/ads/attempt', method: 'POST', body }),
+    }),
+    /**
      * POST /tasks/ads/extra  body: { count, currency }
      *   Buys extra ad slots for the rest of the UTC day once the free cap is
      *   spent. Charges LC or Lucky Stars at the admin-set price and returns the
@@ -111,5 +128,6 @@ export const {
   useGetTasksQuery,
   useClaimTaskMutation,
   useWatchAdMutation,
+  useReportAdAttemptMutation,
   useBuyExtraAdViewsMutation,
 } = tasksApi;
