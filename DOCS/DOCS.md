@@ -1160,6 +1160,18 @@ Purchases are debited in one transaction with the slot grant and recorded in the
 
 **Admin visibility.** Panel → **Реклама** shows, per source (Monetag / Adsgram / Своя реклама), views over the last 30 days, share, views today, AP granted, revenue, cap hits, and views a network never confirmed — plus bought views, what players spent on them, and how many past watchers have gone quiet for 7+ days. Setup, callbacks and operational traps live in [`ADS_SETUP.md`](ADS_SETUP.md).
 
+**How ad revenue is counted — three sources, never merged.** Only Monetag prices each impression for us (`{estimated_price}` in its postback), so only its money is measured. **Adsgram sends no price at all** — its reward callback accepts one macro, `[userId]` — so its earnings can reach the panel two other ways, both labelled for what they are:
+
+| Shown as | Means                                                              |
+| -------- | ------------------------------------------------------------------ |
+| «точно»  | summed per-view prices the network itself sent                     |
+| «оценка» | our exact view count × a CPM an admin read off the network's panel |
+| «факт»   | the monthly figure copied in from that panel by hand               |
+
+Both inputs live in panel → **Реклама** → «Деньги от рекламы». A CPM is never assumed: with none entered, that network's revenue is reported as blank rather than as zero or as a guess, and entering `0` clears it again. A monthly fact is one row per network per month and carries **the network's own impression count** beside ours — the two disagree by design (a network frequency-caps a viewer while we fall through to the next source), and the size of that gap is the only real check on the estimate. Where a month has several, reporting prefers **fact → точно → оценка** and states which it used.
+
+The **Аналитика → выручка** split follows the same rule: the estimated part is shown as a separate `+≈$…` and is deliberately excluded from the revenue total, ARPU and ARPPU, which stay measured.
+
 **Per-player visibility.** The users list carries an **Реклама** column (lifetime views, today against the free cap, bought slots, and how long since the last view — coloured on the silence, not the total), is sortable by both, and filterable by "watched at least N" and "hasn't watched in N days" (the latter deliberately also matches players who never watched). The user card's **Реклама** tab adds the full picture: lifetime and paid totals, what the player's views earned us, a **per-day chart** with every empty day drawn (which is how "stopped watching three weeks ago" becomes visible at all), the per-network split, and three shares — of what they could have watched lifetime, over the chart window, and how many days they showed up at all.
 
 > **The percentages are estimates and are labelled `≈`.** The denominator projects the player's **current** free cap back over the whole life of the account, and the cap moves with status (a month spent as VIP was 40/day, not the 10 they have now) — no history of past caps is kept. The counts behind each share are printed next to it for exactly this reason. Separately, per-view rows (`AdView`) only exist from **2026-07-20**; before that only the lifetime counter survives, so the chart marks older days as _unknown_ rather than zero, and a player whose last view predates it reports "давность неизвестна" rather than a fabricated date.

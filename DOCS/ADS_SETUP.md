@@ -10,21 +10,77 @@ networks as a waterfall** plus its own promo as the final fallback.
 
 ---
 
-## Where things stand (2026-07-20)
+## Where things stand (updated 2026-07-30)
 
-|                         |                                                                     |
-| ----------------------- | ------------------------------------------------------------------- |
-| Waterfall in production | `monetag,house` — Adsgram integrated but **out of rotation**        |
-| Monetag                 | zone `11355872`, live and filling, S2S postback granting            |
-| Adsgram                 | block `37750` active but **never filled a single request**          |
-| House ad                | last in the chain, always fills                                     |
-| Reward authority        | server callback for both networks; client-attested for the house ad |
-| Per-view storage        | `AdView` table (provider, source, outcome, AP, revenue, ymid)       |
-| Admin panel             | section **Реклама** → table «Откуда пришла реклама»                 |
-| Revenue to date         | fractions of a cent — a handful of views total                      |
+|                         |                                                                                      |
+| ----------------------- | ------------------------------------------------------------------------------------ |
+| Waterfall in production | Adsgram first, then Monetag, then the house ad — order lives in env                  |
+| Monetag                 | zone `11355872`, live and filling, S2S postback granting, prices every view          |
+| Adsgram                 | block `37750` live and filling — 41 impressions / $0.36 over 22–29 Jul (their panel) |
+| House ad                | last in the chain, always fills                                                      |
+| Reward authority        | server callback for both networks; client-attested for the house ad                  |
+| Per-view storage        | `AdView` table (provider, source, outcome, AP, revenue, ymid)                        |
+| Admin panel             | section **Реклама** → «Откуда пришла реклама» + «Деньги от рекламы»                  |
+| Revenue to date         | cents. Monetag exact from its postbacks; Adsgram estimated or typed in (see below)   |
 
 Verified end-to-end in the real Mini App: ad served → network callback → AP
 credited → row stored → visible in the panel.
+
+The waterfall row is **inferred**, not read: Adsgram serving 41 impressions in a
+week means it is in rotation and answering first, but `NEXT_PUBLIC_AD_PROVIDERS`
+on Vercel was not opened during that check.
+
+### Where the money is, 2026-07-30 — Adsgram never sends a price
+
+The panel showed a dash in Adsgram's revenue column, and the question "how much
+did ads earn" had no answer in the panel at all. Cause, checked in Adsgram's own
+publisher panel (partner.adsgram.ai → block 37750 → Reward URL field tooltip):
+
+> the GET request is sent when the REWARD event occurs, and `[userId]` is
+> replaced with the user's Telegram ID
+
+**`[userId]` is the only macro Adsgram offers.** No price, no CPM, no event type.
+Their publisher API reference documents client-side `init/show/destroy/
+addEventListener` and nothing else — no reporting endpoint. So per-view revenue
+from Adsgram is not merely unwired, it is unobtainable. Monetag, by contrast,
+sends `{estimated_price}` with every impression.
+
+Their numbers as of that check (block 37750, 22–29 Jul): **41 impressions,
+$0.36**, account balance $0.86. Per day the panel gives impressions / CPM /
+fill rate / earned — 29 Jul: 3 impressions at $75.01 CPM ($0.2250); 28 Jul: 16 at
+$2.90 ($0.0463); 26 Jul: 12 at $2.50, fill rate 30.8%; 23 Jul: 9 at $5.34;
+22 Jul: 1 at $14.00. Sixteen impressions earned a fifth of what three did the
+next day — per-viewer diminishing returns in one table, and a reminder that no
+per-network conclusion holds at this sample size.
+
+**What shipped instead** (both repos, 30 Jul): the panel stops pretending the
+gap isn't there and reports money three ways, never merged into one number.
+
+| Source   | Where it comes from                            | Networks |
+| -------- | ---------------------------------------------- | -------- |
+| «точно»  | the price the network sent with each view      | Monetag  |
+| «оценка» | our exact view count × an admin-entered CPM    | Adsgram  |
+| «факт»   | the monthly figure typed in from its dashboard | any      |
+
+- `AdNetworkRate` — CPM per network, entered in the panel with a note saying
+  where the number was read. **Nothing is seeded**: an unset rate reports
+  nothing at all, because a CPM nobody looked up, rendered as revenue, is a
+  made-up number. Entering `0` clears it.
+- `AdNetworkRevenueFact` — one row per network per month, the network's own
+  figure plus **its own impression count**. Ours and theirs disagree by design
+  (they frequency-cap a viewer, we fall through to the next source), and the size
+  of that gap is the only real check on the estimate.
+- `GET /admin/ads/revenue` reports both against our per-view data per month and
+  picks fact → exact → estimate, stating which it used (`basis`).
+- Analytics' revenue split shows the estimated part as a separate `+≈$…`; it is
+  deliberately NOT added into `totalUsd` or ARPU, which stay measured.
+
+Still open: an **importer** for Adsgram's cabinet API. Their panel calls
+`cab.adsgram.ai/api/statistics/publisher/detailedStatistic?blockIds=…&groupBy=DAY`
+(returns per-day impressions / earned / cpm / fillRate — confirmed live from the
+logged-in panel), and the account menu exposes a personal **Token** with a
+Regenerate button. Undocumented endpoint, and whether that token authorises it
+was **not** tested — that needs the token on the server, not in a chat.
 
 ### Correction, 2026-07-21 — Adsgram was never dead
 
@@ -88,8 +144,14 @@ one viewer.
 - **GigaPub** as a third source — an auction across networks, worth a
   conversation once traffic justifies it. No account, no integration yet.
 - **Per-day chart** in the admin section — only totals over 30 days today.
-- **Compare our numbers against the networks' dashboards** once volume makes
-  the comparison meaningful.
+- **Adsgram importer** — pull their per-day numbers automatically instead of
+  typing a monthly figure in. Needs `ADSGRAM_API_TOKEN` on Railway and one
+  server request to prove the account token authorises
+  `cab.adsgram.ai/api/statistics/publisher/detailedStatistic`. Until then the
+  estimate + the typed-in fact are what the panel has.
+- **Compare our numbers against the networks' dashboards** — now possible in the
+  panel (the fact column carries their impression count next to ours), still
+  meaningless at this volume.
 - **Monetag stats lag** — their panel showed 1 impression against 5 watched
   ads; no capping was observed in our logs, so this looked like reporting
   delay. Unconfirmed; recheck with real volume.
