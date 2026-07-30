@@ -14,7 +14,18 @@ const eslintConfig = defineConfig([
       'react-hooks/set-state-in-effect': 'off',
     },
   },
-  globalIgnores(['.next/**', 'out/**', 'build/**', 'next-env.d.ts', 'public/assets/**']),
+  globalIgnores([
+    '.next/**',
+    // альтернативные dist-каталоги: мок-сервер для e2e (.next-mock), pre-commit, repro
+    '.next-*/**',
+    'out/**',
+    'build/**',
+    'coverage/**',
+    'playwright-report/**',
+    'test-results/**',
+    'next-env.d.ts',
+    'public/assets/**',
+  ]),
 ]);
 
 export default eslintConfig;

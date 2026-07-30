@@ -40,6 +40,9 @@ yarn-error.log*
 # vercel
 .vercel
 
+# eslint (кеш ускоряет повторные прогоны, машинно-зависимый)
+.eslintcache
+
 # typescript
 *.tsbuildinfo
 next-env.d.ts
