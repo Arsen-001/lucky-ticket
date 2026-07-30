@@ -9,6 +9,7 @@ import { TournamentResultWatcher } from '@/components/pages/tabs/tournaments/Tou
 import { ToastViewport } from '@/components/shared/toast/ToastViewport';
 import { AppStatusOverlay } from '@/components/shared/status/AppStatusOverlay';
 import { FullscreenBrandBar } from '@/components/layout-elements/FullscreenBrandBar';
+import { AtmosphericBackground } from '@/components/shared/AtmosphericBackground';
 import { NextIntlClientProvider } from 'next-intl';
 import { gilroy, spaceGrotesk } from '@/fonts/index.fonts';
 import { getLocale } from 'next-intl/server';
@@ -104,14 +105,10 @@ export default async function RootLayout({ children }: ChildrenProps) {
             attributes — this is shallow and does not affect children, so real
             hydration bugs in the app content still surface. */}
         <body suppressHydrationWarning>
-          {/* BISECTION, TEMPORARY — the app's sky is unmounted on purpose.
-              Opening the drawer sends the tab screen behind back to the first
-              frame of its entry animation, and two fixes aimed at the backdrop
-              missed. This build answers one question and nothing else: does the
-              flicker survive without the backdrop? If it does, the backdrop is
-              innocent and the cause predates it. Restore by reverting this
-              commit — the component and its CSS are untouched.
-          <AtmosphericBackground className="left-[var(--app-gutter)] right-[var(--app-gutter)]" /> */}
+          {/* The app's sky, behind every screen. Mounted here rather than in a
+              route layout so drawer and auth screens get it too, and pinned to
+              the phone column so it never spills into the desktop gutters. */}
+          <AtmosphericBackground className="left-[var(--app-gutter)] right-[var(--app-gutter)]" />
           <div id="scroll-container">
             <AppLifecycleProvider />
             <NextIntlClientProvider>
