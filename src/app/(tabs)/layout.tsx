@@ -9,6 +9,9 @@ import { AtmosphericBackground } from '@/components/shared/AtmosphericBackground
 import { routes } from '@/constants/routes';
 import { usePathname } from 'next/navigation';
 
+/** Tabs that get the key-art sky behind their content. */
+const ATMOSPHERE_ROUTES: readonly string[] = [routes.home, routes.tickets.index];
+
 export default function TabsLayout({ children }: ChildrenProps) {
   const pathname = usePathname();
 
@@ -17,7 +20,7 @@ export default function TabsLayout({ children }: ChildrenProps) {
       {/* Lives here, outside the animated page wrapper: that wrapper keeps a
           transform after its entry animation, which would re-anchor a `fixed`
           child to it and make the backdrop scroll with the content. */}
-      {pathname === routes.tickets.index && (
+      {ATMOSPHERE_ROUTES.includes(pathname) && (
         <AtmosphericBackground className="left-[var(--app-gutter)] right-[var(--app-gutter)]" />
       )}
       <Header className="fixed top-0 left-[var(--app-gutter)] right-[var(--app-gutter)] z-50 shadow-xs" />
