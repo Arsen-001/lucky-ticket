@@ -105,7 +105,9 @@ export function TournamentFiltersTabs({
                 aria-pressed={isActive}
                 className={twMerge(
                   'relative z-1 flex items-center gap-1 rounded-full px-2.5 py-1.5 text-[12px] font-semibold whitespace-nowrap shrink-0 active:scale-95 transition-colors duration-300',
-                  isActive ? 'text-white' : 'bg-white/5 text-white-secondary hover:bg-white/10'
+                  isActive
+                    ? 'text-white'
+                    : 'bg-background-overlay text-white-secondary hover:bg-surface-hover'
                 )}
               >
                 <Icon

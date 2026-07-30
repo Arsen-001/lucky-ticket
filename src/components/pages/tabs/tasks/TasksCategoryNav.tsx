@@ -127,7 +127,9 @@ export function TasksCategoryNav({
                 onClick={() => onSelect(category)}
                 className={twMerge(
                   'relative z-1 flex items-center gap-2 rounded-full px-3 py-2 text-sm font-semibold whitespace-nowrap shrink-0 active:scale-95 transition-colors duration-300',
-                  active ? 'text-white' : 'bg-white/5 text-white-secondary hover:bg-white/10'
+                  active
+                    ? 'text-white'
+                    : 'bg-background-overlay text-white-secondary hover:bg-surface-hover'
                 )}
                 aria-pressed={active}
               >

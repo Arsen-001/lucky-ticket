@@ -35,6 +35,10 @@
 
   --color-background: rgba(27, 25, 42, 1);
   --color-background-overlay: rgba(29, 29, 52, 1);
+  /* Hover tone for surfaces that sit directly on the atmospheric backdrop.
+     Opaque on purpose: a `bg-white/10` hover would swap the surface back to a
+     translucent one and let the sky through for the length of the hover. */
+  --color-surface-hover: rgba(45, 44, 74, 1);
   --color-header: rgba(22, 31, 53, 1);
   --color-tab-bar: rgba(22, 31, 53, 1);
   --color-back-button-background: rgba(60, 34, 76, 1);
