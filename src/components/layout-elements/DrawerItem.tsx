@@ -62,6 +62,13 @@ export function DrawerItem({
         href={route}
         tabIndex={tabIndex}
         onClick={onNavigate}
+        // The drawer is a menu of ~15 destinations that all mount at once when
+        // it opens. Prefetching every one of them fires a burst of route
+        // requests and churns the router cache on a screen the player is only
+        // passing through — and the churn is what makes the tab screen behind
+        // replay its entry animation. Prefetch is a no-op in dev, so this only
+        // ever showed up on the deployed app.
+        prefetch={false}
         className={twMerge(
           'group relative flex items-center gap-3 overflow-hidden rounded-xl px-2.5 py-2.5 transition-colors',
           active
