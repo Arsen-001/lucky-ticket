@@ -5,6 +5,8 @@ import { TabBar } from '@/components/layout-elements/TabBar';
 import type { ChildrenProps } from '@/types/interfaces/component.interfcaes';
 import { Drawer } from '@/components/layout-elements/Drawer';
 import { NotificationAutoSurface } from '@/components/layout-elements/NotificationAutoSurface';
+import { AtmosphericBackground } from '@/components/shared/AtmosphericBackground';
+import { routes } from '@/constants/routes';
 import { usePathname } from 'next/navigation';
 
 export default function TabsLayout({ children }: ChildrenProps) {
@@ -12,6 +14,12 @@ export default function TabsLayout({ children }: ChildrenProps) {
 
   return (
     <>
+      {/* Lives here, outside the animated page wrapper: that wrapper keeps a
+          transform after its entry animation, which would re-anchor a `fixed`
+          child to it and make the backdrop scroll with the content. */}
+      {pathname === routes.tickets.index && (
+        <AtmosphericBackground className="left-[var(--app-gutter)] right-[var(--app-gutter)]" />
+      )}
       <Header className="fixed top-0 left-[var(--app-gutter)] right-[var(--app-gutter)] z-50 shadow-xs" />
       <main
         className="h-full"
