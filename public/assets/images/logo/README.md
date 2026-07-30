@@ -41,6 +41,7 @@
 | `luckyticket365-mark.svg/.png`             | только веер, без текста                   |
 | `luckyticket365-icon.svg/.png`             | 1024×1024 — аватар бота/канала, app icon  |
 | `luckyticket365-cover.svg/.png`            | 1200×630 — OG-картинка, обложка в соцсетях |
+| `botfather-description-640x360.jpg/.png`   | 640×360 — картинка над описанием бота      |
 
 Арт билетов вшит внутрь SVG (webp в data-URI, ~580 КБ) — файл самодостаточен и
 рисуется через `<img>`, но только в браузере: старые SVG-редакторы webp внутри
@@ -67,7 +68,13 @@ pip3 install fonttools                                   # один раз
 python3 public/assets/images/logo/generate-logo.py       # вектор + wordmark.json
 node    public/assets/images/logo/export-flat-png.mjs    # PNG для вектора
 node    public/assets/images/logo/generate-logo-real.mjs # арт-версия + её PNG
+node    public/assets/images/logo/generate-botfather-description.mjs
 ```
+
+Последний собирает картинку-описание из готового лок-апа, поэтому его гоняют
+**после** `generate-logo-real.mjs`. Заливается она руками: @BotFather →
+`/mybots` → бот → Edit Bot → **Edit Description Picture** — метода в Bot API для
+неё нет, панель её выставить не может.
 
 Порядок важен: `generate-logo.py` кладёт рядом `wordmark.json` (контуры трёх
 частей вординга), из которого node-скрипты берут текст.
