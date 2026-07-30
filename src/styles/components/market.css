@@ -1,3 +1,68 @@
+/* ---------------------------------------------------------------------------
+   Showcase slide. Every colour derives from `--hero-accent`, set inline per
+   item, so a diamond shard and a pink avatar get the same treatment in their
+   own key. The tint is mixed INTO the card tone rather than layered over it at
+   low alpha — on the atmospheric backdrop a see-through card reads as a hole.
+--------------------------------------------------------------------------- */
+
+.market-hero-card {
+  position: relative;
+  overflow: hidden;
+  border-radius: 18px;
+  border: 1px solid color-mix(in srgb, var(--hero-accent) 40%, transparent);
+  background: linear-gradient(
+    100deg,
+    color-mix(in srgb, var(--hero-accent) 24%, var(--color-background-overlay)) 0%,
+    color-mix(in srgb, var(--hero-accent) 8%, var(--color-background-overlay)) 52%,
+    var(--color-background-overlay) 100%
+  );
+  box-shadow: 0 14px 30px -20px color-mix(in srgb, var(--hero-accent) 85%, transparent);
+}
+
+/* A single fixed highlight along the top edge — enough to read as glass, not
+   so much that four slides in a row start to flicker. */
+.market-hero-card::before {
+  content: '';
+  position: absolute;
+  inset: 0 0 auto;
+  height: 40%;
+  pointer-events: none;
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.07), transparent);
+}
+
+.market-hero-fade {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: linear-gradient(
+    90deg,
+    transparent 45%,
+    color-mix(in srgb, var(--hero-accent) 14%, var(--color-background-overlay)) 100%
+  );
+}
+
+.market-hero-buy {
+  background: color-mix(in srgb, var(--hero-accent) 34%, var(--color-background-overlay));
+  border: 1px solid color-mix(in srgb, var(--hero-accent) 62%, transparent);
+}
+
+/* Swiper's dots, in the app's language: the active one stretches into a bar. */
+.market-hero-swiper .swiper-pagination-bullet {
+  width: 5px;
+  height: 5px;
+  background: rgba(232, 214, 255, 0.28);
+  opacity: 1;
+  transition:
+    width 220ms ease,
+    background-color 220ms ease;
+}
+
+.market-hero-swiper .swiper-pagination-bullet-active {
+  width: 16px;
+  border-radius: 3px;
+  background: var(--color-electric-pink);
+}
+
 @keyframes market-title-shine {
   to {
     transform: translateX(160%);

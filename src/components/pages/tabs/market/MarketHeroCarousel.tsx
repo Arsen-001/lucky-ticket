@@ -2,9 +2,11 @@
 
 import 'swiper/css';
 import 'swiper/css/autoplay';
+import 'swiper/css/pagination';
 
 import { useMemo, type ReactNode } from 'react';
-import { Autoplay } from 'swiper/modules';
+import { Sparkles } from 'lucide-react';
+import { Autoplay, Pagination } from 'swiper/modules';
 import { Swiper, SwiperSlide } from 'swiper/react';
 import {
   useBuyCosmeticMutation,
@@ -17,16 +19,13 @@ import {
   effectiveMarketDiscountPct,
   orderMarketPrices,
 } from '@/utils/global/market.utils';
-import '@/styles/components/tasks.css';
+import '@/styles/components/market.css';
 import { ChipShardIcon } from '@/components/shared/icons/ChipShardIcon';
-import { TelegramStarIcon } from '@/components/shared/icons/TelegramStarIcon';
 import type { MarketSelectedItem } from '@/components/pages/tabs/market/MarketView';
-import { LcLabel } from '@/components/shared/icons/LcLabel';
+import { MarketHeroCard } from '@/components/pages/tabs/market/MarketHeroCard';
 import { useAppTranslations } from '@/hooks/useAppTranslations';
 import { marketShardName } from '@/utils/pages/market-name.utils';
-import { MarketPriceType } from '@/types/enums/market.enums';
 import type { MarketAccent, MarketPrice } from '@/types/interfaces/market.interfaces';
-import { formatCompactPrice } from '@/utils/global/number.utils';
 
 export interface MarketHeroCarouselProps {
   onSelect: (item: MarketSelectedItem) => void;
@@ -43,6 +42,8 @@ interface FeaturedItem {
   isNew?: boolean;
   accent: MarketAccent;
   accentColor: string;
+  /** Artwork for the full-bleed showcase slide; shards have none. */
+  imageUrl?: string;
   renderIcon: (size: number) => ReactNode;
   mutate: (price: MarketPrice) => Promise<unknown>;
 }
@@ -101,6 +102,7 @@ export function MarketHeroCarousel({ onSelect, onBuy }: MarketHeroCarouselProps)
         isNew: c.isNew,
         accent,
         accentColor,
+        imageUrl: c.imageUrl ?? undefined,
         renderIcon: () => renderAvatarIcon(c.imageUrl ?? '', c.name, accentColor),
         mutate: price => buyCosmetic({ cosmeticId: c.id, price }).unwrap(),
       };
@@ -165,7 +167,7 @@ export function MarketHeroCarousel({ onSelect, onBuy }: MarketHeroCarouselProps)
   if (isLoading) {
     return (
       <div className="px-5">
-        <div className="bg-background-overlay h-[100px] w-full animate-pulse rounded-xl" />
+        <div className="bg-background-overlay h-[142px] w-full animate-pulse rounded-[18px]" />
       </div>
     );
   }
@@ -186,109 +188,65 @@ export function MarketHeroCarousel({ onSelect, onBuy }: MarketHeroCarouselProps)
   });
 
   return (
-    <Swiper
-      className="-mt-[10px] w-full"
-      modules={[Autoplay]}
-      centeredSlides
-      grabCursor
-      observer
-      observeParents
-      watchOverflow
-      loop={items.length > 2}
-      slidesPerView="auto"
-      spaceBetween={20}
-      autoplay={{
-        delay: 2000,
-        disableOnInteraction: false,
-        pauseOnMouseEnter: true,
-      }}
-    >
-      {items.map(featured => {
-        const item = buildItem(featured);
-        return (
-          <SwiperSlide key={featured.id} className="w-72! overflow-visible py-[14px]">
-            <MarketHeroCard
-              featured={featured}
-              onClick={() => onSelect(item)}
-              onBuy={price => onBuy(item, price)}
-            />
-          </SwiperSlide>
-        );
-      })}
-    </Swiper>
-  );
-}
+    <section className="flex flex-col gap-2.5">
+      <header className="flex items-center gap-2.5 px-6">
+        <span className="flex-center bg-electric-pink/18 h-7 w-7 shrink-0 rounded-lg">
+          <Sparkles size={14} strokeWidth={2.5} className="text-electric-pink" />
+        </span>
+        <h2 className="truncate text-base font-extrabold tracking-tight text-white">
+          {t('showcase')}
+        </h2>
+        <span className="bg-electric-pink/22 text-electric-pink rounded-full px-2 py-0.5 text-[10px] font-bold tabular-nums">
+          {items.length}
+        </span>
+      </header>
 
-interface MarketHeroCardProps {
-  featured: FeaturedItem;
-  onClick: () => void;
-  onBuy: (price: MarketPrice) => void;
-}
-
-function MarketHeroCard({ featured, onClick, onBuy }: MarketHeroCardProps) {
-  const t = useAppTranslations();
-  const price = featured.prices[0];
-
-  return (
-    <div
-      role="button"
-      tabIndex={0}
-      onClick={onClick}
-      onKeyDown={e => {
-        if (e.key === 'Enter' || e.key === ' ') {
-          e.preventDefault();
-          onClick();
-        }
-      }}
-      className="task-card-default relative flex h-[82px] w-72 cursor-pointer items-center gap-2.5 rounded-[10px] px-3 transition-transform active:scale-99"
-    >
-      <div className="relative h-[78px] w-[78px] flex-shrink-0">
-        {featured.renderIcon(78)}
-        {featured.isNew && (
-          <span className="bg-electric-pink absolute -top-1.5 -right-1.5 z-1 rounded-full px-1.5 py-0.5 text-[8px] font-extrabold uppercase tracking-wider text-white">
-            {t('new')}
-          </span>
-        )}
-        {!featured.isNew && featured.discountPct ? (
-          <span className="bg-pink-gradient absolute -top-1.5 -right-1.5 z-1 rounded-full px-1.5 py-0.5 text-[8px] font-extrabold tabular-nums text-white">
-            −{featured.discountPct}%
-          </span>
-        ) : null}
+      {/* The gutter belongs to this wrapper, not to Swiper: padding on the
+          Swiper itself leaves the neighbouring slide visible inside it, which
+          reads as a stray sliver at the screen edge. */}
+      <div className="px-5">
+        <Swiper
+          // Bottom padding is the dots' room — Swiper pins them to the
+          // container, so without it they sit on top of the artwork.
+          className="market-hero-swiper w-full pb-7!"
+          modules={[Autoplay, Pagination]}
+          grabCursor
+          observer
+          observeParents
+          watchOverflow
+          loop={items.length > 1}
+          slidesPerView={1}
+          spaceBetween={12}
+          pagination={{ clickable: true }}
+          // Slower than a list carousel on purpose: each slide is now a full
+          // offer to read, not a chip to glance at.
+          autoplay={{
+            delay: 4500,
+            disableOnInteraction: false,
+            pauseOnMouseEnter: true,
+          }}
+        >
+          {items.map(featured => {
+            const item = buildItem(featured);
+            return (
+              <SwiperSlide key={featured.id}>
+                <MarketHeroCard
+                  title={featured.title}
+                  description={featured.description}
+                  accentColor={featured.accentColor}
+                  price={featured.prices[0]}
+                  isNew={featured.isNew}
+                  discountPct={featured.discountPct}
+                  imageUrl={featured.imageUrl}
+                  renderIcon={featured.renderIcon}
+                  onOpen={() => onSelect(item)}
+                  onBuy={price => onBuy(item, price)}
+                />
+              </SwiperSlide>
+            );
+          })}
+        </Swiper>
       </div>
-
-      <div className="flex min-w-0 flex-1 flex-col justify-center gap-1">
-        <h5 className="line-clamp-1 text-[13px] font-bold leading-tight text-white">
-          {featured.title}
-        </h5>
-        {featured.description && (
-          <p className="text-pink-secondary line-clamp-1 text-[10px] leading-tight">
-            {featured.description}
-          </p>
-        )}
-        {price && (
-          <button
-            type="button"
-            onClick={e => {
-              e.stopPropagation();
-              onBuy(price);
-            }}
-            className="mt-0.5 inline-flex w-fit items-center gap-1 rounded-md px-2 py-1 text-[11px] font-extrabold tabular-nums text-white transition-transform active:scale-95"
-            style={{
-              backgroundColor: `color-mix(in srgb, ${featured.accentColor} 26%, transparent)`,
-              border: `1px solid color-mix(in srgb, ${featured.accentColor} 50%, transparent)`,
-            }}
-          >
-            {price.type === MarketPriceType.TELEGRAM_STARS && <TelegramStarIcon size={11} />}
-            {price.originalAmount && (
-              <span className="text-[9px] text-white/55 line-through">
-                {formatCompactPrice(price.originalAmount)}
-              </span>
-            )}
-            <span>{formatCompactPrice(price.amount)}</span>
-            {price.type === MarketPriceType.LC && <LcLabel size={11} interactive={false} />}
-          </button>
-        )}
-      </div>
-    </div>
+    </section>
   );
 }
