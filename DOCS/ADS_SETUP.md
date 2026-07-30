@@ -114,12 +114,51 @@ zeros in those columns before that date mean "not counted", not "did not happen"
 and the split of the 2.9× between "closed early" and "never really played" is
 measurable now but **not yet measured**.
 
-Still open: an **importer** for Adsgram's cabinet API. Their panel calls
+### The importer, 2026-07-30 — a file, because there is no API to poll
+
+Their panel reads
 `cab.adsgram.ai/api/statistics/publisher/detailedStatistic?blockIds=…&groupBy=DAY`
-(returns per-day impressions / earned / cpm / fillRate — confirmed live from the
-logged-in panel), and the account menu exposes a personal **Token** with a
-Regenerate button. Undocumented endpoint, and whether that token authorises it
-was **not** tested — that needs the token on the server, not in a chat.
+(per-day impressions / clicks / earned / cpm / fillRate). The account menu exposes
+a personal **Token**, so a server-side poller looked plausible. It is not:
+
+| auth tried on that endpoint                           | answer |
+| ----------------------------------------------------- | ------ |
+| `Authorization: Bearer <token>`                       | 401    |
+| `?token=` · `?key=` · `?apiKey=`                      | 401    |
+| `X-Token` · `X-Api-Key` · `Api-Key` · `Token` headers | 401    |
+| browser session cookie (control)                      | 200    |
+
+The endpoint is undocumented and cookie-only, and the token in their account menu
+authorises nothing on it. (It sits in their JSON under the field name
+`commentary`, which is its own kind of warning.) Nor is there an export endpoint —
+`…/csv`, `…/export`, `…/download` all 404: their «Download CSV» is generated in
+the browser from that same JSON.
+
+So the import takes the **file**: panel → **Реклама** → «Импорт выгрузки из
+кабинета сети», upload or paste, always preview first, then save into
+`AdNetworkDailyStat` (one row per network per day; re-importing an overlapping
+period corrects those days instead of duplicating them). Parser:
+`src/admin/ad-stats-csv.ts`, tolerant by design and covered by
+`ad-stats-csv.spec.ts` — delimiter `,`/`;`/tab, quoted fields, decimal comma,
+`$`/`%` stripped, their `-` glyph read as **absent rather than zero**, EN/RU
+headers, and three date formats where slashes are US order and dots are
+day-first. Lines it cannot read come back as `skipped` with a reason instead of
+being silently dropped.
+
+Reporting order became **fact → imported → exact → estimate**, and a hand-typed
+fact still outranks an import: somebody looked at the dashboard and decided.
+`importedDays` travels with the number, so a four-day import can never read as a
+month.
+
+Verified on production the same day: 13 days of July parsed to **270 impressions
+/ $0.842323**, matching their own panel to the cent, and July now reports
+«$0.8423 файл · 13 дн.» against our 18 views. **Not verified:** the exact bytes of
+their real `Download CSV` — the test used a CSV rebuilt from their live JSON in
+their table's column order. First real file that trips the parser is a one-line
+fix in the alias/date lists.
+
+Worth asking @adsgramsupport whether publishers can get real reporting API
+access; if they can, the same table takes an `api` source with no other change.
 
 ### Correction, 2026-07-21 — Adsgram was never dead
 
