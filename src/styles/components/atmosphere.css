@@ -8,6 +8,17 @@
 --------------------------------------------------------------------------- */
 
 .atmosphere {
+  /* Pin the backdrop to its own compositor layer and keep its painting to
+     itself. Same medicine the Header already takes, for the same disease: a
+     fixed element gets re-rasterized when the page around it changes state —
+     opening the drawer flips `body` to `overflow: hidden` — and re-rasterizing
+     a full-screen 8px-blurred conic gradient behind a mask costs enough frames
+     to read as a blink. Nothing here animates layout, so the layer is bought
+     once and reused. */
+  transform: translateZ(0);
+  backface-visibility: hidden;
+  contain: paint;
+
   /* Base field: purple bloom hanging off the top-right corner, indigo depth
      pooling bottom-left, over the app's own background tone. */
   background:
