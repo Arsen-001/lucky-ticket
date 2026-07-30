@@ -24,6 +24,7 @@ import type { MarketSelectedItem } from '@/components/pages/tabs/market/MarketVi
 import { MarketHeroCard } from '@/components/pages/tabs/market/MarketHeroCard';
 import { useAppTranslations } from '@/hooks/useAppTranslations';
 import { marketShardName } from '@/utils/pages/market-name.utils';
+import type { AvatarBoost, AvatarDailyReward } from '@/types/interfaces/avatars.interfaces';
 import type { MarketAccent, MarketPrice } from '@/types/interfaces/market.interfaces';
 
 export interface MarketHeroCarouselProps {
@@ -43,6 +44,9 @@ interface FeaturedItem {
   accentColor: string;
   /** Artwork for the full-bleed showcase slide; shards have none. */
   imageUrl?: string;
+  /** Avatars only — what the item does while equipped. */
+  boost?: AvatarBoost;
+  dailyReward?: AvatarDailyReward;
   renderIcon: (size: number) => ReactNode;
   mutate: (price: MarketPrice) => Promise<unknown>;
 }
@@ -102,6 +106,8 @@ export function MarketHeroCarousel({ onSelect, onBuy }: MarketHeroCarouselProps)
         accent,
         accentColor,
         imageUrl: c.imageUrl ?? undefined,
+        boost: c.avatarBoost,
+        dailyReward: c.avatarDailyReward,
         renderIcon: () => renderAvatarIcon(c.imageUrl ?? '', c.name, accentColor),
         mutate: price => buyCosmetic({ cosmeticId: c.id, price }).unwrap(),
       };
@@ -224,6 +230,8 @@ export function MarketHeroCarousel({ onSelect, onBuy }: MarketHeroCarouselProps)
                 isNew={featured.isNew}
                 discountPct={featured.discountPct}
                 imageUrl={featured.imageUrl}
+                boost={featured.boost}
+                dailyReward={featured.dailyReward}
                 renderIcon={featured.renderIcon}
                 onOpen={() => onSelect(item)}
                 onBuy={price => onBuy(item, price)}

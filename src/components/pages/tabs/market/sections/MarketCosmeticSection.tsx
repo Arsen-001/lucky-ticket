@@ -1,17 +1,15 @@
 'use client';
 
-import { Gift, Sparkles, Star, UserRound, Zap } from 'lucide-react';
+import { Gift, Sparkles, UserRound, Zap } from 'lucide-react';
 import type { ReactNode } from 'react';
 import { useBuyCosmeticMutation } from '@/api/market.api';
 import { useGetMeQuery } from '@/api/me.api';
 import { MarketSectionGrid } from '@/components/pages/tabs/market/MarketSectionGrid';
 import { MarketUniversalCard } from '@/components/pages/tabs/market/MarketUniversalCard';
 import type { MarketSelectedItem } from '@/components/pages/tabs/market/MarketView';
-import { Ticket } from '@/components/shared/icons/Ticket';
-import { LcLabel } from '@/components/shared/icons/LcLabel';
+import { AvatarDailyRewardValue } from '@/components/shared/user-elements/AvatarDailyRewardValue';
 import { useAppTranslations } from '@/hooks/useAppTranslations';
 import { MarketCosmeticType } from '@/types/enums/market.enums';
-import type { AvatarDailyReward } from '@/types/interfaces/avatars.interfaces';
 import type {
   MarketAccent,
   MarketCosmetic,
@@ -114,7 +112,7 @@ export function MarketCosmeticSection({ cosmetics, onSelect, onBuy }: MarketCosm
                     <Gift size={13} style={{ color: accentValue }} strokeWidth={2.4} />
                     {t('avatar daily reward')}
                     {':'}
-                    {renderDailyReward(avatar.avatarDailyReward)}
+                    <AvatarDailyRewardValue reward={avatar.avatarDailyReward} />
                   </span>
                 )}
               </div>
@@ -137,30 +135,5 @@ export function MarketCosmeticSection({ cosmetics, onSelect, onBuy }: MarketCosm
         );
       })}
     </MarketSectionGrid>
-  );
-}
-
-function renderDailyReward(reward: AvatarDailyReward): ReactNode {
-  if (reward.kind === 'lc') {
-    return (
-      <span className="text-gold inline-flex items-center gap-1 tabular-nums">
-        +{reward.amount}
-        <LcLabel size={12} interactive={false} />
-      </span>
-    );
-  }
-  if (reward.kind === 'stars') {
-    return (
-      <span className="text-gold inline-flex items-center gap-0.5 tabular-nums">
-        +{reward.amount}
-        <Star size={11} className="fill-gold" />
-      </span>
-    );
-  }
-  return (
-    <span className="inline-flex items-center gap-1 tabular-nums text-white">
-      +{reward.amount}
-      <Ticket type={reward.tier ?? 'bronze'} width={14} height={14} />
-    </span>
   );
 }
