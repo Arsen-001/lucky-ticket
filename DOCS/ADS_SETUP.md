@@ -160,6 +160,41 @@ fix in the alias/date lists.
 Worth asking @adsgramsupport whether publishers can get real reporting API
 access; if they can, the same table takes an `api` source with no other change.
 
+### Two numbers for one network, 2026-07-30
+
+For a few hours «Откуда пришла реклама» showed Adsgram's money as a CPM estimate
+(≈$0.0562) while «Деньги от рекламы» right below it showed the imported $0.8423
+for the same 30-day window. Same network, same period, two numbers on one screen —
+because the breakdown was written before the importer existed and only knew about
+per-view prices and CPMs.
+
+Both now follow one order: **money the network priced itself → its dashboard
+export → a typed CPM**, and each figure carries where it came from («файл» for an
+import, `≈` for an estimate). One source per network per window, so the two cards
+cannot disagree again.
+
+### Balances and "which network pays better", 2026-07-30
+
+`AdNetworkAccount` holds what each network owes us, its payout threshold, and the
+date somebody last read those off the dashboard. Nothing here is fetchable —
+Adsgram's balance lives in its sidebar behind a session cookie, Monetag's $5 / 4th
+and 19th is a policy page. An empty field stays unknown; it never becomes a zero,
+because «$0 on the account» is a claim and «nobody looked» is not.
+
+The comparison («Какая сеть выгоднее») reports revenue per 1000 ads we paid a
+reward for, next to the network's own eCPM — and refuses a winner unless:
+
+| condition                                    | why                                                                                                                                                                               |
+| -------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| both sides' money came from their dashboards | `views × CPM ÷ 1000 ÷ views` = the CPM, so ranking on an estimate ranks the input; and postback prices cover only rewarded impressions while a dashboard total covers all of them |
+| ≥ 1000 views per network                     | frequency capping makes small samples misleading, not merely imprecise                                                                                                            |
+| ≥ 100 distinct viewers per network           | everything measured so far is essentially 4 people                                                                                                                                |
+
+Live state right after shipping: Adsgram rankable (imported), Monetag not (its
+money is postback prices), so the verdict reads «Вывода пока нет · Загрузите
+выгрузку для: monetag» — actionable rather than silent. Four unit tests in
+`admin-ads-comparison.spec.ts` lock each refusal in.
+
 ### Correction, 2026-07-21 — Adsgram was never dead
 
 On 20 Jul this doc said Adsgram "has never filled a single request" and it was
