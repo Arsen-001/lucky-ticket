@@ -67,12 +67,17 @@ export function TicketsTierSummary({
                 aria-pressed={isActive}
                 className={twMerge(
                   'relative flex w-[72px] shrink-0 flex-col items-center justify-center gap-1 overflow-hidden rounded-xl px-2 py-2 transition-colors duration-300 active:scale-[0.96]',
-                  isActive ? 'text-white' : 'bg-white/3 text-white-secondary hover:bg-white/6'
+                  isActive
+                    ? 'text-white'
+                    : 'bg-background-overlay text-white-secondary hover:bg-white/10'
                 )}
                 style={
                   isActive
                     ? {
-                        background: `linear-gradient(180deg, color-mix(in srgb, ${accent} 30%, transparent) 0%, color-mix(in srgb, ${accent} 8%, transparent) 100%)`,
+                        // Mixed into the card tone rather than into `transparent`:
+                        // a see-through chip on the atmospheric backdrop picked up
+                        // the sky and stopped reading as a chip at all.
+                        background: `linear-gradient(180deg, color-mix(in srgb, ${accent} 30%, var(--color-background-overlay)) 0%, color-mix(in srgb, ${accent} 8%, var(--color-background-overlay)) 100%)`,
                       }
                     : undefined
                 }

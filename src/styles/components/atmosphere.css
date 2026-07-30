@@ -163,17 +163,35 @@
   }
 }
 
-/* --- Vignette --------------------------------------------------------------
-   Pulls the edges down so foreground cards keep their contrast. */
+/* --- Legibility layer ------------------------------------------------------
+   Two jobs, one element, painted above every glowing layer and below the app.
+
+   The scrim is the important one: the light source sits off the top-right
+   corner, which is exactly the band the header, the tier tiles and the top
+   banners occupy — bright backdrop under mid-tone UI is where elements start
+   to disappear. It is weakest at the very top (the opaque header covers that
+   anyway), strongest just below it, and gone by mid-screen so the rays keep
+   their reach.
+
+   The vignette then pulls the outer edges down so cards keep their contrast. */
 .atmosphere-vignette {
   position: absolute;
   inset: 0;
-  background: radial-gradient(
-    125% 92% at 50% 42%,
-    rgba(9, 8, 20, 0) 38%,
-    rgba(9, 8, 20, 0.28) 74%,
-    rgba(9, 8, 20, 0.6) 100%
-  );
+  background:
+    linear-gradient(
+      to bottom,
+      rgba(9, 8, 20, 0.34) 0%,
+      rgba(9, 8, 20, 0.46) 9%,
+      rgba(9, 8, 20, 0.36) 22%,
+      rgba(9, 8, 20, 0.16) 34%,
+      rgba(9, 8, 20, 0) 46%
+    ),
+    radial-gradient(
+      125% 92% at 50% 42%,
+      rgba(9, 8, 20, 0) 38%,
+      rgba(9, 8, 20, 0.28) 74%,
+      rgba(9, 8, 20, 0.6) 100%
+    );
 }
 
 @media (prefers-reduced-motion: reduce) {

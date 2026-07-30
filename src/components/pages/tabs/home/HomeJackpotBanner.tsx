@@ -62,7 +62,13 @@ export function HomeJackpotBanner() {
     <Link
       href={routes.jackpot}
       aria-label={t('jackpot')}
-      className="relative flex shrink-0 flex-col items-center justify-center gap-1 overflow-hidden rounded-3xl border border-electric-pink/30 bg-gradient-to-br from-electric-purple/20 to-electric-pink/10 px-3.5 py-2 transition-transform active:scale-[0.98]"
+      // Opaque base under the tint. The gradient alone is 20% opaque, so on the
+      // atmospheric backdrop the plate became a window and took the sky's
+      // brightness with it. Inline rather than `bg-background`: that utility and
+      // `bg-gradient-*` land in the same tailwind-merge group, so the merge drops
+      // one of the two.
+      style={{ backgroundColor: 'var(--color-background)' }}
+      className="relative flex shrink-0 flex-col items-center justify-center gap-1 overflow-hidden rounded-3xl border border-electric-pink/50 bg-gradient-to-br from-electric-purple/20 to-electric-pink/10 px-3.5 py-2 transition-transform active:scale-[0.98]"
     >
       <span className="text-[8px] font-black uppercase leading-none tracking-[0.16em] text-white/60">
         {t('jackpot')}

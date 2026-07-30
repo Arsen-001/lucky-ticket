@@ -26,7 +26,9 @@ export function HomeTestQuestCard() {
     <Link
       href={routes.testQuest}
       aria-label={t('test quest chain title')}
-      className="relative flex min-w-0 flex-1 items-center gap-2.5 overflow-hidden rounded-3xl border border-electric-pink/30 bg-gradient-to-r from-electric-purple/15 to-electric-pink/10 p-2.5 transition-transform active:scale-[0.98]"
+      // Opaque base under the tint — see HomeJackpotBanner for why it is inline.
+      style={{ backgroundColor: 'var(--color-background)' }}
+      className="relative flex min-w-0 flex-1 items-center gap-2.5 overflow-hidden rounded-3xl border border-electric-pink/50 bg-gradient-to-r from-electric-purple/15 to-electric-pink/10 p-2.5 transition-transform active:scale-[0.98]"
     >
       <span className="flex min-w-0 flex-1 flex-col">
         <span className="truncate text-[13px] font-extrabold leading-tight">
