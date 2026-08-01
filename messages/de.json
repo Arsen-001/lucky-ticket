@@ -920,6 +920,8 @@
   "reach tier to unlock more": "Erreiche {tier}, um mehr Inhalte freizuschalten",
   "unlock requirement": "Freischalt-Voraussetzung",
   "reach {tier} tier with {ap} ap": "Erreiche die {tier}-Stufe — {ap} AP",
+  "tournament locked": "{tier}-Turniere sind gesperrt",
+  "stake level locked": "{tier}-Stakes sind gesperrt",
   "shard": "Fragment",
   "tour engine title": "Deine Engine",
   "tour engine body": "Deine kostenlose Bronze-Engine prägt Tickets von allein — ganz ohne Tippen.",

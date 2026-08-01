@@ -7,7 +7,6 @@ import { useAppTranslations } from '@/hooks/useAppTranslations';
 import { useGetWalletStateQuery, useGetWalletTransactionsQuery } from '@/api/wallet.api';
 import { useGetLcStateQuery } from '@/api/lc.api';
 import { routes } from '@/constants/routes';
-import { useToast } from '@/hooks/useToast';
 import { useTonWalletConnect } from '@/hooks/useTonWalletConnect';
 import { TonWalletHero } from './TonWalletHero';
 import { WalletActionButtons } from './WalletActionButtons';
@@ -21,6 +20,7 @@ import { BuyStarsModal } from './BuyStarsModal';
 import { ExchangeTonStarsModal } from './ExchangeTonStarsModal';
 import { LcConvertTonModal } from '@/components/pages/out-tabs/drawer/lc/LcConvertTonModal';
 import { ConfirmModal } from '@/components/shared/modals/ConfirmModal';
+import { RequirementModal } from '@/components/shared/modals/RequirementModal';
 import { QueryErrorState } from '@/components/shared/error/QueryErrorState';
 
 type WalletModal =
@@ -30,11 +30,11 @@ type WalletModal =
   | 'convertLc'
   | 'exchange'
   | 'removeWallet'
+  | 'connectGate'
   | null;
 
 export function WalletContainer() {
   const t = useAppTranslations();
-  const toast = useToast();
   const router = useRouter();
   const searchParams = useSearchParams();
   const { data: state, isLoading, isError, refetch } = useGetWalletStateQuery();
@@ -45,7 +45,8 @@ export function WalletContainer() {
     refetch: refetchTransactions,
   } = useGetWalletTransactionsQuery();
   const { data: lcState } = useGetLcStateQuery();
-  const { connect, disconnect, isDisconnecting } = useTonWalletConnect();
+  const { connect, disconnect, isDisconnecting, referralGate, dismissReferralGate } =
+    useTonWalletConnect();
   const [modal, setModal] = useState<WalletModal>(null);
   const [pendingTopUp, setPendingTopUp] = useState<number | undefined>(undefined);
   const [historyTab, setHistoryTab] = useState<'app' | 'onchain'>('app');
@@ -95,12 +96,23 @@ export function WalletContainer() {
 
   // TON-only actions (deposit / withdraw) require a connected wallet — open the
   // TON Connect sheet first when there isn't one. While the invite gate is
-  // unmet the backend rejects that connect, so say what's missing instead of
-  // opening a sheet whose only outcome is an error.
+  // unmet the backend rejects that connect, so show the gate — what is missing
+  // AND the way to it — instead of a sheet whose only outcome is an error.
   const requireConnected = (next: WalletModal) => {
     if (isConnected) setModal(next);
-    else if (isGated) toast.info(t('invite {num} friends to connect a wallet', { num: required }));
+    else if (isGated) setModal('connectGate');
     else void connect();
+  };
+
+  // Both routes into the connect gate: tapping a TON action while it is unmet,
+  // and the backend's own 403 when the count moved between load and connect.
+  const gateOpen = modal === 'connectGate' || !!referralGate;
+  const gateRequired = referralGate?.required ?? required;
+  const gateCurrent = referralGate?.current ?? state?.referralsCount ?? 0;
+
+  const closeConnectGate = () => {
+    if (modal === 'connectGate') setModal(null);
+    dismissReferralGate();
   };
 
   const handleDeposited = () => setDepositWatch({ polls: 8, fromBalance: tonBalance });
@@ -212,6 +224,14 @@ export function WalletContainer() {
         onClose={() => setModal(null)}
         tonBalance={tonBalance}
         isConnected={isConnected}
+      />
+      <RequirementModal
+        open={gateOpen}
+        onClose={closeConnectGate}
+        title={t('wallet unlocks with friends')}
+        description={t('invite {num} friends to connect a wallet', { num: gateRequired })}
+        progress={{ label: t('friends invited'), current: gateCurrent, required: gateRequired }}
+        action={{ label: t('invite friends'), href: routes.inviteFriends }}
       />
       <ConfirmModal
         open={modal === 'removeWallet'}

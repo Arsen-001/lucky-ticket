@@ -921,6 +921,8 @@
   "reach tier to unlock more": "Достигни тира {tier}, чтобы открыть больше",
   "unlock requirement": "Условие разблокировки",
   "reach {tier} tier with {ap} ap": "Достигни тира {tier} — {ap} AP",
+  "tournament locked": "Турниры тира {tier} закрыты",
+  "stake level locked": "Стейки тира {tier} закрыты",
   "tour engine title": "Твой движок",
   "tour engine body": "Бесплатный бронзовый движок сам печатает билеты — без единого нажатия.",
   "tour tickets title": "Твои билеты",

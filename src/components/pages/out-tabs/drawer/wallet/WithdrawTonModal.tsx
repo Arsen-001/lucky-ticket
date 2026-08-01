@@ -50,6 +50,9 @@ export function WithdrawTonModal({
   const [step, setStep] = useState<Step>('form');
   const [toAddress, setToAddress] = useState('');
   const [amount, setAmount] = useState('');
+  // The gate as the server reported it at submit time — the count can move
+  // between the screen's load and the request, so `gated` is not the last word.
+  const [lateGate, setLateGate] = useState<{ required: number; current: number } | null>(null);
 
   const numericAmount = Number(amount) || 0;
   // The backend sends `amount` to the recipient and debits `amount + fee`, so
@@ -91,6 +94,7 @@ export function WithdrawTonModal({
     setStep('form');
     setToAddress('');
     setAmount('');
+    setLateGate(null);
     onClose();
   };
 
@@ -111,9 +115,11 @@ export function WithdrawTonModal({
       const status = (error as { status?: number })?.status;
       // The cash-out gate answers 403 with the requirement — the state this
       // modal renders as a lock, but the count can move between load and submit.
+      // Rendering that lock (invite CTA and all) beats a toast that names the
+      // requirement over a form which can no longer be submitted.
       const referralGate = readReferralGateError(error);
       if (referralGate) {
-        toast.error(t('invite {num} friends to withdraw', { num: referralGate.required }));
+        setLateGate(referralGate);
         setStep('form');
         return;
       }
@@ -126,15 +132,18 @@ export function WithdrawTonModal({
   // The cash-out gate is a state of the screen, not an error: rendering the
   // form behind a lock would invite an address and an amount into a request
   // the API answers 403 to.
-  if (gated) {
+  if (gated || lateGate) {
+    const gateRequired = lateGate?.required ?? requiredReferrals;
+    const gateCurrent = lateGate?.current ?? currentReferrals;
+
     return (
       <Modal open={open} onClose={handleClose}>
         <div className="bg-purple-gradient flex flex-col gap-4 rounded-2xl p-6">
           <WalletReferralGate
             title={t('withdrawals unlock with friends')}
-            description={t('invite {num} friends to withdraw', { num: requiredReferrals })}
-            required={requiredReferrals}
-            current={currentReferrals}
+            description={t('invite {num} friends to withdraw', { num: gateRequired })}
+            required={gateRequired}
+            current={gateCurrent}
           />
           <Button variant="secondary" onClick={handleClose} className="rounded-full px-4 py-2">
             {t('close')}

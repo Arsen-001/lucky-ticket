@@ -29,8 +29,11 @@ import { StakeOpenedModal } from '@/components/pages/out-tabs/drawer/stakes/new/
 import { StakesRewardsPreviewCard } from '@/components/pages/out-tabs/drawer/stakes/StakesRewardsPreviewCard';
 import { StakesSectionLabel } from '@/components/pages/out-tabs/drawer/stakes/StakesSectionLabel';
 import { StakesWalletPill } from '@/components/pages/out-tabs/drawer/stakes/StakesWalletPill';
+import { NotEnoughCoinsModal } from '@/components/shared/modals/NotEnoughCoinsModal';
+import { TierGateModal } from '@/components/shared/modals/TierGateModal';
 import { Skeleton } from '@/components/shared/seleketons/Skeleton';
 import { QueryErrorState } from '@/components/shared/error/QueryErrorState';
+import type { TicketType } from '@/types/types/ticket.types';
 
 export function NewStakeContent() {
   const t = useAppTranslations();
@@ -60,6 +63,9 @@ export function NewStakeContent() {
   const [openedSnapshot, setOpenedSnapshot] = useState<{ amount: number; months: number } | null>(
     null
   );
+  // Which gate the blocked CTA was tapped through — each opens the screen that
+  // moves it (AP page / invites for a tier, tasks for a balance).
+  const [blocked, setBlocked] = useState<'tier' | 'coins' | null>(null);
 
   if (isError) return <QueryErrorState onRetry={() => refetch()} />;
 
@@ -247,6 +253,7 @@ export function NewStakeContent() {
         tierLocked={tierLocked}
         loading={starting}
         onConfirm={handleConfirm}
+        onBlocked={setBlocked}
       />
       {errorMessage && (
         <div className="border-error/40 bg-error/15 text-error mt-2 rounded-xl border px-3 py-2 text-center text-[11px] font-bold">
@@ -258,6 +265,20 @@ export function NewStakeContent() {
         open={compareOpen}
         onClose={() => setCompareOpen(false)}
         levels={levels}
+      />
+
+      <TierGateModal
+        open={blocked === 'tier'}
+        onClose={() => setBlocked(null)}
+        tier={activeLevel.tier as TicketType}
+        titleId="stake level locked"
+      />
+
+      <NotEnoughCoinsModal
+        open={blocked === 'coins'}
+        onClose={() => setBlocked(null)}
+        required={safeDeposit}
+        current={balance}
       />
 
       {openedSnapshot && (

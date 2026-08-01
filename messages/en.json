@@ -921,6 +921,8 @@
   "reach tier to unlock more": "Reach {tier} to unlock more content",
   "unlock requirement": "Unlock requirement",
   "reach {tier} tier with {ap} ap": "Reach {tier} tier — {ap} AP",
+  "tournament locked": "{tier} tournaments are locked",
+  "stake level locked": "{tier} stakes are locked",
   "tour engine title": "Your engine",
   "tour engine body": "Your free Bronze engine mints tickets on its own — no taps needed.",
   "tour tickets title": "Your tickets",

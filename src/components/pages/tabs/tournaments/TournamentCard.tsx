@@ -45,6 +45,7 @@ import type {
 import type { TournamentType } from '@/types/types/tournaments.types';
 import { TournamentBetModal } from '@/components/pages/out-tabs/tabs-extra/tournament/TournamentBetModal';
 import { TournamentResultModal } from '@/components/pages/out-tabs/tabs-extra/tournament/TournamentResultModal';
+import { TierGateModal } from '@/components/shared/modals/TierGateModal';
 import { TournamentSponsorHeader } from './TournamentSponsorHeader';
 import { TournamentSponsorBackground } from './TournamentSponsorBackground';
 import '@/styles/components/tournament-card.css';
@@ -141,6 +142,7 @@ export function TournamentCard({
 
   const [isBetModalOpen, setIsBetModalOpen] = useState(false);
   const [isResultModalOpen, setIsResultModalOpen] = useState(false);
+  const [isLockModalOpen, setIsLockModalOpen] = useState(false);
 
   const availableTickets = tickets?.find(item => item.ticketType === type)?.count ?? 0;
 
@@ -161,7 +163,13 @@ export function TournamentCard({
   const handleActionClick = (e: MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
-    if (locked || isStarted) return;
+    // A locked tier used to swallow the tap silently. Say what the gate is and
+    // open the screen that closes it instead.
+    if (locked) {
+      setIsLockModalOpen(true);
+      return;
+    }
+    if (isStarted) return;
     if (isFinished) {
       setIsResultModalOpen(true);
     } else {
@@ -170,7 +178,12 @@ export function TournamentCard({
   };
 
   const handleCardClick = () => {
-    if (loading || !id || locked || isModeration) return;
+    if (loading || isModeration) return;
+    if (locked) {
+      setIsLockModalOpen(true);
+      return;
+    }
+    if (!id) return;
     router.push(routes.tournaments.getById(id));
   };
 
@@ -185,7 +198,9 @@ export function TournamentCard({
   return (
     <>
       <div
-        role="link"
+        // Locked, the card opens the gate dialog rather than navigating — a
+        // screen reader announcing "link" would promise a page that never loads.
+        role={locked ? 'button' : 'link'}
         tabIndex={0}
         onClick={handleCardClick}
         onKeyDown={e => {
@@ -195,14 +210,11 @@ export function TournamentCard({
           }
         }}
         style={style}
-        aria-disabled={locked || undefined}
         className={twMerge(
           'w-full rounded-2xl flex flex-col p-3 transition-transform focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-white',
-          locked
-            ? 'cursor-not-allowed'
-            : isModeration
-              ? 'cursor-default'
-              : 'active:scale-99 cursor-pointer',
+          // Locked cards stay tappable — the tap now explains the gate, so
+          // neither `cursor-not-allowed` nor `aria-disabled` would be true.
+          isModeration ? 'cursor-default' : 'active:scale-99 cursor-pointer',
           isFinished
             ? 'tournament-card-finished'
             : sponsor
@@ -462,6 +474,13 @@ export function TournamentCard({
         shardType={shardType}
         result={userResult}
         total={participantsCount}
+      />
+
+      <TierGateModal
+        open={isLockModalOpen}
+        onClose={() => setIsLockModalOpen(false)}
+        tier={type ?? 'bronze'}
+        titleId="tournament locked"
       />
     </>
   );

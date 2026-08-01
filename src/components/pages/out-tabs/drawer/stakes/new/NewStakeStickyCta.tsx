@@ -24,6 +24,12 @@ export interface NewStakeStickyCtaProps {
   tierLocked?: boolean;
   loading?: boolean;
   onConfirm: () => void;
+  /**
+   * Tapped when the CTA is blocked by a gate the player can act on (an AP tier,
+   * or an LC balance) rather than by something they simply retype. Without it
+   * the button is a label that names a requirement and goes nowhere.
+   */
+  onBlocked?: (reason: 'tier' | 'coins') => void;
 }
 
 export function NewStakeStickyCta({
@@ -39,12 +45,19 @@ export function NewStakeStickyCta({
   tierLocked = false,
   loading = false,
   onConfirm,
+  onBlocked,
 }: NewStakeStickyCtaProps) {
   const t = useAppTranslations();
   const stakeCfg = useStakesDisplayConfig();
   const belowMin = amount < minDeposit;
   const insufficient = amount > balance;
   const valid = !belowMin && !insufficient && !tierLocked;
+  // "Below minimum" is fixed by typing a bigger number — the slider is right
+  // there. The other two are earned elsewhere, so those stay tappable and
+  // explain where. Tier wins when both apply: it blocks every amount.
+  const blockedReason = tierLocked ? 'tier' : insufficient ? 'coins' : null;
+  const explainBlock = blockedReason && onBlocked ? () => onBlocked(blockedReason) : undefined;
+  const explainable = !!explainBlock && !loading;
 
   let label: string;
   if (tierLocked) {
@@ -64,13 +77,14 @@ export function NewStakeStickyCta({
     <div className="mt-3">
       <button
         type="button"
-        onClick={valid && !loading ? onConfirm : undefined}
-        disabled={!valid || loading}
+        onClick={valid && !loading ? onConfirm : explainable ? explainBlock : undefined}
+        disabled={(!valid && !explainable) || loading}
         className={twMerge(
           'flex w-full items-center justify-between overflow-hidden rounded-2xl px-5 py-3 text-[13px] font-extrabold uppercase tracking-wider text-white transition-transform active:scale-[0.99]',
           valid && !loading
             ? 'stakes-liquid-glass stakes-btn-glow cursor-pointer'
-            : 'cursor-not-allowed border border-white/10 bg-white/5 opacity-60 backdrop-blur-md'
+            : 'border border-white/10 bg-white/5 opacity-60 backdrop-blur-md',
+          !valid && (explainable ? 'cursor-pointer' : 'cursor-not-allowed')
         )}
       >
         <span className="relative z-10">{label}</span>

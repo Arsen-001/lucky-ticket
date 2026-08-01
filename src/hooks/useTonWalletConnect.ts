@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useTonConnectUI } from '@tonconnect/ui-react';
 import {
   useConnectWalletMutation,
@@ -36,6 +36,12 @@ export function useTonWalletConnect() {
   // Address already sent to the backend — guards against a double-verify when
   // onStatusChange fires more than once for the same connection.
   const syncedAddress = useRef<string | null>(null);
+
+  // The invite gate's 403, kept as state so the caller can render it as a way
+  // forward ("invite friends") instead of a toast the player can only read.
+  const [referralGate, setReferralGate] = useState<{ required: number; current: number } | null>(
+    null
+  );
 
   /** Load a fresh nonce and attach it to the next connect request. */
   const primeProof = async () => {
@@ -84,12 +90,11 @@ export function useTonWalletConnect() {
         syncedAddress.current = null;
         // The invite gate answers 403 with the requirement; "connect failed"
         // would send the player back to retry something that cannot succeed.
+        // It is handed up rather than toasted so the screen can offer the way
+        // out — the invite page — instead of only naming what is missing.
         const gate = readReferralGateError(error);
-        toast.error(
-          gate
-            ? t('invite {num} friends to connect a wallet', { num: gate.required })
-            : t('wallet connect failed')
-        );
+        if (gate) setReferralGate(gate);
+        else toast.error(t('wallet connect failed'));
         void tonConnectUI.disconnect();
       }
     });
@@ -116,5 +121,12 @@ export function useTonWalletConnect() {
     }
   };
 
-  return { connect, disconnect, isConnecting, isDisconnecting };
+  return {
+    connect,
+    disconnect,
+    isConnecting,
+    isDisconnecting,
+    referralGate,
+    dismissReferralGate: () => setReferralGate(null),
+  };
 }
