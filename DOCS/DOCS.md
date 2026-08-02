@@ -1145,6 +1145,8 @@ The **Ads** category in the **One-time** tasks tab holds a single task type — 
 
 Exactly one ad plays per tap. The next source is asked only if the previous returned nothing; if the player closes an ad themselves, the chain stops and no reward is granted — otherwise closing an ad would become a second chance at one.
 
+**A five-second pause between views.** After a completed view the next slot locks and counts down on its own button (5 → 1), then becomes playable again. The pause is the network's, not a throttle on the player: asked for a second ad immediately, Adsgram answers `onNonStopShow` — which reaches the player as a button that did nothing. The same seconds are spent warming the SDK for the next request. Timed from the moment the ad ends, so the reward modal is read inside the pause rather than after it, and nothing is auto-played when it expires — the player taps. If the ad still isn't there, they get the house promo as usual.
+
 **The house ad pays nothing.** Nobody bought that impression, so rewarding it would be handing out AP for an ad that earned us zero. It is a promo screen with two exits — **«Попробовать снова»**, which asks the waterfall for a real ad again, and close — and neither grants. It therefore does not consume a daily ad slot either: the player's allowance is only spent by a view a network actually served. There is no countdown on it; the old ten-second timer existed to gate a reward that no longer exists.
 
 _Consequence to watch:_ the derived AP baseline (Section 5.4) assumes a full day of ad views. Whenever fill is short, players now come in under that baseline instead of being topped up by house views — the pacing knobs, not the house ad, are the place to correct for that.

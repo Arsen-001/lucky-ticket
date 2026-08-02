@@ -9,6 +9,12 @@ export interface AdSlideCardProps {
   onWatch: (slot: AdSlot) => void;
   loading?: boolean;
   locked?: boolean;
+  /**
+   * Seconds left in the pause after the previous view — 0 when there is none.
+   * While it runs the button shows the number instead of the play icon, so the
+   * wait reads as "almost ready" rather than as a dead control.
+   */
+  cooldownSeconds?: number;
 }
 
 const AD_FRAME: Record<number, string> = {
@@ -42,13 +48,28 @@ const AD_GLOW: Record<number, string> = {
  * `#index · reward chips · play button` — sized to breathe (~2× the original
  * ultra-compact row). The watch action is an icon-only button (labelled for a11y).
  */
-export function AdSlideCard({ slot, onWatch, loading, locked = false }: AdSlideCardProps) {
+export function AdSlideCard({
+  slot,
+  onWatch,
+  loading,
+  locked = false,
+  cooldownSeconds = 0,
+}: AdSlideCardProps) {
   const t = useAppTranslations();
   const watched = slot.watched;
-  const playable = !watched && !locked;
+  const cooling = !watched && !locked && cooldownSeconds > 0;
+  const playable = !watched && !locked && !cooling;
   const showShine = slot.index >= 9 && playable;
 
-  const label = loading ? t('loading') : watched ? t('watched') : locked ? t('locked') : t('watch');
+  const label = loading
+    ? t('loading')
+    : watched
+      ? t('watched')
+      : locked
+        ? t('locked')
+        : cooling
+          ? t('next ad in seconds', { sec: cooldownSeconds })
+          : t('watch');
 
   return (
     <div
@@ -90,6 +111,9 @@ export function AdSlideCard({ slot, onWatch, loading, locked = false }: AdSlideC
           'relative flex-center h-11 w-11 shrink-0 rounded-full transition-all active:scale-90 disabled:cursor-not-allowed',
           watched && 'bg-success/20 text-success',
           locked && 'bg-white/5 text-white/40',
+          // Keeps the gradient, drops the pulse: still visibly the live slot,
+          // but no longer inviting a tap it would refuse.
+          cooling && 'bg-pink-gradient text-white opacity-70',
           playable && 'bg-pink-gradient text-white hover:brightness-110 animate-task-pulse'
         )}
       >
@@ -99,6 +123,8 @@ export function AdSlideCard({ slot, onWatch, loading, locked = false }: AdSlideC
           <Check size={19} />
         ) : locked ? (
           <Lock size={17} />
+        ) : cooling ? (
+          <span className="text-sm font-extrabold tabular-nums">{cooldownSeconds}</span>
         ) : (
           <Play size={17} fill="currentColor" className="translate-x-[1px]" />
         )}

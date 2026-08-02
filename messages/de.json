@@ -27,6 +27,7 @@
   "ad load failed title": "Anzeige nicht geladen",
   "ad not completed": "Sieh dir die Anzeige vollständig an, um die Belohnung zu erhalten.",
   "ads progress": "{watched} von {total} heute angesehen",
+  "next ad in seconds": "Nächste Anzeige in {sec}s",
   "ads too fast description": "Videos können nur nacheinander angesehen werden. Warte ein paar Sekunden und versuche es erneut.",
   "ads too fast title": "Nicht so schnell",
   "ads watched": "Werbung gesehen",

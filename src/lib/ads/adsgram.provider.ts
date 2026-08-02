@@ -100,5 +100,9 @@ async function show(): Promise<Exclude<RewardedAdOutcome, 'unavailable'>> {
 export const adsgramProvider: AdProvider = {
   id: 'adsgram',
   isConfigured: () => !!getBlockId(),
+  // Adsgram has no "fetch an ad ahead of time" call — `init` is the whole
+  // warm-up, and it is what the first `show()` would otherwise pay for. Safe to
+  // repeat: the SDK returns the same controller, and we memoise it anyway.
+  preload: () => void getController(),
   show,
 };

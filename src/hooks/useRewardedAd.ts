@@ -27,5 +27,9 @@ export function useRewardedAd() {
     }
   }, []);
 
-  return { show, showing };
+  // Exposed so the caller can warm the chain again between views — the pause
+  // after a watch is the only moment when warming up costs the player nothing.
+  const preload = useCallback(() => preloadRewardedAd(), []);
+
+  return { show, showing, preload };
 }

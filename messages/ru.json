@@ -27,6 +27,7 @@
   "ad load failed title": "Реклама не загрузилась",
   "ad not completed": "Досмотрите рекламу до конца, чтобы получить награду.",
   "ads progress": "{watched} из {total} просмотрено сегодня",
+  "next ad in seconds": "Следующая реклама через {sec} с",
   "ads too fast description": "Ролики можно смотреть по одному. Подождите пару секунд и попробуйте снова.",
   "ads too fast title": "Не так быстро",
   "ads watched": "реклам просмотрено",

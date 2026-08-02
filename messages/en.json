@@ -27,6 +27,7 @@
   "ad load failed title": "Ad didn't load",
   "ad not completed": "Watch the full ad to earn the reward.",
   "ads progress": "{watched} of {total} watched today",
+  "next ad in seconds": "Next ad in {sec}s",
   "ads too fast description": "Ads can be watched one at a time. Wait a few seconds and try again.",
   "ads too fast title": "Not so fast",
   "ads watched": "ads watched",

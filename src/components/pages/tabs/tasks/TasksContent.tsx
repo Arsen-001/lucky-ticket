@@ -28,6 +28,7 @@ import { useAppTranslations } from '@/hooks/useAppTranslations';
 import { useCountDown } from '@/hooks/useCountDown';
 import { useToast } from '@/hooks/useToast';
 import { useRewardedAd } from '@/hooks/useRewardedAd';
+import { GlobalConstants } from '@/constants/global.constants';
 import { Skeleton } from '@/components/shared/seleketons/Skeleton';
 import { TasksFrequencyTabs } from './TasksFrequencyTabs';
 import { TasksCategoryNav, type CategoryNavItem } from './TasksCategoryNav';
@@ -142,6 +143,16 @@ const sortByCategoryOrder = <T extends { category: TaskCategory }>(items: T[]): 
 // exactly one place (here) keeps the frequency-tab badge, the category chips and
 // the section list in agreement: the "one-time" count never advertises tasks the
 // user can't actually reach in this tab.
+/**
+ * Clock reads for the pause between ads, kept at module scope on purpose:
+ * `react-hooks/purity` rejects `Date.now()` anywhere inside a component body,
+ * and it is right to — the rule is what caught the last silent React Compiler
+ * bug in this app. These run only from an event handler.
+ */
+const adPauseDeadline = (): number => Date.now() + GlobalConstants.adCooldownSeconds * 1000;
+const isAdPauseOver = (readyAt: number | null): boolean =>
+  readyAt === null || Date.now() >= readyAt;
+
 const HIDDEN_ONCE_CATEGORIES = new Set<TaskCategory>([TaskCategory.PROFILE, TaskCategory.PARTNERS]);
 
 const isCategoryVisibleForFrequency = (category: TaskCategory, frequency: TaskFrequency): boolean =>
@@ -158,7 +169,13 @@ export function TasksContent() {
   const [buyExtraAdViews, buyExtraState] = useBuyExtraAdViewsMutation();
   const [buyExtraOpen, setBuyExtraOpen] = useState(false);
   const toast = useToast();
-  const { show: showRewardedAd, showing: adShowing } = useRewardedAd();
+  const { show: showRewardedAd, showing: adShowing, preload: preloadAd } = useRewardedAd();
+  /**
+   * When the next ad may be requested — set after every completed view.
+   * A timestamp rather than a ticking number so the countdown survives a
+   * re-render and stays honest if the tab is backgrounded mid-pause.
+   */
+  const [adReadyAt, setAdReadyAt] = useState<number | null>(null);
 
   const initialFrequency = ((): TaskFrequency => {
     const v = searchParams?.get('frequency');
@@ -483,6 +500,9 @@ export function TasksContent() {
   // Return type is annotated because the body calls itself (the house-ad
   // retry) — TypeScript cannot infer a self-referencing initializer.
   const handleWatchAd = async (slot: AdSlot): Promise<void> => {
+    // The button is already disabled while the pause runs; this is the backstop
+    // for anything that reaches the handler another way.
+    if (!isAdPauseOver(adReadyAt)) return;
     triggerHaptic('medium');
 
     // Play the real rewarded ad first — the waterfall tries each configured
@@ -515,6 +535,13 @@ export function TasksContent() {
       setAdIssue({ open: true, reason: outcome });
       return;
     }
+
+    // A view just finished. Hold the next slot for a few seconds and spend the
+    // pause warming the SDK: asked again immediately, Adsgram answers
+    // `onNonStopShow` and the player reads that as a broken button. Timed from
+    // here — the end of the ad — not from when the grant call comes back.
+    setAdReadyAt(adPauseDeadline());
+    preloadAd();
 
     try {
       // Show what the server actually granted (not the slot's advertised reward,
@@ -603,6 +630,7 @@ export function TasksContent() {
             <AdsSection
               ads={data.ads}
               loading={watchState.isLoading || adShowing}
+              readyAt={adReadyAt}
               onWatch={handleWatchAd}
               onBuyExtra={() => setBuyExtraOpen(true)}
               registerSection={registerSection}

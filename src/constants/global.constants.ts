@@ -99,6 +99,14 @@ export const GlobalConstants = {
   vipWatchVideoDailyLimit: 40,
   vipReferralPercentage: 25,
   /**
+   * Pause between rewarded ads: the next slot stays locked for this long after
+   * a view, counting down on its own button. Two reasons, one of them the
+   * network's: Adsgram answers a too-quick second request with `onNonStopShow`
+   * (our `tooFast`), which reads to the player as "broken" rather than "wait".
+   * The gap is also when the SDK is warmed for the next one.
+   */
+  adCooldownSeconds: 5,
+  /**
    * Hard floor for engine output rate: no matter how many speed boosts stack
    * (engine level + speed level + speed chip + speed booster), one ticket can
    * never be minted faster than this many seconds. 900s = 15 minutes.

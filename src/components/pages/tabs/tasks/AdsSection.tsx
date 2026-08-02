@@ -5,6 +5,7 @@ import { twMerge } from 'tailwind-merge';
 import { Eye } from 'lucide-react';
 import { useAppTranslations } from '@/hooks/useAppTranslations';
 import { useCountDown } from '@/hooks/useCountDown';
+import { useSecondsUntil } from '@/hooks/useSecondsUntil';
 import { TaskCategory } from '@/types/enums/tasks.enums';
 import type { AdSlot, AdsBlock } from '@/types/interfaces/tasks.interfaces';
 import { TaskCategoryIcon } from './TaskCategoryIcon';
@@ -16,6 +17,11 @@ import { ArrivalShine } from '@/components/shared/ArrivalShine';
 export interface AdsSectionProps {
   ads?: AdsBlock;
   loading?: boolean;
+  /**
+   * Timestamp before which the next ad must not be requested (the pause after
+   * a view). Null once the pause is over — or when there has not been one.
+   */
+  readyAt?: number | null;
   onWatch: (slot: AdSlot) => void;
   /** Opens the buy-extra-views modal; omit to hide the offer entirely. */
   onBuyExtra?: () => void;
@@ -29,6 +35,7 @@ const SLIDE_WIDTH = 168;
 export function AdsSection({
   ads,
   loading,
+  readyAt,
   onWatch,
   onBuyExtra,
   registerSection,
@@ -37,6 +44,7 @@ export function AdsSection({
 }: AdsSectionProps) {
   const t = useAppTranslations();
   const { leftTime, expired } = useCountDown(ads?.resetAt);
+  const cooldown = useSecondsUntil(readyAt);
 
   const scrollerRef = useRef<HTMLDivElement>(null);
   const [activeIndex, setActiveIndex] = useState(0);
@@ -164,7 +172,15 @@ export function AdsSection({
                   !isActive && interactive && 'cursor-pointer'
                 )}
               >
-                <AdSlideCard slot={slot} onWatch={onWatch} loading={loading} locked={locked} />
+                <AdSlideCard
+                  slot={slot}
+                  onWatch={onWatch}
+                  loading={loading}
+                  locked={locked}
+                  // Only the slot that is actually next counts down — the ones
+                  // behind it are locked for their own reason.
+                  cooldownSeconds={index === playableIndex ? cooldown : 0}
+                />
               </div>
             );
           })}

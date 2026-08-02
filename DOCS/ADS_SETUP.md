@@ -238,6 +238,12 @@ one viewer.
   disabled network costs nothing per page load.
 - **A skip stops the chain.** Falling through to the next source when the
   player closes an ad would make "close the ad" a second chance at a reward.
+- **Five seconds between views** (`GlobalConstants.adCooldownSeconds`). Adsgram
+  answers a too-quick second request with `onNonStopShow`, which the player
+  reads as a dead button. The next slot counts the pause down on its own button
+  and `preload()` warms the SDK during it. Client-side only: leaving the Tasks
+  screen and returning resets it, and that is fine — the network's own guard is
+  the one that actually protects the request.
 - **The house ad exists because fill is never guaranteed.** It earns nothing,
   so it also **pays** nothing — it is a promo plus a «Попробовать снова»
   button, never a reward. Changed 2026-08-02; before that it paid at parity
@@ -312,11 +318,11 @@ previous returned nothing:
 
 Providers:
 
-| id        | Module                            | Notes                                   |
-| --------- | --------------------------------- | --------------------------------------- |
-| `adsgram` | `src/lib/ads/adsgram.provider.ts` | SDK script + block id                   |
-| `monetag` | `src/lib/ads/monetag.provider.ts` | SDK tag + zone id, supports preload     |
-| `house`   | `src/lib/ads/house.provider.ts`   | the app's own promo — shows, never pays |
+| id        | Module                            | Notes                                     |
+| --------- | --------------------------------- | ----------------------------------------- |
+| `adsgram` | `src/lib/ads/adsgram.provider.ts` | SDK script + block id; `preload` = `init` |
+| `monetag` | `src/lib/ads/monetag.provider.ts` | SDK tag + zone id, supports preload       |
+| `house`   | `src/lib/ads/house.provider.ts`   | the app's own promo — shows, never pays   |
 
 The **house ad** is what the player gets instead of a bare "no ads right now".
 Its UI is `HouseAdOverlay` (mounted in `TasksContent`), which registers itself
