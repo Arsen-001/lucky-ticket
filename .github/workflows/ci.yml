@@ -1,0 +1,73 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+# A newer push to the same branch makes the older run irrelevant.
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  checks:
+    name: lint · types · unit
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - run: npm run lint
+      - run: npm run type-check
+      # The guardrail suite: economy math, i18n parity, RTK 3-place wiring,
+      # DOCS↔constants drift, production-only traps. The backend-enum parity
+      # test skips itself when ../lucky-ticket-backend isn't checked out.
+      - run: npm test
+
+  e2e-dev:
+    name: e2e · dev server
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - run: npx playwright install --with-deps chromium
+      # Every screen renders, without a crash or a leaked i18n placeholder.
+      - run: npm run test:e2e
+      - uses: actions/upload-artifact@v4
+        if: failure()
+        with:
+          name: e2e-dev-traces
+          path: test-results/
+          retention-days: 7
+
+  e2e-prod:
+    name: e2e · production build
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - run: npx playwright install --with-deps chromium
+      # The suite the dev-server run structurally cannot replace: the image
+      # optimizer, prerendering and redirects only behave like production in a
+      # production build, and three shipped defects were invisible without this.
+      # Builds its own server (see the `e2e:prod-server` script), so it costs a
+      # full `next build`.
+      - run: npm run test:e2e:prod
+      - uses: actions/upload-artifact@v4
+        if: failure()
+        with:
+          name: e2e-prod-traces
+          path: test-results/
+          retention-days: 7

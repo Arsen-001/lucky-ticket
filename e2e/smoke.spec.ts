@@ -1,54 +1,17 @@
 import { test } from '@playwright/test';
 import { assertScreenRenders } from './helpers';
+import { STATIC_ROUTES } from './routes';
 
 /**
- * Smoke test over every static (param-less) screen in the app — derived from
- * `src/constants/routes.ts`. Each screen must load without an HTTP error, render
- * without a runtime crash, show real content, and not leak an i18n placeholder.
- * Parameterized detail pages are covered in `detail.spec.ts`.
+ * Smoke test over every static (param-less) screen in the app — the inventory
+ * lives in `./routes`, shared with the production sweep. Each screen must load
+ * without an HTTP error, render without a runtime crash, show real content, and
+ * not leak an i18n placeholder. Parameterized detail pages are covered in
+ * `detail.spec.ts`; defects that appear only in a production build (blank
+ * images, stray scrollbar tracks, the global 404 redirect) are covered by
+ * `e2e-prod/`, which this suite cannot see — it runs `next dev`.
  */
-const ROUTES = [
-  '/',
-  '/tournaments',
-  '/market',
-  '/tasks',
-  '/tickets',
-  '/engines',
-  '/jackpot',
-  '/partners',
-  '/partners/new',
-  '/promo',
-  '/wallet',
-  '/lc',
-  '/stars',
-  '/stakes',
-  '/stakes/new',
-  '/stakes/history',
-  '/inventory',
-  '/leaderboard',
-  '/invite-friends',
-  '/activity',
-  '/notifications',
-  '/profile',
-  '/profile/achievements',
-  '/support',
-  '/faq',
-  '/privacy',
-  '/settings',
-  '/settings/username',
-  '/settings/email',
-  '/settings/security',
-  '/settings/lucky-player',
-  '/settings/vip',
-  '/languages',
-  '/login',
-  '/register',
-  '/forgot-password',
-  '/reset-password',
-  '/two-factor',
-];
-
-for (const route of ROUTES) {
+for (const route of STATIC_ROUTES) {
   test(`screen renders without errors: ${route}`, async ({ page }) => {
     await assertScreenRenders(page, route, route);
   });
