@@ -3,6 +3,7 @@
 import { twMerge } from 'tailwind-merge';
 import { useCountDown } from '@/hooks/useCountDown';
 import { useAppTranslations } from '@/hooks/useAppTranslations';
+import { getCountdown } from '@/utils/global/date.utils';
 import { CountdownUnit } from './CountdownUnit';
 
 export interface LaunchCountdownProps {
@@ -14,13 +15,21 @@ export interface LaunchCountdownProps {
 /**
  * Ticking days / hours / minutes / seconds until the app opens.
  *
- * `useCountDown` starts at all-zeros and fills in from an effect, so the server
- * and the first client render agree — no hydration mismatch, and no need to
- * gate the whole block behind a `mounted` flag.
+ * `useCountDown` starts at all-zeros and fills in from an effect. Everywhere
+ * else in the app that is invisible — a tile in a list is surrounded by content
+ * that already says what it is. Here the countdown IS the page, and on prod
+ * 2 of 5 cold loads still read "00 · 00 · 00 · 00" two and a half seconds in:
+ * a launch date of nothing, which reads as broken. So the first paint computes
+ * the value itself and the hook takes over from the first tick.
+ *
+ * The hook's unfilled state is distinguishable from a real one: a genuine
+ * all-zero countdown has passed its target, and would come back `expired`.
  */
 export function LaunchCountdown({ targetDate, className }: LaunchCountdownProps) {
   const t = useAppTranslations();
-  const { days, hours, minutes, seconds, expired } = useCountDown(targetDate);
+  const live = useCountDown(targetDate);
+  const unfilled = !live.expired && !live.days && !live.hours && !live.minutes && !live.seconds;
+  const { days, hours, minutes, seconds, expired } = unfilled ? getCountdown(targetDate) : live;
 
   // Past the target the numbers can only sit at zero, which reads as broken —
   // say it in words instead until the gate is actually lifted.

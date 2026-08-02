@@ -36,6 +36,11 @@ export function CountdownUnit({
       {...rest}
     >
       <span
+        // The value is a clock reading: the server computes it, the client
+        // recomputes it a moment later, and the two legitimately differ by the
+        // seconds in between. Suppressing keeps that expected drift out of the
+        // console; the first tick reconciles the text a second later anyway.
+        suppressHydrationWarning
         className={twMerge(
           'countdown-digit text-2xl font-bold leading-none tabular-nums text-white',
           classNames?.value
