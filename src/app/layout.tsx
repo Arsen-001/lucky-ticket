@@ -16,7 +16,7 @@ import { getLocale } from 'next-intl/server';
 import { getAppTranslations } from '@/i18n/getAppTranslations';
 import { GlobalConstants } from '@/constants/global.constants';
 import { appConfig } from '@/config/app.config';
-import type { Metadata } from 'next';
+import type { Metadata, Viewport } from 'next';
 import type { ChildrenProps } from '@/types/interfaces/component.interfcaes';
 import '@/styles/index.css';
 
@@ -67,6 +67,21 @@ export async function generateMetadata(): Promise<Metadata> {
     twitter: { card: 'summary_large_image' },
   };
 }
+
+/**
+ * Without this Next ships its default `width=device-width, initial-scale=1`,
+ * which leaves iOS free to auto-zoom the whole page whenever a focused input
+ * computes below 16px — every input here does (`Input` is `text-sm`, the TON
+ * address field 12px mono). The page scales up under the keyboard and reads as
+ * "the modal grew"; Android never does it, so it looked iPhone-specific.
+ * Pinch-zoom by the user is still allowed by iOS Safari regardless of this.
+ */
+export const viewport: Viewport = {
+  width: 'device-width',
+  initialScale: 1,
+  maximumScale: 1,
+  userScalable: false,
+};
 
 export default async function RootLayout({ children }: ChildrenProps) {
   const locale = await getLocale();
