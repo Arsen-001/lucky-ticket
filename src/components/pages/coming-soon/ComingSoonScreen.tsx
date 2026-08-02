@@ -9,7 +9,12 @@ import { getTelegramWebApp } from '@/lib/telegram/telegram';
 import { LaunchCountdown } from './LaunchCountdown';
 import { ComingSoonChannelLink } from './ComingSoonChannelLink';
 import { ComingSoonLanguageSwitch } from './ComingSoonLanguageSwitch';
-import logo from '@assets/images/logo/luckyticket365-logo-transparent.png';
+// A shipped output, NOT `images/logo/*`: that folder is the logo generation
+// workspace and `.vercelignore` keeps it out of the deployment, so importing
+// from it builds locally and then fails the Vercel build. `logo.png` is the
+// square master and carries its own opaque background, which reads as a dark
+// box over the atmospheric backdrop — hence this transparent derivative.
+import logo from '@assets/images/logo-wordmark.webp';
 
 /** App background — keeps the Telegram header/body chrome on-theme. */
 const THEME_BG = '#1b1930';
