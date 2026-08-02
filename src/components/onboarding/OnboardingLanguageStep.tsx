@@ -1,13 +1,13 @@
 'use client';
 
 import { useState, useTransition } from 'react';
-import Image from 'next/image';
 import { useRouter } from 'next/navigation';
 import { Check, Globe, Search } from 'lucide-react';
 import { twMerge } from 'tailwind-merge';
 import { ClientPortal } from '@/components/shared/ClientPortal';
 import { Button } from '@/components/shared/buttons/Button';
 import { DebouncedInput } from '@/components/shared/form-elements/inputs/DebouncedInput';
+import { LanguageFlag } from '@/components/shared/icons/LanguageFlag';
 import { useAppTranslations } from '@/hooks/useAppTranslations';
 import { useGetAvailableLanguages, type Language } from '@/hooks/useGetAvailableLanguages';
 import { setAppLocale } from '@/services/locale';
@@ -102,13 +102,7 @@ export function OnboardingLanguageStep({ onConfirm }: OnboardingLanguageStepProp
                             : 'border-white/10 bg-background-overlay'
                         )}
                       >
-                        <div className="border-white/15 h-9 w-12 flex-shrink-0 overflow-hidden rounded-md border">
-                          <Image
-                            src={lang.flag}
-                            alt={lang.name}
-                            className="h-full w-full object-cover"
-                          />
-                        </div>
+                        <LanguageFlag flag={lang.flag} name={lang.name} />
                         <div className="flex min-w-0 flex-1 flex-col gap-0.5">
                           <span
                             className={twMerge(

@@ -1,9 +1,9 @@
 'use client';
 
-import Image from 'next/image';
 import { Check, Globe } from 'lucide-react';
 import { useTransition } from 'react';
 import { twMerge } from 'tailwind-merge';
+import { LanguageFlag } from '@/components/shared/icons/LanguageFlag';
 import { useGetAvailableLanguages, type Language } from '@/hooks/useGetAvailableLanguages';
 import { useAppTranslations } from '@/hooks/useAppTranslations';
 import { setAppLocale } from '@/services/locale';
@@ -81,9 +81,7 @@ export default function LanguagesPage() {
                     }}
                   />
                 )}
-                <div className="border-white/15 relative h-9 w-12 flex-shrink-0 overflow-hidden rounded-md border">
-                  <Image src={lang.flag} alt={lang.name} className="h-full w-full object-cover" />
-                </div>
+                <LanguageFlag flag={lang.flag} name={lang.name} className="relative" />
                 <div className="relative flex min-w-0 flex-1 flex-col gap-0.5">
                   <span
                     className={twMerge(
