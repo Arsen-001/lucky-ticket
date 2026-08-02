@@ -1173,5 +1173,9 @@
   "hours": "Stunden",
   "minutes": "Minuten",
   "seconds": "Sekunden",
-  "coming soon blurb": "LuckyTicket365 macht sich startklar. Tickets, Turniere und der Jackpot öffnen für alle, sobald der Countdown abgelaufen ist."
+  "coming soon blurb": "LuckyTicket365 macht sich startklar. Tickets, Turniere und der Jackpot öffnen für alle, sobald der Countdown abgelaufen ist.",
+  "coming soon invite blurb": "Freunde, die deinen Link öffnen, zählen ab sofort.",
+  "coming soon no friends yet": "Über deinen Link ist noch niemand gekommen. Teile ihn — jeder Freund zählt schon jetzt.",
+  "your friends": "Deine Freunde",
+  "invite counted": "Gezählt"
 }

@@ -3,7 +3,6 @@
 import { Check, Copy, Share2, Star, UserPlus } from 'lucide-react';
 import { BoltIcon } from '@/components/shared/icons/BoltIcon';
 import type { ReactNode } from 'react';
-import { useState } from 'react';
 import { twMerge } from 'tailwind-merge';
 import { useLocale } from 'next-intl';
 import { useGetMeQuery } from '@/api/me.api';
@@ -19,8 +18,8 @@ import { ArrivalShine } from '@/components/shared/ArrivalShine';
 import { TelegramStarIcon } from '@/components/shared/icons/TelegramStarIcon';
 import { useAppTranslations } from '@/hooks/useAppTranslations';
 import { useInviteRewards } from '@/hooks/useInviteRewards';
+import { useInviteShare } from '@/hooks/useInviteShare';
 import { getRefererLink } from '@/utils/pages/referral.utils';
-import { getTelegramWebApp, isTelegramEnv } from '@/lib/telegram/telegram';
 import type { LocaleType } from '@/types/types/locale.types';
 
 export function FriendsHeroCard() {
@@ -31,70 +30,24 @@ export function FriendsHeroCard() {
   const [prepareShareMessage] = usePrepareShareMessageMutation();
   const [markShareSent] = useMarkShareSentMutation();
   const rewards = useInviteRewards();
-  const [copied, setCopied] = useState(false);
 
   const link = getRefererLink(me?.id);
   const linkReady = !!link;
 
-  const handleCopy = async () => {
-    if (!link) return;
-    try {
-      await navigator.clipboard.writeText(link);
-      setCopied(true);
-      window.setTimeout(() => setCopied(false), 2000);
-    } catch {
-      /* ignore */
-    }
-  };
-
-  const handleShare = async () => {
-    if (!link) return;
-    const text = t('invite share message');
-    const webApp = getTelegramWebApp();
-
-    if (isTelegramEnv() && webApp) {
-      // Preferred (Bot API 8.0+): a rich card — image + caption + "Play"
-      // button — prepared by the backend via savePreparedInlineMessage and
-      // forwarded through the native chat picker. On any failure we fall
-      // through to the plain-link share below, so the tap never dead-ends.
-      if (webApp.shareMessage) {
-        try {
-          const { id } = await prepareShareMessage({ lang: locale }).unwrap();
-          // The callback fires with sent=true only if the user actually forwarded
-          // the card — that's the reliable "did they share" signal.
-          webApp.shareMessage(id, sent => {
-            if (sent) markShareSent({ confirmed: true });
-          });
-          return;
-        } catch {
-          /* fall back to the plain t.me/share/url flow */
-        }
-      }
-
-      // Fallback: `openTelegramLink` on a `t.me/share/url` link minimizes the
-      // Mini App and opens Telegram's "send to a chat" picker with a bare link.
-      if (webApp.openTelegramLink) {
-        webApp.openTelegramLink(
-          `https://t.me/share/url?url=${encodeURIComponent(link)}&text=${encodeURIComponent(text)}`
-        );
-        // This path gives no delivery callback — record optimistically.
-        markShareSent({ confirmed: false });
-        return;
-      }
-    }
-
-    // Outside Telegram (dev browser): OS share sheet, then copy as last resort.
-    if (typeof navigator !== 'undefined' && navigator.share) {
-      try {
-        await navigator.share({ url: link, title: t('invite friends'), text });
-        markShareSent({ confirmed: true });
-        return;
-      } catch {
-        /* user cancelled */
-      }
-    }
-    handleCopy();
-  };
+  // Every branch of "hand this link to someone" lives in the hook — the
+  // pre-launch countdown shares the exact same behaviour off a different data
+  // layer. @see useInviteShare
+  const {
+    copied,
+    copy: handleCopy,
+    share: handleShare,
+  } = useInviteShare({
+    link,
+    text: t('invite share message'),
+    title: t('invite friends'),
+    prepareCard: async () => (await prepareShareMessage({ lang: locale }).unwrap()).id,
+    onShared: confirmed => markShareSent({ confirmed }),
+  });
 
   return (
     <div

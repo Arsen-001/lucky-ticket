@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { readFileSync } from 'node:fs';
+import { readdirSync, readFileSync } from 'node:fs';
 import { resolve } from 'node:path';
 
 /**
@@ -54,6 +54,29 @@ describe('pre-launch gate', () => {
 
     const gate = read('src/hooks/usePreLaunchGate.ts');
     expect(gate).toMatch(/if \(comingSoonConfig\.forcedOn\)[\s\S]*?status: 'gated'/);
+  });
+
+  it('keeps the gated screen free of the store it renders outside of', () => {
+    // The countdown screen shows real data now (the invite link and who came
+    // through it), and the obvious way to fetch it — an RTK Query hook — cannot
+    // work here: there is no Provider above this screen, so a `useGetXQuery`
+    // would throw on the one screen a pre-launch visitor ever sees. It asks the
+    // backend by hand instead (@see usePreLaunchInvite), and this keeps it that
+    // way.
+    const dir = 'src/components/pages/coming-soon';
+    const files = [
+      ...readdirSync(resolve(root, dir)).map(name => `${dir}/${name}`),
+      'src/hooks/usePreLaunchGate.ts',
+      'src/hooks/usePreLaunchInvite.ts',
+      'src/hooks/useInviteShare.ts',
+    ];
+
+    for (const file of files) {
+      const source = read(file);
+      expect(source, `${file} must not reach for the store`).not.toMatch(
+        /from '(@\/api\/|@\/lib\/rtk|react-redux)/
+      );
+    }
   });
 
   it('keeps the whole app behind the gate, not merely covered by it', () => {

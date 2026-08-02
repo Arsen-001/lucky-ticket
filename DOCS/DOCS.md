@@ -2262,11 +2262,28 @@ not boot, rather than booting under a cover. Every route and deep link resolves
 to that one screen. The countdown reads `PlatformConfig.launchAt` (admin-set;
 falls back to the date bundled in the client).
 
-One request is made on purpose: the Telegram sign-in, which creates the account
-for a pre-launch visitor — so whoever opened the app before launch is already a
-real player and a real referral — and carries the personal verdict (`appOpen`)
-back. The anonymous `GET /config` only reports whether the gate is up at all; it
-never answers a question about a specific person.
+One request decides it: the Telegram sign-in, which creates the account for a
+pre-launch visitor — so whoever opened the app before launch is already a real
+player and a real referral — and carries the personal verdict (`appOpen`) back.
+The anonymous `GET /config` only reports whether the gate is up at all; it never
+answers a question about a specific person.
+
+**Inviting before launch.** The countdown screen also carries the invite link
+and the list of people who already arrived through it. Referrals are fully real
+before launch: a friend's first open creates their account through that same
+sign-in, which binds the referral and pays the inviter — so the list is the true
+one, not a preview. Sharing behaves exactly as it does in-app (server-prepared
+rich card → Telegram's share sheet → the clipboard); the shared behaviour lives
+in `useInviteShare`, used by both screens. The list folds after five rows so a
+prolific inviter's roster does not bury the rest of the screen.
+
+No store exists behind the gate, so this block asks the backend by hand
+(`me`, `referral/friends`, `referral/prepare-share`) with the access token the
+sign-in returned. That token is short-lived and nothing here refreshes it, which
+is why every failure degrades rather than blocks: the list offers a retry, and a
+share that cannot fetch its rich card falls back to a plain link carrying the
+same referral. Outside Telegram there is no sign-in, so the block is not
+rendered at all.
 
 Who gets in while it is up:
 

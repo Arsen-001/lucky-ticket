@@ -1173,5 +1173,9 @@
   "hours": "Hours",
   "minutes": "Minutes",
   "seconds": "Seconds",
-  "coming soon blurb": "LuckyTicket365 is getting ready. Tickets, tournaments and the jackpot open to everyone the moment the countdown ends."
+  "coming soon blurb": "LuckyTicket365 is getting ready. Tickets, tournaments and the jackpot open to everyone the moment the countdown ends.",
+  "coming soon invite blurb": "Friends who open your link are counted from now on.",
+  "coming soon no friends yet": "Nobody has come through your link yet. Share it — every friend already counts.",
+  "your friends": "Your friends",
+  "invite counted": "Counted"
 }

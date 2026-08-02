@@ -1,15 +1,33 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import { apiBase } from '@/config/api.config';
 import { comingSoonConfig } from '@/config/coming-soon.config';
 import { getTelegramWebApp } from '@/lib/telegram/telegram';
 
 export type PreLaunchStatus = 'checking' | 'gated' | 'open';
 
+/**
+ * The credential the countdown screen runs on.
+ *
+ * The gate's sign-in mints a real access token, and while the gate holds it is
+ * the *only* one that exists — the store, and with it every RTK query and its
+ * cookie-bearer plumbing, is never created. Anything the pre-launch screen has
+ * to ask the backend (who did this player invite?) is asked with this.
+ *
+ * Short-lived by design: it is a normal 15-minute access token and nothing here
+ * refreshes it, so treat a failure as "ask again later", never as a hard error.
+ */
+export interface PreLaunchSession {
+  accessToken: string;
+}
+
 export interface PreLaunchGateState {
   status: PreLaunchStatus;
   /** What the countdown counts down to — the server's date, or the bundled one. */
   launchAt: string;
+  /** Present only when the Telegram sign-in actually succeeded. */
+  session: PreLaunchSession | null;
 }
 
 /**
@@ -34,6 +52,7 @@ export function usePreLaunchGate(): PreLaunchGateState {
   const [state, setState] = useState<PreLaunchGateState>({
     status: 'checking',
     launchAt: comingSoonConfig.fallbackLaunchAt,
+    session: null,
   });
 
   useEffect(() => {
@@ -44,19 +63,18 @@ export function usePreLaunchGate(): PreLaunchGateState {
 
     // Emergency close wins over every answer below — see coming-soon.config.
     if (comingSoonConfig.forcedOn) {
-      settle({ status: 'gated', launchAt: comingSoonConfig.fallbackLaunchAt });
+      settle({ status: 'gated', launchAt: comingSoonConfig.fallbackLaunchAt, session: null });
       return;
     }
 
     // No API URL = the mock layer, i.e. local development and e2e. There is no
     // backend to ask and no audience to protect, so the app opens.
-    const apiUrl = process.env.NEXT_PUBLIC_API_URL;
-    if (!apiUrl) {
-      settle({ status: 'open', launchAt: comingSoonConfig.fallbackLaunchAt });
+    if (!apiBase) {
+      settle({ status: 'open', launchAt: comingSoonConfig.fallbackLaunchAt, session: null });
       return;
     }
 
-    const base = apiUrl.replace(/\/$/, '');
+    const base = apiBase;
     const initData = getTelegramWebApp()?.initData;
 
     const readLaunchAt = (value: unknown): string =>
@@ -75,6 +93,8 @@ export function usePreLaunchGate(): PreLaunchGateState {
         // older backend that has never heard of the gate — closed.
         status: gate?.enabled === false ? 'open' : 'gated',
         launchAt: readLaunchAt(gate?.launchAt),
+        // Anonymous by definition: this arm runs when nobody signed in.
+        session: null,
       };
     };
 
@@ -88,12 +108,17 @@ export function usePreLaunchGate(): PreLaunchGateState {
         if (response.ok) {
           const body: unknown = await response.json();
           const auth = body as {
+            accessToken?: string;
             appOpen?: boolean;
             comingSoon?: { launchAt?: string };
           };
           return {
             status: auth?.appOpen === true ? 'open' : 'gated',
             launchAt: readLaunchAt(auth?.comingSoon?.launchAt),
+            // Keep the token this call just minted. It costs nothing here and
+            // it is what lets the countdown screen show a real invite list
+            // instead of a decorative one. @see PreLaunchSession
+            session: auth?.accessToken ? { accessToken: auth.accessToken } : null,
           };
         }
         // Refused (banned, registration closed, bad initData): fall through —
@@ -104,7 +129,9 @@ export function usePreLaunchGate(): PreLaunchGateState {
 
     ask()
       .then(settle)
-      .catch(() => settle({ status: 'gated', launchAt: comingSoonConfig.fallbackLaunchAt }));
+      .catch(() =>
+        settle({ status: 'gated', launchAt: comingSoonConfig.fallbackLaunchAt, session: null })
+      );
 
     return () => {
       cancelled = true;

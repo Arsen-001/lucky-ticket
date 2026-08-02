@@ -20,9 +20,9 @@ import type { ChildrenProps } from '@/types/interfaces/component.interfcaes';
  * the answer is actually "no".
  */
 export function PreLaunchGate({ children }: ChildrenProps) {
-  const { status, launchAt } = usePreLaunchGate();
+  const { status, launchAt, session } = usePreLaunchGate();
 
   if (status === 'checking') return <TelegramSplash />;
-  if (status === 'gated') return <ComingSoonScreen launchAt={launchAt} />;
+  if (status === 'gated') return <ComingSoonScreen launchAt={launchAt} session={session} />;
   return <>{children}</>;
 }
