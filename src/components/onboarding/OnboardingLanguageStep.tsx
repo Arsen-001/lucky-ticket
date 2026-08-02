@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useTransition } from 'react';
+import { useEffect, useState, useTransition } from 'react';
 import { useRouter } from 'next/navigation';
 import { Check, Globe, Search } from 'lucide-react';
 import { twMerge } from 'tailwind-merge';
@@ -38,6 +38,14 @@ export function OnboardingLanguageStep({ onConfirm }: OnboardingLanguageStepProp
   const filtered = search
     ? languages.filter(lang => stringIncludes([lang.name, lang.nativeName, lang.code], search))
     : languages;
+
+  // Narrowing the search to exactly one language selects it. Otherwise the list
+  // shows a single unchecked row while the selection is still whatever it was
+  // before the search — type "deu", see only Deutsch, tap Continue, get Russian.
+  // Keyed on the query, not on `filtered`: that array is rebuilt every render.
+  useEffect(() => {
+    if (filtered.length === 1) setSelected(filtered[0].code);
+  }, [search]);
 
   const handleConfirm = () => {
     if (selected === currentLocale) {
