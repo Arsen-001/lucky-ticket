@@ -6,8 +6,16 @@
   -ms-overflow-style: none;
 }
 
+/* Paints the scrollbar; deliberately says nothing about `overflow`.
+   It used to declare `overflow: scroll` — BOTH axes, unconditionally — while the
+   track is a solid purple. So every user of this class permanently displayed a
+   horizontal track it could never scroll: a purple bar under the onboarding
+   language list, reserving 16px, on the first screen a new player is shown
+   (offsetHeight 226 vs clientHeight 210, with scrollWidth === clientWidth).
+   `overflow-y-auto` at the call site only overrode the Y axis, so the stray one
+   was the axis nobody thought about. Both call sites declare the overflow they
+   want; a class named for the scrollbar has no business overriding it. */
 @utility main-scrollbar {
-  overflow: scroll;
   &::-webkit-scrollbar {
     width: 6px;
   }
