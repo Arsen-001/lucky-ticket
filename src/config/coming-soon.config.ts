@@ -2,10 +2,15 @@
  * Pre-launch gate — the reason this branch exists.
  *
  * While `enabled` is true the app never boots: the root layout renders the
- * Coming Soon screen INSTEAD of `{children}`, so no route, provider, store or
- * backend query is ever mounted. That is deliberate — a gate that renders on
- * top of a running app still authenticates, still polls, and still leaks the
- * real screens for the frame before the overlay paints.
+ * Coming Soon screen INSTEAD of `{children}`, so no route, provider or store is
+ * ever mounted. That is deliberate — a gate that renders on top of a running
+ * app still polls, and still leaks the real screens for the frame before the
+ * overlay paints.
+ *
+ * One backend call is made on purpose: the Telegram sign-in that creates the
+ * account for whoever opens the Mini App before launch, so they are a real
+ * player (and a real referral) by the time it opens. That is a single `fetch`,
+ * not a mounted API layer — @see src/hooks/usePreLaunchSignIn.
  *
  * The gate is on by default here. Set `NEXT_PUBLIC_COMING_SOON=0` (locally or
  * as a Vercel preview env var) to browse the real app off this branch without

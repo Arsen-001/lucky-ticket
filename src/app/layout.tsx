@@ -89,9 +89,11 @@ export default async function RootLayout({ children }: ChildrenProps) {
   const locale = await getLocale();
 
   // Pre-launch gate. `{children}` is deliberately NOT rendered: an unrendered
-  // element never executes, so no page, provider, store or backend query is
-  // mounted behind the screen — the app genuinely does not boot, and every
-  // route (including deep links and drawer routes) resolves to this one screen.
+  // element never executes, so no page, provider or store is mounted behind the
+  // screen — the app genuinely does not boot, and every route (including deep
+  // links and drawer routes) resolves to this one screen. The screen itself
+  // makes exactly one backend call, the Telegram sign-in that registers the
+  // visitor (@see src/hooks/usePreLaunchSignIn).
   // @see src/config/coming-soon.config.ts
   if (comingSoonConfig.enabled) {
     return (

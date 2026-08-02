@@ -3,6 +3,7 @@
 import { useEffect } from 'react';
 import Image from 'next/image';
 import { useAppTranslations } from '@/hooks/useAppTranslations';
+import { usePreLaunchSignIn } from '@/hooks/usePreLaunchSignIn';
 import { comingSoonConfig } from '@/config/coming-soon.config';
 import { GlobalConstants } from '@/constants/global.constants';
 import { getTelegramWebApp } from '@/lib/telegram/telegram';
@@ -21,12 +22,18 @@ const THEME_BG = '#1b1930';
 
 /**
  * The only screen this branch serves. Everything the app normally boots —
- * store, Telegram auth, RTK queries, the tab shell — is skipped by the root
- * layout while the gate is on, so this renders on its own against the shared
- * atmospheric backdrop.
+ * store, RTK queries, the tab shell — is skipped by the root layout while the
+ * gate is on, so this renders on its own against the shared atmospheric
+ * backdrop.
+ *
+ * The single exception is the sign-in below: the account has to exist before
+ * launch (@see usePreLaunchSignIn), and it is one plain request rather than a
+ * mounted app.
  */
 export function ComingSoonScreen() {
   const t = useAppTranslations();
+
+  usePreLaunchSignIn();
 
   useEffect(() => {
     const tg = getTelegramWebApp();
