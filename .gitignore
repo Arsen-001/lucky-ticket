@@ -15,9 +15,11 @@
 
 # next.js
 /.next/
-/.next-mock/
-/.next-precommit/
-/.next-repro/
+# Any NEXT_DIST_DIR build (mock server, pre-commit build, one-off repro). Not
+# just untracked-noise: Tailwind v4 scans every non-ignored file for candidate
+# classes, so a stray dist dir feeds it minified chunks — one corrupt byte in
+# there becomes "Parsing CSS source code failed" and a 500 on every page.
+/.next-*/
 /out/
 
 # production
