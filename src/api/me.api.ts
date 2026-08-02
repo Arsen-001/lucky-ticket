@@ -14,7 +14,10 @@ export const meApi = api.injectEndpoints({
       query: () => ({ url: 'me' }),
       providesTags: [rtkTags.me],
     }),
-    updateMe: builder.mutation<MeResponse, Partial<MeResponse>>({
+    // `email` is deliberately not part of the payload: the backend refuses it on
+    // PATCH /me, because the address is an identity claim (it is what the admin
+    // panel logs in with). It changes only through the verified code flow below.
+    updateMe: builder.mutation<MeResponse, Omit<Partial<MeResponse>, 'email'>>({
       query: body => ({
         url: 'me',
         method: 'PATCH',
