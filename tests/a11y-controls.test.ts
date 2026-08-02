@@ -46,3 +46,34 @@ describe('switch accessibility', () => {
     expect(unnamed).toEqual([]);
   });
 });
+
+describe('overlay semantics', () => {
+  const overlays = ['Modal', 'BottomSheet'] as const;
+
+  it.each(overlays)('%s announces itself as a dialog', name => {
+    // Measured on a running build: every sheet and modal was an anonymous div.
+    // Nothing told a screen reader a dialog had opened.
+    const source = read(`src/components/shared/modals/${name}.tsx`);
+    expect(source).toMatch(/role="dialog"/);
+    expect(source).toMatch(/aria-modal="true"/);
+    expect(source).toMatch(/aria-label=\{label\}/);
+  });
+
+  it.each(overlays)('%s traps focus and locks the page behind it', name => {
+    // An open overlay left 20–103 focusable controls live behind it, and the
+    // first Tab landed on the page underneath. The lock also stops the page
+    // scrolling behind a sheet.
+    const source = read(`src/components/shared/modals/${name}.tsx`);
+    expect(source).toMatch(/useOverlayFocusLock\(open\)/);
+    expect(source).toMatch(/ref=\{panelRef\}/);
+  });
+
+  it('the focus lock keys on the node, not just the open flag', () => {
+    // The panel lives inside a ClientPortal and arrives a render late. Keyed on
+    // `open` alone the effect ran against an empty ref and never ran again —
+    // present, reviewed, and doing nothing.
+    const source = read('src/hooks/useOverlayFocusLock.ts');
+    expect(source).toMatch(/\}, \[open, panel\]\);/);
+    expect(source).toMatch(/document\.body\.style\.overflow = 'hidden'/);
+  });
+});

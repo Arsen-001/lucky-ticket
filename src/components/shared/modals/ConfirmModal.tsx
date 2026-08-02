@@ -31,7 +31,13 @@ export function ConfirmModal({
   const t = useAppTranslations();
 
   return (
-    <Modal open={open} onClose={onClose}>
+    <Modal
+      open={open}
+      onClose={onClose}
+      // `title` is a ReactNode here, so it only doubles as the dialog's name
+      // when it happens to be plain text.
+      label={typeof title === 'string' ? title : undefined}
+    >
       <div
         className="bg-background relative flex flex-col gap-6 overflow-hidden rounded-2xl border border-white/10 p-6 shadow-[0_24px_60px_rgba(0,0,0,0.55)]"
         style={{

@@ -5,6 +5,7 @@ import { twMerge } from 'tailwind-merge';
 import { ClientPortal } from '@/components/shared/ClientPortal';
 import { ModalCloseButton } from '@/components/shared/modals/ModalCloseButton';
 import { useOverlayPresence } from '@/hooks/useOverlayPresence';
+import { useOverlayFocusLock } from '@/hooks/useOverlayFocusLock';
 import type { ButtonProps } from '@/components/shared/buttons/Button';
 
 const ANIMATION_MS = 200;
@@ -17,6 +18,9 @@ interface ModalProps {
   hideOnEscape?: boolean;
   hideCloseButton?: boolean;
   closeButtonProps?: ButtonProps;
+  /** What this dialog is, for assistive tech — a dialog announced as just
+   *  "dialog" tells the user nothing. Modals with a title should pass it. */
+  label?: string;
 }
 
 export const Modal = ({
@@ -27,6 +31,7 @@ export const Modal = ({
   hideOnEscape = true,
   closeButtonProps,
   hideCloseButton,
+  label,
 }: ModalProps) => {
   // Closed → nothing in the DOM. A modal per list row used to mean a
   // full-screen blur layer per row; see useOverlayPresence.
@@ -55,6 +60,8 @@ export const Modal = ({
     };
   }, [open, onClose, hideOnEscape, closeOnOverlayClick]);
 
+  const panelRef = useOverlayFocusLock(open);
+
   // Overlay click
   const handleOverlayClick = () => {
     if (closeOnOverlayClick && onClose) {
@@ -80,9 +87,16 @@ export const Modal = ({
 
         {/* Modal */}
         <div
+          ref={panelRef}
+          role="dialog"
+          aria-modal="true"
+          aria-label={label}
+          // Focused on open instead of the first control, which is often an
+          // input — see useOverlayFocusLock.
+          tabIndex={-1}
           style={{ transitionDuration: `${ANIMATION_MS}ms` }}
           className={twMerge(
-            'w-full relative transition-all transform max-h-[80vh] overflow-scroll scrollbar-hidden rounded-lg',
+            'w-full relative transition-all transform max-h-[80vh] overflow-scroll scrollbar-hidden rounded-lg focus:outline-none',
             visible ? 'scale-100' : 'scale-80'
           )}
         >

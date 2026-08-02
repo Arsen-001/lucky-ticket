@@ -4,6 +4,7 @@ import { useEffect, type ReactNode } from 'react';
 import { twMerge } from 'tailwind-merge';
 import { ClientPortal } from '@/components/shared/ClientPortal';
 import { useOverlayPresence } from '@/hooks/useOverlayPresence';
+import { useOverlayFocusLock } from '@/hooks/useOverlayFocusLock';
 
 /** Matches the panel's `duration-300` slide. */
 const ANIMATION_MS = 300;
@@ -17,6 +18,8 @@ export interface BottomSheetProps {
   closeOnOverlayClick?: boolean;
   /** Show the grab-handle bar at the top. */
   showHandle?: boolean;
+  /** What this sheet is, for assistive tech. @see Modal */
+  label?: string;
 }
 
 /**
@@ -31,9 +34,11 @@ export function BottomSheet({
   className,
   closeOnOverlayClick = true,
   showHandle = true,
+  label,
 }: BottomSheetProps) {
   // Closed → nothing in the DOM (see useOverlayPresence).
   const { mounted, visible } = useOverlayPresence(open, ANIMATION_MS);
+  const panelRef = useOverlayFocusLock(open);
 
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
@@ -61,8 +66,13 @@ export function BottomSheet({
         />
 
         <div
+          ref={panelRef}
+          role="dialog"
+          aria-modal="true"
+          aria-label={label}
+          tabIndex={-1}
           className={twMerge(
-            'max-w-[var(--app-max-w)] scrollbar-hidden relative max-h-[90vh] w-full overflow-y-auto transition-transform duration-300 ease-out',
+            'max-w-[var(--app-max-w)] scrollbar-hidden relative max-h-[90vh] w-full overflow-y-auto transition-transform duration-300 ease-out focus:outline-none',
             visible ? 'translate-y-0' : 'translate-y-full',
             className
           )}
