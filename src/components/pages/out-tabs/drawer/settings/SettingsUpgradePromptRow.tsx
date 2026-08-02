@@ -23,7 +23,13 @@ export function SettingsUpgradePromptRow() {
       title={t('ask before boost upgrade')}
       description={t('confirm every paid engine upgrade')}
       accent="pink"
-      rightElement={<Switch checked={!skip} onChange={next => setSkip(!next)} />}
+      rightElement={
+        <Switch
+          aria-label={t('ask before boost upgrade')}
+          checked={!skip}
+          onChange={next => setSkip(!next)}
+        />
+      }
     />
   );
 }

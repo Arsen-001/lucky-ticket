@@ -1,16 +1,18 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, type ButtonHTMLAttributes, type MouseEvent } from 'react';
 import { twMerge } from 'tailwind-merge';
 import { Loader2 } from 'lucide-react';
 
-interface SwitchProps {
+export interface SwitchProps extends Omit<
+  ButtonHTMLAttributes<HTMLButtonElement>,
+  'onChange' | 'checked' | 'type'
+> {
   checked?: boolean;
   onChange?: (checked: boolean) => void;
   initialChecked?: boolean;
   disabled?: boolean;
   loading?: boolean;
-  className?: string;
 }
 
 export function Switch({
@@ -20,12 +22,21 @@ export function Switch({
   disabled = false,
   loading = false,
   className,
+  onClick,
+  ...rest
 }: SwitchProps) {
   const [innerChecked, setInnerChecked] = useState(initialChecked);
   const isChecked = checked !== undefined ? checked : innerChecked;
 
-  const handleToggle = () => {
+  const handleToggle = (event: MouseEvent<HTMLButtonElement>) => {
+    onClick?.(event);
     if (disabled || loading) return;
+
+    // A switch is a control in its own right, and it is usually dropped into a
+    // clickable settings row. Without this the row's handler ran too, so one tap
+    // toggled twice — harmless only because both calls happened to compute the
+    // same value, while still sending two writes for one tap.
+    event.stopPropagation();
 
     const nextChecked = !isChecked;
     if (checked === undefined) {
@@ -37,8 +48,14 @@ export function Switch({
   return (
     <button
       type="button"
+      // Without these the state exists only as a colour and a knob position:
+      // assistive tech sees an unlabeled button and cannot say whether the thing
+      // it controls is on or off. Callers pass the name via `aria-label`.
+      role="switch"
+      aria-checked={isChecked}
       onClick={handleToggle}
       disabled={disabled || loading}
+      {...rest}
       className={twMerge(
         'relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus-visible:ring-2 focus-visible:ring-pink focus-visible:ring-offset-2',
         isChecked ? 'bg-gradient-lightpink' : 'bg-white/10',

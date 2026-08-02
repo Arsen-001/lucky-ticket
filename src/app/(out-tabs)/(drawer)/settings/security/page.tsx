@@ -48,6 +48,7 @@ export default function SecurityPage() {
           description={is2FAEnabled ? t('enabled') : t('disabled')}
           rightElement={
             <Switch
+              aria-label={t('2fa status')}
               checked={is2FAEnabled || isUpdating}
               onChange={handleToggle2FA}
               loading={isMeLoading}

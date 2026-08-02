@@ -106,6 +106,7 @@ export function NotificationPreferencesSection() {
               onClick={() => handleToggle(channel, category.key, !checked)}
               rightElement={
                 <Switch
+                  aria-label={t(category.labelKey)}
                   checked={checked}
                   onChange={next => handleToggle(channel, category.key, next)}
                   loading={isLoading}

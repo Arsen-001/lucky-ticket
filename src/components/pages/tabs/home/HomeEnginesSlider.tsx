@@ -760,6 +760,7 @@ export function HomeEnginesSlider({ className }: ClassNameProps) {
               </div>
               <label className="mt-1 flex cursor-pointer items-center gap-2.5">
                 <Switch
+                  aria-label={t('do not ask again')}
                   checked={skipUpgradePrompt}
                   onChange={toggleSkipUpgradePrompt}
                   className="scale-90"
