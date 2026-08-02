@@ -23,6 +23,15 @@ const nextConfig: NextConfig = {
   experimental: {
     globalNotFound: true,
   },
+  // `/engines` is a base for detail URLs (`/engines/:id`), not a screen — the
+  // engine list lives on the Tickets tab. But the live task catalog ships
+  // `deeplink: '/engines'` on every "Own N engines" milestone, so tapping one
+  // used to land on a 404 with no way back. A platform redirect fixes it for
+  // the tasks already out there, without a data migration; `/engines/:id` is
+  // untouched, since the source matches that one exact path.
+  async redirects() {
+    return [{ source: '/engines', destination: '/tickets', permanent: false }];
+  },
   // Same-origin proxy to the backend. When the app is served over a tunnel
   // (Telegram Mini App) the browser calls `/api-proxy/*` on its own origin and
   // Next forwards it to the backend server-side — so there's no CORS and the
