@@ -7,7 +7,11 @@ export const routes = {
       return (this.index + `/${tournamentId}`) as `/tournaments/${string}`;
     },
   },
-  market: (tab?: string) => `/market${tab ? `?tab=${tab}` : ''}`,
+  // The cast is what keeps `Route` meaningful: a template with a dynamic part is
+  // just `string`, and one `string` in the union absorbs every literal in it —
+  // which is how `Route` came to mean nothing at all while every navigation prop
+  // dutifully declared it.
+  market: (tab?: string) => `/market${tab ? `?tab=${tab}` : ''}` as `/market${string}`,
   tasks: '/tasks',
   testQuest: '/test-quest',
 
@@ -20,9 +24,6 @@ export const routes = {
 
   // drawer routes
   inviteFriends: '/invite-friends',
-  refererLink: function (refererId: string) {
-    return `/referer/${refererId}`;
-  },
   profile: {
     index: '/profile',
     getByUserId: function (userId: string) {
@@ -98,5 +99,17 @@ type RouteValue<T> = T extends (...args: any[]) => infer R
     ? RouteValue<T[keyof T]>
     : T;
 
-export type Route = RouteValue<typeof routes>;
+type DeclaredRoute = RouteValue<typeof routes>;
+
+/**
+ * A path this app can actually navigate to: one declared above, optionally with a
+ * query string (`?tab=`, `?highlight=`).
+ *
+ * The query arm has to be spelled out. Without it every caller that appends a
+ * query would fail — and the tempting fix, letting one member of the union be a
+ * plain `string`, silently turns the whole type back into `string`, since a union
+ * with `string` absorbs every literal in it. That is what had happened: `Route`
+ * was required by convention on every navigation prop while accepting anything.
+ */
+export type Route = DeclaredRoute | `${DeclaredRoute}?${string}`;
 /* eslint-enable */
