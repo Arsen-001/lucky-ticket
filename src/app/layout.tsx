@@ -16,6 +16,8 @@ import { getLocale } from 'next-intl/server';
 import { getAppTranslations } from '@/i18n/getAppTranslations';
 import { GlobalConstants } from '@/constants/global.constants';
 import { appConfig } from '@/config/app.config';
+import { comingSoonConfig } from '@/config/coming-soon.config';
+import { ComingSoonScreen } from '@/components/pages/coming-soon/ComingSoonScreen';
 import type { Metadata, Viewport } from 'next';
 import type { ChildrenProps } from '@/types/interfaces/component.interfcaes';
 import '@/styles/index.css';
@@ -85,6 +87,33 @@ export const viewport: Viewport = {
 
 export default async function RootLayout({ children }: ChildrenProps) {
   const locale = await getLocale();
+
+  // Pre-launch gate. `{children}` is deliberately NOT rendered: an unrendered
+  // element never executes, so no page, provider, store or backend query is
+  // mounted behind the screen — the app genuinely does not boot, and every
+  // route (including deep links and drawer routes) resolves to this one screen.
+  // @see src/config/coming-soon.config.ts
+  if (comingSoonConfig.enabled) {
+    return (
+      <html
+        lang={locale}
+        className={`${gilroy.variable} ${spaceGrotesk.variable}`}
+        suppressHydrationWarning
+      >
+        <head>
+          <Script src="https://telegram.org/js/telegram-web-app.js" strategy="beforeInteractive" />
+        </head>
+        <body suppressHydrationWarning>
+          <AtmosphericBackground className="left-[var(--app-gutter)] right-[var(--app-gutter)]" />
+          <div id="scroll-container">
+            <NextIntlClientProvider>
+              <ComingSoonScreen />
+            </NextIntlClientProvider>
+          </div>
+        </body>
+      </html>
+    );
+  }
 
   return (
     <StoreProvider>

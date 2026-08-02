@@ -1166,5 +1166,12 @@
   "extra ads expire at reset": "Unwatched bought views expire at the daily reset",
   "extra ads bought": "{n} extra views added",
   "extra ads purchase failed": "Couldn't buy extra views",
-  "not enough balance": "Not enough balance"
+  "not enough balance": "Not enough balance",
+  "coming soon blurb": "LuckyTicket365 is getting ready. Tickets, tournaments and the jackpot open to everyone the moment the countdown ends.",
+  "launch in": "Launch in",
+  "launching any moment": "Launching any moment now",
+  "days": "Days",
+  "hours": "Hours",
+  "minutes": "Minutes",
+  "seconds": "Seconds"
 }

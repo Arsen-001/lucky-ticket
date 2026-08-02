@@ -1,0 +1,9 @@
+/* Space Grotesk (the brand's display face) for the countdown digits — the same
+   accent the splash and the fullscreen brand bar use. Tailwind's `font-*`
+   utilities all resolve to Gilroy, so this is the one thing the countdown needs
+   that a utility class can't express. A plain class, not an `@utility`: this
+   file is imported from the component rather than from `styles/index.css`, and
+   Tailwind only registers `@utility` rules reached from its CSS entry. */
+.countdown-digit {
+  font-family: var(--font-display), ui-sans-serif, sans-serif;
+}

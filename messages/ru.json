@@ -1166,5 +1166,12 @@
   "extra ads expire at reset": "Непросмотренные купленные показы сгорают при сбросе дня",
   "extra ads bought": "Добавлено показов: {n}",
   "extra ads purchase failed": "Не удалось купить показы",
-  "not enough balance": "Недостаточно средств"
+  "not enough balance": "Недостаточно средств",
+  "coming soon blurb": "LuckyTicket365 готовится к запуску. Билеты, турниры и джекпот откроются для всех, как только таймер дойдёт до нуля.",
+  "launch in": "До запуска",
+  "launching any moment": "Запуск с минуты на минуту",
+  "days": "Дней",
+  "hours": "Часов",
+  "minutes": "Минут",
+  "seconds": "Секунд"
 }
