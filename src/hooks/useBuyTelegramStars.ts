@@ -40,6 +40,13 @@ export function useBuyTelegramStars() {
           dispatch(walletApi.util.invalidateTags([rtkTags.wallet, rtkTags.me]));
         }
         return status;
+      } catch {
+        // The invoice never got created — backend down, 500, no network. Without
+        // this the rejection escaped the hook into an async onClick handler, so
+        // "Buy" spun once and then did nothing at all: no sheet, no error, no
+        // toast. `failed` is a status the caller already surfaces, and it is
+        // honest — nothing was charged.
+        return 'failed';
       } finally {
         setPending(false);
       }
