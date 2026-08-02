@@ -26,6 +26,12 @@ jobs:
           cache: npm
       - run: npm ci
       - run: npm run lint
+      # `next-env.d.ts` is what declares the `*.webp` / `*.svg` module types, and
+      # it is generated, not committed — so `tsc` on a fresh clone cannot resolve
+      # a single image import. Locally the file is always there from an earlier
+      # build, which is why type-check only fails on a machine that has never
+      # built. `typegen` writes it without paying for a full build.
+      - run: npx next typegen
       - run: npm run type-check
       # The guardrail suite: economy math, i18n parity, RTK 3-place wiring,
       # DOCS↔constants drift, production-only traps. The backend-enum parity
