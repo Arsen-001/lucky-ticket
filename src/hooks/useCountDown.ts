@@ -26,18 +26,51 @@ const INITIAL_COUNTDOWN_STATE: CountdownState = {
   seconds: 0,
 };
 
+const isSameCountdown = (a: CountdownState, b: CountdownState): boolean =>
+  a.expired === b.expired &&
+  a.days === b.days &&
+  a.hours === b.hours &&
+  a.minutes === b.minutes &&
+  a.seconds === b.seconds;
+
 export const useCountDown = (targetDate?: string | Date | number): UseCountdownResult => {
   const [state, setState] = useState<CountdownState>(INITIAL_COUNTDOWN_STATE);
   const t = useAppTranslations();
 
+  // Key the effect on the instant, not the value handed in: callers pass
+  // `new Date(...)`, a fresh object on every render, which tore the interval
+  // down and rebuilt it each time — and each rebuild set state, which caused
+  // the next render.
+  const targetMs = targetDate == null ? null : new Date(targetDate).getTime();
+  const hasTarget = targetMs !== null && !Number.isNaN(targetMs);
+
   useEffect(() => {
-    setState(getCountdown(targetDate));
+    // Every tick used to store a freshly allocated state object, so a row
+    // re-rendered once a second whether or not anything had changed — and rows
+    // with nothing to count (a finished tournament, a task with no reset time)
+    // paid it too. A list of them re-rendered end to end, every second.
+    const apply = (next: CountdownState) =>
+      setState(prev => (isSameCountdown(prev, next) ? prev : next));
+
+    if (!hasTarget) {
+      // No target = nothing to count; `getCountdown` reads that as expired.
+      apply(getCountdown(undefined));
+      return;
+    }
+
+    const first = getCountdown(targetMs);
+    apply(first);
+    // Already over: the numbers can no longer change, so don't run a timer.
+    if (first.expired) return;
+
     const timer = setInterval(() => {
-      setState(getCountdown(targetDate));
+      const next = getCountdown(targetMs);
+      apply(next);
+      if (next.expired) clearInterval(timer);
     }, 1000);
 
     return () => clearInterval(timer);
-  }, [targetDate]);
+  }, [targetMs, hasTarget]);
 
   // Dedicated short-unit keys — deriving them from the first letter of the
   // full word is ambiguous in de (Stunde/Sekunde both start with "S").
