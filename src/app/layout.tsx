@@ -10,6 +10,7 @@ import { ToastViewport } from '@/components/shared/toast/ToastViewport';
 import { AppStatusOverlay } from '@/components/shared/status/AppStatusOverlay';
 import { FullscreenBrandBar } from '@/components/layout-elements/FullscreenBrandBar';
 import { AtmosphericBackground } from '@/components/shared/AtmosphericBackground';
+import { PreLaunchGate } from '@/components/pages/coming-soon/PreLaunchGate';
 import { NextIntlClientProvider } from 'next-intl';
 import { gilroy, spaceGrotesk } from '@/fonts/index.fonts';
 import { getLocale } from 'next-intl/server';
@@ -87,7 +88,7 @@ export default async function RootLayout({ children }: ChildrenProps) {
   const locale = await getLocale();
 
   return (
-    <StoreProvider>
+    <>
       {/* telegram-web-app.js (beforeInteractive) sets --tg-viewport-* on <html>
           before hydration, so its style attr won't match React's render. This
           is expected external mutation — suppress the hydration warning for the
@@ -125,27 +126,37 @@ export default async function RootLayout({ children }: ChildrenProps) {
               the phone column so it never spills into the desktop gutters. */}
           <AtmosphericBackground className="left-[var(--app-gutter)] right-[var(--app-gutter)]" />
           <div id="scroll-container">
-            <AppLifecycleProvider />
             <NextIntlClientProvider>
-              <NavigationHistoryProvider>
-                <TonConnectProvider>
-                  <TelegramProvider>
-                    <div className="max-w-[var(--app-max-w)] m-auto h-full overflow-hidden">
-                      {children}
-                    </div>
-                    <Onboarding />
-                    <TournamentResultWatcher />
-                  </TelegramProvider>
-                </TonConnectProvider>
-                <FullscreenBrandBar />
-                <ToastViewport />
-                <AppStatusOverlay />
-              </NavigationHistoryProvider>
+              {/* The pre-launch gate sits OUTSIDE every provider on purpose: it
+                  renders its children only on an explicit "this person is let
+                  in", and an unrendered element never executes. So while the
+                  gate holds, the store is never created, no query runs and no
+                  route mounts — the app does not boot, rather than booting
+                  under a cover. @see PreLaunchGate */}
+              <PreLaunchGate>
+                <StoreProvider>
+                  <AppLifecycleProvider />
+                  <NavigationHistoryProvider>
+                    <TonConnectProvider>
+                      <TelegramProvider>
+                        <div className="max-w-[var(--app-max-w)] m-auto h-full overflow-hidden">
+                          {children}
+                        </div>
+                        <Onboarding />
+                        <TournamentResultWatcher />
+                      </TelegramProvider>
+                    </TonConnectProvider>
+                    <FullscreenBrandBar />
+                    <ToastViewport />
+                    <AppStatusOverlay />
+                  </NavigationHistoryProvider>
+                </StoreProvider>
+              </PreLaunchGate>
             </NextIntlClientProvider>
           </div>
           <div id="portal-root" />
         </body>
       </html>
-    </StoreProvider>
+    </>
   );
 }

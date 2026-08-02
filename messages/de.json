@@ -1166,5 +1166,12 @@
   "extra ads expire at reset": "Nicht angesehene gekaufte Ansichten verfallen beim Tages-Reset",
   "extra ads bought": "Ansichten hinzugefügt: {n}",
   "extra ads purchase failed": "Ansichten konnten nicht gekauft werden",
-  "not enough balance": "Guthaben reicht nicht"
+  "not enough balance": "Guthaben reicht nicht",
+  "launch in": "Start in",
+  "launching any moment": "Der Start steht unmittelbar bevor",
+  "days": "Tage",
+  "hours": "Stunden",
+  "minutes": "Minuten",
+  "seconds": "Sekunden",
+  "coming soon blurb": "LuckyTicket365 macht sich startklar. Tickets, Turniere und der Jackpot öffnen für alle, sobald der Countdown abgelaufen ist."
 }
