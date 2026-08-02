@@ -10,12 +10,12 @@ networks as a waterfall** plus its own promo as the final fallback.
 
 ---
 
-## Where things stand (updated 2026-07-30)
+## Where things stand (updated 2026-08-02)
 
 |                         |                                                                                      |
 | ----------------------- | ------------------------------------------------------------------------------------ |
-| Waterfall in production | Adsgram first, then Monetag, then the house ad — order lives in env                  |
-| Monetag                 | zone `11355872`, live and filling, S2S postback granting, prices every view          |
+| Waterfall in production | `adsgram,house` — Monetag taken out of rotation 2026-08-02, order lives in env       |
+| Monetag                 | zone `11355872` kept, code intact, **not in the waterfall** — re-add to the env list |
 | Adsgram                 | block `37750` live and filling — 41 impressions / $0.36 over 22–29 Jul (their panel) |
 | House ad                | last in the chain, always fills                                                      |
 | Reward authority        | server callback for both networks; client-attested for the house ad                  |
@@ -26,9 +26,10 @@ networks as a waterfall** plus its own promo as the final fallback.
 Verified end-to-end in the real Mini App: ad served → network callback → AP
 credited → row stored → visible in the panel.
 
-The waterfall row is **inferred**, not read: Adsgram serving 41 impressions in a
-week means it is in rotation and answering first, but `NEXT_PUBLIC_AD_PROVIDERS`
-on Vercel was not opened during that check.
+The waterfall row is **verified** as of 2026-08-02: the value was set in the
+Vercel panel and the deployed page was then fetched — it loads `sad.adsgram.ai`
+and no longer loads `libtl.com`. (Before that date the row was inferred from
+impression counts alone; the panel had never been opened.)
 
 ### Where the money is, 2026-07-30 — Adsgram never sends a price
 
@@ -360,7 +361,7 @@ NEXT_PUBLIC_ADSGRAM_DEBUG=false   # "true" = test creatives (disables the S2S ca
 NEXT_PUBLIC_MONETAG_ZONE_ID=
 
 # Waterfall order — blank means adsgram,monetag,house
-NEXT_PUBLIC_AD_PROVIDERS=
+NEXT_PUBLIC_AD_PROVIDERS=adsgram,house
 ```
 
 Set them in `.env.local` for local testing and in **Vercel → Settings →
@@ -370,11 +371,15 @@ script is not even loaded — when it has no id OR when it is absent from
 network from it costs nothing at runtime, and putting it back needs no code
 change.
 
-**Currently `monetag,house`** — Adsgram is out of the rotation (block 37750 is
-live but has never filled), while its block id and code stay in place so it can
-be re-added by editing the list. **Reordering the waterfall is an env change, not
-a code change** — once real per-network eCPM is known, put the better payer
-first.
+**Currently `adsgram,house`** (set 2026-08-02) — Monetag is out of the rotation
+by request, while its zone id, provider and postback route stay in place so it
+can be re-added by writing `adsgram,monetag,house` back into the list.
+
+**Reordering the waterfall is an env change, not a code change** — but it still
+needs a **redeploy**. `NEXT_PUBLIC_*` values are inlined into the bundle at build
+time, so editing the variable alone changes nothing; Vercel says as much in the
+toast after saving. Set the value, then `vercel --prod`, then confirm by fetching
+the live page and checking which SDK `<script>` tags it contains.
 
 Real ads only render inside the actual Telegram Mini App, not a desktop browser.
 
