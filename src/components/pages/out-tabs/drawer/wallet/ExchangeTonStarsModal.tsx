@@ -10,7 +10,12 @@ import { useToast } from '@/hooks/useToast';
 import { useTonUsdRate } from '@/hooks/useTonUsdRate';
 import { useBuyStarsMutation } from '@/api/wallet.api';
 import { formatNumber } from '@/utils/global/number.utils';
-import { formatTon, starsToTon, tonToStars } from '@/utils/pages/wallet.utils';
+import {
+  formatTon,
+  sanitizeDecimalInput,
+  starsToTon,
+  tonToStars,
+} from '@/utils/pages/wallet.utils';
 
 export interface ExchangeTonStarsModalProps {
   open: boolean;
@@ -105,7 +110,7 @@ export function ExchangeTonStarsModal({
                     inputMode="decimal"
                     placeholder="0.0"
                     value={input}
-                    onChange={e => setInput(e.target.value.replace(/[^0-9.]/g, ''))}
+                    onChange={e => setInput(sanitizeDecimalInput(e.target.value))}
                     className="w-full bg-transparent text-2xl font-extrabold tabular-nums text-white outline-none"
                   />
                   <button

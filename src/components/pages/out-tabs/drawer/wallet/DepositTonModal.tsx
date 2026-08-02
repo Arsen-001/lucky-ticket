@@ -13,7 +13,14 @@ import { useToast } from '@/hooks/useToast';
 import { useGetDepositAddressQuery } from '@/api/wallet.api';
 import { useWalletLimits } from '@/hooks/useWalletLimits';
 import { DepositUnavailableNotice } from '@/components/pages/out-tabs/drawer/wallet/DepositUnavailableNotice';
-import { formatTon, tonConnectValidUntil, tonToNanoString } from '@/utils/pages/wallet.utils';
+import { TonAmountChips } from '@/components/pages/out-tabs/drawer/wallet/TonAmountChips';
+import {
+  formatTon,
+  sanitizeDecimalInput,
+  tonConnectValidUntil,
+  tonToNanoString,
+  walletConstants,
+} from '@/utils/pages/wallet.utils';
 
 interface DepositTonModalProps {
   open: boolean;
@@ -46,6 +53,7 @@ export function DepositTonModal({ open, onClose, onDeposited }: DepositTonModalP
   // on-chain is credited regardless — refusing real TON would be the worse bug.
   const belowMinimum = numericAmount > 0 && numericAmount < minDepositTon;
   const canSend = viaWallet && numericAmount >= minDepositTon && !sending;
+  const quickAmounts = walletConstants.TON_QUICK_AMOUNTS.filter(v => v >= minDepositTon);
 
   // Manual senders must carry the comment too, else the watcher can't attribute it.
   const transferUri = address
@@ -109,10 +117,15 @@ export function DepositTonModal({ open, onClose, onDeposited }: DepositTonModalP
             </label>
             <Input
               value={amount}
-              onChange={e => setAmount(e.target.value.replace(/[^0-9.]/g, ''))}
+              onChange={e => setAmount(sanitizeDecimalInput(e.target.value))}
               placeholder="0.0"
               inputMode="decimal"
               suffix={<span className="text-pink-secondary text-[11px] font-extrabold">TON</span>}
+            />
+            <TonAmountChips
+              amounts={quickAmounts}
+              value={numericAmount}
+              onPick={v => setAmount(String(v))}
             />
             <p
               className={twMerge(

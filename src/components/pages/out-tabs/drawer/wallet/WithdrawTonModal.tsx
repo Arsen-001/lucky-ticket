@@ -11,8 +11,11 @@ import {
   isValidTonAddress,
   formatTon,
   readReferralGateError,
+  sanitizeDecimalInput,
   tonScanUrl,
+  walletConstants,
 } from '@/utils/pages/wallet.utils';
+import { TonAmountChips } from './TonAmountChips';
 import { useWalletLimits } from '@/hooks/useWalletLimits';
 import { CheckCircle2, ExternalLink } from 'lucide-react';
 import { WithdrawSummaryRow } from './WithdrawSummaryRow';
@@ -89,6 +92,12 @@ export function WithdrawTonModal({
     numericAmount >= minWithdrawTon &&
     numericAmount <= maxWithdrawTon &&
     numericAmount + fee <= tonBalance;
+
+  // Only chips the server would accept: within the per-transaction range and
+  // affordable once the fee is added on top. "Max" already covers the ceiling.
+  const quickAmounts = walletConstants.TON_QUICK_AMOUNTS.filter(
+    v => v >= minWithdrawTon && v <= maxWithdrawTon && v + fee <= tonBalance
+  );
 
   const handleClose = () => {
     setStep('form');
@@ -183,7 +192,7 @@ export function WithdrawTonModal({
               </label>
               <Input
                 value={amount}
-                onChange={e => setAmount(e.target.value.replace(/[^0-9.]/g, ''))}
+                onChange={e => setAmount(sanitizeDecimalInput(e.target.value))}
                 placeholder="0.0"
                 inputMode="decimal"
                 suffix={
@@ -195,6 +204,11 @@ export function WithdrawTonModal({
                     {t('max')}
                   </button>
                 }
+              />
+              <TonAmountChips
+                amounts={quickAmounts}
+                value={numericAmount}
+                onPick={v => setAmount(String(v))}
               />
             </div>
 

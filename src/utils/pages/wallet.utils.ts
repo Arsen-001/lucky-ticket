@@ -28,6 +28,7 @@ const TON_MAX_WITHDRAW = 5;
 const TON_WITHDRAW_DAILY_CAP = 10;
 const TON_MIN_DEPOSIT = 0.1;
 const TON_NETWORK_FEE = 0.05;
+const TON_QUICK_AMOUNTS = [0.1, 0.5, 1, 5];
 const TON_ADDRESS_REGEX = /^(EQ|UQ|kQ|0Q)[A-Za-z0-9_-]{46}$/;
 
 export const walletConstants = {
@@ -44,6 +45,29 @@ export const walletConstants = {
   TON_MIN_DEPOSIT,
   /** Mirrors the backend's `WALLET.withdrawFeeTon` — charged ON TOP of the amount sent. */
   TON_NETWORK_FEE,
+  /**
+   * Ladder offered as one-tap chips on the TON amount fields. Every screen
+   * filters it against the limits the server actually enforces, so a chip is
+   * never an amount the request would be rejected for.
+   */
+  TON_QUICK_AMOUNTS,
+};
+
+/**
+ * Telegram's in-app keyboard cannot be relied on to offer a decimal separator:
+ * on the Android WebView an `inputMode="decimal"` field comes up as a plain
+ * digit pad with no `.` key at all, and comma locales send `,` — which the old
+ * digits-and-dot filter silently dropped. Between them the player could not
+ * type any fraction, and the whole usable TON range is fractions (minimum
+ * deposit and withdrawal are both 0.1). Normalise the separator and keep a
+ * single one; the quick-amount chips cover the keyboard that has no key for it.
+ */
+export const sanitizeDecimalInput = (raw: string): string => {
+  const [whole, ...fraction] = raw
+    .replace(/[,٫]/g, '.')
+    .replace(/[^0-9.]/g, '')
+    .split('.');
+  return fraction.length ? `${whole}.${fraction.join('')}` : whole;
 };
 
 export const truncateAddress = (address?: string): string => {
