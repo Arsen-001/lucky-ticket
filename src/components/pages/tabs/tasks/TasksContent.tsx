@@ -480,7 +480,9 @@ export function TasksContent() {
   // task id only ever worked against the mock; the live backend 404s on it.
   const handleClaimSubStep = (task: Task, step: TaskSubStep) => runClaim(task.id, [step.id]);
 
-  const handleWatchAd = async (slot: AdSlot) => {
+  // Return type is annotated because the body calls itself (the house-ad
+  // retry) — TypeScript cannot infer a self-referencing initializer.
+  const handleWatchAd = async (slot: AdSlot): Promise<void> => {
     triggerHaptic('medium');
 
     // Play the real rewarded ad first — the waterfall tries each configured
@@ -496,8 +498,18 @@ export function TasksContent() {
       reportAdAttempt({ provider, outcome });
     }
     if (outcome === 'skipped') {
-      toast.info(t('ad not completed'));
+      // "Watch it to the end to earn the reward" is only true of a network's
+      // video. The house promo pays nothing either way, so saying that there
+      // would promise a reward that does not exist.
+      if (provider !== 'house') toast.info(t('ad not completed'));
       return;
+    }
+    if (outcome === 'noAd' && provider === 'house') {
+      // The player pressed "try again" on the house promo. That promo already
+      // was the "no ads right now" screen, so stacking the modal on top of it
+      // would just repeat the news — go straight back to the waterfall. This
+      // cannot spin: every pass needs another deliberate tap.
+      return handleWatchAd(slot);
     }
     if (outcome === 'noAd' || outcome === 'tooFast' || outcome === 'error') {
       setAdIssue({ open: true, reason: outcome });

@@ -1138,15 +1138,18 @@ The **Ads** category in the **One-time** tasks tab holds a single task type — 
 
 **Where the ads come from (waterfall).** The app is not tied to one ad network. A view is served by the first source that has inventory, tried in order:
 
-1. **Adsgram** — first, as it measured the higher revenue per view.
-2. **Monetag** — takes the view whenever Adsgram has nothing to serve.
-3. **House ad** — the app's own promo (channel / invite / Market), shown when every network is empty. It earns nothing but keeps the task working, so "watch an ad" never dead-ends on a "no ads right now" modal.
+1. **Adsgram** — the only network in rotation.
+2. **House ad** — the app's own promo (channel / invite / Market), shown when the network is empty.
+
+**Monetag is wired but out of rotation** (since 2026-08-02). Its zone, provider and postback all still work; it returns to the waterfall by being named again in `NEXT_PUBLIC_AD_PROVIDERS`, with no code change.
 
 Exactly one ad plays per tap. The next source is asked only if the previous returned nothing; if the player closes an ad themselves, the chain stops and no reward is granted — otherwise closing an ad would become a second chance at one.
 
-**House-ad reward parity.** A house view pays the same as a paid one. The daily cap already bounds it, and the AP baseline (Section 5.4) assumes a full day of ad views — paying less would quietly cut a player's baseline whenever ad demand dries up, i.e. punish them for our lack of fill.
+**The house ad pays nothing.** Nobody bought that impression, so rewarding it would be handing out AP for an ad that earned us zero. It is a promo screen with two exits — **«Попробовать снова»**, which asks the waterfall for a real ad again, and close — and neither grants. It therefore does not consume a daily ad slot either: the player's allowance is only spent by a view a network actually served. There is no countdown on it; the old ten-second timer existed to gate a reward that no longer exists.
 
-**Reward authority.** When a network's server-to-server callback is configured (Monetag and Adsgram both are), that callback is the only thing that grants — the client's "I finished watching" merely syncs the UI, so a spoofed request pays nothing. A source without a callback (the house ad) still grants client-side, bounded by the same daily cap.
+_Consequence to watch:_ the derived AP baseline (Section 5.4) assumes a full day of ad views. Whenever fill is short, players now come in under that baseline instead of being topped up by house views — the pacing knobs, not the house ad, are the place to correct for that.
+
+**Reward authority.** When a network's server-to-server callback is configured (Monetag and Adsgram both are), that callback is the only thing that grants — the client's "I finished watching" merely syncs the UI, so a spoofed request pays nothing. With the house ad no longer granting, nothing is client-attested any more.
 
 **Per-view rewards (admin-controlled).** Each verified view in the daily ads block grants the admin-configured reward. By default that is the flat per-view knobs (AP per view, default 2; optional LC, default 0). The admin can instead set a **per-view reward ladder** (panel → Настройки → Задания и реклама): view N of the day grants ladder entry N — any mix of AP, LC, Stars, and tickets of a chosen tier — cycling back to the first entry once views outrun the ladder. Every slot in the Mini App ads block advertises exactly what that specific view pays; views past the daily cap grant nothing. Clearing the ladder restores the flat AP/LC behaviour.
 

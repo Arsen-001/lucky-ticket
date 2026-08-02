@@ -57,7 +57,7 @@ afterEach(() => {
 describe('rewarded-ad waterfall', () => {
   it('reports `unavailable` when no network is configured, even with the house ad mounted', async () => {
     const { ads, house } = await loadAds({});
-    house.registerHousePresenter(async () => 'completed');
+    house.registerHousePresenter(async () => 'retry');
 
     // The dev/mock flow depends on this: a promo screen must not replace the
     // instant grant just because the overlay happens to be mounted.
@@ -66,10 +66,12 @@ describe('rewarded-ad waterfall', () => {
 
   it('falls through a failing network to the house ad', async () => {
     const { ads, house } = await loadAds({ NEXT_PUBLIC_ADSGRAM_BLOCK_ID: '37750' });
-    house.registerHousePresenter(async () => 'completed');
+    house.registerHousePresenter(async () => 'retry');
 
     // No SDK on the page → the Adsgram provider fails, and the chain continues.
-    expect(await ads.showRewardedAd()).toEqual({ outcome: 'completed', provider: 'house' });
+    // The house ad answers, and answers `noAd`: it fills the screen, never the
+    // wallet.
+    expect(await ads.showRewardedAd()).toEqual({ outcome: 'noAd', provider: 'house' });
   });
 
   it('stops on a user skip instead of offering the next provider', async () => {
@@ -80,7 +82,7 @@ describe('rewarded-ad waterfall', () => {
     let housePlayed = false;
     house.registerHousePresenter(async () => {
       housePlayed = true;
-      return 'completed';
+      return 'retry';
     });
 
     expect(await ads.showRewardedAd()).toEqual({ outcome: 'skipped', provider: 'adsgram' });
@@ -90,9 +92,22 @@ describe('rewarded-ad waterfall', () => {
   it('treats a playback failure as a fall-through, not a skip', async () => {
     stubAdsgram({ done: false, error: true, state: 'playing', description: 'failed' });
     const { ads, house } = await loadAds({ NEXT_PUBLIC_ADSGRAM_BLOCK_ID: '37750' });
-    house.registerHousePresenter(async () => 'completed');
+    house.registerHousePresenter(async () => 'retry');
 
-    expect(await ads.showRewardedAd()).toEqual({ outcome: 'completed', provider: 'house' });
+    expect(await ads.showRewardedAd()).toEqual({ outcome: 'noAd', provider: 'house' });
+  });
+
+  it('never grants for the house ad, whichever way the player leaves it', async () => {
+    // The money rule: an unpaid impression must not be able to pay out. Both
+    // exits are checked, so adding a third one to the overlay fails here first.
+    for (const exit of ['retry', 'skipped'] as const) {
+      const { ads, house } = await loadAds({ NEXT_PUBLIC_ADSGRAM_BLOCK_ID: '37750' });
+      house.registerHousePresenter(async () => exit);
+
+      const result = await ads.showRewardedAd();
+      expect(result.provider).toBe('house');
+      expect(result.outcome).not.toBe('completed');
+    }
   });
 
   it('honours the order in NEXT_PUBLIC_AD_PROVIDERS and drops unknown ids', async () => {
@@ -101,7 +116,7 @@ describe('rewarded-ad waterfall', () => {
       NEXT_PUBLIC_MONETAG_ZONE_ID: '123',
       NEXT_PUBLIC_AD_PROVIDERS: 'monetag, nonsense ,adsgram',
     });
-    house.registerHousePresenter(async () => 'completed');
+    house.registerHousePresenter(async () => 'retry');
 
     // House is not in the list, so the chain ends on the last network failure.
     const result = await ads.showRewardedAd();

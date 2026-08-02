@@ -5,8 +5,8 @@ import { X } from 'lucide-react';
 import { Modal } from '@/components/shared/modals/Modal';
 import { Button } from '@/components/shared/buttons/Button';
 import { useAppTranslations } from '@/hooks/useAppTranslations';
-import { registerHousePresenter } from '@/lib/ads/house.provider';
-import { houseAdDurationSeconds, houseAdPromos } from '@/constants/house-ads.constants';
+import { registerHousePresenter, type HouseAdExit } from '@/lib/ads/house.provider';
+import { houseAdPromos } from '@/constants/house-ads.constants';
 
 /**
  * Renders the house ad — the app's own promo shown when no ad network had fill.
@@ -16,22 +16,23 @@ import { houseAdDurationSeconds, houseAdPromos } from '@/constants/house-ads.con
  * `src/lib/ads/house.provider.ts`). Without it mounted, the waterfall simply
  * ends at the last network and the "no ads" modal appears as before.
  *
- * The reward unlocks only after the full countdown; closing early resolves as
- * `skipped` and grants nothing — same contract as a network rewarded video.
+ * **Nothing here grants a reward** — the impression is unpaid, so the only
+ * exits are "try for a real ad again" and "close". That is also why there is no
+ * countdown: a timer existed to gate the reward, and gating a retry behind ten
+ * idle seconds would only punish the player for a fill problem that is ours.
  */
 export function HouseAdOverlay() {
   const t = useAppTranslations();
   const [open, setOpen] = useState(false);
-  const [secondsLeft, setSecondsLeft] = useState(houseAdDurationSeconds);
   const [promoIndex, setPromoIndex] = useState(0);
-  const resolveRef = useRef<((outcome: 'completed' | 'skipped') => void) | null>(null);
+  const resolveRef = useRef<((exit: HouseAdExit) => void) | null>(null);
   const shownCountRef = useRef(0);
 
   useEffect(
     () =>
       registerHousePresenter(
         () =>
-          new Promise<'completed' | 'skipped'>(resolve => {
+          new Promise<HouseAdExit>(resolve => {
             resolveRef.current = resolve;
             // Rotate so a player working through the daily quota doesn't see
             // the same promo every time. Read then advance as two statements:
@@ -40,33 +41,25 @@ export function HouseAdOverlay() {
             const next = shownCountRef.current % houseAdPromos.length;
             shownCountRef.current = next + 1;
             setPromoIndex(next);
-            setSecondsLeft(houseAdDurationSeconds);
             setOpen(true);
           })
       ),
     []
   );
 
-  useEffect(() => {
-    if (!open || secondsLeft <= 0) return;
-    const timer = setTimeout(() => setSecondsLeft(current => current - 1), 1000);
-    return () => clearTimeout(timer);
-  }, [open, secondsLeft]);
-
-  const finish = (outcome: 'completed' | 'skipped') => {
+  const finish = (exit: HouseAdExit) => {
     setOpen(false);
-    resolveRef.current?.(outcome);
+    resolveRef.current?.(exit);
     resolveRef.current = null;
   };
 
   const promo = houseAdPromos[promoIndex];
   const Icon = promo.icon;
-  const unlocked = secondsLeft <= 0;
 
   const handleCta = () => {
     if (!promo.href) return;
-    // Opened in Telegram without closing the promo, so the player can still
-    // claim the reward after subscribing.
+    // Opened in Telegram without closing the promo, so the player can act on it
+    // and still ask for another ad afterwards.
     window.Telegram?.WebApp?.openTelegramLink?.(promo.href);
   };
 
@@ -111,12 +104,8 @@ export function HouseAdOverlay() {
             </Button>
           )}
 
-          <Button
-            onClick={() => finish('completed')}
-            disabled={!unlocked}
-            className="w-full rounded-xl py-3 text-sm disabled:opacity-60"
-          >
-            {unlocked ? t('claim reward') : t('reward in seconds', { sec: secondsLeft })}
+          <Button onClick={() => finish('retry')} className="w-full rounded-xl py-3 text-sm">
+            {t('try again')}
           </Button>
         </div>
       </div>

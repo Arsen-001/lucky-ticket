@@ -17,8 +17,8 @@ networks as a waterfall** plus its own promo as the final fallback.
 | Waterfall in production | `adsgram,house` — Monetag taken out of rotation 2026-08-02, order lives in env       |
 | Monetag                 | zone `11355872` kept, code intact, **not in the waterfall** — re-add to the env list |
 | Adsgram                 | block `37750` live and filling — 41 impressions / $0.36 over 22–29 Jul (their panel) |
-| House ad                | last in the chain, always fills                                                      |
-| Reward authority        | server callback for both networks; client-attested for the house ad                  |
+| House ad                | last in the chain, always shows — but **grants nothing**, only offers a retry        |
+| Reward authority        | the network's server callback, and nothing else                                      |
 | Per-view storage        | `AdView` table (provider, source, outcome, AP, revenue, ymid)                        |
 | Admin panel             | section **Реклама** → «Откуда пришла реклама» + «Деньги от рекламы»                  |
 | Revenue to date         | cents. Monetag exact from its postbacks; Adsgram estimated or typed in (see below)   |
@@ -238,10 +238,10 @@ one viewer.
   disabled network costs nothing per page load.
 - **A skip stops the chain.** Falling through to the next source when the
   player closes an ad would make "close the ad" a second chance at a reward.
-- **The house ad exists because fill is never guaranteed.** It earns nothing;
-  it keeps the feature honest at zero fill and at zero traffic.
-- **House pays the same as a paid view.** See DOCS §12.5 — the daily cap bounds
-  it and the AP baseline assumes a full day of views.
+- **The house ad exists because fill is never guaranteed.** It earns nothing,
+  so it also **pays** nothing — it is a promo plus a «Попробовать снова»
+  button, never a reward. Changed 2026-08-02; before that it paid at parity
+  with a real view.
 - **`reward_event_type` is never checked.** The player watched the ad; whether
   the impression was monetised is our problem, not theirs.
 - **Only `event_type=impression` grants.** Monetag also posts back on clicks,
@@ -312,20 +312,25 @@ previous returned nothing:
 
 Providers:
 
-| id        | Module                            | Notes                               |
-| --------- | --------------------------------- | ----------------------------------- |
-| `adsgram` | `src/lib/ads/adsgram.provider.ts` | SDK script + block id               |
-| `monetag` | `src/lib/ads/monetag.provider.ts` | SDK tag + zone id, supports preload |
-| `house`   | `src/lib/ads/house.provider.ts`   | the app's own promo — always fills  |
+| id        | Module                            | Notes                                   |
+| --------- | --------------------------------- | --------------------------------------- |
+| `adsgram` | `src/lib/ads/adsgram.provider.ts` | SDK script + block id                   |
+| `monetag` | `src/lib/ads/monetag.provider.ts` | SDK tag + zone id, supports preload     |
+| `house`   | `src/lib/ads/house.provider.ts`   | the app's own promo — shows, never pays |
 
-The **house ad** is what makes the feature independent of fill. Networks never
-guarantee an ad; without it the task dead-ends on "no ads right now". Its UI is
-`HouseAdOverlay` (mounted in `TasksContent`), which registers itself with the
-provider on mount — if it isn't mounted, the waterfall simply ends at the last
-network. Promos live in `src/constants/house-ads.constants.ts` and rotate per
-show. The reward unlocks only after `houseAdDurationSeconds` (10s), matching a
-typical network video so the house ad can't become the cheaper way to farm the
-daily quota.
+The **house ad** is what the player gets instead of a bare "no ads right now".
+Its UI is `HouseAdOverlay` (mounted in `TasksContent`), which registers itself
+with the provider on mount — if it isn't mounted, the waterfall simply ends at
+the last network. Promos live in `src/constants/house-ads.constants.ts` and
+rotate per show.
+
+It has **no `completed` exit**: the presenter resolves either `retry` or
+`skipped`, and the provider maps `retry` → `noAd`, so no code path can turn an
+unpaid impression into a grant (guarded by `tests/ads-waterfall.test.ts`).
+`TasksContent` reads `outcome === 'noAd' && provider === 'house'` as "the
+player pressed «Попробовать снова»" and re-enters the waterfall instead of
+opening the unavailable-modal on top of a screen that just said the same thing.
+Each pass needs its own tap, so it cannot spin on its own.
 
 `watchAd` POSTs the serving `provider` to the backend, which uses it to pick
 the grant path (client-attested vs waiting for that network's callback).
@@ -449,7 +454,8 @@ calls it only after a genuine ad completion. The server:
 
 - Enforces the **daily cap** (`WATCH_VIDEO.dailyLimit` = 10 / 20 (Lucky Player) /
   40 (VIP)) via a Redis per-UTC-day counter — never trusts the client count. The
-  cap is shared across every provider, house ad included.
+  cap is shared across every network. The house ad never reaches this endpoint
+  at all, so a promo screen cannot spend a slot.
 - Grants `WATCH_VIDEO.ap` (2 AP) per view, bumps `AdWatchProgress`, returns
   `{ adId, rewards }`.
 
@@ -531,7 +537,7 @@ like a retry.
 then set `MONETAG_REWARD_SECRET`. The moment the secret exists, `watchAd` stops
 granting for Monetag views and waits for the callback — if the URL isn't set
 yet, players watch ads for nothing. Each provider's switch is independent:
-enabling Adsgram's callback does not affect Monetag or the house ad.
+enabling Adsgram's callback does not affect Monetag.
 
 ---
 
@@ -575,13 +581,15 @@ enabling Adsgram's callback does not affect Monetag or the house ad.
 
 ### House ad
 
-- [x] `HouseAdOverlay` mounted in Tasks; promos + duration in
+- [x] `HouseAdOverlay` mounted in Tasks; promos in
       `src/constants/house-ads.constants.ts`
-- [x] Daily cap shared with network ads (server-side)
-- [x] Reward parity with a paid view — deliberate. The daily cap (10/20/40)
-      already bounds it, and the economy's AP baseline assumes a full day of ad
-      views (`dailyBaselineApByTier` sums `watchVideo * watchVideoDailyLimit`).
-      Paying less for a house view would quietly cut the baseline every time
-      fill drops, i.e. punish the player for our lack of demand. Revisit only
-      if house views ever dominate the mix — `provider: 'house'` is recorded on
-      every watch, so the split is measurable.
+- [x] **Grants nothing** (2026-08-02). An unpaid impression must not pay out,
+      so the only exits are «Попробовать снова» and close. It consequently does
+      not burn a daily slot either — `watchAd` is only called after a network
+      completion.
+- ⚠️ **Open economy question.** `dailyBaselineApByTier` sums
+  `watchVideo * watchVideoDailyLimit`, i.e. it assumes a full day of ad
+  views. With the house ad no longer topping up short fill, players land
+  under that baseline whenever Adsgram is empty. `provider` is recorded on
+  every watch, so the gap is measurable — correct it with the pacing knobs
+  if it shows up, not by paying for house views again.

@@ -10,6 +10,8 @@ import type { MessageIds } from '@/types/types/i18n.types';
  *
  * Each promo advertises a mechanic that earns the player something, so the
  * unpaid impression still does work: channel reach, referrals, Market traffic.
+ * That is the only thing it does — the house ad grants no reward, so the promo
+ * has to earn its place on screen by itself.
  */
 export interface HouseAdPromo {
   readonly id: string;
@@ -20,13 +22,6 @@ export interface HouseAdPromo {
   readonly href?: string;
   readonly ctaKey?: MessageIds;
 }
-
-/**
- * How long the promo stays on screen before the reward unlocks. Matches the
- * length of a typical network rewarded video, so the house ad can't become the
- * cheaper way to farm the daily ad quota.
- */
-export const houseAdDurationSeconds = 10;
 
 export const houseAdPromos: readonly HouseAdPromo[] = [
   {
