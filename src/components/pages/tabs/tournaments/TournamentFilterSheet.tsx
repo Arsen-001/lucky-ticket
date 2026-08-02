@@ -8,6 +8,10 @@ import { Button } from '@/components/shared/buttons/Button';
 import { TournamentTypeChips } from '@/components/pages/tabs/tournaments/TournamentTypeChips';
 import type { TournamentType } from '@/types/types/tournaments.types';
 import { useAppTranslations } from '@/hooks/useAppTranslations';
+import { useOverlayPresence } from '@/hooks/useOverlayPresence';
+
+/** Matches the panel's `duration-300` slide. */
+const ANIMATION_MS = 300;
 
 export type SortOption = 'soonest' | 'prize-pool' | 'team-size';
 
@@ -37,12 +41,16 @@ export function TournamentFilterSheet({
   onReset,
 }: TournamentFilterSheetProps) {
   const t = useAppTranslations();
+  // Closed → nothing in the DOM (see useOverlayPresence).
+  const { mounted, visible } = useOverlayPresence(open, ANIMATION_MS);
 
   const sortItems: SortItem[] = [
     { key: 'soonest', label: t('starts soonest'), icon: Clock },
     { key: 'prize-pool', label: t('highest prize pool'), icon: Coins },
     { key: 'team-size', label: t('best odds (smallest team)'), icon: Users },
   ];
+
+  if (!mounted) return null;
 
   return (
     <ClientPortal>
@@ -51,7 +59,7 @@ export function TournamentFilterSheet({
         inert={!open ? true : undefined}
         className={twMerge(
           'fixed inset-0 z-100 flex items-end transition-opacity duration-300',
-          open ? 'opacity-100' : 'opacity-0 pointer-events-none'
+          visible ? 'opacity-100' : 'opacity-0 pointer-events-none'
         )}
       >
         {/* Overlay */}
@@ -61,7 +69,7 @@ export function TournamentFilterSheet({
         <div
           className={twMerge(
             'relative w-full bg-[var(--color-background)] rounded-t-3xl transition-transform duration-300 ease-in-out max-h-[85vh] flex flex-col shadow-[0_-12px_40px_rgba(0,0,0,0.5)]',
-            open ? 'translate-y-0' : 'translate-y-full'
+            visible ? 'translate-y-0' : 'translate-y-full'
           )}
         >
           {/* Drag handle */}

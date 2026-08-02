@@ -4,7 +4,10 @@ import { ReactNode, useEffect } from 'react';
 import { twMerge } from 'tailwind-merge';
 import { ClientPortal } from '@/components/shared/ClientPortal';
 import { ModalCloseButton } from '@/components/shared/modals/ModalCloseButton';
+import { useOverlayPresence } from '@/hooks/useOverlayPresence';
 import type { ButtonProps } from '@/components/shared/buttons/Button';
+
+const ANIMATION_MS = 200;
 
 interface ModalProps {
   open: boolean;
@@ -25,7 +28,9 @@ export const Modal = ({
   closeButtonProps,
   hideCloseButton,
 }: ModalProps) => {
-  const ANIMATION_MS = 200;
+  // Closed → nothing in the DOM. A modal per list row used to mean a
+  // full-screen blur layer per row; see useOverlayPresence.
+  const { mounted, visible } = useOverlayPresence(open, ANIMATION_MS);
 
   useEffect(() => {
     if (!open && typeof document !== 'undefined') {
@@ -57,6 +62,8 @@ export const Modal = ({
     }
   };
 
+  if (!mounted) return null;
+
   return (
     <ClientPortal>
       <div
@@ -65,7 +72,7 @@ export const Modal = ({
         style={{ transitionDuration: `${ANIMATION_MS}ms` }}
         className={twMerge(
           'fixed inset-0 flex items-center justify-center z-100 transition-all backdrop-blur-[1px] p-7.5',
-          open ? 'opacity-100' : 'opacity-0 pointer-events-none'
+          visible ? 'opacity-100' : 'opacity-0 pointer-events-none'
         )}
       >
         {/* Overlay */}
@@ -76,7 +83,7 @@ export const Modal = ({
           style={{ transitionDuration: `${ANIMATION_MS}ms` }}
           className={twMerge(
             'w-full relative transition-all transform max-h-[80vh] overflow-scroll scrollbar-hidden rounded-lg',
-            open ? 'scale-100' : 'scale-80'
+            visible ? 'scale-100' : 'scale-80'
           )}
         >
           {onClose && !hideCloseButton && (

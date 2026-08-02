@@ -122,8 +122,12 @@ export function TournamentResultModal({
           ? 'mid-place'
           : 'no-place';
 
-  const counter = useCounter(view === 'top-three' || view === 'mid-place' ? lc : 0);
-  const jackpotCounter = useCounter(jackpotLc);
+  // Count up only while the modal is on screen. A card renders its result modal
+  // whether or not it is open, so this used to run a rAF loop per finished
+  // tournament in the list — and the count-up was over long before the player
+  // ever opened it.
+  const counter = useCounter(open && (view === 'top-three' || view === 'mid-place') ? lc : 0);
+  const jackpotCounter = useCounter(open ? jackpotLc : 0);
   const placeLabel = view === 'top-three' && place ? t(PLACE_LABEL[place]) : undefined;
   // Subtitle place prefix: podium → "1st ·"; a placed non-podium player → "N / total ·".
   const placePrefix = placeLabel

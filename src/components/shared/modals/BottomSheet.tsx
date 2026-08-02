@@ -3,6 +3,10 @@
 import { useEffect, type ReactNode } from 'react';
 import { twMerge } from 'tailwind-merge';
 import { ClientPortal } from '@/components/shared/ClientPortal';
+import { useOverlayPresence } from '@/hooks/useOverlayPresence';
+
+/** Matches the panel's `duration-300` slide. */
+const ANIMATION_MS = 300;
 
 export interface BottomSheetProps {
   open: boolean;
@@ -28,6 +32,9 @@ export function BottomSheet({
   closeOnOverlayClick = true,
   showHandle = true,
 }: BottomSheetProps) {
+  // Closed → nothing in the DOM (see useOverlayPresence).
+  const { mounted, visible } = useOverlayPresence(open, ANIMATION_MS);
+
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
       if (e.key === 'Escape' && open) onClose?.();
@@ -36,6 +43,8 @@ export function BottomSheet({
     return () => window.removeEventListener('keydown', onKey);
   }, [open, onClose]);
 
+  if (!mounted) return null;
+
   return (
     <ClientPortal>
       <div
@@ -43,7 +52,7 @@ export function BottomSheet({
         inert={!open ? true : undefined}
         className={twMerge(
           'fixed inset-0 z-100 flex items-end justify-center transition-opacity duration-300',
-          open ? 'opacity-100' : 'pointer-events-none opacity-0'
+          visible ? 'opacity-100' : 'pointer-events-none opacity-0'
         )}
       >
         <div
@@ -54,7 +63,7 @@ export function BottomSheet({
         <div
           className={twMerge(
             'max-w-[var(--app-max-w)] scrollbar-hidden relative max-h-[90vh] w-full overflow-y-auto transition-transform duration-300 ease-out',
-            open ? 'translate-y-0' : 'translate-y-full',
+            visible ? 'translate-y-0' : 'translate-y-full',
             className
           )}
         >
