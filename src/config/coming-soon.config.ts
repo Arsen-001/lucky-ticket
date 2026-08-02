@@ -19,9 +19,10 @@
  * via `NEXT_PUBLIC_LAUNCH_AT` (any value `new Date()` parses) so the date can
  * be moved from Vercel's env panel + a redeploy, without touching the code.
  *
- * Current value: 15 days from 2026-08-02.
+ * Current value: exactly 15 days out from the moment this branch shipped
+ * (2026-08-02 18:00 UTC).
  */
-const DEFAULT_LAUNCH_AT = '2026-08-17T12:00:00.000Z';
+const DEFAULT_LAUNCH_AT = '2026-08-17T18:00:00.000Z';
 
 const OFF_VALUES = ['0', 'false', 'off', 'no'];
 
