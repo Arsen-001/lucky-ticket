@@ -2248,6 +2248,67 @@ Two rules hold everywhere on that page. A rate whose denominator is empty render
 
 Both rest on **`UserActivityDay`**, one row per player per UTC day, written by a global interceptor on authenticated requests (Redis-guarded to one INSERT per player per day, admin traffic excluded). `User.lastActivityAt` is overwritten on every action and can only answer "when were they last here", which is why per-day active counts, retention and streaks were impossible before it existed. The migration that created it backfilled from every table that already timestamps a user action, so the history did not start empty.
 
+## 21.6 Access gates: pre-launch and maintenance
+
+Two switches can take the product away from players, and both are answered by the
+backend on every visit — not baked into a build. They share one rule for who is
+exempt, so an entry that works for one works for the other.
+
+**The pre-launch gate («скоро»).** While `PlatformConfig.comingSoonEnabled` is
+on, the Mini App renders only the Coming Soon countdown: the root gate sits
+outside every provider and renders the app **only** on an explicit "this person
+is let in", so no route, store or query is ever mounted behind it — the app does
+not boot, rather than booting under a cover. Every route and deep link resolves
+to that one screen. The countdown reads `PlatformConfig.launchAt` (admin-set;
+falls back to the date bundled in the client).
+
+One request is made on purpose: the Telegram sign-in, which creates the account
+for a pre-launch visitor — so whoever opened the app before launch is already a
+real player and a real referral — and carries the personal verdict (`appOpen`)
+back. The anonymous `GET /config` only reports whether the gate is up at all; it
+never answers a question about a specific person.
+
+Who gets in while it is up:
+
+- `User.earlyAccess` — a checkbox on the player's admin card (column + filter in
+  the users list);
+- `PlatformConfig.comingSoonAllowIds` — a hand-written list, the only lever that
+  works for a tester who has never opened the app and therefore has no row yet;
+- any admin — locking the operator out of the product they are gating is a
+  special kind of useless.
+
+The bot reads the same switch: someone who can open the app is never told by
+`/start` to wait for it. While the gate is up, `/start` records the visitor in
+`PreLaunchLead` so the launch announcement can reach people who arrived from
+pre-launch ads and never became users.
+
+**Maintenance mode.** `PlatformConfig.maintenanceMode` makes every player-facing
+route answer **503**, which the Mini App turns into its maintenance overlay.
+Deliberately still reachable: `/health` (probes), `/config` (so the app can
+render that overlay), `/admin/*` (so the switch can be turned back off),
+`/telegram/webhook` (Stars payments Telegram has already charged must still
+credit) and `/auth/telegram` — without a token nobody can be recognised, so
+closing sign-in would lock out exactly the people the exceptions are for.
+Exceptions: `PlatformConfig.maintenanceAllowIds` and admins, so whoever is doing
+the work can check whether it worked without reopening the app to everyone.
+
+**Allow-list semantics (both lists).** A digits-only entry is a Telegram id and
+matches exactly; anything else is a name and is matched, case-insensitively and
+without a leading `@`, against the current Telegram handle **and** the frozen
+in-app username. Ids and names are both accepted because both are what an admin
+actually has at hand — an earlier version kept only digits, so a pasted `@handle`
+saved as an empty list: a silent no-op that reads as "I added them".
+
+**Fail closed, everywhere.** No answer, a 500, an unrecognised payload or a
+config read that throws all resolve to _gated_. The cost of wrongly showing the
+countdown is one confused tester; the cost of wrongly opening the app is the
+launch. The client env var `NEXT_PUBLIC_COMING_SOON=1` can force the gate **on**
+and has deliberately no value that forces it off, so nothing outside the admin
+panel can publish the product.
+
+**Nothing opens by itself.** Reaching the countdown's target date changes
+nothing — only the toggle does, and turning it off asks for confirmation first.
+
 ## 22. Conclusion
 
 LuckyTicket365 is a modular, scalable product built around engagement, fairness, and real value creation. Each system reinforces the others, creating a cohesive ecosystem that rewards consistent participation and long-term loyalty. The Lucky Stars (LS) currency, fueled by both Telegram Stars and TON, bridges the internal economy with external value — giving users tangible real-world worth for their activity on the platform.
