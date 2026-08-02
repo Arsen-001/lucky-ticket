@@ -51,7 +51,17 @@ export function ComingSoonLanguageSwitch({ className }: ComingSoonLanguageSwitch
             )}
           >
             <span className="border-white/15 h-4 w-6 overflow-hidden rounded-sm border">
-              <Image src={lang.flag} alt={lang.name} className="h-full w-full object-cover" />
+              {/* `unoptimized`, unlike the app's other flag rows: the flags are
+                  SVGs, and the image optimizer answers 400 for SVG unless
+                  `dangerouslyAllowSVG` is on — so an optimized flag renders
+                  blank in production while looking fine in dev. Nothing to gain
+                  either way; these are ~1 KB of first-party vector. */}
+              <Image
+                src={lang.flag}
+                alt={lang.name}
+                unoptimized
+                className="h-full w-full object-cover"
+              />
             </span>
             <span
               className={twMerge(
