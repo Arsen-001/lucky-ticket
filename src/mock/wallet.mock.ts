@@ -62,32 +62,6 @@ const canWithdrawTon = () => mockDb.user.referralsCount >= appConfig.wallet.with
 /** Transaction history — fresh copies so RTK Query detects in-place mutations. */
 const getTransactions = () => mockDb.wallet.transactions.map(tx => ({ ...tx }));
 
-/** On-chain history — sample entries in the mock (no real blockchain here). */
-const getOnchainTransactions = () => ({
-  address: mockDb.wallet.address ?? null,
-  network: mockDb.wallet.network,
-  transactions: mockDb.wallet.isConnected
-    ? [
-        {
-          hash: randomHash(),
-          createdAt: new Date(Date.now() - 3_600_000).toISOString(),
-          direction: 'in',
-          amount: '2.5',
-          counterparty: 'UQD8HuDfZsU2JytXStq2TxkdlI9hSxF_PBsHfe1N02uOcZXG',
-          comment: 'Deposit',
-        },
-        {
-          hash: randomHash(),
-          createdAt: new Date(Date.now() - 2 * 86_400_000).toISOString(),
-          direction: 'out',
-          amount: '1.2',
-          counterparty: 'UQAq1cXMjGoz5fB9xoZlf0H6hHGtbS6tEIcQ3U7l_Oyk9fT2',
-          comment: null,
-        },
-      ]
-    : [],
-});
-
 // Mirrors a backend whose treasury IS configured, so the full deposit flow
 // (send-from-wallet + QR + attribution comment) is developable locally. A real
 // deployment without a treasury returns `depositsEnabled: false` and no address.
@@ -230,7 +204,6 @@ export const walletMock = {
   wallet: getWalletState,
   'wallet/supported': appConfig.wallet.supportedWallets,
   'wallet/transactions': getTransactions,
-  'wallet/onchain-transactions': getOnchainTransactions,
   'wallet/stars-packages': appConfig.wallet.starsPackages,
   'wallet/deposit-address': getDepositAddress,
   // One-time ton_proof nonce — any opaque string works in the mock (no real

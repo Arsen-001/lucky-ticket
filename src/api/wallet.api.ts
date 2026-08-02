@@ -6,7 +6,6 @@ import type {
   ConnectWalletRequest,
   ConnectWalletResponse,
   DepositAddressResponse,
-  OnchainTransactionsResponse,
   StarsPackage,
   SupportedWallet,
   TonProofPayloadResponse,
@@ -28,10 +27,6 @@ export const walletApi = api.injectEndpoints({
     getWalletTransactions: builder.query<WalletTransaction[], void>({
       query: () => ({ url: 'wallet/transactions' }),
       providesTags: [rtkTags.walletTransactions],
-    }),
-    // Real on-chain history of the connected wallet, read from the TON network.
-    getOnchainTransactions: builder.query<OnchainTransactionsResponse, void>({
-      query: () => ({ url: 'wallet/onchain-transactions' }),
     }),
     getStarsPackages: builder.query<StarsPackage[], void>({
       query: () => ({ url: 'wallet/stars-packages' }),
@@ -83,7 +78,6 @@ export const {
   useGetWalletStateQuery,
   useGetSupportedWalletsQuery,
   useGetWalletTransactionsQuery,
-  useGetOnchainTransactionsQuery,
   useGetStarsPackagesQuery,
   useGetDepositAddressQuery,
   useLazyGetTonProofPayloadQuery,

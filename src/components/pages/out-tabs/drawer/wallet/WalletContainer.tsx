@@ -2,7 +2,6 @@
 
 import { useEffect, useState } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
-import { twMerge } from 'tailwind-merge';
 import { useAppTranslations } from '@/hooks/useAppTranslations';
 import { useGetWalletStateQuery, useGetWalletTransactionsQuery } from '@/api/wallet.api';
 import { useGetLcStateQuery } from '@/api/lc.api';
@@ -13,7 +12,6 @@ import { WalletActionButtons } from './WalletActionButtons';
 import { StarsBalanceCard } from './StarsBalanceCard';
 import { WalletLcCard } from './WalletLcCard';
 import { WalletTransactionHistory } from './WalletTransactionHistory';
-import { WalletOnchainHistory } from './WalletOnchainHistory';
 import { DepositTonModal } from './DepositTonModal';
 import { WithdrawTonModal } from './WithdrawTonModal';
 import { BuyStarsModal } from './BuyStarsModal';
@@ -49,7 +47,6 @@ export function WalletContainer() {
     useTonWalletConnect();
   const [modal, setModal] = useState<WalletModal>(null);
   const [pendingTopUp, setPendingTopUp] = useState<number | undefined>(undefined);
-  const [historyTab, setHistoryTab] = useState<'app' | 'onchain'>('app');
   const [depositWatch, setDepositWatch] = useState<{ polls: number; fromBalance: number } | null>(
     null
   );
@@ -151,44 +148,31 @@ export function WalletContainer() {
 
       <WalletLcCard onConvert={() => setModal('convertLc')} />
 
+      {/*
+        Our own ledger only. The wallet's blockchain history used to sit next to
+        it behind a tab; it is off the Mini App now — inside Telegram the wallet
+        app already shows it, and every row here that has an on-chain hash still
+        links out to the explorer.
+      */}
       <section className="flex flex-col gap-3">
-        <div className="flex items-center gap-2">
-          <h3 className="flex-1 text-sm font-extrabold uppercase tracking-wider text-white">
-            {t('transactions')}
-          </h3>
-          <div className="bg-background-overlay/60 flex gap-0.5 rounded-full border border-white/5 p-0.5">
-            {(['app', 'onchain'] as const).map(tab => (
-              <button
-                key={tab}
-                type="button"
-                onClick={() => setHistoryTab(tab)}
-                className={twMerge(
-                  'rounded-full px-3 py-1 text-[10px] font-bold uppercase tracking-wider transition-colors',
-                  historyTab === tab ? 'bg-pink-gradient text-white' : 'text-pink-secondary'
-                )}
-              >
-                {t(tab === 'app' ? 'in-app' : 'on-chain')}
-              </button>
-            ))}
-          </div>
-        </div>
+        <h3 className="text-sm font-extrabold uppercase tracking-wider text-white">
+          {t('transactions')}
+        </h3>
 
-        {historyTab === 'app' ? (
-          // A failed history query must not read as "no transactions yet" —
-          // that is indistinguishable from a lost payment to the user.
-          isTxError ? (
-            <QueryErrorState onRetry={() => refetchTransactions()} className="pt-6" />
-          ) : (
-            <WalletTransactionHistory
-              transactions={transactions}
-              loading={isTxLoading}
-              isConnected={isConnected}
-              network={state?.network}
-              hideHeader
-            />
-          )
+        {/*
+          A failed history query must not read as "no transactions yet" — that is
+          indistinguishable from a lost payment to the user.
+        */}
+        {isTxError ? (
+          <QueryErrorState onRetry={() => refetchTransactions()} className="pt-6" />
         ) : (
-          <WalletOnchainHistory isConnected={isConnected} />
+          <WalletTransactionHistory
+            transactions={transactions}
+            loading={isTxLoading}
+            isConnected={isConnected}
+            network={state?.network}
+            hideHeader
+          />
         )}
       </section>
 

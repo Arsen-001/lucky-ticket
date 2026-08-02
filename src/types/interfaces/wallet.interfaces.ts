@@ -57,23 +57,6 @@ export interface WalletTransaction {
   counterparty?: string;
 }
 
-/** A real transfer read from the TON blockchain for the connected wallet. */
-export interface OnchainTransaction {
-  hash: string;
-  createdAt: string;
-  direction: 'in' | 'out';
-  /** TON amount as a decimal string. */
-  amount: string;
-  counterparty: string | null;
-  comment: string | null;
-}
-
-export interface OnchainTransactionsResponse {
-  address: string | null;
-  network: TonNetwork;
-  transactions: OnchainTransaction[];
-}
-
 export interface SupportedWallet {
   provider: WalletProvider;
   name: string;

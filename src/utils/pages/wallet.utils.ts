@@ -103,9 +103,6 @@ const tonScanBase = (network?: TonNetwork) =>
 export const tonScanUrl = (txHash: string, network?: TonNetwork) =>
   `${tonScanBase(network)}/tx/${txHash}`;
 
-export const tonScanAddressUrl = (address: string, network?: TonNetwork) =>
-  `${tonScanBase(network)}/address/${address}`;
-
 /** TON Connect `sendTransaction` validUntil — 6 minutes out (util keeps Date.now out of render). */
 export const tonConnectValidUntil = (): number => Math.floor(Date.now() / 1000) + 360;
 

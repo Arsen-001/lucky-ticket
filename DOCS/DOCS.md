@@ -1351,7 +1351,7 @@ Links an external TON wallet — required for the TON purchase path.
 
 **A player can remove their wallet and bind another one, and the old address is kept.** `POST /wallet/disconnect` archives the current binding into `WalletBindingHistory` (address, provider, network, bound/unbound timestamps, and `reason`: `removed` by the player or `replaced` by a new address) and then clears the address, public key and provider from `WalletConnection`. Connecting a different wallet archives the outgoing one the same way — before this it was overwritten in place, so the previous address simply ceased to exist, and a payout dispute could no longer be traced to the wallet that received it. The admin user card renders the list under «Прошлые кошельки».
 
-- **A removed wallet stops working, not just stops being shown.** `GET /wallet/onchain-transactions` used to read the stored address without checking `isConnected`, so a disconnected wallet kept publishing its blockchain history inside the app; it now requires an active connection, and removal clears the address anyway. Withdrawals already required an active connection, so removing a wallet blocks cash-out until a new one is bound.
+- **A removed wallet stops working, not just stops being shown.** Withdrawals require an _active_ connection, so removing a wallet blocks cash-out until a new one is bound. (`GET /wallet/onchain-transactions` used to read the stored address without checking `isConnected`, so a disconnected wallet kept publishing its blockchain history inside the app; it was fixed to require an active connection, and the Mini App stopped calling it entirely — see «The wallet page shows our ledger, not the chain» below.)
 - **The TON balance belongs to the account, not to the wallet.** `tonBalance` lives on the same row but is deliberately untouched by removal — an LC→TON conversion credits it with no wallet involved. Both wallet-less hero states (disconnected and invite-locked) show it, and the admin card shows it regardless of `isConnected`; hiding it behind a connection blanked out real money on exactly the accounts most likely to ask about it.
 - **Grandfathering follows the history.** `canConnect` is true if the account has any past binding, not just a stored address — otherwise removing a wallet below the invite threshold would leave the player unable to bind the replacement, turning the entry gate into a one-way door.
 
@@ -1389,7 +1389,7 @@ LC reaches real money through **TON**. The user converts LC to TON at the fixed 
 
 ### On-chain deposits & withdrawals are treasury-gated
 
-The two on-chain money paths only exist when the backend has a **treasury wallet** configured (`TON_TREASURY_MNEMONIC`, plus `TON_API_KEY` / `TON_NETWORK`). Everything else on this page — connect, Telegram-Stars purchase, TON→LS exchange, LC→TON conversion, both histories — works regardless.
+The two on-chain money paths only exist when the backend has a **treasury wallet** configured (`TON_TREASURY_MNEMONIC`, plus `TON_API_KEY` / `TON_NETWORK`). Everything else on this page — connect, Telegram-Stars purchase, TON→LS exchange, LC→TON conversion, transaction history — works regardless.
 
 - **Treasury configured:** deposits are watched and credited by comment attribution (~40–80 s), and a withdrawal really broadcasts from the treasury, recording the on-chain hash.
 - **No treasury:** `GET /wallet/deposit-address` returns **no address at all** and `depositsEnabled: false`; the deposit modal shows a "deposits are paused" notice. `POST /wallet/withdraw` returns **503** and the modal says withdrawals are paused.
@@ -1425,6 +1425,8 @@ LC and LS do not convert into each other, and LS cannot be withdrawn. There is n
 ### Transaction History
 
 A record of all balance events (LS purchases, in-game LS/LC earnings, spends), each with **Type**, **Amount**, **Date**, and **Status** (Completed / Pending / Failed).
+
+**The wallet page shows our ledger, not the chain.** Until 2026-08-02 the history sat behind two tabs — «In-app» and «On-chain», the latter reading the connected wallet's real blockchain history through `GET /wallet/onchain-transactions`. The on-chain tab is gone from the Mini App: inside Telegram the wallet app already shows that history first-hand, and repeating it here mostly listed transfers that have nothing to do with the platform, next to rows that do — two lists of different things under one heading. What the platform actually credited stays the only thing the page claims, and every row carrying an on-chain hash still links out to tonscan, so a deposit or withdrawal can be checked against the chain in one tap. The backend endpoint stays (the admin user card reads the chain via `GET /admin/users/:id/onchain`, which is the view that settles "I sent it and it never arrived").
 
 ---
 
