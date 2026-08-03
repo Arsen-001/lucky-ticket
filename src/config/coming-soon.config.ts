@@ -44,9 +44,23 @@ const fallbackLaunchAt = (() => {
   return Number.isNaN(parsed.getTime()) ? FALLBACK_LAUNCH_AT : parsed.toISOString();
 })();
 
+/**
+ * Friends to bring before the bot sends a Telegram gift — the one thing the
+ * pre-launch screen actually pays out, and the reason it shows a 5-step ladder
+ * rather than a bare countdown.
+ *
+ * Lives here rather than in `global.constants` because it is a launch-window
+ * promo, not a rule of the running economy: it stops meaning anything the day
+ * the gate comes down. The delivery itself is the bot's job — the screen only
+ * counts. @see ComingSoonGiftSteps
+ */
+const GIFT_FRIENDS_REQUIRED = 5;
+
 export const comingSoonConfig = {
   /** @see coming-soon.config — this closes the gate; it can never open it. */
   forcedOn,
   /** Shown while the server's date is unknown. @see FALLBACK_LAUNCH_AT */
   fallbackLaunchAt,
+  /** @see GIFT_FRIENDS_REQUIRED */
+  giftFriendsRequired: GIFT_FRIENDS_REQUIRED,
 };

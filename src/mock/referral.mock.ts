@@ -1,10 +1,12 @@
 import { images } from '@/constants/images';
 import {
   InvitedFriend,
+  PreLaunchGiftState,
   PreparedShareMessage,
   ReferralStats,
 } from '@/types/interfaces/referral.interfaces';
 import { appConfig } from '@/config/app.config';
+import { comingSoonConfig } from '@/config/coming-soon.config';
 
 const LOCAL_AVATARS = [
   images.avatar1.src,
@@ -122,9 +124,22 @@ export const preparedShareMessageMock: PreparedShareMessage = {
   id: 'mock-prepared-message-id',
 };
 
+/**
+ * The pre-launch gift, tracking the demo roster: with the full roster the
+ * threshold is long past, so the claim is filed and waiting for an admin —
+ * which is the state the ladder's copy is most easily got wrong in. Level-zero
+ * has no friends and therefore nothing filed.
+ */
+export const preLaunchGiftMock: PreLaunchGiftState = {
+  required: comingSoonConfig.giftFriendsRequired,
+  status: invitedFriendsMock.length >= comingSoonConfig.giftFriendsRequired ? 'PENDING' : null,
+  emoji: null,
+};
+
 export const referralMock = {
   'referral/friends': invitedFriendsMock,
   'referral/stats': referralStatsMock,
+  'referral/prelaunch-gift': preLaunchGiftMock,
   'POST referral/prepare-share': preparedShareMessageMock,
   // A friend's reward is claimed per id — `referral/claim/:friendId` — and the
   // resolver has no wildcards, so the keys come from the roster. `baseFriends`,

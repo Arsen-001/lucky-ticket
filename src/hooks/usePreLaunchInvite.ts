@@ -2,13 +2,26 @@
 
 import { useEffect, useState } from 'react';
 import { apiBase } from '@/config/api.config';
+import { comingSoonConfig } from '@/config/coming-soon.config';
 import { getRefererLink } from '@/utils/pages/referral.utils';
 import type { PreLaunchSession } from '@/hooks/usePreLaunchGate';
-import type { InvitedFriend } from '@/types/interfaces/referral.interfaces';
+import type { InvitedFriend, PreLaunchGiftState } from '@/types/interfaces/referral.interfaces';
 import type { LocaleType } from '@/types/types/locale.types';
 
 /** Placeholder inviter id for the mock layer, where nobody is signed in. */
 const MOCK_USER_ID = 'mock-user-id';
+
+/**
+ * What the ladder shows before the backend has answered — and on any backend
+ * too old to know the promo, whose 404 must not take the friends list down
+ * with it. A `null` status reads as "nothing filed yet", the only claim that
+ * is safe to make without data.
+ */
+const NO_GIFT: PreLaunchGiftState = {
+  required: comingSoonConfig.giftFriendsRequired,
+  status: null,
+  emoji: null,
+};
 
 /**
  * The invite block's data, fetched by hand rather than through RTK Query.
@@ -26,6 +39,8 @@ const MOCK_USER_ID = 'mock-user-id';
 export interface PreLaunchInviteState {
   /** Everyone who has joined through this player's link, newest first. */
   friends: InvitedFriend[];
+  /** Where the five-friend gift stands. @see PreLaunchGiftState */
+  gift: PreLaunchGiftState;
   /** `t.me/<bot>?startapp=<id>` — empty until the inviter's id is known. */
   link: string;
   isLoading: boolean;
@@ -56,6 +71,7 @@ const authedJson = async <T>(path: string, token: string): Promise<T> => {
 
 export function usePreLaunchInvite(session: PreLaunchSession | null): PreLaunchInviteState {
   const [friends, setFriends] = useState<InvitedFriend[]>([]);
+  const [gift, setGift] = useState<PreLaunchGiftState>(NO_GIFT);
   const [link, setLink] = useState('');
   const [isLoading, setIsLoading] = useState(true);
   const [isError, setIsError] = useState(false);
@@ -73,22 +89,35 @@ export function usePreLaunchInvite(session: PreLaunchSession | null): PreLaunchI
     setIsLoading(true);
     setIsError(false);
 
-    const load = async (): Promise<{ friends: InvitedFriend[]; link: string }> => {
+    const load = async (): Promise<{
+      friends: InvitedFriend[];
+      gift: PreLaunchGiftState;
+      link: string;
+    }> => {
       // Mock layer: no backend to ask. The gate opens the app on mocks, so this
       // is only reached with the emergency override on — someone deliberately
       // looking at the pre-launch screen locally. Imported lazily so the demo
       // roster never rides along in the bundle real visitors download.
       if (!apiBase) {
-        const { invitedFriendsMock } = await import('@/mock/referral.mock');
-        return { friends: invitedFriendsMock, link: getRefererLink(MOCK_USER_ID) };
+        const { invitedFriendsMock, preLaunchGiftMock } = await import('@/mock/referral.mock');
+        return {
+          friends: invitedFriendsMock,
+          gift: preLaunchGiftMock,
+          link: getRefererLink(MOCK_USER_ID),
+        };
       }
 
-      const [me, invited] = await Promise.all([
+      const [me, invited, gift] = await Promise.all([
         authedJson<{ id?: string }>('me', token!),
         authedJson<InvitedFriend[]>('referral/friends', token!),
+        // Softer than its siblings on purpose: the ladder is one line of copy,
+        // and a backend that predates the promo answers 404. Losing the whole
+        // invite block over that would be a far worse trade.
+        authedJson<PreLaunchGiftState>('referral/prelaunch-gift', token!).catch(() => NO_GIFT),
       ]);
       return {
         friends: Array.isArray(invited) ? invited : [],
+        gift: gift ?? NO_GIFT,
         link: getRefererLink(me?.id),
       };
     };
@@ -97,6 +126,7 @@ export function usePreLaunchInvite(session: PreLaunchSession | null): PreLaunchI
       .then(result => {
         if (cancelled) return;
         setFriends(result.friends);
+        setGift(result.gift);
         setLink(result.link);
         setIsLoading(false);
       })
@@ -135,6 +165,7 @@ export function usePreLaunchInvite(session: PreLaunchSession | null): PreLaunchI
 
   return {
     friends,
+    gift,
     link,
     isLoading,
     isError,

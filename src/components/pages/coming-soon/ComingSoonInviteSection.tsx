@@ -6,14 +6,16 @@ import { ComingSoonFriendsList } from '@/components/pages/coming-soon/ComingSoon
 import { ComingSoonInviteCard } from '@/components/pages/coming-soon/ComingSoonInviteCard';
 import { useAppTranslations } from '@/hooks/useAppTranslations';
 import { useInviteShare } from '@/hooks/useInviteShare';
-import { usePreLaunchInvite } from '@/hooks/usePreLaunchInvite';
 import type { CSSProperties } from 'react';
-import type { PreLaunchSession } from '@/hooks/usePreLaunchGate';
+import type { PreLaunchInviteState } from '@/hooks/usePreLaunchInvite';
 import type { LocaleType } from '@/types/types/locale.types';
 
 export interface ComingSoonInviteSectionProps {
-  /** The gate's sign-in result — no session, no invite block. */
-  session: PreLaunchSession | null;
+  /**
+   * Referral state owned by the screen — the gift ladder reads the same one.
+   * @see ComingSoonScreen
+   */
+  invite: PreLaunchInviteState;
   className?: string;
   /** Carries the screen's entry-animation delay. */
   style?: CSSProperties;
@@ -28,13 +30,12 @@ export interface ComingSoonInviteSectionProps {
  * `usePreLaunchInvite` rather than RTK Query.
  */
 export function ComingSoonInviteSection({
-  session,
+  invite,
   className,
   style,
 }: ComingSoonInviteSectionProps) {
   const t = useAppTranslations();
   const locale = useLocale() as LocaleType;
-  const invite = usePreLaunchInvite(session);
   const { copied, copy, share, ready } = useInviteShare({
     link: invite.link,
     text: t('invite share message'),

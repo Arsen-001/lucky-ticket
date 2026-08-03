@@ -5,8 +5,10 @@ import Image from 'next/image';
 import { useAppTranslations } from '@/hooks/useAppTranslations';
 import { GlobalConstants } from '@/constants/global.constants';
 import { getTelegramWebApp } from '@/lib/telegram/telegram';
+import { usePreLaunchInvite } from '@/hooks/usePreLaunchInvite';
 import { LaunchCountdown } from './LaunchCountdown';
 import { ComingSoonChannelLink } from './ComingSoonChannelLink';
+import { ComingSoonGiftSteps } from './ComingSoonGiftSteps';
 import { ComingSoonInviteSection } from './ComingSoonInviteSection';
 import { ComingSoonLanguageSwitch } from './ComingSoonLanguageSwitch';
 import type { PreLaunchSession } from '@/hooks/usePreLaunchGate';
@@ -40,6 +42,10 @@ export interface ComingSoonScreenProps {
  */
 export function ComingSoonScreen({ launchAt, session }: ComingSoonScreenProps) {
   const t = useAppTranslations();
+  // Fetched here rather than inside the invite block: the gift ladder sits
+  // directly under the headline and the invite block far below it, and both
+  // count the same referrals. One fetch, one number, no drift between them.
+  const invite = usePreLaunchInvite(session);
 
   useEffect(() => {
     const tg = getTelegramWebApp();
@@ -69,19 +75,24 @@ export function ComingSoonScreen({ launchAt, session }: ComingSoonScreenProps) {
           />
         </h1>
 
-        <div className="animate-slide-in-bottom flex flex-col items-center gap-3">
-          <span className="border-electric-pink/40 bg-electric-pink/10 text-electric-pink rounded-full border px-4 py-1.5 text-[11px] font-extrabold uppercase tracking-[0.2em]">
-            {t('coming soon')}
-          </span>
-          <p className="text-white-secondary max-w-[22rem] text-sm font-medium leading-relaxed">
-            {t('coming soon blurb')}
-          </p>
-        </div>
+        <h2 className="animate-slide-in-bottom max-w-[20rem] text-balance text-lg font-extrabold leading-snug text-white">
+          {t('coming soon earn now')}
+        </h2>
+
+        {invite.available && (
+          <ComingSoonGiftSteps
+            invitedCount={invite.friends.length}
+            gift={invite.gift}
+            loading={invite.isLoading}
+            className="animate-slide-in-bottom"
+            style={{ animationDelay: '100ms' }}
+          />
+        )}
 
         <LaunchCountdown targetDate={launchAt} className="animate-fade-in" />
 
         <ComingSoonInviteSection
-          session={session}
+          invite={invite}
           className="animate-slide-in-bottom"
           style={{ animationDelay: '300ms' }}
         />

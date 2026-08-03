@@ -2277,6 +2277,44 @@ rich card → Telegram's share sheet → the clipboard); the shared behaviour li
 in `useInviteShare`, used by both screens. The list folds after five rows so a
 prolific inviter's roster does not bury the rest of the screen.
 
+**The gift ladder.** Directly under the headline («до открытия игры уже можете
+зарабатывать») the screen shows five horizontal steps — one per friend brought
+through the link — ending in a Telegram gift from the bot, drawn at random from
+a heart, a teddy bear, a gift box or a rose. It reads the same
+`referral/friends` list the invite block below it lists, so the two can never
+disagree about how many friends arrived; the threshold is
+`comingSoonConfig.giftFriendsRequired` (5), kept equal to the backend's
+`PRE_LAUNCH_GIFT_FRIENDS` by the guardrail suite.
+
+**Earning it files a claim; an admin pays it.** Crossing the fifth friend writes
+one `PreLaunchGift` row (PENDING) and nothing else — no gift leaves the bot
+until somebody presses Подтвердить in the panel (Рефералы → «Подарки за 5
+друзей»). That gate is deliberate: each gift is paid out of the bot's own Stars
+balance, and what earns it — five Telegram accounts opening a link — costs an
+abuser nothing. The queue shows friends-when-filed beside friends-now, because
+a roster that shrank after the claim is the shape a farm leaves behind.
+
+Rules the implementation holds to:
+
+- **One per player, ever.** `PreLaunchGift.userId` is unique, which is also what
+  makes the trigger safe under two referrals landing at once — the loser of the
+  race gets a unique violation, not a second gift.
+- **Earning is gated on the countdown, approving is not.** A claim can only be
+  filed while `comingSoonEnabled` is on (a promo nobody is shown must not keep
+  billing the bot), but one filed the day before launch is still payable after.
+- **Which gift is decided at approval**, by matching the four emoji against
+  `getAvailableGifts` — gift ids are rotated by Telegram as stock runs out, so a
+  hardcoded id becomes a failing send with no explanation. Gifts the bot cannot
+  currently afford are filtered out first, so «пополни бота» reaches the admin
+  instead of a raw Telegram rejection.
+- **A refused send is retryable, not final.** FAILED keeps the Telegram error
+  verbatim and approving again re-runs it. REJECTED is kept as a row rather than
+  deleted, so the promo cannot be re-earned on the next referral.
+- **The screen never over-promises.** At 5/5 it says the gift is being confirmed
+  while a claim is open, names the gift only once Telegram accepted it, and for
+  a rejected claim says only that the steps are done — a refusal is not
+  something a player learns from the countdown.
+
 No store exists behind the gate, so this block asks the backend by hand
 (`me`, `referral/friends`, `referral/prepare-share`) with the access token the
 sign-in returned. That token is short-lived and nothing here refreshes it, which
