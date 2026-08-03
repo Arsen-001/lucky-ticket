@@ -60,6 +60,7 @@ export function ComingSoonInviteSection({
       />
       <ComingSoonFriendsList
         friends={invite.friends}
+        notCountedIds={invite.gift.notCountedFriendIds}
         loading={invite.isLoading}
         isError={invite.isError}
         onRetry={invite.retry}

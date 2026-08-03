@@ -7,11 +7,13 @@ import { comingSoonConfig } from '@/config/coming-soon.config';
  * The pre-launch gift ladder is a promise drawn by one repo and paid by
  * another, and neither notices when they stop agreeing.
  *
- * The screen draws `comingSoonConfig.giftFriendsRequired` steps and names four
- * gifts; the backend files a claim at `PRE_LAUNCH_GIFT_FRIENDS` and sends only
+ * The screen draws `comingSoonConfig.giftFriendsRequired` steps and names the
+ * gift; the backend files a claim at `PRE_LAUNCH_GIFT_FRIENDS` and sends only
  * what matches `PRE_LAUNCH_GIFT_EMOJI`. Lower the backend's threshold and
  * players are paid before the ladder fills; raise it and the ladder completes
- * on a promise nothing honours. Neither shows up in a type-check.
+ * on a promise nothing honours. Show a gift the backend will not send and the
+ * screen advertises something nobody can receive. None of it shows up in a
+ * type-check.
  *
  * Needs the backend checked out beside this repo — skipped otherwise, same as
  * the enum-parity guardrail.
@@ -38,8 +40,11 @@ const componentPool = (() => {
 const bare = (value: string) => value.replace(/[︎️]/g, '');
 
 describe('pre-launch gift ladder', () => {
-  it('shows exactly the four gifts the promo pays out', () => {
-    expect(componentPool.map(bare)).toEqual(['❤', '🧸', '🎁', '🌹']);
+  it('shows exactly the gift the promo pays out', () => {
+    // One gift since 2026-08-04 — the four-way draw is gone. Written as the
+    // literal pool rather than a length check: the point is that the screen and
+    // the bot name the SAME thing, not that they name equally many.
+    expect(componentPool.map(bare)).toEqual(['🧸']);
   });
 
   it.runIf(hasBackend)('threshold matches the backend', () => {

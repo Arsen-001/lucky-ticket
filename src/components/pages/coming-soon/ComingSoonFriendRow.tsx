@@ -1,6 +1,6 @@
 'use client';
 
-import { Check, User } from 'lucide-react';
+import { BellOff, Check, User } from 'lucide-react';
 import { twMerge } from 'tailwind-merge';
 import { useAppTranslations } from '@/hooks/useAppTranslations';
 import type { CSSProperties } from 'react';
@@ -9,6 +9,13 @@ export interface ComingSoonFriendRowProps {
   username: string;
   /** Telegram photo or an in-app avatar path; empty for a friend with neither. */
   avatar?: string;
+  /**
+   * Does this friend count toward the gift? False means they arrived but have
+   * not subscribed to the channel. Saying so is the whole point: otherwise a
+   * player with five names in the list and a ladder stuck at three reads the
+   * screen as broken.
+   */
+  counted?: boolean;
   className?: string;
   style?: CSSProperties;
 }
@@ -30,6 +37,7 @@ export interface ComingSoonFriendRowProps {
 export function ComingSoonFriendRow({
   username,
   avatar,
+  counted = true,
   className,
   style,
 }: ComingSoonFriendRowProps) {
@@ -56,10 +64,19 @@ export function ComingSoonFriendRow({
         {username}
       </span>
 
-      <span className="text-success flex flex-shrink-0 items-center gap-1 text-[10px] font-extrabold uppercase tracking-wider">
-        <Check size={12} strokeWidth={3} />
-        {t('invite counted')}
-      </span>
+      {counted ? (
+        <span className="text-success flex flex-shrink-0 items-center gap-1 text-[10px] font-extrabold uppercase tracking-wider">
+          <Check size={12} strokeWidth={3} />
+          {t('invite counted')}
+        </span>
+      ) : (
+        // Not a failure and not the friend's fault — it is one tap away, so the
+        // label names the missing thing rather than scolding.
+        <span className="text-warning flex flex-shrink-0 items-center gap-1 text-[10px] font-extrabold uppercase tracking-wider">
+          <BellOff size={12} strokeWidth={2.6} />
+          {t('invite not subscribed')}
+        </span>
+      )}
     </div>
   );
 }

@@ -1,21 +1,27 @@
 'use client';
 
 import { Fragment } from 'react';
-import { Check, Gift } from 'lucide-react';
+import { Check, Gift, UserPlus } from 'lucide-react';
 import { twMerge } from 'tailwind-merge';
 import { comingSoonConfig } from '@/config/coming-soon.config';
 import { Skeleton } from '@/components/shared/seleketons/Skeleton';
 import { SkeletonSuspense } from '@/components/shared/seleketons/SkeletonSuspense';
 import { useAppTranslations } from '@/hooks/useAppTranslations';
+import { GiftStepBar } from './GiftStepBar';
+import { GiftStepNode } from './GiftStepNode';
 import type { CSSProperties } from 'react';
 import type { PreLaunchGiftState } from '@/types/interfaces/referral.interfaces';
 
 /**
- * The pool the bot draws from. Emoji rather than the Telegram sticker art on
- * purpose: which gift arrives is decided when it is sent, so showing one piece
- * of art would read as a promise of that specific gift.
+ * What the bot sends. One gift since 2026-08-04 — it used to be a four-way draw
+ * — so the row below names it instead of hedging with «случайный».
+ *
+ * Emoji rather than the Telegram sticker art: the art belongs to whichever gift
+ * id Telegram has in stock at approval time, and this must not turn into a
+ * promise of one particular sticker. Kept equal to the backend's
+ * `PRE_LAUNCH_GIFT_EMOJI` by the guardrail suite.
  */
-const GIFT_POOL = ['❤️', '🧸', '🎁', '🌹'];
+const GIFT_POOL = ['🧸'];
 
 export interface ComingSoonGiftStepsProps {
   /** Friends who have already come through this player's link. */
@@ -52,6 +58,7 @@ export function ComingSoonGiftSteps({
   // Clamped: a prolific inviter is at 5/5, not at 11/5.
   const reached = Math.min(Math.max(invitedCount, 0), total);
   const remaining = total - reached;
+  const complete = remaining === 0;
   const sent = gift.status === 'SENT';
 
   /**
@@ -60,6 +67,20 @@ export function ComingSoonGiftSteps({
    * we know — and a refused claim says only that the steps are done: this
    * screen is not where somebody learns they were turned down.
    */
+  /**
+   * Today's places, shown only while they can still change what this player
+   * does. Once their own claim is filed the board is no longer their business —
+   * and a player who sees "0 left" AFTER earning theirs reads it as a loss.
+   */
+  const places = (() => {
+    if (gift.status) return null;
+    const limit = gift.dailyLimit;
+    const left = gift.dailyRemaining;
+    if (typeof limit !== 'number' || typeof left !== 'number') return null;
+    if (limit <= 0 || left <= 0) return t('coming soon gift places gone');
+    return t('coming soon gift places left', { total: limit, left });
+  })();
+
   const caption = (() => {
     if (remaining > 0) return t('coming soon gift steps hint', { count: remaining });
     if (sent) {
@@ -76,60 +97,56 @@ export function ComingSoonGiftSteps({
 
   return (
     <div className={twMerge('flex w-full flex-col items-center gap-3', className)} style={style}>
+      {/* Five friends, then the gift — the gift is a bead of its own now. It
+          used to sit ON the fifth step, which made the last friend look like a
+          present and the ladder look one friend short. */}
       <div aria-hidden className="flex w-full items-center">
         {Array.from({ length: total }, (_, index) => {
           const step = index + 1;
           const done = reached >= step;
-          // The one the player is working on right now — highlighted so the
-          // ladder reads as "you are here", not just as a score.
           const active = !done && reached === index;
-          const isGift = step === total;
 
           return (
             <Fragment key={step}>
-              {index > 0 && (
-                <span className="h-[3px] flex-1 overflow-hidden rounded-full bg-white/10">
-                  <span
-                    className={twMerge(
-                      'block h-full rounded-full transition-all duration-300',
-                      done && 'bg-pink-gradient'
-                    )}
-                    style={{ width: done ? '100%' : 0 }}
-                  />
-                </span>
-              )}
-
-              <span
-                className={twMerge(
-                  'flex-center flex-shrink-0 rounded-full border text-[11px] font-extrabold leading-none tabular-nums transition-colors duration-300',
-                  isGift ? 'h-9 w-9' : 'h-8 w-8',
-                  done
-                    ? 'bg-pink-gradient border-transparent text-white shadow-[0_0_14px_-2px_var(--color-electric-pink)]'
-                    : active
-                      ? 'border-electric-pink/60 bg-electric-pink/12 text-electric-pink'
-                      : 'border-white/12 bg-white/5 text-white/40'
-                )}
-              >
-                {isGift ? (
-                  <Gift size={17} strokeWidth={2.2} />
-                ) : done ? (
-                  <Check size={15} strokeWidth={3} />
-                ) : (
-                  step
-                )}
-              </span>
+              {index > 0 && <GiftStepBar filled={done} />}
+              <GiftStepNode
+                state={done ? 'done' : active ? 'active' : 'idle'}
+                // Every step is one invited friend, and says so: a bare number
+                // reads as a level, not as a person to bring.
+                icon={
+                  done ? (
+                    <Check size={15} strokeWidth={3} />
+                  ) : (
+                    <UserPlus size={15} strokeWidth={2.4} />
+                  )
+                }
+              />
             </Fragment>
           );
         })}
+
+        <GiftStepBar filled={complete} />
+        <GiftStepNode
+          emphasized
+          state={complete ? 'done' : 'idle'}
+          icon={<Gift size={17} strokeWidth={2.2} />}
+        />
       </div>
 
       <SkeletonSuspense
         loading={loading}
         skeleton={<Skeleton variant="line" className="h-4 w-56" />}
       >
-        <p className="text-white-secondary max-w-[22rem] text-[13px] font-semibold leading-snug">
-          {caption}
-        </p>
+        <div className="flex flex-col items-center gap-1.5">
+          <p className="text-white-secondary max-w-[22rem] text-[13px] font-semibold leading-snug">
+            {caption}
+          </p>
+          {places && (
+            <span className="text-warning border-warning/25 bg-warning/10 rounded-full border px-2.5 py-1 text-[11px] font-extrabold tabular-nums">
+              {places}
+            </span>
+          )}
+        </div>
       </SkeletonSuspense>
 
       {/* The draw is over once a gift has actually gone out — leaving the four

@@ -19,6 +19,12 @@ const COLLAPSED_ROWS = 5;
 
 export interface ComingSoonFriendsListProps {
   friends: InvitedFriend[];
+  /**
+   * Ids of friends who arrived but do not count toward the gift yet (not
+   * subscribed to the channel). Empty when the backend does not say — an old
+   * backend must not paint every friend as uncounted.
+   */
+  notCountedIds?: string[];
   loading?: boolean;
   isError?: boolean;
   onRetry?: () => void;
@@ -34,6 +40,7 @@ export interface ComingSoonFriendsListProps {
  */
 export function ComingSoonFriendsList({
   friends,
+  notCountedIds,
   loading,
   isError,
   onRetry,
@@ -44,6 +51,7 @@ export function ComingSoonFriendsList({
 
   const foldable = friends.length > COLLAPSED_ROWS;
   const visible = expanded || !foldable ? friends : friends.slice(0, COLLAPSED_ROWS);
+  const notCounted = new Set(notCountedIds ?? []);
 
   return (
     <div className={twMerge('flex w-full flex-col gap-2', className)}>
@@ -83,6 +91,7 @@ export function ComingSoonFriendsList({
               key={friend.id}
               username={friend.username}
               avatar={friend.avatar}
+              counted={!notCounted.has(friend.id)}
               className="animate-slide-in-bottom"
               style={{ animationDelay: `${index * 60}ms` }}
             />

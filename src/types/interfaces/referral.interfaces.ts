@@ -50,4 +50,18 @@ export interface PreLaunchGiftState {
   status: PreLaunchGiftStatus | null;
   /** Which gift actually arrived. Only ever set once `status` is `SENT`. */
   emoji: string | null;
+  /**
+   * Friends that COUNT toward the ladder — invited *and* subscribed to the
+   * channel, which is the rule the backend files claims by. The ladder draws
+   * this, not the length of the friends list, or the screen would promise a
+   * gift that is never filed. `null` = a backend too old to say; fall back to
+   * the list length rather than showing a zero.
+   */
+  counted?: number | null;
+  /** Ids of invited friends that do not count yet — the list marks them. */
+  notCountedFriendIds?: string[];
+  /** Places on today's board; `0` means the promo is closed today. */
+  dailyLimit?: number | null;
+  /** Places still free today. */
+  dailyRemaining?: number | null;
 }

@@ -125,6 +125,14 @@ export const preparedShareMessageMock: PreparedShareMessage = {
 };
 
 /**
+ * One friend who arrived but never joined the channel — the state that has to
+ * be visible somewhere, because a roster that always counts in full hides the
+ * only rule a player can actually get wrong.
+ */
+const notCountedFriendIds = invitedFriendsMock.slice(1, 2).map(friend => friend.id);
+const countedFriends = invitedFriendsMock.length - notCountedFriendIds.length;
+
+/**
  * The pre-launch gift, tracking the demo roster: with the full roster the
  * threshold is long past, so the claim is filed and waiting for an admin —
  * which is the state the ladder's copy is most easily got wrong in. Level-zero
@@ -132,8 +140,13 @@ export const preparedShareMessageMock: PreparedShareMessage = {
  */
 export const preLaunchGiftMock: PreLaunchGiftState = {
   required: comingSoonConfig.giftFriendsRequired,
-  status: invitedFriendsMock.length >= comingSoonConfig.giftFriendsRequired ? 'PENDING' : null,
+  status: countedFriends >= comingSoonConfig.giftFriendsRequired ? 'PENDING' : null,
   emoji: null,
+  counted: countedFriends,
+  notCountedFriendIds,
+  // Today's board, mid-day: enough left to still be a race.
+  dailyLimit: 5,
+  dailyRemaining: 2,
 };
 
 export const referralMock = {

@@ -49,12 +49,13 @@ export function ComingSoonScreen({ launchAt, session }: ComingSoonScreenProps) {
   useTelegramChrome();
 
   return (
-    // `m-auto` on the inner column rather than `justify-center` on the outer
-    // one: with the invite list the content can now outgrow the viewport, and a
-    // centered flex column clips its own overflow at the TOP — the logo would
-    // become unreachable by scrolling.
-    <main className="mx-auto flex min-h-full max-w-[var(--app-max-w)] flex-col px-6 pb-[calc(var(--tg-inset-bottom)+2rem)] pt-[calc(var(--tg-inset-top)+2rem)] text-center">
-      <div className="m-auto flex w-full flex-col items-center gap-7">
+    // Top-aligned, not centred: the screen opens on the logo and the promise
+    // instead of on a band of empty sky, and the content grows downward as the
+    // invite list fills. (`mb-auto` keeps the leftover space at the bottom; a
+    // centred column would also clip its own overflow at the TOP once the list
+    // outgrows the viewport, putting the logo out of scrolling reach.)
+    <main className="mx-auto flex min-h-full max-w-[var(--app-max-w)] flex-col px-6 pb-[calc(var(--tg-inset-bottom)+2rem)] pt-[calc(var(--tg-inset-top)+1.5rem)] text-center">
+      <div className="mb-auto flex w-full flex-col items-center gap-7">
         <h1 className="animate-fade-in w-full max-w-[270px]">
           <Image
             src={logo}
@@ -70,7 +71,10 @@ export function ComingSoonScreen({ launchAt, session }: ComingSoonScreenProps) {
 
         {invite.available && (
           <ComingSoonGiftSteps
-            invitedCount={invite.friends.length}
+            // The COUNTED friends, not everyone invited: the backend files a
+            // claim on subscribed friends only, and a ladder counting the rest
+            // would promise a gift nobody is going to file.
+            invitedCount={invite.gift.counted ?? invite.friends.length}
             gift={invite.gift}
             loading={invite.isLoading}
             className="animate-slide-in-bottom"

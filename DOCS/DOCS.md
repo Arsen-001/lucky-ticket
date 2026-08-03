@@ -2285,13 +2285,44 @@ in `useInviteShare`, used by both screens. The list folds after five rows so a
 prolific inviter's roster does not bury the rest of the screen.
 
 **The gift ladder.** Directly under the headline («до открытия игры уже можете
-зарабатывать») the screen shows five horizontal steps — one per friend brought
-through the link — ending in a Telegram gift from the bot, drawn at random from
-a heart, a teddy bear, a gift box or a rose. It reads the same
-`referral/friends` list the invite block below it lists, so the two can never
-disagree about how many friends arrived; the threshold is
+зарабатывать») the screen shows five steps — one per friend brought through the
+link, each drawn with the invite icon — ending in a sixth bead: a Telegram
+teddy bear (🧸) from the bot. One gift since 2026-08-04; it used to be a
+four-way draw (heart / bear / box / rose), so the screen named the pool and
+hedged with «случайный», and now names the thing. The threshold is
 `comingSoonConfig.giftFriendsRequired` (5), kept equal to the backend's
-`PRE_LAUNCH_GIFT_FRIENDS` by the guardrail suite.
+`PRE_LAUNCH_GIFT_FRIENDS` by the guardrail suite, which also pins the pool on
+both sides — a screen advertising a gift the bot will not send is the failure
+neither repo notices on its own.
+
+**One gift per account, forever**, enforced in three places: `PreLaunchGift.userId`
+is unique (nothing can file a second claim, whatever its status — a REJECTED row
+is kept precisely so the promo cannot be re-earned), `approve` refuses a claim
+that already went out, and the player's card in the panel (Рефералы →
+«Подарок за 5 друзей») says whether this account has had one, so an admin about
+to send something by hand does not have to search the queue for the name.
+
+**A friend counts only while they are in the channel.** The promo buys an
+audience, and an invited account that never joined `@luckyticket365` is not one,
+so the ladder counts _subscribed_ friends (`preLaunchGift.counted`), not the
+length of the list. Membership is the same cached live check every other channel
+gate uses (`ChannelMembershipService`, 60s, fail-open — our outage must not cost
+a player a friend they really brought). The list says which friends do not count
+yet («без канала»), because a roster of five names beside a ladder stuck at three
+otherwise reads as a broken screen. Admin-tunable:
+`referral.preLaunchGift.requireChannelSubscription`.
+
+**A day has a fixed number of places.** `referral.preLaunchGift.dailyLimit`
+(default 5, editable right on the panel's gift queue) caps how many players may
+**earn** a gift per UTC day — claims filed, not gifts sent; sending is still a
+manual approval. The screen prints the board («сегодня 5 подарков · осталось 2»)
+while it can still change what a player does, and hides it once their own claim
+is filed. `0` closes the promo for the day rather than meaning "unlimited": the
+number always reads as «мест на сегодня», so a field left at zero can only cost
+less money than intended. Running out is a "not today", never a "never" — no row
+is filed, and opening the screen the next day files it. That is also why opening
+the screen is a write path at all: a friend can subscribe long after arriving,
+and neither that nor a new day is a new referral to trigger on.
 
 **Earning it files a claim; an admin pays it.** Crossing the fifth friend writes
 one `PreLaunchGift` row (PENDING) and nothing else — no gift leaves the bot
