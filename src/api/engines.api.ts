@@ -70,7 +70,7 @@ export const enginesApi = api.injectEndpoints({
       // whole home slider right after a claim ("renders the full cube"). Claims
       // award no AP (`me` untouched) but advance tasks/achievements — those get
       // their own tags, which don't touch the slider.
-      invalidatesTags: [rtkTags.engines, rtkTags.tasks, rtkTags.achievements],
+      invalidatesTags: [rtkTags.tasks, rtkTags.achievements],
       async onQueryStarted({ engineId }, { dispatch, queryFulfilled }) {
         const patch = dispatch(
           ticketsApi.util.updateQueryData('getTickets', undefined, draft => {
@@ -98,7 +98,7 @@ export const enginesApi = api.injectEndpoints({
       // No `tickets` invalidation (see claimEngine): the patch below fully updates
       // the getTickets cache, so the refetch is redundant and would refresh every
       // cube in the slider. tasks/achievements have their own tags.
-      invalidatesTags: [rtkTags.engines, rtkTags.tasks, rtkTags.achievements],
+      invalidatesTags: [rtkTags.tasks, rtkTags.achievements],
       async onQueryStarted({ tier }, { dispatch, queryFulfilled }) {
         const patch = dispatch(
           ticketsApi.util.updateQueryData('getTickets', undefined, draft => {
@@ -132,7 +132,7 @@ export const enginesApi = api.injectEndpoints({
       // No `tickets` invalidation (see claimEngine): the patch below fully updates
       // the getTickets cache, so the refetch is redundant and would refresh every
       // cube in the slider. me/tasks/achievements have their own tags.
-      invalidatesTags: [rtkTags.engines, rtkTags.me, rtkTags.tasks, rtkTags.achievements],
+      invalidatesTags: [rtkTags.me, rtkTags.tasks, rtkTags.achievements],
       async onQueryStarted({ engineId, cost }, { dispatch, queryFulfilled, getState }) {
         const inventory = inventoryApi.endpoints.getInventory.select()(
           getState() as Parameters<ReturnType<typeof inventoryApi.endpoints.getInventory.select>>[0]
@@ -176,7 +176,7 @@ export const enginesApi = api.injectEndpoints({
       // the new level into the getTickets cache, so a full refetch is redundant —
       // and it would re-fetch EVERY engine, visibly refreshing the neighbouring
       // cubes on the home slider. Only stars (me) is reconciled.
-      invalidatesTags: [rtkTags.engines, rtkTags.me],
+      invalidatesTags: [rtkTags.me],
       async onQueryStarted({ engineId, cost }, { dispatch, queryFulfilled, getState }) {
         const tables = levelTablesFromState(getState());
         const ticketsPatch = dispatch(
@@ -211,7 +211,7 @@ export const enginesApi = api.injectEndpoints({
       query: body => ({ url: 'engines/upgrade-capacity', method: 'POST', body }),
       // See upgrade-speed: the optimistic patch keeps the cache correct, so we
       // skip the all-engines `tickets` refetch that flickers neighbouring cubes.
-      invalidatesTags: [rtkTags.engines, rtkTags.me],
+      invalidatesTags: [rtkTags.me],
       async onQueryStarted({ engineId, cost }, { dispatch, queryFulfilled, getState }) {
         const tables = levelTablesFromState(getState());
         const ticketsPatch = dispatch(
@@ -252,7 +252,7 @@ export const enginesApi = api.injectEndpoints({
       // See upgrade-speed: fill pendingCount in the cache optimistically (below)
       // instead of refetching EVERY engine, which visibly refreshes the
       // neighbouring cubes on the home slider. Only stars (me) is reconciled.
-      invalidatesTags: [rtkTags.engines, rtkTags.me],
+      invalidatesTags: [rtkTags.me],
       async onQueryStarted({ engineId, cost }, { dispatch, queryFulfilled, getState }) {
         const inventory = inventoryApi.endpoints.getInventory.select()(
           getState() as Parameters<ReturnType<typeof inventoryApi.endpoints.getInventory.select>>[0]
@@ -293,7 +293,10 @@ export const enginesApi = api.injectEndpoints({
       // pendingCount in the cache with the same math the server runs, so the
       // all-engines refetch was pure churn — every engine finishing a cycle
       // used to re-fetch (and visibly refresh) every other cube on screen.
-      invalidatesTags: [rtkTags.engines],
+      // No invalidation: engines live inside the `getTickets` payload, which the
+      // patch below updates in place. Refetching it here is what the patches
+      // exist to avoid — an invalidation reloads the tickets screen into
+      // skeletons every time an engine finishes a cycle.
       async onQueryStarted({ engineId }, { dispatch, queryFulfilled, getState }) {
         const inventory = inventoryApi.endpoints.getInventory.select()(
           getState() as Parameters<ReturnType<typeof inventoryApi.endpoints.getInventory.select>>[0]

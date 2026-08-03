@@ -102,6 +102,42 @@ describe('RTK Query wiring (3-place rule)', () => {
   // exact button. `market/tickets/:ticketId/buy` shipped that way: the mock was
   // registered on the static `market/tickets/buy`, so no ticket could be bought
   // in dev at all.
+  it('every invalidated tag is provided by some query', () => {
+    // `rtkTags.engines` was invalidated by all seven engine mutations and
+    // provided by nobody: engines live inside the `getTickets` payload, so the
+    // tag matched no cache entry and every one of those invalidations was a
+    // no-op. Nothing broke — the mutations patch `getTickets` in place — but the
+    // code claimed a refresh that never happened, which is worse than silence.
+    const provided = new Set<string>();
+    const invalidated = new Map<string, string[]>();
+
+    for (const file of apiFiles) {
+      const source = read(`src/api/${file}`);
+      // Split per endpoint so a tag is attributed to the block that names it.
+      for (const block of source.split(/\n    (?=[a-zA-Z]+: builder\.)/).slice(1)) {
+        const name = block.match(/^([a-zA-Z]+): builder\./)?.[1] ?? '?';
+        const body = block.split(/\n    [a-zA-Z]+: builder\./)[0];
+        for (const [key, sink] of [
+          ['providesTags', provided],
+          ['invalidatesTags', invalidated],
+        ] as const) {
+          const at = body.indexOf(key);
+          if (at === -1) continue;
+          for (const tag of body.slice(at, at + 400).matchAll(/rtkTags\.(\w+)/g)) {
+            if (sink instanceof Set) sink.add(tag[1]);
+            else sink.set(tag[1], [...(sink.get(tag[1]) ?? []), `${file}:${name}`]);
+          }
+        }
+      }
+    }
+
+    const dead = [...invalidated.keys()]
+      .filter(tag => !provided.has(tag))
+      .map(tag => `${tag} (invalidated by ${invalidated.get(tag)!.join(', ')})`);
+
+    expect(dead).toEqual([]);
+  });
+
   it('every mutation URL in *.api.ts resolves to a mock handler', () => {
     const unmocked: string[] = [];
 
