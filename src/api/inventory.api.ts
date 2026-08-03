@@ -23,12 +23,20 @@ export const inventoryApi = api.injectEndpoints({
 
     equipChip: builder.mutation<InventorySnapshot, { chipId: string; engineId: string }>({
       query: body => ({ url: 'inventory/chip/equip', method: 'POST', body }),
-      invalidatesTags: [rtkTags.inventory, rtkTags.tickets],
+      // `me` because this charges Lucky Stars server-side: without it the
+      // header balance and the equip modal's own `userStars / cost` gate both
+      // kept the pre-purchase number, so a second equip was armed against a
+      // balance the server no longer agreed with.
+      invalidatesTags: [rtkTags.inventory, rtkTags.tickets, rtkTags.me],
     }),
 
     unequipChip: builder.mutation<InventorySnapshot, { chipId: string }>({
       query: body => ({ url: 'inventory/chip/unequip', method: 'POST', body }),
-      invalidatesTags: [rtkTags.inventory, rtkTags.tickets],
+      // `me` because this charges Lucky Stars server-side: without it the
+      // header balance and the equip modal's own `userStars / cost` gate both
+      // kept the pre-purchase number, so a second equip was armed against a
+      // balance the server no longer agreed with.
+      invalidatesTags: [rtkTags.inventory, rtkTags.tickets, rtkTags.me],
     }),
 
     levelUpChip: builder.mutation<InventorySnapshot, { chipId: string }>({

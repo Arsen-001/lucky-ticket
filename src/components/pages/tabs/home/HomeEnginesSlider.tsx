@@ -348,7 +348,15 @@ export function HomeEnginesSlider({ className }: ClassNameProps) {
     }));
     setElapsedByEngine(prev => ({ ...prev, [engineId]: 0 }));
     // Persist to the backend so balances (tickets / AP in the header) update.
-    void claimEngine({ engineId });
+    // `.unwrap()` + toast, matching EngineDetails. These were fire-and-forget
+    // `void` calls, so a server refusal (insufficient balance, a lost
+    // concurrency race — which the backend now REJECTS instead of granting
+    // twice) left the optimistic UI to snap back with no explanation, on the
+    // app's default screen. The player could not tell whether the stars were
+    // spent.
+    claimEngine({ engineId })
+      .unwrap()
+      .catch(() => toast.error(t('claim failed')));
   };
 
   const handleInstantClaim = (engineId: string) => {
@@ -386,7 +394,9 @@ export function HomeEnginesSlider({ className }: ClassNameProps) {
     // claims to receive AP. Stars in the header reconcile via the mutation's me patch.
     updateEngine(engineId, e => ({ ...e, pendingCount: fullCapacity }));
     setElapsedByEngine(prev => ({ ...prev, [engineId]: 0 }));
-    void skipEngineCycle({ engineId, cost });
+    skipEngineCycle({ engineId, cost })
+      .unwrap()
+      .catch(() => toast.error(t('action failed')));
   };
 
   const confirmSkip = () => {
@@ -411,8 +421,11 @@ export function HomeEnginesSlider({ className }: ClassNameProps) {
       );
       // Persist to the backend (charges stars + bumps the level) — matches
       // EngineDetails. Without this the upgrade was optimistic-only and reverted.
-      if (type === 'speed') void upgradeEngineSpeed({ engineId, cost });
-      else void upgradeEngineCapacity({ engineId, cost });
+      const upgrade =
+        type === 'speed'
+          ? upgradeEngineSpeed({ engineId, cost })
+          : upgradeEngineCapacity({ engineId, cost });
+      upgrade.unwrap().catch(() => toast.error(t('action failed')));
     });
   };
 

@@ -38,8 +38,22 @@ export function LoginForm() {
     try {
       await login({ email: values.email, password: values.password }).unwrap();
       router.push(routes.home);
-    } catch {
-      toast.error(t('invalid credentials'));
+    } catch (error) {
+      // The backend now has three distinct refusals here, and collapsing them
+      // into "wrong password" makes a locked-out user keep guessing:
+      //  • 429 — per-IP throttle (10/min)
+      //  • 401 with a message — per-email lockout (10 fails / 15 min); the
+      //    server's text is the only place the wait is stated
+      //  • 401 without one — genuinely wrong credentials
+      const status = (error as { status?: number })?.status;
+      const serverMessage = (error as { data?: { message?: string } } | undefined)?.data?.message;
+      if (status === 429) {
+        toast.error(t('too many attempts try later'));
+      } else if (status === 401 && serverMessage) {
+        toast.error(serverMessage);
+      } else {
+        toast.error(t('invalid credentials'));
+      }
     }
   }
 

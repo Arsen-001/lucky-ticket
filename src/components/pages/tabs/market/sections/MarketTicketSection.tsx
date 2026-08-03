@@ -51,6 +51,7 @@ export function MarketTicketSection({ tickets, onSelect, onBuy }: MarketTicketSe
             modalIcon
           ),
           prices: discountedPrices,
+          remainingSupply: ticket.remainingSupply,
           isNew: ticket.isNew,
           discountPct: ticket.discountPct,
           accent: ticket.ticketType,

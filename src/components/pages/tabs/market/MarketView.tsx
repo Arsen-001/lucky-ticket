@@ -169,8 +169,12 @@ export function MarketView() {
       });
       setPurchase(null);
     } catch (error) {
-      console.error('Purchase failed:', error);
-      toast.error(t('action failed'));
+      // Surface the server's reason. It distinguishes "Out of stock" from
+      // "Not enough LC" from a tier gate — all of which used to collapse into
+      // one generic line, so a sold-out item read as a balance problem and
+      // players filed support tickets about coins they clearly had.
+      const serverMessage = (error as { data?: { message?: string } } | undefined)?.data?.message;
+      toast.error(serverMessage || t('action failed'));
     } finally {
       setConfirming(false);
     }

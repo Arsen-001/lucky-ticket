@@ -36,6 +36,15 @@ export interface MarketItemBase {
   expiresAt?: string;
   /** Admin-set storefront photo; when present the card shows it instead of the icon. */
   imageUrl?: string;
+  /**
+   * Units left when the item has a finite stock; undefined = unlimited.
+   *
+   * Lives on the BASE because the backend sets it in the shared `view()`
+   * mapper — every category carries it. It used to be declared only on
+   * `MarketEngine`, so a limited ticket, shard, avatar or VIP advertised no
+   * limit and kept a live Buy button after selling out.
+   */
+  remainingSupply?: number;
 }
 
 export interface MarketTicket extends MarketItemBase {
@@ -54,7 +63,8 @@ export interface VipLevelPrice {
 export interface MarketStatus extends MarketItemBase {
   category?: MarketItemCategory.STATUS;
   statusType: MarketStatusType;
-  privileges: string[];
+  /** Optional: spread in from `attributes`, so an admin-created item may omit it. */
+  privileges?: string[];
   requirements?: MarketRequirement[];
   durationDays?: number;
   /** Flat upgrade price (level-2 cost) — back-compat fallback for `levelPrices`. */
@@ -70,8 +80,6 @@ export interface MarketEngine extends MarketItemBase {
   ticketType: TicketType;
   /** Pre-set engine level on purchase */
   engineLevel: number;
-  /** Slots left for sale (limited supply) */
-  remainingSupply?: number;
 }
 
 export interface MarketShard extends MarketItemBase {

@@ -56,6 +56,7 @@ export function MarketShardSection({ shards, onSelect, onBuy }: MarketShardSecti
             modalIcon
           ),
           prices: discountedPrices,
+          remainingSupply: shard.remainingSupply,
           isNew: shard.isNew,
           discountPct: shard.discountPct,
           accent: shard.quality,

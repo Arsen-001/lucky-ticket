@@ -138,6 +138,20 @@ const isBannedError = (error: FetchBaseQueryError | undefined): boolean =>
   error?.status === 403 &&
   (error.data as { message?: string } | null | undefined)?.message === 'BANNED';
 
+/**
+ * A 503 is NOT enough to declare maintenance — match the guard's own message.
+ *
+ * Feature-level refusals also answer 503 (no treasury configured, no bot
+ * token), and treating those as platform maintenance blanked the entire Mini
+ * App into the full-screen overlay for one player tapping Withdraw — and for
+ * anyone whose next poll happened to be that request. The guard sends this
+ * exact literal (`MaintenanceGuard`), so it is a reliable discriminator.
+ */
+const isMaintenanceError = (error: FetchBaseQueryError | undefined): boolean =>
+  error?.status === 503 &&
+  (error.data as { message?: string } | null | undefined)?.message ===
+    'Platform is under maintenance';
+
 const refreshSession = async (
   store: Parameters<typeof rawBaseQuery>[1],
   extra: Parameters<typeof rawBaseQuery>[2]
@@ -212,7 +226,7 @@ const realBaseQuery: BaseQueryFn<string | FetchArgs, unknown, FetchBaseQueryErro
   // app recovers by itself when the backend comes back.
   const serverDown = (store.getState() as { maintenance?: { serverDown: boolean } }).maintenance
     ?.serverDown;
-  if (result.error?.status === 503) {
+  if (isMaintenanceError(result.error)) {
     if (!serverDown) store.dispatch(setServerMaintenance(true));
   } else if (!result.error && serverDown) {
     store.dispatch(setServerMaintenance(false));

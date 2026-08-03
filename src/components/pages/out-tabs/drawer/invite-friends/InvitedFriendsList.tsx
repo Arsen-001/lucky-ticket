@@ -17,6 +17,7 @@ import { FriendsClaimSummaryCard } from '@/components/pages/out-tabs/drawer/invi
 import { useAppTranslations } from '@/hooks/useAppTranslations';
 import type { ClaimableTicket, InvitedFriend } from '@/types/interfaces/referral.interfaces';
 import type { TicketType } from '@/types/types/ticket.types';
+import { useToast } from '@/hooks/useToast';
 
 const EMPTY_TICKETS: Record<TicketType, number> = {
   bronze: 0,
@@ -31,6 +32,7 @@ const sumClaimable = (friend: InvitedFriend) =>
 
 export const InvitedFriendsList = () => {
   const t = useAppTranslations();
+  const toast = useToast();
   const { data: friends = [], isLoading, isError, refetch } = useGetInvitedFriendsQuery();
   const [claimFriend, { isLoading: isClaiming }] = useClaimFriendMutation();
   const [selectedFriend, setSelectedFriend] = useState<InvitedFriend | null>(null);
@@ -88,7 +90,10 @@ export const InvitedFriendsList = () => {
   };
 
   const handleClaim = async (friendId: string) => {
-    await claimFriend({ friendId });
+    // `claimFriend` without `.unwrap()` RESOLVES with `{error}` instead of
+    // throwing, so the old bare `await` could not tell success from failure.
+    const result = await claimFriend({ friendId });
+    if ('error' in result) toast.error(t('claim failed'));
   };
 
   const handleClaimAll = async () => {
@@ -104,6 +109,27 @@ export const InvitedFriendsList = () => {
       }
     }
 
+    setIsClaimingAll(true);
+    let claimed = 0;
+    let failed = 0;
+    try {
+      for (const friend of targets) {
+        const result = await claimFriend({ friendId: friend.id });
+        if ('error' in result) failed += 1;
+        else claimed += 1;
+      }
+    } finally {
+      setIsClaimingAll(false);
+    }
+
+    if (failed) toast.error(t('claim failed'));
+    // The celebration is raised AFTER the requests, and only when something was
+    // actually granted. It used to be opened from a local snapshot before the
+    // first call went out, so a refusal — which the backend now returns for a
+    // duplicate claim instead of quietly granting twice — still announced
+    // "+N tickets" the player never received.
+    if (!claimed) return;
+
     setClaimAllSnapshot({
       friends: targets,
       ticketsByTier: (Object.entries(snapshotByTier) as [TicketType, number][])
@@ -111,15 +137,6 @@ export const InvitedFriendsList = () => {
         .map(([type, amount]) => ({ type, amount })),
       totalTickets: total,
     });
-
-    setIsClaimingAll(true);
-    try {
-      for (const friend of targets) {
-        await claimFriend({ friendId: friend.id });
-      }
-    } finally {
-      setIsClaimingAll(false);
-    }
   };
 
   if (isError && !friends.length) {

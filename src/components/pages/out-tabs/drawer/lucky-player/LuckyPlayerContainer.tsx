@@ -124,7 +124,7 @@ export function LuckyPlayerContainer() {
               {t('included privileges')}
             </span>
             <StatusPrivileges
-              privileges={luckyPlayerStatus.privileges}
+              privileges={luckyPlayerStatus.privileges ?? []}
               type={luckyPlayerStatus.statusType}
               isSmall
             />

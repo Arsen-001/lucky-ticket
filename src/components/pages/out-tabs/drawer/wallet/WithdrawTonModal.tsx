@@ -134,7 +134,18 @@ export function WithdrawTonModal({
       }
       // Anything else stays on the confirm step so the same amount can be
       // retried without retyping it.
-      toast.error(status === 503 ? t('withdrawals unavailable') : t('action failed'));
+      // Each refusal now has its own code, so say which one it was. Before,
+      // hitting the platform-wide daily TON ceiling was indistinguishable from
+      // a bad address or a bug, and players retried all day.
+      const message =
+        status === 503
+          ? t('withdrawals unavailable') // no treasury configured
+          : status === 429
+            ? t('withdrawals paused today') // platform-wide daily cap reached
+            : status === 502
+              ? t('ton network unreachable')
+              : t('action failed');
+      toast.error(message);
     }
   };
 
@@ -292,15 +303,23 @@ export function WithdrawTonModal({
             <p className="text-pink-secondary text-[12px]">
               {t('arrives in approximately {n} sec', { n: result.estimatedArrivalSec })}
             </p>
-            <a
-              href={tonScanUrl(result.txHash, network)}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="text-electric-purple inline-flex items-center gap-1 text-[12px] font-bold"
-            >
-              {t('view on tonscan')}
-              <ExternalLink size={12} strokeWidth={2.4} />
-            </a>
+            {/* No hash yet = broadcast but not confirmed on-chain. The money
+                HAS left; there is simply no transaction to link to yet. Linking
+                anyway produced tonscan.org/tx/null — a 404 that reads as a lost
+                payment on the one flow where real TON moved. */}
+            {result.txHash ? (
+              <a
+                href={tonScanUrl(result.txHash, network)}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-electric-purple inline-flex items-center gap-1 text-[12px] font-bold"
+              >
+                {t('view on tonscan')}
+                <ExternalLink size={12} strokeWidth={2.4} />
+              </a>
+            ) : (
+              <p className="text-pink-secondary text-[12px]">{t('confirming on chain')}</p>
+            )}
             <Button variant="primary" onClick={handleClose} className="w-full rounded-xl">
               {t('done')}
             </Button>

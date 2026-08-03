@@ -90,7 +90,13 @@ export interface WithdrawTonRequest {
 
 export interface WithdrawTonResponse {
   success: boolean;
-  txHash: string;
+  /**
+   * Null when the transfer was broadcast but not yet confirmed on-chain — the
+   * backend records a PENDING row and answers success, because the money HAS
+   * left. Typed nullable so nobody builds an explorer link out of it: doing so
+   * produced `tonscan.org/tx/null`, a 404 on the one flow where real TON moved.
+   */
+  txHash: string | null;
   estimatedArrivalSec: number;
 }
 

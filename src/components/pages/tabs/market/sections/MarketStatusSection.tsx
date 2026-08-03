@@ -160,13 +160,14 @@ export function MarketStatusSection({ onSelect, onBuy }: MarketStatusSectionProp
             renderIcon(160)
           ),
           prices: activePrices,
+          remainingSupply: status.remainingSupply,
           isNew: status.isNew,
           accent,
           confirmText: isVipUpgrade ? t('upgrade') : t('buy'),
           meta: (
             <div className="flex flex-col gap-2">
               <ul className="text-white/70 flex flex-col gap-1 text-[12px]">
-                {status.privileges.map((privilege, idx) => (
+                {(status.privileges ?? []).map((privilege, idx) => (
                   <li key={idx} className="flex items-start gap-1.5">
                     <span style={{ color: accentVar }} className="mt-0.5">
                       ·

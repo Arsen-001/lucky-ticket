@@ -41,7 +41,7 @@ export function LeaderboardContainer() {
 
   // Ranking is by lifetime Activity Points (the backend tracks no period
   // windows), so the board is a single all-time list.
-  const { data, isLoading, isFetching, isError, refetch } = useGetLeaderboardQuery('all', {
+  const { data, isLoading, isFetching, isError, error, refetch } = useGetLeaderboardQuery('all', {
     skip: !leaderboardEnabled,
   });
   const { data: me } = useGetMeQuery();
@@ -96,6 +96,12 @@ export function LeaderboardContainer() {
 
   // After every hook (rules-of-hooks), before any board markup.
   if (!leaderboardEnabled) return <LeaderboardLockedState />;
+
+  // The gate is enforced server-side too, and `/config` is cached — so a
+  // session that started while the board was on keeps a stale `true` after an
+  // admin switches it off. Without this, the 403 fell through to the generic
+  // "failed to load" card whose Retry would 403 forever.
+  if (isError && (error as { status?: number })?.status === 403) return <LeaderboardLockedState />;
 
   if (!isLoading && !isError && places.length === 0) {
     return (

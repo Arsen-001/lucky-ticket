@@ -63,7 +63,27 @@ export function TelegramProvider({ children }: { children: ReactNode }) {
     telegramLogin({ initData })
       .unwrap()
       .then(() => setPhase('ready'))
-      .catch(() => setPhase('error'));
+      .catch(() => {
+        // A failed sign-in is only fatal when there is nothing to fall back to.
+        //
+        // `initData` is fixed at launch — it lives in the URL fragment, so a
+        // reload re-reads the SAME blob with the same `auth_date`. The backend
+        // only accepts it for an hour, and AppLifecycleProvider reloads after
+        // 15 minutes in the background, so a session that runs past that hour
+        // re-authenticates with a blob the server now refuses. Treating that as
+        // fatal dropped the player on the error splash — and Retry re-sent the
+        // identical stale blob, so it could never recover without fully
+        // relaunching from the chat, all while a perfectly valid refresh token
+        // sat in cookies.
+        //
+        // We still ATTEMPT the sign-in on every mount: it is what refreshes the
+        // Telegram avatar and username. It just no longer has to succeed.
+        if (getAccessTokenCk() || getRefreshTokenCk()) {
+          setPhase('ready');
+          return;
+        }
+        setPhase('error');
+      });
   };
 
   useEffect(() => {

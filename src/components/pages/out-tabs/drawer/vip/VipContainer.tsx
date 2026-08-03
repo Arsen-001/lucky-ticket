@@ -122,7 +122,7 @@ export function VipContainer() {
               {t('included privileges')}
             </span>
             <StatusPrivileges
-              privileges={vipStatus.privileges}
+              privileges={vipStatus.privileges ?? []}
               type={vipStatus.statusType}
               isSmall
             />
