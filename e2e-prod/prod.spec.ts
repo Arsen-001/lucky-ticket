@@ -101,7 +101,23 @@ async function assertLooksRightBuilt(page: Page, label: string, url: string) {
             })
             .every(el => el.complete)
         ),
-      { message: `${label} still had images in flight` }
+      {
+        message: `${label} still had images in flight`,
+        // Longer than the suite's 15s default ON PURPOSE. This runs against a
+        // freshly built server, so the first request for each (src, width,
+        // quality) triple pays a cold `/_next/image` optimize — and several of
+        // the source assets are 200-790 KB for icons rendered at 14-36 px. With
+        // 3 parallel workers that regularly exceeded 15s on /activity, failing
+        // the run on both the initial attempt and the retry, with no code
+        // change between a red run and a green one.
+        //
+        // Raised rather than removed: the assertion is what catches an image
+        // that loads to nothing, which is a real class of bug here. A
+        // non-deterministic red is worse than a slow green — it teaches people
+        // to re-run instead of reading the log, which is exactly how the
+        // sibling backend stayed red for three and a half weeks unnoticed.
+        timeout: 45_000,
+      }
     )
     .toBe(true);
 
