@@ -6,6 +6,11 @@ app records the watch → the reward is granted (2 AP, `WATCH_VIDEO.ap`).
 Telegram has no first-party rewarded-ad SDK, so the app wires **several ad
 networks as a waterfall** plus its own promo as the final fallback.
 
+> **This doc is the SELLING side** — showing ads inside the app for money.
+> Buying ads to bring players in is the other direction and lives in
+> [`TRAFFIC.md`](TRAFFIC.md) (campaign links, source tracking, what the numbers
+> there can and cannot answer). Same networks, opposite cash flow.
+
 ---
 
 ---
