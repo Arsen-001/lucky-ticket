@@ -2333,6 +2333,19 @@ opening a link — costs an abuser nothing. The queue shows friends-when-filed
 beside friends-now, because a roster that shrank after the claim is the shape a
 farm leaves behind.
 
+**The channel announces it — after the fact.** When a gift actually reaches a
+player, autopost publishes it (Каналы → Автопостинг → «Подарок за пятерых
+друзей»): a picture of the bear with the caption «{winner} привёл пятерых
+друзей, и все они подписаны на канал». Three things are deliberate. The trigger
+is Telegram _accepting the send_, never the claim being filed or approved — a
+post about a gift that then failed is a promise the channel cannot take back.
+The winner is named `@handle` where there is one (the only form Telegram links),
+else the in-app name, else «игрок» — never the `tg_<id>` the sign-in invents,
+which reads as a bot talking about a bot. And the post is **silent by its own
+flag**, not the global one: five gifts a day would be five pushes to every
+subscriber, while a jackpot still deserves to ring. Like every autopost it
+respects the queue: in approval mode it waits for a human before it goes out.
+
 **Not asking is a state, not a silence.** Because the claim is a request now,
 the panel shows a second list under the queue: «Набрали пятерых, но не запросили
 подарок» — accounts with five counted friends and no row. Nothing is owed to
