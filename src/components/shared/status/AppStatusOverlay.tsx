@@ -7,7 +7,7 @@ import { useAppSelector } from '@/lib/rtk/hooks';
 import { selectBanned } from '@/lib/rtk/features/ban.slice';
 import { selectServerMaintenance } from '@/lib/rtk/features/maintenance.slice';
 import { BannedOverlay } from './BannedOverlay';
-import { MaintenanceOverlay } from './MaintenanceOverlay';
+import { MaintenanceScreen } from './MaintenanceScreen';
 import { OfflineOverlay } from './OfflineOverlay';
 
 /**
@@ -17,6 +17,10 @@ import { OfflineOverlay } from './OfflineOverlay';
  * or the local config override) takes priority over offline
  * (`navigator.onLine`) — if the platform is down, that's the more relevant
  * message.
+ *
+ * This is the MID-SESSION half of maintenance only: a shutdown that was already
+ * on when the app opened never gets here, because the app does not boot at all
+ * (@see PreLaunchGate). Same screen either way.
  */
 export function AppStatusOverlay() {
   const online = useOnlineStatus();
@@ -28,7 +32,7 @@ export function AppStatusOverlay() {
 
   return (
     <ClientPortal>
-      {banned ? <BannedOverlay /> : maintenance ? <MaintenanceOverlay /> : <OfflineOverlay />}
+      {banned ? <BannedOverlay /> : maintenance ? <MaintenanceScreen /> : <OfflineOverlay />}
     </ClientPortal>
   );
 }

@@ -2,11 +2,14 @@
 
 import { usePreLaunchGate } from '@/hooks/usePreLaunchGate';
 import { TelegramSplash } from '@/components/telegram/TelegramSplash';
+import { MaintenanceScreen } from '@/components/shared/status/MaintenanceScreen';
+import { appConfig } from '@/config/app.config';
 import { ComingSoonScreen } from './ComingSoonScreen';
 import type { ChildrenProps } from '@/types/interfaces/component.interfcaes';
 
 /**
- * Decides, on every open, whether this person gets the app or the countdown.
+ * Decides, on every open, whether this person gets the app, the countdown or
+ * the maintenance wall.
  *
  * It wraps the provider tree rather than living inside it, and it renders
  * `{children}` only on an explicit "open". An unrendered element never
@@ -18,10 +21,22 @@ import type { ChildrenProps } from '@/types/interfaces/component.interfcaes';
  * player who IS allowed in would otherwise see "coming soon" flash before their
  * app, and read it as the product being broken. The countdown appears only once
  * the answer is actually "no".
+ *
+ * **Maintenance is checked first, above everything.** Turning it on in the panel
+ * has to close the product for real, and before this the pre-launch countdown
+ * was a hole in exactly that: the gate answered "gated" and returned the
+ * countdown — a screen that invites friends and files gift claims against a
+ * backend that is answering 503 to everything else. So the wrench replaces the
+ * countdown too, and the same screen the running app shows.
  */
 export function PreLaunchGate({ children }: ChildrenProps) {
-  const { status, launchAt, session } = usePreLaunchGate();
+  const { status, launchAt, session, maintenance, recheck } = usePreLaunchGate();
 
+  // The local flag is the dev/mock override (there is no backend to ask in mock
+  // mode); the second half is the admin switch, decided per person by the
+  // backend — staff and the allow-list are already excused there.
+  if (appConfig.maintenance.enabled || maintenance)
+    return <MaintenanceScreen onRetry={recheck} loading={status === 'checking'} />;
   if (status === 'checking') return <TelegramSplash />;
   if (status === 'gated') return <ComingSoonScreen launchAt={launchAt} session={session} />;
   return <>{children}</>;

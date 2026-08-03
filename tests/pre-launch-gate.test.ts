@@ -32,6 +32,28 @@ describe('pre-launch gate', () => {
     expect(childrenAt).toBeGreaterThan(source.lastIndexOf("status === 'gated'"));
   });
 
+  it('puts maintenance above the countdown, and never behind it', () => {
+    // Turning maintenance on in the panel has to close the product for real.
+    // The countdown used to be a hole in that: it renders on a `gated` answer,
+    // invites friends and files gift claims — against a backend answering 503
+    // to everything else. So the wrench is checked FIRST, before `checking`,
+    // before `gated`, and before the app itself.
+    const source = read('src/components/pages/coming-soon/PreLaunchGate.tsx');
+
+    const maintenanceAt = source.indexOf('<MaintenanceScreen');
+    expect(maintenanceAt).toBeGreaterThan(-1);
+    expect(maintenanceAt).toBeLessThan(source.indexOf('<TelegramSplash'));
+    expect(maintenanceAt).toBeLessThan(source.indexOf('<ComingSoonScreen'));
+    expect(maintenanceAt).toBeLessThan(source.indexOf('return <>{children}</>'));
+
+    // And it must fail the safe way round — the opposite of the gate. Only an
+    // explicit `true` from the backend blacks the app out; an older backend or
+    // an unrecognised payload leaves the platform open.
+    const gate = read('src/hooks/usePreLaunchGate.ts');
+    expect(gate).toMatch(/maintenance: payload\?\.maintenance\?\.enabled === true/);
+    expect(gate).toMatch(/maintenance: auth\?\.maintenance === true/);
+  });
+
   it('fails closed when the backend cannot be reached', () => {
     const source = read('src/hooks/usePreLaunchGate.ts');
 

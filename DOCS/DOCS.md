@@ -2254,6 +2254,13 @@ Two switches can take the product away from players, and both are answered by th
 backend on every visit — not baked into a build. They share one rule for who is
 exempt, so an entry that works for one works for the other.
 
+**Maintenance outranks the countdown.** When both switches are on, a player sees
+the maintenance screen, not «скоро» — and the app does not boot behind either.
+The order matters because the countdown is a screen for a working platform: it
+invites friends, counts referrals and files gift claims against a backend that
+is answering 503 to everything else. Turning maintenance on in the panel has to
+mean the product is closed, including its waiting room.
+
 **The pre-launch gate («скоро»).** While `PlatformConfig.comingSoonEnabled` is
 on, the Mini App renders only the Coming Soon countdown: the root gate sits
 outside every provider and renders the app **only** on an explicit "this person
@@ -2338,14 +2345,28 @@ The bot reads the same switch: someone who can open the app is never told by
 pre-launch ads and never became users.
 
 **Maintenance mode.** `PlatformConfig.maintenanceMode` makes every player-facing
-route answer **503**, which the Mini App turns into its maintenance overlay.
+route answer **503**, which the Mini App turns into its maintenance screen.
 Deliberately still reachable: `/health` (probes), `/config` (so the app can
-render that overlay), `/admin/*` (so the switch can be turned back off),
+render that screen), `/admin/*` (so the switch can be turned back off),
 `/telegram/webhook` (Stars payments Telegram has already charged must still
 credit) and `/auth/telegram` — without a token nobody can be recognised, so
 closing sign-in would lock out exactly the people the exceptions are for.
 Exceptions: `PlatformConfig.maintenanceAllowIds` and admins, so whoever is doing
 the work can check whether it worked without reopening the app to everyone.
+
+The switch is answered twice, by the same rule (`isUnderMaintenanceFor`): the
+guard closes the routes, and the two calls a booting Mini App makes carry the
+verdict so it never renders anything else. `GET /config` reports
+`maintenance.enabled` anonymously (is the platform closed at all); the Telegram
+sign-in returns a personal `maintenance` (are YOU closed out — staff and the
+allow-list are already excused there). Mirrored from the pre-launch gate's rule
+and inverted on the failure side: only an explicit `true` puts the wall up, so an
+old client, an unreadable payload or a config read that threw leaves the platform
+open. Maintenance is an operator's convenience, not a boundary that protects
+anything, and blacking out the app by accident is the worse error. The screen
+carries a **retry** — nothing polls behind it, and inside Telegram there is no
+address bar to reload from. A shutdown that starts mid-session still surfaces the
+same screen through the 503 handling in the API layer.
 
 **Allow-list semantics (both lists).** A digits-only entry is a Telegram id and
 matches exactly; anything else is a name and is matched, case-insensitively and

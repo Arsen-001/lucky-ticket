@@ -1,10 +1,9 @@
 'use client';
 
-import { useEffect } from 'react';
 import Image from 'next/image';
 import { useAppTranslations } from '@/hooks/useAppTranslations';
 import { GlobalConstants } from '@/constants/global.constants';
-import { getTelegramWebApp } from '@/lib/telegram/telegram';
+import { useTelegramChrome } from '@/hooks/useTelegramChrome';
 import { usePreLaunchInvite } from '@/hooks/usePreLaunchInvite';
 import { LaunchCountdown } from './LaunchCountdown';
 import { ComingSoonChannelLink } from './ComingSoonChannelLink';
@@ -18,9 +17,6 @@ import type { PreLaunchSession } from '@/hooks/usePreLaunchGate';
 // square master and carries its own opaque background, which reads as a dark
 // box over the atmospheric backdrop — hence this transparent derivative.
 import logo from '@assets/images/logo-wordmark.webp';
-
-/** App background — keeps the Telegram header/body chrome on-theme. */
-const THEME_BG = '#1b1930';
 
 export interface ComingSoonScreenProps {
   /** ISO instant the countdown runs to — the server's date, or the fallback. */
@@ -46,18 +42,11 @@ export function ComingSoonScreen({ launchAt, session }: ComingSoonScreenProps) {
   // directly under the headline and the invite block far below it, and both
   // count the same referrals. One fetch, one number, no drift between them.
   const invite = usePreLaunchInvite(session);
-
-  useEffect(() => {
-    const tg = getTelegramWebApp();
-    if (!tg) return;
-    // Telegram keeps its own loading placeholder over the Mini App until the
-    // page says it's ready — normally TelegramProvider does this, and it never
-    // mounts here.
-    tg.ready();
-    tg.expand();
-    tg.setHeaderColor?.(THEME_BG);
-    tg.setBackgroundColor?.(THEME_BG);
-  }, []);
+  // Telegram keeps its own loading placeholder over the Mini App until the page
+  // says it's ready — normally TelegramProvider does this, and it never mounts
+  // behind the gate. Shared with the maintenance wall, which has the same
+  // problem. @see useTelegramChrome
+  useTelegramChrome();
 
   return (
     // `m-auto` on the inner column rather than `justify-center` on the outer
