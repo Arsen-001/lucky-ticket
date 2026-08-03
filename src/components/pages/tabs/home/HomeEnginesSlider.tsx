@@ -272,7 +272,13 @@ export function HomeEnginesSlider({ className }: ClassNameProps) {
     tick();
     const intervalId = window.setInterval(tick, 1000);
     return () => window.clearInterval(intervalId);
-  }, [items]);
+    // Everything the cycle length is computed from, not just the engine list.
+    // With `[items]` alone the one-second tick kept measuring against the boosts
+    // and the config table captured when it last ran: equip a chip, gain a badge
+    // boost, or have `GET /config` land after the engines did, and every
+    // countdown on this screen goes on counting to the wrong number until
+    // something unrelated happens to change `items`.
+  }, [items, inventory, isLp, isVip, avatarSpeedPct, badgeSpeedPct, tables, completeEngineCycle]);
 
   const recomputeActive = useCallback(() => {
     const scroller = scrollerRef.current;

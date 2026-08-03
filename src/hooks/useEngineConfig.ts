@@ -1,3 +1,4 @@
+import { useMemo } from 'react';
 import { useGetPublicConfigQuery } from '@/api/config.api';
 import { appConfig } from '@/config/app.config';
 import type { EngineUpgradeKnobs } from '@/utils/global/economy.utils';
@@ -63,5 +64,10 @@ export const resolveEngineConfig = (config?: PublicConfig): EngineConfig => {
  */
 export function useEngineConfig(): EngineConfig {
   const { data } = useGetPublicConfigQuery();
-  return resolveEngineConfig(data);
+  // A deliberate `useMemo` in a project that leaves memoization to the compiler:
+  // this value is used as an effect dependency by the engine tickers, and an
+  // effect's correctness cannot rest on the compiler happening to memoize. A
+  // fresh object each render would rebuild their one-second interval on every
+  // render; leaving it out of their deps is what made them read a stale config.
+  return useMemo(() => resolveEngineConfig(data), [data]);
 }

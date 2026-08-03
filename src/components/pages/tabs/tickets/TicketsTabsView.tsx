@@ -120,7 +120,18 @@ export function TicketsTabsView() {
     tick();
     const intervalId = window.setInterval(tick, 1000);
     return () => window.clearInterval(intervalId);
-  }, [enginesByTier, inventory, isLp, isVip, completeEngineCycle]);
+    // `avatarSpeedPct`, `badgeSpeedPct` and `tables` feed the same cycle
+    // computation as the rest — see HomeEnginesSlider.
+  }, [
+    enginesByTier,
+    inventory,
+    isLp,
+    isVip,
+    avatarSpeedPct,
+    badgeSpeedPct,
+    tables,
+    completeEngineCycle,
+  ]);
 
   if (isError) return <QueryErrorState onRetry={() => refetch()} />;
 

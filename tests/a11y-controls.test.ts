@@ -114,3 +114,43 @@ describe('form validation is not decoration', () => {
     expect(offenders).toEqual([]);
   });
 });
+
+describe('effect dependencies that are easy to get wrong', () => {
+  it('the engine config keeps a stable identity', () => {
+    // The one-second engine tickers now list `tables` among their dependencies,
+    // so this hook returning a fresh object per render would rebuild their
+    // interval on every render. It is memoized on purpose, in a codebase that
+    // otherwise leaves memoization to the compiler — an effect's correctness
+    // cannot rest on the compiler happening to memoize.
+    const source = read('src/hooks/useEngineConfig.ts');
+    expect(source).toMatch(/useMemo\(\(\) => resolveEngineConfig\(data\), \[data\]\)/);
+  });
+
+  it('the engine tickers depend on everything the cycle is computed from', () => {
+    // With `[items]` alone the tick measured against the boosts and config table
+    // captured when it last ran: equip a chip, gain a badge boost, or let
+    // GET /config land after the engines did, and every countdown counts to the
+    // wrong number until something unrelated changes the engine list.
+    for (const file of [
+      'src/components/pages/tabs/home/HomeEnginesSlider.tsx',
+      'src/components/pages/tabs/tickets/TicketsTabsView.tsx',
+    ]) {
+      // The dependency array is whatever follows the interval's teardown.
+      const tail = read(file).split('window.clearInterval(intervalId);')[1] ?? '';
+      // Comments stripped: the note above these arrays names the very
+      // dependencies being checked, so leaving them in let the test pass with
+      // the deps deleted — a guardrail satisfied by its own explanation.
+      const deps = tail.slice(0, tail.indexOf(']);') + 1).replace(/\/\/[^\n]*/g, '');
+      for (const dep of [
+        'inventory',
+        'isLp',
+        'isVip',
+        'avatarSpeedPct',
+        'badgeSpeedPct',
+        'tables',
+      ]) {
+        expect(deps, `${file} misses ${dep}`).toContain(dep);
+      }
+    }
+  });
+});
