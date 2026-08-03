@@ -62,7 +62,9 @@ export function RegisterForm() {
         <PhoneNumberFormItem
           name="phone"
           prefix={<Phone />}
-          numberInputProps={{ autoComplete: 'tel' }}
+          // The only field on this form with no placeholder to fall back on, so
+          // without this it is announced as an unnamed text box.
+          numberInputProps={{ autoComplete: 'tel', 'aria-label': t('phone') }}
         />
 
         <FormItem name="password">

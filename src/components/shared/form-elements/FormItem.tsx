@@ -37,12 +37,23 @@ export function FormItem({
   const { errors } = useFormState({ name });
 
   const error = errors[name]?.message as string | undefined;
+  const errorId = `${name}-error`;
+
+  /**
+   * What makes the error exist for anything but the eye. Without these the
+   * message was red text next to a field that still reported itself as valid:
+   * a screen-reader user submitted, heard nothing, and had no way to learn why
+   * the form had not gone anywhere. `role="alert"` is what announces it on
+   * appearance; `aria-describedby` is what ties it to the field afterwards.
+   */
+  const validationProps = error ? { 'aria-invalid': true, 'aria-describedby': errorId } : undefined;
 
   const isHorizontal = layout === 'horizontal';
 
   if (noStyle) {
     return cloneElement(children, {
       ...register(name, rules),
+      ...validationProps,
     });
   }
 
@@ -70,8 +81,11 @@ export function FormItem({
       <div className="flex flex-col w-full">
         {cloneElement(children, {
           ...register(name, rules),
+          ...validationProps,
         })}
         <p
+          id={errorId}
+          role={error ? 'alert' : undefined}
           className={twMerge(
             'h-5 overflow-hidden text-ellipsis whitespace-nowrap text-sm font-bold',
             error ? 'text-error' : 'text-white-secondary/50',

@@ -42,6 +42,11 @@ export function Input({ className, classNames, prefix, suffix, loading, ...rest 
           classNames?.input
         )}
         id={rest?.name}
+        // Most fields in this app are labelled by their placeholder alone, and a
+        // placeholder stops being a name the moment the user types — so the field
+        // a screen reader was reading as "edit text" goes anonymous exactly when
+        // it has content. A real <label> is better; this is the floor.
+        aria-label={rest['aria-label'] ?? rest.placeholder}
         {...rest}
         disabled={loading || rest.disabled}
       />

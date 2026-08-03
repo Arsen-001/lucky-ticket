@@ -77,3 +77,40 @@ describe('overlay semantics', () => {
     expect(source).toMatch(/document\.body\.style\.overflow = 'hidden'/);
   });
 });
+
+describe('form validation is not decoration', () => {
+  it('field errors are announced and tied to the field', () => {
+    // The message was red text beside a field that still reported itself valid:
+    // a screen-reader user submitted, heard nothing, and had no way to find out
+    // why the form had not moved.
+    for (const file of [
+      'src/components/shared/form-elements/FormItem.tsx',
+      'src/components/shared/form-elements/form-item-wrapped-elements/PhoneNumberFormItem.tsx',
+    ]) {
+      const source = read(file);
+      expect(source, file).toMatch(/'aria-invalid': true/);
+      expect(source, file).toMatch(/'aria-describedby': errorId/);
+      expect(source, file).toMatch(/role=\{error \? 'alert' : undefined\}/);
+    }
+  });
+
+  it('no form item reads errors straight off the form context', () => {
+    // `formState.errors` from `useFormContext` is invisible to the React
+    // Compiler's memoization, so the item never re-renders when its error
+    // appears. FormItem was fixed once; PhoneNumberFormItem kept the old read
+    // and its error never showed — the register form's required phone silently
+    // blocked submission with nothing on screen. Both must use `useFormState`.
+    const items = readdirSync(
+      resolve(root, 'src/components/shared/form-elements/form-item-wrapped-elements')
+    )
+      .filter(f => f.endsWith('.tsx'))
+      .map(f => `src/components/shared/form-elements/form-item-wrapped-elements/${f}`)
+      .concat('src/components/shared/form-elements/FormItem.tsx');
+
+    const offenders = items.filter(file => {
+      const source = read(file);
+      return /formState:\s*\{[^}]*errors/.test(source);
+    });
+    expect(offenders).toEqual([]);
+  });
+});
