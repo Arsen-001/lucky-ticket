@@ -90,17 +90,27 @@ export function ComingSoonGiftSteps({
   })();
 
   /**
-   * Today's places, shown only while they can still change what this player
-   * does. Once their own claim is filed the board is no longer their business —
-   * and a player who sees "0 left" AFTER earning theirs reads it as a loss.
+   * Today's board: the standing rule («каждый день 5 подарков») and how much of
+   * it is already spent. Two facts rather than one, because they do different
+   * work — the rule says the promo repeats tomorrow, the count says how much of
+   * today is gone.
+   *
+   * Shown only while it can still change what this player does: once their own
+   * claim is filed the board is no longer their business, and «роздано 5 из 5»
+   * after earning yours reads as a loss.
    */
-  const places = (() => {
+  const board = (() => {
     if (gift.status) return null;
     const limit = gift.dailyLimit;
     const left = gift.dailyRemaining;
-    if (typeof limit !== 'number' || typeof left !== 'number') return null;
-    if (limit <= 0 || left <= 0) return t('coming soon gift places gone');
-    return t('coming soon gift places left', { total: limit, left });
+    if (typeof limit !== 'number' || typeof left !== 'number' || limit <= 0) return null;
+    // Derived, not a second server number that could disagree with the first.
+    const issued = Math.min(Math.max(limit - left, 0), limit);
+    return {
+      rule: t('coming soon gift daily rule', { total: limit }),
+      issued: t('coming soon gift issued today', { issued, total: limit }),
+      gone: left <= 0,
+    };
   })();
 
   const caption = (() => {
@@ -163,10 +173,22 @@ export function ComingSoonGiftSteps({
           <p className="text-white-secondary max-w-[22rem] text-[13px] font-semibold leading-snug">
             {caption}
           </p>
-          {places && (
-            <span className="text-warning border-warning/25 bg-warning/10 rounded-full border px-2.5 py-1 text-[11px] font-extrabold tabular-nums">
-              {places}
-            </span>
+          {board && (
+            <div className="flex flex-col items-center gap-1">
+              <span className="text-electric-pink text-[11px] font-extrabold uppercase tracking-wider">
+                {board.rule}
+              </span>
+              <span
+                className={twMerge(
+                  'rounded-full border px-2.5 py-1 text-[11px] font-extrabold tabular-nums',
+                  board.gone
+                    ? 'text-warning border-warning/25 bg-warning/10'
+                    : 'border-white/12 bg-white/5 text-white/70'
+                )}
+              >
+                {board.gone ? t('coming soon gift places gone') : board.issued}
+              </span>
+            </div>
           )}
         </div>
       </SkeletonSuspense>

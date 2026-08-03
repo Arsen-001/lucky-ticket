@@ -58,6 +58,15 @@ export function ComingSoonInviteSection({
         onShare={share}
         onCopy={copy}
       />
+      {/* The promo is five friends, but the referral programme does not stop
+          there: friends keep paying their inviter after launch, and the status
+          tiers are gated on how many were brought. Saying so here is the only
+          place a pre-launch visitor can learn that the sixth friend is not
+          wasted. */}
+      <p className="text-white-secondary rounded-xl border border-white/8 bg-white/4 px-3 py-2.5 text-center text-[11px] font-medium leading-relaxed">
+        {t('coming soon more friends better')}
+      </p>
+
       <ComingSoonFriendsList
         friends={invite.friends}
         notCountedIds={invite.gift.notCountedFriendIds}
