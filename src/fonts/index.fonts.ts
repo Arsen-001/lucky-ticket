@@ -9,51 +9,28 @@ export const spaceGrotesk = Space_Grotesk({
 });
 
 export const gilroy = localFont({
+  // Seven faces, WOFF2, down from twenty TTFs.
+  //
+  // Next preloads EVERY declared face on EVERY route: that was 2.56 MB raw /
+  // 1.20 MB gzip of `<link rel="preload" as="font">` competing with the JS
+  // needed to boot, on every cold open of the Mini App. A class census over
+  // all of `src/` found font-light / font-extralight / font-thin used ZERO
+  // times (their six faces, weights 100-300, were pure dead weight) and
+  // exactly ONE italic in the whole app - a 9px footnote in
+  // StakeCancelSection, which inherits weight 400.
+  //
+  // The five dropped italics (500-900) get synthesised by the browser if
+  // anything ever asks for them; the source TTFs stay in git history.
   src: [
-    { path: './gilroy/Gilroy-Black.ttf', weight: '900', style: 'normal' },
-    { path: './gilroy/Gilroy-BlackItalic.ttf', weight: '900', style: 'italic' },
-
-    { path: './gilroy/Gilroy-ExtraBold.ttf', weight: '800', style: 'normal' },
+    { path: './gilroy/Gilroy-Black.woff2', weight: '900', style: 'normal' },
+    { path: './gilroy/Gilroy-ExtraBold.woff2', weight: '800', style: 'normal' },
+    { path: './gilroy/Gilroy-Bold.woff2', weight: '700', style: 'normal' },
+    { path: './gilroy/Gilroy-SemiBold.woff2', weight: '600', style: 'normal' },
+    { path: './gilroy/Gilroy-Medium.woff2', weight: '500', style: 'normal' },
+    { path: './gilroy/Gilroy-Regular.woff2', weight: '400', style: 'normal' },
     {
-      path: './gilroy/Gilroy-ExtraBoldItalic.ttf',
-      weight: '800',
-      style: 'italic',
-    },
-
-    { path: './gilroy/Gilroy-Bold.ttf', weight: '700', style: 'normal' },
-    { path: './gilroy/Gilroy-BoldItalic.ttf', weight: '700', style: 'italic' },
-
-    { path: './gilroy/Gilroy-SemiBold.ttf', weight: '600', style: 'normal' },
-    {
-      path: './gilroy/Gilroy-SemiBoldItalic.ttf',
-      weight: '600',
-      style: 'italic',
-    },
-
-    { path: './gilroy/Gilroy-Medium.ttf', weight: '500', style: 'normal' },
-    {
-      path: './gilroy/Gilroy-MediumItalic.ttf',
-      weight: '500',
-      style: 'italic',
-    },
-
-    { path: './gilroy/Gilroy-Regular.ttf', weight: '400', style: 'normal' },
-    {
-      path: './gilroy/Gilroy-RegularItalic.ttf',
+      path: './gilroy/Gilroy-RegularItalic.woff2',
       weight: '400',
-      style: 'italic',
-    },
-
-    { path: './gilroy/Gilroy-Light.ttf', weight: '300', style: 'normal' },
-    { path: './gilroy/Gilroy-LightItalic.ttf', weight: '300', style: 'italic' },
-
-    { path: './gilroy/Gilroy-Thin.ttf', weight: '200', style: 'normal' },
-    { path: './gilroy/Gilroy-ThinItalic.ttf', weight: '200', style: 'italic' },
-
-    { path: './gilroy/Gilroy-UltraLight.ttf', weight: '100', style: 'normal' },
-    {
-      path: './gilroy/Gilroy-UltraLightItalic.ttf',
-      weight: '100',
       style: 'italic',
     },
   ],
