@@ -89,7 +89,18 @@ async function assertLooksRightBuilt(page: Page, label: string, url: string) {
   await expect
     .poll(
       async () =>
-        page.locator('img').evaluateAll((els: HTMLImageElement[]) => els.every(el => el.complete)),
+        page.locator('img').evaluateAll((els: HTMLImageElement[]) =>
+          els
+            // Only what the viewport actually asked for: `next/image` is lazy by
+            // default, so an image below the fold never starts loading and its
+            // `complete` stays false forever. Waiting on every image made this
+            // suite unsatisfiable on any long list — /activity, in CI.
+            .filter(el => {
+              const box = el.getBoundingClientRect();
+              return box.bottom > 0 && box.top < window.innerHeight;
+            })
+            .every(el => el.complete)
+        ),
       { message: `${label} still had images in flight` }
     )
     .toBe(true);
