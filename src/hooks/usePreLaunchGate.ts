@@ -61,16 +61,26 @@ export function usePreLaunchGate(): PreLaunchGateState {
       if (!cancelled) setState(next);
     };
 
-    // Emergency close wins over every answer below — see coming-soon.config.
-    if (comingSoonConfig.forcedOn) {
-      settle({ status: 'gated', launchAt: comingSoonConfig.fallbackLaunchAt, session: null });
-      return;
-    }
+    // Emergency close — see coming-soon.config. It overrides the ANSWER, not
+    // the code path: everything below still runs, because the countdown is no
+    // longer a dead end (it carries the invite block) and that needs the
+    // session the sign-in returns. Written as a rewrite of a decided answer so
+    // that it can only ever produce `gated` — there is no arrangement of this
+    // function in which the env var opens the app.
+    const forcedClosed = comingSoonConfig.forcedOn;
+    const closeIfForced = (answer: PreLaunchGateState): PreLaunchGateState =>
+      forcedClosed ? { ...answer, status: 'gated' } : answer;
 
     // No API URL = the mock layer, i.e. local development and e2e. There is no
     // backend to ask and no audience to protect, so the app opens.
     if (!apiBase) {
-      settle({ status: 'open', launchAt: comingSoonConfig.fallbackLaunchAt, session: null });
+      settle(
+        closeIfForced({
+          status: 'open',
+          launchAt: comingSoonConfig.fallbackLaunchAt,
+          session: null,
+        })
+      );
       return;
     }
 
@@ -128,7 +138,7 @@ export function usePreLaunchGate(): PreLaunchGateState {
     };
 
     ask()
-      .then(settle)
+      .then(answer => settle(closeIfForced(answer)))
       .catch(() =>
         settle({ status: 'gated', launchAt: comingSoonConfig.fallbackLaunchAt, session: null })
       );

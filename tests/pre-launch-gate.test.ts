@@ -52,8 +52,14 @@ describe('pre-launch gate', () => {
     expect(source).toMatch(/forcedOn/);
     expect(source).not.toMatch(/forcedOff|forceOpen/);
 
+    // The override rewrites an already-decided answer, and the rewrite has
+    // exactly one arm: `gated`. Anything else here — a branch that returns the
+    // untouched answer, a second status in the ternary — would be a way for the
+    // env var to influence the OPEN side, which it must never have.
     const gate = read('src/hooks/usePreLaunchGate.ts');
-    expect(gate).toMatch(/if \(comingSoonConfig\.forcedOn\)[\s\S]*?status: 'gated'/);
+    expect(gate).toMatch(/const forcedClosed = comingSoonConfig\.forcedOn/);
+    expect(gate).toMatch(/forcedClosed[\s\S]{0,60}status: 'gated'/);
+    expect(gate).not.toMatch(/forcedClosed[\s\S]{0,60}status: 'open'/);
   });
 
   it('keeps the gated screen free of the store it renders outside of', () => {
