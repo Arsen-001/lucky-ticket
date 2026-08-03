@@ -11,6 +11,7 @@ import { AppStatusOverlay } from '@/components/shared/status/AppStatusOverlay';
 import { FullscreenBrandBar } from '@/components/layout-elements/FullscreenBrandBar';
 import { AtmosphericBackground } from '@/components/shared/AtmosphericBackground';
 import { PreLaunchGate } from '@/components/pages/coming-soon/PreLaunchGate';
+import { TelegramLocaleSeed } from '@/components/telegram/TelegramLocaleSeed';
 import { NextIntlClientProvider } from 'next-intl';
 import { gilroy, spaceGrotesk } from '@/fonts/index.fonts';
 import { getLocale } from 'next-intl/server';
@@ -133,6 +134,10 @@ export default async function RootLayout({ children }: ChildrenProps) {
                   gate holds, the store is never created, no query runs and no
                   route mounts — the app does not boot, rather than booting
                   under a cover. @see PreLaunchGate */}
+              {/* Above the gate: it renders the countdown INSTEAD of its
+                  children, so a seed underneath never runs for a gated
+                  visitor — and the countdown itself stayed English. */}
+              <TelegramLocaleSeed />
               <PreLaunchGate>
                 <StoreProvider>
                   <AppLifecycleProvider />

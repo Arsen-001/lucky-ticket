@@ -9,7 +9,6 @@ import { getAccessTokenCk, getRefreshTokenCk } from '@/services/cookie.service';
 import { routes } from '@/constants/routes';
 import { resolveStartParamRoute } from '@/utils/global/deep-link.utils';
 import { TelegramSplash } from '@/components/telegram/TelegramSplash';
-import { useTelegramLocale } from '@/hooks/useTelegramLocale';
 
 type Phase = 'pending' | 'authenticating' | 'ready' | 'error';
 
@@ -58,9 +57,6 @@ export function TelegramProvider({ children }: { children: ReactNode }) {
   const isTelegramBoot = useRef(false);
   const router = useRouter();
   const pathname = usePathname();
-  // First launch inside Telegram picks up the client's language. No-ops outside
-  // Telegram, and never overrides a locale the player already has.
-  useTelegramLocale();
 
   const authenticate = (initData: string) => {
     setPhase('authenticating');
