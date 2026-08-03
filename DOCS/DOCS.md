@@ -2313,24 +2313,32 @@ otherwise reads as a broken screen. Admin-tunable:
 `referral.preLaunchGift.requireChannelSubscription`.
 
 **A day has a fixed number of places.** `referral.preLaunchGift.dailyLimit`
-(default 5, editable right on the panel's gift queue) caps how many players may
-**earn** a gift per UTC day — claims filed, not gifts sent; sending is still a
-manual approval. The screen prints the board («сегодня 5 подарков · осталось 2»)
-while it can still change what a player does, and hides it once their own claim
-is filed. `0` closes the promo for the day rather than meaning "unlimited": the
-number always reads as «мест на сегодня», so a field left at zero can only cost
-less money than intended. Running out is a "not today", never a "never" — no row
-is filed, and opening the screen the next day files it. That is also why opening
-the screen is a write path at all: a friend can subscribe long after arriving,
-and neither that nor a new day is a new referral to trigger on.
+(default 5, editable right on the panel's gift queue) caps how many claims may
+be **filed** per UTC day — not gifts sent; sending is still a manual approval.
+The screen prints the board («сегодня 5 подарков · осталось 2») while it can
+still change what a player does, and hides it once their own claim is filed —
+«осталось 0» after your own win reads as a loss. `0` closes the promo for the
+day rather than meaning "unlimited": the number always reads as «мест на
+сегодня», so a field left at zero can only cost less money than intended.
+Running out is a "not today", never a "never": the gift stays lit (`eligible`
+stays true, `canClaim` goes false) and the press works tomorrow.
 
-**Earning it files a claim; an admin pays it.** Crossing the fifth friend writes
-one `PreLaunchGift` row (PENDING) and nothing else — no gift leaves the bot
-until somebody presses Подтвердить in the panel (Рефералы → «Подарки за 5
-друзей»). That gate is deliberate: each gift is paid out of the bot's own Stars
-balance, and what earns it — five Telegram accounts opening a link — costs an
-abuser nothing. The queue shows friends-when-filed beside friends-now, because
-a roster that shrank after the claim is the shape a farm leaves behind.
+**The player asks; an admin pays.** Crossing the fifth friend files nothing — it
+lights the gift up. The player presses it (`POST referral/prelaunch-gift/claim`),
+and that press is the only thing that writes a `PreLaunchGift` row (PENDING).
+Then no gift leaves the bot until somebody presses Подтвердить in the panel
+(Рефералы → «Подарки за 5 друзей»). Each gate earns its keep: every gift is paid
+out of the bot's own Stars balance, and what earns it — five Telegram accounts
+opening a link — costs an abuser nothing. The queue shows friends-when-filed
+beside friends-now, because a roster that shrank after the claim is the shape a
+farm leaves behind.
+
+**Not asking is a state, not a silence.** Because the claim is a request now,
+the panel shows a second list under the queue: «Набрали пятерых, но не запросили
+подарок» — accounts with five counted friends and no row. Nothing is owed to
+them by rule; «Выдать» files the claim on their behalf and sends it in one
+press, and that grant deliberately ignores the daily places (they pace what
+players may take, and this is not a player taking anything).
 
 Rules the implementation holds to:
 

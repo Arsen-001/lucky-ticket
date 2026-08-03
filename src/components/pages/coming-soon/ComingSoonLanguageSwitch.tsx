@@ -5,10 +5,13 @@ import { useTransition } from 'react';
 import { twMerge } from 'tailwind-merge';
 import { useGetAvailableLanguages, type Language } from '@/hooks/useGetAvailableLanguages';
 import { setAppLocale } from '@/services/locale';
+import type { CSSProperties } from 'react';
 import type { LocaleType } from '@/types/types/locale.types';
 
 export interface ComingSoonLanguageSwitchProps {
   className?: string;
+  /** Carries the screen's entry-animation delay. */
+  style?: CSSProperties;
 }
 
 /**
@@ -20,7 +23,7 @@ export interface ComingSoonLanguageSwitchProps {
  * Reloads rather than `router.refresh()` for the same reason the drawer picker
  * does: the locale is resolved server-side from the cookie.
  */
-export function ComingSoonLanguageSwitch({ className }: ComingSoonLanguageSwitchProps) {
+export function ComingSoonLanguageSwitch({ className, style }: ComingSoonLanguageSwitchProps) {
   const { languages, currentLocale } = useGetAvailableLanguages();
   const [isPending, startTransition] = useTransition();
 
@@ -33,7 +36,7 @@ export function ComingSoonLanguageSwitch({ className }: ComingSoonLanguageSwitch
   };
 
   return (
-    <div className={twMerge('flex items-center justify-center gap-2', className)}>
+    <div className={twMerge('flex items-center justify-center gap-2', className)} style={style}>
       {languages.map((lang: Language) => {
         const isActive = lang.code === currentLocale;
         return (

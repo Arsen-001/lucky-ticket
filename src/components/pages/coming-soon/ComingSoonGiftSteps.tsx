@@ -7,21 +7,25 @@ import { comingSoonConfig } from '@/config/coming-soon.config';
 import { Skeleton } from '@/components/shared/seleketons/Skeleton';
 import { SkeletonSuspense } from '@/components/shared/seleketons/SkeletonSuspense';
 import { useAppTranslations } from '@/hooks/useAppTranslations';
+import { GiftPrize } from './GiftPrize';
 import { GiftStepBar } from './GiftStepBar';
 import { GiftStepNode } from './GiftStepNode';
 import type { CSSProperties } from 'react';
 import type { PreLaunchGiftState } from '@/types/interfaces/referral.interfaces';
 
 /**
- * What the bot sends. One gift since 2026-08-04 — it used to be a four-way draw
- * — so the row below names it instead of hedging with «случайный».
+ * What the bot sends. One gift since 2026-08-04 — it used to be a four-way
+ * draw — so the screen shows the thing itself instead of hedging with a pool.
  *
  * Emoji rather than the Telegram sticker art: the art belongs to whichever gift
  * id Telegram has in stock at approval time, and this must not turn into a
  * promise of one particular sticker. Kept equal to the backend's
- * `PRE_LAUNCH_GIFT_EMOJI` by the guardrail suite.
+ * `PRE_LAUNCH_GIFT_EMOJI` by the guardrail suite, which reads this array.
  */
 const GIFT_POOL = ['🧸'];
+
+/** The one gift, for the big prize face. @see GiftPrize */
+const PRIZE_EMOJI = GIFT_POOL[0];
 
 export interface ComingSoonGiftStepsProps {
   /** Friends who have already come through this player's link. */
@@ -29,6 +33,12 @@ export interface ComingSoonGiftStepsProps {
   /** Where the claim stands once the ladder is full. @see PreLaunchGiftState */
   gift: PreLaunchGiftState;
   loading?: boolean;
+  /** Asks the backend for the gift — the player pressed it. */
+  onClaim?: () => void;
+  /** That request is in flight. */
+  claiming?: boolean;
+  /** Why the last press was refused, in the backend's own words. */
+  error?: string | null;
   className?: string;
   /** Carries the screen's entry-animation delay. */
   style?: CSSProperties;
@@ -49,6 +59,9 @@ export function ComingSoonGiftSteps({
   invitedCount,
   gift,
   loading,
+  onClaim,
+  claiming,
+  error,
   className,
   style,
 }: ComingSoonGiftStepsProps) {
@@ -62,11 +75,20 @@ export function ComingSoonGiftSteps({
   const sent = gift.status === 'SENT';
 
   /**
-   * Every branch is something we can stand behind. Nothing says a gift is
-   * coming before an admin has approved one — the claim is filed, which is all
-   * we know — and a refused claim says only that the steps are done: this
-   * screen is not where somebody learns they were turned down.
+   * The gift's own state. `canClaim` is the server's answer to "would pressing
+   * this work right now" — it already accounts for the places, the channel rule
+   * and an existing claim, so the screen never lights up a button that would be
+   * refused. An older backend that says nothing degrades to «locked», which
+   * promises nothing.
    */
+  const prizeState = (() => {
+    if (sent) return 'sent' as const;
+    if (gift.status) return 'claimed' as const;
+    if (gift.canClaim) return 'ready' as const;
+    if (gift.eligible) return 'closed' as const;
+    return 'locked' as const;
+  })();
+
   /**
    * Today's places, shown only while they can still change what this player
    * does. Once their own claim is filed the board is no longer their business —
@@ -149,25 +171,19 @@ export function ComingSoonGiftSteps({
         </div>
       </SkeletonSuspense>
 
-      {/* The draw is over once a gift has actually gone out — leaving the four
-          options up would invite "so which one did I get?". */}
-      {!sent && (
-        <div className="flex items-center gap-2">
-          <span className="text-[10px] font-bold uppercase tracking-wider text-white/45">
-            {t('coming soon gift pool')}
-          </span>
-          <span className="flex items-center gap-1">
-            {GIFT_POOL.map(emoji => (
-              <span
-                key={emoji}
-                className="flex-center h-7 w-7 rounded-lg border border-white/10 bg-white/5 text-[15px] leading-none"
-              >
-                {emoji}
-              </span>
-            ))}
-          </span>
-        </div>
-      )}
+      {/* The prize itself, at the size a reward deserves — and the press that
+          asks for it. It replaces the row of little emoji chips: with one gift
+          and a claim to make, a legend of the pool said nothing and did
+          nothing. @see GiftPrize */}
+      <GiftPrize
+        emoji={gift.emoji ?? PRIZE_EMOJI}
+        state={prizeState}
+        onClaim={onClaim}
+        claiming={claiming}
+        className="mt-1"
+      />
+
+      {error && <p className="text-error-text max-w-[20rem] text-[12px] font-semibold">{error}</p>}
     </div>
   );
 }

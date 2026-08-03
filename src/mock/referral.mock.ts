@@ -133,20 +133,27 @@ const notCountedFriendIds = invitedFriendsMock.slice(1, 2).map(friend => friend.
 const countedFriends = invitedFriendsMock.length - notCountedFriendIds.length;
 
 /**
- * The pre-launch gift, tracking the demo roster: with the full roster the
- * threshold is long past, so the claim is filed and waiting for an admin —
- * which is the state the ladder's copy is most easily got wrong in. Level-zero
- * has no friends and therefore nothing filed.
+ * The pre-launch gift, tracking the demo roster.
+ *
+ * `status: null` with the ladder full is the *normal* state now, not an edge
+ * case: nothing is filed until the player presses the gift, so the fixture that
+ * matters is "earned it, hasn't asked" — the one that renders the glowing
+ * claim. A fixture that arrived pre-claimed would hide the button entirely.
  */
+const eligible = countedFriends >= comingSoonConfig.giftFriendsRequired;
+const dailyRemaining = 2;
+
 export const preLaunchGiftMock: PreLaunchGiftState = {
   required: comingSoonConfig.giftFriendsRequired,
-  status: countedFriends >= comingSoonConfig.giftFriendsRequired ? 'PENDING' : null,
+  status: null,
   emoji: null,
   counted: countedFriends,
   notCountedFriendIds,
   // Today's board, mid-day: enough left to still be a race.
   dailyLimit: 5,
-  dailyRemaining: 2,
+  dailyRemaining,
+  eligible,
+  canClaim: eligible && dailyRemaining > 0,
 };
 
 export const referralMock = {

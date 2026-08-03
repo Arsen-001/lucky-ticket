@@ -1,5 +1,6 @@
 'use client';
 
+import { useState } from 'react';
 import Image from 'next/image';
 import { useAppTranslations } from '@/hooks/useAppTranslations';
 import { GlobalConstants } from '@/constants/global.constants';
@@ -38,6 +39,9 @@ export interface ComingSoonScreenProps {
  */
 export function ComingSoonScreen({ launchAt, session }: ComingSoonScreenProps) {
   const t = useAppTranslations();
+  // There is no toast viewport behind the gate (it lives inside the store), so
+  // a refusal is shown where the press happened — under the gift itself.
+  const [claimError, setClaimError] = useState<string | null>(null);
   // Fetched here rather than inside the invite block: the gift ladder sits
   // directly under the headline and the invite block far below it, and both
   // count the same referrals. One fetch, one number, no drift between them.
@@ -47,6 +51,14 @@ export function ComingSoonScreen({ launchAt, session }: ComingSoonScreenProps) {
   // behind the gate. Shared with the maintenance wall, which has the same
   // problem. @see useTelegramChrome
   useTelegramChrome();
+
+  const handleClaim = async () => {
+    setClaimError(null);
+    const refusal = await invite.claim();
+    // The backend's own sentence when it has one ("подарки на сегодня
+    // разобраны"), a generic line when the request never got there.
+    if (refusal) setClaimError(refusal === 'error' ? t('action failed') : refusal);
+  };
 
   return (
     // Top-aligned, not centred: the screen opens on the logo and the promise
@@ -77,6 +89,9 @@ export function ComingSoonScreen({ launchAt, session }: ComingSoonScreenProps) {
             invitedCount={invite.gift.counted ?? invite.friends.length}
             gift={invite.gift}
             loading={invite.isLoading}
+            onClaim={handleClaim}
+            claiming={invite.claiming}
+            error={claimError}
             className="animate-slide-in-bottom"
             style={{ animationDelay: '100ms' }}
           />
@@ -84,19 +99,21 @@ export function ComingSoonScreen({ launchAt, session }: ComingSoonScreenProps) {
 
         <LaunchCountdown targetDate={launchAt} className="animate-fade-in" />
 
+        {/* Directly under the timer: subscribing is what makes an invited friend
+            COUNT toward the gift, so it belongs where the promo is read — not
+            at the bottom of the page under the roster. */}
+        <ComingSoonChannelLink className="animate-fade-in" />
+
         <ComingSoonInviteSection
           invite={invite}
           className="animate-slide-in-bottom"
           style={{ animationDelay: '300ms' }}
         />
 
-        <div
-          className="animate-slide-in-bottom flex flex-col items-center gap-4"
+        <ComingSoonLanguageSwitch
+          className="animate-slide-in-bottom"
           style={{ animationDelay: '400ms' }}
-        >
-          <ComingSoonChannelLink />
-          <ComingSoonLanguageSwitch />
-        </div>
+        />
       </div>
     </main>
   );

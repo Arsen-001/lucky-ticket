@@ -1,0 +1,35 @@
+/**
+ * The pre-launch gift, when it is the player's to take.
+ *
+ * A slow breathing glow rather than a blink: the gift sits on screen for as
+ * long as the countdown does, and anything faster turns a reward into a nag.
+ * Pure CSS on purpose — this runs on the pre-launch screen, where no store, no
+ * provider and as little JS as possible is mounted.
+ */
+@keyframes coming-soon-gift-glow {
+  0%,
+  100% {
+    box-shadow:
+      0 0 0 0 rgb(from var(--color-electric-pink) r g b / 0.45),
+      0 0 28px -6px rgb(from var(--color-electric-pink) r g b / 0.55);
+    transform: scale(1);
+  }
+  50% {
+    box-shadow:
+      0 0 0 14px rgb(from var(--color-electric-pink) r g b / 0),
+      0 0 44px -4px rgb(from var(--color-electric-pink) r g b / 0.85);
+    transform: scale(1.04);
+  }
+}
+
+@utility gift-glow {
+  animation: coming-soon-gift-glow 2.2s ease-in-out infinite;
+}
+
+/* Respect the OS setting: the glow is decoration, and motion sickness is not. */
+@media (prefers-reduced-motion: reduce) {
+  @utility gift-glow {
+    animation: none;
+    box-shadow: 0 0 32px -6px rgb(from var(--color-electric-pink) r g b / 0.7);
+  }
+}

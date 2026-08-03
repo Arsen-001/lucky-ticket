@@ -64,4 +64,18 @@ export interface PreLaunchGiftState {
   dailyLimit?: number | null;
   /** Places still free today. */
   dailyRemaining?: number | null;
+  /**
+   * The ladder is full — this player has earned the right to ask. Stays true on
+   * a day with no places left, which is exactly the difference between «ещё не
+   * заслужил» and «заслужил, но сегодня опоздал».
+   */
+  eligible?: boolean;
+  /**
+   * Pressing the gift right now would file a claim. The server's answer, not
+   * the screen's guess: it already weighs the places, the channel rule and an
+   * existing claim, so the button lights up only when it would work. Absent on
+   * a backend that predates the button — the gift then stays locked, which
+   * promises nothing.
+   */
+  canClaim?: boolean;
 }

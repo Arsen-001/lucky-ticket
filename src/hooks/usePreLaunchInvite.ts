@@ -47,6 +47,15 @@ export interface PreLaunchInviteState {
   isError: boolean;
   /** False when there is nobody to show this for — render nothing at all. */
   available: boolean;
+  /**
+   * Ask for the gift — the player pressed it. Nothing else files a claim, so
+   * this is the one write the countdown screen performs. Resolves to the
+   * backend's refusal text when it says no (day full, friend unsubscribed
+   * since), which the screen shows instead of a silent no-op.
+   */
+  claim: () => Promise<string | null>;
+  /** That request is in flight. */
+  claiming: boolean;
   retry: () => void;
   /** Prepares the rich share card server-side; rejects when it can't be had. */
   prepareCard: (lang: LocaleType) => Promise<string>;
@@ -75,6 +84,7 @@ export function usePreLaunchInvite(session: PreLaunchSession | null): PreLaunchI
   const [link, setLink] = useState('');
   const [isLoading, setIsLoading] = useState(true);
   const [isError, setIsError] = useState(false);
+  const [claiming, setClaiming] = useState(false);
   const [attempt, setAttempt] = useState(0);
 
   const token = session?.accessToken ?? null;
@@ -153,6 +163,38 @@ export function usePreLaunchInvite(session: PreLaunchSession | null): PreLaunchI
     return id;
   };
 
+  /**
+   * Press the gift. On the mock layer there is no backend to ask, so it just
+   * flips the local state — the screen is still worth looking at locally.
+   */
+  const claim = async (): Promise<string | null> => {
+    if (claiming) return null;
+    setClaiming(true);
+    try {
+      if (!apiBase || !token) {
+        setGift(current => ({ ...current, status: 'PENDING', canClaim: false }));
+        return null;
+      }
+      const response = await authedFetch('referral/prelaunch-gift/claim', token, {
+        method: 'POST',
+        body: JSON.stringify({}),
+      });
+      const body: unknown = await response.json().catch(() => null);
+      if (!response.ok) {
+        // The backend's own words: it knows whether the day filled up, a friend
+        // left the channel, or the promo closed — the screen must not guess.
+        const message = (body as { message?: string } | null)?.message;
+        return message ?? 'error';
+      }
+      setGift((body as PreLaunchGiftState) ?? NO_GIFT);
+      return null;
+    } catch {
+      return 'error';
+    } finally {
+      setClaiming(false);
+    }
+  };
+
   const markShared = (confirmed: boolean) => {
     if (!apiBase || !token) return;
     // Best-effort telemetry: a failed report must never surface as a broken
@@ -170,6 +212,8 @@ export function usePreLaunchInvite(session: PreLaunchSession | null): PreLaunchI
     isLoading,
     isError,
     available,
+    claim,
+    claiming,
     retry: () => setAttempt(value => value + 1),
     prepareCard,
     markShared,
