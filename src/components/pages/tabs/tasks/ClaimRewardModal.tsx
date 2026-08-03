@@ -173,7 +173,7 @@ export function ClaimRewardModal({
                 </>
               ) : view === 'error' ? (
                 <div className="flex-center w-28 h-28 rounded-full bg-error/20 border border-error/40">
-                  <Sparkles size={48} className="text-error" />
+                  <Sparkles size={48} className="text-error-text" />
                 </div>
               ) : (
                 <div className="flex-center w-28 h-28 rounded-full bg-white/5 border border-white/10">

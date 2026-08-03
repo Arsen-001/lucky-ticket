@@ -170,7 +170,9 @@ export function ExchangeTonStarsModal({
               </p>
             )}
             {insufficient && (
-              <p className="text-error text-[11px] font-semibold">{t('insufficient balance')}</p>
+              <p className="text-error-text text-[11px] font-semibold">
+                {t('insufficient balance')}
+              </p>
             )}
 
             <button

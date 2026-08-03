@@ -123,7 +123,7 @@ export function BuyExtraAdsModal({
               <span
                 className={twMerge(
                   'text-[11px] tabular-nums',
-                  short ? 'text-error' : 'text-white/50'
+                  short ? 'text-error-text' : 'text-white/50'
                 )}
               >
                 {t('available')} {formatCompact(balance)}

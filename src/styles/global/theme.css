@@ -23,13 +23,29 @@
   --color-gradient-darkpink: rgba(102, 23, 83, 1);
   --color-gradient-lightpink: rgba(163, 33, 131, 1);
 
-  --color-pink-secondary: rgba(126, 89, 127, 1);
-  --color-gray-secondary: rgba(92, 99, 112, 1);
+  /* Both lightened 2026-08-03 for legibility, not for looks.
+     Measured against every app surface (background / background-overlay /
+     header) they were 2.97:1 and 2.85:1 — under the 4.5:1 body-text floor and
+     under the 3:1 UI floor, on the app's two default "quiet text" colours
+     (pink-secondary alone is used ~233 times, mostly at 10-11px). Raised by the
+     SMALLEST push toward white that clears the threshold with a margin, so the
+     hue is unchanged: now 5.21:1 and 5.24:1 on the worst of the three. */
+  --color-pink-secondary: rgba(163, 137, 164, 1);
+  --color-gray-secondary: rgba(141, 146, 155, 1);
   --color-white-secondary: rgba(212, 201, 201, 1);
   --color-purple-secondary: rgba(114, 103, 164, 1);
 
   --color-success: rgba(4, 120, 87, 1);
+  /* Fills and borders only (`bg-error/15`, `border-error/40`, `from-error`).
+     As TEXT this is 1.73-1.82:1 — below even the 3:1 UI floor, which made every
+     form validation message near-invisible: the player is told the form was
+     refused but not why. Use `--color-error-text` for anything readable. */
   --color-error: rgba(126, 40, 40, 1);
+  /* Error text. Deliberately NOT the minimum lightening of --color-error: that
+     lands on a dusty rgb(176,123,123) that stops reading as "error" at all, and
+     here the colour carries the meaning. This keeps the red saturated and
+     measures 5.92:1 on the worst surface. */
+  --color-error-text: rgba(248, 113, 113, 1);
   --color-disabled: rgba(122, 122, 122, 1);
   --color-warning: rgba(180, 130, 3, 1);
 

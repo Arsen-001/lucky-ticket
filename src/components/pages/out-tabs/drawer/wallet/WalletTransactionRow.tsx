@@ -51,10 +51,10 @@ const TYPE_META: Record<WalletTransactionType, TypeMeta> = {
   },
   [WalletTransactionType.WITHDRAW_TON]: {
     Icon: ArrowUpRight,
-    iconClass: 'text-error',
+    iconClass: 'text-error-text',
     iconBg: 'bg-error/15',
     amountSign: '-',
-    amountClass: 'text-error',
+    amountClass: 'text-error-text',
   },
   [WalletTransactionType.BUY_STARS]: {
     Icon: Star,
@@ -74,7 +74,7 @@ const STATUS_ICON: Record<WalletTransactionStatus, LucideIcon> = {
 const STATUS_CLASS: Record<WalletTransactionStatus, string> = {
   [WalletTransactionStatus.COMPLETED]: 'text-success',
   [WalletTransactionStatus.PENDING]: 'text-warning animate-spin',
-  [WalletTransactionStatus.FAILED]: 'text-error',
+  [WalletTransactionStatus.FAILED]: 'text-error-text',
 };
 
 export function WalletTransactionRow({

@@ -252,7 +252,7 @@ export function WithdrawTonModal({
               />
             </div>
 
-            {error && <p className="text-error text-[11px] font-semibold">{error}</p>}
+            {error && <p className="text-error-text text-[11px] font-semibold">{error}</p>}
 
             <Button
               variant="primary"

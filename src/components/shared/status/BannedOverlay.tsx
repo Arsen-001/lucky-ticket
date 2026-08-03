@@ -14,7 +14,7 @@ export function BannedOverlay() {
 
   return (
     <FullScreenStatus
-      accentClassName="bg-error/15 text-error"
+      accentClassName="bg-error/15 text-error-text"
       icon={<Ban size={34} strokeWidth={2.2} />}
       title={t('account blocked')}
       description={t('account blocked description')}

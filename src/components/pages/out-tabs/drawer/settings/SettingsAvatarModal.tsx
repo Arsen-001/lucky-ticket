@@ -248,7 +248,7 @@ function SelectedAvatarInfo({ avatar, labelKey }: SelectedAvatarInfoProps) {
         </span>
       </div>
       {locked ? (
-        <div className="flex items-center gap-1.5 text-[12px] text-error">
+        <div className="flex items-center gap-1.5 text-[12px] text-error-text">
           <Lock size={12} strokeWidth={2.6} />
           {t('avatar locked buy in market')}
         </div>

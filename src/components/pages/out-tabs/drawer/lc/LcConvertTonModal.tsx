@@ -166,10 +166,12 @@ export function LcConvertTonModal({ open, onClose, balance }: LcConvertTonModalP
             </div>
 
             {insufficient && (
-              <p className="text-error text-[11px] font-semibold">{t('insufficient lc balance')}</p>
+              <p className="text-error-text text-[11px] font-semibold">
+                {t('insufficient lc balance')}
+              </p>
             )}
             {!insufficient && belowMinimum && (
-              <p className="text-error text-[11px] font-semibold">
+              <p className="text-error-text text-[11px] font-semibold">
                 {t('minimum conversion {n} lc', { n: formatNumber(minWithdrawLc) })}
               </p>
             )}

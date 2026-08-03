@@ -45,7 +45,7 @@ export function ProfileFooter({ isOwn, memberSince, userId }: ProfileFooterProps
         <button
           type="button"
           onClick={() => setSignOutOpen(true)}
-          className="text-error/80 hover:text-error border-error/30 bg-error/10 hover:bg-error/15 inline-flex items-center justify-center gap-1.5 self-center rounded-full border px-4 py-2 text-[11px] font-bold uppercase tracking-wider transition-colors"
+          className="text-error-text/80 hover:text-error-text border-error/30 bg-error/10 hover:bg-error/15 inline-flex items-center justify-center gap-1.5 self-center rounded-full border px-4 py-2 text-[11px] font-bold uppercase tracking-wider transition-colors"
         >
           <LogOut size={12} strokeWidth={2.6} />
           {t('sign out')}

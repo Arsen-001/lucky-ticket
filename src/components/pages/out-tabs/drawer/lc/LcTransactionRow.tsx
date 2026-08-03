@@ -157,7 +157,7 @@ export function LcTransactionRow({
 
   const meta = TYPE_META[transaction.type] ?? FALLBACK_META;
   const isCredit = transaction.direction === LcTransactionDirection.CREDIT;
-  const amountClass = isCredit ? 'text-success' : 'text-error';
+  const amountClass = isCredit ? 'text-success' : 'text-error-text';
   const sign = isCredit ? '+' : '−';
 
   return (

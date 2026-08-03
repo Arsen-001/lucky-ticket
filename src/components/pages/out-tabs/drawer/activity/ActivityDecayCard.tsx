@@ -33,7 +33,7 @@ export function ActivityDecayCard({
     },
     decaying: {
       Icon: TrendingDown,
-      color: 'var(--color-error)',
+      color: 'var(--color-error-text)',
       title: t('decay active'),
       sub: t('losing {n} AP per day until you return', { n: decay.decayPerDay }),
     },

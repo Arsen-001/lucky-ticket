@@ -132,7 +132,9 @@ export function EngineSlotPickerModal({
                   <span className="text-white/65 uppercase tracking-wider">
                     {t('matching shard')}
                   </span>
-                  <span className={twMerge('tabular-nums', canMint ? 'text-white' : 'text-error')}>
+                  <span
+                    className={twMerge('tabular-nums', canMint ? 'text-white' : 'text-error-text')}
+                  >
                     {ownedShards}/{requiredShards}
                   </span>
                 </span>

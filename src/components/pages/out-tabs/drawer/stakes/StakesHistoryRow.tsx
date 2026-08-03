@@ -49,7 +49,7 @@ export function StakesHistoryRow({ entry, levels }: StakesHistoryRowProps) {
         </div>
         <div className="text-white-secondary mt-1 flex flex-wrap items-center gap-x-2 gap-y-0.5 text-[11px]">
           {entry.outcome === 'cancelled' ? (
-            <span className="font-bold text-error/90">{t('cancelled · LC returned')}</span>
+            <span className="font-bold text-error-text/90">{t('cancelled · LC returned')}</span>
           ) : (
             <>
               <span className="text-gold inline-flex items-center gap-1 font-bold">

@@ -26,7 +26,7 @@ export function TelegramSplash({ error = false, onRetry }: TelegramSplashProps) 
   if (error) {
     return (
       <FullScreenStatus
-        accentClassName="bg-error/15 text-error"
+        accentClassName="bg-error/15 text-error-text"
         icon={<Unplug size={36} strokeWidth={2.2} />}
         title={t('telegram auth failed')}
         description={t('telegram auth failed description')}

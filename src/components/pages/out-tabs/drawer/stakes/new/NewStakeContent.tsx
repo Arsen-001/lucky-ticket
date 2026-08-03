@@ -235,7 +235,7 @@ export function NewStakeContent() {
       />
 
       {tierLockedHint && (
-        <div className="border-error/40 bg-error/10 text-error mt-3 rounded-xl border px-3 py-2 text-center text-[11px] font-bold">
+        <div className="border-error/40 bg-error/10 text-error-text mt-3 rounded-xl border px-3 py-2 text-center text-[11px] font-bold">
           {tierLockedHint}
         </div>
       )}
@@ -256,7 +256,7 @@ export function NewStakeContent() {
         onBlocked={setBlocked}
       />
       {errorMessage && (
-        <div className="border-error/40 bg-error/15 text-error mt-2 rounded-xl border px-3 py-2 text-center text-[11px] font-bold">
+        <div className="border-error/40 bg-error/15 text-error-text mt-2 rounded-xl border px-3 py-2 text-center text-[11px] font-bold">
           {errorMessage}
         </div>
       )}

@@ -16,7 +16,7 @@ export function ChipMintCostRow({ icon, label, owned, required, ok }: ChipMintCo
         {icon}
         <span className="text-white/65 uppercase tracking-wider">{label}</span>
       </div>
-      <span className={twMerge('tabular-nums', ok ? 'text-white' : 'text-error')}>
+      <span className={twMerge('tabular-nums', ok ? 'text-white' : 'text-error-text')}>
         {owned} / {required}
       </span>
     </div>

@@ -25,7 +25,7 @@ export function Form<T extends FieldValues = FieldValues>({
       {!noStyle && (
         <p
           className={twMerge(
-            'my-1 text-sm text-error font-semibold transition-all duration-500 ease-in-out',
+            'my-1 text-sm text-error-text font-semibold transition-all duration-500 ease-in-out',
             errorMessage
               ? 'opacity-100 translate-y-0 max-h-10'
               : 'opacity-0 -translate-y-2 max-h-0 overflow-hidden'

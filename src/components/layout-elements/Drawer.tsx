@@ -407,7 +407,7 @@ export function Drawer() {
             onClick={handleLogout}
             disabled={isLoggingOut}
             tabIndex={tabIndex}
-            className="mx-3 mb-3 flex items-center gap-3 rounded-2xl px-3 py-3 text-sm font-semibold text-error transition-transform active:scale-99 disabled:opacity-60"
+            className="mx-3 mb-3 flex items-center gap-3 rounded-2xl px-3 py-3 text-sm font-semibold text-error-text transition-transform active:scale-99 disabled:opacity-60"
           >
             <LogOut size={18} />
             <span>{t('logout')}</span>

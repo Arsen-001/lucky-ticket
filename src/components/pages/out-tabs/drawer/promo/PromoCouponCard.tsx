@@ -84,7 +84,7 @@ export function PromoCouponCard({
         />
         {errorMessage && (
           <div className="bg-error/15 animate-fade-in flex items-center justify-center gap-1.5 rounded-lg px-3 py-2">
-            <CircleAlert size={13} className="text-error shrink-0" />
+            <CircleAlert size={13} className="text-error-text shrink-0" />
             <span className="text-[12px] font-semibold leading-snug text-white/90">
               {errorMessage}
             </span>

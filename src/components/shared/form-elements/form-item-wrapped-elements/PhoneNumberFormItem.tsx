@@ -90,7 +90,7 @@ export function PhoneNumberFormItem({
           role={error ? 'alert' : undefined}
           className={twMerge(
             'h-5 mt-1 overflow-hidden text-ellipsis whitespace-nowrap text-sm font-bold',
-            error ? 'text-error' : 'text-white-secondary/50',
+            error ? 'text-error-text' : 'text-white-secondary/50',
             classNames?.info
           )}
         >

@@ -15,7 +15,7 @@ export function OfflineOverlay() {
 
   return (
     <FullScreenStatus
-      accentClassName="bg-error/15 text-error"
+      accentClassName="bg-error/15 text-error-text"
       icon={<WifiOff size={36} strokeWidth={2.2} />}
       title={t('no internet connection')}
       description={t('check connection and retry')}

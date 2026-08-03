@@ -130,7 +130,7 @@ export function DepositTonModal({ open, onClose, onDeposited }: DepositTonModalP
             <p
               className={twMerge(
                 'px-1 text-[11px]',
-                belowMinimum ? 'text-error font-semibold' : 'text-pink-secondary'
+                belowMinimum ? 'text-error-text font-semibold' : 'text-pink-secondary'
               )}
             >
               {t('minimum deposit {n} ton', { n: formatTon(minDepositTon, 4) })}

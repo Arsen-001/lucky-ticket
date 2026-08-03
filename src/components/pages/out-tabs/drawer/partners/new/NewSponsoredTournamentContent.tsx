@@ -232,7 +232,7 @@ export function NewSponsoredTournamentContent() {
       {/* Sticky action bar */}
       <div className="from-background via-background sticky bottom-0 -mx-5 bg-gradient-to-t to-transparent px-5 pb-[calc(env(safe-area-inset-bottom)+0.5rem)] pt-4">
         {insufficient && (
-          <p className="text-error mb-2 text-center text-[11px] font-semibold">
+          <p className="text-error-text mb-2 text-center text-[11px] font-semibold">
             {t('insufficient balance')}
           </p>
         )}

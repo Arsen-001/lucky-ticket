@@ -83,7 +83,7 @@ export function StarsHero({ state, loading }: StarsHeroProps) {
           </span>
           <span>
             {t('total spent')}:{' '}
-            <span className="text-error">−{formatNumber(state?.lifetimeSpent ?? 0)}</span>
+            <span className="text-error-text">−{formatNumber(state?.lifetimeSpent ?? 0)}</span>
           </span>
         </div>
       </div>

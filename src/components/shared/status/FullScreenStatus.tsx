@@ -8,7 +8,7 @@ interface FullScreenStatusProps {
   title: string;
   description: string;
   action?: ReactNode;
-  /** Tailwind classes for the icon circle, e.g. 'bg-error/15 text-error'. */
+  /** Tailwind classes for the icon circle, e.g. 'bg-error/15 text-error-text'. */
   accentClassName?: string;
 }
 

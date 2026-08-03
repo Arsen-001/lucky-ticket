@@ -177,7 +177,7 @@ export function MarketStatusSection({ onSelect, onBuy }: MarketStatusSectionProp
                 ))}
               </ul>
               {!isVIP && !meetsRequirements && activityRequirement && (
-                <span className="text-error text-[11px] font-bold">
+                <span className="text-error-text text-[11px] font-bold">
                   {t('needs {count} activity points', {
                     count: activityRequirement.count,
                     current: me?.activityPoints || 0,

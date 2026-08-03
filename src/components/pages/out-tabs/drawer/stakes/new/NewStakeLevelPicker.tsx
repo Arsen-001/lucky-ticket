@@ -97,12 +97,12 @@ export function NewStakeLevelPicker({
               {formatCompact(lv.minDeposit)}
             </span>
             {!tierUnlocked && apGap > 0 && (
-              <span className="text-error/75 mt-0.5 text-[8px] font-bold tabular-nums">
+              <span className="text-error-text/75 mt-0.5 text-[8px] font-bold tabular-nums">
                 {t('need {n} ap', { n: formatCompact(apGap) })}
               </span>
             )}
             {!tierUnlocked && refGap > 0 && (
-              <span className="text-error/75 mt-0.5 text-[8px] font-bold tabular-nums">
+              <span className="text-error-text/75 mt-0.5 text-[8px] font-bold tabular-nums">
                 {t('need {n} friends', { n: refGap })}
               </span>
             )}

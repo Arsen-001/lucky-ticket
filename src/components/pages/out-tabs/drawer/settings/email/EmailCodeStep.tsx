@@ -58,7 +58,9 @@ export function EmailCodeStep({
         />
         <p className="text-xs text-gray-secondary px-1">{t('code sent to {email}', { email })}</p>
         {errorMessage && (
-          <p className="text-error animate-fade-in px-1 text-xs font-semibold">{errorMessage}</p>
+          <p className="text-error-text animate-fade-in px-1 text-xs font-semibold">
+            {errorMessage}
+          </p>
         )}
       </div>
       <div className="flex flex-col gap-3">

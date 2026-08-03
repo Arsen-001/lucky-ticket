@@ -43,10 +43,10 @@ export function StakeCancelSection({
       <button
         type="button"
         onClick={() => setOpen(true)}
-        className="border-error/40 bg-error/15 flex w-full items-center justify-between rounded-xl border px-4 py-3.5 text-[13px] font-bold text-error/90"
+        className="border-error/40 bg-error/15 flex w-full items-center justify-between rounded-xl border px-4 py-3.5 text-[13px] font-bold text-error-text/90"
       >
         <span>{t('cancel stake')}</span>
-        <span className="inline-flex items-center gap-1 text-error/90 text-[12px] font-bold">
+        <span className="inline-flex items-center gap-1 text-error-text/90 text-[12px] font-bold">
           <span>{t('costs')}</span>
           <Image src={icons.telegramStar} alt="" className="h-3 w-auto" />
           <span className="text-gold tabular-nums">{cancelFee}</span>
@@ -57,10 +57,10 @@ export function StakeCancelSection({
         <div className="bg-background border-error/30 flex flex-col gap-4 rounded-2xl border px-5 py-5 shadow-[0_20px_60px_rgba(0,0,0,0.6)]">
           <div className="flex items-start gap-2.5">
             <div className="border-error/40 bg-error/20 flex h-9 w-9 shrink-0 items-center justify-center rounded-full border">
-              <AlertTriangle size={18} className="text-error" strokeWidth={2.4} />
+              <AlertTriangle size={18} className="text-error-text" strokeWidth={2.4} />
             </div>
             <p className="flex-1 text-[12px] leading-relaxed text-white">
-              <strong className="text-error">{t('cancel forfeits bonus')}</strong>{' '}
+              <strong className="text-error-text">{t('cancel forfeits bonus')}</strong>{' '}
               {t('cancel forfeits description', {
                 amount: lockedAmount.toLocaleString(),
                 coin: GlobalConstants.coinName,
@@ -83,7 +83,7 @@ export function StakeCancelSection({
             </div>
             <div className="text-white-secondary mt-1.5 flex items-center justify-between text-[11px]">
               <span>{t('bonus ap forfeited')}</span>
-              <span className="text-error/85 inline-flex items-center gap-1 font-extrabold tabular-nums line-through">
+              <span className="text-error-text/85 inline-flex items-center gap-1 font-extrabold tabular-nums line-through">
                 <BoltIcon size={14} />+{bonusAp}
               </span>
             </div>

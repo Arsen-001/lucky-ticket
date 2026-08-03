@@ -10,7 +10,7 @@ import { dismissToast, type Toast, type ToastVariant } from '@/lib/rtk/features/
 const TOAST_DURATION = 4000;
 
 const variantConfig: Record<ToastVariant, { icon: LucideIcon; className: string }> = {
-  error: { icon: CircleAlert, className: 'border-error/45 text-error' },
+  error: { icon: CircleAlert, className: 'border-error/45 text-error-text' },
   success: { icon: CircleCheck, className: 'border-success/45 text-success' },
   info: { icon: Info, className: 'border-teal/45 text-teal' },
 };

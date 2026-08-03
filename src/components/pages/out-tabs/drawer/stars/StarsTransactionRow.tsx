@@ -71,7 +71,7 @@ const TYPE_META: Record<StarsTransactionType, TypeMeta> = {
   },
   [StarsTransactionType.STAKE_CANCEL_FEE]: {
     Icon: Lock,
-    iconClass: 'text-error',
+    iconClass: 'text-error-text',
     iconBg: 'bg-error/15',
   },
   [StarsTransactionType.SHOWCASE_SLOT]: {
@@ -138,7 +138,7 @@ export function StarsTransactionRow({
 
   const meta = TYPE_META[transaction.type] ?? FALLBACK_META;
   const isCredit = transaction.direction === StarsTransactionDirection.CREDIT;
-  const amountClass = isCredit ? 'text-success' : 'text-error';
+  const amountClass = isCredit ? 'text-success' : 'text-error-text';
   const sign = isCredit ? '+' : '−';
 
   return (

@@ -28,7 +28,7 @@ export function SettingsSignOut() {
     <>
       <SettingsMenuItem
         onClick={() => setOpen(true)}
-        icon={<LogOut size={18} className="text-error" />}
+        icon={<LogOut size={18} className="text-error-text" />}
         title={t('sign out')}
         accent="error"
         rightElement={<div />}
