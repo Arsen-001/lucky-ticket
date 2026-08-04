@@ -1519,6 +1519,10 @@ Two channels are supported: **Email** and **Telegram bot**. Each channel has its
 
 Toggles are saved instantly (no submit button). Categories not listed here are not exposed as user-toggleable preferences.
 
+**Blocking the bot mutes the Telegram channel entirely**, whatever the toggles say — Telegram refuses every message from a bot its user has blocked, and there is no in-app way to override that. The platform records the block the moment it happens (Telegram announces it once, as a `my_chat_member` update, and never answers the question again afterwards), stops counting the player as a broadcast recipient, and clears the mark by itself when they unblock or press Start again. Nothing else changes: a block is not a ban, the account keeps playing, keeps earning and keeps its balances.
+
+Because the signal only exists at the moment of the block, the record is **forward-only** — anyone who blocked the bot before 2026-08-05 is indistinguishable from a reachable player, and "not marked as blocked" therefore means "no block observed", never "confirmed reachable".
+
 ---
 
 ### 16.3 Email Confirmation & Verification Gift
