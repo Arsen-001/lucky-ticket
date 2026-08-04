@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { twMerge } from 'tailwind-merge';
 import { Eye } from 'lucide-react';
+import { Progress } from '@/components/shared/Progress';
 import { useAppTranslations } from '@/hooks/useAppTranslations';
 import { useCountDown } from '@/hooks/useCountDown';
 import { useSecondsUntil } from '@/hooks/useSecondsUntil';
@@ -30,7 +31,9 @@ export interface AdsSectionProps {
   highlightToken?: number | null;
 }
 
-const SLIDE_WIDTH = 168;
+// Wide enough for a titled card with a reward panel and a labelled button, and
+// still narrow enough that both neighbours peek in at a 390px viewport.
+const SLIDE_WIDTH = 208;
 
 export function AdsSection({
   ads,
@@ -136,6 +139,19 @@ export function AdsSection({
         )}
       </header>
 
+      {/* The day's progress as a bar, not only as a sentence: with a card per
+          slot the carousel no longer shows the whole day at a glance, so how
+          much of it is spent has to be readable without scrolling it.
+          Deliberately not `category ads blurb` here — that copy still promises
+          "up to 10 per day", which contradicts the real cap next to it. */}
+      {total > 0 && (
+        <Progress
+          percentage={Math.min(100, Math.round((watched / total) * 100))}
+          className="h-1"
+          classNames={{ bar: 'bg-pink-gradient' }}
+        />
+      )}
+
       {slots.length === 0 ? (
         <div className="rounded-2xl bg-white/5 border border-white/5 px-4 py-6 text-center text-sm text-white/50">
           <Eye size={28} className="mx-auto mb-2 text-white/30" />
@@ -144,7 +160,10 @@ export function AdsSection({
       ) : (
         <div
           ref={scrollerRef}
-          className="scrollbar-hidden flex snap-x snap-mandatory items-center gap-2 overflow-x-auto overflow-y-visible -mx-4"
+          // `items-stretch`, not `items-center`: a slot with three rewards is a
+          // few pixels taller than one with a single reward, and centre-aligned
+          // cards of unequal height make the row of CTAs zig-zag.
+          className="scrollbar-hidden -mx-4 flex snap-x snap-mandatory items-stretch gap-2 overflow-x-auto overflow-y-visible py-2"
           style={{
             scrollPaddingInline: `calc(50% - ${SLIDE_WIDTH / 2}px)`,
             paddingInline: `calc(50% - ${SLIDE_WIDTH / 2}px)`,
@@ -152,7 +171,9 @@ export function AdsSection({
         >
           {slots.map((slot, index) => {
             const isActive = index === activeIndex;
-            const sideOffset = isActive ? 0 : index < activeIndex ? 12 : -12;
+            // Gentler than the old 12px/0.88 pair: on a card this tall the same
+            // shrink reads as a different card size rather than as depth.
+            const sideOffset = isActive ? 0 : index < activeIndex ? 8 : -8;
             const playableIndex = firstUnwatched < 0 ? -1 : firstUnwatched;
             const locked = !slot.watched && index !== playableIndex;
             const interactive = !slot.watched;
@@ -164,7 +185,7 @@ export function AdsSection({
                 onClick={!isActive && interactive ? () => scrollToIndex(index) : undefined}
                 style={{
                   flex: `0 0 ${SLIDE_WIDTH}px`,
-                  transform: `translateX(${sideOffset}px) scale(${isActive ? 1 : 0.88})`,
+                  transform: `translateX(${sideOffset}px) scale(${isActive ? 1 : 0.93})`,
                 }}
                 className={twMerge(
                   'origin-center snap-center transition-all duration-[450ms] ease-[cubic-bezier(0.22,1,0.36,1)]',
