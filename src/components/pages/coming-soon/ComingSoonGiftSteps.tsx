@@ -175,7 +175,10 @@ export function ComingSoonGiftSteps({
           </p>
           {board && (
             <div className="flex flex-col items-center gap-1">
-              <span className="text-electric-pink text-[11px] font-extrabold uppercase tracking-wider">
+              {/* Not uppercase any more: the line now carries a sentence
+                  («успей забрать первым»), and wide-tracked capitals turn a
+                  sentence into a sign nobody reads. */}
+              <span className="text-electric-pink max-w-[20rem] text-balance text-[12px] font-extrabold leading-snug">
                 {board.rule}
               </span>
               <span

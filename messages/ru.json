@@ -1188,7 +1188,7 @@
   "coming soon gift steps done": "Все шаги пройдены — спасибо, что привели друзей",
   "coming soon gift places left": "Сегодня {total} подарков · осталось {left}",
   "coming soon gift places gone": "Подарки на сегодня разобраны — приходите завтра",
-  "coming soon gift daily rule": "Каждый день — {total} подарков",
+  "coming soon gift daily rule": "Каждый день — {total} подарков. Успей забрать первым",
   "coming soon gift issued today": "Сегодня роздано {issued} из {total}",
   "coming soon more friends better": "Чем больше друзей вы приведёте, тем сильнее старт: после запуска они поднимают ваш статус и приносят вам долю со своих билетов — а подарок за пятерых остаётся вашим в любом случае.",
   "coming soon gift claim": "Забрать подарок",

@@ -1188,7 +1188,7 @@
   "coming soon gift steps done": "Every step done — thank you for bringing them",
   "coming soon gift places left": "Today: {total} gifts · {left} left",
   "coming soon gift places gone": "Today's gifts are taken — come back tomorrow",
-  "coming soon gift daily rule": "Every day — {total} gifts",
+  "coming soon gift daily rule": "{total} gifts every day. Be first to claim one",
   "coming soon gift issued today": "{issued} of {total} given out today",
   "coming soon more friends better": "The more friends you bring, the stronger you start: after launch they raise your status and pay you a share of their tickets — and the gift for five is yours either way.",
   "coming soon gift claim": "Claim your gift",
