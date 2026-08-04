@@ -20,8 +20,19 @@ export interface ComingSoonLanguageSwitchProps {
  * The gate renders before the app boots, so none of the usual places to pick a
  * language exist yet (the drawer, the onboarding step) — without this every
  * visitor would read the launch date in English regardless of where they are.
- * Reloads rather than `router.refresh()` for the same reason the drawer picker
- * does: the locale is resolved server-side from the cookie.
+ *
+ * **No reload.** `setAppLocale` is a server action, and Next re-renders this
+ * route from the server as part of the action's own response — with the cookie
+ * it just set, so the whole screen comes back translated. It used to call
+ * `window.location.reload()` on top of that, and the two landed 24ms apart
+ * (measured on prod): the texts flipped, then the page visibly reloaded under
+ * them — logo, countdown and every entry animation starting over for nothing.
+ *
+ * The in-app picker (`/languages`) still reloads, and has to: behind the gate a
+ * refresh re-renders only the route you are standing on, while every screen you
+ * already visited stays in the client router cache as it was rendered under the
+ * old locale. There is no such cache here — the gate is one screen, and it is
+ * the one being re-rendered.
  */
 export function ComingSoonLanguageSwitch({ className, style }: ComingSoonLanguageSwitchProps) {
   const { languages, currentLocale } = useGetAvailableLanguages();
@@ -31,7 +42,6 @@ export function ComingSoonLanguageSwitch({ className, style }: ComingSoonLanguag
     if (code === currentLocale) return;
     startTransition(async () => {
       await setAppLocale(code);
-      window.location.reload();
     });
   };
 

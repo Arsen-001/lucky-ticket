@@ -1,6 +1,7 @@
 'use client';
 
 import { Check, Loader2, Lock, Play, Timer } from 'lucide-react';
+import type { CSSProperties } from 'react';
 import { twMerge } from 'tailwind-merge';
 import type { AdSlot } from '@/types/interfaces/tasks.interfaces';
 import { useAppTranslations } from '@/hooks/useAppTranslations';
@@ -19,36 +20,56 @@ export interface AdSlideCardProps {
   cooldownSeconds?: number;
 }
 
-const AD_FRAME: Record<number, string> = {
-  1: 'card-outlined',
-  2: 'task-card-rarity-rare',
-  3: 'task-card-tier-bronze',
-  4: 'task-card-tier-silver',
-  5: 'task-card-rarity-epic',
-  6: 'task-card-tier-gold',
-  7: 'task-card-tier-platinum',
-  8: 'task-card-tier-diamond',
-  9: 'task-card-rarity-legendary',
-  10: 'task-card-tier-all',
-};
+interface AdSlideSkin {
+  /** Gradient-border class that gives the slot its rarity. */
+  frame: string;
+  /**
+   * Colour of the light from above, as an `R G B` triplet fed to `--ad-glow`.
+   * Taken from the frame's own palette so the backdrop continues the rarity
+   * ladder instead of decorating it — a bronze slot is lit warm, a diamond one
+   * cold. @see .ad-card-glow
+   */
+  tint: string;
+  /**
+   * Outer halo, carried by the three slots meant to stand out. Softened
+   * 2026-08-04: at 18–28px and 0.30–0.45 it bled past the card into its dimmed
+   * neighbours in the carousel, so the whole row looked hazy rather than the
+   * one card looking special. The ranking between the three is what carries
+   * the meaning, not their weight.
+   */
+  halo: string;
+}
+
+const DEFAULT_SKIN: AdSlideSkin = { frame: 'card-outlined', tint: '116 61 245', halo: '' };
 
 /**
- * Halo on the rare slots only. Softened 2026-08-04: at 18–28px and 0.30–0.45
- * the glow bled past the card into its dimmed neighbours in the carousel, so
- * the whole row looked hazy rather than the one card looking special. The
- * ranking between the three is what carries the meaning, not their weight.
+ * One entry per view number, so frame, light and halo can never drift apart —
+ * they used to be three parallel maps keyed by the same number. Slots past the
+ * tenth fall back to the neutral skin.
  */
-const AD_GLOW: Record<number, string> = {
-  1: '',
-  2: 'shadow-[0_0_12px_rgba(23,141,136,0.18)]',
-  3: '',
-  4: '',
-  5: 'shadow-[0_0_14px_rgba(116,61,245,0.24)]',
-  6: '',
-  7: '',
-  8: '',
-  9: 'shadow-[0_0_18px_rgba(248,189,62,0.28)]',
-  10: '',
+const AD_SKIN: Record<number, AdSlideSkin> = {
+  1: DEFAULT_SKIN,
+  2: {
+    frame: 'task-card-rarity-rare',
+    tint: '23 141 136',
+    halo: 'shadow-[0_0_12px_rgba(23,141,136,0.18)]',
+  },
+  3: { frame: 'task-card-tier-bronze', tint: '172 97 34', halo: '' },
+  4: { frame: 'task-card-tier-silver', tint: '168 170 164', halo: '' },
+  5: {
+    frame: 'task-card-rarity-epic',
+    tint: '116 61 245',
+    halo: 'shadow-[0_0_14px_rgba(116,61,245,0.24)]',
+  },
+  6: { frame: 'task-card-tier-gold', tint: '248 189 62', halo: '' },
+  7: { frame: 'task-card-tier-platinum', tint: '192 190 177', halo: '' },
+  8: { frame: 'task-card-tier-diamond', tint: '23 141 136', halo: '' },
+  9: {
+    frame: 'task-card-rarity-legendary',
+    tint: '248 189 62',
+    halo: 'shadow-[0_0_18px_rgba(248,189,62,0.28)]',
+  },
+  10: { frame: 'task-card-tier-all', tint: '222 0 155', halo: '' },
 };
 
 /**
@@ -100,16 +121,24 @@ export function AdSlideCard({
 
   const ctaAriaLabel = cooling ? t('next ad in seconds', { sec: cooldownSeconds }) : ctaLabel;
 
+  const skin = AD_SKIN[slot.index] ?? DEFAULT_SKIN;
+
   return (
     <div
+      style={{ '--ad-glow': skin.tint } as CSSProperties}
       className={twMerge(
         'bg-background-overlay relative flex h-full w-full flex-col gap-2.5 overflow-hidden rounded-2xl px-3 py-3',
-        AD_FRAME[slot.index] ?? 'card-outlined',
-        AD_GLOW[slot.index] ?? '',
+        skin.frame,
+        skin.halo,
         watched && 'pointer-events-none opacity-60 select-none',
         locked && 'opacity-50 saturate-50'
       )}
     >
+      {/* Lit from above. A layer of its own, drawn before the content: every
+          sibling below carries `relative`, so it paints over this without a
+          z-index of its own. @see .ad-card-glow */}
+      <span className="ad-card-glow pointer-events-none absolute inset-0" aria-hidden />
+
       {showShine && (
         <span className="pointer-events-none absolute -inset-6 overflow-hidden">
           <span className="animate-task-shine absolute top-0 left-0 h-[200%] w-1/3 bg-gradient-to-r from-transparent via-white/15 to-transparent" />

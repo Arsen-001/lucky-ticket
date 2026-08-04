@@ -234,3 +234,28 @@
     0 0 50px rgba(222, 0, 155, 0.18);
   animation: task-tier-all-rotate 6s linear infinite;
 }
+
+/**
+ * Light from above, for the rewarded-ad slides.
+ *
+ * The card body is a flat `--color-background-overlay` fill — the rarity
+ * classes above spend their whole `background` on the gradient border, so the
+ * inside stayed a plain rectangle. This is a separate layer rather than another
+ * `background` on the card for exactly that reason: it would have overwritten
+ * the border gradient.
+ *
+ * The colour comes from `--ad-glow`, an `R G B` triplet set per slot by
+ * `AD_SKIN` so the light matches the frame's rarity. The fallback is the same
+ * electric purple every slot used before the tint existed.
+ *
+ * Static on purpose. An animated backdrop on this app blinks when a drawer
+ * opens over it, and the carousel already moves enough on its own.
+ */
+.ad-card-glow {
+  background: radial-gradient(
+    120% 75% at 50% -12%,
+    rgb(var(--ad-glow, 116 61 245) / 0.4) 0%,
+    rgb(var(--ad-glow, 116 61 245) / 0.1) 45%,
+    transparent 72%
+  );
+}
