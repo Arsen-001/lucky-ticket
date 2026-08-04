@@ -245,3 +245,21 @@
   );
   filter: drop-shadow(0 2px 9px rgba(222, 0, 155, 0.4));
 }
+
+/**
+ * Tier light behind a tournament card's content.
+ *
+ * The card body is a flat `--color-background-overlay` fill — the tier classes
+ * above spend their whole `background` on the gradient border, so a background
+ * declared on the card itself would erase that border. Hence a separate layer,
+ * coloured by `--tier-glow` (an `R G B` triplet set per card).
+ *
+ * Static: an animated backdrop in this app blinks when a drawer opens over it.
+ */
+.tournament-card-glow {
+  background: radial-gradient(
+    90% 70% at 12% -10%,
+    rgb(var(--tier-glow, 116 61 245) / 0.3) 0%,
+    transparent 68%
+  );
+}

@@ -8,17 +8,14 @@ import {
   CalendarDays,
   CheckCircle2,
   Clock,
-  Cpu,
   Lock,
   Megaphone,
-  MemoryStick,
   ShieldCheck,
-  Sparkles,
   Ticket,
-  Users,
 } from 'lucide-react';
 import { twMerge } from 'tailwind-merge';
 import { Button } from '@/components/shared/buttons/Button';
+import { ChipShardIcon } from '@/components/shared/icons/ChipShardIcon';
 import { Medal } from '@/components/shared/icons/Medal';
 import { LcLabel } from '@/components/shared/icons/LcLabel';
 import { Skeleton } from '@/components/shared/seleketons/Skeleton';
@@ -33,7 +30,7 @@ import {
 import { useGetTicketsQuery } from '@/api/tickets.api';
 import { useCountDown } from '@/hooks/useCountDown';
 import { useUnlockedTiers } from '@/hooks/useUnlockedTiers';
-import { formatCompact } from '@/utils/global/number.utils';
+import { formatCompact, formatNumber } from '@/utils/global/number.utils';
 import { useTournamentConfig } from '@/hooks/useTournamentConfig';
 import { resolveShardRewards } from '@/utils/global/tournament.utils';
 import { routes } from '@/constants/routes';
@@ -48,7 +45,22 @@ import { TournamentResultModal } from '@/components/pages/out-tabs/tabs-extra/to
 import { TierGateModal } from '@/components/shared/modals/TierGateModal';
 import { TournamentSponsorHeader } from './TournamentSponsorHeader';
 import { TournamentSponsorBackground } from './TournamentSponsorBackground';
+import { TournamentStatCell } from './TournamentStatCell';
 import '@/styles/components/tournament-card.css';
+
+/**
+ * Tier colour as an `R G B` triplet for the light behind the card.
+ *
+ * Taken from the same palette the tier's gradient border uses, so the backdrop
+ * continues the tier ladder rather than decorating it. @see .tournament-card-glow
+ */
+const TIER_GLOW: Record<TournamentType, string> = {
+  bronze: '172 97 34',
+  silver: '168 170 164',
+  gold: '248 189 62',
+  platinum: '192 190 177',
+  diamond: '23 141 136',
+};
 
 export type TournamentCardProps = (Tournament | PersonalTournament) & {
   loading?: boolean;
@@ -111,13 +123,6 @@ export function TournamentCard({
   // A tournament whose tier sits above the player's AP tier is shown but locked
   // (DOCS §5.2 tier gate / §11). Finished tournaments are never locked.
   const locked = !isFinished && !!type && !isTierUnlocked(type);
-  const tierClass: Record<TournamentType, string> = {
-    bronze: 'tournament-card-tier-bronze',
-    silver: 'tournament-card-tier-silver',
-    gold: 'tournament-card-tier-gold',
-    platinum: 'tournament-card-tier-platinum',
-    diamond: 'tournament-card-tier-diamond',
-  };
   const { leftTimeText, expired, days, hours, minutes } = useCountDown(
     isFinished ? undefined : startTime
   );
@@ -131,7 +136,6 @@ export function TournamentCard({
   // join window is closed, results are pending.
   const isStarted = !isFinished && expired && !!startTime;
   const isStartingSoon = !isFinished && !isStarted && days === 0 && hours === 0 && minutes < 60;
-  const ShardIcon = shardType === 'capacity' ? MemoryStick : Cpu;
   // Card headline pairs with the total prize pool, so it shows the TOTAL shards
   // across the top-3; the bet modal (labeled "1st") still gets the winner's take.
   const { first: firstShards, total: totalShards } = resolveShardRewards(
@@ -195,6 +199,17 @@ export function TournamentCard({
         : pendingCountdown.leftTimeShort
       : leftTimeText || t('soon');
 
+  // Grouped while it fits — «960,000» is the same figure the bet modal and the
+  // result screen show, and the old «960K» made the card disagree with both.
+  // Eight figures and up it goes compact instead: at 24px on a 320px card the
+  // full number would push the countdown chip off the edge.
+  const prizeText =
+    prizePool == null
+      ? ''
+      : prizePool >= 10_000_000
+        ? formatCompact(prizePool)
+        : formatNumber(prizePool);
+
   return (
     <>
       <div
@@ -211,17 +226,18 @@ export function TournamentCard({
         }}
         style={style}
         className={twMerge(
-          'w-full rounded-2xl flex flex-col p-3 transition-transform focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-white',
+          'relative w-full overflow-hidden rounded-2xl flex flex-col p-3 transition-transform focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-white',
           // Locked cards stay tappable — the tap now explains the gate, so
           // neither `cursor-not-allowed` nor `aria-disabled` would be true.
           isModeration ? 'cursor-default' : 'active:scale-99 cursor-pointer',
+          // A plain hairline, not the tier's gradient border: the tier is now
+          // said by the light behind the card and by the medal, and running
+          // both at once put a coloured outline around every row in the list.
           isFinished
             ? 'tournament-card-finished'
             : sponsor
               ? 'tournament-card-sponsored'
-              : type
-                ? tierClass[type]
-                : 'bg-background-overlay',
+              : 'bg-background-overlay border border-white/8',
           locked && 'opacity-70 saturate-[0.55]',
           className
         )}
@@ -232,12 +248,27 @@ export function TournamentCard({
         {/* Sponsored header strip — the dominant "this is not a game tournament" cue */}
         {sponsor && <TournamentSponsorHeader sponsor={sponsor} />}
 
-        <div className="relative z-10 flex items-stretch gap-3">
-          {/* Medal stage — left (sponsor logo replaces the tier medal) */}
+        {/* Tier light. Skipped for sponsors (their banner owns the backdrop)
+            and for finished cards, which are deliberately colourless. */}
+        {!sponsor && !isFinished && type && (
+          <span
+            aria-hidden
+            style={{ '--tier-glow': TIER_GLOW[type] } as CSSProperties}
+            className="tournament-card-glow pointer-events-none absolute inset-0 rounded-2xl"
+          />
+        )}
+
+        {/* Head — medal, name, prize, date, countdown */}
+        <div className="relative z-10 flex items-start gap-3">
+          {/* The medal stands on its own — no plate. The 96px grey square it
+              used to sit in was empty box around a transparent asset. Sponsors
+              keep one: an arbitrary brand logo needs a surface. */}
           <div
             className={twMerge(
-              'w-24 shrink-0 self-stretch rounded-lg relative overflow-hidden',
-              loading ? 'skeleton' : 'flex-center bg-white/8',
+              'relative shrink-0',
+              (loading || sponsor) && 'size-14 overflow-hidden rounded-lg',
+              loading && 'skeleton',
+              !loading && sponsor && 'flex-center bg-white/8',
               isFinished && 'opacity-80'
             )}
           >
@@ -249,208 +280,213 @@ export function TournamentCard({
                     alt={sponsor.name}
                     fill
                     unoptimized
-                    sizes="96px"
-                    className="object-contain p-2.5"
+                    sizes="56px"
+                    className="object-contain p-2"
                   />
                 ) : (
-                  <Megaphone className="h-10 w-10 text-white/90" strokeWidth={1.6} />
+                  <Megaphone className="h-8 w-8 text-white/90" strokeWidth={1.6} />
                 )
               ) : (
-                <Medal className="drop-shadow-xl drop-shadow-black/30" height={84} type={type} />
+                <Medal className="drop-shadow-lg drop-shadow-black/40" height={56} type={type} />
               ))}
             {locked && (
               <span className="flex-center absolute inset-0 rounded-lg bg-black/45 backdrop-blur-[1px]">
-                <Lock className="text-white/90" size={26} strokeWidth={2.4} />
+                <Lock className="text-white/90" size={22} strokeWidth={2.4} />
               </span>
             )}
           </div>
 
-          {/* Right column — 4 rows */}
-          <div className="flex flex-1 min-w-0 flex-col gap-1.5">
-            {/* Row 1: Name */}
+          <div className="flex min-w-0 flex-1 flex-col gap-1">
             <SkeletonSuspense
               loading={loading}
               skeleton={<Skeleton variant="line" textSize="sm" className="w-full max-w-40" />}
             >
-              <h5 className="line-clamp-1 text-sm font-bold leading-tight text-white">{name}</h5>
+              <h5 className="line-clamp-1 text-sm leading-tight font-bold text-white">{name}</h5>
             </SkeletonSuspense>
 
-            {/* Row 2: Date (full) + Countdown */}
+            {/* The number that decides whether to join, finally sized like it.
+                Grouped rather than compact: «960,000» is the figure the bet
+                modal and the result screen also show, and «960K» made the card
+                disagree with both. */}
             <SkeletonSuspense
               loading={loading}
-              skeleton={<Skeleton variant="rounded-rectangle" className="h-6 w-2/3" />}
+              skeleton={<Skeleton variant="line" textSize="xl" className="w-32" />}
             >
-              <div className="flex items-center justify-between gap-1.5 text-[11px] leading-none min-w-0">
-                <span className="inline-flex items-center gap-1 rounded-md bg-white/5 px-1.5 py-1 leading-none shrink-0">
-                  <CalendarDays className="w-3 h-3 text-pink-secondary shrink-0" />
-                  <span
-                    suppressHydrationWarning
-                    className="font-semibold text-white/90 tabular-nums leading-none"
-                  >
-                    {/* No year: this row is exactly full at 390px, and the
-                        countdown beside it is the number that decides whether
-                        to join. Tournaments run within days, so the year was
-                        costing ~30px to say nothing. */}
-                    {dayjs(startTime).format('DD/MM · HH:mm')}
-                  </span>
-                </span>
-                <span
-                  suppressHydrationWarning
-                  className={twMerge(
-                    // shrink-0, not min-w-0: the date chip beside it never
-                    // shrinks, so this one absorbed every squeeze and silently
-                    // ate the trailing "m" of any two-digit-hour countdown.
-                    'inline-flex items-center gap-1 rounded-md px-1.5 py-1 leading-none text-white shrink-0',
-                    isFinished
-                      ? 'bg-white/5 text-white/65'
-                      : isStarted
-                        ? 'bg-teal/20'
-                        : isStartingSoon
-                          ? 'bg-electric-pink/30'
-                          : 'bg-white/5'
-                  )}
-                >
-                  <Clock
-                    className={twMerge(
-                      'w-3 h-3 shrink-0',
-                      isStarted
-                        ? 'text-teal'
-                        : isStartingSoon
-                          ? 'text-electric-pink'
-                          : 'text-pink-secondary'
-                    )}
-                    strokeWidth={2.4}
-                  />
-                  <span className="font-bold tabular-nums leading-none truncate">
-                    {timeChipText}
-                  </span>
-                </span>
-              </div>
+              <GoldenText
+                className="inline-flex items-center gap-1.5 text-2xl leading-none font-extrabold tabular-nums"
+                style={{ textShadow: '0 1px 6px rgba(248, 189, 62, 0.45)' }}
+              >
+                {prizeText}
+                <LcLabel size={18} />
+              </GoldenText>
             </SkeletonSuspense>
 
-            {/* Row 3: LC + Shards (rewards) */}
             <SkeletonSuspense
               loading={loading}
-              skeleton={<Skeleton variant="rounded-rectangle" className="h-7" />}
+              skeleton={<Skeleton variant="line" textSize="xs" className="w-24" />}
             >
-              <div className="flex items-center gap-2 rounded-lg bg-white/5 px-2 py-1.5">
-                <div className="flex items-center gap-1.5 flex-1 min-w-0 leading-none">
-                  <Sparkles className="w-3.5 h-3.5 text-pink-secondary shrink-0" />
-                  <GoldenText
-                    className="inline-flex items-center gap-1 text-sm font-extrabold tabular-nums leading-none truncate"
-                    style={{ textShadow: '0 1px 4px rgba(248, 189, 62, 0.45)' }}
-                  >
-                    {prizePool != null ? formatCompact(prizePool) : ''}
-                    <LcLabel size={14} />
-                  </GoldenText>
-                </div>
-                <div className="h-3.5 w-px bg-white/15 shrink-0" />
-                <div className="flex items-center gap-1 shrink-0 leading-none">
-                  <ShardIcon
-                    className="w-3.5 h-3.5 text-pink-secondary shrink-0"
-                    strokeWidth={2.4}
-                  />
-                  <span className="text-xs font-bold text-white tabular-nums leading-none">
-                    ×{totalShards}
-                  </span>
-                </div>
-              </div>
-            </SkeletonSuspense>
-
-            {/* Row 4: Players + Tickets + Add/Join button */}
-            <div className="flex items-center gap-1.5 min-w-0">
-              <SkeletonSuspense
-                loading={loading}
-                skeleton={<Skeleton variant="rounded-rectangle" className="h-7 w-12" />}
-              >
-                <span className="inline-flex items-center gap-1 rounded-md bg-white/5 px-1.5 py-1.5 leading-none shrink-0 text-[11px]">
-                  <Users className="w-3 h-3 text-pink-secondary shrink-0" />
-                  <span className="font-semibold text-white/90 tabular-nums leading-none">
-                    {participantsCount != null
-                      ? `${formatCompact(participantsCount)} / ${teamSize == null ? '∞' : teamSize}`
-                      : teamSize == null
-                        ? '∞'
-                        : teamSize}
-                  </span>
+              <span className="inline-flex items-center gap-1 text-[11px] leading-none text-white/45">
+                <CalendarDays className="h-3 w-3 shrink-0" />
+                <span suppressHydrationWarning className="tabular-nums">
+                  {/* No year: tournaments run within days, so it cost ~30px to
+                      say nothing. */}
+                  {dayjs(startTime).format('DD/MM · HH:mm')}
                 </span>
-              </SkeletonSuspense>
-
-              <SkeletonSuspense
-                loading={loading}
-                skeleton={<Skeleton variant="rounded-rectangle" className="h-7 w-12" />}
-              >
-                {participated && !isFinished ? (
-                  <span className="inline-flex items-center gap-1 rounded-md bg-success/20 px-1.5 py-1.5 text-success font-bold text-[11px] leading-none shrink-0">
-                    <Ticket className="w-3 h-3 shrink-0" />
-                    <span className="tabular-nums leading-none">×{ticketCount}</span>
-                  </span>
-                ) : null}
-              </SkeletonSuspense>
-
-              <SkeletonSuspense
-                loading={loading}
-                skeleton={<Skeleton variant="rounded-rectangle" className="h-8 w-24 ml-auto" />}
-              >
-                {isModeration ? (
-                  <span className="text-electric-purple border-electric-purple/30 bg-electric-purple/15 ml-auto inline-flex shrink-0 items-center gap-1.5 rounded-full border px-3 py-2 text-[11px] font-extrabold uppercase leading-none tracking-[0.14em]">
-                    <ShieldCheck size={12} strokeWidth={2.6} />
-                    {t('status moderation')}
-                  </span>
-                ) : isFinished && userResult ? (
-                  <Button
-                    variant="purpleGradient"
-                    icon={<CheckCircle2 strokeWidth={2.6} />}
-                    iconSize={13}
-                    onClick={handleActionClick}
-                    className={twMerge(
-                      'ml-auto shrink-0 py-2 px-3 rounded-full text-[11px] font-extrabold uppercase tracking-[0.14em] leading-none',
-                      'shadow-[0_4px_14px_rgba(0,0,0,0.4),inset_0_1px_0_rgba(255,255,255,0.18)]',
-                      'transition-transform active:scale-95',
-                      hasUnseenResult && 'animate-pulse'
-                    )}
-                  >
-                    <span className="leading-none">{t('result')}</span>
-                  </Button>
-                ) : isFinished ? (
-                  <button
-                    type="button"
-                    onClick={handleActionClick}
-                    className="ml-auto shrink-0 inline-flex items-center justify-center px-3 py-2 rounded-full bg-white/5 border border-white/10 text-[11px] font-extrabold uppercase tracking-[0.14em] text-white/65 leading-none transition-transform active:scale-95 cursor-pointer hover:bg-white/8"
-                  >
-                    {t('ended')}
-                  </button>
-                ) : locked ? (
-                  <span className="ml-auto inline-flex shrink-0 items-center gap-1.5 rounded-full border border-white/10 bg-white/5 px-3.5 py-2 text-[11px] font-extrabold uppercase leading-none tracking-[0.14em] text-white/55">
-                    <Lock size={12} strokeWidth={2.6} />
-                    {t('locked')}
-                  </span>
-                ) : isStarted ? (
-                  <span className="text-teal border-teal/30 bg-teal/15 ml-auto inline-flex shrink-0 items-center gap-1.5 rounded-full border px-3.5 py-2 text-[11px] font-extrabold uppercase leading-none tracking-[0.14em]">
-                    <Clock size={12} strokeWidth={2.6} />
-                    {t('started')}
-                  </span>
-                ) : (
-                  <Button
-                    // Anchor only once loaded — locking the tour onto the skeleton
-                    // card's button makes the spotlight drift when data lands.
-                    data-tour={tourJoinAnchor && !loading ? 'tournament-join' : undefined}
-                    disabled={loading}
-                    onClick={handleActionClick}
-                    className={twMerge(
-                      'ml-auto shrink-0 py-2 px-4 rounded-full text-[11px] font-extrabold uppercase tracking-[0.14em] leading-none',
-                      'shadow-[0_4px_14px_rgba(0,0,0,0.4),inset_0_1px_0_rgba(255,255,255,0.28)]',
-                      'transition-transform active:scale-95',
-                      participated && 'bg-success',
-                      !participated && isStartingSoon && 'animate-pulse'
-                    )}
-                  >
-                    <span className="leading-none">{t(participated ? 'add' : 'join')}</span>
-                  </Button>
-                )}
-              </SkeletonSuspense>
-            </div>
+              </span>
+            </SkeletonSuspense>
           </div>
+
+          <SkeletonSuspense
+            loading={loading}
+            skeleton={<Skeleton variant="rounded-rectangle" className="h-6 w-16" />}
+          >
+            <span
+              suppressHydrationWarning
+              className={twMerge(
+                // shrink-0: nothing beside it gives way, so a squeeze here used
+                // to silently eat the trailing "m" of a two-digit-hour value.
+                'inline-flex shrink-0 items-center gap-1 rounded-md px-1.5 py-1 leading-none text-white',
+                isFinished
+                  ? 'bg-white/5 text-white/65'
+                  : isStarted
+                    ? 'bg-teal/20'
+                    : isStartingSoon
+                      ? 'bg-electric-pink/30'
+                      : 'bg-white/6'
+              )}
+            >
+              <Clock
+                className={twMerge(
+                  'h-3 w-3 shrink-0',
+                  isStarted
+                    ? 'text-teal'
+                    : isStartingSoon
+                      ? 'text-electric-pink'
+                      : 'text-pink-secondary'
+                )}
+                strokeWidth={2.4}
+              />
+              <span className="truncate text-[11px] leading-none font-bold tabular-nums">
+                {timeChipText}
+              </span>
+            </span>
+          </SkeletonSuspense>
         </div>
+
+        {/* Facts, captioned. The row this replaced printed a bare «96» that
+            meant seats but read as players — @see TournamentStatCell. */}
+        <SkeletonSuspense
+          loading={loading}
+          skeleton={<Skeleton variant="rounded-rectangle" className="mt-2.5 h-11" />}
+        >
+          <div className="relative z-10 mt-2.5 flex items-stretch divide-x divide-white/10 rounded-xl bg-black/25">
+            <TournamentStatCell caption={t('shards title')}>
+              {shardType && type ? <ChipShardIcon type={shardType} tier={type} size={15} /> : null}
+              <span className="text-[15px] leading-none font-extrabold text-white tabular-nums">
+                ×{totalShards}
+              </span>
+            </TournamentStatCell>
+
+            <TournamentStatCell caption={participantsCount != null ? t('seats taken') : t('seats')}>
+              <span className="text-[15px] leading-none font-extrabold text-white tabular-nums">
+                {participantsCount != null ? (
+                  <>
+                    {formatCompact(participantsCount)}
+                    <span className="text-white/40">/{teamSize == null ? '∞' : teamSize}</span>
+                  </>
+                ) : (
+                  // Nothing to divide by: without a participant count the card
+                  // can only honestly state the capacity, so the caption above
+                  // switches with it rather than implying a total.
+                  (teamSize ?? '∞')
+                )}
+              </span>
+            </TournamentStatCell>
+          </div>
+        </SkeletonSuspense>
+
+        {/* Action — full width, so the card ends on what it wants you to do */}
+        <SkeletonSuspense
+          loading={loading}
+          skeleton={<Skeleton variant="rounded-rectangle" className="mt-2.5 h-9" />}
+        >
+          <div className="relative z-10 mt-2.5 flex items-center gap-2">
+            {participated && !isFinished && (
+              <span className="bg-success/20 text-success inline-flex shrink-0 items-center gap-1 rounded-xl px-2.5 py-2.5 text-[11px] leading-none font-bold">
+                <Ticket className="h-3 w-3 shrink-0" />
+                <span className="tabular-nums">×{ticketCount}</span>
+              </span>
+            )}
+
+            {isModeration ? (
+              <span className="text-electric-purple border-electric-purple/30 bg-electric-purple/15 flex-center flex-1 gap-1.5 rounded-xl border px-3 py-2.5 text-[11px] leading-none font-extrabold tracking-[0.14em] uppercase">
+                <ShieldCheck size={12} strokeWidth={2.6} />
+                {t('status moderation')}
+              </span>
+            ) : isFinished && userResult ? (
+              <Button
+                variant="purpleGradient"
+                icon={<CheckCircle2 strokeWidth={2.6} />}
+                iconSize={13}
+                onClick={handleActionClick}
+                className={twMerge(
+                  'flex-1 rounded-xl px-3 py-2.5 text-[11px] leading-none font-extrabold tracking-[0.14em] uppercase',
+                  'shadow-[0_4px_14px_rgba(0,0,0,0.4),inset_0_1px_0_rgba(255,255,255,0.18)]',
+                  'transition-transform active:scale-95',
+                  hasUnseenResult && 'animate-pulse'
+                )}
+              >
+                {/* Same reset as the join button — @see the note there. */}
+                <span className="leading-none font-extrabold">{t('result')}</span>
+              </Button>
+            ) : isFinished ? (
+              <button
+                type="button"
+                onClick={handleActionClick}
+                className="flex-center flex-1 cursor-pointer rounded-xl border border-white/10 bg-white/5 px-3 py-2.5 text-[11px] leading-none font-extrabold tracking-[0.14em] text-white/65 uppercase transition-transform hover:bg-white/8 active:scale-95"
+              >
+                {t('ended')}
+              </button>
+            ) : locked ? (
+              <span className="flex-center flex-1 gap-1.5 rounded-xl border border-white/10 bg-white/5 px-3 py-2.5 text-[11px] leading-none font-extrabold tracking-[0.14em] text-white/55 uppercase">
+                <Lock size={12} strokeWidth={2.6} />
+                {t('locked')}
+              </span>
+            ) : isStarted ? (
+              <span className="text-teal border-teal/30 bg-teal/15 flex-center flex-1 gap-1.5 rounded-xl border px-3 py-2.5 text-[11px] leading-none font-extrabold tracking-[0.14em] uppercase">
+                <Clock size={12} strokeWidth={2.6} />
+                {t('started')}
+              </span>
+            ) : (
+              <Button
+                // Anchor only once loaded — locking the tour onto the skeleton
+                // card's button makes the spotlight drift when data lands.
+                data-tour={tourJoinAnchor && !loading ? 'tournament-join' : undefined}
+                disabled={loading}
+                onClick={handleActionClick}
+                className={twMerge(
+                  'flex-1 rounded-xl py-2.5 text-[12px] leading-none font-extrabold tracking-[0.14em] uppercase',
+                  'transition-transform active:scale-95',
+                  participated && 'bg-success',
+                  !participated && isStartingSoon && 'animate-pulse'
+                )}
+              >
+                {/* Spelled out, not «Join» / «Add»: the button runs the full
+                    width now, and a two-letter verb on a 300px bar says less
+                    than it has room for — «Add» in particular never said add
+                    WHAT.
+
+                    `font-extrabold` repeated here on purpose: the base layer
+                    sets `* { font-weight: 400 }`, so a nested element does not
+                    inherit the button's weight — it is reset by the star
+                    selector. @see styles/global/base-layer.css */}
+                <span className="leading-none font-extrabold">
+                  {t(participated ? 'add tickets' : 'join tournament')}
+                </span>
+              </Button>
+            )}
+          </div>
+        </SkeletonSuspense>
       </div>
 
       <TournamentBetModal
