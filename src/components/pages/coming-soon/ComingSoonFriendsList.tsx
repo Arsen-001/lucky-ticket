@@ -2,7 +2,6 @@
 
 import { useState } from 'react';
 import { twMerge } from 'tailwind-merge';
-import { comingSoonConfig } from '@/config/coming-soon.config';
 import { Skeleton } from '@/components/shared/seleketons/Skeleton';
 import { ComingSoonFriendRow } from '@/components/pages/coming-soon/ComingSoonFriendRow';
 import { useAppTranslations } from '@/hooks/useAppTranslations';
@@ -21,10 +20,10 @@ const COLLAPSED_ROWS = 5;
 export interface ComingSoonFriendsListProps {
   friends: InvitedFriend[];
   /**
-   * Friends that actually count — the ones the channel confirms. Shown as
-   * «3 из 7 в канале» over the list, because a roster of seven names beside a
-   * ladder stuck at three is the moment the rule has to be stated, not the
-   * moment to make the player guess it.
+   * Friends that actually count — the ones the channel confirms. Shown over the
+   * list as «7 из 10 в канале», i.e. out of the people in THIS list: a roster
+   * whose names outnumber the ladder's steps is the moment the rule has to be
+   * stated, not the moment to make the player guess it.
    */
   counted?: number;
   /**
@@ -67,13 +66,15 @@ export function ComingSoonFriendsList({
       <div className="flex items-center justify-between px-0.5">
         <h3 className="flex items-center gap-2 text-[11px] font-extrabold uppercase tracking-wider text-white/60">
           {t('your friends')}
-          {/* Тот же счёт, что и в лестнице: сколько из пришедших канал
-              подтвердил. Без него список имён спорит с числом шагов. */}
+          {/* Сколько из ПРИШЕДШИХ канал подтвердил — «7 из 10», а не «7 из 7»:
+              знаменатель здесь про этот список, а не про планку подарка. Планку
+              считает лестница выше, и подменять одно другим значит уверять
+              игрока с десятью друзьями, что их семь. */}
           {!loading && !isError && friends.length > 0 && (
             <span className="text-electric-pink rounded-full border border-white/10 bg-white/5 px-2 py-0.5 text-[10px] font-bold normal-case tracking-normal tabular-nums">
               {t('coming soon friends in channel', {
-                counted: counted ?? friends.length,
-                total: comingSoonConfig.giftFriendsRequired,
+                counted: Math.min(counted ?? friends.length, friends.length),
+                total: friends.length,
               })}
             </span>
           )}

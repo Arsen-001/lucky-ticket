@@ -105,6 +105,39 @@ const baseFriends: Omit<InvitedFriend, 'liked' | 'likesReceived'>[] = [
     points: 980,
     claimableTickets: [{ type: 'silver', amount: 4 }],
   },
+  // Ten names against a seven-step ladder, on purpose: the screen has to be
+  // able to say «7 из 10 в канале», and a roster the same size as the
+  // requirement made that sentence impossible to check in dev.
+  {
+    id: '8',
+    username: 'nina_vardan',
+    avatar: avatar(21),
+    isLuckyPlayer: false,
+    isVerified: true,
+    isTelegramPremium: false,
+    points: 640,
+    claimableTickets: [],
+  },
+  {
+    id: '9',
+    username: 'petros_k',
+    avatar: avatar(53),
+    isLuckyPlayer: false,
+    isVerified: false,
+    isTelegramPremium: true,
+    points: 310,
+    claimableTickets: [{ type: 'bronze', amount: 1 }],
+  },
+  {
+    id: '10',
+    username: 'karen_a',
+    avatar: avatar(38),
+    isLuckyPlayer: true,
+    isVerified: false,
+    isTelegramPremium: false,
+    points: 1750,
+    claimableTickets: [{ type: 'gold', amount: 1 }],
+  },
 ];
 
 // Level-zero: no invited friends yet (the demo roster stays in `baseFriends`).
@@ -125,11 +158,17 @@ export const preparedShareMessageMock: PreparedShareMessage = {
 };
 
 /**
- * One friend who arrived but never joined the channel — the state that has to
- * be visible somewhere, because a roster that always counts in full hides the
- * only rule a player can actually get wrong.
+ * Friends who arrived but never joined the channel — the state that has to be
+ * visible somewhere, because a roster that always counts in full hides the only
+ * rule a player can actually get wrong.
+ *
+ * Deliberately leaves the counted number DIFFERENT from both the roster length
+ * and the ladder requirement. A fixture where all three coincide hid a real
+ * bug: the list header printed «7 из 7» to a player with ten friends, because
+ * its denominator was the requirement instead of the roster, and the mock made
+ * the two indistinguishable.
  */
-const notCountedFriendIds = invitedFriendsMock.slice(1, 2).map(friend => friend.id);
+const notCountedFriendIds = invitedFriendsMock.slice(1, 4).map(friend => friend.id);
 const countedFriends = invitedFriendsMock.length - notCountedFriendIds.length;
 
 /**
