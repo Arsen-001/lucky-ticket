@@ -2,6 +2,7 @@
 
 import { Check, Loader2, Lock } from 'lucide-react';
 import { twMerge } from 'tailwind-merge';
+import { comingSoonConfig } from '@/config/coming-soon.config';
 import { useAppTranslations } from '@/hooks/useAppTranslations';
 import '@/styles/components/coming-soon-gift.css';
 
@@ -41,7 +42,11 @@ export function GiftPrize({ emoji, state, onClaim, claiming, className }: GiftPr
     if (state === 'closed') return t('coming soon gift places gone');
     if (state === 'claimed') return t('coming soon gift requested');
     if (state === 'sent') return t('coming soon gift in chat');
-    return t('coming soon gift locked');
+    // Число берётся из конфига, а не из текста: планка уже менялась (5 → 7),
+    // и подпись, которая живёт своей жизнью, обещает не ту лестницу.
+    return t('coming soon gift locked', {
+      count: comingSoonConfig.giftFriendsRequired,
+    });
   })();
 
   const face = (

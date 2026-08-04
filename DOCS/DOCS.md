@@ -2299,17 +2299,27 @@ neither repo notices on its own.
 is unique (nothing can file a second claim, whatever its status — a REJECTED row
 is kept precisely so the promo cannot be re-earned), `approve` refuses a claim
 that already went out, and the player's card in the panel (Рефералы →
-«Подарок за 5 друзей») says whether this account has had one, so an admin about
+«Подарок за 7 друзей») says whether this account has had one, so an admin about
 to send something by hand does not have to search the queue for the name.
 
 **A friend counts only while they are in the channel.** The promo buys an
 audience, and an invited account that never joined `@luckyticket365` is not one,
 so the ladder counts _subscribed_ friends (`preLaunchGift.counted`), not the
-length of the list. Membership is the same cached live check every other channel
-gate uses (`ChannelMembershipService`, 60s, fail-open — our outage must not cost
-a player a friend they really brought). The list says which friends do not count
-yet («без канала»), because a roster of five names beside a ladder stuck at three
-otherwise reads as a broken screen. Admin-tunable:
+length of the list. The ladder itself is **seven friends since 2026-08-04** (it
+was five): the channel check showed what five was really buying — claims
+reaching the queue with none of the six invited friends in the channel.
+
+Membership is the tri-state exact check (`ChannelMembershipService.resolveMany`,
+5-minute cache). Telegram says "not in the channel" two ways — the status `left`,
+and a refusal to resolve the account against the channel at all, which is how it
+answers about someone who was never in it — and **both fail the rule** (measured
+on prod: 23 of 23 unresolved players answered `PARTICIPANT_ID_INVALID` while
+members answered `member`). It still fails **open** when the failure is ours —
+bot unconfigured, Telegram down, a 429 — because our outage must not cost a
+player a friend they really brought. The other channel gates (daily check-in,
+Test-Quest) keep reading an unresolved account as unknown, i.e. subscribed. The
+list says which friends do not count yet («без канала»), because a full roster
+beside a half-empty ladder otherwise reads as a broken screen. Admin-tunable:
 `referral.preLaunchGift.requireChannelSubscription`.
 
 **A day has a fixed number of places.** `referral.preLaunchGift.dailyLimit`
@@ -2323,20 +2333,20 @@ day rather than meaning "unlimited": the number always reads as «мест на
 Running out is a "not today", never a "never": the gift stays lit (`eligible`
 stays true, `canClaim` goes false) and the press works tomorrow.
 
-**The player asks; an admin pays.** Crossing the fifth friend files nothing — it
+**The player asks; an admin pays.** Crossing the last friend files nothing — it
 lights the gift up. The player presses it (`POST referral/prelaunch-gift/claim`),
 and that press is the only thing that writes a `PreLaunchGift` row (PENDING).
 Then no gift leaves the bot until somebody presses Подтвердить in the panel
-(Рефералы → «Подарки за 5 друзей»). Each gate earns its keep: every gift is paid
-out of the bot's own Stars balance, and what earns it — five Telegram accounts
-opening a link — costs an abuser nothing. The queue shows friends-when-filed
+(Рефералы → «Подарки за 7 друзей»). Each gate earns its keep: every gift is paid
+out of the bot's own Stars balance, and what earns it — a handful of Telegram
+accounts opening a link — costs an abuser nothing. The queue shows friends-when-filed
 beside friends-now, because a roster that shrank after the claim is the shape a
 farm leaves behind.
 
 **The channel announces it — after the fact.** When a gift actually reaches a
-player, autopost publishes it (Каналы → Автопостинг → «Подарок за пятерых
-друзей»): a picture of the bear with the caption «{winner} привёл пятерых
-друзей, и все они подписаны на канал». Three things are deliberate. The trigger
+player, autopost publishes it (Каналы → Автопостинг → «Подарок за 7
+друзей»): a picture of the bear with the caption «{winner} привёл семерых
+друзей в канал». Three things are deliberate. The trigger
 is Telegram _accepting the send_, never the claim being filed or approved — a
 post about a gift that then failed is a promise the channel cannot take back.
 The winner is named `@handle` where there is one (the only form Telegram links),
@@ -2346,9 +2356,16 @@ flag**, not the global one: five gifts a day would be five pushes to every
 subscriber, while a jackpot still deserves to ring. Like every autopost it
 respects the queue: in approval mode it waits for a human before it goes out.
 
+A post the settings stopped is written into that queue too, as **«пропущен»**
+with the rule that stopped it (event switched off, or a pot/prize below its
+threshold). This is not decoration: on 2026-08-04 the gift event sat off for 47
+minutes, one gift went out with no announcement, and neither the channel nor the
+queue said anything — silence indistinguishable from a broken integration. A
+skipped row keeps its picture and can still be released with «Опубликовать».
+
 **Not asking is a state, not a silence.** Because the claim is a request now,
-the panel shows a second list under the queue: «Набрали пятерых, но не запросили
-подарок» — accounts with five counted friends and no row. Nothing is owed to
+the panel shows a second list under the queue: «Набрали норму, но не запросили
+подарок» — accounts with enough counted friends and no row. Nothing is owed to
 them by rule; «Выдать» files the claim on their behalf and sends it in one
 press, and that grant deliberately ignores the daily places (they pace what
 players may take, and this is not a player taking anything).

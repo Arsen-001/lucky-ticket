@@ -46,15 +46,20 @@ const fallbackLaunchAt = (() => {
 
 /**
  * Friends to bring before the bot sends a Telegram gift — the one thing the
- * pre-launch screen actually pays out, and the reason it shows a 5-step ladder
- * rather than a bare countdown.
+ * pre-launch screen actually pays out, and the reason it shows a ladder rather
+ * than a bare countdown.
+ *
+ * Seven since 2026-08-04 (was five), and every one of them has to be in the
+ * channel: at five the queue filled with claims whose friends had never joined
+ * it. Must equal the backend's `PRE_LAUNCH_GIFT_FRIENDS` — the guardrail suite
+ * reads both files and fails when they drift.
  *
  * Lives here rather than in `global.constants` because it is a launch-window
  * promo, not a rule of the running economy: it stops meaning anything the day
  * the gate comes down. The delivery itself is the bot's job — the screen only
  * counts. @see ComingSoonGiftSteps
  */
-const GIFT_FRIENDS_REQUIRED = 5;
+const GIFT_FRIENDS_REQUIRED = 7;
 
 export const comingSoonConfig = {
   /** @see coming-soon.config — this closes the gate; it can never open it. */

@@ -4,6 +4,7 @@ import { useLocale } from 'next-intl';
 import { twMerge } from 'tailwind-merge';
 import { ComingSoonFriendsList } from '@/components/pages/coming-soon/ComingSoonFriendsList';
 import { ComingSoonInviteCard } from '@/components/pages/coming-soon/ComingSoonInviteCard';
+import { comingSoonConfig } from '@/config/coming-soon.config';
 import { useAppTranslations } from '@/hooks/useAppTranslations';
 import { useInviteShare } from '@/hooks/useInviteShare';
 import type { CSSProperties } from 'react';
@@ -64,7 +65,9 @@ export function ComingSoonInviteSection({
           place a pre-launch visitor can learn that the sixth friend is not
           wasted. */}
       <p className="text-white-secondary rounded-xl border border-white/8 bg-white/4 px-3 py-2.5 text-center text-[11px] font-medium leading-relaxed">
-        {t('coming soon more friends better')}
+        {t('coming soon more friends better', {
+          count: comingSoonConfig.giftFriendsRequired,
+        })}
       </p>
 
       <ComingSoonFriendsList
