@@ -32,16 +32,22 @@ const AD_FRAME: Record<number, string> = {
   10: 'task-card-tier-all',
 };
 
+/**
+ * Halo on the rare slots only. Softened 2026-08-04: at 18–28px and 0.30–0.45
+ * the glow bled past the card into its dimmed neighbours in the carousel, so
+ * the whole row looked hazy rather than the one card looking special. The
+ * ranking between the three is what carries the meaning, not their weight.
+ */
 const AD_GLOW: Record<number, string> = {
   1: '',
-  2: 'shadow-[0_0_18px_rgba(23,141,136,0.30)]',
+  2: 'shadow-[0_0_12px_rgba(23,141,136,0.18)]',
   3: '',
   4: '',
-  5: 'shadow-[0_0_22px_rgba(116,61,245,0.40)]',
+  5: 'shadow-[0_0_14px_rgba(116,61,245,0.24)]',
   6: '',
   7: '',
   8: '',
-  9: 'shadow-[0_0_28px_rgba(248,189,62,0.45)]',
+  9: 'shadow-[0_0_18px_rgba(248,189,62,0.28)]',
   10: '',
 };
 
@@ -119,7 +125,7 @@ export function AdSlideCard({
             watched && 'bg-success/20 text-success',
             locked && 'bg-white/5 text-white/40',
             cooling && 'bg-pink-gradient text-white opacity-70',
-            playable && 'bg-pink-gradient text-white shadow-md shadow-electric-pink/25'
+            playable && 'bg-pink-gradient text-white'
           )}
         >
           {loading ? (
@@ -170,8 +176,10 @@ export function AdSlideCard({
           // Keeps the gradient, drops the pulse: still visibly the live slot,
           // but no longer inviting a tap it would refuse.
           cooling && 'bg-pink-gradient text-white opacity-70',
-          playable &&
-            'bg-pink-gradient shadow-electric-pink/25 animate-task-pulse text-white shadow-lg hover:brightness-110'
+          // No static shadow here: `animate-task-pulse` animates `box-shadow`
+          // itself, so a `shadow-lg` next to it was overridden on every frame
+          // and only ever showed for the instant before the animation started.
+          playable && 'bg-pink-gradient animate-task-pulse text-white hover:brightness-110'
         )}
       >
         {loading ? (

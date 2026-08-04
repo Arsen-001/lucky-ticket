@@ -1200,8 +1200,9 @@
   "coming soon gift sent": "The bot sent you {emoji} — check your chat with it",
   "coming soon gift sent plain": "The bot sent your gift — check your chat with it",
   "coming soon gift pool": "Gift",
-  "coming soon invite blurb": "Friends who open your link are counted from now on.",
-  "coming soon no friends yet": "Nobody has come through your link yet. Share it — every friend already counts.",
+  "coming soon invite blurb": "Friends who open your link are counted as soon as they follow the channel.",
+  "coming soon no friends yet": "Nobody has come through your link yet. Share it — a friend counts once they follow the channel.",
+  "coming soon friends in channel": "{counted} of {total} in the channel",
   "your friends": "Your friends",
   "invite counted": "Counted"
 }
