@@ -109,12 +109,11 @@ export function BoostRow({
           <span>{t('max')}</span>
         ) : (
           <>
-            {/* Dark halo so the gold star stays readable on the gold-tinted
-                capacity button — without it the icon melts into the accent. */}
-            <TelegramStarIcon
-              size={compact ? 10 : 11}
-              className="drop-shadow-[0_0_2px_rgba(0,0,0,0.85)]"
-            />
+            {/* No `filter` halo here: a filter spawns a composited layer inside
+                the home cube's 3D context (`preserve-3d` + `backface-visibility`),
+                which is where iOS drops the icon. The star reads fine on both
+                accents at this size — the button fill is only 12% tint. */}
+            <TelegramStarIcon size={compact ? 11 : 12} />
             <span className="tabular-nums">{costStars}</span>
           </>
         )}
