@@ -2314,10 +2314,16 @@ Membership is the tri-state exact check (`ChannelMembershipService.resolveMany`,
 and a refusal to resolve the account against the channel at all, which is how it
 answers about someone who was never in it — and **both fail the rule** (measured
 on prod: 23 of 23 unresolved players answered `PARTICIPANT_ID_INVALID` while
-members answered `member`). It still fails **open** when the failure is ours —
-bot unconfigured, Telegram down, a 429 — because our outage must not cost a
-player a friend they really brought. The other channel gates (daily check-in,
-Test-Quest) keep reading an unresolved account as unknown, i.e. subscribed. The
+members answered `member`). **A friend counts only on a confirmed
+yes** — an answer we could not get (bot unconfigured, Telegram down, a 429)
+does not count either. That is the opposite of every other channel gate here,
+on purpose: a gift is paid out of the bot's own Stars, and «мы не смогли
+проверить» is not evidence. The cost is owned — while Telegram is unreachable
+ladders read low and claims are refused — and nothing is lost by waiting: the
+ladder refills from the same live check the moment Telegram answers, and a
+claim refused today is claimable tomorrow. The daily check-in and Test-Quest
+gates still fail **open**, because they hand a player what they already earned
+while this one buys an audience. The
 list says which friends do not count yet («без канала»), because a full roster
 beside a half-empty ladder otherwise reads as a broken screen. Admin-tunable:
 `referral.preLaunchGift.requireChannelSubscription`.
