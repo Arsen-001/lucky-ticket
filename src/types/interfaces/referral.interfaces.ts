@@ -60,6 +60,12 @@ export interface PreLaunchGiftState {
   counted?: number | null;
   /** Ids of invited friends that do not count yet — the list marks them. */
   notCountedFriendIds?: string[];
+  /**
+   * Is the channel rule on? The ladder prints it as a condition, so an admin
+   * switching it off must take the sentence down with it. Undefined = a backend
+   * too old to say, and the rule has been on the whole time it existed.
+   */
+  requireChannelSubscription?: boolean;
   /** Places on today's board; `0` means the promo is closed today. */
   dailyLimit?: number | null;
   /** Places still free today. */

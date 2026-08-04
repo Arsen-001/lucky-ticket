@@ -149,6 +149,8 @@ export const preLaunchGiftMock: PreLaunchGiftState = {
   emoji: null,
   counted: countedFriends,
   notCountedFriendIds,
+  // On, as it is in production — the ladder states it as a condition.
+  requireChannelSubscription: true,
   // Today's board, mid-day: enough left to still be a race.
   dailyLimit: 5,
   dailyRemaining,

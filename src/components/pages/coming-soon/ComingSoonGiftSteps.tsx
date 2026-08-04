@@ -1,7 +1,7 @@
 'use client';
 
 import { Fragment } from 'react';
-import { Check, Gift, UserPlus } from 'lucide-react';
+import { Check, Gift, Megaphone, UserPlus } from 'lucide-react';
 import { twMerge } from 'tailwind-merge';
 import { comingSoonConfig } from '@/config/coming-soon.config';
 import { Skeleton } from '@/components/shared/seleketons/Skeleton';
@@ -113,6 +113,17 @@ export function ComingSoonGiftSteps({
     };
   })();
 
+  /**
+   * The condition on every one of those steps: a friend counts only while
+   * subscribed to the channel. The friends list already flags the ones that do
+   * not count, but only after the fact — said here, it is something the player
+   * can act on *before* sending the link.
+   *
+   * Dropped once their own claim is filed (the rule has done its work) and when
+   * an admin switches the rule off.
+   */
+  const channelRule = !gift.status && gift.requireChannelSubscription !== false;
+
   const caption = (() => {
     if (remaining > 0) return t('coming soon gift steps hint', { count: remaining });
     if (sent) {
@@ -173,6 +184,12 @@ export function ComingSoonGiftSteps({
           <p className="text-white-secondary max-w-[22rem] text-[13px] font-semibold leading-snug">
             {caption}
           </p>
+          {channelRule && (
+            <p className="flex items-center justify-center gap-1.5 text-balance max-w-[21rem] text-[11.5px] font-semibold leading-snug text-white/60">
+              <Megaphone size={13} className="text-electric-pink flex-shrink-0" strokeWidth={2.4} />
+              {t('coming soon gift channel rule')}
+            </p>
+          )}
           {board && (
             <div className="flex flex-col items-center gap-1">
               {/* Not uppercase any more: the line now carries a sentence
