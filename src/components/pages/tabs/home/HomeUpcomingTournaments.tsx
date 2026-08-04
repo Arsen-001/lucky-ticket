@@ -2,6 +2,7 @@
 
 import 'swiper/css';
 import 'swiper/css/autoplay';
+import '@/styles/components/home-tournaments-slider.css';
 
 import { Autoplay } from 'swiper/modules';
 import { Swiper, SwiperSlide } from 'swiper/react';
@@ -26,7 +27,7 @@ export function HomeUpcomingTournaments({ className }: ClassNameProps) {
     <div className={twMerge('flex flex-col gap-3', className)}>
       <Swiper
         key={isLoading ? 'loading' : 'loaded'}
-        className="w-full"
+        className="tournaments-slider-edge-fade w-full"
         modules={[Autoplay]}
         centeredSlides
         grabCursor
