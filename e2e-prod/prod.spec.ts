@@ -103,19 +103,19 @@ async function assertLooksRightBuilt(page: Page, label: string, url: string) {
         ),
       {
         message: `${label} still had images in flight`,
-        // Longer than the suite's 15s default ON PURPOSE. This runs against a
-        // freshly built server, so the first request for each (src, width,
-        // quality) triple pays a cold `/_next/image` optimize — and several of
-        // the source assets are 200-790 KB for icons rendered at 14-36 px. With
-        // 3 parallel workers that regularly exceeded 15s on /activity, failing
-        // the run on both the initial attempt and the retry, with no code
-        // change between a red run and a green one.
+        // Longer than the suite's 15s default, but NOT because the optimizer is
+        // slow — that was the first, wrong reading of this timeout. Measured on
+        // the CI run it was blamed for: every `/_next/image` optimize answered
+        // in 5-20 ms, cold. What actually hung was one medal on /activity whose
+        // request was cancelled mid-flight by a re-render; Chrome then never
+        // resolved that URL again for the page, so no timeout would ever have
+        // been long enough (fixed in ActivityHeroCard — see
+        // ActivityTierLadderSkeleton for the mechanism).
         //
-        // Raised rather than removed: the assertion is what catches an image
-        // that loads to nothing, which is a real class of bug here. A
-        // non-deterministic red is worse than a slow green — it teaches people
-        // to re-run instead of reading the log, which is exactly how the
-        // sibling backend stayed red for three and a half weeks unnoticed.
+        // Kept generous anyway: a slow green costs nothing here (the poll
+        // returns the moment it is true), while a non-deterministic red teaches
+        // people to re-run instead of reading the log — which is exactly how
+        // the sibling backend stayed red for three and a half weeks unnoticed.
         timeout: 45_000,
       }
     )
