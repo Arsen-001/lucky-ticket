@@ -5,6 +5,7 @@ import { useCountDown } from '@/hooks/useCountDown';
 import { useAppTranslations } from '@/hooks/useAppTranslations';
 import { getCountdown } from '@/utils/global/date.utils';
 import { CountdownUnit } from './CountdownUnit';
+import { staggerMs } from '@/utils/global/animation.utils';
 
 export interface LaunchCountdownProps {
   /** Absolute launch instant (ISO). @see comingSoonConfig.launchAt */
@@ -65,7 +66,7 @@ export function LaunchCountdown({ targetDate, className }: LaunchCountdownProps)
             value={unit.value}
             label={unit.label}
             className="animate-slide-in-bottom"
-            style={{ animationDelay: `${index * 100}ms` }}
+            style={{ animationDelay: `${staggerMs(index, 100)}ms` }}
           />
         ))}
       </div>

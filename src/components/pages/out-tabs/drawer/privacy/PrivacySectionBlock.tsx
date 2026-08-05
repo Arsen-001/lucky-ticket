@@ -2,6 +2,7 @@ import { Skeleton } from '@/components/shared/seleketons/Skeleton';
 import { SkeletonSuspense } from '@/components/shared/seleketons/SkeletonSuspense';
 import { getLocalizedText } from '@/utils/pages/faq.utils';
 import type { PrivacySection } from '@/types/interfaces/privacy.interfaces';
+import { staggerMs } from '@/utils/global/animation.utils';
 
 interface PrivacySectionBlockProps {
   section?: PrivacySection;
@@ -14,7 +15,7 @@ export function PrivacySectionBlock({ section, loading, index, locale }: Privacy
   return (
     <section
       className="bg-background-overlay/40 animate-slide-in-bottom flex flex-col gap-2 rounded-2xl border border-white/5 p-4"
-      style={{ animationDelay: `${index * 60}ms` }}
+      style={{ animationDelay: `${staggerMs(index, 60)}ms` }}
     >
       <div className="flex items-center gap-2.5">
         <span className="bg-electric-pink/15 text-electric-pink flex-center h-6 w-6 flex-shrink-0 rounded-md text-[11px] font-extrabold tabular-nums">

@@ -4,6 +4,7 @@ import type { TournamentCardProps } from './TournamentCard';
 import { TournamentCard } from './TournamentCard';
 import { EmptyDataInfo } from '@/components/shared/EmptyDataInfo';
 import { useAppTranslations } from '@/hooks/useAppTranslations';
+import { staggerMs } from '@/utils/global/animation.utils';
 
 interface TournamentListProps {
   tournaments: TournamentCardProps[];
@@ -36,7 +37,7 @@ export function TournamentList({
               loading={isLoading}
               {...tournament}
               tourJoinAnchor
-              style={{ animationDelay: `${index * 60}ms` }}
+              style={{ animationDelay: `${staggerMs(index, 60)}ms` }}
             />
           </div>
         ) : (
@@ -44,7 +45,7 @@ export function TournamentList({
             key={tournament.id ?? index}
             loading={isLoading}
             {...tournament}
-            style={{ animationDelay: `${index * 60}ms` }}
+            style={{ animationDelay: `${staggerMs(index, 60)}ms` }}
           />
         )
       )}

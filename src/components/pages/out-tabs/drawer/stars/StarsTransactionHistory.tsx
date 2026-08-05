@@ -7,6 +7,7 @@ import { useAppTranslations } from '@/hooks/useAppTranslations';
 import { StarsTransactionDirection, StarsTransactionFilter } from '@/types/enums/stars.enums';
 import { StarsTransactionRow } from './StarsTransactionRow';
 import type { StarsTransaction } from '@/types/interfaces/stars.interfaces';
+import { staggerMs } from '@/utils/global/animation.utils';
 
 const FILTERS: StarsTransactionFilter[] = [
   StarsTransactionFilter.ALL,
@@ -81,7 +82,7 @@ export function StarsTransactionHistory({
               key={`s-${index}`}
               loading
               className="animate-slide-in-bottom"
-              style={{ animationDelay: `${index * 60}ms` }}
+              style={{ animationDelay: `${staggerMs(index, 60)}ms` }}
             />
           ))
         ) : visible.length === 0 ? (
@@ -92,7 +93,7 @@ export function StarsTransactionHistory({
               key={tx.id}
               transaction={tx}
               className="animate-slide-in-bottom"
-              style={{ animationDelay: `${Math.min(index, 8) * 50}ms` }}
+              style={{ animationDelay: `${staggerMs(index, 50)}ms` }}
             />
           ))
         )}

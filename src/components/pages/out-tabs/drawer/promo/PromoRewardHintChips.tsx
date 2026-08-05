@@ -5,6 +5,7 @@ import { LcLabel } from '@/components/shared/icons/LcLabel';
 import { TelegramStarIcon } from '@/components/shared/icons/TelegramStarIcon';
 import { useAppTranslations } from '@/hooks/useAppTranslations';
 import { GlobalConstants } from '@/constants/global.constants';
+import { staggerMs } from '@/utils/global/animation.utils';
 
 /**
  * Teaser row under the coupon: the reward kinds a code can drop
@@ -41,7 +42,7 @@ export function PromoRewardHintChips() {
           <span
             key={chip.key}
             className="animate-slide-in-bottom inline-flex items-center gap-1.5 rounded-lg border border-white/5 bg-white/6 px-2.5 py-1.5 text-[11px] font-bold text-white/85"
-            style={{ animationDelay: `${index * 50}ms` }}
+            style={{ animationDelay: `${staggerMs(index, 50)}ms` }}
           >
             {chip.icon}
             {chip.label}

@@ -6,7 +6,7 @@ import { Modal } from '@/components/shared/modals/Modal';
 import { Button } from '@/components/shared/buttons/Button';
 import { useAppTranslations } from '@/hooks/useAppTranslations';
 import { formatDate } from '@/utils/global/date.utils';
-import { formatRelativeTime } from '@/utils/pages/notification.utils';
+import { formatRelativeTime, toInternalRoute } from '@/utils/pages/notification.utils';
 import { getNotificationTheme } from '@/components/pages/out-tabs/tabs-extra/notifications/notification.theme';
 import type { Notification } from '@/types/interfaces/notifications.interfaces';
 
@@ -22,11 +22,12 @@ export function NotificationModal({ notification, open, onClose }: NotificationM
 
   const theme = getNotificationTheme(notification?.type);
   const Icon = theme.icon;
+  const actionRoute = toInternalRoute(notification?.actionRoute);
 
   const handleAction = () => {
-    if (!notification?.actionRoute) return;
+    if (!actionRoute) return;
     onClose();
-    router.push(notification.actionRoute);
+    router.push(actionRoute);
   };
 
   return (
@@ -61,7 +62,7 @@ export function NotificationModal({ notification, open, onClose }: NotificationM
           )}
         </div>
 
-        {notification?.actionRoute && (
+        {actionRoute && (
           <div className="border-t border-white/8 px-6 py-3">
             <Button
               variant="primary"

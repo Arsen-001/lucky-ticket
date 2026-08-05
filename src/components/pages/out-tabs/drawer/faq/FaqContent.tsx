@@ -11,6 +11,7 @@ import { EmptyDataInfo } from '@/components/shared/EmptyDataInfo';
 import { QueryErrorState } from '@/components/shared/error/QueryErrorState';
 import { useAppTranslations } from '@/hooks/useAppTranslations';
 import { filterSections, getLocalizedText, getSectionsSkeletonData } from '@/utils/pages/faq.utils';
+import { staggerMs } from '@/utils/global/animation.utils';
 
 export function FaqContent() {
   const t = useAppTranslations();
@@ -52,7 +53,7 @@ export function FaqContent() {
               >
                 <h4
                   className="text-pink-secondary ml-1 animate-slide-in-bottom text-[10px] font-bold uppercase tracking-widest"
-                  style={{ animationDelay: `${sectionOffset * 60}ms` }}
+                  style={{ animationDelay: `${staggerMs(sectionOffset, 60)}ms` }}
                 >
                   {getLocalizedText(section.title, locale)}
                 </h4>
@@ -67,7 +68,7 @@ export function FaqContent() {
                     searchValue={searchValue}
                     className="animate-slide-in-bottom"
                     style={{
-                      animationDelay: `${(sectionOffset + articleIndex + 1) * 60}ms`,
+                      animationDelay: `${staggerMs(sectionOffset + articleIndex + 1, 60)}ms`,
                     }}
                   />
                 ))}

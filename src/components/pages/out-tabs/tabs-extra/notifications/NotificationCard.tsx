@@ -5,9 +5,10 @@ import { twMerge } from 'tailwind-merge';
 import { Skeleton } from '@/components/shared/seleketons/Skeleton';
 import { SkeletonSuspense } from '@/components/shared/seleketons/SkeletonSuspense';
 import { useAppTranslations } from '@/hooks/useAppTranslations';
-import { formatRelativeTime } from '@/utils/pages/notification.utils';
+import { formatRelativeTime, toInternalRoute } from '@/utils/pages/notification.utils';
 import { getNotificationTheme } from './notification.theme';
 import type { Notification } from '@/types/interfaces/notifications.interfaces';
+import { staggerMs } from '@/utils/global/animation.utils';
 
 interface NotificationCardProps {
   notification: Notification;
@@ -26,13 +27,20 @@ export function NotificationCard({
   const isUnread = !notification?.read;
   const theme = getNotificationTheme(notification?.type);
   const Icon = theme.icon;
+  const actionRoute = toInternalRoute(notification?.actionRoute);
 
   return (
     <button
       type="button"
       onClick={() => !loading && onClick(notification)}
       disabled={loading}
-      style={{ animationDelay: `${index * 60}ms` }}
+      // The unread state is otherwise only a pink dot and a tinted border.
+      aria-label={
+        loading
+          ? undefined
+          : `${isUnread ? t('unread') : t('read')} · ${t(theme.labelKey)} · ${notification?.title}`
+      }
+      style={{ animationDelay: `${staggerMs(index)}ms` }}
       className={twMerge(
         'group relative flex w-full animate-slide-in-bottom items-start gap-3 rounded-2xl border p-3 text-left transition-all',
         isUnread
@@ -113,7 +121,7 @@ export function NotificationCard({
           >
             {t(theme.labelKey)}
           </span>
-          {!loading && notification?.actionRoute && (
+          {!loading && actionRoute && (
             <span className="text-pink-secondary group-hover:text-white inline-flex items-center gap-0.5 text-[10px] font-bold uppercase tracking-wider transition-colors">
               {t(theme.actionLabelKey)}
               <ChevronRight size={12} strokeWidth={2.5} />

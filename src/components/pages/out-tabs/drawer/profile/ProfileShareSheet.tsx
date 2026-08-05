@@ -6,6 +6,7 @@ import { twMerge } from 'tailwind-merge';
 import { ClientPortal } from '@/components/shared/ClientPortal';
 import { useAppTranslations } from '@/hooks/useAppTranslations';
 import { GlobalConstants } from '@/constants/global.constants';
+import { staggerMs } from '@/utils/global/animation.utils';
 
 interface ShareOption {
   key: string;
@@ -152,7 +153,7 @@ export function ProfileShareSheet({ open, onClose, url, username }: ProfileShare
                   type="button"
                   onClick={option.onClick}
                   className="animate-slide-in-bottom flex items-center gap-3 rounded-xl border border-white/8 bg-white/4 p-3 text-left transition-all active:scale-99 hover:bg-white/8"
-                  style={{ animationDelay: `${index * 60}ms` }}
+                  style={{ animationDelay: `${staggerMs(index, 60)}ms` }}
                 >
                   <span
                     className={twMerge(

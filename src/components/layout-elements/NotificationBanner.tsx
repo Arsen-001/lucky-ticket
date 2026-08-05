@@ -5,6 +5,7 @@ import { X } from 'lucide-react';
 import { twMerge } from 'tailwind-merge';
 import { getNotificationTheme } from '@/components/pages/out-tabs/tabs-extra/notifications/notification.theme';
 import { useAppTranslations } from '@/hooks/useAppTranslations';
+import { toInternalRoute } from '@/utils/pages/notification.utils';
 import type { Notification } from '@/types/interfaces/notifications.interfaces';
 
 interface NotificationBannerProps {
@@ -17,11 +18,12 @@ export function NotificationBanner({ notification, onDismiss }: NotificationBann
   const router = useRouter();
   const theme = getNotificationTheme(notification.type);
   const Icon = theme.icon;
+  const actionRoute = toInternalRoute(notification.actionRoute);
 
   const handleAction = () => {
-    if (!notification.actionRoute) return;
+    if (!actionRoute) return;
     onDismiss();
-    router.push(notification.actionRoute);
+    router.push(actionRoute);
   };
 
   const content = (
@@ -32,7 +34,14 @@ export function NotificationBanner({ notification, onDismiss }: NotificationBann
   );
 
   return (
-    <div className="animate-slide-in-bottom fixed left-0 right-0 top-20 z-40 px-3">
+    <div
+      role="status"
+      className="animate-slide-in-bottom fixed left-0 right-0 z-40 px-3"
+      // The header is `5rem + --tg-inset-top` tall (see Header.tsx). A fixed
+      // `top-20` matches only when Telegram reports no inset — in fullscreen,
+      // or on a notched device, the banner slid up under the header.
+      style={{ top: 'calc(5rem + var(--tg-inset-top) + 0.5rem)' }}
+    >
       <div className="bg-purple-gradient card-outlined flex items-center gap-3 rounded-2xl px-3 py-2.5 shadow-lg">
         <div
           className={twMerge(
@@ -43,7 +52,7 @@ export function NotificationBanner({ notification, onDismiss }: NotificationBann
           <Icon size={20} className={theme.fg} strokeWidth={2.2} />
         </div>
 
-        {notification.actionRoute ? (
+        {actionRoute ? (
           <button type="button" onClick={handleAction} className="min-w-0 flex-1 text-left">
             {content}
           </button>

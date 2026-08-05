@@ -1,6 +1,20 @@
 import dayjs from 'dayjs';
+import type { Route } from '@/constants/routes';
 import type { Dictionary, MessageIds } from '@/types/types/i18n.types';
 import type { Notification } from '@/types/interfaces/notifications.interfaces';
+
+/** Day key for the older-than-yesterday groups — one header per calendar day. */
+const DAY_KEY_FORMAT = 'YYYY-MM-DD';
+
+/**
+ * `actionRoute` is free text an admin types into the panel, so it reaches the
+ * app unvalidated. Only an in-app absolute path may be handed to `router.push`:
+ * a protocol-relative `//host` or an absolute URL would navigate the Mini App
+ * off-platform, and anything else (a bare word, `javascript:`) is a dead link
+ * dressed up as a working button.
+ */
+export const toInternalRoute = (value?: string): Route | undefined =>
+  value && value.startsWith('/') && !value.startsWith('//') ? (value as Route) : undefined;
 
 export const formatRelativeTime = (iso: string, t: Dictionary, now = Date.now()) => {
   const ago = Math.max(0, (now - new Date(iso).getTime()) / 1000);
@@ -36,7 +50,11 @@ export const groupNotificationsByDate = (notifications?: Notification[]) => {
       } else if (date.isYesterday()) {
         groupKey = 'yesterday';
       } else {
-        groupKey = date.toISOString();
+        // Calendar day, NOT the full timestamp: keying by `toISOString()` made
+        // every older notification its own group, so a real feed rendered one
+        // repeated date header per row. The mocks hid it — their fixtures share
+        // a single Date object, which real `createdAt` values never do.
+        groupKey = date.format(DAY_KEY_FORMAT);
       }
 
       if (!groups[groupKey]) {
@@ -51,11 +69,13 @@ export const groupNotificationsByDate = (notifications?: Notification[]) => {
 
 export const getNotificationsGroupTitle = (date: string | undefined, t: Dictionary) => {
   if (date === 'today') return t('today');
-  else if (date === 'yesterday') return t('yesterday');
-  else if (dayjs(date).isValid()) {
-    const dateObject = dayjs(date);
-    const month = dateObject.format('MMMM').toLowerCase() as MessageIds;
-    return `${dateObject.format('DD')} ${t(month)} ${dateObject.format('YYYY')}`;
-  }
-  return '';
+  if (date === 'yesterday') return t('yesterday');
+  // Only a day key produced above is a date. The skeleton groups are keyed "1",
+  // "2" — and `dayjs('1')` is a *valid* date (2001-01-01), so a loose check
+  // would print a real-looking header for placeholder rows.
+  if (!date || !/^\d{4}-\d{2}-\d{2}$/.test(date)) return '';
+  const dateObject = dayjs(date);
+  if (!dateObject.isValid()) return '';
+  const month = dateObject.format('MMMM').toLowerCase() as MessageIds;
+  return `${dateObject.format('DD')} ${t(month)} ${dateObject.format('YYYY')}`;
 };

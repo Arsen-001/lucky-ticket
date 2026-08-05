@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import { useGetTournamentsQuery, useMarkTournamentResultSeenMutation } from '@/api/tournaments.api';
 import { TournamentResultModal } from '@/components/pages/out-tabs/tabs-extra/tournament/TournamentResultModal';
+import { useAutoSurfaceSlot } from '@/hooks/useAutoSurfaceSlot';
 
 /**
  * App-wide result popup: whenever the user has a finished tournament they joined
@@ -24,6 +25,9 @@ export function TournamentResultWatcher() {
       !dismissed.has(t.id)
   );
 
+  // Outranks the notification popup — a won tournament is the better welcome.
+  const canShow = useAutoSurfaceSlot('tournament-result', !!pending);
+
   const handleClose = () => {
     if (!pending) return;
     // Fire-and-forget optimistic mark (no unwrap) — the watcher hides it locally
@@ -34,7 +38,7 @@ export function TournamentResultWatcher() {
 
   return (
     <TournamentResultModal
-      open={!!pending}
+      open={canShow}
       onClose={handleClose}
       tournamentName={pending?.name ?? ''}
       tournamentType={pending?.type ?? 'bronze'}

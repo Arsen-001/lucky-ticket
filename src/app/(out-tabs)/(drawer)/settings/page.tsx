@@ -11,6 +11,7 @@ import { SettingsTourRow } from '@/components/pages/out-tabs/drawer/settings/Set
 import { SettingsUpgradePromptRow } from '@/components/pages/out-tabs/drawer/settings/SettingsUpgradePromptRow';
 import { routes } from '@/constants/routes';
 import { useAppTranslations } from '@/hooks/useAppTranslations';
+import { staggerMs } from '@/utils/global/animation.utils';
 
 export default function SettingsPage() {
   const t = useAppTranslations();
@@ -53,7 +54,7 @@ export default function SettingsPage() {
         <div
           key={section.title}
           className="animate-slide-in-bottom flex flex-col gap-2"
-          style={{ animationDelay: `${sectionIndex * 80}ms` }}
+          style={{ animationDelay: `${staggerMs(sectionIndex, 80)}ms` }}
         >
           <h2 className="text-gray-secondary text-sm font-bold uppercase tracking-wider px-1">
             {section.title}
@@ -69,14 +70,14 @@ export default function SettingsPage() {
 
       <div
         className="animate-slide-in-bottom"
-        style={{ animationDelay: `${sections.length * 80}ms` }}
+        style={{ animationDelay: `${staggerMs(sections.length, 80)}ms` }}
       >
         <NotificationPreferencesSection />
       </div>
 
       <div
         className="animate-slide-in-bottom flex flex-col gap-2"
-        style={{ animationDelay: `${(sections.length + 1) * 80}ms` }}
+        style={{ animationDelay: `${staggerMs(sections.length + 1, 80)}ms` }}
       >
         <h2 className="text-gray-secondary text-sm font-bold uppercase tracking-wider px-1">
           {t('gameplay')}
@@ -86,7 +87,7 @@ export default function SettingsPage() {
 
       <div
         className="animate-slide-in-bottom flex flex-col gap-2"
-        style={{ animationDelay: `${(sections.length + 2) * 80}ms` }}
+        style={{ animationDelay: `${staggerMs(sections.length + 2, 80)}ms` }}
       >
         <h2 className="text-gray-secondary text-sm font-bold uppercase tracking-wider px-1">
           {t('app tour')}
@@ -96,7 +97,7 @@ export default function SettingsPage() {
 
       <div
         className="animate-slide-in-bottom mt-4"
-        style={{ animationDelay: `${(sections.length + 3) * 80}ms` }}
+        style={{ animationDelay: `${staggerMs(sections.length + 3, 80)}ms` }}
       >
         <SettingsSignOut />
       </div>

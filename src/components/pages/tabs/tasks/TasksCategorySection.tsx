@@ -11,6 +11,7 @@ import { TaskItemCard } from './TaskItemCard';
 import { TaskItemCardCompact } from './TaskItemCardCompact';
 import { TaskItemRow } from './TaskItemRow';
 import { SectionShine } from './SectionShine';
+import { staggerMs } from '@/utils/global/animation.utils';
 
 export interface TasksCategorySectionProps {
   category: TaskCategory;
@@ -185,7 +186,9 @@ export function TasksCategorySection({
               const isPinned = pinnedIds?.has(task.id) ?? false;
               const pinDisabled = !isPinned && !!pinLimit && (pinnedIds?.size ?? 0) >= pinLimit;
               const animationClass = entryDone ? undefined : 'animate-slide-in-bottom';
-              const animationStyle = entryDone ? undefined : { animationDelay: `${i * 60}ms` };
+              const animationStyle = entryDone
+                ? undefined
+                : { animationDelay: `${staggerMs(i, 60)}ms` };
               const taskShine = taskHighlight?.id === task.id ? taskHighlight.nonce : null;
               if (layout === 'grid') {
                 return (

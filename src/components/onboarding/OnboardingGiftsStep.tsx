@@ -9,6 +9,7 @@ import { TicketOverlap } from '@/components/shared/icons/TicketOverlap';
 import { BoltIcon } from '@/components/shared/icons/BoltIcon';
 import { useAppTranslations } from '@/hooks/useAppTranslations';
 import { appConfig } from '@/config/app.config';
+import { staggerMs } from '@/utils/global/animation.utils';
 
 export interface OnboardingGiftsStepProps {
   /** Fired when the player claims the pack — grants the gifts and starts the tour. */
@@ -58,7 +59,7 @@ export function OnboardingGiftsStep({ onClaim }: OnboardingGiftsStepProps) {
             {gifts.map((gift, index) => (
               <li
                 key={index}
-                style={{ animationDelay: `${index * 90}ms` }}
+                style={{ animationDelay: `${staggerMs(index, 90)}ms` }}
                 className="animate-slide-in-bottom bg-background-overlay flex items-center gap-3 rounded-2xl border border-white/10 p-3"
               >
                 <span className="flex-center h-14 w-14 shrink-0 overflow-hidden rounded-xl bg-white/5">

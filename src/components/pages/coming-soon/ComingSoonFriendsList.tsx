@@ -7,6 +7,7 @@ import { ComingSoonFriendRow } from '@/components/pages/coming-soon/ComingSoonFr
 import { useAppTranslations } from '@/hooks/useAppTranslations';
 import type { InvitedFriend } from '@/types/interfaces/referral.interfaces';
 import { displayNameOf } from '@/utils/global/user.utils';
+import { staggerMs } from '@/utils/global/animation.utils';
 
 /** Rows shown while the list loads — enough to read as a list, not as a screen. */
 const SKELETON_ROWS = 2;
@@ -114,7 +115,7 @@ export function ComingSoonFriendsList({
               avatar={friend.avatar}
               counted={!notCounted.has(friend.id)}
               className="animate-slide-in-bottom"
-              style={{ animationDelay: `${index * 60}ms` }}
+              style={{ animationDelay: `${staggerMs(index, 60)}ms` }}
             />
           ))}
         </div>

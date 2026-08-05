@@ -8,6 +8,7 @@ import { Ticket } from '@/components/shared/icons/Ticket';
 import { useAppTranslations } from '@/hooks/useAppTranslations';
 import type { ClaimableTicket, InvitedFriend } from '@/types/interfaces/referral.interfaces';
 import { displayNameOf } from '@/utils/global/user.utils';
+import { staggerMs } from '@/utils/global/animation.utils';
 
 export interface FriendsClaimAllModalProps {
   open: boolean;
@@ -123,7 +124,7 @@ export function FriendsClaimAllModal({
               <div
                 key={type}
                 className="animate-slide-in-bottom flex flex-col items-center gap-1"
-                style={{ animationDelay: `${index * 80}ms`, minWidth: 72 }}
+                style={{ animationDelay: `${staggerMs(index, 80)}ms`, minWidth: 72 }}
               >
                 <Ticket type={type} width={68} height={68} className="drop-shadow-lg" />
                 <span className="text-gold text-sm font-extrabold tabular-nums">×{amount}</span>

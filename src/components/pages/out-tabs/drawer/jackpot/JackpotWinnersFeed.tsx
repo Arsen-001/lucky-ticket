@@ -7,6 +7,7 @@ import { GlobalConstants } from '@/constants/global.constants';
 import { formatCompact } from '@/utils/global/number.utils';
 import { JackpotWinnerRow } from './JackpotWinnerRow';
 import type { JackpotWinner } from '@/types/interfaces/jackpot.interfaces';
+import { staggerMs } from '@/utils/global/animation.utils';
 
 interface JackpotWinnersFeedProps {
   winners?: JackpotWinner[];
@@ -50,7 +51,7 @@ export function JackpotWinnersFeed({ winners, loading, allTimePaidOut }: Jackpot
               winner={winner}
               loading={loading}
               className="animate-slide-in-bottom"
-              style={{ animationDelay: `${Math.min(index, 12) * 60}ms` }}
+              style={{ animationDelay: `${staggerMs(index, 60)}ms` }}
             />
           ))}
         </div>

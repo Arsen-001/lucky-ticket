@@ -5,16 +5,24 @@ import isToday from 'dayjs/plugin/isToday';
 import isYesterday from 'dayjs/plugin/isYesterday';
 import { useMemo, useState } from 'react';
 import {
-  useGetNotificationsQuery,
+  useGetNotificationsFeedInfiniteQuery,
+  useGetNotificationsSummaryQuery,
   useMarkAllAsReadMutation,
   useMarkAsReadMutation,
 } from '@/api/notifications.api';
-import { Notification, NotificationType } from '@/types/interfaces/notifications.interfaces';
+import { NOTIFICATION_TYPES } from '@/constants/notifications.constants';
+import type {
+  Notification,
+  NotificationsFilter,
+  NotificationType,
+} from '@/types/interfaces/notifications.interfaces';
 import { NotificationCard } from './NotificationCard';
 import { NotificationsHeroCard } from './NotificationsHeroCard';
-import { NotificationsFilterChips, type NotificationsFilter } from './NotificationsFilterChips';
+import { NotificationsFilterChips } from './NotificationsFilterChips';
+import { NotificationsLoadMore } from './NotificationsLoadMore';
 import { NotificationModal } from '@/components/shared/modals/NotificationModal';
 import { useAppTranslations } from '@/hooks/useAppTranslations';
+import { useToast } from '@/hooks/useToast';
 import {
   getNotificationsGroupTitle,
   getNotificationsSkeletonData,
@@ -24,60 +32,66 @@ import { SkeletonSuspense } from '@/components/shared/seleketons/SkeletonSuspens
 import { Skeleton } from '@/components/shared/seleketons/Skeleton';
 import { EmptyDataInfo } from '@/components/shared/EmptyDataInfo';
 import { QueryErrorState } from '@/components/shared/error/QueryErrorState';
+import { staggerMs } from '@/utils/global/animation.utils';
 
 dayjs.extend(isToday);
 dayjs.extend(isYesterday);
 
 export function NotificationsContainer() {
   const t = useAppTranslations();
-  const { data: notifications, isLoading, isError, refetch } = useGetNotificationsQuery();
+  const toast = useToast();
+  const [filter, setFilter] = useState<NotificationsFilter>('all');
+  // Counts describe the WHOLE inbox and the feed describes one filter's pages —
+  // two queries because a paginated list cannot answer "how many are there".
+  const { data: summary, isLoading: isSummaryLoading } = useGetNotificationsSummaryQuery();
+  const { data, isLoading, isError, refetch, fetchNextPage, hasNextPage, isFetchingNextPage } =
+    useGetNotificationsFeedInfiniteQuery(filter);
   const [markAsRead] = useMarkAsReadMutation();
   const [markAllAsRead, { isLoading: isMarkingAll }] = useMarkAllAsReadMutation();
   const [selectedNotification, setSelectedNotification] = useState<Notification | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [filter, setFilter] = useState<NotificationsFilter>('all');
 
-  const handleNotificationClick = (notification: Notification) => {
+  const notifications = useMemo(() => data?.pages.flatMap(page => page.items) ?? [], [data]);
+
+  const handleNotificationClick = async (notification: Notification) => {
     setSelectedNotification(notification);
     setIsModalOpen(true);
-    if (!notification.read) {
-      markAsRead(notification.id);
+    if (notification.read) return;
+    try {
+      await markAsRead(notification.id).unwrap();
+    } catch {
+      // The optimistic patch has already rolled back — say so, otherwise the
+      // row silently flips back to unread and reads as a UI glitch.
+      toast.error(t('action failed'));
     }
   };
 
-  const total = notifications?.length ?? 0;
-  const unread = notifications?.filter(n => !n.read).length ?? 0;
-
-  const visibleTypes = useMemo<NotificationType[]>(() => {
-    if (!notifications?.length) return [];
-    const set = new Set<NotificationType>();
-    for (const n of notifications) {
-      if (n.type) set.add(n.type);
+  const handleMarkAllAsRead = async () => {
+    try {
+      await markAllAsRead().unwrap();
+    } catch {
+      toast.error(t('action failed'));
     }
-    return Array.from(set);
-  }, [notifications]);
+  };
 
-  const counts = useMemo<Partial<Record<NotificationsFilter, number>>>(() => {
-    const result: Partial<Record<NotificationsFilter, number>> = {
-      all: total,
-      unread,
-    };
-    for (const type of visibleTypes) {
-      result[type] = notifications?.filter(n => n.type === type).length ?? 0;
-    }
-    return result;
-  }, [notifications, total, unread, visibleTypes]);
+  const total = summary?.total ?? 0;
+  const unread = summary?.unread ?? 0;
 
-  const filtered = useMemo(() => {
-    if (!notifications) return [];
-    if (filter === 'all') return notifications;
-    if (filter === 'unread') return notifications.filter(n => !n.read);
-    return notifications.filter(n => n.type === filter);
-  }, [notifications, filter]);
+  // Fixed order, not order-of-appearance: the chips must not reshuffle under
+  // the finger when a filter loads a different slice of the inbox.
+  const visibleTypes = useMemo<NotificationType[]>(
+    () => NOTIFICATION_TYPES.filter(type => (summary?.byType[type] ?? 0) > 0),
+    [summary]
+  );
+
+  const counts = useMemo<Partial<Record<NotificationsFilter, number>>>(
+    () => ({ all: total, unread, ...summary?.byType }),
+    [summary, total, unread]
+  );
 
   if (isError) return <QueryErrorState onRetry={() => refetch()} />;
 
-  const groupedNotifications = groupNotificationsByDate(filtered);
+  const groupedNotifications = groupNotificationsByDate(notifications);
   const content = isLoading ? getNotificationsSkeletonData(2, 2) : groupedNotifications;
   const contentEntries = Object.entries(content);
   const contentExists = !!contentEntries.length;
@@ -94,11 +108,11 @@ export function NotificationsContainer() {
       <NotificationsHeroCard
         total={total}
         unread={unread}
-        onMarkAllAsRead={() => markAllAsRead()}
+        onMarkAllAsRead={handleMarkAllAsRead}
         isMarkingAll={isMarkingAll}
       />
 
-      {!isLoading && total > 0 && (
+      {!isSummaryLoading && total > 0 && (
         <NotificationsFilterChips
           active={filter}
           onChange={setFilter}
@@ -111,14 +125,14 @@ export function NotificationsContainer() {
         contentEntries.map(([date, groupNotifications], groupIndex) => {
           const groupOffset = groupAnimationIndexes[groupIndex];
           return (
-            <div key={groupIndex} className="flex flex-col gap-2">
+            <div key={date} className="flex flex-col gap-2">
               <SkeletonSuspense
                 loading={isLoading}
                 skeleton={<Skeleton variant="line" textSize="xs" className="w-32" />}
               >
                 <h3
                   className="text-pink-secondary ml-1 animate-slide-in-bottom text-[10px] font-bold uppercase tracking-widest"
-                  style={{ animationDelay: `${groupOffset * 60}ms` }}
+                  style={{ animationDelay: `${staggerMs(groupOffset)}ms` }}
                 >
                   {getNotificationsGroupTitle(date, t)}
                 </h3>
@@ -144,6 +158,10 @@ export function NotificationsContainer() {
           description={filter === 'unread' ? t('no unread') : undefined}
         />
       ) : null}
+
+      {hasNextPage && !isLoading && (
+        <NotificationsLoadMore onLoadMore={() => fetchNextPage()} loading={isFetchingNextPage} />
+      )}
 
       <NotificationModal
         notification={selectedNotification}

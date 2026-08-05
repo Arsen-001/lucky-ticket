@@ -7,6 +7,7 @@ import { useAppTranslations } from '@/hooks/useAppTranslations';
 import type { TicketEngine } from '@/types/interfaces/ticket.interfaces';
 import type { Ticket, TicketType } from '@/types/types/ticket.types';
 import '@/styles/components/achievement.css';
+import { staggerMs } from '@/utils/global/animation.utils';
 
 const TIER_NUMBER_GRADIENT: Record<TicketType, string> = {
   bronze:
@@ -122,7 +123,7 @@ export function TierUnlockedContent({
             <div
               key={engine.id}
               className="animate-slide-in-bottom"
-              style={{ animationDelay: `${index * 50}ms` }}
+              style={{ animationDelay: `${staggerMs(index, 50)}ms` }}
             >
               <EnginePreviewCard
                 engine={engine}

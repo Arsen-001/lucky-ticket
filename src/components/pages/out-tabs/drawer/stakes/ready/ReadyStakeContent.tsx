@@ -29,6 +29,7 @@ import { StakesClaimSuccessModal } from '@/components/pages/out-tabs/drawer/stak
 import { Skeleton } from '@/components/shared/seleketons/Skeleton';
 import { Button } from '@/components/shared/buttons/Button';
 import { QueryErrorState } from '@/components/shared/error/QueryErrorState';
+import { staggerMs } from '@/utils/global/animation.utils';
 
 interface PrizeCardProps {
   icon: ReactNode;
@@ -234,7 +235,7 @@ export function ReadyStakeContent({ stakeId }: ReadyStakeContentProps) {
 
         <div className="grid grid-cols-2 gap-2.5">
           {prizes.map((prize, i) => (
-            <PrizeCard key={i} {...prize} delayMs={i * 80} />
+            <PrizeCard key={i} {...prize} delayMs={staggerMs(i, 80)} />
           ))}
         </div>
       </div>

@@ -5,6 +5,7 @@ import { ChevronLeft, ChevronRight } from 'lucide-react';
 import { twMerge } from 'tailwind-merge';
 import { Button } from '@/components/shared/buttons/Button';
 import { useAppTranslations } from '@/hooks/useAppTranslations';
+import { staggerMs } from '@/utils/global/animation.utils';
 
 export type TabClassName = string | ((tabKey: string) => string);
 
@@ -186,7 +187,7 @@ export function Tabs({
               aria-selected={activeKey === item.key}
               aria-controls={`tab-panel-${item.key}`}
               style={{
-                animationDelay: `${index * 100}ms`,
+                animationDelay: `${staggerMs(index, 100)}ms`,
               }}
               className={twMerge(
                 `

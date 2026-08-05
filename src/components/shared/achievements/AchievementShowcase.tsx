@@ -10,6 +10,7 @@ import { routes } from '@/constants/routes';
 import { calcShowcaseSlotPrice } from '@/constants/global.constants';
 import type { Achievement as AchievementType } from '@/types/interfaces/achievement.interfaces';
 import '@/styles/components/profile.css';
+import { staggerMs } from '@/utils/global/animation.utils';
 
 export interface AchievementShowcaseProps {
   pinnedAchievements: AchievementType[];
@@ -75,7 +76,7 @@ export function AchievementShowcase({
             isOwn={isOwn}
             onTap={() => onTapSlot?.(i, ach)}
             onLongPress={() => onLongPressSlot?.(i, ach)}
-            animationDelay={i * 80}
+            animationDelay={staggerMs(i, 80)}
           />
         ))}
         {canBuySlot && (

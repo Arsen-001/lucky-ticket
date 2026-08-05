@@ -968,7 +968,9 @@ When a tournament transitions to `finished`, every participant's reward is compu
 
 **Notification & result popup:**
 
-When a tournament finishes, every participant receives an in-app notification with their final placement and reward. When the user opens the finished tournament's detail page, a **result popup** auto-appears once:
+When a tournament finishes, every participant receives an in-app notification with their final placement and reward, deep-linked back to the tournament. Winners additionally get a Telegram DM (gated by the **Tournament end** toggle, Section 16.2); players who won nothing get the feed row only — four draws a day times a full roster of "you finished #312" is how a bot gets muted. A **Tournament start** reminder goes out ~10 minutes before the draw, to everyone entered, once per tournament.
+
+When the user opens the finished tournament's detail page, a **result popup** auto-appears once:
 
 - **Top-3 winners:** celebratory popup with the medal, "You won", LC + shards.
 - **Placed 4–500:** "Your result" popup with the placement and LC.
@@ -1558,6 +1560,14 @@ Two channels are supported: **Email** and **Telegram bot**. Each channel has its
 
 Toggles are saved instantly (no submit button). Categories not listed here are not exposed as user-toggleable preferences.
 
+**What a toggle actually silences.** The wording is exact: a toggle controls the **email and Telegram bot** channels, never the in-app feed. The notifications screen is an inbox — muting a category there would delete the player's own history of it, which is worse than the noise it saves — so the feed row is always written and the toggle only decides whether a bot DM goes out beside it. A category with no DM behind it (an admin announcement, a referral, an achievement) is feed-only whatever the toggle says.
+
+**Wired as of 2026-08-05:** Telegram DMs exist for **Tournament start**, **Tournament end** (winners only), **Staking ready** and **Gifts**, and each is gated by its own toggle. The **Email** channel has no sender behind it at all — the toggles persist, but no email is ever dispatched, and the column stays in the UI for the day one exists. **System** has no DM either; it is feed-only.
+
+**Language.** System notifications are rendered in the recipient's account language at the moment they are written, and stored that way — the same rule the bot DMs already followed. Switching language afterwards does not retranslate notifications already delivered.
+
+**The inbox itself.** The notifications screen is a cursor-paginated feed: **20 rows a page**, the next page loading by itself as the end of the list comes into view (with a "Load more" button as the explicit fallback). Filtering is done by the server, so a chip narrows the whole inbox rather than the pages already on screen — and the counts on the chips, in the hero card, and on the header bell come from a separate whole-inbox summary for the same reason. This replaced a flat newest-100 list, which stopped being enough the moment a tournament result was written for every participant: an active player collects roughly four rows a day, so a fixed hundred was about three weeks of history and everything older was simply unreachable.
+
 **Blocking the bot mutes the Telegram channel entirely**, whatever the toggles say — Telegram refuses every message from a bot its user has blocked, and there is no in-app way to override that. The platform records the block the moment it happens (Telegram announces it once, as a `my_chat_member` update, and never answers the question again afterwards), stops counting the player as a broadcast recipient, and clears the mark by itself when they unblock or press Start again. Nothing else changes: a block is not a ban, the account keeps playing, keeps earning and keeps its balances.
 
 Because the signal only exists at the moment of the block, the record is **forward-only** — anyone who blocked the bot before 2026-08-05 is indistinguishable from a reachable player, and "not marked as blocked" therefore means "no block observed", never "confirmed reachable".
@@ -1979,6 +1989,8 @@ A stake is a **time-locked LC deposit**. The user locks an amount of LC for a ch
 ### Description
 
 The user picks an LC amount and a duration. The LC is locked for that period; locked LC cannot be spent. On completion the principal is returned together with the APR yield, an AP completion bonus, and a guaranteed Lucky Stars payout. The stake may be cancelled early to retrieve the principal, but the yield, AP bonus, and completion Stars are forfeited.
+
+A matured stake is **not** claimed automatically. Within five minutes of maturing the player gets a notification — feed row plus a Telegram DM gated by the **Staking ready** toggle (Section 16.2) — sent once per stake and never repeated, however long the stake stays unclaimed.
 
 ### 18.1 Duration & APR
 

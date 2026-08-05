@@ -7,6 +7,7 @@ import { useAppTranslations } from '@/hooks/useAppTranslations';
 import { GlobalConstants } from '@/constants/global.constants';
 import { formatNumber } from '@/utils/global/number.utils';
 import type { PromoReward, PromoRedeemResponse } from '@/types/interfaces/promo.interfaces';
+import { staggerMs } from '@/utils/global/animation.utils';
 
 interface PromoRewardRevealProps {
   response: PromoRedeemResponse;
@@ -35,7 +36,7 @@ export function PromoRewardReveal({ response }: PromoRewardRevealProps) {
           <div
             key={index}
             className="bg-background-overlay animate-slide-in-bottom flex items-center justify-center rounded-xl border border-white/5 py-2.5"
-            style={{ animationDelay: `${index * 80}ms` }}
+            style={{ animationDelay: `${staggerMs(index, 80)}ms` }}
           >
             <PromoRewardLine reward={reward} />
           </div>

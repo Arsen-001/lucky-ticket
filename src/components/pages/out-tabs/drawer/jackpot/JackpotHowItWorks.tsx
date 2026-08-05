@@ -4,6 +4,7 @@ import type { ReactNode } from 'react';
 import { Coins, Crosshair, PartyPopper } from 'lucide-react';
 import { useAppTranslations } from '@/hooks/useAppTranslations';
 import { useJackpotDisplayConfig } from '@/hooks/useJackpotDisplayConfig';
+import { staggerMs } from '@/utils/global/animation.utils';
 
 interface Step {
   icon: ReactNode;
@@ -41,7 +42,7 @@ export function JackpotHowItWorks() {
           <li
             key={index}
             className="bg-background-overlay animate-slide-in-bottom flex items-center gap-3 rounded-2xl border border-white/5 px-3.5 py-3"
-            style={{ animationDelay: `${index * 100}ms` }}
+            style={{ animationDelay: `${staggerMs(index, 100)}ms` }}
           >
             <span className="bg-electric-pink/15 text-electric-pink flex-center h-9 w-9 flex-shrink-0 rounded-xl">
               {step.icon}

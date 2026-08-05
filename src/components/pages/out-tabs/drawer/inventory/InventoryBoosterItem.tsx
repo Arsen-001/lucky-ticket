@@ -9,6 +9,7 @@ import { useCountDown } from '@/hooks/useCountDown';
 import { CHIP_TYPE_ICON, QUALITY_ACCENT } from '@/utils/global/inventory.utils';
 import type { InventoryBooster } from '@/types/interfaces/inventory.interfaces';
 import type { Dictionary } from '@/types/types/i18n.types';
+import { staggerMs } from '@/utils/global/animation.utils';
 
 export interface InventoryBoosterItemProps {
   booster: InventoryBooster;
@@ -29,7 +30,7 @@ export function InventoryBoosterItem({ booster, index, onActivate }: InventoryBo
     <div
       className="shine-card animate-slide-in-bottom relative flex items-center gap-3 overflow-hidden rounded-2xl p-3"
       style={{
-        animationDelay: `${index * 60}ms`,
+        animationDelay: `${staggerMs(index, 60)}ms`,
         ['--shine-card-accent' as string]: accent,
       }}
     >

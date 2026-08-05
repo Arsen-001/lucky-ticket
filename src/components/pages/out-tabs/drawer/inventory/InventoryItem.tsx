@@ -9,6 +9,7 @@ import type { InventoryChip } from '@/types/interfaces/inventory.interfaces';
 import type { Dictionary } from '@/types/types/i18n.types';
 import type { TicketType } from '@/types/types/ticket.types';
 import '@/styles/components/inventory.css';
+import { staggerMs } from '@/utils/global/animation.utils';
 
 const QUALITY_ACCENT: Record<TicketType, string> = {
   bronze: 'var(--color-bronze)',
@@ -61,7 +62,7 @@ export function InventoryItem({
         isLevelingUp && 'inventory-chip-zoom'
       )}
       style={{
-        animationDelay: `${index * 60}ms`,
+        animationDelay: `${staggerMs(index, 60)}ms`,
         ['--shine-card-accent' as string]: accent,
       }}
     >

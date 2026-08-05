@@ -10,6 +10,7 @@ import { useAppTranslations } from '@/hooks/useAppTranslations';
 import { FileText, House, type LucideProps, ShoppingBag, Ticket, Trophy } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { useLocation } from '@/hooks/useLocation';
+import { staggerMs } from '@/utils/global/animation.utils';
 
 export type Tab = {
   route: Route;
@@ -129,7 +130,7 @@ export function TabBar({ className }: ClassNameProps) {
           flightTarget={route === routes.tickets.index ? 'tickets' : undefined}
           className="relative z-1 animate-slide-in-bottom"
           style={{
-            animationDelay: `${index * 100}ms`,
+            animationDelay: `${staggerMs(index, 100)}ms`,
           }}
         />
       ))}

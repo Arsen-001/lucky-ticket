@@ -13,6 +13,7 @@ import { useGetAvailableLanguages, type Language } from '@/hooks/useGetAvailable
 import { setAppLocale } from '@/services/locale';
 import { stringIncludes } from '@/utils/global/string.utils';
 import type { LocaleType } from '@/types/types/locale.types';
+import { staggerMs } from '@/utils/global/animation.utils';
 
 export interface OnboardingLanguageStepProps {
   /** Fired once the chosen locale is persisted (and the tree refreshed) — starts the tour. */
@@ -102,7 +103,7 @@ export function OnboardingLanguageStep({ onConfirm }: OnboardingLanguageStepProp
                         type="button"
                         onClick={() => setSelected(lang.code)}
                         disabled={isPending}
-                        style={{ animationDelay: `${index * 60}ms` }}
+                        style={{ animationDelay: `${staggerMs(index, 60)}ms` }}
                         className={twMerge(
                           'animate-slide-in-bottom flex w-full items-center gap-3 rounded-2xl border p-3 text-left transition-all active:scale-99 disabled:opacity-60',
                           isActive

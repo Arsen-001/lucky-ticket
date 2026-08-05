@@ -9,6 +9,7 @@ import { useAppTranslations } from '@/hooks/useAppTranslations';
 import { GlobalConstants } from '@/constants/global.constants';
 import { formatNumber } from '@/utils/global/number.utils';
 import type { EmailVerifyReward } from '@/types/interfaces/user.interfaces';
+import { staggerMs } from '@/utils/global/animation.utils';
 
 export interface EmailVerifiedModalProps {
   email: string;
@@ -90,7 +91,7 @@ export function EmailVerifiedModal({ email, reward }: EmailVerifiedModalProps) {
             <div
               key={line.key}
               className="bg-background-overlay animate-slide-in-bottom flex items-center justify-center rounded-xl border border-white/5 py-2.5"
-              style={{ animationDelay: `${index * 80}ms` }}
+              style={{ animationDelay: `${staggerMs(index, 80)}ms` }}
             >
               {line.content}
             </div>

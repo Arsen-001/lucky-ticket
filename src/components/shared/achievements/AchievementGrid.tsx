@@ -2,6 +2,7 @@
 import { twMerge } from 'tailwind-merge';
 import { AchievementCard } from '@/components/shared/achievements/AchievementCard';
 import type { Achievement } from '@/types/interfaces/achievement.interfaces';
+import { staggerMs } from '@/utils/global/animation.utils';
 
 export interface AchievementGridProps {
   achievements: Achievement[];
@@ -25,7 +26,7 @@ export function AchievementGrid({
         <div
           key={a.id}
           className="animate-slide-in-bottom"
-          style={{ animationDelay: `${index * 50}ms` }}
+          style={{ animationDelay: `${staggerMs(index, 50)}ms` }}
         >
           <AchievementCard
             achievement={a}

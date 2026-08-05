@@ -15,6 +15,7 @@ import { speedUpgradeLsCost, capacityUpgradeLsCost } from '@/utils/global/econom
 import type { TicketEngine } from '@/types/interfaces/ticket.interfaces';
 import type { TicketType } from '@/types/types/ticket.types';
 import '@/styles/components/engine-card.css';
+import { staggerMs } from '@/utils/global/animation.utils';
 
 const TIER_GLOW: Record<TicketType, string> = {
   bronze: '#E08A3A',
@@ -116,7 +117,7 @@ export function EngineCard({
           : 'card-outlined bg-purple-gradient rounded-2xl p-[17px] animate-slide-in-bottom',
         className
       )}
-      style={{ animationDelay: `${index * 60}ms` }}
+      style={{ animationDelay: `${staggerMs(index, 60)}ms` }}
     >
       <EngineCardStatsHeader
         tier={tier}

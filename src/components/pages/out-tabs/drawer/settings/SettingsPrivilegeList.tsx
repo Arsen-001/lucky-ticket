@@ -4,6 +4,7 @@ import { Check } from 'lucide-react';
 import { twMerge } from 'tailwind-merge';
 import { useAppTranslations } from '@/hooks/useAppTranslations';
 import type { MessageIds } from '@/types/types/i18n.types';
+import { staggerMs } from '@/utils/global/animation.utils';
 
 export interface SettingsPrivilegeListProps {
   title?: string;
@@ -30,7 +31,7 @@ export function SettingsPrivilegeList({
           <li
             key={index}
             className="flex items-start gap-3 px-4 py-3 animate-slide-in-bottom"
-            style={{ animationDelay: `${index * 60}ms` }}
+            style={{ animationDelay: `${staggerMs(index, 60)}ms` }}
           >
             <span className="flex-center mt-0.5 h-6 w-6 shrink-0 rounded-full bg-emerald-500/15 text-emerald-400">
               <Check size={14} strokeWidth={3} />

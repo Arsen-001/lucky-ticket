@@ -3,9 +3,10 @@
 import { twMerge } from 'tailwind-merge';
 import { useAppTranslations } from '@/hooks/useAppTranslations';
 import { getNotificationTheme } from './notification.theme';
-import type { NotificationType } from '@/types/interfaces/notifications.interfaces';
-
-export type NotificationsFilter = 'all' | 'unread' | NotificationType;
+import type {
+  NotificationsFilter,
+  NotificationType,
+} from '@/types/interfaces/notifications.interfaces';
 
 export interface NotificationsFilterChipsProps {
   active: NotificationsFilter;
@@ -40,6 +41,7 @@ export function NotificationsFilterChips({
           <button
             key={key}
             type="button"
+            aria-pressed={isActive}
             onClick={() => onChange(key)}
             className={twMerge(
               'inline-flex flex-shrink-0 cursor-pointer items-center gap-1.5 rounded-full border px-3 py-1.5 text-xs font-semibold transition-colors',

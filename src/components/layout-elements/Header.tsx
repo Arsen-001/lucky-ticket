@@ -5,7 +5,7 @@ import { useState } from 'react';
 import { Menu } from 'lucide-react';
 import { twMerge } from 'tailwind-merge';
 import { useGetMeQuery } from '@/api/me.api';
-import { useGetNotificationsQuery } from '@/api/notifications.api';
+import { useGetNotificationsSummaryQuery } from '@/api/notifications.api';
 import { useGetStakesQuery } from '@/api/stakes.api';
 import { isStakeReady } from '@/utils/global/stakes.utils';
 import { formatCompact } from '@/utils/global/number.utils';
@@ -35,7 +35,7 @@ export function Header({ className }: ClassNameProps) {
   const dispatch = useAppDispatch();
   const router = useRouter();
   const { data: me, isLoading } = useGetMeQuery();
-  const { data: notifications } = useGetNotificationsQuery();
+  const { data: notificationsSummary } = useGetNotificationsSummaryQuery();
   const { data: stakesData } = useGetStakesQuery();
   const [starsModalOpen, setStarsModalOpen] = useState(false);
   // `me` is client-fetched (absent during SSR), so keep showing skeletons until
@@ -43,7 +43,9 @@ export function Header({ className }: ClassNameProps) {
   const mounted = useMounted();
   const meLoading = !mounted || isLoading;
 
-  const unreadCount = notifications?.filter(n => !n.read).length ?? 0;
+  // Whole-inbox count from the server — the feed is paginated, so counting
+  // the loaded rows would under-report the badge the moment page 2 exists.
+  const unreadCount = notificationsSummary?.unread ?? 0;
   const claimableStakesCount =
     stakesData?.activeStakes.filter(s => !s.claimed && isStakeReady(s.endDate)).length ?? 0;
   const hasUpdates = unreadCount + claimableStakesCount > 0;

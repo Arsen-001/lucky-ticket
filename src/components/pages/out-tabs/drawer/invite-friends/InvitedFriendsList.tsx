@@ -21,6 +21,7 @@ import type { ClaimableTicket, InvitedFriend } from '@/types/interfaces/referral
 import type { TicketType } from '@/types/types/ticket.types';
 import { useToast } from '@/hooks/useToast';
 import { displayNameOf } from '@/utils/global/user.utils';
+import { staggerMs } from '@/utils/global/animation.utils';
 
 const EMPTY_TICKETS: Record<TicketType, number> = {
   bronze: 0,
@@ -190,7 +191,7 @@ export const InvitedFriendsList = () => {
               onClaim={setSelectedFriend}
               onOpenCard={openCard}
               className="animate-slide-in-bottom"
-              style={{ animationDelay: `${index * 60}ms` }}
+              style={{ animationDelay: `${staggerMs(index, 60)}ms` }}
             />
           ))
         ) : friends.length > 0 ? (

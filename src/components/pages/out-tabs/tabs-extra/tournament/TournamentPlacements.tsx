@@ -19,6 +19,7 @@ import { ShardZoomButton } from '@/components/pages/out-tabs/tabs-extra/tourname
 import { useTournamentConfig } from '@/hooks/useTournamentConfig';
 import type { TournamentType } from '@/types/types/tournaments.types';
 import { displayNameOf } from '@/utils/global/user.utils';
+import { staggerMs } from '@/utils/global/animation.utils';
 
 // Literal hexes (not var(--color-*)): ConfettiLayer builds `${color}aa`
 // drop-shadows, which needs a concatenable 6-digit hex, not a CSS variable.
@@ -44,7 +45,7 @@ interface TierRowProps {
 function TierRow({ place, percentage, lc, index, isMe }: TierRowProps) {
   return (
     <div
-      style={{ animationDelay: `${index * 30}ms` }}
+      style={{ animationDelay: `${staggerMs(index, 30)}ms` }}
       className={twMerge(
         'animate-slide-in-bottom flex items-center gap-2.5 rounded-2xl border p-2.5 transition-all',
         isMe

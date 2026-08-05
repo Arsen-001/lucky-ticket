@@ -21,6 +21,7 @@ import {
 } from '@/components/shared/user-elements/PlayerQuickCard';
 import type { LeaderboardEntry } from '@/types/interfaces/leaderboard.interfaces';
 import { displayNameOf } from '@/utils/global/user.utils';
+import { staggerMs } from '@/utils/global/animation.utils';
 
 const COUNT_UP_PLACES = 10;
 
@@ -204,7 +205,7 @@ function ListBody({ isLoading, places, total, myPlace, meId, onOpenCard }: ListB
               <LeaderboardListItem
                 key={`s-${index}`}
                 loading
-                style={{ animationDelay: `${index * 30}ms` }}
+                style={{ animationDelay: `${staggerMs(index, 30)}ms` }}
                 className="animate-slide-in-bottom"
               />
             ))
@@ -218,7 +219,7 @@ function ListBody({ isLoading, places, total, myPlace, meId, onOpenCard }: ListB
                   animateCounter={index < COUNT_UP_PLACES}
                   onOpenCard={onOpenCard}
                   className="animate-slide-in-bottom"
-                  style={{ animationDelay: `${Math.min(index, 30) * 30}ms` }}
+                  style={{ animationDelay: `${staggerMs(index, 30)}ms` }}
                 />
               );
             })}

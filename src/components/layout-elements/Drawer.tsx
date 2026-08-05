@@ -33,7 +33,7 @@ import { useRouter } from 'next/navigation';
 
 import { useLogoutMutation } from '@/api/auth.api';
 import { useGetMeQuery } from '@/api/me.api';
-import { useGetNotificationsQuery } from '@/api/notifications.api';
+import { useGetNotificationsSummaryQuery } from '@/api/notifications.api';
 import { useGetStakesQuery } from '@/api/stakes.api';
 import { isStakeReady } from '@/utils/global/stakes.utils';
 import { Avatar } from '@/components/shared/user-elements/Avatar';
@@ -72,7 +72,7 @@ export function Drawer() {
   const router = useRouter();
   const [logout, { isLoading: isLoggingOut }] = useLogoutMutation();
   const { data: me, isLoading } = useGetMeQuery();
-  const { data: notifications } = useGetNotificationsQuery();
+  const { data: notificationsSummary } = useGetNotificationsSummaryQuery();
   const { data: stakesData } = useGetStakesQuery();
   const location = useLocation();
   // `me` is client-fetched (absent during SSR); the drawer is always in the DOM
@@ -82,7 +82,9 @@ export function Drawer() {
   const meLoading = !mounted || isLoading;
   const activePath = location.getPathPart(1);
 
-  const unreadCount = notifications?.filter(n => !n.read).length ?? 0;
+  // Whole-inbox count from the server — the feed is paginated, so counting
+  // the loaded rows would under-report the badge the moment page 2 exists.
+  const unreadCount = notificationsSummary?.unread ?? 0;
   const claimableStakesCount =
     stakesData?.activeStakes.filter(s => !s.claimed && isStakeReady(s.endDate)).length ?? 0;
 

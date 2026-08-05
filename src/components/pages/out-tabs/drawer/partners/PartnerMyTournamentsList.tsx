@@ -14,6 +14,7 @@ import { appConfig } from '@/config/app.config';
 import { routes } from '@/constants/routes';
 import { useAppTranslations } from '@/hooks/useAppTranslations';
 import type { PersonalTournament } from '@/types/interfaces/tournaments.interfaces';
+import { staggerMs } from '@/utils/global/animation.utils';
 
 export interface PartnerMyTournamentsListProps {
   tournaments?: PersonalTournament[];
@@ -75,7 +76,7 @@ export function PartnerMyTournamentsList({
               loading={loading}
               {...item}
               className="animate-slide-in-bottom"
-              style={{ animationDelay: `${index * 100}ms` }}
+              style={{ animationDelay: `${staggerMs(index, 100)}ms` }}
             />
           );
 

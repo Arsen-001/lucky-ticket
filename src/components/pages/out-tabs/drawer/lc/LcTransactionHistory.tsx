@@ -11,6 +11,7 @@ import {
 } from '@/types/enums/lc.enums';
 import { LcTransactionRow } from './LcTransactionRow';
 import type { LcTransaction } from '@/types/interfaces/lc.interfaces';
+import { staggerMs } from '@/utils/global/animation.utils';
 
 const FILTERS: LcTransactionFilter[] = [
   LcTransactionFilter.ALL,
@@ -95,7 +96,7 @@ export function LcTransactionHistory({ transactions = [], loading }: LcTransacti
               key={`s-${index}`}
               loading
               className="animate-slide-in-bottom"
-              style={{ animationDelay: `${index * 60}ms` }}
+              style={{ animationDelay: `${staggerMs(index, 60)}ms` }}
             />
           ))
         ) : visible.length === 0 ? (
@@ -106,7 +107,7 @@ export function LcTransactionHistory({ transactions = [], loading }: LcTransacti
               key={tx.id}
               transaction={tx}
               className="animate-slide-in-bottom"
-              style={{ animationDelay: `${Math.min(index, 8) * 50}ms` }}
+              style={{ animationDelay: `${staggerMs(index, 50)}ms` }}
             />
           ))
         )}

@@ -8,6 +8,7 @@ import { WalletTransactionFilter } from '@/types/enums/wallet.enums';
 import { filterTransactions } from '@/utils/pages/wallet.utils';
 import { WalletTransactionRow } from './WalletTransactionRow';
 import type { TonNetwork, WalletTransaction } from '@/types/interfaces/wallet.interfaces';
+import { staggerMs } from '@/utils/global/animation.utils';
 
 const FILTERS: WalletTransactionFilter[] = [
   WalletTransactionFilter.ALL,
@@ -87,7 +88,7 @@ export function WalletTransactionHistory({
               key={`s-${index}`}
               loading
               className="animate-slide-in-bottom"
-              style={{ animationDelay: `${index * 60}ms` }}
+              style={{ animationDelay: `${staggerMs(index, 60)}ms` }}
             />
           ))
         ) : visible.length === 0 ? (
@@ -103,7 +104,7 @@ export function WalletTransactionHistory({
               transaction={tx}
               network={network}
               className="animate-slide-in-bottom"
-              style={{ animationDelay: `${Math.min(index, 8) * 50}ms` }}
+              style={{ animationDelay: `${staggerMs(index, 50)}ms` }}
             />
           ))
         )}

@@ -8,6 +8,7 @@ import { useGetAvailableLanguages, type Language } from '@/hooks/useGetAvailable
 import { useAppTranslations } from '@/hooks/useAppTranslations';
 import { setAppLocale } from '@/services/locale';
 import type { LocaleType } from '@/types/types/locale.types';
+import { staggerMs } from '@/utils/global/animation.utils';
 
 export default function LanguagesPage() {
   const t = useAppTranslations();
@@ -61,7 +62,7 @@ export default function LanguagesPage() {
                 onClick={() => handleLanguageChange(lang.code)}
                 disabled={isPending}
                 style={{
-                  animationDelay: `${index * 60}ms`,
+                  animationDelay: `${staggerMs(index, 60)}ms`,
                   ...(isActive
                     ? { ['--shine-card-accent' as string]: 'var(--color-electric-pink)' }
                     : {}),

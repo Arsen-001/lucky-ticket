@@ -209,14 +209,22 @@ animate-spin              → continuous rotation (Lucide icons)
 animation-blink           → pulsing opacity 1.8s
 ```
 
-Every list and grid uses inline `animationDelay` — never JS-based timers:
+Every list and grid uses inline `animationDelay` — never JS-based timers — and
+always through `staggerMs` from `@/utils/global/animation.utils`:
 
 ```
 className="animate-slide-in-bottom"
-style={{ animationDelay: `${index * 100}ms` }}
+style={{ animationDelay: `${staggerMs(index, 100)}ms` }}
 ```
 
 Use `50ms` for dense grids (tournament cards), `100ms` for lists and tab items.
+
+**Never write `index * step` inline.** `animate-slide-in-bottom` is declared with
+`animation-fill-mode: both`, so an item holds `opacity: 0` for the whole of its
+delay — an unclamped index does not stagger a long list, it hides the tail of
+it. Measured on `/faq`: 87 rows reached a **5.1s** delay and 14 items sitting on
+screen were fully invisible. `staggerMs` caps the delay at 400ms and leaves
+short lists byte-identical. `tests/stagger.test.ts` enforces this.
 
 `(tabs)/layout.tsx` wraps content in a `key={pathname}` div — React remounts it on each navigation, re-triggering CSS entry animations automatically. Never add JS animation resets.
 

@@ -16,6 +16,7 @@ import type {
   NotificationPreferenceKey,
 } from '@/types/interfaces/notifications.interfaces';
 import type { SettingsMenuAccent } from '@/components/pages/out-tabs/drawer/settings/SettingsMenuItem';
+import { staggerMs } from '@/utils/global/animation.utils';
 
 interface CategoryDef {
   key: NotificationPreferenceKey;
@@ -96,7 +97,7 @@ export function NotificationPreferencesSection() {
           <div
             key={category.key}
             className="animate-slide-in-bottom"
-            style={{ animationDelay: `${index * 60}ms` }}
+            style={{ animationDelay: `${staggerMs(index, 60)}ms` }}
           >
             <SettingsMenuItem
               icon={<Icon size={18} className={category.fg} strokeWidth={2.4} />}
