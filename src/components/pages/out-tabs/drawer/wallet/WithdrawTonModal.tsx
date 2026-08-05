@@ -10,6 +10,7 @@ import { useWithdrawTonMutation } from '@/api/wallet.api';
 import {
   isValidTonAddress,
   formatTon,
+  isWithdrawalsDisabledError,
   readReferralGateError,
   sanitizeDecimalInput,
   tonScanUrl,
@@ -20,6 +21,7 @@ import { useWalletLimits } from '@/hooks/useWalletLimits';
 import { CheckCircle2, ExternalLink } from 'lucide-react';
 import { WithdrawSummaryRow } from './WithdrawSummaryRow';
 import { WalletReferralGate } from './WalletReferralGate';
+import { WalletWithdrawLocked } from './WalletWithdrawLocked';
 import type { TonNetwork } from '@/types/interfaces/wallet.interfaces';
 
 interface WithdrawTonModalProps {
@@ -56,6 +58,9 @@ export function WithdrawTonModal({
   // The gate as the server reported it at submit time — the count can move
   // between the screen's load and the request, so `gated` is not the last word.
   const [lateGate, setLateGate] = useState<{ required: number; current: number } | null>(null);
+  // Same idea for the kill switch: the config query can be minutes old, so an
+  // exit closed mid-session is caught at submit time and turns into the lock.
+  const [lateDisabled, setLateDisabled] = useState(false);
 
   const numericAmount = Number(amount) || 0;
   // The backend sends `amount` to the recipient and debits `amount + fee`, so
@@ -63,6 +68,7 @@ export function WithdrawTonModal({
   // as amount − fee, quoting the fee twice and understating the payout.
   // Fee and limits come from the server, which enforces exactly these.
   const {
+    withdrawalsEnabled,
     withdrawFeeTon: fee,
     minWithdrawTon,
     maxWithdrawTon,
@@ -104,6 +110,7 @@ export function WithdrawTonModal({
     setToAddress('');
     setAmount('');
     setLateGate(null);
+    setLateDisabled(false);
     onClose();
   };
 
@@ -126,6 +133,13 @@ export function WithdrawTonModal({
       // modal renders as a lock, but the count can move between load and submit.
       // Rendering that lock (invite CTA and all) beats a toast that names the
       // requirement over a form which can no longer be submitted.
+      // The exit closed between the screen's config and this submit — render the
+      // lock rather than a toast, for the same reason as the gate below.
+      if (isWithdrawalsDisabledError(error)) {
+        setLateDisabled(true);
+        setStep('form');
+        return;
+      }
       const referralGate = readReferralGateError(error);
       if (referralGate) {
         setLateGate(referralGate);
@@ -148,6 +162,21 @@ export function WithdrawTonModal({
       toast.error(message);
     }
   };
+
+  // The exit being closed outranks the invite gate: while money can't leave at
+  // all, how many friends the player has invited is beside the point.
+  if (!withdrawalsEnabled || lateDisabled) {
+    return (
+      <Modal open={open} onClose={handleClose}>
+        <div className="bg-purple-gradient flex flex-col gap-4 rounded-2xl p-6">
+          <WalletWithdrawLocked />
+          <Button variant="secondary" onClick={handleClose} className="rounded-full px-4 py-2">
+            {t('close')}
+          </Button>
+        </div>
+      </Modal>
+    );
+  }
 
   // The cash-out gate is a state of the screen, not an error: rendering the
   // form behind a lock would invite an address and an amount into a request

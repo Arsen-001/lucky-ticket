@@ -176,6 +176,20 @@ export const readReferralGateError = (
   return { required: body.required ?? 0, current: body.current ?? 0 };
 };
 
+/**
+ * Whether a failed money-exit call was refused by the kill switch: both
+ * `POST /wallet/withdraw` and `POST /lc/convert-ton` answer 403
+ * `{ error: 'withdrawals-disabled' }` while withdrawals are closed for the test
+ * period. Checked at submit time as well as up front, because the config query
+ * can be minutes stale — an admin closing the exit mid-session must not leave a
+ * form whose only outcome is a generic failure.
+ */
+export const isWithdrawalsDisabledError = (error: unknown): boolean => {
+  const data = (error as { status?: number; data?: unknown } | undefined)?.data;
+  if (!data || typeof data !== 'object') return false;
+  return (data as { error?: string }).error === 'withdrawals-disabled';
+};
+
 export const providerLabel = (provider?: WalletProvider): string => {
   switch (provider) {
     case WalletProvider.TONKEEPER:

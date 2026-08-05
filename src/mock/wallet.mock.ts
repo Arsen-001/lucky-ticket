@@ -125,6 +125,10 @@ const withdrawTon = (args: FetchArgs) => {
   const { toAddress, amount } = (args.body ?? {}) as Partial<WithdrawTonRequest>;
   const value = amount ?? 0;
   const fee = appConfig.wallet.withdrawFeeTon;
+  // The exit kill switch outranks the invite gate, exactly as on the server:
+  // while withdrawals are closed for the test period, nothing else matters.
+  if (!appConfig.wallet.withdrawalsEnabled)
+    return { error: { status: 403, data: { error: 'withdrawals-disabled' } } };
   // Same 403 the backend answers when the cash-out gate isn't met, so the
   // locked withdrawal state is developable against the mock layer.
   if (!canWithdrawTon())

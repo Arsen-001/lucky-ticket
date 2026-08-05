@@ -12,6 +12,8 @@ import { lcToTon } from '@/utils/global/lc.utils';
 import { useLcUsdRate } from '@/hooks/useLcUsdRate';
 import { useTonUsdRate } from '@/hooks/useTonUsdRate';
 import { useWalletLimits } from '@/hooks/useWalletLimits';
+import { isWithdrawalsDisabledError } from '@/utils/pages/wallet.utils';
+import { WalletWithdrawLocked } from '@/components/pages/out-tabs/drawer/wallet/WalletWithdrawLocked';
 
 type Step = 'select' | 'success';
 
@@ -31,12 +33,16 @@ export function LcConvertTonModal({ open, onClose, balance }: LcConvertTonModalP
   const [step, setStep] = useState<Step>('select');
   const [lcInput, setLcInput] = useState('');
   const [submitted, setSubmitted] = useState({ lc: 0, ton: 0 });
+  // The exit closed between this screen's config and the submit — the config
+  // query can be minutes stale, so the refusal itself flips the lock on.
+  const [lateDisabled, setLateDisabled] = useState(false);
 
   useEffect(() => {
     if (!open) {
       setStep('select');
       setLcInput('');
       setSubmitted({ lc: 0, ton: 0 });
+      setLateDisabled(false);
     }
   }, [open]);
 
@@ -44,7 +50,10 @@ export function LcConvertTonModal({ open, onClose, balance }: LcConvertTonModalP
   // what the backend credits — TON's price is a market feed, not a constant.
   const lcUsdRate = useLcUsdRate();
   const tonUsdRate = useTonUsdRate();
-  const { minWithdrawLc } = useWalletLimits();
+  // LC→TON is the same money exit as the TON withdrawal and dies by the same
+  // switch, so it gets the same lock rather than a generic failure.
+  const { minWithdrawLc, withdrawalsEnabled } = useWalletLimits();
+  const locked = !withdrawalsEnabled || lateDisabled;
   const amount = Number(lcInput) || 0;
   const tonOut = lcToTon(amount, lcUsdRate, tonUsdRate);
   const insufficient = amount > balance;
@@ -60,7 +69,11 @@ export function LcConvertTonModal({ open, onClose, balance }: LcConvertTonModalP
       const res = await convert({ lcAmount: amount }).unwrap();
       setSubmitted({ lc: res.lcSpent, ton: res.tonCredited });
       setStep('success');
-    } catch {
+    } catch (error) {
+      if (isWithdrawalsDisabledError(error)) {
+        setLateDisabled(true);
+        return;
+      }
       toast.error(t('action failed'));
     }
   };
@@ -77,7 +90,20 @@ export function LcConvertTonModal({ open, onClose, balance }: LcConvertTonModalP
           }}
         />
 
-        {step === 'select' && (
+        {locked && (
+          <div className="relative flex flex-col gap-4">
+            <WalletWithdrawLocked />
+            <button
+              type="button"
+              onClick={onClose}
+              className="bg-pink-gradient w-full cursor-pointer rounded-xl px-4 py-3 text-sm font-bold uppercase tracking-wider text-white transition-transform active:scale-99"
+            >
+              {t('close')}
+            </button>
+          </div>
+        )}
+
+        {!locked && step === 'select' && (
           <>
             <div className="relative flex flex-col items-center gap-1 text-center">
               <h2 className="text-xl font-extrabold text-white">{t('convert to ton')}</h2>
@@ -196,7 +222,7 @@ export function LcConvertTonModal({ open, onClose, balance }: LcConvertTonModalP
           </>
         )}
 
-        {step === 'success' && (
+        {!locked && step === 'success' && (
           <div className="relative flex flex-col items-center gap-3.5 text-center">
             <div className="relative">
               <span

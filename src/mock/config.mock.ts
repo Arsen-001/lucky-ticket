@@ -14,6 +14,7 @@ const getPublicConfig = (): PublicConfig => ({
   tonUsdRate: appConfig.wallet.tonUsdRate,
   lsUsdRate: appConfig.wallet.lsUsdRate,
   wallet: {
+    withdrawalsEnabled: appConfig.wallet.withdrawalsEnabled,
     withdrawFeeTon: appConfig.wallet.withdrawFeeTon,
     minWithdrawTon: walletConstants.TON_MIN_WITHDRAW,
     maxWithdrawTon: walletConstants.TON_MAX_WITHDRAW,

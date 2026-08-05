@@ -250,6 +250,14 @@ export const appConfig = {
      * loosely rather than being authoritative.
      */
     tonUsdRate: FALLBACK_TON_USD_RATE,
+    /**
+     * Fallback for the exit kill switch (`walletConfig.withdrawalsEnabled`).
+     * The live value is served by `GET /config` and enforced by the backend on
+     * both exits — the TON withdrawal and the LC→TON conversion. This feeds the
+     * mock layer: flip it to `false` to see the "opens after the test period"
+     * lock on both screens without touching a server.
+     */
+    withdrawalsEnabled: true,
     /** Flat TON network fee charged on a withdrawal. */
     withdrawFeeTon: 0.05,
     /**

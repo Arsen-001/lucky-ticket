@@ -7,6 +7,7 @@ import type {
 } from '@/types/interfaces/lc.interfaces';
 import { mockDb } from '@/mock/backend/db';
 import { lcToTon } from '@/utils/global/lc.utils';
+import { appConfig } from '@/config/app.config';
 
 const HOUR_MS = 3_600_000;
 
@@ -32,6 +33,11 @@ const convertLcToTon = (args: FetchArgs) => {
   const { lcAmount } = (args.body ?? {}) as Partial<ConvertLcToTonRequest>;
   const amount = lcAmount ?? 0;
 
+  // The exit kill switch, mirrored from the backend so the locked state is
+  // developable here: LC→TON dies with the TON withdrawal, on one flag.
+  if (!appConfig.wallet.withdrawalsEnabled) {
+    return { error: { status: 403, data: { error: 'withdrawals-disabled' } } };
+  }
   if (amount <= 0) {
     return { error: { status: 400, data: 'Amount must be positive' } };
   }

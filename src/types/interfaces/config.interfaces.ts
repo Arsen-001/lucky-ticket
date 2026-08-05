@@ -76,6 +76,13 @@ export interface PublicConfig {
    * amount the API then rejects.
    */
   wallet?: {
+    /**
+     * The exit kill switch (`walletConfig.withdrawalsEnabled`). False closes
+     * BOTH money exits — the TON withdrawal and the LC→TON conversion — and the
+     * screens render a lock instead of a form. Absent means an older backend:
+     * treat it as open and let the server's 403 be the last word.
+     */
+    withdrawalsEnabled?: boolean;
     /** Flat fee charged ON TOP of a withdrawal — the recipient gets the amount. */
     withdrawFeeTon: number;
     minWithdrawTon: number;

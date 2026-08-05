@@ -3,6 +3,12 @@ import { appConfig } from '@/config/app.config';
 import { walletConstants } from '@/utils/pages/wallet.utils';
 
 export interface WalletLimits {
+  /**
+   * Whether money may leave the platform at all — false closes the TON
+   * withdrawal AND the LC→TON conversion (it is one switch server-side), and
+   * both screens render the "opens after the test period" lock.
+   */
+  withdrawalsEnabled: boolean;
   /** Flat fee charged ON TOP of a withdrawal — the recipient gets the amount. */
   withdrawFeeTon: number;
   minWithdrawTon: number;
@@ -27,6 +33,10 @@ export function useWalletLimits(): WalletLimits {
   const { data } = useGetPublicConfigQuery();
 
   return {
+    // Open until the server says otherwise: while the query is in flight — or
+    // against a backend old enough not to publish the flag — locking the screen
+    // would hide a working feature, and the 403 still refuses anything real.
+    withdrawalsEnabled: data?.wallet?.withdrawalsEnabled ?? true,
     withdrawFeeTon: data?.wallet?.withdrawFeeTon ?? walletConstants.TON_NETWORK_FEE,
     minWithdrawTon: data?.wallet?.minWithdrawTon ?? walletConstants.TON_MIN_WITHDRAW,
     maxWithdrawTon: data?.wallet?.maxWithdrawTon ?? walletConstants.TON_MAX_WITHDRAW,
