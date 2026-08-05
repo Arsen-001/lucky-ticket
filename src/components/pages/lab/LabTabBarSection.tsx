@@ -2,6 +2,7 @@
 
 import { LabSection } from './LabSection';
 import { LabTabBar, type LabTabBarVariant } from './LabTabBar';
+import { LabTabBarNotched, type LabTabBarNotchedVariant } from './LabTabBarNotched';
 import { LabTabBarSignature, type LabTabBarSignatureVariant } from './LabTabBarSignature';
 import { LabVariant } from './LabVariant';
 
@@ -46,6 +47,24 @@ const SIGNATURE: { key: LabTabBarSignatureVariant; label: string; bet: string }[
   },
 ];
 
+const NOTCHED: { key: LabTabBarNotchedVariant; label: string; bet: string }[] = [
+  {
+    key: 'cradle',
+    label: 'В1 · люлька — края скруглены',
+    bet: 'Вырез уходит в панель дугой, а в местах, где он возвращается к верхнему краю, стоят маленькие радиусы: линия нигде не ломается под прямым углом. Самый мягкий и самый спокойный вариант — читается как выемка, отлитая под кружок.',
+  },
+  {
+    key: 'scoop',
+    label: 'В2 · вырез без радиусов',
+    bet: 'Та же дуга, но она встречает верхний край в лоб, без сглаживания: получаются два острых угла по бокам. Резче и графичнее — панель выглядит пробитой, а не отлитой.',
+  },
+  {
+    key: 'gap',
+    label: 'В3 · разрыв во всю высоту',
+    bet: 'Панель не надрезана, а разорвана: две части с закруглёнными торцами, между ними сквозная пустота на всю высоту, и кружок висит в ней сам по себе. Самый смелый — под активной вкладкой панели просто нет, подпись стоит на фоне страницы.',
+  },
+];
+
 /**
  * Bottom-bar options. Each bar is live: it owns its active tab and does not
  * navigate, so tapping through them stays on this page.
@@ -76,6 +95,25 @@ export function LabTabBarSection() {
             <div className="-mx-4 overflow-hidden">
               <div className="bg-background h-12" />
               <LabTabBar variant={v.key} />
+            </div>
+          </LabVariant>
+        ))}
+      </LabSection>
+
+      <LabSection
+        title="Нижние табы — вырез под кружком"
+        note="То же, что стоит сейчас, но панель под активной вкладкой РАСПОРОТА: кружок висит в пустоте, а не лежит на сплошной полосе. Полосатая подложка нарочно просвечивает — по ней видно, где дырка настоящая. Разница между вариантами в том, чем закрыты края рядом с вырезом. Нажимается всё: вырез переезжает вместе с кружком."
+      >
+        {NOTCHED.map(v => (
+          <LabVariant key={v.key} label={v.label} bet={v.bet}>
+            <div className="relative -mx-4 overflow-hidden">
+              {/* Shows through the cut, so the hole cannot be mistaken for paint. */}
+              <span
+                aria-hidden
+                className="absolute inset-0 bg-[repeating-linear-gradient(135deg,rgba(255,255,255,0.07)_0_8px,transparent_8px_16px)]"
+              />
+              <div className="h-14" />
+              <LabTabBarNotched variant={v.key} className="relative" />
             </div>
           </LabVariant>
         ))}

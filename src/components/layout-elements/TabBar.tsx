@@ -4,6 +4,7 @@ import type { ClassNameProps } from '@/types/interfaces/component.interfcaes';
 import { type ReactElement, type ReactNode, useEffect, useState, useTransition } from 'react';
 import { TabBarItem } from '@/components/layout-elements/TabBarItem';
 import { TabBarActiveDisc } from '@/components/layout-elements/TabBarActiveDisc';
+import { TabBarCut } from '@/components/layout-elements/TabBarCut';
 import { type Route, routes } from '@/constants/routes';
 import { useAppTranslations } from '@/hooks/useAppTranslations';
 import { FileText, House, type LucideProps, ShoppingBag, Ticket, Trophy } from 'lucide-react';
@@ -92,12 +93,17 @@ export function TabBar({ className }: ClassNameProps) {
   // and then there is no disc to draw at all.
   const activeIndex = tabs.findIndex(({ route }) => route === activeRoute);
 
+  // Centre of the active column. The five are equal fifths of the bar, which is
+  // what lets the hole, the disc and the row agree on one number.
+  const centre = activeIndex >= 0 ? (activeIndex + 0.5) * (100 / tabs.length) : null;
+
   return (
     <div
       className={twMerge(
-        // The active tab is a raised disc that travels along the row and
-        // overhangs the top edge, so the bar must not clip its own children.
-        'bg-header relative flex items-end justify-between gap-1 px-3 pt-3 animate-fade-in',
+        // The bar paints nothing itself: `TabBarCut` lays the surface with a
+        // hole in it, and the disc hangs above the top edge, so nothing here
+        // may clip its children.
+        'relative flex items-end justify-between pt-3 animate-fade-in',
         className
       )}
       // Ease the bottom inset as Telegram settles it on open (see Header).
@@ -110,10 +116,7 @@ export function TabBar({ className }: ClassNameProps) {
         willChange: 'transform',
       }}
     >
-      <span
-        aria-hidden
-        className="pointer-events-none absolute inset-0 bg-[radial-gradient(120%_80%_at_0%_100%,rgba(222,0,155,0.08),transparent_60%),radial-gradient(120%_80%_at_100%_0%,rgba(248,189,62,0.06),transparent_55%)]"
-      />
+      <TabBarCut centre={centre} />
       {tabs.map(({ route, icon, name }, index) => (
         <TabBarItem
           key={route}
@@ -128,22 +131,17 @@ export function TabBar({ className }: ClassNameProps) {
           }}
         />
       ))}
-      {activeIndex >= 0 && (
+      {centre !== null && (
         <TabBarActiveDisc
           icon={tabs[activeIndex].icon as ReactElement<LucideProps>}
           iconKey={tabs[activeIndex].route}
           className="animate-fade-in"
           style={{
-            // One column wide, stepped along the row by whole columns: the five
-            // are `flex-1` inside `px-3` with `gap-1`, so a column is a fifth of
-            // what is left of the bar and a step is that plus one gap.
-            left: '0.75rem',
-            width: 'calc((100% - 2.5rem) / 5)',
-            transform: `translateX(calc(${activeIndex} * (100% + 0.25rem)))`,
-            // Stands on the row's label line: the bar's bottom padding, the
-            // label, and the gap above it.
-            bottom: 'calc(1rem + var(--tg-inset-bottom) + 0.875rem)',
-            transition: 'transform 320ms cubic-bezier(0.22, 1, 0.36, 1), bottom 220ms ease-out',
+            // Centred on the bar's own top edge: half of the disc stands above
+            // the bar, half sits in the hole cut for it.
+            left: `calc(${centre}% - 1.75rem)`,
+            top: '-1.75rem',
+            transition: 'left 320ms cubic-bezier(0.22, 1, 0.36, 1)',
           }}
         />
       )}
