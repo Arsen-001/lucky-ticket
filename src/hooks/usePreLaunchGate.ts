@@ -3,7 +3,9 @@
 import { useEffect, useState } from 'react';
 import { apiBase } from '@/config/api.config';
 import { comingSoonConfig } from '@/config/coming-soon.config';
+import { readDesktopAccessKey } from '@/config/device-gate.config';
 import { getTelegramWebApp } from '@/lib/telegram/telegram';
+import { getDeviceKind } from '@/lib/telegram/platform';
 
 export type PreLaunchStatus = 'checking' | 'gated' | 'open';
 
@@ -36,6 +38,16 @@ export interface PreLaunchGateAnswer {
    * «скоро» promises a product that currently isn't running. @see PreLaunchGate
    */
   maintenance: boolean;
+  /**
+   * This visitor is on a computer and is not one of the people allowed to play
+   * from one — so they get the QR that opens the game on their phone.
+   *
+   * Which client is asking is decided here, in the page (`initData` is signed
+   * but carries no platform); who is excused is decided by the backend. Always
+   * false on a phone in Telegram, whatever the switch says, so the rule can
+   * never cost the audience it was written for. @see getDeviceKind
+   */
+  desktopBlocked: boolean;
 }
 
 export interface PreLaunchGateState extends PreLaunchGateAnswer {
@@ -72,6 +84,10 @@ export function usePreLaunchGate(): PreLaunchGateState {
     launchAt: comingSoonConfig.fallbackLaunchAt,
     session: null,
     maintenance: false,
+    // Undecided until the first answer — the splash covers this moment, and
+    // flashing a QR at a phone player while we ask would be the one mistake
+    // this whole path is written to avoid.
+    desktopBlocked: false,
   });
 
   useEffect(() => {
@@ -102,6 +118,11 @@ export function usePreLaunchGate(): PreLaunchGateState {
           // override (`appConfig.maintenance.enabled`) is applied by the gate
           // component on top of this, so dev can still see the screen.
           maintenance: false,
+          // Same reasoning, and it is what keeps the app developable: local
+          // work and both e2e suites run in a desktop browser against the mock
+          // layer, and a phone-only rule with no backend to switch it off would
+          // turn every one of those into a QR code.
+          desktopBlocked: false,
         })
       );
       return;
@@ -109,6 +130,30 @@ export function usePreLaunchGate(): PreLaunchGateState {
 
     const base = apiBase;
     const initData = getTelegramWebApp()?.initData;
+    // Decided in the page, because only the page can: the signed payload says
+    // who is asking and never from what. @see getDeviceKind
+    const onAComputer = getDeviceKind() !== 'telegram-mobile';
+
+    /**
+     * The browser's only way past the rule: a shared secret, checked by the
+     * server. Never compared here — a key the bundle carries is not a key — and
+     * any failure answers "no", since the wrong answer costs one person a
+     * detour to their phone.
+     */
+    const keyOpensApp = async (): Promise<boolean> => {
+      const key = readDesktopAccessKey();
+      if (!key) return false;
+      try {
+        const response = await fetch(
+          `${base}/config/desktop-access?key=${encodeURIComponent(key)}`
+        );
+        if (!response.ok) return false;
+        const body = (await response.json()) as { allowed?: boolean };
+        return body?.allowed === true;
+      } catch {
+        return false;
+      }
+    };
 
     const readLaunchAt = (value: unknown): string =>
       typeof value === 'string' && !Number.isNaN(new Date(value).getTime())
@@ -122,6 +167,7 @@ export function usePreLaunchGate(): PreLaunchGateState {
       const payload = config as {
         comingSoon?: { enabled?: boolean; launchAt?: string };
         maintenance?: { enabled?: boolean };
+        telegramOnly?: { enabled?: boolean };
       };
       const gate = payload?.comingSoon;
       return {
@@ -136,6 +182,11 @@ export function usePreLaunchGate(): PreLaunchGateState {
         // is an operator's convenience — so an older backend, or a payload we
         // don't recognise, must not be able to black out the app.
         maintenance: payload?.maintenance?.enabled === true,
+        // Anonymous, so there is nobody to excuse: this arm can only read the
+        // switch. Fail closed like the gate — a missing field is an older
+        // backend, and a computer waiting on an unknown answer belongs on the
+        // QR screen, not in the game.
+        desktopBlocked: onAComputer && payload?.telegramOnly?.enabled !== false,
       };
     };
 
@@ -153,6 +204,7 @@ export function usePreLaunchGate(): PreLaunchGateState {
             appOpen?: boolean;
             comingSoon?: { launchAt?: string };
             maintenance?: boolean;
+            desktopAllowed?: boolean;
           };
           return {
             status: auth?.appOpen === true ? 'open' : 'gated',
@@ -165,6 +217,10 @@ export function usePreLaunchGate(): PreLaunchGateState {
             // whoever the admin allow-listed, so this is true only for someone
             // who really is locked out right now.
             maintenance: auth?.maintenance === true,
+            // The personal answer again: the backend has already accounted for
+            // the switch being off, for staff and for the desktop allow-list,
+            // so anything short of an explicit yes sends a computer to the QR.
+            desktopBlocked: onAComputer && auth?.desktopAllowed !== true,
           };
         }
         // Refused (banned, registration closed, bad initData): fall through —
@@ -174,6 +230,14 @@ export function usePreLaunchGate(): PreLaunchGateState {
     };
 
     ask()
+      // Asked only when the answer was "no", and only for a visitor carrying a
+      // key — one extra request for the handful of people who have one, none
+      // for everybody else.
+      .then(async answer =>
+        answer.desktopBlocked && (await keyOpensApp())
+          ? { ...answer, desktopBlocked: false }
+          : answer
+      )
       .then(answer => settle(closeIfForced(answer)))
       .catch(() =>
         setState(prev =>
@@ -188,6 +252,10 @@ export function usePreLaunchGate(): PreLaunchGateState {
                 // happen while the platform is down, and answering it with the
                 // countdown would tell a player the app is merely unreleased.
                 maintenance: prev.maintenance,
+                // A phone is never blocked, whatever happened to this request;
+                // a computer with no answer waits on the QR screen, which is
+                // the same direction the gate above fails in.
+                desktopBlocked: onAComputer,
               }
         )
       );

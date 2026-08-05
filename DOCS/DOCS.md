@@ -2499,6 +2499,36 @@ The bot reads the same switch: someone who can open the app is never told by
 `PreLaunchLead` so the launch announcement can reach people who arrived from
 pre-launch ads and never became users.
 
+**Telegram on a phone only.** `PlatformConfig.telegramOnlyEnabled` (**on by
+default**) decides that the game is played on a phone: a visitor in a desktop
+Telegram client — or in a plain browser tab — is shown a QR code that opens the
+Mini App on their phone instead of the app itself. It sits directly under the
+boot splash and above everything else the gate can render, so a computer never
+reaches the countdown, its invite block or its gift ladder either.
+
+Two ways past it, and they are not interchangeable, because only one of the two
+kinds of visitor can be identified at all:
+
+- `PlatformConfig.desktopAllowIds` — people who may play from a computer anyway,
+  same entry shape as the lists above (Telegram id or @handle, optional
+  `# note`). Works only inside Telegram, where the client is signed in; admins
+  pass without being listed. Answered per person by the sign-in
+  (`desktopAllowed`), never by the anonymous config.
+- `PlatformConfig.desktopAccessKey` — one shared secret for a plain browser,
+  where there is no signed payload and therefore nobody to match against a list.
+  Opened as `…/?desktop=<key>`, checked by `GET /config/desktop-access` and
+  remembered in `localStorage`; the key is never shipped in the bundle. Empty
+  means there is no way into the app from a browser at all.
+
+Which client is asking can only be answered by the client — `initData` is signed
+but carries no platform, only Telegram's WebApp object knows one — so this rule
+**steers** people to the phone rather than sealing the app shut: anyone who can
+edit a page in devtools can walk past it. Everything that has to actually hold
+(bans, limits, payouts) is still decided on the server. The platform list is a
+closed list of DESKTOP clients (`tdesktop`, `macos`, `weba`, `webk`, `web`,
+`unigram`), so an unknown or brand-new client counts as a phone: blocking a real
+player costs more than letting one desktop through.
+
 **Maintenance mode.** `PlatformConfig.maintenanceMode` makes every player-facing
 route answer **503**, which the Mini App turns into its maintenance screen.
 Deliberately still reachable: `/health` (probes), `/config` (so the app can
