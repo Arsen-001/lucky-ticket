@@ -8,7 +8,7 @@ import { useAppTranslations } from '@/hooks/useAppTranslations';
 import { useLocalized } from '@/hooks/useLocalized';
 import { useCountDown } from '@/hooks/useCountDown';
 import { Button } from '@/components/shared/buttons/Button';
-import { TaskRarity, TaskStatus } from '@/types/enums/tasks.enums';
+import { TaskStatus } from '@/types/enums/tasks.enums';
 import type { Task } from '@/types/interfaces/tasks.interfaces';
 import { type Route } from '@/constants/routes';
 import { TaskCategoryIcon } from './TaskCategoryIcon';
@@ -18,13 +18,6 @@ import { SectionShine } from './SectionShine';
 // useLayoutEffect warns during SSR; fall back to useEffect on the server. The
 // row only ever animates in response to a client-side tap, so this is safe.
 const useIsomorphicLayoutEffect = typeof window !== 'undefined' ? useLayoutEffect : useEffect;
-
-const RARITY_FRAME: Record<TaskRarity, string> = {
-  [TaskRarity.BRONZE]: 'task-card-default',
-  [TaskRarity.SILVER]: 'task-card-rarity-rare',
-  [TaskRarity.GOLD]: 'task-card-rarity-epic',
-  [TaskRarity.PLATINUM]: 'task-card-rarity-legendary',
-};
 
 export interface TaskItemRowProps {
   task: Task;
@@ -165,7 +158,9 @@ export function TaskItemRow({ task, onClaim, highlightToken, className, style }:
       style={style}
       className={twMerge(
         'relative flex items-center gap-2.5 rounded-2xl bg-background-overlay px-3 py-3 overflow-hidden transition-all',
-        RARITY_FRAME[task.rarity],
+        // A plain hairline, like the cards above: the gradient rarity frames
+        // outlined every row of the list in a different colour.
+        'border border-white/8',
         isLocked && 'opacity-60',
         isCompleted && 'opacity-80',
         isInteractive && 'cursor-pointer active:scale-[0.99]',
@@ -178,33 +173,49 @@ export function TaskItemRow({ task, onClaim, highlightToken, className, style }:
     >
       <SectionShine token={highlightToken ?? null} />
 
-      <TaskCategoryIcon category={task.category} size={16} />
+      <TaskCategoryIcon category={task.category} size={18} />
 
       <div ref={bodyRef} className="flex min-w-0 flex-1 flex-col gap-0.5 overflow-hidden">
         <h4
           ref={titleRef}
           className={twMerge(
-            'text-[13px] font-extrabold leading-tight',
-            expanded ? 'whitespace-normal break-words' : 'truncate'
+            'text-[13px] font-extrabold leading-snug',
+            // Two lines collapsed instead of one: the reward chips used to sit
+            // in the headline's way, so «Follow our Telegram channel» became
+            // «Follow our Telegra…» — and the more a task paid, the more chips
+            // it had, the shorter its name got.
+            expanded ? 'whitespace-normal break-words' : 'line-clamp-2'
           )}
         >
           {localized(task.title)}
         </h4>
         {expanded && hasDetail && (
-          <p className="text-[11px] leading-snug text-white/50 whitespace-normal break-words">
+          <p className="text-[11px] leading-snug break-words whitespace-normal text-white/50">
             {detailText}
           </p>
         )}
       </div>
 
-      {task.resetAt && !isLocked && !expired && (
-        <span className="pointer-events-none flex shrink-0 items-center gap-1 text-[10px] font-medium text-white/40 tabular-nums">
-          <Clock3 size={10} />
-          {leftTime}
-        </span>
-      )}
-
-      <TaskRewardRow rewards={task.rewards} size="sm" className="shrink-0 gap-1" />
+      {/* Rewards, the reset countdown and the progress figure stack to the
+          right rather than competing with the title for the same line. */}
+      <div className="flex shrink-0 flex-col items-end gap-1">
+        <TaskRewardRow rewards={task.rewards} size="sm" className="gap-1" />
+        {((task.resetAt && !isLocked && !expired) || showProgress) && (
+          <span className="flex items-center gap-2 text-[10px] leading-none font-medium text-white/40 tabular-nums">
+            {task.resetAt && !isLocked && !expired && (
+              <span className="pointer-events-none inline-flex items-center gap-1">
+                <Clock3 size={10} />
+                {leftTime}
+              </span>
+            )}
+            {showProgress && (
+              <span className="font-semibold text-white/50">
+                {task.progress.current}/{task.progress.target}
+              </span>
+            )}
+          </span>
+        )}
+      </div>
 
       {isReady ? (
         <Button
