@@ -108,7 +108,7 @@ export function TabBar({ className }: ClassNameProps) {
       )}
       // Ease the bottom inset as Telegram settles it on open (see Header).
       style={{
-        paddingBottom: 'calc(1rem + var(--tg-inset-bottom))',
+        paddingBottom: 'calc(0.75rem + var(--tg-inset-bottom))',
         transition: 'padding-bottom 220ms ease-out',
         // Own compositor layer — see Header: fixed bars flicker in WKWebView
         // during heavy content relayouts without this.

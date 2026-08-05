@@ -36,7 +36,9 @@ export function TabBarItem({
       data-flight-target={flightTarget}
       aria-current={active ? 'page' : undefined}
       className={twMerge(
-        'relative flex min-w-0 flex-1 flex-col items-center gap-1.5 rounded-none px-1 pt-2 pb-0',
+        // No padding of its own and a tight gap: the label has to sit close
+        // under the disc, and every pixel above it pushes the two apart.
+        'relative flex min-w-0 flex-1 flex-col items-center gap-1 rounded-none px-1 py-0',
         className
       )}
     >
@@ -49,7 +51,7 @@ export function TabBarItem({
       })}
       <span
         className={twMerge(
-          'max-w-full truncate text-[10px] leading-none font-bold transition-colors duration-300',
+          'max-w-full truncate text-[11px] leading-none font-bold transition-colors duration-300',
           active ? 'text-white' : 'text-white/45'
         )}
       >
