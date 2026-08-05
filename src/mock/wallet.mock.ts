@@ -35,6 +35,7 @@ const getWalletState = (): WalletState => ({
   connectMinReferrals: appConfig.wallet.connectMinReferrals,
   withdrawMinReferrals: appConfig.wallet.withdrawMinReferrals,
   referralsCount: mockDb.user.referralsCount,
+  connectEnabled: appConfig.wallet.connectEnabled,
   canConnect: canConnectWallet(),
   canWithdraw: canWithdrawTon(),
 });
@@ -43,15 +44,18 @@ const getWalletState = (): WalletState => ({
 let everBoundWallet = Boolean(mockDb.wallet.address);
 
 /**
- * The invite gate the real backend enforces on `POST /wallet/connect`: enough
- * invited friends, or a wallet bound at some point (grandfathered, because
- * withdrawing needs an active connection). The history counts too — removing a
- * wallet clears the address, and the gate must not become a one-way door.
+ * Both gates the real backend enforces on `POST /wallet/connect`: the master
+ * switch (`connectEnabled` — off for the test period) and the invite gate,
+ * which enough invited friends clear. A wallet bound at some point is
+ * grandfathered past both, because withdrawing needs an active connection: the
+ * history counts too — removing a wallet clears the address, and the gate must
+ * not become a one-way door.
  */
-const canConnectWallet = () =>
-  mockDb.user.referralsCount >= appConfig.wallet.connectMinReferrals ||
-  Boolean(mockDb.wallet.address) ||
-  everBoundWallet;
+const canConnectWallet = () => {
+  const grandfathered = Boolean(mockDb.wallet.address) || everBoundWallet;
+  if (!appConfig.wallet.connectEnabled) return grandfathered;
+  return mockDb.user.referralsCount >= appConfig.wallet.connectMinReferrals || grandfathered;
+};
 
 /**
  * The heavier gate on the way out (`POST /wallet/withdraw`). No grandfathering
@@ -79,17 +83,20 @@ const getDepositAddress = (): DepositAddressResponse => ({
 /** POST wallet/connect — mark the wallet connected with the chosen provider. */
 const connectWallet = (args: FetchArgs) => {
   const { provider, address } = (args.body ?? {}) as Partial<ConnectWalletRequest>;
-  // Same 403 the backend answers when the invite gate isn't met, so the gated
-  // UI is developable against the mock layer.
+  // Same 403s the backend answers, so both refusals are developable against the
+  // mock layer — and they stay distinguishable: one names a requirement the
+  // player can meet, the other a date nothing they do brings closer.
   if (!canConnectWallet())
     return {
       error: {
         status: 403,
-        data: {
-          error: 'referrals-required',
-          required: appConfig.wallet.connectMinReferrals,
-          current: mockDb.user.referralsCount,
-        },
+        data: appConfig.wallet.connectEnabled
+          ? {
+              error: 'referrals-required',
+              required: appConfig.wallet.connectMinReferrals,
+              current: mockDb.user.referralsCount,
+            }
+          : { error: 'wallet-connect-disabled' },
       },
     };
   if (provider) mockDb.wallet.provider = provider;

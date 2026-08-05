@@ -7,6 +7,7 @@ import { Skeleton } from '@/components/shared/seleketons/Skeleton';
 import { SkeletonSuspense } from '@/components/shared/seleketons/SkeletonSuspense';
 import { useAppTranslations } from '@/hooks/useAppTranslations';
 import { formatTon, formatUsd, providerLabel, truncateAddress } from '@/utils/pages/wallet.utils';
+import { TonWalletClosed } from './TonWalletClosed';
 import { TonWalletLocked } from './TonWalletLocked';
 import { WalletAccountTonNote } from './WalletAccountTonNote';
 import type { WalletState } from '@/types/interfaces/wallet.interfaces';
@@ -37,6 +38,13 @@ export function TonWalletHero({
         <Skeleton variant="rounded-rectangle" className="h-32 w-full" />
       </div>
     );
+  }
+
+  // Binding closed for the test period (`walletConfig.connectEnabled`). Checked
+  // BEFORE the invite gate: with the switch off `canConnect` is false too, and
+  // "invite 1 friend" would promise an unlock the switch does not grant.
+  if (!isConnected && state?.connectEnabled === false) {
+    return <TonWalletClosed tonBalance={state.tonBalance} usdRate={state.usdRate} />;
   }
 
   // Invite gate (admin-editable, enforced by the backend): show what it takes

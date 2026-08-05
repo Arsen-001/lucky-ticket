@@ -1182,6 +1182,8 @@
   "withdrawals open after the test": "Auszahlungen öffnen nach dem Test",
   "withdrawals closed during the test": "Während der Testphase sind TON-Auszahlungen und der LC→TON-Tausch geschlossen.",
   "balance stays on your account": "Alles Verdiente bleibt auf dem Konto und wartet auf die Öffnung.",
+  "wallet opens after the test": "Die Wallet öffnet nach dem Test",
+  "wallet closed during the test": "Die Verbindung zur TON-Wallet öffnet nach dem Ende der Testphase. Sterne und LC funktionieren wie gewohnt.",
   "maximum withdrawal": "Maximale Abhebung",
   "daily withdrawal limit": "Tageslimit",
   "minimum deposit {n} ton": "Mindesteinzahlung — {n} TON",

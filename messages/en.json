@@ -1182,6 +1182,8 @@
   "withdrawals open after the test": "Withdrawals open after the test",
   "withdrawals closed during the test": "TON withdrawal and the LC→TON exchange are closed while the test period runs.",
   "balance stays on your account": "Everything earned stays on the account and waits for the opening.",
+  "wallet opens after the test": "The wallet opens after the test",
+  "wallet closed during the test": "TON wallet connection opens once the test period ends. Stars and LC keep working as usual.",
   "maximum withdrawal": "Maximum withdrawal",
   "daily withdrawal limit": "Daily limit",
   "minimum deposit {n} ton": "Minimum deposit — {n} TON",

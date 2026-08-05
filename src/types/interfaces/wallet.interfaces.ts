@@ -31,6 +31,14 @@ export interface WalletState {
   /** Friends this player has invited — both gates' progress. */
   referralsCount?: number;
   /**
+   * Master switch on binding a wallet (`walletConfig.connectEnabled`): false =
+   * the wallet opens after the test period. Served apart from `canConnect`
+   * because the two refusals need different screens — this one has no
+   * requirement to show and no progress to make. Optional: an older backend
+   * omits it, and the wallet is then treated as open.
+   */
+  connectEnabled?: boolean;
+  /**
    * Server's verdict on the connect gate: false = `POST /wallet/connect` will
    * 403. A wallet bound before the gate stays connectable, so this is not simply
    * `referralsCount >= connectMinReferrals`.

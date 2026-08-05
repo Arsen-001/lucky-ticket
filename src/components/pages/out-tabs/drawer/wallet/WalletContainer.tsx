@@ -53,6 +53,10 @@ export function WalletContainer() {
 
   const isConnected = !!state?.isConnected;
   const tonBalance = state?.tonBalance ?? 0;
+  // Binding closed for the test period (`walletConfig.connectEnabled`). Unlike
+  // the invite gate below, no action of the player's opens it, so the screen
+  // offers none: the TON row goes away instead of sitting there refusing taps.
+  const isConnectClosed = state?.connectEnabled === false && !isConnected;
   // Invite gate on binding a wallet (`walletConfig.connectMinReferrals`), the
   // server's own verdict — an older backend omits it and nothing is gated.
   const isGated = state?.canConnect === false && !isConnected;
@@ -97,6 +101,9 @@ export function WalletContainer() {
   // AND the way to it — instead of a sheet whose only outcome is an error.
   const requireConnected = (next: WalletModal) => {
     if (isConnected) setModal(next);
+    // The switch is off: no sheet, and above all no invite gate — its progress
+    // bar would promise an unlock that inviting friends cannot deliver.
+    else if (isConnectClosed) return;
     else if (isGated) setModal('connectGate');
     else void connect();
   };
@@ -132,12 +139,19 @@ export function WalletContainer() {
         disconnecting={isDisconnecting}
       />
 
-      <WalletActionButtons
-        disabled={isLoading}
-        onDeposit={() => requireConnected('deposit')}
-        onWithdraw={() => requireConnected('withdraw')}
-        onExchange={() => requireConnected('exchange')}
-      />
+      {/*
+        Deposit / withdraw / exchange are all TON-only, so with binding closed
+        every one of them is a dead button. Stars and LC below keep working —
+        the test period closes the TON wallet, not the account.
+      */}
+      {!isConnectClosed && (
+        <WalletActionButtons
+          disabled={isLoading}
+          onDeposit={() => requireConnected('deposit')}
+          onWithdraw={() => requireConnected('withdraw')}
+          onExchange={() => requireConnected('exchange')}
+        />
+      )}
 
       <StarsBalanceCard
         balance={state?.starsBalance}
@@ -170,6 +184,7 @@ export function WalletContainer() {
             transactions={transactions}
             loading={isTxLoading}
             isConnected={isConnected}
+            connectClosed={isConnectClosed}
             network={state?.network}
             hideHeader
           />

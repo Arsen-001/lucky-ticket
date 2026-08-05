@@ -177,6 +177,19 @@ export const readReferralGateError = (
 };
 
 /**
+ * Whether a failed `POST /wallet/connect` was refused by the connect master
+ * switch (403 `{ error: 'wallet-connect-disabled' }`) rather than by the invite
+ * gate. Checked at connect time as well as up front: the wallet state can be
+ * minutes stale, and an admin closing the door mid-session must not turn the
+ * TON Connect sheet into a generic "connect failed".
+ */
+export const isWalletConnectDisabledError = (error: unknown): boolean => {
+  const data = (error as { status?: number; data?: unknown } | undefined)?.data;
+  if (!data || typeof data !== 'object') return false;
+  return (data as { error?: string }).error === 'wallet-connect-disabled';
+};
+
+/**
  * Whether a failed money-exit call was refused by the kill switch: both
  * `POST /wallet/withdraw` and `POST /lc/convert-ton` answer 403
  * `{ error: 'withdrawals-disabled' }` while withdrawals are closed for the test

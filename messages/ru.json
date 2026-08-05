@@ -1182,6 +1182,8 @@
   "withdrawals open after the test": "Вывод откроется после теста",
   "withdrawals closed during the test": "Пока идёт тестовый период, вывод TON и обмен LC→TON закрыты.",
   "balance stays on your account": "Всё заработанное остаётся на счёте и дождётся открытия.",
+  "wallet opens after the test": "Кошелёк откроется после теста",
+  "wallet closed during the test": "Подключение TON-кошелька откроется, когда закончится тестовый период. Звёзды и LC работают как обычно.",
   "maximum withdrawal": "Максимум для вывода",
   "daily withdrawal limit": "Лимит в сутки",
   "minimum deposit {n} ton": "Минимум пополнения — {n} TON",

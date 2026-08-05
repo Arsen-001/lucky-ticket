@@ -22,6 +22,11 @@ export interface WalletTransactionHistoryProps {
   transactions?: WalletTransaction[];
   loading?: boolean;
   isConnected?: boolean;
+  /**
+   * Binding is closed for the test period, so the empty list must not answer
+   * "connect a wallet to start" — that is advice the screen above it refuses.
+   */
+  connectClosed?: boolean;
   /** Suppress the section title when embedded under a shared header. */
   hideHeader?: boolean;
   /** Chain the on-chain hashes belong to — decides which tonscan a row links to. */
@@ -32,6 +37,7 @@ export function WalletTransactionHistory({
   transactions = [],
   loading,
   isConnected,
+  connectClosed,
   hideHeader,
   network,
 }: WalletTransactionHistoryProps) {
@@ -86,7 +92,9 @@ export function WalletTransactionHistory({
           ))
         ) : visible.length === 0 ? (
           <EmptyDataInfo
-            description={isConnected ? t('no transactions yet') : t('connect wallet to start')}
+            description={
+              isConnected || connectClosed ? t('no transactions yet') : t('connect wallet to start')
+            }
           />
         ) : (
           visible.map((tx, index) => (

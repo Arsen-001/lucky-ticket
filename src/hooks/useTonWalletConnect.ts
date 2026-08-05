@@ -11,6 +11,7 @@ import { useAppTranslations } from '@/hooks/useAppTranslations';
 import { useToast } from '@/hooks/useToast';
 import {
   chainToNetwork,
+  isWalletConnectDisabledError,
   readReferralGateError,
   resolveWalletProvider,
 } from '@/utils/pages/wallet.utils';
@@ -94,6 +95,9 @@ export function useTonWalletConnect() {
         // out — the invite page — instead of only naming what is missing.
         const gate = readReferralGateError(error);
         if (gate) setReferralGate(gate);
+        // Closed for the test period: say so. The invite gate's modal would be
+        // wrong here — it offers a way forward this refusal does not have.
+        else if (isWalletConnectDisabledError(error)) toast.error(t('wallet opens after the test'));
         else toast.error(t('wallet connect failed'));
         void tonConnectUI.disconnect();
       }

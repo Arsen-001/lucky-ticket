@@ -258,6 +258,14 @@ export const appConfig = {
      * lock on both screens without touching a server.
      */
     withdrawalsEnabled: true,
+    /**
+     * Fallback for the connect master switch (`walletConfig.connectEnabled`),
+     * served with the wallet state and enforced on `POST /wallet/connect`. The
+     * exit switch above leaves the wallet usable and only shuts the way out;
+     * this one shuts binding itself, which is what "the wallet opens after the
+     * test" actually means. Flip it to `false` to see that screen on mocks.
+     */
+    connectEnabled: true,
     /** Flat TON network fee charged on a withdrawal. */
     withdrawFeeTon: 0.05,
     /**
