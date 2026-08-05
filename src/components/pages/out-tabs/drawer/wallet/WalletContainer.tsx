@@ -204,6 +204,9 @@ export function WalletContainer() {
         gated={isWithdrawGated}
         requiredReferrals={state?.withdrawMinReferrals ?? 0}
         currentReferrals={state?.referralsCount ?? 0}
+        minWithdrawTon={state?.minWithdrawTon}
+        firstWithdrawal={state?.firstWithdrawal}
+        nextWithdrawMinTon={state?.nextWithdrawMinTon}
       />
       <BuyStarsModal
         open={modal === 'buyStars'}

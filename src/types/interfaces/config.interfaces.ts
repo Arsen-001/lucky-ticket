@@ -85,7 +85,15 @@ export interface PublicConfig {
     withdrawalsEnabled?: boolean;
     /** Flat fee charged ON TOP of a withdrawal — the recipient gets the amount. */
     withdrawFeeTon: number;
+    /** Minimum once the account has cashed out before. */
     minWithdrawTon: number;
+    /**
+     * Minimum on an account's FIRST cash-out — lower, so a player can watch the
+     * exit work before saving up to the real threshold. Which of the two applies
+     * comes with the wallet state; this endpoint is anonymous and only says the
+     * pair exists.
+     */
+    firstWithdrawMinTon?: number;
     /** Ceiling on a single withdrawal — the treasury signs these automatically. */
     maxWithdrawTon: number;
     /** Per-account daily withdrawal cap (UTC day) — spans transactions. */

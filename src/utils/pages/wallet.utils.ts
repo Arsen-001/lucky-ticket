@@ -23,16 +23,24 @@ export const starsToTon = (stars: number, tonUsdRate = appConfig.wallet.tonUsdRa
 export const tonToStars = (ton: number, tonUsdRate = appConfig.wallet.tonUsdRate): number =>
   Math.floor((ton * tonUsdRate) / STAR_USD_RATE);
 
-const TON_MIN_WITHDRAW = 0.1;
-const TON_MAX_WITHDRAW = 5;
+const TON_MIN_WITHDRAW = 5;
+const TON_FIRST_MIN_WITHDRAW = 1;
+const TON_MAX_WITHDRAW = 10;
 const TON_WITHDRAW_DAILY_CAP = 10;
 const TON_MIN_DEPOSIT = 0.1;
-const TON_NETWORK_FEE = 0.05;
-const TON_QUICK_AMOUNTS = [0.1, 0.5, 1, 5];
+const TON_NETWORK_FEE = 0.5;
+const TON_QUICK_AMOUNTS = [0.1, 0.5, 1, 5, 10];
 const TON_ADDRESS_REGEX = /^(EQ|UQ|kQ|0Q)[A-Za-z0-9_-]{46}$/;
 
 export const walletConstants = {
+  /** Repeat-withdrawal minimum — mirrors `walletConfig.minWithdrawTon`. */
   TON_MIN_WITHDRAW,
+  /**
+   * First-withdrawal minimum (`walletConfig.firstWithdrawMinTon`). The pair
+   * exists so a player can prove the exit works with a small amount before
+   * saving up to the repeat threshold.
+   */
+  TON_FIRST_MIN_WITHDRAW,
   /** Mirrors the backend's `WALLET_CONFIG_DEFAULTS.maxWithdrawTon` ceiling. */
   TON_MAX_WITHDRAW,
   /** Per-account daily withdrawal cap (`withdrawDailyCapTon`) — spans transactions. */

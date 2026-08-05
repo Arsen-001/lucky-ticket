@@ -17,6 +17,7 @@ const getPublicConfig = (): PublicConfig => ({
     withdrawalsEnabled: appConfig.wallet.withdrawalsEnabled,
     withdrawFeeTon: appConfig.wallet.withdrawFeeTon,
     minWithdrawTon: walletConstants.TON_MIN_WITHDRAW,
+    firstWithdrawMinTon: walletConstants.TON_FIRST_MIN_WITHDRAW,
     maxWithdrawTon: walletConstants.TON_MAX_WITHDRAW,
     withdrawDailyCapTon: walletConstants.TON_WITHDRAW_DAILY_CAP,
     minDepositTon: walletConstants.TON_MIN_DEPOSIT,

@@ -13,6 +13,7 @@ import type {
 } from '@/types/interfaces/wallet.interfaces';
 import { appConfig } from '@/config/app.config';
 import { mockDb } from '@/mock/backend/db';
+import { walletConstants } from '@/utils/pages/wallet.utils';
 
 const randomHash = () =>
   Array.from({ length: 64 }, () => '0123456789abcdef'[Math.floor(Math.random() * 16)]).join('');
@@ -38,7 +39,21 @@ const getWalletState = (): WalletState => ({
   connectEnabled: appConfig.wallet.connectEnabled,
   canConnect: canConnectWallet(),
   canWithdraw: canWithdrawTon(),
+  minWithdrawTon: hasWithdrawnBefore()
+    ? walletConstants.TON_MIN_WITHDRAW
+    : walletConstants.TON_FIRST_MIN_WITHDRAW,
+  firstWithdrawal: !hasWithdrawnBefore(),
+  nextWithdrawMinTon: walletConstants.TON_MIN_WITHDRAW,
 });
+
+/**
+ * Mirrors the backend's ledger read: an account that has cashed out before is
+ * held to the repeat minimum, a fresh one to the lower first-withdrawal number.
+ * FAILED rows don't count there and there are none here — the mock only writes
+ * a row for a withdrawal it accepted.
+ */
+const hasWithdrawnBefore = () =>
+  mockDb.wallet.transactions.some(tx => tx.type === WalletTransactionType.WITHDRAW_TON);
 
 /** Set once a wallet has ever been bound — mirrors `WalletBindingHistory`. */
 let everBoundWallet = Boolean(mockDb.wallet.address);
@@ -149,6 +164,22 @@ const withdrawTon = (args: FetchArgs) => {
         },
       },
     };
+  // The two-step minimum, same as the server: cheap first cash-out, real
+  // threshold afterwards.
+  const min = hasWithdrawnBefore()
+    ? walletConstants.TON_MIN_WITHDRAW
+    : walletConstants.TON_FIRST_MIN_WITHDRAW;
+  if (value < min) {
+    return { error: { status: 400, data: `Minimum withdrawal is ${min} TON` } };
+  }
+  if (value > walletConstants.TON_MAX_WITHDRAW) {
+    return {
+      error: {
+        status: 400,
+        data: `Maximum withdrawal is ${walletConstants.TON_MAX_WITHDRAW} TON`,
+      },
+    };
+  }
   if (value <= 0 || mockDb.wallet.tonBalance < value + fee) {
     return { error: { status: 400, data: 'Insufficient TON balance' } };
   }

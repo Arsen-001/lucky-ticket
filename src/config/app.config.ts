@@ -267,7 +267,7 @@ export const appConfig = {
      */
     connectEnabled: true,
     /** Flat TON network fee charged on a withdrawal. */
-    withdrawFeeTon: 0.05,
+    withdrawFeeTon: 0.5,
     /**
      * Fallback minimum for an LC→TON conversion. The live value is served by
      * `GET /config` (see `useWalletLimits`) — the backend rejects anything

@@ -50,6 +50,18 @@ export interface WalletState {
    * nothing about invited friends.
    */
   canWithdraw?: boolean;
+  /**
+   * The withdrawal minimum THIS account is held to right now. The rule is two
+   * numbers — a lower one for an account's first cash-out, the real threshold
+   * for every one after it — and only the server knows which applies, so the
+   * form validates against this rather than deciding for itself. Optional: an
+   * older backend omits it and the form falls back to `GET /config`.
+   */
+  minWithdrawTon?: number;
+  /** True while the account is still on the cheaper first-withdrawal minimum. */
+  firstWithdrawal?: boolean;
+  /** What the minimum becomes after the first withdrawal — stated up front. */
+  nextWithdrawMinTon?: number;
 }
 
 export interface WalletTransaction {

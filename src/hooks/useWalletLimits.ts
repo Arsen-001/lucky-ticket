@@ -11,7 +11,10 @@ export interface WalletLimits {
   withdrawalsEnabled: boolean;
   /** Flat fee charged ON TOP of a withdrawal — the recipient gets the amount. */
   withdrawFeeTon: number;
+  /** Minimum for an account that has withdrawn before. */
   minWithdrawTon: number;
+  /** Minimum for an account's first withdrawal — lower than the repeat one. */
+  firstWithdrawMinTon: number;
   /** Ceiling on a single withdrawal — the treasury signs these automatically. */
   maxWithdrawTon: number;
   /** Per-account daily withdrawal cap (UTC day) — spans transactions. */
@@ -39,6 +42,8 @@ export function useWalletLimits(): WalletLimits {
     withdrawalsEnabled: data?.wallet?.withdrawalsEnabled ?? true,
     withdrawFeeTon: data?.wallet?.withdrawFeeTon ?? walletConstants.TON_NETWORK_FEE,
     minWithdrawTon: data?.wallet?.minWithdrawTon ?? walletConstants.TON_MIN_WITHDRAW,
+    firstWithdrawMinTon:
+      data?.wallet?.firstWithdrawMinTon ?? walletConstants.TON_FIRST_MIN_WITHDRAW,
     maxWithdrawTon: data?.wallet?.maxWithdrawTon ?? walletConstants.TON_MAX_WITHDRAW,
     withdrawDailyCapTon:
       data?.wallet?.withdrawDailyCapTon ?? walletConstants.TON_WITHDRAW_DAILY_CAP,

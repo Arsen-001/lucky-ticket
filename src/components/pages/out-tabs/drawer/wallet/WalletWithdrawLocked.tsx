@@ -18,8 +18,8 @@ export interface WalletWithdrawLockedProps {
  * "action failed", which reads as a broken button rather than a closed door.
  *
  * There is no progress bar and no call to action on purpose: unlike the invite
- * gates, nothing the player does opens this one. The one thing worth saying is
- * that the balance is not going anywhere.
+ * gates, nothing the player does opens this one — the door and its opening date
+ * are the whole message.
  */
 export function WalletWithdrawLocked({ className }: WalletWithdrawLockedProps) {
   const t = useAppTranslations();
@@ -34,9 +34,6 @@ export function WalletWithdrawLocked({ className }: WalletWithdrawLockedProps) {
       </h2>
       <p className="text-pink-secondary max-w-[280px] text-[12px]">
         {t('withdrawals closed during the test')}
-      </p>
-      <p className="text-pink-secondary/80 max-w-[280px] text-[11px]">
-        {t('balance stays on your account')}
       </p>
     </div>
   );

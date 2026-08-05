@@ -36,6 +36,16 @@ interface WithdrawTonModalProps {
   requiredReferrals?: number;
   /** Friends already invited — the gate's progress. */
   currentReferrals?: number;
+  /**
+   * The minimum the server holds THIS account to (`GET /wallet`): the first
+   * cash-out is allowed to be smaller than every one after it. Omitted by an
+   * older backend, and the form then falls back to the config's repeat value.
+   */
+  minWithdrawTon?: number;
+  /** Whether this account is still on the cheaper first-withdrawal minimum. */
+  firstWithdrawal?: boolean;
+  /** What the minimum becomes once this withdrawal is done. */
+  nextWithdrawMinTon?: number;
 }
 
 type Step = 'form' | 'confirm' | 'success';
@@ -48,6 +58,9 @@ export function WithdrawTonModal({
   gated = false,
   requiredReferrals = 0,
   currentReferrals = 0,
+  minWithdrawTon: accountMinWithdrawTon,
+  firstWithdrawal = false,
+  nextWithdrawMinTon,
 }: WithdrawTonModalProps) {
   const t = useAppTranslations();
   const toast = useToast();
@@ -70,10 +83,14 @@ export function WithdrawTonModal({
   const {
     withdrawalsEnabled,
     withdrawFeeTon: fee,
-    minWithdrawTon,
+    minWithdrawTon: configMinWithdrawTon,
     maxWithdrawTon,
     withdrawDailyCapTon,
   } = useWalletLimits();
+  // The account's own minimum wins: `GET /config` only carries the pair of
+  // thresholds, and which one applies depends on whether this player has cashed
+  // out before — a question only the server can answer.
+  const minWithdrawTon = accountMinWithdrawTon ?? configMinWithdrawTon;
   const totalDebited = numericAmount > 0 ? numericAmount + fee : 0;
 
   const error = useMemo<string | null>(() => {
@@ -280,6 +297,18 @@ export function WithdrawTonModal({
                 value={`${formatTon(withdrawDailyCapTon, 4)} TON`}
               />
             </div>
+
+            {/* The minimum above is this account's, and for a first cash-out it
+                is the lower of two. Say so here rather than let the next
+                withdrawal's rejection be where the player learns it changed. */}
+            {firstWithdrawal && !!nextWithdrawMinTon && nextWithdrawMinTon > minWithdrawTon && (
+              <p className="text-pink-secondary text-center text-[11px]">
+                {t('first withdrawal is smaller {first} {next}', {
+                  first: formatTon(minWithdrawTon, 4),
+                  next: formatTon(nextWithdrawMinTon, 4),
+                })}
+              </p>
+            )}
 
             {error && <p className="text-error-text text-[11px] font-semibold">{error}</p>}
 
