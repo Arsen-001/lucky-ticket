@@ -2487,7 +2487,10 @@ Who gets in while it is up:
 - `User.earlyAccess` — a checkbox on the player's admin card (column + filter in
   the users list);
 - `PlatformConfig.comingSoonAllowIds` — a hand-written list, the only lever that
-  works for a tester who has never opened the app and therefore has no row yet;
+  works for a tester who has never opened the app and therefore has no row yet.
+  An entry is a Telegram id or a handle, optionally followed by `# note` — the
+  note says who this is for the admin reading the list months later and is cut
+  off before anyone is matched, so it can never let somebody in;
 - any admin — locking the operator out of the product they are gating is a
   special kind of useless.
 
