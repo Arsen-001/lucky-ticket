@@ -1,6 +1,6 @@
 'use client';
 import { Calendar, Lock, Sparkles, Star, TicketCheck, Users } from 'lucide-react';
-import dayjs from 'dayjs';
+import { formatLocalDate } from '@/utils/global/date.utils';
 import { twMerge } from 'tailwind-merge';
 import { Achievement } from '@/components/shared/achievements/Achievement';
 import { BoltIcon } from '@/components/shared/icons/BoltIcon';
@@ -102,7 +102,7 @@ export function AchievementDetailModal({ achievement, onClose }: AchievementDeta
               label={achievement.earned ? t('earned') : t('not earned yet')}
               value={
                 achievement.earned && achievement.earnedAt
-                  ? dayjs(achievement.earnedAt).format('DD MMM YYYY')
+                  ? formatLocalDate(achievement.earnedAt)
                   : t('locked')
               }
             />
@@ -117,7 +117,7 @@ export function AchievementDetailModal({ achievement, onClose }: AchievementDeta
               <DetailRow
                 icon={Calendar}
                 label={t('expires')}
-                value={dayjs(achievement.expiresAt).format('DD MMM YYYY')}
+                value={formatLocalDate(achievement.expiresAt)}
               />
             )}
           </div>

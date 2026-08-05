@@ -12,6 +12,7 @@ import { FullscreenBrandBar } from '@/components/layout-elements/FullscreenBrand
 import { AtmosphericBackground } from '@/components/shared/AtmosphericBackground';
 import { PreLaunchGate } from '@/components/pages/coming-soon/PreLaunchGate';
 import { TelegramLocaleSeed } from '@/components/telegram/TelegramLocaleSeed';
+import { DayjsLocaleProvider } from '@/providers/DayjsLocaleProvider';
 import { NextIntlClientProvider } from 'next-intl';
 import { gilroy, spaceGrotesk } from '@/fonts/index.fonts';
 import { getLocale } from 'next-intl/server';
@@ -128,35 +129,39 @@ export default async function RootLayout({ children }: ChildrenProps) {
           <AtmosphericBackground className="left-[var(--app-gutter)] right-[var(--app-gutter)]" />
           <div id="scroll-container">
             <NextIntlClientProvider>
-              {/* The pre-launch gate sits OUTSIDE every provider on purpose: it
+              {/* Dates speak the reader's language from the first paint — it
+                  wraps the gate too, because the countdown screen shows one. */}
+              <DayjsLocaleProvider>
+                {/* The pre-launch gate sits OUTSIDE every provider on purpose: it
                   renders its children only on an explicit "this person is let
                   in", and an unrendered element never executes. So while the
                   gate holds, the store is never created, no query runs and no
                   route mounts — the app does not boot, rather than booting
                   under a cover. @see PreLaunchGate */}
-              {/* Above the gate: it renders the countdown INSTEAD of its
+                {/* Above the gate: it renders the countdown INSTEAD of its
                   children, so a seed underneath never runs for a gated
                   visitor — and the countdown itself stayed English. */}
-              <TelegramLocaleSeed />
-              <PreLaunchGate>
-                <StoreProvider>
-                  <AppLifecycleProvider />
-                  <NavigationHistoryProvider>
-                    <TonConnectProvider>
-                      <TelegramProvider>
-                        <div className="max-w-[var(--app-max-w)] m-auto h-full overflow-hidden">
-                          {children}
-                        </div>
-                        <Onboarding />
-                        <TournamentResultWatcher />
-                      </TelegramProvider>
-                    </TonConnectProvider>
-                    <FullscreenBrandBar />
-                    <ToastViewport />
-                    <AppStatusOverlay />
-                  </NavigationHistoryProvider>
-                </StoreProvider>
-              </PreLaunchGate>
+                <TelegramLocaleSeed />
+                <PreLaunchGate>
+                  <StoreProvider>
+                    <AppLifecycleProvider />
+                    <NavigationHistoryProvider>
+                      <TonConnectProvider>
+                        <TelegramProvider>
+                          <div className="max-w-[var(--app-max-w)] m-auto h-full overflow-hidden">
+                            {children}
+                          </div>
+                          <Onboarding />
+                          <TournamentResultWatcher />
+                        </TelegramProvider>
+                      </TonConnectProvider>
+                      <FullscreenBrandBar />
+                      <ToastViewport />
+                      <AppStatusOverlay />
+                    </NavigationHistoryProvider>
+                  </StoreProvider>
+                </PreLaunchGate>
+              </DayjsLocaleProvider>
             </NextIntlClientProvider>
           </div>
           <div id="portal-root" />

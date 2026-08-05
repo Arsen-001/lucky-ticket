@@ -1,4 +1,5 @@
 import dayjs from 'dayjs';
+import { englishMonthKey } from '@/lib/dayjs/locale';
 import type { Route } from '@/constants/routes';
 import type { Dictionary, MessageIds } from '@/types/types/i18n.types';
 import type { Notification } from '@/types/interfaces/notifications.interfaces';
@@ -76,6 +77,7 @@ export const getNotificationsGroupTitle = (date: string | undefined, t: Dictiona
   if (!date || !/^\d{4}-\d{2}-\d{2}$/.test(date)) return '';
   const dateObject = dayjs(date);
   if (!dateObject.isValid()) return '';
-  const month = dateObject.format('MMMM').toLowerCase() as MessageIds;
+  // English on purpose — this is the translation key, not the visible month.
+  const month = englishMonthKey(dateObject) as MessageIds;
   return `${dateObject.format('DD')} ${t(month)} ${dateObject.format('YYYY')}`;
 };

@@ -1,6 +1,6 @@
 'use client';
 
-import dayjs from 'dayjs';
+import { formatLocalDate } from '@/utils/global/date.utils';
 import { ShieldCheck } from 'lucide-react';
 import { useLocale } from 'next-intl';
 import { useGetPrivacyPolicyQuery } from '@/api/privacy.api';
@@ -39,7 +39,7 @@ export function PrivacyContent() {
             {data && (
               <p className="text-pink-secondary mt-0.5 text-[11px] font-medium">
                 {t('last updated {date}', {
-                  date: dayjs(data.updatedAt).format('MMM D, YYYY'),
+                  date: formatLocalDate(data.updatedAt),
                 })}
               </p>
             )}

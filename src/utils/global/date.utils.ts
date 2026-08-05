@@ -1,6 +1,8 @@
 // utils/getCountdown.ts
 import dayjs from 'dayjs';
 import duration from 'dayjs/plugin/duration';
+// Registers the ru/de locales and the `ll` pattern these helpers format with.
+import '@/lib/dayjs/locale';
 import { getRandomNumber } from '@/utils/global/number.utils';
 import type { Duration } from '@/types/interfaces/date.interfaces';
 
@@ -84,4 +86,17 @@ export const durationToMS = (duration: Duration) => {
 export const formatDate = (date?: string | Date | number, format = 'DD.MM.YYYY HH:mm') => {
   if (!date) return '';
   return dayjs(date).format(format);
+};
+
+/**
+ * A calendar date in the reader's own language **and order**:
+ * `Aug 6, 2026` · `6 авг. 2026 г.` · `6. Aug. 2026`.
+ *
+ * Hardcoded patterns can't do this — `MMM D, YYYY` puts the month first for
+ * everyone, which is American, not universal. `ll` is dayjs's per-locale
+ * pattern, so the order follows the language instead of fighting it.
+ */
+export const formatLocalDate = (date?: string | Date | number) => {
+  if (!date) return '';
+  return dayjs(date).format('ll');
 };

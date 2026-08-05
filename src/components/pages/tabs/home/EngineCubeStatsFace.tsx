@@ -1,4 +1,4 @@
-import dayjs from 'dayjs';
+import { formatLocalDate } from '@/utils/global/date.utils';
 import { CalendarDays, Crown, Sparkles, TrendingUp, UserRound, Zap } from 'lucide-react';
 import { useAppTranslations } from '@/hooks/useAppTranslations';
 import { formatCompact } from '@/utils/global/number.utils';
@@ -34,7 +34,7 @@ export function EngineCubeStatsFace({
   const isVipStatus = statusLabel === 'VIP';
   const statusColor = isVipStatus ? 'var(--color-gold)' : 'var(--color-teal)';
 
-  const createdLabel = createdAt ? dayjs(createdAt).format('MMM D, YYYY') : null;
+  const createdLabel = createdAt ? formatLocalDate(createdAt) : null;
   // Sub-1 rates must keep their fraction — a base bronze engine mints 0.5 T/H
   // and rounding it up to "1" doubles the promised output.
   const rounded = Math.max(0, ticketsPerHour);

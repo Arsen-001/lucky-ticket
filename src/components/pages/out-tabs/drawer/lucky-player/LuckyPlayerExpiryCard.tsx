@@ -1,6 +1,7 @@
 'use client';
 
 import dayjs from 'dayjs';
+import { formatLocalDate } from '@/utils/global/date.utils';
 import { CalendarClock } from 'lucide-react';
 import { useAppTranslations } from '@/hooks/useAppTranslations';
 
@@ -35,7 +36,7 @@ export function LuckyPlayerExpiryCard({ expiresAt }: LuckyPlayerExpiryCardProps)
           <span className="text-[10px] font-bold uppercase tracking-wider text-white/45">
             {t('expires')}
           </span>
-          <span className="text-sm font-semibold text-white">{expiry.format('DD MMM YYYY')}</span>
+          <span className="text-sm font-semibold text-white">{formatLocalDate(expiresAt)}</span>
         </div>
       </div>
       <span

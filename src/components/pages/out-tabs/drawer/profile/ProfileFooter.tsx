@@ -7,6 +7,7 @@ import { useLogoutMutation } from '@/api/auth.api';
 import { ConfirmModal } from '@/components/shared/modals/ConfirmModal';
 import { ProfileSupportIds } from '@/components/pages/out-tabs/drawer/profile/ProfileSupportIds';
 import { useAppTranslations } from '@/hooks/useAppTranslations';
+import { englishMonthKey } from '@/lib/dayjs/locale';
 import { routes } from '@/constants/routes';
 import type { MessageIds } from '@/types/types/i18n.types';
 
@@ -23,7 +24,8 @@ export function ProfileFooter({ isOwn, memberSince, userId }: ProfileFooterProps
   const [signOutOpen, setSignOutOpen] = useState(false);
 
   const memberDate = dayjs(memberSince);
-  const monthKey = memberDate.format('MMMM').toLowerCase() as MessageIds;
+  // English on purpose — this is the translation key, not the visible month.
+  const monthKey = englishMonthKey(memberDate) as MessageIds;
   const formattedDate = `${memberDate.format('DD')} ${t(monthKey)} ${memberDate.format('YYYY')}`;
 
   const handleSignOutConfirm = async () => {
