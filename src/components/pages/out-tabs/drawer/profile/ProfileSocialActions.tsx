@@ -19,6 +19,13 @@ export function ProfileSocialActions({ profile, isPreview }: ProfileSocialAction
   const [sendOpen, setSendOpen] = useState(false);
   const [inviteOpen, setInviteOpen] = useState(false);
 
+  // A tournament invite reaches only one's own referrals (DOCS §17.3.3). On
+  // anyone else the button is absent rather than disabled: a stranger can never
+  // become your referral (attribution is frozen at their first sign-in), so a
+  // greyed-out button would promise an unlock that nothing the player does can
+  // deliver. Preview mode keeps it, since it demonstrates the owner's profile.
+  const canInvite = isPreview || !!profile.isMyReferral;
+
   return (
     <>
       <div className="flex items-center justify-center gap-2">
@@ -31,15 +38,17 @@ export function ProfileSocialActions({ profile, isPreview }: ProfileSocialAction
           <Send size={14} strokeWidth={2.6} />
           {t('send ticket')}
         </button>
-        <button
-          type="button"
-          onClick={() => setInviteOpen(true)}
-          disabled={isPreview}
-          className="flex items-center gap-1.5 rounded-full border border-white/12 bg-white/5 px-3.5 py-2 text-[12px] font-bold text-white/85 transition-all hover:bg-white/10 active:scale-95 disabled:opacity-60"
-        >
-          <Trophy size={14} strokeWidth={2.6} />
-          {t('invite')}
-        </button>
+        {canInvite && (
+          <button
+            type="button"
+            onClick={() => setInviteOpen(true)}
+            disabled={isPreview}
+            className="flex items-center gap-1.5 rounded-full border border-white/12 bg-white/5 px-3.5 py-2 text-[12px] font-bold text-white/85 transition-all hover:bg-white/10 active:scale-95 disabled:opacity-60"
+          >
+            <Trophy size={14} strokeWidth={2.6} />
+            {t('invite')}
+          </button>
+        )}
         <ProfileLikeButton
           userId={profile.id}
           liked={profile.liked}
@@ -56,12 +65,14 @@ export function ProfileSocialActions({ profile, isPreview }: ProfileSocialAction
             userId={profile.id}
             username={displayNameOf(profile)}
           />
-          <ProfileInviteTournamentModal
-            open={inviteOpen}
-            onClose={() => setInviteOpen(false)}
-            userId={profile.id}
-            username={displayNameOf(profile)}
-          />
+          {canInvite && (
+            <ProfileInviteTournamentModal
+              open={inviteOpen}
+              onClose={() => setInviteOpen(false)}
+              userId={profile.id}
+              username={displayNameOf(profile)}
+            />
+          )}
         </>
       )}
     </>

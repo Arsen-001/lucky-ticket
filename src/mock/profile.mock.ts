@@ -121,6 +121,9 @@ export const otherProfile: ProfileResponse = {
   // name takes that an ASCII handle never could.
   displayName: '🚀 Небула Пилот',
   isOwn: false,
+  // Invited by the signed-in account, so the tournament invite is offered on
+  // this profile (DOCS §17.3.3). `strangerProfile` below is the other half.
+  isMyReferral: true,
   // A distinct, populated public player — independent of the signed-in
   // account's level (visiting a profile always shows real data).
   isVerified: true,
@@ -161,6 +164,26 @@ export const otherProfile: ProfileResponse = {
     earnedAchievements: 38,
     likesReceived: 891,
   },
+};
+
+/**
+ * A player this account never invited — reached from the leaderboard or a
+ * shared link. Everything social works on them except the tournament invite,
+ * which is referrals-only (DOCS §17.3.3): the button must be absent here, and
+ * `POST profile/invite-tournament` must refuse them even if it is called.
+ */
+export const strangerProfile: ProfileResponse = {
+  ...otherProfile,
+  id: 'user-3',
+  username: 'QuasarNomad',
+  displayName: 'Quasar Nomad',
+  isMyReferral: false,
+};
+
+/** Profiles reachable by id, so the invite handler can check the same rule. */
+const otherProfilesById: Record<string, ProfileResponse> = {
+  [otherProfile.id]: otherProfile,
+  [strangerProfile.id]: strangerProfile,
 };
 
 // One like per profile per 24h; liking grants the liker +1 AP (DOCS §5.3 / §17.3.4).
@@ -249,10 +272,18 @@ const collageUnpinHandler = (args: FetchArgs) => {
 };
 
 // Nothing cached changes for the sender — the invitation lands on the other
-// user's side.
+// user's side. Only one's own referrals can be invited (DOCS §17.3.3); the
+// button is hidden elsewhere, and this mirrors the backend's 403 for the case
+// where the request is made anyway.
 const inviteToTournamentHandler = (args: FetchArgs) => {
-  const { tournamentId } = (args.body ?? {}) as { tournamentId?: string };
+  const { userId, tournamentId } = (args.body ?? {}) as {
+    userId?: string;
+    tournamentId?: string;
+  };
   if (!tournamentId) return { error: { status: 400, data: 'Tournament is required' } };
+  if (!userId || !otherProfilesById[userId]?.isMyReferral) {
+    return { error: { status: 403, data: 'not-your-referral' } };
+  }
   return { success: true, invitationId: `inv-${Date.now()}` };
 };
 
@@ -302,6 +333,7 @@ export const profileMock = {
     me: ownProfile,
     'user-1': ownProfile,
     'user-2': otherProfile,
+    'user-3': strangerProfile,
   },
   'POST profile/like': likeProfileHandler,
   'POST profile/send-ticket': sendTicketHandler,

@@ -78,6 +78,8 @@ export interface ProfileResponse {
   privateStats?: ProfilePrivateStats;
   recentAchievements: Achievement[];
   isOwn: boolean;
+  /** The viewed player joined through the viewer's link — gates the tournament invite (DOCS §17.3.3). */
+  isMyReferral?: boolean;
   liked: boolean;
   canLikeAt?: string;
   /** Per-icon banner collage positions (keyed by icon id). Owner-editable, public. */
