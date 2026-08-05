@@ -8,6 +8,17 @@ const nextConfig: NextConfig = {
   distDir: process.env.NEXT_DIST_DIR || '.next',
   reactStrictMode: false,
   reactCompiler: true,
+  // Dev-only routes. A `page.dev.tsx` is a route under `next dev` and does not
+  // exist in a production build at all — the file can ride along with a deploy
+  // (the front-end ships from the working tree) without ever answering. Used by
+  // the design lab; see src/app/lab/page.dev.tsx.
+  pageExtensions: [
+    'tsx',
+    'ts',
+    'jsx',
+    'js',
+    ...(process.env.NODE_ENV === 'development' ? ['dev.tsx'] : []),
+  ],
   images: {
     //TODO: Add remote image patterns (aws and so on.)
     remotePatterns: [

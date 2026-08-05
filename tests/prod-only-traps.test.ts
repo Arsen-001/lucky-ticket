@@ -15,15 +15,33 @@ const root = process.cwd();
 const read = (p: string) => readFileSync(resolve(root, p), 'utf8');
 
 describe('production-only traps', () => {
-  it('the global 404 redirect is not prerendered away', () => {
-    // A build-time render cannot perform a per-request redirect: with
-    // `global-not-found` prerendered, production served Next's bare
-    // `__next_error__` shell for every unknown URL — a blank page, and inside a
-    // Mini App there is no address bar to escape it with. `next dev` renders on
-    // demand and redirected correctly, so the dead end existed only in prod.
-    const source = read('src/app/global-not-found.ts');
+  it('the global 404 sends the player home without a server redirect', () => {
+    // Two ways this page has already dead-ended production, both invisible in
+    // `next dev`:
+    //
+    // 1. Prerendered, it cannot redirect per request — production served Next's
+    //    bare `__next_error__` shell for every unknown URL. Hence force-dynamic.
+    // 2. `redirect()` from a not-found render emits `Location:` on a *404*, and
+    //    browsers only follow `Location` on a 3xx. Production answered
+    //    404 + `location: /` and the player sat on a blank page for seconds
+    //    (measured 2026-08-05). A meta refresh works ON a 404 and needs no JS.
+    //
+    // Inside a Mini App there is no address bar to escape a dead end with.
+    const source = read('src/app/global-not-found.tsx');
     expect(source).toMatch(/export const dynamic = 'force-dynamic'/);
-    expect(source).toMatch(/redirect\(/);
+    expect(source).toMatch(/httpEquiv="refresh"/);
+    expect(source).not.toMatch(/import \{[^}]*\bredirect\b[^}]*\} from 'next\/navigation'/);
+  });
+
+  it('dev-only routes cannot exist in a production build', () => {
+    // The front-end deploys from the working tree, so a scratch page WOULD
+    // ship. A runtime guard is not enough: `notFound()` inside the page runs
+    // after the response is committed, so `/lab` still answered 200. The route
+    // has to be absent from the build — `page.dev.tsx` is only a route while
+    // `pageExtensions` accepts that extension, and it may accept it in dev only.
+    const config = read('next.config.ts');
+    expect(config, 'pageExtensions must be declared').toMatch(/pageExtensions: \[/);
+    expect(config).toMatch(/NODE_ENV === 'development' \? \['dev\.tsx'\] : \[\]/);
   });
 
   it('scrollbar utilities do not decide whether an element scrolls', () => {
