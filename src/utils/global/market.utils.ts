@@ -1,6 +1,8 @@
 import { GlobalConstants } from '@/constants/global.constants';
-import { MarketPriceType } from '@/types/enums/market.enums';
-import type { MarketPrice } from '@/types/interfaces/market.interfaces';
+import { MarketPriceType, MarketStatusType } from '@/types/enums/market.enums';
+import { TicketsEnum } from '@/types/enums/ticket.enums';
+import type { InventoryChipType } from '@/types/interfaces/inventory.interfaces';
+import type { MarketData, MarketPrice } from '@/types/interfaces/market.interfaces';
 import type { TicketType } from '@/types/types/ticket.types';
 import { engineMarketPriceLc, lcPriceToLsParity } from '@/utils/global/economy.utils';
 
@@ -57,6 +59,60 @@ const marketPriceRank = (type: MarketPriceType): number =>
  */
 export const orderMarketPrices = (prices: MarketPrice[]): MarketPrice[] =>
   [...prices].sort((a, b) => marketPriceRank(a.type) - marketPriceRank(b.type));
+
+/** Canonical tier ladder — the enum's declaration order (Bronze → Diamond). */
+const tierOrder = Object.values(TicketsEnum) as TicketType[];
+
+/** Unknown/absent tier sorts last instead of jumping to the front. */
+const tierRank = (tier: TicketType | undefined): number => {
+  const index = tier ? tierOrder.indexOf(tier) : -1;
+  return index === -1 ? tierOrder.length : index;
+};
+
+const chipRank = (type: InventoryChipType): number => (type === 'speed' ? 0 : 1);
+
+const statusRank = (type: MarketStatusType): number =>
+  type === MarketStatusType.LUCKY_PLAYER ? 0 : 1;
+
+/**
+ * Deterministic display order for the whole storefront.
+ *
+ * The catalog endpoint has no ORDER BY, so Postgres hands back rows in physical
+ * order — which shifts after **any** UPDATE (a supply decrement, the boot-time
+ * price sync, an admin edit). The market therefore reshuffled itself between
+ * visits. Every section is sorted by its own ladder — tier Bronze → Diamond
+ * first — with `id` as the final tiebreaker so equal keys can never swap
+ * places. Applied once in `transformResponse`, so the cards, the hero carousel
+ * and the info sheet all read the same order.
+ */
+export const sortMarketData = (data: MarketData): MarketData => ({
+  ...data,
+  engines: [...(data.engines ?? [])].sort(
+    (a, b) =>
+      tierRank(a.ticketType) - tierRank(b.ticketType) ||
+      a.engineLevel - b.engineLevel ||
+      a.id.localeCompare(b.id)
+  ),
+  tickets: [...(data.tickets ?? [])].sort(
+    (a, b) => tierRank(a.ticketType) - tierRank(b.ticketType) || a.id.localeCompare(b.id)
+  ),
+  shards: [...(data.shards ?? [])].sort(
+    (a, b) =>
+      tierRank(a.quality) - tierRank(b.quality) ||
+      chipRank(a.type) - chipRank(b.type) ||
+      a.id.localeCompare(b.id)
+  ),
+  // Avatars climb L1 → L10; a cosmetic without a level (badge, theme) sorts last.
+  cosmetics: [...(data.cosmetics ?? [])].sort(
+    (a, b) =>
+      (a.avatarLevel ?? Number.MAX_SAFE_INTEGER) - (b.avatarLevel ?? Number.MAX_SAFE_INTEGER) ||
+      a.name.localeCompare(b.name) ||
+      a.id.localeCompare(b.id)
+  ),
+  statuses: [...(data.statuses ?? [])].sort(
+    (a, b) => statusRank(a.statusType) - statusRank(b.statusType) || a.id.localeCompare(b.id)
+  ),
+});
 
 /**
  * Full price pair (LC + parity LS) for a player's **next** engine of a tier,

@@ -10,6 +10,7 @@ import type { InventoryChipType } from '@/types/interfaces/inventory.interfaces'
 import type { MarketData, MarketPrice } from '@/types/interfaces/market.interfaces';
 import type { TicketEngine } from '@/types/interfaces/ticket.interfaces';
 import type { TicketType } from '@/types/types/ticket.types';
+import { sortMarketData } from '@/utils/global/market.utils';
 
 const deductBalanceUpdater = (price: MarketPrice) =>
   meApi.util.updateQueryData('getMe', undefined, draft => {
@@ -24,6 +25,11 @@ export const marketApi = api.injectEndpoints({
   endpoints: builder => ({
     getMarketData: builder.query<MarketData, void>({
       query: () => ({ url: 'market' }),
+      // The catalog arrives in whatever order Postgres physically stored the
+      // rows, which changes after any UPDATE — so the storefront reshuffled
+      // itself on every visit. Sorting here (not per section) makes the cards,
+      // the hero carousel and the info sheet share one canonical order.
+      transformResponse: (response: MarketData) => sortMarketData(response),
       providesTags: [rtkTags.market],
     }),
 
