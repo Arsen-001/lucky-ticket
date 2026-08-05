@@ -10,16 +10,10 @@ import {
   Circle,
   Clock3,
   Gift,
-  Hash,
-  type LucideIcon,
   Lock,
   Pin,
   PinOff,
-  Send,
-  Share2,
   TrendingUp,
-  Twitter,
-  Youtube,
 } from 'lucide-react';
 import { twMerge } from 'tailwind-merge';
 import { useAppTranslations } from '@/hooks/useAppTranslations';
@@ -31,6 +25,7 @@ import { LcLabel } from '@/components/shared/icons/LcLabel';
 import { Medal, type MedalType } from '@/components/shared/icons/Medal';
 import { GoldenText } from '@/components/shared/typography/GoldenText';
 import { formatNumber } from '@/utils/global/number.utils';
+import { resolveTaskSocialBrand } from '@/utils/pages/task-social.utils';
 import { TaskCategory, TaskFrequency, TaskRewardType, TaskStatus } from '@/types/enums/tasks.enums';
 import type { Task, TaskSubStep } from '@/types/interfaces/tasks.interfaces';
 import { routes, type Route } from '@/constants/routes';
@@ -65,36 +60,6 @@ const TIER_RGB: Record<string, string> = {
   platinum: '192 190 177',
   diamond: '23 141 136',
   all: '222 0 155',
-};
-
-/** Detect social platform from a task's external link to pick the right icon + brand-colored frame. */
-const SOCIAL_ICON_BY_HOST: { match: RegExp; icon: LucideIcon; gradient: string }[] = [
-  { match: /(?:^|\.)t\.me$/i, icon: Send, gradient: 'from-teal to-electric-purple' },
-  { match: /(?:^|\.)telegram\.(?:org|me)$/i, icon: Send, gradient: 'from-teal to-electric-purple' },
-  { match: /(?:^|\.)x\.com$/i, icon: Twitter, gradient: 'from-white/30 to-white/10' },
-  { match: /(?:^|\.)twitter\.com$/i, icon: Twitter, gradient: 'from-electric-purple to-pink' },
-  {
-    match: /(?:^|\.)discord\.(?:gg|com)$/i,
-    icon: Hash,
-    gradient: 'from-electric-purple to-diamond',
-  },
-  { match: /(?:^|\.)youtube\.com$/i, icon: Youtube, gradient: 'from-error to-pink' },
-  { match: /(?:^|\.)youtu\.be$/i, icon: Youtube, gradient: 'from-error to-pink' },
-];
-
-const resolveSocialIcon = (externalLink?: string) => {
-  if (!externalLink) return null;
-  let host = '';
-  try {
-    host = new URL(externalLink).hostname.toLowerCase();
-  } catch {
-    return null;
-  }
-  for (const entry of SOCIAL_ICON_BY_HOST) {
-    if (entry.match.test(host)) return entry;
-  }
-  // Fallback: anything else looks like a generic share action.
-  return { icon: Share2, gradient: 'from-pink to-electric-pink' };
 };
 
 function SubStepRow({
@@ -458,9 +423,10 @@ export function TaskItemCard({
                   height={56}
                   type={(task.tier === 'all' ? 'gold' : task.tier) as MedalType}
                 />
-              ) : task.category === TaskCategory.SOCIAL && resolveSocialIcon(task.externalLink) ? (
+              ) : task.category === TaskCategory.SOCIAL &&
+                resolveTaskSocialBrand(task.externalLink) ? (
                 (() => {
-                  const social = resolveSocialIcon(task.externalLink)!;
+                  const social = resolveTaskSocialBrand(task.externalLink)!;
                   const SocialIcon = social.icon;
                   return (
                     <div
@@ -686,9 +652,9 @@ export function TaskItemCard({
           aria-expanded={hasSubSteps ? expanded : undefined}
         >
           <div className="flex-center relative size-9 shrink-0">
-            {task.category === TaskCategory.SOCIAL && resolveSocialIcon(task.externalLink) ? (
+            {task.category === TaskCategory.SOCIAL && resolveTaskSocialBrand(task.externalLink) ? (
               (() => {
-                const social = resolveSocialIcon(task.externalLink)!;
+                const social = resolveTaskSocialBrand(task.externalLink)!;
                 const SocialIcon = social.icon;
                 return (
                   <div

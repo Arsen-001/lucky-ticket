@@ -8,7 +8,8 @@ import { useAppTranslations } from '@/hooks/useAppTranslations';
 import { useLocalized } from '@/hooks/useLocalized';
 import { useCountDown } from '@/hooks/useCountDown';
 import { Button } from '@/components/shared/buttons/Button';
-import { TaskStatus } from '@/types/enums/tasks.enums';
+import { TaskCategory, TaskStatus } from '@/types/enums/tasks.enums';
+import { resolveTaskSocialBrand } from '@/utils/pages/task-social.utils';
 import type { Task } from '@/types/interfaces/tasks.interfaces';
 import { type Route } from '@/constants/routes';
 import { TaskCategoryIcon } from './TaskCategoryIcon';
@@ -50,6 +51,8 @@ export function TaskItemRow({ task, onClaim, highlightToken, className, style }:
   const isLocked = task.status === TaskStatus.LOCKED;
   const isCompleted = task.status === TaskStatus.COMPLETED;
   const hasLink = !!(task.deeplink || task.externalLink);
+  const socialBrand =
+    task.category === TaskCategory.SOCIAL ? resolveTaskSocialBrand(task.externalLink) : null;
   const canNavigate = hasLink && !isLocked && !isCompleted && !isReady;
   const showProgress = task.progress.target > 1 && !isCompleted && !isLocked;
   const pct =
@@ -173,7 +176,22 @@ export function TaskItemRow({ task, onClaim, highlightToken, className, style }:
     >
       <SectionShine token={highlightToken ?? null} />
 
-      <TaskCategoryIcon category={task.category} size={18} />
+      {/* The platform, not the category: every social row used to carry the
+          same sparkle glyph, so Telegram, X, Discord and YouTube were
+          indistinguishable until you read the title. The link was in the data
+          all along — this row simply never looked at it. */}
+      {socialBrand ? (
+        <div
+          className={twMerge(
+            'flex-center size-9 shrink-0 rounded-xl bg-gradient-to-br shadow-md shadow-black/20',
+            socialBrand.gradient
+          )}
+        >
+          <socialBrand.icon size={18} className="text-white" strokeWidth={2.4} />
+        </div>
+      ) : (
+        <TaskCategoryIcon category={task.category} size={18} />
+      )}
 
       <div ref={bodyRef} className="flex min-w-0 flex-1 flex-col gap-0.5 overflow-hidden">
         <h4
