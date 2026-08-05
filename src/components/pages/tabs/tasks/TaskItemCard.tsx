@@ -27,8 +27,17 @@ import { useLocalized } from '@/hooks/useLocalized';
 import { useCountDown } from '@/hooks/useCountDown';
 import { Progress } from '@/components/shared/Progress';
 import { Button } from '@/components/shared/buttons/Button';
+import { LcLabel } from '@/components/shared/icons/LcLabel';
 import { Medal, type MedalType } from '@/components/shared/icons/Medal';
-import { TaskCategory, TaskFrequency, TaskRarity, TaskStatus } from '@/types/enums/tasks.enums';
+import { GoldenText } from '@/components/shared/typography/GoldenText';
+import { formatNumber } from '@/utils/global/number.utils';
+import {
+  TaskCategory,
+  TaskFrequency,
+  TaskRarity,
+  TaskRewardType,
+  TaskStatus,
+} from '@/types/enums/tasks.enums';
 import type { Task, TaskSubStep } from '@/types/interfaces/tasks.interfaces';
 import { routes, type Route } from '@/constants/routes';
 import { TaskCategoryIcon } from './TaskCategoryIcon';
@@ -64,6 +73,20 @@ const TIER_FRAME: Record<string, string> = {
   platinum: 'task-card-tier-platinum',
   diamond: 'task-card-tier-diamond',
   all: 'task-card-tier-all',
+};
+
+/**
+ * Tier colour as an `R G B` triplet for the light behind a full-size card —
+ * the same palette the tournament card uses, so a Gold task and a Gold
+ * tournament are the same gold. @see .task-card-glow
+ */
+const TIER_RGB: Record<string, string> = {
+  bronze: '172 97 34',
+  silver: '168 170 164',
+  gold: '248 189 62',
+  platinum: '192 190 177',
+  diamond: '23 141 136',
+  all: '222 0 155',
 };
 
 /** Detect social platform from a task's external link to pick the right icon + brand-colored frame. */
@@ -350,19 +373,39 @@ export function TaskItemCard({
     task.category === TaskCategory.PROFILE_STATUS ||
     task.category === TaskCategory.PROFILE;
 
+  const tierRgb = TIER_RGB[task.tier ?? 'gold'] ?? TIER_RGB.gold;
+  const showCountdown = !!task.resetAt && !isLocked && !expired;
+  const showPin = !!onTogglePin && !isCompleted && !isLocked && !isReady;
+  const isClaimAction = (isReady || allStepsDone) && !isCompleted;
+
+  /**
+   * One headline figure and «the rest». LC is the headline when a task pays it:
+   * it is the number tasks get compared by, the role the prize pool plays on a
+   * tournament card.
+   */
+  const heroReward = task.rewards.find(r => r.type === TaskRewardType.LC) ?? null;
+  const restRewards = heroReward ? task.rewards.filter(r => r !== heroReward) : task.rewards;
+
   return (
     <div
       style={style}
       className={twMerge(
         'relative rounded-2xl transition-all bg-background-overlay overflow-hidden',
         isCompactRow ? (showSubtitleInCompact ? 'min-h-[68px]' : 'min-h-[60px]') : 'min-h-[108px]',
-        isCompleted
-          ? 'task-card-completed'
-          : isLockedTournament
-            ? 'task-card-inactive'
-            : task.tier
-              ? TIER_FRAME[task.tier]
-              : RARITY_FRAME[task.rarity],
+        // Full-size cards took the tournament card's treatment: a plain hairline
+        // plus the tier's light behind the content. Keeping the gradient tier
+        // border as well put a coloured outline around every row of the list.
+        // Compact rows (one-time achievements, profile) keep their frames — the
+        // tall shape would turn those long lists into a scroll marathon.
+        !isCompactRow
+          ? 'border border-white/8'
+          : isCompleted
+            ? 'task-card-completed'
+            : isLockedTournament
+              ? 'task-card-inactive'
+              : task.tier
+                ? TIER_FRAME[task.tier]
+                : RARITY_FRAME[task.rarity],
         isLocked && !isLockedTournament && 'opacity-60',
         isCompleted && 'opacity-80',
         className
@@ -370,10 +413,22 @@ export function TaskItemCard({
     >
       <SectionShine token={highlightToken ?? null} />
 
+      {!isCompactRow && !isCompleted && (
+        <span
+          aria-hidden
+          className="pointer-events-none absolute inset-0 rounded-2xl"
+          style={{
+            background: `radial-gradient(90% 70% at 12% -10%, rgb(${tierRgb} / 0.30) 0%, transparent 68%)`,
+          }}
+        />
+      )}
+
       {/* Top-right cluster: countdown + pin button (pin hidden for ready-to-claim — they're already on top).
-          The countdown stays visible on completed periodic tasks — it tells when the task re-opens. */}
-      {(task.resetAt && !isLocked && !expired) ||
-      (onTogglePin && !isCompleted && !isLocked && !isReady) ? (
+          The countdown stays visible on completed periodic tasks — it tells when the task re-opens.
+          Full-size cards place both in flow instead, so they cannot sit over the headline. */}
+      {isCompactRow &&
+      ((task.resetAt && !isLocked && !expired) ||
+        (onTogglePin && !isCompleted && !isLocked && !isReady)) ? (
         <div className="absolute top-1.5 right-1.5 z-[3] flex items-center gap-1.5">
           {task.resetAt && !isLocked && !expired && (
             <span className="pointer-events-none flex items-center gap-1 text-[10px] text-white/40 font-medium tabular-nums">
@@ -411,208 +466,444 @@ export function TaskItemCard({
         </div>
       ) : null}
 
-      {/* main row */}
-      <div
-        className={twMerge(
-          'relative z-[2] flex items-center gap-3',
-          isCompactRow
-            ? showSubtitleInCompact
-              ? 'pl-1.5 pr-3 py-2 min-h-[68px] gap-2.5'
-              : 'pl-1.5 pr-3 py-2 min-h-[60px] gap-2.5'
-            : 'pl-1.5 pr-3 py-3 min-h-[108px]',
-          (!isLocked || isLockedTournament) && 'cursor-pointer active:scale-[0.99]'
-        )}
-        onClick={handleCardClick}
-        role="button"
-        aria-disabled={isLocked && !isLockedTournament}
-        aria-expanded={hasSubSteps ? expanded : undefined}
-      >
-        {/* Icon */}
+      {/* Full-size card — the tournament card's shape: a bare medal on the tier
+          light, the payout as the hero number where the prize pool sits there,
+          a captioned two-cell container, and one full-width action instead of
+          the three different controls this row used to end in. */}
+      {!isCompactRow && (
         <div
           className={twMerge(
-            'relative shrink-0 flex-center',
-            task.category === TaskCategory.TOURNAMENTS && task.tier
-              ? isCompactRow
-                ? 'w-[72px] h-[72px]'
-                : 'w-[84px] h-[84px]'
-              : isCompactRow
-                ? 'w-8 h-8'
-                : 'w-9 h-9'
+            'relative z-[2] flex flex-col p-3',
+            (!isLocked || isLockedTournament) && 'cursor-pointer active:scale-[0.99]'
           )}
+          onClick={handleCardClick}
+          role="button"
+          aria-disabled={isLocked && !isLockedTournament}
+          aria-expanded={hasSubSteps ? expanded : undefined}
         >
-          {task.category === TaskCategory.TOURNAMENTS && task.tier ? (
-            <Medal
-              type={(task.tier === 'all' ? 'gold' : task.tier) as MedalType}
-              width={isCompactRow ? 72 : 84}
-              height={isCompactRow ? 72 : 84}
-            />
-          ) : task.category === TaskCategory.SOCIAL && resolveSocialIcon(task.externalLink) ? (
-            (() => {
-              const social = resolveSocialIcon(task.externalLink)!;
-              const SocialIcon = social.icon;
-              return (
-                <div
-                  className={twMerge(
-                    'flex-center rounded-xl bg-gradient-to-br shadow-md shadow-black/20',
-                    isCompactRow ? 'w-8 h-8' : 'w-9 h-9',
-                    social.gradient
-                  )}
-                >
-                  <SocialIcon
-                    size={isCompactRow ? 16 : 18}
-                    className="text-white"
-                    strokeWidth={2.4}
-                  />
+          <div className="flex items-start gap-3">
+            <div className="relative shrink-0">
+              {task.category === TaskCategory.TOURNAMENTS && task.tier ? (
+                <Medal
+                  className="drop-shadow-lg drop-shadow-black/40"
+                  width={56}
+                  height={56}
+                  type={(task.tier === 'all' ? 'gold' : task.tier) as MedalType}
+                />
+              ) : task.category === TaskCategory.SOCIAL && resolveSocialIcon(task.externalLink) ? (
+                (() => {
+                  const social = resolveSocialIcon(task.externalLink)!;
+                  const SocialIcon = social.icon;
+                  return (
+                    <div
+                      className={twMerge(
+                        'flex-center size-14 rounded-xl bg-gradient-to-br shadow-md shadow-black/20',
+                        social.gradient
+                      )}
+                    >
+                      <SocialIcon size={26} className="text-white" strokeWidth={2.4} />
+                    </div>
+                  );
+                })()
+              ) : (
+                <TaskCategoryIcon category={task.category} size={30} />
+              )}
+              {isLocked && (
+                <span className="flex-center absolute inset-0 rounded-lg bg-black/45 backdrop-blur-[1px]">
+                  <Lock className="text-white/90" size={22} strokeWidth={2.4} />
+                </span>
+              )}
+              {isCompleted && (
+                <div className="flex-center bg-background border-success absolute -right-1 -bottom-1 size-5 rounded-full border">
+                  <Check size={10} className="text-success" />
                 </div>
-              );
-            })()
-          ) : (
-            <TaskCategoryIcon category={task.category} size={18} />
-          )}
-          {isLocked && (
-            <div className="absolute -bottom-1 -right-1 flex-center w-5 h-5 rounded-full bg-background border border-white/10">
-              <Lock size={10} className="text-white/60" />
+              )}
             </div>
-          )}
-          {isCompleted && (
-            <div className="absolute -bottom-1 -right-1 flex-center w-5 h-5 rounded-full bg-background border border-success">
-              <Check size={10} className="text-success" />
+
+            <div className="flex min-w-0 flex-1 flex-col gap-1">
+              {/* Two lines and wrapping, not one line and a truncation: almost
+                  every headline on this screen was being cut mid-word, and it is
+                  the only thing that says what to do. */}
+              <h4 className="line-clamp-2 text-sm leading-tight font-bold text-white">
+                {localized(task.title)}
+              </h4>
+
+              {heroReward && (
+                <GoldenText
+                  className="inline-flex items-center gap-1.5 text-2xl leading-none font-extrabold tabular-nums"
+                  style={{ textShadow: '0 1px 6px rgba(248, 189, 62, 0.45)' }}
+                >
+                  +{formatNumber(heroReward.amount)}
+                  <LcLabel size={18} />
+                </GoldenText>
+              )}
+
+              {(task.subtitle || task.unlockHint) && (
+                <span className="line-clamp-1 text-[11px] leading-none text-white/45">
+                  {localized(isLocked && task.unlockHint ? task.unlockHint : task.subtitle)}
+                </span>
+              )}
             </div>
-          )}
-        </div>
 
-        {/* Body */}
-        <div
-          className={twMerge(
-            'flex-1 min-w-0 flex flex-col',
-            isCompactRow ? 'gap-0.5 -ml-[5px]' : 'gap-1 -ml-1.5'
-          )}
-        >
-          <h4
-            className={twMerge(
-              'font-extrabold leading-snug',
-              isCompactRow ? 'text-sm' : 'text-[15px]',
-              expanded ? 'whitespace-normal break-words' : 'truncate w-max max-w-full'
-            )}
-          >
-            {localized(task.title)}
-          </h4>
-
-          {((isCompactRow && showSubtitleInCompact) || !isCompactRow) &&
-            (task.subtitle || task.unlockHint) && (
-              <p
-                className={twMerge(
-                  'text-white/50',
-                  isCompactRow ? 'text-[10px]' : 'text-[11px]',
-                  expanded ? 'whitespace-normal break-words' : 'line-clamp-1'
-                )}
-              >
-                {localized(isLocked && task.unlockHint ? task.unlockHint : task.subtitle)}
-              </p>
-            )}
-
-          <div
-            className={twMerge(
-              'flex items-center gap-2 flex-wrap',
-              isCompactRow ? 'mt-0' : 'mt-0.5'
-            )}
-          >
-            <TaskRewardRow rewards={task.rewards} size="sm" />
-            {showProgress && !isCompleted && !isLocked && (
-              <span className="text-[11px] text-white/50 font-semibold tabular-nums ml-auto">
-                {task.progress.current}/{task.progress.target}
+            {showCountdown && (
+              <span className="inline-flex shrink-0 items-center gap-1 rounded-md bg-white/6 px-1.5 py-1 leading-none text-white">
+                <Clock3 className="text-pink-secondary h-3 w-3 shrink-0" strokeWidth={2.4} />
+                <span className="truncate text-[11px] leading-none font-bold tabular-nums">
+                  {leftTime}
+                </span>
               </span>
             )}
           </div>
 
-          {showProgress && !isCompleted && !isLocked && !isCompactRow && (
+          <div className="mt-2.5 flex items-stretch divide-x divide-white/10 rounded-xl bg-black/25">
+            <div className="flex min-w-0 flex-1 flex-col items-center gap-1 px-1 py-2">
+              <span className="max-w-full truncate text-[8px] leading-none font-bold tracking-[0.16em] text-white/35 uppercase">
+                {t('reward')}
+              </span>
+              <span className="flex max-w-full items-center gap-1 leading-none">
+                <TaskRewardRow
+                  rewards={restRewards.length ? restRewards : task.rewards}
+                  size="sm"
+                />
+              </span>
+            </div>
+            <div className="flex min-w-0 flex-1 flex-col items-center gap-1 px-1 py-2">
+              <span className="max-w-full truncate text-[8px] leading-none font-bold tracking-[0.16em] text-white/35 uppercase">
+                {t('progress')}
+              </span>
+              <span className="text-[15px] leading-none font-extrabold text-white tabular-nums">
+                {task.progress.current}
+                <span className="text-white/40">/{task.progress.target}</span>
+              </span>
+            </div>
+          </div>
+
+          <div className="mt-2.5 flex items-center gap-2">
+            {showPin && onTogglePin && (
+              <button
+                type="button"
+                aria-label={pinned ? t('unpin') : t('pin')}
+                aria-pressed={pinned}
+                disabled={pinDisabled}
+                onClick={e => {
+                  e.stopPropagation();
+                  if (pinDisabled) return;
+                  onTogglePin(task.id);
+                }}
+                className={twMerge(
+                  'flex-center size-9 shrink-0 rounded-xl transition-all active:scale-90',
+                  pinned
+                    ? 'bg-electric-pink/20 text-electric-pink'
+                    : pinDisabled
+                      ? 'cursor-not-allowed bg-white/[0.04] text-white/20'
+                      : 'bg-white/5 text-white/40'
+                )}
+              >
+                {pinned ? (
+                  <PinOff size={14} strokeWidth={2.5} />
+                ) : (
+                  <Pin size={14} strokeWidth={2.5} />
+                )}
+              </button>
+            )}
+
+            <button
+              type="button"
+              disabled={(isLocked && !isLockedTournament) || isSimulating}
+              onClick={e => {
+                e.stopPropagation();
+                // Claim goes straight to the claim handler. Routing it through
+                // `handleCardClick` would be wrong: for a task WITH sub-steps
+                // that handler toggles the accordion, so an all-steps-done task
+                // could never be claimed from here.
+                if (isClaimAction) {
+                  handleClaimMain();
+                  return;
+                }
+                handleCardClick();
+              }}
+              className={twMerge(
+                'flex-center relative flex-1 gap-1.5 rounded-xl py-2.5 text-[12px] leading-none font-extrabold tracking-[0.14em] uppercase',
+                isSimulating && 'cursor-wait opacity-70',
+                isClaimAction && 'bg-pink-gradient animate-task-pulse text-white',
+                isCompleted && 'bg-success/15 text-success',
+                isLockedTournament && 'bg-pink-gradient text-white',
+                isLocked &&
+                  !isLockedTournament &&
+                  'border border-white/10 bg-white/5 text-white/45',
+                !isLocked &&
+                  !isCompleted &&
+                  !isClaimAction &&
+                  'border border-white/10 bg-white/5 text-white/70'
+              )}
+            >
+              {isClaimAction ? (
+                <>
+                  <Gift size={13} strokeWidth={2.6} />
+                  {isSimulating ? t('claiming') : t('claim')}
+                </>
+              ) : isCompleted ? (
+                <>
+                  <Check size={13} strokeWidth={2.6} />
+                  {t('claimed')}
+                </>
+              ) : isLockedTournament ? (
+                <>
+                  <TrendingUp size={13} strokeWidth={2.6} />
+                  {t('open')}
+                </>
+              ) : isLocked ? (
+                <>
+                  <Lock size={12} strokeWidth={2.6} />
+                  {t('locked')}
+                </>
+              ) : hasSubSteps ? (
+                <>
+                  <ChevronDown
+                    size={13}
+                    strokeWidth={2.6}
+                    className={twMerge(expanded && 'rotate-180')}
+                  />
+                  {t('substeps progress', { completed: completedSteps, total: totalSteps })}
+                </>
+              ) : task.externalLink ? (
+                <>
+                  <ArrowUpRight size={13} strokeWidth={2.6} />
+                  {t('open')}
+                </>
+              ) : (
+                <>
+                  <ChevronRight size={13} strokeWidth={2.6} />
+                  {t('open')}
+                </>
+              )}
+
+              {/* «Внутри есть что забрать» — the pulsing dot that used to sit on
+                  the chevron. Without it a task with a ready sub-step looks
+                  identical to one without, and the reward goes uncollected. */}
+              {hasClaimableSubStep && !isClaimAction && (
+                <span className="pointer-events-none absolute top-1.5 right-1.5 flex h-2.5 w-2.5">
+                  <span className="bg-electric-pink absolute inset-0 animate-ping rounded-full opacity-75" />
+                  <span className="bg-electric-pink border-background-overlay relative h-2.5 w-2.5 rounded-full border" />
+                </span>
+              )}
+            </button>
+          </div>
+
+          {showProgress && !isCompleted && !isLocked && (
             <Progress
               percentage={pct}
-              className="h-1 mt-1"
+              className="mt-2 h-1"
               classNames={{ bar: 'bg-pink-gradient' }}
             />
           )}
         </div>
+      )}
 
-        {/* CTA */}
-        <div className="shrink-0 flex items-center">
-          {(isReady || allStepsDone) && !isCompleted ? (
-            <Button
-              className="rounded-full px-3 py-1.5 text-xs font-bold animate-task-pulse flex-center flex-col gap-0.5 disabled:opacity-70"
-              disabled={isSimulating}
-              onClick={e => {
-                e.stopPropagation();
-                handleClaimMain();
-              }}
-            >
-              <Gift size={14} />
-              {isSimulating ? t('claiming') : t('claim')}
-            </Button>
-          ) : isLocked ? (
-            isLockedTournament ? (
-              <div className="flex-center gap-1 rounded-full bg-pink-gradient px-3 py-2.5 shadow-lg shadow-electric-pink/50 animate-task-pulse">
-                <TrendingUp size={16} className="text-white" strokeWidth={2.5} />
-                <ChevronRight size={14} className="text-white" strokeWidth={2.5} />
-              </div>
+      {/* main row — compact variant, unchanged */}
+      {isCompactRow && (
+        <div
+          className={twMerge(
+            'relative z-[2] flex items-center gap-3',
+            isCompactRow
+              ? showSubtitleInCompact
+                ? 'pl-1.5 pr-3 py-2 min-h-[68px] gap-2.5'
+                : 'pl-1.5 pr-3 py-2 min-h-[60px] gap-2.5'
+              : 'pl-1.5 pr-3 py-3 min-h-[108px]',
+            (!isLocked || isLockedTournament) && 'cursor-pointer active:scale-[0.99]'
+          )}
+          onClick={handleCardClick}
+          role="button"
+          aria-disabled={isLocked && !isLockedTournament}
+          aria-expanded={hasSubSteps ? expanded : undefined}
+        >
+          {/* Icon */}
+          <div
+            className={twMerge(
+              'relative shrink-0 flex-center',
+              task.category === TaskCategory.TOURNAMENTS && task.tier
+                ? isCompactRow
+                  ? 'w-[72px] h-[72px]'
+                  : 'w-[84px] h-[84px]'
+                : isCompactRow
+                  ? 'w-8 h-8'
+                  : 'w-9 h-9'
+            )}
+          >
+            {task.category === TaskCategory.TOURNAMENTS && task.tier ? (
+              <Medal
+                type={(task.tier === 'all' ? 'gold' : task.tier) as MedalType}
+                width={isCompactRow ? 72 : 84}
+                height={isCompactRow ? 72 : 84}
+              />
+            ) : task.category === TaskCategory.SOCIAL && resolveSocialIcon(task.externalLink) ? (
+              (() => {
+                const social = resolveSocialIcon(task.externalLink)!;
+                const SocialIcon = social.icon;
+                return (
+                  <div
+                    className={twMerge(
+                      'flex-center rounded-xl bg-gradient-to-br shadow-md shadow-black/20',
+                      isCompactRow ? 'w-8 h-8' : 'w-9 h-9',
+                      social.gradient
+                    )}
+                  >
+                    <SocialIcon
+                      size={isCompactRow ? 16 : 18}
+                      className="text-white"
+                      strokeWidth={2.4}
+                    />
+                  </div>
+                );
+              })()
             ) : (
-              <div className="flex-center w-9 h-9 rounded-full bg-white/5">
-                <Lock size={14} className="text-white/40" />
+              <TaskCategoryIcon category={task.category} size={18} />
+            )}
+            {isLocked && (
+              <div className="absolute -bottom-1 -right-1 flex-center w-5 h-5 rounded-full bg-background border border-white/10">
+                <Lock size={10} className="text-white/60" />
               </div>
-            )
-          ) : isCompleted ? (
-            <div
+            )}
+            {isCompleted && (
+              <div className="absolute -bottom-1 -right-1 flex-center w-5 h-5 rounded-full bg-background border border-success">
+                <Check size={10} className="text-success" />
+              </div>
+            )}
+          </div>
+
+          {/* Body */}
+          <div
+            className={twMerge(
+              'flex-1 min-w-0 flex flex-col',
+              isCompactRow ? 'gap-0.5 -ml-[5px]' : 'gap-1 -ml-1.5'
+            )}
+          >
+            <h4
               className={twMerge(
-                'flex-center rounded-full bg-success/20',
-                isCompactRow ? 'w-8 h-8' : 'w-9 h-9'
+                'font-extrabold leading-snug',
+                isCompactRow ? 'text-sm' : 'text-[15px]',
+                expanded ? 'whitespace-normal break-words' : 'truncate w-max max-w-full'
               )}
             >
-              <Check size={isCompactRow ? 14 : 16} className="text-success" />
-            </div>
-          ) : hasSubSteps ? (
-            <div className="relative">
-              <div
-                className={twMerge(
-                  'flex-center w-9 h-9 rounded-full bg-white/5 hover:bg-white/10 transition-all',
-                  expanded && 'rotate-180'
-                )}
-              >
-                <ChevronDown size={16} className="text-white/60" />
-              </div>
-              {hasClaimableSubStep && (
-                <span className="pointer-events-none absolute -top-0.5 -right-0.5 flex h-2.5 w-2.5">
-                  <span className="absolute inset-0 rounded-full bg-electric-pink animate-ping opacity-75" />
-                  <span className="relative w-2.5 h-2.5 rounded-full bg-electric-pink border border-background-overlay" />
+              {localized(task.title)}
+            </h4>
+
+            {((isCompactRow && showSubtitleInCompact) || !isCompactRow) &&
+              (task.subtitle || task.unlockHint) && (
+                <p
+                  className={twMerge(
+                    'text-white/50',
+                    isCompactRow ? 'text-[10px]' : 'text-[11px]',
+                    expanded ? 'whitespace-normal break-words' : 'line-clamp-1'
+                  )}
+                >
+                  {localized(isLocked && task.unlockHint ? task.unlockHint : task.subtitle)}
+                </p>
+              )}
+
+            <div
+              className={twMerge(
+                'flex items-center gap-2 flex-wrap',
+                isCompactRow ? 'mt-0' : 'mt-0.5'
+              )}
+            >
+              <TaskRewardRow rewards={task.rewards} size="sm" />
+              {showProgress && !isCompleted && !isLocked && (
+                <span className="text-[11px] text-white/50 font-semibold tabular-nums ml-auto">
+                  {task.progress.current}/{task.progress.target}
                 </span>
               )}
             </div>
-          ) : task.externalLink ? (
-            <button
-              type="button"
-              aria-label={t('open')}
-              onClick={e => {
-                e.stopPropagation();
-                window.open(task.externalLink, '_blank', 'noopener,noreferrer');
-              }}
-              className={twMerge(
-                'flex-center rounded-full bg-electric-pink/15 border border-electric-pink/30 hover:bg-electric-pink/25 active:scale-95 transition-all',
-                isCompactRow ? 'w-8 h-8' : 'w-9 h-9'
-              )}
-            >
-              <ArrowUpRight
-                size={isCompactRow ? 14 : 16}
-                className="text-electric-pink"
-                strokeWidth={2.5}
+
+            {showProgress && !isCompleted && !isLocked && !isCompactRow && (
+              <Progress
+                percentage={pct}
+                className="h-1 mt-1"
+                classNames={{ bar: 'bg-pink-gradient' }}
               />
-            </button>
-          ) : (
-            isInProgress && (
-              <div className="flex-center w-9 h-9 rounded-full bg-white/5 hover:bg-white/10 transition-colors">
-                <ChevronRight size={16} className="text-white/60" />
+            )}
+          </div>
+
+          {/* CTA */}
+          <div className="shrink-0 flex items-center">
+            {(isReady || allStepsDone) && !isCompleted ? (
+              <Button
+                className="rounded-full px-3 py-1.5 text-xs font-bold animate-task-pulse flex-center flex-col gap-0.5 disabled:opacity-70"
+                disabled={isSimulating}
+                onClick={e => {
+                  e.stopPropagation();
+                  handleClaimMain();
+                }}
+              >
+                <Gift size={14} />
+                {isSimulating ? t('claiming') : t('claim')}
+              </Button>
+            ) : isLocked ? (
+              isLockedTournament ? (
+                <div className="flex-center gap-1 rounded-full bg-pink-gradient px-3 py-2.5 shadow-lg shadow-electric-pink/50 animate-task-pulse">
+                  <TrendingUp size={16} className="text-white" strokeWidth={2.5} />
+                  <ChevronRight size={14} className="text-white" strokeWidth={2.5} />
+                </div>
+              ) : (
+                <div className="flex-center w-9 h-9 rounded-full bg-white/5">
+                  <Lock size={14} className="text-white/40" />
+                </div>
+              )
+            ) : isCompleted ? (
+              <div
+                className={twMerge(
+                  'flex-center rounded-full bg-success/20',
+                  isCompactRow ? 'w-8 h-8' : 'w-9 h-9'
+                )}
+              >
+                <Check size={isCompactRow ? 14 : 16} className="text-success" />
               </div>
-            )
-          )}
+            ) : hasSubSteps ? (
+              <div className="relative">
+                <div
+                  className={twMerge(
+                    'flex-center w-9 h-9 rounded-full bg-white/5 hover:bg-white/10 transition-all',
+                    expanded && 'rotate-180'
+                  )}
+                >
+                  <ChevronDown size={16} className="text-white/60" />
+                </div>
+                {hasClaimableSubStep && (
+                  <span className="pointer-events-none absolute -top-0.5 -right-0.5 flex h-2.5 w-2.5">
+                    <span className="absolute inset-0 rounded-full bg-electric-pink animate-ping opacity-75" />
+                    <span className="relative w-2.5 h-2.5 rounded-full bg-electric-pink border border-background-overlay" />
+                  </span>
+                )}
+              </div>
+            ) : task.externalLink ? (
+              <button
+                type="button"
+                aria-label={t('open')}
+                onClick={e => {
+                  e.stopPropagation();
+                  window.open(task.externalLink, '_blank', 'noopener,noreferrer');
+                }}
+                className={twMerge(
+                  'flex-center rounded-full bg-electric-pink/15 border border-electric-pink/30 hover:bg-electric-pink/25 active:scale-95 transition-all',
+                  isCompactRow ? 'w-8 h-8' : 'w-9 h-9'
+                )}
+              >
+                <ArrowUpRight
+                  size={isCompactRow ? 14 : 16}
+                  className="text-electric-pink"
+                  strokeWidth={2.5}
+                />
+              </button>
+            ) : (
+              isInProgress && (
+                <div className="flex-center w-9 h-9 rounded-full bg-white/5 hover:bg-white/10 transition-colors">
+                  <ChevronRight size={16} className="text-white/60" />
+                </div>
+              )
+            )}
+          </div>
         </div>
-      </div>
+      )}
 
       {/* substeps accordion */}
       {hasSubSteps && expanded && !isLocked && (
