@@ -5,6 +5,8 @@ export interface TournamentWinner {
   rank: 1 | 2 | 3;
   userId: string;
   username: string;
+  /** Telegram name, when it should be shown instead of `username`. @see displayNameOf */
+  displayName?: string;
   avatar?: string;
 }
 

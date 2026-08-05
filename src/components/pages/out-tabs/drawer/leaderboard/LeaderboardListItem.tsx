@@ -14,6 +14,7 @@ import { VipIcon } from '@/components/shared/icons/VipIcon';
 import type { QuickCardPlayer } from '@/components/shared/user-elements/PlayerQuickCard';
 import { routes } from '@/constants/routes';
 import type { LeaderboardEntry } from '@/types/interfaces/leaderboard.interfaces';
+import { displayNameOf } from '@/utils/global/user.utils';
 import type { CSSProperties } from 'react';
 
 export interface LeaderboardListItemProps {
@@ -44,7 +45,7 @@ export function LeaderboardListItem({
     if (!entry) return;
     onOpenCard?.({
       userId: entry.id,
-      username: entry.username,
+      username: displayNameOf(entry),
       avatar: entry.avatar,
       liked: entry.liked,
       likesReceived: entry.likesReceived,
@@ -65,7 +66,7 @@ export function LeaderboardListItem({
       {entry?.avatar ? (
         <Image
           src={entry.avatar}
-          alt={entry.username}
+          alt={displayNameOf(entry)}
           width={40}
           height={40}
           loading="lazy"
@@ -73,7 +74,7 @@ export function LeaderboardListItem({
         />
       ) : (
         <div className="flex-center bg-electric-purple/20 text-electric-purple h-10 w-10 rounded-full text-sm font-extrabold">
-          {getInitial(entry?.username)}
+          {getInitial(displayNameOf(entry))}
         </div>
       )}
     </SkeletonSuspense>
@@ -102,7 +103,7 @@ export function LeaderboardListItem({
           type="button"
           className={avatarClass}
           onClick={handleAvatarTap}
-          aria-label={entry ? t('open player card', { name: entry.username }) : undefined}
+          aria-label={entry ? t('open player card', { name: displayNameOf(entry) }) : undefined}
         >
           {avatarInner}
         </button>
@@ -120,7 +121,7 @@ export function LeaderboardListItem({
                 isMe ? 'text-white' : 'text-white/90'
               )}
             >
-              {entry?.username}
+              {displayNameOf(entry)}
             </span>
             {isMe && (
               <span className="bg-electric-pink/30 ml-0.5 inline-flex items-center rounded-full px-1.5 py-0.5 text-[9px] font-extrabold uppercase tracking-wider text-white">

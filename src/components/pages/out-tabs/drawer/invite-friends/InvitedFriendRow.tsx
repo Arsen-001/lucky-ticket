@@ -9,9 +9,12 @@ import { LuckyPlayerIcon } from '@/components/shared/icons/LuckyPlayerIcon';
 import { BoltIcon } from '@/components/shared/icons/BoltIcon';
 import { Ticket } from '@/components/shared/icons/Ticket';
 import { VerifiedSparkleIcon } from '@/components/shared/icons/VerifiedSparkleIcon';
+import { FriendNotCountedBadge } from '@/components/pages/out-tabs/drawer/invite-friends/FriendNotCountedBadge';
 import { useAppTranslations } from '@/hooks/useAppTranslations';
 import { formatCompact } from '@/utils/global/number.utils';
+import { countsAsReferral } from '@/utils/pages/referral.utils';
 import type { InvitedFriend } from '@/types/interfaces/referral.interfaces';
+import { displayNameOf } from '@/utils/global/user.utils';
 import type { CSSProperties } from 'react';
 
 export interface InvitedFriendRowProps {
@@ -37,6 +40,10 @@ export function InvitedFriendRow({
   const claimable = !!friend && friend.claimableTickets.length > 0;
   const claimableAmount =
     friend?.claimableTickets.reduce((sum, ticket) => sum + ticket.amount, 0) ?? 0;
+  // A friend who isn't a referral is still a friend — the row stays fully
+  // interactive and keeps whatever tickets it already accrued. Only the
+  // "counts toward your referrals" claim is withdrawn, and it says why.
+  const notCountedReason = friend && !countsAsReferral(friend) ? friend.notCountedReason : null;
 
   const rowAction = !friend
     ? undefined
@@ -54,7 +61,7 @@ export function InvitedFriendRow({
       onClick={rowAction}
       style={style}
       className={twMerge(
-        'group relative flex items-center gap-3 rounded-2xl border p-2.5 text-left transition-all',
+        'group relative flex flex-col gap-2 rounded-2xl border p-2.5 text-left transition-all',
         claimable
           ? 'border-gold/15 bg-gold/3 hover:bg-gold/8 cursor-pointer shadow-[0_0_10px_rgba(248,189,62,0.10)] active:scale-99'
           : 'bg-background-overlay/50 border-white/5',
@@ -62,115 +69,129 @@ export function InvitedFriendRow({
         className
       )}
     >
-      <div
-        role="button"
-        tabIndex={friend ? 0 : -1}
-        aria-label={friend ? t('open player card', { name: friend.username }) : undefined}
-        onClick={e => {
-          e.stopPropagation();
-          if (friend) onOpenCard?.(friend);
-        }}
-        onKeyDown={e => {
-          if ((e.key === 'Enter' || e.key === ' ') && friend) {
-            e.preventDefault();
+      <div className="flex w-full items-center gap-3">
+        <div
+          role="button"
+          tabIndex={friend ? 0 : -1}
+          aria-label={friend ? t('open player card', { name: displayNameOf(friend) }) : undefined}
+          onClick={e => {
             e.stopPropagation();
-            onOpenCard?.(friend);
-          }
-        }}
-        className="relative flex-shrink-0 cursor-pointer transition-transform active:scale-95"
-      >
-        <div className="h-11 w-11 overflow-hidden rounded-full">
+            if (friend) onOpenCard?.(friend);
+          }}
+          onKeyDown={e => {
+            if ((e.key === 'Enter' || e.key === ' ') && friend) {
+              e.preventDefault();
+              e.stopPropagation();
+              onOpenCard?.(friend);
+            }
+          }}
+          className="relative flex-shrink-0 cursor-pointer transition-transform active:scale-95"
+        >
+          <div className="h-11 w-11 overflow-hidden rounded-full">
+            <SkeletonSuspense
+              loading={loading || !friend}
+              skeleton={<Skeleton variant="round" className="h-full w-full" />}
+            >
+              {friend &&
+                (friend.avatar ? (
+                  <Image
+                    src={friend.avatar}
+                    alt={displayNameOf(friend)}
+                    width={44}
+                    height={44}
+                    className="h-11 w-11 rounded-full object-cover"
+                  />
+                ) : (
+                  <div className="h-11 w-11 rounded-full bg-white/5" />
+                ))}
+            </SkeletonSuspense>
+          </div>
+          {friend?.isVIP && (
+            <span
+              className="bg-pink-gradient border-background-overlay absolute -bottom-0.5 -right-0.5 flex h-4 w-4 items-center justify-center rounded-full border-2"
+              title="VIP"
+            >
+              <Star size={8} className="fill-white text-white" />
+            </span>
+          )}
+        </div>
+
+        <div className="flex min-w-0 flex-1 flex-col gap-0.5">
+          <div className="flex items-center gap-1">
+            <SkeletonSuspense
+              loading={loading || !friend}
+              skeleton={<Skeleton variant="line" textSize="sm" className="h-4 w-24" />}
+            >
+              <span className="truncate text-sm font-bold text-white">{displayNameOf(friend)}</span>
+              {friend?.isVerified && <VerifiedSparkleIcon size={15} className="shrink-0" />}
+              {friend?.isTelegramPremium && (
+                <Star
+                  size={12}
+                  className="fill-gold text-gold flex-shrink-0"
+                  aria-label={t('telegram premium')}
+                />
+              )}
+              {friend?.isLuckyPlayer && <LuckyPlayerIcon size={14} className="shrink-0" />}
+            </SkeletonSuspense>
+          </div>
           <SkeletonSuspense
             loading={loading || !friend}
-            skeleton={<Skeleton variant="round" className="h-full w-full" />}
+            skeleton={<Skeleton variant="line" textSize="xs" className="h-3 w-16" />}
           >
-            {friend &&
-              (friend.avatar ? (
-                <Image
-                  src={friend.avatar}
-                  alt={friend.username}
-                  width={44}
-                  height={44}
-                  className="h-11 w-11 rounded-full object-cover"
-                />
-              ) : (
-                <div className="h-11 w-11 rounded-full bg-white/5" />
-              ))}
+            <div className="flex items-center gap-2 text-[11px]">
+              <span className="text-gold flex items-center gap-1 font-semibold tabular-nums">
+                <BoltIcon size={16} />
+                {formatCompact(friend?.points ?? 0)}
+              </span>
+              {claimable && (
+                <span className="text-pink-secondary truncate">· {t('tickets to claim')}</span>
+              )}
+            </div>
           </SkeletonSuspense>
         </div>
-        {friend?.isVIP && (
-          <span
-            className="bg-pink-gradient border-background-overlay absolute -bottom-0.5 -right-0.5 flex h-4 w-4 items-center justify-center rounded-full border-2"
-            title="VIP"
-          >
-            <Star size={8} className="fill-white text-white" />
-          </span>
+
+        {claimable && friend && (
+          <div className="flex flex-shrink-0 items-center gap-2">
+            <div className="flex items-center">
+              {friend.claimableTickets.slice(0, 3).map(({ type }, idx) => (
+                <Ticket
+                  key={type}
+                  type={type}
+                  width={22}
+                  height={22}
+                  className={twMerge('-ml-2 drop-shadow-md first:ml-0', idx === 0 && 'first:ml-0')}
+                />
+              ))}
+              {friend.claimableTickets.length > 3 && (
+                // `ml-0.5`, not the `-ml-1` the tickets themselves overlap by:
+                // at 10px the "+" is narrower than that tuck, so it sat under
+                // the last ticket and the counter read as a bare "1".
+                <span className="text-pink-secondary ml-0.5 text-[10px] font-bold">
+                  +{friend.claimableTickets.length - 3}
+                </span>
+              )}
+            </div>
+            <span className="bg-pink-gradient inline-flex items-center gap-1 rounded-lg px-2.5 py-1.5 text-[11px] font-extrabold tracking-wide text-white shadow-[0_4px_12px_rgba(222,0,155,0.35)]">
+              {t('claim')}
+              {claimableAmount > 1 && (
+                <span className="tabular-nums opacity-90">×{claimableAmount}</span>
+              )}
+            </span>
+          </div>
+        )}
+
+        {!claimable && !loading && friend && (
+          <ChevronRight className="text-pink-secondary flex-shrink-0" size={16} />
         )}
       </div>
 
-      <div className="flex min-w-0 flex-1 flex-col gap-0.5">
-        <div className="flex items-center gap-1">
-          <SkeletonSuspense
-            loading={loading || !friend}
-            skeleton={<Skeleton variant="line" textSize="sm" className="h-4 w-24" />}
-          >
-            <span className="truncate text-sm font-bold text-white">{friend?.username}</span>
-            {friend?.isVerified && <VerifiedSparkleIcon size={15} className="shrink-0" />}
-            {friend?.isTelegramPremium && (
-              <Star
-                size={12}
-                className="fill-gold text-gold flex-shrink-0"
-                aria-label={t('telegram premium')}
-              />
-            )}
-            {friend?.isLuckyPlayer && <LuckyPlayerIcon size={14} className="shrink-0" />}
-          </SkeletonSuspense>
-        </div>
-        <SkeletonSuspense
-          loading={loading || !friend}
-          skeleton={<Skeleton variant="line" textSize="xs" className="h-3 w-16" />}
-        >
-          <div className="flex items-center gap-2 text-[11px]">
-            <span className="text-gold flex items-center gap-1 font-semibold tabular-nums">
-              <BoltIcon size={16} />
-              {formatCompact(friend?.points ?? 0)}
-            </span>
-            {claimable && (
-              <span className="text-pink-secondary truncate">· {t('tickets to claim')}</span>
-            )}
-          </div>
-        </SkeletonSuspense>
-      </div>
-
-      {claimable && friend && (
-        <div className="flex flex-shrink-0 items-center gap-2">
-          <div className="flex items-center">
-            {friend.claimableTickets.slice(0, 3).map(({ type }, idx) => (
-              <Ticket
-                key={type}
-                type={type}
-                width={22}
-                height={22}
-                className={twMerge('-ml-2 drop-shadow-md first:ml-0', idx === 0 && 'first:ml-0')}
-              />
-            ))}
-            {friend.claimableTickets.length > 3 && (
-              <span className="text-pink-secondary -ml-1 text-[10px] font-bold">
-                +{friend.claimableTickets.length - 3}
-              </span>
-            )}
-          </div>
-          <span className="bg-pink-gradient inline-flex items-center gap-1 rounded-lg px-2.5 py-1.5 text-[11px] font-extrabold tracking-wide text-white shadow-[0_4px_12px_rgba(222,0,155,0.35)]">
-            {t('claim')}
-            {claimableAmount > 1 && (
-              <span className="tabular-nums opacity-90">×{claimableAmount}</span>
-            )}
-          </span>
-        </div>
-      )}
-
-      {!claimable && !loading && friend && (
-        <ChevronRight className="text-pink-secondary flex-shrink-0" size={16} />
+      {/* Its own full-width line under the row, not beside the points. The
+          middle column shares its width with a ticket stack and a Claim
+          button, and the reason — the longest string on the row — first
+          overlapped them, then truncated to «Заблокировал б…», losing exactly
+          the word that carries the meaning. */}
+      {notCountedReason && (
+        <FriendNotCountedBadge reason={notCountedReason} className="self-start" />
       )}
     </Wrapper>
   );

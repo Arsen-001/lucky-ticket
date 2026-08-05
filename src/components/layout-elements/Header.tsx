@@ -27,6 +27,7 @@ import { useAppTranslations } from '@/hooks/useAppTranslations';
 import { useMounted } from '@/hooks/useMounted';
 import { openDrawer } from '@/lib/rtk/features/layout.slice';
 import type { ClassNameProps } from '@/types/interfaces/component.interfcaes';
+import { displayNameOf } from '@/utils/global/user.utils';
 import '@/styles/components/achievement.css';
 
 export function Header({ className }: ClassNameProps) {
@@ -114,7 +115,7 @@ export function Header({ className }: ClassNameProps) {
             loading={meLoading}
             skeleton={<Skeleton variant="line" className="h-6 w-32" />}
           >
-            <span className={usernameClasses}>{me?.username}</span>
+            <span className={usernameClasses}>{displayNameOf(me)}</span>
             {me?.isLuckyPlayer && (
               <Link
                 href={routes.settings.luckyPlayer}

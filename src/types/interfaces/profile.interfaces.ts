@@ -27,6 +27,8 @@ export interface ProfilePrivateStats {
 export interface ProfileFriendPreview {
   id: string;
   username: string;
+  /** Telegram name, when it should be shown instead of `username`. @see displayNameOf */
+  displayName?: string;
   avatar?: string;
 }
 
@@ -52,6 +54,8 @@ export interface ActivityBest {
 export interface ProfileResponse {
   id: string;
   username: string;
+  /** Telegram name, when it should be shown instead of `username`. @see displayNameOf */
+  displayName?: string;
   avatar: string;
   banner?: string;
   isVerified: boolean;

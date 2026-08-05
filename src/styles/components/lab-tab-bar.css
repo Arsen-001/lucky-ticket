@@ -1,0 +1,147 @@
+/* Design-lab only — the signature bottom-bar options.
+   Goes away with /lab once one of them is chosen. */
+
+/* The pink flow the bar's chip used before the ticket strip replaced it. Kept
+   here so the conventional options still look like they did when judged. */
+.lab-tab-flow {
+  background: linear-gradient(
+    135deg,
+    var(--color-electric-pink) 0%,
+    var(--color-gradient-lightpink) 50%,
+    var(--color-electric-pink) 100%
+  );
+}
+
+/* ── С1 · ticket strip ─────────────────────────────────────────────────────
+   The bar IS a ticket: its top edge is punched with half-circle notches, the
+   same tear line a real stub has. The mask clips children too, so the active
+   stub's pink top edge comes out scalloped for free. */
+.lab-tab-ticket {
+  -webkit-mask-image: radial-gradient(circle 5px at 8px 0, transparent 5px, #000 5.5px);
+  mask-image: radial-gradient(circle 5px at 8px 0, transparent 5px, #000 5.5px);
+  -webkit-mask-size: 16px 100%;
+  mask-size: 16px 100%;
+  -webkit-mask-repeat: repeat-x;
+  mask-repeat: repeat-x;
+}
+
+/* The printed tear line that runs across a ticket, just under the notches. */
+.lab-tab-tear {
+  background-image: repeating-linear-gradient(
+    90deg,
+    rgba(255, 255, 255, 0.22) 0 4px,
+    transparent 4px 9px
+  );
+}
+
+/* Perforation between two stubs — the line you would tear along. */
+.lab-tab-perforation {
+  background-image: repeating-linear-gradient(
+    to bottom,
+    rgba(255, 255, 255, 0.18) 0 3px,
+    transparent 3px 7px
+  );
+}
+
+/* The stub that has been torn off: lit from its own tear line downward. */
+.lab-tab-stub-active {
+  background: linear-gradient(
+    180deg,
+    rgba(222, 0, 155, 0.75) 0%,
+    rgba(222, 0, 155, 0.3) 30%,
+    rgba(222, 0, 155, 0.05) 72%,
+    transparent 100%
+  );
+}
+
+/* The torn stub's own tear line: bright where the ticket came apart. */
+.lab-tab-tear-lit {
+  background-image: repeating-linear-gradient(
+    90deg,
+    rgba(255, 255, 255, 0.85) 0 4px,
+    rgba(255, 255, 255, 0.2) 4px 9px
+  );
+}
+
+/* ── С2 · lottery ball on a rail ───────────────────────────────────────────
+   One object moves, and it is a draw ball: it rolls along the rail to the tab
+   you tapped and lights that tab from above. Nothing else in the bar changes. */
+.lab-tab-rail {
+  background-image: repeating-linear-gradient(
+    90deg,
+    rgba(255, 255, 255, 0.16) 0 5px,
+    transparent 5px 11px
+  );
+}
+
+.lab-tab-ball {
+  background: radial-gradient(
+    circle at 32% 28%,
+    #fff 0%,
+    var(--color-electric-pink) 55%,
+    var(--color-gradient-darkpink) 100%
+  );
+  box-shadow:
+    0 0 12px rgba(222, 0, 155, 0.85),
+    0 2px 6px rgba(0, 0, 0, 0.5);
+  /* The rotation is what sells the roll — it turns as it travels. */
+  transform: translateX(-50%) rotate(var(--lab-roll, 0deg));
+  transition:
+    left 520ms cubic-bezier(0.34, 1.42, 0.6, 1),
+    transform 520ms cubic-bezier(0.34, 1.42, 0.6, 1);
+}
+
+.lab-tab-beam {
+  background: radial-gradient(
+    58% 100% at 50% 0%,
+    rgba(222, 0, 155, 0.45) 0%,
+    rgba(222, 0, 155, 0.1) 45%,
+    transparent 75%
+  );
+  transform: translateX(-50%);
+  transition: left 520ms cubic-bezier(0.34, 1.42, 0.6, 1);
+}
+
+/* ── С3 · cube face turn ───────────────────────────────────────────────────
+   A real cube, not a card flip: the tile has depth and turns its bottom face
+   up. Same object the engine already is on the home screen. */
+.lab-tab-cube {
+  perspective: 420px;
+}
+
+.lab-tab-cube-inner {
+  position: absolute;
+  inset: 0;
+  transform-style: preserve-3d;
+  transition: transform 520ms cubic-bezier(0.2, 0.85, 0.25, 1);
+}
+
+.lab-tab-cube[data-active='true'] .lab-tab-cube-inner {
+  transform: rotateX(-90deg);
+}
+
+.lab-tab-cube-face {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 14px;
+  backface-visibility: hidden;
+}
+
+/* Half the tile height — the faces sit on the cube's surface, not on its axis. */
+.lab-tab-cube-front {
+  transform: translateZ(20px);
+}
+
+.lab-tab-cube-bottom {
+  transform: rotateX(90deg) translateZ(20px);
+  background: linear-gradient(
+    135deg,
+    var(--color-electric-pink) 0%,
+    var(--color-gradient-lightpink) 50%,
+    var(--color-electric-pink) 100%
+  );
+  box-shadow: 0 4px 18px rgba(222, 0, 155, 0.45);
+}

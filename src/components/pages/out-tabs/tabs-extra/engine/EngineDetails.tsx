@@ -47,6 +47,7 @@ import { EngineCubeSlot } from '@/components/pages/tabs/home/EngineCubeSlot';
 import { EngineCubeStatsFace } from '@/components/pages/tabs/home/EngineCubeStatsFace';
 import { CubeFaceCard } from '@/components/pages/out-tabs/tabs-extra/engine/CubeFaceCard';
 import type { InventoryChip, InventoryChipType } from '@/types/interfaces/inventory.interfaces';
+import { displayNameOf } from '@/utils/global/user.utils';
 
 export interface EngineDetailsProps {
   id: string;
@@ -289,7 +290,7 @@ export function EngineDetails({ id }: EngineDetailsProps) {
           lifetimeProduced={lifetimeProduced}
           ticketsPerHour={ticketsPerHour}
           engineLevel={engineLevel}
-          ownerName={me?.username}
+          ownerName={displayNameOf(me)}
           createdAt={engine.createdAt}
           accent={tierAccent}
         />

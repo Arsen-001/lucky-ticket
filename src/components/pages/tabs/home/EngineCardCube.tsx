@@ -28,6 +28,7 @@ import {
 import type { InventoryChipType } from '@/types/interfaces/inventory.interfaces';
 import { EngineCubeBackFace } from './EngineCubeBackFace';
 import { EngineCubeSlot } from './EngineCubeSlot';
+import { displayNameOf } from '@/utils/global/user.utils';
 import { EngineCubeStatsFace } from './EngineCubeStatsFace';
 import '@/styles/components/engine-card-cube.css';
 
@@ -74,7 +75,7 @@ function EngineCardCubeImpl(props: EngineCardCubeProps) {
       isLp: data?.isLuckyPlayer ?? false,
       isVip: data?.isVIP ?? false,
       vipLevel: data?.vipLevel ?? 0,
-      ownerName: data?.username,
+      ownerName: displayNameOf(data),
     }),
   });
   const chips = inventory?.chips ?? [];

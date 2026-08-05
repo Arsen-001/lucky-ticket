@@ -19,6 +19,7 @@ import { TelegramStarIcon } from '@/components/shared/icons/TelegramStarIcon';
 import { useAppTranslations } from '@/hooks/useAppTranslations';
 import { useInviteRewards } from '@/hooks/useInviteRewards';
 import { useInviteShare } from '@/hooks/useInviteShare';
+import { useReferralCounts } from '@/hooks/useReferralCounts';
 import { getRefererLink } from '@/utils/pages/referral.utils';
 import type { LocaleType } from '@/types/types/locale.types';
 
@@ -33,6 +34,11 @@ export function FriendsHeroCard() {
 
   const link = getRefererLink(me?.id);
   const linkReady = !!link;
+
+  // Null = don't draw the second stat at all: every invited friend counts, so
+  // it would be a copy of the first, which reads as a rendering bug.
+  const referrals = useReferralCounts();
+  const countedReferrals = referrals.notCounted > 0 ? referrals.counted : null;
 
   // Every branch of "hand this link to someone" lives in the hook — the
   // pre-launch countdown shares the exact same behaviour off a different data
@@ -71,11 +77,25 @@ export function FriendsHeroCard() {
           </ArrivalShine>
           <p className="text-pink-secondary truncate text-[11px]">{t('invite hero subtitle')}</p>
         </div>
-        <HeroInlineStat
-          label={t('invite hero stat invited')}
-          value={stats?.totalInvited ?? 0}
-          loading={isStatsLoading}
-        />
+        <div className="flex flex-shrink-0 items-start gap-3">
+          <HeroInlineStat
+            label={t('invite hero stat invited')}
+            value={stats?.totalInvited ?? 0}
+            loading={isStatsLoading}
+          />
+          {/* The second number appears only when it says something the first
+              doesn't. Equal numbers side by side read as a rendering bug, and
+              on a backend too old to send `counted` there is no second number
+              to show — @see ReferralStats.counted */}
+          {countedReferrals !== null && (
+            <HeroInlineStat
+              label={t('invite hero stat referrals')}
+              value={countedReferrals}
+              accent
+              loading={referrals.loading}
+            />
+          )}
+        </div>
       </div>
 
       <div className="relative mt-2.5 flex flex-col rounded-xl bg-black/25 p-1.5">

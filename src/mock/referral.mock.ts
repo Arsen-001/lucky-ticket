@@ -3,6 +3,7 @@ import {
   InvitedFriend,
   PreLaunchGiftState,
   PreparedShareMessage,
+  ReferralDisqualification,
   ReferralStats,
 } from '@/types/interfaces/referral.interfaces';
 import { appConfig } from '@/config/app.config';
@@ -25,6 +26,7 @@ const baseFriends: Omit<InvitedFriend, 'liked' | 'likesReceived'>[] = [
   {
     id: '1',
     username: 'john_doe',
+    displayName: 'Джон 🎰',
     avatar: avatar(12),
     isLuckyPlayer: false,
     isVerified: true,
@@ -39,6 +41,7 @@ const baseFriends: Omit<InvitedFriend, 'liked' | 'likesReceived'>[] = [
   {
     id: '2',
     username: 'jane_smith',
+    displayName: 'Jane Smith-Wolfenberger the Third',
     avatar: avatar(45),
     isLuckyPlayer: false,
     isVerified: false,
@@ -49,6 +52,7 @@ const baseFriends: Omit<InvitedFriend, 'liked' | 'likesReceived'>[] = [
   {
     id: '3',
     username: 'alex_wilson',
+    displayName: '(.)',
     avatar: avatar(7),
     isLuckyPlayer: true,
     isVerified: false,
@@ -140,6 +144,21 @@ const baseFriends: Omit<InvitedFriend, 'liked' | 'likesReceived'>[] = [
   },
 ];
 
+/**
+ * Who arrived through the link but is not a referral, and why — one friend per
+ * reason, because the three are rendered differently and a fixture missing any
+ * of them leaves that branch unverified in dev.
+ *
+ * `unknown` earns its place here more than the other two: it is the answer
+ * Telegram gives during an outage, it must NOT read as «не в канале», and it is
+ * the one nobody would think to click through to by hand.
+ */
+const MOCK_NOT_COUNTED: Record<string, ReferralDisqualification> = {
+  '2': 'not-in-channel',
+  '3': 'bot-blocked',
+  '4': 'unknown',
+};
+
 // Level-zero: no invited friends yet (the demo roster stays in `baseFriends`).
 export const invitedFriendsMock: InvitedFriend[] = appConfig.account.fresh
   ? []
@@ -147,10 +166,19 @@ export const invitedFriendsMock: InvitedFriend[] = appConfig.account.fresh
       ...friend,
       liked: i % 4 === 1,
       likesReceived: 35 + i * 44,
+      countsAsReferral: !MOCK_NOT_COUNTED[friend.id],
+      notCountedReason: MOCK_NOT_COUNTED[friend.id] ?? null,
     }));
 
 export const referralStatsMock: ReferralStats = {
   totalInvited: invitedFriendsMock.length,
+  // No `counted` here on purpose — it is derived from the friends roster, so
+  // that a fixture cannot state a number the list disagrees with.
+  // @see useReferralCounts
+  // Both rules on, as they are in production — the screen states them as
+  // conditions.
+  requireChannelSubscription: true,
+  requireBotNotBlocked: true,
 };
 
 export const preparedShareMessageMock: PreparedShareMessage = {
@@ -158,17 +186,19 @@ export const preparedShareMessageMock: PreparedShareMessage = {
 };
 
 /**
- * Friends who arrived but never joined the channel — the state that has to be
- * visible somewhere, because a roster that always counts in full hides the only
- * rule a player can actually get wrong.
+ * Friends who arrived but do not count toward the promo — the same three the
+ * friends list marks, read off the one map above rather than re-derived here.
+ * Two fixtures disagreeing about who is in the channel is a state production
+ * cannot be in, and it made the screens impossible to compare in dev.
  *
- * Deliberately leaves the counted number DIFFERENT from both the roster length
- * and the ladder requirement. A fixture where all three coincide hid a real
- * bug: the list header printed «7 из 7» to a player with ten friends, because
- * its denominator was the requirement instead of the roster, and the mock made
- * the two indistinguishable.
+ * The counted number stays DIFFERENT from the roster length on purpose. A
+ * fixture where they coincide hid a real bug: the list header printed «7 из 7»
+ * to a player with ten friends, because its denominator was the requirement
+ * instead of the roster.
  */
-const notCountedFriendIds = invitedFriendsMock.slice(1, 4).map(friend => friend.id);
+const notCountedFriendIds = invitedFriendsMock
+  .filter(friend => !friend.countsAsReferral)
+  .map(friend => friend.id);
 const countedFriends = invitedFriendsMock.length - notCountedFriendIds.length;
 
 /**

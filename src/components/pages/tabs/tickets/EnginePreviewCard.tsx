@@ -1,13 +1,12 @@
 'use client';
 
 import { useRouter } from 'next/navigation';
-import { Clock, Layers, Sparkles } from 'lucide-react';
+import { Clock, Sparkles } from 'lucide-react';
 import { twMerge } from 'tailwind-merge';
 import { useGetInventoryQuery } from '@/api/inventory.api';
 import { useGetMeQuery } from '@/api/me.api';
 import { ReactorDial } from '@/components/pages/out-tabs/tabs-extra/ticket/ReactorDial';
 import { EngineLevelBadge } from '@/components/pages/out-tabs/tabs-extra/ticket/EngineLevelBadge';
-import { EngineNextInFill } from '@/components/pages/out-tabs/tabs-extra/ticket/EngineNextInFill';
 import { useAppTranslations } from '@/hooks/useAppTranslations';
 import { useEngineSpeedAvatarBoostPct } from '@/hooks/useEngineSpeedAvatarBoostPct';
 import { useTestBadgeSpeedBoostPct } from '@/hooks/useTestBadgeSpeedBoostPct';
@@ -75,6 +74,9 @@ export function EnginePreviewCard({
   const capacity = engineCapacity(engine, { capacityChip, capacityBooster, tables });
   const pending = engine.pendingCount > 0;
   const remaining = Math.max(0, cycle - (elapsedSeconds ?? 0));
+  // Undefined until the parent's first tick, so the bar starts at 0 rather
+  // than jumping backwards from a half-done cycle.
+  const pct = cycle > 0 ? Math.min(100, Math.round(((elapsedSeconds ?? 0) / cycle) * 100)) : 0;
   const tierColor = `var(--color-${tier})`;
   const glow = TIER_GLOW[tier];
   const engineLevel = engine.engineLevel ?? 1;
@@ -98,47 +100,68 @@ export function EnginePreviewCard({
       }}
       style={{ ['--shine-card-accent' as string]: tierColor }}
       className={twMerge(
-        'shine-card w-full rounded-2xl flex flex-col gap-2 p-3 transition-transform active:scale-99 cursor-pointer focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-white',
+        'bg-background-overlay relative flex w-full cursor-pointer flex-col gap-2 overflow-hidden rounded-2xl border p-3 transition-transform active:scale-99 focus-visible:ring-1 focus-visible:ring-white focus-visible:outline-none',
+        // Ready is the state this whole screen exists for, so it is the only
+        // one that gets a lit border. It used to be tinted 30% of the tier
+        // colour, which on bronze is a dim brown next to a grey «next in» —
+        // three ready engines in a grid of nine were invisible.
+        pending ? 'border-white/15' : 'border-white/8',
         className
       )}
     >
-      <div className="flex items-stretch gap-2 min-w-0">
+      {pending && (
+        <span
+          aria-hidden
+          className="pointer-events-none absolute inset-0"
+          style={{
+            background: `radial-gradient(85% 70% at 50% -15%, color-mix(in srgb, ${glow} 26%, transparent) 0%, transparent 70%)`,
+          }}
+        />
+      )}
+
+      <div className="relative flex min-w-0 items-stretch gap-2">
         {/* No data-derived key: keying by the cycle/pending remounted the dial
             (and reloaded its engine image — a visible flicker) on every upgrade
             or skip. It renders purely from props, so let it update in place. */}
         <ReactorDial tier={tier} capacity={capacity} size={42} visual="engine" />
-        <div className="flex flex-1 min-w-0 flex-col justify-around items-start py-0.5">
-          <h5 className="text-[12px] font-bold text-white leading-tight truncate w-full">
+        <div className="flex min-w-0 flex-1 flex-col items-start justify-around py-0.5">
+          <h5 className="w-full truncate text-[12px] leading-tight font-bold text-white">
             {t('engine number', { number: index + 1 })}
           </h5>
           <EngineLevelBadge level={engineLevel} tier={tier} />
           {hasBoosts && (
             <span
-              className="inline-flex items-center gap-0.5 rounded-md bg-white/5 px-1.5 py-0.5 text-[8px] font-bold uppercase tracking-wider text-white/85 leading-none"
+              className="inline-flex items-center gap-0.5 rounded-md bg-white/5 px-1.5 py-0.5 text-[8px] leading-none font-bold tracking-wider text-white/85 uppercase"
               title={t('boosted')}
             >
-              <Sparkles className="w-2 h-2 text-electric-pink" strokeWidth={2.6} />
+              <Sparkles className="text-electric-pink h-2 w-2" strokeWidth={2.6} />
               {t('boosted')}
             </span>
           )}
         </div>
       </div>
 
-      <div className="flex items-center gap-1 rounded-lg bg-white/5 px-1.5 py-1">
-        <div className="flex items-center gap-1 flex-1 min-w-0 leading-none">
-          <Clock className="w-3 h-3 shrink-0" stroke={SPEED_ACCENT} strokeWidth={2.4} />
+      {/* Captioned figures, same container the tournament and task cards use.
+          Unlabelled, «×22» (capacity) and the «×1» on the claim button (what is
+          waiting) were the same notation for opposite things. */}
+      <div className="relative flex items-stretch divide-x divide-white/10 rounded-xl bg-black/25">
+        <div className="flex min-w-0 flex-1 flex-col items-center gap-1 px-1 py-1.5">
+          <span className="max-w-full truncate text-[8px] leading-none font-bold tracking-[0.16em] text-white/35 uppercase">
+            {t('cycle')}
+          </span>
           <span
-            className="text-[11px] font-extrabold tabular-nums leading-none"
+            className="text-[12px] leading-none font-extrabold tabular-nums"
             style={{ color: SPEED_ACCENT }}
           >
             {formatCycleTime(cycle)}
           </span>
         </div>
-        <div className="h-3 w-px bg-white/15 shrink-0" />
-        <div className="flex items-center gap-1 shrink-0 leading-none">
-          <Layers className="w-3 h-3 shrink-0" stroke={CAPACITY_ACCENT} strokeWidth={2.4} />
+        <div className="flex min-w-0 flex-1 flex-col items-center gap-1 px-1 py-1.5">
+          <span className="max-w-full truncate text-[8px] leading-none font-bold tracking-[0.16em] text-white/35 uppercase">
+            {t('capacity')}
+          </span>
           <span
-            className="text-[11px] font-extrabold tabular-nums leading-none"
+            className="text-[12px] leading-none font-extrabold tabular-nums"
             style={{ color: CAPACITY_ACCENT }}
           >
             ×{capacity}
@@ -154,48 +177,40 @@ export function EnginePreviewCard({
             e.stopPropagation();
             onClaim?.();
           }}
-          className="relative rounded-lg px-2 py-1.5 flex items-center justify-between gap-1.5 cursor-pointer active:scale-[0.97] transition-transform hover:brightness-110 overflow-hidden"
-          style={{
-            background: `linear-gradient(135deg, color-mix(in srgb, ${tierColor} 30%, transparent) 0%, color-mix(in srgb, ${tierColor} 12%, transparent) 100%)`,
-            border: `1px solid color-mix(in srgb, ${glow} 35%, transparent)`,
-          }}
+          className="bg-pink-gradient flex-center relative w-full cursor-pointer gap-1.5 overflow-hidden rounded-lg px-2 py-2 transition-transform hover:brightness-110 active:scale-[0.97]"
         >
           <span
             aria-hidden
             className="pointer-events-none absolute inset-0 overflow-hidden rounded-lg"
           >
-            <span className="absolute -top-1/2 -left-1/2 h-[200%] w-[55%] bg-gradient-to-r from-transparent via-white/40 to-transparent animate-task-shine" />
+            <span className="animate-task-shine absolute -top-1/2 -left-1/2 h-[200%] w-[55%] bg-gradient-to-r from-transparent via-white/40 to-transparent" />
           </span>
-          <span className="relative text-[9px] font-bold uppercase tracking-wider text-white">
+          <span className="relative text-[10px] font-extrabold tracking-wider text-white uppercase">
             {t('claim')}
           </span>
-          <span
-            className="relative text-[12px] font-extrabold tabular-nums leading-none"
-            style={{ color: glow, textShadow: `0 0 10px ${glow}` }}
-          >
+          <span className="relative text-[13px] leading-none font-extrabold text-white tabular-nums">
             ×{engine.pendingCount}
           </span>
         </button>
       ) : (
-        <div
-          className="relative rounded-lg overflow-hidden border border-white/6 bg-white/3 flex items-center justify-between px-2 py-1.5 tabular-nums"
-          style={{ ['--next-in-accent' as string]: tierColor }}
-        >
-          {/* The fill snapshots elapsed once on mount — rendering it before the
-              parent's first tick would animate from 0% on a half-done cycle. */}
-          {elapsedSeconds !== undefined && (
-            <EngineNextInFill
-              key={engine.cycleStartedAt}
-              cycleSeconds={cycle}
-              elapsedSeconds={elapsedSeconds}
+        <div className="relative flex flex-col gap-1">
+          {/* The cycle as a bar of its own rather than a fill behind the text:
+              a progress bar reads as progress, a tinted plate reads as a
+              highlight. Only ONE time is printed now — how long is left. The
+              cycle's length moved into the captioned cell above, where it was
+              no longer mistakable for a countdown. */}
+          <span className="h-1 overflow-hidden rounded-full bg-white/8">
+            <span
+              className="block h-full rounded-full transition-[width] duration-1000 ease-linear"
+              style={{ width: `${pct}%`, background: tierColor }}
             />
-          )}
-          <span className="relative z-1 text-[8px] font-bold uppercase tracking-wider text-white">
-            {t('next in')}
           </span>
-          <span className="relative z-1 text-[11px] font-bold text-white">
-            {formatCycleTime(remaining)}
-          </span>
+          <div className="flex-center gap-1.5 rounded-lg border border-white/10 bg-white/5 py-1.5">
+            <Clock className="h-3 w-3 text-white/50" strokeWidth={2.4} />
+            <span className="text-[11px] leading-none font-bold text-white/70 tabular-nums">
+              {formatCycleTime(remaining)}
+            </span>
+          </div>
         </div>
       )}
     </div>

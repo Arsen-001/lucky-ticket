@@ -20,6 +20,7 @@ import {
   type QuickCardPlayer,
 } from '@/components/shared/user-elements/PlayerQuickCard';
 import type { LeaderboardEntry } from '@/types/interfaces/leaderboard.interfaces';
+import { displayNameOf } from '@/utils/global/user.utils';
 
 const COUNT_UP_PLACES = 10;
 
@@ -74,10 +75,12 @@ export function LeaderboardContainer() {
     () =>
       places.slice(0, 5).map(entry => ({
         rank: entry.place as PodiumRank,
-        username: entry.username,
+        // A view model — this field is only ever printed, so it carries the
+        // shown name (Telegram's, when there is one), not the account handle.
+        username: displayNameOf(entry),
         points: entry.points,
         avatarUrl: entry.avatar,
-        fallbackInitial: entry.username.charAt(0).toUpperCase(),
+        fallbackInitial: displayNameOf(entry).charAt(0).toUpperCase(),
         isVerified: entry.isVerified,
         isLuckyPlayer: entry.isLuckyPlayer,
         isVIP: entry.isVIP,

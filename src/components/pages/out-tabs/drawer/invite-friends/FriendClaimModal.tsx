@@ -11,6 +11,7 @@ import { Ticket } from '@/components/shared/icons/Ticket';
 import { VipIcon } from '@/components/shared/icons/VipIcon';
 import { useAppTranslations } from '@/hooks/useAppTranslations';
 import type { ClaimableTicket, InvitedFriend } from '@/types/interfaces/referral.interfaces';
+import { displayNameOf } from '@/utils/global/user.utils';
 
 interface FriendClaimModalProps {
   open: boolean;
@@ -85,7 +86,7 @@ export function FriendClaimModal({
               {friend.avatar ? (
                 <Image
                   src={friend.avatar}
-                  alt={friend.username}
+                  alt={displayNameOf(friend)}
                   width={80}
                   height={80}
                   className="h-20 w-20 object-cover"
@@ -107,7 +108,7 @@ export function FriendClaimModal({
               </span>
             </h3>
             <span className="mt-0.5 text-xs text-white/85">
-              {t('rewards from {name}', { name: friend.username })}
+              {t('rewards from {name}', { name: displayNameOf(friend) })}
             </span>
             <div className="mt-2 flex flex-wrap items-center justify-center gap-1.5">
               {friend.isVerified && (

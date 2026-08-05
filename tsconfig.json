@@ -42,7 +42,9 @@
     ".next-mock/types/**/*.ts",
     ".next-mock/dev/types/**/*.ts",
     ".next-probe/types/**/*.ts",
-    ".next-probe/dev/types/**/*.ts"
+    ".next-probe/dev/types/**/*.ts",
+    ".next-404/types/**/*.ts",
+    ".next-404/dev/types/**/*.ts"
   ],
   "exclude": ["node_modules", "public/assets", "ad-platform-backend"]
 }

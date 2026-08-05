@@ -6,6 +6,7 @@ import { Skeleton } from '@/components/shared/seleketons/Skeleton';
 import { ComingSoonFriendRow } from '@/components/pages/coming-soon/ComingSoonFriendRow';
 import { useAppTranslations } from '@/hooks/useAppTranslations';
 import type { InvitedFriend } from '@/types/interfaces/referral.interfaces';
+import { displayNameOf } from '@/utils/global/user.utils';
 
 /** Rows shown while the list loads — enough to read as a list, not as a screen. */
 const SKELETON_ROWS = 2;
@@ -109,7 +110,7 @@ export function ComingSoonFriendsList({
           {visible.map((friend, index) => (
             <ComingSoonFriendRow
               key={friend.id}
-              username={friend.username}
+              username={displayNameOf(friend)}
               avatar={friend.avatar}
               counted={!notCounted.has(friend.id)}
               className="animate-slide-in-bottom"

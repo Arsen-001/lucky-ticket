@@ -14,10 +14,13 @@ import {
   type FriendsFilter,
 } from '@/components/pages/out-tabs/drawer/invite-friends/FriendsFilterChips';
 import { FriendsClaimSummaryCard } from '@/components/pages/out-tabs/drawer/invite-friends/FriendsClaimSummaryCard';
+import { FriendsQualificationNote } from '@/components/pages/out-tabs/drawer/invite-friends/FriendsQualificationNote';
 import { useAppTranslations } from '@/hooks/useAppTranslations';
+import { countsAsReferral } from '@/utils/pages/referral.utils';
 import type { ClaimableTicket, InvitedFriend } from '@/types/interfaces/referral.interfaces';
 import type { TicketType } from '@/types/types/ticket.types';
 import { useToast } from '@/hooks/useToast';
+import { displayNameOf } from '@/utils/global/user.utils';
 
 const EMPTY_TICKETS: Record<TicketType, number> = {
   bronze: 0,
@@ -46,14 +49,16 @@ export const InvitedFriendsList = () => {
     totalTickets: number;
   } | null>(null);
 
-  const counts = useMemo(
-    () => ({
+  const counts = useMemo(() => {
+    const referrals = friends.filter(countsAsReferral).length;
+    return {
       all: friends.length,
+      referrals,
+      'not-counted': friends.length - referrals,
       'with-rewards': friends.filter(f => f.claimableTickets.length > 0).length,
       premium: friends.filter(f => f.isTelegramPremium).length,
-    }),
-    [friends]
-  );
+    };
+  }, [friends]);
 
   const claimableTotal = useMemo(
     () => friends.reduce((sum, friend) => sum + sumClaimable(friend), 0),
@@ -74,6 +79,8 @@ export const InvitedFriendsList = () => {
     const filtered = friends.filter(friend => {
       if (filter === 'with-rewards') return friend.claimableTickets.length > 0;
       if (filter === 'premium') return !!friend.isTelegramPremium;
+      if (filter === 'referrals') return countsAsReferral(friend);
+      if (filter === 'not-counted') return !countsAsReferral(friend);
       return true;
     });
     return [...filtered].sort((a, b) => {
@@ -153,13 +160,20 @@ export const InvitedFriendsList = () => {
         onClaimAll={handleClaimAll}
       />
 
-      <div className="flex items-center justify-between px-1">
+      <div className="flex items-center justify-between gap-2 px-1">
         <ArrivalShine id="sendTicket" variant="title">
           <h3 className="text-base font-bold">
             {t('invited friends count', { count: friends.length })}
           </h3>
         </ArrivalShine>
+        {counts['not-counted'] > 0 && (
+          <span className="text-white-secondary flex-shrink-0 text-[11px] font-semibold tabular-nums">
+            {t('n of m are referrals', { count: counts.referrals, total: friends.length })}
+          </span>
+        )}
       </div>
+
+      {counts['not-counted'] > 0 && <FriendsQualificationNote notCounted={counts['not-counted']} />}
 
       {friends.length > 0 && (
         <FriendsFilterChips active={filter} onChange={setFilter} counts={counts} />
@@ -217,7 +231,7 @@ export const InvitedFriendsList = () => {
           open={cardOpen}
           onClose={() => setCardOpen(false)}
           userId={cardFriend.id}
-          username={cardFriend.username}
+          username={displayNameOf(cardFriend)}
           avatar={cardFriend.avatar}
           liked={cardFriend.liked}
           likesReceived={cardFriend.likesReceived}

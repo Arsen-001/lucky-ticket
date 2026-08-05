@@ -99,6 +99,7 @@ export const ownProfile: ProfileResponse = {
  */
 export const buildAccountOverlay = (): Partial<ProfileResponse> => ({
   username: mockDb.user.username,
+  displayName: mockDb.user.displayName,
   isVerified: mockDb.user.isVerified ?? false,
   isLuckyPlayer: mockDb.user.isLuckyPlayer,
   isVIP: mockDb.user.isVIP,
@@ -116,6 +117,9 @@ export const otherProfile: ProfileResponse = {
   ...ownProfile,
   id: 'user-2',
   username: 'NebulaPilot',
+  // Emoji + a name longer than the row it sits in — the two shapes a Telegram
+  // name takes that an ASCII handle never could.
+  displayName: '🚀 Небула Пилот',
   isOwn: false,
   // A distinct, populated public player — independent of the signed-in
   // account's level (visiting a profile always shows real data).

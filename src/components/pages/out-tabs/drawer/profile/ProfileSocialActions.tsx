@@ -6,6 +6,7 @@ import { ProfileSendTicketModal } from '@/components/pages/out-tabs/drawer/profi
 import { ProfileInviteTournamentModal } from '@/components/pages/out-tabs/drawer/profile/ProfileInviteTournamentModal';
 import { useAppTranslations } from '@/hooks/useAppTranslations';
 import type { ProfileResponse } from '@/types/interfaces/profile.interfaces';
+import { displayNameOf } from '@/utils/global/user.utils';
 
 export interface ProfileSocialActionsProps {
   profile: ProfileResponse;
@@ -53,13 +54,13 @@ export function ProfileSocialActions({ profile, isPreview }: ProfileSocialAction
             open={sendOpen}
             onClose={() => setSendOpen(false)}
             userId={profile.id}
-            username={profile.username}
+            username={displayNameOf(profile)}
           />
           <ProfileInviteTournamentModal
             open={inviteOpen}
             onClose={() => setInviteOpen(false)}
             userId={profile.id}
-            username={profile.username}
+            username={displayNameOf(profile)}
           />
         </>
       )}

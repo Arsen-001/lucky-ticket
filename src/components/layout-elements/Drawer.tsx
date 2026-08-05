@@ -50,6 +50,7 @@ import { useLocation } from '@/hooks/useLocation';
 import { useMounted } from '@/hooks/useMounted';
 import { closeDrawer, selectDrawerOpen } from '@/lib/rtk/features/layout.slice';
 import { useAppDispatch, useAppSelector } from '@/lib/rtk/hooks';
+import { displayNameOf } from '@/utils/global/user.utils';
 import '@/styles/components/drawer.css';
 
 const SWIPE_CLOSE_THRESHOLD_PX = 80;
@@ -371,7 +372,7 @@ export function Drawer() {
                 loading={meLoading}
                 skeleton={<Skeleton variant="line" className="h-4 w-28" />}
               >
-                <span className="truncate text-sm font-bold text-white">{me?.username}</span>
+                <span className="truncate text-sm font-bold text-white">{displayNameOf(me)}</span>
                 <span className="text-pink-secondary text-[11px] font-semibold">
                   {t('view profile')}
                 </span>

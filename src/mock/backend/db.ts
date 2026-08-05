@@ -55,6 +55,11 @@ export const mockDb = {
   user: {
     id: faker.string.uuid(),
     username: 'Arsen 001',
+    // What the player wrote for themselves in Telegram — deliberately the ugly
+    // real case, not a pretty one: this exact name exists in production, it can
+    // never be a `username` (the handle pattern rejects the parentheses), and a
+    // one-character name is what breaks name-shaped layouts and initials.
+    displayName: '(.)',
     email: 'arsen@gmai.com',
     // Account scalars switch with `fresh`: level-zero on the left, full demo on
     // the right. Nothing deleted — the rich values stay in the `: …` branch.

@@ -4,6 +4,7 @@ import { Check, UserPlus } from 'lucide-react';
 import { useGetReferralStatsQuery } from '@/api/referral.api';
 import { Medal } from '@/components/shared/icons/Medal';
 import { useAppTranslations } from '@/hooks/useAppTranslations';
+import { useReferralCounts } from '@/hooks/useReferralCounts';
 import { GlobalConstants, activityTierOrder } from '@/constants/global.constants';
 
 // Tiers with a non-zero friends requirement — the second half of the tier
@@ -18,7 +19,12 @@ const LADDER = activityTierOrder.filter(tier => GlobalConstants.tierReferralRequ
 export function FriendsTierLadderCard() {
   const t = useAppTranslations();
   const { data: stats } = useGetReferralStatsQuery();
+  // ALL invited friends, deliberately — not the referral count next door.
+  // The tier gate on the backend reads the raw lifetime counter, so drawing
+  // the narrower number here would show "7/10 до Gold" to a player who already
+  // holds Gold. The two numbers differ, so the card says which one this is.
   const invited = stats?.totalInvited ?? 0;
+  const countingDiffers = useReferralCounts().notCounted > 0;
 
   const next = LADDER.find(tier => invited < GlobalConstants.tierReferralRequirements[tier]);
   const nextReq = next ? GlobalConstants.tierReferralRequirements[next] : null;
@@ -101,6 +107,12 @@ export function FriendsTierLadderCard() {
       ) : (
         <span className="text-success text-[11px] font-bold">
           {t('all friend requirements met')}
+        </span>
+      )}
+
+      {countingDiffers && (
+        <span className="text-white-secondary text-[10px] leading-snug">
+          {t('tiers count every invited friend')}
         </span>
       )}
     </section>

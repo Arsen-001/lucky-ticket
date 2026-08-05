@@ -28,6 +28,7 @@ import {
   type ActivityTier,
 } from '@/constants/global.constants';
 import { routes } from '@/constants/routes';
+import { displayNameOf } from '@/utils/global/user.utils';
 import type { ProfileResponse } from '@/types/interfaces/profile.interfaces';
 import '@/styles/components/achievement.css';
 import '@/styles/components/profile.css';
@@ -224,7 +225,7 @@ export function ProfileHero({ profile, loading, isPreview, onTogglePreview }: Pr
           skeleton={<Skeleton variant="line" textSize="3xl" className="h-9 w-48" />}
         >
           <div className="flex items-center justify-center gap-2">
-            <h1 className={usernameClasses}>{profile?.username}</h1>
+            <h1 className={usernameClasses}>{displayNameOf(profile)}</h1>
             {profile?.isOwn && !isPreview && <ProfileUsernameEditButton />}
           </div>
         </SkeletonSuspense>
@@ -326,7 +327,7 @@ export function ProfileHero({ profile, loading, isPreview, onTogglePreview }: Pr
         open={shareOpen}
         onClose={() => setShareOpen(false)}
         url={profile ? routes.profile.getByUserId(profile.id) : undefined}
-        username={profile?.username}
+        username={displayNameOf(profile)}
       />
 
       <ConfirmModal

@@ -5,9 +5,22 @@ export interface ClaimableTicket {
   amount: number;
 }
 
+/**
+ * Why an invited friend is a friend but not a referral.
+ *
+ * `unknown` is NOT «не в канале»: it is Telegram refusing to answer (an
+ * outage, a 429, a bot that can't see the channel). The row says so in those
+ * words — telling someone their friend left when we simply could not ask
+ * accuses a real player of something they did not do, and unlike the other two
+ * reasons there is nothing the inviter can act on.
+ */
+export type ReferralDisqualification = 'not-in-channel' | 'bot-blocked' | 'unknown';
+
 export interface InvitedFriend {
   id: string;
   username: string;
+  /** Telegram name, when it should be shown instead of `username`. @see displayNameOf */
+  displayName?: string;
   avatar: string;
   isLuckyPlayer: boolean;
   isVerified: boolean;
@@ -17,10 +30,28 @@ export interface InvitedFriend {
   isVIP?: boolean;
   liked: boolean;
   likesReceived: number;
+  /**
+   * Counts toward the referral number right now — in the channel, and hasn't
+   * blocked the bot. Everyone on this list is a FRIEND regardless; this is the
+   * narrower thing. `undefined` = a backend too old to say, which must read as
+   * "counts" rather than painting every existing friend as disqualified.
+   */
+  countsAsReferral?: boolean;
+  /** Set exactly when `countsAsReferral` is false. @see ReferralDisqualification */
+  notCountedReason?: ReferralDisqualification | null;
 }
 
 export interface ReferralStats {
+  /** Everyone who ever arrived through the link. Permanent; unlocks tiers. */
   totalInvited: number;
+  /**
+   * Is the channel rule on? Off ⇒ the screen stops stating it as a condition.
+   * Config, not a count — which is why it lives here and the referral COUNT
+   * does not: that is derived from the friends list. @see useReferralCounts
+   */
+  requireChannelSubscription?: boolean;
+  /** Is the bot-block rule on? */
+  requireBotNotBlocked?: boolean;
 }
 
 /** Server-prepared rich invite message (image + caption + button), created via

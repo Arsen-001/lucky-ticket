@@ -1,0 +1,298 @@
+/**
+ * "Living engine" — motion layers laid over the flat 777x777 tier render.
+ *
+ * The render is a single baked image, so no gear inside it can actually turn.
+ * Everything here fakes the machine being at work with transform/opacity only
+ * (composited, no layout, no JS timers): a print jolt, a ticket leaving the
+ * tray, light moving through the mechanism, sparks at the slot.
+ *
+ * Every layer runs on ONE shared duration — `--engine-cycle` — so the jolt, the
+ * ticket and the sparks stay phase-locked without a single timer. The cycle
+ * timeline the percentages below encode:
+ *
+ *   0-5%    charge      core brightens
+ *   6-11%   PRINT       jolt + sparks
+ *   6-26%   eject       ticket slides out of the slot
+ *   26-34%  settle      it rests on the tray, small hop
+ *   34-70%  fly         it lifts away and fades
+ *   30-62%  sweep       highlight travels across the frame
+ *   70-100% idle        machine is quiet until the next cycle
+ */
+
+.engine-alive {
+  position: relative;
+  display: inline-flex;
+  flex-shrink: 0;
+}
+
+/* Jolt target: the render itself. Kept off the flying ticket, which has its
+   own trajectory and must not inherit the shake. */
+.engine-alive-frame {
+  position: absolute;
+  inset: 0;
+  transform-origin: 50% 64%;
+}
+
+.engine-alive-frame--stamp {
+  animation: engine-alive-stamp var(--engine-cycle) cubic-bezier(0.3, 0, 0.2, 1) infinite;
+}
+
+.engine-alive-img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+
+@keyframes engine-alive-stamp {
+  0%,
+  4% {
+    transform: scale(1) rotate(0deg);
+  }
+  7% {
+    transform: scale(0.962) rotate(-0.7deg);
+  }
+  11% {
+    transform: scale(1.014) rotate(0.4deg);
+  }
+  16% {
+    transform: scale(0.996) rotate(-0.15deg);
+  }
+  22%,
+  100% {
+    transform: scale(1) rotate(0deg);
+  }
+}
+
+/* ---------------------------------------------------------------- core glow */
+
+/* Light inside the mechanism. On gold / platinum / diamond the body is literal
+   glass, so a slowly rotating conic gradient behind it reads as gears moving;
+   on bronze / silver it lights the circuit traces baked into the dark casing.
+   Spin and pulse are two animations on one element on purpose — they drive
+   different properties (transform / opacity), so they never fight. */
+.engine-alive-core {
+  position: absolute;
+  border-radius: 50%;
+  pointer-events: none;
+  mix-blend-mode: screen;
+  filter: blur(6px);
+  background: conic-gradient(
+    from 0deg,
+    transparent 0deg,
+    var(--engine-accent) 40deg,
+    transparent 90deg,
+    transparent 180deg,
+    var(--engine-accent) 220deg,
+    transparent 270deg
+  );
+  -webkit-mask-image: radial-gradient(circle, #000 30%, transparent 70%);
+  mask-image: radial-gradient(circle, #000 30%, transparent 70%);
+  animation:
+    engine-alive-core-spin 5.5s linear infinite,
+    engine-alive-core-pulse var(--engine-cycle) ease-in-out infinite;
+}
+
+@keyframes engine-alive-core-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes engine-alive-core-pulse {
+  0%,
+  100% {
+    opacity: 0.3;
+  }
+  6% {
+    opacity: 0.95;
+  }
+  14% {
+    opacity: 0.5;
+  }
+  40% {
+    opacity: 0.26;
+  }
+}
+
+/* -------------------------------------------------------------------- sweep */
+
+/* A highlight crossing the machine, clipped to the render's own alpha via
+   `mask-image: var(--engine-mask)` — the same webp used as a stencil, so the
+   band never paints on the transparent background around the cube. */
+.engine-alive-sweep {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  pointer-events: none;
+  -webkit-mask-image: var(--engine-mask);
+  mask-image: var(--engine-mask);
+  -webkit-mask-size: contain;
+  mask-size: contain;
+  -webkit-mask-position: center;
+  mask-position: center;
+  -webkit-mask-repeat: no-repeat;
+  mask-repeat: no-repeat;
+}
+
+.engine-alive-sweep-band {
+  position: absolute;
+  top: -20%;
+  bottom: -20%;
+  left: 0;
+  width: 55%;
+  mix-blend-mode: screen;
+  background: linear-gradient(
+    100deg,
+    transparent 0%,
+    rgba(255, 255, 255, 0.05) 35%,
+    rgba(255, 255, 255, 0.42) 50%,
+    rgba(255, 255, 255, 0.05) 65%,
+    transparent 100%
+  );
+  animation: engine-alive-sweep var(--engine-cycle) cubic-bezier(0.4, 0, 0.3, 1) infinite;
+}
+
+@keyframes engine-alive-sweep {
+  0%,
+  30% {
+    transform: translate3d(-140%, 0, 0);
+  }
+  62%,
+  100% {
+    transform: translate3d(240%, 0, 0);
+  }
+}
+
+/* --------------------------------------------------------------------- slot */
+
+/* Anchored at the tray mouth of each tier's render; the ticket is laid out from
+   its left-centre so it can slide out to the right the way the printed one in
+   the image does. */
+.engine-alive-slot {
+  position: absolute;
+  pointer-events: none;
+}
+
+.engine-alive-ticket {
+  position: absolute;
+  inset: 0;
+  transform-origin: 0% 50%;
+  will-change: transform, opacity;
+  filter: drop-shadow(0 6px 12px rgba(0, 0, 0, 0.45));
+  animation: engine-alive-eject var(--engine-cycle) linear infinite;
+}
+
+.engine-alive-ticket img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+
+@keyframes engine-alive-eject {
+  0%,
+  5% {
+    transform: translate3d(-48%, 0, 0) scale(0.92) rotate(var(--engine-tilt));
+    opacity: 0;
+  }
+  10% {
+    opacity: 1;
+  }
+  26% {
+    transform: translate3d(0, 0, 0) scale(1) rotate(var(--engine-tilt));
+    opacity: 1;
+  }
+  34% {
+    transform: translate3d(3%, -9%, 0) scale(1.05) rotate(calc(var(--engine-tilt) * 0.4));
+    opacity: 1;
+  }
+  68% {
+    transform: translate3d(40%, -175%, 0) scale(0.42) rotate(12deg);
+    opacity: 0;
+  }
+  100% {
+    transform: translate3d(40%, -175%, 0) scale(0.42) rotate(12deg);
+    opacity: 0;
+  }
+}
+
+/* ------------------------------------------------------------------- sparks */
+
+.engine-alive-spark {
+  position: absolute;
+  top: 50%;
+  left: 0;
+  width: 3px;
+  height: 3px;
+  border-radius: 50%;
+  background: #fff;
+  box-shadow: 0 0 6px 2px var(--engine-accent);
+  opacity: 0;
+  animation: engine-alive-spark var(--engine-cycle) ease-out infinite;
+}
+
+@keyframes engine-alive-spark {
+  0%,
+  4% {
+    transform: translate3d(0, 0, 0) scale(0.2);
+    opacity: 0;
+  }
+  9% {
+    opacity: 1;
+  }
+  24% {
+    transform: translate3d(var(--spark-x), var(--spark-y), 0) scale(1);
+    opacity: 0;
+  }
+  100% {
+    opacity: 0;
+  }
+}
+
+/* -------------------------------------------------------------------- floor */
+
+/* Light pooling under the cube — the cheapest cue that the thing is powered,
+   and the only layer still readable at the 117px slider size. */
+.engine-alive-floor {
+  position: absolute;
+  left: 12%;
+  right: 12%;
+  bottom: 2%;
+  height: 12%;
+  border-radius: 50%;
+  pointer-events: none;
+  filter: blur(8px);
+  background: radial-gradient(ellipse at center, var(--engine-accent) 0%, transparent 70%);
+  animation: engine-alive-floor var(--engine-cycle) ease-in-out infinite;
+}
+
+@keyframes engine-alive-floor {
+  0%,
+  100% {
+    opacity: 0.22;
+    transform: scaleX(1);
+  }
+  8% {
+    opacity: 0.6;
+    transform: scaleX(1.1);
+  }
+  30% {
+    opacity: 0.3;
+    transform: scaleX(1);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .engine-alive-frame--stamp,
+  .engine-alive-core,
+  .engine-alive-sweep-band,
+  .engine-alive-ticket,
+  .engine-alive-spark,
+  .engine-alive-floor {
+    animation: none;
+  }
+
+  .engine-alive-ticket,
+  .engine-alive-spark {
+    opacity: 0;
+  }
+}

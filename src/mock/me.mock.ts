@@ -32,7 +32,15 @@ const meMock = {
   // Persist PATCH-ed fields (avatar, hasSeenTour, …) onto the shared user
   // record so they survive subsequent `getMe` refetches.
   'PATCH me': (args: FetchArgs) => {
-    Object.assign(mockDb.user, (args.body ?? {}) as Partial<MeResponse>);
+    const body = (args.body ?? {}) as Partial<MeResponse>;
+    // Mirror the backend rule (`usernameCustom`): a self-chosen name outranks
+    // the Telegram one from then on. Without this the mock would keep printing
+    // the Telegram name after a rename and the settings screen would look
+    // broken in dev while working in production.
+    if (body.username !== undefined && body.username !== mockDb.user.username) {
+      mockDb.user.displayName = undefined;
+    }
+    Object.assign(mockDb.user, body);
     return { ...mockDb.user };
   },
   // ── Change-email flow (mirrors the backend EmailVerificationService) ──

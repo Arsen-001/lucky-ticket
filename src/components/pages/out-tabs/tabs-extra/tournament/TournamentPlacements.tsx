@@ -18,6 +18,7 @@ import { LcLabel } from '@/components/shared/icons/LcLabel';
 import { ShardZoomButton } from '@/components/pages/out-tabs/tabs-extra/tournament/ShardZoomButton';
 import { useTournamentConfig } from '@/hooks/useTournamentConfig';
 import type { TournamentType } from '@/types/types/tournaments.types';
+import { displayNameOf } from '@/utils/global/user.utils';
 
 // Literal hexes (not var(--color-*)): ConfettiLayer builds `${color}aa`
 // drop-shadows, which needs a concatenable 6-digit hex, not a CSS variable.
@@ -131,10 +132,10 @@ export function TournamentPlacements({ id }: TournamentPlacementsProps) {
         (rank === 1 ? shardRewards.first : rank === 2 ? shardRewards.second : shardRewards.third);
       return {
         rank: rank as PodiumRank,
-        username: winner?.username ?? t(rank === 1 ? '1st' : rank === 2 ? '2nd' : '3rd'),
+        username: displayNameOf(winner) || t(rank === 1 ? '1st' : rank === 2 ? '2nd' : '3rd'),
         points: lc,
         avatarUrl: winner?.avatar,
-        fallbackInitial: winner?.username?.charAt(0).toUpperCase(),
+        fallbackInitial: displayNameOf(winner).charAt(0).toUpperCase() || undefined,
         extra: (
           <span
             className={twMerge(

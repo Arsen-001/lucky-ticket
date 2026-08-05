@@ -3,7 +3,7 @@
 import { twMerge } from 'tailwind-merge';
 import { useAppTranslations } from '@/hooks/useAppTranslations';
 
-export type FriendsFilter = 'all' | 'with-rewards' | 'premium';
+export type FriendsFilter = 'all' | 'referrals' | 'not-counted' | 'with-rewards' | 'premium';
 
 export interface FriendsFilterChipsProps {
   active: FriendsFilter;
@@ -16,6 +16,16 @@ export function FriendsFilterChips({ active, onChange, counts }: FriendsFilterCh
 
   const items: { key: FriendsFilter; label: string }[] = [
     { key: 'all', label: t('all') },
+    // Both referral chips appear only once somebody is actually not counted.
+    // With every friend qualifying, "рефералы" is a copy of "все" and "не
+    // засчитаны" is an empty list — two chips that answer nothing, and a rule
+    // stated to a player it does not apply to.
+    ...(counts['not-counted'] > 0
+      ? ([
+          { key: 'referrals', label: t('referrals') },
+          { key: 'not-counted', label: t('not counted') },
+        ] as const)
+      : []),
     { key: 'with-rewards', label: t('with rewards') },
     { key: 'premium', label: t('premium friends') },
   ];

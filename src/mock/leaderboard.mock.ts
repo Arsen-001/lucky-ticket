@@ -88,6 +88,7 @@ const buildResponse = (period: LeaderboardPeriod): LeaderboardResponse => {
       ...bound,
       id: otherProfile.id,
       username: otherProfile.username,
+      displayName: otherProfile.displayName,
       avatar: otherProfile.avatar,
       liked: otherProfile.liked,
       likesReceived: otherProfile.publicStats.likesReceived,
@@ -102,6 +103,7 @@ const buildResponse = (period: LeaderboardPeriod): LeaderboardResponse => {
   const myPlace: LeaderboardEntry = {
     id: me.id,
     username: me.username,
+    displayName: me.displayName,
     points: fresh ? 0 : (myPlaceInList?.points ?? POINTS_FLOOR_BY_PERIOD[period] + 80),
     avatar: me.avatar,
     rankChange: fresh ? 0 : faker.number.int({ min: -5, max: 12 }),

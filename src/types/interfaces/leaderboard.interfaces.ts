@@ -3,6 +3,8 @@ export type LeaderboardPeriod = 'today' | 'week' | 'month' | 'all';
 export interface LeaderboardEntry {
   id: string;
   username: string;
+  /** Telegram name, when it should be shown instead of `username`. @see displayNameOf */
+  displayName?: string;
   points: number;
   avatar: string;
   rankChange: number;

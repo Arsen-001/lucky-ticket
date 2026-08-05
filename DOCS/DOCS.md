@@ -76,6 +76,35 @@ Each account includes:
 
 The account is required to participate in all platform activities.
 
+#### Two names: the handle and the shown name
+
+A player has a **username** and a **display name**, and they answer different
+questions.
+
+- **`username`** — unique, ASCII only (letters, digits, `.`, `-`, `_`), 3–32
+  characters. It IDENTIFIES an account: leaderboard rows, referrals and admin
+  search all key off it. Assigned at first Telegram sign-in from the `@handle`,
+  or `tg_<telegram id>` when that handle is taken or absent.
+- **`displayName`** — the name the player wrote for themselves in Telegram
+  (`first_name` + `last_name`), refreshed on **every login**, exactly like the
+  avatar. It is only ever PRINTED. Telegram allows anything here — `(.)`, emoji,
+  Cyrillic, right-to-left — so most real names could never be a `username`.
+
+**What the app shows** (in order): the player's own in-app name if they renamed
+themselves in Settings → otherwise their Telegram name → otherwise `username`.
+Renaming in Settings latches that choice permanently (`usernameCustom`), so the
+Telegram name stops overriding it — without that latch, the rename screen would
+let someone type a name that never appears anywhere.
+
+The shown name is used in the header, drawer, profile, leaderboard, friends
+list, tournament podium, and the channel post announcing tournament results —
+everywhere a human reads a name. Names arriving from Telegram are stripped of
+invisible and bidirectional-override characters (which can visually reverse the
+row around them) and capped at 32 characters.
+
+Accounts that existed before this shipped have no `displayName` until their
+owner next opens the app, and show their `username` in the meantime.
+
 ### 4.2 User Profile
 
 The profile represents the user publicly and internally. It contains:
@@ -971,23 +1000,23 @@ Each tab shows a count badge of matching tournaments. Tournaments outside any ta
 
 The Tournament data model (`PersonalTournament`) is a superset of the public `Tournament` plus user-specific fields:
 
-| Field                      | Type                                         | Notes                                                              |
-| :------------------------- | :------------------------------------------- | :----------------------------------------------------------------- |
-| `id`                       | `string`                                     | UUID                                                               |
-| `name`                     | `string`                                     | `<TimeOfDay> <Tier>` per 11.2.1                                    |
-| `startTime`                | `string` (ISO)                               | When winners are determined                                        |
-| `teamSize`                 | `number`                                     | Total seats in the tournament                                      |
-| `prizePool`                | `number`                                     | LC distributed among the placement table                           |
-| `type`                     | `TournamentType`                             | `bronze` / `silver` / `gold` / `platinum` / `diamond`              |
-| `shardType`                | `'speed'` / `'capacity'`                     | Which chip type's shards are dropped (alternates per 11.4)         |
-| `status`                   | `'upcoming'` / `'finished'` / `'moderation'` | Lifecycle per 11.5; `moderation` = sponsored, under review (§11.8) |
-| `winners`                  | `TournamentWinner[]?`                        | Top-3 with `userId` + `username` + `avatar`. Only when `finished`. |
-| `places`                   | `TournamentPlacesResponse?`                  | Percentage breakdown (1, 2, 3, 4–5, 6–10, …, 101–500)              |
-| `participated`             | `boolean`                                    | User has joined                                                    |
-| `participatedTicketsCount` | `number?`                                    | How many tickets the user has submitted                            |
-| `userResult`               | `TournamentUserResult?`                      | `{ place?, lc, shards? }` — only when `finished` AND user joined   |
-| `resultSeen`               | `boolean?`                                   | Whether the result popup has been dismissed                        |
-| `sponsor`                  | `TournamentSponsor?`                         | Advertiser branding for a sponsored tournament (§11.8)             |
+| Field                      | Type                                         | Notes                                                                                      |
+| :------------------------- | :------------------------------------------- | :----------------------------------------------------------------------------------------- |
+| `id`                       | `string`                                     | UUID                                                                                       |
+| `name`                     | `string`                                     | `<TimeOfDay> <Tier>` per 11.2.1                                                            |
+| `startTime`                | `string` (ISO)                               | When winners are determined                                                                |
+| `teamSize`                 | `number`                                     | Total seats in the tournament                                                              |
+| `prizePool`                | `number`                                     | LC distributed among the placement table                                                   |
+| `type`                     | `TournamentType`                             | `bronze` / `silver` / `gold` / `platinum` / `diamond`                                      |
+| `shardType`                | `'speed'` / `'capacity'`                     | Which chip type's shards are dropped (alternates per 11.4)                                 |
+| `status`                   | `'upcoming'` / `'finished'` / `'moderation'` | Lifecycle per 11.5; `moderation` = sponsored, under review (§11.8)                         |
+| `winners`                  | `TournamentWinner[]?`                        | Top-3 with `userId` + `username` + `displayName?` + `avatar` (§4.1). Only when `finished`. |
+| `places`                   | `TournamentPlacesResponse?`                  | Percentage breakdown (1, 2, 3, 4–5, 6–10, …, 101–500)                                      |
+| `participated`             | `boolean`                                    | User has joined                                                                            |
+| `participatedTicketsCount` | `number?`                                    | How many tickets the user has submitted                                                    |
+| `userResult`               | `TournamentUserResult?`                      | `{ place?, lc, shards? }` — only when `finished` AND user joined                           |
+| `resultSeen`               | `boolean?`                                   | Whether the result popup has been dismissed                                                |
+| `sponsor`                  | `TournamentSponsor?`                         | Advertiser branding for a sponsored tournament (§11.8)                                     |
 
 **Endpoints** (`src/api/tournaments.api.ts`):
 
@@ -1551,14 +1580,33 @@ Provides assistance through:
 
 Encourages growth through referral rewards. Users can track their invited friends and view details such as:
 
-- Invited friend count.
+- Invited friend count, **and how many of them currently count as referrals** (see below).
 - Friend's status (Verified, Lucky Player, VIP).
 - Friend's Activity Points.
 - Friend's username and avatar.
+- Whether the friend counts as a referral, and if not — why.
 
 **How a referral is established:**
 
 Each user's invite link is a Telegram deep link — `https://t.me/<bot>?startapp=<referrerId>`. When a friend opens it, Telegram delivers `<referrerId>` as the `start_param` inside the signed `initData`. On the friend's **first** sign-in the backend records the referral (referrer → new user) and pays the inviter the signup reward below. The link is captured only at registration: a user who already has an account cannot be retro-attributed to a referrer, and each user can be referred at most once (self-referral is ignored).
+
+**Friend vs referral — who actually counts.** Everyone who arrives through the link is a **friend**, permanently: the relationship is recorded once and nothing takes it away. A **referral** is the narrower, _live_ thing the friends screen reports — a friend who is currently **subscribed to the official channel** and has **not blocked the bot**. Someone who joined through a link, never opened the channel and blocked the bot is still listed as a friend, still keeps whatever ticket commission they already generated, but stops counting as a referral.
+
+The screen therefore shows two numbers side by side, and each row that does not count carries its own reason:
+
+| Reason on the row   | What it means                                             | Counts? |
+| :------------------ | :-------------------------------------------------------- | :------ |
+| «Не в канале»       | Telegram confirms the friend is not a channel member      | no      |
+| «Заблокировал бота» | `User.botBlockedAt` is set — the friend blocked the bot   | no      |
+| «Не проверено»      | Telegram would not answer (outage, 429, unconfigured bot) | no      |
+
+The third reason is deliberately **not** worded as "not in channel". It is our own failure to ask, not the friend's action, and it is labelled in a muted tone rather than a warning one — telling a player their friend left when nobody knows that accuses a real person of something they did not do. Like every other channel gate since 2026-08-04 the rule **fails closed**: only a confirmed yes counts, so while Telegram is unreachable the referral number reads low and refills by itself once it answers. Blocking the bot outranks the channel answer when both apply — it is the more actionable thing to tell the inviter, since a channel can be rejoined silently but an unblock cannot be requested through a blocked bot.
+
+Both halves of the rule are admin-switchable (`referralConfig.qualification.requireChannelSubscription` / `.requireBotNotBlocked`); with both off every invited friend counts again, nothing is asked of Telegram at all, and the screen stops stating the condition. The switches exist as the escape hatch for a long Telegram outage — turning them off is the one fix that does not itself depend on Telegram.
+
+**One endpoint owns the rule.** `GET referral/friends` carries `countsAsReferral` + `notCountedReason` per friend; `GET referral/stats` stays a single cheap `COUNT` (`totalInvited` plus the two rule flags) and deliberately does **not** report the referral count. Both endpoints fire together when the screen opens, so computing it in each meant resolving the whole roster against Telegram twice on a cold cache — for the largest referrer on prod (248 friends) that is ~496 `getChatMember` calls to render one screen. The Mini App derives the count from the list it already loads (`useReferralCounts`), which also makes it impossible for the header to disagree with the rows beneath it.
+
+**This is a reporting rule, not an economy rule.** Tier requirements (§5.2) still read the raw lifetime `User.referralsCount`, and the signup reward is still paid the moment the friend registers — so nobody loses a tier or a reward they already hold. The tier ladder on the friends screen therefore draws **all invited friends**, and says so in a note whenever the two numbers differ; drawing the narrower number there would show "7/10 до Gold" to a player who is already Gold.
 
 **Share flow:** On Telegram clients with Bot API 8.0+, tapping **Share invite** sends a **rich invite card** instead of a bare link — a branded 1280×720 image with a localized caption and a "Play" button carrying the `?startapp=<referrerId>` deep link. The backend prepares it per tap (`POST referral/prepare-share`, one-time-use message via Bot API `savePreparedInlineMessage`), and the Mini App forwards it through the native chat picker (`WebApp.shareMessage`). On older clients — or if preparation fails — the flow falls back to the plain `t.me/share/url` link share; outside Telegram it uses the OS share sheet or copies the link.
 

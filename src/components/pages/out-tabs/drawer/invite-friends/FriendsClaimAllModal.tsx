@@ -7,6 +7,7 @@ import { Button } from '@/components/shared/buttons/Button';
 import { Ticket } from '@/components/shared/icons/Ticket';
 import { useAppTranslations } from '@/hooks/useAppTranslations';
 import type { ClaimableTicket, InvitedFriend } from '@/types/interfaces/referral.interfaces';
+import { displayNameOf } from '@/utils/global/user.utils';
 
 export interface FriendsClaimAllModalProps {
   open: boolean;
@@ -79,7 +80,7 @@ export function FriendsClaimAllModal({
                   {friend.avatar ? (
                     <Image
                       src={friend.avatar}
-                      alt={friend.username}
+                      alt={displayNameOf(friend)}
                       width={56}
                       height={56}
                       className="h-14 w-14 object-cover"

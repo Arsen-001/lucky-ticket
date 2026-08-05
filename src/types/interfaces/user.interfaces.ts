@@ -19,6 +19,12 @@ export interface StatusPerks {
 export interface MeResponse {
   id: string;
   username: string;
+  /**
+   * The name written in Telegram (`first_name` + `last_name`), sent only when
+   * it should be shown instead of `username` — i.e. the player never renamed
+   * themselves in Settings. Render it with `displayNameOf()`, never raw.
+   */
+  displayName?: string;
   email?: string;
   isLuckyPlayer: boolean;
   luckyPlayerExpiresAt?: string;
