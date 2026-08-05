@@ -14,9 +14,10 @@ export interface TabBarItemProps {
 }
 
 /**
- * One of the four tabs that stay in the row. The fifth — Home — is lifted out
- * of it into `TabBarCenterItem`, so these keep an even, quiet weight: every
- * label is always on, and the active one is marked by colour alone.
+ * One tab of the row. All five are equal here: the active one is marked by the
+ * raised disc that travels to it (`TabBarActiveDisc`), so while the disc stands
+ * on this tab the tab hides its own icon and lends it to the disc. It comes
+ * back late enough for the disc to have left, so the two are never seen at once.
  */
 export function TabBarItem({
   active,
@@ -42,8 +43,8 @@ export function TabBarItem({
       {cloneElement<LucideProps>(icon, {
         size: 22,
         className: twMerge(
-          'transition-colors duration-300',
-          active ? 'text-electric-pink' : 'text-white/50'
+          'text-white/50 transition-opacity',
+          active ? 'opacity-0 duration-100' : 'opacity-100 delay-200 duration-200'
         ),
       })}
       <span
