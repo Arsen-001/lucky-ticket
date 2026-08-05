@@ -7,8 +7,8 @@ import { useAppTranslations } from '@/hooks/useAppTranslations';
 import '@/styles/components/lab-tab-bar.css';
 
 /**
- * The conventional options, kept for comparison. Today's bar is not one of them
- * — it is the ticket strip (С1) carrying the raised Home button of `center`.
+ * The conventional options. Today's bar is the third of them (`center`), which
+ * now lives in the app itself; the ticket strip (С1) stood there before it.
  */
 export type LabTabBarVariant = 'labeled' | 'quiet' | 'center' | 'stacked';
 

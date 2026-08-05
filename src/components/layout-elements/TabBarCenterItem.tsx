@@ -13,14 +13,10 @@ export interface TabBarCenterItemProps {
 }
 
 /**
- * The middle tab, lifted out of the ticket strip into a raised disc that hangs
- * over its torn edge. It is the anchor of the bar and the easiest target for a
- * thumb; the ring is painted in the strip's own colour, so the disc reads as
- * punched out of the ticket rather than laid on top of it.
- *
- * It is positioned by the bar, not by the row — the strip masks its own
- * children into the notched shape, and anything inside it would be cut off at
- * the tear edge.
+ * The middle tab, lifted out of the row into a raised disc that sits half above
+ * the bar. It is the anchor of the bar and the easiest target for a thumb; the
+ * ring is painted in the bar's own colour, so the disc reads as punched out of
+ * it rather than laid on top.
  */
 export function TabBarCenterItem({
   active,
@@ -36,11 +32,14 @@ export function TabBarCenterItem({
       onClick={onClick}
       style={style}
       aria-current={active ? 'page' : undefined}
-      className={twMerge('flex flex-col items-center gap-1.5 rounded-none px-1 py-0', className)}
+      className={twMerge(
+        'relative flex min-w-0 flex-1 flex-col items-center gap-1 rounded-none px-1 py-0',
+        className
+      )}
     >
       <span
         className={twMerge(
-          'flex-center ring-header size-14 shrink-0 rounded-full ring-[6px] transition-all duration-300',
+          'flex-center ring-header size-14 shrink-0 -mt-7 rounded-full ring-[6px] transition-all duration-300',
           active ? 'bg-pink-gradient shadow-[0_8px_24px_rgba(222,0,155,0.5)]' : 'bg-gradient-purple'
         )}
       >
