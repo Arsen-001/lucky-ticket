@@ -108,7 +108,9 @@ export function TabBar({ className }: ClassNameProps) {
       )}
       // Ease the bottom inset as Telegram settles it on open (see Header).
       style={{
-        paddingBottom: 'calc(0.75rem + var(--tg-inset-bottom))',
+        // Keeps the bar at its old 74px: the row sits high so the label stays
+        // under the disc, and the height it gives back goes below the labels.
+        paddingBottom: 'calc(23px + var(--tg-inset-bottom))',
         transition: 'padding-bottom 220ms ease-out',
         // Own compositor layer — see Header: fixed bars flicker in WKWebView
         // during heavy content relayouts without this.

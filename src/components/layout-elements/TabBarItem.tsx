@@ -51,7 +51,7 @@ export function TabBarItem({
       })}
       <span
         className={twMerge(
-          'max-w-full truncate text-[11px] leading-none font-bold transition-colors duration-300',
+          'max-w-full truncate text-[13px] leading-none font-bold transition-colors duration-300',
           active ? 'text-white' : 'text-white/45'
         )}
       >

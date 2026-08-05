@@ -28,7 +28,7 @@ export function TabBarActiveDisc({ icon, iconKey, className, style }: TabBarActi
       aria-hidden
       style={style}
       className={twMerge(
-        'flex-center bg-pink-gradient pointer-events-none absolute z-2 size-14 rounded-full shadow-[0_8px_24px_rgba(222,0,155,0.5)]',
+        'flex-center bg-pink-gradient pointer-events-none absolute z-2 size-14 rounded-full',
         className
       )}
     >
