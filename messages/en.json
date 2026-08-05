@@ -1198,6 +1198,8 @@
   "coming soon more friends better": "The more friends you bring, the stronger you start: after launch they raise your status and pay you a share of their tickets — and the gift for {count} is yours either way.",
   "coming soon gift claim": "Claim your gift",
   "coming soon gift locked": "Bring {count} friends into the channel to unlock",
+  "coming soon gift paused": "On hold — a friend left the channel",
+  "coming soon gift paused hint": "{count, plural, one {Your gift is requested, but # invited friend is no longer in the channel — it goes out as soon as they are back} other {Your gift is requested, but # invited friends are no longer in the channel — it goes out as soon as they are back}}",
   "coming soon gift requested": "Requested — waiting for approval",
   "coming soon gift in chat": "Sent — check your chat with the bot",
   "invite not subscribed": "Not in channel",

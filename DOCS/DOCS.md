@@ -2353,6 +2353,31 @@ accounts opening a link — costs an abuser nothing. The queue shows friends-whe
 beside friends-now, because a roster that shrank after the claim is the shape a
 farm leaves behind.
 
+**The ladder is re-checked at approval, not just at the press.** `referralsAtEarn`
+froze the moment the player pressed; the channel did not. Observed on
+2026-08-05: a claim filed at 7 confirmed friends read 6/8 in the panel a few
+hours later, because one of them left the channel. Since then Подтвердить
+refuses such a row outright — the gift is paid on the live count or not at all,
+and the claim stays PENDING so it can be paid the day the friend comes back.
+One deliberate exception, and it is the difference between «вышел из канала» and
+«Telegram не ответил»: the unresolvable friends get the benefit of the doubt
+(the refusal triggers on `confirmed + unresolved < 7`, not on `confirmed < 7`).
+Without it a Telegram outage would read as everybody's ladder collapsing at once
+and freeze the whole queue, and the claim already passed the strict check once,
+at filing. A `not_participant` is a confirmed no here as everywhere else and
+softens nothing. The panel's «N/M в канале» turns red with «нужно 7» on exactly
+the rows this rule would refuse, so the button never surprises.
+
+**And the player's own screen says the same thing.** The ladder is drawn from
+the live counted number, so it falls back to 6/7 by itself; on top of that a
+filed claim whose ladder came apart shows the gift as **«на паузе»** (amber, ⚠)
+instead of the green «запрошен», with «отправим, как только он вернётся» and the
+channel rule printed again. It is deliberately not shown as _locked_: the
+`PreLaunchGift` row is unique per account and permanent, so there is nothing to
+press again — a padlock would invite a tap that can only answer «Подарок уже
+запрошен». Only PENDING and FAILED pause; APPROVED, SENT and REJECTED are past
+the point where a returning friend changes anything.
+
 **The channel announces it — after the fact.** When a gift actually reaches a
 player, autopost publishes it (Каналы → Автопостинг → «Подарок за 7
 друзей»): a picture of the bear with the caption «{winner} привёл семерых

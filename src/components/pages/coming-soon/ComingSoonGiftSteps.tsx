@@ -75,6 +75,20 @@ export function ComingSoonGiftSteps({
   const sent = gift.status === 'SENT';
 
   /**
+   * A claim was filed and the ladder has since come apart — a friend left the
+   * channel after the press, which the backend notices because it recounts the
+   * channel live on every read.
+   *
+   * Only while the claim can still be paid: APPROVED is already on its way out,
+   * SENT has landed, and REJECTED is over — telling any of them to bring a
+   * friend back would be asking for something that changes nothing. PENDING and
+   * FAILED (an admin's retry away) are the two that a returning friend still
+   * helps, and they are exactly the two the backend now refuses to pay while
+   * the count is short.
+   */
+  const paused = !complete && (gift.status === 'PENDING' || gift.status === 'FAILED');
+
+  /**
    * The gift's own state. `canClaim` is the server's answer to "would pressing
    * this work right now" — it already accounts for the places, the channel rule
    * and an existing claim, so the screen never lights up a button that would be
@@ -83,6 +97,10 @@ export function ComingSoonGiftSteps({
    */
   const prizeState = (() => {
     if (sent) return 'sent' as const;
+    // Before the plain `claimed`: a filed claim that is no longer covered by a
+    // full ladder must not keep showing a green tick, or the screen promises a
+    // gift the panel is now refusing to send. @see paused
+    if (paused) return 'paused' as const;
     if (gift.status) return 'claimed' as const;
     if (gift.canClaim) return 'ready' as const;
     if (gift.eligible) return 'closed' as const;
@@ -120,11 +138,16 @@ export function ComingSoonGiftSteps({
    * can act on *before* sending the link.
    *
    * Dropped once their own claim is filed (the rule has done its work) and when
-   * an admin switches the rule off.
+   * an admin switches the rule off — but it comes back on a paused claim, where
+   * it is the one thing standing between them and the gift again.
    */
-  const channelRule = !gift.status && gift.requireChannelSubscription !== false;
+  const channelRule = (!gift.status || paused) && gift.requireChannelSubscription !== false;
 
   const caption = (() => {
+    // Ahead of the plain «пригласите ещё N»: that sentence offers a gift for
+    // bringing friends, and this player already asked for theirs. What they
+    // need to hear is that the request is waiting, not that it never happened.
+    if (paused) return t('coming soon gift paused hint', { count: remaining });
     if (remaining > 0) return t('coming soon gift steps hint', { count: remaining });
     if (sent) {
       return gift.emoji
