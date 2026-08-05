@@ -12,7 +12,18 @@ export interface TabBarItemProps {
   className?: string;
   style?: CSSProperties;
   flightTarget?: string;
+  /** Tear line shared with the stub on the left. The first stub has none. */
+  perforated?: boolean;
 }
+
+/**
+ * One stub of the ticket the tab bar is made of.
+ *
+ * The active tab is not a chip laid over the bar — it is the stub torn off it:
+ * lit from its own tear line downward and lifted 2px out of the strip. That is
+ * why every label can stay visible (the old chip had to expand sideways to make
+ * room for one, and capped "Tournaments" at 26vw).
+ */
 export function TabBarItem({
   active,
   onClick,
@@ -21,26 +32,32 @@ export function TabBarItem({
   className,
   style,
   flightTarget,
+  perforated = true,
 }: TabBarItemProps) {
   return (
     <Button
-      variant={active ? 'primary' : 'transparent'}
+      variant="transparent"
       onClick={onClick}
       style={style}
       data-flight-target={flightTarget}
+      aria-current={active ? 'page' : undefined}
       className={twMerge(
-        'p-3 flex-center rounded-full',
-        active && 'tab-bar-active-flow text-white shadow-[0_4px_18px_rgba(222,0,155,0.45)]',
+        'relative flex min-w-0 flex-1 flex-col items-center gap-1.5 rounded-none px-1 pt-5 pb-1 transition-transform duration-300',
+        active && 'tab-bar-stub-active -translate-y-0.5',
         className
       )}
     >
-      {cloneElement<LucideProps>(icon, { size: 22 })}
+      {perforated && (
+        <span aria-hidden className="tab-bar-perforation absolute top-1 bottom-1 left-0 w-px" />
+      )}
+      {active && (
+        <span aria-hidden className="tab-bar-tear-lit absolute top-1.5 right-0 left-0 h-px" />
+      )}
+      {cloneElement<LucideProps>(icon, { size: 22, strokeWidth: active ? 2.4 : 2 })}
       <span
         className={twMerge(
-          'max-w-0 whitespace-nowrap overflow-hidden h-5.5',
-          // text-sm + wider cap so the longest label ("Tournaments") fits on a
-          // 390px viewport instead of truncating to "Tourname…".
-          active && 'ml-1 max-w-[26vw] tab-bar-transition font-bold truncate text-sm leading-5.5'
+          'max-w-full truncate text-[10px] leading-none font-bold transition-colors duration-300',
+          active ? 'text-white' : 'text-white/45'
         )}
       >
         {name}

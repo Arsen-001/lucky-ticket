@@ -90,7 +90,9 @@ export function TabBar({ className }: ClassNameProps) {
   return (
     <div
       className={twMerge(
-        'bg-header relative px-5 pt-4 flex justify-between items-center gap-2 overflow-hidden animate-fade-in',
+        // The bar is a ticket strip: `tab-bar-ticket` punches the notched tear
+        // edge along its top, and clips everything inside it to that shape.
+        'bg-header tab-bar-ticket relative flex items-stretch justify-between overflow-hidden animate-fade-in',
         className
       )}
       // Ease the bottom inset as Telegram settles it on open (see Header).
@@ -107,6 +109,8 @@ export function TabBar({ className }: ClassNameProps) {
         aria-hidden
         className="pointer-events-none absolute inset-0 bg-[radial-gradient(120%_80%_at_0%_100%,rgba(222,0,155,0.08),transparent_60%),radial-gradient(120%_80%_at_100%_0%,rgba(248,189,62,0.06),transparent_55%)]"
       />
+      {/* The tear line printed across the strip, right under the notches. */}
+      <span aria-hidden className="tab-bar-tear absolute top-1.5 right-0 left-0 h-px" />
       {tabs.map(({ route, icon, name }, index) => (
         <TabBarItem
           key={route}
@@ -114,6 +118,7 @@ export function TabBar({ className }: ClassNameProps) {
           name={name}
           onClick={() => handleTabClick(route)}
           active={activeRoute === route}
+          perforated={index > 0}
           flightTarget={route === routes.tickets.index ? 'tickets' : undefined}
           className="relative z-1 animate-slide-in-bottom"
           style={{
