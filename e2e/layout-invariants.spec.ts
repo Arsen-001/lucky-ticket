@@ -22,6 +22,31 @@ import { STATIC_ROUTES } from './routes';
 /** Widths that matter: smallest Android, iPhone 15 Pro, iPhone 15 Pro Max. */
 const WIDTHS = [320, 393, 430] as const;
 
+/**
+ * The per-route sweep runs at ONE width, the narrowest — that is where content
+ * runs out of room, so a wider pass finds nothing the narrow one missed. All 40
+ * routes at three widths in two engines took the CI job to 17 minutes on a
+ * runner where one page load costs 13-21s. The cube checks below still run at
+ * every width, which is where per-width behaviour actually lives.
+ */
+const SWEEP_WIDTH = 320;
+
+/**
+ * CI compiles routes on demand and is far slower than a warm local dev server,
+ * so the waits here are generous. A 20s cube wait already flaked at 393px while
+ * passing at 320 and 430 in the same run — a timeout, not a layout defect.
+ */
+const SLOW = 45_000;
+
+/** Home must be the app, and its engines must have painted, before measuring. */
+async function openHome(page: Page) {
+  await page.goto('/', { waitUntil: 'domcontentloaded' });
+  await page.getByTestId('app-shell').waitFor({ timeout: SLOW });
+  await page.locator('.engine-cube-scaled').first().waitFor({ timeout: SLOW });
+  // Let the slider settle on its active slide before measuring.
+  await page.waitForTimeout(800);
+}
+
 async function declaredVsPainted(page: Page) {
   return page.evaluate(() => {
     const scaled = document.querySelector('.engine-cube-scaled');
@@ -51,15 +76,36 @@ async function declaredVsPainted(page: Page) {
   });
 }
 
+test('cube keeps the same share of the screen on every phone', async ({ page }) => {
+  // The whole point of scaling instead of re-flowing: one look, every device.
+  // Measured on the PAINTED face, which is what a player actually sees.
+  const shares: { width: number; share: number }[] = [];
+  await openHome(page);
+
+  for (const width of [320, 360, 375, 390, 393, 412, 430]) {
+    await page.setViewportSize({ width, height: 900 });
+    await page.waitForTimeout(400);
+    const m = await declaredVsPainted(page);
+    expect(m).not.toBeNull();
+    if (!m) return;
+    shares.push({ width, share: (m.faceRight - m.faceLeft) / m.viewport });
+  }
+
+  const spread = Math.max(...shares.map(s => s.share)) - Math.min(...shares.map(s => s.share));
+  expect(
+    spread,
+    `cube covers a different share of the screen per width: ${shares
+      .map(s => `${s.width}px→${(s.share * 100).toFixed(1)}%`)
+      .join(', ')}`
+  ).toBeLessThan(0.02);
+});
+
 for (const width of WIDTHS) {
   test.describe(`at ${width}px`, () => {
     test.use({ viewport: { width, height: 900 } });
 
     test('home cube is painted at exactly the size its CSS declares', async ({ page }) => {
-      await page.goto('/');
-      await page.locator('.engine-cube-scaled').first().waitFor({ timeout: 20_000 });
-      // Let the slider settle on its active slide before measuring.
-      await page.waitForTimeout(800);
+      await openHome(page);
 
       const m = await declaredVsPainted(page);
       expect(m, 'engine cube missing from home — the mock account owns engines').not.toBeNull();
@@ -81,22 +127,26 @@ for (const width of WIDTHS) {
       // Content laid out at the design square must not be clipped by the face.
       expect(m.faceContentH, 'cube face content is clipped').toBeLessThanOrEqual(m.faceBoxH + 1);
     });
-
-    for (const route of STATIC_ROUTES) {
-      test(`no horizontal overflow: ${route}`, async ({ page }) => {
-        await page.goto(route, { waitUntil: 'domcontentloaded' });
-        await page.getByTestId('app-shell').waitFor({ timeout: 20_000 });
-        await page.waitForTimeout(400);
-
-        const { scrollWidth, innerWidth } = await page.evaluate(() => ({
-          scrollWidth: document.documentElement.scrollWidth,
-          innerWidth: window.innerWidth,
-        }));
-        expect(
-          scrollWidth,
-          `${route} scrolls sideways at ${innerWidth}px (content ${scrollWidth}px)`
-        ).toBeLessThanOrEqual(innerWidth + 1);
-      });
-    }
   });
 }
+
+test.describe(`no screen scrolls sideways at ${SWEEP_WIDTH}px`, () => {
+  test.use({ viewport: { width: SWEEP_WIDTH, height: 900 } });
+
+  for (const route of STATIC_ROUTES) {
+    test(route, async ({ page }) => {
+      await page.goto(route, { waitUntil: 'domcontentloaded' });
+      await page.getByTestId('app-shell').waitFor({ timeout: SLOW });
+      await page.waitForTimeout(400);
+
+      const { scrollWidth, innerWidth } = await page.evaluate(() => ({
+        scrollWidth: document.documentElement.scrollWidth,
+        innerWidth: window.innerWidth,
+      }));
+      expect(
+        scrollWidth,
+        `${route} scrolls sideways at ${innerWidth}px (content ${scrollWidth}px)`
+      ).toBeLessThanOrEqual(innerWidth + 1);
+    });
+  }
+});
