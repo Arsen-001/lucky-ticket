@@ -1,13 +1,6 @@
 'use client';
 
-import {
-  type CSSProperties,
-  type PointerEvent as ReactPointerEvent,
-  memo,
-  useEffect,
-  useRef,
-  useState,
-} from 'react';
+import { type PointerEvent as ReactPointerEvent, memo, useEffect, useRef, useState } from 'react';
 import { twMerge } from 'tailwind-merge';
 import {
   EngineCard,
@@ -30,14 +23,9 @@ import { EngineCubeBackFace } from './EngineCubeBackFace';
 import { EngineCubeSlot } from './EngineCubeSlot';
 import { displayNameOf } from '@/utils/global/user.utils';
 import { EngineCubeStatsFace } from './EngineCubeStatsFace';
+import '@/styles/components/engine-cube-scale.css';
 import '@/styles/components/engine-card-cube.css';
 
-// Square cube, sized to match HomeEnginesSlider's SLIDE_WIDTH_CSS: it grows with the
-// viewport but is capped at MAX_ENGINE_PX so it never balloons on a wide / fullscreen
-// screen. Keep MAX_ENGINE_PX in sync with the slider's copy (and HomeBuyEngineSlot).
-const MAX_ENGINE_PX = 300;
-const FACE_SIZE = `min((100vw - 120px) / 1.038, ${MAX_ENGINE_PX}px)`;
-const FACE_HALF_DEPTH = `calc(min((100vw - 120px) / 1.038, ${MAX_ENGINE_PX}px) / 2 + 15px)`;
 const SWIPE_INTENT_PX = 8;
 const DRAG_DEGREES_PER_PX = 0.5;
 
@@ -237,114 +225,112 @@ function EngineCardCubeImpl(props: EngineCardCubeProps) {
   const liveRotation = rotation + dragDelta * DRAG_DEGREES_PER_PX;
 
   return (
-    <div
-      className={twMerge('engine-card-cube-perspective', cubeClassName)}
-      style={
-        {
-          height: FACE_SIZE,
-          '--cube-half': FACE_HALF_DEPTH,
-        } as CSSProperties
-      }
-    >
-      <div
-        ref={cubeRef}
-        className={twMerge('engine-card-cube', isDragging && 'engine-card-cube--dragging')}
-        style={{ transform: `rotateX(${-liveRotation}deg)` }}
-        onPointerDown={handlePointerDown}
-        onPointerMove={handlePointerMove}
-        onPointerUp={finishDrag}
-        onPointerCancel={finishDrag}
-      >
-        <span aria-hidden className="engine-card-cube-core">
-          <span className="engine-card-cube-core-shell engine-card-cube-core-shell--xy" />
-          <span className="engine-card-cube-core-shell engine-card-cube-core-shell--yz" />
-          <span className="engine-card-cube-core-shell engine-card-cube-core-shell--xz" />
-        </span>
+    // The outer box is the cube's footprint on this viewport; the inner one is
+    // the fixed design square the faces are laid out in, scaled down to fit it.
+    <div className={twMerge('engine-cube-viewport', cubeClassName)}>
+      <div className="engine-cube-scaled engine-card-cube-perspective">
+        <div
+          ref={cubeRef}
+          className={twMerge('engine-card-cube', isDragging && 'engine-card-cube--dragging')}
+          style={{ transform: `rotateX(${-liveRotation}deg)` }}
+          onPointerDown={handlePointerDown}
+          onPointerMove={handlePointerMove}
+          onPointerUp={finishDrag}
+          onPointerCancel={finishDrag}
+        >
+          <span aria-hidden className="engine-card-cube-core">
+            <span className="engine-card-cube-core-shell engine-card-cube-core-shell--xy" />
+            <span className="engine-card-cube-core-shell engine-card-cube-core-shell--yz" />
+            <span className="engine-card-cube-core-shell engine-card-cube-core-shell--xz" />
+          </span>
 
-        <div className="engine-card-cube-face engine-card-cube-face--front">
-          <EngineCard
-            {...engineCardProps}
-            compact
-            reactorVisual="engine"
-            className="w-full h-full"
-          />
-        </div>
+          <div className="engine-card-cube-face engine-card-cube-face--front">
+            <EngineCard
+              {...engineCardProps}
+              compact
+              reactorVisual="engine"
+              className="w-full h-full"
+            />
+          </div>
 
-        <div className="engine-card-cube-face engine-card-cube-face--back">
-          <EngineCubeBackFace
-            engineLevel={engineLevel}
-            speedLevel={speedLevel}
-            capacityLevel={capacityLevel}
-            baseCycleSeconds={baseCycleSeconds}
-            baseCapacity={baseCapacity}
-            totalBoostPct={totalBoostPct}
-            luckyPlayerBoostPct={statusEngineSpeedBoostPct}
-            statusLabel={statusLabel}
-            avatarBoostPct={avatarSpeedPct}
-            badgeBoostPct={badgeSpeedPct}
-            speedChip={equippedSpeedChip}
-            capacityChip={equippedCapacityChip}
-            speedBooster={activeSpeedBooster}
-            capacityBooster={activeCapacityBooster}
-            accent={tierAccent}
-          />
-        </div>
+          <div className="engine-card-cube-face engine-card-cube-face--back">
+            <EngineCubeBackFace
+              engineLevel={engineLevel}
+              speedLevel={speedLevel}
+              capacityLevel={capacityLevel}
+              baseCycleSeconds={baseCycleSeconds}
+              baseCapacity={baseCapacity}
+              totalBoostPct={totalBoostPct}
+              luckyPlayerBoostPct={statusEngineSpeedBoostPct}
+              statusLabel={statusLabel}
+              avatarBoostPct={avatarSpeedPct}
+              badgeBoostPct={badgeSpeedPct}
+              speedChip={equippedSpeedChip}
+              capacityChip={equippedCapacityChip}
+              speedBooster={activeSpeedBooster}
+              capacityBooster={activeCapacityBooster}
+              accent={tierAccent}
+            />
+          </div>
 
-        <div className="engine-card-cube-face engine-card-cube-face--bottom">
-          <div className="flex h-full w-full flex-col items-center justify-center gap-3 p-4">
-            <div className="grid w-full max-w-[260px] grid-cols-2 gap-2">
-              <EngineCubeSlot
-                category="chip"
-                type="speed"
-                chip={equippedSpeedChip}
-                loading={isSlotPending('chip', 'speed')}
-                onClick={() => onSlotPick?.({ category: 'chip', type: 'speed' })}
-                onRemove={
-                  equippedSpeedChip ? () => onChipUnequip?.(equippedSpeedChip.id) : undefined
-                }
-              />
-              <EngineCubeSlot
-                category="chip"
-                type="capacity"
-                chip={equippedCapacityChip}
-                loading={isSlotPending('chip', 'capacity')}
-                onClick={() => onSlotPick?.({ category: 'chip', type: 'capacity' })}
-                onRemove={
-                  equippedCapacityChip ? () => onChipUnequip?.(equippedCapacityChip.id) : undefined
-                }
-              />
-            </div>
-            <div className="grid w-full max-w-[260px] grid-cols-2 gap-2">
-              <EngineCubeSlot
-                category="booster"
-                type="speed"
-                booster={activeSpeedBooster}
-                loading={isSlotPending('booster', 'speed')}
-                onClick={() => onSlotPick?.({ category: 'booster', type: 'speed' })}
-              />
-              <EngineCubeSlot
-                category="booster"
-                type="capacity"
-                booster={activeCapacityBooster}
-                loading={isSlotPending('booster', 'capacity')}
-                onClick={() => onSlotPick?.({ category: 'booster', type: 'capacity' })}
-              />
+          <div className="engine-card-cube-face engine-card-cube-face--bottom">
+            <div className="flex h-full w-full flex-col items-center justify-center gap-3 p-4">
+              <div className="grid w-full max-w-[260px] grid-cols-2 gap-2">
+                <EngineCubeSlot
+                  category="chip"
+                  type="speed"
+                  chip={equippedSpeedChip}
+                  loading={isSlotPending('chip', 'speed')}
+                  onClick={() => onSlotPick?.({ category: 'chip', type: 'speed' })}
+                  onRemove={
+                    equippedSpeedChip ? () => onChipUnequip?.(equippedSpeedChip.id) : undefined
+                  }
+                />
+                <EngineCubeSlot
+                  category="chip"
+                  type="capacity"
+                  chip={equippedCapacityChip}
+                  loading={isSlotPending('chip', 'capacity')}
+                  onClick={() => onSlotPick?.({ category: 'chip', type: 'capacity' })}
+                  onRemove={
+                    equippedCapacityChip
+                      ? () => onChipUnequip?.(equippedCapacityChip.id)
+                      : undefined
+                  }
+                />
+              </div>
+              <div className="grid w-full max-w-[260px] grid-cols-2 gap-2">
+                <EngineCubeSlot
+                  category="booster"
+                  type="speed"
+                  booster={activeSpeedBooster}
+                  loading={isSlotPending('booster', 'speed')}
+                  onClick={() => onSlotPick?.({ category: 'booster', type: 'speed' })}
+                />
+                <EngineCubeSlot
+                  category="booster"
+                  type="capacity"
+                  booster={activeCapacityBooster}
+                  loading={isSlotPending('booster', 'capacity')}
+                  onClick={() => onSlotPick?.({ category: 'booster', type: 'capacity' })}
+                />
+              </div>
             </div>
           </div>
-        </div>
 
-        <div className="engine-card-cube-face engine-card-cube-face--top">
-          <EngineCubeStatsFace
-            lifetimeProduced={lifetimeProduced}
-            ticketsPerHour={ticketsPerHour}
-            engineLevel={engineLevel}
-            ownerName={ownerName}
-            createdAt={engine.createdAt}
-            statusLabel={statusLabel}
-            statusLevel={statusLevel}
-            statusSpeedBoostPct={statusEngineSpeedBoostPct}
-            accent={tierAccent}
-          />
+          <div className="engine-card-cube-face engine-card-cube-face--top">
+            <EngineCubeStatsFace
+              lifetimeProduced={lifetimeProduced}
+              ticketsPerHour={ticketsPerHour}
+              engineLevel={engineLevel}
+              ownerName={ownerName}
+              createdAt={engine.createdAt}
+              statusLabel={statusLabel}
+              statusLevel={statusLevel}
+              statusSpeedBoostPct={statusEngineSpeedBoostPct}
+              accent={tierAccent}
+            />
+          </div>
         </div>
       </div>
     </div>

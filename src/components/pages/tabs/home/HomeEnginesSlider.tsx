@@ -55,20 +55,20 @@ import type { TicketType } from '@/types/types/ticket.types';
 import type { InventoryChipType } from '@/types/interfaces/inventory.interfaces';
 import { mergeEngineItems, type EngineWithTier } from '@/utils/global/engine-items.utils';
 
-// The square engine cube is capped at a fixed max so it never balloons on a wide
-// / Telegram-Desktop-fullscreen viewport. Below the cap it grows with the viewport
-// (phone unchanged); past it the cube stays MAX_ENGINE_PX and only its side padding
-// grows. `SCROLLER_W_CSS` is the app's real usable width — the whole app is a
-// centered phone-width column (`--app-max-w`), so raw 100vw over-measured and the
-// active engine flew off the column. Centering padding is derived from the real
-// scroller width MINUS the (capped) slide width, so the active slide stays centered
-// at every viewport width. MAX_ENGINE_PX must match EngineCardCube's copy and
-// HomeBuyEngineSlot's height class.
-const MAX_ENGINE_PX = 300;
+// One slide is exactly one cube footprint (`--engine-cube-box`, declared in
+// base-layer.css): a square that grows with the viewport up to a cap, so the
+// cube never balloons on a wide / Telegram-Desktop-fullscreen screen — past the
+// cap only the side padding grows. The cube's CONTENT no longer depends on this
+// size at all; it is laid out at `--engine-cube-design` and scaled to fit.
+// `SCROLLER_W_CSS` is the app's real usable width — the whole app is a centered
+// phone-width column (`--app-max-w`), so raw 100vw over-measured and the active
+// engine flew off the column. Centering padding is derived from the real
+// scroller width MINUS the slide width, so the active slide stays centered at
+// every viewport width.
 const SCROLLER_W_CSS = 'min(100vw, var(--app-max-w))';
-const SLIDE_WIDTH_CSS = `min((100vw - 120px) / 1.038, ${MAX_ENGINE_PX}px)`;
+const SLIDE_WIDTH_CSS = 'var(--engine-cube-box)';
 const SLIDE_PADDING_CSS = `calc((${SCROLLER_W_CSS} - ${SLIDE_WIDTH_CSS}) / 2)`;
-const SLIDE_MIN_H_CSS = `min(100vw - 60px, ${MAX_ENGINE_PX + 70}px)`;
+const SLIDE_MIN_H_CSS = 'min(100vw - 60px, calc(var(--engine-cube-design) + 70px))';
 
 const CORE_TIER_COLORS: Record<TicketType, { mid: string; dark: string; glow: string }> = {
   bronze: {

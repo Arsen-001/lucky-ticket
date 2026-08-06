@@ -1,0 +1,31 @@
+/* Two halves of the home slider's "design once, scale to fit" cube geometry.
+   The variables they read (`--engine-cube-design`, `--engine-cube-box`,
+   `--engine-cube-scale`) are declared in styles/global/base-layer.css. */
+
+/* The footprint the cube occupies in the slider's layout: a square that tracks
+   the viewport. Everything around the cube (slide padding, dots, the peeking
+   neighbours) is positioned against THIS box, not against the scaled content. */
+.engine-cube-viewport {
+  position: relative;
+  width: 100%;
+  height: var(--engine-cube-box);
+}
+
+/* The design-space square that actually holds content. It is always
+   `--engine-cube-design` wide, whatever the phone, and is shrunk to the
+   footprint by a uniform scale — so a face laid out to fit here fits
+   everywhere.
+
+   Centred by absolute positioning, NOT by flex: the un-scaled square is wider
+   than the footprint it sits in, and an overflowing flex item gets pinned to
+   the start edge instead of centred, which pushed the active cube off the
+   column by half the overflow (53px on a 320px phone). */
+.engine-cube-scaled {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: var(--engine-cube-design);
+  height: var(--engine-cube-design);
+  transform: translate(-50%, -50%) scale(var(--engine-cube-scale));
+  transform-origin: center;
+}

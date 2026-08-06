@@ -2,22 +2,22 @@
    the active slide — into transparency near the viewport edges. Without it,
    the peeking card's stat/button column is hard-cut by the screen border and
    reads as broken floating UI (most visible when the empty "buy engine" slide
-   is selected and the last engine card peeks on the left). The 60px ramp stays
-   inside the scroller's ~65px inline padding, so the centered active card is
-   never faded. */
+   is selected and the last engine card peeks on the left). The ramp is exactly
+   the gap beside the active cube's painted face (`--engine-cube-edge-fade`, see
+   base-layer.css), so it can never bleed onto the active card itself. */
 .engines-slider-edge-fade {
   -webkit-mask-image: linear-gradient(
     to right,
     transparent 0,
-    black 60px,
-    black calc(100% - 60px),
+    black var(--engine-cube-edge-fade),
+    black calc(100% - var(--engine-cube-edge-fade)),
     transparent 100%
   );
   mask-image: linear-gradient(
     to right,
     transparent 0,
-    black 60px,
-    black calc(100% - 60px),
+    black var(--engine-cube-edge-fade),
+    black calc(100% - var(--engine-cube-edge-fade)),
     transparent 100%
   );
 }

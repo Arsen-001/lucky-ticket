@@ -1,7 +1,12 @@
+/* Sits on the design-space square (`.engine-cube-scaled`), so both the
+   perspective and the faces' Z offset are constants — the cube's 3D projection
+   no longer changes shape from phone to phone. Positioning is deliberately left
+   to `.engine-cube-scaled`: declaring `position: relative` here would win on
+   source order, put the 300px square back in flow, and stretch the slider's
+   slide to it. */
 .engine-card-cube-perspective {
   perspective: 1400px;
-  width: 100%;
-  position: relative;
+  --cube-half: calc(var(--engine-cube-design) / 2 + 15px);
 }
 
 .engine-card-cube {
