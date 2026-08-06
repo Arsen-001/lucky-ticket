@@ -31,6 +31,7 @@ import type { Task, TaskSubStep } from '@/types/interfaces/tasks.interfaces';
 import { routes, type Route } from '@/constants/routes';
 import { TaskCategoryIcon } from './TaskCategoryIcon';
 import { TaskRewardRow } from './TaskRewardRow';
+import { openExternalUrl } from '@/lib/telegram/telegram';
 import { TaskRewardBadge } from './TaskRewardBadge';
 import { SectionShine } from './SectionShine';
 
@@ -292,13 +293,13 @@ export function TaskItemCard({
       return;
     }
     if (task.externalLink) {
-      window.open(task.externalLink, '_blank', 'noopener,noreferrer');
+      openExternalUrl(task.externalLink);
     }
   };
 
   const handleStepNavigate = () => {
     if (task.deeplink) router.push(task.deeplink as Route);
-    else if (task.externalLink) window.open(task.externalLink, '_blank', 'noopener,noreferrer');
+    else if (task.externalLink) openExternalUrl(task.externalLink);
   };
 
   // Compact layout flag — applies only to ONCE-frequency tasks in selected
@@ -742,9 +743,10 @@ export function TaskItemCard({
                 aria-label={t('open')}
                 onClick={e => {
                   e.stopPropagation();
-                  window.open(task.externalLink, '_blank', 'noopener,noreferrer');
+                  openExternalUrl(task.externalLink);
                 }}
-                className="flex-center bg-electric-pink/15 border-electric-pink/30 hover:bg-electric-pink/25 size-8 rounded-full border transition-all active:scale-95"
+                // 32px circle, 44px hit area — see TaskItemRow.
+                className="flex-center bg-electric-pink/15 border-electric-pink/30 hover:bg-electric-pink/25 relative size-8 rounded-full border transition-all before:absolute before:-inset-1.5 before:content-[''] active:scale-95"
               >
                 <ArrowUpRight size={14} className="text-electric-pink" strokeWidth={2.5} />
               </button>

@@ -25,6 +25,7 @@ import { TaskRarity, TaskStatus } from '@/types/enums/tasks.enums';
 import type { TicketType } from '@/types/types/ticket.types';
 import type { Task } from '@/types/interfaces/tasks.interfaces';
 import { type Route, routes } from '@/constants/routes';
+import { openExternalUrl } from '@/lib/telegram/telegram';
 import { TaskRewardRow } from './TaskRewardRow';
 
 const RARITY_FRAME: Record<TaskRarity, string> = {
@@ -364,7 +365,7 @@ function MilestoneCard({
       return;
     }
     if (task.externalLink) {
-      window.open(task.externalLink, '_blank', 'noopener,noreferrer');
+      openExternalUrl(task.externalLink);
     }
   };
 

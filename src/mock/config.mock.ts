@@ -30,10 +30,13 @@ const getPublicConfig = (): PublicConfig => ({
     signup: {
       ap: GlobalConstants.inviteActivityPoints,
       stars: GlobalConstants.inviteStars,
-      premiumAp: GlobalConstants.inviteTelegramPremiumActivityPoints,
-      premiumStars: GlobalConstants.inviteTelegramPremiumStars,
+      // Equal to the flat pair on purpose — the doubling is gone, and a mock
+      // that still showed 20/2 would be the only place it survived.
+      premiumAp: GlobalConstants.inviteActivityPoints,
+      premiumStars: GlobalConstants.inviteStars,
     },
     hasRewardLadder: false,
+    tournamentLcPct: GlobalConstants.referralTournamentLcPercentage,
   },
   jackpot: {
     accrualPercent: appConfig.jackpot.accrualPercent,

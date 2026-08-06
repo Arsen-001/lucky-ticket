@@ -10,14 +10,14 @@ import { FriendsClaimAllModal } from '@/components/pages/out-tabs/drawer/invite-
 import { InvitedFriendRow } from '@/components/pages/out-tabs/drawer/invite-friends/InvitedFriendRow';
 import { PlayerQuickCard } from '@/components/shared/user-elements/PlayerQuickCard';
 import {
-  FriendsFilterChips,
-  type FriendsFilter,
-} from '@/components/pages/out-tabs/drawer/invite-friends/FriendsFilterChips';
+  FriendsTabs,
+  type FriendsTab,
+} from '@/components/pages/out-tabs/drawer/invite-friends/FriendsTabs';
 import { FriendsClaimSummaryCard } from '@/components/pages/out-tabs/drawer/invite-friends/FriendsClaimSummaryCard';
 import { FriendsQualificationNote } from '@/components/pages/out-tabs/drawer/invite-friends/FriendsQualificationNote';
 import { useAppTranslations } from '@/hooks/useAppTranslations';
-import { countsAsReferral } from '@/utils/pages/referral.utils';
-import type { ClaimableTicket, InvitedFriend } from '@/types/interfaces/referral.interfaces';
+import { claimableLcOf, countsAsReferral } from '@/utils/pages/referral.utils';
+import type { InvitedFriend } from '@/types/interfaces/referral.interfaces';
 import type { TicketType } from '@/types/types/ticket.types';
 import { useToast } from '@/hooks/useToast';
 import { displayNameOf } from '@/utils/global/user.utils';
@@ -31,8 +31,16 @@ const EMPTY_TICKETS: Record<TicketType, number> = {
   diamond: 0,
 };
 
-const sumClaimable = (friend: InvitedFriend) =>
+const sumTickets = (friend: InvitedFriend) =>
   friend.claimableTickets.reduce((sum, ticket) => sum + ticket.amount, 0);
+
+/**
+ * Claimable right now: the LC reward needs the friend to still count as a
+ * referral, the leftover tickets do not. Mirrors the backend gate exactly —
+ * a button the API is about to 403 is worse than no button.
+ */
+const hasSomethingToClaim = (friend: InvitedFriend) =>
+  (claimableLcOf(friend) > 0 && countsAsReferral(friend)) || sumTickets(friend) > 0;
 
 export const InvitedFriendsList = () => {
   const t = useAppTranslations();
@@ -42,27 +50,25 @@ export const InvitedFriendsList = () => {
   const [selectedFriend, setSelectedFriend] = useState<InvitedFriend | null>(null);
   const [cardFriend, setCardFriend] = useState<InvitedFriend | null>(null);
   const [cardOpen, setCardOpen] = useState(false);
-  const [filter, setFilter] = useState<FriendsFilter>('all');
+  const [tab, setTab] = useState<FriendsTab>('friends');
   const [isClaimingAll, setIsClaimingAll] = useState(false);
   const [claimAllSnapshot, setClaimAllSnapshot] = useState<{
     friends: InvitedFriend[];
-    ticketsByTier: ClaimableTicket[];
-    totalTickets: number;
+    totalLc: number;
   } | null>(null);
 
   const counts = useMemo(() => {
     const referrals = friends.filter(countsAsReferral).length;
     return {
-      all: friends.length,
+      friends: friends.length,
       referrals,
-      'not-counted': friends.length - referrals,
-      'with-rewards': friends.filter(f => f.claimableTickets.length > 0).length,
-      premium: friends.filter(f => f.isTelegramPremium).length,
+      notCounted: friends.length - referrals,
+      withRewards: friends.filter(hasSomethingToClaim).length,
     };
   }, [friends]);
 
-  const claimableTotal = useMemo(
-    () => friends.reduce((sum, friend) => sum + sumClaimable(friend), 0),
+  const claimableLc = useMemo(
+    () => friends.filter(countsAsReferral).reduce((sum, friend) => sum + claimableLcOf(friend), 0),
     [friends]
   );
 
@@ -76,21 +82,15 @@ export const InvitedFriendsList = () => {
     return result;
   }, [friends]);
 
-  const filteredFriends = useMemo(() => {
-    const filtered = friends.filter(friend => {
-      if (filter === 'with-rewards') return friend.claimableTickets.length > 0;
-      if (filter === 'premium') return !!friend.isTelegramPremium;
-      if (filter === 'referrals') return countsAsReferral(friend);
-      if (filter === 'not-counted') return !countsAsReferral(friend);
-      return true;
-    });
+  const visibleFriends = useMemo(() => {
+    const filtered = tab === 'referrals' ? friends.filter(countsAsReferral) : friends;
     return [...filtered].sort((a, b) => {
-      const aReady = a.claimableTickets.length > 0 ? 1 : 0;
-      const bReady = b.claimableTickets.length > 0 ? 1 : 0;
+      const aReady = hasSomethingToClaim(a) ? 1 : 0;
+      const bReady = hasSomethingToClaim(b) ? 1 : 0;
       if (aReady !== bReady) return bReady - aReady;
-      return sumClaimable(b) - sumClaimable(a) || b.points - a.points;
+      return claimableLcOf(b) - claimableLcOf(a) || b.points - a.points;
     });
-  }, [friends, filter]);
+  }, [friends, tab]);
 
   const openCard = (friend: InvitedFriend) => {
     setCardFriend(friend);
@@ -99,23 +99,18 @@ export const InvitedFriendsList = () => {
 
   const handleClaim = async (friendId: string) => {
     // `claimFriend` without `.unwrap()` RESOLVES with `{error}` instead of
-    // throwing, so the old bare `await` could not tell success from failure.
+    // throwing, so a bare `await` could not tell success from failure.
     const result = await claimFriend({ friendId });
     if ('error' in result) toast.error(t('claim failed'));
   };
 
   const handleClaimAll = async () => {
-    const targets = friends.filter(f => f.claimableTickets.length > 0);
+    const targets = friends.filter(hasSomethingToClaim);
     if (!targets.length) return;
 
-    const snapshotByTier: Record<TicketType, number> = { ...EMPTY_TICKETS };
-    let total = 0;
-    for (const friend of targets) {
-      for (const { type, amount } of friend.claimableTickets) {
-        snapshotByTier[type] += amount;
-        total += amount;
-      }
-    }
+    const totalLc = targets
+      .filter(countsAsReferral)
+      .reduce((sum, friend) => sum + claimableLcOf(friend), 0);
 
     setIsClaimingAll(true);
     let claimed = 0;
@@ -133,18 +128,12 @@ export const InvitedFriendsList = () => {
     if (failed) toast.error(t('claim failed'));
     // The celebration is raised AFTER the requests, and only when something was
     // actually granted. It used to be opened from a local snapshot before the
-    // first call went out, so a refusal — which the backend now returns for a
+    // first call went out, so a refusal — which the backend returns for a
     // duplicate claim instead of quietly granting twice — still announced
-    // "+N tickets" the player never received.
+    // "+N" the player never received.
     if (!claimed) return;
 
-    setClaimAllSnapshot({
-      friends: targets,
-      ticketsByTier: (Object.entries(snapshotByTier) as [TicketType, number][])
-        .filter(([, amount]) => amount > 0)
-        .map(([type, amount]) => ({ type, amount })),
-      totalTickets: total,
-    });
+    setClaimAllSnapshot({ friends: targets, totalLc });
   };
 
   if (isError && !friends.length) {
@@ -154,37 +143,35 @@ export const InvitedFriendsList = () => {
   return (
     <div className="flex flex-col gap-3">
       <FriendsClaimSummaryCard
-        claimableTotal={claimableTotal}
-        friendsWithRewards={counts['with-rewards']}
+        claimableLc={claimableLc}
+        friendsWithRewards={counts.withRewards}
         ticketsByType={ticketsByType}
         loading={isClaimingAll}
         onClaimAll={handleClaimAll}
       />
 
-      <div className="flex items-center justify-between gap-2 px-1">
-        <ArrivalShine id="sendTicket" variant="title">
-          <h3 className="text-base font-bold">
-            {t('invited friends count', { count: friends.length })}
-          </h3>
-        </ArrivalShine>
-        {counts['not-counted'] > 0 && (
-          <span className="text-white-secondary flex-shrink-0 text-[11px] font-semibold tabular-nums">
-            {t('n of m are referrals', { count: counts.referrals, total: friends.length })}
-          </span>
-        )}
-      </div>
-
-      {counts['not-counted'] > 0 && <FriendsQualificationNote notCounted={counts['not-counted']} />}
+      <ArrivalShine id="sendTicket" variant="title">
+        <h3 className="px-1 text-base font-bold">{t('your friends')}</h3>
+      </ArrivalShine>
 
       {friends.length > 0 && (
-        <FriendsFilterChips active={filter} onChange={setFilter} counts={counts} />
+        <FriendsTabs
+          active={tab}
+          onChange={setTab}
+          counts={{ friends: counts.friends, referrals: counts.referrals }}
+        />
       )}
+
+      {/* The rule, once, and only while it is actually costing this player
+          something — a condition announced to someone it does not apply to is
+          noise. @see FriendsQualificationNote */}
+      {counts.notCounted > 0 && <FriendsQualificationNote notCounted={counts.notCounted} />}
 
       <div className="flex flex-col gap-2">
         {isLoading ? (
           Array.from({ length: 3 }).map((_, i) => <InvitedFriendRow key={i} loading />)
-        ) : filteredFriends.length ? (
-          filteredFriends.map((friend, index) => (
+        ) : visibleFriends.length ? (
+          visibleFriends.map((friend, index) => (
             <InvitedFriendRow
               key={friend.id}
               friend={friend}
@@ -195,7 +182,7 @@ export const InvitedFriendsList = () => {
             />
           ))
         ) : friends.length > 0 ? (
-          <EmptyDataInfo className="mt-6" description={t('no rewards yet')} />
+          <EmptyDataInfo className="mt-6" description={t('no referrals yet')} />
         ) : (
           <EmptyDataInfo
             className="mt-6"
@@ -220,8 +207,7 @@ export const InvitedFriendsList = () => {
           open={!!claimAllSnapshot}
           onClose={() => setClaimAllSnapshot(null)}
           friends={claimAllSnapshot.friends}
-          totalTickets={claimAllSnapshot.totalTickets}
-          ticketsByTier={claimAllSnapshot.ticketsByTier}
+          totalLc={claimAllSnapshot.totalLc}
           isClaiming={isClaimingAll}
         />
       )}

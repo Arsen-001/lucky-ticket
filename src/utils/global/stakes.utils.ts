@@ -176,6 +176,33 @@ export const findLevelForDeposit = (levels: StakeLevelDefinition[], amount: numb
   return chosen;
 };
 
+/**
+ * The cheapest level the player's tier does not open — the wall the deposit
+ * controls stop at. `null` when every level is unlocked.
+ */
+export const findFirstLockedLevel = (
+  levels: StakeLevelDefinition[],
+  isTierUnlocked: (tier: StakeLevelDefinition['tier']) => boolean
+) =>
+  [...levels].sort((a, b) => a.minDeposit - b.minDeposit).find(lv => !isTierUnlocked(lv.tier)) ??
+  null;
+
+/**
+ * Largest deposit the player can actually stake right now: their balance, and
+ * never into a level their tier has not opened. Returning the ceiling instead
+ * of letting the slider run to the balance is the difference between "the
+ * thumb stops here, and here is why" and a screen that looks fine until a
+ * greyed-out button two scrolls below says "Locked".
+ */
+export const computeMaxStakeable = (
+  levels: StakeLevelDefinition[],
+  balance: number,
+  isTierUnlocked: (tier: StakeLevelDefinition['tier']) => boolean
+) => {
+  const locked = findFirstLockedLevel(levels, isTierUnlocked);
+  return locked ? Math.min(balance, locked.minDeposit - 1) : balance;
+};
+
 export const findNextLevelOver = (levels: StakeLevelDefinition[], amount: number) => {
   const sorted = [...levels].sort((a, b) => a.minDeposit - b.minDeposit);
   return sorted.find(lv => lv.minDeposit > amount) ?? null;

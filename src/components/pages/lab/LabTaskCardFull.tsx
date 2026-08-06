@@ -33,6 +33,7 @@ import { formatNumber } from '@/utils/global/number.utils';
 import { TaskCategory, TaskRewardType, TaskStatus } from '@/types/enums/tasks.enums';
 import type { Task, TaskSubStep } from '@/types/interfaces/tasks.interfaces';
 import { routes, type Route } from '@/constants/routes';
+import { openExternalUrl } from '@/lib/telegram/telegram';
 import { LabSubStepRow } from './LabSubStepRow';
 
 export interface LabTaskCardFullProps {
@@ -222,13 +223,13 @@ export function LabTaskCardFull({
       return;
     }
     if (task.externalLink) {
-      window.open(task.externalLink, '_blank', 'noopener,noreferrer');
+      openExternalUrl(task.externalLink);
     }
   };
 
   const handleStepNavigate = () => {
     if (task.deeplink) router.push(task.deeplink as Route);
-    else if (task.externalLink) window.open(task.externalLink, '_blank', 'noopener,noreferrer');
+    else if (task.externalLink) openExternalUrl(task.externalLink);
   };
 
   const social =

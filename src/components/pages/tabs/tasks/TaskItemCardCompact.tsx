@@ -11,6 +11,7 @@ import { Progress } from '@/components/shared/Progress';
 import { TaskRarity, TaskStatus } from '@/types/enums/tasks.enums';
 import type { Task } from '@/types/interfaces/tasks.interfaces';
 import { type Route } from '@/constants/routes';
+import { openExternalUrl } from '@/lib/telegram/telegram';
 import { TaskCategoryIcon } from './TaskCategoryIcon';
 import { TaskRewardRow } from './TaskRewardRow';
 import { SectionShine } from './SectionShine';
@@ -74,7 +75,7 @@ export function TaskItemCardCompact({
       return;
     }
     if (task.externalLink) {
-      window.open(task.externalLink, '_blank', 'noopener,noreferrer');
+      openExternalUrl(task.externalLink);
     }
   };
 

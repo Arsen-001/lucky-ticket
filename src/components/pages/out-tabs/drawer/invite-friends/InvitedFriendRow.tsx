@@ -1,7 +1,7 @@
 'use client';
 
 import Image from 'next/image';
-import { ChevronRight, Star } from 'lucide-react';
+import { ChevronRight, Lock, Star } from 'lucide-react';
 import { twMerge } from 'tailwind-merge';
 import { Skeleton } from '@/components/shared/seleketons/Skeleton';
 import { SkeletonSuspense } from '@/components/shared/seleketons/SkeletonSuspense';
@@ -12,7 +12,8 @@ import { VerifiedSparkleIcon } from '@/components/shared/icons/VerifiedSparkleIc
 import { FriendNotCountedBadge } from '@/components/pages/out-tabs/drawer/invite-friends/FriendNotCountedBadge';
 import { useAppTranslations } from '@/hooks/useAppTranslations';
 import { formatCompact } from '@/utils/global/number.utils';
-import { countsAsReferral } from '@/utils/pages/referral.utils';
+import { GlobalConstants } from '@/constants/global.constants';
+import { claimableLcOf, countsAsReferral } from '@/utils/pages/referral.utils';
 import type { InvitedFriend } from '@/types/interfaces/referral.interfaces';
 import { displayNameOf } from '@/utils/global/user.utils';
 import type { CSSProperties } from 'react';
@@ -37,17 +38,23 @@ export function InvitedFriendRow({
   style,
 }: InvitedFriendRowProps) {
   const t = useAppTranslations();
-  const claimable = !!friend && friend.claimableTickets.length > 0;
-  const claimableAmount =
-    friend?.claimableTickets.reduce((sum, ticket) => sum + ticket.amount, 0) ?? 0;
-  // A friend who isn't a referral is still a friend — the row stays fully
-  // interactive and keeps whatever tickets it already accrued. Only the
-  // "counts toward your referrals" claim is withdrawn, and it says why.
-  const notCountedReason = friend && !countsAsReferral(friend) ? friend.notCountedReason : null;
+
+  const lc = claimableLcOf(friend);
+  const legacyTickets = friend?.claimableTickets ?? [];
+  const legacyTicketCount = legacyTickets.reduce((sum, ticket) => sum + ticket.amount, 0);
+  const isReferral = !friend || countsAsReferral(friend);
+
+  // The LC half needs a live referral; the leftover tickets do not — they were
+  // earned under a rule that made no such demand, and withdrawing them now
+  // would take back something already shown as owed. @see claimFriend (backend)
+  const claimableNow = (lc > 0 && isReferral) || legacyTicketCount > 0;
+  // Earned, but the friend stopped counting. The money is not lost — the row
+  // says frozen rather than nothing, so "why is there no button" has an answer.
+  const frozenLc = lc > 0 && !isReferral;
 
   const rowAction = !friend
     ? undefined
-    : claimable && onClaim
+    : claimableNow && onClaim
       ? () => onClaim(friend)
       : onOpenCard
         ? () => onOpenCard(friend)
@@ -62,10 +69,10 @@ export function InvitedFriendRow({
       style={style}
       className={twMerge(
         'group relative flex flex-col gap-2 rounded-2xl border p-2.5 text-left transition-all',
-        claimable
+        claimableNow
           ? 'border-gold/15 bg-gold/3 hover:bg-gold/8 cursor-pointer shadow-[0_0_10px_rgba(248,189,62,0.10)] active:scale-99'
           : 'bg-background-overlay/50 border-white/5',
-        !claimable && rowAction && 'active:scale-99 cursor-pointer hover:bg-white/5',
+        !claimableNow && rowAction && 'active:scale-99 cursor-pointer hover:bg-white/5',
         className
       )}
     >
@@ -143,56 +150,73 @@ export function InvitedFriendRow({
                 <BoltIcon size={16} />
                 {formatCompact(friend?.points ?? 0)}
               </span>
-              {claimable && (
-                <span className="text-pink-secondary truncate">· {t('tickets to claim')}</span>
+              {/* Dropped whenever the row is tight — when a legacy ticket
+                  stack shares the right column, and on 320px screens. The gold
+                  border and the amount already say "ready"; keeping the words
+                  cost the NAME its width and rendered «Д…» in German. */}
+              {claimableNow && legacyTicketCount === 0 && (
+                <span className="text-pink-secondary hidden truncate min-[360px]:inline">
+                  · {t('ready to claim')}
+                </span>
               )}
             </div>
           </SkeletonSuspense>
         </div>
 
-        {claimable && friend && (
+        {claimableNow && friend && (
           <div className="flex flex-shrink-0 items-center gap-2">
-            <div className="flex items-center">
-              {friend.claimableTickets.slice(0, 3).map(({ type }, idx) => (
-                <Ticket
-                  key={type}
-                  type={type}
-                  width={22}
-                  height={22}
-                  className={twMerge('-ml-2 drop-shadow-md first:ml-0', idx === 0 && 'first:ml-0')}
-                />
-              ))}
-              {friend.claimableTickets.length > 3 && (
-                // `ml-0.5`, not the `-ml-1` the tickets themselves overlap by:
-                // at 10px the "+" is narrower than that tuck, so it sat under
-                // the last ticket and the counter read as a bare "1".
-                <span className="text-pink-secondary ml-0.5 text-[10px] font-bold">
-                  +{friend.claimableTickets.length - 3}
-                </span>
-              )}
-            </div>
+            {/* Leftover ticket commission — shown only while it exists, and it
+                never grows back. @see InvitedFriend.claimableTickets */}
+            {/* Hidden on 320px screens: the preview is decoration for a
+                balance that only drains, and at that width it cost the friend
+                their NAME («Джон 🎰» → «Д…»). The claim pays them out either way. */}
+            {legacyTicketCount > 0 && (
+              <div className="hidden items-center min-[360px]:flex">
+                {legacyTickets.slice(0, 2).map(({ type }) => (
+                  <Ticket
+                    key={type}
+                    type={type}
+                    width={22}
+                    height={22}
+                    className="-ml-2 drop-shadow-md first:ml-0"
+                  />
+                ))}
+                {legacyTickets.length > 2 && (
+                  <span className="text-pink-secondary ml-0.5 text-[10px] font-bold">
+                    +{legacyTickets.length - 2}
+                  </span>
+                )}
+              </div>
+            )}
             <span className="bg-pink-gradient inline-flex items-center gap-1 rounded-lg px-2.5 py-1.5 text-[11px] font-extrabold tracking-wide text-white shadow-[0_4px_12px_rgba(222,0,155,0.35)]">
-              {t('claim')}
-              {claimableAmount > 1 && (
-                <span className="tabular-nums opacity-90">×{claimableAmount}</span>
+              {lc > 0 && isReferral ? (
+                <>
+                  +{formatCompact(lc)}
+                  <span className="opacity-90">{GlobalConstants.coinName}</span>
+                </>
+              ) : (
+                t('claim')
               )}
             </span>
           </div>
         )}
 
-        {!claimable && !loading && friend && (
+        {frozenLc && (
+          <span className="inline-flex flex-shrink-0 items-center gap-1 rounded-lg border border-white/10 bg-white/5 px-2 py-1.5 text-[11px] font-extrabold tabular-nums text-white/45">
+            <Lock size={11} className="flex-shrink-0" />
+            {formatCompact(lc)} {GlobalConstants.coinName}
+          </span>
+        )}
+
+        {!claimableNow && !frozenLc && !loading && friend && (
           <ChevronRight className="text-pink-secondary flex-shrink-0" size={16} />
         )}
       </div>
 
       {/* Its own full-width line under the row, not beside the points. The
-          middle column shares its width with a ticket stack and a Claim
-          button, and the reason — the longest string on the row — first
-          overlapped them, then truncated to «Заблокировал б…», losing exactly
-          the word that carries the meaning. */}
-      {notCountedReason && (
-        <FriendNotCountedBadge reason={notCountedReason} className="self-start" />
-      )}
+          middle column shares its width with the amount and a Claim button,
+          and the badge would first overlap them and then truncate. */}
+      {friend && !isReferral && <FriendNotCountedBadge className="self-start" />}
     </Wrapper>
   );
 }

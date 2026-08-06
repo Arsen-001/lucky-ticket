@@ -9,7 +9,9 @@ import { Button } from '@/components/shared/buttons/Button';
 import { LuckyPlayerIcon } from '@/components/shared/icons/LuckyPlayerIcon';
 import { Ticket } from '@/components/shared/icons/Ticket';
 import { VipIcon } from '@/components/shared/icons/VipIcon';
+import { GlobalConstants } from '@/constants/global.constants';
 import { useAppTranslations } from '@/hooks/useAppTranslations';
+import { claimableLcOf } from '@/utils/pages/referral.utils';
 import type { ClaimableTicket, InvitedFriend } from '@/types/interfaces/referral.interfaces';
 import { displayNameOf } from '@/utils/global/user.utils';
 import { staggerMs } from '@/utils/global/animation.utils';
@@ -30,7 +32,12 @@ export function FriendClaimModal({
   isClaiming,
 }: FriendClaimModalProps) {
   const t = useAppTranslations();
-  const [snapshot, setSnapshot] = useState<ClaimableTicket[] | null>(null);
+  // Snapshotted BEFORE the claim fires: the mutation zeroes the row optimistically,
+  // so reading it live would blank the celebration the moment it opens.
+  const [snapshot, setSnapshot] = useState<{
+    lc: number;
+    tickets: ClaimableTicket[];
+  } | null>(null);
   const triggeredRef = useRef(false);
 
   useEffect(() => {
@@ -40,14 +47,14 @@ export function FriendClaimModal({
       return;
     }
     if (triggeredRef.current) return;
-    if (friend.claimableTickets.length === 0) return;
+    if (claimableLcOf(friend) === 0 && friend.claimableTickets.length === 0) return;
     triggeredRef.current = true;
-    setSnapshot(friend.claimableTickets);
+    setSnapshot({ lc: claimableLcOf(friend), tickets: friend.claimableTickets });
     void onClaim(friend.id);
   }, [open, friend, onClaim]);
 
-  const tickets = snapshot ?? friend.claimableTickets;
-  const totalCount = tickets.reduce((sum, t) => sum + t.amount, 0);
+  const lc = snapshot?.lc ?? claimableLcOf(friend);
+  const tickets = snapshot?.tickets ?? friend.claimableTickets;
 
   return (
     <Modal
@@ -102,10 +109,10 @@ export function FriendClaimModal({
             <span className="text-[11px] font-bold uppercase tracking-[0.2em] text-white/80">
               {t('you earned')}
             </span>
-            <h3 className="text-3xl font-extrabold leading-none text-white drop-shadow-md">
-              {totalCount}
+            <h3 className="text-3xl font-extrabold leading-none text-white drop-shadow-md tabular-nums">
+              {lc.toLocaleString()}
               <span className="ml-1.5 text-sm font-bold opacity-90">
-                {t('claimable tickets count', { count: totalCount }).replace(/^\d+\s*/, '')}
+                {GlobalConstants.coinName}
               </span>
             </h3>
             <span className="mt-0.5 text-xs text-white/85">
@@ -141,6 +148,8 @@ export function FriendClaimModal({
         </div>
 
         <div className="relative flex flex-col gap-4 px-6 pt-5 pb-6">
+          {/* Leftover ticket commission from the rule the LC reward replaced —
+              rendered only while a friend still has some. */}
           <div className="flex flex-wrap items-center justify-center gap-3">
             {tickets.map(({ type, amount }, index) => (
               <div
@@ -155,7 +164,7 @@ export function FriendClaimModal({
           </div>
 
           <span className="text-pink-secondary text-center text-[11px]">
-            {t('tickets in your inventory')}
+            {tickets.length > 0 ? t('tickets in your inventory') : t('lc added to your balance')}
           </span>
 
           <Button

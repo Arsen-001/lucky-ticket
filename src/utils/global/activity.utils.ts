@@ -5,6 +5,7 @@ import {
   computeDailyBaselineAp,
   type ActivityTier,
 } from '@/constants/global.constants';
+import type { Dictionary } from '@/types/types/i18n.types';
 
 /**
  * Whether a tier-gated item is unlocked for the player.
@@ -18,6 +19,41 @@ export const isTierUnlocked = (
 ): boolean =>
   activityTierOrder.indexOf(computeActivityTier(activityPoints, referralsCount)) >=
   activityTierOrder.indexOf(itemTier);
+
+export interface TierGap {
+  /** AP still missing for the tier — 0 once that half of the gate is met. */
+  apGap: number;
+  /** Invited friends still missing for the tier — 0 once that half is met. */
+  refGap: number;
+}
+
+/**
+ * The tier gate stated as what is still missing (DOCS §5.1). Both halves are
+ * returned because either one alone keeps the tier locked: naming only the AP
+ * half is how a gated stake ended up telling the player "need 0 more AP" while
+ * refusing to open — the friends half was the one blocking.
+ */
+export const computeTierGap = (
+  activityPoints: number,
+  referralsCount: number,
+  tier: ActivityTier
+): TierGap => ({
+  apGap: Math.max(0, GlobalConstants.apTierThresholds[tier] - activityPoints),
+  refGap: Math.max(0, GlobalConstants.tierReferralRequirements[tier] - referralsCount),
+});
+
+/**
+ * The gap as one short line: "Need 3 friends · Need 400 AP". Friends lead —
+ * AP keeps accruing on its own, invites never do — and a met half is dropped
+ * rather than printed as a zero.
+ */
+export const formatTierGap = (gap: TierGap, t: Dictionary): string =>
+  [
+    gap.refGap > 0 ? t('need {n} friends', { n: gap.refGap }) : null,
+    gap.apGap > 0 ? t('need {n} ap', { n: gap.apGap.toLocaleString() }) : null,
+  ]
+    .filter(Boolean)
+    .join(' · ');
 
 export type ApDecayState = 'active' | 'grace' | 'decaying';
 

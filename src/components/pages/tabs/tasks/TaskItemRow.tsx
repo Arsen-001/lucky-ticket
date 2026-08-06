@@ -12,6 +12,7 @@ import { TaskCategory, TaskStatus } from '@/types/enums/tasks.enums';
 import { resolveTaskSocialBrand } from '@/utils/pages/task-social.utils';
 import type { Task } from '@/types/interfaces/tasks.interfaces';
 import { type Route } from '@/constants/routes';
+import { openExternalUrl } from '@/lib/telegram/telegram';
 import { TaskCategoryIcon } from './TaskCategoryIcon';
 import { TaskRewardRow } from './TaskRewardRow';
 import { SectionShine } from './SectionShine';
@@ -83,9 +84,10 @@ export function TaskItemRow({ task, onClaim, highlightToken, className, style }:
   }, [expanded, task.title]);
 
   // A tap only "opens" something when there's hidden copy to reveal. Ready rows
-  // claim on tap, so they never expand.
-  const isExpandable = !isReady && (hasDetail || isTruncated || expanded);
-  const isInteractive = isReady || isExpandable;
+  // claim on tap, so they never expand — and a row that leads somewhere goes
+  // there instead of expanding (see `handleClick`).
+  const isExpandable = !isReady && !canNavigate && (hasDetail || isTruncated || expanded);
+  const isInteractive = isReady || canNavigate || isExpandable;
 
   // Smoothly grow/shrink the row between its collapsed and expanded heights.
   // `height: auto` can't be transitioned in CSS, so FLIP it: measure the height
@@ -144,13 +146,21 @@ export function TaskItemRow({ task, onClaim, highlightToken, className, style }:
       return;
     }
     if (task.externalLink) {
-      window.open(task.externalLink, '_blank', 'noopener,noreferrer');
+      openExternalUrl(task.externalLink);
     }
   };
 
   const handleClick = () => {
     if (isReady) {
       onClaim(task);
+      return;
+    }
+    // A row that leads somewhere IS the link — the whole strip opens it, not
+    // just the 28px chevron at its edge. The daily check-in is the case that
+    // made this obvious: its one job is "go subscribe to the channel", and a
+    // tap on the card did nothing but reveal a subtitle.
+    if (canNavigate) {
+      navigate();
       return;
     }
     if (isExpandable) setExpanded(prev => !prev);
@@ -262,7 +272,11 @@ export function TaskItemRow({ task, onClaim, highlightToken, className, style }:
             e.stopPropagation();
             navigate();
           }}
-          className="flex-center border-electric-pink/30 bg-electric-pink/15 hover:bg-electric-pink/25 h-7 w-7 shrink-0 rounded-full border transition-colors active:scale-95"
+          // The circle stays 28px, but the finger gets 44px: `before` inflates
+          // the hit area past the drawn edge without moving anything in the
+          // row. At 28px this was a miss more often than a hit, which reads
+          // exactly like a dead button.
+          className="flex-center border-electric-pink/30 bg-electric-pink/15 hover:bg-electric-pink/25 relative h-7 w-7 shrink-0 rounded-full border transition-colors before:absolute before:-inset-2 before:content-[''] active:scale-95"
         >
           <ChevronRight size={13} className="text-electric-pink" strokeWidth={2.5} />
         </button>
