@@ -5,6 +5,7 @@ import { twMerge } from 'tailwind-merge';
 import { ClientPortal } from '@/components/shared/ClientPortal';
 import { useOverlayPresence } from '@/hooks/useOverlayPresence';
 import { useOverlayFocusLock } from '@/hooks/useOverlayFocusLock';
+import { useBackdropDismiss } from '@/hooks/useBackdropDismiss';
 
 /** Matches the panel's `duration-300` slide. */
 const ANIMATION_MS = 300;
@@ -39,6 +40,13 @@ export function BottomSheet({
   // Closed → nothing in the DOM (see useOverlayPresence).
   const { mounted, visible } = useOverlayPresence(open, ANIMATION_MS);
   const panelRef = useOverlayFocusLock(open);
+  // The opening tap's own click lands here, on a backdrop that did not exist
+  // when the finger went down — see useBackdropDismiss.
+  const backdropProps = useBackdropDismiss(
+    visible,
+    ANIMATION_MS,
+    closeOnOverlayClick ? onClose : undefined
+  );
 
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
@@ -60,10 +68,7 @@ export function BottomSheet({
           visible ? 'opacity-100' : 'pointer-events-none opacity-0'
         )}
       >
-        <div
-          className="bg-fade absolute inset-0 backdrop-blur-[2px]"
-          onClick={closeOnOverlayClick ? onClose : undefined}
-        />
+        <div className="bg-fade absolute inset-0 backdrop-blur-[2px]" {...backdropProps} />
 
         <div
           ref={panelRef}

@@ -6,6 +6,7 @@ import { ClientPortal } from '@/components/shared/ClientPortal';
 import { ModalCloseButton } from '@/components/shared/modals/ModalCloseButton';
 import { useOverlayPresence } from '@/hooks/useOverlayPresence';
 import { useOverlayFocusLock } from '@/hooks/useOverlayFocusLock';
+import { useBackdropDismiss } from '@/hooks/useBackdropDismiss';
 import type { ButtonProps } from '@/components/shared/buttons/Button';
 
 const ANIMATION_MS = 200;
@@ -62,12 +63,13 @@ export const Modal = ({
 
   const panelRef = useOverlayFocusLock(open);
 
-  // Overlay click
-  const handleOverlayClick = () => {
-    if (closeOnOverlayClick && onClose) {
-      onClose();
-    }
-  };
+  // The opening tap's own click lands on the backdrop, which did not exist when
+  // the finger went down — see useBackdropDismiss.
+  const backdropProps = useBackdropDismiss(
+    visible,
+    ANIMATION_MS,
+    closeOnOverlayClick ? onClose : undefined
+  );
 
   if (!mounted) return null;
 
@@ -83,7 +85,7 @@ export const Modal = ({
         )}
       >
         {/* Overlay */}
-        <div className="absolute inset-0 bg-fade" onClick={handleOverlayClick} />
+        <div className="absolute inset-0 bg-fade" {...backdropProps} />
 
         {/* Modal */}
         <div
