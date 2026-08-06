@@ -1238,5 +1238,8 @@
   "market engine purpose": "A producer engine mints {tier} tickets on its own cycle. Claim what it made and the next cycle starts right away.",
   "market shard purpose": "Shards are spent in the inventory: mint a new chip, or level up one you already have. Chips raise an engine's speed and capacity.",
   "market avatar purpose": "Equip it in your profile — the avatar's bonus works the whole time it is on.",
-  "ticket not on sale": "This ticket is not on sale right now. It still drops from tournaments, tasks and engines."
+  "ticket not on sale": "This ticket is not on sale right now. It still drops from tournaments, tasks and engines.",
+  "ads all watched today": "That's all for today",
+  "new ads in": "New ads in {time}",
+  "paid ad no ap": "Bought view — activity points are not granted"
 }

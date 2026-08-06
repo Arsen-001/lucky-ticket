@@ -217,25 +217,52 @@ const buildCategory = (bp: CategoryBlueprint): CategoryTasks => {
 };
 
 // ───────────────── ADS ─────────────────
-// Single source of truth for the ads block. Reward tiers are matched by upper-bound index:
-// the first tier whose `upTo` >= slot index wins. Add tiers / slots / change reset by editing this.
+// Single source of truth for the ads block. The reward ladder is indexed by
+// view number and CYCLES, exactly like the backend does it
+// (`adViewDef`: `ladder[viewIndex % ladder.length]`) — the mock used to match by
+// upper bound instead, which no admin config can express.
 interface AdsConfig {
   total: number;
   watchedToday: number;
-  rewardTiers: { upTo: number; rewards: TaskReward[] }[];
+  /** Entry N is view N (0-based); the list repeats once it runs out. */
+  rewardLadder: TaskReward[][];
 }
 
+const flatAdReward: TaskReward[] = [ap(GlobalConstants.apRewards.watchVideo)];
+
+/**
+ * LC exactly as the admin stores it. The `lc()` helper above authors rewards in
+ * design units and scales them, which is right for tasks but wrong here: the ad
+ * ladder is typed into the admin panel in whole LC and must be copied verbatim.
+ */
+const rawLc = (amount: number): TaskReward => ({ type: TaskRewardType.LC, amount });
+
 const ADS_CONFIG: AdsConfig = {
-  total: 20,
+  // Default status cap. Lucky Player gets 20, VIP 40 — the ladder just keeps
+  // cycling through them.
+  total: 10,
   watchedToday: 3,
-  // Every ad/video grants a flat AP reward — DOCS §5.3 "Watch a video".
-  rewardTiers: [{ upTo: 20, rewards: [ap(GlobalConstants.apRewards.watchVideo)] }],
+  // Copy of the live ladder (admin → Реклама → Награды, read 06.08.2026), so
+  // dev shows what a player actually sees instead of an invented ramp. A
+  // backend with an empty `adRewardsConfig` pays flat AP for every view —
+  // replace the whole list with `[flatAdReward]` to see that state.
+  rewardLadder: [
+    [ap(1)],
+    [ap(1), rawLc(100)],
+    [ap(2)],
+    [ap(2), rawLc(150)],
+    [ap(2), stars(1)],
+    [ap(2), rawLc(200)],
+    [ap(2)],
+    [ap(2), rawLc(250)],
+    [ap(3), rawLc(300)],
+    [ap(3), stars(1), { ...tickets(1), label: 'bronze' }],
+  ],
 };
 
-const getAdRewards = (index: number): TaskReward[] => {
-  const tier = ADS_CONFIG.rewardTiers.find(t => index <= t.upTo);
-  return tier?.rewards ?? ADS_CONFIG.rewardTiers[0].rewards;
-};
+/** `index` is 0-based, the way the backend numbers slots. */
+const getAdRewards = (index: number): TaskReward[] =>
+  ADS_CONFIG.rewardLadder[index % ADS_CONFIG.rewardLadder.length] ?? flatAdReward;
 
 /** Extra slots bought in this dev session — mirrors `AdWatchProgress`. */
 const ADS_EXTRA = {
@@ -249,19 +276,29 @@ const ADS_EXTRA = {
 const buildAds = (): AdsBlock => {
   const free = ADS_CONFIG.total;
   const total = free + ADS_EXTRA.purchasedToday;
+  // 0-based index and a stable id per slot, both matching the backend
+  // (`id: \`ad-slot-${i}\`, index: i`). Two dev-only bugs came out of not
+  // doing that: the first playable slot was labelled one view ahead of the one
+  // about to be watched, and `mockState.watchedAdIds` could never match a slot,
+  // because `nextId()` handed out a fresh id on every rebuild — so watching an
+  // ad on localhost left the day's counter exactly where it was.
+  const slots = Array.from({ length: total }, (_, i) => {
+    const id = `ad-slot-${i}`;
+    return {
+      id,
+      index: i,
+      rewards: getAdRewards(i),
+      watched: i < ADS_CONFIG.watchedToday || mockState.watchedAdIds.has(id),
+      paid: i >= free,
+    };
+  });
   return {
     enabled: true,
     total,
     free,
-    watchedToday: ADS_CONFIG.watchedToday,
+    watchedToday: slots.filter(slot => slot.watched).length,
     resetAt: nextUtcMidnight(),
-    slots: Array.from({ length: total }, (_, i) => ({
-      id: nextId('ad'),
-      index: i + 1,
-      rewards: getAdRewards(i + 1),
-      watched: i < ADS_CONFIG.watchedToday,
-      paid: i >= free,
-    })),
+    slots,
     extra: {
       enabled: true,
       priceLc: ADS_EXTRA.priceLc,
