@@ -47,105 +47,165 @@
 
 /* Home engine cube geometry — see EngineCardCube / HomeEnginesSlider.
 
-   The cube's four faces are laid out ONCE at `--engine-cube-design`: the square
-   at which every row (claim, speed, capacity) fits. Every other viewport gets
-   that SAME layout scaled uniformly down to `--engine-cube-box`, the cube's
-   footprint here — never re-flowed. That is what keeps the cube square and
-   pixel-identical on every phone. Sizing the box and letting the content reflow
-   is what it used to do, and it silently clipped: measured on a 320px-wide
-   device, a 193px box held 269px of content, so the whole Capacity row and half
-   the Speed row were cut off by the face's `overflow-hidden`.
+   The cube's four faces are laid out ONCE at `--engine-cube-design` and the whole
+   thing is scaled to `--engine-cube-box`, its footprint here — never re-flowed.
+   That is what keeps it square and identical on every phone. Sizing the box and
+   letting the content reflow is what it used to do, and it silently clipped: on a
+   320px device a 193px box held 269px of content, so the whole Capacity row and
+   half the Speed row were cut off by the face's `overflow-hidden`.
 
-   The scale is a plain media-query ladder and the footprint is DERIVED from it,
-   so the two cannot disagree on any engine. Each rung is 0.0024x its own
-   min-width: the footprint is 72% of the viewport — the other 28% is the room
-   the slider keeps for its peeking neighbours — until it reaches the design
-   square around 417px and stops growing. That replaced a flat 120px reserve,
-   which took 37% of a 320px phone against 28% of a 430px one, so the narrowest
-   screens were the ones giving up the most.
+   scale(1) is defined at 480px — the widest phone there is. Every real screen
+   is narrower, so every real screen scales DOWN and the cube occupies the same
+   share of the width everywhere: 62.5%. Nothing is ever enlarged, which is
+   what keeps it from reading as oversized on a big phone. Above 430px the app
+   itself stops growing (`--app-max-w`), so the ladder stops there too — a desktop
+   window shows the same cube a 430px phone does.
 
-   ⚠️ Do NOT go back to `tan(atan2(box, design))`, the usual CSS trick for
-   dividing one length by another. WebKit evaluates it in RADIANS — it returns
-   tan(45rad) = 1.6198 where the answer is tan(45deg) = 1 — and shipped the cube
-   at 486px inside a 300px slot on every iPhone. `@supports (scale: tan(atan2(…)))`
+   The rungs ARE the mechanism, not a fallback: each one is its own min-width over
+   480, and the footprint is derived from the scale
+   (`box = design * scale`) so the two cannot disagree on any engine.
+
+   ⚠️ Do NOT go back to `tan(atan2(box, design))`, the usual CSS trick for dividing
+   one length by another. WebKit evaluates it in RADIANS — it returns
+   tan(45rad) = 1.6198 where the answer is tan(45deg) = 1 — and shipped the cube at
+   486px inside a 300px slot on every iPhone. `@supports (scale: tan(atan2(…)))`
    does not catch it: WebKit parses the expression happily, only the VALUE is
-   wrong. Chromium computes it correctly, so no desktop check can see this. */
+   wrong. Chromium computes it correctly, so no desktop check can see it. */
 :root {
   --engine-cube-design: 300px;
-  --engine-cube-scale: 0.48;
+  --engine-cube-reference: 480px;
+  --engine-cube-scale: 0.5;
   --engine-cube-box: calc(var(--engine-cube-design) * var(--engine-cube-scale));
-  /* Width the front face actually PAINTS. It sits `--cube-half` (design/2 +
-     15px = 165px) nearer the viewer than the cube's centre, so the 1400px
-     perspective renders it 1400/(1400-165) = 1.134x wider than the box. Keep in
-     step with `perspective` and `--cube-half` in engine-card-cube.css. */
+  /* Width the front face actually PAINTS. It sits `--cube-half` (design/2 + 15px
+     = 165px) nearer the viewer than the cube's centre, so the 1400px perspective
+     renders it 1400/(1400-165) = 1.134x wider than the box. Keep in step with
+     `perspective` and `--cube-half` in engine-card-cube.css. */
   --engine-cube-face-w: calc(var(--engine-cube-box) * 1.134);
   /* Ramp of the slider's edge mask: exactly the empty strip beside the painted
-     face, so the fade always stops where the active cube starts. A fixed ramp
-     could not do both jobs — 60px cleared the face on a 430px screen but ate
-     30px of it once the proportional footprint widened the cube on a 320px one. */
+     face, so the fade always stops where the active cube starts. */
   --engine-cube-edge-fade: max(
     0px,
     calc((min(100vw, var(--app-max-w)) - var(--engine-cube-face-w)) / 2)
   );
 }
-@media (min-width: 240px) {
-  :root {
-    --engine-cube-scale: 0.576;
-  }
-}
-@media (min-width: 260px) {
-  :root {
-    --engine-cube-scale: 0.624;
-  }
-}
 @media (min-width: 280px) {
   :root {
-    --engine-cube-scale: 0.672;
+    --engine-cube-scale: 0.5833;
+  }
+}
+@media (min-width: 290px) {
+  :root {
+    --engine-cube-scale: 0.6042;
   }
 }
 @media (min-width: 300px) {
   :root {
-    --engine-cube-scale: 0.72;
+    --engine-cube-scale: 0.625;
+  }
+}
+@media (min-width: 310px) {
+  :root {
+    --engine-cube-scale: 0.6458;
   }
 }
 @media (min-width: 320px) {
   :root {
-    --engine-cube-scale: 0.768;
+    --engine-cube-scale: 0.6667;
+  }
+}
+@media (min-width: 330px) {
+  :root {
+    --engine-cube-scale: 0.6875;
   }
 }
 @media (min-width: 340px) {
   :root {
-    --engine-cube-scale: 0.816;
+    --engine-cube-scale: 0.7083;
+  }
+}
+@media (min-width: 350px) {
+  :root {
+    --engine-cube-scale: 0.7292;
+  }
+}
+@media (min-width: 353px) {
+  :root {
+    --engine-cube-scale: 0.7354;
   }
 }
 @media (min-width: 360px) {
   :root {
-    --engine-cube-scale: 0.864;
+    --engine-cube-scale: 0.75;
+  }
+}
+@media (min-width: 370px) {
+  :root {
+    --engine-cube-scale: 0.7708;
   }
 }
 @media (min-width: 375px) {
   :root {
-    --engine-cube-scale: 0.9;
+    --engine-cube-scale: 0.7812;
+  }
+}
+@media (min-width: 380px) {
+  :root {
+    --engine-cube-scale: 0.7917;
+  }
+}
+@media (min-width: 384px) {
+  :root {
+    --engine-cube-scale: 0.8;
   }
 }
 @media (min-width: 390px) {
   :root {
-    --engine-cube-scale: 0.936;
+    --engine-cube-scale: 0.8125;
   }
 }
-@media (min-width: 402px) {
+@media (min-width: 393px) {
   :root {
-    --engine-cube-scale: 0.965;
+    --engine-cube-scale: 0.8187;
+  }
+}
+@media (min-width: 400px) {
+  :root {
+    --engine-cube-scale: 0.8333;
+  }
+}
+@media (min-width: 410px) {
+  :root {
+    --engine-cube-scale: 0.8542;
+  }
+}
+@media (min-width: 411px) {
+  :root {
+    --engine-cube-scale: 0.8562;
   }
 }
 @media (min-width: 412px) {
   :root {
-    --engine-cube-scale: 0.988;
+    --engine-cube-scale: 0.8583;
   }
 }
-@media (min-width: 417px) {
+@media (min-width: 414px) {
   :root {
-    --engine-cube-scale: 1;
+    --engine-cube-scale: 0.8625;
+  }
+}
+@media (min-width: 420px) {
+  :root {
+    --engine-cube-scale: 0.875;
+  }
+}
+@media (min-width: 428px) {
+  :root {
+    --engine-cube-scale: 0.8917;
+  }
+}
+@media (min-width: 430px) {
+  :root {
+    --engine-cube-scale: 0.8958;
   }
 }
 

@@ -15,6 +15,10 @@ const ladder = [
 /** The face is painted 1.134x its footprint — see `--engine-cube-face-w`. */
 const PERSPECTIVE_GAIN = 1.134;
 const DESIGN_PX = 300;
+/** scale(1) is defined at the widest phone there is; every screen scales down. */
+const REFERENCE_PX = 480;
+/** `--app-max-w` — the app stops widening here, so the ladder does too. */
+const COLUMN_PX = 430;
 
 describe('engine cube scale', () => {
   /**
@@ -37,13 +41,26 @@ describe('engine cube scale', () => {
     );
   });
 
-  it('rises with viewport width and tops out at the design square', () => {
+  it('rises with viewport width and never enlarges', () => {
     expect(ladder.length).toBeGreaterThan(5);
     for (let i = 1; i < ladder.length; i++) {
       expect(ladder[i].width).toBeGreaterThan(ladder[i - 1].width);
-      expect(ladder[i].scale).toBeGreaterThan(ladder[i - 1].scale);
+      expect(ladder[i].scale).toBeGreaterThanOrEqual(ladder[i - 1].scale);
     }
-    expect(ladder.at(-1)?.scale).toBe(1);
+    // scale(1) lives at the reference width, which no real screen reaches, so
+    // the cube is only ever shrunk. Enlarging is how it read as oversized.
+    for (const { scale } of ladder) expect(scale).toBeLessThanOrEqual(1);
+  });
+
+  /**
+   * The promise the ladder exists to keep: the cube takes the SAME share of the
+   * screen on every phone. Each rung is its own width over the reference, until
+   * the app column stops widening and the cube stops with it.
+   */
+  it('gives every rung the same share of its own width', () => {
+    for (const { width, scale } of ladder) {
+      expect(scale, `rung at ${width}px`).toBeCloseTo(Math.min(width, COLUMN_PX) / REFERENCE_PX, 3);
+    }
   });
 
   it('keeps the painted face inside the narrowest viewport each rung serves', () => {
