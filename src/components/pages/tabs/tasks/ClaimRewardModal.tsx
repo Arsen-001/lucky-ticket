@@ -130,7 +130,14 @@ export function ClaimRewardModal({
     result?.rewards.find(r => r.type === TaskRewardType.LC) ?? result?.rewards[0];
 
   const primaryIsAp = primaryReward?.type === TaskRewardType.ACTIVITY_POINTS;
-  const PrimaryIcon = primaryReward && !primaryIsAp ? REWARD_ICON[primaryReward.type] : Coins;
+  // Compared inline rather than through `primaryIsAp`: the icon map has no
+  // entry for activity points, and a separate boolean does not narrow the type
+  // that indexes it — which is what `noImplicitAny: false` was silently
+  // papering over here.
+  const PrimaryIcon =
+    primaryReward && primaryReward.type !== TaskRewardType.ACTIVITY_POINTS
+      ? REWARD_ICON[primaryReward.type]
+      : Coins;
   const gradient = primaryReward
     ? REWARD_GRADIENT[primaryReward.type]
     : 'from-pink to-electric-pink';

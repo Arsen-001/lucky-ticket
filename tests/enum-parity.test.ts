@@ -158,7 +158,12 @@ const parseTsEnumValues = (fileSrc: string, enumName: string): string[] | undefi
 };
 
 describe.skipIf(!hasBackend)('backend Prisma ↔ frontend enum parity', () => {
-  const prismaEnums = hasBackend ? parsePrismaEnums(readFileSync(schemaPath, 'utf8')) : new Map();
+  // Typed even when empty: a bare `new Map()` is `Map<any, any>`, which widened
+  // every value read from it to `any` — so with the backend not checked out the
+  // comparison below type-checked against nothing at all.
+  const prismaEnums = hasBackend
+    ? parsePrismaEnums(readFileSync(schemaPath, 'utf8'))
+    : new Map<string, string[]>();
 
   for (const { prismaEnum, file, tsEnum, transform } of PAIRS) {
     it(`${prismaEnum} → ${tsEnum} (${file})`, () => {

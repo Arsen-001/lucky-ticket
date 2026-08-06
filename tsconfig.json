@@ -1,6 +1,12 @@
 {
   "compilerOptions": {
-    "noImplicitAny": false,
+    // Was `false`, which quietly cancelled the `strict: true` below — implicit
+    // `any` is the thing strict mode exists to stop. Turning it on cost exactly
+    // two fixes in the whole repo, and both were real bugs in waiting: an icon
+    // map indexed by a reward type it has no entry for, and an untyped
+    // `new Map()` that widened a whole test's comparison to `any` whenever the
+    // backend wasn't checked out beside this one.
+    "noImplicitAny": true,
     "noUnusedLocals": true,
     "noUnusedParameters": true,
     "target": "ES2017",
@@ -44,7 +50,11 @@
     ".next-probe/types/**/*.ts",
     ".next-probe/dev/types/**/*.ts",
     ".next-404/types/**/*.ts",
-    ".next-404/dev/types/**/*.ts"
+    ".next-404/dev/types/**/*.ts",
+    ".next-e2e-prod/types/**/*.ts",
+    ".next-e2e-prod/dev/types/**/*.ts",
+    ".next-gate/types/**/*.ts",
+    ".next-gate/dev/types/**/*.ts"
   ],
   "exclude": ["node_modules", "public/assets", "ad-platform-backend"]
 }
