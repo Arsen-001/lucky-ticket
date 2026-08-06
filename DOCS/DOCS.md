@@ -1313,6 +1313,8 @@ The Market is the central hub for purchasing improvements, resources, and status
 
 Tier-bound market items (engines, chips, chip builders, boosters, tier tickets) are gated by the **AP tier** (Section 5.2): an item of tier `T` is buyable only when `AP-tier ≥ T`. Cosmetics (avatars, badges, themes) are **not** gated.
 
+**Every item explains itself — locked ones included.** Any card in the Market opens an info sheet stating what the item is and **what it is for** (an engine mints tickets of its tier on its own cycle; shards are spent in the inventory to mint or level chips; a ticket names the tournaments and stake level it opens; an avatar's bonus runs while it is equipped), plus its perks, stock and timer. A gated card is not a dead end: it stays tappable, and instead of a price the sheet carries the gate — the AP threshold, the referral count where one applies, progress against whichever half is blocking, and a link to the screen that closes it (Invite Friends / How to earn AP). A tier ticket that is switched off in the catalog says so rather than showing a padlock without a reason, and the showcase carousel follows the same rule: a gated offer shows a lock, never a Buy button the server is bound to refuse. A status the player already holds reads **Active** / **Max**, not "Locked".
+
 ### 14.2 LC Price Ladder & Progression Economy
 
 The Market is the platform's main LC **sink** — the counterweight to the tournament LC faucet. All knobs below live in `appConfig.economy` (single source of truth); derivations live in `src/utils/global/economy.utils.ts`, and every rule in this section is asserted by the guardrail simulation `tests/economy-sim.test.ts`.

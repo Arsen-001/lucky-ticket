@@ -1233,5 +1233,10 @@
   "coming soon no friends yet": "Über deinen Link ist noch niemand gekommen. Teile ihn — ein Freund zählt, sobald er dem Kanal folgt.",
   "coming soon friends in channel": "{counted} von {total} im Kanal",
   "your friends": "Deine Freunde",
-  "invite counted": "Gezählt"
+  "invite counted": "Gezählt",
+  "what it is for": "Wofür es da ist",
+  "market engine purpose": "Ein Motor produziert {tier}-Tickets in eigenem Takt. Hol das Fertige ab — der nächste Zyklus startet sofort.",
+  "market shard purpose": "Fragmente gibst du im Inventar aus: einen neuen Chip prägen oder einen vorhandenen aufleveln. Chips erhöhen Tempo und Kapazität eines Motors.",
+  "market avatar purpose": "Leg ihn im Profil an — der Bonus des Avatars wirkt, solange er getragen wird.",
+  "ticket not on sale": "Dieses Ticket ist gerade nicht im Verkauf. Aus Turnieren, Aufgaben und Motoren fällt es weiterhin."
 }
