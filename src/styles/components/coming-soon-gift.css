@@ -5,7 +5,16 @@
  * long as the countdown does, and anything faster turns a reward into a nag.
  * Pure CSS on purpose — this runs on the pre-launch screen, where no store, no
  * provider and as little JS as possible is mounted.
+ *
+ * The `@import` is what makes `@utility` below actually compile. This file is
+ * pulled in from a component, not from `styles/index.css`, so Tailwind never
+ * sees it as part of the entry graph — and an unexpanded `@utility` does not
+ * fail the build, it ships verbatim into the bundle where the browser drops it
+ * as an unknown at-rule. That is how this glow was dead in production and no
+ * check said a word. Matches skeleton.css / phone-input.css / stakes.css.
  */
+@import 'tailwindcss';
+
 @keyframes coming-soon-gift-glow {
   0%,
   100% {
@@ -24,11 +33,12 @@
 
 @utility gift-glow {
   animation: coming-soon-gift-glow 2.2s ease-in-out infinite;
-}
 
-/* Respect the OS setting: the glow is decoration, and motion sickness is not. */
-@media (prefers-reduced-motion: reduce) {
-  @utility gift-glow {
+  /* Respect the OS setting: the glow is decoration, motion sickness is not.
+     Nested INSIDE the utility — `@utility` has to sit at the top level, and a
+     second one wrapped in `@media` is not an override, it is a parse error
+     waiting to be ignored. */
+  @media (prefers-reduced-motion: reduce) {
     animation: none;
     box-shadow: 0 0 32px -6px rgb(from var(--color-electric-pink) r g b / 0.7);
   }

@@ -1,3 +1,10 @@
+/* The `@import` is what makes the `@utility` below actually compile: this file
+   is pulled in from components, not from `styles/index.css`, so Tailwind never
+   sees it as part of the entry graph. An unexpanded `@utility` does not fail
+   the build — it ships verbatim and the browser drops it as an unknown at-rule,
+   which is how this pulse was dead in production unnoticed. */
+@import 'tailwindcss';
+
 .engine-preview-card-tier-bronze,
 .engine-preview-card-tier-silver,
 .engine-preview-card-tier-gold,
