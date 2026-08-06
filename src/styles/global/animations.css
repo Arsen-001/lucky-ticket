@@ -77,3 +77,30 @@
   --animate-arrival-shine: arrival-shine 0.95s ease-in-out 3;
   --animate-arrival-title-shine: arrival-title-shine 0.95s ease-in-out 3;
 }
+
+/**
+ * "Reduce motion" is an accessibility setting a person turns on because motion
+ * makes them ill — it is not a preference about taste. The app animates a great
+ * deal: every list staggers in, badges pulse, the shine sweeps, engines breathe.
+ * Two component stylesheets honoured the setting; nothing else did.
+ *
+ * Animations are collapsed rather than removed. `animate-slide-in-bottom` is
+ * declared with `fill-mode: both`, so an item holds `opacity: 0` until its
+ * animation runs — cancelling animations outright would leave staggered lists
+ * permanently invisible. A 1ms duration lets every animation reach its final
+ * frame immediately, which is the state the design wants anyway.
+ *
+ * `scroll-behavior: auto` is part of the same setting: a smooth-scrolled jump
+ * is motion too.
+ */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 1ms !important;
+    animation-delay: 0ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 1ms !important;
+    scroll-behavior: auto !important;
+  }
+}
