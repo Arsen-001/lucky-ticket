@@ -4,17 +4,10 @@ import { useGetMeQuery } from '@/api/me.api';
 import { RequirementModal } from '@/components/shared/modals/RequirementModal';
 import { GlobalConstants } from '@/constants/global.constants';
 import { routes } from '@/constants/routes';
+import { tierNameId } from '@/constants/tier-names';
 import { useAppTranslations } from '@/hooks/useAppTranslations';
 import type { MessageIds } from '@/types/types/i18n.types';
 import type { TicketType } from '@/types/types/ticket.types';
-
-const tierNameId: Record<TicketType, MessageIds> = {
-  bronze: 'bronze',
-  silver: 'silver',
-  gold: 'golden',
-  platinum: 'platinum',
-  diamond: 'diamond',
-};
 
 export interface TierGateModalProps {
   open: boolean;

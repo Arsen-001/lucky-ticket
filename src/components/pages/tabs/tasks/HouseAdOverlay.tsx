@@ -7,6 +7,7 @@ import { Button } from '@/components/shared/buttons/Button';
 import { useAppTranslations } from '@/hooks/useAppTranslations';
 import { registerHousePresenter, type HouseAdExit } from '@/lib/ads/house.provider';
 import { houseAdPromos } from '@/constants/house-ads.constants';
+import { openExternalUrl } from '@/lib/telegram/telegram';
 
 /**
  * Renders the house ad — the app's own promo shown when no ad network had fill.
@@ -60,7 +61,7 @@ export function HouseAdOverlay() {
     if (!promo.href) return;
     // Opened in Telegram without closing the promo, so the player can act on it
     // and still ask for another ad afterwards.
-    window.Telegram?.WebApp?.openTelegramLink?.(promo.href);
+    openExternalUrl(promo.href);
   };
 
   return (

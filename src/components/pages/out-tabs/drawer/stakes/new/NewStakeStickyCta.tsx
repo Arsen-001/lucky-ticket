@@ -2,7 +2,7 @@
 
 import '@/styles/components/stakes.css';
 import Image from 'next/image';
-import { Loader2 } from 'lucide-react';
+import { Loader2, Lock } from 'lucide-react';
 import { icons } from '@/constants/icons';
 import { useAppTranslations } from '@/hooks/useAppTranslations';
 import { useStakesDisplayConfig } from '@/hooks/useStakesDisplayConfig';
@@ -22,6 +22,8 @@ export interface NewStakeStickyCtaProps {
   /** LC balance left after this stake locks the deposit — shown as subtitle when valid. */
   balanceAfter?: number;
   tierLocked?: boolean;
+  /** What the tier gate is still short of, already localized. */
+  tierLockedHint?: string;
   loading?: boolean;
   onConfirm: () => void;
   /**
@@ -32,6 +34,14 @@ export interface NewStakeStickyCtaProps {
   onBlocked?: (reason: 'tier' | 'coins') => void;
 }
 
+/**
+ * The confirm button, and — when it refuses — the reason.
+ *
+ * A dimmed button labelled "Locked" is read as a bug, not as a rule: players
+ * tapped it, scrolled past it, and asked why the screen was broken. So a
+ * blocked CTA now carries an error skin, a lock, a sentence naming what is
+ * missing, and an invitation to tap it for the screen that fixes it.
+ */
 export function NewStakeStickyCta({
   level,
   amount,
@@ -43,6 +53,7 @@ export function NewStakeStickyCta({
   hint,
   balanceAfter,
   tierLocked = false,
+  tierLockedHint,
   loading = false,
   onConfirm,
   onBlocked,
@@ -60,34 +71,48 @@ export function NewStakeStickyCta({
   const explainable = !!explainBlock && !loading;
 
   let label: string;
+  let reason: string | null = null;
   if (tierLocked) {
-    label = t('locked');
+    label = t('level {level} is locked', { level });
+    reason = tierLockedHint ?? null;
   } else if (belowMin) {
     label = t('min {amount} {coin}', {
       amount: minDeposit.toLocaleString(),
       coin: GlobalConstants.coinName,
     });
+    reason = t('raise the amount to at least {amount} {coin}', {
+      amount: minDeposit.toLocaleString(),
+      coin: GlobalConstants.coinName,
+    });
   } else if (insufficient) {
     label = t('not enough {coin}', { coin: GlobalConstants.coinName });
+    reason = t('not enough coins description', {
+      balance: `${balance.toLocaleString()} ${GlobalConstants.coinName}`,
+      required: `${amount.toLocaleString()} ${GlobalConstants.coinName}`,
+    });
   } else {
     label = t('confirm level {level} stake', { level });
   }
 
   return (
-    <div className="mt-3">
+    <div>
       <button
         type="button"
         onClick={valid && !loading ? onConfirm : explainable ? explainBlock : undefined}
         disabled={(!valid && !explainable) || loading}
+        aria-disabled={!valid}
         className={twMerge(
           'flex w-full items-center justify-between overflow-hidden rounded-2xl px-5 py-3 text-[13px] font-extrabold uppercase tracking-wider text-white transition-transform active:scale-[0.99]',
           valid && !loading
             ? 'stakes-liquid-glass stakes-btn-glow cursor-pointer'
-            : 'border border-white/10 bg-white/5 opacity-60 backdrop-blur-md',
+            : 'border-error/50 bg-error/20 text-error-text border backdrop-blur-md',
           !valid && (explainable ? 'cursor-pointer' : 'cursor-not-allowed')
         )}
       >
-        <span className="relative z-10">{label}</span>
+        <span className="relative z-10 flex items-center gap-2">
+          {!valid && !loading && <Lock size={14} strokeWidth={2.8} className="shrink-0" />}
+          {label}
+        </span>
         {loading ? (
           <Loader2 size={18} className="relative z-10 animate-spin" />
         ) : valid ? (
@@ -108,6 +133,17 @@ export function NewStakeStickyCta({
           )
         ) : null}
       </button>
+      {/* The refusal always says why, right under the button that refused. */}
+      {!valid && (reason || explainable) && (
+        <div className="text-error-text mt-1.5 text-center text-[10px] font-bold leading-snug">
+          {reason}
+          {explainable && (
+            <span className="text-white-secondary block font-semibold">
+              {t('tap to see how to unlock')}
+            </span>
+          )}
+        </div>
+      )}
       {valid && balanceAfter !== undefined && (
         <div className="text-white-secondary mt-1.5 text-center text-[10px] tabular-nums">
           {t('balance after {n} {coin}', {

@@ -166,6 +166,7 @@ export function Header({ className }: ClassNameProps) {
               value={formatCompact(me?.coins ?? 0)}
               onClick={() => router.push(routes.lc)}
               ariaLabel="LC"
+              dataTour="lc"
             />
           </SkeletonSuspense>
           <SkeletonSuspense

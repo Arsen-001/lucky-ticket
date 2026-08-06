@@ -9,16 +9,9 @@ import { useAppTranslations } from '@/hooks/useAppTranslations';
 import { GlobalConstants } from '@/constants/global.constants';
 import { routes } from '@/constants/routes';
 import { icons } from '@/constants/icons';
+import { tierNameId } from '@/constants/tier-names';
 import type { Ticket as TicketModel, TicketType } from '@/types/types/ticket.types';
 import type { MessageIds } from '@/types/types/i18n.types';
-
-const titleIdByType: Record<TicketType, MessageIds> = {
-  bronze: 'bronze',
-  silver: 'silver',
-  gold: 'golden',
-  platinum: 'platinum',
-  diamond: 'diamond',
-};
 
 const descriptionIdByType: Record<TicketType, MessageIds> = {
   bronze: 'bronze ticket description',
@@ -72,7 +65,7 @@ export function TierLockedContent({ ticket, className }: TierLockedContentProps)
               {t('locked')}
             </span>
             <h2 className="mt-1.5 text-xl font-extrabold text-white tracking-tight leading-tight">
-              {t('{tier} ticket', { tier: t(titleIdByType[ticket.ticketType]) })}
+              {t('{tier} ticket', { tier: t(tierNameId[ticket.ticketType]) })}
             </h2>
             <div className="mt-1.5 text-[11px] text-white-secondary leading-snug">
               {t(descriptionIdByType[ticket.ticketType])}
@@ -87,7 +80,7 @@ export function TierLockedContent({ ticket, className }: TierLockedContentProps)
         </span>
         <p className="text-white-secondary text-[12px] leading-snug">
           {t('reach {tier} tier with {ap} ap', {
-            tier: t(titleIdByType[ticket.ticketType]),
+            tier: t(tierNameId[ticket.ticketType]),
             ap: threshold.toLocaleString(),
           })}
         </p>

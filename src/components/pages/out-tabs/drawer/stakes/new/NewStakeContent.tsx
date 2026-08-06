@@ -14,13 +14,15 @@ import { routes } from '@/constants/routes';
 import { useAppTranslations } from '@/hooks/useAppTranslations';
 import { useStakesDisplayConfig } from '@/hooks/useStakesDisplayConfig';
 import {
+  computeMaxStakeable,
   computeStakeActivityPoints,
   computeStakeFee,
   computeStakeReturnCoins,
+  findFirstLockedLevel,
   findLevelForDeposit,
 } from '@/utils/global/stakes.utils';
-import { GlobalConstants } from '@/constants/global.constants';
-import type { ActivityTier } from '@/constants/global.constants';
+import { formatTierGap } from '@/utils/global/activity.utils';
+import { tierNameId } from '@/constants/tier-names';
 import { useUnlockedTiers } from '@/hooks/useUnlockedTiers';
 import { NewStakeHero } from '@/components/pages/out-tabs/drawer/stakes/new/NewStakeHero';
 import { NewStakeStickyCta } from '@/components/pages/out-tabs/drawer/stakes/new/NewStakeStickyCta';
@@ -43,7 +45,7 @@ export function NewStakeContent() {
   const { data: me, isLoading: meLoading } = useGetMeQuery();
   const stakeCfg = useStakesDisplayConfig();
   const [startStake, { isLoading: starting }] = useStartStakeMutation();
-  const { isTierUnlocked } = useUnlockedTiers();
+  const { isTierUnlocked, tierGap } = useUnlockedTiers();
 
   const balance = me?.coins ?? 0;
   const levels = stakes?.levels ?? [];
@@ -93,9 +95,15 @@ export function NewStakeContent() {
   const activeLevel = findLevelForDeposit(levels, safeDeposit);
   const tierLocked = !isTierUnlocked(activeLevel.tier);
   // The balance is the only ceiling the backend enforces (`StakesService.start`
-  // checks `user.coins >= amount` and nothing above it), so the slider and the
-  // MAX preset run to the full balance — a fixed UI cap used to hide the rest.
+  // checks `user.coins >= amount` and nothing above it), so the track runs to
+  // the full balance — a fixed UI cap used to hide the rest.
   const sliderMax = Math.max(balance, minDepositOfFirst);
+  // …but the tier gate is a second ceiling, and it used to exist only as a
+  // greyed-out button at the far end of the screen. `maxStakeable` is where the
+  // controls stop; `lockedLevel` is the level that put the wall there.
+  const lockedLevel = findFirstLockedLevel(levels, isTierUnlocked);
+  const maxStakeable = computeMaxStakeable(levels, balance, isTierUnlocked);
+  const lockedLevelHint = lockedLevel ? formatTierGap(tierGap(lockedLevel.tier), t) : undefined;
   const stakeFee = computeStakeFee(
     safeDeposit,
     durationMonths,
@@ -139,19 +147,22 @@ export function NewStakeContent() {
   const starsBalance = me?.telegramStars ?? 0;
   const notEnoughStars = !stakeFee.free && starsBalance < stakeFee.fee;
 
+  // Both halves of the gate, and only the ones actually missing. Naming AP
+  // unconditionally is how a stake blocked on friends said "need 0 more AP".
   const tierLockedHint = tierLocked
-    ? (() => {
-        const required = GlobalConstants.apTierThresholds[activeLevel.tier as ActivityTier];
-        const apShort = required - (me?.activityPoints ?? 0);
-        return t('need {tier} tier {ap} more ap', {
-          tier: t(activeLevel.tier),
-          ap: Math.max(0, apShort).toLocaleString(),
-        });
-      })()
-    : null;
+    ? [
+        t('level {level} needs {tier} tier', {
+          level: activeLevel.level,
+          tier: t(tierNameId[activeLevel.tier]),
+        }),
+        formatTierGap(tierGap(activeLevel.tier), t),
+      ]
+        .filter(Boolean)
+        .join(' · ')
+    : undefined;
 
   const handleConfirm = async () => {
-    if (tierLocked || safeDeposit < activeLevel.minDeposit || safeDeposit > balance) return;
+    if (tierLocked || safeDeposit < activeLevel.minDeposit || safeDeposit > maxStakeable) return;
     if (notEnoughStars) {
       setErrorMessage(t('not enough stars for fee {n}', { n: stakeFee.fee - starsBalance }));
       return;
@@ -207,6 +218,10 @@ export function NewStakeContent() {
         balance={balance}
         sliderMin={minDepositOfFirst}
         sliderMax={sliderMax}
+        maxStakeable={maxStakeable}
+        lockedLevel={lockedLevel}
+        lockedLevelHint={lockedLevelHint}
+        onExplainLock={() => setBlocked('tier')}
         durationMonths={durationMonths}
         onDepositChange={setDeposit}
         onDurationChange={setDurationMonths}
@@ -234,32 +249,35 @@ export function NewStakeContent() {
         durationMonths={durationMonths}
       />
 
-      {tierLockedHint && (
-        <div className="border-error/40 bg-error/10 text-error-text mt-3 rounded-xl border px-3 py-2 text-center text-[11px] font-bold">
-          {tierLockedHint}
-        </div>
-      )}
-
-      <NewStakeStickyCta
-        level={activeLevel.level}
-        amount={safeDeposit}
-        minDeposit={activeLevel.minDeposit}
-        balance={balance}
-        stakeFee={stakeFee.fee}
-        stakeFeeFree={stakeFee.free}
-        bronzeFreeRemaining={bronzeFreeRemaining}
-        hint={ctaHint}
-        balanceAfter={Math.max(0, balance - safeDeposit)}
-        tierLocked={tierLocked}
-        loading={starting}
-        onConfirm={handleConfirm}
-        onBlocked={setBlocked}
-      />
-      {errorMessage && (
-        <div className="border-error/40 bg-error/15 text-error-text mt-2 rounded-xl border px-3 py-2 text-center text-[11px] font-bold">
-          {errorMessage}
-        </div>
-      )}
+      {/* Pinned to the bottom of the scroller: the answer to "can I stake this?"
+          has to be on screen while the amount is being set, not two scrolls
+          under the rewards preview. */}
+      <div
+        className="from-background via-background sticky z-20 -mx-5 mt-3 bg-gradient-to-t via-70% to-transparent px-5 pb-2 pt-6"
+        style={{ bottom: 'var(--tg-inset-bottom)' }}
+      >
+        {errorMessage && (
+          <div className="border-error/40 bg-error/15 text-error-text mb-2 rounded-xl border px-3 py-2 text-center text-[11px] font-bold">
+            {errorMessage}
+          </div>
+        )}
+        <NewStakeStickyCta
+          level={activeLevel.level}
+          amount={safeDeposit}
+          minDeposit={activeLevel.minDeposit}
+          balance={balance}
+          stakeFee={stakeFee.fee}
+          stakeFeeFree={stakeFee.free}
+          bronzeFreeRemaining={bronzeFreeRemaining}
+          hint={ctaHint}
+          balanceAfter={Math.max(0, balance - safeDeposit)}
+          tierLocked={tierLocked}
+          tierLockedHint={tierLockedHint}
+          loading={starting}
+          onConfirm={handleConfirm}
+          onBlocked={setBlocked}
+        />
+      </div>
 
       <StakeLevelsCompareModal
         open={compareOpen}
@@ -270,7 +288,12 @@ export function NewStakeContent() {
       <TierGateModal
         open={blocked === 'tier'}
         onClose={() => setBlocked(null)}
-        tier={activeLevel.tier as TicketType}
+        // Blocked → the level being configured is the gated one. Otherwise the
+        // gate was opened from the ceiling notice, which is about the level
+        // above the wall, not the (unlocked) one currently selected.
+        tier={
+          (tierLocked ? activeLevel.tier : (lockedLevel?.tier ?? activeLevel.tier)) as TicketType
+        }
         titleId="stake level locked"
       />
 

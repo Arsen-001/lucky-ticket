@@ -62,7 +62,9 @@ export function TabBar({ className }: ClassNameProps) {
     {
       route: routes.tournaments.index,
       icon: <Trophy />,
-      name: t('tournaments'),
+      // Its own key, not `tournaments`: the English word does not fit a fifth
+      // of the bar at this size, while the page heading still wants it in full.
+      name: t('tournaments tab'),
     },
     {
       route: routes.home,

@@ -181,7 +181,7 @@ AP is earned from a data-driven **source registry** — every meaningful action 
 | Spend LC                  | 1 per 2,500 LC spent                  | no daily cap                                                                                   |
 | Complete a stake          | `LC staked × months / 5,000`          | base credited on start (retained on cancel), +50% bonus on completion (forfeited if cancelled) |
 
-Tiered sources (daily / weekly tasks, tournament join) scale with the relevant tier — Bronze→Diamond — and recurring daily sources carry per-day caps. **Claiming engine output awards no AP** — claims pay in tickets only, so farming the claim button cannot drive progression. **One-off and on-top sources** — verify-email, one-time tasks, friend invites, tournament joins, stake completion — are earned above the daily baseline (Section 5.4). **Purchases are uncapped:** 1 AP per 10 LS or per 2,500 LC spent with no daily limit, so a heavy spender climbs tiers substantially faster than a free player.
+Tiered sources (daily / weekly tasks, tournament join) scale with the relevant tier — Bronze→Diamond — and recurring daily sources carry per-day caps. **Claiming engine output awards no AP** — claims pay in tickets only, so farming the claim button cannot drive progression. For the same reason **a tournament pays its join AP once**, however many times the player re-enters it to add tickets (Section 11). **One-off and on-top sources** — verify-email, one-time tasks, friend invites, tournament joins, stake completion — are earned above the daily baseline (Section 5.4). **Purchases are uncapped:** 1 AP per 10 LS or per 2,500 LC spent with no daily limit, so a heavy spender climbs tiers substantially faster than a free player.
 
 ### 5.4 Daily Baseline
 
@@ -272,7 +272,7 @@ All perk magnitudes live in `src/constants/global.constants.ts` and can be tuned
 
 #### Lucky Player perks
 
-**Every** Lucky Player perk is **admin-tunable** in one place (Admin → Настройки → Статусы): price (LC + LS), duration (days), and the full perk set — engine speed, stake yield, tournament reward, tournament join-AP, **market discount %, referral %, daily ads cap, and per-tier ticket-send limits**. The backend resolves these into `me.statusPerks` so the Mini App shows exactly what the server enforces. Admins can also set/extend a specific player's LP expiry from the user editor.
+**Every** Lucky Player perk is **admin-tunable** in one place (Admin → Настройки → Статусы): price (LC + LS), duration (days), and the full perk set — engine speed, stake yield, tournament reward, tournament join-AP, **market discount %, daily ads cap, and per-tier ticket-send limits**. The backend resolves these into `me.statusPerks` so the Mini App shows exactly what the server enforces. Admins can also set/extend a specific player's LP expiry from the user editor.
 
 | Perk                            | Value                     | Source constant                                  |
 | :------------------------------ | :------------------------ | :----------------------------------------------- |
@@ -283,7 +283,6 @@ All perk magnitudes live in `src/constants/global.constants.ts` and can be tuned
 | Tournament LC reward boost      | +25%                      | `luckyPlayerTournamentRewardBoostPct`            |
 | Tournament join AP boost        | +50%                      | `luckyPlayerTournamentJoinApBoostPct`            |
 | Daily ads cap                   | 20                        | `apRewards.luckyPlayerWatchVideoDailyLimit`      |
-| Referral percentage             | 15%                       | `luckyPlayerReferralPercentage`                  |
 | Higher ticket send daily limits | B5/S4/G3/P2/D1            | `ticketSendDailyLimits.luckyPlayer`              |
 | Send Platinum/Diamond tickets   | allowed                   | `ticketSendDailyLimits.default = 0` for P/D      |
 | Bulk "Claim all" per tier       | enabled (admin-tunable)   | `statusPerks.bulkClaimEnabled` (LP default true) |
@@ -291,7 +290,7 @@ All perk magnitudes live in `src/constants/global.constants.ts` and can be tuned
 
 #### VIP perks
 
-VIP is the high-tier permanent status; by default its values exceed Lucky Player at every category. **Every VIP perk is admin-tunable per level** (Admin → Настройки → Статусы) — engine speed, stake yield, tournament reward, tournament join-AP, **market discount %, referral %, daily ads cap, and per-tier ticket-send limits**, plus the per-level price. Defaults are uniform (the values below apply to every level), but an admin can make higher levels grant stronger perks. The market / referral / tasks sections keep only the NON-status values (base market prices, referral regular/premium %, default ads cap); the VIP/LP values moved to Статусы and the backend reads them from there (single source of truth, surfaced to the client via `me.statusPerks`).
+VIP is the high-tier permanent status; by default its values exceed Lucky Player at every category. **Every VIP perk is admin-tunable per level** (Admin → Настройки → Статусы) — engine speed, stake yield, tournament reward, tournament join-AP, **market discount %, daily ads cap, and per-tier ticket-send limits**, plus the per-level price. Defaults are uniform (the values below apply to every level), but an admin can make higher levels grant stronger perks. The market / referral / tasks sections keep only the NON-status values (base market prices, the flat referral %, default ads cap); the VIP/LP values moved to Статусы and the backend reads them from there (single source of truth, surfaced to the client via `me.statusPerks`).
 
 | Perk                            | Value                         | Source constant                                  |
 | :------------------------------ | :---------------------------- | :----------------------------------------------- |
@@ -302,7 +301,6 @@ VIP is the high-tier permanent status; by default its values exceed Lucky Player
 | Tournament LC reward boost      | +50%                          | `vipTournamentRewardBoostPct`                    |
 | Tournament join AP boost        | +100%                         | `vipTournamentJoinApBoostPct`                    |
 | Daily ads cap                   | 40                            | `vipWatchVideoDailyLimit`                        |
-| Referral percentage             | 25%                           | `vipReferralPercentage`                          |
 | Higher ticket send daily limits | inherits LP table             | `ticketSendDailyLimits.luckyPlayer`              |
 | Send Platinum/Diamond tickets   | allowed                       | (same gate as LP)                                |
 | Profile badge                   | Animated VIP-level            | n/a (visual)                                     |
@@ -343,7 +341,7 @@ VIP pricing is **per level and admin-tunable** (Admin → Настройки →
 
 #### VIP Benefits
 
-The full list of VIP perks (engine speed, stake yield, market discount, tournament boosts, ads cap, referral %, send limits, profile badge, dedicated support) and their concrete magnitudes are documented in **Section 7.3 — Status Benefits → VIP perks table**. The four game boosts are **admin-tunable per VIP level** (defaults uniform); price is per level; the other perks are shared across levels (their own admin sections). Stacking and self-discount rules from §7.3 apply.
+The full list of VIP perks (engine speed, stake yield, market discount, tournament boosts, ads cap, send limits, profile badge, dedicated support) and their concrete magnitudes are documented in **Section 7.3 — Status Benefits → VIP perks table**. The four game boosts are **admin-tunable per VIP level** (defaults uniform); price is per level; the other perks are shared across levels (their own admin sections). Stacking and self-discount rules from §7.3 apply.
 
 ### Connections
 
@@ -911,6 +909,7 @@ Beyond the per-user AP-tier gate, every tournament tier carries a **platform-wid
 - Winners are selected randomly from the pool of participants at the designated Start Time.
 - **Probability:** Joining with more tickets increases the chance of winning.
 - **AP reward:** joining grants AP scaled by the tournament's tier — 1 AP at Bronze up to 5 AP at Diamond (`apRewards.tournamentJoinByTier`). Placement does not grant AP.
+- **The AP is paid per tournament, not per join call.** A player may enter the same tournament repeatedly to add tickets, and every added ticket counts toward the draw — but only the **first** entry pays the AP and advances the tournament tasks. Without that rule the participation row (an upsert) let a ticket pile be traded straight for tier progression: 20 separate one-ticket entries into one tournament paid 20× the AP of a single 20-ticket entry, for the same draw weight. "First entry" is read off the upsert's own result inside the transaction rather than a prior lookup, so two simultaneous first joins cannot both collect.
 
 **Prize distribution.** The prize pool is split across placements by a top-heavy percentage table:
 
@@ -1612,23 +1611,17 @@ Encourages growth through referral rewards. Users can track their invited friend
 
 Each user's invite link is a Telegram deep link — `https://t.me/<bot>?startapp=<referrerId>`. When a friend opens it, Telegram delivers `<referrerId>` as the `start_param` inside the signed `initData`. On the friend's **first** sign-in the backend records the referral (referrer → new user) and pays the inviter the signup reward below. The link is captured only at registration: a user who already has an account cannot be retro-attributed to a referrer, and each user can be referred at most once (self-referral is ignored).
 
-**Friend vs referral — who actually counts.** Everyone who arrives through the link is a **friend**, permanently: the relationship is recorded once and nothing takes it away. A **referral** is the narrower, _live_ thing the friends screen reports — a friend who is currently **subscribed to the official channel** and has **not blocked the bot**. Someone who joined through a link, never opened the channel and blocked the bot is still listed as a friend, still keeps whatever ticket commission they already generated, but stops counting as a referral.
+**Friend vs referral — who actually counts.** Everyone who arrives through the link is a **friend**, permanently: the relationship is recorded once and nothing takes it away. A **referral** is the narrower, _live_ thing the friends screen reports — a friend who is currently **subscribed to the official channel** and has **not blocked the bot**. Someone who joined through a link, never opened the channel and blocked the bot is still listed as a friend, still keeps whatever they already generated, but stops counting as a referral — and stops paying (§17.2).
 
-The screen therefore shows two numbers side by side, and each row that does not count carries its own reason:
+Three things can disqualify a friend — Telegram confirms they are not a channel member, `User.botBlockedAt` is set, or Telegram would not answer at all (outage, 429, unconfigured bot). **The screen no longer distinguishes them.** Since the split became an economy rule the question a player has is "does this person pay me", which has two answers, so a disqualified row carries one neutral «не засчитан» badge and the rule itself is stated once above the list. The three reasons still exist server-side (`notCountedReason` on the endpoint) for support and future admin surfaces.
 
-| Reason on the row   | What it means                                             | Counts? |
-| :------------------ | :-------------------------------------------------------- | :------ |
-| «Не в канале»       | Telegram confirms the friend is not a channel member      | no      |
-| «Заблокировал бота» | `User.botBlockedAt` is set — the friend blocked the bot   | no      |
-| «Не проверено»      | Telegram would not answer (outage, 429, unconfigured bot) | no      |
-
-The third reason is deliberately **not** worded as "not in channel". It is our own failure to ask, not the friend's action, and it is labelled in a muted tone rather than a warning one — telling a player their friend left when nobody knows that accuses a real person of something they did not do. Like every other channel gate since 2026-08-04 the rule **fails closed**: only a confirmed yes counts, so while Telegram is unreachable the referral number reads low and refills by itself once it answers. Blocking the bot outranks the channel answer when both apply — it is the more actionable thing to tell the inviter, since a channel can be rejoined silently but an unblock cannot be requested through a blocked bot.
+Like every other channel gate since 2026-08-04 the rule **fails closed**: only a confirmed yes counts, so while Telegram is unreachable the referral number reads low and refills by itself once it answers. That is also exactly why the LC reward is gated on the CLAIM rather than on the accrual — an outage must be able to delay money, never destroy it (§17.2).
 
 Both halves of the rule are admin-switchable (`referralConfig.qualification.requireChannelSubscription` / `.requireBotNotBlocked`); with both off every invited friend counts again, nothing is asked of Telegram at all, and the screen stops stating the condition. The switches exist as the escape hatch for a long Telegram outage — turning them off is the one fix that does not itself depend on Telegram.
 
 **One endpoint owns the rule.** `GET referral/friends` carries `countsAsReferral` + `notCountedReason` per friend; `GET referral/stats` stays a single cheap `COUNT` (`totalInvited` plus the two rule flags) and deliberately does **not** report the referral count. Both endpoints fire together when the screen opens, so computing it in each meant resolving the whole roster against Telegram twice on a cold cache — for the largest referrer on prod (248 friends) that is ~496 `getChatMember` calls to render one screen. The Mini App derives the count from the list it already loads (`useReferralCounts`), which also makes it impossible for the header to disagree with the rows beneath it.
 
-**This is a reporting rule, not an economy rule.** Tier requirements (§5.2) still read the raw lifetime `User.referralsCount`, and the signup reward is still paid the moment the friend registers — so nobody loses a tier or a reward they already hold. The tier ladder on the friends screen therefore draws **all invited friends**, and says so in a note whenever the two numbers differ; drawing the narrower number there would show "7/10 до Gold" to a player who is already Gold.
+**What the rule does and does not reach.** It governs exactly one thing: whether the **tournament LC reward** can be claimed off that friend (§17.2). Everything cumulative still reads the raw lifetime `User.referralsCount` — **tier requirements** (§5.2), the **wallet connect/withdraw gates** (§16.4) and the **Friends milestone chain** (§21). That is deliberate and not an oversight: those are irreversible things a player already holds, and recomputing them from a live count would demote someone out of Gold, or shut the withdrawal of a player who had already passed the gate, because a friend left a channel. The signup reward is likewise still paid at registration, when no verdict exists yet. The tier ladder on the friends screen therefore draws **all invited friends**, and says so in a note whenever the two numbers differ; drawing the narrower number there would show "7/10 до Gold" to a player who is already Gold.
 
 **Share flow:** On Telegram clients with Bot API 8.0+, tapping **Share invite** sends a **rich invite card** instead of a bare link — a branded 1280×720 image with a localized caption and a "Play" button carrying the `?startapp=<referrerId>` deep link. The backend prepares it per tap (`POST referral/prepare-share`, one-time-use message via Bot API `savePreparedInlineMessage`), and the Mini App forwards it through the native chat picker (`WebApp.shareMessage`). On older clients — or if preparation fails — the flow falls back to the plain `t.me/share/url` link share; outside Telegram it uses the OS share sheet or copies the link.
 
@@ -1648,23 +1641,20 @@ The recipient's language is **not** available at any point and never can be: `sa
 
 **Referral Benefits:**
 
-- **Signup Reward:** The moment a referred friend registers, the inviter is credited a one-off reward — **10 AP + 1 Lucky Star**, doubled to **20 AP + 2 Lucky Stars** when the invited friend is a Telegram Premium user. This is granted instantly (unlike the ticket commission below, which accumulates and must be claimed).
+- **Signup Reward:** The moment a referred friend registers, the inviter is credited a one-off reward — **10 AP + 1 Lucky Star**, the same for every invited friend. It used to double to 20 AP + 2 Lucky Stars for a **Telegram Premium** invitee; that priced a friend by something the inviter cannot influence — whether the person they happen to know pays Telegram — and made an ordinary friend read as the lesser catch. The doubling is gone from both the screen (one line: what an invite pays) and the mechanic. `referralConfig.signup.premiumAp` / `.premiumStars` still exist, hold the same values as the flat pair and are read by nothing; they survive so a config written before the change still round-trips through an admin save. This is granted instantly (unlike the tournament reward below, which accumulates and must be claimed). It is **not** conditioned on the friend qualifying as a referral — at registration nobody has joined a channel yet, and the payment cannot wait for a verdict that does not exist.
 - **Per-invite reward ladder (admin-controlled):** the admin can replace the flat signup reward with a ladder (panel → Настройки → Рефералка → «Награды по номеру друга»): the N-th invited friend grants ladder entry N — any mix of AP, LC, Stars, and tickets of a chosen tier — cycling back to the first entry once invites outrun the ladder. While a ladder is set it applies to all invitees (the Premium doubling does not apply); clearing the ladder restores the flat signup reward.
 
-When an invited friend claims tickets, the inviter earns a percentage of those tickets as a claimable reward — mirroring the same claim mechanic used for regular tickets:
+The ongoing half is a cut of what a friend WINS:
 
-- **Ticket Commission:** For every ticket a referred friend claims, the inviter accumulates a percentage of that amount as claimable tickets of the same type. The commission rate has three tiers, keyed to the friend's account:
+- **Tournament LC reward:** whenever a referred friend takes a prize in a tournament, **5%** of that prize accrues to the inviter as claimable LC (`referralConfig.tournamentLcPct`, admin-tunable, `0` disables it). The number is **flat — the friend's status does not change it.** It replaced a four-step ladder keyed to the friend's account (5 / 10 / 15 / 25% for regular / Premium / Lucky Player / VIP), which was both impossible to state in one sentence on the screen and a perk that paid the wrong person: being VIP raised what somebody _else_ collected off you. The VIP/LP "referral %" perk line is gone from both status perk lists with it.
+- **Minted on top.** The friend's own prize is untouched — a 10 000 LC win pays the friend 10 000 and mints 500 for the inviter. Rounding is always **down**, so a prize too small to pay a whole coin pays nothing rather than inventing one.
+- **The prize only, never the jackpot.** A jackpot drop (§20.3) redistributes LC that already exists; paying a commission on it would mint new coins against a fixed pot, so `jackpotLc` is excluded and only the placement prize (status/avatar boosts included, as actually credited) counts.
+- **Accrued inside the finish transaction.** The commission rides in the same `$transaction` as the payout that produced it and under the same compare-and-swap that makes a double finish impossible — a commission can never outlive a prize that rolled back.
+- **Claim Mechanic:** the LC is not credited instantly — it accumulates per friend and is claimed from the friends screen, individually or with «Забрать всё».
+- **Only a live referral pays out, and it freezes rather than burns.** The claim — not the accrual — is gated on the friend counting as a referral right now (§17.2 above). Accrual is deliberately ungated: resolving Telegram inside the finish transaction would let a `getChatMember` timeout silently destroy a commission with no way to recover it. So the pile keeps growing, the row shows it locked, and it becomes claimable the moment the friend rejoins the channel or unblocks the bot. `POST referral/claim/:friendId` answers **403** `{ error: 'not-a-referral' }` when the only thing pending is gated LC.
+- **Legacy ticket commission.** Before this, the inviter earned a % of the _tickets_ a friend claimed from engines. Nothing accrues there any more, but existing `ReferralClaimable` rows were **not** wiped: the same claim button still pays them out, ungated (they were earned under a rule that made no such demand), and the balance drains to zero on its own. The friends screen shows the ticket stack only while a friend still has one.
 
-  | Friend's Account | Commission Rate |
-  | :--------------- | :-------------- |
-  | Regular          | 5%              |
-  | Telegram Premium | 10%             |
-  | Lucky Player     | 15%             |
-
-  For example, if a regular friend claims 20 Bronze tickets, the inviter can claim 1 Bronze ticket; a Lucky Player friend claiming the same yields 3 Bronze tickets to the inviter. (Final percentages are knobs.)
-
-- **Claim Mechanic:** These referral tickets are not credited instantly — they accumulate and must be actively claimed by the inviter, the same way regular tickets are claimed.
-- **No LC Commission:** Referral rewards apply only to tickets. There is no commission on Lucky Coins (LC) earned by referred friends.
+**Two lists, not five filters.** The friends screen is two tabs — **Друзья** (everyone who ever arrived through the link) and **Рефералы** (the ones currently paying). A friend who stopped counting carries one neutral «не засчитан» badge; the earlier three-way reason (left the channel / blocked the bot / could not check) is no longer shown per row, because the screen now has exactly two states and the rule that separates them is stated once above the list.
 
 ### 17.3 Profile Page (Statistics)
 
@@ -1689,26 +1679,27 @@ The Profile page is built to run inside a **Telegram WebApp** when available, wi
 
 #### 17.3.0 Own vs Public — Visibility Matrix
 
-| Element                                                                                     | Own view | Public view |
-| :------------------------------------------------------------------------------------------ | :------: | :---------: |
-| Avatar, banner, username, status badge                                                      |    ✅    |     ✅      |
-| Activity Points                                                                             |    ✅    |     ✅      |
-| Activity flame / streak                                                                     |    ✅    |     ✅      |
-| Badge showcase (pinned)                                                                     |    ✅    |     ✅      |
-| Total badges earned count (e.g., 47 / 120)                                                  |    ✅    |     ✅      |
-| "View all" badge grid                                                                       |    ✅    |     ✅      |
-| Public social stats (tournaments played/won, stakes completed, tickets sent, friends count) |    ✅    |     ✅      |
-| Likes received                                                                              |    ✅    |     ✅      |
-| Friends preview (avatars row)                                                               |    ✅    |     ✅      |
-| **LC / LS / TON balances**                                                                  |    ✅    |     ❌      |
-| **Transaction history entry**                                                               |    ✅    |     ❌      |
-| Per-tier ticket inventory counts                                                            |    ✅    |     ❌      |
-| Email / phone / 2FA / Settings entry                                                        |    ✅    |     ❌      |
-| Edit avatar / username / banner                                                             |    ✅    |     ❌      |
-| Pin / Replace / Unpin badge menu                                                            |    ✅    |     ❌      |
-| Share own profile                                                                           |    ✅    |      —      |
-| **Send Ticket / Invite to Tournament / Like** the profile owner                             |    —     |     ✅      |
-| **Share** this profile                                                                      |    —     |     ✅      |
+| Element                                                                                     | Own view |    Public view     |
+| :------------------------------------------------------------------------------------------ | :------: | :----------------: |
+| Avatar, banner, username, status badge                                                      |    ✅    |         ✅         |
+| Activity Points                                                                             |    ✅    |         ✅         |
+| Activity flame / streak                                                                     |    ✅    |         ✅         |
+| Badge showcase (pinned)                                                                     |    ✅    |         ✅         |
+| Total badges earned count (e.g., 47 / 120)                                                  |    ✅    |         ✅         |
+| "View all" badge grid                                                                       |    ✅    |         ✅         |
+| Public social stats (tournaments played/won, stakes completed, tickets sent, friends count) |    ✅    |         ✅         |
+| Likes received                                                                              |    ✅    |         ✅         |
+| Friends preview (avatars row)                                                               |    ✅    |         ✅         |
+| **LC / LS / TON balances**                                                                  |    ✅    |         ❌         |
+| **Transaction history entry**                                                               |    ✅    |         ❌         |
+| Per-tier ticket inventory counts                                                            |    ✅    |         ❌         |
+| Email / phone / 2FA / Settings entry                                                        |    ✅    |         ❌         |
+| Edit avatar / username / banner                                                             |    ✅    |         ❌         |
+| Pin / Replace / Unpin badge menu                                                            |    ✅    |         ❌         |
+| Share own profile                                                                           |    ✅    |         —          |
+| **Send Ticket / Like** the profile owner                                                    |    —     |         ✅         |
+| **Invite to Tournament**                                                                    |    —     | only own referrals |
+| **Share** this profile                                                                      |    —     |         ✅         |
 
 #### 17.3.1 Page Composition (top to bottom)
 
@@ -1765,7 +1756,11 @@ When viewing another user's profile, the following actions are available (typica
   - **Daily limit per recipient, by tier.** Bronze / Silver / Gold are sendable by everyone — **1 each per day** to a given player. **Platinum and Diamond require Lucky Player status.**
   - With **Lucky Player**, the per-recipient daily limits rise to **Bronze 5 / Silver 4 / Gold 3 / Platinum 2 / Diamond 1**.
   - Limits live in `ticketSendDailyLimits` (`default` / `luckyPlayer`).
-- **Invite to Tournament** — opens a partner tournament picker. Available only for tournaments the inviter holds the required partner ticket for. Sends an in-app invite to the target user.
+- **Invite to Tournament** — opens a picker of upcoming tournaments and sends the target an in-app invite (a notification carrying a deep link to that tournament).
+  - **Only one's own referrals can be invited.** The action is offered exclusively on the profile of a player who joined through the viewer's link; on anyone else — a stranger from the leaderboard, a shared profile link — the button is **not rendered at all**, and `POST profile/invite-tournament` answers **403 `{ error: 'not-your-referral' }`** if it is called anyway. The gate is on the invited person, not on the tournament: what a player can invite to is every upcoming tournament, whom they can invite is only the people they brought into the game.
+  - The button is absent rather than disabled on purpose. Referral attribution is frozen at the invitee's first sign-in (§17.2) — a player who is not already your referral can never become one — so a greyed-out button would promise an unlock that nothing the viewer does can deliver. This is the opposite of the wallet invite gates (§16.4), which are shown locked precisely because inviting more friends does open them.
+  - `GET profile/:id` carries the verdict as **`isMyReferral`** so the Mini App never draws an action the API is about to refuse. It is false on one's own profile.
+  - Without the rule every profile in the leaderboard is a free notification channel into a stranger's Telegram; the invite exists to pull back the people a player already invited, which is also why it costs nothing to send.
 - **Share profile** — copy link or share via Telegram.
 - **Like** — see Section 17.3.4.
 
@@ -1941,19 +1936,22 @@ Before the very first tour, a **language picker** is shown to the brand-new acco
 
 #### Steps
 
-The tour visits nine stops, in order:
+The tour visits ten stops, in order:
 
-| #   | Screen         | Highlights                      | Teaches                                 |
-| --- | -------------- | ------------------------------- | --------------------------------------- |
-| 1   | Home           | The free Bronze engine          | It mints tickets automatically          |
-| 2   | Tickets        | The tickets summary             | Where minted tickets collect            |
-| 3   | Tournaments    | A tournament card               | Spend tickets, win LC + chips           |
-| 4   | Tasks          | The task tab rows               | Earn AP and rewards                     |
-| 5   | Header         | The AP pill                     | AP is progression, Bronze→Diamond       |
-| 6   | Stakes         | The stakes summary              | Lock LC for yield + AP                  |
-| 7   | Invite Friends | The referral hero               | Earn a share from friends               |
-| 8   | Home           | The engine's **Claim** button   | Claims the first ticket                 |
-| 9   | Tournaments    | The first tournament's **Join** | Enter the first tournament — the finale |
+| #   | Screen         | Highlights                      | Teaches                                          |
+| --- | -------------- | ------------------------------- | ------------------------------------------------ |
+| 1   | Home           | The free Bronze engine          | It mints tickets automatically                   |
+| 2   | Header         | The LC pill                     | LC **is** Lucky Coin — how it's earned and spent |
+| 3   | Tickets        | The tickets summary             | Where minted tickets collect                     |
+| 4   | Tournaments    | A tournament card               | Spend tickets, win LC + chips                    |
+| 5   | Tasks          | The task tab rows               | Earn AP and rewards                              |
+| 6   | Header         | The AP pill                     | AP is progression, Bronze→Diamond                |
+| 7   | Stakes         | The stakes summary              | Lock LC for yield + AP                           |
+| 8   | Invite Friends | The referral hero               | Earn a share from friends                        |
+| 9   | Home           | The engine's **Claim** button   | Claims the first ticket                          |
+| 10  | Tournaments    | The first tournament's **Join** | Enter the first tournament — the finale          |
+
+Step 2 lands early on purpose: every later caption (tournament prizes, stake yield, market prices) is denominated in LC, and a brand-new player has no way to know that the "LC" in those captions and the "Lucky Coin" they win are the same currency. It names the abbreviation, points at the live balance pill, and states both sides of the loop — earned in tournaments / tasks / stakes, spent on tickets, engines and statuses (Section 6.1).
 
 The last two steps perform a **real action**: the player claims their first ticket, then taps **Join** on the first tournament to enter it (opening the join sheet) — the finale. After the claim step the tour briefly waits for the claim animation to finish (so the ticket actually mints) before navigating to Tournaments. Every other step is acknowledged with a tap. A **Skip tour** control is always available, and pressing Escape exits.
 
@@ -1969,7 +1967,7 @@ Steps are defined declaratively in one place (`TOUR_STEPS` in `onboarding-tour.c
 
 #### Connections
 
-The tour spans Home / Engines (Section 9), Tickets (Section 8), Tournaments (Section 11), Tasks (Section 12), Activity Points (Section 5), Stakes (Section 18), and Invite Friends (Section 17.2).
+The tour spans Home / Engines (Section 9), Currency (Section 6.1), Tickets (Section 8), Tournaments (Section 11), Tasks (Section 12), Activity Points (Section 5), Stakes (Section 18), and Invite Friends (Section 17.2).
 
 ---
 
@@ -2012,6 +2010,10 @@ Stakes have five tiers keyed to the minimum deposit. The tier is **AP-tier gated
 | Gold     | 100,000 LC      |
 | Platinum | 250,000 LC      |
 | Diamond  | 500,000 LC      |
+
+The gate therefore sets a **maximum stakeable amount**: one LC below the minimum deposit of the cheapest tier the player has not reached (a Gold player caps at 249,999 LC), or their whole balance when every tier is open. The new-stake screen enforces that ceiling on the slider, the presets and the typed amount, and states it next to the amount — a player who could once configure a locked stake in full and only learn of it from a greyed-out button at the bottom of the screen.
+
+**A level is a band, and the server enforces it.** Level `n` covers `[minDeposit(n), minDeposit(n+1))`; the Mini App derives the level from the amount and never sends anything else. The API used to check only the floor, which made the ceiling above a screen-only courtesy: a hand-made request could open 500,000 LC — a Diamond-sized deposit — as a **level 1** stake, drawing the same yield while paying Bronze completion Stars, passing the Bronze tier gate instead of Diamond's, and, inside the Bronze free-start waiver, paying **no start fee at all** against 42 ⭐ for the same deposit at level 5. `POST /stakes/start` now rejects a deposit that belongs to another level and names the level it belongs to.
 
 ### 18.3 Reward Structure
 

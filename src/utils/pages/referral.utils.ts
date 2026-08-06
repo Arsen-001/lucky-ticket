@@ -14,6 +14,16 @@ export const countsAsReferral = (friend: Pick<InvitedFriend, 'countsAsReferral'>
   friend.countsAsReferral !== false;
 
 /**
+ * The referral reward waiting on a friend, in LC.
+ *
+ * `undefined` reads as zero — a backend that predates the reward says nothing,
+ * and rendering `NaN` or `undefined LC` in a money row is worse than showing
+ * the row with nothing to claim. @see InvitedFriend.claimableLc
+ */
+export const claimableLcOf = (friend?: Pick<InvitedFriend, 'claimableLc'>): number =>
+  friend?.claimableLc ?? 0;
+
+/**
  * Telegram Mini App invite link. Opening `t.me/<bot>?startapp=<refererId>`
  * launches the app and delivers `<refererId>` as `start_param` inside initData,
  * which the backend reads on the friend's first sign-in to record the referral

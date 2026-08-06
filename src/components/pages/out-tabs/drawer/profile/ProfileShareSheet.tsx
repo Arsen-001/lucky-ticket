@@ -7,6 +7,7 @@ import { ClientPortal } from '@/components/shared/ClientPortal';
 import { useAppTranslations } from '@/hooks/useAppTranslations';
 import { GlobalConstants } from '@/constants/global.constants';
 import { staggerMs } from '@/utils/global/animation.utils';
+import { openExternalUrl } from '@/lib/telegram/telegram';
 
 interface ShareOption {
   key: string;
@@ -54,7 +55,7 @@ export function ProfileShareSheet({ open, onClose, url, username }: ProfileShare
   };
 
   const openInNewTab = (link: string) => {
-    if (typeof window !== 'undefined') window.open(link, '_blank', 'noopener,noreferrer');
+    openExternalUrl(link);
     onClose();
   };
 

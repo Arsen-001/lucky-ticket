@@ -5,17 +5,6 @@ export interface ClaimableTicket {
   amount: number;
 }
 
-/**
- * Why an invited friend is a friend but not a referral.
- *
- * `unknown` is NOT «не в канале»: it is Telegram refusing to answer (an
- * outage, a 429, a bot that can't see the channel). The row says so in those
- * words — telling someone their friend left when we simply could not ask
- * accuses a real player of something they did not do, and unlike the other two
- * reasons there is nothing the inviter can act on.
- */
-export type ReferralDisqualification = 'not-in-channel' | 'bot-blocked' | 'unknown';
-
 export interface InvitedFriend {
   id: string;
   username: string;
@@ -26,6 +15,20 @@ export interface InvitedFriend {
   isVerified: boolean;
   isTelegramPremium?: boolean;
   points: number;
+  /**
+   * The referral reward waiting on this friend: your cut of the LC they have
+   * won in tournaments (DOCS §17.2). `undefined` = a backend too old to send
+   * it, which must read as zero rather than as a broken row.
+   *
+   * Only claimable while they still count as a referral — the money freezes
+   * rather than burns, and unfreezes if they come back. @see countsAsReferral
+   */
+  claimableLc?: number;
+  /**
+   * LEGACY: leftover commission from the ticket rule this replaced. Nothing
+   * accrues here any more; it drains to zero as people claim it, and the UI
+   * shows it only while a friend still has some.
+   */
   claimableTickets: ClaimableTicket[];
   isVIP?: boolean;
   liked: boolean;
@@ -37,8 +40,6 @@ export interface InvitedFriend {
    * "counts" rather than painting every existing friend as disqualified.
    */
   countsAsReferral?: boolean;
-  /** Set exactly when `countsAsReferral` is false. @see ReferralDisqualification */
-  notCountedReason?: ReferralDisqualification | null;
 }
 
 export interface ReferralStats {

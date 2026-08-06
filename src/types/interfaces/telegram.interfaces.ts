@@ -56,6 +56,9 @@ export interface TelegramWebApp {
   /** Opens a `t.me/…` link inside Telegram. For a `t.me/share/url?…` link this
    *  brings up the native "share to a chat" picker (used for the invite share). */
   openTelegramLink?: (url: string) => void;
+  /** Opens a non-Telegram URL in Telegram's in-app browser. Needed because the
+   *  WebView silently swallows `window.open`. */
+  openLink?: (url: string, options?: { try_instant_view?: boolean }) => void;
   /** Bot API 8.0+ — sends a message prepared server-side via
    *  `savePreparedInlineMessage` to a chat the user picks (rich invite card
    *  with an image). The callback reports whether it was actually sent. */

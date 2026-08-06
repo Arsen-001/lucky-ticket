@@ -3,20 +3,23 @@
 import { Gift } from 'lucide-react';
 import { Button } from '@/components/shared/buttons/Button';
 import { Ticket } from '@/components/shared/icons/Ticket';
+import { GlobalConstants } from '@/constants/global.constants';
 import { useAppTranslations } from '@/hooks/useAppTranslations';
 import type { ClaimableTicket } from '@/types/interfaces/referral.interfaces';
 import type { TicketType } from '@/types/types/ticket.types';
 
 export interface FriendsClaimSummaryCardProps {
-  claimableTotal: number;
+  /** LC waiting across every friend who still counts as a referral. */
+  claimableLc: number;
   friendsWithRewards: number;
+  /** LEGACY: leftover ticket commission, drains to zero and never refills. */
   ticketsByType: Record<TicketType, number>;
   loading?: boolean;
   onClaimAll: () => void;
 }
 
 export function FriendsClaimSummaryCard({
-  claimableTotal,
+  claimableLc,
   friendsWithRewards,
   ticketsByType,
   loading,
@@ -24,11 +27,11 @@ export function FriendsClaimSummaryCard({
 }: FriendsClaimSummaryCardProps) {
   const t = useAppTranslations();
 
-  if (claimableTotal === 0) return null;
-
   const stacks: ClaimableTicket[] = (Object.entries(ticketsByType) as [TicketType, number][])
     .filter(([, amount]) => amount > 0)
     .map(([type, amount]) => ({ type, amount }));
+
+  if (claimableLc === 0 && stacks.length === 0) return null;
 
   return (
     <div
@@ -40,8 +43,8 @@ export function FriendsClaimSummaryCard({
           <Gift size={20} className="text-gold" strokeWidth={2.2} />
         </div>
         <div className="flex min-w-0 flex-1 flex-col">
-          <span className="text-gold text-base font-extrabold leading-tight">
-            {t('claimable tickets count', { count: claimableTotal })}
+          <span className="text-gold text-base font-extrabold leading-tight tabular-nums">
+            {claimableLc.toLocaleString()} {GlobalConstants.coinName}
           </span>
           <span className="text-pink-secondary text-xs">
             {t('claim from {count} friends', { count: friendsWithRewards })}

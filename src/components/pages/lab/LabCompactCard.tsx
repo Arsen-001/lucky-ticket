@@ -25,6 +25,7 @@ import { useLocalized } from '@/hooks/useLocalized';
 import { TaskCategory, TaskStatus } from '@/types/enums/tasks.enums';
 import type { Task } from '@/types/interfaces/tasks.interfaces';
 import { type Route } from '@/constants/routes';
+import { openExternalUrl } from '@/lib/telegram/telegram';
 
 /**
  * `current` is today's compact row. The rest are the candidates.
@@ -114,7 +115,7 @@ export function LabCompactCard({
       router.push(task.deeplink as Route);
       return;
     }
-    if (task.externalLink) window.open(task.externalLink, '_blank', 'noopener,noreferrer');
+    if (task.externalLink) openExternalUrl(task.externalLink);
   };
 
   const icon = (size: number) =>

@@ -111,33 +111,22 @@ export function FriendsHeroCard() {
             </span>
           </div>
         ) : (
-          <>
-            <div className="mb-1 flex items-center justify-between px-2 pt-1.5">
-              <span className="text-[9px] font-bold uppercase tracking-wider text-white/60">
-                {t('per invite')}
-              </span>
-              <span className="text-gold inline-flex items-center gap-0.5 text-[9px] font-bold uppercase tracking-wider">
-                <Star size={9} className="fill-gold" />
-                {t('telegram premium')} ×2
-              </span>
+          // One line, no Regular/Premium split. The two rows it replaced said
+          // the same thing twice and made the Premium invite look like the
+          // real offer next to a lesser one — the screen states what an invite
+          // pays, and that is one number.
+          <div className="flex items-center gap-2 rounded-lg px-2 py-2">
+            <div className="bg-electric-pink/15 flex-center h-6 w-6 flex-shrink-0 rounded-md">
+              <UserPlus size={12} className="text-electric-pink" strokeWidth={2.4} />
             </div>
-            <RewardRow
-              label={t('regular')}
-              icon={<UserPlus size={12} className="text-white" strokeWidth={2.4} />}
-              iconWrapClass="bg-white/15"
-              activityPoints={rewards.ap}
-              stars={rewards.stars}
-            />
-            <span className="mx-2 my-0.5 h-px bg-white/10" />
-            <RewardRow
-              label={t('telegram premium')}
-              icon={<Star size={12} className="fill-gold text-gold" />}
-              iconWrapClass="bg-gold/20"
-              activityPoints={rewards.premiumAp}
-              stars={rewards.premiumStars}
-              highlight
-            />
-          </>
+            <span className="flex-1 truncate text-[11px] font-semibold text-white/85">
+              {t('per invite')}
+            </span>
+            <div className="flex flex-shrink-0 items-center gap-1.5">
+              <RewardChip icon={<BoltIcon size={16} />} value={`+${rewards.ap}`} />
+              <RewardChip icon={<TelegramStarIcon size={11} />} value={`+${rewards.stars}`} />
+            </div>
+          </div>
         )}
       </div>
 
@@ -165,49 +154,6 @@ export function FriendsHeroCard() {
             <Copy size={14} className="text-white" />
           )}
         </Button>
-      </div>
-    </div>
-  );
-}
-
-interface RewardRowProps {
-  label: string;
-  icon: ReactNode;
-  iconWrapClass: string;
-  activityPoints: number;
-  stars: number;
-  highlight?: boolean;
-}
-
-function RewardRow({
-  label,
-  icon,
-  iconWrapClass,
-  activityPoints,
-  stars,
-  highlight,
-}: RewardRowProps) {
-  return (
-    <div
-      className={twMerge(
-        'flex items-center gap-2 rounded-lg px-2 py-1.5 transition-colors',
-        highlight && 'bg-gold/8'
-      )}
-    >
-      <div className={twMerge('flex-center h-6 w-6 flex-shrink-0 rounded-md', iconWrapClass)}>
-        {icon}
-      </div>
-      <span
-        className={twMerge(
-          'flex-1 truncate text-[11px] font-semibold',
-          highlight ? 'text-gold' : 'text-white/85'
-        )}
-      >
-        {label}
-      </span>
-      <div className="flex flex-shrink-0 items-center gap-1.5">
-        <RewardChip icon={<BoltIcon size={16} />} value={`+${activityPoints}`} />
-        <RewardChip icon={<TelegramStarIcon size={11} />} value={`+${stars}`} />
       </div>
     </div>
   );

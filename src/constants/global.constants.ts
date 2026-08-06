@@ -6,8 +6,8 @@ const apTiers = ['bronze', 'silver', 'gold', 'platinum', 'diamond'] as const;
 /**
  * Canonical AP-source rates — mirrors DOCS §5.3 "How Activity Points Are
  * Earned". Single source of truth for every "earn AP" surface in the UI.
- * `*ByTier` rates are keyed by ActivityTier (Bronze→Diamond). Invite rates
- * live in `inviteActivityPoints` / `inviteTelegramPremiumActivityPoints`.
+ * `*ByTier` rates are keyed by ActivityTier (Bronze→Diamond). The invite rate
+ * lives in `inviteActivityPoints`.
  */
 const apRewards = {
   dailyStreak: 3,
@@ -71,9 +71,16 @@ export const GlobalConstants = {
   usernamePattern: /^[A-Za-z0-9._-]+$/,
   coinName: 'LC',
   defaultLanguage: defaultLocale,
-  referralPercentage: 5,
-  telegramPremiumReferralPercentage: 10,
-  luckyPlayerReferralPercentage: 15,
+  /**
+   * The referral reward (DOCS §17.2): this % of the LC a referred friend wins
+   * in a TOURNAMENT accrues to whoever invited them, minted on top so the
+   * friend's own prize is untouched.
+   *
+   * Flat — the friend's status does not change it. Display fallback only; the
+   * live value rides on `GET /config` (`referral.tournamentLcPct`) so an admin
+   * retune reaches the screen without a deploy. @see useReferralReward
+   */
+  referralTournamentLcPercentage: 5,
   /** Engine cycle speed reduction granted by Lucky Player status (stacks with chips/boosters). */
   luckyPlayerEngineSpeedBoostPct: 10,
   /** Flat discount applied to every Market item price for Lucky Player holders (DOCS §7.3). */
@@ -97,7 +104,6 @@ export const GlobalConstants = {
   vipTournamentRewardBoostPct: 50,
   vipTournamentJoinApBoostPct: 100,
   vipWatchVideoDailyLimit: 40,
-  vipReferralPercentage: 25,
   /**
    * Pause between rewarded ads: the next slot stays locked for this long after
    * a view, counting down on its own button. Two reasons, one of them the
@@ -112,10 +118,14 @@ export const GlobalConstants = {
    * never be minted faster than this many seconds. 900s = 15 minutes.
    */
   engineMinSecondsPerTicket: 900,
+  /**
+   * What one invited friend pays the inviter, once, at registration. FLAT —
+   * a Telegram Premium invitee used to pay double, which priced a friend by
+   * something the inviter cannot influence. Display fallback only; the live
+   * value rides on `GET /config`. @see useInviteRewards
+   */
   inviteActivityPoints: 10,
   inviteStars: 1,
-  inviteTelegramPremiumActivityPoints: 20,
-  inviteTelegramPremiumStars: 2,
   // Stake values are sourced from the single config (`appConfig.stakes`) —
   // change them there, not here.
   stakeDurationMinMonths: appConfig.stakes.durationMinMonths,

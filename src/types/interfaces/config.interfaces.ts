@@ -29,11 +29,19 @@ export interface PublicConfig {
     signup: {
       ap: number;
       stars: number;
+      /** @deprecated Equal to `ap`; the reward no longer doubles for Premium. */
       premiumAp: number;
+      /** @deprecated Equal to `stars`. */
       premiumStars: number;
     };
     /** True when the per-invite reward ladder replaces the flat signup reward. */
     hasRewardLadder: boolean;
+    /**
+     * The ongoing reward: this % of the LC a referred friend wins in a
+     * tournament accrues to you (DOCS §17.2). Flat — the friend's status does
+     * not change it.
+     */
+    tournamentLcPct?: number;
   };
   /** Jackpot split display values (admin-editable, DOCS §20). */
   jackpot?: {

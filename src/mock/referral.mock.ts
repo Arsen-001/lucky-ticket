@@ -3,7 +3,6 @@ import {
   InvitedFriend,
   PreLaunchGiftState,
   PreparedShareMessage,
-  ReferralDisqualification,
   ReferralStats,
 } from '@/types/interfaces/referral.interfaces';
 import { appConfig } from '@/config/app.config';
@@ -25,6 +24,7 @@ const avatar = (seed: number) => LOCAL_AVATARS[seed % LOCAL_AVATARS.length];
 const baseFriends: Omit<InvitedFriend, 'liked' | 'likesReceived'>[] = [
   {
     id: '1',
+    claimableLc: 4820,
     username: 'john_doe',
     displayName: 'Джон 🎰',
     avatar: avatar(12),
@@ -33,6 +33,8 @@ const baseFriends: Omit<InvitedFriend, 'liked' | 'likesReceived'>[] = [
     isVIP: true,
     isTelegramPremium: false,
     points: 1500,
+    // Leftover from the ticket commission the LC reward replaced — kept on two
+    // friends only, because it drains to zero and never refills.
     claimableTickets: [
       { type: 'bronze', amount: 3 },
       { type: 'silver', amount: 1 },
@@ -40,6 +42,7 @@ const baseFriends: Omit<InvitedFriend, 'liked' | 'likesReceived'>[] = [
   },
   {
     id: '2',
+    claimableLc: 1150,
     username: 'jane_smith',
     displayName: 'Jane Smith-Wolfenberger the Third',
     avatar: avatar(45),
@@ -47,10 +50,11 @@ const baseFriends: Omit<InvitedFriend, 'liked' | 'likesReceived'>[] = [
     isVerified: false,
     isTelegramPremium: false,
     points: 800,
-    claimableTickets: [{ type: 'bronze', amount: 2 }],
+    claimableTickets: [],
   },
   {
     id: '3',
+    claimableLc: 12400,
     username: 'alex_wilson',
     displayName: '(.)',
     avatar: avatar(7),
@@ -58,15 +62,11 @@ const baseFriends: Omit<InvitedFriend, 'liked' | 'likesReceived'>[] = [
     isVerified: false,
     isTelegramPremium: true,
     points: 2000,
-    claimableTickets: [
-      { type: 'bronze', amount: 6 },
-      { type: 'silver', amount: 2 },
-      { type: 'gold', amount: 1 },
-      { type: 'platinum', amount: 1 },
-    ],
+    claimableTickets: [],
   },
   {
     id: '4',
+    claimableLc: 0,
     username: 'sarah_jones',
     avatar: avatar(32),
     isLuckyPlayer: false,
@@ -77,6 +77,7 @@ const baseFriends: Omit<InvitedFriend, 'liked' | 'likesReceived'>[] = [
   },
   {
     id: '5',
+    claimableLc: 27650,
     username: 'mike_brown',
     avatar: avatar(60),
     isLuckyPlayer: true,
@@ -84,13 +85,11 @@ const baseFriends: Omit<InvitedFriend, 'liked' | 'likesReceived'>[] = [
     isTelegramPremium: true,
     isVIP: true,
     points: 3200,
-    claimableTickets: [
-      { type: 'gold', amount: 2 },
-      { type: 'diamond', amount: 1 },
-    ],
+    claimableTickets: [],
   },
   {
     id: '6',
+    claimableLc: 0,
     username: 'lina_park',
     avatar: avatar(48),
     isLuckyPlayer: false,
@@ -101,6 +100,7 @@ const baseFriends: Omit<InvitedFriend, 'liked' | 'likesReceived'>[] = [
   },
   {
     id: '7',
+    claimableLc: 3090,
     username: 'omar_amini',
     avatar: avatar(15),
     isLuckyPlayer: true,
@@ -114,6 +114,7 @@ const baseFriends: Omit<InvitedFriend, 'liked' | 'likesReceived'>[] = [
   // requirement made that sentence impossible to check in dev.
   {
     id: '8',
+    claimableLc: 0,
     username: 'nina_vardan',
     avatar: avatar(21),
     isLuckyPlayer: false,
@@ -124,40 +125,37 @@ const baseFriends: Omit<InvitedFriend, 'liked' | 'likesReceived'>[] = [
   },
   {
     id: '9',
+    claimableLc: 480,
     username: 'petros_k',
     avatar: avatar(53),
     isLuckyPlayer: false,
     isVerified: false,
     isTelegramPremium: true,
     points: 310,
-    claimableTickets: [{ type: 'bronze', amount: 1 }],
+    claimableTickets: [],
   },
   {
     id: '10',
+    claimableLc: 6200,
     username: 'karen_a',
     avatar: avatar(38),
     isLuckyPlayer: true,
     isVerified: false,
     isTelegramPremium: false,
     points: 1750,
-    claimableTickets: [{ type: 'gold', amount: 1 }],
+    claimableTickets: [],
   },
 ];
 
 /**
- * Who arrived through the link but is not a referral, and why — one friend per
- * reason, because the three are rendered differently and a fixture missing any
- * of them leaves that branch unverified in dev.
+ * Who arrived through the link but is not a referral right now.
  *
- * `unknown` earns its place here more than the other two: it is the answer
- * Telegram gives during an outage, it must NOT read as «не в канале», and it is
- * the one nobody would think to click through to by hand.
+ * Friend `3` is the fixture that matters: he has the second-largest LC pile on
+ * the roster AND does not count, so the frozen row — earned money the player
+ * cannot take until he comes back — is on screen in dev without anyone having
+ * to construct it.
  */
-const MOCK_NOT_COUNTED: Record<string, ReferralDisqualification> = {
-  '2': 'not-in-channel',
-  '3': 'bot-blocked',
-  '4': 'unknown',
-};
+const MOCK_NOT_COUNTED = new Set(['2', '3', '4']);
 
 // Level-zero: no invited friends yet (the demo roster stays in `baseFriends`).
 export const invitedFriendsMock: InvitedFriend[] = appConfig.account.fresh
@@ -166,8 +164,7 @@ export const invitedFriendsMock: InvitedFriend[] = appConfig.account.fresh
       ...friend,
       liked: i % 4 === 1,
       likesReceived: 35 + i * 44,
-      countsAsReferral: !MOCK_NOT_COUNTED[friend.id],
-      notCountedReason: MOCK_NOT_COUNTED[friend.id] ?? null,
+      countsAsReferral: !MOCK_NOT_COUNTED.has(friend.id),
     }));
 
 export const referralStatsMock: ReferralStats = {

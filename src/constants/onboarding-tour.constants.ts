@@ -55,6 +55,14 @@ export const TOUR_STEPS: readonly TourStep[] = [
     placement: 'bottom',
   },
   {
+    id: 'lc',
+    route: routes.home,
+    anchor: 'lc',
+    titleKey: 'tour lc title',
+    bodyKey: 'tour lc body',
+    placement: 'bottom',
+  },
+  {
     id: 'tickets',
     route: routes.tickets.index,
     anchor: 'tickets',

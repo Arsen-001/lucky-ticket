@@ -24,6 +24,7 @@ import {
 } from '@/api/tasks.api';
 import { TaskCategory, TaskFrequency, TaskStatus } from '@/types/enums/tasks.enums';
 import type { AdSlot, CategoryTasks, Task, TaskSubStep } from '@/types/interfaces/tasks.interfaces';
+import type { AdProviderId } from '@/lib/ads';
 import { useAppTranslations } from '@/hooks/useAppTranslations';
 import { useCountDown } from '@/hooks/useCountDown';
 import { useToast } from '@/hooks/useToast';
@@ -162,7 +163,7 @@ export function TasksContent() {
   const t = useAppTranslations();
   const searchParams = useSearchParams();
   const { data, isLoading, isError, refetch } = useGetTasksQuery();
-  const [claimTask, claimState] = useClaimTaskMutation();
+  const [claimTask] = useClaimTaskMutation();
   const [watchAd, watchState] = useWatchAdMutation();
   // Telemetry only — never awaited, never surfaced to the player.
   const [reportAdAttempt] = useReportAdAttemptMutation();
@@ -231,11 +232,22 @@ export function TasksContent() {
     });
   };
 
+  // `status` is the modal's own view state. It used to be derived from the
+  // task-claim mutation (`!claimState.isLoading && !result && open`), which is
+  // wrong for anything the modal shows that isn't a task claim: an ad grant
+  // leaves that mutation idle, so its modal read as "failed" on sight.
   const [pendingClaim, setPendingClaim] = useState<{
     id: string;
     open: boolean;
+    status: 'pending' | 'done' | 'failed';
     result?: RewardModalResult | null;
-  }>({ id: '', open: false, result: null });
+  }>({ id: '', open: false, status: 'pending', result: null });
+
+  // Exactly what to run again when the player taps «Retry» — set by whoever
+  // opened the modal. Retry used to be hardcoded to `runClaim(pendingClaim.id)`,
+  // so a failed ad grant retried by POSTing the ad's id to the task-claim
+  // endpoint, which can only fail again: press, error, press, error.
+  const retryRef = useRef<(() => void) | null>(null);
 
   // Rewarded-ad failure modal (replaces the SDK's native Telegram alert).
   // `reason` survives close so the content doesn't flicker mid exit animation.
@@ -479,14 +491,17 @@ export function TasksContent() {
 
   const runClaim = async (id: string, subStepIds?: string[]) => {
     triggerHaptic('medium');
-    setPendingClaim({ id, open: true, result: null });
+    // Retry has to redo *this* claim, sub-steps included — retrying a failed
+    // sub-step claim as a whole-task claim asks for something else entirely.
+    retryRef.current = () => runClaim(id, subStepIds);
+    setPendingClaim({ id, open: true, status: 'pending', result: null });
     try {
       const res = await claimTask({ id, subStepIds }).unwrap();
-      setPendingClaim({ id, open: true, result: res });
+      setPendingClaim({ id, open: true, status: 'done', result: res });
       // Backend updates state on its side; RTK invalidates `tasks` tag
       // (see tasks.api.ts) which triggers automatic refetch + UI sync.
     } catch {
-      setPendingClaim({ id, open: true, result: null });
+      setPendingClaim({ id, open: true, status: 'failed', result: null });
     }
   };
 
@@ -543,17 +558,29 @@ export function TasksContent() {
     setAdReadyAt(adPauseDeadline());
     preloadAd();
 
+    await grantAdReward(slot, provider ?? undefined);
+  };
+
+  /**
+   * Credit a view that already played. Split out from `handleWatchAd` so
+   * «Retry» re-attempts only the grant: the ad was watched and the impression
+   * is spent, so replaying it would cost the player another video for a reward
+   * they already earned.
+   */
+  const grantAdReward = async (slot: AdSlot, provider?: AdProviderId): Promise<void> => {
+    retryRef.current = () => grantAdReward(slot, provider);
     try {
       // Show what the server actually granted (not the slot's advertised reward,
       // which can differ) — and no fabricated balance (watchAd returns none).
-      const res = await watchAd({ adId: slot.id, provider: provider ?? undefined }).unwrap();
+      const res = await watchAd({ adId: slot.id, provider }).unwrap();
       setPendingClaim({
         id: slot.id,
         open: true,
+        status: 'done',
         result: { id: slot.id, rewards: res.rewards },
       });
     } catch {
-      setPendingClaim({ id: slot.id, open: true, result: null });
+      setPendingClaim({ id: slot.id, open: true, status: 'failed', result: null });
     }
   };
 
@@ -952,14 +979,14 @@ export function TasksContent() {
       <ClaimRewardModal
         open={pendingClaim.open}
         result={pendingClaim.result}
-        loading={claimState.isLoading}
-        error={!claimState.isLoading && !pendingClaim.result && pendingClaim.open}
+        loading={pendingClaim.status === 'pending'}
+        error={pendingClaim.open && pendingClaim.status === 'failed'}
         onClose={handleClose}
         onContinue={() => {
           handleClose();
           refetch();
         }}
-        onRetry={() => runClaim(pendingClaim.id)}
+        onRetry={() => retryRef.current?.()}
       />
     </div>
   );

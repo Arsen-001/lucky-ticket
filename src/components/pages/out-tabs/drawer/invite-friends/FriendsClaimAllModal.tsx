@@ -4,18 +4,17 @@ import Image from 'next/image';
 import { Sparkles, Star } from 'lucide-react';
 import { Modal } from '@/components/shared/modals/Modal';
 import { Button } from '@/components/shared/buttons/Button';
-import { Ticket } from '@/components/shared/icons/Ticket';
+import { GlobalConstants } from '@/constants/global.constants';
 import { useAppTranslations } from '@/hooks/useAppTranslations';
-import type { ClaimableTicket, InvitedFriend } from '@/types/interfaces/referral.interfaces';
+import type { InvitedFriend } from '@/types/interfaces/referral.interfaces';
 import { displayNameOf } from '@/utils/global/user.utils';
-import { staggerMs } from '@/utils/global/animation.utils';
 
 export interface FriendsClaimAllModalProps {
   open: boolean;
   onClose: () => void;
   friends: InvitedFriend[];
-  totalTickets: number;
-  ticketsByTier: ClaimableTicket[];
+  /** LC actually granted, snapshotted before the claims went out. */
+  totalLc: number;
   isClaiming?: boolean;
 }
 
@@ -23,8 +22,7 @@ export function FriendsClaimAllModal({
   open,
   onClose,
   friends,
-  totalTickets,
-  ticketsByTier,
+  totalLc,
   isClaiming,
 }: FriendsClaimAllModalProps) {
   const t = useAppTranslations();
@@ -106,10 +104,10 @@ export function FriendsClaimAllModal({
             <span className="text-[11px] font-bold uppercase tracking-[0.2em] text-white/80">
               {t('you earned')}
             </span>
-            <h3 className="text-3xl font-extrabold leading-none text-white drop-shadow-md">
-              {totalTickets}
+            <h3 className="text-3xl font-extrabold leading-none text-white drop-shadow-md tabular-nums">
+              {totalLc.toLocaleString()}
               <span className="ml-1.5 text-sm font-bold opacity-90">
-                {t('claimable tickets count', { count: totalTickets }).replace(/^\d+\s*/, '')}
+                {GlobalConstants.coinName}
               </span>
             </h3>
             <span className="mt-0.5 text-xs text-white/85">
@@ -119,21 +117,8 @@ export function FriendsClaimAllModal({
         </div>
 
         <div className="relative flex flex-col gap-4 px-6 pt-5 pb-6">
-          <div className="flex flex-wrap items-center justify-center gap-3">
-            {ticketsByTier.map(({ type, amount }, index) => (
-              <div
-                key={type}
-                className="animate-slide-in-bottom flex flex-col items-center gap-1"
-                style={{ animationDelay: `${staggerMs(index, 80)}ms`, minWidth: 72 }}
-              >
-                <Ticket type={type} width={68} height={68} className="drop-shadow-lg" />
-                <span className="text-gold text-sm font-extrabold tabular-nums">×{amount}</span>
-              </div>
-            ))}
-          </div>
-
           <span className="text-pink-secondary text-center text-[11px]">
-            {t('tickets in your inventory')}
+            {t('lc added to your balance')}
           </span>
 
           <Button
