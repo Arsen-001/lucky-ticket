@@ -8,6 +8,7 @@ import { useGetMeQuery } from '@/api/me.api';
 import { MarketSectionGrid } from '@/components/pages/tabs/market/MarketSectionGrid';
 import { MarketUniversalCard } from '@/components/pages/tabs/market/MarketUniversalCard';
 import { MarketItemImage } from '@/components/pages/tabs/market/MarketItemImage';
+import { MarketLockPanel } from '@/components/pages/tabs/market/MarketLockPanel';
 import type { MarketSelectedItem } from '@/components/pages/tabs/market/MarketView';
 import { ChipShardIcon } from '@/components/shared/icons/ChipShardIcon';
 import { GlobalConstants } from '@/constants/global.constants';
@@ -50,6 +51,9 @@ export function MarketShardSection({ shards, onSelect, onBuy }: MarketShardSecti
           id: shard.id,
           name: shard.name,
           description,
+          about: t('market shard purpose'),
+          locked: isLocked,
+          lockNote: isLocked ? <MarketLockPanel tier={shard.quality} /> : undefined,
           iconNode: shard.imageUrl ? (
             <MarketItemImage src={shard.imageUrl} alt={shard.name} size={140} />
           ) : (

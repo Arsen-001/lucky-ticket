@@ -9,6 +9,7 @@ import { useGetMeQuery } from '@/api/me.api';
 import { MarketSectionGrid } from '@/components/pages/tabs/market/MarketSectionGrid';
 import { MarketUniversalCard } from '@/components/pages/tabs/market/MarketUniversalCard';
 import { MarketItemImage } from '@/components/pages/tabs/market/MarketItemImage';
+import { MarketLockPanel } from '@/components/pages/tabs/market/MarketLockPanel';
 import type { MarketSelectedItem } from '@/components/pages/tabs/market/MarketView';
 import { LuckyPlayerIcon } from '@/components/shared/icons/LuckyPlayerIcon';
 import { VipIcon } from '@/components/shared/icons/VipIcon';
@@ -154,6 +155,27 @@ export function MarketStatusSection({ onSelect, onBuy }: MarketStatusSectionProp
           id: status.id,
           name: displayName,
           description: durationLabel,
+          about: isVIP
+            ? t('vip inactive description')
+            : isLuckyPlayer
+              ? t('lucky player inactive description')
+              : undefined,
+          locked: isDisabled,
+          lockNote: isDisabled ? (
+            lpActive ? (
+              <MarketLockPanel note={t('lucky player active')} />
+            ) : vipAtMax ? (
+              <MarketLockPanel note={t('vip maxed description')} />
+            ) : (
+              <MarketLockPanel
+                note={t('needs {count} activity points', {
+                  count: activityRequirement?.count ?? 0,
+                  current: me?.activityPoints || 0,
+                })}
+                action={{ label: t('how to earn ap'), href: routes.activity }}
+              />
+            )
+          ) : undefined,
           iconNode: status.imageUrl ? (
             <MarketItemImage src={status.imageUrl} alt={status.name} size={160} />
           ) : (
@@ -202,13 +224,16 @@ export function MarketStatusSection({ onSelect, onBuy }: MarketStatusSectionProp
             accent={accent}
             isNew={status.isNew && !isOwned}
             disabled={isDisabled}
+            owned={isOwned}
+            // An owned status is not gated — it is already the player's. The
+            // padlock and the word "Locked" contradicted the ACTIVE badge above it.
+            disabledLabel={isOwned ? (vipAtMax ? t('max') : t('active')) : undefined}
             badge={ownershipBadge}
             iconStage={renderIcon(75)}
             imageUrl={status.imageUrl}
             iconStageClassName="h-24"
             prices={activePrices}
             onClick={() => (statusPage ? router.push(statusPage) : onSelect(item))}
-            clickableWhenDisabled={!!statusPage}
             onBuy={price => onBuy(item, price)}
           />
         );

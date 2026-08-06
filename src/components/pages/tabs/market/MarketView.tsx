@@ -33,8 +33,14 @@ export interface MarketSelectedItem {
   id: string;
   name: string;
   description?: ReactNode;
+  /** What the item is for — shown for every item, buyable or locked. */
+  about?: ReactNode;
   iconNode: ReactNode;
   meta?: ReactNode;
+  /** Gated: the sheet states the gate instead of offering a price. */
+  locked?: boolean;
+  /** What blocks the purchase and how to clear it — usually a `MarketLockPanel`. */
+  lockNote?: ReactNode;
   prices: MarketPrice[];
   expiresAt?: string;
   remainingSupply?: number;
@@ -109,6 +115,11 @@ export function MarketView() {
   };
 
   const handleBuy = (item: MarketSelectedItem, price: MarketPrice) => {
+    // A gated item never buys — show what it is and what the gate asks instead.
+    if (item.locked) {
+      setInfoItem(item);
+      return;
+    }
     // Close the info sheet first so a "not enough" modal never stacks on top of it.
     setInfoItem(null);
     if (price.type === MarketPriceType.TELEGRAM_STARS) {

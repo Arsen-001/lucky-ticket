@@ -8,6 +8,7 @@ import { useGetTicketsQuery } from '@/api/tickets.api';
 import { MarketSectionGrid } from '@/components/pages/tabs/market/MarketSectionGrid';
 import { MarketUniversalCard } from '@/components/pages/tabs/market/MarketUniversalCard';
 import { MarketItemImage } from '@/components/pages/tabs/market/MarketItemImage';
+import { MarketLockPanel } from '@/components/pages/tabs/market/MarketLockPanel';
 import type { MarketSelectedItem } from '@/components/pages/tabs/market/MarketView';
 import { Ticket } from '@/components/shared/icons/Ticket';
 import { GlobalConstants } from '@/constants/global.constants';
@@ -15,7 +16,18 @@ import { useAppTranslations } from '@/hooks/useAppTranslations';
 import { marketTicketName } from '@/utils/pages/market-name.utils';
 import { useUnlockedTiers } from '@/hooks/useUnlockedTiers';
 import type { MarketPrice, MarketTicket } from '@/types/interfaces/market.interfaces';
+import type { MessageIds } from '@/types/types/i18n.types';
+import type { TicketType } from '@/types/types/ticket.types';
 import { applyStatusMarketDiscount, effectiveMarketDiscountPct } from '@/utils/global/market.utils';
+
+/** What each tier's ticket actually opens — the same copy the Tickets tab shows. */
+const purposeIdByTier: Record<TicketType, MessageIds> = {
+  bronze: 'bronze ticket description',
+  silver: 'silver ticket description',
+  gold: 'golden ticket description',
+  platinum: 'platinum ticket description',
+  diamond: 'diamond ticket description',
+};
 
 export interface MarketTicketSectionProps {
   tickets: MarketTicket[];
@@ -37,7 +49,8 @@ export function MarketTicketSection({ tickets, onSelect, onBuy }: MarketTicketSe
   return (
     <MarketSectionGrid title={t('tickets')} icon={TicketLucide} accent="var(--color-electric-pink)">
       {tickets.map(ticket => {
-        const isLocked = !isTierUnlocked(ticket.ticketType) || ticket.isAvailable === false;
+        const isTierLocked = !isTierUnlocked(ticket.ticketType);
+        const isLocked = isTierLocked || ticket.isAvailable === false;
         const cardIcon: ReactNode = <Ticket type={ticket.ticketType} width={104} height={104} />;
         const modalIcon: ReactNode = <Ticket type={ticket.ticketType} width={140} height={140} />;
         const discountedPrices = applyStatusMarketDiscount(ticket.prices, discountPct);
@@ -45,6 +58,15 @@ export function MarketTicketSection({ tickets, onSelect, onBuy }: MarketTicketSe
           id: ticket.id,
           name: ticket.name,
           description: t(ticket.ticketType),
+          about: t(purposeIdByTier[ticket.ticketType]),
+          locked: isLocked,
+          lockNote: isLocked ? (
+            isTierLocked ? (
+              <MarketLockPanel tier={ticket.ticketType} />
+            ) : (
+              <MarketLockPanel note={t('ticket not on sale')} />
+            )
+          ) : undefined,
           iconNode: ticket.imageUrl ? (
             <MarketItemImage src={ticket.imageUrl} alt={ticket.name} size={140} />
           ) : (

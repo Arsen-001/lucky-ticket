@@ -1,7 +1,7 @@
 'use client';
 
 import type { ReactNode } from 'react';
-import { Gift, Zap } from 'lucide-react';
+import { Gift, Lock, Zap } from 'lucide-react';
 import { twMerge } from 'tailwind-merge';
 import { TelegramStarIcon } from '@/components/shared/icons/TelegramStarIcon';
 import { LcLabel } from '@/components/shared/icons/LcLabel';
@@ -23,6 +23,8 @@ export interface MarketHeroCardProps {
   discountPct?: number;
   /** Full-bleed artwork. Absent for shards and image-less cosmetics. */
   imageUrl?: string;
+  /** Behind a gate — the price turns into a lock that opens the item instead. */
+  locked?: boolean;
   /** What an avatar does while equipped. */
   boost?: AvatarBoost;
   /** What an avatar pays out every day while equipped. */
@@ -52,6 +54,7 @@ export function MarketHeroCard({
   isNew,
   discountPct,
   imageUrl,
+  locked,
   boost,
   dailyReward,
   renderIcon,
@@ -148,27 +151,36 @@ export function MarketHeroCard({
           )
         )}
 
-        {price && (
-          <button
-            type="button"
-            onClick={e => {
-              e.stopPropagation();
-              onBuy(price);
-            }}
-            className="market-hero-buy mt-0.5 inline-flex w-fit items-center gap-1.5 rounded-lg px-3 py-1.5 text-[12px] font-extrabold tabular-nums text-white transition-transform active:scale-95"
-          >
-            <span className="text-[11px] font-bold uppercase tracking-wider opacity-80">
-              {t('buy')}
-            </span>
-            {price.type === MarketPriceType.TELEGRAM_STARS && <TelegramStarIcon size={12} />}
-            {price.originalAmount && (
-              <span className="text-[10px] text-white/55 line-through">
-                {formatCompactPrice(price.originalAmount)}
+        {locked ? (
+          // Tapping it opens the sheet, where the item and its gate are stated —
+          // the slide used to offer a Buy the backend was bound to refuse.
+          <span className="text-pink-secondary mt-0.5 inline-flex w-fit items-center gap-1.5 rounded-lg border border-white/12 bg-white/8 px-3 py-1.5 text-[11px] font-extrabold uppercase tracking-wider">
+            <Lock size={12} strokeWidth={2.6} />
+            {t('locked')}
+          </span>
+        ) : (
+          price && (
+            <button
+              type="button"
+              onClick={e => {
+                e.stopPropagation();
+                onBuy(price);
+              }}
+              className="market-hero-buy mt-0.5 inline-flex w-fit items-center gap-1.5 rounded-lg px-3 py-1.5 text-[12px] font-extrabold tabular-nums text-white transition-transform active:scale-95"
+            >
+              <span className="text-[11px] font-bold uppercase tracking-wider opacity-80">
+                {t('buy')}
               </span>
-            )}
-            <span>{formatCompactPrice(price.amount)}</span>
-            {price.type === MarketPriceType.LC && <LcLabel size={12} interactive={false} />}
-          </button>
+              {price.type === MarketPriceType.TELEGRAM_STARS && <TelegramStarIcon size={12} />}
+              {price.originalAmount && (
+                <span className="text-[10px] text-white/55 line-through">
+                  {formatCompactPrice(price.originalAmount)}
+                </span>
+              )}
+              <span>{formatCompactPrice(price.amount)}</span>
+              {price.type === MarketPriceType.LC && <LcLabel size={12} interactive={false} />}
+            </button>
+          )
         )}
       </div>
     </div>

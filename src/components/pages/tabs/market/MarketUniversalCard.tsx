@@ -1,6 +1,7 @@
 'use client';
 
 import Image from 'next/image';
+import { Check } from 'lucide-react';
 import type { ReactNode } from 'react';
 import { twMerge } from 'tailwind-merge';
 import { Skeleton } from '@/components/shared/seleketons/Skeleton';
@@ -38,8 +39,10 @@ export interface MarketUniversalCardProps {
   isNew?: boolean;
   discountPct?: number;
   disabled?: boolean;
-  /** Keep the card body clickable even when `disabled` (e.g. an owned status card that still links to its page). The buy buttons stay locked. */
-  clickableWhenDisabled?: boolean;
+  /** Why the card can't be bought — defaults to "Locked". */
+  disabledLabel?: string;
+  /** Disabled because the player already owns it: a check reads right, a padlock doesn't. */
+  owned?: boolean;
   loading?: boolean;
   prices?: MarketPrice[];
   onClick?: () => void;
@@ -57,7 +60,8 @@ export function MarketUniversalCard({
   isNew,
   discountPct,
   disabled,
-  clickableWhenDisabled,
+  disabledLabel,
+  owned,
   loading,
   prices,
   onClick,
@@ -66,8 +70,9 @@ export function MarketUniversalCard({
 }: MarketUniversalCardProps) {
   const t = useAppTranslations();
   const accentColor = accentValue(accent);
-  // The body stays interactive when enabled, or when explicitly allowed while disabled.
-  const cardClickable = !loading && (!disabled || !!clickableWhenDisabled);
+  // A locked card still opens: only the buy buttons are gated, never the
+  // explanation of what the thing is and what the gate asks for.
+  const cardClickable = !loading;
 
   return (
     <div
@@ -144,8 +149,20 @@ export function MarketUniversalCard({
       <div className="mt-auto">
         <SkeletonSuspense loading={loading} skeleton={<Skeleton variant="card" className="h-9" />}>
           {disabled ? (
-            <div className="flex-center w-full gap-1 rounded-lg p-2 text-xs font-semibold bg-white/5 border border-white/8">
-              <Image src={icons.lock} alt="" className="h-4 w-auto object-contain" />
+            // Names the state and stays tappable — the card opens its sheet,
+            // where the gate and what sits behind it are spelled out.
+            <div
+              className={twMerge(
+                'flex-center text-pink-secondary w-full gap-1 rounded-lg border border-white/8 bg-white/5 p-2 text-[11px] font-bold uppercase tracking-wider',
+                owned && 'text-success border-success/25 bg-success/10'
+              )}
+            >
+              {owned ? (
+                <Check size={13} strokeWidth={3} />
+              ) : (
+                <Image src={icons.lock} alt="" className="h-3.5 w-auto object-contain" />
+              )}
+              {disabledLabel ?? t('locked')}
             </div>
           ) : prices && prices.length > 0 ? (
             <div className="flex gap-1.5">

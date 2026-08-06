@@ -1,6 +1,6 @@
 'use client';
 
-import { Timer } from 'lucide-react';
+import { Lock, Timer } from 'lucide-react';
 import { twMerge } from 'tailwind-merge';
 import { Modal } from '@/components/shared/modals/Modal';
 import { TelegramStarIcon } from '@/components/shared/icons/TelegramStarIcon';
@@ -52,6 +52,13 @@ export function MarketInfoModal({ open, item, onClose, onBuy }: MarketInfoModalP
           />
           <div className="relative">{item.iconNode}</div>
 
+          {item.locked && (
+            <span className="text-pink-secondary bg-pink-secondary/18 border-pink-secondary/40 absolute left-3 top-3 z-3 inline-flex items-center gap-1 rounded-full border px-2 py-0.5 text-[10px] font-extrabold uppercase tracking-wider">
+              <Lock size={11} strokeWidth={2.6} />
+              {t('locked')}
+            </span>
+          )}
+
           {(item.isNew || item.discountPct) && (
             <div className="absolute right-3 top-3 z-3 flex flex-col items-end gap-1">
               {item.isNew && (
@@ -75,6 +82,18 @@ export function MarketInfoModal({ open, item, onClose, onBuy }: MarketInfoModalP
           )}
         </div>
 
+        {/* Every item says what it is for — the price alone never explained
+            whether a shard feeds an engine or a tournament, and a locked card
+            explained nothing at all. */}
+        {item.about && (
+          <div className="flex flex-col gap-1 rounded-xl border border-white/8 bg-white/4 p-3">
+            <span className="text-pink-secondary text-[11px] font-extrabold uppercase tracking-wider">
+              {t('what it is for')}
+            </span>
+            <p className="text-white-secondary text-[12px] leading-snug">{item.about}</p>
+          </div>
+        )}
+
         {item.meta && <div className="flex flex-col gap-1.5">{item.meta}</div>}
 
         {(showCountdown || (item.remainingSupply !== undefined && item.remainingSupply > 0)) && (
@@ -96,11 +115,15 @@ export function MarketInfoModal({ open, item, onClose, onBuy }: MarketInfoModalP
           </div>
         )}
 
-        <div className="flex flex-col gap-2">
-          {orderMarketPrices(item.prices).map((price, index) => (
-            <PriceButton key={index} price={price} accent={accent} onClick={() => onBuy(price)} />
-          ))}
-        </div>
+        {item.locked ? (
+          item.lockNote
+        ) : (
+          <div className="flex flex-col gap-2">
+            {orderMarketPrices(item.prices).map((price, index) => (
+              <PriceButton key={index} price={price} accent={accent} onClick={() => onBuy(price)} />
+            ))}
+          </div>
+        )}
       </div>
     </Modal>
   );

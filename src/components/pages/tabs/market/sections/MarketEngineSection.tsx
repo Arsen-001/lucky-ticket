@@ -8,12 +8,14 @@ import { useGetTicketsQuery } from '@/api/tickets.api';
 import { MarketSectionGrid } from '@/components/pages/tabs/market/MarketSectionGrid';
 import { MarketUniversalCard } from '@/components/pages/tabs/market/MarketUniversalCard';
 import { MarketItemImage } from '@/components/pages/tabs/market/MarketItemImage';
+import { MarketLockPanel } from '@/components/pages/tabs/market/MarketLockPanel';
 import type { MarketSelectedItem } from '@/components/pages/tabs/market/MarketView';
 import { EngineIcon } from '@/components/shared/icons/EngineIcon';
 import { useAppTranslations } from '@/hooks/useAppTranslations';
 import { marketEngineName } from '@/utils/pages/market-name.utils';
 import { useUnlockedTiers } from '@/hooks/useUnlockedTiers';
 import type { MarketEngine, MarketPrice } from '@/types/interfaces/market.interfaces';
+import type { MessageIds } from '@/types/types/i18n.types';
 import type { TicketType } from '@/types/types/ticket.types';
 import { effectiveMarketDiscountPct, engineNextPurchasePrices } from '@/utils/global/market.utils';
 
@@ -59,6 +61,9 @@ export function MarketEngineSection({ engines, onSelect, onBuy }: MarketEngineSe
           id: engine.id,
           name: engine.name,
           description,
+          about: t('market engine purpose', { tier: t(engine.ticketType as MessageIds) }),
+          locked: isLocked,
+          lockNote: isLocked ? <MarketLockPanel tier={engine.ticketType} /> : undefined,
           iconNode: engine.imageUrl ? (
             <MarketItemImage src={engine.imageUrl} alt={engine.name} size={156} />
           ) : (

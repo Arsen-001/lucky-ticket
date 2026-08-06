@@ -22,10 +22,14 @@ import '@/styles/components/market.css';
 import { ChipShardIcon } from '@/components/shared/icons/ChipShardIcon';
 import type { MarketSelectedItem } from '@/components/pages/tabs/market/MarketView';
 import { MarketHeroCard } from '@/components/pages/tabs/market/MarketHeroCard';
+import { MarketLockPanel } from '@/components/pages/tabs/market/MarketLockPanel';
 import { useAppTranslations } from '@/hooks/useAppTranslations';
+import { useUnlockedTiers } from '@/hooks/useUnlockedTiers';
 import { marketShardName } from '@/utils/pages/market-name.utils';
 import type { AvatarBoost, AvatarDailyReward } from '@/types/interfaces/avatars.interfaces';
 import type { MarketAccent, MarketPrice } from '@/types/interfaces/market.interfaces';
+import { isTierAtOrAbove, type TierName } from '@/types/types/tier.types';
+import type { TicketType } from '@/types/types/ticket.types';
 
 export interface MarketHeroCarouselProps {
   onSelect: (item: MarketSelectedItem) => void;
@@ -36,6 +40,10 @@ interface FeaturedItem {
   id: string;
   title: string;
   description: string;
+  /** What the item is for — the sheet states it for every slide. */
+  about: string;
+  /** Tier gate the slide sits behind; the buy button turns into a lock. */
+  lockedTier?: TicketType;
   prices: MarketPrice[];
   expiresAt?: string;
   discountPct?: number;
@@ -86,6 +94,9 @@ export function MarketHeroCarousel({ onSelect, onBuy }: MarketHeroCarouselProps)
   const discountPct = effectiveMarketDiscountPct(isLp, isVip, me?.statusPerks);
   const [buyCosmetic] = useBuyCosmeticMutation();
   const [buyShard] = useBuyShardMutation();
+  // The plain tier string, not `isTierUnlocked`: this list is memoized, and a
+  // function identity that changes every render drops the memo entirely.
+  const { maxUnlockedTier } = useUnlockedTiers();
 
   const items = useMemo<FeaturedItem[]>(() => {
     if (!data) return [];
@@ -99,6 +110,7 @@ export function MarketHeroCarousel({ onSelect, onBuy }: MarketHeroCarouselProps)
         id: c.id,
         title: c.name,
         description: c.description ?? '',
+        about: t('market avatar purpose'),
         prices: orderMarketPrices(applyStatusMarketDiscount(c.prices, discountPct)),
         expiresAt: c.expiresAt,
         discountPct: c.discountPct,
@@ -117,6 +129,12 @@ export function MarketHeroCarousel({ onSelect, onBuy }: MarketHeroCarouselProps)
       id: s.id,
       title: marketShardName(s, t),
       description: `+${s.count} ${t('shards')}`,
+      about: t('market shard purpose'),
+      // The grid gates shards by tier; the showcase used to sell the same item
+      // with a live Buy button the backend would refuse.
+      lockedTier: isTierAtOrAbove(maxUnlockedTier as TierName, s.quality as TierName)
+        ? undefined
+        : s.quality,
       prices: orderMarketPrices(applyStatusMarketDiscount(s.prices, discountPct)),
       discountPct: s.discountPct,
       isNew: s.isNew,
@@ -167,7 +185,7 @@ export function MarketHeroCarousel({ onSelect, onBuy }: MarketHeroCarouselProps)
     }
 
     return list;
-  }, [data, buyCosmetic, buyShard, t, discountPct]);
+  }, [data, buyCosmetic, buyShard, t, discountPct, maxUnlockedTier]);
 
   if (isLoading) {
     return (
@@ -183,6 +201,9 @@ export function MarketHeroCarousel({ onSelect, onBuy }: MarketHeroCarouselProps)
     id: featured.id,
     name: featured.title,
     description: featured.description,
+    about: featured.about,
+    locked: !!featured.lockedTier,
+    lockNote: featured.lockedTier ? <MarketLockPanel tier={featured.lockedTier} /> : undefined,
     iconNode: <div className="h-32 w-32">{featured.renderIcon(128)}</div>,
     prices: featured.prices,
     expiresAt: featured.expiresAt,
@@ -230,6 +251,7 @@ export function MarketHeroCarousel({ onSelect, onBuy }: MarketHeroCarouselProps)
                 isNew={featured.isNew}
                 discountPct={featured.discountPct}
                 imageUrl={featured.imageUrl}
+                locked={!!featured.lockedTier}
                 boost={featured.boost}
                 dailyReward={featured.dailyReward}
                 renderIcon={featured.renderIcon}
