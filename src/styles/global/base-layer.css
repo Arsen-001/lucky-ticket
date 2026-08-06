@@ -56,20 +56,24 @@
    device, a 193px box held 269px of content, so the whole Capacity row and half
    the Speed row were cut off by the face's `overflow-hidden`.
 
-   `tan(atan2(a, b))` is the only way CSS can divide one length by another. The
-   stepped values below are the fallback for engines without CSS trig (WebViews
-   older than ~2022); each step is the exact scale at the LOW end of its width
-   range, so there the cube can only come out smaller than its footprint — never
-   overflow it. */
+   The scale is a plain media-query ladder and the footprint is DERIVED from it,
+   so the two cannot disagree on any engine. Each rung is 0.0024x its own
+   min-width: the footprint is 72% of the viewport — the other 28% is the room
+   the slider keeps for its peeking neighbours — until it reaches the design
+   square around 417px and stops growing. That replaced a flat 120px reserve,
+   which took 37% of a 320px phone against 28% of a 430px one, so the narrowest
+   screens were the ones giving up the most.
+
+   ⚠️ Do NOT go back to `tan(atan2(box, design))`, the usual CSS trick for
+   dividing one length by another. WebKit evaluates it in RADIANS — it returns
+   tan(45rad) = 1.6198 where the answer is tan(45deg) = 1 — and shipped the cube
+   at 486px inside a 300px slot on every iPhone. `@supports (scale: tan(atan2(…)))`
+   does not catch it: WebKit parses the expression happily, only the VALUE is
+   wrong. Chromium computes it correctly, so no desktop check can see this. */
 :root {
   --engine-cube-design: 300px;
-  /* Room the slider keeps beside the active cube for its peeking neighbours.
-     Proportional, not a flat 120px: a flat reserve took 37% of a 320px phone
-     but only 28% of a 430px one, so the narrowest screens — the ones with the
-     least to spare — were the ones handing over the most. Capped at the value
-     the 430px column already used, so nothing changes at or above it. */
-  --engine-cube-peek: min(120px, 28vw);
-  --engine-cube-box: min(100vw - var(--engine-cube-peek), var(--engine-cube-design));
+  --engine-cube-scale: 0.48;
+  --engine-cube-box: calc(var(--engine-cube-design) * var(--engine-cube-scale));
   /* Width the front face actually PAINTS. It sits `--cube-half` (design/2 +
      15px = 165px) nearer the viewer than the cube's centre, so the 1400px
      perspective renders it 1400/(1400-165) = 1.134x wider than the box. Keep in
@@ -78,12 +82,21 @@
   /* Ramp of the slider's edge mask: exactly the empty strip beside the painted
      face, so the fade always stops where the active cube starts. A fixed ramp
      could not do both jobs — 60px cleared the face on a 430px screen but ate
-     30px of it once the proportional peek widened the cube on a 320px one. */
+     30px of it once the proportional footprint widened the cube on a 320px one. */
   --engine-cube-edge-fade: max(
     0px,
     calc((min(100vw, var(--app-max-w)) - var(--engine-cube-face-w)) / 2)
   );
-  --engine-cube-scale: 0.576;
+}
+@media (min-width: 240px) {
+  :root {
+    --engine-cube-scale: 0.576;
+  }
+}
+@media (min-width: 260px) {
+  :root {
+    --engine-cube-scale: 0.624;
+  }
 }
 @media (min-width: 280px) {
   :root {
@@ -110,24 +123,29 @@
     --engine-cube-scale: 0.864;
   }
 }
-@media (min-width: 380px) {
+@media (min-width: 375px) {
   :root {
-    --engine-cube-scale: 0.912;
+    --engine-cube-scale: 0.9;
   }
 }
-@media (min-width: 400px) {
+@media (min-width: 390px) {
   :root {
-    --engine-cube-scale: 0.96;
+    --engine-cube-scale: 0.936;
+  }
+}
+@media (min-width: 402px) {
+  :root {
+    --engine-cube-scale: 0.965;
+  }
+}
+@media (min-width: 412px) {
+  :root {
+    --engine-cube-scale: 0.988;
   }
 }
 @media (min-width: 417px) {
   :root {
     --engine-cube-scale: 1;
-  }
-}
-@supports (scale: tan(atan2(1px, 1px))) {
-  :root {
-    --engine-cube-scale: tan(atan2(var(--engine-cube-box), var(--engine-cube-design)));
   }
 }
 

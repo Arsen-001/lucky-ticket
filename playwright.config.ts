@@ -20,10 +20,25 @@ export default defineConfig({
   use: {
     baseURL: BASE_URL,
     trace: 'on-first-retry',
-    // Mobile-first app → run the smoke at a phone viewport on Chromium.
-    ...devices['Desktop Chrome'],
-    viewport: { width: 390, height: 844 },
   },
+  projects: [
+    {
+      // Mobile-first app → run the smoke at a phone viewport on Chromium.
+      name: 'chromium',
+      use: { ...devices['Desktop Chrome'], viewport: { width: 390, height: 844 } },
+    },
+    {
+      // The audience is iPhones inside Telegram, i.e. WKWebView — and WebKit does
+      // not always COMPUTE from the same CSS what Chromium computes. It shipped a
+      // 486px cube into a 300px slot once (see layout-invariants.spec.ts) while
+      // every Chromium check stayed green. Scoped to the invariants spec, which
+      // walks every screen itself, so the engine is covered without doubling the
+      // whole suite.
+      name: 'webkit',
+      testMatch: /layout-invariants\.spec\.ts/,
+      use: { ...devices['iPhone 14 Pro Max'] },
+    },
+  ],
   // Auto-start the app (mock backend) for the smoke; reuse a running dev server locally.
   webServer: {
     command: 'npm run dev',

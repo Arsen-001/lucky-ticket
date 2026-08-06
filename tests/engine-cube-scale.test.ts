@@ -1,0 +1,58 @@
+import { describe, expect, it } from 'vitest';
+import { readFileSync } from 'node:fs';
+import { resolve } from 'node:path';
+
+const css = readFileSync(resolve(process.cwd(), 'src/styles/global/base-layer.css'), 'utf8');
+const declarations = css.replace(/\/\*[\s\S]*?\*\//g, '');
+
+/** `@media (min-width: Npx) { :root { --engine-cube-scale: S } }`, in source order. */
+const ladder = [
+  ...declarations.matchAll(
+    /@media\s*\(min-width:\s*(\d+)px\)\s*\{\s*:root\s*\{\s*--engine-cube-scale:\s*([\d.]+)/g
+  ),
+].map(match => ({ width: Number(match[1]), scale: Number(match[2]) }));
+
+/** The face is painted 1.134x its footprint — see `--engine-cube-face-w`. */
+const PERSPECTIVE_GAIN = 1.134;
+const DESIGN_PX = 300;
+
+describe('engine cube scale', () => {
+  /**
+   * The home cube is laid out at one design square and scaled to fit. Getting
+   * that scale used to mean dividing one CSS length by another, for which the
+   * known trick is `tan(atan2(a, b))` — and WebKit evaluates it in RADIANS:
+   * tan(45rad) = 1.6198 where the answer is tan(45deg) = 1. That shipped a
+   * 486px cube into a 300px slot on every iPhone in Telegram. `@supports
+   * (scale: tan(atan2(1px, 1px)))` does NOT gate it — WebKit parses the
+   * expression happily and only the value is wrong, so Chromium (and every
+   * desktop check) sees nothing.
+   */
+  it('never divides lengths with CSS trig', () => {
+    expect(declarations).not.toMatch(/atan2|\btan\(/);
+  });
+
+  it('derives the footprint from the scale so the two cannot disagree', () => {
+    expect(declarations).toMatch(
+      /--engine-cube-box:\s*calc\(var\(--engine-cube-design\)\s*\*\s*var\(--engine-cube-scale\)\)/
+    );
+  });
+
+  it('rises with viewport width and tops out at the design square', () => {
+    expect(ladder.length).toBeGreaterThan(5);
+    for (let i = 1; i < ladder.length; i++) {
+      expect(ladder[i].width).toBeGreaterThan(ladder[i - 1].width);
+      expect(ladder[i].scale).toBeGreaterThan(ladder[i - 1].scale);
+    }
+    expect(ladder.at(-1)?.scale).toBe(1);
+  });
+
+  it('keeps the painted face inside the narrowest viewport each rung serves', () => {
+    // A rung applies from its own min-width upward, so the tightest case is
+    // exactly at that width. If the face does not fit there, it never fits.
+    for (const { width, scale } of ladder) {
+      expect(scale).toBeGreaterThan(0);
+      expect(scale).toBeLessThanOrEqual(1);
+      expect(DESIGN_PX * scale * PERSPECTIVE_GAIN).toBeLessThanOrEqual(width);
+    }
+  });
+});
