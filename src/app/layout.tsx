@@ -148,7 +148,16 @@ export default async function RootLayout({ children }: ChildrenProps) {
                     <NavigationHistoryProvider>
                       <TonConnectProvider>
                         <TelegramProvider>
-                          <div className="max-w-[var(--app-max-w)] m-auto h-full overflow-hidden">
+                          {/* The one element that exists only when the app truly
+                            booted: it lives inside PreLaunchGate, so the
+                            countdown, the maintenance wall, the boot splash and
+                            the open-on-your-phone screen all render *instead* of
+                            it. The smoke suites assert it, because "the page
+                            rendered some text" is equally true of all five. */}
+                          <div
+                            data-testid="app-shell"
+                            className="max-w-[var(--app-max-w)] m-auto h-full overflow-hidden"
+                          >
                             {children}
                           </div>
                           <Onboarding />

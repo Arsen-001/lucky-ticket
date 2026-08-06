@@ -25,7 +25,15 @@ jobs:
           node-version-file: .nvmrc
           cache: npm
       - run: npm ci
-      - run: npm run lint
+      # Order matters, and so does the `if:` on the steps below. Lint used to run first in this
+      # same job, so one style complaint ended the run before a single test
+      # executed and the summary said "lint · types · unit" had failed — which
+      # reads as "the tests didn't get a chance", not "the tests are broken". The
+      # backend CI stayed quiet for three and a half weeks behind exactly that.
+      # Now the checks that can find a real defect run first, and every step runs
+      # even after an earlier one fails, so one red report shows *everything*
+      # that is wrong instead of the first thing.
+      #
       # `next-env.d.ts` is what declares the `*.webp` / `*.svg` module types, and
       # it is generated, not committed — so `tsc` on a fresh clone cannot resolve
       # a single image import. Locally the file is always there from an earlier
@@ -37,6 +45,9 @@ jobs:
       # DOCS↔constants drift, production-only traps. The backend-enum parity
       # test skips itself when ../lucky-ticket-backend isn't checked out.
       - run: npm test
+        if: ${{ !cancelled() }}
+      - run: npm run lint
+        if: ${{ !cancelled() }}
 
   e2e-dev:
     name: e2e · dev server

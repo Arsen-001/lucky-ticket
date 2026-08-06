@@ -30,6 +30,17 @@ export async function assertScreenRenders(page: Page, label: string, url: string
     })
     .toBeGreaterThan(0);
 
+  // Positive identity: this has to be the APP, not one of the four screens that
+  // render in its place. `PreLaunchGate` swaps the whole tree for the countdown,
+  // the maintenance wall, the boot splash or open-on-your-phone — every one of
+  // which loads fine, renders plenty of text and leaks no placeholder, so the
+  // checks above pass on all of them. A run with the gate up scored a clean
+  // sweep against the same countdown on every route.
+  await expect(
+    page.getByTestId('app-shell'),
+    `${label} did not render the app itself`
+  ).toBeAttached({ timeout: 15_000 });
+
   // Let any late async error surface, then assert no crash + no placeholder leak.
   await page.waitForTimeout(300);
   expect(errors, `uncaught runtime errors on ${label}`).toEqual([]);

@@ -1,6 +1,10 @@
 import { defineConfig, devices } from '@playwright/test';
 
-const BASE_URL = 'http://localhost:3000';
+// Overridable so the suite can be pointed at a server started with different
+// env — which is how the "is this the app or the countdown?" assertion gets a
+// positive control: run it once against a server with NEXT_PUBLIC_COMING_SOON=1
+// and it must FAIL. A check that has never been seen failing proves nothing.
+const BASE_URL = process.env.E2E_BASE_URL ?? 'http://localhost:3000';
 
 export default defineConfig({
   testDir: './e2e',

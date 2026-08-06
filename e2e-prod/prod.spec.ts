@@ -86,6 +86,16 @@ async function assertLooksRightBuilt(page: Page, label: string, url: string) {
       message: `${label} never rendered visible text`,
     })
     .toBeGreaterThan(0);
+
+  // The app itself, not one of the screens PreLaunchGate renders in its place
+  // (countdown / maintenance / splash / open-on-your-phone). All four load
+  // cleanly and render text, so without this the whole sweep can pass against
+  // the same countdown on every route — which is exactly what it did.
+  await expect(
+    page.getByTestId('app-shell'),
+    `${label} did not render the app itself`
+  ).toBeAttached({ timeout: 15_000 });
+
   await expect
     .poll(
       async () =>
