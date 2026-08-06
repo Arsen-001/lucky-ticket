@@ -1,11 +1,11 @@
 'use client';
 
-import Image from 'next/image';
 import { useState } from 'react';
 import { Check, Copy, ShieldAlert } from 'lucide-react';
 import { twMerge } from 'tailwind-merge';
 import { useTonConnectUI } from '@tonconnect/ui-react';
 import { Modal } from '@/components/shared/modals/Modal';
+import { QrCode } from '@/components/shared/QrCode';
 import { Button } from '@/components/shared/buttons/Button';
 import { Input } from '@/components/shared/form-elements/inputs/Input';
 import { useAppTranslations } from '@/hooks/useAppTranslations';
@@ -59,10 +59,6 @@ export function DepositTonModal({ open, onClose, onDeposited }: DepositTonModalP
   const transferUri = address
     ? `ton://transfer/${address}${comment ? `?text=${encodeURIComponent(comment)}` : ''}`
     : '';
-  const qrSrc = transferUri
-    ? `https://api.qrserver.com/v1/create-qr-code/?size=240x240&bgcolor=1d1d34&color=ffffff&margin=8&data=${encodeURIComponent(transferUri)}`
-    : '';
-
   const copy = async (value: string, mark: (v: boolean) => void) => {
     if (!value) return;
     try {
@@ -161,17 +157,21 @@ export function DepositTonModal({ open, onClose, onDeposited }: DepositTonModalP
           <DepositUnavailableNotice />
         ) : (
           <>
+            {/* Drawn on the device, never fetched. This code is what a player
+                points a wallet at to send real TON, so the address inside it
+                must not make a round trip through a third party: whoever serves
+                the image chooses what it encodes, and a swapped one looks
+                identical. It also used to mean no QR at all whenever that host
+                was slow, blocked (it is a plain external image, and this runs
+                inside Telegram) or down. */}
             <div className="flex-center bg-background-overlay rounded-2xl p-3">
-              {isLoading || !qrSrc ? (
+              {isLoading || !transferUri ? (
                 <div className="bg-background-overlay/60 h-[240px] w-[240px] animate-pulse rounded-xl" />
               ) : (
-                <Image
-                  src={qrSrc}
-                  alt={t('deposit ton')}
-                  width={240}
-                  height={240}
-                  unoptimized
-                  className="rounded-xl"
+                <QrCode
+                  value={transferUri}
+                  label={t('deposit ton')}
+                  className="h-[240px] w-[240px] rounded-xl"
                 />
               )}
             </div>
