@@ -18,6 +18,7 @@ import type {
 } from '@/types/interfaces/achievement.interfaces';
 import { getLocalizedText } from '@/utils/pages/faq.utils';
 import { useLocale } from 'next-intl';
+import { rarityMarkColors } from '@/constants/tier-colors';
 
 export interface AchievementDetailModalProps {
   achievement: AchievementType | null;
@@ -32,15 +33,6 @@ const rarityOrder: AchievementRarity[] = [
   AchievementRarity.DIAMOND,
   AchievementRarity.DIAMOND_PLUS,
 ];
-
-const rarityDot: Record<AchievementRarity, string> = {
-  [AchievementRarity.BRONZE]: '#FFFFFF',
-  [AchievementRarity.SILVER]: '#5FE3F5',
-  [AchievementRarity.GOLD]: '#A78BFA',
-  [AchievementRarity.PLATINUM]: '#F8BD3E',
-  [AchievementRarity.DIAMOND]: '#FF5FC8',
-  [AchievementRarity.DIAMOND_PLUS]: '#FFD700',
-};
 
 export function AchievementDetailModal({ achievement, onClose }: AchievementDetailModalProps) {
   const t = useAppTranslations();
@@ -57,7 +49,7 @@ export function AchievementDetailModal({ achievement, onClose }: AchievementDeta
               {getLocalizedText(achievement.name, locale)}
             </h2>
             <div className="flex items-center gap-1.5 text-[11px] uppercase tracking-wider">
-              <span className="font-bold" style={{ color: rarityDot[achievement.rarity] }}>
+              <span className="font-bold" style={{ color: rarityMarkColors[achievement.rarity] }}>
                 {achievement.rarity === AchievementRarity.DIAMOND_PLUS && achievement.tier
                   ? achievement.tier.max === 0
                     ? `${t(rarityLabelKey(achievement.rarity))} · ${t('level short')} ${achievement.tier.current} · ∞`
@@ -220,7 +212,7 @@ function ChainLadder({ achievement }: ChainLadderProps) {
           const isEarned =
             position < currentPosition || (position === currentPosition && achievement.earned);
           const isComingSoon = position === comingSoonPosition;
-          const dotColor = rarityDot[rarity];
+          const dotColor = rarityMarkColors[rarity];
           const isLast = i === renderTo - baseVisible;
 
           return (

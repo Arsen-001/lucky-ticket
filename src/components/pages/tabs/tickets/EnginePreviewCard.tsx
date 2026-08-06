@@ -20,14 +20,7 @@ import {
 } from '@/utils/global/ticket-engine.utils';
 import type { TicketEngine } from '@/types/interfaces/ticket.interfaces';
 import type { TicketType } from '@/types/types/ticket.types';
-
-const TIER_GLOW: Record<TicketType, string> = {
-  bronze: '#E08A3A',
-  silver: '#D8D8D8',
-  gold: '#FFD56A',
-  platinum: '#E2E0D0',
-  diamond: '#3FD9CF',
-};
+import { tierAccentColors } from '@/constants/tier-colors';
 
 const SPEED_ACCENT = '#C5B0F8';
 const CAPACITY_ACCENT = '#FFE08A';
@@ -78,7 +71,7 @@ export function EnginePreviewCard({
   // than jumping backwards from a half-done cycle.
   const pct = cycle > 0 ? Math.min(100, Math.round(((elapsedSeconds ?? 0) / cycle) * 100)) : 0;
   const tierColor = `var(--color-${tier})`;
-  const glow = TIER_GLOW[tier];
+  const glow = tierAccentColors[tier];
   const engineLevel = engine.engineLevel ?? 1;
 
   const hasBoosts = !!speedChip || !!speedBooster || !!capacityChip || !!capacityBooster;

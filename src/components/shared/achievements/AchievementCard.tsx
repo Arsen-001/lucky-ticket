@@ -9,18 +9,10 @@ import { useAppTranslations } from '@/hooks/useAppTranslations';
 import { rarityLabelKey } from '@/components/shared/achievements/achievement.utils';
 import { getLocalizedText } from '@/utils/pages/faq.utils';
 import { useLocale } from 'next-intl';
-
-const rarityColor: Record<AchievementRarity, string> = {
-  [AchievementRarity.BRONZE]: '#E08A3A',
-  [AchievementRarity.SILVER]: '#5FE3F5',
-  [AchievementRarity.GOLD]: '#A78BFA',
-  [AchievementRarity.PLATINUM]: '#F8BD3E',
-  [AchievementRarity.DIAMOND]: '#FF5FC8',
-  [AchievementRarity.DIAMOND_PLUS]: '#FFD700',
-};
+import { rarityColors } from '@/constants/tier-colors';
 
 function cardStyle(rarity: AchievementRarity, locked: boolean): CSSProperties {
-  const c = rarityColor[rarity];
+  const c = rarityColors[rarity];
   return {
     background: `
       linear-gradient(var(--color-background-overlay), var(--color-background-overlay)) padding-box,
@@ -82,7 +74,7 @@ export function AchievementCard({
   };
 
   const isLocked = !achievement.earned;
-  const c = rarityColor[achievement.rarity];
+  const c = rarityColors[achievement.rarity];
 
   const locale = useLocale();
   const rarityLabel =

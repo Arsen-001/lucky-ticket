@@ -14,19 +14,9 @@ import { MarketPriceType } from '@/types/enums/market.enums';
 import type { MarketAccent, MarketPrice } from '@/types/interfaces/market.interfaces';
 import { formatCompactPrice } from '@/utils/global/number.utils';
 import { orderMarketPrices } from '@/utils/global/market.utils';
+import { marketAccentColors, marketDefaultAccent } from '@/constants/tier-colors';
 
-const ACCENT_COLOR: Record<MarketAccent, string> = {
-  bronze: '#E08A3A',
-  silver: '#D8D8D8',
-  gold: '#FFD56A',
-  platinum: '#E2E0D0',
-  diamond: '#3FD9CF',
-  pink: 'var(--color-electric-pink)',
-  purple: 'var(--color-electric-purple)',
-};
-
-const accentValue = (a?: MarketAccent): string =>
-  a ? ACCENT_COLOR[a] : 'var(--color-electric-pink)';
+const accentValue = (a?: MarketAccent): string => (a ? marketAccentColors[a] : marketDefaultAccent);
 
 export interface MarketUniversalCardProps {
   name: ReactNode;

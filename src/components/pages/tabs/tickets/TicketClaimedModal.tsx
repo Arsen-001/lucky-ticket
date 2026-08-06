@@ -8,6 +8,7 @@ import { TicketOverlap } from '@/components/shared/icons/TicketOverlap';
 import { useAppTranslations } from '@/hooks/useAppTranslations';
 import type { TicketType } from '@/types/types/ticket.types';
 import type { MessageIds } from '@/types/types/i18n.types';
+import { tierAccentColors } from '@/constants/tier-colors';
 
 const TIER_LABEL_KEY: Record<TicketType, MessageIds> = {
   bronze: 'bronze',
@@ -15,14 +16,6 @@ const TIER_LABEL_KEY: Record<TicketType, MessageIds> = {
   gold: 'golden',
   platinum: 'platinum',
   diamond: 'diamond',
-};
-
-const TIER_GLOW: Record<TicketType, string> = {
-  bronze: '#E08A3A',
-  silver: '#D8D8D8',
-  gold: '#FFD56A',
-  platinum: '#E2E0D0',
-  diamond: '#3FD9CF',
 };
 
 export interface TicketClaimedModalProps {
@@ -64,7 +57,7 @@ const useCounter = (target: number, durationMs = 700) => {
 export function TicketClaimedModal({ open, tier, count, onClose }: TicketClaimedModalProps) {
   const t = useAppTranslations();
   const counter = useCounter(open ? count : 0);
-  const glow = TIER_GLOW[tier];
+  const glow = tierAccentColors[tier];
   const tierColor = `var(--color-${tier})`;
 
   return (

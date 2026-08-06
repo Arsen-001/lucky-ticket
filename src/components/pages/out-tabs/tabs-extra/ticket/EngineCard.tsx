@@ -16,14 +16,7 @@ import type { TicketEngine } from '@/types/interfaces/ticket.interfaces';
 import type { TicketType } from '@/types/types/ticket.types';
 import '@/styles/components/engine-card.css';
 import { staggerMs } from '@/utils/global/animation.utils';
-
-const TIER_GLOW: Record<TicketType, string> = {
-  bronze: '#E08A3A',
-  silver: '#D8D8D8',
-  gold: '#FFD56A',
-  platinum: '#E2E0D0',
-  diamond: '#3FD9CF',
-};
+import { tierAccentColors } from '@/constants/tier-colors';
 
 export interface EngineCardProps {
   engine: TicketEngine;
@@ -107,7 +100,7 @@ export function EngineCard({
   const capacityCost = capacityUpgradeLsCost(capacityLevel, engineLevel, tier, upgrade);
   const instantClaimCost = Math.max(1, Math.ceil(remaining / 3600));
 
-  const glow = TIER_GLOW[tier];
+  const glow = tierAccentColors[tier];
 
   return (
     <div

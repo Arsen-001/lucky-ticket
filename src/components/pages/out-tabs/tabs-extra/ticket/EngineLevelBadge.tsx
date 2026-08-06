@@ -4,6 +4,7 @@ import { twMerge } from 'tailwind-merge';
 import { Star } from 'lucide-react';
 import type { TicketType } from '@/types/types/ticket.types';
 import { useAppTranslations } from '@/hooks/useAppTranslations';
+import { tierAccentColors } from '@/constants/tier-colors';
 
 export interface EngineLevelBadgeProps {
   level: number;
@@ -11,17 +12,9 @@ export interface EngineLevelBadgeProps {
   className?: string;
 }
 
-const TIER_GLOW: Record<TicketType, string> = {
-  bronze: '#E08A3A',
-  silver: '#D8D8D8',
-  gold: '#FFD56A',
-  platinum: '#E2E0D0',
-  diamond: '#3FD9CF',
-};
-
 export function EngineLevelBadge({ level, tier, className }: EngineLevelBadgeProps) {
   const t = useAppTranslations();
-  const glow = TIER_GLOW[tier];
+  const glow = tierAccentColors[tier];
 
   return (
     <span

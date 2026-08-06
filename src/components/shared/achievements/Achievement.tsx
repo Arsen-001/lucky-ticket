@@ -51,6 +51,7 @@ import type { Achievement as AchievementType } from '@/types/interfaces/achievem
 import '@/styles/components/achievement.css';
 import { getLocalizedText } from '@/utils/pages/faq.utils';
 import { useLocale } from 'next-intl';
+import { rarityMarkColors } from '@/constants/tier-colors';
 
 const iconMap: Record<string, LucideIcon> = {
   'shield-check': ShieldCheck,
@@ -92,15 +93,6 @@ const iconMap: Record<string, LucideIcon> = {
   snowflake: Snowflake,
   vault: Vault,
   layers: Layers,
-};
-
-const rarityIconColor: Record<AchievementRarity, string> = {
-  [AchievementRarity.BRONZE]: '#FFFFFF',
-  [AchievementRarity.SILVER]: '#5FE3F5',
-  [AchievementRarity.GOLD]: '#A78BFA',
-  [AchievementRarity.PLATINUM]: '#F8BD3E',
-  [AchievementRarity.DIAMOND]: '#FF5FC8',
-  [AchievementRarity.DIAMOND_PLUS]: '#FFD700',
 };
 
 type RarityImageMap = Record<AchievementRarity, string>;
@@ -198,7 +190,7 @@ export function Achievement({
   const badgeSrc = resolveBadgeSrc(achievement);
   const Icon: LucideIcon =
     (achievement.iconCode ? iconMap[achievement.iconCode] : undefined) ?? Award;
-  const rarityColor = rarityIconColor[achievement.rarity];
+  const rarityColor = rarityMarkColors[achievement.rarity];
 
   return (
     <div

@@ -10,18 +10,9 @@ import { orderMarketPrices } from '@/utils/global/market.utils';
 import { useAppTranslations } from '@/hooks/useAppTranslations';
 import { useCountDown } from '@/hooks/useCountDown';
 import { MarketPriceType } from '@/types/enums/market.enums';
-import type { MarketAccent, MarketPrice } from '@/types/interfaces/market.interfaces';
+import type { MarketPrice } from '@/types/interfaces/market.interfaces';
 import type { MarketSelectedItem } from './MarketView';
-
-const TIER_GLOW: Record<MarketAccent, string> = {
-  bronze: '#E08A3A',
-  silver: '#D8D8D8',
-  gold: '#FFD56A',
-  platinum: '#E2E0D0',
-  diamond: '#3FD9CF',
-  pink: '#FF4FBE',
-  purple: '#743DF5',
-};
+import { marketAccentColors, marketDefaultAccent } from '@/constants/tier-colors';
 
 export interface MarketInfoModalProps {
   open: boolean;
@@ -34,7 +25,7 @@ export function MarketInfoModal({ open, item, onClose, onBuy }: MarketInfoModalP
   const t = useAppTranslations();
   const { leftTime, expired } = useCountDown(item?.expiresAt);
   const showCountdown = !!item?.expiresAt && !expired;
-  const accent = item?.accent ? TIER_GLOW[item.accent] : 'var(--color-electric-pink)';
+  const accent = item?.accent ? marketAccentColors[item.accent] : marketDefaultAccent;
 
   if (!item) return null;
 
