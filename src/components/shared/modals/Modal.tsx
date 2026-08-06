@@ -38,14 +38,17 @@ export const Modal = ({
   // full-screen blur layer per row; see useOverlayPresence.
   const { mounted, visible } = useOverlayPresence(open, ANIMATION_MS);
 
+  // No `document.activeElement.blur()` for the closed state here, however
+  // harmless it reads. It blurred whatever was focused ANYWHERE in the app, and
+  // a closed modal runs this effect far more often than it looks: the deps
+  // carry `onClose`, which every caller passes as an inline arrow, so a new
+  // identity on any parent render re-runs it. Home re-renders once a second for
+  // the engine tick, so typing an amount in the Stars sheet lost focus within
+  // ~600ms — on a phone that is the keyboard opening and closing itself
+  // (measured 06.08.2026: focus at 13966ms, blur at 14592ms, stack ending in
+  // commitHookPassiveMountEffects). Focus on close is `useOverlayFocusLock`'s
+  // job, and it restores it to the control that opened the dialog.
   useEffect(() => {
-    if (!open && typeof document !== 'undefined') {
-      const activeElement = document.activeElement as HTMLElement;
-      if (activeElement && activeElement instanceof HTMLElement) {
-        activeElement.blur();
-      }
-    }
-
     const handleKeyDown = (event: KeyboardEvent) => {
       if (event.key === 'Escape' && open && onClose && hideOnEscape && closeOnOverlayClick) {
         onClose();

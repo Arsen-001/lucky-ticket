@@ -29,14 +29,24 @@ const SHEET_HEADING = /stars|звёзды/i;
  * dismissal that needs no locale-specific button name.
  */
 async function clearAutoPopups(page: Page) {
-  const dialogs = page.getByRole('dialog');
-  for (let i = 0; i < 12; i++) {
-    if ((await dialogs.count()) === 0) return;
-    await page.keyboard.press('Escape');
+  // Dialogs, not the portal's children: `ToastViewport` lives in `#portal-root`
+  // permanently, so "the portal is empty" is never true.
+  const portal = page.getByRole('dialog');
+  let quietRounds = 0;
+  // Emptying it once is not enough: the results arrive as a queue, and the next
+  // one surfaces as soon as the previous leaves. Wait for the portal to stay
+  // empty across consecutive checks, or the tap lands on the next backdrop.
+  for (let i = 0; i < 40 && quietRounds < 3; i++) {
+    if ((await portal.count()) === 0) {
+      quietRounds += 1;
+    } else {
+      quietRounds = 0;
+      await page.keyboard.press('Escape');
+    }
     // Past the close animation, after which the overlay leaves the DOM.
     await page.waitForTimeout(400);
   }
-  expect(await dialogs.count(), 'auto-surfaced popups never stopped coming').toBe(0);
+  expect(await portal.count(), 'auto-surfaced popups never stopped coming').toBe(0);
 }
 
 /** Opens the Stars sheet from the header pill with a real tap. */
@@ -58,6 +68,22 @@ test('the Stars sheet survives the tap that opened it', async ({ page }) => {
   // animation later, so a surviving count of 1 here is the whole assertion.
   await page.waitForTimeout(1000);
   await expect(sheet, 'the sheet closed itself after opening').toHaveCount(1);
+});
+
+test('the amount field keeps focus while the sheet is open', async ({ page }) => {
+  await tapStarsPill(page);
+  const amount = page.locator('#portal-root input');
+  await amount.tap();
+  await expect(amount, 'tapping the field did not focus it').toBeFocused();
+
+  // The reported bug, and the reason it looked like a keyboard "opening and
+  // closing itself": a CLOSED Modal's effect called
+  // `document.activeElement.blur()`, and its deps carry the caller's inline
+  // `onClose`, so it re-ran on any parent render. Home re-renders once a second
+  // for the engine tick, so focus survived about 600ms. Waiting past several
+  // ticks is the whole assertion.
+  await page.waitForTimeout(3000);
+  await expect(amount, 'focus was stolen while the sheet was open').toBeFocused();
 });
 
 test('tapping the backdrop still closes the Stars sheet', async ({ page }) => {
