@@ -142,13 +142,26 @@ for (const { name, url } of DETAIL_PAGES) {
   });
 }
 
-for (const { from, to } of REDIRECTS) {
+for (const { from, to, status } of REDIRECTS) {
   test(`redirect survives the build: ${from} → ${to}`, async ({ page }) => {
     // Following the redirect is the point: a build-time render can answer 200
     // with a blank error shell, which only a check on the landing URL catches.
     const response = await page.goto(from, { waitUntil: 'load' });
-    expect(response?.status(), `HTTP status after ${from}`).toBeLessThan(400);
-    expect(new URL(page.url()).pathname, `where ${from} lands`).toBe(to);
+
+    if (status === undefined) {
+      expect(response?.status(), `HTTP status after ${from}`).toBeLessThan(400);
+    } else {
+      // An error status can be the right answer — what must not happen is the
+      // player being stranded on it. The landing check below is the real test.
+      expect(response?.status(), `HTTP status after ${from}`).toBe(status);
+    }
+
+    // Polled, not read once: a meta refresh fires after `load`, so the URL is
+    // still the dead one at this point. Reading it synchronously passed only
+    // for the platform redirect, which `goto` had already followed.
+    await expect
+      .poll(() => new URL(page.url()).pathname, { message: `where ${from} lands` })
+      .toBe(to);
     await expect
       .poll(async () => (await page.locator('body').innerText()).trim().length, {
         message: `${from} landed on a blank page`,

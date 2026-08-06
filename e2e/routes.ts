@@ -76,7 +76,21 @@ export const DETAIL_PAGES = [
  * `next.config.ts`, one in `global-not-found.ts`) and both are invisible to a
  * dev-server run — see `e2e-prod/`.
  */
-export const REDIRECTS = [
+export interface RedirectCase {
+  from: string;
+  to: string;
+  /**
+   * Status the FIRST response must carry. Omitted = anything below 400, which
+   * is what a platform redirect answers once followed. Spell it out only where
+   * an error status is the intended answer.
+   */
+  status?: number;
+}
+
+export const REDIRECTS: RedirectCase[] = [
   { from: '/engines', to: '/tickets' },
-  { from: '/no-such-screen-abc123', to: '/' },
+  // A truthful 404 is the product decision here, not a defect: the page keeps
+  // the honest status and carries the player Home by meta refresh, because a
+  // browser does not follow `Location:` on a 404. See `src/app/global-not-found.tsx`.
+  { from: '/no-such-screen-abc123', to: '/', status: 404 },
 ];
