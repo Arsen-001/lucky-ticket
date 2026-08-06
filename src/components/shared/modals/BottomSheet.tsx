@@ -1,11 +1,12 @@
 'use client';
 
-import { useEffect, type ReactNode } from 'react';
+import { useEffect, useRef, type ReactNode } from 'react';
 import { twMerge } from 'tailwind-merge';
 import { ClientPortal } from '@/components/shared/ClientPortal';
 import { useOverlayPresence } from '@/hooks/useOverlayPresence';
 import { useOverlayFocusLock } from '@/hooks/useOverlayFocusLock';
 import { useBackdropDismiss } from '@/hooks/useBackdropDismiss';
+import { noteDismissIntent, noteOverlayClose, noteOverlayOpen } from '@/lib/debug/overlay-probe';
 
 /** Matches the panel's `duration-300` slide. */
 const ANIMATION_MS = 300;
@@ -50,11 +51,33 @@ export function BottomSheet({
 
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
-      if (e.key === 'Escape' && open) onClose?.();
+      if (e.key === 'Escape' && open) {
+        noteDismissIntent('escape');
+        onClose?.();
+      }
     };
     if (open) window.addEventListener('keydown', onKey);
     return () => window.removeEventListener('keydown', onKey);
   }, [open, onClose]);
+
+  // Field probe (off unless switched on): records what closed this sheet when
+  // it closes right after opening. The cleanup fires on unmount too, which is
+  // the case a dismissal gesture cannot explain — see lib/debug/overlay-probe.
+  const probeLabel = label ?? 'sheet';
+  // Declared first on purpose: React runs cleanups in declaration order, so this
+  // one has already flagged the unmount by the time the probe effect below reads
+  // it. On a plain `open` change it does not run at all.
+  const unmounting = useRef(false);
+  useEffect(() => {
+    return () => {
+      unmounting.current = true;
+    };
+  }, []);
+  useEffect(() => {
+    if (!open) return;
+    noteOverlayOpen(probeLabel);
+    return () => noteOverlayClose(probeLabel, unmounting.current);
+  }, [open, probeLabel]);
 
   if (!mounted) return null;
 

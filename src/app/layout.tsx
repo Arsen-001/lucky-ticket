@@ -7,6 +7,7 @@ import { TonConnectProvider } from '@/providers/TonConnectProvider';
 import { Onboarding } from '@/components/onboarding/Onboarding';
 import { TournamentResultWatcher } from '@/components/pages/tabs/tournaments/TournamentResultWatcher';
 import { ToastViewport } from '@/components/shared/toast/ToastViewport';
+import { OverlayProbeBanner } from '@/components/shared/debug/OverlayProbeBanner';
 import { AppStatusOverlay } from '@/components/shared/status/AppStatusOverlay';
 import { FullscreenBrandBar } from '@/components/layout-elements/FullscreenBrandBar';
 import { AtmosphericBackground } from '@/components/shared/AtmosphericBackground';
@@ -167,6 +168,7 @@ export default async function RootLayout({ children }: ChildrenProps) {
                       <FullscreenBrandBar />
                       <ToastViewport />
                       <AppStatusOverlay />
+                      <OverlayProbeBanner />
                     </NavigationHistoryProvider>
                   </StoreProvider>
                 </PreLaunchGate>

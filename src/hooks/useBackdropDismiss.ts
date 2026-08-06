@@ -2,6 +2,7 @@
 
 import { useEffect, useRef } from 'react';
 import type { MouseEvent as ReactMouseEvent, PointerEvent as ReactPointerEvent } from 'react';
+import { noteDismissIntent } from '@/lib/debug/overlay-probe';
 
 /**
  * Tap-to-dismiss for an overlay backdrop that only fires on a real press.
@@ -44,9 +45,18 @@ export function useBackdropDismiss(visible: boolean, animationMs: number, onDism
       const pressed = pressedOnBackdrop.current;
       pressedOnBackdrop.current = false;
 
-      if (!onDismiss || !pressed) return;
-      if (event.target !== event.currentTarget) return;
-      if (performance.now() - openedAt.current < animationMs) return;
+      if (!onDismiss) return;
+
+      // A click the guard turns down is the interesting one in the field: it is
+      // the shape a stray tap-leftover has. Recorded either way so the probe can
+      // say which of the two happened — see lib/debug/overlay-probe.
+      const rejected =
+        !pressed ||
+        event.target !== event.currentTarget ||
+        performance.now() - openedAt.current < animationMs;
+
+      noteDismissIntent(rejected ? 'backdrop-blocked' : 'backdrop');
+      if (rejected) return;
 
       onDismiss();
     },
