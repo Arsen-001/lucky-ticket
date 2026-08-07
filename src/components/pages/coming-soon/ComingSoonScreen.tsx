@@ -77,9 +77,21 @@ export function ComingSoonScreen({ launchAt, session }: ComingSoonScreenProps) {
           />
         </h1>
 
-        <h2 className="animate-slide-in-bottom max-w-[20rem] text-balance text-lg font-extrabold leading-snug text-white">
+        {/* The single instruction for someone who just arrived, and the only
+            thing they can act on before launch — so it sits directly under the
+            logo, at headline size, with its own button attached rather than the
+            link living further down the page. */}
+        <div className="flex w-full flex-col items-center gap-4">
+          <h2 className="animate-slide-in-bottom max-w-[20rem] text-balance text-2xl font-extrabold leading-tight text-white">
+            {t('coming soon follow and wait')}
+          </h2>
+
+          <ComingSoonChannelLink className="animate-fade-in" />
+        </div>
+
+        <p className="animate-slide-in-bottom max-w-[20rem] text-balance text-lg font-extrabold leading-snug text-white">
           {t('coming soon earn now')}
-        </h2>
+        </p>
 
         {invite.available && (
           <ComingSoonGiftSteps
@@ -98,11 +110,6 @@ export function ComingSoonScreen({ launchAt, session }: ComingSoonScreenProps) {
         )}
 
         <LaunchCountdown targetDate={launchAt} className="animate-fade-in" />
-
-        {/* Directly under the timer: subscribing is what makes an invited friend
-            COUNT toward the gift, so it belongs where the promo is read — not
-            at the bottom of the page under the roster. */}
-        <ComingSoonChannelLink className="animate-fade-in" />
 
         <ComingSoonInviteSection
           invite={invite}

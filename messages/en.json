@@ -1195,6 +1195,7 @@
   "hours": "Hours",
   "minutes": "Minutes",
   "seconds": "Seconds",
+  "coming soon follow and wait": "Follow the channel and wait for the news",
   "coming soon earn now": "You can already earn before the game opens!",
   "coming soon gift steps hint": "{count, plural, =1 {Invite 1 more friend — and the bot sends you a gift} other {Invite # more friends — and the bot sends you a gift}}",
   "coming soon gift filed": "Every step done — your gift is being confirmed",
