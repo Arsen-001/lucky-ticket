@@ -36,12 +36,17 @@ export function ComingSoonChannelLink({ className }: ComingSoonChannelLinkProps)
       rel="noreferrer"
       onClick={handleClick}
       className={twMerge(
-        'flex-center gap-2 rounded-xl border border-white/12 bg-white/5 px-5 py-3 text-sm font-bold text-white transition-colors active:scale-99',
-        'hover:bg-surface-hover focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-white',
+        // The screen's primary action, so it is dressed as one: the app's own
+        // pink gradient rather than the ghost outline it used to wear, at the
+        // width of the headline above it. The glow is the same idiom a
+        // completed gift step uses. @see GiftStepNode
+        'bg-pink-gradient flex-center w-full max-w-[18rem] gap-2.5 rounded-2xl px-7 py-4 text-lg font-extrabold text-white',
+        'shadow-[0_0_28px_-6px_var(--color-electric-pink)] transition-transform active:scale-98',
+        'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white',
         className
       )}
     >
-      <Megaphone size={18} className="text-electric-pink" strokeWidth={2.2} />
+      <Megaphone size={22} strokeWidth={2.4} />
       {t('follow channel')}
     </a>
   );
