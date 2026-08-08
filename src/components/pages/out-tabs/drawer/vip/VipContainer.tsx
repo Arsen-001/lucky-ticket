@@ -15,7 +15,8 @@ import { GlobalConstants } from '@/constants/global.constants';
 import { useAppTranslations } from '@/hooks/useAppTranslations';
 import { useToast } from '@/hooks/useToast';
 import { QueryErrorState } from '@/components/shared/error/QueryErrorState';
-import { MarketStatusType } from '@/types/enums/market.enums';
+import { MarketPriceType, MarketStatusType } from '@/types/enums/market.enums';
+import type { MarketPrice } from '@/types/interfaces/market.interfaces';
 
 export function VipContainer() {
   const t = useAppTranslations();
@@ -34,9 +35,21 @@ export function VipContainer() {
 
   const vipStatus = market?.statuses.find(s => s.statusType === MarketStatusType.VIP);
   const privileges = vipStatus?.privileges ?? [];
-  const prices = isVIP
-    ? (vipStatus?.upgradePrices ?? vipStatus?.prices ?? [])
-    : (vipStatus?.prices ?? []);
+  // Every level has its own price (DOCS §7.4), so an upgrade must quote the row
+  // for the NEXT level — the flat `upgradePrices` is only the level-2 step and
+  // is kept as a fallback for payloads that predate the ladder. Same resolution
+  // order as the market card (`MarketStatusSection`); the two must not disagree.
+  const nextLevelPrice = isVIP
+    ? vipStatus?.levelPrices?.find(l => l.level === vipLevel + 1)
+    : undefined;
+  const prices: MarketPrice[] = nextLevelPrice
+    ? [
+        { type: MarketPriceType.LC, amount: nextLevelPrice.lc },
+        { type: MarketPriceType.TELEGRAM_STARS, amount: nextLevelPrice.ls },
+      ]
+    : isVIP
+      ? (vipStatus?.upgradePrices ?? vipStatus?.prices ?? [])
+      : (vipStatus?.prices ?? []);
   const primaryPrice = prices[0];
 
   const statusLabel = isVIP ? t('vip level', { level: vipLevel }) : t('inactive');

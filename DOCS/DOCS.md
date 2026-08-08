@@ -240,7 +240,7 @@ LS is the premium / real-money currency (see Section 19). It is **bought with re
 
 ### Connections
 
-LC connects market, tournaments, stakes, tasks, and progression. LS connects the Market premium rail, the Shop, the Wallet purchase paths, and engine premium actions (instant claim, capacity upgrade).
+LC connects market, tournaments, stakes, tasks, and progression. LS connects the Market premium rail, the Wallet purchase paths, and engine premium actions (instant claim, capacity upgrade).
 
 ---
 
@@ -290,21 +290,24 @@ All perk magnitudes live in `src/constants/global.constants.ts` and can be tuned
 
 #### VIP perks
 
-VIP is the high-tier permanent status; by default its values exceed Lucky Player at every category. **Every VIP perk is admin-tunable per level** (Admin → Настройки → Статусы) — engine speed, stake yield, tournament reward, tournament join-AP, **market discount %, daily ads cap, and per-tier ticket-send limits**, plus the per-level price. Defaults are uniform (the values below apply to every level), but an admin can make higher levels grant stronger perks. The market / referral / tasks sections keep only the NON-status values (base market prices, the flat referral %, default ads cap); the VIP/LP values moved to Статусы and the backend reads them from there (single source of truth, surfaced to the client via `me.statusPerks`).
+VIP is the high-tier permanent status. **Every VIP perk is admin-tunable per level** (Admin → Настройки → Статусы) — engine speed, stake yield, tournament reward, tournament join-AP, **market discount %, daily ads cap, per-tier ticket-send limits and bulk claim**, plus the per-level price. The market / referral / tasks sections keep only the NON-status values (base market prices, the flat referral %, default ads cap); the VIP/LP values moved to Статусы and the backend reads them from there (single source of truth, surfaced to the client via `me.statusPerks`).
 
-| Perk                            | Value                         | Source constant                                  |
-| :------------------------------ | :---------------------------- | :----------------------------------------------- |
-| Engine speed boost (additive)   | +25%                          | `vipEngineSpeedBoostPct`                         |
-| Stake LC yield boost            | +40%                          | `vipStakeYieldBoostPct`                          |
-| Stake fee volume discount       | doubled brackets (same as LP) | `appConfig.stakes.feeVolumeDiscount.luckyPlayer` |
-| Market discount on every item   | −20%                          | `vipMarketDiscountPct`                           |
-| Tournament LC reward boost      | +50%                          | `vipTournamentRewardBoostPct`                    |
-| Tournament join AP boost        | +100%                         | `vipTournamentJoinApBoostPct`                    |
-| Daily ads cap                   | 40                            | `vipWatchVideoDailyLimit`                        |
-| Higher ticket send daily limits | inherits LP table             | `ticketSendDailyLimits.luckyPlayer`              |
-| Send Platinum/Diamond tickets   | allowed                       | (same gate as LP)                                |
-| Profile badge                   | Animated VIP-level            | n/a (visual)                                     |
-| Dedicated support               | yes                           | n/a (operations)                                 |
+**VIP is a ramp, not a flat status.** The values below are the **Level 20 ceiling**; a VIP starts far under Lucky Player and climbs past it. The full per-level ladder — the actual live numbers — is in **§7.4**. The two milestones that matter: **Level 10** is where VIP draws level with Lucky Player on every percentage perk and takes over its "Claim all" capability _permanently_; **Level 20** is the table below. The code constants (`vipEngineSpeedBoostPct` etc.) are the flat fallback a fresh environment boots with; production runs the ladder from `statusConfig`.
+
+| Perk                            | Value at Level 20             | Level 1 · Level 10      | Source constant                                  |
+| :------------------------------ | :---------------------------- | :---------------------- | :----------------------------------------------- |
+| Engine speed boost (additive)   | +25%                          | +1% · +10%              | `vipEngineSpeedBoostPct`                         |
+| Stake LC yield boost            | +40%                          | +0.1% · +6%             | `vipStakeYieldBoostPct`                          |
+| Stake fee volume discount       | doubled brackets (same as LP) | same at every level     | `appConfig.stakes.feeVolumeDiscount.luckyPlayer` |
+| Market discount on every item   | −20%                          | −1% · −10%              | `vipMarketDiscountPct`                           |
+| Tournament LC reward boost      | +50%                          | none until L5 · +15%    | `vipTournamentRewardBoostPct`                    |
+| Tournament join AP boost        | +100%                         | none until L5 · +30%    | `vipTournamentJoinApBoostPct`                    |
+| Daily ads cap                   | 40                            | 12 · 22                 | `vipWatchVideoDailyLimit`                        |
+| Higher ticket send daily limits | 15/12/10/6/5 by tier          | LP table · 10/8/5/4/2   | `ticketSendDailyLimits.luckyPlayer`              |
+| Bulk "Claim all"                | yes                           | no · **unlocks at L10** | `bulkClaimEnabled` (LP-only in code defaults)    |
+| Send Platinum/Diamond tickets   | allowed                       | allowed at every level  | (same gate as LP)                                |
+| Profile badge                   | Animated VIP-level            | every level             | n/a (visual)                                     |
+| Dedicated support               | yes                           | every level             | n/a (operations)                                 |
 
 #### Stacking & self-discount rules
 
@@ -326,22 +329,49 @@ VIP can be purchased and upgraded with either **Lucky Coins (LC)** or **Lucky St
 
 VIP pricing is **per level and admin-tunable** (Admin → Настройки → Статусы). Each level 1…`maxLevel` has its own LC + LS price: **level 1 is the first unlock**, and **levels 2+ are the cost to upgrade to that level**. Both the price ceiling (`maxLevel`) and every per-level price are knobs.
 
-| Action            | Default cost           | Notes                                           |
-| :---------------- | :--------------------- | :---------------------------------------------- |
-| **First unlock**  | 20,000,000 LC / 500 LS | Level 1 — higher one-time barrier to entry      |
-| **Level upgrade** | 10,000,000 LC / 250 LS | Levels 2+ — flat by default, editable per level |
+**LC price = LS price × 20,000 at every level.** That is the same $-parity Lucky Player is priced at (`lcUsdRate` 0.000001 × 20,000 = `lsUsdRate` 0.02), so neither currency is the cheap path and a grinder and a payer buy the same level for the same value. Any edit to one side must move the other.
 
-> The catalog carries the full per-level ladder in `attrs.levelPrices`; the Mini App shows the price to reach the player's next level. The backend charges the exact per-level price server-side (`market.buyStatus`). Defaults reproduce the previous flat unlock + flat upgrade model, so nothing changes until an admin edits.
+#### The ladder (live values)
+
+|  Lv | Price          | Engine | Stake | Trn reward | Trn join AP | Market | Ads/day | Send B/S/G/P/D | Claim all |
+| --: | :------------- | -----: | ----: | ---------: | ----------: | -----: | ------: | :------------- | :-------- |
+|   1 | 250 ⭐ / 5.0M  |    +1% | +0.1% |          — |           — |    −1% |      12 | 5/4/3/2/1      | —         |
+|   2 | 50 ⭐ / 1.0M   |    +2% | +0.2% |          — |           — |    −2% |      13 | 6/5/3/2/1      | —         |
+|   3 | 60 ⭐ / 1.2M   |    +3% | +0.5% |          — |           — |    −3% |      14 | 6/5/3/2/1      | —         |
+|   4 | 70 ⭐ / 1.4M   |    +4% |   +1% |          — |           — |    −4% |      15 | 7/5/4/2/1      | —         |
+|   5 | 80 ⭐ / 1.6M   |    +5% | +1.5% |        +5% |        +10% |    −5% |      16 | 7/6/4/3/1      | —         |
+|   6 | 95 ⭐ / 1.9M   |    +6% |   +2% |        +7% |        +14% |    −6% |      17 | 8/6/4/3/1      | —         |
+|   7 | 110 ⭐ / 2.2M  |    +7% |   +3% |        +9% |        +18% |    −7% |      18 | 8/6/4/3/2      | —         |
+|   8 | 125 ⭐ / 2.5M  |    +8% |   +4% |       +11% |        +22% |    −8% |      19 | 9/7/5/3/2      | —         |
+|   9 | 145 ⭐ / 2.9M  |    +9% |   +5% |       +13% |        +26% |    −9% |      20 | 9/7/5/3/2      | —         |
+|  10 | 165 ⭐ / 3.3M  |   +10% |   +6% |       +15% |        +30% |   −10% |      22 | 10/8/5/4/2     | **yes**   |
+|  11 | 190 ⭐ / 3.8M  |   +11% |   +8% |       +18% |        +36% |   −11% |      24 | 10/8/6/4/2     | yes       |
+|  12 | 220 ⭐ / 4.4M  |   +12% |  +10% |       +21% |        +42% |   −12% |      26 | 11/9/6/4/2     | yes       |
+|  13 | 250 ⭐ / 5.0M  |   +14% |  +12% |       +24% |        +48% |   −13% |      28 | 11/9/6/4/3     | yes       |
+|  14 | 290 ⭐ / 5.8M  |   +15% |  +15% |       +27% |        +54% |   −14% |      30 | 12/10/7/5/3    | yes       |
+|  15 | 330 ⭐ / 6.6M  |   +17% |  +18% |       +30% |        +60% |   −15% |      32 | 12/10/7/5/3    | yes       |
+|  16 | 380 ⭐ / 7.6M  |   +18% |  +22% |       +34% |        +68% |   −16% |      34 | 13/10/7/5/3    | yes       |
+|  17 | 440 ⭐ / 8.8M  |   +20% |  +26% |       +38% |        +76% |   −17% |      36 | 13/11/8/5/3    | yes       |
+|  18 | 500 ⭐ / 10.0M |   +21% |  +30% |       +42% |        +84% |   −18% |      37 | 14/11/8/6/4    | yes       |
+|  19 | 575 ⭐ / 11.5M |   +23% |  +35% |       +46% |        +92% |   −19% |      38 | 14/12/9/6/4    | yes       |
+|  20 | 660 ⭐ / 13.2M |   +25% |  +40% |       +50% |       +100% |   −20% |      40 | 15/12/10/6/5   | yes       |
+
+**Reading the ladder.** Level 1 is a deliberately small perk behind a deliberately large unlock (250 ⭐) — it buys _permanence and a seat on the ladder_, not power. Level 2 restarts the price at 50 ⭐ and each step grows ~15% from there; the whole climb from nothing to Level 20 is **4,985 ⭐ (≈ $100) or 99,700,000 LC**, and reaching Level 10 is 1,150 ⭐. Every column is monotone — **no level ever takes a perk away from the level below it**, which is also the rule any future admin edit has to preserve.
+
+**Where it crosses Lucky Player.** Under 10 levels VIP is genuinely weaker than a 50 ⭐/week LP subscription, and that is the intent: LP is rented power, VIP is owned power. Engine speed and market discount draw level with LP at **Level 10**, stake yield at **Level 9**, ads at **Level 9**, and "Claim all" — LP's signature capability — transfers to VIP at **Level 10**. Below that a VIP+LP holder still resolves to the VIP row (higher tier wins, §7.3), so a low-level VIP who also subscribes to LP gets the _weaker_ numbers. That is a known, accepted consequence of "higher tier wins"; it is the strongest reason not to stall a player at Level 1–9.
+
+> The catalog carries the full ladder in `attrs.levelPrices`; the Mini App shows the price to reach the player's next level (both the market card and `/settings/vip`). The backend charges the exact per-level price server-side (`market.buyStatus`). The code defaults in `STATUS_CONFIG_DEFAULTS` remain the older flat unlock + flat upgrade model — a fresh environment boots flat, production runs the ladder above from `PlatformConfig.statusConfig`.
 
 #### Rules
 
-- The first purchase (unlock) costs more than the subsequent upgrades by default.
+- The first purchase (unlock) costs more than any single upgrade below Level 13.
 - VIP level is permanent: it cannot decrease, expire, or be lost through inactivity.
-- Higher VIP levels grant incrementally stronger game benefits when an admin sets per-level boosts (uniform by default), up to `maxLevel`.
+- Perks are **cumulative by level, never stacking with Lucky Player** — a VIP always resolves to their own row.
+- The ads cap must never drop below the free `watchVideoDailyLimit` (10): a VIP row of 4 would hand a paying player _fewer_ rewarded views than a free one. Level 1 starts at 12 for exactly this reason.
 
 #### VIP Benefits
 
-The full list of VIP perks (engine speed, stake yield, market discount, tournament boosts, ads cap, send limits, profile badge, dedicated support) and their concrete magnitudes are documented in **Section 7.3 — Status Benefits → VIP perks table**. The four game boosts are **admin-tunable per VIP level** (defaults uniform); price is per level; the other perks are shared across levels (their own admin sections). Stacking and self-discount rules from §7.3 apply.
+The perk ceiling and the LP comparison live in **Section 7.3 — Status Benefits → VIP perks table**; the per-level numbers are the ladder above. Stacking and self-discount rules from §7.3 apply.
 
 ### Connections
 
@@ -456,7 +486,8 @@ This claim-gates-production rule applies per engine: each engine independently w
 
 Users may pay **Lucky Stars (LS)** to receive an engine's next ticket immediately, skipping the remaining wait time of the current production cycle. After an instant claim, the engine begins its next cycle just as it would after a normal claim.
 
-- **Acquisition:** Available directly from the Tickets / Ticket Details page on any engine that is currently mid-cycle.
+- **Acquisition:** Available on any engine that is currently mid-cycle — from the Home engine slider, the Tickets page and the Engine Details page. It is **one tap**: the payment, the collection and the next cycle's start happen in a single action, with a confirm step showing the Star price.
+- **Counts as a claim:** the tickets land in the tier balance and advance the ticket-collection tasks exactly like a free claim does. Like a free claim, it awards **no AP** (Section 5.3).
 - **Cost formula:** **1 Lucky Star per remaining hour of the cycle, minimum 1 Star** — `cost = max(1, ceil(remainingSeconds / 3600))`. So skipping a 30-min remainder costs 1 ★, a 90-min remainder costs 2 ★, a 4h05m remainder costs 5 ★. The cost is recomputed live as the cycle elapses, getting cheaper the closer the engine is to finishing on its own.
 - **Scope:** Targets a specific engine — only that engine's current cycle is fulfilled instantly; other owned engines continue their normal cycles.
 - **Stacking:** Can be combined with active Speed Boosts and Capacity Upgrades — instant claim delivers the full per-cycle output (e.g., 2 tickets if a 2× Capacity Upgrade is active).
@@ -564,7 +595,7 @@ A Capacity Upgrade increases an engine's **per-cycle output** — instead of pro
 
 **Example:** A Bronze engine that normally produces 1 ticket every 2 hours, after 3 capacity taps produces 4 tickets per cycle (1 + 3) — a bigger batch without changing the cycle (until the 900 s/ticket floor stretches it — §9.7).
 
-- **Acquisition:** Purchased exclusively with **Lucky Stars (LS)** in the LuckyTicket365 Shop (see Section 19.3).
+- **Acquisition:** Purchased exclusively with **Lucky Stars (LS)** on the engine itself (the engine cube / engine details screen — §10.2). It is not a Market catalog item.
 - **Scope:** Applied to a specific engine the user owns.
 - **Tiers:** Higher-tier capacity upgrades may yield 3 or more tickets per cycle (defined by product team).
 - **Duration:** Defined by product team (permanent or time-limited per upgrade tier).
@@ -627,7 +658,7 @@ Every chip is minted through the inventory's **Mint modal** for a flat, tier-spe
 
 The price applies to every mint equally — the first Bronze Speed Chip and the fifth cost the same 10 Bronze Speed shards. A freshly minted chip always starts at **Lvl 1** (+0.5%). This flat pricing (mirrored by the backend and the frontend constant `CHIP_MINT_SHARD_COST`) is the only mint cost; the previously documented **Chip Builder** item is removed from the design.
 
-**Dead-end redirects.** The UI never leaves the user stranded on an empty chip flow: when an engine's chip-slot picker has no eligible chips, it shows the matching shard balance vs. the mint price and a CTA — to the **Inventory** mint modal if the user already holds enough matching shards, otherwise straight to the **Shop's Shards tab**. Likewise, the Mint modal itself swaps its Mint button for a **Buy shards** shortcut (→ Shop Shards tab) whenever the selected type/tier combination lacks shards.
+**Dead-end redirects.** The UI never leaves the user stranded on an empty chip flow: when an engine's chip-slot picker has no eligible chips, it shows the matching shard balance vs. the mint price and a CTA — to the **Inventory** mint modal if the user already holds enough matching shards, otherwise straight to the **Market's Shards tab**. Likewise, the Mint modal itself swaps its Mint button for a **Buy shards** shortcut (→ Market Shards tab) whenever the selected type/tier combination lacks shards.
 
 #### Chip Shards — How Levels Are Earned
 
@@ -716,18 +747,18 @@ Chip effects stack multiplicatively with the Speed Boost (10.1) and Capacity Upg
 
 ### 10.5 Boost Inventory
 
-The **Boost Inventory** is the user's storage for every owned-but-not-yet-equipped boost item. Anything acquired through the Market, the LuckyTicket365 Shop, tournaments (chips), tasks, or stake bonuses lands in the inventory until the user equips it onto an engine.
+The **Boost Inventory** is the user's storage for every owned-but-not-yet-equipped boost item. Anything acquired through the Market, tournaments (chips), tasks, or stake bonuses lands in the inventory until the user equips it onto an engine.
 
 #### What the Inventory Holds
 
 The inventory is a unified view across all boost categories defined in this section:
 
 - **Speed Boosts** (Section 10.1) — from the engine's speed level (LS) or status-granted.
-- **Capacity Upgrades** (Section 10.2) — purchased with Lucky Stars in the Shop.
+- **Capacity Upgrades** (Section 10.2) — purchased with Lucky Stars on the engine itself, not in the Market.
 - **Speed Chips** and **Capacity Chips** (Section 10.4) — built up from tournament-won shards.
 - **Chip Shards** (Section 10.4) — uncommitted fragments waiting to be spent on a level-up.
 
-Each inventory entry shows: type, current level (for chips) or remaining count (for shards) or magnitude (for Market/Shop boosts), and **lifetime state**.
+Each inventory entry shows: type, current level (for chips) or remaining count (for shards) or magnitude (for Market boosts), and **lifetime state**.
 
 #### Shards in the Inventory
 
@@ -801,9 +832,9 @@ A higher-quality booster cannot be downgraded onto a lower-tier engine, and a lo
 
 #### Acquisition
 
-Boosters are obtainable through three independent channels:
+Boosters are obtainable through two independent channels:
 
-- **Market / Shop purchase** — bought with LC (lower tiers) or Lucky Stars (higher tiers, durations 24/48h). Exact pricing per quality and duration is product-defined.
+- ~~**Market purchase**~~ — **retired.** The Market booster listing (`MarketItemCategory.BOOSTER`) was removed from the seed, the catalog response and the FE contract (§19.3); boosters are no longer sold anywhere. They remain an inventory item, earned only from the two channels below.
 - **Tasks** — awarded as drops from completing daily / weekly / monthly tasks (Section 12). Higher-tier task chains drop higher-tier boosters.
 - **Tournaments** — included in the prize pool of every tournament (Section 11) alongside LC, tickets, and chip shards. The tournament's tier dictates the booster's quality (Bronze tournament → Bronze booster).
 
@@ -1250,7 +1281,7 @@ The one-time tab holds a curated catalog of **~120 tasks** whose reward budget i
 | Invite friends             | 1/5/10/25/50/100           | referral joins       |
 | Leaderboard rank           | top 1000/500/100/50/10/1   | all-time board only  |
 | Purchase Stars             | 100/250/500/1k/2.5k/5k     | cashback chain, 0 AP |
-| VIP level                  | 1–10                       | cashback chain, 0 AP |
+| VIP level                  | 1–20                       | cashback chain, 0 AP |
 
 Plus ~35 single achievements: onboarding (email, username, 2FA, avatar, wallet, deposit), first steps, engine mastery (tier unlocks in ascending order, parallel producer, boosts), tournament prowess (project/partner wins, all-tier winner, Platinum/Diamond winner), referrals, wallet actions, login streaks (7/30/90/365), and the tier journey.
 
@@ -1306,7 +1337,7 @@ The Market is the central hub for purchasing improvements, resources, and status
 - **Cosmetics:** avatars, badges, themes (Section 16.1) — not tier-gated.
 - Premium items (pre-built chips, chip builders, passes) are defined in the model but **not currently surfaced** — see Section 19.3 for the implemented-vs-deferred category list. (The legacy LC market **Speed Boost** was retired — engine speed is deepened via the engine's speed level, §10.2.)
 
-> Engine **Capacity Upgrades** are not sold here — they are exclusive to the LuckyTicket365 Shop, paid only with LS (Section 19.3).
+> Engine **Capacity Upgrades** are not sold here — they are bought on the engine itself (engine cube / details, §10.2), paid only with LS.
 
 ### 14.1 AP Tier Gate
 
@@ -1485,7 +1516,8 @@ Settings provide control, security, and personalization for the user's account.
 - **Change Username:** Update the public display name. Available from Settings and directly on the own-profile screen (pencil next to the name). 3–32 characters, letters/digits/dots/dashes/underscores only, must be unique; the same rule applies to registration and admin edits.
 - **Change Avatar:** Pick a profile picture from the user's owned avatar inventory. The picker lists every avatar the user owns — both the default free avatars and any paid avatars purchased in the Market. New avatars are acquired exclusively through the Market (see Section 16.1).
 - **Notification Preferences:** Per-channel (Email / Telegram bot) toggles for which notification categories the user receives. See Section 16.2.
-- **Sign Out:** Securely log out of the application.
+
+There is **no Sign Out action anywhere in the app** — not in Settings, not on the own-profile screen, not in the drawer. The session is established by Telegram `initData` on every launch, so signing out only breaks the current session and the player cannot choose a different account anyway. The `logout` mutation still exists in `src/api/auth.api.ts` (it clears local tokens) but nothing calls it.
 
 ### 16.1 Avatars — Free & Paid Tiers
 
@@ -1705,7 +1737,7 @@ The Profile page is built to run inside a **Telegram WebApp** when available, wi
 
 1. **Hero Header**
    - Large **avatar** with an **animated rotating gradient ring** around it. Ring color reflects the user's current status (Verified / Lucky Player / VIP). Ring fill represents **progress to the next Activity Points threshold**.
-   - Cover **banner image** at the top of the page (cosmetic; customizable via the LuckyTicket365 Shop).
+   - Cover **banner image** at the top of the page (cosmetic; customizable via the Market). _Banners are not a surfaced Market category today — see §19.3 deferred list._
    - **Username** rendered with a **multi-status shine cycle**: the username's glow effect cycles through styles representing every status the user currently holds. Example: a user with Verified + Lucky Player + VIP cycles through Verified-blue glow → Lucky Player-purple glow → VIP-holographic glow (~2s per phase, looped). A user with a single status displays only that one effect.
    - **Status badges** displayed beside the username (Verified / Lucky Player / VIP X).
    - **Decorative badge collage** — three semi-transparent badge silhouettes drift slowly behind the avatar/name. The three slots are **user-selectable**, similar to showcase pinning: the user actively picks which badges appear in the background. Empty slots simply do not render.
@@ -1740,7 +1772,7 @@ When viewing one's own profile, the following actions are available:
 
 - **Edit avatar** — opens the avatar picker. The picker is also reachable from Settings (Section 16). New avatars are acquired in the Market; paid avatars carry a bound boost (see Section 16.1).
 - **Edit username** — routes to Settings (see Section 16).
-- **Change cover banner** — selects from owned banners. Premium banners are purchased in the Shop with Lucky Stars.
+- **Change cover banner** — selects from owned banners. Premium banners are purchased in the Market with Lucky Stars (not a surfaced category today — §19.3).
 - **Pin / Replace / Unpin badges** — managed via the showcase long-press menu (see Section 17.4.7).
 - **Pin / Replace decorative collage badges** — same long-press menu pattern, but on the three background-collage slots in the hero header.
 - **Arrange banner icons** — drag the decorative banner icons (crown / star / gem) to reposition them on the cover banner; positions save automatically and are shown publicly. Icons cannot be placed over the avatar (see Section 17.3.1a).
@@ -2071,7 +2103,7 @@ Stakes connect the LC currency system (velocity sink + APR faucet), the AP tier 
 
 ### Purpose
 
-**Lucky Stars (LS)** are LuckyTicket365's secondary internal currency, designed for premium upgrades and access to the exclusive LuckyTicket365 Shop. They run alongside LC and bridge into the broader economy via Telegram Stars and TON. Lucky Stars are the primary monetization currency: most premium in-game purchases are paid in LS rather than LC.
+**Lucky Stars (LS)** are LuckyTicket365's secondary internal currency, designed for premium upgrades and the Market's premium rail. They run alongside LC and bridge into the broader economy via Telegram Stars and TON. Lucky Stars are the primary monetization currency: most premium in-game purchases are paid in LS rather than LC.
 
 ### Description
 
@@ -2079,7 +2111,7 @@ Lucky Stars are a LuckyTicket365 internal currency, stored in the user's app bal
 
 1. **Earn** Lucky Stars through platform activity — stakes, tasks, friend invitations.
 2. **Buy** Lucky Stars with Telegram Stars (XTR) at a fixed 1:1 rate, or with TON (with a volume bonus on larger packages).
-3. **Spend** Lucky Stars in the LuckyTicket365 Shop.
+3. **Spend** Lucky Stars in the Market, and on the engine's premium actions (instant claim, speed / capacity levels).
 
 Lucky Stars are conceptually distinct from **Telegram Stars (XTR)** — Telegram's native virtual currency. LuckyTicket365 integrates Telegram Stars only as a _purchase method_ for Lucky Stars; Telegram Stars themselves are not held in the user's app balance.
 
@@ -2163,7 +2195,7 @@ In addition to earning, users may buy Lucky Stars from the Wallet page (see Sect
 
 ### 19.3 Spending Lucky Stars — The Mega Market
 
-The Market (Mega Market) is the unified shop. **All purchases are paid in either Lucky Coin (LC) or Lucky Stars (LS) — no fiat / USDT / TON.** Items that already _grant_ Lucky Stars (bundles containing stars) are LC-only — users cannot pay stars to receive stars.
+The Market (Mega Market) is the single storefront — there is no separate "Shop" screen; the two names meant the same thing and only "Market" is used now (route `/market`, tab «Маркет»). **All purchases are paid in either Lucky Coin (LC) or Lucky Stars (LS) — no fiat / USDT / TON.** Items that already _grant_ Lucky Stars (bundles containing stars) are LC-only — users cannot pay stars to receive stars.
 
 The Market opens with a **Hero card** showing the current featured deal (with countdown if limited) and a horizontal **filter chip strip**. The **implemented** categories, in priority order:
 
@@ -2223,7 +2255,7 @@ LuckyTicket365 integrates the **Telegram Stars** purchase flow via the **Telegra
 
 ### Connections
 
-Lucky Stars connect: the Stakes system, Task system, Invite Friends system, Engine system (Capacity Upgrades and Instant Claims), the LuckyTicket365 Shop, and the Wallet (Telegram Stars and TON purchase paths). Telegram Stars (XTR) and TON serve as bridges between external value and the LuckyTicket365 internal economy.
+Lucky Stars connect: the Stakes system, Task system, Invite Friends system, Engine system (Capacity Upgrades and Instant Claims), the Market, and the Wallet (Telegram Stars and TON purchase paths). Telegram Stars (XTR) and TON serve as bridges between external value and the LuckyTicket365 internal economy.
 
 ---
 

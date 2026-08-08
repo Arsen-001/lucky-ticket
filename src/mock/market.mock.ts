@@ -416,24 +416,24 @@ export const marketMock: MarketData = {
       name: 'VIP Status',
       statusType: MarketStatusType.VIP,
       prices: [
-        { type: MarketPriceType.LC, amount: 20_000_000 },
-        { type: MarketPriceType.TELEGRAM_STARS, amount: 500 },
-      ],
-      upgradePrices: [
-        { type: MarketPriceType.LC, amount: 10_000_000 },
+        { type: MarketPriceType.LC, amount: 5_000_000 },
         { type: MarketPriceType.TELEGRAM_STARS, amount: 250 },
       ],
+      // Back-compat fallback only (clients that predate `levelPrices`): the
+      // level-2 step. Everything current reads the ladder below.
+      upgradePrices: [
+        { type: MarketPriceType.LC, amount: 1_000_000 },
+        { type: MarketPriceType.TELEGRAM_STARS, amount: 50 },
+      ],
       maxLevel: 20,
-      // Per-level price ladder (mirrors the backend STATUS_CONFIG_DEFAULTS): L1 =
-      // first unlock, L2+ = the upgrade to reach that level.
-      levelPrices: Array.from({ length: 20 }, (_, i) => {
-        const level = i + 1;
-        return {
-          level,
-          lc: level === 1 ? 20_000_000 : 10_000_000,
-          ls: level === 1 ? 500 : 250,
-        };
-      }),
+      // Per-level price ladder (mirrors the live `statusConfig` on prod): L1 =
+      // first unlock, L2+ = the upgrade to reach that level. LC is pinned to
+      // LS × 20,000 — the same $-parity Lucky Player is priced at, so neither
+      // currency is the cheap path (DOCS §7.4).
+      levelPrices: [
+        250, 50, 60, 70, 80, 95, 110, 125, 145, 165, 190, 220, 250, 290, 330, 380, 440, 500, 575,
+        660,
+      ].map((ls, i) => ({ level: i + 1, lc: ls * 20_000, ls })),
       privileges: [
         'vip engine speed boost',
         'vip stake yield boost',
