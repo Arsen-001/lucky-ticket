@@ -1,0 +1,117 @@
+import { test, expect, type Page } from '@playwright/test';
+import { STATIC_ROUTES } from './routes';
+
+/**
+ * Two things that are invisible in review and invisible on screen, so they only
+ * stay fixed if a machine keeps checking them:
+ *
+ * 1. **Every control says what it is.** An icon-only button with no
+ *    `aria-label` is announced as "button" and nothing else. This is the same
+ *    class of defect as the 39 unnamed dialogs (`tests/modal-label.test.ts`) —
+ *    that one is a source sweep, this one catches what only exists at runtime
+ *    (a name coming from data, an icon rendered by a shared component).
+ *
+ * 2. **`tap-target` still reaches 44px.** The utility is an absolutely
+ *    positioned `::after`, and it dies silently in two ways: an ancestor that
+ *    clips with `overflow: hidden`, or a layer painted over it (that is exactly
+ *    how the profile banner collage was eating the preview/share buttons). Both
+ *    leave the markup looking correct.
+ */
+
+/**
+ * A fresh mock account greets several screens with an auto-surfaced dialog
+ * (tournament result, reward claim). Its backdrop owns every point on the
+ * screen, so any hit test taken through it measures the backdrop instead.
+ */
+async function dismissAutoDialogs(page: Page) {
+  for (let i = 0; i < 5; i++) {
+    const dialog = page.locator('[role="dialog"]').first();
+    if (!(await dialog.isVisible().catch(() => false))) return;
+    const buttons = dialog.locator('button');
+    const count = await buttons.count();
+    if (count === 0) {
+      await page.keyboard.press('Escape');
+    } else {
+      await buttons
+        .nth(count - 1)
+        .click({ timeout: 5000 })
+        .catch(() => {});
+    }
+    await page.waitForTimeout(500);
+  }
+}
+
+async function openScreen(page: Page, route: string) {
+  await page.goto(route, { waitUntil: 'domcontentloaded' });
+  await expect(page.getByTestId('app-shell')).toBeAttached({ timeout: 20_000 });
+  await page.waitForTimeout(1500);
+  await dismissAutoDialogs(page);
+}
+
+for (const route of STATIC_ROUTES) {
+  test(`every control on ${route} says what it is`, async ({ page }) => {
+    await openScreen(page, route);
+
+    const unnamed = await page.evaluate(() => {
+      const nodes = document.querySelectorAll('button, a[href], [role="button"]');
+      return [...nodes]
+        .filter(el => {
+          const style = getComputedStyle(el);
+          if (style.display === 'none' || style.visibility === 'hidden') return false;
+          const rect = el.getBoundingClientRect();
+          if (rect.width === 0 || rect.height === 0) return false;
+          const named =
+            (el.textContent ?? '').trim() ||
+            el.getAttribute('aria-label') ||
+            el.getAttribute('title') ||
+            el.getAttribute('aria-labelledby');
+          return !named;
+        })
+        .map(el => {
+          const icon = el.querySelector('svg')?.getAttribute('class') ?? '';
+          return `<${el.tagName.toLowerCase()} class="${String(el.className).slice(0, 60)}"> icon="${icon}"`;
+        });
+    });
+
+    expect(unnamed, `controls with no accessible name on ${route}`).toEqual([]);
+  });
+
+  test(`tap-target controls on ${route} own their 44px zone`, async ({ page }) => {
+    await openScreen(page, route);
+
+    const short = await page.evaluate(() => {
+      // 44/2 minus a pixel, so every sample sits inside the required square.
+      const REACH = 21;
+      const owns = (el: Element, hit: Element | null) =>
+        // An ancestor swallowing the point is NOT the control owning it.
+        !!hit && (hit === el || el.contains(hit));
+
+      return [...document.querySelectorAll('.tap-target')]
+        .filter(el => {
+          const rect = el.getBoundingClientRect();
+          return rect.width > 0 && rect.top >= 0 && rect.bottom <= window.innerHeight;
+        })
+        .map(el => {
+          const rect = el.getBoundingClientRect();
+          const cx = rect.left + rect.width / 2;
+          const cy = rect.top + rect.height / 2;
+          const points: Array<[number, number]> = [
+            [cx, cy],
+            [cx - REACH, cy],
+            [cx + REACH, cy],
+            [cx, cy - REACH],
+            [cx, cy + REACH],
+          ];
+          const missed = points.filter(([x, y]) => !owns(el, document.elementFromPoint(x, y)));
+          return {
+            who: el.getAttribute('aria-label') ?? (el.textContent ?? '').trim().slice(0, 20),
+            missed: missed.length,
+          };
+        })
+        .filter(result => result.missed > 0)
+        .map(result => `${result.who} (${result.missed} of 5 sample points lost)`);
+    });
+
+    expect(short, `tap-target hit zones swallowed on ${route}`).toEqual([]);
+  });
+}

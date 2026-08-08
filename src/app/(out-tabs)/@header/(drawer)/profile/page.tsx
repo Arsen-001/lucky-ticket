@@ -14,7 +14,11 @@ export default function ProfileHeader() {
   return (
     <PageHeader
       title={t('profile')}
-      extraButtonProps={{ icon: <UserRoundPen />, onClick: handleEditClick }}
+      extraButtonProps={{
+        icon: <UserRoundPen />,
+        onClick: handleEditClick,
+        'aria-label': t('settings'),
+      }}
     />
   );
 }

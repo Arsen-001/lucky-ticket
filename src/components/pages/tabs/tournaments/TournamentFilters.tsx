@@ -71,6 +71,7 @@ export function TournamentFilters({
               suffix={
                 <Button
                   variant="transparent"
+                  aria-label={t('close')}
                   onClick={() => {
                     setIsSearchOpen(false);
                     onSearchChange('');
@@ -85,6 +86,7 @@ export function TournamentFilters({
         ) : (
           <Button
             variant="transparent"
+            aria-label={t('search')}
             className="p-2 w-10 h-10 flex-center"
             onClick={() => setIsSearchOpen(true)}
           >
