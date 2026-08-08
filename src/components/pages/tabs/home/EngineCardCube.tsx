@@ -20,6 +20,7 @@ import {
 } from '@/utils/global/ticket-engine.utils';
 import type { InventoryChipType } from '@/types/interfaces/inventory.interfaces';
 import { EngineCubeBackFace } from './EngineCubeBackFace';
+import { EngineCubeFacePips } from './EngineCubeFacePips';
 import { EngineCubeSlot } from './EngineCubeSlot';
 import { displayNameOf } from '@/utils/global/user.utils';
 import { EngineCubeStatsFace } from './EngineCubeStatsFace';
@@ -28,6 +29,15 @@ import '@/styles/components/engine-card-cube.css';
 
 const SWIPE_INTENT_PX = 8;
 const DRAG_DEGREES_PER_PX = 0.5;
+
+/**
+ * The one-shot teaser: how far the cube tips its top toward the player, and
+ * when. Big enough to expose a slice of the top face (so it reads as a solid
+ * that turns, not a card that wobbled), small enough that nothing on the front
+ * face becomes unreadable. The easing is the cube's own CSS transition.
+ */
+const NUDGE_DEGREES = 16;
+const NUDGE_STEPS_MS = [900, 1450] as const;
 
 export interface EngineCardCubeProps extends EngineCardProps {
   cubeClassName?: string;
@@ -38,10 +48,22 @@ export interface EngineCardCubeProps extends EngineCardProps {
     category: 'chip' | 'booster';
     type: InventoryChipType;
   } | null;
+  /** Plays the one-shot "this turns" teaser and pulses the face rail with it. */
+  showRotateHint?: boolean;
+  /** Fired the moment the player takes the cube into a real drag. */
+  onRotate?: () => void;
 }
 
 function EngineCardCubeImpl(props: EngineCardCubeProps) {
-  const { cubeClassName, onSlotPick, onChipUnequip, pendingSlot, ...engineCardProps } = props;
+  const {
+    cubeClassName,
+    onSlotPick,
+    onChipUnequip,
+    pendingSlot,
+    showRotateHint = false,
+    onRotate,
+    ...engineCardProps
+  } = props;
   const isSlotPending = (category: 'chip' | 'booster', type: InventoryChipType) =>
     !!pendingSlot &&
     pendingSlot.engineId === props.engine.id &&
@@ -148,8 +170,28 @@ function EngineCardCubeImpl(props: EngineCardCubeProps) {
     locked: boolean;
   } | null>(null);
   const [isDragging, setIsDragging] = useState(false);
+  const [nudge, setNudge] = useState(0);
   const cubeRef = useRef<HTMLDivElement>(null);
   const touchStart = useRef<{ x: number; y: number } | null>(null);
+
+  // The cube tips its top toward the player and springs back — once. Nothing
+  // else on this screen moves on its own, so the motion is what actually gets
+  // noticed — the face rail then explains what it meant. Clearing the timers on
+  // teardown is what stops it the instant the player grabs the cube, since
+  // `showRotateHint` drops on the first drag.
+  useEffect(() => {
+    if (!showRotateHint) {
+      setNudge(0);
+      return;
+    }
+    const timers = NUDGE_STEPS_MS.map((delay, step) =>
+      setTimeout(() => setNudge(step % 2 === 0 ? NUDGE_DEGREES : 0), delay)
+    );
+    return () => {
+      timers.forEach(clearTimeout);
+      setNudge(0);
+    };
+  }, [showRotateHint]);
 
   // iOS (Telegram WKWebView) ignores `touch-action: pan-x` and starts a native
   // scroll (horizontal slider pan or vertical page rubber-band) on vertical
@@ -197,6 +239,8 @@ function EngineCardCubeImpl(props: EngineCardCubeProps) {
       if (Math.abs(dy) < SWIPE_INTENT_PX) return;
       dragState.current.locked = true;
       setIsDragging(true);
+      // The player has the cube in hand — the lesson landed, retire the hint.
+      onRotate?.();
       try {
         e.currentTarget.setPointerCapture(e.pointerId);
       } catch {
@@ -222,7 +266,10 @@ function EngineCardCubeImpl(props: EngineCardCubeProps) {
     setIsDragging(false);
   };
 
-  const liveRotation = rotation + dragDelta * DRAG_DEGREES_PER_PX;
+  // `nudge` is pure decoration and never survives into `rotation` — the snap in
+  // `finishDrag()` deliberately reads the drag only, so a teaser that happens to
+  // be mid-swing can't leave the cube resting off-face.
+  const liveRotation = rotation + dragDelta * DRAG_DEGREES_PER_PX + nudge;
 
   return (
     // The outer box is the cube's footprint on this viewport; the inner one is
@@ -333,6 +380,8 @@ function EngineCardCubeImpl(props: EngineCardCubeProps) {
           </div>
         </div>
       </div>
+
+      <EngineCubeFacePips rotation={liveRotation} accent={tierAccent} hinting={showRotateHint} />
     </div>
   );
 }
@@ -355,5 +404,6 @@ export const EngineCardCube = memo(
     prev.tourAnchor === next.tourAnchor &&
     prev.elapsedSeconds === next.elapsedSeconds &&
     prev.pendingSlot === next.pendingSlot &&
+    prev.showRotateHint === next.showRotateHint &&
     prev.cubeClassName === next.cubeClassName
 );

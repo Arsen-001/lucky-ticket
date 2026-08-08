@@ -47,6 +47,7 @@ import {
   promoteEngineIfMaxed,
 } from '@/utils/global/ticket-engine.utils';
 import { useEngineConfig } from '@/hooks/useEngineConfig';
+import { useEngineRotateHint } from '@/hooks/useEngineRotateHint';
 import { useSkipUpgradePrompt } from '@/hooks/useSkipUpgradePrompt';
 import { speedUpgradeLsCost, capacityUpgradeLsCost } from '@/utils/global/economy.utils';
 import type { ClassNameProps } from '@/types/interfaces/component.interfcaes';
@@ -124,6 +125,9 @@ export function HomeEnginesSlider({ className }: ClassNameProps) {
   // upgrades immediately (stars top-up flow still interrupts when balance is
   // short). The profile settings row can turn the question back on.
   const [skipUpgradePrompt, toggleSkipUpgradePrompt] = useSkipUpgradePrompt();
+  // Owned here, not per cube, so the "this turns" teaser plays on the ACTIVE
+  // engine only — twenty cubes nudging at once would read as a glitch.
+  const [rotateHintActive, dismissRotateHint] = useEngineRotateHint();
   const [pendingPick, setPendingPick] = useState<{
     engineId: string;
     category: 'chip' | 'booster';
@@ -545,6 +549,8 @@ export function HomeEnginesSlider({ className }: ClassNameProps) {
                 tier={tier}
                 index={index}
                 tourAnchor={isActive}
+                showRotateHint={isActive && rotateHintActive}
+                onRotate={dismissRotateHint}
                 elapsedSeconds={elapsedByEngine[engine.id] ?? 0}
                 onClaim={handleClaim}
                 onInstantClaim={handleInstantClaim}

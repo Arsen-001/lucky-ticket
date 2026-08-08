@@ -1,0 +1,82 @@
+/* A scrollbar-shaped rail down the cube's right edge: one mark per face, the
+   current one grown and painted in the tier colour.
+
+   It borrows the shape of a scrollbar on purpose — that silhouette already
+   means "there is more of this, along THIS axis" in every app on the phone, so
+   the affordance needs no words and no translation keys. It is the vertical
+   twin of the dot row under the slider, which teaches the horizontal axis.
+
+   Sits on `.engine-cube-viewport` (the cube's un-scaled footprint), NOT inside
+   `.engine-cube-scaled` — the rail must keep its own pixel size instead of
+   being shrunk with the 300px design square, and it must stay out of the 3D
+   `preserve-3d` context so it never rotates with the faces.
+
+   It hangs OUTSIDE the card rather than on it. All four faces run their content
+   to the padding on the right — measured, not assumed: on the card it covered
+   the claim CTA on the front, "T/H" on the passport, the +15%/+50% column on the
+   stats face and a chip tile on the slots face. There is no band that is clear
+   on all four, so the rail lives in the slide gutter, where nothing can ever
+   grow under it. The couple of pixels it leans over belong to the neighbouring
+   cube, which is dimmed to 30% and sits below the active slide's z-index. */
+.engine-cube-face-pips {
+  position: absolute;
+  top: 50%;
+  right: -9px;
+  z-index: 5;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  padding: 4px 3px;
+  border-radius: 999px;
+  background: rgba(12, 10, 24, 0.55);
+  transform: translateY(-50%);
+  pointer-events: none;
+}
+
+.engine-cube-face-pip {
+  width: 3px;
+  height: 7px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.32);
+  transition:
+    height 260ms cubic-bezier(0.22, 1, 0.36, 1),
+    background 260ms ease;
+}
+
+.engine-cube-face-pip--active {
+  height: 16px;
+}
+
+/* One pulse, timed to ride along with the cube's single tip-and-return teaser
+   (`NUDGE_STEPS_MS` in `EngineCardCube`), so the two read as one gesture: the
+   cube turns, the rail that reports the turn blinks with it. Plays once per
+   visit until the player rotates a cube for good (see `useEngineRotateHint`).
+
+   The pulse dims and comes back rather than brightening: the rail already sits
+   at full opacity, so a 0.5 → 1 breathe would have to snap it dark on the first
+   frame and again on every repeat. */
+.engine-cube-face-pips--hinting {
+  animation: engine-cube-face-pips-breathe 1.2s ease-in-out 900ms 1;
+}
+
+@keyframes engine-cube-face-pips-breathe {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.45;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .engine-cube-face-pips--hinting {
+    animation: none;
+    opacity: 1;
+  }
+
+  .engine-cube-face-pip {
+    transition: none;
+  }
+}
