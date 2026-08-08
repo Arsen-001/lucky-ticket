@@ -1,0 +1,53 @@
+/* The portrait-only wall — see PortraitOnlyGate / usePortraitOnly.
+
+   Deliberately pure CSS rather than a `matchMedia` listener in React: the rule
+   has to hold on the FIRST paint (an app opened sideways must never flash a
+   sideways screen) and on every rotation, and a media query does both with no
+   render, no hydration mismatch and nothing to forget to unsubscribe.
+
+   The gate is `display: none` by default, so on every upright screen this file
+   costs one unmatched selector and nothing else. */
+
+.portrait-gate {
+  display: none;
+  /* A full-viewport layer in its own right, not a wrapper around one: its only
+     child is `position: fixed`, so a plain block box would compute to zero
+     height — present in the DOM, at the right z-index, and still "not visible"
+     to a screen reader, a hit test or Playwright. Owns a stacking context above
+     every in-app layer (the splash and the status screens top out at 1100) so a
+     rewarded-ad frame or any other late-appended overlay cannot cover the wall. */
+  position: fixed;
+  inset: 0;
+  z-index: 1200;
+}
+
+/* Trigger 1 — a phone-shaped viewport turned on its side.
+   Applies everywhere, including a plain browser: 560px is taller than the long
+   edge of any phone (the widest is 430pt), and shorter than a desktop window,
+   a laptop, or a tablet in landscape. Those keep working, which is what keeps
+   the desktop access key (`?desktop=…`) and both e2e suites usable. */
+@media (orientation: landscape) and (max-height: 560px) {
+  .portrait-gate {
+    display: block;
+  }
+  /* Not just covered — taken out of the a11y tree and the tab order, so the
+     app behind the wall cannot be read out or focused into. */
+  #scroll-container,
+  #portal-root {
+    visibility: hidden;
+  }
+}
+
+/* Trigger 2 — a phone-class Telegram session, at any height. A tablet in
+   landscape is ~700px tall and would walk straight past the rule above; inside
+   Telegram we know it is not a computer (@see usePortraitOnly), so sideways is
+   refused there whatever the numbers say. */
+@media (orientation: landscape) {
+  html[data-tg-phone='true'] .portrait-gate {
+    display: block;
+  }
+  html[data-tg-phone='true'] #scroll-container,
+  html[data-tg-phone='true'] #portal-root {
+    visibility: hidden;
+  }
+}

@@ -76,6 +76,18 @@ export interface TelegramWebApp {
   isFullscreen?: boolean;
   requestFullscreen?: () => void;
   exitFullscreen?: () => void;
+  /**
+   * Bot API 8.0+ — freezes the Mini App in **whatever orientation it is in when
+   * called**, so the client stops following the device. There is no "lock to
+   * portrait" argument: calling this in landscape would nail the app to
+   * landscape, which is the opposite of what we want. @see usePortraitOnly
+   *
+   * The SDK warns to the console (and does nothing) below client version 8.0,
+   * so callers gate on `isTelegramVersionAtLeast('8.0')`.
+   */
+  lockOrientation?: () => void;
+  unlockOrientation?: () => void;
+  isOrientationLocked?: boolean;
   /** Device-level insets (notch, status bar, home indicator), in px. */
   safeAreaInset?: TelegramInset;
   /** Insets from Telegram's own chrome (close/menu buttons) in fullscreen, in px. */

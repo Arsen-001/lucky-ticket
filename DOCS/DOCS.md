@@ -2555,6 +2555,25 @@ closed list of DESKTOP clients (`tdesktop`, `macos`, `weba`, `webk`, `web`,
 `unigram`), so an unknown or brand-new client counts as a phone: blocking a real
 player costs more than letting one desktop through.
 
+**Portrait only.** The game is played upright. A phone turned on its side gets a
+"rotate back" wall instead of the app — the layout is a 430px column built for a
+thumb, and landscape leaves it under 400px of height for a header, a scrolling
+screen and a tab bar, so the modals, the engine cube and the tab bar all crop.
+Unlike the two rules above there is no switch and no allow-list: it is a
+property of the layout, not a policy.
+
+Enforced twice, because neither half covers the other. Inside Telegram the
+client is asked not to rotate at all (`lockOrientation`, Bot API 8.0+) — called
+only while the app is already upright, since Telegram freezes whichever
+orientation it finds, so an app opened sideways is explicitly *un*locked instead
+and locked the moment it is turned back. Everywhere else — older clients,
+split-screen, a plain browser — landscape is walled off by a media query, which
+also covers a lock request that simply fails. The wall sits outside the gate, so
+the countdown, the maintenance screen and the boot splash are behind it too. A
+laptop or a tablet in landscape is not affected: the height trigger is set
+between the long edge of the largest phone and the shortest desktop window,
+which is what keeps `?desktop=<key>` and local development usable.
+
 **Maintenance mode.** `PlatformConfig.maintenanceMode` makes every player-facing
 route answer **503**, which the Mini App turns into its maintenance screen.
 Deliberately still reachable: `/health` (probes), `/config` (so the app can

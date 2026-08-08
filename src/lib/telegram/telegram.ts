@@ -16,6 +16,24 @@ export function isTelegramEnv(): boolean {
   return !!getTelegramWebApp()?.initData;
 }
 
+/**
+ * Whether the Telegram client is new enough for a given Bot API feature.
+ *
+ * `WebApp.version` is the CLIENT's Bot API version, not the SDK's — the script
+ * is the same file for everyone, so a method existing on the object says
+ * nothing about whether the client will act on it. Below the required version
+ * the SDK logs a console warning and drops the call, which is why anything
+ * called repeatedly (once per rotation, say) checks first.
+ */
+export function isTelegramVersionAtLeast(version: string): boolean {
+  const current = getTelegramWebApp()?.version;
+  if (!current) return false;
+  const parse = (value: string) => value.split('.').map(part => parseInt(part, 10) || 0);
+  const [major, minor] = parse(current);
+  const [needMajor, needMinor] = parse(version);
+  return major !== needMajor ? major > needMajor : minor >= needMinor;
+}
+
 /** `t.me` / `telegram.me` / `telegram.dog` — links Telegram opens in itself. */
 const TELEGRAM_HOST = /^(www\.)?(t|telegram)\.(me|dog)$/i;
 

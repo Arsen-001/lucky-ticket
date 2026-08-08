@@ -10,6 +10,7 @@ import { ToastViewport } from '@/components/shared/toast/ToastViewport';
 import { OverlayProbeBanner } from '@/components/shared/debug/OverlayProbeBanner';
 import { AppStatusOverlay } from '@/components/shared/status/AppStatusOverlay';
 import { FullscreenBrandBar } from '@/components/layout-elements/FullscreenBrandBar';
+import { PortraitOnlyGate } from '@/components/layout-elements/PortraitOnlyGate';
 import { AtmosphericBackground } from '@/components/shared/AtmosphericBackground';
 import { PreLaunchGate } from '@/components/pages/coming-soon/PreLaunchGate';
 import { TelegramLocaleSeed } from '@/components/telegram/TelegramLocaleSeed';
@@ -89,6 +90,9 @@ export const viewport: Viewport = {
 
 export default async function RootLayout({ children }: ChildrenProps) {
   const locale = await getLocale();
+  // The portrait wall lives outside every provider, i18n included — so its two
+  // strings are translated here. @see PortraitOnlyGate
+  const t = await getAppTranslations();
 
   return (
     <>
@@ -176,6 +180,14 @@ export default async function RootLayout({ children }: ChildrenProps) {
             </NextIntlClientProvider>
           </div>
           <div id="portal-root" />
+          {/* Outside the gate and outside every provider, and last in the body:
+              a phone on its side gets this instead of the app, the countdown,
+              the maintenance wall or a modal — whichever of them it was about
+              to show. @see PortraitOnlyGate */}
+          <PortraitOnlyGate
+            title={t('turn your phone upright')}
+            description={t('the game plays in portrait only')}
+          />
         </body>
       </html>
     </>
