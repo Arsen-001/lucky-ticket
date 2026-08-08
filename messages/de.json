@@ -1252,5 +1252,10 @@
   "market engine purpose": "Ein Motor produziert {tier}-Tickets in eigenem Takt. Hol das Fertige ab — der nächste Zyklus startet sofort.",
   "market shard purpose": "Fragmente gibst du im Inventar aus: einen neuen Chip prägen oder einen vorhandenen aufleveln. Chips erhöhen Tempo und Kapazität eines Motors.",
   "market avatar purpose": "Leg ihn im Profil an — der Bonus des Avatars wirkt, solange er getragen wird.",
-  "ticket not on sale": "Dieses Ticket ist gerade nicht im Verkauf. Aus Turnieren, Aufgaben und Motoren fällt es weiterhin."
+  "ticket not on sale": "Dieses Ticket ist gerade nicht im Verkauf. Aus Turnieren, Aufgaben und Motoren fällt es weiterhin.",
+  "day {day} of {total}": "Tag {day} von {total}",
+  "tomorrow": "Morgen",
+  "in {n} days": "in {n} Tagen",
+  "what is next": "Was kommt",
+  "steps for day {day}": "Aufgaben für Tag {day}"
 }

@@ -1252,5 +1252,10 @@
   "market engine purpose": "A producer engine mints {tier} tickets on its own cycle. Claim what it made and the next cycle starts right away.",
   "market shard purpose": "Shards are spent in the inventory: mint a new chip, or level up one you already have. Chips raise an engine's speed and capacity.",
   "market avatar purpose": "Equip it in your profile — the avatar's bonus works the whole time it is on.",
-  "ticket not on sale": "This ticket is not on sale right now. It still drops from tournaments, tasks and engines."
+  "ticket not on sale": "This ticket is not on sale right now. It still drops from tournaments, tasks and engines.",
+  "day {day} of {total}": "Day {day} of {total}",
+  "tomorrow": "Tomorrow",
+  "in {n} days": "in {n} days",
+  "what is next": "What's next",
+  "steps for day {day}": "Steps for day {day}"
 }

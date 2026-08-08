@@ -1,205 +1,106 @@
 'use client';
 
-import { useState } from 'react';
-import { CornerUpLeft, FlaskConical, Gift } from 'lucide-react';
 import { twMerge } from 'tailwind-merge';
 import { useAppTranslations } from '@/hooks/useAppTranslations';
-import { useToast } from '@/hooks/useToast';
-import {
-  useClaimTestQuestLevelMutation,
-  useGetTestQuestQuery,
-  useRecheckChannelSubscriptionMutation,
-} from '@/api/testQuest.api';
-import { getTelegramWebApp } from '@/lib/telegram/telegram';
-import {
-  getTestQuestSteps,
-  TEST_QUEST_CHANNEL_URL,
-  TEST_QUEST_START_LEVEL,
-  testQuestLadder,
-} from '@/constants/testQuest.constants';
-import type { TestQuestAction } from '@/types/interfaces/testQuest.interfaces';
-import { triggerHaptic } from '@/utils/global/haptic.utils';
-import { TestQuestBadge } from './TestQuestBadge';
-import { TestQuestSteps } from './TestQuestSteps';
-import { TestQuestRewardChips } from './TestQuestRewardChips';
 import { TestQuestClaimBurst } from './TestQuestClaimBurst';
-import { TestQuestPyramid } from './TestQuestPyramid';
-
-// The ladder is a static constant (31 → 1), so sort once at module load.
-const LEVELS = [...testQuestLadder].sort((a, b) => b.level - a.level);
+import { TestQuestFrozenSummary } from './TestQuestFrozenSummary';
+import { TestQuestSteps } from './TestQuestSteps';
+import { TestQuestRewardPanel } from './TestQuestRewardPanel';
+import { useTestQuestScreen } from './useTestQuestScreen';
+import { TestQuestAheadList } from './TestQuestAheadList';
+import { TestQuestRewardRail } from './TestQuestRewardRail';
 
 export interface TestQuestChainProps {
   className?: string;
 }
 
 /**
- * "Тест-квест" launch quest — the 31 → 1 climb as a **pyramid map** (apex = level
- * 1 = the crown; numbers grow down to 31 at the base) plus a checklist panel
- * below. Tapping a pyramid level drives the reward + "what to do" checklist to
- * that level (a "back to today" chip returns); the claim only shows for today's
- * level and, on success, advances the marker up the pyramid. Levels 31 → 4 are
- * the daily ladder; 3 → 1 are the competitive crown, shown at the apex.
+ * **Шкала + «что дальше»** — the chosen rail layout, built to answer "what is in
+ * the other days". Two paths, on purpose:
+ *
+ * - the rail prints the LC amount of the nearest reward walls, so the size of
+ *   what is coming needs no tap at all;
+ * - below today's claim button, upcoming days list their full reward and unfold
+ *   their checklist in place — measured against the player's live counters, so a
+ *   future day reads as "35/93 left", not as an abstract target.
+ *
+ * Today never leaves the screen: previewing a future day expands a row, it does
+ * not replace the day card. Dragging the rail scrubs to any day and drops the
+ * card on the one under the finger, for jumping far ahead.
+ *
+ * Once the test is frozen the climb is over — the screen collapses to the badge
+ * and its monthly chests ({@link TestQuestFrozenSummary}).
  */
 export function TestQuestChain({ className }: TestQuestChainProps) {
   const t = useAppTranslations();
-  const toast = useToast();
-  // Refetch on every mount so the checklist progress reflects actions taken on
-  // other screens (spending tickets, watching ads…) since the last visit.
-  const { data } = useGetTestQuestQuery(undefined, { refetchOnMountOrArgChange: true });
-  const [claim, { isLoading: claiming }] = useClaimTestQuestLevelMutation();
-  const [recheckChannel, { isLoading: verifyingChannel }] = useRecheckChannelSubscriptionMutation();
+  const s = useTestQuestScreen();
 
-  // Bumped on each successful claim to replay the coin burst over the today panel.
-  const [burstId, setBurstId] = useState(0);
-  // Level tapped on the pyramid (drives the checklist below); null = follow today.
-  const [selectedLevel, setSelectedLevel] = useState<number | null>(null);
+  if (!s.data || !s.activeCard) return null;
 
-  const currentLevel = data?.level ?? TEST_QUEST_START_LEVEL; // daily current (31 → 4)
-  const claimableToday = data?.claimableToday ?? true;
-  // Missing field (older backend) ⇒ don't gate — default to satisfied.
-  const channelSubscribed = data?.channelSubscribed ?? true;
-  const dailyTop = data?.dailyTopLevel ?? 4;
-
-  // Prefer the live ladder from the server (reflects admin-editable rewards);
-  // fall back to the bundled prototype text until the response arrives.
-  const cards = data?.ladder?.length
-    ? data.ladder.map(l => ({
-        level: l.level,
-        drop: l.rewardLabel,
-        crown: l.level < dailyTop,
-      }))
-    : LEVELS.map(l => ({
-        level: l.level,
-        drop: l.drop,
-        crown: l.zone === 'crown',
-      }));
-
-  // The checklist below shows the tapped pyramid level; defaults to today.
-  const activeLevel = selectedLevel ?? currentLevel;
-  const activeCard = cards.find(c => c.level === activeLevel);
-  const isToday = activeLevel === currentLevel;
-
-  // What the already-claimed levels (higher numbers = climbed past) have banked
-  // per action — the highest cumulative target reached. Seeds every level's
-  // badges so progress carries over (e.g. after level 29's "spend 11", level 28
-  // starts at 11/16) instead of resetting to 0 when the live counter is behind.
-  const baselines: Partial<Record<TestQuestAction, number>> = {};
-  for (const card of cards) {
-    if (card.level <= currentLevel) continue; // only claimed levels
-    for (const step of getTestQuestSteps(card.level)) {
-      if (step.action && step.target != null) {
-        baselines[step.action] = Math.max(baselines[step.action] ?? 0, step.target);
-      }
-    }
+  if (s.data.frozen) {
+    return (
+      <TestQuestFrozenSummary
+        badgeLevel={s.data.badgeLevel}
+        chestsPaid={s.data.chestsPaid}
+        chestsTotal={s.data.chestsTotal}
+        className={className}
+      />
+    );
   }
-
-  const handleClaim = async () => {
-    // The channel-subscription gate blocks advancing until the player subscribes.
-    if (!claimableToday || claiming || !channelSubscribed) return;
-    try {
-      await claim().unwrap();
-      setBurstId(id => id + 1);
-      setSelectedLevel(null); // follow the new current level after advancing
-      triggerHaptic();
-      toast.success(t('level taken'));
-    } catch {
-      toast.error(t('claim failed'));
-    }
-  };
-
-  // Gate action: open the channel, then re-check membership so the lock lifts
-  // without a reload (the re-check reads the live subscription server-side).
-  const handleVerifyChannel = () => {
-    if (verifyingChannel) return;
-    getTelegramWebApp()?.openTelegramLink?.(TEST_QUEST_CHANNEL_URL);
-    void recheckChannel();
-  };
 
   return (
     <section className={twMerge('flex flex-col gap-2 px-2.5 pt-3', className)}>
-      <div className="flex items-center gap-2">
-        <div className="flex-center h-7 w-7 rounded-lg bg-gradient-to-br from-electric-pink to-electric-purple shadow-md shadow-black/30">
-          <FlaskConical size={14} className="text-white" />
-        </div>
-        <div className="min-w-0 flex-1">
-          <h3 className="text-sm font-extrabold leading-tight">{t('test quest chain title')}</h3>
-          <p className="line-clamp-1 text-[11px] text-pink-secondary">
-            {t('test quest chain blurb')}
-          </p>
-        </div>
-        {data?.frozen && data.badgeLevel != null && (
-          <TestQuestBadge level={data.badgeLevel} className="shrink-0" />
-        )}
+      <div className="flex items-baseline justify-between">
+        <h3 className="text-[13px] font-extrabold tabular-nums">
+          {t('day {day} of {total}', { day: s.currentDay, total: s.totalDays })}
+        </h3>
+        <span className="text-[11px] font-semibold tabular-nums text-white/45">
+          {t('{n} days left', { n: s.totalDays - s.currentDay })}
+        </span>
       </div>
 
-      {!data?.frozen && data && (
-        <div className="flex items-center justify-between text-[11px] font-semibold">
-          <span className="text-white-secondary">
-            {t('level')} <span className="tabular-nums text-white">{data.level}</span>
-          </span>
-          <span className="tabular-nums text-white/80">
-            {data.climbed}/{data.totalLevels}
-          </span>
-        </div>
-      )}
-
-      {data?.frozen && (
-        <div className="flex items-center gap-1.5 text-[11px] text-white-secondary">
-          <Gift size={12} className="text-gold" />
-          {t('monthly chest')} ·{' '}
-          <span className="font-bold tabular-nums text-white">
-            {data.chestsPaid}/{data.chestsTotal}
-          </span>
-        </div>
-      )}
-
-      {!data?.frozen && data && (
-        <TestQuestPyramid
-          currentLevel={data.level}
-          selectedLevel={activeLevel}
-          onSelect={setSelectedLevel}
+      <div className="flex items-start gap-2">
+        <TestQuestRewardRail
+          cards={s.cards}
+          currentLevel={s.currentLevel}
+          selectedLevel={s.activeLevel}
+          onSelect={s.selectLevel}
         />
-      )}
 
-      {activeCard && !data?.frozen && (
-        <div className="relative flex flex-col gap-2">
-          {burstId > 0 && <TestQuestClaimBurst key={burstId} />}
+        <div className="relative flex min-w-0 flex-1 flex-col gap-2">
+          {s.burstId > 0 && <TestQuestClaimBurst key={s.burstId} />}
 
-          <div className="flex flex-col gap-1.5 rounded-2xl border border-white/10 bg-background-overlay p-2.5">
-            <div className="flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-wider text-white/40">
-              <Gift size={10} className={activeCard.crown ? 'text-gold' : 'text-electric-pink'} />
-              {t('reward')} ·
-              <span className="tabular-nums text-white/70">
-                {t('level')} {activeCard.level}
-              </span>
-              {!isToday && (
-                <button
-                  type="button"
-                  onClick={() => setSelectedLevel(null)}
-                  className="flex-center ml-auto gap-1 rounded-full bg-electric-pink/15 px-2 py-0.5 text-[9px] font-bold uppercase tracking-wider text-electric-pink active:scale-95"
-                >
-                  <CornerUpLeft size={10} />
-                  {t('today')}
-                </button>
-              )}
-            </div>
-            <TestQuestRewardChips label={activeCard.drop} crown={activeCard.crown} />
-          </div>
+          <TestQuestRewardPanel
+            card={s.activeCard}
+            isToday={s.isToday}
+            onBackToToday={s.backToToday}
+          />
 
           <TestQuestSteps
-            level={activeCard.level}
-            claimed={activeLevel > currentLevel}
-            ready={isToday && claimableToday}
-            claiming={claiming}
-            onClaim={handleClaim}
-            channelSubscribed={channelSubscribed}
-            onVerifyChannel={handleVerifyChannel}
-            verifyingChannel={verifyingChannel}
-            progress={data?.stepProgress}
-            baselines={baselines}
+            level={s.activeCard.level}
+            // The screen speaks days everywhere else — keep the checklist heading
+            // in the same language instead of switching to level numbers.
+            title={t('steps for day {day}', { day: s.activeCard.day })}
+            claimed={s.activeCard.taken}
+            ready={s.isToday && s.claimableToday}
+            claiming={s.claiming}
+            onClaim={s.handleClaim}
+            channelSubscribed={s.channelSubscribed}
+            onVerifyChannel={s.handleVerifyChannel}
+            verifyingChannel={s.verifyingChannel}
+            progress={s.data.stepProgress}
+            baselines={s.baselines}
+          />
+
+          <TestQuestAheadList
+            cards={s.cards}
+            currentLevel={s.currentLevel}
+            currentDay={s.currentDay}
+            progress={s.data.stepProgress}
+            baselines={s.baselines}
           />
         </div>
-      )}
+      </div>
     </section>
   );
 }

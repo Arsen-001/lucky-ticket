@@ -1,6 +1,7 @@
 'use client';
 
 import { Gift, ListChecks, Lock, Send } from 'lucide-react';
+import { twMerge } from 'tailwind-merge';
 import { Button } from '@/components/shared/buttons/Button';
 import { useAppTranslations } from '@/hooks/useAppTranslations';
 import { getTestQuestSteps } from '@/constants/testQuest.constants';
@@ -28,6 +29,11 @@ export interface TestQuestStepsProps {
    *  carries over the prior levels' cumulative targets (e.g. after level 29's
    *  "spend 11", level 28 starts at 11/16 instead of 0/16). */
   baselines?: Partial<Record<TestQuestAction, number>>;
+  /** Lets a host merge the panel into its own card (drop the border/background). */
+  className?: string;
+  /** Overrides the panel heading — a preview of a future day titles itself by
+   *  day, not by level. Defaults to "steps for level {level}". */
+  title?: string;
 }
 
 /**
@@ -46,6 +52,8 @@ export function TestQuestSteps({
   verifyingChannel,
   progress,
   baselines,
+  className,
+  title,
 }: TestQuestStepsProps) {
   const t = useAppTranslations();
   const steps = getTestQuestSteps(level);
@@ -65,14 +73,19 @@ export function TestQuestSteps({
   const gateBlocked = steps.some(s => s.gate === 'channel') && !channelSubscribed;
 
   return (
-    <div className="flex flex-col gap-1.5 rounded-2xl border border-white/10 bg-background-overlay p-2.5">
+    <div
+      className={twMerge(
+        'flex flex-col gap-1.5 rounded-2xl border border-white/10 bg-background-overlay p-2.5',
+        className
+      )}
+    >
       <div className="flex items-center gap-2">
         <div className="flex-center h-6 w-6 rounded-lg bg-gradient-to-br from-electric-pink to-electric-purple shadow-md shadow-black/30">
           <ListChecks size={13} className="text-white" />
         </div>
         <div className="min-w-0 flex-1">
           <h3 className="text-[13px] font-extrabold leading-tight">
-            {t('steps for level {level}', { level })}
+            {title ?? t('steps for level {level}', { level })}
           </h3>
           <p className="line-clamp-1 text-[10px] text-pink-secondary">{t('steps blurb')}</p>
         </div>
