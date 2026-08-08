@@ -1,4 +1,5 @@
-/* "+X" pop that rises and fades when a tournament feeds the live pot. */
+/* "+X" pop that rises and fades when a tournament feeds the live pot.
+   Used by the Home jackpot chip and the page's pot counter. */
 @keyframes jackpot-pop {
   0% {
     opacity: 0;
@@ -19,222 +20,100 @@
 }
 
 /* ---------------------------------------------------------------------------
-   Premium jackpot capsule: a polished platinum/graphite metal ring wraps a
-   glassmorphic inner capsule with a cool electric-pink bloom (matches the
-   app's tab-bar / header pink). Gold is intentionally reserved for the LC
-   coin medallion only. Two layers:
-     .jackpot-capsule       — the outer metal ring (padding = ring thickness)
-     .jackpot-capsule-glass — the inner glass body with bevel + inner glow
+   The stage: the jackpot page's first screen. One lit surface, edge to edge,
+   with the pot as the only object on it. Everything below the stage is flat
+   dark rows, so the page has exactly one loud moment.
 --------------------------------------------------------------------------- */
 
-.jackpot-capsule {
-  /* Brushed platinum: vertical polish + a faint horizontal sheen. */
-  background:
-    linear-gradient(
-      90deg,
-      rgba(255, 255, 255, 0.06),
-      transparent 30%,
-      transparent 70%,
-      rgba(255, 255, 255, 0.06)
-    ),
-    linear-gradient(180deg, #5a5a63 0%, #2c2c34 30%, #16161c 55%, #242430 78%, #43434e 100%);
-  animation: jackpot-capsule-glow 3s ease-in-out infinite;
-}
-
-@keyframes jackpot-capsule-glow {
-  0%,
-  100% {
-    box-shadow:
-      0 0 0 1px rgba(210, 210, 222, 0.18),
-      0 0 18px color-mix(in srgb, var(--color-electric-pink) 10%, transparent),
-      0 10px 28px rgba(0, 0, 0, 0.55),
-      inset 0 1px 0 rgba(255, 255, 255, 0.22),
-      inset 0 -1px 1px rgba(0, 0, 0, 0.6);
-  }
-  50% {
-    box-shadow:
-      0 0 0 1px rgba(210, 210, 222, 0.26),
-      0 0 30px color-mix(in srgb, var(--color-electric-pink) 24%, transparent),
-      0 10px 28px rgba(0, 0, 0, 0.55),
-      inset 0 1px 0 rgba(255, 255, 255, 0.22),
-      inset 0 -1px 1px rgba(0, 0, 0, 0.6);
-  }
-}
-
-.jackpot-capsule-glass {
-  border: 1px solid rgba(200, 200, 215, 0.16);
-  background:
-    /* electric-pink bloom top-right */
+.jackpot-stage {
+  background-image:
+    /* liquid gold pooling at the floor of the stage */
     radial-gradient(
-      120% 150% at 82% 0%,
-      color-mix(in srgb, var(--color-electric-pink) 26%, transparent),
-      transparent 55%
-    ),
-    /* deep neutral glass base */
-    linear-gradient(180deg, rgba(32, 28, 50, 0.94), rgba(14, 12, 26, 0.96));
-  backdrop-filter: blur(10px);
-  -webkit-backdrop-filter: blur(10px);
-  box-shadow:
-    /* 3D glass bevel: lit top rim, shaded lower rim */
-    inset 0 1.5px 0 rgba(255, 255, 255, 0.14),
-    inset 0 -2px 4px rgba(0, 0, 0, 0.5),
-    /* inner pink atmosphere */ inset 0 0 20px
-      color-mix(in srgb, var(--color-electric-pink) 14%, transparent);
-}
-
-/* Diagonal light sweep that crosses the glass every few seconds. */
-.jackpot-plaque-shine {
-  position: absolute;
-  inset: 0;
-  pointer-events: none;
-  overflow: hidden;
-  border-radius: inherit;
-}
-
-.jackpot-plaque-shine::before {
-  content: '';
-  position: absolute;
-  top: -20%;
-  left: 0;
-  height: 140%;
-  width: 34%;
-  background: linear-gradient(100deg, transparent, rgba(255, 255, 255, 0.09), transparent);
-  transform: skewX(-18deg) translateX(-260%);
-  animation: jackpot-shine-sweep 4.6s ease-in-out infinite;
-}
-
-@keyframes jackpot-shine-sweep {
-  0%,
-  55% {
-    transform: skewX(-18deg) translateX(-260%);
-  }
-  90%,
-  100% {
-    transform: skewX(-18deg) translateX(460%);
-  }
-}
-
-/* Gold-gradient lettering for the JACKPOT wordmark (jackpot-page hero). */
-.jackpot-title {
-  background: linear-gradient(180deg, #ffe9b0 8%, var(--color-gold) 55%, #b07d1f 96%);
-  -webkit-background-clip: text;
-  background-clip: text;
-  color: transparent;
-  filter: drop-shadow(0 0 8px rgba(248, 189, 62, 0.35));
-}
-
-/* Home capsule keeps the wordmark cool platinum-white, not gold. */
-.jackpot-capsule .jackpot-title {
-  background: linear-gradient(180deg, #ffffff 10%, #c9c7d6 96%);
-  -webkit-background-clip: text;
-  background-clip: text;
-  color: transparent;
-  filter: drop-shadow(0 0 6px rgba(255, 255, 255, 0.22));
-}
-
-/* Thin neon underline beneath the wordmark — electric-pink accent. */
-.jackpot-title-rule {
-  width: 100%;
-  height: 1px;
-  background: linear-gradient(
-    90deg,
-    color-mix(in srgb, var(--color-electric-pink) 85%, transparent),
-    transparent
-  );
-  box-shadow: 0 0 6px color-mix(in srgb, var(--color-electric-pink) 45%, transparent);
-}
-
-/* Gold coin medallion on the right of the capsule. */
-.jackpot-coin {
-  background:
-    radial-gradient(
-      100% 100% at 30% 25%,
-      color-mix(in srgb, var(--color-gold) 28%, transparent),
+      85% 60% at 50% 100%,
+      color-mix(in srgb, var(--color-gold) 18%, transparent),
       transparent 70%
     ),
-    linear-gradient(180deg, rgba(255, 255, 255, 0.08), rgba(0, 0, 0, 0.35));
-  border: 1px solid color-mix(in srgb, var(--color-gold) 40%, transparent);
-  box-shadow:
-    inset 0 1px 0 rgba(255, 255, 255, 0.18),
-    inset 0 -2px 4px rgba(0, 0, 0, 0.45),
-    0 0 12px color-mix(in srgb, var(--color-gold) 25%, transparent);
-}
-
-/* ---------------------------------------------------------------------------
-   Jackpot-page hero plaque: the page-scale sibling of the Home capsule —
-   same purple-gold glass language, with a breathing gold halo.
---------------------------------------------------------------------------- */
-.jackpot-hero-card {
-  border: 1px solid color-mix(in srgb, var(--color-gold) 30%, transparent);
-  background:
-    /* liquid-gold pool bottom-left */
+    /* cosmic bloom overhead */
     radial-gradient(
-      120% 140% at 15% 100%,
-      color-mix(in srgb, var(--color-gold) 15%, transparent),
-      transparent 45%
-    ),
-    /* cosmic purple bloom top-right */
-    radial-gradient(
-        130% 160% at 85% 0%,
-        color-mix(in srgb, var(--color-electric-purple) 32%, transparent),
-        transparent 55%
+        120% 85% at 50% 0%,
+        color-mix(in srgb, var(--color-electric-purple) 34%, transparent),
+        transparent 62%
       ),
-    linear-gradient(180deg, rgba(38, 26, 66, 0.92), rgba(16, 11, 34, 0.96));
+    linear-gradient(180deg, rgba(26, 17, 52, 0.96), rgba(10, 8, 22, 0.98));
   box-shadow:
-    inset 0 1.5px 0 rgba(255, 255, 255, 0.12),
-    inset 0 -2px 4px rgba(0, 0, 0, 0.5),
-    inset 0 0 26px color-mix(in srgb, var(--color-electric-purple) 20%, transparent);
-  animation: jackpot-hero-glow 3.2s ease-in-out infinite;
+    inset 0 -1px 0 color-mix(in srgb, var(--color-gold) 24%, transparent),
+    0 18px 40px rgba(0, 0, 0, 0.45);
 }
 
-@keyframes jackpot-hero-glow {
-  0%,
-  100% {
-    filter: drop-shadow(0 6px 18px color-mix(in srgb, var(--color-gold) 10%, transparent));
-  }
-  50% {
-    filter: drop-shadow(0 6px 26px color-mix(in srgb, var(--color-gold) 26%, transparent));
-  }
-}
-
-/* Symmetric variant of the wordmark underline for centered layouts. */
-.jackpot-title-rule-center {
-  height: 1px;
-  background: linear-gradient(
-    90deg,
-    transparent,
-    color-mix(in srgb, var(--color-gold) 85%, transparent) 50%,
-    transparent
+/* Light shafts fanning down from the top edge. The geometry is static — only
+   the opacity breathes — so nothing shifts layout or flickers when the drawer
+   opens over it. */
+.jackpot-stage-rays::before {
+  content: '';
+  position: absolute;
+  inset: -30% -30% auto -30%;
+  height: 170%;
+  pointer-events: none;
+  background-image: repeating-conic-gradient(
+    from 200deg at 50% 0%,
+    transparent 0deg,
+    color-mix(in srgb, var(--color-gold) 9%, transparent) 3deg,
+    transparent 7deg,
+    transparent 13deg
   );
-  box-shadow: 0 0 6px color-mix(in srgb, var(--color-gold) 50%, transparent);
+  -webkit-mask-image: radial-gradient(70% 75% at 50% 0%, #000 0%, transparent 72%);
+  mask-image: radial-gradient(70% 75% at 50% 0%, #000 0%, transparent 72%);
+  animation: jackpot-stage-rays 5s ease-in-out infinite;
 }
 
-/* Gold sibling of .jackpot-glow for the page-hero pot number. */
-@keyframes jackpot-glow-gold {
+@keyframes jackpot-stage-rays {
   0%,
   100% {
-    text-shadow: 0 0 14px color-mix(in srgb, var(--color-gold) 35%, transparent);
+    opacity: 0.55;
   }
   50% {
-    text-shadow: 0 0 28px color-mix(in srgb, var(--color-gold) 65%, transparent);
+    opacity: 1;
   }
 }
 
-.jackpot-glow-gold {
-  animation: jackpot-glow-gold 2.4s ease-in-out infinite;
-}
-
-/* Soft electric-pink glow that breathes under the hero pot number. */
-@keyframes jackpot-glow {
-  0%,
-  100% {
-    text-shadow: 0 0 18px color-mix(in srgb, var(--color-electric-pink) 45%, transparent);
-  }
-  50% {
-    text-shadow: 0 0 34px color-mix(in srgb, var(--color-electric-pink) 78%, transparent);
+@media (prefers-reduced-motion: reduce) {
+  .jackpot-stage-rays::before {
+    animation: none;
   }
 }
 
-.jackpot-glow {
-  animation: jackpot-glow 2.4s ease-in-out infinite;
+/* "Last drop 803.9K LC · 6h ago" — the proof under the pot. */
+.jackpot-proof {
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  background-image: linear-gradient(180deg, rgba(255, 255, 255, 0.08), rgba(255, 255, 255, 0.02));
+}
+
+/* Strips the slot-machine cell chrome off the odometer so the pot reads as
+   plain type; the reels still roll. */
+.jackpot-digits-plain .jackpot-odometer-cell {
+  background: none;
+  border: 0;
+  box-shadow: none;
+  padding: 0;
+  border-radius: 0;
+}
+
+/* Dotted leader between a label and its value (record · paid out). */
+.jackpot-leader {
+  background-image: radial-gradient(circle, rgba(255, 255, 255, 0.22) 1px, transparent 1px);
+  background-size: 5px 1px;
+  background-repeat: repeat-x;
+  background-position: 0 bottom;
+}
+
+/* Pinned call to action: the page scrolls under it, so it fades the content
+   out instead of cutting it off. */
+.jackpot-cta {
+  background-image: linear-gradient(
+    180deg,
+    transparent,
+    color-mix(in srgb, var(--color-background) 70%, transparent) 30%,
+    var(--color-background) 70%
+  );
+  padding-bottom: calc(0.5rem + var(--tg-inset-bottom, 0px));
 }
