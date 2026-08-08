@@ -7,7 +7,8 @@ import Image from 'next/image';
 import { useUpdateBannerIconsMutation } from '@/api/profile.api';
 import { UserAvatar, type AvatarStatusColor } from '@/components/shared/user-elements/UserAvatar';
 import { BannerIconsLayer } from '@/components/pages/out-tabs/drawer/profile/BannerIconsLayer';
-import { ProfileCollageLayer } from '@/components/pages/out-tabs/drawer/profile/ProfileCollageLayer';
+// Коллаж ачивок скрыт с профиля — расконсервировать вместе с блоком ниже.
+// import { ProfileCollageLayer } from '@/components/pages/out-tabs/drawer/profile/ProfileCollageLayer';
 import { ProfileAvatarEditButton } from '@/components/pages/out-tabs/drawer/profile/ProfileAvatarEditButton';
 import { ProfileUsernameEditButton } from '@/components/pages/out-tabs/drawer/profile/ProfileUsernameEditButton';
 import { ProfileShareSheet } from '@/components/pages/out-tabs/drawer/profile/ProfileShareSheet';
@@ -230,6 +231,7 @@ export function ProfileHero({ profile, loading, isPreview, onTogglePreview }: Pr
           </div>
         </SkeletonSuspense>
 
+        {/* Коллаж ачивок скрыт с профиля: сами достижения ещё не выдаются.
         {profile && (
           <ProfileCollageLayer
             collageAchievements={profile.collageAchievements}
@@ -237,6 +239,7 @@ export function ProfileHero({ profile, loading, isPreview, onTogglePreview }: Pr
             isPreview={isPreview}
           />
         )}
+        */}
 
         <div className="flex flex-wrap items-center justify-center gap-3">
           {profile?.isOwn && (

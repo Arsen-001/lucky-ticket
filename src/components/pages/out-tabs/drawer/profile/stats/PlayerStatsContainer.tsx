@@ -5,7 +5,7 @@ import {
   CalendarDays,
   Trophy,
   Medal,
-  Percent,
+  // Percent, — вернуть вместе с плиткой «win rate» ниже
   Coins,
   Ticket,
   Star,
@@ -101,6 +101,7 @@ export function PlayerStatsContainer() {
           accent="pink"
           loading={isLoading}
         />
+        {/* Плитка «win rate» скрыта из My Stats.
         <StatTile
           label={t('win rate')}
           value={data?.tournaments.winRate != null ? `${data.tournaments.winRate}%` : null}
@@ -108,6 +109,7 @@ export function PlayerStatsContainer() {
           accent="teal"
           loading={isLoading}
         />
+        */}
       </StatsSection>
 
       <StatsSection title={t('all time')}>

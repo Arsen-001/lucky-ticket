@@ -1,21 +1,22 @@
 'use client';
 import { useState } from 'react';
-import {
-  useBuyShowcaseSlotMutation,
-  useGetProfileQuery,
-  useUnpinAchievementMutation,
-} from '@/api/profile.api';
-import { useToast } from '@/hooks/useToast';
-import { useAppTranslations } from '@/hooks/useAppTranslations';
+import { useGetProfileQuery } from '@/api/profile.api';
+// Витрина ачивок скрыта с профиля — расконсервировать вместе с блоком ниже.
+// import {
+//   useBuyShowcaseSlotMutation,
+//   useUnpinAchievementMutation,
+// } from '@/api/profile.api';
+// import { useToast } from '@/hooks/useToast';
+// import { useAppTranslations } from '@/hooks/useAppTranslations';
 import { ProfileHero } from '@/components/pages/out-tabs/drawer/profile/ProfileHero';
 import { ProfileLeaderboardCard } from '@/components/pages/out-tabs/drawer/profile/ProfileLeaderboardCard';
 import { ProfileActivityCard } from '@/components/pages/out-tabs/drawer/profile/ProfileActivityCard';
 import { ProfileQuickStats } from '@/components/pages/out-tabs/drawer/profile/ProfileQuickStats';
 import { ProfileStatsLink } from '@/components/pages/out-tabs/drawer/profile/ProfileStatsLink';
 import { ProfileFooter } from '@/components/pages/out-tabs/drawer/profile/ProfileFooter';
-import { AchievementShowcase } from '@/components/shared/achievements/AchievementShowcase';
-import { AchievementDetailModal } from '@/components/shared/achievements/AchievementDetailModal';
-import type { Achievement } from '@/types/interfaces/achievement.interfaces';
+// import { AchievementShowcase } from '@/components/shared/achievements/AchievementShowcase';
+// import { AchievementDetailModal } from '@/components/shared/achievements/AchievementDetailModal';
+// import type { Achievement } from '@/types/interfaces/achievement.interfaces';
 import type { ProfileResponse } from '@/types/interfaces/profile.interfaces';
 import { QueryErrorState } from '@/components/shared/error/QueryErrorState';
 
@@ -25,12 +26,12 @@ export interface ProfilePageProps {
 
 export function ProfilePage({ userId }: ProfilePageProps) {
   const { data: profile, isLoading, isError, refetch } = useGetProfileQuery(userId);
-  const [unpinAchievement] = useUnpinAchievementMutation();
-  const [buyShowcaseSlot] = useBuyShowcaseSlotMutation();
-  const toast = useToast();
-  const t = useAppTranslations();
   const [previewMode, setPreviewMode] = useState(false);
-  const [selected, setSelected] = useState<Achievement | null>(null);
+  // const [unpinAchievement] = useUnpinAchievementMutation();
+  // const [buyShowcaseSlot] = useBuyShowcaseSlotMutation();
+  // const toast = useToast();
+  // const t = useAppTranslations();
+  // const [selected, setSelected] = useState<Achievement | null>(null);
 
   // "Preview as visitor" strips the owner-only fields (React Compiler memoizes).
   const effectiveProfile: ProfileResponse | undefined =
@@ -60,6 +61,7 @@ export function ProfilePage({ userId }: ProfilePageProps) {
 
           <ProfileLeaderboardCard profile={effectiveProfile} loading={isLoading} />
 
+          {/* Витрина ачивок скрыта с профиля: сами достижения ещё не выдаются.
           <AchievementShowcase
             pinnedAchievements={effectiveProfile.pinnedAchievements}
             showcaseSlots={effectiveProfile.showcaseSlots}
@@ -79,6 +81,7 @@ export function ProfilePage({ userId }: ProfilePageProps) {
               }
             }}
           />
+          */}
 
           <ProfileQuickStats profile={effectiveProfile} loading={isLoading} />
 
@@ -92,7 +95,7 @@ export function ProfilePage({ userId }: ProfilePageProps) {
         </div>
       )}
 
-      <AchievementDetailModal achievement={selected} onClose={() => setSelected(null)} />
+      {/* <AchievementDetailModal achievement={selected} onClose={() => setSelected(null)} /> */}
     </div>
   );
 }
