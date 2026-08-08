@@ -1,21 +1,21 @@
 'use client';
 
+import { Flame } from 'lucide-react';
 import { useGetJackpotQuery, useGetJackpotWinnersQuery } from '@/api/jackpot.api';
 import { useAppTranslations } from '@/hooks/useAppTranslations';
 import { QueryErrorState } from '@/components/shared/error/QueryErrorState';
-import { JackpotStage } from './JackpotStage';
-import { JackpotStanding } from './JackpotStanding';
-import { JackpotPayoutLadder } from './JackpotPayoutLadder';
-import { JackpotTotals } from './JackpotTotals';
+import { formatCompact } from '@/utils/global/number.utils';
+import { JackpotPotCard } from './JackpotPotCard';
+import { JackpotSplitBand } from './JackpotSplitBand';
+import { JackpotActionRow } from './JackpotActionRow';
 import { JackpotMechanics } from './JackpotMechanics';
-import { JackpotLog } from './JackpotLog';
-import { JackpotCta } from './JackpotCta';
+import { JackpotDropList } from './JackpotDropList';
 
 /**
- * Jackpot page. Order is the argument: the pot and the proof it drops, then
- * where the player stands, then what each place takes out of *this* pot —
- * everything a decision needs before the mechanic, which is folded away, and
- * the history, which is the last thing that matters.
+ * Jackpot page, in the LC wallet's card language: one dark card carrying the
+ * pot, what each place takes out of it today, and the three ways into the draw
+ * — then the drops as history. The pot and the balance are the app's two big
+ * numbers, so their screens are built from the same parts.
  */
 export function JackpotContainer() {
   const t = useAppTranslations();
@@ -32,17 +32,35 @@ export function JackpotContainer() {
     return <QueryErrorState onRetry={() => refetch()} message={t('couldnt load jackpot')} />;
   }
 
+  const lastDrop = winners?.[0];
+
   return (
-    <div className="flex flex-col gap-5 pb-4">
-      <JackpotStage data={data} loading={isLoading} lastDrop={winners?.[0]} />
-      <div className="flex flex-col gap-5">
-        <JackpotStanding activeTournaments={data?.myActiveTournamentsCount} loading={isLoading} />
-        <JackpotPayoutLadder pot={data?.pot} loading={isLoading} />
-        <JackpotTotals data={data} loading={isLoading} />
-        <JackpotMechanics />
-        <JackpotLog winners={winners} loading={winnersLoading} />
-      </div>
-      <JackpotCta />
+    <div className="flex flex-col gap-4 px-4 pb-8 pt-2">
+      <JackpotPotCard
+        pot={data?.pot}
+        loading={isLoading}
+        className="animate-slide-in-bottom"
+        chip={
+          lastDrop && (
+            <span className="bg-success/20 text-success inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[10.5px] font-extrabold tabular-nums">
+              <Flame size={11} strokeWidth={3} />
+              {formatCompact(lastDrop.potTotal)}
+              <span className="text-white/40">{t('last drop')}</span>
+            </span>
+          )
+        }
+      >
+        <JackpotSplitBand pot={data?.pot} />
+        <JackpotActionRow />
+      </JackpotPotCard>
+
+      <JackpotMechanics />
+
+      <JackpotDropList
+        winners={winners}
+        loading={winnersLoading}
+        allTimePaidOut={data?.allTimePaidOut}
+      />
     </div>
   );
 }

@@ -1,5 +1,6 @@
-/* "+X" pop that rises and fades when a tournament feeds the live pot.
-   Used by the Home jackpot chip and the page's pot counter. */
+/* "+X" pop that rises and fades when a tournament feeds the live pot — used by
+   the Home jackpot chip's counter. The jackpot page itself renders the pot as
+   plain type (LC-wallet card language), so it has no reels of its own. */
 @keyframes jackpot-pop {
   0% {
     opacity: 0;
@@ -17,103 +18,4 @@
 
 .jackpot-pop {
   animation: jackpot-pop 1.5s ease-out forwards;
-}
-
-/* ---------------------------------------------------------------------------
-   The stage: the jackpot page's first screen. One lit surface, edge to edge,
-   with the pot as the only object on it. Everything below the stage is flat
-   dark rows, so the page has exactly one loud moment.
---------------------------------------------------------------------------- */
-
-.jackpot-stage {
-  background-image:
-    /* liquid gold pooling at the floor of the stage */
-    radial-gradient(
-      85% 60% at 50% 100%,
-      color-mix(in srgb, var(--color-gold) 18%, transparent),
-      transparent 70%
-    ),
-    /* cosmic bloom overhead */
-    radial-gradient(
-        120% 85% at 50% 0%,
-        color-mix(in srgb, var(--color-electric-purple) 34%, transparent),
-        transparent 62%
-      ),
-    linear-gradient(180deg, rgba(26, 17, 52, 0.96), rgba(10, 8, 22, 0.98));
-  box-shadow:
-    inset 0 -1px 0 color-mix(in srgb, var(--color-gold) 24%, transparent),
-    0 18px 40px rgba(0, 0, 0, 0.45);
-}
-
-/* Light shafts fanning down from the top edge. The geometry is static — only
-   the opacity breathes — so nothing shifts layout or flickers when the drawer
-   opens over it. */
-.jackpot-stage-rays::before {
-  content: '';
-  position: absolute;
-  inset: -30% -30% auto -30%;
-  height: 170%;
-  pointer-events: none;
-  background-image: repeating-conic-gradient(
-    from 200deg at 50% 0%,
-    transparent 0deg,
-    color-mix(in srgb, var(--color-gold) 9%, transparent) 3deg,
-    transparent 7deg,
-    transparent 13deg
-  );
-  -webkit-mask-image: radial-gradient(70% 75% at 50% 0%, #000 0%, transparent 72%);
-  mask-image: radial-gradient(70% 75% at 50% 0%, #000 0%, transparent 72%);
-  animation: jackpot-stage-rays 5s ease-in-out infinite;
-}
-
-@keyframes jackpot-stage-rays {
-  0%,
-  100% {
-    opacity: 0.55;
-  }
-  50% {
-    opacity: 1;
-  }
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .jackpot-stage-rays::before {
-    animation: none;
-  }
-}
-
-/* "Last drop 803.9K LC · 6h ago" — the proof under the pot. */
-.jackpot-proof {
-  border: 1px solid rgba(255, 255, 255, 0.12);
-  background-image: linear-gradient(180deg, rgba(255, 255, 255, 0.08), rgba(255, 255, 255, 0.02));
-}
-
-/* Strips the slot-machine cell chrome off the odometer so the pot reads as
-   plain type; the reels still roll. */
-.jackpot-digits-plain .jackpot-odometer-cell {
-  background: none;
-  border: 0;
-  box-shadow: none;
-  padding: 0;
-  border-radius: 0;
-}
-
-/* Dotted leader between a label and its value (record · paid out). */
-.jackpot-leader {
-  background-image: radial-gradient(circle, rgba(255, 255, 255, 0.22) 1px, transparent 1px);
-  background-size: 5px 1px;
-  background-repeat: repeat-x;
-  background-position: 0 bottom;
-}
-
-/* Pinned call to action: the page scrolls under it, so it fades the content
-   out instead of cutting it off. */
-.jackpot-cta {
-  background-image: linear-gradient(
-    180deg,
-    transparent,
-    color-mix(in srgb, var(--color-background) 70%, transparent) 30%,
-    var(--color-background) 70%
-  );
-  padding-bottom: calc(0.5rem + var(--tg-inset-bottom, 0px));
 }
