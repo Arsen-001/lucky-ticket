@@ -1,29 +1,15 @@
 /* Branded launch splash for the Telegram Mini App. See TelegramSplash. */
 
-/* Wordmark rendered with the app's pink text-stroke shimmer (same identity as
-   the in-app ProjectNameLoader), scaled responsively so "LuckyTicket365" never
-   overflows on narrow phones. The gradient sweeps across the glyphs as it
-   authenticates. */
+/* The shared brand lockup (see components/shared/brand/Wordmark.tsx) sized down
+   responsively so "LuckyTicket365" never overflows on narrow phones. The splash
+   used to paint its own pink text-stroke shimmer here; the motion now lives in
+   the sweeping bar below the subtitle, so the brand reads the same as everywhere
+   else in the app. */
 .tg-splash__wordmark {
+  display: block;
   width: fit-content;
   max-width: 100%;
-  font-family: var(--font-display), ui-sans-serif, sans-serif;
-  font-weight: 800;
   font-size: clamp(30px, 9vw, 46px);
-  line-height: 1;
-  letter-spacing: 0.01em;
-  white-space: nowrap;
-  color: transparent;
-  -webkit-text-stroke: 1px var(--color-gradient-darkpink);
-  background: linear-gradient(
-      90deg,
-      transparent 33%,
-      var(--color-gradient-darkpink) 50%,
-      var(--color-gradient-lightpink) 67%,
-      transparent 0
-    )
-    0 / 300% 100% no-repeat text;
-  animation: fill 1.9s linear infinite;
 }
 
 /* Thin sweeping progress line beneath the subtitle. */

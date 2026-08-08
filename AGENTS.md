@@ -184,6 +184,15 @@ Use `inert={!open ? true : undefined}` — not `inert={false}` — because React
 - Use `twMerge()` from `tailwind-merge` whenever merging classes conditionally
 - When a component needs CSS Tailwind can't express (complex transitions, keyframes), create `/src/styles/components/<name>.css` and import it directly in the component. Define new utilities with the `@utility` at-rule (Tailwind v4 syntax)
 
+### Brand Wordmark
+
+The brand is rendered **only** through `Wordmark` (`@/components/shared/brand/Wordmark`) — `Lucky` white, `Ticket` on `--gradient-brand`, `365` on `--gradient-gold`, always one unbroken word. Callers pass a size and nothing else; face, weight and paint stay in the component so screens can't drift apart (they had, four ways: plain white in the drawer, semibold in auth, a pink text-stroke shimmer in the splash and the route loader). Those gradients are shared verbatim with the landing page and the admin panel — changing them in one repo alone breaks the lockup.
+
+Two traps, both enforced by `tests/wordmark.test.ts`:
+
+- Never write the brand as a bare text node (`>LuckyTicket365<` or `{GlobalConstants.projectName}` as an element's only child) — that constant is for metadata, share text and image `alt`.
+- In gradient-text CSS use `background-image`, never the `background` shorthand: the shorthand resets `background-clip` to `border-box`, and the word paints as a **solid rectangle with invisible text**. Computed styles still look correct — only a screenshot catches it.
+
 ### Custom Utilities Available
 
 ```

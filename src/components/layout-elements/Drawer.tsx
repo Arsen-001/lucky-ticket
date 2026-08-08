@@ -18,7 +18,6 @@ import {
   Handshake,
   Layers,
   LifeBuoy,
-  LogOut,
   Package,
   ScrollText,
   Settings,
@@ -29,9 +28,7 @@ import {
   Wallet,
 } from 'lucide-react';
 import { twMerge } from 'tailwind-merge';
-import { useRouter } from 'next/navigation';
 
-import { useLogoutMutation } from '@/api/auth.api';
 import { useGetMeQuery } from '@/api/me.api';
 import { useGetNotificationsSummaryQuery } from '@/api/notifications.api';
 import { useGetStakesQuery } from '@/api/stakes.api';
@@ -41,6 +38,7 @@ import { ClientPortal } from '@/components/shared/ClientPortal';
 import { DrawerItem } from '@/components/layout-elements/DrawerItem';
 import { Link } from '@/components/shared/links/Link';
 import { Skeleton } from '@/components/shared/seleketons/Skeleton';
+import { Wordmark } from '@/components/shared/brand/Wordmark';
 import { SkeletonSuspense } from '@/components/shared/seleketons/SkeletonSuspense';
 import { type Route, routes } from '@/constants/routes';
 import { useAppTranslations } from '@/hooks/useAppTranslations';
@@ -69,8 +67,6 @@ export function Drawer() {
   const leaderboardEnabled = useLeaderboardEnabled();
   const open = useAppSelector(selectDrawerOpen);
   const dispatch = useAppDispatch();
-  const router = useRouter();
-  const [logout, { isLoading: isLoggingOut }] = useLogoutMutation();
   const { data: me, isLoading } = useGetMeQuery();
   const { data: notificationsSummary } = useGetNotificationsSummaryQuery();
   const { data: stakesData } = useGetStakesQuery();
@@ -90,17 +86,6 @@ export function Drawer() {
 
   const handleDrawerClose = () => {
     dispatch(closeDrawer());
-  };
-
-  const handleLogout = async () => {
-    try {
-      await logout().unwrap();
-    } catch {
-      // logout still clears local tokens in the mutation's onQueryStarted
-    } finally {
-      handleDrawerClose();
-      router.push(routes.login);
-    }
   };
 
   const asideRef = useRef<HTMLElement>(null);
@@ -336,7 +321,9 @@ export function Drawer() {
               // Clear Telegram's floating chrome in fullscreen (the drawer is a
               // top-to-bottom fixed panel, so its top-right corner meets the ✕).
               paddingTop: 'var(--tg-inset-top)',
-              paddingBottom: 'var(--tg-inset-bottom)',
+              // No bottom inset here on purpose — the footer strip absorbs it
+              // instead, so the wordmark ends up centred in the space a player
+              // actually sees rather than pinned above an empty band. See there.
               ...(swipeDelta > 0
                 ? { transform: `translateX(${swipeDelta}px)`, transition: 'none' }
                 : {}),
@@ -356,7 +343,7 @@ export function Drawer() {
             href={routes.profile.index}
             tabIndex={tabIndex}
             onClick={handleDrawerClose}
-            className="bg-background-overlay relative mx-3 mt-5 flex items-center gap-3 overflow-hidden rounded-2xl px-2.5 py-3 transition-transform active:scale-99"
+            className="bg-background-overlay relative mx-3 mt-2 flex items-center gap-3 overflow-hidden rounded-2xl px-2.5 py-2 transition-transform active:scale-99"
           >
             <div className="relative h-14 w-14 flex-shrink-0">
               <Avatar shadow size={56} />
@@ -383,9 +370,9 @@ export function Drawer() {
             <ChevronRight className="text-pink-secondary flex-shrink-0" size={16} />
           </Link>
 
-          <div aria-hidden className="drawer-divider mx-3 mt-4" />
+          <div aria-hidden className="drawer-divider mx-3 mt-2" />
 
-          <nav className="scrollbar-hidden mt-2 flex-1 overflow-y-auto px-3 pb-2">
+          <nav className="scrollbar-hidden mt-1 flex-1 overflow-y-auto px-3 pb-1">
             <ul className="flex flex-col">
               {items.map(item => (
                 <DrawerItem
@@ -403,24 +390,26 @@ export function Drawer() {
             </ul>
           </nav>
 
-          <div aria-hidden className="drawer-divider mx-3 mb-3" />
+          <div aria-hidden className="drawer-divider mx-3 mb-2" />
 
-          <button
-            type="button"
-            onClick={handleLogout}
-            disabled={isLoggingOut}
-            tabIndex={tabIndex}
-            className="mx-3 mb-3 flex items-center gap-3 rounded-2xl px-3 py-3 text-sm font-semibold text-error-text transition-transform active:scale-99 disabled:opacity-60"
+          {/* The panel's background paints through the Telegram bottom inset, so
+              spending it as the aside's padding leaves the wordmark stuck under
+              the divider with an empty band beneath it — measured at 31px off
+              centre in fullscreen. The strip takes the inset itself and splits
+              it evenly, which puts the lockup in the middle of the space that
+              is actually visible, and keeps it clear of the home indicator. */}
+          <div
+            className="flex-center mx-3 mb-2"
+            style={{
+              paddingTop: 'calc(0.25rem + var(--tg-inset-bottom) / 2)',
+              paddingBottom: 'calc(0.25rem + var(--tg-inset-bottom) / 2)',
+            }}
           >
-            <LogOut size={18} />
-            <span>{t('logout')}</span>
-          </button>
-
-          <div className="bg-background-overlay relative mx-3 mb-5 flex flex-col items-center gap-0.5 overflow-hidden rounded-2xl px-4 py-3">
-            <span className="text-sm font-extrabold tracking-wide text-white">LuckyTicket365</span>
-            <span className="text-pink-secondary text-[10px] font-semibold tracking-wider uppercase">
-              {t('daily luck awaits')}
-            </span>
+            {/* `line-height: 1` measures the em box, not the glyphs: the `y` in
+                Lucky hangs below it, so an evenly padded strip renders the word
+                2.8px low. Giving the descent back as a bottom margin centres
+                what a player sees instead of the box it sits in. */}
+            <Wordmark className="mb-[0.2em] text-sm" />
           </div>
         </aside>
       </div>

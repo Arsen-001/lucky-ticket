@@ -154,19 +154,14 @@
   }
 }
 
+/* Route-level loading wordmark (only ProjectNameLoader uses it). The class name
+   is a contract: TelegramProvider decides "the route has not committed yet" with
+   `document.querySelector('.loader')`, so renaming it would dismiss the Telegram
+   splash too early. It used to paint its own pink text-stroke shimmer — the
+   brand now comes from the shared lockup, and this only sizes it and pulses so
+   it still reads as work in progress. */
 @utility loader {
   width: fit-content;
   font-size: 40px;
-  font-weight: bold;
-  color: transparent;
-  -webkit-text-stroke: 1px var(--color-gradient-darkpink);
-  background: linear-gradient(
-      90deg,
-      transparent 33%,
-      var(--color-gradient-darkpink) 50%,
-      var(--color-gradient-lightpink) 67%,
-      transparent 0
-    )
-    0/300% 100% no-repeat text;
-  @apply animate-fill;
+  animation: blink 1.8s ease-in-out infinite;
 }

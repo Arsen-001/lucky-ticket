@@ -1,6 +1,6 @@
 'use client';
 import type { ChildrenProps } from '@/types/interfaces/component.interfcaes';
-import { GlobalConstants } from '@/constants/global.constants';
+import { Wordmark } from '@/components/shared/brand/Wordmark';
 import { routes } from '@/constants/routes';
 import { isTelegramEnv } from '@/lib/telegram/telegram';
 import { usePathname, useRouter } from 'next/navigation';
@@ -18,8 +18,8 @@ export default function AuthLayout({ children }: ChildrenProps) {
 
   return (
     <div className="h-full flex flex-col">
-      <h1 className="text-2xl text-center p-12 font-semibold animate-fade-in">
-        {GlobalConstants.projectName}
+      <h1 className="animate-fade-in p-12 text-center">
+        <Wordmark className="text-2xl" />
       </h1>
       <div
         key={pathname}

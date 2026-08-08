@@ -82,4 +82,11 @@
     var(--color-gradient-purple),
     var(--color-gradient-blue)
   );
+
+  /* Wordmark gradients — the brand lockup paints `Lucky` white, `Ticket` on the
+     brand gradient and `365` on the gold one. Copied verbatim from the landing
+     page's theme.css (the admin panel holds the same copy) so the wordmark
+     renders identically in all three. Do not "improve" them here alone. */
+  --gradient-brand: linear-gradient(100deg, #de009b 0%, #a32183 45%, #743df5 100%);
+  --gradient-gold: linear-gradient(100deg, #f8bd3e 0%, #ffe6a3 50%, #f8bd3e 100%);
 }

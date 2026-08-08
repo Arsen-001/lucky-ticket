@@ -1,5 +1,6 @@
 'use client';
 
+import { Wordmark } from '@/components/shared/brand/Wordmark';
 import '@/styles/components/fullscreen-brand.css';
 
 /**
@@ -18,9 +19,7 @@ export function FullscreenBrandBar() {
   return (
     <div aria-hidden className="fullscreen-brand-bar">
       <span className="fullscreen-brand-bar__inner">
-        <span className="fullscreen-brand-bar__text">
-          LuckyTicket<span className="fullscreen-brand-bar__accent">365</span>
-        </span>
+        <Wordmark className="fullscreen-brand-bar__wordmark" />
       </span>
     </div>
   );

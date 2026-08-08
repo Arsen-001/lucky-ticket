@@ -4,7 +4,7 @@ import { Unplug, RotateCw } from 'lucide-react';
 import { Button } from '@/components/shared/buttons/Button';
 import { FullScreenStatus } from '@/components/shared/status/FullScreenStatus';
 import { useAppTranslations } from '@/hooks/useAppTranslations';
-import { GlobalConstants } from '@/constants/global.constants';
+import { Wordmark } from '@/components/shared/brand/Wordmark';
 import '@/styles/components/telegram-splash.css';
 
 interface TelegramSplashProps {
@@ -16,8 +16,8 @@ interface TelegramSplashProps {
 /**
  * Full-screen branded launch screen shown while the Telegram session
  * authenticates on boot (and, on failure, with a retry). The loading state is a
- * proper splash — the shimmering LuckyTicket365 wordmark over the app's brand
- * background — instead of a bare spinner. The error state reuses the app's
+ * proper splash — the shared brand lockup over the app's brand background, with
+ * the sweeping bar below it carrying the motion — instead of a bare spinner. The error state reuses the app's
  * blocking-status shell so it matches the no-internet / maintenance screens.
  */
 export function TelegramSplash({ error = false, onRetry }: TelegramSplashProps) {
@@ -57,8 +57,8 @@ export function TelegramSplash({ error = false, onRetry }: TelegramSplashProps) 
         className="bg-electric-purple/15 pointer-events-none absolute -bottom-24 -right-16 h-60 w-60 rounded-full blur-3xl"
       />
 
-      <h1 className="tg-splash__wordmark animate-slide-in-bottom relative">
-        {GlobalConstants.projectName}
+      <h1 className="animate-slide-in-bottom relative">
+        <Wordmark className="tg-splash__wordmark" />
       </h1>
 
       <div className="animate-fade-in relative flex flex-col items-center gap-4">

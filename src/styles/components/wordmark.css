@@ -1,0 +1,46 @@
+/* Paint for the brand lockup. See components/shared/brand/Wordmark.tsx — that
+   component is the only thing that should use these classes. The gradients
+   themselves live in styles/global/theme.css and are shared verbatim with the
+   landing page and the admin panel. */
+
+.wordmark {
+  font-family: var(--font-display), ui-sans-serif, sans-serif;
+  font-weight: 700;
+  line-height: 1;
+  letter-spacing: 0.01em;
+  white-space: nowrap;
+  /* The lockup used to be painted with a pink text-stroke shimmer in the splash
+     and the route loader; reset the stroke so an ancestor that still sets one
+     cannot outline these glyphs. */
+  -webkit-text-stroke: 0;
+}
+
+.wordmark__lucky {
+  color: #ffffff;
+  /* `-webkit-text-fill-color` beats `color` in WebKit, so the white segment has
+     to state it too — otherwise an inherited transparent fill hides it. */
+  -webkit-text-fill-color: #ffffff;
+}
+
+/* Gradient text clips to the glyph box, so the padding/negative-margin pair
+   keeps ascenders and descenders from being shaved off. */
+.wordmark__ticket,
+.wordmark__accent {
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  color: transparent;
+  padding-block: 0.14em;
+  margin-block: -0.14em;
+}
+
+/* `background-image`, never the `background` shorthand: the shorthand resets
+   `background-clip` back to `border-box`, and the segment then paints as a solid
+   rectangle with invisible text instead of gradient glyphs. */
+.wordmark__ticket {
+  background-image: var(--gradient-brand);
+}
+
+.wordmark__accent {
+  background-image: var(--gradient-gold);
+}
