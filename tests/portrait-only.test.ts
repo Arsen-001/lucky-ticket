@@ -67,6 +67,42 @@ describe('portrait-only wall wiring', () => {
     expect(layout.indexOf('<PortraitOnlyGate')).toBeGreaterThan(layout.indexOf('</PreLaunchGate>'));
   });
 
+  /**
+   * The bug that reached players: both triggers ask the VIEWPORT which way
+   * things are facing, and a Telegram Mini App is handed a webview rather than
+   * a window — short and wide in compact mode, mid-fullscreen animation, with
+   * the keyboard up, in split-screen. Trigger 2 has no height bound at all, so
+   * inside Telegram that was enough to put "turn your phone upright" in front
+   * of a phone that was upright. The device's own answer vetoes both.
+   */
+  it('lets the device veto the viewport, and lets the veto win', () => {
+    const css = read('src/styles/components/portrait-gate.css');
+    const veto = css.indexOf("html[data-device-portrait='true'] .portrait-gate");
+    expect(veto).toBeGreaterThan(-1);
+    // It ties trigger 2 on specificity (element + attribute + class, both), so
+    // the only thing making it win is coming last. Moving it up is silent.
+    expect(veto).toBeGreaterThan(css.indexOf("html[data-tg-phone='true'] .portrait-gate"));
+    expect(veto).toBeGreaterThan(css.indexOf('max-height'));
+    // The app comes back with it — hiding the wall while leaving the app
+    // `visibility: hidden` would be a blank screen, which is worse than either.
+    expect(css).toContain("html[data-device-portrait='true'] #scroll-container");
+  });
+
+  it('answers before the first paint, not after hydration', () => {
+    // Without this the same short-and-wide webview flashes the wall on every
+    // launch — hydration is far too late to be the first frame.
+    const layout = read('src/app/layout.tsx');
+    expect(layout).toMatch(/dangerouslySetInnerHTML[\s\S]{0,400}devicePortrait/);
+  });
+
+  it('asks the screen which way the phone is facing, not the window', () => {
+    const hook = read('src/hooks/usePortraitOnly.ts');
+    expect(hook).toContain('screen?.orientation');
+    // `lockOrientation` had the same bug in reverse: driven by the viewport, a
+    // compact webview made it *unlock* the rotation of an upright phone.
+    expect(hook).not.toMatch(/if\s*\(portrait\.matches\)/);
+  });
+
   it('keeps a desktop-sized window out of the height trigger', () => {
     const css = read('src/styles/components/portrait-gate.css');
     const [, height] = css.match(/max-height:\s*(\d+)px/) ?? [];

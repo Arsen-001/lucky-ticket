@@ -2574,6 +2574,19 @@ laptop or a tablet in landscape is not affected: the height trigger is set
 between the long edge of the largest phone and the shortest desktop window,
 which is what keeps `?desktop=<key>` and local development usable.
 
+"On its side" means **the device**, not the shape of the window — a distinction
+that cost a day of the wall standing in front of upright players. A Mini App is
+handed a webview, not a window, and that webview is wider than it is tall on a
+perfectly upright phone: in Telegram's compact mode before `expand()`, during
+the fullscreen transition, with the keyboard open, and in Android split-screen.
+The media queries see landscape in all of them. So the device's own answer
+(`screen.orientation`, `window.orientation` on iOS below 16.4) vetoes them: while
+the phone reports itself upright there is no wall, whatever shape the webview
+happens to be. It is set before the first paint by an inline script — hydration
+is too late to stop a flash — and re-read on every rotation. The same answer now
+drives `lockOrientation`, which had the fault in reverse: reading the viewport, a
+compact webview made the app _unlock_ the rotation of a phone that was upright.
+
 **Maintenance mode.** `PlatformConfig.maintenanceMode` makes every player-facing
 route answer **503**, which the Mini App turns into its maintenance screen.
 Deliberately still reachable: `/health` (probes), `/config` (so the app can

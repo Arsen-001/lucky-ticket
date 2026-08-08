@@ -51,3 +51,24 @@
     visibility: hidden;
   }
 }
+
+/* The veto: the DEVICE says it is upright, so neither trigger above is talking
+   about a phone on its side.
+
+   Both triggers ask the viewport, and a Mini App does not own the window — its
+   webview is short and wide on an upright phone in compact mode, mid-fullscreen
+   animation, with the keyboard open, and in split-screen. Trigger 2 has no
+   height bound at all, so inside Telegram that alone put the wall in front of
+   players holding the phone perfectly straight. @see usePortraitOnly, which
+   sets this attribute from `screen.orientation`, pre-paint via the root layout
+   and on every rotation after it.
+
+   Must stay LAST in this file: it ties trigger 2 on specificity, so source
+   order is what decides the winner (tests/portrait-only.test.ts pins that). */
+html[data-device-portrait='true'] .portrait-gate {
+  display: none;
+}
+html[data-device-portrait='true'] #scroll-container,
+html[data-device-portrait='true'] #portal-root {
+  visibility: visible;
+}

@@ -106,6 +106,17 @@ export default async function RootLayout({ children }: ChildrenProps) {
         suppressHydrationWarning
       >
         <head>
+          {/* Which way the DEVICE is facing, decided before the first paint.
+              The portrait wall is a media query, and a media query only knows
+              the shape of the webview — which is short and wide on an upright
+              phone in Telegram's compact mode. Without this attribute in place
+              from the very first frame, such a phone flashes "turn me upright"
+              on every launch. @see usePortraitOnly, which owns it afterwards. */}
+          <script
+            dangerouslySetInnerHTML={{
+              __html: `(function(){try{var t=screen.orientation&&screen.orientation.type,u=t?t.indexOf('portrait')===0:(typeof orientation==='number'?Math.abs(orientation)!==90:null);if(u===true)document.documentElement.dataset.devicePortrait='true';}catch(e){}})();`,
+            }}
+          />
           <Script src="https://telegram.org/js/telegram-web-app.js" strategy="beforeInteractive" />
           {/* Rewarded-ad SDKs — each loads only when its network is configured,
               so an unused network costs nothing. Order here is irrelevant; the
