@@ -39,6 +39,18 @@ export default defineConfig({
       // a slow runner — three routes failed that way, none of them for a layout
       // reason. Four cube tests keep the engine coverage that actually earned its
       // place.
+      //
+      // What this project can NOT tell you: anything about how 3D PAINTS. This
+      // WebKit build (headless and headed alike, measured 09.08.2026) renders no
+      // CSS 3D at all — `perspective` on a parent is ignored, and a `preserve-3d`
+      // stack paints in DOM order with no depth sorting, so the far face lands on
+      // top of the near one. A screenshot of the engine cube here therefore shows
+      // the passport face mirrored over the card, on any code: it is the probe
+      // flattening the cube, not the app. The cube checks below survive that
+      // because they read geometry (`getBoundingClientRect`, computed transforms),
+      // which WebKit computes correctly — verified face by face against Chromium,
+      // identical to the pixel. Judge the cube's LOOK on a device or in real
+      // Safari; never from a `playwright.webkit` screenshot.
       name: 'webkit',
       testMatch: /layout-invariants\.spec\.ts/,
       grepInvert: /no screen scrolls sideways/,
