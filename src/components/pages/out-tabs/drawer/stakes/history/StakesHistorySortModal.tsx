@@ -44,7 +44,7 @@ export function StakesHistorySortModal({
   };
 
   return (
-    <Modal open={open} onClose={onClose}>
+    <Modal open={open} onClose={onClose} label={t('sort by')}>
       <div className="flex flex-col gap-3 rounded-2xl border border-white/10 bg-background-overlay p-5">
         <h2 className="text-base font-extrabold text-white">{t('sort by')}</h2>
         <div className="flex flex-col gap-1.5">

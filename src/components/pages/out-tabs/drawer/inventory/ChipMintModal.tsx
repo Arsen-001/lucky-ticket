@@ -50,7 +50,7 @@ export function ChipMintModal({
   const accent = QUALITY_ACCENT[quality];
 
   return (
-    <Modal open={open} onClose={onClose}>
+    <Modal open={open} onClose={onClose} label={t('mint a new chip')}>
       <div className="card-outlined bg-purple-gradient flex flex-col gap-4 rounded-2xl p-5">
         <header className="flex flex-col">
           <h2 className="text-base font-extrabold text-white">{t('mint a new chip')}</h2>

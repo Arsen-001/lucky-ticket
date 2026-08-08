@@ -30,7 +30,7 @@ export function MarketInfoModal({ open, item, onClose, onBuy }: MarketInfoModalP
   if (!item) return null;
 
   return (
-    <Modal open={open} onClose={onClose}>
+    <Modal open={open} onClose={onClose} label={item.name}>
       <div className="card-outlined bg-purple-gradient flex flex-col gap-4 rounded-2xl p-5">
         <div
           className="flex-center relative h-44 w-full overflow-hidden rounded-xl"

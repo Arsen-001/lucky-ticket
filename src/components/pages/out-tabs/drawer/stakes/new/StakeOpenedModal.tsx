@@ -17,7 +17,7 @@ export function StakeOpenedModal({ open, onClose, amount, months }: StakeOpenedM
   const t = useAppTranslations();
 
   return (
-    <Modal open={open} onClose={onClose} hideCloseButton>
+    <Modal open={open} onClose={onClose} hideCloseButton label={t('stake opened')}>
       <div
         className="border-success/30 flex flex-col items-center gap-4 rounded-2xl border px-5 py-6 text-center shadow-[0_20px_60px_rgba(0,0,0,0.6)]"
         style={{

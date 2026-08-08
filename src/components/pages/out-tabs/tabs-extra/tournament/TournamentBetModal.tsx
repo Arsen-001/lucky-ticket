@@ -135,7 +135,7 @@ export function TournamentBetModal({
   const newTotal = (participatedTicketsCount ?? 0) + betCount;
 
   return (
-    <Modal open={open} onClose={handleClose} hideCloseButton>
+    <Modal open={open} onClose={handleClose} hideCloseButton label={tournamentName}>
       <div className="bg-purple-gradient relative w-full max-w-[360px] mx-auto rounded-3xl overflow-hidden">
         <div className="relative flex flex-col items-center gap-4 px-5 pt-7 pb-5">
           <TicketOverlap

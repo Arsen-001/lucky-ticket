@@ -58,6 +58,7 @@ export function FriendClaimModal({
 
   return (
     <Modal
+      label={t('rewards from {name}', { name: displayNameOf(friend) })}
       open={open}
       onClose={onClose}
       closeOnOverlayClick={false}

@@ -53,7 +53,12 @@ export function StakeCancelSection({
         </span>
       </button>
 
-      <Modal open={open} onClose={() => setOpen(false)} hideCloseButton>
+      <Modal
+        open={open}
+        onClose={() => setOpen(false)}
+        hideCloseButton
+        label={t('cancel forfeits bonus')}
+      >
         <div className="bg-background border-error/30 flex flex-col gap-4 rounded-2xl border px-5 py-5 shadow-[0_20px_60px_rgba(0,0,0,0.6)]">
           <div className="flex items-start gap-2.5">
             <div className="border-error/40 bg-error/20 flex h-9 w-9 shrink-0 items-center justify-center rounded-full border">

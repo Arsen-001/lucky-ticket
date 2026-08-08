@@ -76,7 +76,7 @@ export function RequirementModal({
   const percentage = progress && progress.required > 0 ? (current / progress.required) * 100 : 100;
 
   return (
-    <Modal open={open} onClose={onClose}>
+    <Modal open={open} onClose={onClose} label={title}>
       <div className="bg-purple-gradient relative flex flex-col items-center gap-3 overflow-hidden rounded-2xl p-6 text-center">
         <span
           aria-hidden

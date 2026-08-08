@@ -57,7 +57,7 @@ export function BuyStarsModal({ open, onClose, initialStars }: BuyStarsModalProp
   };
 
   return (
-    <BottomSheet open={open} onClose={onClose}>
+    <BottomSheet open={open} onClose={onClose} label={t('buy stars')}>
       <div className="card-outlined bg-purple-gradient relative flex flex-col gap-5 overflow-hidden rounded-t-2xl px-6 pb-8 pt-7">
         <div
           aria-hidden

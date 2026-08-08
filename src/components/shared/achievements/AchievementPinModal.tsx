@@ -24,7 +24,7 @@ export function AchievementPinModal({
   const locale = useLocale();
 
   return (
-    <Modal open={!!achievement} onClose={onClose}>
+    <Modal open={!!achievement} onClose={onClose} label={t('pin to profile')}>
       {achievement && (
         <div className="flex flex-col gap-6 rounded-3xl border border-white/10 bg-background-overlay p-5">
           <div className="flex flex-col items-center gap-2">

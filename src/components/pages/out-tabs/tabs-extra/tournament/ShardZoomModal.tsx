@@ -33,7 +33,7 @@ export function ShardZoomModal({ open, onClose, type, tier }: ShardZoomModalProp
   const typeLabel = type === 'capacity' ? t('capacity') : t('time');
 
   return (
-    <Modal open={open} onClose={onClose}>
+    <Modal open={open} onClose={onClose} label={t('shard')}>
       <div className="flex flex-col items-center gap-4 rounded-2xl border border-white/10 bg-background-overlay p-6 text-center">
         <div className="flex-center relative h-44 w-44">
           <span

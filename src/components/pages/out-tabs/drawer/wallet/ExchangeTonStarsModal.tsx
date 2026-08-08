@@ -68,7 +68,7 @@ export function ExchangeTonStarsModal({
   };
 
   return (
-    <Modal open={open} onClose={onClose}>
+    <Modal open={open} onClose={onClose} label={t('exchange ton to stars')}>
       <div className="card-outlined bg-purple-gradient relative flex flex-col gap-5 overflow-hidden rounded-2xl p-6">
         <span
           aria-hidden

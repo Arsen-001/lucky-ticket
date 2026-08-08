@@ -110,7 +110,11 @@ export function ProfileCollageLayer({
         })}
       </div>
 
-      <Modal open={pickerSlot !== null} onClose={() => setPickerSlot(null)}>
+      <Modal
+        open={pickerSlot !== null}
+        onClose={() => setPickerSlot(null)}
+        label={t('add to collage')}
+      >
         <div className="bg-purple-gradient mx-auto flex w-full max-w-[360px] flex-col gap-3 rounded-3xl p-5">
           <h3 className="text-center text-base font-extrabold text-white">{t('add to collage')}</h3>
           {earnedOptions.length === 0 ? (

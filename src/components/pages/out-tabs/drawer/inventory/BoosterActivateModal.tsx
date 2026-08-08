@@ -55,7 +55,7 @@ export function BoosterActivateModal({
   const accent = booster ? QUALITY_ACCENT[booster.quality] : 'var(--color-electric-pink)';
 
   return (
-    <Modal open={open} onClose={onClose}>
+    <Modal open={open} onClose={onClose} label={t('activate booster')}>
       <div className="card-outlined bg-purple-gradient rounded-2xl p-5">
         <h2 className="text-base font-extrabold text-white">{t('activate booster')}</h2>
         {booster && (

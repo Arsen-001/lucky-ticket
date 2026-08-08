@@ -97,7 +97,7 @@ export function DepositTonModal({ open, onClose, onDeposited }: DepositTonModalP
   };
 
   return (
-    <Modal open={open} onClose={handleClose}>
+    <Modal open={open} onClose={handleClose} label={t('deposit ton')}>
       <div className="bg-purple-gradient flex flex-col gap-4 rounded-2xl p-6">
         <div className="flex flex-col gap-1 text-center">
           <h2 className="text-white text-xl font-extrabold">{t('deposit ton')}</h2>

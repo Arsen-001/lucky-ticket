@@ -31,7 +31,7 @@ export function NotificationModal({ notification, open, onClose }: NotificationM
   };
 
   return (
-    <Modal open={open} onClose={onClose}>
+    <Modal open={open} onClose={onClose} label={notification?.title}>
       <div className="bg-purple-gradient relative overflow-hidden rounded-2xl">
         <div className={`relative px-6 pt-7 pb-5 text-center ${theme.bg}`}>
           <span

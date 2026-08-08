@@ -99,19 +99,22 @@ export function EngineSlotPickerModal({
     router.push(canMint ? routes.inventory : routes.market('shards'));
   };
 
+  // Hoisted out of the heading so the dialog can announce itself with the same
+  // words it shows — four pickers share this component.
+  const title =
+    category === 'chip'
+      ? type === 'speed'
+        ? t('pick speed chip')
+        : t('pick capacity chip')
+      : type === 'speed'
+        ? t('pick speed booster')
+        : t('pick capacity booster');
+
   return (
-    <Modal open={open} onClose={onClose}>
+    <Modal open={open} onClose={onClose} label={title}>
       <div className="card-outlined bg-purple-gradient flex flex-col gap-3 rounded-2xl p-5">
         <header>
-          <h2 className="text-base font-extrabold text-white">
-            {category === 'chip'
-              ? type === 'speed'
-                ? t('pick speed chip')
-                : t('pick capacity chip')
-              : type === 'speed'
-                ? t('pick speed booster')
-                : t('pick capacity booster')}
-          </h2>
+          <h2 className="text-base font-extrabold text-white">{title}</h2>
           <p className="text-pink-secondary mt-1 text-[11px]">
             {category === 'chip'
               ? t('chip slot picker hint', { tier: t(engineTier) })

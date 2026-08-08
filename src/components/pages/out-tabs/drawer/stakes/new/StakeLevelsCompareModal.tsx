@@ -24,7 +24,7 @@ export function StakeLevelsCompareModal({ open, onClose, levels }: StakeLevelsCo
   const apDivisor = stakeCfg.apDivisor;
 
   return (
-    <Modal open={open} onClose={onClose}>
+    <Modal open={open} onClose={onClose} label={t('compare stake levels')}>
       <div className="bg-background flex flex-col gap-3 rounded-2xl border border-white/10 px-5 py-5 shadow-[0_20px_60px_rgba(0,0,0,0.6)]">
         <h3 className="text-[16px] font-extrabold text-white">{t('compare stake levels')}</h3>
         <p className="text-pink-secondary text-[10px]">

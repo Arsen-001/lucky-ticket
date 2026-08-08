@@ -103,7 +103,7 @@ export function PlayerQuickCard({
 
   return (
     <>
-      <Modal open={open} onClose={onClose} hideCloseButton>
+      <Modal open={open} onClose={onClose} hideCloseButton label={username}>
         <div className="bg-purple-gradient mx-auto w-full max-w-[330px] overflow-hidden rounded-3xl">
           <div className="relative flex flex-col items-center gap-2.5 px-5 pb-4 pt-7">
             <span

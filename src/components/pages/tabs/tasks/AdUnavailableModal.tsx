@@ -49,7 +49,7 @@ export function AdUnavailableModal({ open, reason, onClose }: AdUnavailableModal
   const Icon = REASON_ICON[active];
 
   return (
-    <Modal open={open} onClose={onClose} hideCloseButton>
+    <Modal open={open} onClose={onClose} hideCloseButton label={t(REASON_TITLE_KEY[active])}>
       <div className="relative bg-purple-gradient rounded-2xl overflow-hidden w-full max-w-[360px] mx-auto">
         <span
           aria-hidden

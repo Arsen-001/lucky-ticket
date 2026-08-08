@@ -89,7 +89,7 @@ export function ProfileSendTicketModal({
   };
 
   return (
-    <Modal open={open} onClose={onClose} hideCloseButton>
+    <Modal open={open} onClose={onClose} hideCloseButton label={t('send a ticket')}>
       <div className="bg-purple-gradient mx-auto flex w-full max-w-[360px] flex-col gap-4 rounded-3xl p-5">
         <div className="flex flex-col gap-1 text-center">
           <h2 className="text-base font-extrabold text-white">{t('send a ticket')}</h2>

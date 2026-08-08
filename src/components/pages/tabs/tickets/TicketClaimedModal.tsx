@@ -61,7 +61,7 @@ export function TicketClaimedModal({ open, tier, count, onClose }: TicketClaimed
   const tierColor = `var(--color-${tier})`;
 
   return (
-    <Modal open={open} onClose={onClose} hideCloseButton>
+    <Modal open={open} onClose={onClose} hideCloseButton label={t('claimed')}>
       <div
         className={twMerge(
           'relative rounded-2xl overflow-hidden w-full max-w-[340px] mx-auto px-6 pt-8 pb-6 flex flex-col items-center gap-4'

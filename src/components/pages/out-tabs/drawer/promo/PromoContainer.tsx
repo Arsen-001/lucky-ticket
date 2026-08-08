@@ -74,7 +74,7 @@ export function PromoContainer() {
         <PromoChannelCard />
       </div>
 
-      <Modal open={resultOpen} onClose={() => setResultOpen(false)}>
+      <Modal open={resultOpen} onClose={() => setResultOpen(false)} label={t('promo code')}>
         {result && <PromoRewardReveal key={result.code} response={result} />}
       </Modal>
     </div>

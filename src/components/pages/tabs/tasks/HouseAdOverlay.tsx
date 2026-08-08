@@ -65,7 +65,13 @@ export function HouseAdOverlay() {
   };
 
   return (
-    <Modal open={open} closeOnOverlayClick={false} hideOnEscape={false} hideCloseButton>
+    <Modal
+      open={open}
+      closeOnOverlayClick={false}
+      hideOnEscape={false}
+      hideCloseButton
+      label={t(promo.titleKey)}
+    >
       <div className="relative bg-purple-gradient rounded-2xl overflow-hidden w-full max-w-[360px] mx-auto">
         <span
           aria-hidden

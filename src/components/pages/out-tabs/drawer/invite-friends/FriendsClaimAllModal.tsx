@@ -31,6 +31,7 @@ export function FriendsClaimAllModal({
 
   return (
     <Modal
+      label={t('claim all')}
       open={open}
       onClose={onClose}
       closeOnOverlayClick={false}

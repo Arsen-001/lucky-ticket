@@ -149,7 +149,7 @@ export function ClaimRewardModal({
   }, [open, result]);
 
   return (
-    <Modal open={open} onClose={onClose} hideCloseButton>
+    <Modal open={open} onClose={onClose} hideCloseButton label={t('claim reward')}>
       <div
         className="relative bg-purple-gradient rounded-2xl overflow-hidden w-full max-w-[360px] mx-auto"
         style={{ height: 540 }}

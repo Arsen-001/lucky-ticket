@@ -161,7 +161,7 @@ export function TournamentResultModal({
   const title = view === 'no-place' && jackpotLc > 0 ? `${t('jackpot')}!` : titleByView[view];
 
   return (
-    <Modal open={open} onClose={onClose} hideCloseButton>
+    <Modal open={open} onClose={onClose} hideCloseButton label={title}>
       <div className="relative bg-purple-gradient rounded-2xl overflow-hidden w-full max-w-[360px] mx-auto">
         <div className="relative flex flex-col items-center gap-4 px-6 pt-7 pb-5">
           {/* PRIZE AREA */}

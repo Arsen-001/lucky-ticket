@@ -79,7 +79,7 @@ export function LcConvertTonModal({ open, onClose, balance }: LcConvertTonModalP
   };
 
   return (
-    <Modal open={open} onClose={onClose}>
+    <Modal open={open} onClose={onClose} label={t('convert to ton')}>
       <div className="card-outlined bg-purple-gradient relative flex flex-col gap-5 overflow-hidden rounded-2xl p-6">
         <span
           aria-hidden

@@ -120,7 +120,7 @@ export function EmailVerificationContainer() {
         />
       )}
 
-      <Modal open={resultOpen} onClose={() => setResultOpen(false)}>
+      <Modal open={resultOpen} onClose={() => setResultOpen(false)} label={t('email verified')}>
         {result?.reward && <EmailVerifiedModal email={result.email} reward={result.reward} />}
       </Modal>
     </>

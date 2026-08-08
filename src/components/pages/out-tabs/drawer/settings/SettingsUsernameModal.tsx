@@ -48,7 +48,7 @@ export function SettingsUsernameModal({ open, onClose }: SettingsUsernameModalPr
   };
 
   return (
-    <Modal open={open} onClose={onClose}>
+    <Modal open={open} onClose={onClose} label={t('change username')}>
       <div className="bg-purple-gradient flex flex-col gap-5 rounded-2xl p-6">
         <div className="flex flex-col gap-1 text-center">
           <h3 className="text-xl font-bold text-white">{t('change username')}</h3>

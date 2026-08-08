@@ -184,7 +184,7 @@ export function WithdrawTonModal({
   // all, how many friends the player has invited is beside the point.
   if (!withdrawalsEnabled || lateDisabled) {
     return (
-      <Modal open={open} onClose={handleClose}>
+      <Modal open={open} onClose={handleClose} label={t('withdraw ton')}>
         <div className="bg-purple-gradient flex flex-col gap-4 rounded-2xl p-6">
           <WalletWithdrawLocked />
           <Button variant="secondary" onClick={handleClose} className="rounded-full px-4 py-2">
@@ -203,7 +203,7 @@ export function WithdrawTonModal({
     const gateCurrent = lateGate?.current ?? currentReferrals;
 
     return (
-      <Modal open={open} onClose={handleClose}>
+      <Modal open={open} onClose={handleClose} label={t('withdrawals unlock with friends')}>
         <div className="bg-purple-gradient flex flex-col gap-4 rounded-2xl p-6">
           <WalletReferralGate
             title={t('withdrawals unlock with friends')}
@@ -220,7 +220,7 @@ export function WithdrawTonModal({
   }
 
   return (
-    <Modal open={open} onClose={handleClose}>
+    <Modal open={open} onClose={handleClose} label={t('withdraw ton')}>
       <div className="bg-purple-gradient flex flex-col gap-4 rounded-2xl p-6">
         {step === 'form' && (
           <>

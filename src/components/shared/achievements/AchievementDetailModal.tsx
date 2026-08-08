@@ -40,7 +40,11 @@ export function AchievementDetailModal({ achievement, onClose }: AchievementDeta
   const open = !!achievement;
 
   return (
-    <Modal open={open} onClose={onClose}>
+    <Modal
+      open={open}
+      onClose={onClose}
+      label={achievement ? getLocalizedText(achievement.name, locale) : undefined}
+    >
       {achievement && (
         <div className="bg-background-overlay flex flex-col items-center gap-4 rounded-3xl border border-white/10 p-6">
           <Achievement achievement={achievement} size="xl" />
