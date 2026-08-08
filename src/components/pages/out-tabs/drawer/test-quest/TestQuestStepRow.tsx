@@ -129,7 +129,7 @@ export function TestQuestStepRow({ step, done = false, count }: TestQuestStepRow
             type="button"
             onClick={openChannel}
             aria-label={t('open channel')}
-            className="flex-center -my-0.5 shrink-0 rounded-lg px-1 py-0.5 text-gold active:scale-95"
+            className="tap-target relative flex-center -my-0.5 shrink-0 rounded-lg px-1 py-0.5 text-gold active:scale-95"
           >
             <ArrowUpRight size={15} />
           </button>

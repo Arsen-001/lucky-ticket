@@ -22,7 +22,7 @@ export function BackButton({ className, ...props }: ButtonProps) {
       variant="transparent"
       aria-label={t('back')}
       className={twMerge(
-        'py-1 px-1.5 rounded-lg bg-back-button-background flex items-center justify-center',
+        'tap-target relative py-1 px-1.5 rounded-lg bg-back-button-background flex items-center justify-center',
         className
       )}
       {...props}

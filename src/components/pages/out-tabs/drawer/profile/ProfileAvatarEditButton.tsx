@@ -17,7 +17,7 @@ export function ProfileAvatarEditButton() {
         type="button"
         onClick={() => setOpen(true)}
         aria-label={t('change avatar')}
-        className="bg-pink-gradient flex-center animate-fade-in border-background absolute -bottom-[5px] -right-[5px] z-10 h-9 w-9 rounded-full border-2 text-white shadow-lg transition-all active:scale-90"
+        className="tap-target bg-pink-gradient flex-center animate-fade-in border-background absolute -bottom-[5px] -right-[5px] z-10 h-9 w-9 rounded-full border-2 text-white shadow-lg transition-all active:scale-90"
       >
         <Pencil size={15} strokeWidth={2.5} />
       </button>

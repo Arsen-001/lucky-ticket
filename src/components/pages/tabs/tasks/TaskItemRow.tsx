@@ -272,11 +272,10 @@ export function TaskItemRow({ task, onClaim, highlightToken, className, style }:
             e.stopPropagation();
             navigate();
           }}
-          // The circle stays 28px, but the finger gets 44px: `before` inflates
-          // the hit area past the drawn edge without moving anything in the
-          // row. At 28px this was a miss more often than a hit, which reads
-          // exactly like a dead button.
-          className="flex-center border-electric-pink/30 bg-electric-pink/15 hover:bg-electric-pink/25 relative h-7 w-7 shrink-0 rounded-full border transition-colors before:absolute before:-inset-2 before:content-[''] active:scale-95"
+          // The circle stays 28px, but the finger gets 44px (`tap-target`).
+          // At 28px this was a miss more often than a hit, which reads exactly
+          // like a dead button.
+          className="tap-target flex-center border-electric-pink/30 bg-electric-pink/15 hover:bg-electric-pink/25 relative h-7 w-7 shrink-0 rounded-full border transition-colors active:scale-95"
         >
           <ChevronRight size={13} className="text-electric-pink" strokeWidth={2.5} />
         </button>

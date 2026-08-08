@@ -188,7 +188,7 @@ export function Header({ className }: ClassNameProps) {
         onClick={handleDrawerOpen}
         variant="transparent"
         aria-label={t('menu')}
-        className="bg-electric-pink/10 border-electric-pink/30 hover:bg-electric-pink/20 hover:border-electric-pink/50 active:scale-95 flex-center group relative z-1 h-10 w-10 flex-shrink-0 rounded-full border p-0 shadow-[0_0_18px_rgba(222,0,155,0.35)] transition-all duration-200"
+        className="tap-target bg-electric-pink/10 border-electric-pink/30 hover:bg-electric-pink/20 hover:border-electric-pink/50 active:scale-95 flex-center group relative z-1 h-10 w-10 flex-shrink-0 rounded-full border p-0 shadow-[0_0_18px_rgba(222,0,155,0.35)] transition-all duration-200"
       >
         <Menu
           className="text-electric-pink group-hover:text-white transition-colors"

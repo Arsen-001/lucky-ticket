@@ -15,7 +15,7 @@ export function ProfileUsernameEditButton() {
         type="button"
         onClick={() => setOpen(true)}
         aria-label={t('change username')}
-        className="flex-center animate-fade-in h-7 w-7 shrink-0 rounded-full border border-white/15 bg-white/10 text-white/80 transition-all active:scale-90"
+        className="tap-target flex-center animate-fade-in relative h-7 w-7 shrink-0 rounded-full border border-white/15 bg-white/10 text-white/80 transition-all active:scale-90"
       >
         <Pencil size={13} strokeWidth={2.5} />
       </button>

@@ -158,13 +158,18 @@ export function ProfileHero({ profile, loading, isPreview, onTogglePreview }: Pr
           onPositionsChange={positions => updateBannerIcons({ positions })}
         />
 
-        <div className="absolute right-4 top-4 z-2 flex flex-col items-end gap-2">
+        {/* Above the collage (`.profile-banner-collage.editable` is z-3), not
+            below it: on your own profile the drifting achievement icons are a
+            drag surface, and at z-2 they sat over these two buttons and ate the
+            taps — measured with elementFromPoint, both buttons lost their own
+            centre to a `lucide-star`. */}
+        <div className="absolute right-4 top-4 z-4 flex flex-col items-end gap-2">
           {showPreviewToggle && (
             <button
               type="button"
               onClick={onTogglePreview}
               aria-label={isPreview ? t('exit preview') : t('preview as visitor')}
-              className="flex h-9 w-9 items-center justify-center rounded-full backdrop-blur-md border border-white/15 bg-black/30 text-white/90 transition-all active:scale-95"
+              className="tap-target relative flex h-9 w-9 items-center justify-center rounded-full backdrop-blur-md border border-white/15 bg-black/30 text-white/90 transition-all active:scale-95"
             >
               {isPreview ? <EyeOff size={16} /> : <Eye size={16} />}
             </button>
@@ -173,7 +178,7 @@ export function ProfileHero({ profile, loading, isPreview, onTogglePreview }: Pr
             type="button"
             onClick={() => setShareOpen(true)}
             aria-label={t('share')}
-            className="flex h-9 w-9 items-center justify-center rounded-full backdrop-blur-md border border-white/15 bg-black/30 text-white/90 transition-all active:scale-95"
+            className="tap-target relative flex h-9 w-9 items-center justify-center rounded-full backdrop-blur-md border border-white/15 bg-black/30 text-white/90 transition-all active:scale-95"
           >
             <Share2 size={16} />
           </button>

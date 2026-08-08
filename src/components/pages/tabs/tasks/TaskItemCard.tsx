@@ -746,7 +746,7 @@ export function TaskItemCard({
                   openExternalUrl(task.externalLink);
                 }}
                 // 32px circle, 44px hit area — see TaskItemRow.
-                className="flex-center bg-electric-pink/15 border-electric-pink/30 hover:bg-electric-pink/25 relative size-8 rounded-full border transition-all before:absolute before:-inset-1.5 before:content-[''] active:scale-95"
+                className="tap-target flex-center bg-electric-pink/15 border-electric-pink/30 hover:bg-electric-pink/25 relative size-8 rounded-full border transition-all active:scale-95"
               >
                 <ArrowUpRight size={14} className="text-electric-pink" strokeWidth={2.5} />
               </button>

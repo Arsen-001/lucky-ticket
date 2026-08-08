@@ -146,7 +146,7 @@ export function FriendsHeroCard() {
           loading={isMeLoading || !linkReady}
           onClick={handleCopy}
           aria-label={t('copy link')}
-          className="flex-center h-9 w-9 rounded-lg bg-white/8 p-0 hover:bg-white/12"
+          className="tap-target relative flex-center h-9 w-9 rounded-lg bg-white/8 p-0 hover:bg-white/12"
         >
           {copied ? (
             <Check size={14} className="text-white" />
