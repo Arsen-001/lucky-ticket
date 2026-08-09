@@ -11,7 +11,7 @@ import { termsMock } from '@/mock/terms.mock';
 import { notificationsMock } from '@/mock/notifications.mock';
 import { notificationPreferencesMock } from '@/mock/notification-preferences.mock';
 import { referralMock } from '@/mock/referral.mock';
-import { marketMock } from '@/mock/market.mock';
+import { marketMock, marketSavingsMock } from '@/mock/market.mock';
 import { giftsMock } from '@/mock/gifts.mock';
 import { stakesMock } from '@/mock/stakes.mock';
 import { walletMock } from '@/mock/wallet.mock';
@@ -105,6 +105,7 @@ export const mockData = {
   ...notificationPreferencesMock,
   ...referralMock,
   market: marketMock,
+  'market/savings': marketSavingsMock,
   ...marketMutationHandlers,
   ...giftsMock,
   ...stakesMock,

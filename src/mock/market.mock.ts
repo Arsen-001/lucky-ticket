@@ -8,7 +8,11 @@ import { TicketsEnum } from '@/types/enums/ticket.enums';
 import { images } from '@/constants/images';
 import { appConfig } from '@/config/app.config';
 import { lcPriceToLsParity } from '@/utils/global/economy.utils';
-import type { MarketData, MarketPrice } from '@/types/interfaces/market.interfaces';
+import type {
+  MarketData,
+  MarketPrice,
+  MarketStatusSavings,
+} from '@/types/interfaces/market.interfaces';
 
 /**
  * LC price ladder + LS parity (DOCS §14.2). Engine and ticket LC prices come
@@ -449,4 +453,16 @@ export const marketMock: MarketData = {
       ],
     },
   ],
+};
+
+/**
+ * A month of a VIP 2 player's savings. Deliberately lopsided — most of the
+ * money is saved on LC (engines cost millions) while the Stars figure stays
+ * small, which is what the real ratio looks like and what the layout has to
+ * survive.
+ */
+export const marketSavingsMock: MarketStatusSavings = {
+  lc: 1_284_320,
+  stars: 47,
+  windowDays: 30,
 };

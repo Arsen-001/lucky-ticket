@@ -7,7 +7,11 @@ import { ticketsApi } from '@/api/tickets.api';
 import { rtkTags } from '@/constants/rtk-tags';
 import { MarketPriceType } from '@/types/enums/market.enums';
 import type { InventoryChipType } from '@/types/interfaces/inventory.interfaces';
-import type { MarketData, MarketPrice } from '@/types/interfaces/market.interfaces';
+import type {
+  MarketData,
+  MarketPrice,
+  MarketStatusSavings,
+} from '@/types/interfaces/market.interfaces';
 import type { TicketEngine } from '@/types/interfaces/ticket.interfaces';
 import type { TicketType } from '@/types/types/ticket.types';
 import { sortMarketData } from '@/utils/global/market.utils';
@@ -33,6 +37,11 @@ export const marketApi = api.injectEndpoints({
       providesTags: [rtkTags.market],
     }),
 
+    getMarketStatusSavings: builder.query<MarketStatusSavings, void>({
+      query: () => ({ url: 'market/savings' }),
+      providesTags: [rtkTags.marketSavings],
+    }),
+
     buyTicket: builder.mutation<
       void,
       { ticketId: string; count: number; priceType: MarketPriceType }
@@ -43,6 +52,7 @@ export const marketApi = api.injectEndpoints({
         body: { count, priceType },
       }),
       invalidatesTags: [
+        rtkTags.marketSavings,
         rtkTags.market,
         rtkTags.me,
         rtkTags.tickets,
@@ -60,6 +70,7 @@ export const marketApi = api.injectEndpoints({
       // `profile` too: the profile hero renders isVIP/isLuckyPlayer/vipLevel
       // from its own query — without it the badges stay stale after a purchase.
       invalidatesTags: [
+        rtkTags.marketSavings,
         rtkTags.market,
         rtkTags.me,
         rtkTags.profile,
@@ -78,6 +89,7 @@ export const marketApi = api.injectEndpoints({
         body: { engineId, priceType: price.type },
       }),
       invalidatesTags: [
+        rtkTags.marketSavings,
         rtkTags.market,
         rtkTags.me,
         rtkTags.tickets,
@@ -130,6 +142,7 @@ export const marketApi = api.injectEndpoints({
         body: { shardId, priceType: price.type },
       }),
       invalidatesTags: [
+        rtkTags.marketSavings,
         rtkTags.market,
         rtkTags.me,
         rtkTags.inventory,
@@ -164,6 +177,7 @@ export const marketApi = api.injectEndpoints({
         body: { cosmeticId, priceType: price.type },
       }),
       invalidatesTags: [
+        rtkTags.marketSavings,
         rtkTags.market,
         rtkTags.me,
         rtkTags.avatars,
@@ -184,6 +198,7 @@ export const marketApi = api.injectEndpoints({
 
 export const {
   useGetMarketDataQuery,
+  useGetMarketStatusSavingsQuery,
   useBuyTicketMutation,
   useBuyStatusMutation,
   useBuyEngineMutation,

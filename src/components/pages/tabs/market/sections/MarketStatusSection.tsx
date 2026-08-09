@@ -6,6 +6,7 @@ import { Crown, Gem } from 'lucide-react';
 import type { ReactNode } from 'react';
 import { useBuyStatusMutation, useGetMarketDataQuery } from '@/api/market.api';
 import { useGetMeQuery } from '@/api/me.api';
+import { MarketSavingsRow } from '@/components/pages/tabs/market/sections/MarketSavingsRow';
 import { MarketSectionGrid } from '@/components/pages/tabs/market/MarketSectionGrid';
 import { MarketUniversalCard } from '@/components/pages/tabs/market/MarketUniversalCard';
 import { MarketItemImage } from '@/components/pages/tabs/market/MarketItemImage';
@@ -76,7 +77,16 @@ export function MarketStatusSection({ onSelect, onBuy }: MarketStatusSectionProp
   if (!isLoading && !statuses.length) return null;
 
   return (
-    <MarketSectionGrid title={t('statuses')} icon={Crown} accent="var(--color-gold)">
+    // `count` is pinned to the statuses: the savings receipt is a child of the
+    // grid (it spans both columns) and would otherwise be counted as a third
+    // thing on sale.
+    <MarketSectionGrid
+      title={t('statuses')}
+      icon={Crown}
+      accent="var(--color-gold)"
+      count={statuses.length}
+    >
+      <MarketSavingsRow className="col-span-2" />
       {statuses.map(status => {
         const isVIP = status.statusType === MarketStatusType.VIP;
         const isLuckyPlayer = status.statusType === MarketStatusType.LUCKY_PLAYER;

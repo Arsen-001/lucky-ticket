@@ -115,3 +115,19 @@ export interface MarketData {
   cosmetics: MarketCosmetic[];
   statuses: MarketStatus[];
 }
+
+/**
+ * What the player's status discount took off their Market charges over a
+ * rolling window. Summed by the backend from the ledger, so it counts what was
+ * actually charged rather than re-deriving it from today's discount rate — the
+ * rate climbs with VIP level, and an estimate would be most wrong for the
+ * players who bought the most.
+ */
+export interface MarketStatusSavings {
+  /** Lucky Coins saved in the window. */
+  lc: number;
+  /** Lucky Stars saved in the window. */
+  stars: number;
+  /** Length of the window the two totals cover. */
+  windowDays: number;
+}
