@@ -6,7 +6,7 @@ import { useAppTranslations } from '@/hooks/useAppTranslations';
 import { GlobalConstants } from '@/constants/global.constants';
 import type { AdSlot } from '@/types/interfaces/tasks.interfaces';
 import { AdRewardRow } from './AdRewardRow';
-import { AdDayStrip } from './AdDayStrip';
+import { AdRewardRail } from './AdRewardRail';
 
 /** Radius and circumference of the progress ring, in its own 58×58 viewBox. */
 const RING_R = 26;
@@ -200,7 +200,7 @@ export function AdWatchCard({
         <span className={twMerge((cooling || spent) && 'tabular-nums')}>{ctaLabel}</span>
       </button>
 
-      <AdDayStrip
+      <AdRewardRail
         slots={slots}
         activeIndex={nextSlot ? slots.findIndex(slot => slot.id === nextSlot.id) : -1}
         className="relative"
