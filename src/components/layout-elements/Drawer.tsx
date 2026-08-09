@@ -343,6 +343,10 @@ export function Drawer() {
             href={routes.profile.index}
             tabIndex={tabIndex}
             onClick={handleDrawerClose}
+            // The row is an avatar plus the player's own name, and the name is
+            // the last thing to arrive — until it does, the drawer's first
+            // link says nothing.
+            aria-label={t('view profile')}
             className="bg-background-overlay relative mx-3 mt-2 flex items-center gap-3 overflow-hidden rounded-2xl px-2.5 py-2 transition-transform active:scale-99"
           >
             <div className="relative h-14 w-14 flex-shrink-0">

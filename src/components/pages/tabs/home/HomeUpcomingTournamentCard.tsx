@@ -51,7 +51,13 @@ export function HomeUpcomingTournamentCard({
   const countdown = days > 0 ? `${days}${t('day short')} ${pad(hours)}:${pad(minutes)}` : leftTime;
 
   return (
-    <Link href={id ? routes.tournaments.getById(id) : routes.tournaments.index}>
+    <Link
+      href={id ? routes.tournaments.getById(id) : routes.tournaments.index}
+      // Every word inside this card arrives with the data, so while it loads
+      // the link has no name at all — three of them in a row on the home
+      // slider, each announced as bare "link".
+      aria-label={name || t('tournaments')}
+    >
       <div
         style={style}
         className={twMerge(
