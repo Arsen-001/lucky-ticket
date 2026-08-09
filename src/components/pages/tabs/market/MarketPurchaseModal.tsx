@@ -7,10 +7,8 @@ import { QuantityStepper } from '@/components/shared/form-elements/QuantityStepp
 import { TelegramStarIcon } from '@/components/shared/icons/TelegramStarIcon';
 import { LcLabel } from '@/components/shared/icons/LcLabel';
 import { formatCompact, formatNumber } from '@/utils/global/number.utils';
-import { BoltIcon } from '@/components/shared/icons/BoltIcon';
 import { useAppTranslations } from '@/hooks/useAppTranslations';
 import { useGetMeQuery } from '@/api/me.api';
-import { GlobalConstants } from '@/constants/global.constants';
 import { MarketPriceType } from '@/types/enums/market.enums';
 import type { MarketPrice } from '@/types/interfaces/market.interfaces';
 
@@ -73,11 +71,6 @@ export function MarketPurchaseModal({
       : price?.type === MarketPriceType.TELEGRAM_STARS
         ? (me?.telegramStars ?? 0)
         : undefined;
-
-  const purchaseAp =
-    price?.type === MarketPriceType.TELEGRAM_STARS
-      ? Math.floor(total / GlobalConstants.apRewards.purchaseLsPerAp)
-      : 0;
 
   return (
     <ConfirmModal
@@ -184,23 +177,6 @@ export function MarketPurchaseModal({
                 {price.type === MarketPriceType.LC && <LcLabel size={14} interactive={false} />}
                 {price.type === MarketPriceType.TELEGRAM_STARS && <TelegramStarIcon size={14} />}
               </div>
-            </div>
-          )}
-
-          {/* Always mounted for Stars purchases (invisible at 0 AP) so stepping
-              the quantity across the AP threshold never resizes the modal. */}
-          {price?.type === MarketPriceType.TELEGRAM_STARS && (
-            <div
-              className={twMerge(
-                'flex items-center justify-center gap-1.5',
-                purchaseAp <= 0 && 'invisible'
-              )}
-            >
-              <BoltIcon size={13} />
-              <span className="text-teal text-[12px] font-bold">
-                {t('plus {n} ap', { n: purchaseAp })}
-              </span>
-              <span className="text-[12px] text-white/50">{t('for this purchase')}</span>
             </div>
           )}
         </div>

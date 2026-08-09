@@ -177,11 +177,12 @@ AP is earned from a data-driven **source registry** — every meaningful action 
 | Like a profile            | 1                                     | 3×/day                                                                                         |
 | Invite a friend           | 10 (20 for a Telegram Premium friend) | per invite                                                                                     |
 | Join a tournament         | 1 / 2 / 3 / 4 / 5                     | by tournament tier (Bronze→Diamond), per join                                                  |
-| Purchase                  | 1 per 10 LS spent                     | no daily cap                                                                                   |
-| Spend LC                  | 1 per 2,500 LC spent                  | no daily cap                                                                                   |
+| Spend LC or LS            | **0 — buying pays no AP**             | —                                                                                              |
 | Complete a stake          | `LC staked × months / 5,000`          | base credited on start (retained on cancel), +50% bonus on completion (forfeited if cancelled) |
 
-Tiered sources (daily / weekly tasks, tournament join) scale with the relevant tier — Bronze→Diamond — and recurring daily sources carry per-day caps. **Claiming engine output awards no AP** — claims pay in tickets only, so farming the claim button cannot drive progression. For the same reason **a tournament pays its join AP once**, however many times the player re-enters it to add tickets (Section 11). **One-off and on-top sources** — verify-email, one-time tasks, friend invites, tournament joins, stake completion — are earned above the daily baseline (Section 5.4). **Purchases are uncapped:** 1 AP per 10 LS or per 2,500 LC spent with no daily limit, so a heavy spender climbs tiers substantially faster than a free player.
+Tiered sources (daily / weekly tasks, tournament join) scale with the relevant tier — Bronze→Diamond — and recurring daily sources carry per-day caps. **Claiming engine output awards no AP** — claims pay in tickets only, so farming the claim button cannot drive progression. For the same reason **a tournament pays its join AP once**, however many times the player re-enters it to add tickets (Section 11). **One-off and on-top sources** — verify-email, one-time tasks, friend invites, tournament joins, stake completion — are earned above the daily baseline (Section 5.4).
+
+**Spending pays no AP, in either currency.** Until 2026-08-10 this table promised 1 AP per 10 LS and 1 AP per 2,500 LC spent, uncapped — the backend never granted a point for a purchase in its life, and the market's purchase modal previewed AP the player then never received. The product call was to delete the promise rather than build it: tiers are earned by playing, not by paying, which is the same rule the one-time catalog already applies to paid milestones (Section 12.6). The one spend-shaped source that survives is the **stake** — it pays for locking coins up for months, not for handing them over. Money still buys advantage everywhere else it should (status perks, engines, boosts, extra ad views); it just cannot buy tier progression.
 
 ### 5.4 Daily Baseline
 
@@ -195,7 +196,7 @@ The **daily baseline** is the AP a fully-active player earns per day without don
 | Platinum | 57                       |
 | Diamond  | 70                       |
 
-The baseline is shown on the AP dashboard and is the basis of the decay rate (Section 5.5). One-off and on-top sources — verify-email, one-time tasks, invites, tournaments, stakes, purchases — are earned above this baseline.
+The baseline is shown on the AP dashboard and is the basis of the decay rate (Section 5.5). One-off and on-top sources — verify-email, one-time tasks, invites, tournaments, stakes — are earned above this baseline. Purchases are not among them: spending pays no AP (Section 5.3).
 
 ### 5.5 Activity Decay
 
@@ -282,7 +283,7 @@ A running Lucky Player subscription pays a **fixed drop once per UTC day**: `dai
 | :----------------------------- | :----- | :------------------------------------------------------------------------------------------- |
 | `status/daily-gift`            | GET    | State: the configured drop, `canClaim`, `shouldSurface`, `surfaceReason` (`gift` \| `promo`) |
 | `status/daily-gift/claim`      | POST   | Credits the drop once. `gift-disabled` / `lucky-player-required` / `already-claimed-today`   |
-| `status/daily-gift/promo-seen` | POST   | Spends the one-time offer (stamps `lpGiftPromoSeenAt`). Grants nothing; idempotent            |
+| `status/daily-gift/promo-seen` | POST   | Spends the one-time offer (stamps `lpGiftPromoSeenAt`). Grants nothing; idempotent           |
 
 The claim stamps `User.lpDailyGiftClaimedAt` and credits inside **one interactive transaction**, where the stamp is a conditional update still carrying the previous timestamp in its `WHERE`. Two taps that race both read "not collected yet", but only one matches the row; the loser credits nothing. The LC side writes an `LP_DAILY_GIFT` ledger row — its own type because this is a recurring emission bought by a subscription, not a task reward, and the economy report has to be able to separate the two.
 
@@ -2411,7 +2412,7 @@ The Market opens with a **Hero card** showing the current featured deal (with co
 - If the user has enough — opens a centered **purchase confirmation modal** with the item's icon, name, description, and price, plus a pill row showing the **available balance** of the currency being spent (compact-formatted) and — for tickets/shards — how many of that item the player **already owns**.
 - If Lucky Stars are insufficient — opens the **Not-enough-Stars bottom sheet** (with top-up presets).
 - If LC are insufficient — opens the **Not-enough-LC modal**.
-- **Quantity selection** — countable items (tickets, shards) show a tournament-bet-style stepper (MIN / − / tap-to-type value / + / MAX) in the confirmation modal; the price row switches to the order **total** with a `unit × N` breakdown, and the Stars-purchase AP preview scales with the total. MAX is capped by what the balance covers and by a per-order cap (`marketMaxPurchaseQuantity` = 999 for tickets; `marketMaxShardPurchaseQuantity` = 10 for shards, whose backend endpoint buys one unit per request, so the client loops). Single-purchase items (engines, cosmetics, statuses) show no stepper.
+- **Quantity selection** — countable items (tickets, shards) show a tournament-bet-style stepper (MIN / − / tap-to-type value / + / MAX) in the confirmation modal; the price row switches to the order **total** with a `unit × N` breakdown. MAX is capped by what the balance covers and by a per-order cap (`marketMaxPurchaseQuantity` = 999 for tickets; `marketMaxShardPurchaseQuantity` = 10 for shards, whose backend endpoint buys one unit per request, so the client loops). Single-purchase items (engines, cosmetics, statuses) show no stepper.
 - Confirming dispatches the corresponding RTK mutation (`buyEngine`, `buyTicket`, `buyStatus`, `buyShard`, `buyCosmetic`); `buyTicket` sends the chosen `count` natively. Mutations apply optimistic updates: the cost is deducted from `me.coins` / `me.telegramStars`, and the granted item is appended to the relevant cache (engines → ticket-tier engines, shards → inventory, tickets → ticket balance, status → `me`). On error, all patches are rolled back.
 
 **Card-body tap:** tapping a card's body (not its price buttons) opens an item **info sheet** — except **Status** cards (Lucky Player / VIP), whose body links to the status's dedicated page (`/settings/lucky-player`, `/settings/vip` — the single canonical route used everywhere: header pills, profile, stakes, market) where it can be reviewed, bought, or extended. This link stays active even when the status is already owned (the in-card buy buttons lock, the body still navigates). Price buttons always buy in place.

@@ -21,10 +21,11 @@ const apRewards = {
   sendTicketDailyLimit: 3,
   likeProfile: 1,
   likeProfileDailyLimit: 3,
-  /** LS spent per 1 AP from purchases — no daily cap. */
-  purchaseLsPerAp: 10,
-  /** LC spent per 1 AP from spending — no daily cap. */
-  spendLcPerAp: 2_500,
+  // NO rate for spending: buying pays no AP, in either currency. `purchaseLsPerAp: 10`
+  // and `spendLcPerAp: 2500` used to live here on the strength of DOCS §5.3 alone —
+  // the backend never granted a single point for a purchase, and the market modal
+  // was promising AP that never arrived. Product call 10.08.2026: tiers are earned
+  // by playing, not by paying, so the promise came out instead of being built.
   dailyTaskByTier: { bronze: 1, silver: 2, gold: 3, platinum: 4, diamond: 5 },
   weeklyTaskByTier: { bronze: 2, silver: 3, gold: 4, platinum: 5, diamond: 6 },
   tournamentJoinByTier: { bronze: 1, silver: 2, gold: 3, platinum: 4, diamond: 5 },

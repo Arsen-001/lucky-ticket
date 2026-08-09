@@ -2,14 +2,12 @@ import {
   CalendarCheck,
   CalendarDays,
   Clapperboard,
-  Coins,
   Flame,
   Heart,
   ListChecks,
   type LucideIcon,
   MailCheck,
   Send,
-  ShoppingBag,
   Swords,
   TrendingUp,
   UserPlus,
@@ -152,26 +150,12 @@ export const AP_SOURCES: ApSource[] = [
     hintKey: 'by tournament tier',
     route: routes.tournaments.index,
   },
-  {
-    id: 'purchase',
-    category: 'spend',
-    Icon: ShoppingBag,
-    labelKey: 'ap source purchase',
-    ap: '+1',
-    hintKey: 'per {n} ls no cap',
-    hintParams: { n: apRewards.purchaseLsPerAp },
-    route: routes.market(),
-  },
-  {
-    id: 'spendLc',
-    category: 'spend',
-    Icon: Coins,
-    labelKey: 'ap source spend lc',
-    ap: '+1',
-    hintKey: 'per {n} lc no cap',
-    hintParams: { n: apRewards.spendLcPerAp.toLocaleString() },
-    route: routes.market(),
-  },
+  // Spending itself pays NO AP — no rate for LC spent, none for LS spent.
+  // DOCS §5.3 promised «1 AP per 10 LS / per 2,500 LC» and the backend never
+  // implemented it; the product call (10.08.2026) was that tiers are earned by
+  // playing, not by paying, so the promise was removed rather than built.
+  // The only spend-shaped source left is the stake below, which pays for the
+  // lock-up, not for the purchase.
   {
     id: 'stake',
     category: 'spend',
@@ -196,8 +180,8 @@ export const AP_CATEGORY_LABEL: Record<ApCategory, MessageIds> = {
 /**
  * How much AP each capped recurring source can still pay in a day at this tier
  * — the same terms `dailyBaselineApByTier` is summed from, so "fastest today"
- * and the "~47 AP/day" caption can never disagree. Uncapped sources (purchases,
- * stakes) have no daily ceiling and are absent by design.
+ * and the "~47 AP/day" caption can never disagree. The stake has no daily
+ * ceiling and is absent by design.
  */
 export const apDailyCeilings = (
   tier: ActivityTier,
