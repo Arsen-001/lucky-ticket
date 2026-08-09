@@ -1,5 +1,6 @@
 import { ArrowRight, Check } from 'lucide-react';
 import { twMerge } from 'tailwind-merge';
+import { Ticket } from '@/components/shared/icons/Ticket';
 import type { StatusPerkRow } from '@/utils/global/status-perks.utils';
 import { staggerMs } from '@/utils/global/animation.utils';
 
@@ -68,29 +69,46 @@ export function StatusPerkList({
               >
                 {row.label}
               </span>
-              {row.value && (
+              {row.tiers ? (
                 <span
                   className={twMerge(
-                    'ml-auto flex flex-wrap items-baseline justify-end gap-x-1 text-right font-bold text-white',
+                    'ml-auto flex flex-wrap items-center justify-end gap-x-2.5 gap-y-1 font-bold text-white',
                     isSmall ? 'text-xs' : 'text-sm',
                     classNames?.value
                   )}
                 >
-                  {/*
+                  {row.tiers.map(({ tier, total }) => (
+                    <span key={tier} className="flex items-center gap-1">
+                      <Ticket type={tier} width={isSmall ? 16 : 22} height={isSmall ? 16 : 22} />
+                      {total}
+                    </span>
+                  ))}
+                </span>
+              ) : (
+                row.value && (
+                  <span
+                    className={twMerge(
+                      'ml-auto flex flex-wrap items-baseline justify-end gap-x-1 text-right font-bold text-white',
+                      isSmall ? 'text-xs' : 'text-sm',
+                      classNames?.value
+                    )}
+                  >
+                    {/*
                     The "was → is" pair only earns its space when both sides are
                     short (percentages, ad counts). On the send row it would
                     print two five-tier lists side by side; there the new value
                     alone carries the news — a tier the level opens simply
                     appears in it.
                   */}
-                  {row.from && row.from.length <= 14 && row.value.length <= 14 && (
-                    <span className="flex items-baseline gap-1 text-white/40 font-semibold">
-                      <span className="line-through">{row.from}</span>
-                      <ArrowRight size={12} className="self-center" />
-                    </span>
-                  )}
-                  {row.value}
-                </span>
+                    {row.from && row.from.length <= 14 && row.value.length <= 14 && (
+                      <span className="flex items-baseline gap-1 text-white/40 font-semibold">
+                        <span className="line-through">{row.from}</span>
+                        <ArrowRight size={12} className="self-center" />
+                      </span>
+                    )}
+                    {row.value}
+                  </span>
+                )
               )}
             </div>
           </li>

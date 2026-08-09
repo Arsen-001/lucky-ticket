@@ -11,6 +11,7 @@ import { MarketSectionGrid } from '@/components/pages/tabs/market/MarketSectionG
 import { MarketUniversalCard } from '@/components/pages/tabs/market/MarketUniversalCard';
 import { MarketItemImage } from '@/components/pages/tabs/market/MarketItemImage';
 import { MarketLockPanel } from '@/components/pages/tabs/market/MarketLockPanel';
+import { StatusPerkList } from '@/components/pages/tabs/market/status/StatusPerkList';
 import type { MarketSelectedItem } from '@/components/pages/tabs/market/MarketView';
 import { LuckyPlayerIcon } from '@/components/shared/icons/LuckyPlayerIcon';
 import { VipIcon } from '@/components/shared/icons/VipIcon';
@@ -23,8 +24,8 @@ import {
   MarketStatusType,
 } from '@/types/enums/market.enums';
 import type { MarketPrice, MarketStatus } from '@/types/interfaces/market.interfaces';
-import type { MessageIds } from '@/types/types/i18n.types';
 import { applyStatusMarketDiscount, effectiveMarketDiscountPct } from '@/utils/global/market.utils';
+import { buildStatusPerkRows, buildVipUpgradeRows } from '@/utils/global/status-perks.utils';
 
 export interface MarketStatusSectionProps {
   onSelect: (item: MarketSelectedItem) => void;
@@ -72,6 +73,27 @@ export function MarketStatusSection({ onSelect, onBuy }: MarketStatusSectionProp
     const pct =
       lpEligible || vipEligible ? effectiveMarketDiscountPct(isLp, isVip, me?.statusPerks) : 0;
     return applyStatusMarketDiscount(rawPrices, pct);
+  };
+
+  /**
+   * What this card is selling, in perks: Lucky Player's flat set, or — for VIP —
+   * the level the player would REACH (their next rung, or level 1 when they have
+   * no VIP), showing only what that rung changes. Mirrors the status page, which
+   * the card links to; the two must not tell different stories.
+   */
+  const perkRowsFor = (status: MarketStatus) => {
+    if (status.statusType === MarketStatusType.VIP) {
+      const levels = status.levelPerks ?? [];
+      return buildVipUpgradeRows(
+        levels.find(l => l.level === userVipLevel),
+        levels.find(l => l.level === userVipLevel + 1),
+        status.perkBase,
+        t
+      );
+    }
+    return status.perks
+      ? buildStatusPerkRows(status.perks, status.perkBase, t, status.dailyGift)
+      : [];
   };
 
   if (!isLoading && !statuses.length) return null;
@@ -198,16 +220,13 @@ export function MarketStatusSection({ onSelect, onBuy }: MarketStatusSectionProp
           confirmText: isVipUpgrade ? t('upgrade') : t('buy'),
           meta: (
             <div className="flex flex-col gap-2">
-              <ul className="text-white/70 flex flex-col gap-1 text-[12px]">
-                {(status.privileges ?? []).map((privilege, idx) => (
-                  <li key={idx} className="flex items-start gap-1.5">
-                    <span style={{ color: accentVar }} className="mt-0.5">
-                      ·
-                    </span>
-                    <span>{t(privilege as MessageIds)}</span>
-                  </li>
-                ))}
-              </ul>
+              {/*
+                The same LIVE perk rows the status page shows. This card used to
+                render `status.privileges` — the frozen i18n key list seeded into
+                the catalog — so the storefront kept advertising perks the admin
+                config had already zeroed.
+              */}
+              <StatusPerkList rows={perkRowsFor(status)} isSmall />
               {!isVIP && !meetsRequirements && activityRequirement && (
                 <span className="text-error-text text-[11px] font-bold">
                   {t('needs {count} activity points', {

@@ -25,6 +25,7 @@ export function VipContainer() {
   const { data: market, isLoading: isMarketLoading, isError, refetch } = useGetMarketDataQuery();
   const [buyStatus, { isLoading: isBuying }] = useBuyStatusMutation();
   const [buyOpen, setBuyOpen] = useState(false);
+  const [priceType, setPriceType] = useState<MarketPriceType | undefined>();
 
   if (isError) return <QueryErrorState onRetry={() => refetch()} />;
 
@@ -63,7 +64,9 @@ export function VipContainer() {
     : isVIP
       ? (vipStatus?.upgradePrices ?? vipStatus?.prices ?? [])
       : (vipStatus?.prices ?? []);
-  const primaryPrice = prices[0];
+  // LC or Lucky Stars — the page charged `prices[0]` (always LC) whatever the
+  // player tapped, so the Stars tag was unbuyable. The chips pick the currency.
+  const primaryPrice = prices.find(p => p.type === priceType) ?? prices[0];
 
   const statusLabel = isVIP ? t('vip level', { level: vipLevel }) : t('inactive');
   const description = isVIP
@@ -121,6 +124,8 @@ export function VipContainer() {
           <SettingsStatusPriceRow
             prices={prices}
             label={isVIP ? t('upgrade price') : t('unlock price')}
+            selectedType={primaryPrice?.type}
+            onSelect={price => setPriceType(price.type)}
           />
           <SettingsStatusActionButton
             variant="gold"

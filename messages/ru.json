@@ -830,6 +830,7 @@
   "unlock price": "Цена открытия",
   "upgrade price": "Цена повышения",
   "monthly price": "Цена за месяц",
+  "price for {days} days": "Цена за {days} дн.",
   "extend lucky player": "Продлить Lucky Player",
   "extension price": "Цена продления",
   "extends by {days} days": "Продлевает на {days} дн.",

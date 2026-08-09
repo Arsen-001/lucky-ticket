@@ -14,7 +14,7 @@ import { SettingsStatusPriceRow } from '@/components/pages/out-tabs/drawer/setti
 import { useAppTranslations } from '@/hooks/useAppTranslations';
 import { useToast } from '@/hooks/useToast';
 import { QueryErrorState } from '@/components/shared/error/QueryErrorState';
-import { MarketStatusType } from '@/types/enums/market.enums';
+import { MarketPriceType, MarketStatusType } from '@/types/enums/market.enums';
 import { buildStatusPerkRows } from '@/utils/global/status-perks.utils';
 
 export function LuckyPlayerContainer() {
@@ -24,6 +24,7 @@ export function LuckyPlayerContainer() {
   const { data: market, isLoading: isMarketLoading, isError, refetch } = useGetMarketDataQuery();
   const [buyStatus, { isLoading: isBuying }] = useBuyStatusMutation();
   const [buyOpen, setBuyOpen] = useState(false);
+  const [priceType, setPriceType] = useState<MarketPriceType | undefined>();
 
   if (isError) return <QueryErrorState onRetry={() => refetch()} />;
 
@@ -47,7 +48,10 @@ export function LuckyPlayerContainer() {
       )
     : [];
   const prices = luckyPlayerStatus?.prices ?? [];
-  const primaryPrice = prices[0];
+  // The catalog quotes LC and Lucky Stars; the page used to charge `prices[0]`
+  // — always LC — so the Stars price was decoration a player could not act on.
+  // The chips are now the picker and this is what the modal charges.
+  const primaryPrice = prices.find(p => p.type === priceType) ?? prices[0];
   const durationDays = luckyPlayerStatus?.durationDays;
 
   const statusLabel = isLuckyPlayer ? t('active') : t('inactive');
@@ -94,7 +98,17 @@ export function LuckyPlayerContainer() {
 
       {luckyPlayerStatus && primaryPrice && (
         <div className="bg-purple-gradient flex flex-col gap-4 rounded-2xl p-4">
-          <SettingsStatusPriceRow prices={prices} label={t('monthly price')} />
+          <SettingsStatusPriceRow
+            prices={prices}
+            // Lucky Player's length is an admin setting (7 days in production),
+            // so a hardcoded "monthly price" was the same class of lie as the
+            // perk list: a label that stopped matching the config.
+            label={
+              durationDays ? t('price for {days} days', { days: durationDays }) : t('monthly price')
+            }
+            selectedType={primaryPrice?.type}
+            onSelect={price => setPriceType(price.type)}
+          />
           <SettingsStatusActionButton
             variant="pink"
             title={ctaTitle}

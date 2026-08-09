@@ -31,6 +31,14 @@ export interface StatusPerkRow {
   value?: string;
   /** Same value at the level the player holds today — set only on upgrade rows. */
   from?: string;
+  /**
+   * Per-tier daily send limits, when the row has them. The renderer draws the
+   * ticket art for each tier instead of its name — five spelled-out tiers is
+   * the longest value on the screen and reads as a wall of words, while the
+   * tickets are the same objects the player already recognises everywhere else.
+   * `value` stays the written form: it is what diffs two VIP levels.
+   */
+  tiers?: { tier: TicketType; total: number }[];
 }
 
 const TIERS: TicketType[] = ['bronze', 'silver', 'gold', 'platinum', 'diamond'];
@@ -123,22 +131,28 @@ export const buildStatusPerkRows = (
   const sendTiers = TIERS.filter(
     tier => (perks.ticketSendDailyBonus?.[tier.toUpperCase()] ?? 0) > 0
   );
-  if (sendTiers.length)
+  if (sendTiers.length) {
+    // Only the tiers the status opens or widens. Platinum and Diamond have a
+    // free limit of 0, so their presence here IS the permission to send them.
+    const sends = sendTiers.map(tier => {
+      const bonus = perks.ticketSendDailyBonus[tier.toUpperCase()];
+      return {
+        tier,
+        total: (base?.ticketSendDailyLimit?.[tier.toUpperCase()] ?? 0) + bonus,
+        bonus,
+      };
+    });
     rows.push({
       id: 'ticketSend',
       label: t('perk ticket send'),
-      // Only the tiers the status opens or widens. Platinum and Diamond have a
-      // free limit of 0, so their presence here IS the permission to send them.
-      value: sendTiers
-        .map(tier => {
-          const bonus = perks.ticketSendDailyBonus[tier.toUpperCase()];
-          const total = (base?.ticketSendDailyLimit?.[tier.toUpperCase()] ?? 0) + bonus;
-          return `${t(tier)}${NB}${base ? total : `+${bonus}`}`;
-        })
+      tiers: sends.map(({ tier, total }) => ({ tier, total })),
+      value: sends
+        .map(({ tier, total, bonus }) => `${t(tier)}${NB}${base ? total : `+${bonus}`}`)
         // The separator sticks to the pair before it, so a wrap happens AFTER
         // the dot rather than leaving a line that opens with one.
         .join(`${NB}· `),
     });
+  }
 
   if (perks.bulkClaimEnabled) rows.push({ id: 'bulkClaim', label: t('perk bulk claim') });
 
