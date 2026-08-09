@@ -107,9 +107,34 @@ async function assertLooksRightBuilt(page: Page, label: string, url: string) {
             // suite unsatisfiable on any long list — /activity, in CI.
             .filter(el => {
               const box = el.getBoundingClientRect();
-              return box.bottom > 0 && box.top < window.innerHeight;
+              if (!(box.bottom > 0 && box.top < window.innerHeight)) return false;
+              // …and only what is actually FACING the viewport. The home cube
+              // keeps chip and booster art on its bottom face, which paints a
+              // 72×72 icon as 46×5 — inside the viewport by the box test, seen
+              // by nobody. Chrome's own lazy-loading agrees and never requests
+              // them, so `complete` stays false for as long as the poll cares
+              // to wait: measured 10.08.2026, five such slivers at a ratio of
+              // 0.07 while the front face sat at 0.72 and loaded normally.
+              // That is the whole of this check's flakiness — waiting on
+              // images the browser had decided not to fetch.
+              return box.height >= el.offsetHeight / 2 && box.width >= el.offsetWidth / 2;
             })
-            .every(el => el.complete)
+            .filter(el => !el.complete)
+            // Name the offender. This used to assert a bare `true`, so a red
+            // said only "images in flight" and every diagnosis after it was
+            // guesswork — the file, its size and whether the request had even
+            // been made all had to be re-derived by hand, and the condition is
+            // rare enough (once in ~40 loads of a production build, measured
+            // 10.08.2026) that it may not reproduce at all. The poll's own
+            // output now carries the evidence.
+            .map(el => {
+              const box = el.getBoundingClientRect();
+              const file =
+                decodeURIComponent(el.currentSrc || el.src)
+                  .split('/')
+                  .pop() ?? '?';
+              return `${file.slice(0, 70)} [${Math.round(box.width)}×${Math.round(box.height)}, loading=${el.loading}, natural=${el.naturalWidth}]`;
+            })
         ),
       {
         message: `${label} still had images in flight`,
@@ -129,7 +154,7 @@ async function assertLooksRightBuilt(page: Page, label: string, url: string) {
         timeout: 45_000,
       }
     )
-    .toBe(true);
+    .toEqual([]);
 
   const { blankImages, strayTracks, sidewaysScroll } = await page.evaluate(probe);
 
