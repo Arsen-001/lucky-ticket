@@ -239,9 +239,9 @@ export function MarketView() {
 
       <div key={resolvedActive} className="animate-slide-in-bottom flex flex-col gap-5 px-5">
         {showAll ? (
-          categoryOrder.filter(k => k !== ALL_KEY).map(key => (
-            <div key={key}>{sections?.[key as Exclude<MarketCategoryKey, 'all'>]}</div>
-          ))
+          categoryOrder
+            .filter(k => k !== ALL_KEY)
+            .map(key => <div key={key}>{sections?.[key as Exclude<MarketCategoryKey, 'all'>]}</div>)
         ) : (
           <div className={highlight ? 'market-section-highlight' : undefined}>
             {sections?.[resolvedActive as Exclude<MarketCategoryKey, 'all'>]}

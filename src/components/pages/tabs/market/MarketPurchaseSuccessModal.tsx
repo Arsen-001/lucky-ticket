@@ -51,9 +51,14 @@ export function MarketPurchaseSuccessModal({
               admin photo comes in at whatever aspect ratio was uploaded (a 16:9
               banner in a square box shows a third of itself under `cover`), and
               the receipt has to show what was actually bought. Square variants —
-              the avatar tile with its tier ring, the VIP crown — are unaffected. */}
+              the avatar tile with its tier ring, the VIP crown — are unaffected.
+              The padding is not decoration: the shard art is rendered edge to
+              edge (every `shards/*.webp` has its opaque bbox on the canvas
+              border), so `contain` alone puts the diamond's tips flush against
+              the box — and a rotated diamond puts them straight into the
+              `rounded-xl` corners, which `overflow-hidden` then shaves off. */}
           {itemIcon && (
-            <div className="flex-center size-14 shrink-0 overflow-hidden rounded-xl [&>*]:size-full! [&_img]:size-full! [&_img]:object-contain">
+            <div className="flex-center size-14 shrink-0 overflow-hidden rounded-xl p-1.5 [&>*]:size-full! [&_img]:size-full! [&_img]:object-contain">
               {itemIcon}
             </div>
           )}

@@ -91,9 +91,12 @@ export function MarketPurchaseModal({
                 forced because those nodes carry inline width/height, and the
                 image is contained rather than cropped: an admin photo arrives at
                 whatever aspect ratio was uploaded, and a buyer confirming a
-                purchase has to see the whole product, not its middle third. */}
+                purchase has to see the whole product, not its middle third.
+                Padded for the same reason as the success-modal receipt: shard
+                art is drawn edge to edge, so `contain` on its own runs the
+                diamond's tips into the rounded corners and loses them. */}
             {iconNode && (
-              <div className="flex-center size-20 shrink-0 overflow-hidden rounded-2xl [&>*]:size-full! [&_img]:size-full! [&_img]:object-contain">
+              <div className="flex-center size-20 shrink-0 overflow-hidden rounded-2xl p-2 [&>*]:size-full! [&_img]:size-full! [&_img]:object-contain">
                 {iconNode}
               </div>
             )}

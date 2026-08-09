@@ -16,18 +16,8 @@ import { useAppTranslations } from '@/hooks/useAppTranslations';
 import { marketTicketName } from '@/utils/pages/market-name.utils';
 import { useUnlockedTiers } from '@/hooks/useUnlockedTiers';
 import type { MarketPrice, MarketTicket } from '@/types/interfaces/market.interfaces';
-import type { MessageIds } from '@/types/types/i18n.types';
-import type { TicketType } from '@/types/types/ticket.types';
+import { tierTicketDescriptionId } from '@/constants/tier-names';
 import { applyStatusMarketDiscount, effectiveMarketDiscountPct } from '@/utils/global/market.utils';
-
-/** What each tier's ticket actually opens — the same copy the Tickets tab shows. */
-const purposeIdByTier: Record<TicketType, MessageIds> = {
-  bronze: 'bronze ticket description',
-  silver: 'silver ticket description',
-  gold: 'golden ticket description',
-  platinum: 'platinum ticket description',
-  diamond: 'diamond ticket description',
-};
 
 export interface MarketTicketSectionProps {
   tickets: MarketTicket[];
@@ -58,7 +48,7 @@ export function MarketTicketSection({ tickets, onSelect, onBuy }: MarketTicketSe
           id: ticket.id,
           name: ticket.name,
           description: t(ticket.ticketType),
-          about: t(purposeIdByTier[ticket.ticketType]),
+          about: t(tierTicketDescriptionId[ticket.ticketType]),
           locked: isLocked,
           lockNote: isLocked ? (
             isTierLocked ? (

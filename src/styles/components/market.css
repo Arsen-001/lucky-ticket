@@ -1,5 +1,5 @@
 /* ---------------------------------------------------------------------------
-   Showcase slide. Every colour derives from `--hero-accent`, set inline per
+   Showcase poster. Every colour derives from `--hero-accent`, set inline per
    item, so a diamond shard and a pink avatar get the same treatment in their
    own key. The tint is mixed INTO the card tone rather than layered over it at
    low alpha — on the atmospheric backdrop a see-through card reads as a hole.
@@ -8,59 +8,73 @@
 .market-hero-card {
   position: relative;
   overflow: hidden;
-  border-radius: 18px;
-  border: 1px solid color-mix(in srgb, var(--hero-accent) 40%, transparent);
+  border-radius: 20px;
+  border: 1px solid color-mix(in srgb, var(--hero-accent) 42%, transparent);
+  /* Only ever seen on a slide with no artwork (shards): the blurred backdrop
+     covers it otherwise. Flat tint read as an empty box, so it stays a wash. */
   background: linear-gradient(
     100deg,
-    color-mix(in srgb, var(--hero-accent) 24%, var(--color-background-overlay)) 0%,
-    color-mix(in srgb, var(--hero-accent) 8%, var(--color-background-overlay)) 52%,
+    color-mix(in srgb, var(--hero-accent) 26%, var(--color-background-overlay)) 0%,
+    color-mix(in srgb, var(--hero-accent) 10%, var(--color-background-overlay)) 55%,
     var(--color-background-overlay) 100%
   );
-  box-shadow: 0 14px 30px -20px color-mix(in srgb, var(--hero-accent) 85%, transparent);
+  box-shadow: 0 16px 34px -22px color-mix(in srgb, var(--hero-accent) 90%, transparent);
 }
 
-/* A single fixed highlight along the top edge — enough to read as glass, not
-   so much that four slides in a row start to flicker. */
-.market-hero-card::before {
-  content: '';
+/* A blown-up, blurred copy of the artwork fills the card behind the portrait,
+   so the offer is bathed in its own colour without cropping anyone's face. */
+.market-hero-backdrop {
   position: absolute;
-  inset: 0 0 auto;
-  height: 40%;
-  pointer-events: none;
-  background: linear-gradient(180deg, rgba(255, 255, 255, 0.07), transparent);
+  inset: -20%;
+  width: 140%;
+  height: 140%;
+  object-fit: cover;
+  filter: blur(26px) saturate(1.25) brightness(0.65);
+  transform: scale(1.1);
 }
 
-.market-hero-fade {
+/* The portrait is a hard-edged square over a blurred field — without this fade
+   its left edge reads as a seam splitting the card in two. */
+.market-hero-art {
+  -webkit-mask-image: linear-gradient(90deg, transparent 0%, #000 38%);
+  mask-image: linear-gradient(90deg, transparent 0%, #000 38%);
+}
+
+/* The text column sits on top of the portrait's left edge, so the scrim runs
+   horizontally: opaque under the copy, gone before it reaches the face. */
+.market-hero-scrim {
   position: absolute;
   inset: 0;
   pointer-events: none;
-  background: linear-gradient(
-    90deg,
-    transparent 45%,
-    color-mix(in srgb, var(--hero-accent) 14%, var(--color-background-overlay)) 100%
-  );
+  background:
+    linear-gradient(
+      90deg,
+      color-mix(in srgb, var(--color-background) 94%, transparent) 0%,
+      color-mix(in srgb, var(--color-background) 82%, transparent) 42%,
+      transparent 72%
+    ),
+    linear-gradient(
+      180deg,
+      transparent 55%,
+      color-mix(in srgb, var(--color-background) 55%, transparent) 100%
+    );
 }
 
 .market-hero-buy {
-  background: color-mix(in srgb, var(--hero-accent) 34%, var(--color-background-overlay));
-  border: 1px solid color-mix(in srgb, var(--hero-accent) 62%, transparent);
+  background: color-mix(in srgb, var(--hero-accent) 46%, var(--color-background-overlay));
+  border: 1px solid color-mix(in srgb, var(--hero-accent) 70%, transparent);
+  box-shadow: 0 6px 18px -8px color-mix(in srgb, var(--hero-accent) 90%, transparent);
 }
 
-/* Swiper's dots, in the app's language: the active one stretches into a bar. */
-.market-hero-swiper .swiper-pagination-bullet {
-  width: 5px;
-  height: 5px;
-  background: rgba(232, 214, 255, 0.28);
-  opacity: 1;
-  transition:
-    width 220ms ease,
-    background-color 220ms ease;
+/* The rail under the poster: the offers themselves, in place of dots. */
+.market-hero-thumb {
+  border: 1px solid color-mix(in srgb, var(--hero-accent) 40%, transparent);
+  background: color-mix(in srgb, var(--hero-accent) 20%, var(--color-background-overlay));
 }
 
-.market-hero-swiper .swiper-pagination-bullet-active {
-  width: 16px;
-  border-radius: 3px;
-  background: var(--color-electric-pink);
+.market-hero-thumb-active {
+  border-color: color-mix(in srgb, var(--hero-accent) 95%, transparent);
+  box-shadow: 0 0 0 1px color-mix(in srgb, var(--hero-accent) 55%, transparent);
 }
 
 @keyframes market-title-shine {
