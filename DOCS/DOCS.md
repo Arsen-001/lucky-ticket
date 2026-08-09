@@ -1195,7 +1195,8 @@ Tasks guide user behavior and introduce structured goals.
 
 - Daily tasks
 - Weekly tasks
-- Monthly tasks
+
+> There is no **Monthly** frequency — `enum TaskFrequency` is `DAILY | WEEKLY | ONCE` and always has been. Monthly tasks were listed here, in the check-in examples (§12.2), in the all-set bonus (§12.4) and in the achievement catalog (§16.x) purely as documentation; nothing in either repo can produce one.
 
 ### 12.2 Task Structure
 
@@ -1267,7 +1268,7 @@ Tasks guide user behavior and include actions such as:
 - Visiting specified websites or partner links.
 - Joining a tournament.
 - Sharing content on social media.
-- Daily/Weekly/Monthly check-ins.
+- Daily / weekly check-ins.
 
 **Daily channel check-in (subscription-gated).** The daily check-in task is completed by **staying subscribed to the official Telegram channel** (`TELEGRAM_CHANNEL_ID`, default `@luckyticket365`) rather than a bare tap. The backend drives its progress from a live `getChatMember` check (exposed as the `channel_subscribed` 0/1 counter), cached ~60s per player so the tasks screen never fires a live lookup on every fetch. While the player is not subscribed the task shows **in-progress** with an "open channel" affordance; once subscribed it becomes claimable and grants its Activity Point like any daily task, re-opening at the next 00:00 UTC reset. The check is **strict since 2026-08-04** (it used to fail open): only a confirmed subscription completes the task. An account Telegram will not resolve against the channel — how it answers about someone who was never in it — is not subscribed, and neither is one we could not ask about at all (bot unconfigured, synthetic/seed account, a 429). The old fail-open quietly meant "the gate is off" for exactly the accounts it existed to stop; the cost of the new rule is that a Telegram outage leaves the check-in incomplete for everyone until it answers again, which costs the player nothing — the task re-opens at the next reset. Same rule for the Test-Quest channel gate and promo redemption.
 
@@ -1281,7 +1282,7 @@ A bot **cannot grant, buy or transfer a boost** — Bot API exposes no such meth
 
 ### 12.4 All-Tasks Completion Bonus
 
-When a user completes **all tasks** within a given category (Daily, Weekly, or Monthly), they receive an extra gift in addition to the individual task rewards. This bonus is separate from the per-task rewards and is awarded automatically upon finishing the last task in the set.
+When a user completes **all tasks** within a given category (Daily or Weekly — there is no Monthly set), they receive an extra gift in addition to the individual task rewards. This bonus is separate from the per-task rewards and is awarded automatically upon finishing the last task in the set.
 
 ### 12.5 Ads Watch Milestones
 
@@ -2029,7 +2030,7 @@ Badges are organized into themed categories. Final list and per-category counts 
 - **Leaderboard:** Reached Top 100 / Top 10 / Top 3 / #1 (weekly / monthly / all-time)
 - **Social:** Invited 1 / 5 / 25 / 100 friends, invited a Telegram Premium friend, sent N tickets
 - **Finance:** Earned cumulative LC, first withdrawal, Lucky Stars earned/spent thresholds
-- **Tasks:** All Daily for a week, all Weekly for a month, all Monthly completed
+- **Tasks:** All Daily for a week, all Weekly for a month
 - **Exclusives & Rare:** OG (registered in first N days), seasonal events, partner-specific, beta-tester
 
 #### 17.4.2 Rarity Tiers
@@ -2303,7 +2304,7 @@ Lucky Stars are conceptually distinct from **Telegram Stars (XTR)** — Telegram
 
 ### 19.1 How Users Earn Lucky Stars
 
-Lucky Stars are awarded through three channels:
+Lucky Stars are awarded through four channels — stakes, one-time tasks, friend invitations, and the **rewarded-ads reward ladder** (§12.5), the only one of the four that can pay on a daily rhythm: the ladder is admin-authored, and the shape copied out of the panel on 2026-08-06 (mirrored in `src/mock/tasks.mock.ts`) pays **1 LS on the 5th and 1 LS on the 10th view of the UTC day**. It is a knob — read the panel rather than this line before pricing anything on it. Everything else below is one-off.
 
 #### Stakes
 
@@ -2321,7 +2322,13 @@ A completed stake (no early cancellation — Section 18) pays a **guaranteed** L
 
 #### Task Completion
 
-Completing tasks from any category (Daily, Weekly, Monthly) gives a **chance** to receive Lucky Stars in addition to the standard ticket/coin/boost prizes. LS are not guaranteed on every task — they appear as a random bonus outcome. LS-eligible tasks are marked distinctly in the task list.
+Stars come from **one-time milestone tasks only**, in fixed amounts printed on the task itself — there is no randomness anywhere in task rewards. 36 of the ~119 one-time tasks carry an LS reward, **845 LS across the whole catalog**: the friend chain below, all-time leaderboard ranks, the star-purchase and VIP-level ladders, and the long-haul counters (800 ads watched, 50,000 tickets collected, 30 stakes).
+
+**Daily and weekly tasks pay LC, AP and tickets — never stars.** Measured against the catalog on 2026-08-10: the 8 daily tasks pay **2,300 LC + 18 AP + 1 ticket** a day between them, the 7 weekly ones **21,000 LC + 24 AP + 13 tickets** a week, and zero LS in either column. (A player never sees all 8 dailies at once — the set is tier-gated to 3–7, so those are ceilings, not takings.)
+
+> Until 2026-08-10 this section promised the opposite: a **chance** of Lucky Stars on any Daily / Weekly / Monthly task, "a random bonus outcome", with "LS-eligible tasks marked distinctly in the task list". None of the three was ever built — no random reward roll exists in the backend, nothing is marked in the task list, and no periodic task has ever carried an LS reward. The promise was deleted rather than implemented (product call, same day as the AP-for-spending removal in §5.3). Note also there is no **Monthly** frequency at all: tasks are ONCE / DAILY / WEEKLY.
+>
+> **During the closed test only**, stars do arrive on a periodic rhythm — but from the test-quest faucet, not from task rewards: closing the entire daily set pays **1 LS**, the entire weekly set **10 LS**, and every 10 ad views **1 LS** (`testQuestConfig.lsFaucets`, admin-tunable). That faucet ends with the test period, which is one of the reasons withdrawals stay closed while it runs (§15, "On-chain deposits & withdrawals are treasury-gated").
 
 #### Friend Invitations
 
