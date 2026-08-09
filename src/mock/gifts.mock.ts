@@ -12,7 +12,10 @@ import type { GiftShopState } from '@/types/interfaces/gift.interfaces';
  */
 const LC_PER_STAR = 50_000;
 const PER_USER_MONTHLY = 1;
-const MONTHLY_STAR_BUDGET = 200;
+// 300, not 200: the budget also caps what is *listed* (`starCount <=
+// budgetRemaining`), so at 200 the two 100-Star gifts sat one purchase away from
+// vanishing and dev never showed the full shelf.
+const MONTHLY_STAR_BUDGET = 300;
 
 /** Telegram's real cheap tier, in the order the storefront lists it. */
 const CATALOG = [
@@ -24,6 +27,7 @@ const CATALOG = [
   { id: 'gift-bouquet', emoji: '💐', starCount: 50 },
   { id: 'gift-rocket', emoji: '🚀', starCount: 50 },
   { id: 'gift-ring', emoji: '💍', starCount: 100 },
+  { id: 'gift-diamond', emoji: '💎', starCount: 100 },
 ];
 
 /** `awaiting` mirrors the real flow: buying files a request, it does not send. */
