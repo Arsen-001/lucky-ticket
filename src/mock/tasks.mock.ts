@@ -401,12 +401,9 @@ const QUEST: Quest = {
 // ───────────────── TOURNAMENT TIER CONFIGS ─────────────────
 // Single source of truth for all tier-bound tournament tasks (daily + weekly).
 // Adding a new tier or tweaking rewards is a single config change.
-type TournamentKind = 'play' | 'bet';
-
 interface TierTournamentConfig {
   tier: TierName;
   daily: {
-    kind: TournamentKind;
     count: number;
     title: string;
     subtitle: string;
@@ -427,7 +424,6 @@ const TIER_CONFIGS: TierTournamentConfig[] = [
   {
     tier: 'bronze',
     daily: {
-      kind: 'play',
       count: 4,
       title: 'Join 4 Bronze tournaments',
       subtitle: 'All 4 Bronze brackets of the day are open at once — enter them in one go.',
@@ -446,7 +442,6 @@ const TIER_CONFIGS: TierTournamentConfig[] = [
   {
     tier: 'silver',
     daily: {
-      kind: 'play',
       count: 2,
       title: 'Join 2 Silver tournaments',
       subtitle: 'Both daily Silver brackets.',
@@ -465,10 +460,9 @@ const TIER_CONFIGS: TierTournamentConfig[] = [
   {
     tier: 'gold',
     daily: {
-      kind: 'bet',
       count: 1,
-      title: 'Bet 1 ticket on a starting Gold tournament',
-      subtitle: 'Spectate-bet on todayʼs Gold bracket.',
+      title: 'Join a Gold tournament with 1 ticket',
+      subtitle: 'The entry itself counts — no need to wait for the draw.',
       rewards: [lc(2), ap(180)],
       progress: { current: 0, target: 1 },
       rarity: TaskRarity.SILVER,
@@ -484,10 +478,9 @@ const TIER_CONFIGS: TierTournamentConfig[] = [
   {
     tier: 'platinum',
     daily: {
-      kind: 'bet',
       count: 1,
-      title: 'Bet 1 ticket on a starting Platinum tournament',
-      subtitle: 'Place a ticket on the daily Platinum bracket.',
+      title: 'Join a Platinum tournament with 1 ticket',
+      subtitle: 'The entry itself counts — no need to wait for the draw.',
       rewards: [lc(4), ap(260)],
       progress: { current: 0, target: 1 },
       rarity: TaskRarity.GOLD,
@@ -503,10 +496,9 @@ const TIER_CONFIGS: TierTournamentConfig[] = [
   {
     tier: 'diamond',
     daily: {
-      kind: 'bet',
       count: 1,
-      title: 'Bet 1 ticket on a starting Diamond tournament',
-      subtitle: 'Place a ticket on the daily Diamond bracket.',
+      title: 'Join a Diamond tournament with 1 ticket',
+      subtitle: 'The entry itself counts — no need to wait for the draw.',
       rewards: [lc(8), tickets(1), ap(400)],
       progress: { current: 0, target: 1 },
       rarity: TaskRarity.PLATINUM,
@@ -548,15 +540,18 @@ const buildDailyTierTask = (cfg: TierTournamentConfig): Task => {
 
 const buildWeeklyTierTask = (cfg: TierTournamentConfig): Task => {
   const tierCap = cap(cfg.tier);
-  const verb = cfg.daily.kind === 'bet' ? 'bet' : 'task';
+  // Every tier task is an entry, so the wording now forks only on the tier's
+  // daily count. The higher tiers used to say "bet", describing a mechanic
+  // that does not exist. The counter is `weekly_days_<tier>` — distinct days
+  // whose daily target was met.
   const subtitle =
-    cfg.daily.kind === 'bet'
-      ? `Place 1 ticket on ${tierCap} × 7 days.`
-      : `Finish the full daily ${tierCap} run × 7 days.`;
+    cfg.daily.count > 1
+      ? `Finish the full daily ${tierCap} run on 7 different days.`
+      : `Enter a ${tierCap} tournament on 7 different days.`;
   return baseTask({
     category: TaskCategory.TOURNAMENTS,
     frequency: TaskFrequency.WEEKLY,
-    title: `Complete daily ${tierCap} ${verb} 7 times`,
+    title: `Complete the daily ${tierCap} task 7 times`,
     subtitle,
     rewards: cfg.weekly.rewards,
     progress: cfg.weekly.progress,

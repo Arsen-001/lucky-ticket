@@ -29,8 +29,8 @@ const TASKS: Task[] = [
     frequency: TaskFrequency.DAILY,
     status: TaskStatus.IN_PROGRESS,
     rarity: TaskRarity.GOLD,
-    title: 'Bet 1 ticket on a starting Gold tournament',
-    subtitle: 'Spectate-bet on today’s Gold bracket.',
+    title: 'Join a Gold tournament with 1 ticket',
+    subtitle: 'The entry itself counts — no need to wait for the draw.',
     rewards: [
       { type: TaskRewardType.LC, amount: 200 },
       { type: TaskRewardType.ACTIVITY_POINTS, amount: 3 },
@@ -94,8 +94,8 @@ const TASKS: Task[] = [
     frequency: TaskFrequency.DAILY,
     status: TaskStatus.LOCKED,
     rarity: TaskRarity.PLATINUM,
-    title: 'Bet 1 ticket on a starting Diamond tournament',
-    subtitle: 'Place a ticket on the daily Diamond bracket.',
+    title: 'Join a Diamond tournament with 1 ticket',
+    subtitle: 'The entry itself counts — no need to wait for the draw.',
     unlockHint: 'Reach Diamond tier to unlock.',
     rewards: [
       { type: TaskRewardType.LC, amount: 800 },
