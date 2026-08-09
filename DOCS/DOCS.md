@@ -990,26 +990,17 @@ regardless. The admin panel refuses to save a tier that has hours but a pool of 
 — such a slot would run, draw, and pay its winners nothing after the player spent
 a ticket to enter.
 
-### 11.2.2 Tier Activation — Active-Player Gate
+### 11.2.2 Tier Availability — What Actually Limits It
 
-Beyond the per-user AP-tier gate, every tournament tier carries a **platform-wide activation threshold**: the tier only becomes playable once the number of **active players** on the platform crosses a hidden threshold. Reaching Silver AP-tier does **not**, by itself, let a user into Silver tournaments — the platform must also have grown large enough.
+**There is no active-player gate.** Until 2026-08-10 this section specified one — a hidden platform-wide threshold per tier (0 / 10,000 / 50,000 / 200,000 / 1,000,000 active players) that had to be crossed before the tier became playable. It was never real anywhere it mattered: the backend has no such check and never had one, and the only code that enforced it was the **dev mock**, whose seeded player count (1,250,000) sat above the top threshold — so the gate never fired even there. A rule that cannot fire in dev and does not exist in production is not a rule, so it was deleted rather than implemented.
 
-| Tier     | Active players required to open the tier |
-| -------- | ---------------------------------------- |
-| Bronze   | 0 — open from launch                     |
-| Silver   | 10,000                                   |
-| Gold     | 50,000                                   |
-| Platinum | 200,000                                  |
-| Diamond  | 1,000,000                                |
+**What limits the tiers today is the spawner:** it only ever creates **BRONZE** tournaments. That is the real, live constraint, and it has a real, live consequence — Silver and above tickets have nowhere to be spent, because a ticket only converts to LC by entering a tournament of its tier. Whoever opens the higher tiers does it by teaching the spawner to create them, not by growing a counter.
 
-- The count is **active players only** — not total registered accounts.
-- The threshold is **never surfaced in the UI** — there is no progress bar or "X players to unlock" hint. A tier that has not been activated simply shows no tournaments.
-- In practice the gate is one-directional: once a tier opens it stays open as the player base keeps growing.
-- Thresholds live in `tournamentTierActivePlayerThresholds` in `global.constants.ts`.
+A player's own **AP tier** still gates entry (§5.2, §11.3): they play their own tier and every lower one. That gate is enforced server-side and is unaffected by this removal.
 
 ### 11.3 Participation & Winning Logic
 
-- **Entry requires three conditions:** the correct ticket, `AP-tier ≥ tournament tier` (Section 5.2), **and** the tournament tier must be platform-activated (Section 11.2.2). A player can enter their own tier and every lower tier.
+- **Entry requires two conditions:** the correct ticket and `AP-tier ≥ tournament tier` (Section 5.2). A player can enter their own tier and every lower tier. (A third condition — "the tier must be platform-activated" — was specified here until 2026-08-10 and never existed in any server; see Section 11.2.2.)
 - Users join by submitting one or more tickets. Submitted tickets are **consumed**.
 - Winners are selected randomly from the pool of participants at the designated Start Time.
 - **Probability:** Joining with more tickets increases the chance of winning.
@@ -1228,8 +1219,7 @@ chosen language, because the strings went from the database straight into the UI
 **A tier task exists only while that tier has a tournament.** The daily and
 weekly tournament tasks are per tier, but only Bronze is auto-spawned
 (`tournamentsConfig.spawnerTier`, §11.2.1) — Silver and up appear only when an
-admin creates one, and carry the platform-wide activation threshold of §11.2.2
-on top. So "Join 2 Silver tournaments" sat on the daily list permanently at 0/2
+admin creates one. So "Join 2 Silver tournaments" sat on the daily list permanently at 0/2
 with nowhere to go. `GET /tasks` now returns a tier's daily/weekly task **only
 when that tier has at least one bracket still accepting entries**, or when the
 player already entered it this period — the second half matters because progress

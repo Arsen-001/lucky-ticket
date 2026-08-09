@@ -223,18 +223,14 @@ export const GlobalConstants = {
     second: 2,
     third: 1,
   },
-  /**
-   * Hidden platform-wide gate for tournament tiers: a tier only becomes
-   * playable once the number of active players crosses its threshold.
-   * Counts active players only, not total registrations. Never shown in UI.
-   */
-  tournamentTierActivePlayerThresholds: {
-    bronze: 0,
-    silver: 10_000,
-    gold: 50_000,
-    platinum: 200_000,
-    diamond: 1_000_000,
-  },
+  // NO tournament-tier active-player gate. `tournamentTierActivePlayerThresholds`
+  // (0 / 10k / 50k / 200k / 1M) and `isTournamentTierActivated` used to live here
+  // and were enforced in exactly one place: the dev mock — where the seeded
+  // player count sat above the top threshold, so even there the gate never once
+  // fired. The real backend has no such check and never had one, so on production
+  // the rule was pure fiction. Removed 10.08.2026 rather than implemented: what
+  // actually limits the tiers today is the spawner, which only ever creates
+  // BRONZE tournaments (DOCS §11.2.2).
 };
 
 export type ActivityTier = 'bronze' | 'silver' | 'gold' | 'platinum' | 'diamond';
@@ -294,14 +290,6 @@ export const computeNextTierReferralGap = (
   const nextTier = activityTierOrder[idx + 1];
   return Math.max(0, GlobalConstants.tierReferralRequirements[nextTier] - referralsCount);
 };
-
-/**
- * Whether a tournament tier is platform-activated — the hidden active-player
- * gate from DOCS §11.2.2. A tier becomes playable only once the platform's
- * active-player count crosses its threshold; the gate is one-directional.
- */
-export const isTournamentTierActivated = (tier: ActivityTier, activePlayers: number): boolean =>
-  activePlayers >= GlobalConstants.tournamentTierActivePlayerThresholds[tier];
 
 export const calcShowcaseSlotPrice = (slotIndex: number): number => {
   if (slotIndex < GlobalConstants.showcaseFreeSlots) return 0;

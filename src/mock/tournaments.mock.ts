@@ -9,7 +9,7 @@ import type {
 import { images } from '@/constants/images';
 import { getRandomNumber } from '@/utils/global/number.utils';
 import { mockDb } from '@/mock/backend/db';
-import { GlobalConstants, isTournamentTierActivated } from '@/constants/global.constants';
+import { GlobalConstants } from '@/constants/global.constants';
 import { applyStatusTournamentJoinApBoost } from '@/utils/global/tournament.utils';
 import { computeSponsoredTournamentCost, roundTon } from '@/utils/global/partners.utils';
 import { appConfig } from '@/config/app.config';
@@ -351,26 +351,12 @@ export const topTournaments: Tournament[] = tournaments.filter(
   tournament => tournament.status === 'upcoming' && !tournament.participated
 );
 
-/**
- * Tournament-tier activation gate (DOCS §11.2.2): a tier's tournaments are
- * only listed once the platform's active-player count crosses its threshold.
- * The detail endpoint (`tournaments/{id}`) is intentionally NOT gated — a
- * tournament stays reachable by direct link (§11.6); only joining is blocked.
- */
-const gateByActivation = <T extends Tournament>(list: T[]): T[] =>
-  list.filter(tour => isTournamentTierActivated(tour.type, mockDb.platform.activePlayers));
-
 /* ─── Mutation handlers ─── */
 
 const joinTournament = (args: { body?: unknown }) => {
   const body = (args.body ?? {}) as { tournamentId?: string; ticketsCount?: number };
   const ticketsCount = Math.max(1, body.ticketsCount ?? 1);
   const tournament = tournaments.find(tour => tour.id === body.tournamentId);
-
-  // Entry condition #3 (DOCS §11.3): the tournament tier must be platform-activated.
-  if (tournament && !isTournamentTierActivated(tournament.type, mockDb.platform.activePlayers)) {
-    return { error: { status: 403, data: 'Tournament tier not yet available' } };
-  }
 
   const participated = (tournament?.participatedTicketsCount ?? 0) + ticketsCount;
 
@@ -499,14 +485,12 @@ const servedTournaments = fresh ? freshTournaments : tournaments;
 // (createdByMe). The partner cabinet only owns the advertiser balance now.
 
 export const tournamentsMock = {
-  // `GET tournaments` (gated list) wins over the raw `tournaments` array,
-  // which is kept for `tournaments/{id}` + `/places` path traversal.
-  'GET tournaments': () => gateByActivation(servedTournaments),
+  // `GET tournaments` wins over the raw `tournaments` array, which is kept for
+  // `tournaments/{id}` + `/places` path traversal.
+  'GET tournaments': () => servedTournaments,
   topTournaments: () =>
-    gateByActivation(
-      servedTournaments.filter(
-        tournament => tournament.status === 'upcoming' && !tournament.participated
-      )
+    servedTournaments.filter(
+      tournament => tournament.status === 'upcoming' && !tournament.participated
     ),
   tournaments: servedTournaments,
   'POST tournaments/join': joinTournament,

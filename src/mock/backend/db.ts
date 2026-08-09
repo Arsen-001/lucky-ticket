@@ -525,16 +525,6 @@ export const mockDb = {
         ]) as LcTransaction[],
   },
 
-  platform: {
-    /**
-     * Total active players on the platform — drives the tournament-tier
-     * activation gate (DOCS §11.2.2). Seeded above the Diamond threshold
-     * (1,000,000) so every tier is live; lower it to watch higher tiers
-     * gate off (their tournaments disappear from the list / block joining).
-     */
-    activePlayers: 1_250_000,
-  },
-
   /**
    * The advertiser (casino) account behind the partner cabinet (DOCS §11.8).
    * Its TON balance is debited when a sponsored tournament is created.
