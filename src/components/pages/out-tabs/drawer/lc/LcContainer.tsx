@@ -3,8 +3,7 @@
 import { useState } from 'react';
 import { useGetLcStateQuery, useGetLcTransactionsQuery } from '@/api/lc.api';
 import { QueryErrorState } from '@/components/shared/error/QueryErrorState';
-import { LcHero } from './LcHero';
-import { LcActionButtons } from './LcActionButtons';
+import { LcBalanceCard } from './LcBalanceCard';
 import { LcTransactionHistory } from './LcTransactionHistory';
 import { LcConvertTonModal } from './LcConvertTonModal';
 
@@ -17,11 +16,15 @@ export function LcContainer() {
 
   return (
     <div className="flex flex-col gap-4 px-4 pb-8 pt-2">
-      <LcHero state={state} loading={isLoading} />
+      <LcBalanceCard
+        state={state}
+        transactions={transactions}
+        loading={isLoading}
+        onConvertTon={() => setConvertTonOpen(true)}
+        className="animate-slide-in-bottom"
+      />
 
-      <LcActionButtons disabled={isLoading} onConvertTon={() => setConvertTonOpen(true)} />
-
-      <LcTransactionHistory transactions={transactions} loading={isTxLoading} />
+      <LcTransactionHistory state={state} transactions={transactions} loading={isTxLoading} />
 
       <LcConvertTonModal
         open={convertTonOpen}
