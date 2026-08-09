@@ -6,6 +6,7 @@ import type { LucideIcon } from 'lucide-react';
 import { twMerge } from 'tailwind-merge';
 import { Modal } from '@/components/shared/modals/Modal';
 import { Button } from '@/components/shared/buttons/Button';
+import { Skeleton } from '@/components/shared/seleketons/Skeleton';
 import { useAppTranslations } from '@/hooks/useAppTranslations';
 import { BoltIcon } from '@/components/shared/icons/BoltIcon';
 import { LcLabel } from '@/components/shared/icons/LcLabel';
@@ -239,16 +240,31 @@ export function ClaimRewardModal({
             <h2 className="text-2xl font-extrabold leading-tight">
               {view === 'success' && `${t('awesome')}!`}
               {view === 'error' && errorTitle}
-              {view === 'loading' && t('loading')}
+              {view === 'loading' && t('claiming')}
             </h2>
-            <p className="text-xs text-white-secondary text-center max-w-[260px] line-clamp-2">
-              {view === 'success' && t('claim modal description')}
-              {view === 'error' && errorDescription}
-            </p>
+            {view === 'loading' ? (
+              <Skeleton variant="line" className="h-3 w-40 rounded-full" />
+            ) : (
+              <p className="text-xs text-white-secondary text-center max-w-[260px] line-clamp-2">
+                {view === 'success' && t('claim modal description')}
+                {view === 'error' && errorDescription}
+              </p>
+            )}
           </div>
 
           {/* COUNTER + EXTRA REWARDS — fixed h-20 */}
           <div className="flex flex-col items-center justify-center gap-2 h-20 w-full">
+            {/* The card's height is fixed so the layout does not jump when the
+                claim lands, which left the waiting state as a spinner over two
+                empty bands — it read as a broken screen rather than a pending
+                one. The skeletons stand in the exact shapes the numbers will
+                take. */}
+            {view === 'loading' && (
+              <>
+                <Skeleton variant="line" className="h-9 w-36 rounded-xl" />
+                <Skeleton variant="line" className="h-4 w-24 rounded-full" />
+              </>
+            )}
             {view === 'success' && (
               <>
                 <span className="text-4xl font-extrabold tabular-nums bg-gradient-to-r from-gold via-electric-pink to-electric-purple bg-clip-text text-transparent leading-none">
@@ -290,6 +306,8 @@ export function ClaimRewardModal({
                   </div>
                 </div>
               </div>
+            ) : view === 'loading' ? (
+              <Skeleton variant="line" className="h-full w-full rounded-2xl" />
             ) : (
               <div className="w-full h-full" />
             )}
@@ -324,13 +342,13 @@ export function ClaimRewardModal({
                 {t('continue tasks')}
               </Button>
             ) : (
+              // Spinner, not the word "Loading" a second time: the title above
+              // already says what is happening.
               <Button
                 variant="secondary"
-                disabled
+                loading
                 className="flex-1 rounded-xl py-3 text-sm h-full opacity-50"
-              >
-                {t('loading')}
-              </Button>
+              />
             )}
           </div>
         </div>
