@@ -353,6 +353,7 @@ Platinum and Diamond sends have a base of **0**, so there is no separate "may se
 - **Higher-tier wins.** If both LP and VIP are active, every percent-based perk uses the VIP value. The two values are never summed.
 - **No self-discount.** When buying / upgrading the **VIP** status, the VIP market discount is excluded. When buying the **Lucky Player** status, the LP market discount is excluded.
 - **Avatar boosts** still stack additively on top of the chosen status (DOCS §6 / market avatars).
+- **The discount is stated, not just applied.** The Market header names the player's own rate ("−2% · VIP 2 · already in every price"), the item sheet and the purchase confirmation print what it takes off **in coins** rather than in percent, and the Statuses section carries the 30-day total the status has saved. A player without a status sees what one would give instead. The monthly total is summed from the ledger's `discountSaved`, written at charge time, so it counts what was actually charged — it starts at zero for everyone (it counts from the 09.08.2026 backend release) and is never back-estimated from today's rate, which would be most wrong for the players who bought the most.
 
 Benefit magnitudes stay bounded so they cannot break economy balance: combined boosts from all sources stay within ~×2 effective output, and discounts stay within ~30%.
 
