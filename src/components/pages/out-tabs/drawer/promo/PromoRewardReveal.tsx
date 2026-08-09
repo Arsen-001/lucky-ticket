@@ -1,6 +1,7 @@
 'use client';
 
-import { PartyPopper, Ticket as TicketIcon } from 'lucide-react';
+import { PartyPopper } from 'lucide-react';
+import { Ticket } from '@/components/shared/icons/Ticket';
 import { LcLabel } from '@/components/shared/icons/LcLabel';
 import { TelegramStarIcon } from '@/components/shared/icons/TelegramStarIcon';
 import { useAppTranslations } from '@/hooks/useAppTranslations';
@@ -69,9 +70,13 @@ function PromoRewardLine({ reward }: { reward: PromoReward }) {
     );
   }
 
+  // The ticket's own art, not a lucide glyph: the card behind this modal names
+  // the same three prizes with their renders, and an outline icon here read as a
+  // different prize than the one the screen had just promised.
   return (
     <span className="inline-flex items-center gap-1.5 text-sm font-extrabold tabular-nums text-white">
-      <TicketIcon size={16} className="text-electric-pink" /> {amount}
+      <Ticket type={reward.tier ?? 'bronze'} width={36} height={19} className="h-auto w-9" />
+      {amount}
       <span className="text-white-secondary text-[12px] font-semibold capitalize">
         {reward.tier ? t(reward.tier) : ''} {t('tickets').toLowerCase()}
       </span>
