@@ -38,11 +38,27 @@ const SWEEP_WIDTH = 320;
  */
 const SLOW = 45_000;
 
+/**
+ * The cube gets a longer wait than the shell, and deliberately so. Measured
+ * 10.08.2026: this screen costs 3.5–7.2s in WebKit against a warm local dev
+ * server and 18–21s on the CI runner, where three workers compile routes on
+ * demand — and in one run the two waits that happened to overlap starved past
+ * 45s while their siblings at 320 and 430px passed. Raising 20s to 45s did not
+ * end that; a ceiling near four times the observed CI cost does.
+ *
+ * A wait is not a verdict. Nothing about the layout is asserted here — the
+ * expectations below are what decide that, and they are unchanged.
+ */
+const CUBE_WAIT = 90_000;
+
+/** That wait plus seven viewport measurements needs more than the 90s default. */
+const CUBE_TEST_TIMEOUT = 180_000;
+
 /** Home must be the app, and its engines must have painted, before measuring. */
 async function openHome(page: Page) {
   await page.goto('/', { waitUntil: 'domcontentloaded' });
   await page.getByTestId('app-shell').waitFor({ timeout: SLOW });
-  await page.locator('.engine-cube-scaled').first().waitFor({ timeout: SLOW });
+  await page.locator('.engine-cube-scaled').first().waitFor({ timeout: CUBE_WAIT });
   // Let the slider settle on its active slide before measuring.
   await page.waitForTimeout(800);
 }
@@ -76,7 +92,46 @@ async function declaredVsPainted(page: Page) {
   });
 }
 
+/**
+ * How long the painted geometry needs after a viewport change before it means
+ * anything. Sampled every 100ms on 10.08.2026, three runs, identical curve:
+ *
+ *   100ms 72.9 · 200 72.92 · 300 72.92 · 400 72.19 · 500 71.15 · 600 70.89 ·
+ *   700 70.86 · 800 70.85 · … 1600 70.85
+ *
+ * Two things to read off it. The old flat 400ms sample lands in the middle of
+ * the descent, which is the whole reason this test drifted: every other width
+ * read a settled 70.85%, and only the first one of a run — taken right after
+ * the load, while the slide holding the cube was still animating in — reported
+ * 70.9–72.9%, spending the spread's entire 2-point budget on nothing.
+ *
+ * The second is why "sample twice and compare" does not work here: the reading
+ * holds a PLATEAU for the first 300ms. Two identical samples inside it look
+ * exactly like stillness, and that is the wrong number.
+ */
+const SETTLE_MS = 900;
+
+/** The same measurement, taken once the screen has stopped moving. */
+async function settledMeasurement(page: Page) {
+  await page.waitForTimeout(SETTLE_MS);
+  // Belt and braces for a loaded CI runner, where the curve above may still be
+  // running: keep reading until it repeats, then trust it.
+  let previous = await declaredVsPainted(page);
+  for (let i = 0; i < 8; i++) {
+    await page.waitForTimeout(150);
+    const next = await declaredVsPainted(page);
+    if (!next || !previous) return next;
+    const moved = Math.abs(
+      next.faceRight - next.faceLeft - (previous.faceRight - previous.faceLeft)
+    );
+    if (moved < 0.2) return next;
+    previous = next;
+  }
+  return previous;
+}
+
 test('cube keeps the same share of the screen on every phone', async ({ page }) => {
+  test.setTimeout(CUBE_TEST_TIMEOUT);
   // The whole point of scaling instead of re-flowing: one look, every device.
   // Measured on the PAINTED face, which is what a player actually sees.
   const shares: { width: number; share: number }[] = [];
@@ -84,8 +139,7 @@ test('cube keeps the same share of the screen on every phone', async ({ page }) 
 
   for (const width of [320, 360, 375, 390, 393, 412, 430]) {
     await page.setViewportSize({ width, height: 900 });
-    await page.waitForTimeout(400);
-    const m = await declaredVsPainted(page);
+    const m = await settledMeasurement(page);
     expect(m).not.toBeNull();
     if (!m) return;
     shares.push({ width, share: (m.faceRight - m.faceLeft) / m.viewport });
@@ -105,9 +159,12 @@ for (const width of WIDTHS) {
     test.use({ viewport: { width, height: 900 } });
 
     test('home cube is painted at exactly the size its CSS declares', async ({ page }) => {
+      test.setTimeout(CUBE_TEST_TIMEOUT);
       await openHome(page);
 
-      const m = await declaredVsPainted(page);
+      // Same reason as the share test: this one measures straight after the
+      // load, which is exactly when the entry animation is still running.
+      const m = await settledMeasurement(page);
       expect(m, 'engine cube missing from home — the mock account owns engines').not.toBeNull();
       if (!m) return;
 
