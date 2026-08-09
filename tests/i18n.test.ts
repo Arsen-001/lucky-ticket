@@ -7,6 +7,8 @@ import { StarsTransactionFilter } from '@/types/enums/stars.enums';
 import { TicketsEnum } from '@/types/enums/ticket.enums';
 import { WalletTransactionFilter, WalletTransactionStatus } from '@/types/enums/wallet.enums';
 import { marketMock } from '@/mock/market.mock';
+import { buildStatusPerkRows } from '@/utils/global/status-perks.utils';
+import type { Dictionary } from '@/types/types/i18n.types';
 
 const LOCALES = ['en', 'ru', 'de'] as const;
 
@@ -88,9 +90,25 @@ describe('i18n runtime-built keys', () => {
         )
       ),
     ],
-    // Status perk rows call t(privilege) on raw strings the backend sends —
-    // nothing type-checks these, so they need the same explicit guard.
-    'status privilege': [...new Set(marketMock.statuses.flatMap(s => s.privileges ?? []))],
+    // The VIP / Lucky Player perk rows are built from the LIVE status config,
+    // and two of their keys are runtime strings the backend picks (the ticket
+    // tier a send row lists, the tier of the daily gift) — nothing type-checks
+    // those. Running the real builder over the mock ladder records every key it
+    // asks for, so a new perk row or a new tier fails here, not in production.
+    'status perk row': (() => {
+      const asked = new Set<string>();
+      const record = ((key: string) => {
+        asked.add(key);
+        return key;
+      }) as unknown as Dictionary;
+      for (const status of marketMock.statuses) {
+        if (status.perks)
+          buildStatusPerkRows(status.perks, status.perkBase, record, status.dailyGift);
+        for (const rung of status.levelPerks ?? [])
+          buildStatusPerkRows(rung.perks, status.perkBase, record);
+      }
+      return [...asked];
+    })(),
   };
 
   for (const [family, keys] of Object.entries(families)) {

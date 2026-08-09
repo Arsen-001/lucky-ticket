@@ -6,8 +6,7 @@ import { useGetMeQuery } from '@/api/me.api';
 import { VipIcon } from '@/components/shared/icons/VipIcon';
 import { MarketBuyModal } from '@/components/pages/tabs/market/MarketBuyModal';
 import { StatusIcon } from '@/components/pages/tabs/market/status/StatusIcon';
-import { StatusPrivileges } from '@/components/pages/tabs/market/status/StatusPrivileges';
-import { SettingsPrivilegeList } from '@/components/pages/out-tabs/drawer/settings/SettingsPrivilegeList';
+import { StatusPerkList } from '@/components/pages/tabs/market/status/StatusPerkList';
 import { SettingsStatusActionButton } from '@/components/pages/out-tabs/drawer/settings/SettingsStatusActionButton';
 import { SettingsStatusHero } from '@/components/pages/out-tabs/drawer/settings/SettingsStatusHero';
 import { SettingsStatusPriceRow } from '@/components/pages/out-tabs/drawer/settings/SettingsStatusPriceRow';
@@ -17,6 +16,7 @@ import { useToast } from '@/hooks/useToast';
 import { QueryErrorState } from '@/components/shared/error/QueryErrorState';
 import { MarketPriceType, MarketStatusType } from '@/types/enums/market.enums';
 import type { MarketPrice } from '@/types/interfaces/market.interfaces';
+import { buildStatusPerkRows, buildVipUpgradeRows } from '@/utils/global/status-perks.utils';
 
 export function VipContainer() {
   const t = useAppTranslations();
@@ -34,7 +34,20 @@ export function VipContainer() {
   const isMaxed = vipLevel >= GlobalConstants.maxVipLevel;
 
   const vipStatus = market?.statuses.find(s => s.statusType === MarketStatusType.VIP);
-  const privileges = vipStatus?.privileges ?? [];
+  // Perks come from the live per-level ladder the backend ships with the
+  // listing (`levelPerks`), never from the catalog's frozen `privileges` copy:
+  // every VIP level grants different numbers, and the seeded text quoted a
+  // ceiling the config no longer holds. A player who owns level N sees N, and
+  // the upgrade block shows only what level N+1 changes.
+  const levelPerks = vipStatus?.levelPerks ?? [];
+  const currentLevel = levelPerks.find(l => l.level === vipLevel);
+  const nextLevel = levelPerks.find(l => l.level === vipLevel + 1);
+  const ownedRows = currentLevel
+    ? buildStatusPerkRows(currentLevel.perks, vipStatus?.perkBase, t)
+    : [];
+  // Not a VIP yet: level 1 IS the purchase, so its full list is what's on offer.
+  const upgradeRows = buildVipUpgradeRows(currentLevel, nextLevel, vipStatus?.perkBase, t);
+  const offerRows = isVIP ? upgradeRows : ownedRows.length ? ownedRows : upgradeRows;
   // Every level has its own price (DOCS §7.4), so an upgrade must quote the row
   // for the NEXT level — the flat `upgradePrices` is only the level-2 step and
   // is kept as a fallback for payloads that predate the ladder. Same resolution
@@ -89,7 +102,19 @@ export function VipContainer() {
         loading={isLoading}
       />
 
-      <SettingsPrivilegeList title={t('what you get')} privileges={privileges} percentage={100} />
+      <StatusPerkList
+        // A VIP already owns their rows — "what you get" is the offer, and only
+        // a player without the status is being offered anything.
+        title={isVIP ? t('vip level', { level: vipLevel }) : t('what you get')}
+        rows={isVIP ? ownedRows : offerRows}
+      />
+
+      {isVIP && upgradeRows.length > 0 && (
+        <StatusPerkList
+          title={t('what level {level} adds', { level: vipLevel + 1 })}
+          rows={upgradeRows}
+        />
+      )}
 
       {!isMaxed && vipStatus && primaryPrice && (
         <div className="bg-purple-gradient flex flex-col gap-4 rounded-2xl p-4">
@@ -130,16 +155,16 @@ export function VipContainer() {
             </div>
           }
         >
-          <div className="flex flex-col gap-2.5 bg-white/5 p-3.5 rounded-xl border border-white/5">
-            <span className="text-[10px] text-white/40 uppercase font-bold tracking-widest text-left px-1">
-              {t('included privileges')}
-            </span>
-            <StatusPrivileges
-              privileges={vipStatus.privileges ?? []}
-              type={vipStatus.statusType}
-              isSmall
-            />
-          </div>
+          {offerRows.length > 0 && (
+            <div className="flex flex-col gap-2.5 bg-white/5 p-3.5 rounded-xl border border-white/5">
+              <span className="text-[10px] text-white/40 uppercase font-bold tracking-widest text-left px-1">
+                {isVIP
+                  ? t('what level {level} adds', { level: vipLevel + 1 })
+                  : t('included privileges')}
+              </span>
+              <StatusPerkList rows={offerRows} isSmall />
+            </div>
+          )}
         </MarketBuyModal>
       )}
     </div>

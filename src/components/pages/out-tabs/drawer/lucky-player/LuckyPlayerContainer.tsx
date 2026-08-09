@@ -7,8 +7,7 @@ import { LuckyPlayerIcon } from '@/components/shared/icons/LuckyPlayerIcon';
 import { LuckyPlayerExpiryCard } from '@/components/pages/out-tabs/drawer/lucky-player/LuckyPlayerExpiryCard';
 import { MarketBuyModal } from '@/components/pages/tabs/market/MarketBuyModal';
 import { StatusIcon } from '@/components/pages/tabs/market/status/StatusIcon';
-import { StatusPrivileges } from '@/components/pages/tabs/market/status/StatusPrivileges';
-import { SettingsPrivilegeList } from '@/components/pages/out-tabs/drawer/settings/SettingsPrivilegeList';
+import { StatusPerkList } from '@/components/pages/tabs/market/status/StatusPerkList';
 import { SettingsStatusActionButton } from '@/components/pages/out-tabs/drawer/settings/SettingsStatusActionButton';
 import { SettingsStatusHero } from '@/components/pages/out-tabs/drawer/settings/SettingsStatusHero';
 import { SettingsStatusPriceRow } from '@/components/pages/out-tabs/drawer/settings/SettingsStatusPriceRow';
@@ -16,6 +15,7 @@ import { useAppTranslations } from '@/hooks/useAppTranslations';
 import { useToast } from '@/hooks/useToast';
 import { QueryErrorState } from '@/components/shared/error/QueryErrorState';
 import { MarketStatusType } from '@/types/enums/market.enums';
+import { buildStatusPerkRows } from '@/utils/global/status-perks.utils';
 
 export function LuckyPlayerContainer() {
   const t = useAppTranslations();
@@ -34,7 +34,18 @@ export function LuckyPlayerContainer() {
   const luckyPlayerStatus = market?.statuses.find(
     s => s.statusType === MarketStatusType.LUCKY_PLAYER
   );
-  const privileges = luckyPlayerStatus?.privileges ?? [];
+  // The perk rows come from the live admin config the backend ships with the
+  // listing, never from the catalog's frozen `privileges` copy — see
+  // `buildStatusPerkRows`. No perks in the payload → no list, rather than a
+  // stale one.
+  const perkRows = luckyPlayerStatus?.perks
+    ? buildStatusPerkRows(
+        luckyPlayerStatus.perks,
+        luckyPlayerStatus.perkBase,
+        t,
+        luckyPlayerStatus.dailyGift
+      )
+    : [];
   const prices = luckyPlayerStatus?.prices ?? [];
   const primaryPrice = prices[0];
   const durationDays = luckyPlayerStatus?.durationDays;
@@ -79,7 +90,7 @@ export function LuckyPlayerContainer() {
 
       {isLuckyPlayer && expiresAt && <LuckyPlayerExpiryCard expiresAt={expiresAt} />}
 
-      <SettingsPrivilegeList title={t('what you get')} privileges={privileges} percentage={50} />
+      <StatusPerkList title={t('what you get')} rows={perkRows} />
 
       {luckyPlayerStatus && primaryPrice && (
         <div className="bg-purple-gradient flex flex-col gap-4 rounded-2xl p-4">
@@ -119,16 +130,14 @@ export function LuckyPlayerContainer() {
             </div>
           }
         >
-          <div className="flex flex-col gap-2.5 bg-white/5 p-3.5 rounded-xl border border-white/5">
-            <span className="text-[10px] text-white/40 uppercase font-bold tracking-widest text-left px-1">
-              {t('included privileges')}
-            </span>
-            <StatusPrivileges
-              privileges={luckyPlayerStatus.privileges ?? []}
-              type={luckyPlayerStatus.statusType}
-              isSmall
-            />
-          </div>
+          {perkRows.length > 0 && (
+            <div className="flex flex-col gap-2.5 bg-white/5 p-3.5 rounded-xl border border-white/5">
+              <span className="text-[10px] text-white/40 uppercase font-bold tracking-widest text-left px-1">
+                {t('included privileges')}
+              </span>
+              <StatusPerkList rows={perkRows} isSmall />
+            </div>
+          )}
         </MarketBuyModal>
       )}
     </div>
