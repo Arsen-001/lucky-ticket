@@ -122,7 +122,13 @@ for (const locale of LOCALES) {
   test.describe(`dialogs in ${locale}`, () => {
     for (const route of ROUTES) {
       test(`no text hides under the close button on ${route}`, async ({ page, context }) => {
-        test.setTimeout(240_000);
+        // One fresh load per control is what makes the sweep trustworthy (see
+        // below) and also what makes it long: `/` takes 2.5 min locally against
+        // a warm dev server. A CI runner is slower than that by enough to have
+        // died on a 240s ceiling mid-sweep — with no collision found, purely
+        // out of budget. The ceiling is the wrong lever for correctness, so it
+        // gets the room the work actually needs.
+        test.setTimeout(420_000);
         await context.addCookies([{ name: 'locale', value: locale, url: 'http://localhost:3000' }]);
 
         const collisions: Collision[] = [];
@@ -136,8 +142,17 @@ for (const locale of LOCALES) {
         // two upgrade confirmations that this file exists to guard.
         for (let i = 0; i < MAX_CONTROLS; i++) {
           await page.goto(route, { waitUntil: 'domcontentloaded' });
-          // Mock latency runs to 1200ms, and CI compiles the route on demand.
-          await page.waitForTimeout(2200);
+          // Wait for the shell and for the control this pass is about, instead
+          // of sleeping a flat 2.2s sized for the slowest possible load (mock
+          // latency runs to 1200ms, and CI compiles the route on demand). Same
+          // guarantee, and every fast load hands its share of the budget back:
+          // the flat sleep alone was 57s of the 150s the `/` sweep takes.
+          await page.getByTestId('app-shell').waitFor({ state: 'attached', timeout: 20_000 });
+          await page
+            .locator(CONTROLS)
+            .nth(i)
+            .waitFor({ state: 'visible', timeout: 4_000 })
+            .catch(() => {});
           await clearAutoPopups(page);
 
           const control = page.locator(CONTROLS).nth(i);

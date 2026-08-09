@@ -89,7 +89,16 @@ for (const route of STATIC_ROUTES) {
       return [...document.querySelectorAll('.tap-target')]
         .filter(el => {
           const rect = el.getBoundingClientRect();
-          return rect.width > 0 && rect.top >= 0 && rect.bottom <= window.innerHeight;
+          if (!(rect.width > 0 && rect.top >= 0 && rect.bottom <= window.innerHeight)) return false;
+          // A control on a 3D face turned away from the viewer still reports a
+          // box — a sliver. The home cube keeps its chip and booster slots on
+          // its bottom face, so each "Unequip" paints its 20×20 as 18×2 and
+          // loses all five sample points to the faces in front of it. Nothing
+          // there is touchable until the player rotates the cube, so that
+          // reading is about the cube, not about hit zones. Half the CSS box
+          // separates the cases with room to spare: the cube draws its facing
+          // side at 0.81 scale and an edge-on side at ~0.1.
+          return rect.height >= el.clientHeight / 2 && rect.width >= el.clientWidth / 2;
         })
         .map(el => {
           const rect = el.getBoundingClientRect();
