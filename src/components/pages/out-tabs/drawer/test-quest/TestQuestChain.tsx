@@ -91,16 +91,19 @@ export function TestQuestChain({ className }: TestQuestChainProps) {
             progress={s.data.stepProgress}
             baselines={s.baselines}
           />
-
-          <TestQuestAheadList
-            cards={s.cards}
-            currentLevel={s.currentLevel}
-            currentDay={s.currentDay}
-            progress={s.data.stepProgress}
-            baselines={s.baselines}
-          />
         </div>
       </div>
+
+      {/* Outside the rail's row on purpose: the gauge only has to stand beside
+          today's card, so everything below it gets the full 390px — the upcoming
+          days' reward chips fit on one line instead of wrapping in a 282px column. */}
+      <TestQuestAheadList
+        cards={s.cards}
+        currentLevel={s.currentLevel}
+        currentDay={s.currentDay}
+        progress={s.data.stepProgress}
+        baselines={s.baselines}
+      />
     </section>
   );
 }
