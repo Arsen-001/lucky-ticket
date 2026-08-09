@@ -3,6 +3,7 @@ import { StoreProvider } from '@/providers/StoreProvider';
 import { AppLifecycleProvider } from '@/providers/AppLifecycleProvider';
 import { NavigationHistoryProvider } from '@/providers/NavigationHistoryProvider';
 import { TelegramProvider } from '@/providers/TelegramProvider';
+import { ContentProtectionProvider } from '@/providers/ContentProtectionProvider';
 import { TonConnectProvider } from '@/providers/TonConnectProvider';
 import { Onboarding } from '@/components/onboarding/Onboarding';
 import { TournamentResultWatcher } from '@/components/pages/tabs/tournaments/TournamentResultWatcher';
@@ -140,6 +141,11 @@ export default async function RootLayout({ children }: ChildrenProps) {
             attributes — this is shallow and does not affect children, so real
             hydration bugs in the app content still surface. */}
         <body suppressHydrationWarning>
+          {/* Above every gate and every provider: a long press must not offer
+              "save image" / "search this image" on the countdown screen, the
+              maintenance wall or a modal any more than it may inside the app.
+              @see ContentProtectionProvider */}
+          <ContentProtectionProvider />
           {/* The app's sky, behind every screen. Mounted here rather than in a
               route layout so drawer and auth screens get it too, and pinned to
               the phone column so it never spills into the desktop gutters. */}

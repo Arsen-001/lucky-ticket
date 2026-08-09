@@ -1,0 +1,41 @@
+/* Keeps the app's artwork inside the app — see ContentProtectionProvider for
+   the whole story and for what this deliberately cannot cover (screenshots).
+
+   This half exists because iOS fires NO DOM event for the long-press sheet: by
+   the time "Save image / Copy image / Look Up" is on screen, no listener has
+   run and nothing is left to cancel. `-webkit-touch-callout` is the only switch
+   for it, and it is CSS-only. */
+@layer base {
+  /* The long-press sheet, on every element — it is offered for links (copy
+     link, open in…) as well as images. */
+  * {
+    -webkit-touch-callout: none;
+  }
+
+  /* Dragging an image out of the window is a download with extra steps; it is
+     also how a picture reaches a browser's reverse-image search on desktop.
+     `-webkit-user-drag` is non-standard and webkit-only by name, but it is what
+     both Chromium and Safari implement — the two engines Telegram ships. */
+  img,
+  video,
+  canvas,
+  svg {
+    -webkit-user-drag: none;
+  }
+
+  /* Text fields keep everything: without the callout there is no paste bubble
+     on iOS, and the TON address is pasted, never typed. `select-none` is set
+     globally on `*` in base-layer.css, so selection has to be handed back here
+     too — a field you cannot select inside is a field you cannot correct.
+     Mirrors EDITABLE_SELECTOR in content-protection.utils.ts. */
+  input,
+  textarea,
+  select,
+  [contenteditable=''],
+  [contenteditable='true'],
+  [data-allow-native-menu='true'] {
+    -webkit-touch-callout: default;
+    -webkit-user-select: text;
+    user-select: text;
+  }
+}

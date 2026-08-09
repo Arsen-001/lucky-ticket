@@ -4,6 +4,7 @@
 @import './global/animations.css';
 @import './global/base-layer.css';
 @import './global/nullify.css';
+@import './global/content-protection.css';
 @import './components/tasks.css';
 @import './components/shine-card.css';
 @import './components/toast.css';
