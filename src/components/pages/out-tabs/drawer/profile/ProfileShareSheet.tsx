@@ -5,6 +5,9 @@ import type { LucideIcon } from 'lucide-react';
 import { twMerge } from 'tailwind-merge';
 import { ClientPortal } from '@/components/shared/ClientPortal';
 import { useAppTranslations } from '@/hooks/useAppTranslations';
+import { useOverlayPresence } from '@/hooks/useOverlayPresence';
+import { useOverlayFocusLock } from '@/hooks/useOverlayFocusLock';
+import { useBackdropDismiss } from '@/hooks/useBackdropDismiss';
 import { GlobalConstants } from '@/constants/global.constants';
 import { staggerMs } from '@/utils/global/animation.utils';
 import { openExternalUrl } from '@/lib/telegram/telegram';
@@ -27,9 +30,19 @@ export interface ProfileShareSheetProps {
   username?: string;
 }
 
+/** Matches the panel's `duration-300` slide. */
+const ANIMATION_MS = 300;
+
 export function ProfileShareSheet({ open, onClose, url, username }: ProfileShareSheetProps) {
   const t = useAppTranslations();
   const [copied, setCopied] = useState(false);
+  // A sheet that only looked like a dialog: no role, no accessible name, and no
+  // focus lock, so Tab walked straight into the profile behind it.
+  // @see useOverlayFocusLock
+  const panelRef = useOverlayFocusLock(open);
+  const { mounted, visible } = useOverlayPresence(open, ANIMATION_MS);
+  // The opening tap's own click lands on the backdrop. @see useBackdropDismiss
+  const backdropProps = useBackdropDismiss(visible, ANIMATION_MS, onClose);
 
   useEffect(() => {
     if (!open) {
@@ -116,6 +129,11 @@ export function ProfileShareSheet({ open, onClose, url, username }: ProfileShare
     return () => window.removeEventListener('keydown', handleKey);
   }, [open, onClose]);
 
+  // Closed → nothing in the DOM. This sheet stayed mounted whatever its state,
+  // so a full-screen layer with `role="dialog"` sat over the profile at all
+  // times — see useOverlayPresence, which every other overlay here already uses.
+  if (!mounted) return null;
+
   return (
     <ClientPortal>
       <div
@@ -123,16 +141,21 @@ export function ProfileShareSheet({ open, onClose, url, username }: ProfileShare
         inert={!open ? true : undefined}
         className={twMerge(
           'fixed inset-0 z-100 flex items-end justify-center transition-opacity duration-300',
-          open ? 'opacity-100' : 'pointer-events-none opacity-0'
+          visible ? 'opacity-100' : 'pointer-events-none opacity-0'
         )}
       >
-        <div className="bg-fade absolute inset-0 backdrop-blur-[1px]" onClick={onClose} />
+        <div className="bg-fade absolute inset-0 backdrop-blur-[1px]" {...backdropProps} />
 
         <div
+          ref={panelRef}
+          role="dialog"
+          aria-modal="true"
+          aria-label={t('share profile')}
+          tabIndex={-1}
           className={twMerge(
             // Capped to the phone column like every other overlay. @see BottomSheet
             'bg-background relative flex w-full max-w-[var(--app-max-w)] flex-col rounded-t-2xl transition-transform duration-300 ease-in-out',
-            open ? 'translate-y-0' : 'translate-y-full'
+            visible ? 'translate-y-0' : 'translate-y-full'
           )}
         >
           <div className="flex justify-center pb-1 pt-3">

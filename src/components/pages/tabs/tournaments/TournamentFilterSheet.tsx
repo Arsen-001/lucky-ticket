@@ -7,8 +7,11 @@ import { ClientPortal } from '@/components/shared/ClientPortal';
 import { Button } from '@/components/shared/buttons/Button';
 import { TournamentTypeChips } from '@/components/pages/tabs/tournaments/TournamentTypeChips';
 import type { TournamentType } from '@/types/types/tournaments.types';
+import { useEffect } from 'react';
 import { useAppTranslations } from '@/hooks/useAppTranslations';
 import { useOverlayPresence } from '@/hooks/useOverlayPresence';
+import { useOverlayFocusLock } from '@/hooks/useOverlayFocusLock';
+import { useBackdropDismiss } from '@/hooks/useBackdropDismiss';
 
 /** Matches the panel's `duration-300` slide. */
 const ANIMATION_MS = 300;
@@ -43,6 +46,21 @@ export function TournamentFilterSheet({
   const t = useAppTranslations();
   // Closed → nothing in the DOM (see useOverlayPresence).
   const { mounted, visible } = useOverlayPresence(open, ANIMATION_MS);
+  // This is a dialog, and it was one only by appearance: no role, no name, and
+  // nothing holding focus — the first Tab landed on the tournament list behind
+  // it and the page scrolled under the sheet. @see useOverlayFocusLock
+  const panelRef = useOverlayFocusLock(open);
+  // The opening tap's own click lands on a backdrop that did not exist when the
+  // finger went down. @see useBackdropDismiss
+  const backdropProps = useBackdropDismiss(visible, ANIMATION_MS, onClose);
+
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') onClose();
+    };
+    if (open) window.addEventListener('keydown', onKey);
+    return () => window.removeEventListener('keydown', onKey);
+  }, [open, onClose]);
 
   const sortItems: SortItem[] = [
     { key: 'soonest', label: t('starts soonest'), icon: Clock },
@@ -63,10 +81,15 @@ export function TournamentFilterSheet({
         )}
       >
         {/* Overlay */}
-        <div className="absolute inset-0 bg-fade backdrop-blur-[2px]" onClick={onClose} />
+        <div className="absolute inset-0 bg-fade backdrop-blur-[2px]" {...backdropProps} />
 
         {/* Sheet panel */}
         <div
+          ref={panelRef}
+          role="dialog"
+          aria-modal="true"
+          aria-label={t('filters')}
+          tabIndex={-1}
           className={twMerge(
             // Capped to the phone column like every other overlay — a `fixed`
             // layer measures `w-full` against the browser window. @see BottomSheet
