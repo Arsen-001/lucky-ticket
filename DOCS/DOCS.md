@@ -936,7 +936,7 @@ Each tournament includes:
 - **Start Time:** The date and time when the tournament begins and winners are decided.
 - **Team Size:** The total number of seats. `teamSizeCap` = 500 per instance; when more eligible players exist than the cap, additional parallel instances of the slot are spawned. For **admin-created project tournaments** the panel sets this seat count explicitly and it is enforced as a hard cap at join time — a full tournament rejects new entrants (already-joined players may still add tickets). Leaving the field blank creates an **unlimited (∞)** tournament with no seat cap.
 
-  The **auto-spawned daily slots** (Section 11.2.1) are unlimited by default — `tournamentsConfig.spawnerTeamSize = null`. They are the only way into a tournament for most players, and the spawned pool is a fixed LC amount rather than `seats × prizeLcPerSeat`, so an extra entrant dilutes nobody's payout — the ladder just runs deeper (down to place 500, Section 11.3). A cap there could only turn a latecomer away. The admin panel can still set a number, which applies to slots spawned from then on; tournaments already created keep the seat count they were spawned with.
+  The **auto-spawned daily slots** (Section 11.2.1) are unlimited by default — `tournamentsConfig.spawnerTeamSize = null`, one seat cap shared by every tier the spawner fills. They are the only way into a tournament for most players, and the spawned pool is a fixed LC amount rather than `seats × prizeLcPerSeat`, so an extra entrant dilutes nobody's payout — the ladder just runs deeper (down to place 500, Section 11.3). A cap there could only turn a latecomer away. The admin panel can still set a number, which applies to slots spawned from then on; tournaments already created keep the seat count they were spawned with.
 
 The prize pool is the platform's main LC faucet; it scales with the player base because more players spawn more tournament instances.
 
@@ -957,13 +957,34 @@ The time-of-day vocabulary belongs to **tournament names only**. The daily tourn
 
 Tier coverage across the day is uneven by design — lower tiers run more often, higher tiers are scarcer and concentrate on premium time slots:
 
-| Tier     | Typical slots                                   |
+| Tier     | Intended slots                                  |
 | -------- | ----------------------------------------------- |
 | Bronze   | Morning · Afternoon · Evening · Night (any/all) |
 | Silver   | Afternoon · Night                               |
 | Gold     | Evening                                         |
 | Platinum | Evening                                         |
 | Diamond  | Night                                           |
+
+**The spawner schedules every tier, and each tier is switched on separately.**
+`tournamentsConfig.spawnerHoursByTier` holds a list of UTC hours **per tier**
+(`{ BRONZE: [6, 12, 18, 0], SILVER: [], … }`) and `spawnerPrizePoolByTier` the LC
+each spawned bracket of that tier mints. An **empty hour list means the tier does
+not spawn at all** — which is how Silver…Diamond ship. Until 2026-08 the config
+held a single `spawnerTier` plus one `spawnerHours` list, so the platform could
+auto-run exactly ONE tier: Bronze. Everything above it existed only if an admin
+hand-created a tournament, which in practice meant never — four of the five tiers
+were dead, and with them the tier tasks that ask for them (§12.2). A stored config
+in the old shape is read as "that one tier on those hours, every other tier off",
+so the split changed no live schedule by itself.
+
+Turning a tier on is a **money decision, not a config tidy-up**: every hour listed
+against a tier mints that tier's whole pool once a day whether anyone enters or
+not, and the pools scale steeply with tier (100 seats × the per-seat value —
+400 000 LC at Bronze, 15 000 000 at Diamond). Attendance is what decides whether
+that is a prize or an emission: at 1–4 entrants a slot the coins are minted
+regardless. The admin panel refuses to save a tier that has hours but a pool of 0
+— such a slot would run, draw, and pay its winners nothing after the player spent
+a ticket to enter.
 
 ### 11.2.2 Tier Activation — Active-Player Gate
 
