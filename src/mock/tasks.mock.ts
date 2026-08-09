@@ -1616,9 +1616,18 @@ const claimTaskHandler = (args: { body?: { id?: string; subStepIds?: string[] } 
   let rewards: TaskReward[] = [];
   const allSubSteps = allTasks.flatMap(t => t.subSteps ?? []);
 
+  // Mirrors the live backend's `BadRequestException('Task already claimed')`.
+  // The fixture used to pay out again on every repeat call, so a UI that let
+  // the player tap a claimed row twice looked perfectly healthy in dev and only
+  // showed its error modal on production.
+  const alreadyClaimed = {
+    error: { status: 400, data: { message: 'Task already claimed' } },
+  };
+
   if (!found) {
     // Legacy form: a substep id passed as the task id.
     const sub = allSubSteps.find(s => s.id === id);
+    if (mockState.claimedSubStepIds.has(id)) return alreadyClaimed;
     if (sub?.reward) {
       rewards = [sub.reward];
       mockState.claimedSubStepIds.add(id);
@@ -1628,21 +1637,27 @@ const claimTaskHandler = (args: { body?: { id?: string; subStepIds?: string[] } 
     // the named substeps are claimed, but the MAIN task completes only when
     // it is genuinely done (all its substeps completed), so collecting one
     // substep never swallows the whole task.
-    const bundled = subStepIds
-      .map(sid => allSubSteps.find(s => s.id === sid))
-      .filter(s => s?.reward)
-      .map(s => s!.reward!);
-    rewards = bundled;
-    subStepIds.forEach(sid => mockState.claimedSubStepIds.add(sid));
+    const fresh = subStepIds.filter(sid => !mockState.claimedSubStepIds.has(sid));
     const ownSubs = found.subSteps ?? [];
     const mainReady =
       found.status === TaskStatus.READY_TO_CLAIM ||
       (ownSubs.length > 0 && ownSubs.every(s => s.completed));
-    if (mainReady && !mockState.claimedTaskIds.has(id)) {
+    const mainClaim = mainReady && !mockState.claimedTaskIds.has(id);
+    // Nothing new in the bundle and the main task is already banked — the live
+    // backend answers 400 here rather than handing out the rewards a second time.
+    if (!fresh.length && !mainClaim) return alreadyClaimed;
+    const bundled = fresh
+      .map(sid => allSubSteps.find(s => s.id === sid))
+      .filter(s => s?.reward)
+      .map(s => s!.reward!);
+    rewards = bundled;
+    fresh.forEach(sid => mockState.claimedSubStepIds.add(sid));
+    if (mainClaim) {
       mockState.claimedTaskIds.add(id);
       rewards = [...(found.rewards ?? []), ...rewards];
     }
   } else {
+    if (mockState.claimedTaskIds.has(id)) return alreadyClaimed;
     mockState.claimedTaskIds.add(id);
     rewards = found.rewards ?? [];
   }
