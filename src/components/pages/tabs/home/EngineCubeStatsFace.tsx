@@ -1,7 +1,7 @@
 import { formatLocalDate } from '@/utils/global/date.utils';
 import { CalendarDays, Crown, Sparkles, TrendingUp, UserRound, Zap } from 'lucide-react';
 import { useAppTranslations } from '@/hooks/useAppTranslations';
-import { formatCompact } from '@/utils/global/number.utils';
+import { formatCompact, formatTicketRate } from '@/utils/global/number.utils';
 import '@/styles/components/engine-cube-faces.css';
 
 export interface EngineCubeStatsFaceProps {
@@ -35,11 +35,10 @@ export function EngineCubeStatsFace({
   const statusColor = isVipStatus ? 'var(--color-gold)' : 'var(--color-teal)';
 
   const createdLabel = createdAt ? formatLocalDate(createdAt) : null;
-  // Sub-1 rates must keep their fraction — a base bronze engine mints 0.5 T/H
-  // and rounding it up to "1" doubles the promised output.
-  const rounded = Math.max(0, ticketsPerHour);
-  const perHour =
-    rounded >= 1 ? String(Math.round(rounded * 10) / 10) : String(Math.round(rounded * 100) / 100);
+  // The LIVE rate — running boosters included, same as the cycle the countdown
+  // shows (DOCS §9.8). `formatTicketRate` keeps a sub-1 rate's fraction: a base
+  // bronze engine mints 0.5 T/H and rounding it to "1" doubles the promise.
+  const perHour = formatTicketRate(ticketsPerHour);
 
   return (
     <div
@@ -86,7 +85,7 @@ export function EngineCubeStatsFace({
             <span className="cube-hud-stat-value cube-hud-stat-value--xs mb-0.5">T/H</span>
           </span>
           <span className="text-[8px] font-extrabold uppercase tracking-[0.16em] text-white/55">
-            {t('per hour base')}
+            {t('per hour')}
           </span>
         </div>
       </div>

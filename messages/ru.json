@@ -815,7 +815,6 @@
   "cycle full": "Полный цикл: {time}",
   "per cycle": "за цикл",
   "per cycle full": "{capacity, plural, one {# билет за цикл} few {# билета за цикл} many {# билетов за цикл} other {# билета за цикл}}",
-  "per hour base": "Производительность",
   "streak": "Стрик",
   "engine details": "Двигатель",
   "engine not found": "Двигатель не найден",
@@ -1312,5 +1311,8 @@
   "tester badge": "Бейдж тестировщика",
   "at speed cap": "Предел скорости",
   "per hour": "В час",
-  "no speed boosts yet": "Бустов скорости пока нет — прокачай скорость или поставь чип"
+  "no speed boosts yet": "Бустов скорости пока нет — прокачай скорость или поставь чип",
+  "capacity upgrades": "Апгрейды ёмкости",
+  "t/h": "Б/Ч",
+  "per day short": "/сут"
 }

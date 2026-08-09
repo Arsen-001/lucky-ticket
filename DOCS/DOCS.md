@@ -587,29 +587,27 @@ Where:
 
 ### 9.8 Productivity Metric
 
-Each engine has a derived stat — **Productivity (tickets/hour)** — visible in the engine UI. It represents the engine's output rate **before any time-limited Engine Booster** (Section 10.6) is applied, but **with** the Speed Chip and Capacity Chip currently equipped.
+Each engine has a derived stat — **Productivity (tickets/hour)** — visible in the engine UI. It is the **live** rate: what the engine is minting right now, with every boost that is currently running, **including** a time-limited Engine Booster (Section 10.6).
 
 Formula:
 
 ```
-productivity = (3600 / cycleSeconds_with_chip) × capacity_with_chip
+productivity = (3600 / effectiveCycleSeconds) × capacity
 ```
 
-Where:
+Where both terms are exactly the ones the engine runs on: `effectiveCycleSeconds` (§9.7 — the full additive speed stack plus the 900 s/ticket floor) and `capacity` (§9.7 — base batch, capacity sub-level bonus, capacity chip and booster).
 
-- `cycleSeconds_with_chip` = base engine cycle reduced by the equipped Speed Chip's `effectPct` (and any permanent Speed Boost from 10.1 / status).
-- `capacity_with_chip` = base per-cycle output increased by the equipped Capacity Chip's `effectPct` (and any Capacity Upgrade from 10.2).
-- One-shot **Engine Boosters** (10.6) are deliberately **excluded** so the user sees their long-term baseline rate, not a number that drops when a 3-hour booster expires.
+_(Until 2026-08-09 this metric deliberately EXCLUDED time-limited boosters, to show "the long-term baseline". The number that produced disagreed with the countdown and the ×N on the same screen — an engine with a running booster minted faster than its own stat promised — so the definition was unified on the live rate. What a booster contributes is not hidden: it is a named row in the speed breakdown on both the engine screen and the cube's stats face, marked as time-limited.)_
 
 ### 9.9 Engine UI — Rotating Cube
 
 On the home screen, each owned engine is rendered as a **3D rotating cube** the user can swipe vertically (front → bottom → back → top → front). Four of the six faces carry distinct content:
 
-| Face       | Content                                                                                                                                                                                                                                                                                                                                     |
+| Face       | Content                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            |
 | :--------- | :------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
 | **Front**  | Live engine card — Reactor dial, tier-coloured Claim button, Speed/Capacity boost rows, cycle stats.                                                                                                                                                                                                                                        |
 | **Bottom** | **Equipment grid** — 2 Chip slots (Speed / Capacity, see 10.4) on top, 2 Booster slots (10.6) below. Tapping a filled slot opens its picker; an active chip slot also shows an **X** unequip control (cost rules in 10.4).                                                                                                                  |
-| **Back**   | **Stats panel** — header (`ENGINE STATS` + level pill), then five stacked stat rows (`BASE` factory cycle/capacity → `ENGINE` level upgrades → `CHIP` slot effects → `BOOST` active boosters → `LP/VIP` status perk), and a `TOTAL` row at the bottom showing aggregated ⚡ and 📦 boost percentages. Uses the LM-additive model from §9.7. |
+| **Back**   | **Reactor panel** — the whole calculation as two dials. The ⚡ ring is the speed stack: a grey arc for the factory ×1 plus one coloured arc per boost (engine level, speed upgrades, status, chip, booster, badge), with the resulting **cycle** in its centre and the total `+N%` under it. The 📦 ring is the capacity ladder (factory batch → engine level → capacity upgrades → chip/booster %), with the **batch ×N** in its centre and its build-up under it. Below both: a colour-matched legend of every contributing term, and a footer line with the arithmetic (`base cycle ÷ multiplier = raw cycle`) and the live rate (`T/H · per day`), or the **at speed cap** marker when the 900 s/ticket floor is what decides the cycle. Uses the LM-additive model from §9.7. |
 | **Top**    | **Engine Passport** — header with engine level pill, lifetime tickets (huge number), Productivity (Section 9.8), and footer with Owner + Created date.                                                                                                                                                                                      |
 
 The two unused faces (left / right) are reserved for future content. The cube also carries a glowing core in the center, visible through the inner edges, that uses the engine's tier color.

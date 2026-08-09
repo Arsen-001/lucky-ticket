@@ -4,6 +4,8 @@ import type { StatusPerks } from '@/types/interfaces/user.interfaces';
 import { effectiveStatusPct } from '@/utils/global/status.utils';
 import {
   type EngineLevelTables,
+  baseCapacity,
+  capacityLevelBonusTickets,
   engineLevelBoostPct,
   speedLevelBoostPct,
 } from '@/utils/global/ticket-engine.utils';
@@ -71,6 +73,51 @@ export const engineSpeedBoostSources = (
 
 export const totalSpeedBoostPct = (sources: readonly EngineSpeedBoostSource[]) =>
   sources.reduce((sum, source) => sum + source.pct, 0);
+
+/**
+ * The capacity ladder, itemised the way `engineCapacity` builds it: absolute
+ * tickets first (factory batch + engine level + capacity sub-level), then the
+ * percentage scalers (chip, booster) applied to that whole batch.
+ */
+export type EngineCapacityKey = 'factory' | 'engineLevel' | 'capacityLevel' | 'chip' | 'booster';
+
+export interface EngineCapacitySource {
+  key: EngineCapacityKey;
+  /** Absolute tickets this source adds (`factory` carries the starting batch). */
+  tickets: number;
+  /** Percentage this source scales the batch by — chips and boosters only. */
+  pct: number;
+}
+
+export interface EngineCapacityOptions {
+  capacityChip?: InventoryChip;
+  /** Must already be filtered for liveness (`findActiveBooster` does it). */
+  capacityBooster?: InventoryBooster;
+  tables?: EngineLevelTables;
+}
+
+export const engineCapacitySources = (
+  engine: TicketEngine,
+  options: EngineCapacityOptions = {}
+): EngineCapacitySource[] => {
+  const levelBase = baseCapacity(engine.engineLevel || 1, options.tables);
+  const factory = baseCapacity(1, options.tables);
+  return [
+    { key: 'factory', tickets: factory, pct: 0 },
+    { key: 'engineLevel', tickets: levelBase - factory, pct: 0 },
+    {
+      key: 'capacityLevel',
+      tickets: capacityLevelBonusTickets(engine.capacityLevel || 0, options.tables),
+      pct: 0,
+    },
+    { key: 'chip', tickets: 0, pct: options.capacityChip?.effectPct ?? 0 },
+    { key: 'booster', tickets: 0, pct: options.capacityBooster?.effectPct ?? 0 },
+  ];
+};
+
+/** Only the rungs that actually contribute — what the UI renders. */
+export const activeCapacitySources = (sources: readonly EngineCapacitySource[]) =>
+  sources.filter(source => source.tickets > 0 || source.pct > 0);
 
 /** Only the contributors actually granting something — what the UI renders. */
 export const activeSpeedBoostSources = (sources: readonly EngineSpeedBoostSource[]) =>

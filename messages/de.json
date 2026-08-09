@@ -814,7 +814,6 @@
   "cycle full": "Voller Zyklus: {time}",
   "per cycle": "pro Zyklus",
   "per cycle full": "{capacity, plural, =1 {# Ticket pro Zyklus} other {# Tickets pro Zyklus}}",
-  "per hour base": "Produktivität",
   "streak": "Serie",
   "engine details": "Engine-Details",
   "engine not found": "Engine nicht gefunden",
@@ -1312,5 +1311,8 @@
   "tester badge": "Tester-Abzeichen",
   "at speed cap": "Tempolimit erreicht",
   "per hour": "Pro Stunde",
-  "no speed boosts yet": "Noch keine Tempo-Boosts — Tempo aufwerten oder Chip einsetzen"
+  "no speed boosts yet": "Noch keine Tempo-Boosts — Tempo aufwerten oder Chip einsetzen",
+  "capacity upgrades": "Kapazitäts-Upgrades",
+  "t/h": "T/H",
+  "per day short": "/Tag"
 }

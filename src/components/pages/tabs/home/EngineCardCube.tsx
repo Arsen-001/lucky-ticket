@@ -11,14 +11,16 @@ import { useGetMeQuery } from '@/api/me.api';
 import { useEngineSpeedAvatarBoostPct } from '@/hooks/useEngineSpeedAvatarBoostPct';
 import { useTestBadgeSpeedBoostPct } from '@/hooks/useTestBadgeSpeedBoostPct';
 import { useEngineConfig } from '@/hooks/useEngineConfig';
-import {
-  effectiveCycleSeconds,
-  engineCapacity,
-  engineLevelBoostPct,
-  speedLevelBoostPct,
-} from '@/utils/global/ticket-engine.utils';
+import { effectiveCycleSeconds, engineCapacity } from '@/utils/global/ticket-engine.utils';
 import type { InventoryChipType } from '@/types/interfaces/inventory.interfaces';
-import { EngineCubeBackFace } from './EngineCubeBackFace';
+import { findActiveBooster, findEquippedChip } from '@/utils/global/inventory.utils';
+import {
+  engineCapacitySources,
+  engineSpeedBoostSources,
+  totalSpeedBoostPct,
+} from '@/utils/global/engine-boosts.utils';
+import { GlobalConstants } from '@/constants/global.constants';
+import { EngineCubeReactorFace } from './EngineCubeReactorFace';
 import { EngineCubeFacePips } from './EngineCubeFacePips';
 import { EngineCubeSlot } from './EngineCubeSlot';
 import { displayNameOf } from '@/utils/global/user.utils';
@@ -72,8 +74,6 @@ function EngineCardCubeImpl(props: EngineCardCubeProps) {
   const { engine, tier } = engineCardProps;
   const tierAccent = `var(--color-${tier})`;
 
-  const speedLevel = engine.speedLevel ?? 0;
-  const capacityLevel = engine.capacityLevel ?? 0;
   const engineLevel = engine.engineLevel ?? 1;
 
   const { data: inventory } = useGetInventoryQuery();
@@ -89,20 +89,14 @@ function EngineCardCubeImpl(props: EngineCardCubeProps) {
       statusPerks: data?.statusPerks,
     }),
   });
-  const chips = inventory?.chips ?? [];
-  const boosters = inventory?.boosters ?? [];
-  const equippedSpeedChip = chips.find(
-    c => c.equippedOnEngineId === engine.id && c.type === 'speed'
-  );
-  const equippedCapacityChip = chips.find(
-    c => c.equippedOnEngineId === engine.id && c.type === 'capacity'
-  );
-  const activeSpeedBooster = boosters.find(
-    b => b.activeOnEngineId === engine.id && b.type === 'speed'
-  );
-  const activeCapacityBooster = boosters.find(
-    b => b.activeOnEngineId === engine.id && b.type === 'capacity'
-  );
+  const chips = inventory?.chips;
+  const boosters = inventory?.boosters;
+  const equippedSpeedChip = findEquippedChip(chips, engine.id, 'speed');
+  const equippedCapacityChip = findEquippedChip(chips, engine.id, 'capacity');
+  // `expiresAt` is the authority: a spent booster keeps its `activeOnEngineId`,
+  // so matching on the assignment alone kept boosting the face forever.
+  const activeSpeedBooster = findActiveBooster(boosters, engine.id, 'speed');
+  const activeCapacityBooster = findActiveBooster(boosters, engine.id, 'capacity');
 
   // Real running total of tickets this engine has ever claimed (backend counter).
   const lifetimeProduced = engine.lifetimeProduced ?? 0;
@@ -120,22 +114,18 @@ function EngineCardCubeImpl(props: EngineCardCubeProps) {
   const badgeSpeedPct = useTestBadgeSpeedBoostPct();
   const { tables } = useEngineConfig();
 
-  // BASE row on the stats face = the engine's factory starting point: exactly
-  // ONE ticket over the tier's base cycle ("1 ticket per Xh"). Everything the
-  // player built on top belongs to the ENGINE row — both the speed the level +
-  // sub-level added AND the extra ticket "slots" the level + capacity upgrades
-  // unlocked. So base stays 1 × the base cycle; the back face derives the added
-  // slots from engineLevel / capacityLevel itself.
-  const baseCapacity = 1;
+  // The factory starting point the reactor face divides down from: the tier's
+  // untouched cycle, before a single boost.
   const baseCycleSeconds = engine.cycleSeconds;
 
-  // Passport "T/H" is the productivity baseline (DOCS §9.8): permanent boosts
-  // only — engine/speed levels, chips, status, equipped avatar — with
-  // time-limited boosters deliberately EXCLUDED, matching Engine Details so both
-  // screens print the same rate. (The booster-inclusive figure lives in the back
-  // face's TOTAL row via `totalBoostPct` below.)
-  const productivityCycleSeconds = effectiveCycleSeconds(engine, {
+  // Rates on the cube are the LIVE ones — every boost that is running right now,
+  // time-limited boosters included — so the faces quote the same numbers as the
+  // countdown and the ×N on the front card (DOCS §9.8).
+  const liveCycleSeconds = effectiveCycleSeconds(engine, {
     speedChip: equippedSpeedChip,
+    speedBooster: activeSpeedBooster,
+    capacityChip: equippedCapacityChip,
+    capacityBooster: activeCapacityBooster,
     isLuckyPlayer: isLp,
     isVip,
     perks: statusPerks,
@@ -143,22 +133,35 @@ function EngineCardCubeImpl(props: EngineCardCubeProps) {
     badgeBoostPct: badgeSpeedPct,
     tables,
   });
-  const productivityCapacity = engineCapacity(engine, {
+  const liveCapacity = engineCapacity(engine, {
     capacityChip: equippedCapacityChip,
+    capacityBooster: activeCapacityBooster,
     tables,
   });
-  const ticketsPerHour =
-    productivityCycleSeconds > 0 ? (3600 / productivityCycleSeconds) * productivityCapacity : 0;
+  const ticketsPerHour = liveCycleSeconds > 0 ? (3600 / liveCycleSeconds) * liveCapacity : 0;
 
-  // Aggregated additive speed boost (mirrors `effectiveCycleSeconds()`).
-  const totalBoostPct =
-    engineLevelBoostPct(engineLevel, tables) +
-    speedLevelBoostPct(speedLevel, tables) +
-    statusEngineSpeedBoostPct +
-    avatarSpeedPct +
-    badgeSpeedPct +
-    (equippedSpeedChip?.effectPct ?? 0) +
-    (activeSpeedBooster?.effectPct ?? 0);
+  // The two ladders, itemised — the reactor face draws its arcs straight off these.
+  const speedBoosts = engineSpeedBoostSources(engine, {
+    speedChip: equippedSpeedChip,
+    speedBooster: activeSpeedBooster,
+    isLuckyPlayer: isLp,
+    isVip,
+    perks: statusPerks,
+    avatarBoostPct: avatarSpeedPct,
+    badgeBoostPct: badgeSpeedPct,
+    tables,
+  });
+  const capacitySources = engineCapacitySources(engine, {
+    capacityChip: equippedCapacityChip,
+    capacityBooster: activeCapacityBooster,
+    tables,
+  });
+  const totalBoostPct = totalSpeedBoostPct(speedBoosts);
+  // Boost past the hard 15-min-per-ticket floor buys nothing — the face says so
+  // instead of quoting a speed the engine cannot deliver.
+  const atSpeedCap =
+    engine.cycleSeconds / (1 + totalBoostPct / 100) <
+    liveCapacity * GlobalConstants.engineMinSecondsPerTicket;
 
   // Premium status — surfaced on the stats face (its speed-boost row) and as the
   // passport identity badge. VIP supersedes LP (never stacks); the level is a
@@ -305,21 +308,15 @@ function EngineCardCubeImpl(props: EngineCardCubeProps) {
           </div>
 
           <div className="engine-card-cube-face engine-card-cube-face--back">
-            <EngineCubeBackFace
+            <EngineCubeReactorFace
               engineLevel={engineLevel}
-              speedLevel={speedLevel}
-              capacityLevel={capacityLevel}
               baseCycleSeconds={baseCycleSeconds}
-              baseCapacity={baseCapacity}
-              totalBoostPct={totalBoostPct}
-              luckyPlayerBoostPct={statusEngineSpeedBoostPct}
-              statusLabel={statusLabel}
-              avatarBoostPct={avatarSpeedPct}
-              badgeBoostPct={badgeSpeedPct}
-              speedChip={equippedSpeedChip}
-              capacityChip={equippedCapacityChip}
-              speedBooster={activeSpeedBooster}
-              capacityBooster={activeCapacityBooster}
+              cycleSeconds={liveCycleSeconds}
+              capacity={liveCapacity}
+              ticketsPerHour={ticketsPerHour}
+              boosts={speedBoosts}
+              capacitySources={capacitySources}
+              atSpeedCap={atSpeedCap}
               accent={tierAccent}
             />
           </div>
