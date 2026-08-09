@@ -1196,7 +1196,7 @@ Tasks guide user behavior and introduce structured goals.
 - Daily tasks
 - Weekly tasks
 
-> There is no **Monthly** frequency — `enum TaskFrequency` is `DAILY | WEEKLY | ONCE` and always has been. Monthly tasks were listed here, in the check-in examples (§12.2), in the all-set bonus (§12.4) and in the achievement catalog (§16.x) purely as documentation; nothing in either repo can produce one.
+> There is no **Monthly** frequency and there will not be one — product call 2026-08-10. The ladder stays two recurring rungs (daily, weekly) plus one-time; a month is longer than the reward loop this game runs on, and the long-haul goals it would hold are already the one-time catalog's job (§12.6). `enum TaskFrequency` is `DAILY | WEEKLY | ONCE` in both repos and always has been — monthly tasks were listed here, in the check-in examples (§12.2), in the all-set bonus (§12.4) and in the achievement catalog purely as documentation; nothing in either repo could ever produce one. The two enums are held together by `tests/enum-parity.test.ts`, so adding the rung on one side alone fails the build rather than quietly half-shipping.
 
 ### 12.2 Task Structure
 
