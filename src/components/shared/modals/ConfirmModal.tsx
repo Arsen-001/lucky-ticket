@@ -47,7 +47,12 @@ export function ConfirmModal({
         }}
       >
         <div className="relative z-1 flex flex-col gap-2 text-center">
-          {title && <h3 className="text-xl font-bold text-white">{title}</h3>}
+          {/* `px-7` keeps the title clear of the close button in the panel's
+              top-right corner. A centered title only reaches that corner once it
+              fills the line, which English rarely does and Russian does:
+              "Улучшить скорость?" had the X drawn over its last two glyphs on a
+              320px screen (measured 09.08.2026). */}
+          {title && <h3 className="px-7 text-xl font-bold text-white">{title}</h3>}
           {content}
         </div>
 
