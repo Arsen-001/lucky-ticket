@@ -127,29 +127,22 @@ const normalizeCategoryAp = (cat: CategoryTasks): CategoryTasks => ({
   weekly: cat.weekly.map(normalizeTaskAp),
 });
 
-const buildSubSteps = (
-  _prefix: string,
-  count: number,
-  completedCount: number,
-  apPerStep: number,
-  labels?: string[]
-) =>
+// Sub-steps are numbered `n / total`, mirroring the backend's `stepLabel`.
+// They used to be named brackets ('Morning Bronze · 06:00') and weekdays
+// ('Mon'), which no data backs: a step is completed by "counter reached n",
+// nothing ties step #4 to the night bracket or to Sunday — and all four daily
+// Bronze brackets are open at the same time, so entering them in one sitting
+// lit up 'Night Bronze · 00:00' at breakfast. Digits also need no translation;
+// `label` is a bare string in the FE contract, so those English names used to
+// reach RU/DE players untranslated.
+const buildSubSteps = (_prefix: string, count: number, completedCount: number, apPerStep: number) =>
   Array.from({ length: count }, (_, i) => ({
     id: nextId('ss'),
-    label: labels?.[i] ?? '',
+    label: `${i + 1} / ${count}`,
     completed: i < completedCount,
     claimed: false,
     reward: ap(apPerStep),
   }));
-
-const BRONZE_DAILY_SLOTS = [
-  'Morning Bronze · 06:00',
-  'Afternoon Bronze · 12:00',
-  'Evening Bronze · 18:00',
-  'Night Bronze · 00:00',
-];
-const SILVER_DAILY_SLOTS = ['Afternoon Silver · 12:00', 'Night Silver · 00:00'];
-const WEEKDAYS_7 = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
 
 const baseTask = (override: Partial<Task>): Task => {
   const target = override.progress?.target ?? 1;
@@ -415,7 +408,6 @@ interface TierTournamentConfig {
   daily: {
     kind: TournamentKind;
     count: number;
-    slots: string[];
     title: string;
     subtitle: string;
     rewards: TaskReward[];
@@ -437,9 +429,8 @@ const TIER_CONFIGS: TierTournamentConfig[] = [
     daily: {
       kind: 'play',
       count: 4,
-      slots: BRONZE_DAILY_SLOTS,
       title: 'Join 4 Bronze tournaments',
-      subtitle: 'All 4 daily Bronze brackets — easy AP grind.',
+      subtitle: 'All 4 Bronze brackets of the day are open at once — enter them in one go.',
       rewards: [lc(1), ap(120)],
       progress: { current: 4, target: 4 },
       rarity: TaskRarity.BRONZE,
@@ -457,7 +448,6 @@ const TIER_CONFIGS: TierTournamentConfig[] = [
     daily: {
       kind: 'play',
       count: 2,
-      slots: SILVER_DAILY_SLOTS,
       title: 'Join 2 Silver tournaments',
       subtitle: 'Both daily Silver brackets.',
       rewards: [lc(2), ap(160)],
@@ -477,7 +467,6 @@ const TIER_CONFIGS: TierTournamentConfig[] = [
     daily: {
       kind: 'bet',
       count: 1,
-      slots: [],
       title: 'Bet 1 ticket on a starting Gold tournament',
       subtitle: 'Spectate-bet on todayʼs Gold bracket.',
       rewards: [lc(2), ap(180)],
@@ -497,7 +486,6 @@ const TIER_CONFIGS: TierTournamentConfig[] = [
     daily: {
       kind: 'bet',
       count: 1,
-      slots: [],
       title: 'Bet 1 ticket on a starting Platinum tournament',
       subtitle: 'Place a ticket on the daily Platinum bracket.',
       rewards: [lc(4), ap(260)],
@@ -517,7 +505,6 @@ const TIER_CONFIGS: TierTournamentConfig[] = [
     daily: {
       kind: 'bet',
       count: 1,
-      slots: [],
       title: 'Bet 1 ticket on a starting Diamond tournament',
       subtitle: 'Place a ticket on the daily Diamond bracket.',
       rewards: [lc(8), tickets(1), ap(400)],
@@ -554,8 +541,7 @@ const buildDailyTierTask = (cfg: TierTournamentConfig): Task => {
       tierCap,
       cfg.daily.count,
       cfg.daily.progress.current,
-      cfg.daily.subStepAp,
-      cfg.daily.slots
+      cfg.daily.subStepAp
     ),
   });
 };
@@ -578,13 +564,7 @@ const buildWeeklyTierTask = (cfg: TierTournamentConfig): Task => {
     deeplink: `/tasks?frequency=daily&category=tournaments&task=task-daily-${cfg.tier}`,
     rarity: cfg.weekly.rarity,
     tier: cfg.tier,
-    subSteps: buildSubSteps(
-      tierCap,
-      7,
-      cfg.weekly.progress.current,
-      cfg.weekly.subStepAp,
-      WEEKDAYS_7
-    ),
+    subSteps: buildSubSteps(tierCap, 7, cfg.weekly.progress.current, cfg.weekly.subStepAp),
   });
 };
 
@@ -814,7 +794,7 @@ const PROFILE = buildCategory({
       rewards: [lc(2), ap(150)],
       progress: { current: 5, target: 7 },
       rarity: TaskRarity.SILVER,
-      subSteps: buildSubSteps('profile-checkin', 7, 5, 15, WEEKDAYS_7),
+      subSteps: buildSubSteps('profile-checkin', 7, 5, 15),
     },
   ],
   once: [

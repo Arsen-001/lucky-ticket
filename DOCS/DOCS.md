@@ -952,7 +952,7 @@ Examples: `Morning Bronze`, `Afternoon Silver`, `Evening Gold`, `Night Diamond`.
 
 The exact start time is **not** part of the name — it's surfaced separately in the UI as a date pill (`DD/MM/YYYY · HH:mm`) and a live countdown chip on every tournament surface. This keeps names short and reusable across days while the time/date metadata stays explicit.
 
-This pattern mirrors the daily-slot structure used in tasks (`BRONZE_DAILY_SLOTS` / `SILVER_DAILY_SLOTS` in `tasks.mock.ts`) so the player sees a consistent time-of-day vocabulary across both systems.
+The time-of-day vocabulary belongs to **tournament names only**. The daily tournament **tasks** used to reuse it for their sub-steps ("Morning Bronze · 06:00" … "Night Bronze · 00:00"), and it was a lie: a sub-step is completed by "the day's join counter reached N", so nothing binds step #4 to the night bracket. Sub-steps are now numbered `n / total` (§12.2).
 
 Tier coverage across the day is uneven by design — lower tiers run more often, higher tiers are scarcer and concentrate on premium time slots:
 
@@ -1197,6 +1197,21 @@ admin API, so a new task must be able to carry its own copy without a deploy.
 
 Before this, every task title and subtitle rendered in English regardless of the
 chosen language, because the strings went from the database straight into the UI.
+
+**Sub-steps are a counter, not a schedule.** A daily/weekly task whose target is
+greater than 1 expands into `progressTarget` sub-steps, each claimable on its own
+for a slice of the AP. Step _n_ is completed by one rule and one only — **the
+period counter reached _n_** — so the steps are labelled `1 / 4`, `2 / 4`, … and
+nothing more. They used to be named after time slots (`Morning Bronze · 06:00` …
+`Night Bronze · 00:00`) and weekdays (`Mon` … `Sun`), which the data cannot back:
+step #4 is not the night bracket and step #1 is not Monday. Two consequences the
+labels hid: all four daily Bronze brackets are `UPCOMING` at the same time
+(§11.2.1), so the "4 Bronze tournaments" task is finished in one sitting rather
+than four visits, and it is credited **on entry** — `TournamentParticipation.joinedAt`
+inside the current UTC day — not when the tournament is drawn. Task copy says
+"join" in every language for that reason. The meta "complete all tournament tasks"
+task is the exception that keeps named steps (Bronze … Diamond), because there each
+step really is one specific tier's task.
 
 **Reset timing & countdowns.** Daily tasks reset at **00:00 UTC**; weekly tasks reset **Monday 00:00 UTC**; the rewarded-ads block resets with the daily boundary. The backend stamps every daily/weekly task (and the ads block) with `resetAt` — the exact period boundary — and the UI renders live countdowns from it: a small timer on each task card/row (kept on completed tasks to show when they re-open), a period-level "Next reset in …" line under the Daily/Weekly frequency tabs, and the ads-section timer. One-time tasks never reset and show no countdown.
 
