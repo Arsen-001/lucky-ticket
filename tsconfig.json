@@ -54,7 +54,11 @@
     ".next-e2e-prod/types/**/*.ts",
     ".next-e2e-prod/dev/types/**/*.ts",
     ".next-gate/types/**/*.ts",
-    ".next-gate/dev/types/**/*.ts"
+    ".next-gate/dev/types/**/*.ts",
+    ".next-shot/types/**/*.ts",
+    ".next-shot/dev/types/**/*.ts",
+    ".next-verify/types/**/*.ts",
+    ".next-verify/dev/types/**/*.ts"
   ],
   "exclude": ["node_modules", "public/assets", "ad-platform-backend"]
 }

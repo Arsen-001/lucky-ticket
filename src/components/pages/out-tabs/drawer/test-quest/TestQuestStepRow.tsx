@@ -45,7 +45,7 @@ const STEP_VISUALS: Record<TestQuestStepKind, { Icon: LucideIcon; tint: string }
   share: { Icon: Share2, tint: 'bg-electric-pink/16 text-electric-pink' },
   referral: { Icon: UserPlus, tint: 'bg-electric-pink/16 text-electric-pink' },
   engine: { Icon: Zap, tint: 'bg-gold/16 text-gold' },
-  shop: { Icon: ShoppingBag, tint: 'bg-orange/18 text-orange' },
+  market: { Icon: ShoppingBag, tint: 'bg-orange/18 text-orange' },
   wallet: { Icon: Wallet, tint: 'bg-diamond/18 text-diamond' },
   stake: { Icon: Coins, tint: 'bg-silver/16 text-silver' },
   status: { Icon: Medal, tint: 'bg-gold/16 text-gold' },

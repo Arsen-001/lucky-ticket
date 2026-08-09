@@ -6,7 +6,6 @@ import { NotificationPreferencesSection } from '@/components/pages/out-tabs/draw
 import { SettingsAvatarRow } from '@/components/pages/out-tabs/drawer/settings/SettingsAvatarRow';
 import { SettingsMenuItem } from '@/components/pages/out-tabs/drawer/settings/SettingsMenuItem';
 import type { SettingsMenuAccent } from '@/components/pages/out-tabs/drawer/settings/SettingsMenuItem';
-import { SettingsSignOut } from '@/components/pages/out-tabs/drawer/settings/SettingsSignOut';
 import { SettingsTourRow } from '@/components/pages/out-tabs/drawer/settings/SettingsTourRow';
 import { SettingsUpgradePromptRow } from '@/components/pages/out-tabs/drawer/settings/SettingsUpgradePromptRow';
 import { routes } from '@/constants/routes';
@@ -93,13 +92,6 @@ export default function SettingsPage() {
           {t('app tour')}
         </h2>
         <SettingsTourRow />
-      </div>
-
-      <div
-        className="animate-slide-in-bottom mt-4"
-        style={{ animationDelay: `${staggerMs(sections.length + 3, 80)}ms` }}
-      >
-        <SettingsSignOut />
       </div>
     </div>
   );

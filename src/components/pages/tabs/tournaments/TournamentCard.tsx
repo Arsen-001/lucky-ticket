@@ -42,6 +42,7 @@ import type {
 import type { TournamentType } from '@/types/types/tournaments.types';
 import { TournamentBetModal } from '@/components/pages/out-tabs/tabs-extra/tournament/TournamentBetModal';
 import { TournamentResultModal } from '@/components/pages/out-tabs/tabs-extra/tournament/TournamentResultModal';
+import { ShardZoomButton } from '@/components/pages/out-tabs/tabs-extra/tournament/ShardZoomButton';
 import { TierGateModal } from '@/components/shared/modals/TierGateModal';
 import { TournamentSponsorHeader } from './TournamentSponsorHeader';
 import { TournamentSponsorBackground } from './TournamentSponsorBackground';
@@ -62,7 +63,17 @@ const TIER_GLOW: Record<TournamentType, string> = {
   diamond: '23 141 136',
 };
 
+/**
+ * `list` — a row in the catalog: the whole card is the link to the detail page.
+ * `detail` — the same card as the detail screen's header. It is already the
+ * page it would navigate to, so it doesn't act as a link; in exchange the shard
+ * icon becomes tappable (zoom preview), which in the list would fight the
+ * card's own tap.
+ */
+export type TournamentCardVariant = 'list' | 'detail';
+
 export type TournamentCardProps = (Tournament | PersonalTournament) & {
+  variant?: TournamentCardVariant;
   loading?: boolean;
   participated?: boolean;
   participatedTicketsCount?: number;
@@ -99,6 +110,7 @@ export function TournamentCard({
   shardsThird,
   status,
   sponsor,
+  variant = 'list',
   loading,
   participated = false,
   participatedTicketsCount,
@@ -111,6 +123,7 @@ export function TournamentCard({
   const t = useAppTranslations();
   const router = useRouter();
   const toast = useToast();
+  const isDetail = variant === 'detail';
   const { isTierUnlocked } = useUnlockedTiers();
   const { shardRewards } = useTournamentConfig();
   const { data: tickets } = useGetTicketsQuery();
@@ -215,21 +228,27 @@ export function TournamentCard({
       <div
         // Locked, the card opens the gate dialog rather than navigating — a
         // screen reader announcing "link" would promise a page that never loads.
-        role={locked ? 'button' : 'link'}
-        tabIndex={0}
-        onClick={handleCardClick}
-        onKeyDown={e => {
-          if (e.key === 'Enter' || e.key === ' ') {
-            e.preventDefault();
-            handleCardClick();
-          }
-        }}
+        // On the detail screen the card is the page itself: no role, no tab
+        // stop, no tap target — only the buttons inside it act.
+        role={isDetail ? undefined : locked ? 'button' : 'link'}
+        tabIndex={isDetail ? undefined : 0}
+        onClick={isDetail ? undefined : handleCardClick}
+        onKeyDown={
+          isDetail
+            ? undefined
+            : e => {
+                if (e.key === 'Enter' || e.key === ' ') {
+                  e.preventDefault();
+                  handleCardClick();
+                }
+              }
+        }
         style={style}
         className={twMerge(
           'relative w-full overflow-hidden rounded-2xl flex flex-col p-3 transition-transform focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-white',
           // Locked cards stay tappable — the tap now explains the gate, so
           // neither `cursor-not-allowed` nor `aria-disabled` would be true.
-          isModeration ? 'cursor-default' : 'active:scale-99 cursor-pointer',
+          isDetail || isModeration ? 'cursor-default' : 'active:scale-99 cursor-pointer',
           // A plain hairline, not the tier's gradient border: the tier is now
           // said by the light behind the card and by the medal, and running
           // both at once put a coloured outline around every row in the list.
@@ -381,7 +400,13 @@ export function TournamentCard({
         >
           <div className="relative z-10 mt-2.5 flex items-stretch divide-x divide-white/10 rounded-xl bg-black/25">
             <TournamentStatCell caption={t('shards title')}>
-              {shardType && type ? <ChipShardIcon type={shardType} tier={type} size={15} /> : null}
+              {shardType && type ? (
+                isDetail ? (
+                  <ShardZoomButton type={shardType} tier={type} size={15} />
+                ) : (
+                  <ChipShardIcon type={shardType} tier={type} size={15} />
+                )
+              ) : null}
               <span className="text-[15px] leading-none font-extrabold text-white tabular-nums">
                 ×{totalShards}
               </span>

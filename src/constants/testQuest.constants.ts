@@ -105,7 +105,7 @@ export type TestQuestStepKind =
   | 'share'
   | 'referral'
   | 'engine'
-  | 'shop'
+  | 'market'
   | 'wallet'
   | 'stake'
   | 'status'
@@ -121,7 +121,7 @@ export const testQuestStepHref: Partial<Record<TestQuestStepKind, Route>> = {
   share: routes.inviteFriends,
   referral: routes.inviteFriends,
   engine: routes.home,
-  shop: routes.market(),
+  market: routes.market(),
   wallet: routes.wallet,
   stake: routes.stakes.index,
   status: routes.settings.vip,
@@ -219,7 +219,7 @@ const TEST_QUEST_STEP_OVERRIDES: Record<number, TestQuestStep[]> = {
     spend(18),
     ads(5),
     share(3),
-    { labelKey: 'quest step buy ticket market', kind: 'shop' },
+    { labelKey: 'quest step buy ticket market', kind: 'market' },
     upgrade(2),
     CHANNEL_GATE,
   ],
@@ -238,7 +238,7 @@ const TEST_QUEST_STEP_OVERRIDES: Record<number, TestQuestStep[]> = {
   // 26 · day 5
   26: [spend(43), ads(22), share(8), upgrade(5), CHANNEL_GATE],
   // 25 · day 6
-  25: [spend(52), ads(29), share(9), upgrade(6), CHANNEL_GATE],
+  25: [spend(52), ads(29), share(9), invite(2), upgrade(6), CHANNEL_GATE],
   // 24 · day 7 — wallet + stars
   24: [
     spend(60),
@@ -255,11 +255,11 @@ const TEST_QUEST_STEP_OVERRIDES: Record<number, TestQuestStep[]> = {
     ads(43),
     share(12),
     upgrade(8),
-    { labelKey: 'quest step buy engine shard market', kind: 'shop' },
+    { labelKey: 'quest step buy engine shard market', kind: 'market' },
     CHANNEL_GATE,
   ],
   // 22 · day 9
-  22: [spend(77), ads(51), share(14), invite(2), upgrade(9), CHANNEL_GATE],
+  22: [spend(77), ads(51), share(14), invite(3), upgrade(9), CHANNEL_GATE],
   // 21 · day 10 — first stake
   21: [
     spend(85),
@@ -276,22 +276,22 @@ const TEST_QUEST_STEP_OVERRIDES: Record<number, TestQuestStep[]> = {
     share(17),
     upgrade(11),
     { labelKey: 'quest step reach silver', kind: 'status' },
-    { labelKey: 'quest step buy tier ticket market', kind: 'shop' },
+    { labelKey: 'quest step buy tier ticket market', kind: 'market' },
     CHANNEL_GATE,
   ],
   // 19 · day 12
-  19: [spend(102), ads(72), share(18), upgrade(12), CHANNEL_GATE],
+  19: [spend(102), ads(72), share(18), invite(4), upgrade(12), CHANNEL_GATE],
   // 18 · day 13
   18: [spend(110), ads(79), share(20), upgrade(13), CHANNEL_GATE],
   // 17 · day 14
-  17: [spend(118), ads(86), share(21), invite(3), upgrade(14), CHANNEL_GATE],
+  17: [spend(118), ads(86), share(21), invite(5), upgrade(14), CHANNEL_GATE],
   // 16 · day 15
   16: [
     spend(127),
     ads(93),
     share(23),
     upgrade(15),
-    { labelKey: 'quest step buy shard market', kind: 'shop' },
+    { labelKey: 'quest step buy shard market', kind: 'market' },
     CHANNEL_GATE,
   ],
   // 15 · day 16 — Gold wall
@@ -305,7 +305,7 @@ const TEST_QUEST_STEP_OVERRIDES: Record<number, TestQuestStep[]> = {
     CHANNEL_GATE,
   ],
   // 14 · day 17
-  14: [spend(143), ads(108), share(26), upgrade(17), CHANNEL_GATE],
+  14: [spend(143), ads(108), share(26), invite(6), upgrade(17), CHANNEL_GATE],
   // 13 · day 18
   13: [spend(152), ads(115), share(27), upgrade(18), CHANNEL_GATE],
   // 12 · day 19 — new engine
@@ -318,7 +318,7 @@ const TEST_QUEST_STEP_OVERRIDES: Record<number, TestQuestStep[]> = {
     CHANNEL_GATE,
   ],
   // 11 · day 20 — two stakes
-  11: [spend(168), ads(129), share(30), invite(4), upgrade(20), holdStakes(2), CHANNEL_GATE],
+  11: [spend(168), ads(129), share(30), invite(7), upgrade(20), holdStakes(2), CHANNEL_GATE],
   // 10 · day 21
   10: [spend(177), ads(136), share(32), upgrade(21), CHANNEL_GATE],
   // 9 · day 22 — Gold
@@ -328,7 +328,7 @@ const TEST_QUEST_STEP_OVERRIDES: Record<number, TestQuestStep[]> = {
     share(33),
     upgrade(22),
     { labelKey: 'quest step keep gold', kind: 'status' },
-    { labelKey: 'quest step buy gold shard market', kind: 'shop' },
+    { labelKey: 'quest step buy gold shard market', kind: 'market' },
     CHANNEL_GATE,
   ],
   // 8 · day 23
@@ -336,8 +336,9 @@ const TEST_QUEST_STEP_OVERRIDES: Record<number, TestQuestStep[]> = {
     spend(193),
     ads(150),
     share(35),
+    invite(8),
     upgrade(23),
-    { labelKey: 'quest step buy engine market', kind: 'shop' },
+    { labelKey: 'quest step buy engine market', kind: 'market' },
     CHANNEL_GATE,
   ],
   // 7 · day 24
@@ -352,7 +353,7 @@ const TEST_QUEST_STEP_OVERRIDES: Record<number, TestQuestStep[]> = {
     CHANNEL_GATE,
   ],
   // 5 · day 26
-  5: [spend(218), ads(172), share(39), invite(5), upgrade(26), CHANNEL_GATE],
+  5: [spend(218), ads(172), share(39), invite(9), upgrade(26), CHANNEL_GATE],
   // 4 · day 27 — Platinum + qualification
   4: [
     spend(227),
@@ -377,6 +378,7 @@ const TEST_QUEST_STEP_OVERRIDES: Record<number, TestQuestStep[]> = {
     spend(243),
     ads(193),
     share(44),
+    invite(10),
     upgrade(29),
     { labelKey: 'quest step top 10', kind: 'rank' },
     CHANNEL_GATE,
@@ -385,6 +387,7 @@ const TEST_QUEST_STEP_OVERRIDES: Record<number, TestQuestStep[]> = {
     spend(250),
     ads(200),
     share(45),
+    invite(10),
     upgrade(30),
     { labelKey: 'quest step become first', kind: 'rank' },
     CHANNEL_GATE,
