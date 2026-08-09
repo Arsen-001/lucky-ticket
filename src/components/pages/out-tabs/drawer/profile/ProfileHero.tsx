@@ -9,7 +9,12 @@ import { UserAvatar, type AvatarStatusColor } from '@/components/shared/user-ele
 import { BannerIconsLayer } from '@/components/pages/out-tabs/drawer/profile/BannerIconsLayer';
 // Коллаж ачивок скрыт с профиля — расконсервировать вместе с блоком ниже.
 // import { ProfileCollageLayer } from '@/components/pages/out-tabs/drawer/profile/ProfileCollageLayer';
-import { ProfileAvatarEditButton } from '@/components/pages/out-tabs/drawer/profile/ProfileAvatarEditButton';
+// AVATARS OFF (2026-08-09) — the avatar cosmetics feature is switched off for
+// ~2 months, not removed. The pencil on the hero opens the avatar picker
+// (DOCS §17.3.2); with the picker gone it would open a dead sheet. The avatar
+// itself keeps rendering — only the edit affordance goes.
+// Uncomment to bring it back — grep `AVATARS OFF`.
+// import { ProfileAvatarEditButton } from '@/components/pages/out-tabs/drawer/profile/ProfileAvatarEditButton';
 import { ProfileUsernameEditButton } from '@/components/pages/out-tabs/drawer/profile/ProfileUsernameEditButton';
 import { ProfileShareSheet } from '@/components/pages/out-tabs/drawer/profile/ProfileShareSheet';
 import { ProfileSocialActions } from '@/components/pages/out-tabs/drawer/profile/ProfileSocialActions';
@@ -223,7 +228,7 @@ export function ProfileHero({ profile, loading, isPreview, onTogglePreview }: Pr
             />
           </SkeletonSuspense>
 
-          {profile?.isOwn && !isPreview && <ProfileAvatarEditButton />}
+          {/* AVATARS OFF — {profile?.isOwn && !isPreview && <ProfileAvatarEditButton />} */}
         </div>
 
         <SkeletonSuspense

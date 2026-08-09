@@ -22,7 +22,10 @@ import { StarsTopUpFlow } from '@/components/pages/tabs/home/StarsTopUpFlow';
 import { MarketEngineSection } from '@/components/pages/tabs/market/sections/MarketEngineSection';
 import { MarketTicketSection } from '@/components/pages/tabs/market/sections/MarketTicketSection';
 import { MarketShardSection } from '@/components/pages/tabs/market/sections/MarketShardSection';
-import { MarketCosmeticSection } from '@/components/pages/tabs/market/sections/MarketCosmeticSection';
+// AVATARS OFF (2026-08-09) — the avatar cosmetics feature is switched off for
+// ~2 months, not removed. Cosmetics are avatars and nothing else here, so the
+// section and its chip both go. Uncomment to bring it back — grep `AVATARS OFF`.
+// import { MarketCosmeticSection } from '@/components/pages/tabs/market/sections/MarketCosmeticSection';
 import { MarketStatusSection } from '@/components/pages/tabs/market/sections/MarketStatusSection';
 import { MarketGiftSection } from '@/components/pages/tabs/market/sections/MarketGiftSection';
 import { MarketPriceType } from '@/types/enums/market.enums';
@@ -92,7 +95,13 @@ export function MarketView() {
   // an empty screen, which reads as breakage rather than as "not on sale".
   const { data: giftShop } = useGetGiftShopQuery();
   const giftsOpen = !!giftShop && giftShop.closedReason !== 'disabled';
-  const categoryOrder = MARKET_CATEGORY_ORDER.filter(k => k !== 'gifts' || giftsOpen);
+  // AVATARS OFF (2026-08-09) — same rule for the cosmetics chip: the section
+  // behind it draws nothing while avatars are off, and a chip that opens an
+  // empty screen reads as breakage. Dropping it here also makes a stale
+  // `?tab=cosmetics` link fall back to "all" (see `resolvedActive` below).
+  const categoryOrder = MARKET_CATEGORY_ORDER.filter(
+    k => (k !== 'gifts' || giftsOpen) && k !== 'cosmetics'
+  );
   const [infoItem, setInfoItem] = useState<MarketSelectedItem | null>(null);
   const [purchase, setPurchase] = useState<MarketActivePurchase | null>(null);
   const [confirming, setConfirming] = useState(false);
@@ -210,13 +219,17 @@ export function MarketView() {
         <MarketTicketSection tickets={data.tickets} onSelect={handleSelect} onBuy={handleBuy} />
       ),
       shards: <MarketShardSection shards={data.shards} onSelect={handleSelect} onBuy={handleBuy} />,
-      cosmetics: (
-        <MarketCosmeticSection
-          cosmetics={data.cosmetics}
-          onSelect={handleSelect}
-          onBuy={handleBuy}
-        />
-      ),
+      // AVATARS OFF — the key stays (the record is exhaustive over the category
+      // keys) but draws nothing; `categoryOrder` also drops the chip, so this
+      // branch is unreachable rather than empty.
+      cosmetics: null,
+      // cosmetics: (
+      //   <MarketCosmeticSection
+      //     cosmetics={data.cosmetics}
+      //     onSelect={handleSelect}
+      //     onBuy={handleBuy}
+      //   />
+      // ),
       status: <MarketStatusSection onSelect={handleSelect} onBuy={handleBuy} />,
       // Owns its own query (a live Telegram catalog) and draws nothing while
       // the counter is off, so it needs no data from `data` here.

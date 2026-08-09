@@ -580,7 +580,7 @@ Where:
   - Each **speed-level upgrade** contributes `SPEED_LEVEL_BOOST_PCT_TABLE[level]` (default `+10%`/level, `0…100%`). `MAX_BOOST_LEVEL` (= table length − 1, default 10) is the max, so at the default curve a fully speed-upgraded engine runs its cycle **twice as fast**.
   - Each **capacity-level upgrade** adds an **absolute per-cycle ticket bonus** — `CAPACITY_LEVEL_BONUS_TICKETS_TABLE[level]`, default **+1 ticket per paid tap** (`0…10`). The bonus is the same +1 at every engine level: `perCycle = (base + bonus) × (1 + chips%)`, so a maxed level-1 engine mints **11 per cycle** (1 + 10) and a maxed level-2 mints **21** (11 + 10). Chips/boosters stay percentage-based and scale the whole batch.
 - **Status boost** uses VIP value if active, otherwise LP, otherwise 0 (DOCS §7.3).
-- **Equipped-avatar boost** contributes the currently-equipped avatar's `engineSpeed` boost `pct` (0 if the equipped avatar has no speed boost). Like the status boost it is permanent-while-equipped, so it applies to the real production cycle, not just the UI (§14 cosmetics).
+- **Equipped-avatar boost** contributes the currently-equipped avatar's `engineSpeed` boost `pct` (0 if the equipped avatar has no speed boost). Like the status boost it is permanent-while-equipped, so it applies to the real production cycle, not just the UI (§14 cosmetics). _(**Pinned to 0 in the Mini App since 2026-08-09** — Section 16.1. The backend still applies it, so an owner's engine mints on the boosted cycle while the app counts the base one.)_
 
 **Hard speed floor.** No matter how many boosts stack, one ticket can never be minted faster than `GlobalConstants.engineMinSecondsPerTicket = 900s` (15 minutes per ticket). `effectiveCycleSeconds()` clamps the result against `capacity × 900s`. Because a promoted engine's base capacity is larger, that per-cycle floor rises with it — so promotion is felt as a **bigger batch per cycle at the 900s/ticket floor**, not a proportionally shorter cycle (e.g. a level-2 Bronze engine mints its 11-ticket batch in `11 × 900s`, i.e. 900s per ticket, rather than halving the 2 h cycle).
 
@@ -1382,7 +1382,7 @@ The Market is the central hub for purchasing improvements, resources, and status
 - **Tickets:** Purchase project or partner tickets directly with LC.
 - **Shards:** chip fragments collected to build chips (Section 10.4). The **full tier ladder is listed** (Bronze → Diamond, both chip types, one shard per purchase, LC or LS) but the purchase is AP-tier-gated (14.1) — a player buys shards **of their own tier and below**; higher tiers show locked.
 - **Statuses:** Lucky Player subscription and VIP unlock/upgrade (LC or LS — Section 7).
-- **Cosmetics:** avatars, badges, themes (Section 16.1) — not tier-gated.
+- **Cosmetics:** avatars, badges, themes (Section 16.1) — not tier-gated. _(Switched off in the Mini App since 2026-08-09 — Section 16.1.)_
 - Premium items (pre-built chips, chip builders, passes) are defined in the model but **not currently surfaced** — see Section 19.3 for the implemented-vs-deferred category list. (The legacy LC market **Speed Boost** was retired — engine speed is deepened via the engine's speed level, §10.2.)
 
 > Engine **Capacity Upgrades** are not sold here — they are bought on the engine itself (engine cube / details, §10.2), paid only with LS.
@@ -1602,12 +1602,26 @@ Settings provide control, security, and personalization for the user's account.
 - **Two-Factor Authentication (2FA):** Enable extra security for the account.
 - **Email Confirmation:** Confirm or change the linked email address — see Section 16.3.
 - **Change Username:** Update the public display name. Available from Settings and directly on the own-profile screen (pencil next to the name). 3–32 characters, letters/digits/dots/dashes/underscores only, must be unique; the same rule applies to registration and admin edits.
-- **Change Avatar:** Pick a profile picture from the user's owned avatar inventory. The picker lists every avatar the user owns — both the default free avatars and any paid avatars purchased in the Market. New avatars are acquired exclusively through the Market (see Section 16.1).
+- **Change Avatar:** _(switched off since 2026-08-09 — Section 16.1)_ Pick a profile picture from the user's owned avatar inventory. The picker lists every avatar the user owns — both the default free avatars and any paid avatars purchased in the Market. New avatars are acquired exclusively through the Market (see Section 16.1).
 - **Notification Preferences:** Per-channel (Email / Telegram bot) toggles for which notification categories the user receives. See Section 16.2.
 
 There is **no Sign Out action anywhere in the app** — not in Settings, not on the own-profile screen, not in the drawer. The session is established by Telegram `initData` on every launch, so signing out only breaks the current session and the player cannot choose a different account anyway. The `logout` mutation still exists in `src/api/auth.api.ts` (it clears local tokens) but nothing calls it.
 
 ### 16.1 Avatars — Free & Paid Tiers
+
+> 🚫 **SWITCHED OFF IN THE MINI APP SINCE 2026-08-09 — planned back around October 2026.**
+> Nothing is deleted: every avatar surface is commented out behind the marker
+> `AVATARS OFF` (grep it). Off in the app: the Settings → Change Avatar row, the
+> profile pencil, the Market **Cosmetics** section _and its chip_, avatar slides in
+> the Market showcase carousel, the accrued daily-reward card on Tasks, and the
+> equipped-avatar engine-speed boost in the UI.
+> **The backend is untouched** — `GET /avatars`, `/avatars/daily-reward`, the
+> cosmetic listings and the server-side boosts all still run. Two consequences
+> while the feature is off: a player who already owns _and_ wears a speed avatar
+> keeps the boosted production cycle server-side, so their engine finishes a little
+> earlier than the countdown predicts (the next refetch corrects the display); and
+> the daily reward keeps accruing with no way to collect it in the app. Everything
+> below describes the feature as it stands and as it will come back.
 
 Avatars are a marketable cosmetic category with **two tiers** and a **10-level progression ladder**:
 
@@ -1858,7 +1872,7 @@ Layered over the cover banner are three small **decorative icons** (a crown, a s
 
 When viewing one's own profile, the following actions are available:
 
-- **Edit avatar** — opens the avatar picker. The picker is also reachable from Settings (Section 16). New avatars are acquired in the Market; paid avatars carry a bound boost (see Section 16.1).
+- **Edit avatar** — _(switched off since 2026-08-09 — Section 16.1)_ opens the avatar picker. The picker is also reachable from Settings (Section 16). New avatars are acquired in the Market; paid avatars carry a bound boost (see Section 16.1). The avatar itself still renders; only the pencil is gone.
 - **Edit username** — routes to Settings (see Section 16).
 - **Change cover banner** — selects from owned banners. Premium banners are purchased in the Market with Lucky Stars (not a surfaced category today — §19.3).
 - **Pin / Replace / Unpin badges** — managed via the showcase long-press menu (see Section 17.4.7).
@@ -2292,7 +2306,7 @@ The Market opens with a **Hero card** showing the current featured deal (with co
 3. **Tickets** — buy tier tickets directly with LC (Section 14). Tier-locked.
 4. **Shards** — chip fragments ({speed, capacity} per tier) collected and spent to build chips in the inventory (Section 10.4). Tier-locked; currently seeded for Bronze + Silver.
 5. **Engines** — one producer engine per tier, level 1, priced with geometric repeat pricing (Section 14.2). Tier-locked.
-6. **Cosmetics** — Avatars, badges, themes (mix of tier-themed and brand-themed accents). Always available regardless of tier. **Avatars are a two-tier sub-category** — free avatars (granted by default, cosmetic only) and paid avatars (purchased here; each paid SKU carries a bound boost — see Section 16.1).
+6. **Cosmetics** — _(the section **and its chip** are switched off in the Mini App since 2026-08-09 — Section 16.1; the backend still lists the items)_ Avatars, badges, themes (mix of tier-themed and brand-themed accents). Always available regardless of tier. **Avatars are a two-tier sub-category** — free avatars (granted by default, cosmetic only) and paid avatars (purchased here; each paid SKU carries a bound boost — see Section 16.1).
 
 **Deferred categories** — defined in the data model / roadmap but **not currently surfaced** as their own tab:
 

@@ -17,10 +17,11 @@ import {
   type EngineLevelTables,
 } from '@/utils/global/ticket-engine.utils';
 import { findActiveBooster, findEquippedChip } from '@/utils/global/inventory.utils';
-import { equippedAvatarEngineSpeedPct } from '@/utils/global/avatar.utils';
+// AVATARS OFF (2026-08-09) — see the `avatarSpeedPct` note below.
+// import { equippedAvatarEngineSpeedPct } from '@/utils/global/avatar.utils';
 import { testBadgeSpeedBoostPct } from '@/utils/global/testQuest.utils';
 import { inventoryApi } from '@/api/inventory.api';
-import { avatarsApi } from '@/api/avatars.api';
+// AVATARS OFF — import { avatarsApi } from '@/api/avatars.api';
 import { testQuestApi } from '@/api/testQuest.api';
 import type { TicketEngine } from '@/types/interfaces/ticket.interfaces';
 import type { TicketType } from '@/types/types/ticket.types';
@@ -350,12 +351,18 @@ export const enginesApi = api.injectEndpoints({
         // The equipped avatar's engine-speed boost is permanent-while-equipped,
         // so it must move the real production cycle too (DOCS §9.7) — not just
         // the UI — exactly like the status boost above.
-        const avatars = avatarsApi.endpoints.getAvatarInventory.select()(
-          getState() as Parameters<
-            ReturnType<typeof avatarsApi.endpoints.getAvatarInventory.select>
-          >[0]
-        ).data;
-        const avatarSpeedPct = equippedAvatarEngineSpeedPct(avatars, me?.avatarId);
+        //
+        // AVATARS OFF (2026-08-09) — the avatar cosmetics feature is switched
+        // off for ~2 months, not removed. This is the non-React twin of
+        // `useEngineSpeedAvatarBoostPct`; both are pinned to 0 together, and the
+        // same caveat applies (the backend still boosts an owner's real cycle).
+        const avatarSpeedPct = 0;
+        // const avatars = avatarsApi.endpoints.getAvatarInventory.select()(
+        //   getState() as Parameters<
+        //     ReturnType<typeof avatarsApi.endpoints.getAvatarInventory.select>
+        //   >[0]
+        // ).data;
+        // const avatarSpeedPct = equippedAvatarEngineSpeedPct(avatars, me?.avatarId);
         // The frozen Test-Quest badge's engine-speed boost is permanent too, and
         // the backend applies it to the real cycle (computeEngineState) — so the
         // optimistic completion math must match, or a badge holder's engine shows

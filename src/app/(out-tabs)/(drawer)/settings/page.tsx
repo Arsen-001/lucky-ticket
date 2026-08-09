@@ -3,7 +3,11 @@
 import { Mail, UserPen } from 'lucide-react';
 import { useGetMeQuery } from '@/api/me.api';
 import { NotificationPreferencesSection } from '@/components/pages/out-tabs/drawer/settings/NotificationPreferencesSection';
-import { SettingsAvatarRow } from '@/components/pages/out-tabs/drawer/settings/SettingsAvatarRow';
+// AVATARS OFF (2026-08-09) — the avatar cosmetics feature is switched off for
+// ~2 months, not removed. This row is the only way into the avatar picker from
+// Settings (DOCS §16); the picker itself, the Market listing and the profile
+// pencil go with it. Uncomment to bring it back — grep `AVATARS OFF`.
+// import { SettingsAvatarRow } from '@/components/pages/out-tabs/drawer/settings/SettingsAvatarRow';
 import { SettingsMenuItem } from '@/components/pages/out-tabs/drawer/settings/SettingsMenuItem';
 import type { SettingsMenuAccent } from '@/components/pages/out-tabs/drawer/settings/SettingsMenuItem';
 import { SettingsTourRow } from '@/components/pages/out-tabs/drawer/settings/SettingsTourRow';
@@ -59,7 +63,7 @@ export default function SettingsPage() {
             {section.title}
           </h2>
           <div className="flex flex-col gap-2">
-            {sectionIndex === 0 && <SettingsAvatarRow />}
+            {/* AVATARS OFF — {sectionIndex === 0 && <SettingsAvatarRow />} */}
             {section.items.map(item => (
               <SettingsMenuItem key={item.title} {...item} />
             ))}

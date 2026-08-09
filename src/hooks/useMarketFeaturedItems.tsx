@@ -2,7 +2,8 @@
 
 import { useMemo, type ReactNode } from 'react';
 import {
-  useBuyCosmeticMutation,
+  // AVATARS OFF (2026-08-09) — no avatar slide is built, so nothing buys one.
+  // useBuyCosmeticMutation,
   useBuyShardMutation,
   useGetMarketDataQuery,
 } from '@/api/market.api';
@@ -48,31 +49,34 @@ export interface MarketFeaturedItem {
   mutate: (price: MarketPrice) => Promise<unknown>;
 }
 
-const renderAvatarIcon = (imageUrl: string, title: string, accentColor: string): ReactNode => (
-  <div
-    className="relative h-full w-full overflow-hidden rounded-xl border-2"
-    style={{
-      borderColor: `color-mix(in srgb, ${accentColor} 65%, transparent)`,
-      boxShadow: `0 0 16px color-mix(in srgb, ${accentColor} 38%, transparent)`,
-    }}
-  >
-    {imageUrl ? (
-      // Admin-provided URL (Blob upload or pasted) — plain <img> avoids the
-      // next/image host allow-list, matching the cards / MarketItemImage.
-      // eslint-disable-next-line @next/next/no-img-element
-      <img src={imageUrl} alt={title} className="h-full w-full object-cover" />
-    ) : (
-      // No image (e.g. a badge/theme cosmetic) — show the name initial on the accent
-      // tile instead of passing an empty string to next/image.
-      <div
-        className="flex-center h-full w-full text-xl font-extrabold"
-        style={{ color: accentColor }}
-      >
-        {title.charAt(0).toUpperCase()}
-      </div>
-    )}
-  </div>
-);
+// AVATARS OFF (2026-08-09) — the avatar cosmetics feature is switched off for
+// ~2 months, not removed. The showcase runs shards only until it is back; the
+// avatar slide's artwork is kept here verbatim.
+// const renderAvatarIcon = (imageUrl: string, title: string, accentColor: string): ReactNode => (
+//   <div
+//     className="relative h-full w-full overflow-hidden rounded-xl border-2"
+//     style={{
+//       borderColor: `color-mix(in srgb, ${accentColor} 65%, transparent)`,
+//       boxShadow: `0 0 16px color-mix(in srgb, ${accentColor} 38%, transparent)`,
+//     }}
+//   >
+//     {imageUrl ? (
+//       // Admin-provided URL (Blob upload or pasted) — plain <img> avoids the
+//       // next/image host allow-list, matching the cards / MarketItemImage.
+//       // eslint-disable-next-line @next/next/no-img-element
+//       <img src={imageUrl} alt={title} className="h-full w-full object-cover" />
+//     ) : (
+//       // No image (e.g. a badge/theme cosmetic) — show the name initial on the accent
+//       // tile instead of passing an empty string to next/image.
+//       <div
+//         className="flex-center h-full w-full text-xl font-extrabold"
+//         style={{ color: accentColor }}
+//       >
+//         {title.charAt(0).toUpperCase()}
+//       </div>
+//     )}
+//   </div>
+// );
 
 /**
  * The offers the market showcase runs: featured cosmetics and shards, topped up
@@ -85,7 +89,7 @@ export function useMarketFeaturedItems(): { items: MarketFeaturedItem[]; isLoadi
   const isLp = me?.isLuckyPlayer ?? false;
   const isVip = me?.isVIP ?? false;
   const discountPct = effectiveMarketDiscountPct(isLp, isVip, me?.statusPerks);
-  const [buyCosmetic] = useBuyCosmeticMutation();
+  // AVATARS OFF — const [buyCosmetic] = useBuyCosmeticMutation();
   const [buyShard] = useBuyShardMutation();
   // The plain tier string, not `isTierUnlocked`: this list is memoized, and a
   // function identity that changes every render drops the memo entirely.
@@ -96,27 +100,29 @@ export function useMarketFeaturedItems(): { items: MarketFeaturedItem[]; isLoadi
     const list: MarketFeaturedItem[] = [];
     const seen = new Set<string>();
 
-    const cosmeticToItem = (c: (typeof data.cosmetics)[number]): MarketFeaturedItem => {
-      const accent: MarketAccent = (c.accent as MarketAccent) ?? 'pink';
-      const accentColor = c.accent ? `var(--color-${c.accent})` : 'var(--color-electric-pink)';
-      return {
-        id: c.id,
-        title: c.name,
-        description: c.description ?? '',
-        about: t('market avatar purpose'),
-        prices: orderMarketPrices(applyStatusMarketDiscount(c.prices, discountPct)),
-        expiresAt: c.expiresAt,
-        discountPct: c.discountPct,
-        isNew: c.isNew,
-        accent,
-        accentColor,
-        imageUrl: c.imageUrl ?? undefined,
-        boost: c.avatarBoost,
-        dailyReward: c.avatarDailyReward,
-        renderIcon: () => renderAvatarIcon(c.imageUrl ?? '', c.name, accentColor),
-        mutate: price => buyCosmetic({ cosmeticId: c.id, price }).unwrap(),
-      };
-    };
+    // AVATARS OFF (2026-08-09) — kept verbatim; uncomment together with the two
+    // feed sites below and the `buyCosmetic` / `renderAvatarIcon` declarations.
+    // const cosmeticToItem = (c: (typeof data.cosmetics)[number]): MarketFeaturedItem => {
+    //   const accent: MarketAccent = (c.accent as MarketAccent) ?? 'pink';
+    //   const accentColor = c.accent ? `var(--color-${c.accent})` : 'var(--color-electric-pink)';
+    //   return {
+    //     id: c.id,
+    //     title: c.name,
+    //     description: c.description ?? '',
+    //     about: t('market avatar purpose'),
+    //     prices: orderMarketPrices(applyStatusMarketDiscount(c.prices, discountPct)),
+    //     expiresAt: c.expiresAt,
+    //     discountPct: c.discountPct,
+    //     isNew: c.isNew,
+    //     accent,
+    //     accentColor,
+    //     imageUrl: c.imageUrl ?? undefined,
+    //     boost: c.avatarBoost,
+    //     dailyReward: c.avatarDailyReward,
+    //     renderIcon: () => renderAvatarIcon(c.imageUrl ?? '', c.name, accentColor),
+    //     mutate: price => buyCosmetic({ cosmeticId: c.id, price }).unwrap(),
+    //   };
+    // };
 
     const shardToItem = (s: (typeof data.shards)[number]): MarketFeaturedItem => ({
       id: s.id,
@@ -154,22 +160,24 @@ export function useMarketFeaturedItems(): { items: MarketFeaturedItem[]; isLoadi
       list.push(entry);
     };
 
-    data.cosmetics
-      .filter(c => c.featured || c.avatarLevel === 10)
-      .forEach(c => push(cosmeticToItem(c)));
+    // AVATARS OFF — data.cosmetics
+    //   .filter(c => c.featured || c.avatarLevel === 10)
+    //   .forEach(c => push(cosmeticToItem(c)));
     data.shards.filter(s => s.featured).forEach(s => push(shardToItem(s)));
 
     // Backfill — guarantee at least 4 slides by adding top non-featured items
     const MIN_ITEMS = 4;
     if (list.length < MIN_ITEMS) {
-      const fillCosmetics = [...data.cosmetics]
-        .filter(c => !seen.has(c.id))
-        .sort((a, b) => (b.avatarLevel ?? 0) - (a.avatarLevel ?? 0));
+      // AVATARS OFF — the backfill runs on shards alone; there are far more than
+      // MIN_ITEMS of them, so the rail still fills.
+      // const fillCosmetics = [...data.cosmetics]
+      //   .filter(c => !seen.has(c.id))
+      //   .sort((a, b) => (b.avatarLevel ?? 0) - (a.avatarLevel ?? 0));
       const fillShards = [...data.shards]
         .filter(s => !seen.has(s.id))
         .sort((a, b) => (b.prices[0]?.amount ?? 0) - (a.prices[0]?.amount ?? 0));
       const queue: MarketFeaturedItem[] = [];
-      fillCosmetics.forEach(c => queue.push(cosmeticToItem(c)));
+      // AVATARS OFF — fillCosmetics.forEach(c => queue.push(cosmeticToItem(c)));
       fillShards.forEach(s => queue.push(shardToItem(s)));
       for (const entry of queue) {
         if (list.length >= MIN_ITEMS) break;
@@ -178,7 +186,8 @@ export function useMarketFeaturedItems(): { items: MarketFeaturedItem[]; isLoadi
     }
 
     return list;
-  }, [data, buyCosmetic, buyShard, t, discountPct, maxUnlockedTier]);
+    // AVATARS OFF — `buyCosmetic` drops out of the deps with the avatar slide.
+  }, [data, buyShard, t, discountPct, maxUnlockedTier]);
 
   return { items, isLoading };
 }
