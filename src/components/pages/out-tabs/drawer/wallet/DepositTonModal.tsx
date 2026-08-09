@@ -157,25 +157,12 @@ export function DepositTonModal({ open, onClose, onDeposited }: DepositTonModalP
           <DepositUnavailableNotice />
         ) : (
           <>
-            {/* Drawn on the device, never fetched. This code is what a player
-                points a wallet at to send real TON, so the address inside it
-                must not make a round trip through a third party: whoever serves
-                the image chooses what it encodes, and a swapped one looks
-                identical. It also used to mean no QR at all whenever that host
-                was slow, blocked (it is a plain external image, and this runs
-                inside Telegram) or down. */}
-            <div className="flex-center bg-background-overlay rounded-2xl p-3">
-              {isLoading || !transferUri ? (
-                <div className="bg-background-overlay/60 h-[240px] w-[240px] animate-pulse rounded-xl" />
-              ) : (
-                <QrCode
-                  value={transferUri}
-                  label={t('deposit ton')}
-                  className="h-[240px] w-[240px] rounded-xl"
-                />
-              )}
-            </div>
-
+            {/* Address first, QR under it. The card is taller than the modal's
+                80vh ceiling (1028px of content in a 675px panel on a 393×844
+                phone), and with the QR on top the address and its copy button
+                were the part that fell below the fold — the one thing a player
+                on the same device, who cannot scan their own screen, actually
+                needs. */}
             <div className="bg-background-overlay flex items-center gap-2 rounded-xl p-3">
               <span className="text-pink-secondary flex-1 break-all font-mono text-[11px]">
                 {address || '—'}
@@ -193,6 +180,25 @@ export function DepositTonModal({ open, onClose, onDeposited }: DepositTonModalP
                   <Copy size={16} />
                 )}
               </button>
+            </div>
+
+            {/* Drawn on the device, never fetched. This code is what a player
+                points a wallet at to send real TON, so the address inside it
+                must not make a round trip through a third party: whoever serves
+                the image chooses what it encodes, and a swapped one looks
+                identical. It also used to mean no QR at all whenever that host
+                was slow, blocked (it is a plain external image, and this runs
+                inside Telegram) or down. */}
+            <div className="flex-center bg-background-overlay rounded-2xl p-3">
+              {isLoading || !transferUri ? (
+                <div className="bg-background-overlay/60 h-[240px] w-[240px] animate-pulse rounded-xl" />
+              ) : (
+                <QrCode
+                  value={transferUri}
+                  label={t('deposit ton')}
+                  className="h-[240px] w-[240px] rounded-xl"
+                />
+              )}
             </div>
           </>
         )}
