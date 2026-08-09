@@ -36,17 +36,21 @@ export const effectiveMarketDiscountPct = (
  * Applies a `discountPct` on top of any existing sale. Each price gets its
  * `amount` reduced, with the pre-discount value preserved in `originalAmount`
  * so the UI can render a strike-through. Returns the array unchanged at 0%.
+ *
+ * `originalAmount` is dropped when the cut rounds away to nothing: a 2% VIP
+ * discount on a 1⭐ ticket lands back on 1, and keeping it painted a
+ * strike-through over a number identical to the one printed next to it ("1̶ 1").
  */
 export const applyStatusMarketDiscount = (
   prices: MarketPrice[],
   discountPct: number
 ): MarketPrice[] => {
   if (discountPct <= 0) return prices;
-  return prices.map(p => ({
-    ...p,
-    originalAmount: p.originalAmount ?? p.amount,
-    amount: Math.max(1, Math.round(p.amount * (1 - discountPct / 100))),
-  }));
+  return prices.map(p => {
+    const base = p.originalAmount ?? p.amount;
+    const amount = Math.max(1, Math.round(p.amount * (1 - discountPct / 100)));
+    return { ...p, amount, originalAmount: amount < base ? base : undefined };
+  });
 };
 
 const marketPriceRank = (type: MarketPriceType): number =>

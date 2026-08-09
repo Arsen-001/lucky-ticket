@@ -155,7 +155,13 @@ export function MarketUniversalCard({
               {disabledLabel ?? t('locked')}
             </div>
           ) : prices && prices.length > 0 ? (
-            <div className="flex gap-1.5">
+            // Wraps instead of squeezing: two prices share a row while they fit
+            // (a ticket's "673"), and stack full-width the moment they don't (a
+            // repeat-purchase engine's "13.74M 13.47M"). Half a card is 67px on
+            // a 390px phone — a discounted million-scale price needs 84px, and
+            // side-by-side that difference came out as the LC coin printed over
+            // the last digits.
+            <div className="flex flex-wrap gap-1.5">
               {orderMarketPrices(prices).map((price, index) => (
                 <PriceButton
                   key={index}
@@ -183,6 +189,12 @@ interface PriceButtonProps {
 function PriceButton({ price, accent, onClick, fullWidth }: PriceButtonProps) {
   const isStars = price.type === MarketPriceType.TELEGRAM_STARS;
   const isLc = price.type === MarketPriceType.LC;
+  const amount = formatCompactPrice(price.amount);
+  const original = price.originalAmount ? formatCompactPrice(price.originalAmount) : null;
+  // One step down for the long prices only. A full-width card row holds 115px
+  // on the narrowest phone (320px), and "13.74M 13.47M" plus the LC glyph asks
+  // for more than that at 13px — every short price keeps the original size.
+  const dense = amount.length + (original?.length ?? 0) > 8;
 
   return (
     <button
@@ -193,7 +205,10 @@ function PriceButton({ price, accent, onClick, fullWidth }: PriceButtonProps) {
       }}
       className={twMerge(
         'flex-center relative gap-0.5 overflow-hidden whitespace-nowrap rounded-lg px-1.5 py-2 text-xs font-semibold text-white transition-transform active:scale-[0.97] hover:brightness-110',
-        fullWidth ? 'w-full' : 'min-w-0 flex-1'
+        // `min-w-fit` is what makes the row wrap: the button refuses to shrink
+        // below its own content, so a pair that cannot share a row breaks onto
+        // two full-width rows instead of clipping.
+        fullWidth ? 'w-full' : 'min-w-fit max-w-full flex-1'
       )}
       style={{
         backgroundColor: `color-mix(in srgb, ${accent} 18%, transparent)`,
@@ -202,12 +217,14 @@ function PriceButton({ price, accent, onClick, fullWidth }: PriceButtonProps) {
     >
       {isStars && <TelegramStarIcon size={13} className="shrink-0" />}
       <span className="inline-flex min-w-0 items-baseline gap-0.5 tabular-nums">
-        {price.originalAmount && (
-          <span className="text-[10px] text-white/55 line-through">
-            {formatCompactPrice(price.originalAmount)}
+        {original && (
+          <span
+            className={twMerge('text-white/55 line-through', dense ? 'text-[9px]' : 'text-[10px]')}
+          >
+            {original}
           </span>
         )}
-        <span className="text-[13px]">{formatCompactPrice(price.amount)}</span>
+        <span className={dense ? 'text-[11px]' : 'text-[13px]'}>{amount}</span>
       </span>
       {isLc && <LcLabel size={11} interactive={false} className="shrink-0" />}
     </button>
