@@ -11,6 +11,13 @@ export interface MarketSectionGridProps {
   accent?: string;
   children: ReactNode;
   cols?: 1 | 2;
+  /**
+   * How many items the badge claims, when the child count is not that number.
+   * A section whose only child is an explanatory panel ("nothing on sale this
+   * month") would otherwise advertise "1" — one thing to buy, which is a lie.
+   * Pass `0` to drop the badge entirely.
+   */
+  count?: number;
   className?: string;
 }
 
@@ -21,9 +28,10 @@ export function MarketSectionGrid({
   accent = 'var(--color-electric-pink)',
   children,
   cols = 2,
+  count: countProp,
   className,
 }: MarketSectionGridProps) {
-  const count = Children.count(children);
+  const count = countProp ?? Children.count(children);
 
   return (
     <section className={twMerge('flex flex-col gap-3', className)}>

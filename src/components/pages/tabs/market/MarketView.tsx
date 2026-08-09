@@ -3,6 +3,7 @@
 import { useEffect, useMemo, useState, type ReactNode } from 'react';
 import { useSearchParams } from 'next/navigation';
 import { useGetMarketDataQuery } from '@/api/market.api';
+import { useGetGiftShopQuery } from '@/api/gifts.api';
 import { useGetMeQuery } from '@/api/me.api';
 import { useAppTranslations } from '@/hooks/useAppTranslations';
 import { useToast } from '@/hooks/useToast';
@@ -23,6 +24,7 @@ import { MarketTicketSection } from '@/components/pages/tabs/market/sections/Mar
 import { MarketShardSection } from '@/components/pages/tabs/market/sections/MarketShardSection';
 import { MarketCosmeticSection } from '@/components/pages/tabs/market/sections/MarketCosmeticSection';
 import { MarketStatusSection } from '@/components/pages/tabs/market/sections/MarketStatusSection';
+import { MarketGiftSection } from '@/components/pages/tabs/market/sections/MarketGiftSection';
 import { MarketPriceType } from '@/types/enums/market.enums';
 import type { MarketAccent, MarketPrice } from '@/types/interfaces/market.interfaces';
 import '@/styles/components/market.css';
@@ -85,6 +87,12 @@ export function MarketView() {
   const [highlight, setHighlight] = useState(initialTab !== ALL_KEY);
   const { data, isError, refetch } = useGetMarketDataQuery();
   const { data: me } = useGetMeQuery();
+  // The gift counter is off by default and draws nothing when it is, so its
+  // chip has to disappear with it — otherwise the Market shows a tab that opens
+  // an empty screen, which reads as breakage rather than as "not on sale".
+  const { data: giftShop } = useGetGiftShopQuery();
+  const giftsOpen = !!giftShop && giftShop.closedReason !== 'disabled';
+  const categoryOrder = MARKET_CATEGORY_ORDER.filter(k => k !== 'gifts' || giftsOpen);
   const [infoItem, setInfoItem] = useState<MarketSelectedItem | null>(null);
   const [purchase, setPurchase] = useState<MarketActivePurchase | null>(null);
   const [confirming, setConfirming] = useState(false);
@@ -103,7 +111,8 @@ export function MarketView() {
     setHighlight(initialTab !== ALL_KEY);
   }, [initialTab]);
 
-  const showAll = active === ALL_KEY;
+  const resolvedActive = categoryOrder.includes(active) ? active : ALL_KEY;
+  const showAll = resolvedActive === ALL_KEY;
 
   const handleCategoryChange = (key: MarketCategoryKey) => {
     setActive(key);
@@ -209,6 +218,9 @@ export function MarketView() {
         />
       ),
       status: <MarketStatusSection onSelect={handleSelect} onBuy={handleBuy} />,
+      // Owns its own query (a live Telegram catalog) and draws nothing while
+      // the counter is off, so it needs no data from `data` here.
+      gifts: <MarketGiftSection onSelect={handleSelect} onBuy={handleBuy} />,
     } as Record<Exclude<MarketCategoryKey, 'all'>, React.ReactNode>;
   }, [data]);
 
@@ -218,17 +230,21 @@ export function MarketView() {
     <div className="flex flex-col gap-4">
       <MarketHeroCarousel onSelect={handleSelect} onBuy={handleBuy} />
       <div className="px-5">
-        <MarketCategoryChips active={active} onChange={handleCategoryChange} />
+        <MarketCategoryChips
+          active={resolvedActive}
+          onChange={handleCategoryChange}
+          order={categoryOrder}
+        />
       </div>
 
-      <div key={active} className="animate-slide-in-bottom flex flex-col gap-5 px-5">
+      <div key={resolvedActive} className="animate-slide-in-bottom flex flex-col gap-5 px-5">
         {showAll ? (
-          MARKET_CATEGORY_ORDER.filter(k => k !== ALL_KEY).map(key => (
+          categoryOrder.filter(k => k !== ALL_KEY).map(key => (
             <div key={key}>{sections?.[key as Exclude<MarketCategoryKey, 'all'>]}</div>
           ))
         ) : (
           <div className={highlight ? 'market-section-highlight' : undefined}>
-            {sections?.[active as Exclude<MarketCategoryKey, 'all'>]}
+            {sections?.[resolvedActive as Exclude<MarketCategoryKey, 'all'>]}
           </div>
         )}
       </div>

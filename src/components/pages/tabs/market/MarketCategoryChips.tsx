@@ -1,13 +1,20 @@
 'use client';
 
 import { useEffect, useLayoutEffect, useRef, useState } from 'react';
-import { CircleStar, Cog, Gem, Palette, Sparkles, Ticket } from 'lucide-react';
+import { CircleStar, Cog, Gem, Gift, Palette, Sparkles, Ticket } from 'lucide-react';
 import type { LucideIcon } from 'lucide-react';
 import { twMerge } from 'tailwind-merge';
 import { useAppTranslations } from '@/hooks/useAppTranslations';
 import type { MessageIds } from '@/types/types/i18n.types';
 
-export type MarketCategoryKey = 'all' | 'engines' | 'tickets' | 'shards' | 'cosmetics' | 'status';
+export type MarketCategoryKey =
+  | 'all'
+  | 'engines'
+  | 'tickets'
+  | 'shards'
+  | 'cosmetics'
+  | 'status'
+  | 'gifts';
 
 export const MARKET_CATEGORY_ORDER: MarketCategoryKey[] = [
   'all',
@@ -16,6 +23,10 @@ export const MARKET_CATEGORY_ORDER: MarketCategoryKey[] = [
   'shards',
   'engines',
   'cosmetics',
+  // Last on purpose: the counter is off by default and renders nothing at all
+  // when it is, so a chip that leads to an empty screen sits where it is least
+  // in the way.
+  'gifts',
 ];
 
 const CATEGORY_ICON: Record<MarketCategoryKey, LucideIcon> = {
@@ -25,6 +36,7 @@ const CATEGORY_ICON: Record<MarketCategoryKey, LucideIcon> = {
   shards: Gem,
   cosmetics: Palette,
   status: CircleStar,
+  gifts: Gift,
 };
 
 const CATEGORY_LABEL: Record<MarketCategoryKey, MessageIds> = {
@@ -34,15 +46,28 @@ const CATEGORY_LABEL: Record<MarketCategoryKey, MessageIds> = {
   shards: 'shards title',
   cosmetics: 'cosmetics',
   status: 'status',
+  gifts: 'gifts',
 };
 
 export interface MarketCategoryChipsProps {
   active: MarketCategoryKey;
   onChange: (key: MarketCategoryKey) => void;
+  /**
+   * Which chips to draw. Defaults to every category — pass a narrower list when
+   * one of them has nothing behind it. A chip whose section renders nothing is
+   * worse than a missing chip: it reads as a broken screen, not an absent
+   * feature (the gift counter ships switched off, so this is its normal state).
+   */
+  order?: MarketCategoryKey[];
   className?: string;
 }
 
-export function MarketCategoryChips({ active, onChange, className }: MarketCategoryChipsProps) {
+export function MarketCategoryChips({
+  active,
+  onChange,
+  order = MARKET_CATEGORY_ORDER,
+  className,
+}: MarketCategoryChipsProps) {
   const t = useAppTranslations();
   const scrollRef = useRef<HTMLDivElement>(null);
   const trackRef = useRef<HTMLDivElement>(null);
@@ -93,7 +118,7 @@ export function MarketCategoryChips({ active, onChange, className }: MarketCateg
             />
           )}
 
-          {MARKET_CATEGORY_ORDER.map(key => {
+          {order.map(key => {
             const isActive = key === active;
             const Icon = CATEGORY_ICON[key];
             return (
