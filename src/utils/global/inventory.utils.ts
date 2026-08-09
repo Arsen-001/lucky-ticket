@@ -95,6 +95,11 @@ export const findEquippedChip = (
  *
  * `now` is injectable so the boost can be recomputed off a ticking clock rather
  * than only when something else happens to re-render.
+ *
+ * Two boosters of one type can sit on one engine — activation never cleared the
+ * slot — so the STRONGEST running one wins. That is the rule the server applies
+ * (`activeBoosterPct`), and it has to be the same one here: "whichever comes
+ * first in the array" is not something two codebases can agree on.
  */
 export const findActiveBooster = (
   boosters: import('@/types/interfaces/inventory.interfaces').InventoryBooster[] | undefined,
@@ -102,9 +107,13 @@ export const findActiveBooster = (
   type: InventoryChipType,
   now: number = Date.now()
 ) =>
-  boosters?.find(
-    b =>
-      b.activeOnEngineId === engineId &&
-      b.type === type &&
-      (!b.expiresAt || new Date(b.expiresAt).getTime() > now)
-  );
+  boosters
+    ?.filter(
+      b =>
+        b.activeOnEngineId === engineId &&
+        b.type === type &&
+        (!b.expiresAt || new Date(b.expiresAt).getTime() > now)
+    )
+    .reduce<
+      import('@/types/interfaces/inventory.interfaces').InventoryBooster | undefined
+    >((best, b) => (!best || b.effectPct > best.effectPct ? b : best), undefined);

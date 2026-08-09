@@ -76,3 +76,27 @@ describe('an expired booster stops counting (DOCS §10.6)', () => {
     expect(withSpent).toBe(bare);
   });
 });
+
+/**
+ * The slot can hold two at once (activation never cleared it), so both sides
+ * must pick the same one — the server's `activeBoosterPct` takes the strongest
+ * still running, and this has to agree or the shown cycle drifts from the minted one.
+ */
+describe('two boosters in one slot', () => {
+  it('the strongest running one wins', () => {
+    const weak = booster({ id: 'weak', effectPct: 25 });
+    const strong = booster({ id: 'strong', effectPct: 75 });
+    expect(findActiveBooster([weak, strong], 'e1', 'speed', NOW)?.id).toBe('strong');
+    expect(findActiveBooster([strong, weak], 'e1', 'speed', NOW)?.id).toBe('strong');
+  });
+
+  it('a stronger one that has run out does not win', () => {
+    const live = booster({ id: 'live', effectPct: 25 });
+    const spent = booster({
+      id: 'spent',
+      effectPct: 100,
+      expiresAt: new Date(NOW - 1).toISOString(),
+    });
+    expect(findActiveBooster([live, spent], 'e1', 'speed', NOW)?.id).toBe('live');
+  });
+});
