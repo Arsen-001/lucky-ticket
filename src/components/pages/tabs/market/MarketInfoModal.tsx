@@ -51,7 +51,10 @@ export function MarketInfoModal({ open, item, onClose, onBuy }: MarketInfoModalP
           )}
 
           {(item.isNew || item.discountPct) && (
-            <div className="absolute right-3 top-3 z-3 flex flex-col items-end gap-1">
+            // Held left of the modal's close button, which sits in the same
+            // corner — the "NEW" pill and the X were painted on top of each
+            // other (measured 09.08.2026).
+            <div className="absolute right-12 top-3 z-3 flex flex-col items-end gap-1">
               {item.isNew && (
                 <span className="bg-electric-pink rounded-full px-1.5 py-0.5 text-[10px] font-extrabold uppercase tracking-wider text-white">
                   {t('new')}
@@ -109,14 +112,39 @@ export function MarketInfoModal({ open, item, onClose, onBuy }: MarketInfoModalP
         {item.locked ? (
           item.lockNote
         ) : (
-          <div className="flex flex-col gap-2">
+          <div className="flex flex-col gap-2.5">
             {orderMarketPrices(item.prices).map((price, index) => (
-              <PriceButton key={index} price={price} accent={accent} onClick={() => onBuy(price)} />
+              <div key={index} className="flex flex-col gap-1">
+                <PriceButton price={price} accent={accent} onClick={() => onBuy(price)} />
+                <PriceSaving price={price} />
+              </div>
             ))}
           </div>
         )}
       </div>
     </Modal>
+  );
+}
+
+/**
+ * What the discount is worth in coins, under the price it applies to.
+ *
+ * The percentage alone under-sells the perk on this catalog: a repeat-purchase
+ * engine costs millions, so "−2%" reads as rounding while the same cut is
+ * 270,000 LC. Stated in the currency of the price it sits under, so an LC
+ * saving is never read as stars.
+ */
+function PriceSaving({ price }: { price: MarketPrice }) {
+  const t = useAppTranslations();
+  const saved = price.originalAmount ? price.originalAmount - price.amount : 0;
+  if (saved <= 0) return null;
+
+  return (
+    <span className="text-electric-pink flex-center gap-1 text-[11px] font-bold tabular-nums">
+      {t('you save')} {formatCompactPrice(saved)}
+      {price.type === MarketPriceType.LC && <LcLabel size={11} interactive={false} />}
+      {price.type === MarketPriceType.TELEGRAM_STARS && <TelegramStarIcon size={11} />}
+    </span>
   );
 }
 

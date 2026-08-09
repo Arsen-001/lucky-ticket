@@ -60,6 +60,11 @@ export function MarketPurchaseModal({
 
   const effectiveCount = quantityEnabled ? count : 1;
   const total = (price?.amount ?? 0) * effectiveCount;
+  // What the status discount takes off THIS order — the percentage alone reads
+  // as rounding on a million-scale price, and it is the only number here that
+  // grows with the quantity stepper.
+  const savedPerItem = price?.originalAmount ? price.originalAmount - price.amount : 0;
+  const saved = savedPerItem > 0 ? savedPerItem * effectiveCount : 0;
 
   const balance =
     price?.type === MarketPriceType.LC
@@ -166,6 +171,21 @@ export function MarketPurchaseModal({
                     {formatNumber(price.amount)} × {effectiveCount}
                   </span>
                 )}
+              </div>
+            </div>
+          )}
+
+          {price && saved > 0 && (
+            <div className="border-electric-pink/25 bg-electric-pink/10 -mt-2 flex items-center justify-between rounded-xl border px-4 py-2.5">
+              <span className="text-[11px] font-bold tracking-wider text-white/60 uppercase">
+                {t('you save')}
+              </span>
+              <div className="flex items-center gap-1.5">
+                <span className="text-electric-pink text-sm font-extrabold tabular-nums">
+                  −{formatNumber(saved)}
+                </span>
+                {price.type === MarketPriceType.LC && <LcLabel size={14} interactive={false} />}
+                {price.type === MarketPriceType.TELEGRAM_STARS && <TelegramStarIcon size={14} />}
               </div>
             </div>
           )}
