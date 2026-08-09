@@ -24,6 +24,17 @@
        the fixed chrome (header, tab bar, drawer) flush to the centered column. */
     --app-max-w: 430px;
     --app-gutter: max(0px, calc((100vw - var(--app-max-w)) / 2));
+    /* Side inset a centered dialog keeps from the frame's edge — the padding of
+       `Modal`'s backdrop layer, named here so the panel can cap itself at the
+       same width the app column would have left it. */
+    --app-modal-inset: 1.875rem;
+    /* Widest a centered dialog may be: the phone column minus its two insets.
+       Every overlay is `position: fixed`, so without this cap a dialog measures
+       itself against the BROWSER window, not the app — on a desktop Telegram
+       window the daily-gift modal stretched across 1280px while the app it
+       belongs to was 430px wide. Bottom sheets sit flush to the frame edges and
+       cap at `--app-max-w` instead. */
+    --app-modal-max-w: calc(var(--app-max-w) - 2 * var(--app-modal-inset));
   }
   html {
     width: 100%;

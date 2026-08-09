@@ -58,7 +58,7 @@ export function TournamentFilterSheet({
         aria-hidden={!open}
         inert={!open ? true : undefined}
         className={twMerge(
-          'fixed inset-0 z-100 flex items-end transition-opacity duration-300',
+          'fixed inset-0 z-100 flex items-end justify-center transition-opacity duration-300',
           visible ? 'opacity-100' : 'opacity-0 pointer-events-none'
         )}
       >
@@ -68,7 +68,9 @@ export function TournamentFilterSheet({
         {/* Sheet panel */}
         <div
           className={twMerge(
-            'relative w-full bg-[var(--color-background)] rounded-t-3xl transition-transform duration-300 ease-in-out max-h-[85vh] flex flex-col shadow-[0_-12px_40px_rgba(0,0,0,0.5)]',
+            // Capped to the phone column like every other overlay — a `fixed`
+            // layer measures `w-full` against the browser window. @see BottomSheet
+            'relative w-full max-w-[var(--app-max-w)] bg-[var(--color-background)] rounded-t-3xl transition-transform duration-300 ease-in-out max-h-[85vh] flex flex-col shadow-[0_-12px_40px_rgba(0,0,0,0.5)]',
             visible ? 'translate-y-0' : 'translate-y-full'
           )}
         >

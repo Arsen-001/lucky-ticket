@@ -2,15 +2,12 @@
 
 import { useRouter } from 'next/navigation';
 import { Gift } from 'lucide-react';
-import { twMerge } from 'tailwind-merge';
 import { Modal } from '@/components/shared/modals/Modal';
 import { Button } from '@/components/shared/buttons/Button';
 import { LuckyPlayerIcon } from '@/components/shared/icons/LuckyPlayerIcon';
-import { Ticket } from '@/components/shared/icons/Ticket';
-import { LcLabel } from '@/components/shared/icons/LcLabel';
+import { LuckyPlayerDailyGiftReward } from '@/components/pages/tabs/home/LuckyPlayerDailyGiftReward';
 import { useAppTranslations } from '@/hooks/useAppTranslations';
 import { routes } from '@/constants/routes';
-import { formatNumber } from '@/utils/global/number.utils';
 import type { DailyGiftState } from '@/types/interfaces/status-gift.interfaces';
 
 export interface LuckyPlayerDailyGiftModalProps {
@@ -28,6 +25,11 @@ export interface LuckyPlayerDailyGiftModalProps {
  * and a Collect button, everyone else sees the same drop as what a subscription
  * would have paid today. Splitting them into two modals guaranteed the offer
  * would drift away from the gift the moment an admin retuned the numbers.
+ *
+ * The card surface is this component's own, like every other modal here —
+ * `Modal` only supplies the backdrop and the frame. Without it the contents
+ * floated as bare text over the blurred home screen, which is exactly how this
+ * looked until 09.08.2026.
  */
 export function LuckyPlayerDailyGiftModal({
   open,
@@ -39,51 +41,42 @@ export function LuckyPlayerDailyGiftModal({
   const t = useAppTranslations();
   const router = useRouter();
   const isPromo = !gift.isLuckyPlayer;
+  const title = isPromo ? t('lucky player daily gift') : t('your daily gift');
 
   return (
-    <Modal
-      open={open}
-      onClose={onClose}
-      label={isPromo ? t('lucky player daily gift') : t('your daily gift')}
-    >
-      <div className="flex flex-col items-center gap-5 px-1 py-2 text-center">
-        <div className="relative flex-center">
-          <div className="absolute size-28 rounded-full bg-pink-gradient opacity-20 blur-2xl" />
-          <LuckyPlayerIcon size={72} state={isPromo ? 'locked' : 'active'} />
-        </div>
+    <Modal open={open} onClose={onClose} label={title}>
+      <div
+        className="relative flex flex-col items-center gap-4 overflow-hidden rounded-2xl border border-white/10 px-5 pt-7 pb-5 text-center shadow-[0_24px_60px_rgba(0,0,0,0.55)]"
+        style={{
+          background:
+            'radial-gradient(circle at 50% 8%, rgba(240, 185, 90, 0.16) 0%, transparent 42%),' +
+            'var(--gradient-purple-reverse)',
+        }}
+      >
+        {/* Halo behind the medal, not a wash over the card: kept tight enough
+            that the title below it stays on the purple. */}
+        <span
+          aria-hidden
+          className="bg-gold/20 pointer-events-none absolute -top-16 left-1/2 h-40 w-40 -translate-x-1/2 rounded-full blur-3xl"
+        />
 
-        <div className="flex flex-col gap-1.5">
-          <h2 className="text-xl font-bold text-white">
-            {isPromo ? t('lucky player daily gift') : t('your daily gift')}
-          </h2>
-          <p className="text-sm text-white/60">
+        <LuckyPlayerIcon size={84} state={isPromo ? 'locked' : 'active'} className="relative" />
+
+        <div className="relative flex flex-col items-center gap-1.5">
+          <span className="text-gold text-[10px] font-extrabold tracking-[1.5px] uppercase">
+            {t('lucky player')}
+          </span>
+          <h2 className="text-[21px] leading-tight font-extrabold text-white">{title}</h2>
+          <p className="text-white-secondary max-w-[270px] text-[12.5px] leading-snug">
             {isPromo
               ? t('this is what lucky player brings every day')
               : t('collect it every day while lucky player is active')}
           </p>
         </div>
 
-        {/* The drop itself — identical in both modes, so the offer can never
-            promise something other than what the gift actually pays. */}
-        <div className="flex w-full items-center justify-center gap-3 rounded-2xl border border-white/10 bg-background-overlay p-4">
-          {gift.lc > 0 && (
-            <div className="flex flex-col items-center gap-1">
-              <LcLabel size={16} interactive={false} />
-              <span className="text-lg font-bold text-white">+{formatNumber(gift.lc)}</span>
-            </div>
-          )}
-          {gift.lc > 0 && gift.ticketCount > 0 && <span className="h-8 w-px bg-white/10" />}
-          {gift.ticketCount > 0 && (
-            <div className="flex flex-col items-center gap-1">
-              <Ticket type={gift.ticketTier} width={34} />
-              <span className="text-lg font-bold text-white">
-                +{formatNumber(gift.ticketCount)}
-              </span>
-            </div>
-          )}
-        </div>
+        <LuckyPlayerDailyGiftReward gift={gift} className="relative" />
 
-        <div className="flex w-full flex-col gap-2">
+        <div className="relative flex w-full flex-col items-center gap-1">
           {isPromo ? (
             <Button
               className="w-full"
@@ -96,7 +89,7 @@ export function LuckyPlayerDailyGiftModal({
             </Button>
           ) : (
             <Button
-              className={twMerge('flex-center w-full gap-2')}
+              className="flex-center w-full gap-2"
               loading={claiming}
               disabled={!gift.canClaim || claiming}
               onClick={onClaim}
@@ -105,7 +98,11 @@ export function LuckyPlayerDailyGiftModal({
               {t('collect')}
             </Button>
           )}
-          <Button variant="transparent" className="w-full text-white/50" onClick={onClose}>
+          <Button
+            variant="transparent"
+            className="w-full py-2 text-[13px] font-semibold text-white/45"
+            onClick={onClose}
+          >
             {t('later')}
           </Button>
         </div>

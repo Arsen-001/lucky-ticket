@@ -83,7 +83,7 @@ export const Modal = ({
         inert={!open ? true : undefined}
         style={{ transitionDuration: `${ANIMATION_MS}ms` }}
         className={twMerge(
-          'fixed inset-0 flex items-center justify-center z-100 transition-all backdrop-blur-[1px] p-7.5',
+          'fixed inset-0 flex items-center justify-center z-100 transition-all backdrop-blur-[1px] p-[var(--app-modal-inset)]',
           visible ? 'opacity-100' : 'opacity-0 pointer-events-none'
         )}
       >
@@ -101,7 +101,11 @@ export const Modal = ({
           tabIndex={-1}
           style={{ transitionDuration: `${ANIMATION_MS}ms` }}
           className={twMerge(
-            'w-full relative transition-all transform max-h-[80vh] overflow-scroll scrollbar-hidden rounded-lg focus:outline-none',
+            // Capped to the phone column, not the browser window: the layer
+            // above is `fixed`, so `w-full` alone measured against the viewport
+            // and a desktop-width window opened a 1200px-wide dialog over a
+            // 430px app. @see --app-modal-max-w
+            'w-full max-w-[var(--app-modal-max-w)] relative transition-all transform max-h-[80vh] overflow-y-auto overflow-x-hidden scrollbar-hidden rounded-lg focus:outline-none',
             visible ? 'scale-100' : 'scale-80'
           )}
         >

@@ -122,7 +122,7 @@ export function ProfileShareSheet({ open, onClose, url, username }: ProfileShare
         aria-hidden={!open}
         inert={!open ? true : undefined}
         className={twMerge(
-          'fixed inset-0 z-100 flex items-end transition-opacity duration-300',
+          'fixed inset-0 z-100 flex items-end justify-center transition-opacity duration-300',
           open ? 'opacity-100' : 'pointer-events-none opacity-0'
         )}
       >
@@ -130,7 +130,8 @@ export function ProfileShareSheet({ open, onClose, url, username }: ProfileShare
 
         <div
           className={twMerge(
-            'bg-background relative flex w-full flex-col rounded-t-2xl transition-transform duration-300 ease-in-out',
+            // Capped to the phone column like every other overlay. @see BottomSheet
+            'bg-background relative flex w-full max-w-[var(--app-max-w)] flex-col rounded-t-2xl transition-transform duration-300 ease-in-out',
             open ? 'translate-y-0' : 'translate-y-full'
           )}
         >

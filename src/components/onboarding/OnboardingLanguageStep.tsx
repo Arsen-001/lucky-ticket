@@ -69,7 +69,7 @@ export function OnboardingLanguageStep({ onConfirm }: OnboardingLanguageStepProp
       >
         <div className="absolute inset-0 bg-[rgba(9,7,18,0.92)] backdrop-blur-sm" />
 
-        <div className="border-electric-pink/30 bg-background-overlay/95 animate-slide-in-bottom relative w-full max-w-[420px] rounded-2xl border p-5 shadow-[0_18px_60px_-12px_rgba(0,0,0,0.7)] backdrop-blur-md">
+        <div className="border-electric-pink/30 bg-background-overlay/95 animate-slide-in-bottom relative w-full max-w-[var(--app-modal-max-w)] rounded-2xl border p-5 shadow-[0_18px_60px_-12px_rgba(0,0,0,0.7)] backdrop-blur-md">
           <div className="mb-4 flex flex-col items-center text-center">
             <span className="bg-electric-pink/15 ring-electric-pink/30 flex-center mb-3 h-12 w-12 rounded-2xl ring-1">
               <Globe size={24} className="text-electric-pink" strokeWidth={2.2} />

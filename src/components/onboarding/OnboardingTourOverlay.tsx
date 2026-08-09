@@ -130,7 +130,7 @@ export function OnboardingTourOverlay({
 
         {phase !== 'searching' && (
           <div className="absolute inset-x-0 flex justify-center px-4" style={cardPosition}>
-            <div className="border-electric-pink/30 bg-background-overlay/95 animate-slide-in-bottom w-full max-w-[420px] rounded-2xl border p-5 shadow-[0_18px_60px_-12px_rgba(0,0,0,0.7)] backdrop-blur-md">
+            <div className="border-electric-pink/30 bg-background-overlay/95 animate-slide-in-bottom w-full max-w-[var(--app-modal-max-w)] rounded-2xl border p-5 shadow-[0_18px_60px_-12px_rgba(0,0,0,0.7)] backdrop-blur-md">
               <div className="mb-3 flex items-center justify-center gap-1.5">
                 {Array.from({ length: total }).map((_, i) => (
                   <span
