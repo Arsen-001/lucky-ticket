@@ -227,7 +227,7 @@ export function TaskItemRow({ task, onClaim, highlightToken, className, style }:
       {/* Rewards, the reset countdown and the progress figure stack to the
           right rather than competing with the title for the same line. */}
       <div className="flex shrink-0 flex-col items-end gap-1">
-        <TaskRewardRow rewards={task.rewards} size="sm" className="gap-1" />
+        <TaskRewardRow rewards={task.rewards} tier={task.tier} size="sm" className="gap-1" />
         {((task.resetAt && !isLocked && !expired) || showProgress) && (
           <span className="flex items-center gap-2 text-[10px] leading-none font-medium text-white/40 tabular-nums">
             {task.resetAt && !isLocked && !expired && (

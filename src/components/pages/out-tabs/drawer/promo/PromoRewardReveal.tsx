@@ -1,9 +1,11 @@
 'use client';
 
-import { PartyPopper, Ticket as TicketIcon } from 'lucide-react';
+import { PartyPopper } from 'lucide-react';
 import { LcLabel } from '@/components/shared/icons/LcLabel';
+import { TicketRewardIcon } from '@/components/shared/icons/TicketRewardIcon';
 import { useAppTranslations } from '@/hooks/useAppTranslations';
 import { formatNumber } from '@/utils/global/number.utils';
+import { asTicketTier } from '@/utils/global/ticket-tier.utils';
 import type { PromoReward, PromoRedeemResponse } from '@/types/interfaces/promo.interfaces';
 import { staggerMs } from '@/utils/global/animation.utils';
 
@@ -64,9 +66,13 @@ function PromoRewardLine({ reward }: { reward: PromoReward }) {
     );
   }
 
+  // The code names the tier it grants, so the line shows that ticket rather
+  // than a glyph that would look the same for a Bronze drop and a Diamond one.
+  const tier = asTicketTier(reward.tier);
+
   return (
     <span className="inline-flex items-center gap-1.5 text-sm font-extrabold tabular-nums text-white">
-      <TicketIcon size={16} className="text-electric-pink" /> {amount}
+      <TicketRewardIcon tier={tier} amount={reward.amount} size={18} /> {amount}
       <span className="text-white-secondary text-[12px] font-semibold capitalize">
         {reward.tier ? t(reward.tier) : ''} {t('tickets').toLowerCase()}
       </span>

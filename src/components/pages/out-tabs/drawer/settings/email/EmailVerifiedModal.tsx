@@ -1,13 +1,15 @@
 'use client';
 
 import type { ReactNode } from 'react';
-import { MailCheck, Ticket as TicketIcon } from 'lucide-react';
+import { MailCheck } from 'lucide-react';
 import { BoltIcon } from '@/components/shared/icons/BoltIcon';
 import { LcLabel } from '@/components/shared/icons/LcLabel';
 import { TelegramStarIcon } from '@/components/shared/icons/TelegramStarIcon';
+import { TicketRewardIcon } from '@/components/shared/icons/TicketRewardIcon';
 import { useAppTranslations } from '@/hooks/useAppTranslations';
 import { GlobalConstants } from '@/constants/global.constants';
 import { formatNumber } from '@/utils/global/number.utils';
+import { asTicketTier } from '@/utils/global/ticket-tier.utils';
 import type { EmailVerifyReward } from '@/types/interfaces/user.interfaces';
 import { staggerMs } from '@/utils/global/animation.utils';
 
@@ -60,7 +62,12 @@ export function EmailVerifiedModal({ email, reward }: EmailVerifiedModalProps) {
       key: 'tickets',
       content: (
         <span className="inline-flex items-center gap-1.5 text-sm font-extrabold tabular-nums text-white">
-          <TicketIcon size={16} className="text-electric-pink" /> +{reward.tickets}
+          <TicketRewardIcon
+            tier={asTicketTier(reward.ticketTier)}
+            amount={reward.tickets}
+            size={18}
+          />{' '}
+          +{reward.tickets}
           <span className="text-white-secondary text-[12px] font-semibold capitalize">
             {t(reward.ticketTier.toLowerCase() as Lowercase<EmailVerifyReward['ticketTier']>)}{' '}
             {t('tickets').toLowerCase()}

@@ -17,3 +17,35 @@ export const tierNameId: Record<TicketType, MessageIds> = {
   platinum: 'platinum',
   diamond: 'diamond',
 };
+
+/**
+ * Message id for the full name of a tier's ticket ("Bronze Ticket").
+ *
+ * Not `t('{tier} ticket', { tier })`: that pattern glues the tier's bare noun
+ * onto the word for ticket and only works in English. Russian needs an
+ * adjective agreeing with the noun — the interpolated form reads "Алмаз билет"
+ * where the language wants "Алмазный билет". Each locale owns the whole phrase.
+ */
+export const tierTicketNameId: Record<TicketType, MessageIds> = {
+  bronze: 'bronze ticket',
+  silver: 'silver ticket',
+  gold: 'gold ticket',
+  platinum: 'platinum ticket',
+  diamond: 'diamond ticket',
+};
+
+/**
+ * Message id describing what a ticket of each tier is *for* — the one sentence
+ * that answers "what will I get?".
+ *
+ * Same drift hazard as {@link tierNameId}, and it had already started: the
+ * Tickets screen and the Market ticket section each carried their own copy of
+ * this map.
+ */
+export const tierTicketDescriptionId: Record<TicketType, MessageIds> = {
+  bronze: 'bronze ticket description',
+  silver: 'silver ticket description',
+  gold: 'golden ticket description',
+  platinum: 'platinum ticket description',
+  diamond: 'diamond ticket description',
+};

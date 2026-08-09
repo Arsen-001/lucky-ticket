@@ -160,6 +160,7 @@ export function TaskItemCardCompact({
       {/* Rewards (centered, wrapped) */}
       <TaskRewardRow
         rewards={task.rewards}
+        tier={task.tier}
         size="sm"
         className="flex-wrap justify-start gap-1 mt-auto"
       />

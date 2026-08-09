@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useRef, useState } from 'react';
-import { Coins, Loader2, Sparkles, Star, Ticket, Trophy } from 'lucide-react';
+import { Check, Coins, Loader2, Sparkles, Star, Ticket, Trophy } from 'lucide-react';
 import type { LucideIcon } from 'lucide-react';
 import { twMerge } from 'tailwind-merge';
 import { Modal } from '@/components/shared/modals/Modal';
@@ -9,9 +9,13 @@ import { Button } from '@/components/shared/buttons/Button';
 import { useAppTranslations } from '@/hooks/useAppTranslations';
 import { BoltIcon } from '@/components/shared/icons/BoltIcon';
 import { LcLabel } from '@/components/shared/icons/LcLabel';
+import { Ticket as TicketArt } from '@/components/shared/icons/Ticket';
 import { TaskRewardType } from '@/types/enums/tasks.enums';
 import type { ClaimTaskResponse, TaskReward } from '@/types/interfaces/tasks.interfaces';
+import type { ClaimErrorKind } from '@/utils/pages/task-claim.utils';
 import { triggerHaptic } from '@/utils/global/haptic.utils';
+import { formatNumber } from '@/utils/global/number.utils';
+import { asTicketTier } from '@/utils/global/ticket-tier.utils';
 import { TaskRewardRow } from './TaskRewardRow';
 
 // Task claims return a full balance snapshot; ad-watch grants rewards only (no
@@ -25,6 +29,9 @@ export interface ClaimRewardModalProps {
   result?: RewardModalResult | null;
   loading?: boolean;
   error?: boolean;
+  errorKind?: ClaimErrorKind;
+  /** Tier of whatever was claimed — decides which ticket the prize art shows. */
+  tier?: string;
   onClose: () => void;
   onContinue: () => void;
   onRetry?: () => void;
@@ -118,6 +125,8 @@ export function ClaimRewardModal({
   result,
   loading,
   error,
+  errorKind = 'network',
+  tier,
   onClose,
   onContinue,
   onRetry,
@@ -125,11 +134,31 @@ export function ClaimRewardModal({
   const t = useAppTranslations();
 
   const view: ModalView = error ? 'error' : result ? 'success' : 'loading';
+  const canRetry = errorKind === 'network';
+
+  const errorTitle =
+    errorKind === 'claimed'
+      ? t('claim already done')
+      : errorKind === 'rejected'
+        ? t('claim unavailable')
+        : t('claim failed');
+  const errorDescription =
+    errorKind === 'claimed'
+      ? t('claim already done description')
+      : errorKind === 'rejected'
+        ? t('claim unavailable description')
+        : t('claim failed description');
 
   const primaryReward: TaskReward | undefined =
     result?.rewards.find(r => r.type === TaskRewardType.LC) ?? result?.rewards[0];
 
   const primaryIsAp = primaryReward?.type === TaskRewardType.ACTIVITY_POINTS;
+  // A claim that pays tickets shows the ticket it paid, at prize size. The
+  // outline glyph named the currency and hid the only thing that varies.
+  const primaryTicketTier =
+    primaryReward?.type === TaskRewardType.TICKETS
+      ? (asTicketTier(primaryReward.label) ?? asTicketTier(tier) ?? 'bronze')
+      : undefined;
   // Compared inline rather than through `primaryIsAp`: the icon map has no
   // entry for activity points, and a separate boolean does not narrow the type
   // that indexes it — which is what `noImplicitAny: false` was silently
@@ -170,6 +199,13 @@ export function ClaimRewardModal({
                   >
                     {primaryIsAp ? (
                       <BoltIcon size={84} className="drop-shadow-lg" />
+                    ) : primaryTicketTier ? (
+                      <TicketArt
+                        type={primaryTicketTier}
+                        width={96}
+                        height={50}
+                        className="drop-shadow-lg"
+                      />
                     ) : (
                       <PrimaryIcon size={56} className="text-white drop-shadow-lg" />
                     )}
@@ -179,9 +215,17 @@ export function ClaimRewardModal({
                   </span>
                 </>
               ) : view === 'error' ? (
-                <div className="flex-center w-28 h-28 rounded-full bg-error/20 border border-error/40">
-                  <Sparkles size={48} className="text-error-text" />
-                </div>
+                // "Already claimed" is not a failure — the player got the
+                // reward. Painting it in error red says they lost something.
+                errorKind === 'claimed' ? (
+                  <div className="flex-center w-28 h-28 rounded-full bg-success/20 border border-success/40">
+                    <Check size={48} className="text-success" />
+                  </div>
+                ) : (
+                  <div className="flex-center w-28 h-28 rounded-full bg-error/20 border border-error/40">
+                    <Sparkles size={48} className="text-error-text" />
+                  </div>
+                )
               ) : (
                 <div className="flex-center w-28 h-28 rounded-full bg-white/5 border border-white/10">
                   <Loader2 size={42} className="text-white/60 animate-spin" />
@@ -194,12 +238,12 @@ export function ClaimRewardModal({
           <div className="flex flex-col items-center justify-center gap-1 h-16 w-full">
             <h2 className="text-2xl font-extrabold leading-tight">
               {view === 'success' && `${t('awesome')}!`}
-              {view === 'error' && t('claim failed')}
+              {view === 'error' && errorTitle}
               {view === 'loading' && t('loading')}
             </h2>
             <p className="text-xs text-white-secondary text-center max-w-[260px] line-clamp-2">
               {view === 'success' && t('claim modal description')}
-              {view === 'error' && t('claim failed description')}
+              {view === 'error' && errorDescription}
             </p>
           </div>
 
@@ -208,10 +252,15 @@ export function ClaimRewardModal({
             {view === 'success' && (
               <>
                 <span className="text-4xl font-extrabold tabular-nums bg-gradient-to-r from-gold via-electric-pink to-electric-purple bg-clip-text text-transparent leading-none">
-                  +{counter}
+                  +{formatNumber(counter)}
                 </span>
                 {result && result.rewards.length > 1 ? (
-                  <TaskRewardRow rewards={result.rewards} size="md" className="justify-center" />
+                  <TaskRewardRow
+                    rewards={result.rewards}
+                    tier={tier}
+                    size="md"
+                    className="justify-center"
+                  />
                 ) : (
                   <div className="h-6" />
                 )}
@@ -233,11 +282,11 @@ export function ClaimRewardModal({
                   </div>
                   <div className="flex items-center gap-1">
                     <Ticket size={14} className="text-electric-pink" />
-                    <span>{result.newBalance.tickets}</span>
+                    <span>{formatNumber(result.newBalance.tickets)}</span>
                   </div>
                   <div className="flex items-center gap-1">
                     <BoltIcon size={20} />
-                    <span>{result.newBalance.activityPoints}</span>
+                    <span>{formatNumber(result.newBalance.activityPoints)}</span>
                   </div>
                 </div>
               </div>
@@ -246,16 +295,30 @@ export function ClaimRewardModal({
             )}
           </div>
 
-          {/* BUTTON — fixed h-12, single action */}
-          <div className="flex w-full h-12">
+          {/* BUTTON — fixed h-12. The modal hides its X, so the error view has
+              to carry its own way out: with Retry as the only control, a claim
+              the server keeps refusing (already claimed) had no exit but the
+              sliver of backdrop around a 360px panel, and read as a freeze. */}
+          <div className="flex w-full h-12 gap-2">
             {view === 'error' ? (
-              <Button
-                onClick={onRetry}
-                loading={loading}
-                className="flex-1 rounded-xl py-3 text-sm h-full"
-              >
-                {t('retry')}
-              </Button>
+              <>
+                <Button
+                  variant="secondary"
+                  onClick={onContinue}
+                  className="flex-1 rounded-xl py-3 text-sm h-full"
+                >
+                  {t('close')}
+                </Button>
+                {canRetry && (
+                  <Button
+                    onClick={onRetry}
+                    loading={loading}
+                    className="flex-1 rounded-xl py-3 text-sm h-full"
+                  >
+                    {t('retry')}
+                  </Button>
+                )}
+              </>
             ) : view === 'success' ? (
               <Button onClick={onContinue} className="flex-1 rounded-xl py-3 text-sm h-full">
                 {t('continue tasks')}

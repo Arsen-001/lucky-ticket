@@ -2,10 +2,11 @@ import { twMerge } from 'tailwind-merge';
 import { Coins, Sparkles, Star, Ticket, Trophy } from 'lucide-react';
 import type { LucideIcon } from 'lucide-react';
 import { BoltIcon } from '@/components/shared/icons/BoltIcon';
+import { TicketRewardIcon } from '@/components/shared/icons/TicketRewardIcon';
 import { formatCompact, formatNumber } from '@/utils/global/number.utils';
+import { asTicketTier } from '@/utils/global/ticket-tier.utils';
 import { TaskRewardType } from '@/types/enums/tasks.enums';
 import type { TaskReward } from '@/types/interfaces/tasks.interfaces';
-import { TIER_RANK, type TierName } from '@/types/types/tier.types';
 
 interface RewardSkin {
   Icon: LucideIcon | null;
@@ -51,17 +52,6 @@ const SKIN: Record<TaskRewardType, RewardSkin> = {
     chipClass: 'border-platinum/45 bg-gradient-to-b from-platinum/24 to-platinum/[0.04]',
   },
 };
-
-/** Tier of a ticket reward, shown as a dot — the word never fits a quarter chip. */
-const TIER_DOT: Record<TierName, string> = {
-  bronze: 'bg-bronze',
-  silver: 'bg-silver',
-  gold: 'bg-gold',
-  platinum: 'bg-platinum',
-  diamond: 'bg-diamond',
-};
-
-const isTier = (label?: string): label is TierName => !!label && label in TIER_RANK;
 
 /**
  * Exact below five figures, compact above. A view paying 150 000 LC is the one
@@ -125,6 +115,11 @@ export function AdRewardRow({
         const skin = SKIN[reward.type];
         if (!skin) return null;
         const { Icon, iconClass, chipClass } = skin;
+        // The ladder always names the tier it credits (`adViewRewardsApi`), so
+        // the chip can draw that exact ticket instead of a tier dot beside a
+        // generic glyph — the dot said "some tier", never which one.
+        const ticketTier =
+          reward.type === TaskRewardType.TICKETS ? asTicketTier(reward.label) : undefined;
         return (
           <span
             key={`${reward.type}-${index}`}
@@ -135,7 +130,16 @@ export function AdRewardRow({
               chipClass
             )}
           >
-            {Icon ? (
+            {ticketTier ? (
+              // The artwork is ~2:1, so at a glyph's height it is twice a
+              // glyph's width. In the four-chip case a chip is a quarter of
+              // 390px and that difference is what would clip the number.
+              <TicketRewardIcon
+                tier={ticketTier}
+                amount={reward.amount}
+                size={dense ? iconSize - 3 : iconSize}
+              />
+            ) : Icon ? (
               <Icon size={iconSize} strokeWidth={2.2} className={twMerge('shrink-0', iconClass)} />
             ) : (
               <BoltIcon size={iconSize + BOLT_BONUS} />
@@ -144,14 +148,6 @@ export function AdRewardRow({
               {reward.type === TaskRewardType.ACTIVITY_POINTS ? '+' : ''}
               {formatAmount(reward.amount)}
             </span>
-            {reward.type === TaskRewardType.TICKETS && isTier(reward.label) && (
-              <span
-                className={twMerge(
-                  'size-1.5 shrink-0 rounded-full ring-1 ring-white/20',
-                  TIER_DOT[reward.label]
-                )}
-              />
-            )}
           </span>
         );
       })}

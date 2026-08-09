@@ -2,7 +2,7 @@
 
 import { Gift } from 'lucide-react';
 import { Button } from '@/components/shared/buttons/Button';
-import { Ticket } from '@/components/shared/icons/Ticket';
+import { TicketRewardIcon } from '@/components/shared/icons/TicketRewardIcon';
 import { GlobalConstants } from '@/constants/global.constants';
 import { useAppTranslations } from '@/hooks/useAppTranslations';
 import type { ClaimableTicket } from '@/types/interfaces/referral.interfaces';
@@ -56,7 +56,7 @@ export function FriendsClaimSummaryCard({
         <div className="flex flex-wrap items-center gap-3 rounded-xl bg-black/25 px-3 py-2.5">
           {stacks.map(({ type, amount }) => (
             <div key={type} className="flex items-center gap-1.5">
-              <Ticket type={type} width={22} height={22} className="drop-shadow-sm" />
+              <TicketRewardIcon tier={type} amount={amount} size={20} />
               <span className="text-sm font-extrabold tabular-nums text-white">×{amount}</span>
             </div>
           ))}

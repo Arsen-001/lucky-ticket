@@ -2,11 +2,19 @@ import { twMerge } from 'tailwind-merge';
 import { Coins, Sparkles, Star, Ticket, Trophy } from 'lucide-react';
 import type { LucideIcon } from 'lucide-react';
 import { BoltIcon } from '@/components/shared/icons/BoltIcon';
+import { TicketRewardIcon } from '@/components/shared/icons/TicketRewardIcon';
 import { TaskRewardType } from '@/types/enums/tasks.enums';
 import type { TaskReward } from '@/types/interfaces/tasks.interfaces';
+import { asTicketTier } from '@/utils/global/ticket-tier.utils';
 
 export interface TaskRewardBadgeProps {
   reward: TaskReward;
+  /**
+   * Tier of the task this reward belongs to — the tier its tickets are credited
+   * to (the backend's `tierOf(task.tier)`, Bronze when the task names none).
+   * The reward's own `label` wins when it carries one, as the ads ladder does.
+   */
+  tier?: string;
   size?: 'sm' | 'md' | 'lg';
   className?: string;
 }
@@ -34,9 +42,15 @@ const SIZE_MAP = {
   lg: { icon: 16, text: 'text-sm', padding: 'px-2.5 py-1 gap-1.5' },
 };
 
-export function TaskRewardBadge({ reward, size = 'md', className }: TaskRewardBadgeProps) {
+export function TaskRewardBadge({ reward, tier, size = 'md', className }: TaskRewardBadgeProps) {
   const cfg = SIZE_MAP[size];
   const Icon = reward.type !== TaskRewardType.ACTIVITY_POINTS ? ICON_MAP[reward.type] : null;
+  const isTickets = reward.type === TaskRewardType.TICKETS;
+  // Bronze is not a guess: every task-shaped ticket payout the backend makes
+  // goes through `rewardOps`, whose tier defaults to Bronze — that is where a
+  // task with no tier of its own (and one scoped to `all`) actually lands.
+  const ticketTier = asTicketTier(reward.label) ?? asTicketTier(tier) ?? 'bronze';
+
   return (
     <div
       className={twMerge(
@@ -47,7 +61,13 @@ export function TaskRewardBadge({ reward, size = 'md', className }: TaskRewardBa
         className
       )}
     >
-      {Icon ? <Icon size={cfg.icon} className="shrink-0" /> : <BoltIcon size={cfg.icon + 6} />}
+      {isTickets ? (
+        <TicketRewardIcon tier={ticketTier} amount={reward.amount} size={cfg.icon} />
+      ) : Icon ? (
+        <Icon size={cfg.icon} className="shrink-0" />
+      ) : (
+        <BoltIcon size={cfg.icon + 6} />
+      )}
       <span>+{reward.amount}</span>
     </div>
   );

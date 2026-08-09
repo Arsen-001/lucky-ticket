@@ -66,11 +66,14 @@ const TIER_RGB: Record<string, string> = {
 function SubStepRow({
   step,
   claimed,
+  tier,
   onClaim,
   onNavigate,
 }: {
   step: TaskSubStep;
   claimed: boolean;
+  /** Owning task's tier — which ticket a ticket-paying step draws. */
+  tier?: string;
   onClaim: () => void;
   onNavigate?: () => void;
 }) {
@@ -139,7 +142,9 @@ function SubStepRow({
       ) : (
         <div className="flex-1" />
       )}
-      {step.reward && !isFullyClaimed && <TaskRewardBadge reward={step.reward} size="sm" />}
+      {step.reward && !isFullyClaimed && (
+        <TaskRewardBadge reward={step.reward} tier={tier} size="sm" />
+      )}
       {isPending && onNavigate && (
         <button
           type="button"
@@ -498,6 +503,7 @@ export function TaskItemCard({
               <span className="flex max-w-full items-center gap-1 leading-none">
                 <TaskRewardRow
                   rewards={restRewards.length ? restRewards : task.rewards}
+                  tier={task.tier}
                   size="sm"
                 />
               </span>
@@ -698,7 +704,7 @@ export function TaskItemCard({
               way. The reset countdown and the progress figure join them, so
               nothing that used to be on this row has been dropped. */}
           <div className="flex shrink-0 flex-col items-end gap-1">
-            <TaskRewardRow rewards={task.rewards} size="sm" />
+            <TaskRewardRow rewards={task.rewards} tier={task.tier} size="sm" />
             {(showProgress || (task.resetAt && !isLocked && !expired)) && (
               <span className="flex items-center gap-2 text-[10px] leading-none font-medium text-white/40 tabular-nums">
                 {task.resetAt && !isLocked && !expired && (
@@ -787,6 +793,7 @@ export function TaskItemCard({
               key={step.id}
               step={step}
               claimed={isStepClaimed(step)}
+              tier={task.tier}
               onClaim={() => handleClaimSubStep(step)}
               onNavigate={task.deeplink || task.externalLink ? handleStepNavigate : undefined}
             />
@@ -817,7 +824,7 @@ export function TaskItemCard({
               <span className="text-[10px] uppercase tracking-wider font-bold text-white/40">
                 {t('main bonus')}
               </span>
-              <TaskRewardRow rewards={task.rewards} size="sm" />
+              <TaskRewardRow rewards={task.rewards} tier={task.tier} size="sm" />
             </div>
             {isCompleted ? (
               <div className="w-full rounded-xl py-2.5 text-sm font-bold flex-center gap-1.5 bg-success/15 text-success">

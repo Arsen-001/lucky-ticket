@@ -9,6 +9,7 @@ import { useAppTranslations } from '@/hooks/useAppTranslations';
 import type { TicketType } from '@/types/types/ticket.types';
 import type { MessageIds } from '@/types/types/i18n.types';
 import { tierAccentColors } from '@/constants/tier-colors';
+import { formatNumber } from '@/utils/global/number.utils';
 
 const TIER_LABEL_KEY: Record<TicketType, MessageIds> = {
   bronze: 'bronze',
@@ -89,7 +90,7 @@ export function TicketClaimedModal({ open, tier, count, onClose }: TicketClaimed
               className="text-[44px] font-extrabold text-white tabular-nums leading-none"
               style={{ textShadow: `0 0 20px color-mix(in srgb, ${glow} 50%, transparent)` }}
             >
-              +{counter}
+              +{formatNumber(counter)}
             </span>
             <span className="text-base font-bold text-white">{t(TIER_LABEL_KEY[tier])}</span>
           </div>

@@ -1,6 +1,7 @@
 import type { LucideIcon } from 'lucide-react';
 import { Coins, Gift, Sparkles, Star, Ticket, Timer, TrendingUp } from 'lucide-react';
 import { twMerge } from 'tailwind-merge';
+import { TicketRewardIcon } from '@/components/shared/icons/TicketRewardIcon';
 import { parseRewardChips, type RewardChipKind } from '@/utils/pages/testQuest.utils';
 
 export interface TestQuestRewardChipsProps {
@@ -41,14 +42,22 @@ export function TestQuestRewardChips({ label, crown, className }: TestQuestRewar
             key={i}
             className="flex items-center gap-1 rounded-lg border border-white/[0.07] bg-white/[0.03] py-1 pl-1 pr-2 text-[12.5px] font-semibold tabular-nums text-white"
           >
-            <span
-              className={twMerge(
-                'flex-center h-[19px] w-[19px] rounded-md',
-                crown ? GOLD_TINT : tint
-              )}
-            >
-              <Icon size={12} />
-            </span>
+            {chip.kind === 'ticket' ? (
+              // Every Test-Quest level credits its tickets to Bronze
+              // (`test-quest.service`), so the chip can show that exact ticket.
+              <span className="flex-center h-[19px] w-[26px]">
+                <TicketRewardIcon tier="bronze" size={13} />
+              </span>
+            ) : (
+              <span
+                className={twMerge(
+                  'flex-center h-[19px] w-[19px] rounded-md',
+                  crown ? GOLD_TINT : tint
+                )}
+              >
+                <Icon size={12} />
+              </span>
+            )}
             {chip.text}
           </span>
         );

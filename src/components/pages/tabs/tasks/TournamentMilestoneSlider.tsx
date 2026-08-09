@@ -498,7 +498,12 @@ function MilestoneCard({
       </div>
 
       {/* Rewards */}
-      <TaskRewardRow rewards={task.rewards} size="sm" className="flex-wrap gap-1" />
+      <TaskRewardRow
+        rewards={task.rewards}
+        tier={task.tier}
+        size="sm"
+        className="flex-wrap gap-1"
+      />
 
       {/* Progress */}
       {showProgress && (

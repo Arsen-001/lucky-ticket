@@ -9,17 +9,8 @@ import { useAppTranslations } from '@/hooks/useAppTranslations';
 import { GlobalConstants } from '@/constants/global.constants';
 import { routes } from '@/constants/routes';
 import { icons } from '@/constants/icons';
-import { tierNameId } from '@/constants/tier-names';
-import type { Ticket as TicketModel, TicketType } from '@/types/types/ticket.types';
-import type { MessageIds } from '@/types/types/i18n.types';
-
-const descriptionIdByType: Record<TicketType, MessageIds> = {
-  bronze: 'bronze ticket description',
-  silver: 'silver ticket description',
-  gold: 'golden ticket description',
-  platinum: 'platinum ticket description',
-  diamond: 'diamond ticket description',
-};
+import { tierNameId, tierTicketDescriptionId } from '@/constants/tier-names';
+import type { Ticket as TicketModel } from '@/types/types/ticket.types';
 
 export interface TierLockedContentProps {
   ticket: TicketModel;
@@ -68,7 +59,7 @@ export function TierLockedContent({ ticket, className }: TierLockedContentProps)
               {t('{tier} ticket', { tier: t(tierNameId[ticket.ticketType]) })}
             </h2>
             <div className="mt-1.5 text-[11px] text-white-secondary leading-snug">
-              {t(descriptionIdByType[ticket.ticketType])}
+              {t(tierTicketDescriptionId[ticket.ticketType])}
             </div>
           </div>
         </div>
