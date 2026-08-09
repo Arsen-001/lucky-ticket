@@ -15,7 +15,7 @@ export interface ActivityActionRowProps {
 }
 
 const CELL =
-  'flex min-h-13 flex-1 items-center justify-center gap-1.5 px-1 text-[11px] font-extrabold uppercase tracking-wide transition-colors hover:bg-white/4 cursor-pointer';
+  'flex min-h-13 flex-1 items-center justify-center gap-1.5 px-1 text-[12px] font-extrabold uppercase tracking-wide transition-colors hover:bg-white/4 cursor-pointer';
 
 /**
  * The card's footer: the three screens where AP is actually earned. Same
@@ -41,7 +41,7 @@ export function ActivityActionRow({ accent, className }: ActivityActionRowProps)
       {links.map(link => (
         <Link key={link.href} href={link.href} className={CELL}>
           <link.Icon
-            size={15}
+            size={16}
             strokeWidth={2.5}
             className="flex-shrink-0"
             style={{ color: accent }}

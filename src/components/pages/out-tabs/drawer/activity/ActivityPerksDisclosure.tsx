@@ -32,9 +32,9 @@ export function ActivityPerksDisclosure({ tier, nextTier, refGap }: ActivityPerk
         aria-expanded={open}
         className="flex min-h-11 w-full cursor-pointer items-center justify-between gap-3 py-3 text-left"
       >
-        <span className="text-[13px] font-bold text-white">{t('what your tier unlocks')}</span>
+        <span className="text-[14px] font-bold text-white">{t('what your tier unlocks')}</span>
         <ChevronDown
-          size={18}
+          size={19}
           aria-hidden
           className={`text-white/40 transition-transform duration-200 ${open ? 'rotate-180' : ''}`}
         />
@@ -52,7 +52,7 @@ export function ActivityPerksDisclosure({ tier, nextTier, refGap }: ActivityPerk
             >
               <Unlock size={15} strokeWidth={2.2} />
             </div>
-            <span className="text-white-secondary text-[12px]">
+            <span className="text-white-secondary text-[13px]">
               {t('tier unlocks engines tournaments stakes market', { tier: t(tier) })}
             </span>
           </div>
@@ -62,7 +62,7 @@ export function ActivityPerksDisclosure({ tier, nextTier, refGap }: ActivityPerk
               <div className="flex-center h-8 w-8 shrink-0 rounded-lg bg-white/5 text-white/45">
                 <Lock size={14} strokeWidth={2.2} />
               </div>
-              <span className="text-white-secondary text-[12px]">
+              <span className="text-white-secondary text-[13px]">
                 {t('reach tier to unlock more', { tier: t(nextTier) })}
               </span>
             </div>
@@ -73,7 +73,7 @@ export function ActivityPerksDisclosure({ tier, nextTier, refGap }: ActivityPerk
               <div className="flex-center bg-pink/15 text-pink h-8 w-8 shrink-0 rounded-lg">
                 <UserPlus size={14} strokeWidth={2.2} />
               </div>
-              <span className="text-white-secondary text-[12px]">
+              <span className="text-white-secondary text-[13px]">
                 {t('and invite {n} more friends', { n: refGap })}
               </span>
             </Link>

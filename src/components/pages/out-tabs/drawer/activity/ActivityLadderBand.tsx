@@ -70,7 +70,9 @@ export function ActivityLadderBand({
                 />
               </span>
               <span
-                className="text-[9px] font-extrabold uppercase leading-none tracking-wider"
+                // No letter-spacing left to give: five columns of a 360px screen
+                // are 59px, and "PLATINUM" at this size fills 54 of them.
+                className="text-[10px] font-extrabold uppercase leading-none"
                 style={{
                   color: isCurrent ? stopAccent : reached ? 'white' : 'rgba(255,255,255,0.42)',
                 }}
@@ -79,7 +81,7 @@ export function ActivityLadderBand({
               </span>
               <span
                 className={twMerge(
-                  'flex items-center gap-1 text-[9.5px] leading-none tabular-nums',
+                  'flex items-center gap-1 text-[10.5px] leading-none tabular-nums',
                   isCurrent && 'font-bold'
                 )}
                 style={{ color: isCurrent ? stopAccent : 'rgba(255,255,255,0.42)' }}
@@ -87,7 +89,7 @@ export function ActivityLadderBand({
                 {threshold === 0 ? '0' : formatCompact(threshold)}
                 {friendsNeeded > 0 && (
                   <span className="flex items-center gap-0.5">
-                    <UserPlus size={8} strokeWidth={2.5} />
+                    <UserPlus size={9} strokeWidth={2.5} />
                     {friendsNeeded}
                   </span>
                 )}

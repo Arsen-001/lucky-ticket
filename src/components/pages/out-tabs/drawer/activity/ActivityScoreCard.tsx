@@ -70,19 +70,21 @@ export function ActivityScoreCard({
       <div className="relative px-5 pb-4 pt-5">
         <div className="flex items-center gap-2">
           <Medal type={tier} width={16} aria-hidden />
-          <span className="text-[10px] font-bold uppercase tracking-[0.22em] text-white/60">
+          <span className="text-[11.5px] font-bold uppercase tracking-[0.12em] text-white/60">
             {t('activity points')}
           </span>
-          {chip && <span className="ml-auto">{chip}</span>}
+          {/* The chip keeps its line; the eyebrow beside it is the one that may
+              shrink. Both wrapping is how "Decay in 5 / days" got two rows. */}
+          {chip && <span className="ml-auto shrink-0">{chip}</span>}
         </div>
 
         <SkeletonSuspense
           loading={loading}
-          skeleton={<Skeleton variant="line" className="mt-3 h-9 w-44" />}
+          skeleton={<Skeleton variant="line" className="mt-3 h-10 w-48" />}
         >
           <div className="mt-2.5 flex items-baseline gap-2">
             <span
-              className="text-[34px] font-extrabold leading-none tabular-nums"
+              className="text-[38px] font-extrabold leading-none tabular-nums"
               style={{
                 // The tier ramp, built from the tier's own colour so every tier
                 // gets the same light→base→dark paint the gold number has.
@@ -96,7 +98,7 @@ export function ActivityScoreCard({
               {formatNumber(activityPoints)}
             </span>
             <span
-              className="text-sm font-extrabold uppercase tracking-wider"
+              className="text-[15px] font-extrabold uppercase tracking-wider"
               style={{ color: `color-mix(in srgb, ${accent} 70%, transparent)` }}
             >
               {t('ap')}
@@ -105,7 +107,7 @@ export function ActivityScoreCard({
         </SkeletonSuspense>
 
         {subline && (
-          <span className="mt-1 block text-[11.5px] font-semibold text-white/55">{subline}</span>
+          <span className="mt-1 block text-[13px] font-semibold text-white/55">{subline}</span>
         )}
       </div>
 

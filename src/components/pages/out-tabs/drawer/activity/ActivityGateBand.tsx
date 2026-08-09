@@ -53,7 +53,7 @@ export function ActivityGateBand({
 
   return (
     <div className={twMerge('flex flex-col gap-2.5 border-t border-white/8 px-4 py-3', className)}>
-      <span className="text-[9px] font-bold uppercase tracking-widest text-white/45">
+      <span className="text-[10px] font-bold uppercase tracking-wider text-white/45">
         {t('to {tier}', { tier: t(nextTier) })}
       </span>
 
@@ -65,18 +65,18 @@ export function ActivityGateBand({
           <div key={meter.id} className="flex flex-col gap-1">
             <div className="flex items-center gap-1.5">
               <meter.Icon
-                size={12}
+                size={13}
                 strokeWidth={2.6}
                 style={{ color: met ? 'var(--color-success-text)' : accent }}
               />
-              <span className="text-[10.5px] font-bold uppercase tracking-wider text-white/55">
+              <span className="text-[11.5px] font-bold uppercase tracking-wider text-white/55">
                 {meter.label}
               </span>
-              <span className="ml-auto text-[11.5px] font-extrabold tabular-nums text-white">
+              <span className="ml-auto text-[13px] font-extrabold tabular-nums text-white">
                 {meter.format(meter.value)}
                 <span className="text-white/35"> / {meter.format(meter.required)}</span>
               </span>
-              {met && <Check size={12} strokeWidth={3} className="text-success-text" aria-hidden />}
+              {met && <Check size={13} strokeWidth={3} className="text-success-text" aria-hidden />}
             </div>
             <div className="h-1.5 overflow-hidden rounded-full bg-white/8">
               <div

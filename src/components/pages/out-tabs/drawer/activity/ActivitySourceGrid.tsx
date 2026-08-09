@@ -44,11 +44,11 @@ export function ActivitySourceGrid({
   return (
     <section className="flex flex-col gap-2.5">
       <div className="flex items-baseline justify-between gap-2">
-        <h2 className="text-sm font-extrabold uppercase tracking-wider text-white">
+        <h2 className="text-[15px] font-extrabold uppercase tracking-wider text-white">
           {t('how to earn ap')}
         </h2>
         {dailyBaseline !== undefined && (
-          <span className="text-pink-secondary text-[11px] font-bold">
+          <span className="text-pink-secondary text-[12px] font-bold">
             {t('~{n} AP per day without donation', { n: dailyBaseline })}
           </span>
         )}
@@ -69,15 +69,18 @@ export function ActivitySourceGrid({
               style={{ animationDelay: `${staggerMs(index, 40)}ms` }}
             >
               <div className="flex items-center gap-1.5">
-                <source.Icon size={14} strokeWidth={2.2} className="text-electric-pink shrink-0" />
-                <span className="truncate text-[11.5px] font-bold leading-tight text-white">
+                <source.Icon size={15} strokeWidth={2.2} className="text-electric-pink shrink-0" />
+                {/* Two lines rather than an ellipsis: at this size "Join a
+                    tournament" — and every German label — loses its last word to
+                    `truncate`, and a rate whose action is cut off says nothing. */}
+                <span className="line-clamp-2 min-w-0 text-[12.5px] font-bold leading-tight text-white">
                   {t(source.labelKey)}
                 </span>
               </div>
-              <span className="text-success-text text-[12.5px] font-extrabold tabular-nums">
+              <span className="text-success-text text-[14px] font-extrabold tabular-nums">
                 {source.ap ? `${source.ap} ${t('ap')}` : t(source.apFallbackKey ?? 'varies')}
               </span>
-              <span className="text-pink-secondary truncate text-[10px]">
+              <span className="text-pink-secondary line-clamp-2 text-[11px] leading-tight">
                 {t(source.hintKey, hintParams)}
               </span>
             </Link>
@@ -92,11 +95,11 @@ export function ActivitySourceGrid({
           aria-expanded={open}
           className="flex min-h-11 w-full cursor-pointer items-center justify-between gap-3 border-b border-white/5 text-left"
         >
-          <span className="text-[12.5px] font-bold text-white/70">
+          <span className="text-[13.5px] font-bold text-white/70">
             {t('all ap sources', { n: AP_SOURCES.length })}
           </span>
           <ChevronDown
-            size={17}
+            size={18}
             aria-hidden
             className={`text-white/40 transition-transform duration-200 ${open ? 'rotate-180' : ''}`}
           />

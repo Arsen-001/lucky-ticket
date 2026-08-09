@@ -15,13 +15,13 @@ export function ActivityDecayChip({ decay }: ActivityDecayChipProps) {
 
   return (
     <span
-      className="inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[10.5px] font-extrabold tabular-nums"
+      className="inline-flex items-center gap-1 whitespace-nowrap rounded-full px-2 py-0.5 text-[11.5px] font-extrabold tabular-nums"
       style={{
         backgroundColor: `color-mix(in srgb, ${face.color} 18%, transparent)`,
         color: face.color,
       }}
     >
-      <face.Icon size={11} strokeWidth={3} />
+      <face.Icon size={12} strokeWidth={3} />
       {face.short}
     </span>
   );

@@ -27,18 +27,18 @@ export function ActivityCardBandsSkeleton() {
               <span className="flex h-9 items-end">
                 <Skeleton variant="round" className="h-5 w-5" />
               </span>
-              <Skeleton variant="line" className="h-2 w-10" />
-              <Skeleton variant="line" className="h-2 w-6" />
+              <Skeleton variant="line" className="h-2.5 w-10" />
+              <Skeleton variant="line" className="h-2.5 w-6" />
             </div>
           ))}
         </div>
       </div>
 
       <div className="flex flex-col gap-2.5 border-t border-white/8 px-4 py-3">
-        <Skeleton variant="line" className="h-2 w-24" />
+        <Skeleton variant="line" className="h-2.5 w-24" />
         {[0, 1].map(index => (
           <div key={index} className="flex flex-col gap-1">
-            <Skeleton variant="line" className="h-3 w-full" />
+            <Skeleton variant="line" className="h-3.5 w-full" />
             <Skeleton variant="line" className="h-1.5 w-full rounded-full" />
           </div>
         ))}
