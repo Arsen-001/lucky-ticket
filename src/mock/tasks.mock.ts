@@ -401,6 +401,11 @@ const QUEST: Quest = {
 // ───────────────── TOURNAMENT TIER CONFIGS ─────────────────
 // Single source of truth for all tier-bound tournament tasks (daily + weekly).
 // Adding a new tier or tweaking rewards is a single config change.
+//
+// This fixture deliberately emits all five tiers so the tier-locked card states
+// stay reachable in dev. Production does NOT: the backend returns a tier's task
+// only while that tier has a bracket accepting entries (DOCS §12.2), and only
+// Bronze is auto-spawned — so the live daily list normally holds Bronze alone.
 interface TierTournamentConfig {
   tier: TierName;
   daily: {

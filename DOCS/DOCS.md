@@ -1198,6 +1198,24 @@ admin API, so a new task must be able to carry its own copy without a deploy.
 Before this, every task title and subtitle rendered in English regardless of the
 chosen language, because the strings went from the database straight into the UI.
 
+**A tier task exists only while that tier has a tournament.** The daily and
+weekly tournament tasks are per tier, but only Bronze is auto-spawned
+(`tournamentsConfig.spawnerTier`, §11.2.1) — Silver and up appear only when an
+admin creates one, and carry the platform-wide activation threshold of §11.2.2
+on top. So "Join 2 Silver tournaments" sat on the daily list permanently at 0/2
+with nowhere to go. `GET /tasks` now returns a tier's daily/weekly task **only
+when that tier has at least one bracket still accepting entries**, or when the
+player already entered it this period — the second half matters because progress
+is derived from live participation, so without it a player who entered the only
+Silver bracket at 11:00 would watch the task and their unclaimed reward vanish
+the moment it was drawn. The two **meta** tasks ("complete all available
+tournament tasks", daily and weekly) follow the same set: a tier that is not
+running contributes no sub-step, and the target becomes the sum of the running
+tiers' own targets — 4 a day rather than the stored 8 while Bronze is the only
+tier alive (×7 for the weekly one). With nothing running at all, both meta tasks
+disappear rather than fall to a target of 0 that would pay out for doing nothing.
+The same numbers gate the claim, so the card and the server cannot disagree.
+
 **Sub-steps are a counter, not a schedule.** A daily/weekly task whose target is
 greater than 1 expands into `progressTarget` sub-steps, each claimable on its own
 for a slice of the AP. Step _n_ is completed by one rule and one only — **the
