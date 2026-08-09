@@ -119,6 +119,14 @@ export const GlobalConstants = {
    */
   engineMinSecondsPerTicket: 900,
   /**
+   * How many ticket sprites a claim flies to the Tickets tab: one per ticket
+   * collected, and never more than this. A capacity-1 engine flies one, a
+   * capacity-10 engine flies ten, and anything above ten still flies ten —
+   * past that the burst stops reading as "count" and starts covering the
+   * screen. @see ticketFlightCount
+   */
+  maxFlyingTickets: 10,
+  /**
    * What one invited friend pays the inviter, once, at registration. FLAT —
    * a Telegram Premium invitee used to pay double, which priced a friend by
    * something the inviter cannot influence. Display fallback only; the live

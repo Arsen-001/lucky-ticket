@@ -5,6 +5,7 @@ import { banSlice } from '@/lib/rtk/features/ban.slice';
 import { layoutSlice } from '@/lib/rtk/features/layout.slice';
 import { maintenanceSlice } from '@/lib/rtk/features/maintenance.slice';
 import { onboardingTourSlice } from '@/lib/rtk/features/onboarding-tour.slice';
+import { ticketFlightSlice } from '@/lib/rtk/features/ticket-flight.slice';
 import { toastsSlice } from '@/lib/rtk/features/toasts.slice';
 
 // `combineSlices` automatically combines the reducers using
@@ -15,6 +16,7 @@ const rootReducer = combineSlices(
   layoutSlice,
   maintenanceSlice,
   onboardingTourSlice,
+  ticketFlightSlice,
   toastsSlice
 );
 // Infer the `RootState` type from the root reducer

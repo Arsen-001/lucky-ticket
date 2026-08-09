@@ -6,6 +6,7 @@ import { TelegramProvider } from '@/providers/TelegramProvider';
 import { TonConnectProvider } from '@/providers/TonConnectProvider';
 import { Onboarding } from '@/components/onboarding/Onboarding';
 import { TournamentResultWatcher } from '@/components/pages/tabs/tournaments/TournamentResultWatcher';
+import { TicketFlightViewport } from '@/components/shared/ticket-flight/TicketFlightViewport';
 import { ToastViewport } from '@/components/shared/toast/ToastViewport';
 import { OverlayProbeBanner } from '@/components/shared/debug/OverlayProbeBanner';
 import { AppStatusOverlay } from '@/components/shared/status/AppStatusOverlay';
@@ -181,6 +182,7 @@ export default async function RootLayout({ children }: ChildrenProps) {
                         </TelegramProvider>
                       </TonConnectProvider>
                       <FullscreenBrandBar />
+                      <TicketFlightViewport />
                       <ToastViewport />
                       <AppStatusOverlay />
                       <OverlayProbeBanner />

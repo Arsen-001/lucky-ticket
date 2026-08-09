@@ -5,12 +5,13 @@ import { twMerge } from 'tailwind-merge';
 import { Clock } from 'lucide-react';
 import { TelegramStarIcon } from '@/components/shared/icons/TelegramStarIcon';
 import { TicketOverlap } from '@/components/shared/icons/TicketOverlap';
-import { ClientPortal } from '@/components/shared/ClientPortal';
 import { formatCycleTime } from '@/utils/global/ticket-engine.utils';
 import { useAppTranslations } from '@/hooks/useAppTranslations';
+import { useTicketFlight } from '@/hooks/useTicketFlight';
+import { ticketFlightOriginAttr } from '@/utils/global/ticket-flight.utils';
 import type { TicketType } from '@/types/types/ticket.types';
 // Owns the `.engine-claim-*` classes now — imported here, not just in EngineCard,
-// so the claim button/fly-out styling survives in any chunk that renders the row.
+// so the claim button's styling survives in any chunk that renders the row.
 import '@/styles/components/engine-card.css';
 
 const TIER_CLAIM_FLOW: Record<TicketType, { c1: string; c2: string; c3: string }> = {
@@ -35,21 +36,16 @@ export interface EngineCardCycleRowProps {
   onInstantClaim: (engineId: string) => void;
 }
 
-type FlightItem = {
-  top: number;
-  left: number;
-  width: number;
-  height: number;
-  dx: number;
-  dy: number;
-};
-
 /**
  * The only part of the engine card that legitimately updates on a claim / skip /
- * countdown tick: the pending-vs-producing info strip, the claim/skip button and
- * the reward fly-out. Isolated into its own component so those per-second updates
- * don't drag the reactor image and boost rows (the memoized siblings) into a
+ * countdown tick: the pending-vs-producing info strip and the claim / claim-now
+ * buttons. Isolated into its own component so those per-second updates don't
+ * drag the reactor image and boost rows (the memoized siblings) into a
  * re-render. This is the "kusok chto izmenilsya" — only this re-renders.
+ *
+ * The reward the claim pays out flies from here to the Tickets tab, but is drawn
+ * by the app-wide {@link TicketFlightViewport} — one sprite per ticket — so the
+ * paid path can raise the same celebration from the parent screen's confirm modal.
  */
 export function EngineCardCycleRow({
   engineId,
@@ -65,9 +61,10 @@ export function EngineCardCycleRow({
   onInstantClaim,
 }: EngineCardCycleRowProps) {
   const t = useAppTranslations();
+  const launchTicketFlight = useTicketFlight();
 
-  const [flightData, setFlightData] = useState<{ tickets: FlightItem } | null>(null);
-  const ticketsGroupRef = useRef<HTMLDivElement>(null);
+  const [flying, setFlying] = useState(false);
+  const rowRef = useRef<HTMLDivElement>(null);
   const flyTimerRef = useRef<number | null>(null);
 
   useEffect(() => {
@@ -77,47 +74,28 @@ export function EngineCardCycleRow({
   }, []);
 
   const handleClaim = () => {
-    if (!pending || flightData) return;
-    const ticketsEl = ticketsGroupRef.current;
-    if (!ticketsEl) {
+    if (!pending || flying) return;
+    // The tickets reach the tab bar before the balance moves, so the counter
+    // ticks up as they land. `duration === 0` means nothing could be measured —
+    // then there is no animation to wait on and the claim goes through at once.
+    const duration = launchTicketFlight(rowRef.current, tier, pendingCount);
+    if (!duration) {
       onClaim(engineId);
       return;
     }
-
-    const computeFlight = (
-      el: HTMLElement,
-      targetSelector: string,
-      fallbackY: number
-    ): FlightItem => {
-      const rect = el.getBoundingClientRect();
-      const target = document.querySelector(targetSelector);
-      const targetRect = target?.getBoundingClientRect();
-      const fromX = rect.left + rect.width / 2;
-      const fromY = rect.top + rect.height / 2;
-      const toX = targetRect ? targetRect.left + targetRect.width / 2 : fromX;
-      const toY = targetRect ? targetRect.top + targetRect.height / 2 : fallbackY;
-      return {
-        top: rect.top,
-        left: rect.left,
-        width: rect.width,
-        height: rect.height,
-        dx: toX - fromX,
-        dy: toY - fromY,
-      };
-    };
-
-    setFlightData({
-      tickets: computeFlight(ticketsEl, '[data-flight-target="tickets"]', window.innerHeight - 40),
-    });
-
+    setFlying(true);
     flyTimerRef.current = window.setTimeout(() => {
-      setFlightData(null);
+      setFlying(false);
       onClaim(engineId);
-    }, 1400);
+    }, duration);
   };
 
   return (
     <div
+      ref={rowRef}
+      // The launch point for this engine's burst — looked up by id from the
+      // paid "claim now" path, which is confirmed on the parent screen.
+      {...{ [ticketFlightOriginAttr]: engineId }}
       className={twMerge(
         'flex items-center bg-black/28 border border-white/5',
         compact ? 'gap-2 p-1.5 px-2 rounded-lg' : 'gap-2.5 p-2 px-2.5 rounded-xl'
@@ -133,9 +111,12 @@ export function EngineCardCycleRow({
           'relative flex-1 min-w-0 flex items-center justify-center gap-1.5 overflow-hidden rounded-md',
           !pending && 'hidden'
         )}
-        style={{ visibility: flightData ? 'hidden' : undefined }}
+        // Hidden, not unmounted, for the length of the burst: the sprites read
+        // as THESE tickets lifting off, which they can't if the originals are
+        // still sitting on the card.
+        style={{ visibility: flying ? 'hidden' : undefined }}
       >
-        <div ref={ticketsGroupRef} className="flex items-center gap-1.5">
+        <div className="flex items-center gap-1.5">
           <TicketOverlap type={tier} width={32} height={24} className="shrink-0" />
           <span
             className={twMerge(
@@ -183,7 +164,7 @@ export function EngineCardCycleRow({
       <button
         data-tour="claim-cta"
         onClick={handleClaim}
-        disabled={!!flightData}
+        disabled={flying}
         className={twMerge(
           'engine-claim-button engine-claim-flow relative z-10 cursor-pointer overflow-hidden text-white font-extrabold uppercase tracking-wider flex-center shrink-0 active:scale-99 transition-transform duration-100 disabled:opacity-70',
           compact
@@ -218,40 +199,6 @@ export function EngineCardCycleRow({
           {t('claim now')} · {instantClaimCost}
         </span>
       </button>
-
-      {flightData && (
-        <ClientPortal>
-          <div
-            aria-hidden
-            className="engine-claim-fly pointer-events-none fixed z-[200] flex items-center gap-1.5"
-            style={
-              {
-                top: flightData.tickets.top,
-                left: flightData.tickets.left,
-                width: flightData.tickets.width,
-                height: flightData.tickets.height,
-                '--fly-dx': `${flightData.tickets.dx}px`,
-                '--fly-dy': `${flightData.tickets.dy}px`,
-              } as CSSProperties
-            }
-          >
-            <TicketOverlap type={tier} width={32} height={24} className="shrink-0" />
-            <span
-              className={twMerge(
-                'font-extrabold tabular-nums rounded-full',
-                compact ? 'text-[10px] px-1.5 py-px' : 'text-[11px] px-2 py-0.5'
-              )}
-              style={{
-                color: glow,
-                background: `color-mix(in srgb, ${glow} 18%, transparent)`,
-                border: `1px solid color-mix(in srgb, ${glow} 35%, transparent)`,
-              }}
-            >
-              ×{pendingCount}
-            </span>
-          </div>
-        </ClientPortal>
-      )}
     </div>
   );
 }

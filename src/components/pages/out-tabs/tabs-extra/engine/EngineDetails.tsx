@@ -26,6 +26,7 @@ import { useToast } from '@/hooks/useToast';
 import { useEngineSpeedAvatarBoostPct } from '@/hooks/useEngineSpeedAvatarBoostPct';
 import { useTestBadgeSpeedBoostPct } from '@/hooks/useTestBadgeSpeedBoostPct';
 import { useEngineConfig } from '@/hooks/useEngineConfig';
+import { findTicketFlightOrigin, useTicketFlight } from '@/hooks/useTicketFlight';
 import {
   chipEquipStarsCost,
   findActiveBooster,
@@ -39,14 +40,13 @@ import {
 } from '@/utils/global/ticket-engine.utils';
 import { speedUpgradeLsCost, capacityUpgradeLsCost } from '@/utils/global/economy.utils';
 import { EngineCard } from '@/components/pages/out-tabs/tabs-extra/ticket/EngineCard';
-import {
-  DEFAULT_BADGE_DEFS,
-  EngineCubeBadgesFace,
-} from '@/components/pages/tabs/home/EngineCubeBadgesFace';
+import { EngineCubeStatsFace } from '@/components/pages/tabs/home/EngineCubeStatsFace';
 import { EngineCubeSlot } from '@/components/pages/tabs/home/EngineCubeSlot';
 import { CubeFaceCard } from '@/components/pages/out-tabs/tabs-extra/engine/CubeFaceCard';
 import { EngineStatsLedger } from '@/components/pages/out-tabs/tabs-extra/engine/EngineStatsLedger';
 import { engineSpeedBoostSources, totalSpeedBoostPct } from '@/utils/global/engine-boosts.utils';
+import { effectiveStatusPct } from '@/utils/global/status.utils';
+import { displayNameOf } from '@/utils/global/user.utils';
 import { GlobalConstants } from '@/constants/global.constants';
 import type { InventoryChip, InventoryChipType } from '@/types/interfaces/inventory.interfaces';
 
@@ -57,6 +57,7 @@ export interface EngineDetailsProps {
 export function EngineDetails({ id }: EngineDetailsProps) {
   const t = useAppTranslations();
   const toast = useToast();
+  const launchTicketFlight = useTicketFlight();
   const { data: tickets, isLoading, isError, refetch } = useGetTicketsQuery();
   const { data: me } = useGetMeQuery();
   const { data: inventory } = useGetInventoryQuery();
@@ -257,6 +258,14 @@ export function EngineDetails({ id }: EngineDetailsProps) {
     // engine claims have awarded none since 2026-07-08.)
     // Paid action — a failure must surface, never silently refund the stars.
     requireStars(instantClaimCost, async () => {
+      // Same celebration a free claim gets (@see EngineCardCycleRow): one ticket
+      // per ticket collected, flying to the Tickets tab. The count mirrors the
+      // mutation's optimistic patch — pending if there is any, else a full batch.
+      launchTicketFlight(
+        findTicketFlightOrigin(engine.id),
+        tier,
+        engine.pendingCount > 0 ? engine.pendingCount : liveCapacity
+      );
       setElapsedSeconds(0);
       try {
         await instantClaimEngine({ engineId: engine.id, cost: instantClaimCost }).unwrap();
@@ -292,12 +301,17 @@ export function EngineDetails({ id }: EngineDetailsProps) {
     !!pendingPick && pendingPick.category === category && pendingPick.type === type;
 
   const tierAccent = `var(--color-${tier})`;
-  const badges = DEFAULT_BADGE_DEFS({
-    spark: engineLevel >= 1,
-    speed: speedLevel >= 3,
-    capacity: capacityLevel >= 3,
-    veteran: lifetimeProduced >= 1000,
-  });
+
+  // The passport face quotes the owner's own status, exactly as the cube does:
+  // VIP supersedes LP (never stacks, DOCS §7.3) and the boost comes from the
+  // player's VIP level rather than the level-20 constant.
+  const statusLabel = isVip ? 'VIP' : isLp ? 'LP' : undefined;
+  const statusEngineSpeedBoostPct = effectiveStatusPct(
+    'engineSpeedBoostPct',
+    isLp,
+    isVip,
+    me?.statusPerks
+  );
 
   return (
     <div className="flex flex-col gap-4 px-5 pb-6">
@@ -377,8 +391,21 @@ export function EngineDetails({ id }: EngineDetailsProps) {
         </div>
       </CubeFaceCard>
 
+      {/* The cube's fourth face — its top. This screen unrolls the cube into a
+          column of cards, and the passport was the one face with no card, while
+          a badges panel that is on no face of the cube took its place. */}
       <CubeFaceCard accent={tierAccent} aspect="4/3">
-        <EngineCubeBadgesFace badges={badges} accent={tierAccent} />
+        <EngineCubeStatsFace
+          lifetimeProduced={lifetimeProduced}
+          ticketsPerHour={liveTicketsPerHour}
+          engineLevel={engineLevel}
+          ownerName={displayNameOf(me)}
+          createdAt={engine.createdAt}
+          statusLabel={statusLabel}
+          statusLevel={isVip ? me?.vipLevel : undefined}
+          statusSpeedBoostPct={statusEngineSpeedBoostPct}
+          accent={tierAccent}
+        />
       </CubeFaceCard>
 
       <EngineSlotPickerModal

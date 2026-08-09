@@ -32,6 +32,7 @@ import { useAppTranslations } from '@/hooks/useAppTranslations';
 import { useToast } from '@/hooks/useToast';
 import { useEngineSpeedAvatarBoostPct } from '@/hooks/useEngineSpeedAvatarBoostPct';
 import { useTestBadgeSpeedBoostPct } from '@/hooks/useTestBadgeSpeedBoostPct';
+import { findTicketFlightOrigin, useTicketFlight } from '@/hooks/useTicketFlight';
 import { chipEquipStarsCost } from '@/utils/global/inventory.utils';
 import type { InventoryChip } from '@/types/interfaces/inventory.interfaces';
 import { EmptyDataInfo } from '@/components/shared/EmptyDataInfo';
@@ -104,6 +105,7 @@ export function HomeEnginesSlider({ className }: ClassNameProps) {
   const { data: me } = useGetMeQuery();
   const t = useAppTranslations();
   const toast = useToast();
+  const launchTicketFlight = useTicketFlight();
   const { data: inventory } = useGetInventoryQuery();
   const [unequipChip, { isLoading: unequipping }] = useUnequipChipMutation();
   const [equipChipMutation] = useEquipChipMutation();
@@ -393,8 +395,25 @@ export function HomeEnginesSlider({ className }: ClassNameProps) {
   };
 
   const performInstantClaim = (engineId: string, cost: number) => {
-    const engine = itemsRef.current.find(item => item.engine.id === engineId)?.engine;
-    if (!engine) return;
+    const item = itemsRef.current.find(item => item.engine.id === engineId);
+    if (!item) return;
+    const { engine, tier } = item;
+    // The paid path buys the same tickets a plain claim would, so it gets the
+    // same celebration — it had none, and a star charge that produced no visible
+    // reward was the least legible action on the screen. Same count the
+    // mutation's optimistic patch credits: whatever is pending, or a full batch
+    // when the engine is still mid-cycle.
+    launchTicketFlight(
+      findTicketFlightOrigin(engineId),
+      tier,
+      engine.pendingCount > 0
+        ? engine.pendingCount
+        : engineCapacity(engine, {
+            capacityChip: findEquippedChip(inventory?.chips, engineId, 'capacity'),
+            capacityBooster: findActiveBooster(inventory?.boosters, engineId, 'capacity'),
+            tables,
+          })
+    );
     // Charges stars AND collects the cycle's tickets in one call, so the
     // optimistic shape is the same as a plain claim: nothing left pending, next
     // cycle running from now. (This used to go through `skip`, which only filled

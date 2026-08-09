@@ -1,0 +1,48 @@
+/* One claimed ticket on its way to the Tickets tab (@see TicketFlightBurst).
+   Every sprite in a burst shares these keyframes and differs only by its
+   custom properties — where it pops out to (--pop-x / --pop-y), how far it has
+   to travel (--fly-dx / --fly-dy), how much it turns (--spin) — plus its own
+   animation-delay, which is what turns ten tickets into a stream.
+
+   `animation-fill-mode: both` matters: a staggered sprite holds the 0% frame
+   (opacity 0, scaled down) for the whole of its delay, so it is invisible until
+   its turn instead of sitting fully drawn on the launch point. */
+.ticket-flight-sprite {
+  position: fixed;
+  animation-name: ticket-flight;
+  animation-timing-function: cubic-bezier(0.5, 0, 0.2, 1);
+  animation-fill-mode: both;
+  transform-origin: 50% 50%;
+  will-change: transform, opacity;
+  pointer-events: none;
+  filter: drop-shadow(0 6px 14px rgba(0, 0, 0, 0.5));
+}
+
+@keyframes ticket-flight {
+  0% {
+    transform: translate3d(0, 0, 0) scale(0.35) rotate(0deg);
+    opacity: 0;
+    animation-timing-function: cubic-bezier(0.34, 1.56, 0.64, 1);
+  }
+  /* Out of the card and held for a beat — the part the player actually reads
+     as "N tickets", before the sprites converge and stop being countable. */
+  20% {
+    transform: translate3d(var(--pop-x, 0), var(--pop-y, -40px), 0) scale(1.18)
+      rotate(var(--spin, 0deg));
+    opacity: 1;
+  }
+  36% {
+    transform: translate3d(var(--pop-x, 0), var(--pop-y, -40px), 0) scale(1.05)
+      rotate(var(--spin, 0deg));
+    opacity: 1;
+    animation-timing-function: cubic-bezier(0.55, 0, 0.25, 1);
+  }
+  90% {
+    opacity: 0.8;
+  }
+  100% {
+    transform: translate3d(var(--fly-dx, 0), var(--fly-dy, 0), 0) scale(0.2)
+      rotate(calc(var(--spin, 0deg) * -1.5));
+    opacity: 0;
+  }
+}

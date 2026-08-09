@@ -153,8 +153,11 @@ export function EngineCubeStatsFace({
               <Zap size={10} stroke={statusColor} strokeWidth={2.6} />
               {statusLabel} {t('speed')}
             </span>
+            {/* Rounded like every other boost percentage (EngineStatsLedger) —
+                the engine screen now shows this face right under that ledger,
+                and "+2%" there next to "+1.9%" here reads as two boosts. */}
             <span className="font-black tabular-nums" style={{ color: statusColor }}>
-              +{statusSpeedBoostPct}%
+              +{Math.round(statusSpeedBoostPct)}%
             </span>
           </div>
         )}

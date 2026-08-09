@@ -72,31 +72,3 @@
 .engine-tap-pulse {
   animation: engine-tap-pulse 0.38s ease-in-out;
 }
-
-.engine-claim-fly {
-  animation: engine-claim-fly 1400ms cubic-bezier(0.5, 0, 0.2, 1) forwards;
-  pointer-events: none;
-  transform-origin: 50% 50%;
-  will-change: transform, opacity;
-  filter: drop-shadow(0 8px 18px rgba(248, 189, 62, 0.4));
-}
-
-@keyframes engine-claim-fly {
-  0% {
-    transform: translate(0, 0) scale(1) rotate(0deg);
-    opacity: 1;
-    animation-timing-function: cubic-bezier(0.34, 1.56, 0.64, 1);
-  }
-  14% {
-    transform: translate(0, -28px) scale(1.28) rotate(-4deg);
-    opacity: 1;
-    animation-timing-function: cubic-bezier(0.5, 0, 0.2, 1);
-  }
-  95% {
-    opacity: 0.35;
-  }
-  100% {
-    transform: translate(var(--fly-dx, 0), var(--fly-dy, 0)) scale(0.18) rotate(-6deg);
-    opacity: 0;
-  }
-}
