@@ -7,12 +7,17 @@ import { createSlice, type PayloadAction } from '@reduxjs/toolkit';
  * away and an admin notification is waiting, and both watchers fire on the
  * first render of the first screen.
  */
-export type AutoSurfaceId = 'tournament-result' | 'notification';
+export type AutoSurfaceId = 'tournament-result' | 'notification' | 'daily-gift';
 
-/** Higher wins the screen first. A won tournament outranks an announcement. */
+/**
+ * Higher wins the screen first. A won tournament outranks an announcement, and
+ * the daily gift goes last: it is the only one of the three that survives being
+ * postponed — it stays collectable until midnight UTC either way.
+ */
 const AUTO_SURFACE_PRIORITY: Record<AutoSurfaceId, number> = {
   'tournament-result': 2,
   notification: 1,
+  'daily-gift': 0,
 };
 
 export interface LayoutSliceState {

@@ -27,6 +27,7 @@ import type {
 import { inventoryMock } from '@/mock/inventory.mock';
 import { enginesMock } from '@/mock/engines.mock';
 import { avatarsMock } from '@/mock/avatars.mock';
+import { statusGiftMock } from '@/mock/statusGift.mock';
 import { jackpotMock } from '@/mock/jackpot.mock';
 import { promoMock } from '@/mock/promo.mock';
 import { partnersMock } from '@/mock/partners.mock';
@@ -116,6 +117,7 @@ export const mockData = {
   ...inventoryMock,
   ...enginesMock,
   ...avatarsMock,
+  ...statusGiftMock,
   ...jackpotMock,
   ...promoMock,
   ...partnersMock,

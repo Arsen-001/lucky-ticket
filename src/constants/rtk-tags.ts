@@ -29,6 +29,7 @@ export const rtkTags = {
   inventory: 'Inventory',
   avatars: 'Avatars',
   avatarDailyReward: 'AvatarDailyReward',
+  statusDailyGift: 'StatusDailyGift',
   partnerStats: 'PartnerStats',
   platformConfig: 'PlatformConfig',
   emailReward: 'EmailReward',

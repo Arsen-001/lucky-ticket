@@ -5,6 +5,7 @@ import { TabBar } from '@/components/layout-elements/TabBar';
 import type { ChildrenProps } from '@/types/interfaces/component.interfcaes';
 import { Drawer } from '@/components/layout-elements/Drawer';
 import { NotificationAutoSurface } from '@/components/layout-elements/NotificationAutoSurface';
+import { DailyGiftAutoSurface } from '@/components/layout-elements/DailyGiftAutoSurface';
 import { usePathname } from 'next/navigation';
 
 export default function TabsLayout({ children }: ChildrenProps) {
@@ -36,6 +37,7 @@ export default function TabsLayout({ children }: ChildrenProps) {
       <TabBar className="fixed bottom-0 left-[var(--app-gutter)] right-[var(--app-gutter)] z-50 shadow-xs" />
       <Drawer />
       <NotificationAutoSurface />
+      <DailyGiftAutoSurface />
     </>
   );
 }
