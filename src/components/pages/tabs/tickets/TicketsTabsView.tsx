@@ -28,7 +28,11 @@ import { useTestBadgeSpeedBoostPct } from '@/hooks/useTestBadgeSpeedBoostPct';
 import { useEngineConfig } from '@/hooks/useEngineConfig';
 import { TicketsEnum } from '@/types/enums/ticket.enums';
 import { findActiveBooster, findEquippedChip } from '@/utils/global/inventory.utils';
-import { effectiveCycleSeconds, engineElapsedSeconds } from '@/utils/global/ticket-engine.utils';
+import {
+  effectiveCycleSeconds,
+  engineElapsedSeconds,
+  resolveClaimedCount,
+} from '@/utils/global/ticket-engine.utils';
 import type { Ticket, TicketType } from '@/types/types/ticket.types';
 import { QueryErrorState } from '@/components/shared/error/QueryErrorState';
 
@@ -95,6 +99,7 @@ export function TicketsTabsView() {
           speedBooster,
           isLuckyPlayer: isLp,
           isVip,
+          perks: me?.statusPerks,
           avatarBoostPct: avatarSpeedPct,
           badgeBoostPct: badgeSpeedPct,
           tables,
@@ -152,12 +157,15 @@ export function TicketsTabsView() {
 
   // The celebration modal opens only after the server confirms — a "+N added
   // to inventory" splash followed by a silent optimistic rollback would lie.
+  // The count it shows is the server's own `claimed`, not the local sum, for
+  // the same reason: see `resolveClaimedCount`.
   const handleClaimAllForTier = async (tier: TicketType) => {
     const engines = enginesByTier[tier] ?? [];
     const total = engines.reduce((sum, engine) => sum + (engine.pendingCount || 0), 0);
     if (total === 0) return;
     try {
-      await claimEnginesForTier({ tier }).unwrap();
+      const response = await claimEnginesForTier({ tier }).unwrap();
+      const claimed = resolveClaimedCount(response, total);
       setElapsedByEngine(prev => {
         const next = { ...prev };
         for (const engine of engines) {
@@ -165,7 +173,9 @@ export function TicketsTabsView() {
         }
         return next;
       });
-      setClaimedModal({ open: true, tier, count: total });
+      // A confirmed zero means someone else drained the tier first — the tickets
+      // cache already settled, so celebrating "+0" would be the only lie left.
+      if (claimed > 0) setClaimedModal({ open: true, tier, count: claimed });
     } catch {
       toast.error(t('claim failed'));
     }
@@ -174,11 +184,12 @@ export function TicketsTabsView() {
   const handleClaimEngine = async (tier: TicketType, engineId: string) => {
     const engine = (enginesByTier[tier] ?? []).find(item => item.id === engineId);
     if (!engine || engine.pendingCount <= 0) return;
-    const claimed = engine.pendingCount;
+    const pending = engine.pendingCount;
     try {
-      await claimEngine({ engineId }).unwrap();
+      const response = await claimEngine({ engineId }).unwrap();
+      const claimed = resolveClaimedCount(response, pending);
       setElapsedByEngine(prev => ({ ...prev, [engineId]: 0 }));
-      setClaimedModal({ open: true, tier, count: claimed });
+      if (claimed > 0) setClaimedModal({ open: true, tier, count: claimed });
     } catch {
       toast.error(t('claim failed'));
     }

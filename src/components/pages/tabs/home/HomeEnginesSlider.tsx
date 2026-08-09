@@ -14,7 +14,7 @@ import {
 import {
   useClaimEngineMutation,
   useCompleteEngineCycleMutation,
-  useSkipEngineCycleMutation,
+  useInstantClaimEngineMutation,
   useUpgradeEngineSpeedMutation,
   useUpgradeEngineCapacityMutation,
 } from '@/api/engines.api';
@@ -110,11 +110,14 @@ export function HomeEnginesSlider({ className }: ClassNameProps) {
   const [activateBoosterMutation] = useActivateBoosterMutation();
   const [claimEngine] = useClaimEngineMutation();
   const [completeEngineCycle] = useCompleteEngineCycleMutation();
-  const [skipEngineCycle] = useSkipEngineCycleMutation();
+  const [instantClaimEngine] = useInstantClaimEngineMutation();
   const [upgradeEngineSpeed] = useUpgradeEngineSpeedMutation();
   const [upgradeEngineCapacity] = useUpgradeEngineCapacityMutation();
   const [chipToUnequip, setChipToUnequip] = useState<InventoryChip | null>(null);
-  const [skipConfirm, setSkipConfirm] = useState<{ engineId: string; cost: number } | null>(null);
+  const [instantClaimConfirm, setInstantClaimConfirm] = useState<{
+    engineId: string;
+    cost: number;
+  } | null>(null);
   const [upgradeConfirm, setUpgradeConfirm] = useState<{
     engineId: string;
     type: 'speed' | 'capacity';
@@ -224,10 +227,10 @@ export function HomeEnginesSlider({ className }: ClassNameProps) {
           capacityBooster,
           isLuckyPlayer: isLp,
           isVip,
+          perks: me?.statusPerks,
           avatarBoostPct: avatarSpeedPct,
           badgeBoostPct: badgeSpeedPct,
           tables,
-          perks: me?.statusPerks,
         });
         if (engine.pendingCount > 0) {
           elapsedNext[engine.id] = cycle;
@@ -378,38 +381,43 @@ export function HomeEnginesSlider({ className }: ClassNameProps) {
       capacityBooster,
       isLuckyPlayer: isLp,
       isVip,
+      perks: me?.statusPerks,
       avatarBoostPct: avatarSpeedPct,
       badgeBoostPct: badgeSpeedPct,
       tables,
-      perks: me?.statusPerks,
     });
     const elapsed = elapsedByEngine[engine.id] ?? engineElapsedSeconds(engine);
     const remaining = Math.max(0, cycle - elapsed);
     const cost = Math.max(1, Math.ceil(remaining / 3600));
-    setSkipConfirm({ engineId, cost });
+    setInstantClaimConfirm({ engineId, cost });
   };
 
-  const fastForwardEngine = (engineId: string, cost: number) => {
+  const performInstantClaim = (engineId: string, cost: number) => {
     const engine = itemsRef.current.find(item => item.engine.id === engineId)?.engine;
     if (!engine) return;
-    const capacityChip = findEquippedChip(inventory?.chips, engine.id, 'capacity');
-    const capacityBooster = findActiveBooster(inventory?.boosters, engine.id, 'capacity');
-    const fullCapacity = engineCapacity(engine, { capacityChip, capacityBooster, tables });
-    // Skip charges stars on the server and marks the cycle ready WITHOUT claiming:
-    // optimistically fill pendingCount so the button flips to "Claim". The user then
-    // claims to receive AP. Stars in the header reconcile via the mutation's me patch.
-    updateEngine(engineId, e => ({ ...e, pendingCount: fullCapacity }));
+    // Charges stars AND collects the cycle's tickets in one call, so the
+    // optimistic shape is the same as a plain claim: nothing left pending, next
+    // cycle running from now. (This used to go through `skip`, which only filled
+    // pendingCount and left the player a second tap — that existed to preserve
+    // the AP a claim once paid, and engine claims have awarded no AP since
+    // 2026-07-08.) Tickets and stars in the header reconcile via the mutation's
+    // own patches.
+    updateEngine(engineId, e => ({
+      ...e,
+      pendingCount: 0,
+      cycleStartedAt: dayjs().toISOString(),
+    }));
     setElapsedByEngine(prev => ({ ...prev, [engineId]: 0 }));
-    skipEngineCycle({ engineId, cost })
+    instantClaimEngine({ engineId, cost })
       .unwrap()
       .catch(() => toast.error(t('action failed')));
   };
 
-  const confirmSkip = () => {
-    if (!skipConfirm) return;
-    const { engineId, cost } = skipConfirm;
-    setSkipConfirm(null);
-    requireStars(cost, () => fastForwardEngine(engineId, cost));
+  const confirmInstantClaim = () => {
+    if (!instantClaimConfirm) return;
+    const { engineId, cost } = instantClaimConfirm;
+    setInstantClaimConfirm(null);
+    requireStars(cost, () => performInstantClaim(engineId, cost));
   };
 
   const performUpgrade = (engineId: string, type: 'speed' | 'capacity', cost: number) => {
@@ -745,17 +753,17 @@ export function HomeEnginesSlider({ className }: ClassNameProps) {
       />
 
       <ConfirmModal
-        open={!!skipConfirm}
-        onClose={() => setSkipConfirm(null)}
-        onConfirm={confirmSkip}
+        open={!!instantClaimConfirm}
+        onClose={() => setInstantClaimConfirm(null)}
+        onConfirm={confirmInstantClaim}
         title={t('instant claim title')}
         content={
-          skipConfirm ? (
+          instantClaimConfirm ? (
             <div className="flex flex-col items-center gap-3">
               <p className="text-pink-secondary text-sm">{t('instant claim description')}</p>
               <div className="border-gold/40 bg-gold/10 text-gold inline-flex items-center gap-1.5 rounded-full border px-3.5 py-1.5 text-sm font-extrabold tabular-nums">
                 <TelegramStarIcon size={14} />
-                {skipConfirm.cost}
+                {instantClaimConfirm.cost}
               </div>
             </div>
           ) : null

@@ -7,10 +7,13 @@ import { rtkTags } from '@/constants/rtk-tags';
 import { appConfig } from '@/config/app.config';
 import { resolveEngineConfig } from '@/hooks/useEngineConfig';
 import {
+  distributeClaimShortfall,
   effectiveCycleSeconds,
   engineCapacity,
   maxBoostLevel,
   promoteEngineIfMaxed,
+  resolveClaimedCount,
+  type DrainedEngine,
   type EngineLevelTables,
 } from '@/utils/global/ticket-engine.utils';
 import { findActiveBooster, findEquippedChip } from '@/utils/global/inventory.utils';
@@ -61,7 +64,11 @@ const buildStarterEngine = (): TicketEngine => {
 
 export const enginesApi = api.injectEndpoints({
   endpoints: builder => ({
-    claimEngine: builder.mutation<{ claimed: number }, { engineId: string }>({
+    // `claimed` is OPTIONAL on purpose: it is the number the UI reports back to
+    // the player, and the mock cannot know it (it holds no engine state), so the
+    // type must force every caller through the local-total fallback in
+    // `resolveClaimedCount` rather than trusting a field that may be absent.
+    claimEngine: builder.mutation<{ claimed?: number }, { engineId: string }>({
       query: body => ({ url: 'engines/claim', method: 'POST', body }),
       // No `tickets` invalidation: the onQueryStarted patch below already writes
       // the claim result (pendingCount→0, balance, cycle restart, lifetime) into
@@ -72,11 +79,15 @@ export const enginesApi = api.injectEndpoints({
       // their own tags, which don't touch the slider.
       invalidatesTags: [rtkTags.tasks, rtkTags.achievements],
       async onQueryStarted({ engineId }, { dispatch, queryFulfilled }) {
+        // Recorded from inside the recipe (immer runs it synchronously during
+        // the dispatch) so the reconciliation below knows what was predicted.
+        let predicted = 0;
         const patch = dispatch(
           ticketsApi.util.updateQueryData('getTickets', undefined, draft => {
             for (const ticket of draft) {
               const engine = ticket.engines?.find(item => item.id === engineId);
               if (engine && engine.pendingCount > 0) {
+                predicted = engine.pendingCount;
                 ticket.count = (ticket.count ?? 0) + engine.pendingCount;
                 engine.lifetimeProduced = (engine.lifetimeProduced ?? 0) + engine.pendingCount;
                 engine.pendingCount = 0;
@@ -86,20 +97,43 @@ export const enginesApi = api.injectEndpoints({
           })
         );
         try {
-          await queryFulfilled;
+          const { data } = await queryFulfilled;
+          // Settle the prediction against the server's own count. Nothing else
+          // will: these mutations skip the `tickets` invalidation on purpose, so
+          // an over-predicted inventory number would otherwise just stay on
+          // screen. A matching response dispatches nothing.
+          const delta = resolveClaimedCount(data, predicted) - predicted;
+          if (delta !== 0) {
+            dispatch(
+              ticketsApi.util.updateQueryData('getTickets', undefined, draft => {
+                for (const ticket of draft) {
+                  const engine = ticket.engines?.find(item => item.id === engineId);
+                  if (!engine) continue;
+                  ticket.count = Math.max(0, (ticket.count ?? 0) + delta);
+                  engine.lifetimeProduced = Math.max(0, (engine.lifetimeProduced ?? 0) + delta);
+                }
+              })
+            );
+          }
         } catch {
           patch.undo();
         }
       },
     }),
 
-    claimEnginesForTier: builder.mutation<{ claimed: number }, { tier: TicketType }>({
+    // See claimEngine — `claimed` optional for the same reason.
+    claimEnginesForTier: builder.mutation<{ claimed?: number }, { tier: TicketType }>({
       query: body => ({ url: 'engines/claim-all', method: 'POST', body }),
       // No `tickets` invalidation (see claimEngine): the patch below fully updates
       // the getTickets cache, so the refetch is redundant and would refresh every
       // cube in the slider. tasks/achievements have their own tags.
       invalidatesTags: [rtkTags.tasks, rtkTags.achievements],
       async onQueryStarted({ tier }, { dispatch, queryFulfilled }) {
+        // See claimEngine — filled synchronously by the recipe below. `drained`
+        // keeps each engine's predicted share so a shortfall can be given back
+        // without inventing per-engine numbers the response never carried.
+        let predicted = 0;
+        const drained: DrainedEngine[] = [];
         const patch = dispatch(
           ticketsApi.util.updateQueryData('getTickets', undefined, draft => {
             const ticket = draft.find(item => item.ticketType === tier);
@@ -108,24 +142,51 @@ export const enginesApi = api.injectEndpoints({
             for (const engine of ticket.engines) {
               if (engine.pendingCount > 0) {
                 total += engine.pendingCount;
+                drained.push({ engineId: engine.id, amount: engine.pendingCount });
                 engine.lifetimeProduced = (engine.lifetimeProduced ?? 0) + engine.pendingCount;
                 engine.pendingCount = 0;
                 engine.cycleStartedAt = dayjs().toISOString();
               }
             }
             ticket.count = (ticket.count ?? 0) + total;
+            predicted = total;
           })
         );
         try {
-          await queryFulfilled;
+          const { data } = await queryFulfilled;
+          // See claimEngine: without this the tier's inventory keeps whatever the
+          // prediction guessed, forever.
+          const delta = resolveClaimedCount(data, predicted) - predicted;
+          if (delta !== 0) {
+            dispatch(
+              ticketsApi.util.updateQueryData('getTickets', undefined, draft => {
+                const ticket = draft.find(item => item.ticketType === tier);
+                if (!ticket) return;
+                ticket.count = Math.max(0, (ticket.count ?? 0) + delta);
+                // Only a shortfall is attributable: a surplus (the cache sat a
+                // cycle behind the server) has no engine to credit, so that
+                // lifetime lands on the next refetch instead of being guessed.
+                const giveback = distributeClaimShortfall(drained, -delta);
+                for (const engine of ticket.engines ?? []) {
+                  const back = giveback.get(engine.id);
+                  if (back) {
+                    engine.lifetimeProduced = Math.max(0, (engine.lifetimeProduced ?? 0) - back);
+                  }
+                }
+              })
+            );
+          }
         } catch {
           patch.undo();
         }
       },
     }),
 
+    // Optional for the reason spelled out on claimEngine — and here the mock was
+    // already contradicting the old non-optional type: `engines/instant-claim`
+    // answers a bare `{}`.
     instantClaimEngine: builder.mutation<
-      { claimed: number; cost: number },
+      { claimed?: number; cost?: number },
       { engineId: string; cost: number }
     >({
       query: body => ({ url: 'engines/instant-claim', method: 'POST', body }),
@@ -138,6 +199,13 @@ export const enginesApi = api.injectEndpoints({
           getState() as Parameters<ReturnType<typeof inventoryApi.endpoints.getInventory.select>>[0]
         ).data;
         const tables = levelTablesFromState(getState());
+        // The boldest prediction of the three claim paths: with nothing pending
+        // it invents a whole batch from `engineCapacity` — client-side math over
+        // chips, boosters and admin-tunable tables — instead of summing counts
+        // the server already sent. Most likely of the three to need the
+        // reconciliation below, and it is a PAID action, so a wrong ticket count
+        // sits next to a real star charge.
+        let predicted = 0;
         const ticketsPatch = dispatch(
           ticketsApi.util.updateQueryData('getTickets', undefined, draft => {
             for (const ticket of draft) {
@@ -149,6 +217,7 @@ export const enginesApi = api.injectEndpoints({
                 engine.pendingCount > 0
                   ? engine.pendingCount
                   : engineCapacity(engine, { capacityChip, capacityBooster, tables });
+              predicted = claimAmount;
               ticket.count = (ticket.count ?? 0) + claimAmount;
               engine.lifetimeProduced = (engine.lifetimeProduced ?? 0) + claimAmount;
               engine.pendingCount = 0;
@@ -162,7 +231,23 @@ export const enginesApi = api.injectEndpoints({
           })
         );
         try {
-          await queryFulfilled;
+          const { data } = await queryFulfilled;
+          // See claimEngine. Stars need no such pass — `me` is invalidated above,
+          // so the real balance arrives with the refetch; only the tickets cache
+          // is left to the prediction.
+          const delta = resolveClaimedCount(data, predicted) - predicted;
+          if (delta !== 0) {
+            dispatch(
+              ticketsApi.util.updateQueryData('getTickets', undefined, draft => {
+                for (const ticket of draft) {
+                  const engine = ticket.engines?.find(item => item.id === engineId);
+                  if (!engine) continue;
+                  ticket.count = Math.max(0, (ticket.count ?? 0) + delta);
+                  engine.lifetimeProduced = Math.max(0, (engine.lifetimeProduced ?? 0) + delta);
+                }
+              })
+            );
+          }
         } catch {
           ticketsPatch.undo();
           mePatch.undo();
@@ -242,51 +327,6 @@ export const enginesApi = api.injectEndpoints({
       },
     }),
 
-    // Pay stars to skip the remaining cycle → engine becomes ready (button turns
-    // into "Claim"); the actual claim (and its AP) happens when the user taps Claim.
-    skipEngineCycle: builder.mutation<
-      { skipped: boolean; cost: number },
-      { engineId: string; cost: number }
-    >({
-      query: ({ engineId }) => ({ url: 'engines/skip', method: 'POST', body: { engineId } }),
-      // See upgrade-speed: fill pendingCount in the cache optimistically (below)
-      // instead of refetching EVERY engine, which visibly refreshes the
-      // neighbouring cubes on the home slider. Only stars (me) is reconciled.
-      invalidatesTags: [rtkTags.me],
-      async onQueryStarted({ engineId, cost }, { dispatch, queryFulfilled, getState }) {
-        const inventory = inventoryApi.endpoints.getInventory.select()(
-          getState() as Parameters<ReturnType<typeof inventoryApi.endpoints.getInventory.select>>[0]
-        ).data;
-        const tables = levelTablesFromState(getState());
-        const ticketsPatch = dispatch(
-          ticketsApi.util.updateQueryData('getTickets', undefined, draft => {
-            for (const ticket of draft) {
-              const engine = ticket.engines?.find(item => item.id === engineId);
-              if (!engine || engine.pendingCount > 0) continue;
-              const capacityChip = findEquippedChip(inventory?.chips, engineId, 'capacity');
-              const capacityBooster = findActiveBooster(inventory?.boosters, engineId, 'capacity');
-              engine.pendingCount = engineCapacity(engine, {
-                capacityChip,
-                capacityBooster,
-                tables,
-              });
-            }
-          })
-        );
-        const mePatch = dispatch(
-          meApi.util.updateQueryData('getMe', undefined, draft => {
-            draft.telegramStars = Math.max(0, draft.telegramStars - cost);
-          })
-        );
-        try {
-          await queryFulfilled;
-        } catch {
-          ticketsPatch.undo();
-          mePatch.undo();
-        }
-      },
-    }),
-
     completeEngineCycle: builder.mutation<void, { engineId: string }>({
       query: body => ({ url: 'engines/complete-cycle', method: 'POST', body }),
       // No `tickets` invalidation: the onQueryStarted patch below fills
@@ -338,6 +378,7 @@ export const enginesApi = api.injectEndpoints({
                 speedChip,
                 speedBooster,
                 isLuckyPlayer: me?.isLuckyPlayer ?? false,
+                perks: me?.statusPerks,
                 isVip: me?.isVIP ?? false,
                 avatarBoostPct: avatarSpeedPct,
                 badgeBoostPct: badgeSpeedPct,
@@ -410,7 +451,6 @@ export const {
   useClaimEngineMutation,
   useClaimEnginesForTierMutation,
   useInstantClaimEngineMutation,
-  useSkipEngineCycleMutation,
   useUpgradeEngineSpeedMutation,
   useUpgradeEngineCapacityMutation,
   useCompleteEngineCycleMutation,

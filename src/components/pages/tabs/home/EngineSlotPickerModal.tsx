@@ -89,7 +89,7 @@ export function EngineSlotPickerModal({
   const empty = category === 'chip' ? eligibleChips.length === 0 : eligibleBoosters.length === 0;
 
   // Chips are tier-locked, so a new one can only come from minting a chip of
-  // the engine's own tier: enough matching shards → inventory, otherwise → shop.
+  // the engine's own tier: enough matching shards → inventory, otherwise → market.
   const ownedShards = shards.find(s => s.type === type && s.quality === engineTier)?.count ?? 0;
   const requiredShards = CHIP_MINT_SHARD_COST[engineTier];
   const canMint = ownedShards >= requiredShards;

@@ -302,6 +302,65 @@ export const findEngineLocation = (
 };
 
 /**
+ * How many tickets a claim actually awarded — what the celebration modal shows.
+ *
+ * Prefer the server's own `claimed`: the locally summed `pendingCount` is a
+ * prediction that can be a tick stale. `completeEngineCycle` fires on a 1s
+ * interval, so an engine can flip to ready (or a second device can drain the
+ * tier) between the sum and the server handling the claim — and the modal would
+ * then promise tickets that never landed in the inventory.
+ *
+ * Falls back to the local total when the response omits the field: the mock
+ * holds no engine state and cannot know the number (see `engines.mock.ts`),
+ * and an older backend may not send it either. A negative or non-finite value
+ * is treated as absent — a `claimed: -1` must not render as "-1 tickets".
+ */
+export const resolveClaimedCount = (
+  response: { claimed?: number } | undefined,
+  localTotal: number
+): number =>
+  typeof response?.claimed === 'number' &&
+  Number.isFinite(response.claimed) &&
+  response.claimed >= 0
+    ? response.claimed
+    : localTotal;
+
+/** One engine's share of an optimistic claim — what the patch predicted it gave. */
+export interface DrainedEngine {
+  engineId: string;
+  amount: number;
+}
+
+/**
+ * Splits a claim shortfall back across the engines an optimistic patch drained.
+ *
+ * A claim answers with a TOTAL, so when the server claims fewer tickets than
+ * predicted there is no way to know which engine fell short — any per-engine
+ * split is arbitrary. What is not arbitrary is the invariant: the givebacks must
+ * sum to exactly the shortfall, or `lifetimeProduced` drifts permanently (the
+ * claim mutations skip the `tickets` invalidation on purpose, so nothing
+ * refetches these counters on this path).
+ *
+ * Walks newest-drained first and never takes back more than an engine
+ * contributed. A non-positive shortfall (the server claimed as much as
+ * predicted, or more — a cache one cycle behind the server) gives back nothing.
+ */
+export const distributeClaimShortfall = (
+  drained: readonly DrainedEngine[],
+  shortfall: number
+): Map<string, number> => {
+  const giveback = new Map<string, number>();
+  let remaining = Math.max(0, shortfall);
+  for (let index = drained.length - 1; index >= 0 && remaining > 0; index--) {
+    const { engineId, amount } = drained[index];
+    const share = Math.min(remaining, Math.max(0, amount));
+    if (share > 0) giveback.set(engineId, (giveback.get(engineId) ?? 0) + share);
+    remaining -= share;
+  }
+  return giveback;
+};
+
+/**
  * Duration/countdown as "H:MM:SS" above an hour, "MM:SS" below — base engine
  * cycles run 2h–32h, so a minutes-only format would read "1920:00" on diamond.
  */

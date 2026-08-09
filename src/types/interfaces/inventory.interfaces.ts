@@ -30,7 +30,7 @@ export interface InventoryBooster {
   quality: TicketType;
   durationHours: InventoryBoosterDuration;
   effectPct: number;
-  source: 'shop' | 'task' | 'tournament';
+  source: 'market' | 'task' | 'tournament';
   activeOnEngineId?: string;
   expiresAt?: string;
 }

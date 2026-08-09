@@ -1,4 +1,4 @@
-import { describe, it, expect } from 'vitest';
+import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { findActiveBooster } from '@/utils/global/inventory.utils';
 import { effectiveCycleSeconds } from '@/utils/global/ticket-engine.utils';
 import type { InventoryBooster } from '@/types/interfaces/inventory.interfaces';
@@ -38,6 +38,18 @@ const engine: TicketEngine = {
  * one the server actually mints at.
  */
 describe('an expired booster stops counting (DOCS §10.6)', () => {
+  // `effectiveCycleSeconds` checks the booster's window against the real clock,
+  // so the "live" fixture below silently expired once wall-clock time passed
+  // its `expiresAt` and the suite started failing on its own. Freeze time at
+  // NOW — the same instant the fixtures are written against.
+  beforeEach(() => {
+    vi.useFakeTimers();
+    vi.setSystemTime(NOW);
+  });
+  afterEach(() => {
+    vi.useRealTimers();
+  });
+
   it('is found while its window is open', () => {
     expect(findActiveBooster([booster()], 'e1', 'speed', NOW)?.id).toBe('b1');
   });

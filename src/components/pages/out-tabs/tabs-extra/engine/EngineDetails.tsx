@@ -4,7 +4,7 @@ import { useEffect, useRef, useState } from 'react';
 import {
   useClaimEngineMutation,
   useCompleteEngineCycleMutation,
-  useSkipEngineCycleMutation,
+  useInstantClaimEngineMutation,
   useUpgradeEngineCapacityMutation,
   useUpgradeEngineSpeedMutation,
 } from '@/api/engines.api';
@@ -69,7 +69,7 @@ export function EngineDetails({ id }: EngineDetailsProps) {
   const [activateBoosterMutation] = useActivateBoosterMutation();
   const [unequipChip, { isLoading: unequipping }] = useUnequipChipMutation();
   const [claimEngine] = useClaimEngineMutation();
-  const [skipEngineCycle] = useSkipEngineCycleMutation();
+  const [instantClaimEngine] = useInstantClaimEngineMutation();
   const [upgradeEngineSpeed] = useUpgradeEngineSpeedMutation();
   const [upgradeEngineCapacity] = useUpgradeEngineCapacityMutation();
   const [completeEngineCycle] = useCompleteEngineCycleMutation();
@@ -229,12 +229,16 @@ export function EngineDetails({ id }: EngineDetailsProps) {
   };
 
   const handleInstantClaim = () => {
-    // "Skip" charges stars + marks the cycle ready (does NOT claim). The button
-    // then flips to "Claim"; claiming awards AP. Server reconciles via invalidation.
+    // One tap: charges stars, collects this cycle's tickets and restarts the
+    // engine — so the local countdown resets exactly as it does after a plain
+    // claim. (It used to call `skip`, which only marked the cycle ready and left
+    // a second tap to collect; that preserved the AP a claim once awarded, and
+    // engine claims have awarded none since 2026-07-08.)
     // Paid action — a failure must surface, never silently refund the stars.
     requireStars(instantClaimCost, async () => {
+      setElapsedSeconds(0);
       try {
-        await skipEngineCycle({ engineId: engine.id, cost: instantClaimCost }).unwrap();
+        await instantClaimEngine({ engineId: engine.id, cost: instantClaimCost }).unwrap();
       } catch {
         toast.error(t('action failed'));
       }

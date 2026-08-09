@@ -121,7 +121,7 @@ const initialBoosters: InventoryBooster[] = [
     quality: 'bronze',
     durationHours: 6,
     effectPct: 50,
-    source: 'shop',
+    source: 'market',
     activeOnEngineId: 'engine-bronze-1',
     expiresAt: new Date(Date.now() + 4 * 3600_000).toISOString(),
   },
@@ -139,7 +139,7 @@ const initialBoosters: InventoryBooster[] = [
     quality: 'gold',
     durationHours: 24,
     effectPct: 75,
-    source: 'shop',
+    source: 'market',
   },
   {
     id: 'boost-5',
