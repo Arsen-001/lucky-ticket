@@ -9,6 +9,7 @@ import { routes } from '@/constants/routes';
 import { useAppTranslations } from '@/hooks/useAppTranslations';
 import { findLevelDef, formatStakeRelative } from '@/utils/global/stakes.utils';
 import { StakesLevelChip } from '@/components/pages/out-tabs/drawer/stakes/StakesLevelChip';
+import { formatNumber } from '@/utils/global/number.utils';
 import type { StakeHistoryEntry, StakeLevelDefinition } from '@/types/interfaces/stakes.interfaces';
 
 export interface StakesHistoryRowProps {
@@ -65,7 +66,7 @@ export function StakesHistoryRow({ entry, levels }: StakesHistoryRowProps) {
           )}
           {entry.apAwarded > 0 && (
             <span className="text-teal inline-flex items-center gap-0.5 font-bold tabular-nums">
-              <BoltIcon size={11} />+{entry.apAwarded} AP
+              <BoltIcon size={11} />+{formatNumber(entry.apAwarded)} AP
             </span>
           )}
         </div>

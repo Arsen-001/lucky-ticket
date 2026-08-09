@@ -5,6 +5,7 @@ import { useLikeProfileMutation } from '@/api/profile.api';
 import { BoltIcon } from '@/components/shared/icons/BoltIcon';
 import { useAppTranslations } from '@/hooks/useAppTranslations';
 import { GlobalConstants } from '@/constants/global.constants';
+import { formatNumber } from '@/utils/global/number.utils';
 
 export interface ProfileLikeButtonProps {
   userId: string;
@@ -49,7 +50,7 @@ export function ProfileLikeButton({
       )}
     >
       <Heart size={14} strokeWidth={2.6} fill={liked ? 'currentColor' : 'none'} />
-      <span className="tabular-nums">{likesReceived}</span>
+      <span className="tabular-nums">{formatNumber(likesReceived)}</span>
       {!liked && (
         <span className="text-teal flex items-center gap-0.5 border-l border-white/15 pl-1.5">
           <BoltIcon size={11} />

@@ -7,6 +7,7 @@ import type {
 } from '@/types/interfaces/notifications.interfaces';
 import { routes } from '@/constants/routes';
 import { NOTIFICATIONS_PAGE_SIZE } from '@/constants/notifications.constants';
+import { formatNumber } from '@/utils/global/number.utils';
 import { appConfig } from '@/config/app.config';
 
 const now = new Date();
@@ -58,7 +59,8 @@ const HISTORY_TEMPLATES = [
   {
     type: 'reward' as const,
     title: 'Tournament result',
-    content: (n: number) => `You finished #${n} in "Morning Gold" and won ${n * 250} LC.`,
+    content: (n: number) =>
+      `You finished #${n} in "Morning Gold" and won ${formatNumber(n * 250)} LC.`,
     actionRoute: routes.tournaments.index,
   },
   {

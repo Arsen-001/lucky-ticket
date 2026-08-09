@@ -1,6 +1,7 @@
 import { Star } from 'lucide-react';
 import { twMerge } from 'tailwind-merge';
 import { LcLabel } from '@/components/shared/icons/LcLabel';
+import { formatNumber } from '@/utils/global/number.utils';
 import { Ticket } from '@/components/shared/icons/Ticket';
 import type { AvatarDailyReward } from '@/types/interfaces/avatars.interfaces';
 
@@ -24,7 +25,7 @@ export function AvatarDailyRewardValue({
   if (reward.kind === 'lc') {
     return (
       <span className={twMerge('text-gold inline-flex items-center gap-1 tabular-nums', className)}>
-        +{reward.amount}
+        +{formatNumber(reward.amount)}
         <LcLabel size={size} interactive={false} />
       </span>
     );
@@ -35,7 +36,7 @@ export function AvatarDailyRewardValue({
       <span
         className={twMerge('text-gold inline-flex items-center gap-0.5 tabular-nums', className)}
       >
-        +{reward.amount}
+        +{formatNumber(reward.amount)}
         <Star size={size - 1} className="fill-gold" />
       </span>
     );
@@ -43,7 +44,7 @@ export function AvatarDailyRewardValue({
 
   return (
     <span className={twMerge('inline-flex items-center gap-1 tabular-nums text-white', className)}>
-      +{reward.amount}
+      +{formatNumber(reward.amount)}
       <Ticket type={reward.tier ?? 'bronze'} width={size + 2} height={size + 2} />
     </span>
   );

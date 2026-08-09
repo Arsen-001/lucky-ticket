@@ -13,6 +13,7 @@ import type { InventoryChipType } from '@/types/interfaces/inventory.interfaces'
 import type { TournamentUserResult } from '@/types/interfaces/tournaments.interfaces';
 import type { TournamentType } from '@/types/types/tournaments.types';
 import { statusTournamentLcBoostPct } from '@/utils/global/tournament.utils';
+import { formatNumber } from '@/utils/global/number.utils';
 import '@/styles/components/tournament-card.css';
 import { triggerHaptic } from '@/utils/global/haptic.utils';
 
@@ -230,7 +231,7 @@ export function TournamentResultModal({
                 <div className="inline-flex items-baseline gap-2 leading-none">
                   <LcLabel size={26} className="self-center" />
                   <span className={`${textClass} text-4xl tabular-nums leading-none`}>
-                    {counter}
+                    {formatNumber(counter)}
                   </span>
                 </div>
                 {statusBonusLc > 0 && (
@@ -285,7 +286,7 @@ export function TournamentResultModal({
                 <div className="inline-flex items-baseline gap-2 leading-none">
                   <LcLabel size={22} className="self-center" />
                   <span className="tournament-rank-text tournament-rank-text--gold text-3xl tabular-nums leading-none">
-                    {jackpotCounter}
+                    {formatNumber(jackpotCounter)}
                   </span>
                 </div>
               </div>

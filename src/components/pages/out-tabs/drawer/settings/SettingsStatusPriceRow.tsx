@@ -4,6 +4,7 @@ import { twMerge } from 'tailwind-merge';
 import { TelegramStarIcon } from '@/components/shared/icons/TelegramStarIcon';
 import { LcLabel } from '@/components/shared/icons/LcLabel';
 import { useAppTranslations } from '@/hooks/useAppTranslations';
+import { formatNumber } from '@/utils/global/number.utils';
 import { MarketPriceType } from '@/types/enums/market.enums';
 import type { MarketPrice } from '@/types/interfaces/market.interfaces';
 
@@ -31,7 +32,9 @@ export function SettingsStatusPriceRow({ prices, label, className }: SettingsSta
             key={price.type}
             className="flex items-center gap-1.5 rounded-full bg-white/5 px-3 py-1.5"
           >
-            <span className="text-sm font-bold tabular-nums text-white">{price.amount}</span>
+            <span className="text-sm font-bold tabular-nums text-white">
+              {formatNumber(price.amount)}
+            </span>
             {price.type === MarketPriceType.LC && <LcLabel size={14} />}
             {price.type === MarketPriceType.TELEGRAM_STARS && (
               <TelegramStarIcon size={14} alt={t('stars')} />
