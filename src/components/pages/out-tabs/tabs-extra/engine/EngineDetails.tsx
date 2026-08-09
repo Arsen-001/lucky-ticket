@@ -44,10 +44,11 @@ import {
   EngineCubeBadgesFace,
 } from '@/components/pages/tabs/home/EngineCubeBadgesFace';
 import { EngineCubeSlot } from '@/components/pages/tabs/home/EngineCubeSlot';
-import { EngineCubeStatsFace } from '@/components/pages/tabs/home/EngineCubeStatsFace';
 import { CubeFaceCard } from '@/components/pages/out-tabs/tabs-extra/engine/CubeFaceCard';
+import { EngineStatsLedger } from '@/components/pages/out-tabs/tabs-extra/engine/EngineStatsLedger';
+import { engineSpeedBoostSources, totalSpeedBoostPct } from '@/utils/global/engine-boosts.utils';
+import { GlobalConstants } from '@/constants/global.constants';
 import type { InventoryChip, InventoryChipType } from '@/types/interfaces/inventory.interfaces';
-import { displayNameOf } from '@/utils/global/user.utils';
 
 export interface EngineDetailsProps {
   id: string;
@@ -116,6 +117,8 @@ export function EngineDetails({ id }: EngineDetailsProps) {
       const cycle = effectiveCycleSeconds(engine, {
         speedChip,
         speedBooster,
+        capacityChip,
+        capacityBooster,
         isLuckyPlayer: isLp,
         isVip,
         perks: me?.statusPerks,
@@ -141,6 +144,8 @@ export function EngineDetails({ id }: EngineDetailsProps) {
     engine,
     speedChip,
     speedBooster,
+    capacityChip,
+    capacityBooster,
     isLp,
     isVip,
     avatarSpeedPct,
@@ -176,7 +181,31 @@ export function EngineDetails({ id }: EngineDetailsProps) {
     );
   }
 
+  // Same inputs `EngineCard` uses — including the capacity chip/booster, which
+  // move the per-ticket floor. Anything less and this screen's cycle disagrees
+  // with the countdown ticking on the card right above it.
   const cycle = effectiveCycleSeconds(engine, {
+    speedChip,
+    speedBooster,
+    capacityChip,
+    capacityBooster,
+    isLuckyPlayer: isLp,
+    isVip,
+    perks: me?.statusPerks,
+    avatarBoostPct: avatarSpeedPct,
+    badgeBoostPct: badgeSpeedPct,
+    tables,
+  });
+  // What the engine is doing RIGHT NOW — batch and rate off the live cycle, so
+  // every number in the stats layer matches the countdown and the ×N on the card.
+  // (The old passport quoted a rate computed "before the time-limited booster",
+  // which disagreed with the countdown running right above it.)
+  const liveCapacity = engineCapacity(engine, { capacityChip, capacityBooster, tables });
+  const liveTicketsPerHour = cycle > 0 ? (3600 / cycle) * liveCapacity : 0;
+
+  // The speed stack itemised — same terms `effectiveCycleSeconds` sums, so the
+  // total below always agrees with the countdown on the card above.
+  const boosts = engineSpeedBoostSources(engine, {
     speedChip,
     speedBooster,
     isLuckyPlayer: isLp,
@@ -186,19 +215,11 @@ export function EngineDetails({ id }: EngineDetailsProps) {
     badgeBoostPct: badgeSpeedPct,
     tables,
   });
-  // Productivity is "before time-limited booster" but *with* permanent boosts
-  // (engine/speed levels, chip, status, equipped avatar) — so those are all in.
-  const baseCycleSeconds = effectiveCycleSeconds(engine, {
-    speedChip,
-    isLuckyPlayer: isLp,
-    isVip,
-    perks: me?.statusPerks,
-    avatarBoostPct: avatarSpeedPct,
-    badgeBoostPct: badgeSpeedPct,
-    tables,
-  });
-  const baseCapacity = engineCapacity(engine, { capacityChip, tables });
-  const ticketsPerHour = baseCycleSeconds > 0 ? (3600 / baseCycleSeconds) * baseCapacity : 0;
+  // Boost past the hard 15-min-per-ticket floor buys nothing — say so instead of
+  // quoting a percentage the engine cannot deliver.
+  const atSpeedCap =
+    engine.cycleSeconds / (1 + totalSpeedBoostPct(boosts) / 100) <
+    liveCapacity * GlobalConstants.engineMinSecondsPerTicket;
 
   const speedLevel = engine.speedLevel ?? 0;
   const capacityLevel = engine.capacityLevel ?? 0;
@@ -292,16 +313,16 @@ export function EngineDetails({ id }: EngineDetailsProps) {
         reactorVisual="engine"
       />
 
-      <CubeFaceCard accent={tierAccent} aspect="4/3">
-        <EngineCubeStatsFace
-          lifetimeProduced={lifetimeProduced}
-          ticketsPerHour={ticketsPerHour}
-          engineLevel={engineLevel}
-          ownerName={displayNameOf(me)}
-          createdAt={engine.createdAt}
-          accent={tierAccent}
-        />
-      </CubeFaceCard>
+      <EngineStatsLedger
+        accent={tierAccent}
+        ticketsPerHour={liveTicketsPerHour}
+        capacity={liveCapacity}
+        cycleSeconds={cycle}
+        baseCycleSeconds={engine.cycleSeconds}
+        lifetimeProduced={lifetimeProduced}
+        boosts={boosts}
+        atSpeedCap={atSpeedCap}
+      />
 
       <CubeFaceCard accent={tierAccent}>
         <div className="flex h-full w-full flex-col items-center justify-center gap-3 p-5">

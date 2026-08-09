@@ -811,7 +811,7 @@
   "cycle": "Zyklus",
   "cycle full": "Voller Zyklus: {time}",
   "per cycle": "pro Zyklus",
-  "per cycle full": "{capacity} Tickets pro Zyklus",
+  "per cycle full": "{capacity, plural, =1 {# Ticket pro Zyklus} other {# Tickets pro Zyklus}}",
   "per hour base": "Produktivität",
   "streak": "Serie",
   "engine details": "Engine-Details",
@@ -1303,5 +1303,12 @@
   "later": "Später",
   "daily gift collected": "Tagesgeschenk eingesammelt",
   "daily gift collected with ticket": "Tagesgeschenk eingesammelt — Münzen und ein Ticket gehören dir",
-  "could not collect the gift": "Geschenk konnte nicht eingesammelt werden. Versuch es erneut."
+  "could not collect the gift": "Geschenk konnte nicht eingesammelt werden. Versuch es erneut.",
+  "engine level": "Motorlevel",
+  "speed upgrades": "Tempo-Upgrades",
+  "speed boost": "Tempo-Boost",
+  "tester badge": "Tester-Abzeichen",
+  "at speed cap": "Tempolimit erreicht",
+  "per hour": "Pro Stunde",
+  "no speed boosts yet": "Noch keine Tempo-Boosts — Tempo aufwerten oder Chip einsetzen"
 }

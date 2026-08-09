@@ -812,7 +812,7 @@
   "cycle": "Cycle",
   "cycle full": "Full cycle: {time}",
   "per cycle": "per cycle",
-  "per cycle full": "{capacity} tickets per cycle",
+  "per cycle full": "{capacity, plural, =1 {# ticket per cycle} other {# tickets per cycle}}",
   "per hour base": "Productivity",
   "streak": "Streak",
   "engine details": "Engine details",
@@ -1303,5 +1303,12 @@
   "later": "Later",
   "daily gift collected": "Daily gift collected",
   "daily gift collected with ticket": "Daily gift collected — coins and a ticket are yours",
-  "could not collect the gift": "Could not collect the gift. Try again."
+  "could not collect the gift": "Could not collect the gift. Try again.",
+  "engine level": "Engine level",
+  "speed upgrades": "Speed upgrades",
+  "speed boost": "Speed boost",
+  "tester badge": "Tester badge",
+  "at speed cap": "At speed cap",
+  "per hour": "Per hour",
+  "no speed boosts yet": "No speed boosts yet — upgrade speed or fit a chip"
 }
