@@ -22,7 +22,8 @@ export interface MarketPurchaseModalProps {
   loading?: boolean;
   title?: string;
   description?: ReactNode;
-  iconNode?: ReactNode;
+  /** Draws the item at the size this modal has room for. */
+  renderIcon?: (size: number) => ReactNode;
   price?: MarketPrice;
   confirmText?: string;
   /** Cap for the quantity stepper; omit (or pass 1) to hide it. */
@@ -40,7 +41,7 @@ export function MarketPurchaseModal({
   loading,
   title,
   description,
-  iconNode,
+  renderIcon,
   price,
   confirmText,
   maxQuantity,
@@ -89,20 +90,16 @@ export function MarketPurchaseModal({
       content={
         <div className="mt-2 flex flex-col gap-4 text-center text-white/80">
           <div className="flex items-center gap-4 rounded-xl bg-white/5 p-4">
-            {/* Sections hand over a 140–165px node. Left at its own size it eats
-                half the row on a 390px screen and wraps the name onto three
-                lines, so it is boxed down here too — bigger than the receipt row
-                in the success modal, since this is the item being bought. Size is
-                forced because those nodes carry inline width/height, and the
-                image is contained rather than cropped: an admin photo arrives at
-                whatever aspect ratio was uploaded, and a buyer confirming a
-                purchase has to see the whole product, not its middle third.
-                Padded for the same reason as the success-modal receipt: shard
-                art is drawn edge to edge, so `contain` on its own runs the
-                diamond's tips into the rounded corners and loses them. */}
-            {iconNode && (
-              <div className="flex-center size-20 shrink-0 overflow-hidden rounded-2xl p-2 [&>*]:size-full! [&_img]:size-full! [&_img]:object-contain">
-                {iconNode}
+            {/* The picture is REQUESTED at 64px rather than boxed down from
+                165: forcing `size-full` on a pre-sized node resizes the element
+                and not what it draws, so a gift's emoji kept its 99px glyph and
+                the box sliced it. `object-contain` still guards an admin photo,
+                which arrives at whatever aspect ratio was uploaded — a buyer
+                confirming a purchase has to see the whole product, not its
+                middle third. */}
+            {renderIcon && (
+              <div className="flex-center size-20 shrink-0 rounded-2xl [&_img]:object-contain">
+                {renderIcon(64)}
               </div>
             )}
             <div className="flex min-w-0 flex-1 flex-col gap-1 text-left">

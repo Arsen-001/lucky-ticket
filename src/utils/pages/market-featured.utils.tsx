@@ -11,7 +11,9 @@ export function buildMarketSelectedItem(featured: MarketFeaturedItem): MarketSel
     about: featured.about,
     locked: !!featured.lockedTier,
     lockNote: featured.lockedTier ? <MarketLockPanel tier={featured.lockedTier} /> : undefined,
-    iconNode: <div className="h-32 w-32">{featured.renderIcon(128)}</div>,
+    // The showcase already draws at any size — hand the renderer straight on
+    // instead of freezing it at 128 inside a fixed box.
+    renderIcon: featured.renderIcon,
     prices: featured.prices,
     expiresAt: featured.expiresAt,
     isNew: featured.isNew,

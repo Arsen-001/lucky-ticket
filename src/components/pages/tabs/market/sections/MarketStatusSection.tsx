@@ -208,11 +208,12 @@ export function MarketStatusSection({ onSelect, onBuy }: MarketStatusSectionProp
               />
             )
           ) : undefined,
-          iconNode: status.imageUrl ? (
-            <MarketItemImage src={status.imageUrl} alt={status.name} size={160} />
-          ) : (
-            renderIcon(160)
-          ),
+          renderIcon: (size: number) =>
+            status.imageUrl ? (
+              <MarketItemImage src={status.imageUrl} alt={status.name} size={size} />
+            ) : (
+              renderIcon(size)
+            ),
           prices: activePrices,
           remainingSupply: status.remainingSupply,
           isNew: status.isNew,

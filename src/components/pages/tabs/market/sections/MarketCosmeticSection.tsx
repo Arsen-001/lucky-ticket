@@ -91,7 +91,7 @@ export function MarketCosmeticSection({ cosmetics, onSelect, onBuy }: MarketCosm
           name: avatar.name,
           description: avatar.description,
           about: t('market avatar purpose'),
-          iconNode: renderIcon(165),
+          renderIcon,
           prices: discountedPrices,
           remainingSupply: avatar.remainingSupply,
           isNew: avatar.isNew,

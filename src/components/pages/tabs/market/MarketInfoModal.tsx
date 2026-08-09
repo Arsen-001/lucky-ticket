@@ -41,7 +41,9 @@ export function MarketInfoModal({ open, item, onClose, onBuy }: MarketInfoModalP
             className="pointer-events-none absolute -right-12 -top-12 h-40 w-40 rounded-full blur-3xl"
             style={{ backgroundColor: `color-mix(in srgb, ${accent} 38%, transparent)` }}
           />
-          <div className="relative">{item.iconNode}</div>
+          {/* Asked for at 156 inside a 176px stage: nothing here is scaled
+              after the fact, so nothing can overflow the rounded box. */}
+          <div className="relative">{item.renderIcon(156)}</div>
 
           {item.locked && (
             <span className="text-pink-secondary bg-pink-secondary/18 border-pink-secondary/40 absolute left-3 top-3 z-3 inline-flex items-center gap-1 rounded-full border px-2 py-0.5 text-[10px] font-extrabold uppercase tracking-wider">

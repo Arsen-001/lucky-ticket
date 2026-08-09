@@ -42,7 +42,13 @@ export function MarketTicketSection({ tickets, onSelect, onBuy }: MarketTicketSe
         const isTierLocked = !isTierUnlocked(ticket.ticketType);
         const isLocked = isTierLocked || ticket.isAvailable === false;
         const cardIcon: ReactNode = <Ticket type={ticket.ticketType} width={104} height={104} />;
-        const modalIcon: ReactNode = <Ticket type={ticket.ticketType} width={140} height={140} />;
+        // One picture, any size the surface asks for — see `MarketSelectedItem`.
+        const renderIcon = (size: number): ReactNode =>
+          ticket.imageUrl ? (
+            <MarketItemImage src={ticket.imageUrl} alt={ticket.name} size={size} />
+          ) : (
+            <Ticket type={ticket.ticketType} width={size} height={size} />
+          );
         const discountedPrices = applyStatusMarketDiscount(ticket.prices, discountPct);
         const item: MarketSelectedItem = {
           id: ticket.id,
@@ -57,11 +63,7 @@ export function MarketTicketSection({ tickets, onSelect, onBuy }: MarketTicketSe
               <MarketLockPanel note={t('ticket not on sale')} />
             )
           ) : undefined,
-          iconNode: ticket.imageUrl ? (
-            <MarketItemImage src={ticket.imageUrl} alt={ticket.name} size={140} />
-          ) : (
-            modalIcon
-          ),
+          renderIcon,
           prices: discountedPrices,
           remainingSupply: ticket.remainingSupply,
           isNew: ticket.isNew,

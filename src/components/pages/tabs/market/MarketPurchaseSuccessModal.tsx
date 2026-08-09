@@ -10,7 +10,8 @@ export interface MarketPurchaseSuccessModalProps {
   onClose: () => void;
   itemName?: string;
   itemDescription?: ReactNode;
-  itemIcon?: ReactNode;
+  /** Draws the bought item at the size this receipt row has room for. */
+  renderItemIcon?: (size: number) => ReactNode;
 }
 
 export function MarketPurchaseSuccessModal({
@@ -18,7 +19,7 @@ export function MarketPurchaseSuccessModal({
   onClose,
   itemName,
   itemDescription,
-  itemIcon,
+  renderItemIcon,
 }: MarketPurchaseSuccessModalProps) {
   const t = useAppTranslations();
 
@@ -44,22 +45,14 @@ export function MarketPurchaseSuccessModal({
         </div>
 
         <div className="flex w-full items-center gap-3 rounded-xl border border-white/10 bg-black/25 p-3.5">
-          {/* Callers hand over the same icon they render in the confirm modal — a
-              140–165px hero. This row is a receipt line, not a stage, so the node
-              is boxed down to a thumbnail; the size is forced because those nodes
-              carry inline width/height. The image is contained, not cropped: an
-              admin photo comes in at whatever aspect ratio was uploaded (a 16:9
-              banner in a square box shows a third of itself under `cover`), and
-              the receipt has to show what was actually bought. Square variants —
-              the avatar tile with its tier ring, the VIP crown — are unaffected.
-              The padding is not decoration: the shard art is rendered edge to
-              edge (every `shards/*.webp` has its opaque bbox on the canvas
-              border), so `contain` alone puts the diamond's tips flush against
-              the box — and a rotated diamond puts them straight into the
-              `rounded-xl` corners, which `overflow-hidden` then shaves off. */}
-          {itemIcon && (
-            <div className="flex-center size-14 shrink-0 overflow-hidden rounded-xl p-1.5 [&>*]:size-full! [&_img]:size-full! [&_img]:object-contain">
-              {itemIcon}
+          {/* Receipt line, not a stage — the picture is asked for at 44px
+              instead of being boxed down from 165. Boxing only resized the
+              element, never what it drew: a gift emoji kept its 99px glyph and
+              lost its ears to the box edge. `object-contain` still guards an
+              admin photo of any aspect ratio. */}
+          {renderItemIcon && (
+            <div className="flex-center size-14 shrink-0 rounded-xl [&_img]:object-contain">
+              {renderItemIcon(44)}
             </div>
           )}
           <div className="flex min-w-0 flex-1 flex-col gap-0.5 text-left">

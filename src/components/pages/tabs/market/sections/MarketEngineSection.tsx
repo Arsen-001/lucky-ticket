@@ -47,7 +47,12 @@ export function MarketEngineSection({ engines, onSelect, onBuy }: MarketEngineSe
       {engines.map(engine => {
         const isLocked = !isTierUnlocked(engine.ticketType);
         const cardIcon: ReactNode = <EngineIcon tier={engine.ticketType} size={144} />;
-        const modalIcon: ReactNode = <EngineIcon tier={engine.ticketType} size={156} />;
+        const renderIcon = (size: number): ReactNode =>
+          engine.imageUrl ? (
+            <MarketItemImage src={engine.imageUrl} alt={engine.name} size={size} />
+          ) : (
+            <EngineIcon tier={engine.ticketType} size={size} />
+          );
         const description = t('level x', { n: engine.engineLevel });
         // The catalog `engine.prices` is only the first-engine base; the real
         // price is the geometric repeat price for the player's owned count, so
@@ -64,11 +69,7 @@ export function MarketEngineSection({ engines, onSelect, onBuy }: MarketEngineSe
           about: t('market engine purpose', { tier: t(engine.ticketType as MessageIds) }),
           locked: isLocked,
           lockNote: isLocked ? <MarketLockPanel tier={engine.ticketType} /> : undefined,
-          iconNode: engine.imageUrl ? (
-            <MarketItemImage src={engine.imageUrl} alt={engine.name} size={156} />
-          ) : (
-            modalIcon
-          ),
+          renderIcon,
           prices: discountedPrices,
           remainingSupply: engine.remainingSupply,
           isNew: engine.isNew,

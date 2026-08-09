@@ -69,7 +69,7 @@ export function MarketGiftSection({ onSelect, onBuy }: MarketGiftSectionProps) {
             // expecting an instant delivery reads that wait as a failure.
             description: t('gift card description'),
             about: t('gift purpose'),
-            iconNode: <MarketGiftCardStage emoji={gift.emoji} size={165} />,
+            renderIcon: (size: number) => <MarketGiftCardStage emoji={gift.emoji} size={size} />,
             prices,
             accent: 'pink',
             confirmText: t('gift confirm'),

@@ -42,9 +42,12 @@ export function MarketShardSection({ shards, onSelect, onBuy }: MarketShardSecti
         const cardIcon: ReactNode = (
           <ChipShardIcon type={shard.type} tier={shard.quality} size={101} />
         );
-        const modalIcon: ReactNode = (
-          <ChipShardIcon type={shard.type} tier={shard.quality} size={140} />
-        );
+        const renderIcon = (size: number): ReactNode =>
+          shard.imageUrl ? (
+            <MarketItemImage src={shard.imageUrl} alt={shard.name} size={size} />
+          ) : (
+            <ChipShardIcon type={shard.type} tier={shard.quality} size={size} />
+          );
         const description = `+${shard.count} ${t('shards')}`;
         const discountedPrices = applyStatusMarketDiscount(shard.prices, discountPct);
         const item: MarketSelectedItem = {
@@ -54,11 +57,7 @@ export function MarketShardSection({ shards, onSelect, onBuy }: MarketShardSecti
           about: t('market shard purpose'),
           locked: isLocked,
           lockNote: isLocked ? <MarketLockPanel tier={shard.quality} /> : undefined,
-          iconNode: shard.imageUrl ? (
-            <MarketItemImage src={shard.imageUrl} alt={shard.name} size={140} />
-          ) : (
-            modalIcon
-          ),
+          renderIcon,
           prices: discountedPrices,
           remainingSupply: shard.remainingSupply,
           isNew: shard.isNew,

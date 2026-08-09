@@ -41,7 +41,16 @@ export interface MarketSelectedItem {
   description?: ReactNode;
   /** What the item is for — shown for every item, buyable or locked. */
   about?: ReactNode;
-  iconNode: ReactNode;
+  /**
+   * The item's picture at whatever size the surface asks for.
+   *
+   * A pre-sized node cannot be shrunk from the outside: the modals used to box
+   * a 140–165px node into 80px and force `size-full` on it, which resizes an
+   * element but NOT what it draws — a gift's emoji is sized by `font-size`, so
+   * it kept its 99px glyph and `overflow-hidden` sliced the bear's ears off
+   * (measured 2026-08-09). Every surface now asks for the size it has room for.
+   */
+  renderIcon: (size: number) => ReactNode;
   meta?: ReactNode;
   /** Gated: the sheet states the gate instead of offering a price. */
   locked?: boolean;
@@ -59,7 +68,7 @@ export interface MarketSelectedItem {
   maxQuantity?: number;
   /** How many of this item the player already owns (tickets of the tier, same shards…). */
   ownedCount?: number;
-  /** Small icon for the owned pill (the big `iconNode` doesn't fit there). */
+  /** Small icon for the owned pill (the big picture doesn't fit there). */
   ownedIconNode?: ReactNode;
   mutate: (price: MarketPrice, count: number) => Promise<unknown>;
 }
@@ -68,7 +77,7 @@ interface MarketActivePurchase {
   id: string;
   name: string;
   description?: ReactNode;
-  iconNode: ReactNode;
+  renderIcon: (size: number) => ReactNode;
   price: MarketPrice;
   confirmText?: string;
   maxQuantity?: number;
@@ -109,7 +118,7 @@ export function MarketView() {
   const [success, setSuccess] = useState<{
     name: string;
     description?: ReactNode;
-    iconNode: ReactNode;
+    renderIcon: (size: number) => ReactNode;
   } | null>(null);
   const [insufficientStars, setInsufficientStars] = useState<{ required: number } | null>(null);
   const [insufficientCoins, setInsufficientCoins] = useState<{ required: number } | null>(null);
@@ -172,7 +181,7 @@ export function MarketView() {
       id: item.id,
       name: item.name,
       description: item.description,
-      iconNode: item.iconNode,
+      renderIcon: item.renderIcon,
       price,
       confirmText: item.confirmText,
       maxQuantity,
@@ -195,7 +204,7 @@ export function MarketView() {
       setSuccess({
         name: count > 1 ? `${purchase.name} ×${count}` : purchase.name,
         description: purchase.description,
-        iconNode: purchase.iconNode,
+        renderIcon: purchase.renderIcon,
       });
       setPurchase(null);
     } catch (error) {
@@ -280,7 +289,7 @@ export function MarketView() {
         loading={confirming}
         title={purchase?.name}
         description={purchase?.description}
-        iconNode={purchase?.iconNode}
+        renderIcon={purchase?.renderIcon}
         price={purchase?.price}
         confirmText={purchase?.confirmText}
         maxQuantity={purchase?.maxQuantity}
@@ -307,7 +316,7 @@ export function MarketView() {
         onClose={() => setSuccess(null)}
         itemName={success?.name}
         itemDescription={success?.description}
-        itemIcon={success?.iconNode}
+        renderItemIcon={success?.renderIcon}
       />
     </div>
   );
