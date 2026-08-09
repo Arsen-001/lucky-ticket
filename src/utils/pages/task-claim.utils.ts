@@ -1,3 +1,25 @@
+import type { TaskReward } from '@/types/interfaces/tasks.interfaces';
+
+/**
+ * Collapse a payout into one entry per currency.
+ *
+ * A bundle claim answers with one reward object per sub-step, so five +1 AP
+ * steps arrive as five separate rewards — and the reward modal drew five
+ * identical "+1" chips where the player expected "+5". Tickets keep their
+ * `label` in the key: a Bronze and a Gold ticket are two prizes, not one line
+ * of "+2".
+ */
+export const mergeRewards = (rewards: TaskReward[]): TaskReward[] => {
+  const byKind = new Map<string, TaskReward>();
+  for (const reward of rewards) {
+    const key = `${reward.type}:${reward.label ?? ''}`;
+    const seen = byKind.get(key);
+    if (seen) seen.amount += reward.amount;
+    else byKind.set(key, { ...reward });
+  }
+  return [...byKind.values()];
+};
+
 /**
  * What kind of "no" a claim got back — the Tasks screen offers Retry for
  * exactly one of them.

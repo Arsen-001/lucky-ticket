@@ -250,6 +250,9 @@ export function TasksContent() {
      *  shows the ticket the player actually received. Ad grants carry their own
      *  tier on the reward and leave this unset. */
     tier?: string;
+    /** Set by an ad grant only: the day's views after this one, which the modal
+     *  shows where a task claim shows its new balance. */
+    ad?: { watchedToday: number; total: number };
   }>({ id: '', open: false, status: 'pending', result: null });
 
   // Exactly what to run again when the player taps «Retry» — set by whoever
@@ -644,6 +647,10 @@ export function TasksContent() {
         open: true,
         status: 'done',
         result: { id: slot.id, rewards: res.rewards },
+        // The slot's own position is the count, and it is right even before the
+        // refetch that follows the modal lands: this view is the (index + 1)-th
+        // of the day.
+        ad: { watchedToday: slot.index + 1, total: data?.ads?.total ?? slot.index + 1 },
       });
     } catch (error) {
       // Same rule as a task claim: a slot the server says is already credited
@@ -1057,6 +1064,7 @@ export function TasksContent() {
         error={pendingClaim.open && pendingClaim.status === 'failed'}
         errorKind={pendingClaim.failure}
         tier={pendingClaim.tier}
+        ad={pendingClaim.ad}
         onClose={handleClose}
         onContinue={() => {
           handleClose();

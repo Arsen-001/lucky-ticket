@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Check, Coins, Loader2, Sparkles, Star, Ticket, Trophy } from 'lucide-react';
 import type { LucideIcon } from 'lucide-react';
 import { twMerge } from 'tailwind-merge';
@@ -13,10 +13,12 @@ import { LcLabel } from '@/components/shared/icons/LcLabel';
 import { Ticket as TicketArt } from '@/components/shared/icons/Ticket';
 import { TaskRewardType } from '@/types/enums/tasks.enums';
 import type { ClaimTaskResponse, TaskReward } from '@/types/interfaces/tasks.interfaces';
-import type { ClaimErrorKind } from '@/utils/pages/task-claim.utils';
+import { mergeRewards, type ClaimErrorKind } from '@/utils/pages/task-claim.utils';
 import { triggerHaptic } from '@/utils/global/haptic.utils';
 import { formatNumber } from '@/utils/global/number.utils';
 import { asTicketTier } from '@/utils/global/ticket-tier.utils';
+import { ClaimAdProgress } from './ClaimAdProgress';
+import { ClaimRewardAmount } from './ClaimRewardAmount';
 import { TaskRewardRow } from './TaskRewardRow';
 
 // Task claims return a full balance snapshot; ad-watch grants rewards only (no
@@ -33,6 +35,10 @@ export interface ClaimRewardModalProps {
   errorKind?: ClaimErrorKind;
   /** Tier of whatever was claimed — decides which ticket the prize art shows. */
   tier?: string;
+  /** Set when the reward came from a rewarded ad rather than a task claim: an
+   *  ad grant has no balance snapshot, so the modal shows the day's remaining
+   *  views in its place and closes with a neutral label. */
+  ad?: { watchedToday: number; total: number };
   onClose: () => void;
   onContinue: () => void;
   onRetry?: () => void;
@@ -53,35 +59,6 @@ const REWARD_GRADIENT: Record<TaskRewardType, string> = {
   [TaskRewardType.STARS]: 'from-warning to-gold',
   [TaskRewardType.PREMIUM]: 'from-pink to-electric-purple',
   [TaskRewardType.ENGINE]: 'from-platinum to-gold',
-};
-
-const useCounter = (target: number, durationMs = 900) => {
-  const [value, setValue] = useState(0);
-  const startedAt = useRef<number | null>(null);
-  const raf = useRef<number | null>(null);
-
-  useEffect(() => {
-    if (target <= 0) {
-      setValue(0);
-      return;
-    }
-    setValue(0);
-    startedAt.current = null;
-    const tick = (ts: number) => {
-      if (startedAt.current === null) startedAt.current = ts;
-      const elapsed = ts - startedAt.current;
-      const ratio = Math.min(1, elapsed / durationMs);
-      const eased = 1 - Math.pow(1 - ratio, 3);
-      setValue(Math.round(target * eased));
-      if (ratio < 1) raf.current = requestAnimationFrame(tick);
-    };
-    raf.current = requestAnimationFrame(tick);
-    return () => {
-      if (raf.current) cancelAnimationFrame(raf.current);
-    };
-  }, [target, durationMs]);
-
-  return value;
 };
 
 const buildParticles = () =>
@@ -128,6 +105,7 @@ export function ClaimRewardModal({
   error,
   errorKind = 'network',
   tier,
+  ad,
   onClose,
   onContinue,
   onRetry,
@@ -150,8 +128,15 @@ export function ClaimRewardModal({
         ? t('claim unavailable description')
         : t('claim failed description');
 
+  // One entry per currency: a bundle claim answers per sub-step, and the row
+  // below used to repeat "+1" five times for what is one payout of +5.
+  const rewards = mergeRewards(result?.rewards ?? []);
   const primaryReward: TaskReward | undefined =
-    result?.rewards.find(r => r.type === TaskRewardType.LC) ?? result?.rewards[0];
+    rewards.find(r => r.type === TaskRewardType.LC) ?? rewards[0];
+  // The headline already states the primary reward in full. Listing it again in
+  // the chip row put the same number on screen twice, which reads as two
+  // separate prizes — the row carries only what the headline left out.
+  const extraRewards = rewards.filter(r => r !== primaryReward);
 
   const primaryIsAp = primaryReward?.type === TaskRewardType.ACTIVITY_POINTS;
   // A claim that pays tickets shows the ticket it paid, at prize size. The
@@ -171,8 +156,6 @@ export function ClaimRewardModal({
   const gradient = primaryReward
     ? REWARD_GRADIENT[primaryReward.type]
     : 'from-pink to-electric-pink';
-  const counterTarget = primaryReward?.amount ?? 0;
-  const counter = useCounter(counterTarget);
 
   useEffect(() => {
     if (open && result) triggerHaptic('success');
@@ -267,12 +250,10 @@ export function ClaimRewardModal({
             )}
             {view === 'success' && (
               <>
-                <span className="text-4xl font-extrabold tabular-nums bg-gradient-to-r from-gold via-electric-pink to-electric-purple bg-clip-text text-transparent leading-none">
-                  +{formatNumber(counter)}
-                </span>
-                {result && result.rewards.length > 1 ? (
+                {primaryReward && <ClaimRewardAmount reward={primaryReward} />}
+                {extraRewards.length > 0 ? (
                   <TaskRewardRow
-                    rewards={result.rewards}
+                    rewards={extraRewards}
                     tier={tier}
                     size="md"
                     className="justify-center"
@@ -284,9 +265,12 @@ export function ClaimRewardModal({
             )}
           </div>
 
-          {/* BALANCE ROW — fixed h-16 (ad-watch has no balance snapshot → hidden) */}
+          {/* BALANCE ROW — fixed h-16. An ad grant carries no balance snapshot,
+              so it shows the day's views instead of leaving the band empty. */}
           <div className="h-16 w-full flex items-center">
-            {view === 'success' && result?.newBalance ? (
+            {view === 'success' && !result?.newBalance && ad ? (
+              <ClaimAdProgress watchedToday={ad.watchedToday} total={ad.total} />
+            ) : view === 'success' && result?.newBalance ? (
               <div className="flex flex-col gap-1 w-full rounded-2xl bg-white/5 p-2.5">
                 <p className="text-[10px] uppercase tracking-wider text-white/40 font-bold text-center">
                   {t('new balance')}
@@ -338,8 +322,11 @@ export function ClaimRewardModal({
                 )}
               </>
             ) : view === 'success' ? (
+              // «Continue tasks» is the task-claim promise. An ad view is not a
+              // task, and the player watching one is mid-loop on this very
+              // screen — the button just closes the card.
               <Button onClick={onContinue} className="flex-1 rounded-xl py-3 text-sm h-full">
-                {t('continue tasks')}
+                {ad ? t('continue') : t('continue tasks')}
               </Button>
             ) : (
               // Spinner, not the word "Loading" a second time: the title above
