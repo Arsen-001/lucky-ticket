@@ -1307,5 +1307,6 @@
   "capacity upgrades": "Capacity upgrades",
   "t/h": "T/H",
   "per day short": "/day",
-  "result": "Result"
+  "result": "Result",
+  "expired": "Expired"
 }

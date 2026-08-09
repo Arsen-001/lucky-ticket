@@ -3,6 +3,7 @@ import { twMerge } from 'tailwind-merge';
 import { BoosterIcon } from '@/components/shared/icons/BoosterIcon';
 import { ChipIcon } from '@/components/shared/icons/ChipIcon';
 import { useAppTranslations } from '@/hooks/useAppTranslations';
+import { useCountDown } from '@/hooks/useCountDown';
 import { QUALITY_ACCENT, TYPE_ACCENT } from '@/utils/global/inventory.utils';
 import type {
   InventoryBooster,
@@ -30,6 +31,8 @@ export function EngineCubeSlot({
   onRemove,
 }: EngineCubeSlotProps) {
   const t = useAppTranslations();
+  // Called before the empty-slot early return — a hook cannot sit behind one.
+  const { leftTimeShort, expired } = useCountDown(booster?.expiresAt);
 
   const filled = category === 'chip' ? !!chip : !!booster;
   const accent =
@@ -119,7 +122,7 @@ export function EngineCubeSlot({
           )}
           {category === 'booster' && booster && (
             <>
-              +{booster.effectPct}% {booster.durationHours}h
+              +{booster.effectPct}% {!booster.expiresAt || !expired ? leftTimeShort : t('expired')}
             </>
           )}
         </span>
@@ -133,7 +136,7 @@ export function EngineCubeSlot({
           }}
           aria-label={t('unequip')}
           className={twMerge(
-            'flex-center absolute top-1 right-1 z-10 h-5 w-5 cursor-pointer rounded-full border bg-black/60 text-white/80 transition-colors hover:bg-black/80 hover:text-white'
+            'tap-target flex-center absolute top-1 right-1 z-10 h-5 w-5 cursor-pointer rounded-full border bg-black/60 text-white/80 transition-colors hover:bg-black/80 hover:text-white'
           )}
           style={{
             borderColor: `color-mix(in srgb, ${accent} 70%, transparent)`,

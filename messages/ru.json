@@ -1307,5 +1307,6 @@
   "capacity upgrades": "Апгрейды ёмкости",
   "t/h": "Б/Ч",
   "per day short": "/сут",
-  "result": "Результат"
+  "result": "Результат",
+  "expired": "Истёк"
 }
