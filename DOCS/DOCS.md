@@ -1624,19 +1624,44 @@ There is **no Sign Out action anywhere in the app** — not in Settings, not on 
 
 ### 16.1 Avatars — Free & Paid Tiers
 
-> 🚫 **SWITCHED OFF IN THE MINI APP SINCE 2026-08-09 — planned back around October 2026.**
-> Nothing is deleted: every avatar surface is commented out behind the marker
-> `AVATARS OFF` (grep it). Off in the app: the Settings → Change Avatar row, the
-> profile pencil, the Market **Cosmetics** section _and its chip_, avatar slides in
-> the Market showcase carousel, the accrued daily-reward card on Tasks, and the
-> equipped-avatar engine-speed boost in the UI.
-> **The backend is untouched** — `GET /avatars`, `/avatars/daily-reward`, the
-> cosmetic listings and the server-side boosts all still run. Two consequences
-> while the feature is off: a player who already owns _and_ wears a speed avatar
-> keeps the boosted production cycle server-side, so their engine finishes a little
-> earlier than the countdown predicts (the next refetch corrects the display); and
-> the daily reward keeps accruing with no way to collect it in the app. Everything
-> below describes the feature as it stands and as it will come back.
+> 🚫 **SWITCHED OFF SINCE 2026-08-09 — planned back around October 2026.**
+> Nothing is deleted anywhere: every avatar surface is commented out behind the
+> marker `AVATARS OFF` (grep it, in both repos).
+>
+> **Mini App** — off: the Settings → Change Avatar row, the profile pencil, the
+> Market **Cosmetics** section _and its chip_, avatar slides in the Market showcase
+> carousel, the accrued daily-reward card on Tasks, and the equipped-avatar
+> engine-speed boost in the UI.
+>
+> **Backend** — off in step, so no client (not just the Mini App) can reach the
+> feature and the two sides never disagree about a cycle: `GET /avatars` returns
+> an empty inventory; the engine-speed boost (`EnginesService.avatarBoost`) and
+> the tournament-reward boost (`avatarTournamentBoostMap`) are pinned to nothing;
+> avatar listings leave the storefront response and `syncAvatarCosmetics` no
+> longer runs at boot; `buyCosmetic` refuses an avatar before charging; and
+> `POST /avatars/daily-reward/claim` returns `avatars-disabled`.
+>
+> **Nothing is lost while it is off.** `UserAvatar` ownership rows, the DB avatar
+> catalog, the Market listings (with the admin's photo/price edits) and every
+> accrued reward pile all stay exactly as they are — the accrual is frozen, not
+> wiped, and `GET /avatars/daily-reward` still reports the pile with
+> `canClaim: false`. Players keep their Telegram profile photo throughout;
+> `Avatar`/`UserAvatar` rendering was never part of this.
+>
+> ⚠️ **Before switching it back on**, roll the accrual clock forward, or every day
+> the feature was off back-pays on the first read:
+> `UPDATE "AvatarRewardAccrual" SET "accruedThrough" = date_trunc('day', now() AT TIME ZONE 'utc');`
+> `settle()` keeps advancing the clock on its own for any row it touches (the
+> switch sits in `rewardingAvatarFor`, taking the same no-pay path a free avatar
+> already took), but rows nobody touches for two months stay stale.
+>
+> One edge left standing on purpose: the milestone **t-263 "Customize your
+> avatar"** (+300 LC) scores off `has_avatar`, which any Telegram profile photo
+> satisfies, so it still completes for practically everyone — but a player whose
+> Telegram account has no photo at all cannot clear it while the picker is gone.
+> Pulling a live milestone out of the catalog was judged riskier than the edge.
+>
+> Everything below describes the feature as it stands and as it will come back.
 
 Avatars are a marketable cosmetic category with **two tiers** and a **10-level progression ladder**:
 
