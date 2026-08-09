@@ -62,6 +62,26 @@ describe('production-only traps', () => {
     expect(offenders).toEqual([]);
   });
 
+  it('the daily gift normalizes the backend tier before drawing a ticket', () => {
+    // The backend answers `status/daily-gift` with Prisma's `Tier` — upper case
+    // — while `ticketSources` in the Ticket icon is keyed lower case. The raw
+    // value resolved to `undefined`, and `next/image` does not throw on a
+    // missing src: it flips to unoptimized and renders an empty `<img>`. The
+    // caption died the same silent way, `t(tierTicketNameId['BRONZE'])`
+    // resolving to an empty string. Production showed a blank tile under "+1".
+    //
+    // What kept it invisible was the fixture, not the code: it spelled the tier
+    // `'bronze'`, so localhost drew the gift perfectly. Both halves are pinned
+    // here — the fixture must speak the wire's casing, and the boundary must
+    // translate it.
+    expect(read('src/mock/statusGift.mock.ts'), 'fixture must use the wire casing').toMatch(
+      /ticketTier: '[A-Z]+'/
+    );
+    expect(read('src/api/statusGift.api.ts'), 'the endpoint must normalize the tier').toMatch(
+      /asTicketTier/
+    );
+  });
+
   it('every task deeplink resolves to a real destination', () => {
     // The live task catalog deep-links to `/engines`, which is only a base for
     // `/engines/:id` — the engine list itself lives on the Tickets tab. In

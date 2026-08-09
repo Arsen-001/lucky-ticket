@@ -29,3 +29,24 @@ export interface ClaimDailyGiftResponse {
   ticketTier: TicketType;
   ticketCount: number;
 }
+
+/**
+ * The WIRE shape of both daily-gift endpoints — the tier as the backend spells
+ * it, not as the app reads it.
+ *
+ * Prisma's `Tier` is upper case (`"BRONZE"`); every screen here keys off the
+ * lower-case {@link TicketType}. Declaring the response as `TicketType` and
+ * hoping was a type that simply lied, and nothing crashed on the lie:
+ * `ticketSources['BRONZE']` is `undefined`, so `next/image` quietly fell back
+ * to an empty `src` and the gift tile lost both its ticket and its caption
+ * (`t(tierTicketNameId['BRONZE'])` resolves to nothing either). `statusGift.api`
+ * normalizes here, at the boundary, so no consumer has to know which side of
+ * the wire it is on.
+ */
+export interface DailyGiftStateResponse extends Omit<DailyGiftState, 'ticketTier'> {
+  ticketTier: string;
+}
+
+export interface ClaimDailyGiftApiResponse extends Omit<ClaimDailyGiftResponse, 'ticketTier'> {
+  ticketTier: string;
+}
