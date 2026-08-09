@@ -10,6 +10,8 @@
   "referral requires channel explainer": "A referral counts while they stay subscribed to the channel and haven't blocked the bot. They stay your friends either way.",
   "referrals": "Referrals",
   "select tournament": "Select a tournament",
+  "to {tier}": "To {tier}",
+  "all ap sources": "All {n} ways to earn",
   "+{amount} {coin} back": "+{amount} {coin} on top",
   "+{amount} {coin} for level {level}": "+{amount} {coin} for Level {level}",
   "1st": "1st",

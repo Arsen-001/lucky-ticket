@@ -1,9 +1,6 @@
-'use client';
-
 import {
   CalendarCheck,
   CalendarDays,
-  ChevronRight,
   Clapperboard,
   Coins,
   Flame,
@@ -17,22 +14,17 @@ import {
   TrendingUp,
   UserPlus,
 } from 'lucide-react';
-import { useGetMeQuery } from '@/api/me.api';
-import { Link } from '@/components/shared/links/Link';
-import { useAppTranslations } from '@/hooks/useAppTranslations';
 import {
   GlobalConstants,
   activityTierOrder,
-  computeDailyBaselineAp,
   type ActivityTier,
 } from '@/constants/global.constants';
 import { routes, type Route } from '@/constants/routes';
 import type { MessageIds } from '@/types/types/i18n.types';
-import { effectiveAdsDailyLimit } from '@/utils/global/status.utils';
 
-type ApCategory = 'base' | 'social' | 'tournament' | 'spend';
+export type ApCategory = 'base' | 'social' | 'tournament' | 'spend';
 
-interface ApSource {
+export interface ApSource {
   id: string;
   category: ApCategory;
   Icon: LucideIcon;
@@ -57,7 +49,12 @@ const tierRange = (byTier: Record<ActivityTier, number>): string => {
   return `+${first}–${last}`;
 };
 
-const SOURCES: ApSource[] = [
+/**
+ * Every way a player earns AP, in one place — the list screen, the variants
+ * that show only the best few, and the grid all read from here so a rate can
+ * never say one thing in one shape and another in the next.
+ */
+export const AP_SOURCES: ApSource[] = [
   {
     id: 'streak',
     category: 'base',
@@ -187,77 +184,39 @@ const SOURCES: ApSource[] = [
   },
 ];
 
-const CATEGORY_ORDER: ApCategory[] = ['base', 'social', 'tournament', 'spend'];
+export const AP_CATEGORY_ORDER: ApCategory[] = ['base', 'social', 'tournament', 'spend'];
 
-const CATEGORY_LABEL: Record<ApCategory, MessageIds> = {
+export const AP_CATEGORY_LABEL: Record<ApCategory, MessageIds> = {
   base: 'ap category everyday',
   social: 'ap category social',
   tournament: 'ap category tournaments',
   spend: 'ap category spending',
 };
 
-export interface ActivitySourcesListProps {
-  activityPoints?: number;
-}
+/**
+ * How much AP each capped recurring source can still pay in a day at this tier
+ * — the same terms `dailyBaselineApByTier` is summed from, so "fastest today"
+ * and the "~47 AP/day" caption can never disagree. Uncapped sources (purchases,
+ * stakes) have no daily ceiling and are absent by design.
+ */
+export const apDailyCeilings = (
+  tier: ActivityTier,
+  watchVideoLimit: number
+): Record<string, number> => ({
+  watchVideo: apRewards.watchVideo * watchVideoLimit,
+  dailyTask: apRewards.dailyTaskByTier[tier] * apRewards.dailyTasksCountByTier[tier],
+  weeklyTask: (apRewards.weeklyTaskByTier[tier] * apRewards.weeklyTasksCountByTier[tier]) / 7,
+  sendTicket: apRewards.sendTicket * apRewards.sendTicketDailyLimit,
+  like: apRewards.likeProfile * apRewards.likeProfileDailyLimit,
+  streak: apRewards.dailyStreak,
+});
 
-export function ActivitySourcesList({ activityPoints = 0 }: ActivitySourcesListProps) {
-  const t = useAppTranslations();
-  const { data: me } = useGetMeQuery();
-  const dailyBaseline = computeDailyBaselineAp(activityPoints, me?.referralsCount ?? 0);
-  // Base cap + the backend-resolved status bonus. The flat constants are only a
-  // fallback: VIP's bonus scales per level, so quoting `vipWatchVideoDailyLimit`
-  // promised a level-1 VIP 40 views a day when the server allows 12.
-  const watchVideoLimit = effectiveAdsDailyLimit(
-    me?.isLuckyPlayer ?? false,
-    me?.isVIP ?? false,
-    me?.statusPerks
-  );
+/** The catalogue ordered by what pays fastest today; unranked sources keep their order, last. */
+export const apSourcesByPace = (tier: ActivityTier, watchVideoLimit: number): ApSource[] => {
+  const ceilings = apDailyCeilings(tier, watchVideoLimit);
+  return [...AP_SOURCES].sort((a, b) => (ceilings[b.id] ?? -1) - (ceilings[a.id] ?? -1));
+};
 
-  return (
-    <section className="flex flex-col gap-3">
-      <div className="flex items-baseline justify-between gap-2 px-1">
-        <h2 className="text-base font-extrabold text-white">{t('how to earn ap')}</h2>
-        <span className="text-pink-secondary text-[11px] font-bold">
-          {t('~{n} AP per day without donation', { n: dailyBaseline })}
-        </span>
-      </div>
-
-      {CATEGORY_ORDER.map(category => (
-        <div key={category} className="flex flex-col gap-1.5">
-          <span className="text-[10px] font-bold uppercase tracking-wider text-white/40">
-            {t(CATEGORY_LABEL[category])}
-          </span>
-          {SOURCES.filter(s => s.category === category).map(source => {
-            const hintParams =
-              source.id === 'watchVideo'
-                ? { ...source.hintParams, n: watchVideoLimit }
-                : source.hintParams;
-            return (
-              <Link
-                key={source.id}
-                href={`${source.route}?highlight=${source.id}${source.query ? `&${source.query}` : ''}`}
-                className="bg-background-overlay flex items-center gap-3 rounded-xl p-3 transition-all hover:bg-white/8 active:scale-99"
-              >
-                <div className="flex-center text-electric-pink h-9 w-9 shrink-0 rounded-lg bg-white/5">
-                  <source.Icon size={17} strokeWidth={2.2} />
-                </div>
-                <div className="flex min-w-0 flex-1 flex-col">
-                  <span className="truncate text-[13px] font-bold text-white">
-                    {t(source.labelKey)}
-                  </span>
-                  <span className="text-white-secondary text-[11px]">
-                    {t(source.hintKey, hintParams)}
-                  </span>
-                </div>
-                <span className="text-success shrink-0 text-[13px] font-extrabold tabular-nums">
-                  {source.ap ? `${source.ap} AP` : t(source.apFallbackKey ?? 'varies')}
-                </span>
-                <ChevronRight size={15} className="shrink-0 text-white/25" />
-              </Link>
-            );
-          })}
-        </div>
-      ))}
-    </section>
-  );
-}
+/** Where a source row sends the player, with the highlight the target screen reads. */
+export const apSourceHref = (source: ApSource): Route =>
+  `${source.route}?highlight=${source.id}${source.query ? `&${source.query}` : ''}` as Route;

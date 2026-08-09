@@ -10,6 +10,8 @@
   "referral requires channel explainer": "Реферал засчитывается, пока он подписан на канал и не заблокировал бота. Вашими друзьями они остаются в любом случае.",
   "referrals": "Рефералы",
   "select tournament": "Выберите турнир",
+  "to {tier}": "До тира {tier}",
+  "all ap sources": "Все источники · {n}",
   "+{amount} {coin} back": "+{amount} {coin} сверху",
   "+{amount} {coin} for level {level}": "+{amount} {coin} для Уровня {level}",
   "1st": "1-е",

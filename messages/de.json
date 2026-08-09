@@ -10,6 +10,8 @@
   "referral requires channel explainer": "Ein Referral zählt, solange er den Kanal abonniert hat und den Bot nicht blockiert. Deine Freunde bleiben sie in jedem Fall.",
   "referrals": "Referrals",
   "select tournament": "Turnier auswählen",
+  "to {tier}": "Bis {tier}",
+  "all ap sources": "Alle {n} Quellen",
   "+{amount} {coin} back": "+{amount} {coin} extra",
   "+{amount} {coin} for level {level}": "+{amount} {coin} für Level {level}",
   "1st": "1.",
