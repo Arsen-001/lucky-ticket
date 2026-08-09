@@ -104,23 +104,20 @@ export const appConfig = {
     feeMonthDiscountPercent: 1,
     /**
      * Volume-discount brackets applied on top of the month discount. The user
-     * gets the percent of the largest bracket whose `threshold` they meet.
-     * Lucky Player holders get the boosted set.
+     * gets the percent of the largest bracket whose `threshold` they meet. ONE
+     * ladder for everybody — a status adds its `stakeFeeDiscountBonusPct` on
+     * top (DOCS §7.3). There used to be a second, Lucky-Player-only ladder
+     * (this one +10 everywhere) picked by an `isLuckyPlayer` boolean, which is
+     * why a VIP without Lucky Player silently got the base discount.
      */
-    feeVolumeDiscount: {
-      default: [
-        { threshold: 100_000, percent: 10 },
-        { threshold: 250_000, percent: 12 },
-        { threshold: 500_000, percent: 15 },
-        { threshold: 1_000_000, percent: 20 },
-      ],
-      luckyPlayer: [
-        { threshold: 100_000, percent: 20 },
-        { threshold: 250_000, percent: 22 },
-        { threshold: 500_000, percent: 25 },
-        { threshold: 1_000_000, percent: 30 },
-      ],
-    },
+    feeVolumeDiscount: [
+      { threshold: 100_000, percent: 10 },
+      { threshold: 250_000, percent: 12 },
+      { threshold: 500_000, percent: 15 },
+      { threshold: 1_000_000, percent: 20 },
+    ],
+    /** Default status bonus, in percentage points — what the old LP ladder was. */
+    feeDiscountBonusLuckyPlayer: 10,
     /** Stake fee never drops below this floor (in Stars). */
     feeMinStars: 1,
     /** Cancel fee never drops below this floor (in Stars). */

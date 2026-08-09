@@ -382,7 +382,8 @@ const joinTournament = (args: { body?: unknown }) => {
   mockDb.user.activityPoints += applyStatusTournamentJoinApBoost(
     baseJoinAp,
     mockDb.user.isLuckyPlayer ?? false,
-    mockDb.user.isVIP ?? false
+    mockDb.user.isVIP ?? false,
+    mockDb.user.statusPerks
   );
 
   return {

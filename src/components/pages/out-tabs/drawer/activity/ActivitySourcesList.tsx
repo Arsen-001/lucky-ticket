@@ -28,6 +28,7 @@ import {
 } from '@/constants/global.constants';
 import { routes, type Route } from '@/constants/routes';
 import type { MessageIds } from '@/types/types/i18n.types';
+import { effectiveAdsDailyLimit } from '@/utils/global/status.utils';
 
 type ApCategory = 'base' | 'social' | 'tournament' | 'spend';
 
@@ -203,12 +204,14 @@ export function ActivitySourcesList({ activityPoints = 0 }: ActivitySourcesListP
   const t = useAppTranslations();
   const { data: me } = useGetMeQuery();
   const dailyBaseline = computeDailyBaselineAp(activityPoints, me?.referralsCount ?? 0);
-  // VIP supersedes LP — highest tier wins.
-  const watchVideoLimit = me?.isVIP
-    ? GlobalConstants.vipWatchVideoDailyLimit
-    : me?.isLuckyPlayer
-      ? apRewards.luckyPlayerWatchVideoDailyLimit
-      : apRewards.watchVideoDailyLimit;
+  // Base cap + the backend-resolved status bonus. The flat constants are only a
+  // fallback: VIP's bonus scales per level, so quoting `vipWatchVideoDailyLimit`
+  // promised a level-1 VIP 40 views a day when the server allows 12.
+  const watchVideoLimit = effectiveAdsDailyLimit(
+    me?.isLuckyPlayer ?? false,
+    me?.isVIP ?? false,
+    me?.statusPerks
+  );
 
   return (
     <section className="flex flex-col gap-3">

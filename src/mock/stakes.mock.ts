@@ -48,7 +48,15 @@ const startStake = (args: FetchArgs) => {
 
   const isLuckyPlayer = mockDb.user.isLuckyPlayer ?? false;
   const bronzeOpened = mockDb.user.bronzeStakesOpened ?? 0;
-  const feeBreakdown = computeStakeFee(amount, months, isLuckyPlayer, level, bronzeOpened);
+  const feeBreakdown = computeStakeFee(
+    amount,
+    months,
+    isLuckyPlayer,
+    level,
+    bronzeOpened,
+    mockDb.user.isVIP ?? false,
+    mockDb.user.statusPerks
+  );
 
   if (mockDb.user.telegramStars < feeBreakdown.fee) {
     return { error: { status: 400, data: 'Insufficient Stars for stake fee' } };
@@ -120,7 +128,11 @@ const claimStake = (args: FetchArgs) => {
     stake.lockedAmount,
     months,
     mockDb.user.isLuckyPlayer ?? false,
-    mockDb.user.isVIP ?? false
+    mockDb.user.isVIP ?? false,
+    undefined,
+    // The mock stands in for the server, so it has to credit the same per-level
+    // boost the screens now quote — otherwise dev pays out more than it promised.
+    mockDb.user.statusPerks
   );
   const bonusLS = levelDef ? computeStakeCompletionStars(months, levelDef) : 0;
 

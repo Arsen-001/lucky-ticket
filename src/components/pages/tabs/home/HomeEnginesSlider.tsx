@@ -227,6 +227,7 @@ export function HomeEnginesSlider({ className }: ClassNameProps) {
           avatarBoostPct: avatarSpeedPct,
           badgeBoostPct: badgeSpeedPct,
           tables,
+          perks: me?.statusPerks,
         });
         if (engine.pendingCount > 0) {
           elapsedNext[engine.id] = cycle;
@@ -380,6 +381,7 @@ export function HomeEnginesSlider({ className }: ClassNameProps) {
       avatarBoostPct: avatarSpeedPct,
       badgeBoostPct: badgeSpeedPct,
       tables,
+      perks: me?.statusPerks,
     });
     const elapsed = elapsedByEngine[engine.id] ?? engineElapsedSeconds(engine);
     const remaining = Math.max(0, cycle - elapsed);

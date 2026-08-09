@@ -103,7 +103,7 @@ export function TournamentResultModal({
   // VIP/LP reward boost at finish-time (DOCS §7.3). Show it as-is; split out the
   // status bonus only to label the badge below.
   const lc = result?.lc ?? 0;
-  const statusBoostPct = statusTournamentLcBoostPct(isLp, isVip);
+  const statusBoostPct = statusTournamentLcBoostPct(isLp, isVip, me?.statusPerks);
   const baseLc = statusBoostPct > 0 ? Math.round(lc / (1 + statusBoostPct / 100)) : lc;
   const statusBonusLc = lc - baseLc;
   const statusLabelKey = isVip ? 'vip' : 'lucky player';

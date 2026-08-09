@@ -59,6 +59,7 @@ export function EnginePreviewCard({
     speedChip,
     speedBooster,
     isLuckyPlayer: me?.isLuckyPlayer ?? false,
+    perks: me?.statusPerks,
     isVip: me?.isVIP ?? false,
     avatarBoostPct: avatarSpeedPct,
     badgeBoostPct: badgeSpeedPct,

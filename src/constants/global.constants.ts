@@ -137,6 +137,7 @@ export const GlobalConstants = {
   stakeFeeStep: appConfig.stakes.feeStep,
   stakeFeeMonthDiscountPercent: appConfig.stakes.feeMonthDiscountPercent,
   stakeFeeVolumeDiscount: appConfig.stakes.feeVolumeDiscount,
+  stakeFeeDiscountBonusLuckyPlayer: appConfig.stakes.feeDiscountBonusLuckyPlayer,
   stakeFeeMinStars: appConfig.stakes.feeMinStars,
   stakeCancelFeeMinStars: appConfig.stakes.cancelFeeMinStars,
   stakeCancelFeeMultiplier: appConfig.stakes.cancelFeeMultiplier,

@@ -41,7 +41,8 @@ export function StakesActiveStakeCard({ stake, levelDef }: StakesActiveStakeCard
     months,
     me?.isLuckyPlayer ?? false,
     me?.isVIP ?? false,
-    stakeKnobs
+    stakeKnobs,
+    me?.statusPerks
   );
   const stakeBonusAp = computeStakeCompletionBonusAp(stake.lockedAmount, months, stakeKnobs);
   const completionStars = computeStakeCompletionStars(months, levelDef);

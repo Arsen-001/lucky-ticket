@@ -11,7 +11,6 @@ import { useGetMeQuery } from '@/api/me.api';
 import { useEngineSpeedAvatarBoostPct } from '@/hooks/useEngineSpeedAvatarBoostPct';
 import { useTestBadgeSpeedBoostPct } from '@/hooks/useTestBadgeSpeedBoostPct';
 import { useEngineConfig } from '@/hooks/useEngineConfig';
-import { GlobalConstants } from '@/constants/global.constants';
 import {
   effectiveCycleSeconds,
   engineCapacity,
@@ -23,6 +22,7 @@ import { EngineCubeBackFace } from './EngineCubeBackFace';
 import { EngineCubeFacePips } from './EngineCubeFacePips';
 import { EngineCubeSlot } from './EngineCubeSlot';
 import { displayNameOf } from '@/utils/global/user.utils';
+import { effectiveStatusPct } from '@/utils/global/status.utils';
 import { EngineCubeStatsFace } from './EngineCubeStatsFace';
 import '@/styles/components/engine-cube-scale.css';
 import '@/styles/components/engine-card-cube.css';
@@ -80,12 +80,13 @@ function EngineCardCubeImpl(props: EngineCardCubeProps) {
   // Scope the `me` subscription to the fields the cube actually renders — a
   // Lucky-Stars change (every engine action) must not re-render all 20 cubes
   // for values (status / name) that didn't change.
-  const { isLp, isVip, vipLevel, ownerName } = useGetMeQuery(undefined, {
+  const { isLp, isVip, vipLevel, ownerName, statusPerks } = useGetMeQuery(undefined, {
     selectFromResult: ({ data }) => ({
       isLp: data?.isLuckyPlayer ?? false,
       isVip: data?.isVIP ?? false,
       vipLevel: data?.vipLevel ?? 0,
       ownerName: displayNameOf(data),
+      statusPerks: data?.statusPerks,
     }),
   });
   const chips = inventory?.chips ?? [];
@@ -106,13 +107,15 @@ function EngineCardCubeImpl(props: EngineCardCubeProps) {
   // Real running total of tickets this engine has ever claimed (backend counter).
   const lifetimeProduced = engine.lifetimeProduced ?? 0;
 
-  // Status (VIP > LP) grants a flat additive engine speed boost. VIP
-  // supersedes LP — higher tier wins, never stacks (DOCS §7.3).
-  const statusEngineSpeedBoostPct = isVip
-    ? GlobalConstants.vipEngineSpeedBoostPct
-    : isLp
-      ? GlobalConstants.luckyPlayerEngineSpeedBoostPct
-      : 0;
+  // Status grants an additive engine speed boost. VIP supersedes LP — higher
+  // tier wins, never stacks (DOCS §7.3) — and its size comes from the player's
+  // own VIP level, not the level-20 constant the stats face used to show.
+  const statusEngineSpeedBoostPct = effectiveStatusPct(
+    'engineSpeedBoostPct',
+    isLp,
+    isVip,
+    statusPerks
+  );
   const avatarSpeedPct = useEngineSpeedAvatarBoostPct();
   const badgeSpeedPct = useTestBadgeSpeedBoostPct();
   const { tables } = useEngineConfig();
@@ -135,6 +138,7 @@ function EngineCardCubeImpl(props: EngineCardCubeProps) {
     speedChip: equippedSpeedChip,
     isLuckyPlayer: isLp,
     isVip,
+    perks: statusPerks,
     avatarBoostPct: avatarSpeedPct,
     badgeBoostPct: badgeSpeedPct,
     tables,

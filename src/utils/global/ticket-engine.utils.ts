@@ -2,7 +2,9 @@ import dayjs from 'dayjs';
 import { GlobalConstants } from '@/constants/global.constants';
 import type { InventoryBooster, InventoryChip } from '@/types/interfaces/inventory.interfaces';
 import type { TicketEngine } from '@/types/interfaces/ticket.interfaces';
+import type { StatusPerks } from '@/types/interfaces/user.interfaces';
 import type { Ticket, TicketType } from '@/types/types/ticket.types';
+import { effectiveStatusPct } from '@/utils/global/status.utils';
 
 /* ────────────────────────────────────────────────────────────────────────────
  *  ⚙️  ENGINE LEVEL TABLES — «сколько даёт каждый уровень» (скорость / объём)
@@ -176,15 +178,20 @@ export const effectiveCycleSeconds = (
      * (it does, in `computeEngineState`) or a badge holder's cycle drifts.
      */
     badgeBoostPct?: number;
+    /** `me.statusPerks` — the per-level status boost the server actually applies. */
+    perks?: Pick<StatusPerks, 'engineSpeedBoostPct'>;
     tables?: EngineLevelTables;
   }
 ) => {
-  // VIP supersedes LP — higher-tier engine speed boost wins, no stacking.
-  const statusBoostPct = options?.isVip
-    ? GlobalConstants.vipEngineSpeedBoostPct
-    : options?.isLuckyPlayer
-      ? GlobalConstants.luckyPlayerEngineSpeedBoostPct
-      : 0;
+  // VIP supersedes LP — higher-tier engine speed boost wins, no stacking. The
+  // per-level value comes from `me.statusPerks`; the constants are the ceiling
+  // and only stand in when the backend didn't send perks.
+  const statusBoostPct = effectiveStatusPct(
+    'engineSpeedBoostPct',
+    options?.isLuckyPlayer ?? false,
+    options?.isVip ?? false,
+    options?.perks
+  );
 
   let totalBoostPct =
     engineLevelBoostPct(engine.engineLevel || 1, options?.tables) +

@@ -91,7 +91,8 @@ export function NewStakeHero({
     clampedDuration,
     me?.isLuckyPlayer ?? false,
     me?.isVIP ?? false,
-    stakeKnobs
+    stakeKnobs,
+    me?.statusPerks
   );
   const aprLabel = aprPercent.toFixed(aprPercent % 1 === 0 ? 0 : 1);
 

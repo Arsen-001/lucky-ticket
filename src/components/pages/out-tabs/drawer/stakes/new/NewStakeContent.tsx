@@ -109,7 +109,9 @@ export function NewStakeContent() {
     durationMonths,
     me?.isLuckyPlayer ?? false,
     activeLevel.level,
-    me?.bronzeStakesOpened ?? 0
+    me?.bronzeStakesOpened ?? 0,
+    me?.isVIP ?? false,
+    me?.statusPerks
   );
   const bronzeFreeRemaining = Math.max(
     0,
@@ -125,14 +127,16 @@ export function NewStakeContent() {
     maxMonths,
     me?.isLuckyPlayer ?? false,
     me?.isVIP ?? false,
-    stakeCfg
+    stakeCfg,
+    me?.statusPerks
   );
   const lcNow = computeStakeReturnCoins(
     safeDeposit,
     durationMonths,
     me?.isLuckyPlayer ?? false,
     me?.isVIP ?? false,
-    stakeCfg
+    stakeCfg,
+    me?.statusPerks
   );
   const lcDelta = lcAtMax - lcNow;
   const ctaHint =

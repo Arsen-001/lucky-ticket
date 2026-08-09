@@ -122,7 +122,8 @@ export function ReadyStakeContent({ stakeId }: ReadyStakeContentProps) {
     months,
     me?.isLuckyPlayer ?? false,
     me?.isVIP ?? false,
-    stakeKnobs
+    stakeKnobs,
+    me?.statusPerks
   );
   const ratePercent = computeStakeAprPercent(months, stakeKnobs);
   const rateLabel = ratePercent.toFixed(ratePercent % 1 === 0 ? 0 : 1);

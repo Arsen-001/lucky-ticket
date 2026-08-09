@@ -1,5 +1,6 @@
-import { GlobalConstants } from '@/constants/global.constants';
 import { appConfig } from '@/config/app.config';
+import type { StatusPerks } from '@/types/interfaces/user.interfaces';
+import { effectiveStatusPct } from '@/utils/global/status.utils';
 
 /**
  * Net LC a placement actually pays out: the prize pool minus the jackpot skim
@@ -37,17 +38,17 @@ export const resolveShardRewards = (
  * Returns the effective LC-reward boost % from status. VIP supersedes LP —
  * the higher-tier value wins, the two never stack.
  */
-export const statusTournamentLcBoostPct = (isLp: boolean, isVip: boolean): number => {
-  if (isVip) return GlobalConstants.vipTournamentRewardBoostPct;
-  if (isLp) return GlobalConstants.luckyPlayerTournamentRewardBoostPct;
-  return 0;
-};
+export const statusTournamentLcBoostPct = (
+  isLp: boolean,
+  isVip: boolean,
+  perks?: Pick<StatusPerks, 'tournamentRewardBoostPct'>
+): number => effectiveStatusPct('tournamentRewardBoostPct', isLp, isVip, perks);
 
-const statusTournamentJoinApBoostPct = (isLp: boolean, isVip: boolean): number => {
-  if (isVip) return GlobalConstants.vipTournamentJoinApBoostPct;
-  if (isLp) return GlobalConstants.luckyPlayerTournamentJoinApBoostPct;
-  return 0;
-};
+const statusTournamentJoinApBoostPct = (
+  isLp: boolean,
+  isVip: boolean,
+  perks?: Pick<StatusPerks, 'tournamentJoinApBoostPct'>
+): number => effectiveStatusPct('tournamentJoinApBoostPct', isLp, isVip, perks);
 
 /**
  * Applies the status (VIP > LP) AP-join boost when entering a tournament.
@@ -55,9 +56,10 @@ const statusTournamentJoinApBoostPct = (isLp: boolean, isVip: boolean): number =
 export const applyStatusTournamentJoinApBoost = (
   baseAp: number,
   isLp: boolean,
-  isVip: boolean
+  isVip: boolean,
+  perks?: Pick<StatusPerks, 'tournamentJoinApBoostPct'>
 ): number => {
-  const pct = statusTournamentJoinApBoostPct(isLp, isVip);
+  const pct = statusTournamentJoinApBoostPct(isLp, isVip, perks);
   if (pct === 0) return baseAp;
   return Math.round(baseAp * (1 + pct / 100));
 };

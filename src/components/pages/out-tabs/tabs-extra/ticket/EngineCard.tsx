@@ -62,10 +62,11 @@ export function EngineCard({
   const { data: inventory } = useGetInventoryQuery();
   // Scope the `me` subscription to status flags only — a Lucky-Stars change on
   // any engine action must not re-render every card for a value it doesn't use.
-  const { isLp, isVip } = useGetMeQuery(undefined, {
+  const { isLp, isVip, statusPerks } = useGetMeQuery(undefined, {
     selectFromResult: ({ data }) => ({
       isLp: data?.isLuckyPlayer ?? false,
       isVip: data?.isVIP ?? false,
+      statusPerks: data?.statusPerks,
     }),
   });
   const avatarSpeedPct = useEngineSpeedAvatarBoostPct();
@@ -82,6 +83,7 @@ export function EngineCard({
     capacityBooster,
     isLuckyPlayer: isLp,
     isVip,
+    perks: statusPerks,
     avatarBoostPct: avatarSpeedPct,
     badgeBoostPct: badgeSpeedPct,
     tables,

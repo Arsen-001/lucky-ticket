@@ -10,8 +10,15 @@ export interface StatusPerks {
   tournamentJoinApBoostPct: number;
   marketDiscountPct: number;
   referralPct: number;
-  adsDailyLimit: number;
-  ticketSendDailyLimits: Record<string, number>;
+  /**
+   * EXTRA daily rewarded-ad views the status grants, ON TOP of the base cap —
+   * a bonus, not the cap itself. VIP level 1 sends `2`, meaning 10 + 2 = 12.
+   */
+  adsDailyBonus: number;
+  /** EXTRA percentage points on the stake-fee volume discount (DOCS §18.5). */
+  stakeFeeDiscountBonusPct: number;
+  /** EXTRA per-recipient daily ticket sends per tier, on top of the free table. */
+  ticketSendDailyBonus: Record<string, number>;
   /** Bulk "Claim all" per tier on the Tickets page (DOCS §8.4). LP-only by default. */
   bulkClaimEnabled: boolean;
 }

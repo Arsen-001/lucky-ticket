@@ -33,10 +33,19 @@ describe('stake math (DOCS §18)', () => {
     expect(computeStakeCancelFee(50_000)).toBe(10); // max(2, 2 × 5)
   });
 
-  it('default volume-discount brackets', () => {
-    expect(computeStakeVolumeDiscountPercent(99_999, false)).toBe(0);
-    expect(computeStakeVolumeDiscountPercent(100_000, false)).toBe(10);
-    expect(computeStakeVolumeDiscountPercent(1_000_000, false)).toBe(20);
+  it('volume-discount brackets without a status', () => {
+    expect(computeStakeVolumeDiscountPercent(99_999, 0)).toBe(0);
+    expect(computeStakeVolumeDiscountPercent(100_000, 0)).toBe(10);
+    expect(computeStakeVolumeDiscountPercent(1_000_000, 0)).toBe(20);
+  });
+
+  it('a status adds its bonus to the bracket, but never invents one', () => {
+    // +10pp is the default for both LP and VIP — the numbers Lucky Player has
+    // always had, and the ones VIP was promised but never actually got.
+    expect(computeStakeVolumeDiscountPercent(100_000, 10)).toBe(20);
+    expect(computeStakeVolumeDiscountPercent(1_000_000, 10)).toBe(30);
+    // Under the first threshold there is no discount to boost.
+    expect(computeStakeVolumeDiscountPercent(99_999, 10)).toBe(0);
   });
 
   it('APR spans the configured min..max across the duration slider', () => {

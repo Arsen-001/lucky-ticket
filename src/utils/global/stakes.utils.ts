@@ -1,6 +1,8 @@
 import { GlobalConstants } from '@/constants/global.constants';
 import type { StakeHistoryEntry, StakeLevelDefinition } from '@/types/interfaces/stakes.interfaces';
+import type { StatusPerks } from '@/types/interfaces/user.interfaces';
 import type { Dictionary } from '@/types/types/i18n.types';
+import { effectiveStakeFeeDiscountBonusPct, effectiveStatusPct } from '@/utils/global/status.utils';
 
 /**
  * Admin-tunable inputs of the stake projections. Components pass the live
@@ -45,16 +47,15 @@ export const computeStakeReturnCoins = (
   months: number,
   isLuckyPlayer = false,
   isVip = false,
-  knobs: StakeMathKnobs = defaultStakeKnobs
+  knobs: StakeMathKnobs = defaultStakeKnobs,
+  perks?: Pick<StatusPerks, 'stakeYieldBoostPct'>
 ) => {
   const ratePercent = computeStakeAprPercent(months, knobs);
   const base = (deposit * ratePercent) / 100;
-  // VIP supersedes LP — the higher-tier yield boost wins, never stacks.
-  const statusBoostPct = isVip
-    ? GlobalConstants.vipStakeYieldBoostPct
-    : isLuckyPlayer
-      ? GlobalConstants.luckyPlayerStakeYieldBoostPct
-      : 0;
+  // VIP supersedes LP — the higher-tier yield boost wins, never stacks. Pass
+  // `me.statusPerks` from anywhere that shows this number to a player: VIP's
+  // boost ramps per level, so the flat constant over-promises at low levels.
+  const statusBoostPct = effectiveStatusPct('stakeYieldBoostPct', isLuckyPlayer, isVip, perks);
   return Math.round(base * (1 + statusBoostPct / 100));
 };
 
@@ -100,18 +101,16 @@ export const computeStakeFeeBase = (deposit: number) =>
   Math.ceil(deposit / GlobalConstants.stakeFeeStep);
 
 /**
- * Volume discount % keyed to the deposit size — uses the boosted bracket set
- * when the user holds Lucky Player (DOCS §18.5).
+ * Volume discount % keyed to the deposit size, plus the status bonus on top
+ * (DOCS §18.5). A deposit under the first threshold gets nothing to boost — a
+ * status must not discount a fee for volume the player never put up.
  */
-export const computeStakeVolumeDiscountPercent = (deposit: number, isLuckyPlayer: boolean) => {
-  const brackets = isLuckyPlayer
-    ? GlobalConstants.stakeFeeVolumeDiscount.luckyPlayer
-    : GlobalConstants.stakeFeeVolumeDiscount.default;
+export const computeStakeVolumeDiscountPercent = (deposit: number, statusBonusPct: number) => {
   let percent = 0;
-  for (const b of brackets) {
+  for (const b of GlobalConstants.stakeFeeVolumeDiscount) {
     if (deposit >= b.threshold) percent = b.percent;
   }
-  return percent;
+  return percent > 0 ? percent + Math.max(0, statusBonusPct) : 0;
 };
 
 export interface StakeFeeBreakdown {
@@ -132,10 +131,15 @@ export const computeStakeFee = (
   months: number,
   isLuckyPlayer: boolean,
   level: number,
-  bronzeStakesOpened: number
+  bronzeStakesOpened: number,
+  isVip = false,
+  perks?: Pick<StatusPerks, 'stakeFeeDiscountBonusPct'>
 ): StakeFeeBreakdown => {
   const base = computeStakeFeeBase(deposit);
-  const volumeDiscountPercent = computeStakeVolumeDiscountPercent(deposit, isLuckyPlayer);
+  const volumeDiscountPercent = computeStakeVolumeDiscountPercent(
+    deposit,
+    effectiveStakeFeeDiscountBonusPct(isLuckyPlayer, isVip, perks)
+  );
   const monthDiscountPercent = months * GlobalConstants.stakeFeeMonthDiscountPercent;
   const totalDiscountPercent = Math.min(99, volumeDiscountPercent + monthDiscountPercent);
   const free = level === 1 && bronzeStakesOpened < GlobalConstants.stakeBronzeFreeStartCount;

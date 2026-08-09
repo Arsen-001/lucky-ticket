@@ -74,7 +74,8 @@ export function TournamentBetModal({
   const joinAp = applyStatusTournamentJoinApBoost(
     joinApByTier[tournamentType],
     me?.isLuckyPlayer ?? false,
-    me?.isVIP ?? false
+    me?.isVIP ?? false,
+    me?.statusPerks
   );
   const hasTickets = availableTickets > 0;
 

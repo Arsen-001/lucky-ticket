@@ -38,7 +38,8 @@ export function StakesRewardsPreviewCard({
     durationMonths,
     me?.isLuckyPlayer ?? false,
     me?.isVIP ?? false,
-    stakeKnobs
+    stakeKnobs,
+    me?.statusPerks
   );
   const stakeBaseAp = computeStakeBaseAp(deposit, durationMonths, stakeKnobs);
   const stakeBonusAp = computeStakeCompletionBonusAp(deposit, durationMonths, stakeKnobs);

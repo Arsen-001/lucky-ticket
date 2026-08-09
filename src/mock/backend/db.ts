@@ -67,6 +67,33 @@ export const mockDb = {
     luckyPlayerExpiresAt: new Date(Date.now() + 18 * 24 * 3_600_000).toISOString(),
     isVIP: !fresh,
     vipLevel: fresh ? 0 : 2,
+    // The backend always resolves these and the UI prefers them over the flat
+    // code constants, so the mock has to send them too — otherwise dev only
+    // ever exercises the fallback. This is the VIP **level 2** row of the live
+    // ladder (DOCS §7.4): the counted perks are BONUSES over the free numbers,
+    // so `adsDailyBonus: 3` is 10 + 3 = 13 views and Bronze `+5` is 1 + 5 = 6.
+    // `bulkClaimEnabled` is false on purpose — "Claim all" unlocks at VIP 10,
+    // and VIP supersedes Lucky Player rather than stacking with it (DOCS §7.3).
+    statusPerks: fresh
+      ? undefined
+      : {
+          engineSpeedBoostPct: 2,
+          stakeYieldBoostPct: 0.2,
+          tournamentRewardBoostPct: 0,
+          tournamentJoinApBoostPct: 0,
+          marketDiscountPct: 2,
+          referralPct: 25,
+          adsDailyBonus: 3,
+          stakeFeeDiscountBonusPct: 10,
+          ticketSendDailyBonus: {
+            BRONZE: 5,
+            SILVER: 4,
+            GOLD: 2,
+            PLATINUM: 2,
+            DIAMOND: 1,
+          },
+          bulkClaimEnabled: false,
+        },
     isVerified: !fresh,
     avatar: images.avatar.src,
     avatarId: 'avatar-10',

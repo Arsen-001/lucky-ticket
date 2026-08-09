@@ -8,9 +8,11 @@ import { QuantityStepperButton } from '@/components/pages/out-tabs/drawer/profil
 import { TicketOverlap } from '@/components/shared/icons/TicketOverlap';
 import { BoltIcon } from '@/components/shared/icons/BoltIcon';
 import { useGetProfileQuery, useSendTicketMutation } from '@/api/profile.api';
+import { useGetMeQuery } from '@/api/me.api';
 import { useAppTranslations } from '@/hooks/useAppTranslations';
 import { useToast } from '@/hooks/useToast';
 import { GlobalConstants } from '@/constants/global.constants';
+import { effectiveTicketSendDailyLimit } from '@/utils/global/status.utils';
 import { TicketsEnum } from '@/types/enums/ticket.enums';
 import type { TicketType } from '@/types/types/ticket.types';
 import type { MessageIds } from '@/types/types/i18n.types';
@@ -47,15 +49,27 @@ export function ProfileSendTicketModal({
   const t = useAppTranslations();
   const toast = useToast();
   const { data: me } = useGetProfileQuery(undefined);
+  const { data: meUser } = useGetMeQuery();
   const [sendTicket, { isLoading }] = useSendTicketMutation();
 
   const byTier = me?.privateStats?.ticketsByTier ?? {};
   const ownedTiers = TIER_ORDER.filter(tt => (byTier[tt] ?? 0) > 0);
-  // VIP inherits the Lucky Player send-limit table (DOCS §7.3).
-  const sendLimits =
-    GlobalConstants.ticketSendDailyLimits[
-      me?.isLuckyPlayer || me?.isVIP ? 'luckyPlayer' : 'default'
-    ];
+  // Free table + the backend-resolved status bonus, per tier (DOCS §7.3). Read
+  // from `statusPerks` rather than the flat LP table so a VIP sees their own
+  // level's allowance, and a 0 here is the same "tier closed" the server means.
+  // `statusPerks` rides on /me, not on the profile payload — the query is
+  // already cached app-wide, so this costs no extra request.
+  const sendLimits = Object.fromEntries(
+    TIER_ORDER.map(tt => [
+      tt,
+      effectiveTicketSendDailyLimit(
+        tt,
+        me?.isLuckyPlayer ?? false,
+        me?.isVIP ?? false,
+        meUser?.statusPerks
+      ),
+    ])
+  ) as Record<TicketType, number>;
 
   const [tier, setTier] = useState<TicketType | null>(null);
   const [quantity, setQuantity] = useState(1);

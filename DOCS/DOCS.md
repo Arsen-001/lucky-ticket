@@ -274,19 +274,19 @@ All perk magnitudes live in `src/constants/global.constants.ts` and can be tuned
 
 **Every** Lucky Player perk is **admin-tunable** in one place (Admin → Настройки → Статусы): price (LC + LS), duration (days), and the full perk set — engine speed, stake yield, tournament reward, tournament join-AP, **market discount %, daily ads cap, and per-tier ticket-send limits**. The backend resolves these into `me.statusPerks` so the Mini App shows exactly what the server enforces. Admins can also set/extend a specific player's LP expiry from the user editor.
 
-| Perk                            | Value                     | Source constant                                  |
-| :------------------------------ | :------------------------ | :----------------------------------------------- |
-| Engine speed boost (additive)   | +10%                      | `luckyPlayerEngineSpeedBoostPct`                 |
-| Stake LC yield boost            | +20%                      | `luckyPlayerStakeYieldBoostPct`                  |
-| Stake fee volume discount       | doubled brackets (20–30%) | `appConfig.stakes.feeVolumeDiscount.luckyPlayer` |
-| Market discount on every item   | −10%                      | `luckyPlayerMarketDiscountPct`                   |
-| Tournament LC reward boost      | +25%                      | `luckyPlayerTournamentRewardBoostPct`            |
-| Tournament join AP boost        | +50%                      | `luckyPlayerTournamentJoinApBoostPct`            |
-| Daily ads cap                   | 20                        | `apRewards.luckyPlayerWatchVideoDailyLimit`      |
-| Higher ticket send daily limits | B5/S4/G3/P2/D1            | `ticketSendDailyLimits.luckyPlayer`              |
-| Send Platinum/Diamond tickets   | allowed                   | `ticketSendDailyLimits.default = 0` for P/D      |
-| Bulk "Claim all" per tier       | enabled (admin-tunable)   | `statusPerks.bulkClaimEnabled` (LP default true) |
-| Profile badge                   | LP icon + glow            | n/a (visual)                                     |
+| Perk                            | Value                                              | Source constant                                  |
+| :------------------------------ | :------------------------------------------------- | :----------------------------------------------- |
+| Engine speed boost (additive)   | +10%                                               | `luckyPlayerEngineSpeedBoostPct`                 |
+| Stake LC yield boost            | +20%                                               | `luckyPlayerStakeYieldBoostPct`                  |
+| Stake fee volume discount       | 20–30% (base 10–20% **+10pp**)                     | `statusPerks.stakeFeeDiscountBonusPct`           |
+| Market discount on every item   | −10%                                               | `luckyPlayerMarketDiscountPct`                   |
+| Tournament LC reward boost      | +25%                                               | `luckyPlayerTournamentRewardBoostPct`            |
+| Tournament join AP boost        | +50%                                               | `luckyPlayerTournamentJoinApBoostPct`            |
+| Daily ads cap                   | 20 (base 10 **+10**)                               | `statusPerks.adsDailyBonus`                      |
+| Higher ticket send daily limits | B5/S4/G3/P2/D1 (base 1/1/1/0/0 **+4/+3/+2/+2/+1**) | `statusPerks.ticketSendDailyBonus`               |
+| Send Platinum/Diamond tickets   | allowed                                            | base is 0 → any positive bonus opens the tier    |
+| Bulk "Claim all" per tier       | enabled (admin-tunable)                            | `statusPerks.bulkClaimEnabled` (LP default true) |
+| Profile badge                   | LP icon + glow                                     | n/a (visual)                                     |
 
 #### VIP perks
 
@@ -294,20 +294,36 @@ VIP is the high-tier permanent status. **Every VIP perk is admin-tunable per lev
 
 **VIP is a ramp, not a flat status.** The values below are the **Level 20 ceiling**; a VIP starts far under Lucky Player and climbs past it. The full per-level ladder — the actual live numbers — is in **§7.4**. The two milestones that matter: **Level 10** is where VIP draws level with Lucky Player on every percentage perk and takes over its "Claim all" capability _permanently_; **Level 20** is the table below. The code constants (`vipEngineSpeedBoostPct` etc.) are the flat fallback a fresh environment boots with; production runs the ladder from `statusConfig`.
 
-| Perk                            | Value at Level 20             | Level 1 · Level 10      | Source constant                                  |
-| :------------------------------ | :---------------------------- | :---------------------- | :----------------------------------------------- |
-| Engine speed boost (additive)   | +25%                          | +1% · +10%              | `vipEngineSpeedBoostPct`                         |
-| Stake LC yield boost            | +40%                          | +0.1% · +6%             | `vipStakeYieldBoostPct`                          |
-| Stake fee volume discount       | doubled brackets (same as LP) | same at every level     | `appConfig.stakes.feeVolumeDiscount.luckyPlayer` |
-| Market discount on every item   | −20%                          | −1% · −10%              | `vipMarketDiscountPct`                           |
-| Tournament LC reward boost      | +50%                          | none until L5 · +15%    | `vipTournamentRewardBoostPct`                    |
-| Tournament join AP boost        | +100%                         | none until L5 · +30%    | `vipTournamentJoinApBoostPct`                    |
-| Daily ads cap                   | 40                            | 12 · 22                 | `vipWatchVideoDailyLimit`                        |
-| Higher ticket send daily limits | 15/12/10/6/5 by tier          | LP table · 10/8/5/4/2   | `ticketSendDailyLimits.luckyPlayer`              |
-| Bulk "Claim all"                | yes                           | no · **unlocks at L10** | `bulkClaimEnabled` (LP-only in code defaults)    |
-| Send Platinum/Diamond tickets   | allowed                       | allowed at every level  | (same gate as LP)                                |
-| Profile badge                   | Animated VIP-level            | every level             | n/a (visual)                                     |
-| Dedicated support               | yes                           | every level             | n/a (operations)                                 |
+| Perk                            | Value at Level 20              | Level 1 · Level 10      | Source constant                               |
+| :------------------------------ | :----------------------------- | :---------------------- | :-------------------------------------------- |
+| Engine speed boost (additive)   | +25%                           | +1% · +10%              | `vipEngineSpeedBoostPct`                      |
+| Stake LC yield boost            | +40%                           | +0.1% · +6%             | `vipStakeYieldBoostPct`                       |
+| Stake fee volume discount       | 20–30% (base 10–20% **+10pp**) | same at every level     | `statusPerks.stakeFeeDiscountBonusPct`        |
+| Market discount on every item   | −20%                           | −1% · −10%              | `vipMarketDiscountPct`                        |
+| Tournament LC reward boost      | +50%                           | none until L5 · +15%    | `vipTournamentRewardBoostPct`                 |
+| Tournament join AP boost        | +100%                          | none until L5 · +30%    | `vipTournamentJoinApBoostPct`                 |
+| Daily ads cap                   | 40 (base 10 **+30**)           | 12 · 22                 | `statusPerks.adsDailyBonus`                   |
+| Higher ticket send daily limits | 15/12/10/6/5 by tier           | LP table · 10/8/5/4/2   | `statusPerks.ticketSendDailyBonus`            |
+| Bulk "Claim all"                | yes                            | no · **unlocks at L10** | `bulkClaimEnabled` (LP-only in code defaults) |
+| Send Platinum/Diamond tickets   | allowed                        | allowed at every level  | (same gate as LP)                             |
+| Profile badge                   | Animated VIP-level             | every level             | n/a (visual)                                  |
+| Dedicated support               | yes                            | every level             | n/a (operations)                              |
+
+#### Every status perk is a bonus over a base, never a replacement
+
+**A status never states a final number — it states what it ADDS to the number a free player already has.** That is the rule for the whole perk set, and the two counted perks are where it is easiest to get wrong:
+
+| Perk                      | Base a free player has                           | What the admin types                                    |
+| :------------------------ | :----------------------------------------------- | :------------------------------------------------------ |
+| Daily ad views            | `watchVideoDailyLimit` (10, Настройки → Задания) | `adsDailyBonus` — `+2` on VIP 1 → the player gets 12    |
+| Ticket sends by tier      | `TICKET_SEND_DAILY_LIMITS.default` (1/1/1/0/0)   | `ticketSendDailyBonus` — `+4` Bronze → the player has 5 |
+| Stake fee volume discount | `STAKE.feeVolumeDiscount` (10/12/15/20%)         | `stakeFeeDiscountBonusPct` — `+10` → 20/22/25/30%       |
+
+The other percentage perks (engine speed, stake yield, tournament reward/join-AP, market discount) were always deltas over an implicit base of 0, so they already obey the rule. **Every table in this document quotes the effective number; the admin panel quotes the bonus**, prefixed with `+` and captioned with the total it works out to.
+
+Both counted perks used to be absolute values that replaced the base. That let a status be written _below_ the free limit, and production shipped exactly that: VIP levels 1 and 2 were capped at 4 and 2 ad views against a free 10, so paying players watched fewer ads than free ones. With a `Min(0)` floor on a bonus that is unrepresentable — the worst an admin can now do is add nothing. Configs written before the switch still store the old `adsDailyLimit` / `ticketSendDailyLimits` keys and are converted on read (`value − base`, floored at 0), which reproduces the same effective numbers — see `mergeStatusPerks` in the backend.
+
+Platinum and Diamond sends have a base of **0**, so there is no separate "may send this tier" flag: a positive bonus is what opens the tier, and `0 + 0` is the refusal.
 
 #### Stacking & self-discount rules
 
@@ -332,6 +348,8 @@ VIP pricing is **per level and admin-tunable** (Admin → Настройки →
 **LC price = LS price × 20,000 at every level.** That is the same $-parity Lucky Player is priced at (`lcUsdRate` 0.000001 × 20,000 = `lsUsdRate` 0.02), so neither currency is the cheap path and a grinder and a payer buy the same level for the same value. Any edit to one side must move the other.
 
 #### The ladder (live values)
+
+`Ads/day` is the **effective** cap a VIP of that level is held to. In the admin panel the same row is typed as a bonus over the free cap — level 1's `12` is entered as `+2` against a base of 10 (§7.3).
 
 |  Lv | Price          | Engine | Stake | Trn reward | Trn join AP | Market | Ads/day | Send B/S/G/P/D | Claim all |
 | --: | :------------- | -----: | ----: | ---------: | ----------: | -----: | ------: | :------------- | :-------- |
@@ -1787,7 +1805,7 @@ When viewing another user's profile, the following actions are available (typica
 - **Send Ticket** — opens the ticket-sending modal (selects tier and quantity from the user's owned tickets). Mirrors the Send action defined in Section 8.2.
   - **Daily limit per recipient, by tier.** Bronze / Silver / Gold are sendable by everyone — **1 each per day** to a given player. **Platinum and Diamond require Lucky Player status.**
   - With **Lucky Player**, the per-recipient daily limits rise to **Bronze 5 / Silver 4 / Gold 3 / Platinum 2 / Diamond 1**.
-  - Limits live in `ticketSendDailyLimits` (`default` / `luckyPlayer`).
+  - The free table is `TICKET_SEND_DAILY_LIMITS.default`; a status adds `statusPerks.ticketSendDailyBonus` on top (§7.3).
 - **Invite to Tournament** — opens a picker of upcoming tournaments and sends the target an in-app invite (a notification carrying a deep link to that tournament).
   - **Only one's own referrals can be invited.** The action is offered exclusively on the profile of a player who joined through the viewer's link; on anyone else — a stranger from the leaderboard, a shared profile link — the button is **not rendered at all**, and `POST profile/invite-tournament` answers **403 `{ error: 'not-your-referral' }`** if it is called anyway. The gate is on the invited person, not on the tournament: what a player can invite to is every upcoming tournament, whom they can invite is only the people they brought into the game.
   - The button is absent rather than disabled on purpose. Referral attribution is frozen at the invitee's first sign-in (§17.2) — a player who is not already your referral can never become one — so a greyed-out button would promise an unlock that nothing the viewer does can deliver. This is the opposite of the wallet invite gates (§16.4), which are shown locked precisely because inviting more friends does open them.
