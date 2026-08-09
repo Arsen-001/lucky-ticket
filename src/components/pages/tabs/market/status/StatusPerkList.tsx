@@ -41,41 +41,58 @@ export function StatusPerkList({
           <li
             key={row.id}
             className={twMerge(
-              'flex items-center gap-3 animate-slide-in-bottom',
+              'flex items-start gap-3 animate-slide-in-bottom',
               isSmall ? 'py-1.5' : 'px-4 py-3',
               classNames?.row
             )}
             style={{ animationDelay: `${staggerMs(index, 60)}ms` }}
           >
-            <span className="flex-center h-5 w-5 shrink-0 rounded-full bg-emerald-500/15 text-emerald-400">
+            <span className="flex-center mt-0.5 h-5 w-5 shrink-0 rounded-full bg-emerald-500/15 text-emerald-400">
               <Check size={12} strokeWidth={3} />
             </span>
-            <span
-              className={twMerge(
-                'flex-available text-left text-white/85 leading-relaxed',
-                isSmall ? 'text-xs' : 'text-sm',
-                classNames?.label
-              )}
-            >
-              {row.label}
-            </span>
-            {row.value && (
+            {/*
+              Label and value share one wrapping row. The per-tier send limits
+              are the reason: "Bronze 5 · Silver 4 · Gold 3 · Platinum 2 ·
+              Diamond 1" does not fit beside its label on any phone (it ran 72px
+              past a 390px viewport as one nowrap line, and Russian is longer
+              still), so on a narrow screen the value drops to its own line and
+              wraps there instead of pushing the row off-screen.
+            */}
+            <div className="flex-available flex min-w-0 flex-wrap items-baseline gap-x-3">
               <span
                 className={twMerge(
-                  'flex-center shrink-0 gap-1 font-bold text-white whitespace-nowrap',
+                  'text-left text-white/85 leading-relaxed',
                   isSmall ? 'text-xs' : 'text-sm',
-                  classNames?.value
+                  classNames?.label
                 )}
               >
-                {row.from && (
-                  <>
-                    <span className="text-white/40 font-semibold line-through">{row.from}</span>
-                    <ArrowRight size={12} className="text-white/40" />
-                  </>
-                )}
-                {row.value}
+                {row.label}
               </span>
-            )}
+              {row.value && (
+                <span
+                  className={twMerge(
+                    'ml-auto flex flex-wrap items-baseline justify-end gap-x-1 text-right font-bold text-white',
+                    isSmall ? 'text-xs' : 'text-sm',
+                    classNames?.value
+                  )}
+                >
+                  {/*
+                    The "was → is" pair only earns its space when both sides are
+                    short (percentages, ad counts). On the send row it would
+                    print two five-tier lists side by side; there the new value
+                    alone carries the news — a tier the level opens simply
+                    appears in it.
+                  */}
+                  {row.from && row.from.length <= 14 && row.value.length <= 14 && (
+                    <span className="flex items-baseline gap-1 text-white/40 font-semibold">
+                      <span className="line-through">{row.from}</span>
+                      <ArrowRight size={12} className="self-center" />
+                    </span>
+                  )}
+                  {row.value}
+                </span>
+              )}
+            </div>
           </li>
         ))}
       </ul>

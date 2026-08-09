@@ -80,13 +80,16 @@ describe('status perk rows', () => {
       BASE,
       t
     );
-    expect(valueOf(rows, 'adsDaily')).toBe('20 (+10)');
+    expect(valueOf(rows, 'adsDaily')).toBe('20\u00A0(+10)');
     // The bonus is percentage points on the shared volume ladder, so the number
     // worth showing is the ceiling it reaches: 20 + 10.
     expect(valueOf(rows, 'stakeFeeDiscount')).toBe('up to {pct}');
     // Only the tiers the status opens or widens, quoted as base + bonus.
+    // Each tier keeps a NON-BREAKING space before its count: the list wraps on
+    // a phone, and "platinum" alone on one line with its "2" on the next reads
+    // as a different number.
     expect(valueOf(rows, 'ticketSend')).toBe(
-      'bronze 5 · silver 4 · gold 3 · platinum 2 · diamond 1'
+      'bronze\u00A05\u00A0· silver\u00A04\u00A0· gold\u00A03\u00A0· platinum\u00A02\u00A0· diamond\u00A01'
     );
   });
 
@@ -98,13 +101,13 @@ describe('status perk rows', () => {
       BASE,
       t
     );
-    expect(valueOf(rows, 'ticketSend')).toBe('bronze 3 · silver 2');
+    expect(valueOf(rows, 'ticketSend')).toBe('bronze\u00A03\u00A0· silver\u00A02');
   });
 
   it('shows the daily gift only while it is enabled', () => {
     const gift = { enabled: true, lc: 1_000, ticketTier: 'BRONZE', ticketCount: 2 };
     expect(valueOf(buildStatusPerkRows(perks(), BASE, t, gift), 'dailyGift')).toBe(
-      '1,000 LC + 2 × bronze'
+      '1,000\u00A0LC + 2\u00A0×\u00A0bronze'
     );
     expect(ids(buildStatusPerkRows(perks(), BASE, t, { ...gift, enabled: false }))).toEqual([]);
   });
@@ -133,7 +136,9 @@ describe('vip upgrade rows', () => {
     expect(ids(rows)).toEqual(['engineSpeed', 'ticketSend']);
     expect(rows[0]).toMatchObject({ from: '+1.9%', value: '+2.7%' });
     // Gold opens at level 3.
-    expect(valueOf(rows, 'ticketSend')).toBe('bronze 5 · silver 4 · gold 2');
+    expect(valueOf(rows, 'ticketSend')).toBe(
+      'bronze\u00A05\u00A0· silver\u00A04\u00A0· gold\u00A02'
+    );
   });
 
   it('offers the full level-1 list to someone who is not a VIP yet', () => {

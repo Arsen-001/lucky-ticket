@@ -41,6 +41,13 @@ const num = (value: number): string => String(Math.round(value * 100) / 100);
 const pct = (value: number): string => `+${num(value)}%`;
 
 /**
+ * Non-breaking space. A value like the five-tier send list is long enough to
+ * wrap on a phone, and it must break BETWEEN pairs — "Платина" alone on one
+ * line with its "2" on the next reads as a different number.
+ */
+const NB = '\u00A0';
+
+/**
  * The rows a status with these perks actually grants.
  *
  * `base` carries the free limits the counted perks are added to, so ad views
@@ -109,7 +116,7 @@ export const buildStatusPerkRows = (
       id: 'adsDaily',
       label: t('perk ads daily'),
       value: base
-        ? `${base.adsDailyLimit + perks.adsDailyBonus} (+${perks.adsDailyBonus})`
+        ? `${base.adsDailyLimit + perks.adsDailyBonus}${NB}(+${perks.adsDailyBonus})`
         : `+${perks.adsDailyBonus}`,
     });
 
@@ -126,9 +133,11 @@ export const buildStatusPerkRows = (
         .map(tier => {
           const bonus = perks.ticketSendDailyBonus[tier.toUpperCase()];
           const total = (base?.ticketSendDailyLimit?.[tier.toUpperCase()] ?? 0) + bonus;
-          return `${t(tier)} ${base ? total : `+${bonus}`}`;
+          return `${t(tier)}${NB}${base ? total : `+${bonus}`}`;
         })
-        .join(' · '),
+        // The separator sticks to the pair before it, so a wrap happens AFTER
+        // the dot rather than leaving a line that opens with one.
+        .join(`${NB}· `),
     });
 
   if (perks.bulkClaimEnabled) rows.push({ id: 'bulkClaim', label: t('perk bulk claim') });
@@ -138,9 +147,9 @@ export const buildStatusPerkRows = (
       id: 'dailyGift',
       label: t('perk daily gift'),
       value: [
-        dailyGift.lc > 0 ? `${formatNumber(dailyGift.lc)} ${GlobalConstants.coinName}` : null,
+        dailyGift.lc > 0 ? `${formatNumber(dailyGift.lc)}${NB}${GlobalConstants.coinName}` : null,
         dailyGift.ticketCount > 0
-          ? `${dailyGift.ticketCount} × ${t(dailyGift.ticketTier.toLowerCase() as 'bronze')}`
+          ? `${dailyGift.ticketCount}${NB}×${NB}${t(dailyGift.ticketTier.toLowerCase() as 'bronze')}`
           : null,
       ]
         .filter(Boolean)
