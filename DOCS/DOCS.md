@@ -172,7 +172,7 @@ AP is earned from a data-driven **source registry** — every meaningful action 
 | Weekly task               | 2 / 3 / 4 / 5 / 6                     | by task tier; a tier-T player completes 3–7/week (`weeklyTasksCountByTier`)                    |
 | One-time task             | varies                                | once per task                                                                                  |
 | Verify email              | 20 (admin-configurable gift, §16.3)   | one-time                                                                                       |
-| Watch a video             | 2                                     | 10×/day default · 20×/day with LP · 40×/day with VIP (daily cap = limit × 2 AP)                |
+| Watch a video             | 2                                     | 10×/day default · 20×/day with LP · 11→30×/day with VIP by level (daily cap = limit × 2 AP)    |
 | Send a ticket to a friend | 1                                     | 3×/day                                                                                         |
 | Like a profile            | 1                                     | 3×/day                                                                                         |
 | Invite a friend           | 10 (20 for a Telegram Premium friend) | per invite                                                                                     |
@@ -264,6 +264,25 @@ Statuses reward trust, loyalty, and engagement while enabling monetization. Stat
 - **Lucky Player:** A paid, time-limited **weekly** subscription (7 days), purchased via the Market with Lucky Coins (LC) or Lucky Stars (LS) — **100⭐ ($2) / 2,000,000 LC ($2)** per week, priced at parity (the week costs the same $2 in either currency; no grind premium — unlike VIP).
 - **VIP:** Unlocked and upgraded via the Market. No Activity Points requirement. Detailed rules in Section 7.4.
 
+### 7.2a Lucky Player daily gift
+
+A running Lucky Player subscription pays a **fixed drop once per UTC day**: `dailyGift.lc` coins plus `dailyGift.ticketCount` tickets of `dailyGift.ticketTier`. Live defaults: **25,000 LC + 1 Bronze ticket**, i.e. ~175,000 LC and 7 tickets across the 7-day subscription it is attached to. Everything here is admin-tunable in one place (Admin → Настройки → Статусы → Lucky Player → «Подарок за ежедневный вход»), including an off switch.
+
+**It is not a streak.** Every day pays the same, and a missed day is simply not paid — there is no accrual, no back-pay and no ladder to reset. Two consequences, both deliberate: a week away costs a player nothing but that week, and the emission this adds is exactly `lc × active subscribers × days`, a number the economy report can state rather than model.
+
+**The modal opens by itself on the first entry of the day** (`DailyGiftAutoSurface`, mounted in the tabs layout). It takes its turn at the shared app-open popup slot **behind** the tournament result and admin notifications — those expire or matter more, this one stays collectable until midnight UTC regardless.
+
+**Who decides "once a day" matters.** The **server** answers `shouldSurface` from the account's `lpDailyGiftClaimedAt`; the client only remembers that the player waved the popup away today, so a dismissal is not re-nagged on every navigation. A purely client-side counter would hand out a second gift after a reinstall, on a second device, or after cleared storage — all three reset local state while the subscription does not.
+
+**A free player sees the same modal as an offer** when `promoForNonLp` is on (default): identical numbers, but the button buys Lucky Player instead of collecting. One component renders both, so the offer can never drift away from the gift an admin has since retuned.
+
+| Path                      | Method | What it does                                                                                 |
+| :------------------------ | :----- | :------------------------------------------------------------------------------------------- |
+| `status/daily-gift`       | GET    | State: the configured drop, `canClaim`, `shouldSurface`, `surfaceReason` (`gift` \| `promo`) |
+| `status/daily-gift/claim` | POST   | Credits the drop once. `gift-disabled` / `lucky-player-required` / `already-claimed-today`   |
+
+The claim stamps `User.lpDailyGiftClaimedAt` and credits inside **one interactive transaction**, where the stamp is a conditional update still carrying the previous timestamp in its `WHERE`. Two taps that race both read "not collected yet", but only one matches the row; the loser credits nothing. The LC side writes an `LP_DAILY_GIFT` ledger row — its own type because this is a recurring emission bought by a subscription, not a task reward, and the economy report has to be able to separate the two.
+
 ### 7.3 Status Benefits
 
 Statuses grant a fixed set of privileges. **Lucky Player** and **VIP** never stack — when both are active, the higher-tier (VIP) value supersedes Lucky Player. The same magnitude is also never applied to the matching status purchase (e.g. VIP discount is **not** applied when buying / upgrading VIP itself).
@@ -274,14 +293,16 @@ All perk magnitudes live in `src/constants/global.constants.ts` and can be tuned
 
 **Every** Lucky Player perk is **admin-tunable** in one place (Admin → Настройки → Статусы): price (LC + LS), duration (days), and the full perk set — engine speed, stake yield, tournament reward, tournament join-AP, **market discount %, daily ads cap, and per-tier ticket-send limits**. The backend resolves these into `me.statusPerks` so the Mini App shows exactly what the server enforces. Admins can also set/extend a specific player's LP expiry from the user editor.
 
+The table below is the **live production configuration**. The `luckyPlayer*` code constants are the flat fallback a fresh environment boots with and no longer match it — production runs `PlatformConfig.statusConfig`.
+
 | Perk                            | Value                                              | Source constant                                  |
 | :------------------------------ | :------------------------------------------------- | :----------------------------------------------- |
 | Engine speed boost (additive)   | +10%                                               | `luckyPlayerEngineSpeedBoostPct`                 |
-| Stake LC yield boost            | +20%                                               | `luckyPlayerStakeYieldBoostPct`                  |
-| Stake fee volume discount       | 20–30% (base 10–20% **+10pp**)                     | `statusPerks.stakeFeeDiscountBonusPct`           |
+| Stake LC yield boost            | +5%                                                | `luckyPlayerStakeYieldBoostPct`                  |
+| Stake fee volume discount       | base 10–20% only (**no LP bonus**)                 | `statusPerks.stakeFeeDiscountBonusPct` (`0`)     |
 | Market discount on every item   | −10%                                               | `luckyPlayerMarketDiscountPct`                   |
-| Tournament LC reward boost      | +25%                                               | `luckyPlayerTournamentRewardBoostPct`            |
-| Tournament join AP boost        | +50%                                               | `luckyPlayerTournamentJoinApBoostPct`            |
+| Tournament LC reward boost      | — (`0`)                                            | `luckyPlayerTournamentRewardBoostPct`            |
+| Tournament join AP boost        | — (`0`)                                            | `luckyPlayerTournamentJoinApBoostPct`            |
 | Daily ads cap                   | 20 (base 10 **+10**)                               | `statusPerks.adsDailyBonus`                      |
 | Higher ticket send daily limits | B5/S4/G3/P2/D1 (base 1/1/1/0/0 **+4/+3/+2/+2/+1**) | `statusPerks.ticketSendDailyBonus`               |
 | Send Platinum/Diamond tickets   | allowed                                            | base is 0 → any positive bonus opens the tier    |
@@ -292,32 +313,34 @@ All perk magnitudes live in `src/constants/global.constants.ts` and can be tuned
 
 VIP is the high-tier permanent status. **Every VIP perk is admin-tunable per level** (Admin → Настройки → Статусы) — engine speed, stake yield, tournament reward, tournament join-AP, **market discount %, daily ads cap, per-tier ticket-send limits and bulk claim**, plus the per-level price. The market / referral / tasks sections keep only the NON-status values (base market prices, the flat referral %, default ads cap); the VIP/LP values moved to Статусы and the backend reads them from there (single source of truth, surfaced to the client via `me.statusPerks`).
 
-**VIP is a ramp, not a flat status.** The values below are the **Level 20 ceiling**; a VIP starts far under Lucky Player and climbs past it. The full per-level ladder — the actual live numbers — is in **§7.4**. The two milestones that matter: **Level 10** is where VIP draws level with Lucky Player on every percentage perk and takes over its "Claim all" capability _permanently_; **Level 20** is the table below. The code constants (`vipEngineSpeedBoostPct` etc.) are the flat fallback a fresh environment boots with; production runs the ladder from `statusConfig`.
+**VIP is a ramp, not a flat status.** The values below are the **Level 20 ceiling**; a VIP starts far under Lucky Player and only overtakes it at the very top. The full per-level ladder — the actual live numbers — is in **§7.4**. The two milestones that matter: **Level 15** is where VIP takes the "Claim all" capability; **Level 20** is the table below, and it is a deliberate step, not a next rung — every column on it stands **20% above Level 19**. The code constants (`vipEngineSpeedBoostPct` etc.) are the flat fallback a fresh environment boots with; production runs the ladder from `statusConfig`.
 
-| Perk                            | Value at Level 20              | Level 1 · Level 10      | Source constant                               |
-| :------------------------------ | :----------------------------- | :---------------------- | :-------------------------------------------- |
-| Engine speed boost (additive)   | +25%                           | +1% · +10%              | `vipEngineSpeedBoostPct`                      |
-| Stake LC yield boost            | +40%                           | +0.1% · +6%             | `vipStakeYieldBoostPct`                       |
-| Stake fee volume discount       | 20–30% (base 10–20% **+10pp**) | same at every level     | `statusPerks.stakeFeeDiscountBonusPct`        |
-| Market discount on every item   | −20%                           | −1% · −10%              | `vipMarketDiscountPct`                        |
-| Tournament LC reward boost      | +50%                           | none until L5 · +15%    | `vipTournamentRewardBoostPct`                 |
-| Tournament join AP boost        | +100%                          | none until L5 · +30%    | `vipTournamentJoinApBoostPct`                 |
-| Daily ads cap                   | 40 (base 10 **+30**)           | 12 · 22                 | `statusPerks.adsDailyBonus`                   |
-| Higher ticket send daily limits | 15/12/10/6/5 by tier           | LP table · 10/8/5/4/2   | `statusPerks.ticketSendDailyBonus`            |
-| Bulk "Claim all"                | yes                            | no · **unlocks at L10** | `bulkClaimEnabled` (LP-only in code defaults) |
-| Send Platinum/Diamond tickets   | allowed                        | allowed at every level  | (same gate as LP)                             |
-| Profile badge                   | Animated VIP-level             | every level             | n/a (visual)                                  |
-| Dedicated support               | yes                            | every level             | n/a (operations)                              |
+**Three perks are switched off for both statuses entirely** — tournament LC reward, tournament join AP, and the stake-fee volume discount are `0` for Lucky Player and on all twenty VIP levels. The stake-fee volume discount is therefore **the same 10/12/15/20% ladder for everybody**, paid and unpaid alike: no status buys a cheaper stake any more.
+
+| Perk                            | Value at Level 20                   | Level 1 · Level 10                 | Source constant                               |
+| :------------------------------ | :---------------------------------- | :--------------------------------- | :-------------------------------------------- |
+| Engine speed boost (additive)   | +20%                                | +1% · +8.8%                        | `vipEngineSpeedBoostPct`                      |
+| Stake LC yield boost            | +5%                                 | +0.1% · +2.2%                      | `vipStakeYieldBoostPct`                       |
+| Stake fee volume discount       | base 10–20% only (**no VIP bonus**) | same at every level                | `statusPerks.stakeFeeDiscountBonusPct` (`0`)  |
+| Market discount on every item   | −10%                                | −1% · −4.7%                        | `vipMarketDiscountPct`                        |
+| Tournament LC reward boost      | — (`0` at every level)              | —                                  | `vipTournamentRewardBoostPct`                 |
+| Tournament join AP boost        | — (`0` at every level)              | —                                  | `vipTournamentJoinApBoostPct`                 |
+| Daily ads cap                   | 30 (base 10 **+20**)                | 11 · 19                            | `statusPerks.adsDailyBonus`                   |
+| Higher ticket send daily limits | 21/19/17/14/12 by tier              | 3/2/1/0/0 · 11/9/7/5/3             | `statusPerks.ticketSendDailyBonus`            |
+| Bulk "Claim all"                | yes                                 | no · **unlocks at L15**            | `bulkClaimEnabled` (LP-only in code defaults) |
+| Send Platinum/Diamond tickets   | allowed                             | Platinum from L5 · Diamond from L7 | (bonus > 0 is the gate, §7.3)                 |
+| Profile badge                   | Animated VIP-level                  | every level                        | n/a (visual)                                  |
+| Dedicated support               | yes                                 | every level                        | n/a (operations)                              |
 
 #### Every status perk is a bonus over a base, never a replacement
 
 **A status never states a final number — it states what it ADDS to the number a free player already has.** That is the rule for the whole perk set, and the two counted perks are where it is easiest to get wrong:
 
-| Perk                      | Base a free player has                           | What the admin types                                    |
-| :------------------------ | :----------------------------------------------- | :------------------------------------------------------ |
-| Daily ad views            | `watchVideoDailyLimit` (10, Настройки → Задания) | `adsDailyBonus` — `+2` on VIP 1 → the player gets 12    |
-| Ticket sends by tier      | `TICKET_SEND_DAILY_LIMITS.default` (1/1/1/0/0)   | `ticketSendDailyBonus` — `+4` Bronze → the player has 5 |
-| Stake fee volume discount | `STAKE.feeVolumeDiscount` (10/12/15/20%)         | `stakeFeeDiscountBonusPct` — `+10` → 20/22/25/30%       |
+| Perk                      | Base a free player has                           | What the admin types                                                                            |
+| :------------------------ | :----------------------------------------------- | :---------------------------------------------------------------------------------------------- |
+| Daily ad views            | `watchVideoDailyLimit` (10, Настройки → Задания) | `adsDailyBonus` — `+1` on VIP 1 → the player gets 11                                            |
+| Ticket sends by tier      | `TICKET_SEND_DAILY_LIMITS.default` (1/1/1/0/0)   | `ticketSendDailyBonus` — `+4` Bronze → the player has 5                                         |
+| Stake fee volume discount | `STAKE.feeVolumeDiscount` (10/12/15/20%)         | `stakeFeeDiscountBonusPct` — live value is `0` for both statuses; `+10` would give 20/22/25/30% |
 
 The other percentage perks (engine speed, stake yield, tournament reward/join-AP, market discount) were always deltas over an implicit base of 0, so they already obey the rule. **Every table in this document quotes the effective number; the admin panel quotes the bonus**, prefixed with `+` and captioned with the total it works out to.
 
@@ -345,47 +368,52 @@ VIP can be purchased and upgraded with either **Lucky Coins (LC)** or **Lucky St
 
 VIP pricing is **per level and admin-tunable** (Admin → Настройки → Статусы). Each level 1…`maxLevel` has its own LC + LS price: **level 1 is the first unlock**, and **levels 2+ are the cost to upgrade to that level**. Both the price ceiling (`maxLevel`) and every per-level price are knobs.
 
-**LC price = LS price × 20,000 at every level.** That is the same $-parity Lucky Player is priced at (`lcUsdRate` 0.000001 × 20,000 = `lsUsdRate` 0.02), so neither currency is the cheap path and a grinder and a payer buy the same level for the same value. Any edit to one side must move the other.
+**LC price = LS price × 10,000 at every level.** The ratio is uniform across the whole ladder, so neither currency is the cheap path _relative to another level_ — but it is **half** the $-parity rate Lucky Player is priced at (`lcUsdRate` 0.000001 × 20,000 = `lsUsdRate` 0.02 would give ×20,000). In other words the coin price of VIP is deliberately half of dollar parity: grinding to VIP is cheaper than paying for it. Any edit to one side must move the other.
 
 #### The ladder (live values)
 
-`Ads/day` is the **effective** cap a VIP of that level is held to. In the admin panel the same row is typed as a bonus over the free cap — level 1's `12` is entered as `+2` against a base of 10 (§7.3).
+`Ads/day` and `Send B/S/G/P/D` are the **effective** numbers a VIP of that level is held to. In the admin panel the same rows are typed as bonuses over the free base — level 1's `11` ads is entered as `+1` against a base of 10, and its `3/2/1/0/0` sends as `+2/+1/0/0/0` against `1/1/1/0/0` (§7.3).
 
-|  Lv | Price          | Engine | Stake | Trn reward | Trn join AP | Market | Ads/day | Send B/S/G/P/D | Claim all |
-| --: | :------------- | -----: | ----: | ---------: | ----------: | -----: | ------: | :------------- | :-------- |
-|   1 | 250 ⭐ / 5.0M  |    +1% | +0.1% |          — |           — |    −1% |      12 | 5/4/3/2/1      | —         |
-|   2 | 50 ⭐ / 1.0M   |    +2% | +0.2% |          — |           — |    −2% |      13 | 6/5/3/2/1      | —         |
-|   3 | 60 ⭐ / 1.2M   |    +3% | +0.5% |          — |           — |    −3% |      14 | 6/5/3/2/1      | —         |
-|   4 | 70 ⭐ / 1.4M   |    +4% |   +1% |          — |           — |    −4% |      15 | 7/5/4/2/1      | —         |
-|   5 | 80 ⭐ / 1.6M   |    +5% | +1.5% |        +5% |        +10% |    −5% |      16 | 7/6/4/3/1      | —         |
-|   6 | 95 ⭐ / 1.9M   |    +6% |   +2% |        +7% |        +14% |    −6% |      17 | 8/6/4/3/1      | —         |
-|   7 | 110 ⭐ / 2.2M  |    +7% |   +3% |        +9% |        +18% |    −7% |      18 | 8/6/4/3/2      | —         |
-|   8 | 125 ⭐ / 2.5M  |    +8% |   +4% |       +11% |        +22% |    −8% |      19 | 9/7/5/3/2      | —         |
-|   9 | 145 ⭐ / 2.9M  |    +9% |   +5% |       +13% |        +26% |    −9% |      20 | 9/7/5/3/2      | —         |
-|  10 | 165 ⭐ / 3.3M  |   +10% |   +6% |       +15% |        +30% |   −10% |      22 | 10/8/5/4/2     | **yes**   |
-|  11 | 190 ⭐ / 3.8M  |   +11% |   +8% |       +18% |        +36% |   −11% |      24 | 10/8/6/4/2     | yes       |
-|  12 | 220 ⭐ / 4.4M  |   +12% |  +10% |       +21% |        +42% |   −12% |      26 | 11/9/6/4/2     | yes       |
-|  13 | 250 ⭐ / 5.0M  |   +14% |  +12% |       +24% |        +48% |   −13% |      28 | 11/9/6/4/3     | yes       |
-|  14 | 290 ⭐ / 5.8M  |   +15% |  +15% |       +27% |        +54% |   −14% |      30 | 12/10/7/5/3    | yes       |
-|  15 | 330 ⭐ / 6.6M  |   +17% |  +18% |       +30% |        +60% |   −15% |      32 | 12/10/7/5/3    | yes       |
-|  16 | 380 ⭐ / 7.6M  |   +18% |  +22% |       +34% |        +68% |   −16% |      34 | 13/10/7/5/3    | yes       |
-|  17 | 440 ⭐ / 8.8M  |   +20% |  +26% |       +38% |        +76% |   −17% |      36 | 13/11/8/5/3    | yes       |
-|  18 | 500 ⭐ / 10.0M |   +21% |  +30% |       +42% |        +84% |   −18% |      37 | 14/11/8/6/4    | yes       |
-|  19 | 575 ⭐ / 11.5M |   +23% |  +35% |       +46% |        +92% |   −19% |      38 | 14/12/9/6/4    | yes       |
-|  20 | 660 ⭐ / 13.2M |   +25% |  +40% |       +50% |       +100% |   −20% |      40 | 15/12/10/6/5   | yes       |
+Tournament reward, tournament join AP and the stake-fee discount are `0` on every level and are omitted from the table rather than printed as twenty dashes.
 
-**Reading the ladder.** Level 1 is a deliberately small perk behind a deliberately large unlock (250 ⭐) — it buys _permanence and a seat on the ladder_, not power. Level 2 restarts the price at 50 ⭐ and each step grows ~15% from there; the whole climb from nothing to Level 20 is **4,985 ⭐ (≈ $100) or 99,700,000 LC**, and reaching Level 10 is 1,150 ⭐. Every column is monotone — **no level ever takes a perk away from the level below it**, which is also the rule any future admin edit has to preserve.
+|  Lv | Price          | Engine | Stake | Market | Ads/day | Send B/S/G/P/D | Claim all |
+| --: | :------------- | -----: | ----: | -----: | ------: | :------------- | :-------- |
+|   1 | 100 ⭐ / 1.00M |    +1% | +0.1% |    −1% |      11 | 3/2/1/0/0      | —         |
+|   2 | 110 ⭐ / 1.10M |  +1.9% | +0.3% |  −1.4% |      12 | 4/3/1/0/0      | —         |
+|   3 | 115 ⭐ / 1.15M |  +2.7% | +0.6% |  −1.8% |      13 | 5/4/2/0/0      | —         |
+|   4 | 125 ⭐ / 1.25M |  +3.6% | +0.8% |  −2.2% |      14 | 6/4/3/0/0      | —         |
+|   5 | 135 ⭐ / 1.35M |  +4.5% |   +1% |  −2.6% |      15 | 6/5/4/1/0      | —         |
+|   6 | 140 ⭐ / 1.40M |  +5.4% | +1.2% |    −3% |      15 | 7/6/4/2/0      | —         |
+|   7 | 150 ⭐ / 1.50M |  +6.2% | +1.5% |  −3.4% |      16 | 8/7/5/3/1      | —         |
+|   8 | 160 ⭐ / 1.60M |  +7.1% | +1.7% |  −3.8% |      17 | 9/7/6/3/2      | —         |
+|   9 | 165 ⭐ / 1.65M |    +8% | +1.9% |  −4.2% |      18 | 10/8/7/4/3     | —         |
+|  10 | 175 ⭐ / 1.75M |  +8.8% | +2.2% |  −4.7% |      19 | 11/9/7/5/3     | —         |
+|  11 | 185 ⭐ / 1.85M |  +9.7% | +2.4% |  −5.1% |      20 | 11/10/8/6/4    | —         |
+|  12 | 190 ⭐ / 1.90M | +10.6% | +2.6% |  −5.5% |      21 | 12/11/9/7/5    | —         |
+|  13 | 200 ⭐ / 2.00M | +11.5% | +2.8% |  −5.9% |      22 | 13/11/10/7/6   | —         |
+|  14 | 210 ⭐ / 2.10M | +12.3% | +3.1% |  −6.3% |      23 | 14/12/10/8/6   | —         |
+|  15 | 215 ⭐ / 2.15M | +13.2% | +3.3% |  −6.7% |      23 | 15/13/11/9/7   | **yes**   |
+|  16 | 225 ⭐ / 2.25M | +14.1% | +3.5% |  −7.1% |      24 | 16/14/12/10/8  | yes       |
+|  17 | 235 ⭐ / 2.35M |   +15% | +3.7% |  −7.5% |      25 | 16/14/13/10/9  | yes       |
+|  18 | 240 ⭐ / 2.40M | +15.8% |   +4% |  −7.9% |      26 | 17/15/13/11/9  | yes       |
+|  19 | 250 ⭐ / 2.50M | +16.7% | +4.2% |  −8.3% |      27 | 18/16/14/12/10 | yes       |
+|  20 | 300 ⭐ / 3.00M |   +20% |   +5% |   −10% |      30 | 21/19/17/14/12 | yes       |
 
-**Where it crosses Lucky Player.** Under 10 levels VIP is genuinely weaker than a 50 ⭐/week LP subscription, and that is the intent: LP is rented power, VIP is owned power. Engine speed and market discount draw level with LP at **Level 10**, stake yield at **Level 9**, ads at **Level 9**, and "Claim all" — LP's signature capability — transfers to VIP at **Level 10**. Below that a VIP+LP holder still resolves to the VIP row (higher tier wins, §7.3), so a low-level VIP who also subscribes to LP gets the _weaker_ numbers. That is a known, accepted consequence of "higher tier wins"; it is the strongest reason not to stall a player at Level 1–9.
+**Reading the ladder.** Level 1 is a small perk behind a small unlock (100 ⭐) — it buys _permanence and a seat on the ladder_, not power, and it is the cheapest step on the whole climb. From there price and perks rise together in near-linear steps to Level 19, and **Level 20 stands 20% above Level 19 on every single column** — perks and price alike (2.50M → 3.00M, 250 ⭐ → 300 ⭐). That last rung is the one deliberate discontinuity in the table: the top level is meant to read as an achievement, not as "one more step". The whole climb from nothing to Level 20 is **3,625 ⭐ (≈ $73) or 36,250,000 LC**, and reaching Level 10 is 1,375 ⭐. Every column is monotone — **no level ever takes a perk away from the level below it**, which is also the rule any future admin edit has to preserve.
+
+**Where it crosses Lucky Player.** For nineteen levels VIP is genuinely weaker than a 50 ⭐/week LP subscription, and that is the intent: LP is rented power, VIP is owned power. VIP only overtakes LP at the very top — engine speed passes it at **Level 12**, ads at **Level 11**, ticket sends much earlier (**Level 3**), while stake yield and market discount merely _draw level_ at **Level 20** and never exceed it. "Claim all" transfers to VIP at **Level 15**. The **stake-fee volume discount never enters the comparison**: it is `0` for both statuses, so every player stakes on the same 10/12/15/20% ladder.
+
+That ordering matters more than it looks, because of "higher tier wins" (§7.3): a VIP+LP holder resolves to the **VIP** row, so subscribing to LP while holding a low VIP level makes almost every number _worse_ than the subscription alone. It is a known, accepted consequence of the rule; it is also the strongest reason not to stall a player in the middle of the ladder.
 
 > The catalog carries the full ladder in `attrs.levelPrices`; the Mini App shows the price to reach the player's next level (both the market card and `/settings/vip`). The backend charges the exact per-level price server-side (`market.buyStatus`). The code defaults in `STATUS_CONFIG_DEFAULTS` remain the older flat unlock + flat upgrade model — a fresh environment boots flat, production runs the ladder above from `PlatformConfig.statusConfig`.
 
 #### Rules
 
-- The first purchase (unlock) costs more than any single upgrade below Level 13.
+- The first purchase (unlock, 100 ⭐) is the **cheapest** step on the ladder; every upgrade above it costs more. The old model had it the other way round — a large unlock and then cheap upgrades.
 - VIP level is permanent: it cannot decrease, expire, or be lost through inactivity.
 - Perks are **cumulative by level, never stacking with Lucky Player** — a VIP always resolves to their own row.
-- The ads cap must never drop below the free `watchVideoDailyLimit` (10): a VIP row of 4 would hand a paying player _fewer_ rewarded views than a free one. Level 1 starts at 12 for exactly this reason.
+- The ads cap must never drop below the free `watchVideoDailyLimit` (10): a VIP row of 4 would hand a paying player _fewer_ rewarded views than a free one. Level 1 starts at 11 for exactly this reason.
+- **Level 20 is 20% above Level 19 on every column, price included.** That ratio is the top of the ladder's defining rule; a future edit that rebalances the middle has to re-derive Level 19 as `Level 20 ÷ 1.2` or restate the rule.
 
 #### VIP Benefits
 
@@ -410,7 +438,7 @@ The Tickets page is structured as a tier-tabs view:
 - **Summary row (top):** A 5-tile grid (Bronze · Silver · Gold · Platinum · Diamond) showing the user's current inventory count for each tier. Tapping a tile switches the active tier tab.
 - **Tab strip:** Six pill-style chips — five tier tabs (Bronze → Diamond) plus a **Partners** tab. Locked tiers render with a lock icon. The active tab carries a tier-color dot/icon plus a `×N` ready-to-claim badge in white.
 - **Tab content per tier:**
-  - **Unlocked tier:** A summary card (`X tickets in inventory · Y engines active`), a `{count} tickets ready · Claim all` callout (when any engine has pending output **and** the player's effective status grants the **bulk-claim** perk — `statusPerks.bulkClaimEnabled`, an **admin-tunable capability** that is **Lucky Player-only by default** (VIP off), toggled per status in Admin → Настройки → Статусы; enforced server-side on `engines/claim-all`. Otherwise each engine is claimed individually; see Section 7), and a 2-column grid of engine preview cards. Each card opens that engine's dedicated page.
+  - **Unlocked tier:** A summary card (`X tickets in inventory · Y engines active`), a `{count} tickets ready · Claim all` callout (when any engine has pending output **and** the player's effective status grants the **bulk-claim** perk — `statusPerks.bulkClaimEnabled`, an **admin-tunable capability** that is **Lucky Player-only in the code defaults** (VIP off) and in production is granted to **VIP from Level 15 up** (§7.4), toggled per status in Admin → Настройки → Статусы; enforced server-side on `engines/claim-all`. Otherwise each engine is claimed individually; see Section 7), and a 2-column grid of engine preview cards. Each card opens that engine's dedicated page.
   - **Locked tier:** A locked-state hero plus the requirements list (Section 8.5).
 - **Partners tab:** Reserved for partner-ticket integrations — currently shows a "Coming soon" placeholder.
 
@@ -907,6 +935,8 @@ Each tournament includes:
 - **Start Time:** The date and time when the tournament begins and winners are decided.
 - **Team Size:** The total number of seats. `teamSizeCap` = 500 per instance; when more eligible players exist than the cap, additional parallel instances of the slot are spawned. For **admin-created project tournaments** the panel sets this seat count explicitly and it is enforced as a hard cap at join time — a full tournament rejects new entrants (already-joined players may still add tickets). Leaving the field blank creates an **unlimited (∞)** tournament with no seat cap.
 
+  The **auto-spawned daily slots** (Section 11.2.1) are unlimited by default — `tournamentsConfig.spawnerTeamSize = null`. They are the only way into a tournament for most players, and the spawned pool is a fixed LC amount rather than `seats × prizeLcPerSeat`, so an extra entrant dilutes nobody's payout — the ladder just runs deeper (down to place 500, Section 11.3). A cap there could only turn a latecomer away. The admin panel can still set a number, which applies to slots spawned from then on; tournaments already created keep the seat count they were spawned with.
+
 The prize pool is the platform's main LC faucet; it scales with the player base because more players spawn more tournament instances.
 
 ### 11.2.1 Tournament Naming Convention
@@ -1270,7 +1300,7 @@ The **Аналитика → выручка** split follows the same rule: the e
 
 **Per-player visibility.** The users list carries an **Реклама** column (lifetime views, today against the free cap, bought slots, and how long since the last view — coloured on the silence, not the total), is sortable by both, and filterable by "watched at least N" and "hasn't watched in N days" (the latter deliberately also matches players who never watched). The user card's **Реклама** tab adds the full picture: lifetime and paid totals, what the player's views earned us, a **per-day chart** with every empty day drawn (which is how "stopped watching three weeks ago" becomes visible at all), the per-network split, and three shares — of what they could have watched lifetime, over the chart window, and how many days they showed up at all.
 
-> **The percentages are estimates and are labelled `≈`.** The denominator projects the player's **current** free cap back over the whole life of the account, and the cap moves with status (a month spent as VIP was 40/day, not the 10 they have now) — no history of past caps is kept. The counts behind each share are printed next to it for exactly this reason. Separately, per-view rows (`AdView`) only exist from **2026-07-20**; before that only the lifetime counter survives, so the chart marks older days as _unknown_ rather than zero, and a player whose last view predates it reports "давность неизвестна" rather than a fabricated date.
+> **The percentages are estimates and are labelled `≈`.** The denominator projects the player's **current** free cap back over the whole life of the account, and the cap moves with status (a month spent at VIP 20 was 30/day, not the 10 they have now) — no history of past caps is kept. The counts behind each share are printed next to it for exactly this reason. Separately, per-view rows (`AdView`) only exist from **2026-07-20**; before that only the lifetime counter survives, so the chart marks older days as _unknown_ rather than zero, and a player whose last view predates it reports "давность неизвестна" rather than a fabricated date.
 
 ### 12.6 One-Time Milestone Catalog (2026-07 rebalance)
 
@@ -1393,9 +1423,49 @@ Shards also carry a flat by-tier **LS ladder** (1 / 1 / 3 / 6 / 11 ⭐ per shard
 
 **Balance rule:** total LC spent in the Market per day should be ≥ the total LC faucet per day (tournaments + tasks + ads + stake APR), keeping LC mildly deflationary so it does not lose value.
 
+### 14.6 Gift Counter (Telegram gifts for LC)
+
+The Market sells **real Telegram gifts for Lucky Coins**. The bot sends the gift into the buyer's own chat with it; the catalog is Telegram's live `getAvailableGifts`, so what is on sale and what it costs are not ours to choose.
+
+This is the only LC sink that **costs the platform real money** — a gift is paid out of the bot's own Stars balance. Everything below exists because of that one fact.
+
+**Three brakes, and only one of them actually bounds the cost** (`PlatformConfig.giftShopConfig`, editable in Настройки → Подарки за LC, superadmin only):
+
+| Knob                | Default | What it does                                             |
+| :------------------ | ------: | :------------------------------------------------------- |
+| `enabled`           | **off** | Master switch. Off = the section does not render at all. |
+| `lcPerStar`         |  50,000 | LC charged per Star of the gift's Telegram price.        |
+| `monthlyStarBudget` |  200 ⭐ | Platform-wide ceiling per UTC month. **The real brake.** |
+| `perUserMonthly`    |       1 | Gifts one player may buy per UTC month.                  |
+| `maxGiftStars`      |  100 ⭐ | Priciest gift the shop will list.                        |
+
+**Why price is not the protection.** LC is not scarce: the tournament spawner mints a fixed pool four times a day whether anyone shows up or not, so a coin balance says nothing about how much value a player should be able to take out. The price rations gifts _between_ players; only the monthly Star budget bounds what the feature can cost, and it holds regardless of how much LC exists or how many players arrive.
+
+**Why the price floor is 25,000 LC/⭐.** Buying extra ad views (§12.5) already converts coins into Stars at roughly that rate. Anything cheaper here makes gifts the cheapest exit for LC and silently replaces the ad valve — which at least earns ad revenue against what it pays out. The default of 50,000 is 2.5× the dollar parity of 20,000 LC = 1⭐ (`lcUsdRate` × 20,000 = `lsUsdRate`) because a gift returns nothing at all. Enforced by `src/market/gift-shop.spec.ts` and by a `@Min(25_000)` on the admin DTO.
+
+**Buying does not send anything.** A purchase debits the coins and files a request in Звёзды → Подарки → «Заявки за LC»; the bot spends real Stars only when an admin presses **Подтвердить**. Two things follow, both deliberate:
+
+- **An empty bot balance stops being a failed purchase.** It becomes a scheduling problem — the request waits, the operator tops up, the gift goes out. Sending inline meant a bot at zero Stars turned every purchase into a charge-and-refund the player experienced as breakage.
+- **Every gift that leaves is seen by a person.** This is real money against a currency the platform mints on a timer, so the last gate is human.
+
+Coins are taken at request time rather than at approval — they have to be reserved, or the same balance could be spent twice while the request sits in the queue.
+
+| status     | meaning                                                                                                          |
+| :--------- | :--------------------------------------------------------------------------------------------------------------- |
+| `PENDING`  | paid, waiting for the panel                                                                                      |
+| `SENT`     | approved and Telegram accepted it — terminal, cannot be refunded (Telegram cannot recall a gift)                 |
+| `FAILED`   | approved but Telegram refused; **coins are still held** and the row stays in the queue to be retried or refunded |
+| `REFUNDED` | declined or given up on — coins returned                                                                         |
+
+A refusal is deliberately **not** an automatic refund: the operator who pressed the button is the one who can fix the cause (top the bot up, ask the recipient to allow ordinary gifts) and press it again. Both caps count every row except `REFUNDED`, so a queue of unapproved requests cannot quietly exceed the month's ceiling.
+
+The player's side says so plainly: the confirm sheet states that coins go now and the gift arrives after confirmation, and until the request is resolved the counter shows «Ваш подарок подтверждают» rather than a limit.
+
+**Ledger.** Gift spending is `LcTransactionType.GIFT_PURCHASE`, deliberately apart from `MARKET_PURCHASE`, so the economy report can price the one sink that costs us Stars separately from the ones that cost us nothing.
+
 ### Connections
 
-The Market integrates with LC, LS, engines, boosts, tickets, statuses, and the AP tier gate.
+The Market integrates with LC, LS, engines, boosts, tickets, statuses, the AP tier gate, and — through the gift counter — the bot's own Telegram Stars balance.
 
 ---
 
