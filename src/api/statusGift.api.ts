@@ -46,7 +46,25 @@ export const statusGiftApi = api.injectEndpoints({
         rtkTags.inventory,
       ],
     }),
+
+    /**
+     * Spend the one-time offer shown to a player without the subscription.
+     *
+     * Deliberately invalidates NOTHING. The natural instinct is to refresh
+     * `statusDailyGift`, but the refetch would come back `shouldSurface: false`
+     * while the offer is still on screen — and the modal is driven by exactly
+     * that field, so it would close itself under the player's finger a second
+     * after opening. The server's answer matters on the NEXT app open, and by
+     * then this cache entry is gone anyway.
+     */
+    markDailyGiftPromoSeen: builder.mutation<{ ok: true }, void>({
+      query: () => ({ url: 'status/daily-gift/promo-seen', method: 'POST' }),
+    }),
   }),
 });
 
-export const { useGetDailyGiftQuery, useClaimDailyGiftMutation } = statusGiftApi;
+export const {
+  useGetDailyGiftQuery,
+  useClaimDailyGiftMutation,
+  useMarkDailyGiftPromoSeenMutation,
+} = statusGiftApi;

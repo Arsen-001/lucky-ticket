@@ -276,10 +276,13 @@ A running Lucky Player subscription pays a **fixed drop once per UTC day**: `dai
 
 **A free player sees the same modal as an offer** when `promoForNonLp` is on (default): identical numbers, but the button buys Lucky Player instead of collecting. One component renders both, so the offer can never drift away from the gift an admin has since retuned.
 
-| Path                      | Method | What it does                                                                                 |
-| :------------------------ | :----- | :------------------------------------------------------------------------------------------- |
-| `status/daily-gift`       | GET    | State: the configured drop, `canClaim`, `shouldSurface`, `surfaceReason` (`gift` \| `promo`) |
-| `status/daily-gift/claim` | POST   | Credits the drop once. `gift-disabled` / `lucky-player-required` / `already-claimed-today`   |
+**The offer is shown ONCE per account, ever — the gift is what repeats daily.** Until 2026‑08‑09 both halves were on the same daily timer, so a player without the subscription was pitched the same status on the first entry of every day, and got the whole run of pitches back after a reinstall or on a second device (the only throttle was a `localStorage` "dismissed today" stamp). Now the server refuses `promo` once `User.lpGiftPromoSeenAt` is set, and the client stamps it the moment the offer is actually on screen — not when it is dismissed, because an app killed mid-pitch has still spent the pitch. The stamp is never cleared: a lapsed subscriber is not re-pitched either, having already been sold the status once. Nothing about the daily gift changed for subscribers.
+
+| Path                           | Method | What it does                                                                                 |
+| :----------------------------- | :----- | :------------------------------------------------------------------------------------------- |
+| `status/daily-gift`            | GET    | State: the configured drop, `canClaim`, `shouldSurface`, `surfaceReason` (`gift` \| `promo`) |
+| `status/daily-gift/claim`      | POST   | Credits the drop once. `gift-disabled` / `lucky-player-required` / `already-claimed-today`   |
+| `status/daily-gift/promo-seen` | POST   | Spends the one-time offer (stamps `lpGiftPromoSeenAt`). Grants nothing; idempotent            |
 
 The claim stamps `User.lpDailyGiftClaimedAt` and credits inside **one interactive transaction**, where the stamp is a conditional update still carrying the previous timestamp in its `WHERE`. Two taps that race both read "not collected yet", but only one matches the row; the loser credits nothing. The LC side writes an `LP_DAILY_GIFT` ledger row — its own type because this is a recurring emission bought by a subscription, not a task reward, and the economy report has to be able to separate the two.
 

@@ -38,4 +38,13 @@ export const statusGiftMock = {
       ticketCount: state.ticketCount,
     };
   },
+  // The offer is spent for good, so the fixture must not hand it back on the
+  // next read either — that is the whole behaviour being modelled, and a mock
+  // that keeps answering `promo` would make the one-time rule look broken here
+  // and correct in production.
+  'POST status/daily-gift/promo-seen': () => {
+    state.shouldSurface = false;
+    state.surfaceReason = null;
+    return { ok: true as const };
+  },
 };

@@ -1,7 +1,11 @@
 'use client';
 
-import { useEffect, useState } from 'react';
-import { useClaimDailyGiftMutation, useGetDailyGiftQuery } from '@/api/statusGift.api';
+import { useEffect, useRef, useState } from 'react';
+import {
+  useClaimDailyGiftMutation,
+  useGetDailyGiftQuery,
+  useMarkDailyGiftPromoSeenMutation,
+} from '@/api/statusGift.api';
 import { LuckyPlayerDailyGiftModal } from '@/components/pages/tabs/home/LuckyPlayerDailyGiftModal';
 import { useAutoSurfaceSlot } from '@/hooks/useAutoSurfaceSlot';
 import { useAppTranslations } from '@/hooks/useAppTranslations';
@@ -22,12 +26,19 @@ const utcDay = (d: Date) => d.toISOString().slice(0, 10);
  * local counter would re-offer a collected gift after a reinstall or on a
  * second device, and a purely server-side one would have to persist a dismissal
  * that means nothing to the account.
+ *
+ * The two audiences are throttled differently, and the difference is the point:
+ * a subscriber's GIFT comes back every UTC day because there is a new one to
+ * collect, while a non-subscriber's OFFER is spent the first time it is seen
+ * and never returns. Pitching the same status on every first entry of every day
+ * is what this component did until 09.08.2026.
  */
 export function DailyGiftAutoSurface() {
   const t = useAppTranslations();
   const toast = useToast();
   const { data: gift } = useGetDailyGiftQuery();
   const [claim, { isLoading: claiming }] = useClaimDailyGiftMutation();
+  const [markPromoSeen] = useMarkDailyGiftPromoSeenMutation();
   const [dismissed, setDismissed] = useState(true);
 
   // Read the stamp after mount: localStorage is not available while the tree is
@@ -39,6 +50,21 @@ export function DailyGiftAutoSurface() {
 
   const wants = Boolean(gift?.shouldSurface) && !dismissed;
   const canShow = useAutoSurfaceSlot('daily-gift', wants);
+
+  // Burn the one-time offer the moment it is actually on screen — not when it
+  // is dismissed. An app killed mid-pitch has still spent the pitch, and
+  // stamping on dismissal would hand the offer back to everyone who swipes the
+  // app away instead of tapping. `wants` alone is not "on screen": the popup
+  // may still be queued behind a tournament result, and burning it there would
+  // spend an offer nobody ever saw.
+  const promoBurned = useRef(false);
+  useEffect(() => {
+    if (!canShow || gift?.surfaceReason !== 'promo' || promoBurned.current) return;
+    promoBurned.current = true;
+    // Fire-and-forget: nothing on this screen depends on the answer, and a
+    // failed stamp costs one extra offer, not a wrong one.
+    markPromoSeen();
+  }, [canShow, gift?.surfaceReason, markPromoSeen]);
 
   const close = () => {
     localStorage.setItem(DISMISSED_KEY, utcDay(new Date()));
