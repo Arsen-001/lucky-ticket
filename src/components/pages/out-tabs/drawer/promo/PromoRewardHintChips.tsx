@@ -2,14 +2,18 @@
 
 import { Ticket as TicketIcon } from 'lucide-react';
 import { LcLabel } from '@/components/shared/icons/LcLabel';
-import { TelegramStarIcon } from '@/components/shared/icons/TelegramStarIcon';
 import { useAppTranslations } from '@/hooks/useAppTranslations';
 import { GlobalConstants } from '@/constants/global.constants';
 import { staggerMs } from '@/utils/global/animation.utils';
 
 /**
- * Teaser row under the coupon: the reward kinds a code can drop
- * (LC, Stars, tickets) so the page never feels like a bare input.
+ * Teaser row under the coupon: the reward kinds a code can drop, so the page
+ * never feels like a bare input.
+ *
+ * Stars are deliberately not listed. A code can still grant them and the reveal
+ * shows them when it happens — but this row is a promise made before anything
+ * is entered, and naming Telegram's currency here reads as a price tag on a
+ * screen where nothing is for sale.
  */
 export function PromoRewardHintChips() {
   const t = useAppTranslations();
@@ -19,11 +23,6 @@ export function PromoRewardHintChips() {
       key: 'lc',
       icon: <LcLabel size={13} interactive={false} />,
       label: GlobalConstants.coinName,
-    },
-    {
-      key: 'stars',
-      icon: <TelegramStarIcon size={12} />,
-      label: GlobalConstants.starName,
     },
     {
       key: 'tickets',
