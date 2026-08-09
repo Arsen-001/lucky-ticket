@@ -200,3 +200,20 @@
     transform: translate(-50%, -50%);
   }
 }
+
+/* Bottom edge of a scroll area, faded out.
+
+   A modal that scrolls hides its scrollbar (`scrollbar-hidden`), so the only
+   thing telling the player there is more below is the content itself — and a
+   hard clip through the middle of a row reads as broken, not as scrollable.
+   Measured 09.08.2026: the avatar picker cut an avatar in half, the chip
+   picker sliced an engine row, the TON deposit sheet cut its QR code.
+
+   Applied only while the area actually overflows (see `Modal`), otherwise it
+   fades the last line of a short dialog for no reason. Both spellings are
+   written: `mask-image` is unprefixed only from Safari 15.4, and this app's
+   audience is iOS WebViews. */
+@utility scroll-fade-bottom {
+  -webkit-mask-image: linear-gradient(to bottom, #000 calc(100% - 26px), transparent);
+  mask-image: linear-gradient(to bottom, #000 calc(100% - 26px), transparent);
+}

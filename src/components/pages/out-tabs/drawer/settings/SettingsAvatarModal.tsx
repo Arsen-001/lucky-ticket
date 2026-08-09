@@ -101,7 +101,16 @@ export function SettingsAvatarModal({ open, onClose, currentAvatarId }: Settings
           </p>
         </div>
 
-        <div className="min-h-0 flex-1 overflow-y-auto scrollbar-hidden">
+        {/* The scroll edge falls in the middle of a row, and with the scrollbar
+            hidden nothing said the grid continues — it read as an avatar sliced
+            in half. The mask fades that edge instead, and only when there is
+            actually a row below it. */}
+        <div
+          className={twMerge(
+            'min-h-0 flex-1 overflow-y-auto scrollbar-hidden',
+            sortedAvatars.length > 9 && 'scroll-fade-bottom'
+          )}
+        >
           <div className="grid grid-cols-3 gap-3 p-1.5">
             {isLoading
               ? Array.from({ length: 9 }).map((_, i) => (

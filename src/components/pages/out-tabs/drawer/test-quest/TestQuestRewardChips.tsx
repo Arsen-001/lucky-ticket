@@ -46,7 +46,14 @@ export function TestQuestRewardChips({ label, crown, className }: TestQuestRewar
               // Every Test-Quest level credits its tickets to Bronze
               // (`test-quest.service`), so the chip can show that exact ticket.
               <span className="flex-center h-[19px] w-[26px]">
-                <TicketRewardIcon tier="bronze" size={13} />
+                {/* Not interactive here: a chip row sits INSIDE the level row's
+                    own <button> (TestQuestAheadRow), and the icon's default
+                    interactive form is a button too — React reported
+                    "<button> cannot be a descendant of <button>. This will
+                    cause a hydration error" on /test-quest until this was
+                    passed. The row itself opens the level, which is the tap the
+                    player wants. */}
+                <TicketRewardIcon tier="bronze" size={13} interactive={false} />
               </span>
             ) : (
               <span

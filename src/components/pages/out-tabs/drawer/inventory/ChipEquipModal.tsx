@@ -85,7 +85,17 @@ export function ChipEquipModal({
 
         <p className="text-pink-secondary text-[11px]">{t('pick engine to equip')}</p>
 
-        <div className="flex flex-col gap-2">
+        {/* The list owns the scrolling, not the whole card. An account with ten
+            engines pushed the cost row and the Equip button past the panel's
+            80vh edge, and the header scrolled away with them: the player saw a
+            list of engines and no way to confirm one. */}
+        <div
+          className={twMerge(
+            'flex flex-col gap-2',
+            eligibleEngines.length > 4 &&
+              'scrollbar-hidden scroll-fade-bottom max-h-[38vh] overflow-y-auto'
+          )}
+        >
           {eligibleEngines.length === 0 ? (
             <p className="text-xs text-white/55">{t('no engines available')}</p>
           ) : (

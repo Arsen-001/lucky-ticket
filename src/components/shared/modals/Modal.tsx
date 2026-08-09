@@ -1,6 +1,6 @@
 'use client';
 
-import { ReactNode, useEffect } from 'react';
+import { ReactNode, useCallback, useEffect, useState } from 'react';
 import { twMerge } from 'tailwind-merge';
 import { ClientPortal } from '@/components/shared/ClientPortal';
 import { ModalCloseButton } from '@/components/shared/modals/ModalCloseButton';
@@ -64,7 +64,49 @@ export const Modal = ({
     };
   }, [open, onClose, hideOnEscape, closeOnOverlayClick]);
 
-  const panelRef = useOverlayFocusLock(open);
+  // Both need the panel node, and the focus lock hands back a callback ref
+  // rather than an object one (the panel arrives late, inside a portal — see
+  // useOverlayFocusLock), so the node is kept here and forwarded to it.
+  const lockPanel = useOverlayFocusLock(open);
+  const [panel, setPanel] = useState<HTMLElement | null>(null);
+  // Stable identity on purpose: React re-runs a ref callback whose identity
+  // changed, detaching with null and re-attaching on every single render.
+  const panelRef = useCallback(
+    (node: HTMLDivElement | null) => {
+      setPanel(node);
+      lockPanel(node);
+    },
+    [lockPanel]
+  );
+
+  // Does the panel have content below its bottom edge right now?
+  //
+  // A modal taller than 80vh scrolls, but `scrollbar-hidden` means nothing says
+  // so — the panel simply clips, and a card cut through the middle of a row
+  // reads as broken rather than scrollable (the TON deposit sheet sliced its QR
+  // code in half, measured 09.08.2026). Fading that edge is the hint, and it
+  // has to come and go with the scrolling: a fade on a dialog that fits would
+  // dim the last line of every short modal in the app.
+  const [overflowing, setOverflowing] = useState(false);
+  useEffect(() => {
+    if (!panel) return;
+
+    const check = () =>
+      setOverflowing(panel.scrollHeight - panel.scrollTop - panel.clientHeight > 8);
+
+    check();
+    panel.addEventListener('scroll', check, { passive: true });
+    // Content arriving late (a query resolving, an image loading) changes the
+    // answer without any scrolling.
+    const observer = new ResizeObserver(check);
+    observer.observe(panel);
+    for (const child of Array.from(panel.children)) observer.observe(child as Element);
+
+    return () => {
+      panel.removeEventListener('scroll', check);
+      observer.disconnect();
+    };
+  }, [panel, open]);
 
   // The opening tap's own click lands on the backdrop, which did not exist when
   // the finger went down — see useBackdropDismiss.
@@ -106,6 +148,7 @@ export const Modal = ({
             // and a desktop-width window opened a 1200px-wide dialog over a
             // 430px app. @see --app-modal-max-w
             'w-full max-w-[var(--app-modal-max-w)] relative transition-all transform max-h-[80vh] overflow-y-auto overflow-x-hidden scrollbar-hidden rounded-lg focus:outline-none',
+            overflowing && 'scroll-fade-bottom',
             visible ? 'scale-100' : 'scale-80'
           )}
         >
