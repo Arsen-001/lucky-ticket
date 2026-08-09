@@ -2,9 +2,7 @@
 
 import { PartyPopper, Ticket as TicketIcon } from 'lucide-react';
 import { LcLabel } from '@/components/shared/icons/LcLabel';
-import { TelegramStarIcon } from '@/components/shared/icons/TelegramStarIcon';
 import { useAppTranslations } from '@/hooks/useAppTranslations';
-import { GlobalConstants } from '@/constants/global.constants';
 import { formatNumber } from '@/utils/global/number.utils';
 import type { PromoReward, PromoRedeemResponse } from '@/types/interfaces/promo.interfaces';
 import { staggerMs } from '@/utils/global/animation.utils';
@@ -15,6 +13,12 @@ interface PromoRewardRevealProps {
 
 export function PromoRewardReveal({ response }: PromoRewardRevealProps) {
   const t = useAppTranslations();
+
+  // Stars are kept off this screen entirely, the teaser row and the reveal
+  // alike. A code can still carry them and the balance still receives them —
+  // they are simply not named here. A code that holds nothing else therefore
+  // shows its header and no lines.
+  const rewards = response.rewards.filter(reward => reward.kind !== 'stars');
 
   return (
     <div className="card-outlined bg-background animate-slide-in-bottom relative flex flex-col items-center gap-3 overflow-hidden rounded-2xl px-4 py-5 text-center">
@@ -31,17 +35,19 @@ export function PromoRewardReveal({ response }: PromoRewardRevealProps) {
           {response.code}
         </span>
       </div>
-      <div className="relative flex w-full flex-col gap-2">
-        {response.rewards.map((reward, index) => (
-          <div
-            key={index}
-            className="bg-background-overlay animate-slide-in-bottom flex items-center justify-center rounded-xl border border-white/5 py-2.5"
-            style={{ animationDelay: `${staggerMs(index, 80)}ms` }}
-          >
-            <PromoRewardLine reward={reward} />
-          </div>
-        ))}
-      </div>
+      {rewards.length > 0 && (
+        <div className="relative flex w-full flex-col gap-2">
+          {rewards.map((reward, index) => (
+            <div
+              key={index}
+              className="bg-background-overlay animate-slide-in-bottom flex items-center justify-center rounded-xl border border-white/5 py-2.5"
+              style={{ animationDelay: `${staggerMs(index, 80)}ms` }}
+            >
+              <PromoRewardLine reward={reward} />
+            </div>
+          ))}
+        </div>
+      )}
     </div>
   );
 }
@@ -54,17 +60,6 @@ function PromoRewardLine({ reward }: { reward: PromoReward }) {
     return (
       <span className="inline-flex items-center gap-1.5 text-sm font-extrabold tabular-nums text-white">
         {amount} <LcLabel size={16} interactive={false} />
-      </span>
-    );
-  }
-
-  if (reward.kind === 'stars') {
-    return (
-      <span className="inline-flex items-center gap-1.5 text-sm font-extrabold tabular-nums text-white">
-        {amount} <TelegramStarIcon size={16} />
-        <span className="text-pink-secondary text-[11px] font-bold uppercase">
-          {GlobalConstants.starName}
-        </span>
       </span>
     );
   }
