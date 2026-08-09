@@ -8,8 +8,14 @@ export interface PromoScreenShellProps {
 /**
  * Full-bleed frame for the promo screen: the negative margins cancel the drawer
  * layout's own padding so the prize art runs to the edges of the phone, and the
- * flex column lets the backdrop cover the viewport even though the card only
- * fills the top 380px of it.
+ * flex column lets the backdrop cover the viewport even though the card is only
+ * 380px of it.
+ *
+ * The card is centred with `my-auto` on the child, not `justify-center` here:
+ * centred justification in a scroll container puts the overflow above the top
+ * edge, where it cannot be scrolled to — the moment the card grows past the
+ * viewport (an error line, a taller locale, the keyboard shrinking the screen)
+ * its header would be unreachable. Auto margins collapse instead.
  */
 export function PromoScreenShell({ children }: PromoScreenShellProps) {
   return (

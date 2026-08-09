@@ -29,7 +29,7 @@ export function PromoContainer() {
         loading={promo.loading}
         onCodeChange={promo.onCodeChange}
         onSubmit={promo.onSubmit}
-        className="animate-slide-in-bottom"
+        className="animate-slide-in-bottom my-auto"
       />
 
       <Modal open={promo.resultOpen} onClose={promo.closeResult} label={t('promo code')}>

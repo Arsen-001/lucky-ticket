@@ -22,32 +22,34 @@ interface GiftPiece {
  * coin and the Star. Engines, chips and trophies are prettier still, but a
  * player reads a background as a promise, and codes never drop those.
  *
- * Hand-placed, not random: the card ends 54% down a 390×844 screen, so above
- * that line only the extreme edges carry art — cropped hints that never reach
- * under the input — and everything below it, the 392px the screen used to leave
- * flat and empty, carries the field at full strength. Deliberately motionless:
- * animating a full-bleed backdrop is what made the tab screens blink when the
- * drawer opened.
+ * Hand-placed, not random, and placed around the card rather than under it: on a
+ * 390×844 screen the centred card spans y 27–72%, so that band carries only
+ * cropped hints at the extreme edges, while the free space above and below it —
+ * the 226px header gap and the 238px foot — carries the field at full strength.
+ * Deliberately motionless: animating a full-bleed backdrop is what made the tab
+ * screens blink when the drawer opened.
  */
 const PIECES: GiftPiece[] = [
-  // Above and beside the card — mostly cropped by the edge, they only hint.
-  { src: icons.goldenTicket, x: -4, y: 6, w: 104, rotate: -18, opacity: 0.16, blur: 0.4 },
-  { src: icons.coin, x: 96, y: 3, w: 58, rotate: 12, opacity: 0.14 },
-  { src: icons.telegramStar, x: 84, y: 13, w: 30, rotate: -14, opacity: 0.1, blur: 0.3 },
-  { src: icons.diamondTicket, x: -6, y: 30, w: 88, rotate: 14, opacity: 0.1, blur: 0.5 },
-  { src: icons.silverTicket, x: 104, y: 41, w: 96, rotate: -12, opacity: 0.11, blur: 0.5 },
-  { src: icons.coin, x: -3, y: 52, w: 44, rotate: 0, opacity: 0.09, blur: 0.4 },
+  // Above the card.
+  { src: icons.coin, x: 34, y: 3, w: 42, rotate: -6, opacity: 0.18, blur: 0.4 },
+  { src: icons.goldenTicket, x: 10, y: 8, w: 128, rotate: -16, opacity: 0.26 },
+  { src: icons.coin, x: 84, y: 6, w: 64, rotate: 12, opacity: 0.3 },
+  { src: icons.telegramStar, x: 55, y: 15, w: 42, rotate: -12, opacity: 0.24 },
+  { src: icons.diamondTicket, x: -6, y: 20, w: 112, rotate: 14, opacity: 0.2, blur: 0.3 },
+  { src: icons.platinumTicket, x: 94, y: 21, w: 122, rotate: -13, opacity: 0.22 },
 
-  // Below the card — the part of the screen that used to be empty.
-  { src: icons.telegramStar, x: 47, y: 61, w: 42, rotate: 10, opacity: 0.26 },
-  { src: icons.goldenTicket, x: 8, y: 64, w: 122, rotate: -14, opacity: 0.18, blur: 0.4 },
-  { src: icons.platinumTicket, x: 20, y: 72, w: 130, rotate: -11, opacity: 0.28 },
-  { src: icons.bronzeTicket, x: 84, y: 70, w: 120, rotate: 15, opacity: 0.26 },
-  { src: icons.coin, x: 62, y: 80, w: 70, rotate: -8, opacity: 0.32 },
-  { src: icons.goldenTicketOverlap, x: 30, y: 88, w: 124, rotate: 8, opacity: 0.24, blur: 0.3 },
-  { src: icons.telegramStar, x: 9, y: 91, w: 36, rotate: -20, opacity: 0.22, blur: 0.3 },
-  { src: icons.diamondTicket, x: 90, y: 92, w: 110, rotate: -10, opacity: 0.2, blur: 0.4 },
-  { src: icons.silverTicket, x: 52, y: 98, w: 108, rotate: 13, opacity: 0.16, blur: 0.5 },
+  // Beside the card — cropped by the edge, they only hint.
+  { src: icons.silverTicket, x: -8, y: 38, w: 96, rotate: -12, opacity: 0.1, blur: 0.5 },
+  { src: icons.coin, x: 104, y: 50, w: 48, rotate: 0, opacity: 0.09, blur: 0.5 },
+  { src: icons.telegramStar, x: -4, y: 63, w: 32, rotate: 16, opacity: 0.08, blur: 0.5 },
+
+  // Below the card.
+  { src: icons.coin, x: 62, y: 79, w: 70, rotate: -8, opacity: 0.32 },
+  { src: icons.platinumTicket, x: 20, y: 84, w: 130, rotate: -11, opacity: 0.28 },
+  { src: icons.bronzeTicket, x: 90, y: 87, w: 120, rotate: 15, opacity: 0.24 },
+  { src: icons.telegramStar, x: 9, y: 94, w: 38, rotate: -20, opacity: 0.24 },
+  { src: icons.goldenTicketOverlap, x: 38, y: 96, w: 126, rotate: 8, opacity: 0.24, blur: 0.3 },
+  { src: icons.diamondTicket, x: 92, y: 99, w: 112, rotate: -10, opacity: 0.18, blur: 0.4 },
 ];
 
 export interface PromoGiftBackdropProps {
@@ -93,12 +95,14 @@ export function PromoGiftBackdrop({ className }: PromoGiftBackdropProps) {
         />
       ))}
 
-      {/* Vignette: keeps the field from competing with text near the edges. */}
+      {/* Vignette: only the far corners, since the art now lives at the top and
+          bottom of the screen — the old one centred at 38% dimmed exactly the
+          two bands that are meant to carry it. */}
       <span
         className="absolute inset-0"
         style={{
           background:
-            'radial-gradient(120% 70% at 50% 38%, transparent 40%, rgba(15,13,32,0.55) 100%)',
+            'radial-gradient(135% 88% at 50% 50%, transparent 58%, rgba(15,13,32,0.45) 100%)',
         }}
       />
     </div>
