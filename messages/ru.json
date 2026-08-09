@@ -1,4 +1,8 @@
 {
+  "your market discount": "Твоя скидка",
+  "discount already in prices": "уже в каждой цене",
+  "no market discount": "Скидки нет",
+  "get market discount {pct}": "Lucky Player даёт −{pct}% на всё",
   "friends not counted as referrals": "{count, plural, one {# друг не засчитан как реферал} few {# друга не засчитаны как рефералы} many {# друзей не засчитаны как рефералы} other {# друзей не засчитаны как рефералы}}",
   "invite hero stat referrals": "Рефералов",
   "no achievements yet": "Пока нет ачивок",

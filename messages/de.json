@@ -1,4 +1,8 @@
 {
+  "your market discount": "Dein Rabatt",
+  "discount already in prices": "schon in jedem Preis",
+  "no market discount": "Kein Rabatt",
+  "get market discount {pct}": "Lucky Player gibt {pct}% auf alles",
   "friends not counted as referrals": "{count, plural, =1 {1 Freund zählt nicht als Referral} other {# Freunde zählen nicht als Referrals}}",
   "invite hero stat referrals": "Referrals",
   "no achievements yet": "Noch keine Erfolge",

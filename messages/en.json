@@ -1,4 +1,8 @@
 {
+  "your market discount": "Your discount",
+  "discount already in prices": "already in every price",
+  "no market discount": "No discount",
+  "get market discount {pct}": "Lucky Player takes {pct}% off everything",
   "friends not counted as referrals": "{count, plural, =1 {1 friend doesn't count as a referral} other {# friends don't count as referrals}}",
   "invite hero stat referrals": "Referrals",
   "no achievements yet": "No achievements yet",

@@ -14,6 +14,7 @@ import {
   MarketCategoryChips,
   type MarketCategoryKey,
 } from '@/components/pages/tabs/market/MarketCategoryChips';
+import { MarketDiscountNote } from '@/components/pages/tabs/market/MarketDiscountNote';
 import { MarketInfoModal } from '@/components/pages/tabs/market/MarketInfoModal';
 import { MarketPurchaseModal } from '@/components/pages/tabs/market/MarketPurchaseModal';
 import { MarketPurchaseSuccessModal } from '@/components/pages/tabs/market/MarketPurchaseSuccessModal';
@@ -242,6 +243,9 @@ export function MarketView() {
   return (
     <div className="flex flex-col gap-4">
       <MarketHeroCarousel onSelect={handleSelect} onBuy={handleBuy} />
+      <div className="px-5">
+        <MarketDiscountNote />
+      </div>
       <div className="px-5">
         <MarketCategoryChips
           active={resolvedActive}
