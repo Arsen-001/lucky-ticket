@@ -12,7 +12,78 @@ import type {
   MarketData,
   MarketPrice,
   MarketStatusSavings,
+  StatusPerkBase,
+  VipLevelPerks,
 } from '@/types/interfaces/market.interfaces';
+import { GlobalConstants } from '@/constants/global.constants';
+
+/**
+ * Free limits the counted status perks are added to — the backend sends these
+ * with every status listing so the app can quote the resulting total.
+ */
+const STATUS_PERK_BASE: StatusPerkBase = {
+  adsDailyLimit: GlobalConstants.apRewards.watchVideoDailyLimit,
+  ticketSendDailyLimit: { BRONZE: 1, SILVER: 1, GOLD: 1, PLATINUM: 0, DIAMOND: 0 },
+  stakeFeeVolumeDiscountMaxPct: Math.max(
+    ...GlobalConstants.stakeFeeVolumeDiscount.map(b => b.percent)
+  ),
+};
+
+/**
+ * The live VIP ladder from prod (`statusConfig.vip.levels`, read 2026-08-09),
+ * column order: engine % · stake % · market % · ad views · sends
+ * Bronze→Diamond · bulk claim.
+ *
+ * Copied verbatim rather than generated so the mock reproduces what the screen
+ * must survive on real data: fractional percents (0.1, 1.9), tiers that stay
+ * closed for the first levels, and the three perks that are ZERO on all twenty
+ * — tournament reward, join AP and the stake-fee bonus. None of those may grow
+ * a row.
+ */
+const VIP_LEVEL_PERK_LADDER: VipLevelPerks[] = (
+  [
+    [1, 0.1, 1, 1, [2, 1, 0, 0, 0], false],
+    [1.9, 0.3, 1.4, 2, [3, 2, 0, 0, 0], false],
+    [2.7, 0.6, 1.8, 3, [4, 3, 1, 0, 0], false],
+    [3.6, 0.8, 2.2, 4, [5, 3, 2, 0, 0], false],
+    [4.5, 1, 2.6, 5, [5, 4, 3, 1, 0], false],
+    [5.4, 1.2, 3, 5, [6, 5, 3, 2, 0], false],
+    [6.2, 1.5, 3.4, 6, [7, 6, 4, 3, 1], false],
+    [7.1, 1.7, 3.8, 7, [8, 6, 5, 3, 2], false],
+    [8, 1.9, 4.2, 8, [9, 7, 6, 4, 3], false],
+    [8.8, 2.2, 4.7, 9, [10, 8, 6, 5, 3], false],
+    [9.7, 2.4, 5.1, 10, [10, 9, 7, 6, 4], false],
+    [10.6, 2.6, 5.5, 11, [11, 10, 8, 7, 5], false],
+    [11.5, 2.8, 5.9, 12, [12, 10, 9, 7, 6], false],
+    [12.3, 3.1, 6.3, 13, [13, 11, 9, 8, 6], false],
+    [13.2, 3.3, 6.7, 13, [14, 12, 10, 9, 7], true],
+    [14.1, 3.5, 7.1, 14, [15, 13, 11, 10, 8], true],
+    [15, 3.7, 7.5, 15, [15, 13, 12, 10, 9], true],
+    [15.8, 4, 7.9, 16, [16, 14, 12, 11, 9], true],
+    [16.7, 4.2, 8.3, 17, [17, 15, 13, 12, 10], true],
+    [20, 5, 10, 20, [20, 18, 16, 14, 12], true],
+  ] as [number, number, number, number, number[], boolean][]
+).map(([engine, stake, market, ads, send, bulk], i) => ({
+  level: i + 1,
+  perks: {
+    engineSpeedBoostPct: engine,
+    stakeYieldBoostPct: stake,
+    tournamentRewardBoostPct: 0,
+    tournamentJoinApBoostPct: 0,
+    marketDiscountPct: market,
+    referralPct: 25,
+    adsDailyBonus: ads,
+    stakeFeeDiscountBonusPct: 0,
+    ticketSendDailyBonus: {
+      BRONZE: send[0],
+      SILVER: send[1],
+      GOLD: send[2],
+      PLATINUM: send[3],
+      DIAMOND: send[4],
+    },
+    bulkClaimEnabled: bulk,
+  },
+}));
 
 /**
  * LC price ladder + LS parity (DOCS §14.2). Engine and ticket LC prices come
@@ -401,19 +472,24 @@ export const marketMock: MarketData = {
         { type: MarketPriceType.LC, amount: 2_000_000 },
         { type: MarketPriceType.TELEGRAM_STARS, amount: 100 },
       ],
-      privileges: [
-        'lp engine speed boost',
-        'lp stake yield boost',
-        'lp stake fee discount',
-        'lp market discount value',
-        'lp tournament reward boost',
-        'lp tournament join ap boost',
-        'higher ticket send limits',
-        'send platinum diamond tickets',
-        'lp claim all tickets',
-        'lp watch ads daily',
-        'lucky player badge on profile',
-      ],
+      perkBase: STATUS_PERK_BASE,
+      // Mirrors the live `statusConfig.luckyPlayer.perks` on prod: the zeros are
+      // real (tournament boosts and the stake-fee bonus are not granted today)
+      // and must stay zeros here, because the screen's whole contract is that a
+      // perk at 0 renders NO row.
+      perks: {
+        engineSpeedBoostPct: 10,
+        stakeYieldBoostPct: 5,
+        tournamentRewardBoostPct: 0,
+        tournamentJoinApBoostPct: 0,
+        marketDiscountPct: 10,
+        referralPct: 15,
+        adsDailyBonus: 10,
+        stakeFeeDiscountBonusPct: 0,
+        ticketSendDailyBonus: { BRONZE: 4, SILVER: 3, GOLD: 2, PLATINUM: 2, DIAMOND: 1 },
+        bulkClaimEnabled: true,
+      },
+      dailyGift: { enabled: true, lc: 1_000, ticketTier: 'BRONZE', ticketCount: 2 },
     },
     {
       id: 's2',
@@ -438,31 +514,24 @@ export const marketMock: MarketData = {
         250, 50, 60, 70, 80, 95, 110, 125, 145, 165, 190, 220, 250, 290, 330, 380, 440, 500, 575,
         660,
       ].map((ls, i) => ({ level: i + 1, lc: ls * 20_000, ls })),
-      privileges: [
-        'vip engine speed boost',
-        'vip stake yield boost',
-        'vip stake fee discount',
-        'vip market discount value',
-        'vip tournament reward boost',
-        'vip tournament join ap boost',
-        'higher ticket send limits',
-        'send platinum diamond tickets',
-        'vip watch ads daily',
-        'vip level badge on profile',
-        'dedicated support',
-      ],
+      perkBase: STATUS_PERK_BASE,
+      levelPerks: VIP_LEVEL_PERK_LADDER,
     },
   ],
 };
 
 /**
- * A month of a VIP 2 player's savings. Deliberately lopsided — most of the
- * money is saved on LC (engines cost millions) while the Stars figure stays
- * small, which is what the real ratio looks like and what the layout has to
- * survive.
+ * Real 30-day savings from production, read 09.08.2026 — not invented.
+ *
+ * The LC figure is the top market buyer's own: `M I K A`, VIP 20 (the live rate
+ * is 10%, not the 20% DOCS still claims), 3 purchases totalling 10,412,000 LC
+ * charged, i.e. 11,568,889 before the discount. The Stars figure is `AK001`'s,
+ * VIP 20, 16 purchases totalling 1,386 ⭐ charged. Different players, taken
+ * together on purpose: this fixture is the widest real pair the row has to fit,
+ * and invented round numbers had been hiding exactly that.
  */
 export const marketSavingsMock: MarketStatusSavings = {
-  lc: 1_284_320,
-  stars: 47,
+  lc: 1_156_889,
+  stars: 154,
   windowDays: 30,
 };

@@ -69,28 +69,32 @@ export const mockDb = {
     vipLevel: fresh ? 0 : 2,
     // The backend always resolves these and the UI prefers them over the flat
     // code constants, so the mock has to send them too — otherwise dev only
-    // ever exercises the fallback. This is the VIP **level 2** row of the live
-    // ladder (DOCS §7.4): the counted perks are BONUSES over the free numbers,
-    // so `adsDailyBonus: 3` is 10 + 3 = 13 views and Bronze `+5` is 1 + 5 = 6.
-    // `bulkClaimEnabled` is false on purpose — "Claim all" unlocks at VIP 10,
-    // and VIP supersedes Lucky Player rather than stacking with it (DOCS §7.3).
+    // ever exercises the fallback.
+    //
+    // Copied verbatim from the LIVE VIP **level 2** row (prod
+    // `PlatformConfig.statusConfig`, read 09.08.2026). Every number here was
+    // invented before and every one of them was wrong — the market discount
+    // read 2% where production charges 1.4%, so dev was validating prices the
+    // server would never quote. The counted perks are BONUSES over the free
+    // numbers: `adsDailyBonus: 2` means 10 + 2 = 12 views. `bulkClaimEnabled`
+    // is false because "Claim all" unlocks at VIP 10 (DOCS §7.3).
     statusPerks: fresh
       ? undefined
       : {
-          engineSpeedBoostPct: 2,
-          stakeYieldBoostPct: 0.2,
+          engineSpeedBoostPct: 1.9,
+          stakeYieldBoostPct: 0.3,
           tournamentRewardBoostPct: 0,
           tournamentJoinApBoostPct: 0,
-          marketDiscountPct: 2,
+          marketDiscountPct: 1.4,
           referralPct: 25,
-          adsDailyBonus: 3,
-          stakeFeeDiscountBonusPct: 10,
+          adsDailyBonus: 2,
+          stakeFeeDiscountBonusPct: 0,
           ticketSendDailyBonus: {
-            BRONZE: 5,
-            SILVER: 4,
-            GOLD: 2,
-            PLATINUM: 2,
-            DIAMOND: 1,
+            BRONZE: 3,
+            SILVER: 2,
+            GOLD: 0,
+            PLATINUM: 0,
+            DIAMOND: 0,
           },
           bulkClaimEnabled: false,
         },
