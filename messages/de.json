@@ -805,6 +805,7 @@
   "lvl": "Lvl",
   "cycle": "Zyklus",
   "cycle full": "Voller Zyklus: {time}",
+  "per cycle": "pro Zyklus",
   "per cycle full": "{capacity} Tickets pro Zyklus",
   "per hour base": "Produktivität",
   "streak": "Serie",
@@ -1130,6 +1131,7 @@
   "started": "Gestartet",
   "no tickets of this type": "Du hast noch keine Tickets dieses Typs",
   "get tickets": "Tickets holen",
+  "view tickets": "Meine Tickets",
   "no joined tournaments": "Noch keine Turnier-Teilnahmen",
   "no joined tournaments description": "Tritt einem anstehenden Turnier bei, und es erscheint hier.",
   "no prize description": "Diesmal kein Gewinn — hol dir mehr Tickets und versuch es erneut!",
@@ -1287,5 +1289,14 @@
   "gift error temporarily unavailable": "Geschenke sind vorübergehend nicht verfügbar — versuche es etwas später. Es wurde nichts abgebucht.",
   "gift error send failed": "Die Anfrage konnte nicht angelegt werden. Es wurde nichts abgebucht.",
   "gift closed review title": "Dein Geschenk wird bestätigt",
-  "gift closed review text": "Die Anfrage ist da. Wir bestätigen jede von Hand — gib ihr etwas Zeit, der Bot schickt das Geschenk in diesen Chat. Geht etwas schief, kommen die Münzen zurück."
+  "gift closed review text": "Die Anfrage ist da. Wir bestätigen jede von Hand — gib ihr etwas Zeit, der Bot schickt das Geschenk in diesen Chat. Geht etwas schief, kommen die Münzen zurück.",
+  "your daily gift": "Dein Tagesgeschenk",
+  "lucky player daily gift": "Tägliches Lucky-Player-Geschenk",
+  "collect it every day while lucky player is active": "Hol es dir jeden Tag, solange das Abo läuft. Ein verpasster Tag wird nicht angespart.",
+  "this is what lucky player brings every day": "Das holt sich ein Lucky Player jeden Tag. Deins wartet hinter dem Status.",
+  "get lucky player": "Lucky Player holen",
+  "later": "Später",
+  "daily gift collected": "Tagesgeschenk eingesammelt",
+  "daily gift collected with ticket": "Tagesgeschenk eingesammelt — Münzen und ein Ticket gehören dir",
+  "could not collect the gift": "Geschenk konnte nicht eingesammelt werden. Versuch es erneut."
 }

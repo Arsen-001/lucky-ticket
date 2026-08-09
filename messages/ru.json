@@ -806,6 +806,7 @@
   "lvl": "Ур.",
   "cycle": "Цикл",
   "cycle full": "Полный цикл: {time}",
+  "per cycle": "за цикл",
   "per cycle full": "{capacity} билетов за цикл",
   "per hour base": "Производительность",
   "streak": "Стрик",
@@ -1130,6 +1131,7 @@
   "started": "Начался",
   "no tickets of this type": "У вас пока нет билетов этого типа",
   "get tickets": "Получить билеты",
+  "view tickets": "Мои билеты",
   "no joined tournaments": "Вы ещё не участвуете в турнирах",
   "no joined tournaments description": "Присоединитесь к предстоящему турниру — он появится здесь.",
   "no prize description": "В этот раз без приза — возьмите больше билетов и попробуйте снова!",
@@ -1287,5 +1289,14 @@
   "gift error temporarily unavailable": "Подарки временно недоступны — попробуйте чуть позже. Монеты не списаны.",
   "gift error send failed": "Не получилось оформить заявку. Монеты не списаны.",
   "gift closed review title": "Ваш подарок подтверждают",
-  "gift closed review text": "Заявка принята. Мы подтверждаем каждую руками, так что дайте немного времени — бот пришлёт подарок в этот чат. Если что-то пойдёт не так, монеты вернутся на баланс."
+  "gift closed review text": "Заявка принята. Мы подтверждаем каждую руками, так что дайте немного времени — бот пришлёт подарок в этот чат. Если что-то пойдёт не так, монеты вернутся на баланс.",
+  "your daily gift": "Твой подарок дня",
+  "lucky player daily gift": "Ежедневный подарок Lucky Player",
+  "collect it every day while lucky player is active": "Забирай каждый день, пока идёт подписка. Пропущенный день не копится.",
+  "this is what lucky player brings every day": "Это забирает Lucky Player каждый день. Твой подарок ждёт за статусом.",
+  "get lucky player": "Получить Lucky Player",
+  "later": "Позже",
+  "daily gift collected": "Подарок дня забран",
+  "daily gift collected with ticket": "Подарок дня забран — монеты и билет твои",
+  "could not collect the gift": "Не удалось забрать подарок. Попробуй ещё раз."
 }

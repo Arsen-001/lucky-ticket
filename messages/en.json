@@ -806,6 +806,7 @@
   "lvl": "Lvl",
   "cycle": "Cycle",
   "cycle full": "Full cycle: {time}",
+  "per cycle": "per cycle",
   "per cycle full": "{capacity} tickets per cycle",
   "per hour base": "Productivity",
   "streak": "Streak",
@@ -1130,6 +1131,7 @@
   "started": "Started",
   "no tickets of this type": "You don't have any tickets of this type yet",
   "get tickets": "Get tickets",
+  "view tickets": "Your tickets",
   "no joined tournaments": "No joined tournaments yet",
   "no joined tournaments description": "Join an upcoming tournament and it will show up here.",
   "no prize description": "No prize this time — grab more tickets and try the next one!",
@@ -1287,5 +1289,14 @@
   "gift error temporarily unavailable": "Gifts are temporarily unavailable — try again a little later. Nothing was charged.",
   "gift error send failed": "Could not place the request. Nothing was charged.",
   "gift closed review title": "Your gift is being confirmed",
-  "gift closed review text": "The request is in. We confirm each one by hand, so give it a little time — the bot will deliver it to this chat. If anything goes wrong, the coins return to your balance."
+  "gift closed review text": "The request is in. We confirm each one by hand, so give it a little time — the bot will deliver it to this chat. If anything goes wrong, the coins return to your balance.",
+  "your daily gift": "Your daily gift",
+  "lucky player daily gift": "Lucky Player daily gift",
+  "collect it every day while lucky player is active": "Collect it every day your subscription is running. A missed day is not saved up.",
+  "this is what lucky player brings every day": "This is what a Lucky Player collects every day. Yours is waiting behind the status.",
+  "get lucky player": "Get Lucky Player",
+  "later": "Later",
+  "daily gift collected": "Daily gift collected",
+  "daily gift collected with ticket": "Daily gift collected — coins and a ticket are yours",
+  "could not collect the gift": "Could not collect the gift. Try again."
 }
