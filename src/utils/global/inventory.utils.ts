@@ -80,8 +80,31 @@ export const findEquippedChip = (
   type: InventoryChipType
 ) => chips?.find(c => c.equippedOnEngineId === engineId && c.type === type);
 
+/**
+ * The booster still RUNNING on this engine's slot.
+ *
+ * A booster is a time-limited consumable (3–48h by tier), but the row keeps its
+ * `activeOnEngineId` after the window closes — matching on the assignment alone
+ * counted an expired booster forever, so a cycle on screen stayed permanently
+ * faster than the one the server mints at. `expiresAt` is the authority.
+ *
+ * A missing `expiresAt` does NOT revoke the boost: it means the window is
+ * unknown (older payload, or a booster the backend never dated), and that is
+ * not evidence it ran out — the same rule the backend applies to a Lucky Player
+ * subscription with no recorded expiry.
+ *
+ * `now` is injectable so the boost can be recomputed off a ticking clock rather
+ * than only when something else happens to re-render.
+ */
 export const findActiveBooster = (
   boosters: import('@/types/interfaces/inventory.interfaces').InventoryBooster[] | undefined,
   engineId: string,
-  type: InventoryChipType
-) => boosters?.find(b => b.activeOnEngineId === engineId && b.type === type);
+  type: InventoryChipType,
+  now: number = Date.now()
+) =>
+  boosters?.find(
+    b =>
+      b.activeOnEngineId === engineId &&
+      b.type === type &&
+      (!b.expiresAt || new Date(b.expiresAt).getTime() > now)
+  );
