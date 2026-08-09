@@ -748,11 +748,11 @@ export function HomeEnginesSlider({ className }: ClassNameProps) {
         open={!!skipConfirm}
         onClose={() => setSkipConfirm(null)}
         onConfirm={confirmSkip}
-        title={t('skip cycle title')}
+        title={t('instant claim title')}
         content={
           skipConfirm ? (
             <div className="flex flex-col items-center gap-3">
-              <p className="text-pink-secondary text-sm">{t('skip cycle description')}</p>
+              <p className="text-pink-secondary text-sm">{t('instant claim description')}</p>
               <div className="border-gold/40 bg-gold/10 text-gold inline-flex items-center gap-1.5 rounded-full border px-3.5 py-1.5 text-sm font-extrabold tabular-nums">
                 <TelegramStarIcon size={14} />
                 {skipConfirm.cost}
@@ -760,7 +760,7 @@ export function HomeEnginesSlider({ className }: ClassNameProps) {
             </div>
           ) : null
         }
-        confirmText={t('skip')}
+        confirmText={t('claim now')}
       />
 
       <ConfirmModal

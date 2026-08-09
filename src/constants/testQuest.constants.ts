@@ -219,7 +219,7 @@ const TEST_QUEST_STEP_OVERRIDES: Record<number, TestQuestStep[]> = {
     spend(18),
     ads(5),
     share(3),
-    { labelKey: 'quest step buy ticket shop', kind: 'shop' },
+    { labelKey: 'quest step buy ticket market', kind: 'shop' },
     upgrade(2),
     CHANNEL_GATE,
   ],
@@ -255,7 +255,7 @@ const TEST_QUEST_STEP_OVERRIDES: Record<number, TestQuestStep[]> = {
     ads(43),
     share(12),
     upgrade(8),
-    { labelKey: 'quest step buy engine shard shop', kind: 'shop' },
+    { labelKey: 'quest step buy engine shard market', kind: 'shop' },
     CHANNEL_GATE,
   ],
   // 22 · day 9
@@ -276,7 +276,7 @@ const TEST_QUEST_STEP_OVERRIDES: Record<number, TestQuestStep[]> = {
     share(17),
     upgrade(11),
     { labelKey: 'quest step reach silver', kind: 'status' },
-    { labelKey: 'quest step buy tier ticket shop', kind: 'shop' },
+    { labelKey: 'quest step buy tier ticket market', kind: 'shop' },
     CHANNEL_GATE,
   ],
   // 19 · day 12
@@ -291,7 +291,7 @@ const TEST_QUEST_STEP_OVERRIDES: Record<number, TestQuestStep[]> = {
     ads(93),
     share(23),
     upgrade(15),
-    { labelKey: 'quest step buy shard shop', kind: 'shop' },
+    { labelKey: 'quest step buy shard market', kind: 'shop' },
     CHANNEL_GATE,
   ],
   // 15 · day 16 — Gold wall
@@ -328,7 +328,7 @@ const TEST_QUEST_STEP_OVERRIDES: Record<number, TestQuestStep[]> = {
     share(33),
     upgrade(22),
     { labelKey: 'quest step keep gold', kind: 'status' },
-    { labelKey: 'quest step buy gold shard shop', kind: 'shop' },
+    { labelKey: 'quest step buy gold shard market', kind: 'shop' },
     CHANNEL_GATE,
   ],
   // 8 · day 23
@@ -337,7 +337,7 @@ const TEST_QUEST_STEP_OVERRIDES: Record<number, TestQuestStep[]> = {
     ads(150),
     share(35),
     upgrade(23),
-    { labelKey: 'quest step buy engine shop', kind: 'shop' },
+    { labelKey: 'quest step buy engine market', kind: 'shop' },
     CHANNEL_GATE,
   ],
   // 7 · day 24

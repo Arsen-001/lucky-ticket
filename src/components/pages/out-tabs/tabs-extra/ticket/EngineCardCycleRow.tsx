@@ -215,7 +215,7 @@ export function EngineCardCycleRow({
       >
         <TelegramStarIcon size={compact ? 10 : 11} />
         <span>
-          {t('skip')} · {instantClaimCost}
+          {t('claim now')} · {instantClaimCost}
         </span>
       </button>
 
