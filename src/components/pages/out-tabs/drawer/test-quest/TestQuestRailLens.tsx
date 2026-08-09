@@ -35,13 +35,13 @@ export function TestQuestRailLens({ card, offsetDays, top, className }: TestQues
         className
       )}
     >
-      <div className="flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-wider text-white/45">
+      <div className="flex items-center gap-1.5 text-[11px] font-bold uppercase tracking-wider text-white/55">
         {card.crown ? (
           <Crown size={11} className="text-gold" />
         ) : (
           <Gift size={10} className={card.wall ? 'text-gold' : 'text-electric-pink'} />
         )}
-        <span className="tabular-nums text-white">
+        <span className="text-[13px] font-extrabold capitalize tracking-normal tabular-nums text-white">
           {t('day')} {card.day}
         </span>
         <span className="ml-auto tabular-nums">

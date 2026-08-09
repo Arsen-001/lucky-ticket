@@ -34,17 +34,17 @@ export function TestQuestRewardPanel({
         className
       )}
     >
-      <div className="flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-wider text-white/40">
-        <Gift size={10} className={card.crown ? 'text-gold' : 'text-electric-pink'} />
+      <div className="flex items-center gap-1.5 text-[11px] font-bold uppercase tracking-wider text-white/55">
+        <Gift size={12} className={card.crown ? 'text-gold' : 'text-electric-pink'} />
         {t('reward')} ·
-        <span className="tabular-nums text-white/70">
+        <span className="text-[14px] font-extrabold capitalize tracking-normal tabular-nums text-white">
           {t('day')} {card.day}
         </span>
         {!isToday && (
           <button
             type="button"
             onClick={onBackToToday}
-            className="flex-center ml-auto gap-1 rounded-full bg-electric-pink/15 px-2 py-0.5 text-[9px] font-bold uppercase tracking-wider text-electric-pink active:scale-95"
+            className="flex-center ml-auto gap-1 rounded-full bg-electric-pink/20 px-2 py-1 text-[10px] font-bold uppercase tracking-wider text-electric-pink active:scale-95"
           >
             <CornerUpLeft size={10} />
             {t('today')}

@@ -39,15 +39,15 @@ export function TestQuestRewardChips({ label, crown, className }: TestQuestRewar
         return (
           <span
             key={i}
-            className="flex items-center gap-1 rounded-lg border border-white/[0.07] bg-white/[0.03] py-1 pl-1 pr-2 text-[11.5px] font-semibold tabular-nums text-white/90"
+            className="flex items-center gap-1 rounded-lg border border-white/[0.07] bg-white/[0.03] py-1 pl-1 pr-2 text-[12.5px] font-semibold tabular-nums text-white"
           >
             <span
               className={twMerge(
-                'flex-center h-[18px] w-[18px] rounded-md',
+                'flex-center h-[19px] w-[19px] rounded-md',
                 crown ? GOLD_TINT : tint
               )}
             >
-              <Icon size={11} />
+              <Icon size={12} />
             </span>
             {chip.text}
           </span>

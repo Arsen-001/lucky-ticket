@@ -55,7 +55,7 @@ export function TestQuestAheadRow({
       >
         <span
           className={twMerge(
-            'flex-center h-8 w-8 shrink-0 rounded-lg text-[12px] font-extrabold tabular-nums',
+            'flex-center h-8 w-8 shrink-0 rounded-lg text-[13px] font-extrabold tabular-nums',
             card.crown
               ? 'bg-gradient-to-b from-gold to-orange text-black/70'
               : card.wall
@@ -67,8 +67,8 @@ export function TestQuestAheadRow({
         </span>
 
         <span className="min-w-0 flex-1">
-          <span className="flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-wider text-white/35">
-            <Lock size={9} className="shrink-0" />
+          <span className="flex items-center gap-1.5 text-[11px] font-bold uppercase tracking-wider text-white/55">
+            <Lock size={10} className="shrink-0" />
             {inDays === 1 ? t('tomorrow') : t('in {n} days', { n: inDays })}
           </span>
           <TestQuestRewardChips label={card.drop} crown={card.crown} className="mt-1" />

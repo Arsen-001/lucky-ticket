@@ -132,7 +132,7 @@ export function TestQuestRewardRail({
       aria-valuetext={`${t('day')} ${activeDay}`}
       onKeyDown={handleKeyDown}
       className={twMerge(
-        'relative w-11 shrink-0 rounded-2xl border bg-background-overlay py-2.5 transition-colors',
+        'relative w-10 shrink-0 rounded-2xl border bg-background-overlay py-2.5 transition-colors',
         scrubbing ? 'border-gold/40' : 'border-white/10',
         className
       )}
@@ -173,7 +173,7 @@ export function TestQuestRewardRail({
                   {card.day}
                 </span>
               ) : amount ? (
-                <span className="flex-center absolute h-3 w-8 rounded-full bg-gold/15 text-[8px] font-extrabold leading-none tabular-nums text-gold ring-1 ring-inset ring-gold/40">
+                <span className="flex-center absolute h-3.5 w-9 rounded-full bg-gold/20 text-[9.5px] font-extrabold leading-none tabular-nums text-gold ring-1 ring-inset ring-gold/50">
                   {amount}
                 </span>
               ) : (

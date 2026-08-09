@@ -51,10 +51,10 @@ export function TestQuestChain({ className }: TestQuestChainProps) {
   return (
     <section className={twMerge('flex flex-col gap-2 px-2.5 pt-3', className)}>
       <div className="flex items-baseline justify-between">
-        <h3 className="text-[13px] font-extrabold tabular-nums">
+        <h3 className="text-[15px] font-extrabold tabular-nums">
           {t('day {day} of {total}', { day: s.currentDay, total: s.totalDays })}
         </h3>
-        <span className="text-[11px] font-semibold tabular-nums text-white/45">
+        <span className="text-[12px] font-semibold tabular-nums text-white/60">
           {t('{n} days left', { n: s.totalDays - s.currentDay })}
         </span>
       </div>

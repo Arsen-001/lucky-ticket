@@ -54,8 +54,8 @@ export function TestQuestAheadList({
 
   return (
     <div className={twMerge('flex flex-col gap-1.5', className)}>
-      <div className="flex items-center gap-1.5 px-1 pt-0.5 text-[10px] font-bold uppercase tracking-wider text-white/40">
-        <Telescope size={11} className="text-electric-pink" />
+      <div className="flex items-center gap-1.5 px-1 pt-0.5 text-[11px] font-bold uppercase tracking-wider text-white/60">
+        <Telescope size={12} className="text-electric-pink" />
         {t('what is next')}
       </div>
 

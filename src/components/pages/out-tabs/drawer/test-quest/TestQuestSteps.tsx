@@ -75,7 +75,7 @@ export function TestQuestSteps({
   return (
     <div
       className={twMerge(
-        'flex flex-col gap-1.5 rounded-2xl border border-white/10 bg-background-overlay p-2.5',
+        'flex flex-col gap-1.5 rounded-2xl border border-white/10 bg-background-overlay p-2',
         className
       )}
     >
@@ -84,10 +84,10 @@ export function TestQuestSteps({
           <ListChecks size={13} className="text-white" />
         </div>
         <div className="min-w-0 flex-1">
-          <h3 className="text-[13px] font-extrabold leading-tight">
+          <h3 className="text-[14px] font-extrabold leading-tight">
             {title ?? t('steps for level {level}', { level })}
           </h3>
-          <p className="line-clamp-1 text-[10px] text-pink-secondary">{t('steps blurb')}</p>
+          <p className="line-clamp-1 text-[11px] text-pink-secondary">{t('steps blurb')}</p>
         </div>
       </div>
 
