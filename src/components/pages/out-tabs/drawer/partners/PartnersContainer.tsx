@@ -95,7 +95,11 @@ export function PartnersContainer() {
           value={view}
           onChange={setView}
           options={[
-            { value: 'active', label: t('status active'), icon: <Radio className="h-4 w-4" /> },
+            {
+              value: 'active',
+              label: t('partners filter active'),
+              icon: <Radio className="h-4 w-4" />,
+            },
             { value: 'history', label: t('history'), icon: <History className="h-4 w-4" /> },
           ]}
         />

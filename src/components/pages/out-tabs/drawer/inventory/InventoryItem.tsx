@@ -136,7 +136,7 @@ export function InventoryItem({
           </span>
           <span className="text-white tabular-nums" style={{ color: accent }}>
             {Math.min(availableShards, chip.shardsForNextLevel)} / {chip.shardsForNextLevel}{' '}
-            {t('shards')}
+            {t('shards unit {count}', { count: chip.shardsForNextLevel })}
           </span>
         </div>
         <div className="h-1.5 overflow-hidden rounded-full bg-white/8">
@@ -163,7 +163,8 @@ export function InventoryItem({
             {isLevelingUp ? t('leveling up') : t('level up')}
             {!isLevelingUp && (
               <span className="text-white/85 tabular-nums">
-                · −{chip.shardsForNextLevel} {t('shards')}
+                · −{chip.shardsForNextLevel}{' '}
+                {t('shards unit {count}', { count: chip.shardsForNextLevel })}
               </span>
             )}
           </button>

@@ -67,8 +67,14 @@ export function TournamentBetModal({
   const { shardRewards, joinApByTier } = useTournamentConfig();
   const [betCount, setBetCount] = useState(1);
   const [isEditing, setIsEditing] = useState(false);
-  const shardLabel = shardType === 'capacity' ? t('capacity') : t('time');
   const topShards = topShardsProp ?? shardRewards.first;
+  // One key per shard type rather than "{type} {unit}": Russian needs the noun
+  // first and the type in the genitive («2 осколка вместимости»), which no
+  // ordering of two independent strings produces.
+  const shardLabel = t(
+    shardType === 'capacity' ? 'capacity shards {count}' : 'speed shards {count}',
+    { count: topShards }
+  );
   // Show what will actually be credited — the backend applies the VIP/LP
   // join-AP boost, so the badge must too (DOCS §7).
   const joinAp = applyStatusTournamentJoinApBoost(
@@ -202,9 +208,7 @@ export function TournamentBetModal({
               <span className={twMerge(tierTextClass, 'text-sm tabular-nums leading-none')}>
                 +{topShards}
               </span>
-              <span className="text-white/55">
-                {shardLabel} {t('shards')}
-              </span>
+              <span className="text-white/55">{shardLabel}</span>
             </div>
           )}
 

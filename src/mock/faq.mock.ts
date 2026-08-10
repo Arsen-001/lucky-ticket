@@ -51,7 +51,7 @@ const articles: FaqArticle[] = [
     ),
     content: tx(
       'Right after you pick your language on first launch, you receive a welcome pack — 1 Bronze producer engine, 5 Bronze tickets and 1 Activity Point — by tapping Claim. The Bronze engine immediately starts minting tickets for free, so you can begin progressing with no purchase or unlock required. A guided tour then shows you around the app.',
-      'Сразу после выбора языка при первом запуске вы получаете приветственный набор — 1 бронзовый движок, 5 бронзовых билетов и 1 очко активности — нажав «Забрать». Бронзовый движок сразу начинает бесплатно производить билеты, так что можно начать прогресс без покупок и разблокировок. Затем гид-тур познакомит вас с приложением.',
+      'Сразу после выбора языка при первом запуске вы получаете приветственный набор — 1 бронзовый двигатель, 5 бронзовых билетов и 1 очко активности — нажав «Забрать». Бронзовый двигатель сразу начинает бесплатно производить билеты, так что можно начать прогресс без покупок и разблокировок. Затем гид-тур познакомит вас с приложением.',
       'Առաջին գործարկման ժամանակ լեզուն ընտրելուց անմիջապես հետո դուք ստանում եք ողջույնի փաթեթ՝ 1 Bronze շարժիչ, 5 Bronze տոմս և 1 ակտիվության միավոր՝ սեղմելով «Ստանալ»։ Bronze շարժիչն անմիջապես սկսում է անվճար տոմսեր արտադրել, այնպես որ կարող եք առաջընթաց սկսել առանց գնումների կամ ապակողպման։ Այնուհետև ուղեցույց շրջագայությունը կներկայացնի հավելվածը։',
       'Direkt nachdem du beim ersten Start deine Sprache gewählt hast, erhältst du ein Willkommenspaket — 1 Bronze-Engine, 5 Bronze-Tickets und 1 Aktivitätspunkt — durch Tippen auf „Einlösen". Die Bronze-Engine beginnt sofort kostenlos Tickets zu erzeugen, sodass du ohne Kauf oder Freischaltung starten kannst. Eine geführte Tour zeigt dir dann die App.'
     ),
@@ -73,7 +73,7 @@ const articles: FaqArticle[] = [
     ),
     content: tx(
       'Own engines that produce tickets, spend those tickets to join tournaments for LC prizes, complete daily/weekly tasks for rewards, lock LC in stakes to earn yield, climb tiers with Activity Points, buy upgrades in the Market, compete on the leaderboard, invite friends for a share of their tickets, and collect 100+ badges. A single global Jackpot can also drop on any tournament at any time.',
-      'Владейте движками, которые производят билеты, тратьте билеты на участие в турнирах ради призов в LC, выполняйте ежедневные и еженедельные задания за награды, блокируйте LC в стейках ради доходности, повышайте уровни за очки активности, покупайте улучшения в Маркете, соревнуйтесь в таблице лидеров, приглашайте друзей ради доли их билетов и собирайте 100+ значков. А единый глобальный Джекпот может выпасть на любом турнире в любой момент.',
+      'Владейте двигателями, которые производят билеты, тратьте билеты на участие в турнирах ради призов в LC, выполняйте ежедневные и еженедельные задания за награды, блокируйте LC в стейках ради доходности, повышайте уровни за очки активности, покупайте улучшения в Маркете, соревнуйтесь в таблице лидеров, приглашайте друзей ради доли их билетов и собирайте 100+ значков. А единый глобальный Джекпот может выпасть на любом турнире в любой момент.',
       'Տիրապետեք շարժիչների, որոնք տոմսեր են արտադրում, ծախսեք այդ տոմսերը մրցաշարերում LC մրցանակների համար, կատարեք օրական/շաբաթական առաջադրանքներ պարգևների համար, կողպեք LC-ն սթեյքերում եկամուտ ստանալու համար, բարձրացեք մակարդակներ ակտիվության միավորներով, գնեք բարելավումներ Շուկայում, մրցեք առաջատարների ցուցակում, հրավիրեք ընկերներին նրանց տոմսերի բաժնի համար և հավաքեք 100+ կրծքանշան։ Մեկ գլոբալ Ջեքփոթը նույնպես կարող է ընկնել ցանկացած մրցաշարի վրա ցանկացած պահի։',
       'Besitze Engines, die Tickets produzieren, gib diese Tickets aus, um an Turnieren für LC-Preise teilzunehmen, erledige tägliche/wöchentliche Aufgaben für Belohnungen, sperre LC in Stakes für Rendite, steige mit Aktivitätspunkten in Stufen auf, kaufe Upgrades im Markt, tritt in der Bestenliste an, lade Freunde ein für einen Anteil ihrer Tickets und sammle 100+ Abzeichen. Ein einziger globaler Jackpot kann zudem jederzeit bei jedem Turnier ausgeschüttet werden.'
     ),
@@ -119,7 +119,7 @@ const articles: FaqArticle[] = [
     ),
     content: tx(
       "Activity Points are the one progression metric of the platform — there is no separate 'level'. AP measures your engagement and consistency, and acts as the universal gate that unlocks higher-tier content (engines, tournaments, stakes, tier market items). Your profile shows the raw AP count.",
-      'Очки активности — единственная метрика прогресса на платформе, отдельного «уровня» нет. AP измеряют вашу вовлечённость и постоянство и служат универсальным замком, открывающим контент более высоких уровней (движки, турниры, стейки, тировые товары Маркета). В профиле показывается само число AP.',
+      'Очки активности — единственная метрика прогресса на платформе, отдельного «уровня» нет. AP измеряют вашу вовлечённость и постоянство и служат универсальным замком, открывающим контент более высоких уровней (двигатели, турниры, стейки, тировые товары Маркета). В профиле показывается само число AP.',
       'Ակտիվության միավորները հարթակի առաջընթացի միակ չափանիշն են. առանձին «մակարդակ» չկա։ AP-ն չափում է ձեր ներգրավվածությունն ու հետևողականությունը և հանդես է գալիս որպես ունիվերսալ դարպաս, որը բացում է ավելի բարձր մակարդակի բովանդակությունը (շարժիչներ, մրցաշարեր, սթեյքեր, մակարդակային շուկայի ապրանքներ)։ Ձեր պրոֆիլում ցուցադրվում է AP-ի քանակը։',
       'Aktivitätspunkte sind die eine Fortschrittsmetrik der Plattform — es gibt kein separates „Level". AP messen dein Engagement und deine Beständigkeit und dienen als universelles Tor, das Inhalte höherer Stufen freischaltet (Engines, Turniere, Stakes, stufengebundene Markt-Artikel). Dein Profil zeigt die reine AP-Zahl.'
     ),
@@ -207,7 +207,7 @@ const articles: FaqArticle[] = [
     ),
     content: tx(
       "After 7 days of inactivity (a grace period with no decay), AP drops by 0.5× your tier's daily baseline per inactive day (≈35 AP at Bronze, ≈76 at Diamond), down to a floor of 0. Any action resets the timer. Lower AP can freeze content above your new tier, but no assets are lost — engines, tickets and LC remain and unfreeze when AP recovers. You can never fall below Bronze.",
-      'После 7 дней бездействия (льготный период без спада) AP падает на 0,5× дневной базы вашего уровня за каждый неактивный день (≈35 AP на Bronze, ≈76 на Diamond), вплоть до 0. Любое действие сбрасывает таймер. Снижение AP может заморозить контент выше нового уровня, но активы не теряются — движки, билеты и LC остаются и размораживаются при восстановлении AP. Ниже Bronze упасть нельзя.',
+      'После 7 дней бездействия (льготный период без спада) AP падает на 0,5× дневной базы вашего уровня за каждый неактивный день (≈35 AP на Bronze, ≈76 на Diamond), вплоть до 0. Любое действие сбрасывает таймер. Снижение AP может заморозить контент выше нового уровня, но активы не теряются — двигатели, билеты и LC остаются и размораживаются при восстановлении AP. Ниже Bronze упасть нельзя.',
       'Անգործության 7 օրից հետո (առանց անկման արտոնյալ ժամանակահատված) AP-ն նվազում է ձեր մակարդակի օրական բազայի 0.5×-ով յուրաքանչյուր ոչ ակտիվ օրվա համար (≈35 AP Bronze-ում, ≈76 Diamond-ում)՝ մինչև 0։ Ցանկացած գործողություն վերականգնում է ժամանակաչափը։ Ցածր AP-ն կարող է սառեցնել ձեր նոր մակարդակից բարձր բովանդակությունը, բայց ակտիվներ չեն կորչում՝ շարժիչները, տոմսերը և LC-ն մնում են և ապասառչում, երբ AP-ն վերականգնվում է։ Bronze-ից ցածր երբեք չեք ընկնի։',
       'Nach 7 Tagen Inaktivität (eine Schonfrist ohne Verfall) sinkt AP um das 0,5-fache der Tagesbasis deiner Stufe pro inaktivem Tag (≈35 AP bei Bronze, ≈76 bei Diamond), bis auf 0. Jede Aktion setzt den Timer zurück. Weniger AP kann Inhalte über deiner neuen Stufe einfrieren, aber es gehen keine Vermögenswerte verloren — Engines, Tickets und LC bleiben und tauen wieder auf, sobald AP sich erholt. Unter Bronze fällst du nie.'
     ),
@@ -229,7 +229,7 @@ const articles: FaqArticle[] = [
     ),
     content: tx(
       'A feature of tier T requires your AP-tier ≥ T, and you can always use your own tier and every lower tier. Tier-gated: producer engines, tournaments, stakes and tier-bound market items. Not gated: avatars, statuses/VIP and the referral system.',
-      'Функция уровня T требует вашего AP-уровня ≥ T, и вы всегда можете пользоваться своим уровнем и всеми ниже. Под замком уровня: движки-производители, турниры, стейки и тировые товары Маркета. Без замка: аватары, статусы/VIP и реферальная система.',
+      'Функция уровня T требует вашего AP-уровня ≥ T, и вы всегда можете пользоваться своим уровнем и всеми ниже. Под замком уровня: двигатели-производители, турниры, стейки и тировые товары Маркета. Без замка: аватары, статусы/VIP и реферальная система.',
       'T մակարդակի հատկությունը պահանջում է ձեր AP-մակարդակը ≥ T, և դուք միշտ կարող եք օգտագործել ձեր մակարդակը և բոլոր ավելի ցածրերը։ Մակարդակով կողպված՝ արտադրող շարժիչներ, մրցաշարեր, սթեյքեր և մակարդակին կապված շուկայի ապրանքներ։ Կողպված չեն՝ ավատարները, կարգավիճակները/VIP-ը և ռեֆերալ համակարգը։',
       'Ein Feature der Stufe T erfordert deine AP-Stufe ≥ T, und du kannst immer deine eigene Stufe und jede niedrigere nutzen. Stufengebunden: Producer-Engines, Turniere, Stakes und stufengebundene Markt-Artikel. Nicht gebunden: Avatare, Status/VIP und das Empfehlungssystem.'
     ),
@@ -253,7 +253,7 @@ const articles: FaqArticle[] = [
     ),
     content: tx(
       'LC is the internal reward currency, earned only by playing — tournament prizes, stake yield, task and ad rewards. It is spent on tickets, engines, speed boosts and status upgrades. LC cannot be bought with real money; it reaches real value by converting to TON at a fixed $0.000001/LC valuation, which is then withdrawn. A direct LC withdrawal is coming soon.',
-      'LC — внутренняя валюта вознаграждений, зарабатывается только игрой: призы турниров, доход со стейков, награды заданий и рекламы. Тратится на билеты, движки, бусты скорости и улучшения статусов. LC нельзя купить за реальные деньги; реальную ценность она получает при конвертации в TON по фиксированной оценке $0,00001 за LC с последующим выводом. Прямой вывод LC скоро появится.',
+      'LC — внутренняя валюта вознаграждений, зарабатывается только игрой: призы турниров, доход со стейков, награды заданий и рекламы. Тратится на билеты, двигатели, бусты скорости и улучшения статусов. LC нельзя купить за реальные деньги; реальную ценность она получает при конвертации в TON по фиксированной оценке $0,00001 за LC с последующим выводом. Прямой вывод LC скоро появится.',
       'LC-ն ներքին պարգևային արժույթն է, վաստակվում է միայն խաղալով՝ մրցաշարերի մրցանակներ, սթեյքի եկամուտ, առաջադրանքների և գովազդի պարգևներ։ Ծախսվում է տոմսերի, շարժիչների, արագության ուժեղացումների և կարգավիճակի բարելավումների վրա։ LC-ն հնարավոր չէ գնել իրական փողով. այն իրական արժեք է ստանում TON-ի փոխարկվելով՝ ֆիքսված $0.00001/LC գնահատմամբ, որն ապա դուրս է բերվում։ LC-ի ուղղակի դուրսբերումը շուտով կլինի։',
       'LC ist die interne Belohnungswährung, die nur durch Spielen verdient wird — Turnierpreise, Stake-Rendite, Aufgaben- und Werbebelohnungen. Sie wird für Tickets, Engines, Geschwindigkeits-Boosts und Status-Upgrades ausgegeben. LC kann nicht mit echtem Geld gekauft werden; sie erhält echten Wert durch Umwandlung in TON zum festen Kurs von $0,00001/LC, das dann ausgezahlt wird. Eine direkte LC-Auszahlung kommt bald.'
     ),
@@ -316,7 +316,7 @@ const articles: FaqArticle[] = [
     ),
     content: tx(
       'Tickets are the core resource you spend to join tournaments, send to friends, or hold in inventory. They come in five rarities — Bronze, Silver, Gold, Platinum, Diamond — plus Partner tickets used for specific partner tournaments. Every ticket you own was produced by an engine you own.',
-      'Билеты — ключевой ресурс, который вы тратите на участие в турнирах, отправляете друзьям или храните в инвентаре. Есть пять редкостей — Bronze, Silver, Gold, Platinum, Diamond — плюс партнёрские билеты для конкретных партнёрских турниров. Каждый ваш билет произведён одним из ваших движков.',
+      'Билеты — ключевой ресурс, который вы тратите на участие в турнирах, отправляете друзьям или храните в инвентаре. Есть пять редкостей — Bronze, Silver, Gold, Platinum, Diamond — плюс партнёрские билеты для конкретных партнёрских турниров. Каждый ваш билет произведён одним из ваших двигателей.',
       'Տոմսերը հիմնական ռեսուրսն են, որ ծախսում եք մրցաշարերին միանալու, ընկերներին ուղարկելու կամ գույքագրման մեջ պահելու համար։ Դրանք լինում են հինգ հազվագյուտությամբ՝ Bronze, Silver, Gold, Platinum, Diamond, գումարած Partner տոմսեր՝ որոշակի գործընկեր մրցաշարերի համար։ Ձեր ունեցած յուրաքանչյուր տոմս արտադրվել է ձեր շարժիչներից մեկով։',
       'Tickets sind die Kernressource, die du ausgibst, um an Turnieren teilzunehmen, an Freunde zu senden oder im Inventar zu halten. Es gibt fünf Seltenheiten — Bronze, Silber, Gold, Platin, Diamond — plus Partner-Tickets für bestimmte Partner-Turniere. Jedes Ticket, das du besitzt, wurde von einer deiner Engines produziert.'
     ),
@@ -338,7 +338,7 @@ const articles: FaqArticle[] = [
     ),
     content: tx(
       'Tickets are minted by your producer engines on a cycle and collected by claiming. You can also buy tickets directly in the Market with LC, or receive them as task rewards, tournament prizes and referral commission. Higher-tier tickets require their tier to be AP-unlocked.',
-      'Билеты производятся вашими движками по циклу и собираются нажатием «Забрать». Также билеты можно покупать прямо в Маркете за LC или получать как награды заданий, призы турниров и реферальную комиссию. Билеты высоких уровней требуют, чтобы их уровень был открыт по AP.',
+      'Билеты производятся вашими двигателями по циклу и собираются нажатием «Забрать». Также билеты можно покупать прямо в Маркете за LC или получать как награды заданий, призы турниров и реферальную комиссию. Билеты высоких уровней требуют, чтобы их уровень был открыт по AP.',
       'Տոմսերն արտադրվում են ձեր շարժիչների կողմից ցիկլով և հավաքվում «Ստանալ» սեղմելով։ Կարող եք նաև տոմսեր գնել ուղղակիորեն Շուկայում LC-ով կամ ստանալ որպես առաջադրանքների պարգևներ, մրցաշարերի մրցանակներ և ռեֆերալ միջնորդավճար։ Բարձր մակարդակի տոմսերը պահանջում են, որ իրենց մակարդակը AP-ով ապակողպված լինի։',
       'Tickets werden von deinen Engines zyklisch erzeugt und durch Einlösen eingesammelt. Du kannst Tickets auch direkt im Markt mit LC kaufen oder als Aufgabenbelohnungen, Turnierpreise und Empfehlungsprovision erhalten. Tickets höherer Stufen erfordern, dass ihre Stufe per AP freigeschaltet ist.'
     ),
@@ -354,13 +354,13 @@ const articles: FaqArticle[] = [
     ),
     description: tx(
       'The AP tier gate on engines.',
-      'Тировый замок AP на движках.',
+      'Тировый замок AP на двигателях.',
       'Շարժիչների AP մակարդակի դարպասը',
       'Das AP-Stufen-Tor bei Engines.'
     ),
     content: tx(
       'At first only Bronze is available (gifted on launch). Higher-tier producer engines unlock with your AP tier: reaching Silver AP unlocks Silver engines, Gold AP unlocks Gold, and so on. Once a tier is unlocked you can own as many engines of that tier as you like. If AP decays below a threshold, that tier freezes until AP recovers — nothing is lost.',
-      'Сначала доступен только Bronze (подарок при запуске). Движки-производители выше открываются по вашему уровню AP: достижение Silver AP открывает Silver-движки, Gold AP — Gold и так далее. После открытия уровня можно владеть сколько угодно движками этого уровня. Если AP падает ниже порога, этот уровень замораживается до восстановления AP — ничего не теряется.',
+      'Сначала доступен только Bronze (подарок при запуске). Двигатели-производители выше открываются по вашему уровню AP: достижение Silver AP открывает Silver-двигатели, Gold AP — Gold и так далее. После открытия уровня можно владеть сколько угодно двигателями этого уровня. Если AP падает ниже порога, этот уровень замораживается до восстановления AP — ничего не теряется.',
       'Սկզբում հասանելի է միայն Bronze-ը (նվեր մեկնարկին)։ Ավելի բարձր մակարդակի շարժիչներն ապակողպվում են ձեր AP մակարդակով՝ Silver AP-ին հասնելը բացում է Silver շարժիչներ, Gold AP-ն՝ Gold և այլն։ Մակարդակն ապակողպվելուց հետո կարող եք ունենալ այդ մակարդակի այնքան շարժիչ, որքան ցանկանաք։ Եթե AP-ն իջնում է շեմից ցածր, այդ մակարդակը սառչում է մինչև AP-ի վերականգնումը. ոչինչ չի կորչում։',
       'Zunächst ist nur Bronze verfügbar (Geschenk beim Start). Höherstufige Engines schalten sich mit deiner AP-Stufe frei: Silber-AP schaltet Silber-Engines frei, Gold-AP schaltet Gold frei und so weiter. Sobald eine Stufe freigeschaltet ist, kannst du beliebig viele Engines dieser Stufe besitzen. Fällt AP unter eine Schwelle, friert diese Stufe ein, bis AP sich erholt — nichts geht verloren.'
     ),
@@ -394,7 +394,7 @@ const articles: FaqArticle[] = [
     sectionId: '5',
     title: tx(
       'What is a producer engine?',
-      'Что такое движок-производитель?',
+      'Что такое двигатель-производитель?',
       'Ի՞նչ է արտադրող շարժիչը',
       'Was ist eine Producer-Engine?'
     ),
@@ -406,7 +406,7 @@ const articles: FaqArticle[] = [
     ),
     content: tx(
       'An engine is a permanent, ownable producer that mints one specific ticket type on a fixed production cycle. Each engine has a per-cycle output (default 1 ticket) and accumulates produced tickets into a pending pool until you claim them. Engines never expire, decay or get lost.',
-      'Движок — это постоянный собственный производитель, который выпускает один конкретный тип билетов по фиксированному циклу. У каждого движка есть выпуск за цикл (по умолчанию 1 билет), и произведённые билеты копятся в ожидающем пуле, пока вы их не заберёте. Движки не истекают, не теряются и не разрушаются.',
+      'Двигатель — это постоянный собственный производитель, который выпускает один конкретный тип билетов по фиксированному циклу. У каждого двигателя есть выпуск за цикл (по умолчанию 1 билет), и произведённые билеты копятся в ожидающем пуле, пока вы их не заберёте. Двигатели не истекают, не теряются и не разрушаются.',
       'Շարժիչը մշտական, սեփականության ենթակա արտադրող է, որը թողարկում է տոմսի մեկ կոնկրետ տեսակ՝ ֆիքսված արտադրական ցիկլով։ Յուրաքանչյուր շարժիչ ունի ցիկլի արտադրանք (լռելյայն՝ 1 տոմս) և կուտակում է արտադրված տոմսերը սպասող ֆոնդում, մինչև դրանք վերցնեք։ Շարժիչները երբեք չեն ժամկետանց լինում, քայքայվում կամ կորչում։',
       'Eine Engine ist ein dauerhafter, besitzbarer Produzent, der einen bestimmten Tickettyp in einem festen Produktionszyklus erzeugt. Jede Engine hat eine Ausgabe pro Zyklus (standardmäßig 1 Ticket) und sammelt produzierte Tickets in einem Wartepool, bis du sie einlöst. Engines verfallen nie, verlieren nicht an Wert und gehen nicht verloren.'
     ),
@@ -428,7 +428,7 @@ const articles: FaqArticle[] = [
     ),
     content: tx(
       'An engine runs one cycle and outputs its ticket(s) into a pending pool, then pauses — the next cycle does not begin until you claim what it produced. Claiming moves tickets into your inventory and immediately restarts the engine. This claim-gates-production rule applies per engine, so claiming regularly keeps output flowing.',
-      'Движок проходит один цикл и выдаёт билет(ы) в ожидающий пул, затем приостанавливается — следующий цикл не начнётся, пока вы не заберёте произведённое. Сбор перемещает билеты в инвентарь и сразу перезапускает движок. Правило «сбор открывает производство» действует для каждого движка, поэтому регулярный сбор поддерживает поток.',
+      'Двигатель проходит один цикл и выдаёт билет(ы) в ожидающий пул, затем приостанавливается — следующий цикл не начнётся, пока вы не заберёте произведённое. Сбор перемещает билеты в инвентарь и сразу перезапускает двигатель. Правило «сбор открывает производство» действует для каждого двигателя, поэтому регулярный сбор поддерживает поток.',
       'Շարժիչն անցնում է մեկ ցիկլ և տոմս(եր)ը հանում սպասող ֆոնդ, ապա դադարում է. հաջորդ ցիկլը չի սկսվում, մինչև չվերցնեք արտադրվածը։ Վերցնելը տեղափոխում է տոմսերը ձեր գույքագրում և անմիջապես վերագործարկում շարժիչը։ «Վերցնելը բացում է արտադրությունը» կանոնը գործում է յուրաքանչյուր շարժիչի համար, այնպես որ կանոնավոր վերցնելը պահպանում է հոսքը։',
       'Eine Engine durchläuft einen Zyklus und gibt ihr(e) Ticket(s) in einen Wartepool, dann pausiert sie — der nächste Zyklus beginnt erst, wenn du das Produzierte einlöst. Das Einlösen verschiebt Tickets in dein Inventar und startet die Engine sofort neu. Diese „Einlösen-schaltet-Produktion-frei"-Regel gilt pro Engine, also hält regelmäßiges Einlösen den Output am Laufen.'
     ),
@@ -460,7 +460,7 @@ const articles: FaqArticle[] = [
     sectionId: '5',
     title: tx(
       'Can I run multiple engines at once?',
-      'Можно ли запускать несколько движков сразу?',
+      'Можно ли запускать несколько двигателей сразу?',
       'Կարո՞ղ եմ միաժամանակ գործարկել մի քանի շարժիչ',
       'Kann ich mehrere Engines gleichzeitig betreiben?'
     ),
@@ -472,7 +472,7 @@ const articles: FaqArticle[] = [
     ),
     content: tx(
       'Yes — you can own and run an unlimited number of engines of any unlocked tier in parallel. They all produce independently and accumulate output simultaneously. For example, 3 Bronze engines plus 1 Silver engine yield 3 Bronze tickets per Bronze cycle and 1 Silver ticket per Silver cycle at the same time.',
-      'Да — можно владеть и запускать неограниченное число движков любого открытого уровня параллельно. Все они производят независимо и копят выпуск одновременно. Например, 3 Bronze-движка плюс 1 Silver-движок дают 3 Bronze-билета за Bronze-цикл и 1 Silver-билет за Silver-цикл одновременно.',
+      'Да — можно владеть и запускать неограниченное число двигателей любого открытого уровня параллельно. Все они производят независимо и копят выпуск одновременно. Например, 3 Bronze-двигателя плюс 1 Silver-двигатель дают 3 Bronze-билета за Bronze-цикл и 1 Silver-билет за Silver-цикл одновременно.',
       'Այո, կարող եք ունենալ և գործարկել ցանկացած ապակողպված մակարդակի անսահմանափակ թվով շարժիչներ զուգահեռ։ Դրանք բոլորն արտադրում են անկախ և կուտակում արտադրանքը միաժամանակ։ Օրինակ՝ 3 Bronze շարժիչ գումարած 1 Silver շարժիչ տալիս են 3 Bronze տոմս Bronze ցիկլում և 1 Silver տոմս Silver ցիկլում միաժամանակ։',
       'Ja — du kannst beliebig viele Engines jeder freigeschalteten Stufe parallel besitzen und betreiben. Sie produzieren alle unabhängig und sammeln gleichzeitig Output. Zum Beispiel liefern 3 Bronze-Engines plus 1 Silber-Engine gleichzeitig 3 Bronze-Tickets pro Bronze-Zyklus und 1 Silber-Ticket pro Silber-Zyklus.'
     ),
@@ -494,7 +494,7 @@ const articles: FaqArticle[] = [
     ),
     content: tx(
       "Instant Claim lets you pay Lucky Stars to receive an engine's next ticket immediately, skipping the remaining cycle time. The cost is 1 Star per remaining hour, minimum 1 Star (so a 30-min remainder costs 1★, a 90-min remainder 2★). It gets cheaper as the cycle nears completion and delivers the full per-cycle output, including any capacity bonus.",
-      'Мгновенный сбор позволяет заплатить Lucky Stars и сразу получить следующий билет движка, пропустив остаток цикла. Стоимость — 1 звезда за каждый оставшийся час, минимум 1 звезда (остаток 30 мин стоит 1★, 90 мин — 2★). Чем ближе конец цикла, тем дешевле, и выдаётся полный выпуск за цикл, включая бонус ёмкости.',
+      'Мгновенный сбор позволяет заплатить Lucky Stars и сразу получить следующий билет двигателя, пропустив остаток цикла. Стоимость — 1 звезда за каждый оставшийся час, минимум 1 звезда (остаток 30 мин стоит 1★, 90 мин — 2★). Чем ближе конец цикла, тем дешевле, и выдаётся полный выпуск за цикл, включая бонус ёмкости.',
       'Ակնթարթային վերցնելը թույլ է տալիս վճարել Lucky Stars և անմիջապես ստանալ շարժիչի հաջորդ տոմսը՝ բաց թողնելով ցիկլի մնացած ժամանակը։ Արժեքը՝ 1 աստղ յուրաքանչյուր մնացած ժամի համար, նվազագույնը 1 աստղ (30 րոպե մնացորդը՝ 1★, 90 րոպեն՝ 2★)։ Որքան ցիկլը մոտ է ավարտին, այնքան էժան է, և տրվում է ցիկլի ամբողջ արտադրանքը՝ ներառյալ ծավալի բոնուսը։',
       'Sofort-Einlösen lässt dich Lucky Stars zahlen, um das nächste Ticket einer Engine sofort zu erhalten und die restliche Zykluszeit zu überspringen. Die Kosten betragen 1 Stern pro verbleibender Stunde, mindestens 1 Stern (ein 30-Min-Rest kostet 1★, ein 90-Min-Rest 2★). Es wird günstiger, je näher der Zyklus dem Ende kommt, und liefert die volle Zyklusausgabe einschließlich Kapazitätsbonus.'
     ),
@@ -504,7 +504,7 @@ const articles: FaqArticle[] = [
     sectionId: '5',
     title: tx(
       'How do I get more engines?',
-      'Как получить больше движков?',
+      'Как получить больше двигателей?',
       'Ինչպե՞ս ստանալ ավելի շատ շարժիչներ',
       'Wie bekomme ich mehr Engines?'
     ),
@@ -516,7 +516,7 @@ const articles: FaqArticle[] = [
     ),
     content: tx(
       'Beyond the free Bronze engine, you acquire engines by unlocking their tier with AP and buying them in the Market with LC (you can own as many of a tier as you want), or by receiving them as task rewards, tournament prizes or stake bonuses.',
-      'Помимо бесплатного Bronze-движка, движки получают, открывая их уровень по AP и покупая в Маркете за LC (можно владеть сколько угодно одного уровня), либо получая как награды заданий, призы турниров или бонусы стейков.',
+      'Помимо бесплатного Bronze-двигателя, двигатели получают, открывая их уровень по AP и покупая в Маркете за LC (можно владеть сколько угодно одного уровня), либо получая как награды заданий, призы турниров или бонусы стейков.',
       'Բացի անվճար Bronze շարժիչից, շարժիչներ ձեռք եք բերում՝ ապակողպելով դրանց մակարդակը AP-ով և գնելով Շուկայում LC-ով (կարող եք ունենալ մեկ մակարդակի այնքան, որքան ցանկանաք), կամ ստանալով որպես առաջադրանքների պարգևներ, մրցաշարերի մրցանակներ կամ սթեյքի բոնուսներ։',
       'Über die kostenlose Bronze-Engine hinaus erhältst du Engines, indem du ihre Stufe mit AP freischaltest und sie im Markt mit LC kaufst (du kannst beliebig viele einer Stufe besitzen), oder indem du sie als Aufgabenbelohnungen, Turnierpreise oder Stake-Boni erhältst.'
     ),
@@ -534,13 +534,13 @@ const articles: FaqArticle[] = [
     ),
     description: tx(
       'Two independent engine parameters.',
-      'Два независимых параметра движка.',
+      'Два независимых параметра двигателя.',
       'Շարժիչի երկու անկախ պարամետր',
       'Zwei unabhängige Engine-Parameter.'
     ),
     content: tx(
       "A Speed Boost reduces an engine's cycle time so it produces more often (bought with LC or granted by status). A Capacity Upgrade increases per-cycle output — 2 or more tickets per cycle instead of 1 (bought only with Lucky Stars, on the engine itself). They target independent parameters and multiply: a 2× speed + 2× capacity engine produces 4× its base rate.",
-      'Буст скорости сокращает время цикла, чтобы движок производил чаще (покупается за LC или даётся статусом). Улучшение ёмкости увеличивает выпуск за цикл — 2 и более билетов за цикл вместо 1 (покупается только за Lucky Stars, прямо на движке). Они влияют на независимые параметры и перемножаются: движок с 2× скоростью и 2× ёмкостью производит 4× базовой скорости.',
+      'Буст скорости сокращает время цикла, чтобы двигатель производил чаще (покупается за LC или даётся статусом). Улучшение ёмкости увеличивает выпуск за цикл — 2 и более билетов за цикл вместо 1 (покупается только за Lucky Stars, прямо на двигателе). Они влияют на независимые параметры и перемножаются: двигатель с 2× скоростью и 2× ёмкостью производит 4× базовой скорости.',
       'Արագության ուժեղացումը կրճատում է շարժիչի ցիկլի ժամանակը, որպեսզի այն ավելի հաճախ արտադրի (գնվում է LC-ով կամ տրվում կարգավիճակով)։ Ծավալի բարելավումը մեծացնում է ցիկլի արտադրանքը՝ 2 կամ ավելի տոմս ցիկլում 1-ի փոխարեն (գնվում է միայն Lucky Stars-ով՝ հենց շարժիչի վրա)։ Դրանք ազդում են անկախ պարամետրերի վրա և բազմապատկվում են. 2× արագությամբ և 2× ծավալով շարժիչն արտադրում է բազային արագության 4×-ը։',
       'Ein Geschwindigkeits-Boost verkürzt die Zykluszeit einer Engine, sodass sie häufiger produziert (mit LC gekauft oder durch Status gewährt). Ein Kapazitäts-Upgrade erhöht die Ausgabe pro Zyklus — 2 oder mehr Tickets pro Zyklus statt 1 (nur mit Lucky Stars, direkt an der Engine gekauft). Sie betreffen unabhängige Parameter und multiplizieren sich: eine Engine mit 2× Geschwindigkeit und 2× Kapazität produziert das 4-fache ihrer Basisrate.'
     ),
@@ -551,13 +551,13 @@ const articles: FaqArticle[] = [
     title: tx('What are chips?', 'Что такое чипы?', 'Ի՞նչ են չիպերը', 'Was sind Chips?'),
     description: tx(
       'Tournament-won engine upgrades.',
-      'Улучшения движков из турниров.',
+      'Улучшения двигателей из турниров.',
       'Մրցաշարերից շահված շարժիչի բարելավումներ',
       'In Turnieren gewonnene Engine-Upgrades.'
     ),
     content: tx(
       'Chips are a third boost layer earned only from tournaments. There are two types: Speed Chips (reduce cycle time) and Capacity Chips (increase output). Each engine has one Speed slot and one Capacity slot. Each chip levels up +0.5% per level, up to +100% at level 200. Chips stack multiplicatively with Speed Boosts and Capacity Upgrades.',
-      'Чипы — третий слой бустов, добываемый только в турнирах. Есть два типа: чипы скорости (сокращают время цикла) и чипы ёмкости (увеличивают выпуск). У каждого движка один слот скорости и один слот ёмкости. Каждый чип растёт на +0,5% за уровень, до +100% на уровне 200. Чипы перемножаются с бустами скорости и улучшениями ёмкости.',
+      'Чипы — третий слой бустов, добываемый только в турнирах. Есть два типа: чипы скорости (сокращают время цикла) и чипы ёмкости (увеличивают выпуск). У каждого двигателя один слот скорости и один слот ёмкости. Каждый чип растёт на +0,5% за уровень, до +100% на уровне 200. Чипы перемножаются с бустами скорости и улучшениями ёмкости.',
       'Չիպերը ուժեղացման երրորդ շերտն են, որ ձեռք է բերվում միայն մրցաշարերից։ Կան երկու տեսակ՝ արագության չիպեր (կրճատում են ցիկլի ժամանակը) և ծավալի չիպեր (մեծացնում են արտադրանքը)։ Յուրաքանչյուր շարժիչ ունի մեկ արագության և մեկ ծավալի բնիկ։ Յուրաքանչյուր չիպ բարձրանում է +0.5%-ով մակարդակում՝ մինչև +100% 200-րդ մակարդակում։ Չիպերը բազմապատկվում են արագության ուժեղացումների և ծավալի բարելավումների հետ։',
       'Chips sind eine dritte Boost-Ebene, die nur aus Turnieren stammt. Es gibt zwei Typen: Geschwindigkeits-Chips (verkürzen die Zykluszeit) und Kapazitäts-Chips (erhöhen den Output). Jede Engine hat einen Geschwindigkeits- und einen Kapazitäts-Slot. Jeder Chip steigt um +0,5% pro Stufe, bis zu +100% bei Stufe 200. Chips multiplizieren sich mit Geschwindigkeits-Boosts und Kapazitäts-Upgrades.'
     ),
@@ -623,7 +623,7 @@ const articles: FaqArticle[] = [
     ),
     content: tx(
       'A chip of quality X can be equipped on an engine of tier X or lower (a Gold chip works on Bronze/Silver/Gold engines), making higher-tier chips more valuable. Equipping costs Lucky Stars equal to the chip level (Lvl 12 = 12★); unequipping costs half, rounded up (Lvl 12 = 6★). Moving a chip between engines pays both, discouraging constant shuffling.',
-      'Чип качества X можно установить на движок уровня X или ниже (Gold-чип работает на Bronze/Silver/Gold-движках), что делает чипы выше ценнее. Установка стоит Lucky Stars, равные уровню чипа (ур. 12 = 12★); снятие — половину с округлением вверх (ур. 12 = 6★). Перемещение чипа между движками оплачивает оба, что отбивает охоту постоянно тасовать.',
+      'Чип качества X можно установить на двигатель уровня X или ниже (Gold-чип работает на Bronze/Silver/Gold-двигателях), что делает чипы выше ценнее. Установка стоит Lucky Stars, равные уровню чипа (ур. 12 = 12★); снятие — половину с округлением вверх (ур. 12 = 6★). Перемещение чипа между двигателями оплачивает оба, что отбивает охоту постоянно тасовать.',
       'X որակի չիպը կարելի է տեղադրել X կամ ավելի ցածր մակարդակի շարժիչի վրա (Gold չիպն աշխատում է Bronze/Silver/Gold շարժիչների վրա)՝ դարձնելով ավելի բարձր մակարդակի չիպերն ավելի արժեքավոր։ Տեղադրումն արժե Lucky Stars՝ չիպի մակարդակին հավասար (մակ. 12 = 12★), հանումը՝ կեսը՝ կլորացված վերև (մակ. 12 = 6★)։ Չիպը շարժիչների միջև տեղափոխելը վճարում է երկուսն էլ՝ խրախուսելով չանընդհատ տեղափոխել։',
       'Ein Chip der Qualität X kann auf einer Engine der Stufe X oder niedriger ausgerüstet werden (ein Gold-Chip funktioniert auf Bronze/Silber/Gold-Engines), was höherstufige Chips wertvoller macht. Ausrüsten kostet Lucky Stars gleich der Chip-Stufe (Stufe 12 = 12★); Ablegen kostet die Hälfte, aufgerundet (Stufe 12 = 6★). Einen Chip zwischen Engines zu bewegen kostet beides, was ständiges Umstecken verhindert.'
     ),
@@ -633,7 +633,7 @@ const articles: FaqArticle[] = [
     sectionId: '6',
     title: tx(
       'What are Engine Boosters?',
-      'Что такое бустеры движков?',
+      'Что такое бустеры двигателей?',
       'Ի՞նչ են շարժիչի բուստերները',
       'Was sind Engine-Booster?'
     ),
@@ -645,7 +645,7 @@ const articles: FaqArticle[] = [
     ),
     content: tx(
       'Boosters are one-shot, time-limited consumables (Time or Capacity) you activate on an engine for a fixed duration — 3h, 6h, 12h, 24h or 48h. They are tier-locked (a Bronze booster only fits a Bronze engine) and come from tasks and tournament prize pools — they are no longer sold in the Market. The countdown runs in real time and cannot be paused once started.',
-      'Бустеры — одноразовые расходники с таймером (время или ёмкость), которые активируют на движке на фиксированный срок — 3, 6, 12, 24 или 48 ч. Они привязаны к уровню (Bronze-бустер подходит только Bronze-движку) и берутся из заданий и призовых фондов турниров — в Маркете они больше не продаются. Отсчёт идёт в реальном времени и не приостанавливается после запуска.',
+      'Бустеры — одноразовые расходники с таймером (время или ёмкость), которые активируют на двигателе на фиксированный срок — 3, 6, 12, 24 или 48 ч. Они привязаны к уровню (Bronze-бустер подходит только Bronze-двигателю) и берутся из заданий и призовых фондов турниров — в Маркете они больше не продаются. Отсчёт идёт в реальном времени и не приостанавливается после запуска.',
       'Բուստերները միանգամյա, ժամանակով սահմանափակ ծախսվող իրեր են (ժամանակ կամ ծավալ), որ ակտիվացնում եք շարժիչի վրա ֆիքսված տևողությամբ՝ 3ժ, 6ժ, 12ժ, 24ժ կամ 48ժ։ Դրանք կապված են մակարդակին (Bronze բուստերը հարմար է միայն Bronze շարժիչին) և գալիս են առաջադրանքներից և մրցաշարերի մրցանակային ֆոնդերից՝ Շուկայում այլևս չեն վաճառվում։ Հետհաշվարկն ընթանում է իրական ժամանակում և չի կարող դադարեցվել մեկնարկից հետո։',
       'Booster sind einmalige, zeitlich begrenzte Verbrauchsgegenstände (Zeit oder Kapazität), die du auf einer Engine für eine feste Dauer aktivierst — 3h, 6h, 12h, 24h oder 48h. Sie sind stufengebunden (ein Bronze-Booster passt nur zu einer Bronze-Engine) und kommen aus Aufgaben und Turnier-Preispools — im Markt werden sie nicht mehr verkauft. Der Countdown läuft in Echtzeit und kann nach dem Start nicht pausiert werden.'
     ),
@@ -667,7 +667,7 @@ const articles: FaqArticle[] = [
     ),
     content: tx(
       'The Boost Inventory stores every owned-but-not-equipped boost item: Speed Boosts, Capacity Upgrades, Speed/Capacity Chips, uncommitted shards and Chip Builders. From there you level up chips by spending shards, and equip items onto engines. Items are either permanent or time-limited; time-limited items only tick down while equipped.',
-      'Инвентарь бустов хранит все принадлежащие, но не установленные предметы: бусты скорости, улучшения ёмкости, чипы скорости/ёмкости, неиспользованные осколки и Chip Builder. Оттуда вы повышаете уровень чипов, тратя осколки, и устанавливаете предметы на движки. Предметы бывают постоянными или временными; временные тратят время только пока установлены.',
+      'Инвентарь бустов хранит все принадлежащие, но не установленные предметы: бусты скорости, улучшения ёмкости, чипы скорости/ёмкости, неиспользованные осколки и Chip Builder. Оттуда вы повышаете уровень чипов, тратя осколки, и устанавливаете предметы на двигатели. Предметы бывают постоянными или временными; временные тратят время только пока установлены.',
       'Ուժեղացումների գույքագրումը պահում է բոլոր սեփական, բայց չտեղադրված ուժեղացման իրերը՝ արագության ուժեղացումներ, ծավալի բարելավումներ, արագության/ծավալի չիպեր, չծախսված բեկորներ և Chip Builder-ներ։ Այնտեղից բարձրացնում եք չիպերի մակարդակը՝ ծախսելով բեկորներ, և իրեր տեղադրում շարժիչների վրա։ Իրերը կա՛մ մշտական են, կա՛մ ժամանակավոր. ժամանակավորները ժամանակ են ծախսում միայն տեղադրված ժամանակ։',
       'Das Boost-Inventar speichert jeden besessenen, aber nicht ausgerüsteten Boost-Gegenstand: Geschwindigkeits-Boosts, Kapazitäts-Upgrades, Geschwindigkeits-/Kapazitäts-Chips, nicht verwendete Splitter und Chip-Builder. Von dort steigerst du Chip-Stufen durch Ausgeben von Splittern und rüstest Gegenstände auf Engines aus. Gegenstände sind entweder permanent oder zeitlich begrenzt; zeitlich begrenzte laufen nur ab, während sie ausgerüstet sind.'
     ),
@@ -932,7 +932,7 @@ const articles: FaqArticle[] = [
     ),
     content: tx(
       'The Market is the single storefront — there is no separate Shop. Paid in LC or Lucky Stars (no fiat). Surfaced categories: Status (Lucky Player/VIP), Tickets, Shards, Engines and Cosmetics (avatars, badges, themes). Engine Capacity Upgrades are not sold here — they are bought with Lucky Stars on the engine itself.',
-      'Маркет — единственная витрина, отдельного «Шопа» нет. Оплата в LC или Lucky Stars (без фиата). Доступные категории: Статусы (Lucky Player/VIP), Билеты, Осколки, Движки и Косметика (аватары, бейджи, темы). Улучшения ёмкости здесь не продаются — они покупаются за Lucky Stars прямо на движке.',
+      'Маркет — единственная витрина, отдельного «Шопа» нет. Оплата в LC или Lucky Stars (без фиата). Доступные категории: Статусы (Lucky Player/VIP), Билеты, Осколки, Двигатели и Косметика (аватары, бейджи, темы). Улучшения ёмкости здесь не продаются — они покупаются за Lucky Stars прямо на двигателе.',
       'Շուկան միակ վաճառակետն է՝ առանձին «Խանութ» չկա։ Վճարումը LC-ով կամ Lucky Stars-ով (առանց ֆիատի)։ Հասանելի կատեգորիաներ՝ Կարգավիճակներ (Lucky Player/VIP), Տոմսեր, Բեկորներ, Շարժիչներ և Կոսմետիկա (ավատարներ, կրծքանշաններ, թեմաներ)։ Շարժիչի ծավալի բարելավումներն այստեղ չեն վաճառվում՝ դրանք գնվում են Lucky Stars-ով հենց շարժիչի վրա։',
       'Der Markt ist die einzige Verkaufsfläche — einen separaten Shop gibt es nicht. Bezahlt wird in LC oder Lucky Stars (kein Fiat). Verfügbare Kategorien: Status (Lucky Player/VIP), Tickets, Fragmente, Engines und Kosmetik (Avatare, Abzeichen, Themes). Engine-Kapazitäts-Upgrades werden hier nicht verkauft — sie werden mit Lucky Stars direkt an der Engine gekauft.'
     ),
@@ -971,7 +971,7 @@ const articles: FaqArticle[] = [
     ),
     content: tx(
       "Market prices follow a ~×3 per-tier ladder (e.g. a Bronze engine 2,000,000 LC, Bronze ticket 60,000 LC). A ticket's price equals 1.5× the tournament LC-per-seat, always above the average LC a ticket returns. This house edge stops bought tickets from being a money loop — free engine-produced tickets are your free roll, and the Market is the main LC sink that keeps LC valuable.",
-      'Цены Маркета растут лесенкой ~×3 за уровень (например, Bronze-движок 2 000 000 LC, Bronze-билет 60 000 LC). Цена билета равна 1,5× от LC за место в турнире — всегда выше среднего возврата с билета. Это преимущество площадки не даёт купленным билетам стать денежной петлёй: бесплатные билеты с движков — ваш бесплатный ролл, а Маркет — главный сток LC, поддерживающий ценность LC.',
+      'Цены Маркета растут лесенкой ~×3 за уровень (например, Bronze-двигатель 2 000 000 LC, Bronze-билет 60 000 LC). Цена билета равна 1,5× от LC за место в турнире — всегда выше среднего возврата с билета. Это преимущество площадки не даёт купленным билетам стать денежной петлёй: бесплатные билеты с двигателей — ваш бесплатный ролл, а Маркет — главный сток LC, поддерживающий ценность LC.',
       'Շուկայի գները հետևում են ~×3 մակարդակային սանդուղքին (օրինակ՝ Bronze շարժիչ 2,000,000 LC, Bronze տոմս 60,000 LC)։ Տոմսի գինը հավասար է մրցաշարի մեկ տեղի LC-ի 1.5×-ին՝ միշտ բարձր տոմսի միջին վերադարձից։ Այս առավելությունը թույլ չի տալիս գնված տոմսերը դառնալ դրամական օղակ. շարժիչներով արտադրված անվճար տոմսերը ձեր անվճար փորձն են, իսկ Շուկան LC-ի հիմնական ստոքն է, որ պահպանում է LC-ի արժեքը։',
       'Marktpreise folgen einer ~×3-Stufenleiter (z. B. Bronze-Engine 2.000.000 LC, Bronze-Ticket 60.000 LC). Der Preis eines Tickets entspricht dem 1,5-fachen des Turnier-LC-pro-Platz, immer über dem durchschnittlichen LC-Rückfluss eines Tickets. Dieser Hausvorteil verhindert, dass gekaufte Tickets zur Geldschleife werden — kostenlose Engine-Tickets sind dein Freilos, und der Markt ist die wichtigste LC-Senke, die LC wertvoll hält.'
     ),
@@ -1080,7 +1080,7 @@ const articles: FaqArticle[] = [
     ),
     content: tx(
       'Lucky Player is a paid subscription: faster engines, a bigger LC yield on stakes, a Market discount, extra rewarded-ad views per day, higher per-tier ticket-send limits (including Platinum and Diamond), one-tap "Claim all", and a daily gift. The exact amounts are platform settings and can change — Settings → Lucky Player always lists what the subscription grants right now.',
-      'Lucky Player — платная подписка: движки быстрее, больше LC за завершённый стейк, скидка в Маркете, дополнительные показы рекламы в день, повышенные лимиты отправки билетов по тирам (включая платину и алмаз), «Забрать все» одним нажатием и ежедневный подарок. Точные значения задаются настройками платформы и могут меняться — актуальный список всегда в «Настройки → Lucky Player».',
+      'Lucky Player — платная подписка: двигатели быстрее, больше LC за завершённый стейк, скидка в Маркете, дополнительные показы рекламы в день, повышенные лимиты отправки билетов по тирам (включая платину и алмаз), «Забрать все» одним нажатием и ежедневный подарок. Точные значения задаются настройками платформы и могут меняться — актуальный список всегда в «Настройки → Lucky Player».',
       'Lucky Player-ը վճարովի բաժանորդագրություն է՝ ավելի արագ շարժիչներ, ավելի մեծ LC եկամուտ սթեյքից, զեղչ Շուկայում, օրական լրացուցիչ գովազդի դիտումներ, տոմս ուղարկելու բարձրացված սահմաններ ըստ մակարդակի (ներառյալ Platinum-ը և Diamond-ը), «Վերցնել բոլորը» մեկ հպումով և ամենօրյա նվեր։ Ճշգրիտ թվերը հարթակի կարգավորումներ են և կարող են փոխվել — արդիական ցանկը միշտ «Կարգավորումներ → Lucky Player» բաժնում է։',
       'Lucky Player ist ein bezahltes Abo: schnellere Engines, mehr LC-Ertrag pro abgeschlossenem Stake, ein Marktrabatt, zusätzliche Werbe-Ansichten pro Tag, höhere Ticket-Sendelimits je Stufe (inklusive Platin und Diamant), „Alle einlösen" mit einem Tipp und ein tägliches Geschenk. Die genauen Werte sind Plattform-Einstellungen und können sich ändern — Einstellungen → Lucky Player zeigt immer, was das Abo aktuell gewährt.'
     ),
@@ -1102,7 +1102,7 @@ const articles: FaqArticle[] = [
     ),
     content: tx(
       'VIP is permanent and leveled (up to level 20) — it never expires or drops. Each level raises the same perk set: engine speed, stake LC yield, Market discount, daily rewarded-ad views and per-tier ticket-send limits; the higher levels also unlock one-tap "Claim all". Levels are bought one at a time with LC or Lucky Stars, and every level has its own price. Settings → VIP shows what your level grants today and exactly what the next one adds.',
-      'VIP — постоянный и уровневый (до 20-го), не истекает и не снижается. Каждый уровень поднимает один и тот же набор: скорость движков, награду за стейк, скидку в Маркете, показы рекламы в день и лимиты отправки билетов по тирам; на старших уровнях открывается «Забрать все» одним нажатием. Уровни покупаются по одному за LC или Lucky Stars, у каждого своя цена. В «Настройки → VIP» видно, что даёт ваш уровень сейчас и что именно добавит следующий.',
+      'VIP — постоянный и уровневый (до 20-го), не истекает и не снижается. Каждый уровень поднимает один и тот же набор: скорость двигателей, награду за стейк, скидку в Маркете, показы рекламы в день и лимиты отправки билетов по тирам; на старших уровнях открывается «Забрать все» одним нажатием. Уровни покупаются по одному за LC или Lucky Stars, у каждого своя цена. В «Настройки → VIP» видно, что даёт ваш уровень сейчас и что именно добавит следующий.',
       'VIP-ը մշտական է և մակարդակներով (մինչև 20-րդ)՝ երբեք չի ժամկետանց լինում և չի նվազում։ Յուրաքանչյուր մակարդակ բարձրացնում է նույն հավաքածուն՝ շարժիչի արագություն, սթեյքի LC եկամուտ, զեղչ Շուկայում, օրական գովազդի դիտումներ և տոմս ուղարկելու սահմաններ ըստ մակարդակի. բարձր մակարդակներում բացվում է նաև «Վերցնել բոլորը» մեկ հպումով։ Մակարդակները գնվում են մեկ առ մեկ՝ LC-ով կամ Lucky Stars-ով, յուրաքանչյուրն ունի իր գինը։ «Կարգավորումներ → VIP» բաժնում երևում է, թե ինչ է տալիս ձեր մակարդակն այսօր և ինչ կավելացնի հաջորդը։',
       'VIP ist permanent und gestuft (bis Stufe 20) — es verfällt oder sinkt nie. Jede Stufe hebt denselben Satz an Vorteilen: Engine-Tempo, LC-Ertrag aus Stakes, Marktrabatt, tägliche Werbe-Ansichten und Ticket-Sendelimits je Stufe; die höheren Stufen schalten zusätzlich „Alle einlösen" mit einem Tipp frei. Stufen werden einzeln mit LC oder Lucky Stars gekauft und haben jeweils einen eigenen Preis. Einstellungen → VIP zeigt, was deine Stufe heute gewährt und was die nächste genau hinzufügt.'
     ),
@@ -1354,7 +1354,7 @@ const articles: FaqArticle[] = [
     ),
     content: tx(
       'Avatars have a 10-level ladder. Levels 1–2 are free (cosmetic only); levels 3–10 are paid in the Market and carry a bound boost (engine speed, market discount, claim multiplier, AP earn or tournament reward), growing from ~3–5% up to ~25% at the animated level-10 apex. Ownership is permanent, but only one avatar is active at a time — its boost stacks with your status and engine boosts.',
-      'У аватаров лесенка из 10 уровней. Уровни 1–2 бесплатны (только косметика); уровни 3–10 покупаются в Маркете и несут привязанный буст (скорость движков, скидка в Маркете, множитель сбора, заработок AP или награда турниров), растущий от ~3–5% до ~25% на анимированной вершине 10 уровня. Владение постоянно, но активен только один аватар — его буст складывается со статусом и бустами движков.',
+      'У аватаров лесенка из 10 уровней. Уровни 1–2 бесплатны (только косметика); уровни 3–10 покупаются в Маркете и несут привязанный буст (скорость двигателей, скидка в Маркете, множитель сбора, заработок AP или награда турниров), растущий от ~3–5% до ~25% на анимированной вершине 10 уровня. Владение постоянно, но активен только один аватар — его буст складывается со статусом и бустами двигателей.',
       'Ավատարներն ունեն 10 մակարդակի սանդուղք։ 1–2 մակարդակներն անվճար են (միայն կոսմետիկ). 3–10 մակարդակները գնվում են Շուկայում և կրում են կապված ուժեղացում (շարժիչի արագություն, շուկայի զեղչ, վերցնելու բազմապատկիչ, AP վաստակ կամ մրցաշարի պարգև)՝ աճելով ~3–5%-ից մինչև ~25% անիմացված 10-րդ մակարդակի գագաթին։ Սեփականությունը մշտական է, բայց միաժամանակ ակտիվ է միայն մեկ ավատար. դրա ուժեղացումը գումարվում է ձեր կարգավիճակի և շարժիչի ուժեղացումների հետ։',
       'Avatare haben eine 10-Stufen-Leiter. Stufen 1–2 sind kostenlos (nur kosmetisch); Stufen 3–10 werden im Markt gekauft und tragen einen gebundenen Boost (Engine-Geschwindigkeit, Marktrabatt, Einlöse-Multiplikator, AP-Verdienst oder Turnierbelohnung), der von ~3–5% bis ~25% auf dem animierten Stufe-10-Gipfel wächst. Der Besitz ist permanent, aber nur ein Avatar ist gleichzeitig aktiv — sein Boost stapelt sich mit deinem Status und Engine-Boosts.'
     ),
@@ -1400,7 +1400,7 @@ const articles: FaqArticle[] = [
     ),
     content: tx(
       'LuckyTicket365 ships 100+ badges across categories like Status, Stakes, Tickets, Engines, Tournaments, Streaks, Social, Finance, Tasks, Leaderboard and rare Exclusives. Every meaningful action contributes to one or more badges. They are account-bound (non-tradeable) and act as a visible identity layer other players see on your profile.',
-      'LuckyTicket365 содержит 100+ значков в категориях: Статус, Стейки, Билеты, Движки, Турниры, Серии, Социальное, Финансы, Задания, Таблица лидеров и редкие Эксклюзивы. Каждое значимое действие вносит вклад в один или несколько значков. Они привязаны к аккаунту (не торгуются) и служат видимым слоем идентичности, который другие видят в вашем профиле.',
+      'LuckyTicket365 содержит 100+ значков в категориях: Статус, Стейки, Билеты, Двигатели, Турниры, Серии, Социальное, Финансы, Задания, Таблица лидеров и редкие Эксклюзивы. Каждое значимое действие вносит вклад в один или несколько значков. Они привязаны к аккаунту (не торгуются) и служат видимым слоем идентичности, который другие видят в вашем профиле.',
       'LuckyTicket365-ը պարունակում է 100+ կրծքանշան այնպիսի կատեգորիաներում, ինչպիսիք են՝ Կարգավիճակ, Սթեյքեր, Տոմսեր, Շարժիչներ, Մրցաշարեր, Շարքեր, Սոցիալական, Ֆինանսներ, Առաջադրանքներ, Առաջատարների ցուցակ և հազվագյուտ Բացառիկներ։ Յուրաքանչյուր նշանակալի գործողություն նպաստում է մեկ կամ ավելի կրծքանշանի։ Դրանք կապված են հաշվին (չեն վաճառվում) և հանդես են գալիս որպես ինքնության տեսանելի շերտ, որ ուրիշները տեսնում են ձեր պրոֆիլում։',
       'LuckyTicket365 enthält 100+ Abzeichen in Kategorien wie Status, Stakes, Tickets, Engines, Turniere, Serien, Social, Finanzen, Aufgaben, Bestenliste und seltene Exklusive. Jede sinnvolle Aktion trägt zu einem oder mehreren Abzeichen bei. Sie sind kontogebunden (nicht handelbar) und dienen als sichtbare Identitätsebene, die andere Spieler in deinem Profil sehen.'
     ),
@@ -1514,10 +1514,10 @@ const SECTION_TITLES: Record<string, LocalizedText> = {
     'Währungen: LC & Lucky Stars'
   ),
   '4': tx('Tickets', 'Билеты', 'Տոմսեր', 'Tickets'),
-  '5': tx('Producer Engines', 'Движки-производители', 'Արտադրող շարժիչներ', 'Producer-Engines'),
+  '5': tx('Producer Engines', 'Двигатели-производители', 'Արտադրող շարժիչներ', 'Producer-Engines'),
   '6': tx(
     'Engine Boosts, Chips & Boosters',
-    'Бусты, чипы и бустеры движков',
+    'Бусты, чипы и бустеры двигателей',
     'Շարժիչի ուժեղացումներ, չիպեր և բուստերներ',
     'Engine-Boosts, Chips & Booster'
   ),

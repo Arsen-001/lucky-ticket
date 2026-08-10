@@ -259,7 +259,7 @@ export function TournamentResultModal({
                     <span
                       className={`${textClass} text-base tabular-nums leading-none uppercase tracking-wider`}
                     >
-                      {t('shards')}
+                      {t('shards unit {count}', { count: shards })}
                     </span>
                   </div>
                 )}

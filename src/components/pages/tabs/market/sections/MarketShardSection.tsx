@@ -48,7 +48,7 @@ export function MarketShardSection({ shards, onSelect, onBuy }: MarketShardSecti
           ) : (
             <ChipShardIcon type={shard.type} tier={shard.quality} size={size} />
           );
-        const description = `+${shard.count} ${t('shards')}`;
+        const description = `+${shard.count} ${t('shards unit {count}', { count: shard.count })}`;
         const discountedPrices = applyStatusMarketDiscount(shard.prices, discountPct);
         const item: MarketSelectedItem = {
           id: shard.id,

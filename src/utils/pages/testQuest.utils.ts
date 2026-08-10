@@ -12,10 +12,12 @@ export interface RewardChip {
 
 // Keyword → chip kind, first match wins. Matches both the language-neutral tokens
 // authored on the front end (TIX, ENG, LC…) and the localized unit words a live
-// server may send (Russian "билет", "движ"), so a mixed-locale response still
+// server may send (Russian "билет", "двигат"), so a mixed-locale response still
 // classifies. Ordered so specific units are tested before the generic LC coin.
+// "движ" stays alongside "двигат": a server deployed before the term was
+// unified still answers with the old word.
 const CHIP_RULES: { re: RegExp; kind: RewardChipKind }[] = [
-  { re: /движ|\bENG\b/i, kind: 'engine' },
+  { re: /двигат|движ|\bENG\b/i, kind: 'engine' },
   { re: /билет|\bTIX\b/i, kind: 'ticket' },
   { re: /\bLS\b/i, kind: 'star' },
   { re: /\bAP\b/i, kind: 'ap' },

@@ -213,7 +213,7 @@
   "claim already done description": "You've already taken this reward. Your tasks are up to date now.",
   "claim unavailable": "Reward unavailable",
   "claim unavailable description": "This reward can't be claimed right now. Your tasks are up to date now.",
-  "claim locked steps remaining": "{remaining} steps left",
+  "claim locked steps remaining": "{remaining, plural, =1 {1 step left} other {# steps left}}",
   "claim main bonus": "Claim all",
   "claim modal description": "Your reward has been added to your balance.",
   "claim now": "Claim now",
@@ -1132,7 +1132,7 @@
   "stakes disabled": "Staking is temporarily unavailable.",
   "and invite {n} friends": "…and invite {n} friends",
   "and invite {n} more friends": "And invite {n} more friends",
-  "need {n} friends": "Need {n} friends",
+  "need {n} friends": "Need {n, plural, =1 {1 friend} other {# friends}}",
   "friends unlock tiers": "Friends unlock tiers",
   "each tier also needs its ap threshold": "Each tier also needs its AP threshold",
   "all friend requirements met": "All friend requirements met",
@@ -1304,5 +1304,9 @@
   "t/h": "T/H",
   "per day short": "/day",
   "result": "Result",
-  "expired": "Expired"
+  "expired": "Expired",
+  "partners filter active": "Active",
+  "shards unit {count}": "{count, plural, =1 {shard} other {shards}}",
+  "speed shards {count}": "{count, plural, =1 {Time shard} other {Time shards}}",
+  "capacity shards {count}": "{count, plural, =1 {Capacity shard} other {Capacity shards}}"
 }

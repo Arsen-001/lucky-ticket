@@ -127,7 +127,7 @@ export function useMarketFeaturedItems(): { items: MarketFeaturedItem[]; isLoadi
     const shardToItem = (s: (typeof data.shards)[number]): MarketFeaturedItem => ({
       id: s.id,
       title: marketShardName(s, t),
-      description: `+${s.count} ${t('shards')}`,
+      description: `+${s.count} ${t('shards unit {count}', { count: s.count })}`,
       about: t('market shard purpose'),
       // The grid gates shards by tier; the showcase used to sell the same item
       // with a live Buy button the backend would refuse.
