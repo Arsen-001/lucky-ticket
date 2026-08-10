@@ -5,7 +5,7 @@ import { ArrowDown, CheckCircle2, Coins } from 'lucide-react';
 import { twMerge } from 'tailwind-merge';
 import { Modal } from '@/components/shared/modals/Modal';
 import { useAppTranslations } from '@/hooks/useAppTranslations';
-import { useToast } from '@/hooks/useToast';
+import { useSpendFailure } from '@/hooks/useSpendFailure';
 import { useConvertLcToTonMutation } from '@/api/lc.api';
 import { formatNumber } from '@/utils/global/number.utils';
 import { lcToTon } from '@/utils/global/lc.utils';
@@ -28,7 +28,7 @@ const fmtTon = (n: number) => String(Number(n.toFixed(6)));
 
 export function LcConvertTonModal({ open, onClose, balance }: LcConvertTonModalProps) {
   const t = useAppTranslations();
-  const toast = useToast();
+  const spend = useSpendFailure();
   const [convert, { isLoading }] = useConvertLcToTonMutation();
   const [step, setStep] = useState<Step>('select');
   const [lcInput, setLcInput] = useState('');
@@ -74,7 +74,10 @@ export function LcConvertTonModal({ open, onClose, balance }: LcConvertTonModalP
         setLateDisabled(true);
         return;
       }
-      toast.error(t('action failed'));
+      // The local check reads a balance that can be minutes old, so the server
+      // is the one that decides — and «Not enough LC» here means the same thing
+      // it means anywhere else in the app: go and win some.
+      await spend.report(error, { required: amount });
     }
   };
 
@@ -265,6 +268,8 @@ export function LcConvertTonModal({ open, onClose, balance }: LcConvertTonModalP
           </div>
         )}
       </div>
+
+      {spend.modals}
     </Modal>
   );
 }
