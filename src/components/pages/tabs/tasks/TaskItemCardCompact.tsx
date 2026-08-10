@@ -1,7 +1,6 @@
 'use client';
 
 import { type CSSProperties } from 'react';
-import { useRouter } from 'next/navigation';
 import { Check, ChevronRight, Gift, Lock, Pin, PinOff } from 'lucide-react';
 import { twMerge } from 'tailwind-merge';
 import { useAppTranslations } from '@/hooks/useAppTranslations';
@@ -10,8 +9,8 @@ import { Button } from '@/components/shared/buttons/Button';
 import { Progress } from '@/components/shared/Progress';
 import { TaskRarity, TaskStatus } from '@/types/enums/tasks.enums';
 import type { Task } from '@/types/interfaces/tasks.interfaces';
-import { type Route } from '@/constants/routes';
-import { openExternalUrl } from '@/lib/telegram/telegram';
+import { useTaskNavigate } from '@/hooks/useTaskNavigate';
+import { taskHasDestination } from '@/utils/pages/task-destination.utils';
 import { TaskCategoryIcon } from './TaskCategoryIcon';
 import { TaskRewardRow } from './TaskRewardRow';
 import { SectionShine } from './SectionShine';
@@ -53,12 +52,14 @@ export function TaskItemCardCompact({
 }: TaskItemCardCompactProps) {
   const t = useAppTranslations();
   const localized = useLocalized();
-  const router = useRouter();
+  const navigateToTask = useTaskNavigate();
 
   const isReady = task.status === TaskStatus.READY_TO_CLAIM;
   const isLocked = task.status === TaskStatus.LOCKED;
   const isCompleted = task.status === TaskStatus.COMPLETED;
-  const hasLink = !!(task.deeplink || task.externalLink);
+  // Where the tap goes — resolved, not read off `task.deeplink`: the catalog
+  // ships tasks with no link and tasks pointing at this very screen.
+  const hasLink = taskHasDestination(task);
   const canNavigate = hasLink && !isLocked && !isCompleted && !isReady;
   const showProgress = task.progress.target > 1 && !isCompleted && !isLocked;
   const pct =
@@ -72,13 +73,7 @@ export function TaskItemCardCompact({
       onClaim(task);
       return;
     }
-    if (task.deeplink) {
-      router.push(task.deeplink as Route);
-      return;
-    }
-    if (task.externalLink) {
-      openExternalUrl(task.externalLink);
-    }
+    navigateToTask(task);
   };
 
   return (

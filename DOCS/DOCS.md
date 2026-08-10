@@ -1258,6 +1258,22 @@ claimed on their own cards.
 
 **«Есть что забрать» — one mark, everywhere.** A task counts as _claimable_ when it is `READY_TO_CLAIM`, **or** when it still holds a completed-but-unclaimed sub-step. A rewarded-ad view left in the day does **not** count, on any surface: its button says «Смотреть», so it is work still to be done, not a reward waiting — and counted as claimable it would light the tab bar every morning for every player, which is the same as never lighting it. Wherever the rule is true the UI shows one blinking pink dot **without a number**: on the task's own icon, on the accordion control of a task whose reward sits inside the drop-down, on the header of the section and of the milestone slider that holds it (the ready card is often scrolled off the strip), and on the **Tasks** tab of the bottom bar plus every shortcut that leads to it (LC wallet, activity and jackpot cards). The Daily / Weekly / One-Time tabs and the category chips keep a plain, still figure: they are filters, and their number counts what the section holds worth opening it for — claimable rows **and** the day's remaining ad views (`frequencyTabCounts`). The two are deliberately different sets, which is why one is a number and the other a dot: nothing blinks unless a tap on it pays. One rule computes both (`tasks-claimable.utils.ts`), so the bar can never promise a reward the screen does not show; hidden categories (Profile / Partners in the one-time tab, everything ads-related when the ads kill switch is off) are excluded from every count.
 
+**Where a task card leads.** A tap on a card that is not ready to claim opens the
+screen where its work is done — that is the card's whole promise, so the chevron
+is only drawn when there is somewhere to go. The catalog's `deeplink` answers
+first, but it is server data, editable in the admin panel, and two shapes of it
+lead nowhere: a **bare `/tasks`** (the screen the card is drawn on — pushing the
+current URL navigates nowhere, which is how every «Watch N ads» milestone came
+to be a dead tap) and a **screen that does not exist** (a typo, or `/engines`,
+which is only a base for `/engines/:id`). Both are ignored in favour of the
+task's own category — Ads → the daily ads block, Tournaments → `/tournaments`,
+Engines and Tickets → the Tickets tab, Stakes → `/stakes`, Friends →
+`/invite-friends`, Stars → the wallet, VIP / Lucky Player → the Market's Status
+tab. Categories whose tasks each lead somewhere different (Achievements,
+Profile) and the all-set bonus, whose card opens its own checklist, get no guess
+and no chevron. One resolver (`task-destination.utils.ts`) answers for every
+shape of card — full, compact, row and milestone slide.
+
 ### 12.3 Task Examples
 
 Tasks guide user behavior and include actions such as:

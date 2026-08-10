@@ -24,8 +24,9 @@ import { Medal, type MedalType } from '@/components/shared/icons/Medal';
 import { TaskRarity, TaskStatus } from '@/types/enums/tasks.enums';
 import type { TicketType } from '@/types/types/ticket.types';
 import type { Task } from '@/types/interfaces/tasks.interfaces';
-import { type Route, routes } from '@/constants/routes';
-import { openExternalUrl } from '@/lib/telegram/telegram';
+import { routes } from '@/constants/routes';
+import { useTaskNavigate } from '@/hooks/useTaskNavigate';
+import { taskHasDestination } from '@/utils/pages/task-destination.utils';
 import { TaskRewardRow } from './TaskRewardRow';
 import { ClaimableDot } from '@/components/shared/badges/ClaimableDot';
 import { isTaskClaimable } from '@/utils/global/tasks-claimable.utils';
@@ -354,10 +355,12 @@ function MilestoneCard({
   const t = useAppTranslations();
   const localized = useLocalized();
   const router = useRouter();
+  const navigateToTask = useTaskNavigate();
 
   const isReady = task.status === TaskStatus.READY_TO_CLAIM;
   const isLocked = task.status === TaskStatus.LOCKED;
   const isCompleted = task.status === TaskStatus.COMPLETED;
+  const hasDestination = taskHasDestination(task);
   const showProgress = task.progress.target > 1 && !isCompleted && !isLocked;
   const unit = unitLabel(task.progress.target);
   const pct =
@@ -375,13 +378,10 @@ function MilestoneCard({
       onClaim(task);
       return;
     }
-    if (task.deeplink) {
-      router.push(task.deeplink as Route);
-      return;
-    }
-    if (task.externalLink) {
-      openExternalUrl(task.externalLink);
-    }
+    // Not `task.deeplink` verbatim: every «Watch N ads» milestone ships a bare
+    // `/tasks`, which is the screen this slide is already on — the push was a
+    // no-op and the tap did nothing. See `resolveTaskDestination`.
+    navigateToTask(task);
   };
 
   return (
@@ -471,7 +471,7 @@ function MilestoneCard({
           </div>
         ) : isReady ? (
           <ClaimableDot label={t('something to claim')} className="mt-1 mr-1" />
-        ) : task.deeplink || task.externalLink ? (
+        ) : hasDestination ? (
           <div className="flex-center w-6 h-6 rounded-full bg-electric-pink/15 border border-electric-pink/30 shrink-0">
             <ChevronRight size={12} className="text-electric-pink" strokeWidth={2.5} />
           </div>

@@ -28,7 +28,9 @@ import { formatNumber } from '@/utils/global/number.utils';
 import { resolveTaskSocialBrand } from '@/utils/pages/task-social.utils';
 import { TaskCategory, TaskFrequency, TaskRewardType, TaskStatus } from '@/types/enums/tasks.enums';
 import type { Task, TaskSubStep } from '@/types/interfaces/tasks.interfaces';
-import { routes, type Route } from '@/constants/routes';
+import { routes } from '@/constants/routes';
+import { useTaskNavigate } from '@/hooks/useTaskNavigate';
+import { taskHasDestination } from '@/utils/pages/task-destination.utils';
 import { TaskCategoryIcon } from './TaskCategoryIcon';
 import { TaskRewardRow } from './TaskRewardRow';
 import { openExternalUrl } from '@/lib/telegram/telegram';
@@ -196,12 +198,14 @@ export function TaskItemCard({
   const t = useAppTranslations();
   const localized = useLocalized();
   const router = useRouter();
+  const navigateToTask = useTaskNavigate();
   const { leftTime, expired } = useCountDown(task.resetAt);
 
   const isReady = task.status === TaskStatus.READY_TO_CLAIM;
   const isLocked = task.status === TaskStatus.LOCKED;
   const isCompleted = task.status === TaskStatus.COMPLETED;
   const isInProgress = task.status === TaskStatus.IN_PROGRESS;
+  const hasDestination = taskHasDestination(task);
   const showProgress = task.progress.target > 1;
   const pct =
     task.progress.target > 0
@@ -310,18 +314,14 @@ export function TaskItemCard({
       return;
     }
     if (isCompleted) return;
-    if (task.deeplink) {
-      router.push(task.deeplink as Route);
-      return;
-    }
-    if (task.externalLink) {
-      openExternalUrl(task.externalLink);
-    }
+    // Resolved, not pushed verbatim: a catalog task can arrive with no deeplink
+    // at all or with a bare `/tasks` — the screen this card is already on, where
+    // `router.push` does nothing. See `resolveTaskDestination`.
+    navigateToTask(task);
   };
 
   const handleStepNavigate = () => {
-    if (task.deeplink) router.push(task.deeplink as Route);
-    else if (task.externalLink) openExternalUrl(task.externalLink);
+    navigateToTask(task);
   };
 
   // Compact layout flag — applies only to ONCE-frequency tasks in selected
@@ -343,6 +343,14 @@ export function TaskItemCard({
   const showCountdown = !!task.resetAt && !isLocked && !expired;
   const showPin = !!onTogglePin && !isCompleted && !isLocked && !isReady;
   const isClaimAction = (isReady || allStepsDone) && !isCompleted;
+
+  /**
+   * The full-width control at the foot of the card, only when it does something:
+   * claim, open the sub-steps, state «locked»/«claimed» — or actually go
+   * somewhere. A task whose catalog row names no destination (and whose category
+   * has no single obvious one) used to end in an «Open ›» that led nowhere.
+   */
+  const showAction = isClaimAction || isCompleted || isLocked || hasSubSteps || hasDestination;
 
   /**
    * «Здесь есть что забрать» — the numberless mark that rides the card's icon.
@@ -553,7 +561,12 @@ export function TaskItemCard({
             </div>
           </div>
 
-          <div className="mt-2.5 flex items-center gap-2">
+          <div
+            className={twMerge(
+              'mt-2.5 flex items-center gap-2',
+              !showPin && !showAction && 'mt-0 hidden'
+            )}
+          >
             {showPin && onTogglePin && (
               <button
                 type="button"
@@ -582,85 +595,87 @@ export function TaskItemCard({
               </button>
             )}
 
-            <button
-              type="button"
-              disabled={(isLocked && !isLockedTournament) || isSimulating}
-              onClick={e => {
-                e.stopPropagation();
-                // Claim goes straight to the claim handler. Routing it through
-                // `handleCardClick` would be wrong: for a task WITH sub-steps
-                // that handler toggles the accordion, so an all-steps-done task
-                // could never be claimed from here.
-                if (isClaimAction) {
-                  handleClaimMain();
-                  return;
-                }
-                handleCardClick();
-              }}
-              className={twMerge(
-                'flex-center relative flex-1 gap-1.5 rounded-xl py-2.5 text-[12px] leading-none font-extrabold tracking-[0.14em] uppercase',
-                isSimulating && 'cursor-wait opacity-70',
-                isClaimAction && 'bg-pink-gradient animate-task-pulse text-white',
-                isCompleted && 'bg-success/15 text-success',
-                isLockedTournament && 'bg-pink-gradient text-white',
-                isLocked &&
-                  !isLockedTournament &&
-                  'border border-white/10 bg-white/5 text-white/45',
-                !isLocked &&
-                  !isCompleted &&
-                  !isClaimAction &&
-                  'border border-white/10 bg-white/5 text-white/70'
-              )}
-            >
-              {isClaimAction ? (
-                <>
-                  <Gift size={13} strokeWidth={2.6} />
-                  {isSimulating ? t('claiming') : t('claim')}
-                </>
-              ) : isCompleted ? (
-                <>
-                  <Check size={13} strokeWidth={2.6} />
-                  {t('claimed')}
-                </>
-              ) : isLockedTournament ? (
-                <>
-                  <TrendingUp size={13} strokeWidth={2.6} />
-                  {t('open')}
-                </>
-              ) : isLocked ? (
-                <>
-                  <Lock size={12} strokeWidth={2.6} />
-                  {t('locked')}
-                </>
-              ) : hasSubSteps ? (
-                <>
-                  <ChevronDown
-                    size={13}
-                    strokeWidth={2.6}
-                    className={twMerge(expanded && 'rotate-180')}
-                  />
-                  {t('substeps progress', { completed: completedSteps, total: totalSteps })}
-                </>
-              ) : task.externalLink ? (
-                <>
-                  <ArrowUpRight size={13} strokeWidth={2.6} />
-                  {t('open')}
-                </>
-              ) : (
-                <>
-                  <ChevronRight size={13} strokeWidth={2.6} />
-                  {t('open')}
-                </>
-              )}
+            {showAction && (
+              <button
+                type="button"
+                disabled={(isLocked && !isLockedTournament) || isSimulating}
+                onClick={e => {
+                  e.stopPropagation();
+                  // Claim goes straight to the claim handler. Routing it through
+                  // `handleCardClick` would be wrong: for a task WITH sub-steps
+                  // that handler toggles the accordion, so an all-steps-done task
+                  // could never be claimed from here.
+                  if (isClaimAction) {
+                    handleClaimMain();
+                    return;
+                  }
+                  handleCardClick();
+                }}
+                className={twMerge(
+                  'flex-center relative flex-1 gap-1.5 rounded-xl py-2.5 text-[12px] leading-none font-extrabold tracking-[0.14em] uppercase',
+                  isSimulating && 'cursor-wait opacity-70',
+                  isClaimAction && 'bg-pink-gradient animate-task-pulse text-white',
+                  isCompleted && 'bg-success/15 text-success',
+                  isLockedTournament && 'bg-pink-gradient text-white',
+                  isLocked &&
+                    !isLockedTournament &&
+                    'border border-white/10 bg-white/5 text-white/45',
+                  !isLocked &&
+                    !isCompleted &&
+                    !isClaimAction &&
+                    'border border-white/10 bg-white/5 text-white/70'
+                )}
+              >
+                {isClaimAction ? (
+                  <>
+                    <Gift size={13} strokeWidth={2.6} />
+                    {isSimulating ? t('claiming') : t('claim')}
+                  </>
+                ) : isCompleted ? (
+                  <>
+                    <Check size={13} strokeWidth={2.6} />
+                    {t('claimed')}
+                  </>
+                ) : isLockedTournament ? (
+                  <>
+                    <TrendingUp size={13} strokeWidth={2.6} />
+                    {t('open')}
+                  </>
+                ) : isLocked ? (
+                  <>
+                    <Lock size={12} strokeWidth={2.6} />
+                    {t('locked')}
+                  </>
+                ) : hasSubSteps ? (
+                  <>
+                    <ChevronDown
+                      size={13}
+                      strokeWidth={2.6}
+                      className={twMerge(expanded && 'rotate-180')}
+                    />
+                    {t('substeps progress', { completed: completedSteps, total: totalSteps })}
+                  </>
+                ) : task.externalLink ? (
+                  <>
+                    <ArrowUpRight size={13} strokeWidth={2.6} />
+                    {t('open')}
+                  </>
+                ) : (
+                  <>
+                    <ChevronRight size={13} strokeWidth={2.6} />
+                    {t('open')}
+                  </>
+                )}
 
-              {/* «Внутри есть что забрать» — the same dot the icon carries,
-                  repeated on the control that opens the accordion, so the mark
-                  also says where to tap. Unlabelled: the card's own dot already
-                  announces it once, and twice is noise in a screen reader. */}
-              {hasClaimableSubStep && !isClaimAction && (
-                <ClaimableDot className="absolute top-1.5 right-1.5" />
-              )}
-            </button>
+                {/* «Внутри есть что забрать» — the same dot the icon carries,
+                    repeated on the control that opens the accordion, so the mark
+                    also says where to tap. Unlabelled: the card's own dot already
+                    announces it once, and twice is noise in a screen reader. */}
+                {hasClaimableSubStep && !isClaimAction && (
+                  <ClaimableDot className="absolute top-1.5 right-1.5" />
+                )}
+              </button>
+            )}
           </div>
 
           {showProgress && !isCompleted && !isLocked && (
@@ -796,7 +811,10 @@ export function TaskItemCard({
                 <ArrowUpRight size={14} className="text-electric-pink" strokeWidth={2.5} />
               </button>
             ) : (
-              isInProgress && (
+              // A chevron only when the tap actually leads somewhere — see
+              // `taskHasDestination`.
+              isInProgress &&
+              hasDestination && (
                 <div className="flex-center size-8 rounded-full bg-white/5 transition-colors hover:bg-white/10">
                   <ChevronRight size={14} className="text-white/60" />
                 </div>
@@ -817,7 +835,7 @@ export function TaskItemCard({
                 no-op without a link, and the all-set bonus — a checklist of
                 other tasks — has none. A link that does nothing is worse than
                 no link. */}
-            {!isCompleted && (task.deeplink || task.externalLink) && (
+            {!isCompleted && hasDestination && (
               <button
                 type="button"
                 onClick={e => {
@@ -838,7 +856,7 @@ export function TaskItemCard({
               claimed={isStepClaimed(step)}
               tier={task.tier}
               onClaim={() => handleClaimSubStep(step)}
-              onNavigate={task.deeplink || task.externalLink ? handleStepNavigate : undefined}
+              onNavigate={hasDestination ? handleStepNavigate : undefined}
             />
           ))}
 

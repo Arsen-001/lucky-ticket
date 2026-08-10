@@ -979,7 +979,7 @@ const ENGINES = buildCategory({
       },
       rewards: [lc(1), ap(10)],
       progress: { current: 0, target: 1 },
-      deeplink: '/engines',
+      deeplink: '/tickets',
       rarity: TaskRarity.BRONZE,
     },
   ],
@@ -989,7 +989,7 @@ const ENGINES = buildCategory({
     subtitle: 'Engines of any tier count.',
     rewards: m.rewards,
     progress: { current: 0, target: m.target },
-    deeplink: '/engines',
+    deeplink: '/tickets',
     rarity: m.rarity,
   })),
 });
@@ -1187,7 +1187,7 @@ const PROFILE_STATUS = buildCategory({
       subtitle: 'Unlock the Lucky Player perks.',
       rewards: [lc(20), tickets(2)],
       progress: { current: 0, target: 1 },
-      deeplink: '/market',
+      deeplink: '/market?tab=status',
       rarity: TaskRarity.GOLD,
     },
   ],
@@ -1207,6 +1207,7 @@ const ACHIEVEMENTS = buildCategory({
     // ─── First steps (instant, 0 AP by design) ───
     {
       id: 't-414',
+      deeplink: '/tickets',
       title: 'First claim',
       subtitle: 'Claim tickets from an engine.',
       rewards: [lc(2)],
@@ -1215,6 +1216,7 @@ const ACHIEVEMENTS = buildCategory({
     },
     {
       id: 't-415',
+      deeplink: '/tournaments',
       title: 'First tournament',
       subtitle: 'Join your first tournament.',
       rewards: [lc(2)],
@@ -1223,6 +1225,7 @@ const ACHIEVEMENTS = buildCategory({
     },
     {
       id: 't-416',
+      deeplink: '/tournaments',
       title: 'First win',
       subtitle: 'Win your first tournament.',
       rewards: [lc(5)],
@@ -1231,6 +1234,7 @@ const ACHIEVEMENTS = buildCategory({
     },
     {
       id: 't-417',
+      deeplink: '/stakes',
       title: 'First stake',
       subtitle: 'Start your first stake.',
       rewards: [lc(5)],
@@ -1239,6 +1243,7 @@ const ACHIEVEMENTS = buildCategory({
     },
     {
       id: 't-418',
+      deeplink: '/invite-friends',
       title: 'First friend',
       subtitle: 'Invite your first friend.',
       rewards: [lc(5)],
@@ -1249,6 +1254,7 @@ const ACHIEVEMENTS = buildCategory({
     // ─── Engine mastery (LC/time-gated → AP allowed, ascending by tier) ───
     {
       id: 't-419',
+      deeplink: '/market?tab=engines',
       title: 'Unlock Silver engine',
       subtitle: 'Own your first Silver engine.',
       rewards: [lc(15), ap(15)],
@@ -1258,6 +1264,7 @@ const ACHIEVEMENTS = buildCategory({
     },
     {
       id: 't-420',
+      deeplink: '/market?tab=engines',
       title: 'Unlock Gold engine',
       subtitle: 'Own your first Gold engine.',
       rewards: [lc(30), tickets(1), ap(25)],
@@ -1267,6 +1274,7 @@ const ACHIEVEMENTS = buildCategory({
     },
     {
       id: 't-422',
+      deeplink: '/market?tab=engines',
       title: 'Unlock Platinum engine',
       subtitle: 'Own your first Platinum engine.',
       rewards: [lc(60), tickets(2), ap(40)],
@@ -1275,6 +1283,7 @@ const ACHIEVEMENTS = buildCategory({
     },
     {
       id: 't-421',
+      deeplink: '/market?tab=engines',
       title: 'Unlock Diamond engine',
       subtitle: 'Own your first Diamond engine.',
       rewards: [lc(120), tickets(4), stars(10), ap(60)],
@@ -1283,6 +1292,7 @@ const ACHIEVEMENTS = buildCategory({
     },
     {
       id: 't-423',
+      deeplink: '/tickets',
       title: 'Parallel producer',
       subtitle: 'Run 5 engines at the same time.',
       rewards: [lc(20), tickets(1), ap(25)],
@@ -1291,6 +1301,7 @@ const ACHIEVEMENTS = buildCategory({
     },
     {
       id: 't-424',
+      deeplink: '/tickets',
       title: 'First Speed Boost',
       subtitle: 'Upgrade an engine’s speed.',
       rewards: [lc(8), ap(10)],
@@ -1300,6 +1311,7 @@ const ACHIEVEMENTS = buildCategory({
     },
     {
       id: 't-425',
+      deeplink: '/tickets',
       title: 'Capacity Upgrade',
       subtitle: 'Upgrade an engine’s capacity.',
       rewards: [lc(12), ap(15)],
@@ -1308,6 +1320,7 @@ const ACHIEVEMENTS = buildCategory({
     },
     {
       id: 't-426',
+      deeplink: '/tickets',
       title: 'Stack Boosts',
       subtitle: 'Speed + capacity on one engine.',
       rewards: [lc(25), tickets(1), ap(25)],
@@ -1318,6 +1331,7 @@ const ACHIEVEMENTS = buildCategory({
     // ─── Tournament prowess ───
     {
       id: 't-429',
+      deeplink: '/tournaments',
       title: 'Project tournament win',
       subtitle: 'Win a project tournament.',
       rewards: [lc(25), tickets(1), ap(25)],
@@ -1327,6 +1341,7 @@ const ACHIEVEMENTS = buildCategory({
     },
     {
       id: 't-430',
+      deeplink: '/tournaments',
       title: 'Partner tournament win',
       subtitle: 'Win a partner tournament.',
       rewards: [lc(25), tickets(1), ap(25)],
@@ -1335,6 +1350,7 @@ const ACHIEVEMENTS = buildCategory({
     },
     {
       id: 't-431',
+      deeplink: '/tournaments',
       title: 'All-tier winner',
       subtitle: 'Win 1st place in every tier.',
       rewards: [lc(100), tickets(3), ap(60)],
@@ -1343,6 +1359,7 @@ const ACHIEVEMENTS = buildCategory({
     },
     {
       id: 't-433',
+      deeplink: '/tournaments',
       title: 'Platinum winner',
       subtitle: 'Win a Platinum tournament.',
       rewards: [lc(80), tickets(2), ap(40)],
@@ -1351,6 +1368,7 @@ const ACHIEVEMENTS = buildCategory({
     },
     {
       id: 't-432',
+      deeplink: '/tournaments',
       title: 'Diamond winner',
       subtitle: 'Win a Diamond tournament.',
       rewards: [lc(150), tickets(4), stars(10), ap(60)],
@@ -1361,6 +1379,7 @@ const ACHIEVEMENTS = buildCategory({
     // ─── Tier journey (0 AP — awarding AP for AP is circular) ───
     {
       id: 'reach-silver',
+      deeplink: '/profile',
       title: 'Reach Silver',
       subtitle: 'Earn 500 activity points.',
       rewards: [lc(15), tickets(1)],
@@ -1370,6 +1389,7 @@ const ACHIEVEMENTS = buildCategory({
     },
     {
       id: 'reach-gold',
+      deeplink: '/profile',
       title: 'Reach Gold',
       subtitle: 'Earn 1 650 activity points.',
       rewards: [lc(40), tickets(2)],
@@ -1379,6 +1399,7 @@ const ACHIEVEMENTS = buildCategory({
     },
     {
       id: 'reach-platinum',
+      deeplink: '/profile',
       title: 'Reach Platinum',
       subtitle: 'Earn 5 900 activity points.',
       rewards: [lc(100), tickets(4), stars(10)],
@@ -1387,6 +1408,7 @@ const ACHIEVEMENTS = buildCategory({
     },
     {
       id: 't-461',
+      deeplink: '/profile',
       title: 'Reach Diamond',
       subtitle: 'Enter the highest tier.',
       rewards: [lc(250), tickets(8), stars(25)],
@@ -1397,6 +1419,7 @@ const ACHIEVEMENTS = buildCategory({
     // ─── Stakes / referrals / wallet ───
     {
       id: 't-441',
+      deeplink: '/stakes',
       title: 'Diamond Staker',
       subtitle: 'Start a Diamond-tier stake.',
       rewards: [lc(50), tickets(2), ap(30)],
@@ -1405,6 +1428,7 @@ const ACHIEVEMENTS = buildCategory({
     },
     {
       id: 't-445',
+      deeplink: '/invite-friends',
       title: 'Referral claimer',
       subtitle: 'Claim referral rewards 100 times.',
       rewards: [lc(50), tickets(2), ap(30)],
@@ -1413,6 +1437,7 @@ const ACHIEVEMENTS = buildCategory({
     },
     {
       id: 't-446',
+      deeplink: '/invite-friends',
       title: 'Verified referrals',
       subtitle: '3 invited friends verified.',
       rewards: [lc(60), tickets(2), ap(40)],
@@ -1421,6 +1446,7 @@ const ACHIEVEMENTS = buildCategory({
     },
     {
       id: 't-447',
+      deeplink: '/invite-friends',
       title: 'VIP referral',
       subtitle: 'An invited friend became VIP.',
       rewards: [lc(120), tickets(4), stars(10), ap(50)],
@@ -1429,6 +1455,7 @@ const ACHIEVEMENTS = buildCategory({
     },
     {
       id: 't-450',
+      deeplink: '/wallet',
       title: 'First withdrawal',
       subtitle: 'Withdraw TON for the first time.',
       rewards: [lc(10), ap(10)],
@@ -1437,6 +1464,7 @@ const ACHIEVEMENTS = buildCategory({
     },
     {
       id: 't-451',
+      deeplink: '/wallet',
       title: 'Stars → LC swap',
       subtitle: 'Convert Stars into LC.',
       rewards: [lc(5), ap(5)],
@@ -1447,6 +1475,7 @@ const ACHIEVEMENTS = buildCategory({
     // ─── Engagement (time-gated) ───
     {
       id: 't-455',
+      deeplink: '/tasks?frequency=daily&category=ads',
       title: 'Ad Maxer',
       subtitle: 'Watch every daily ad 7 days in a row.',
       rewards: [lc(25), tickets(1), ap(30)],
@@ -1455,6 +1484,7 @@ const ACHIEVEMENTS = buildCategory({
     },
     {
       id: 't-456',
+      deeplink: '/tasks?frequency=daily&category=profile',
       title: '7-day streak',
       subtitle: 'Log in 7 days in a row.',
       rewards: [lc(10), ap(15)],
@@ -1464,6 +1494,7 @@ const ACHIEVEMENTS = buildCategory({
     },
     {
       id: 't-457',
+      deeplink: '/tasks?frequency=daily&category=profile',
       title: '30-day streak',
       subtitle: 'Log in 30 days in a row.',
       rewards: [lc(40), tickets(2), ap(40)],
@@ -1472,6 +1503,7 @@ const ACHIEVEMENTS = buildCategory({
     },
     {
       id: 't-458',
+      deeplink: '/tasks?frequency=daily&category=profile',
       title: '90-day streak',
       subtitle: 'Log in 90 days in a row.',
       rewards: [lc(120), tickets(4), stars(15), ap(80)],
@@ -1480,6 +1512,7 @@ const ACHIEVEMENTS = buildCategory({
     },
     {
       id: 't-459',
+      deeplink: '/tasks?frequency=daily&category=profile',
       title: '365-day streak',
       subtitle: 'A full year of daily logins.',
       rewards: [lc(500), tickets(10), stars(50), ap(150)],

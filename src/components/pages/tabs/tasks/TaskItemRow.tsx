@@ -1,7 +1,6 @@
 'use client';
 
 import { type CSSProperties, useEffect, useLayoutEffect, useRef, useState } from 'react';
-import { useRouter } from 'next/navigation';
 import { Check, ChevronDown, ChevronRight, Clock3, Gift, Lock } from 'lucide-react';
 import { twMerge } from 'tailwind-merge';
 import { useAppTranslations } from '@/hooks/useAppTranslations';
@@ -11,8 +10,8 @@ import { Button } from '@/components/shared/buttons/Button';
 import { TaskCategory, TaskStatus } from '@/types/enums/tasks.enums';
 import { resolveTaskSocialBrand } from '@/utils/pages/task-social.utils';
 import type { Task } from '@/types/interfaces/tasks.interfaces';
-import { type Route } from '@/constants/routes';
-import { openExternalUrl } from '@/lib/telegram/telegram';
+import { useTaskNavigate } from '@/hooks/useTaskNavigate';
+import { taskHasDestination } from '@/utils/pages/task-destination.utils';
 import { TaskCategoryIcon } from './TaskCategoryIcon';
 import { TaskRewardRow } from './TaskRewardRow';
 import { SectionShine } from './SectionShine';
@@ -45,7 +44,7 @@ export interface TaskItemRowProps {
 export function TaskItemRow({ task, onClaim, highlightToken, className, style }: TaskItemRowProps) {
   const t = useAppTranslations();
   const localized = useLocalized();
-  const router = useRouter();
+  const navigateToTask = useTaskNavigate();
   const { leftTime, expired } = useCountDown(task.resetAt);
 
   const [expanded, setExpanded] = useState(false);
@@ -53,7 +52,9 @@ export function TaskItemRow({ task, onClaim, highlightToken, className, style }:
   const isReady = task.status === TaskStatus.READY_TO_CLAIM;
   const isLocked = task.status === TaskStatus.LOCKED;
   const isCompleted = task.status === TaskStatus.COMPLETED;
-  const hasLink = !!(task.deeplink || task.externalLink);
+  // Resolved rather than read off the row: a catalog task can carry no
+  // deeplink, or a bare `/tasks` — the screen it is already on.
+  const hasLink = taskHasDestination(task);
   const socialBrand =
     task.category === TaskCategory.SOCIAL ? resolveTaskSocialBrand(task.externalLink) : null;
   const canNavigate = hasLink && !isLocked && !isCompleted && !isReady;
@@ -143,13 +144,7 @@ export function TaskItemRow({ task, onClaim, highlightToken, className, style }:
   }, [expanded]);
 
   const navigate = () => {
-    if (task.deeplink) {
-      router.push(task.deeplink as Route);
-      return;
-    }
-    if (task.externalLink) {
-      openExternalUrl(task.externalLink);
-    }
+    navigateToTask(task);
   };
 
   const handleClick = () => {
