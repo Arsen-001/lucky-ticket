@@ -12,7 +12,6 @@ import { AdWatchCard } from './AdWatchCard';
 import { AdBuyMoreCard } from './AdBuyMoreCard';
 import { SectionShine } from './SectionShine';
 import { ArrivalShine } from '@/components/shared/ArrivalShine';
-import { ClaimableDot } from '@/components/shared/badges/ClaimableDot';
 
 export interface AdsSectionProps {
   ads?: AdsBlock;
@@ -85,12 +84,9 @@ export function AdsSection({
         <TaskCategoryIcon category={TaskCategory.ADS} size={20} />
         <div className="min-w-0 flex-1">
           <ArrivalShine id="watchVideo" variant="title">
-            <h2 className="flex items-center gap-1.5 text-base leading-tight font-extrabold">
-              <span className="min-w-0 truncate">{t('category ads')}</span>
-              {/* A view left in the day is a reward waiting, so it gets the same
-                  mark as a claimable task — the chips and the tab count it. */}
-              {!!nextSlot && <ClaimableDot label={t('something to claim')} />}
-            </h2>
+            {/* No claim dot here, ever: the card below says «Смотреть». The
+                mark promises a reward for a tap, and a view is a video first. */}
+            <h2 className="text-base leading-tight font-extrabold">{t('category ads')}</h2>
           </ArrivalShine>
           <p className="text-pink-secondary text-[11px]">{t('ads progress', { watched, total })}</p>
         </div>

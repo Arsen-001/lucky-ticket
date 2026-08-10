@@ -27,9 +27,9 @@ import { useAppDispatch } from '@/lib/rtk/hooks';
 import { TaskCategory, TaskFrequency, TaskStatus } from '@/types/enums/tasks.enums';
 import type { AdSlot, Task, TaskSubStep } from '@/types/interfaces/tasks.interfaces';
 import {
-  claimableCountsByFrequency,
   countClaimableAdSlots,
   countClaimableTasks,
+  frequencyTabCounts,
   hasClaimableTask,
   isCategoryVisibleForFrequency,
   tasksForFrequency,
@@ -281,10 +281,11 @@ export function TasksContent() {
     return null;
   };
 
-  // Counts for the frequency tabs — everything collectable in each tab, which
-  // is the same rule the dots on the cards and the one on the tab bar use.
+  // Counts for the frequency tabs — what each tab holds worth opening it for:
+  // everything claimable in it plus the day's remaining ad views. A wider set
+  // than the claim mark, on purpose: a view is watched, not collected.
   const frequencyCounts = useMemo<Record<TaskFrequency, number>>(
-    () => claimableCountsByFrequency(data),
+    () => frequencyTabCounts(data),
     [data]
   );
 

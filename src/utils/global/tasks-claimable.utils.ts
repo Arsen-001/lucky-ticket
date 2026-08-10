@@ -54,7 +54,15 @@ export const countClaimableTasks = (tasks: Task[]): number => tasks.filter(isTas
 
 export const hasClaimableTask = (tasks: Task[]): boolean => tasks.some(isTaskClaimable);
 
-/** An unwatched rewarded-ad slot is a reward waiting to be taken, like a task. */
+/**
+ * Rewarded-ad views left in the day.
+ *
+ * **Not claimable.** A view is work the player has yet to do — its button says
+ * «Смотреть», not «Забрать» — so it belongs in a filter's count of what is
+ * actionable inside a section, and nowhere near the «есть что забрать» mark.
+ * Counted as claimable it would light the tab bar every morning for every
+ * player, which is the same as never lighting it at all.
+ */
 export const countClaimableAdSlots = (data?: TasksResponse): number => {
   if (!data?.ads || data.ads.enabled === false) return 0;
   return data.ads.slots.filter(slot => !slot.watched).length;
@@ -62,7 +70,8 @@ export const countClaimableAdSlots = (data?: TasksResponse): number => {
 
 /**
  * Claimable count per frequency tab — counting only what that tab actually
- * renders, so a category hidden from a tab never inflates its badge.
+ * renders, so a category hidden from a tab never inflates its badge. Tasks
+ * only: see `countClaimableAdSlots` for why ad views are not in here.
  */
 export const claimableCountsByFrequency = (data?: TasksResponse): Record<TaskFrequency, number> => {
   const counts: Record<TaskFrequency, number> = {
@@ -80,6 +89,17 @@ export const claimableCountsByFrequency = (data?: TasksResponse): Record<TaskFre
     });
   });
 
+  return counts;
+};
+
+/**
+ * What each frequency tab has to show for itself: everything claimable in it,
+ * plus the day's remaining ad views. This is the tab's own filter count — the
+ * number of rows worth opening it for — and deliberately a wider set than the
+ * claim mark above, which is why the tabs carry a figure and not a dot.
+ */
+export const frequencyTabCounts = (data?: TasksResponse): Record<TaskFrequency, number> => {
+  const counts = claimableCountsByFrequency(data);
   counts[TaskFrequency.DAILY] += countClaimableAdSlots(data);
   return counts;
 };
