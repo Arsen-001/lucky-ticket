@@ -1394,13 +1394,14 @@ The one-time tab holds a curated catalog of **~120 tasks** whose reward budget i
 | Start stakes               | 3/5/10/15/20/30            | stakes of any tier   |
 | Stake volume               | 10k/50k/200k/500k/2M/5M LC | lifetime locked LC   |
 | Invite friends             | 1/5/10/25/50/100           | referral joins       |
-| Leaderboard rank           | top 1000/500/100/50/10/1   | all-time board only  |
 | Purchase Stars             | 100/250/500/1k/2.5k/5k     | cashback chain, 0 AP |
 | VIP level                  | 1–20                       | cashback chain, 0 AP |
 
 Plus ~35 single achievements: onboarding (email, username, 2FA, avatar, wallet, deposit), first steps, engine mastery (tier unlocks in ascending order, parallel producer, boosts), tournament prowess (project/partner wins, all-tier winner, Platinum/Diamond winner), referrals, wallet actions, login streaks (7/30/90/365), and the tier journey.
 
 Deliberately **removed** in the rebalance (multi-dipping or stale old-economy scale): the 2nd/3rd-place chains, all per-tier tournament chains, per-tier engine/ticket/stake chains, daily/weekly/monthly leaderboard chains, the star-earn chain, the “10K/100K/1M AP” achievements (replaced by Reach Silver/Gold/Platinum), and duplicate achievements for email/wallet/deposit/status actions.
+
+**Switched off, not removed — the all-time leaderboard rank chain** (top 1000/500/100/50/10/1). Since **2026-08-10** the six tasks are commented out of the catalog and of the mock fixture, so the Leaderboard category does not appear in the one-time tab at all. Two reasons: they deep-link to a screen that renders locked while `leaderboardEnabled` is off (§13), and rank counts **down** — on the closed-test player base every player already sits inside top-1000/500/100, so the first three steps paid for standing still. They come back **together with the board**, by uncommenting both blocks (grep `LEADERBOARD TASKS OFF`); the boot sync then re-upserts them verbatim. The catalog is **113 one-time tasks** without them.
 
 The catalog is **code-canonical**: the backend upserts it on every boot (code wins over DB/admin edits to seeded tasks — same policy as market ladder prices and periodic task AP) and deletes seeded tasks that were removed from the catalog. Admin-created tasks (UUID ids) are never touched.
 
@@ -1427,7 +1428,8 @@ The whole board sits behind an admin toggle (`GET /config` → `leaderboardEnabl
 
 - the drawer entry renders locked ("Скоро", same treatment as the partners cabinet);
 - the profile's Leaderboard card still shows **the player's own** Activity Points and rank, but leads nowhere and carries an "opens after the test period" note;
-- `/leaderboard` renders the locked screen instead of the standings, and the leaderboard query is **not fired at all**.
+- `/leaderboard` renders the locked screen instead of the standings, and the leaderboard query is **not fired at all**;
+- the **all-time rank task chain is out of the catalog** (§12.6, since 2026-08-10) — the Leaderboard category is absent from the one-time tab rather than pointing six tasks at a locked screen. Unlike the three above, this one is **not** driven by the toggle: it is commented out in code (`milestones.data.ts` + `src/mock/tasks.mock.ts`, grep `LEADERBOARD TASKS OFF`), so opening the board is an admin toggle **plus** one deploy of both repos if the chain is wanted back the same day.
 
 Rationale: during the closed beta the standings cover a handful of testers, so publishing them would read as the real ranking. Ranking keeps accruing throughout — only the display waits. The switch defaults to **off**; flipping it on is an admin action, not a redeploy.
 
@@ -2341,7 +2343,7 @@ A completed stake (no early cancellation — Section 18) pays a **guaranteed** L
 
 #### Task Completion
 
-Stars come from **one-time milestone tasks only**, in fixed amounts printed on the task itself — there is no randomness anywhere in task rewards. 36 of the ~119 one-time tasks carry an LS reward, **845 LS across the whole catalog**: the friend chain below, all-time leaderboard ranks, the star-purchase and VIP-level ladders, and the long-haul counters (800 ads watched, 50,000 tickets collected, 30 stakes).
+Stars come from **one-time milestone tasks only**, in fixed amounts printed on the task itself — there is no randomness anywhere in task rewards. 32 of the 113 one-time tasks carry an LS reward, **745 LS across the whole catalog**: the friend chain below, the star-purchase and VIP-level ladders, and the long-haul counters (800 ads watched, 50,000 tickets collected, 30 stakes). The all-time leaderboard ranks used to add another 100 LS; they are switched off with the board (§12.6) and return with it.
 
 **Daily and weekly tasks pay LC, AP and tickets — never stars.** Measured against the catalog on 2026-08-10: the 8 daily tasks pay **2,300 LC + 18 AP + 1 ticket** a day between them, the 7 weekly ones **21,000 LC + 24 AP + 13 tickets** a week, and zero LS in either column. (A player never sees all 8 dailies at once — the set is tier-gated to 3–7, so those are ceilings, not takings.)
 

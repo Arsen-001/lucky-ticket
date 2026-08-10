@@ -748,9 +748,19 @@ const TOURNAMENTS = buildCategory({
 });
 
 // ───────────────── LEADERBOARD ─────────────────
+// LEADERBOARD TASKS OFF (2026-08-10) — the all-time rank chain is switched off
+// for as long as the public board is gated (`appConfig.leaderboard.enabled` /
+// `GET /config` → `leaderboardEnabled`, DOCS §13): the tasks deep-link to a
+// screen that renders locked, and rank counts down, so on the closed-test
+// player base everyone already sits inside top-1000/500/100. The backend
+// catalog is commented out in the same breath (milestones.data.ts) — this
+// fixture only keeps dev honest with it. Uncomment both when the board opens;
+// grep `LEADERBOARD TASKS OFF`.
+//
 // Four time-period sliders: daily / weekly / monthly / all-time.
 // Same rank ladder (1000 → #1) for each, with rewards scaled by period
 // difficulty (all-time is hardest to crack, so it pays the most).
+/*
 type LeaderboardMilestone = { rank: number; rewards: TaskReward[]; rarity: TaskRarity };
 
 // 2026-07 rebalance: one prestige chain on the all-time board (daily/weekly/
@@ -776,6 +786,7 @@ const LEADERBOARD = buildCategory({
     rarity: m.rarity,
   })),
 });
+*/
 
 // ───────────────── SOCIAL ─────────────────
 const SOCIAL_PLATFORMS = [
@@ -1538,7 +1549,7 @@ const computeDailyProgress = (categories: CategoryTasks[]) => {
 const CATEGORIES: CategoryTasks[] = [
   ADS,
   TOURNAMENTS,
-  LEADERBOARD,
+  // LEADERBOARD TASKS OFF (2026-08-10) — LEADERBOARD,
   SOCIAL,
   PROFILE,
   FRIENDS,
