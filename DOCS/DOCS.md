@@ -1063,7 +1063,7 @@ When a tournament transitions to `finished`, every participant's reward is compu
 
 **Notification & result popup:**
 
-When a tournament finishes, every participant receives an in-app notification with their final placement and reward, deep-linked back to the tournament. Winners additionally get a Telegram DM (gated by the **Tournament end** toggle, Section 16.2); players who won nothing get the feed row only — four draws a day times a full roster of "you finished #312" is how a bot gets muted. A **Tournament start** reminder goes out ~10 minutes before the draw, to everyone entered, once per tournament.
+When a tournament finishes, every participant receives an in-app notification with their final placement and reward, deep-linked back to the tournament, plus a Telegram DM gated by the **Tournament end** toggle (Section 16.2). Winners and non-winners get different texts — congratulations against "the next draw is already open" — each editable on its own in the panel. This is the loudest thing the bot does (four draws a day times a full roster), which is exactly what the toggle is for. A **Tournament start** reminder goes out ~10 minutes before the draw, to everyone entered, once per tournament.
 
 When the user opens the finished tournament's detail page, a **result popup** auto-appears once:
 
@@ -1225,13 +1225,9 @@ when that tier has at least one bracket still accepting entries**, or when the
 player already entered it this period — the second half matters because progress
 is derived from live participation, so without it a player who entered the only
 Silver bracket at 11:00 would watch the task and their unclaimed reward vanish
-the moment it was drawn. The two **meta** tasks ("complete all available
-tournament tasks", daily and weekly) follow the same set: a tier that is not
-running contributes no sub-step, and the target becomes the sum of the running
-tiers' own targets — 4 a day rather than the stored 8 while Bronze is the only
-tier alive (×7 for the weekly one). With nothing running at all, both meta tasks
-disappear rather than fall to a target of 0 that would pay out for doing nothing.
-The same numbers gate the claim, so the card and the server cannot disagree.
+the moment it was drawn. The same visibility rule decides what the all-set
+bonus (§12.4) sweeps, and the same numbers gate the claim, so the card and the
+server cannot disagree.
 
 **Sub-steps are a counter, not a schedule.** A daily/weekly task whose target is
 greater than 1 expands into `progressTarget` sub-steps, each claimable on its own
@@ -1244,9 +1240,10 @@ labels hid: all four daily Bronze brackets are `UPCOMING` at the same time
 (§11.2.1), so the "4 Bronze tournaments" task is finished in one sitting rather
 than four visits, and it is credited **on entry** — `TournamentParticipation.joinedAt`
 inside the current UTC day — not when the tournament is drawn. Task copy says
-"join" in every language for that reason. The meta "complete all tournament tasks"
-task is the exception that keeps named steps (Bronze … Diamond), because there each
-step really is one specific tier's task.
+"join" in every language for that reason. The all-set bonus (§12.4) is the one
+exception that keeps named steps, because there each step really is one specific
+other task — it lists them by title, and those rows are **read-only**: they are
+claimed on their own cards.
 
 **Reset timing & countdowns.** Daily tasks reset at **00:00 UTC**; weekly tasks reset **Monday 00:00 UTC**; the rewarded-ads block resets with the daily boundary. The backend stamps every daily/weekly task (and the ads block) with `resetAt` — the exact period boundary — and the UI renders live countdowns from it: a small timer on each task card/row (kept on completed tasks to show when they re-open), a period-level "Next reset in …" line under the Daily/Weekly frequency tabs, and the ads-section timer. One-time tasks never reset and show no countdown.
 
@@ -1262,6 +1259,8 @@ Tasks guide user behavior and include actions such as:
 - Sharing content on social media.
 - Daily / weekly check-ins.
 
+**The daily set a brand-new account sees.** Four cards plus the ads block: join the day's Bronze brackets (`task-daily-bronze`), claim what the starter engine produced (`t-246`, counter `daily_tickets`), watch 3 rewarded ads (`task-daily-ads`, counter `daily_ads`), the channel check-in (`t-258`), and the all-set bonus over the other three (§12.4). Every one of them is driven by a live counter — produce → play → watch → subscribe. `t-246` used to be "Share your daily result", which had no share mechanic anywhere in the app, no external link and a deeplink pointing at the tasks screen it already sat on: an always-claimable button worth 1 AP a day for a tap. It was repurposed rather than deleted, because the day needs an action a zero-balance account can always take, and its engine is already running.
+
 **Daily channel check-in (subscription-gated).** The daily check-in task is completed by **staying subscribed to the official Telegram channel** (`TELEGRAM_CHANNEL_ID`, default `@luckyticket365`) rather than a bare tap. The backend drives its progress from a live `getChatMember` check (exposed as the `channel_subscribed` 0/1 counter), cached ~60s per player so the tasks screen never fires a live lookup on every fetch. While the player is not subscribed the task shows **in-progress** with an "open channel" affordance; once subscribed it becomes claimable and grants its Activity Point like any daily task, re-opening at the next 00:00 UTC reset. The check is **strict since 2026-08-04** (it used to fail open): only a confirmed subscription completes the task. An account Telegram will not resolve against the channel — how it answers about someone who was never in it — is not subscribed, and neither is one we could not ask about at all (bot unconfigured, synthetic/seed account, a 429). The old fail-open quietly meant "the gate is off" for exactly the accounts it existed to stop; the cost of the new rule is that a Telegram outage leaves the check-in incomplete for everyone until it answers again, which costs the player nothing — the task re-opens at the next reset. Same rule for the Test-Quest channel gate and promo redemption.
 
 The cached lookup lives in one place (`ChannelMembershipService`) and is shared by every channel gate — this check-in, the promo-code gate (§17.6), and the beta Test-Quest daily claim. One shared answer means the gates cannot disagree inside the cache window, a single screen refresh fires at most one `getChatMember`, and the Test-Quest's "I subscribed, check again" button opens all of them at once.
@@ -1274,7 +1273,14 @@ A bot **cannot grant, buy or transfer a boost** — Bot API exposes no such meth
 
 ### 12.4 All-Tasks Completion Bonus
 
-When a user completes **all tasks** within a given category (Daily or Weekly — there is no Monthly set), they receive an extra gift in addition to the individual task rewards. This bonus is separate from the per-task rewards and is awarded automatically upon finishing the last task in the set.
+When a user completes **every task of a period** (Daily or Weekly — there is no Monthly set), they receive an extra gift on top of the individual task rewards. It is one card per period (`t-70` daily, `t-71` weekly), pinned **above** the list rather than filed under a category, because its condition is the other cards on the screen.
+
+- **Target = the player's own list.** Every other task of that frequency that is actually visible to them counts — the tournament entries their tier can reach, the channel check-in, the engine claim, the ads task. A tier with no open bracket contributes nothing, since it is not on their list to begin with (§12.2).
+- **A member counts as done when its condition is met**, claimed or merely claimable. Requiring it to be unclaimed would make the bonus unreachable for anyone who collects as they go.
+- **The sub-steps are a read-only checklist** — each row is another task with its own reward on its own card. The server sends them with `claimable: false` and rejects a sub-step claim on this task, so nothing is paid twice.
+- **It hides itself below two other tasks in the period.** A "bonus" over a single task is that task's reward paid a second time.
+
+This is what the task was always documented to be and, until 2026-08-10, never was. It shipped as "complete all available **tournament** tasks": it counted tournament entries against the sum of the running tiers' targets, so with Bronze the only auto-spawned tier its condition was _literally_ `task-daily-bronze`'s — the same four entries, for 600 LC on top of that task's 100 — the daily check-in did not count towards the "all" in its title, and as a tier-less tournament row it drew the **Gold** medal as a fallback, advertising a rank it never had. The counter is `daily_all_tasks` / `weekly_all_tasks`, computed per request from the player's visible list (`TasksService.allSetState`) since no stored counter can express "all of today's tasks" — it is a different set for every player, on every day.
 
 ### 12.5 Ads Watch Milestones
 
@@ -1763,18 +1769,22 @@ the LC / Lucky Stars histories.
 
 ### 16.2 Notification Preferences
 
-Two channels are supported: **Email** and **Telegram bot**. Each channel has its own independent set of category toggles. Categories cover the high-signal events:
+Two channels are supported: **Telegram bot** (first, and the one that actually delivers) and **Email**. Each channel has its own independent set of category toggles, and the tab carries a count of how many of its categories are on. The list is every category the game writes to a player — there is nothing the bot says that the settings screen does not name:
 
-- **Tournament start** — fires ~10 minutes before a joined tournament begins.
-- **Tournament end** — fires after final places are announced.
-- **Staking ready** — fires when a stake is mature and ready to claim.
-- **System** — security, status, and account-related alerts.
+- **Tournament start** — ~10 minutes before a joined tournament begins.
+- **Tournament end** — after the draw, to every participant: their place, and the prize if there was one.
+- **Tournament invites** — when a friend calls the player into a tournament (§17.3.3).
+- **Staking ready** — when a stake is mature and waiting to be claimed.
+- **Gifts** — when another player sends tickets.
+- **Friends joined** — when somebody signs up through the player's invite link, with the reward that was credited.
+- **Achievements** — when a new badge unlocks (one DM even when several settle at once).
+- **News and announcements** — admin broadcasts from the panel.
 
-Toggles are saved instantly (no submit button). Categories not listed here are not exposed as user-toggleable preferences.
+Toggles are saved instantly (no submit button). The list is kept one-for-one with `DEFAULT_PREFS` in `notifications.service.ts`: a row with no send site behind it is a switch that lies, and a send site with no row is a message the player cannot turn off.
 
-**What a toggle actually silences.** The wording is exact: a toggle controls the **email and Telegram bot** channels, never the in-app feed. The notifications screen is an inbox — muting a category there would delete the player's own history of it, which is worse than the noise it saves — so the feed row is always written and the toggle only decides whether a bot DM goes out beside it. A category with no DM behind it (an admin announcement, a referral, an achievement) is feed-only whatever the toggle says.
+**What a toggle actually silences.** The wording is exact: a toggle controls the **email and Telegram bot** channels, never the in-app feed. The notifications screen is an inbox — muting a category there would delete the player's own history of it, which is worse than the noise it saves — so the feed row is always written and the toggle only decides whether a bot DM goes out beside it.
 
-**Wired as of 2026-08-05:** Telegram DMs exist for **Tournament start**, **Tournament end** (winners only), **Staking ready** and **Gifts**, and each is gated by its own toggle. The **Email** channel has no sender behind it at all — the toggles persist, but no email is ever dispatched, and the column stays in the UI for the day one exists. **System** has no DM either; it is feed-only.
+**Wired as of 2026-08-10:** every category above has a Telegram DM behind it, gated by its own toggle, and the text of each is admin-editable (Bot → «Сообщения игрокам»). Two of them are new-loudest: tournament results now DM the whole roster rather than winners only (four draws a day, so its toggle is the one that keeps the bot bearable), and an admin broadcast now skips anyone who switched **News and announcements** off — `recipientsCount` still records the size of the chosen audience, `deliveredCount` is what says how many were written to. The **Email** channel has no sender behind it at all: the toggles persist, no email is ever dispatched, and the tab stays in the UI for the day one exists.
 
 **Language.** System notifications are rendered in the recipient's account language at the moment they are written, and stored that way — the same rule the bot DMs already followed. Switching language afterwards does not retranslate notifications already delivered.
 
@@ -1852,7 +1862,7 @@ The recipient's language is **not** available at any point and never can be: `sa
 
 **Referral Benefits:**
 
-- **Signup Reward:** The moment a referred friend registers, the inviter is credited a one-off reward — **10 AP + 1 Lucky Star**, the same for every invited friend. It used to double to 20 AP + 2 Lucky Stars for a **Telegram Premium** invitee; that priced a friend by something the inviter cannot influence — whether the person they happen to know pays Telegram — and made an ordinary friend read as the lesser catch. The doubling is gone from both the screen (one line: what an invite pays) and the mechanic. `referralConfig.signup.premiumAp` / `.premiumStars` still exist, hold the same values as the flat pair and are read by nothing; they survive so a config written before the change still round-trips through an admin save. This is granted instantly (unlike the tournament reward below, which accumulates and must be claimed). It is **not** conditioned on the friend qualifying as a referral — at registration nobody has joined a channel yet, and the payment cannot wait for a verdict that does not exist.
+- **Signup Reward:** The moment a referred friend registers, the inviter is credited a one-off reward — **10 AP + 1 Lucky Star**, the same for every invited friend. It used to double to 20 AP + 2 Lucky Stars for a **Telegram Premium** invitee; that priced a friend by something the inviter cannot influence — whether the person they happen to know pays Telegram — and made an ordinary friend read as the lesser catch. The doubling is gone from both the screen (one line: what an invite pays) and the mechanic. `referralConfig.signup.premiumAp` / `.premiumStars` still exist, hold the same values as the flat pair and are read by nothing; they survive so a config written before the change still round-trips through an admin save. This is granted instantly (unlike the tournament reward below, which accumulates and must be claimed). It is **not** conditioned on the friend qualifying as a referral — at registration nobody has joined a channel yet, and the payment cannot wait for a verdict that does not exist. The inviter is told twice: a feed row, and a Telegram DM naming what was credited, gated by their **Friends joined** toggle (§16.2) — a reward only visible to someone who already opened the app cannot pull anybody back into it.
 - **Per-invite reward ladder (admin-controlled):** the admin can replace the flat signup reward with a ladder (panel → Настройки → Рефералка → «Награды по номеру друга»): the N-th invited friend grants ladder entry N — any mix of AP, LC, Stars, and tickets of a chosen tier — cycling back to the first entry once invites outrun the ladder. While a ladder is set it applies to all invitees (the Premium doubling does not apply); clearing the ladder restores the flat signup reward.
 
 The ongoing half is a cut of what a friend WINS:
@@ -1973,7 +1983,7 @@ When viewing another user's profile, the following actions are available (typica
   - **Daily limit per recipient, by tier.** Bronze / Silver / Gold are sendable by everyone — **1 each per day** to a given player. **Platinum and Diamond require Lucky Player status.**
   - With **Lucky Player**, the per-recipient daily limits rise to **Bronze 5 / Silver 4 / Gold 3 / Platinum 2 / Diamond 1**.
   - The free table is `TICKET_SEND_DAILY_LIMITS.default`; a status adds `statusPerks.ticketSendDailyBonus` on top (§7.3).
-- **Invite to Tournament** — opens a picker of upcoming tournaments and sends the target an in-app invite (a notification carrying a deep link to that tournament).
+- **Invite to Tournament** — opens a picker of upcoming tournaments and sends the target an in-app invite (a notification carrying a deep link to that tournament), plus a Telegram DM gated by the invited player's **Tournament invites** toggle (§16.2). An invite that waits for its target to next open the app is an invite to a tournament that has already started.
   - **Only one's own referrals can be invited.** The action is offered exclusively on the profile of a player who joined through the viewer's link; on anyone else — a stranger from the leaderboard, a shared profile link — the button is **not rendered at all**, and `POST profile/invite-tournament` answers **403 `{ error: 'not-your-referral' }`** if it is called anyway. The gate is on the invited person, not on the tournament: what a player can invite to is every upcoming tournament, whom they can invite is only the people they brought into the game.
   - The button is absent rather than disabled on purpose. Referral attribution is frozen at the invitee's first sign-in (§17.2) — a player who is not already your referral can never become one — so a greyed-out button would promise an unlock that nothing the viewer does can deliver. This is the opposite of the wallet invite gates (§16.4), which are shown locked precisely because inviting more friends does open them.
   - `GET profile/:id` carries the verdict as **`isMyReferral`** so the Mini App never draws an action the API is about to refuse. It is false on one's own profile.
@@ -2136,6 +2146,8 @@ When a user earns a new badge, the platform notifies them:
 
 - **Common / Rare:** in-app toast with the badge thumbnail
 - **Epic+:** full-screen celebration modal with the badge animation, particle burst, and a CTA to view detail or pin to showcase
+
+Alongside the in-app surface, a feed row is written per badge and **one** Telegram DM goes out, gated by the **Achievements** toggle (§16.2) — one badge names it, several report the count. A first visit can settle a dozen at once, and a dozen DMs for one visit is how a bot gets muted.
 
 #### Connections
 

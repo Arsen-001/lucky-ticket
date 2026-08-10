@@ -42,12 +42,21 @@ export interface NotificationsSummary {
 
 export type NotificationChannel = 'email' | 'telegram';
 
+/**
+ * One key per thing the game tells a player about — the settings screen renders
+ * exactly this list. Every key is gated at a real send site on the backend
+ * (`DEFAULT_PREFS` in `notifications.service.ts`); a key with nothing behind it
+ * would be a switch that lies.
+ */
 export type NotificationPreferenceKey =
   | 'tournamentStart'
   | 'tournamentEnd'
+  | 'invites'
   | 'stake'
-  | 'system'
-  | 'gifts';
+  | 'gifts'
+  | 'friends'
+  | 'achievements'
+  | 'system';
 
 export type NotificationPreferences = Record<
   NotificationChannel,
