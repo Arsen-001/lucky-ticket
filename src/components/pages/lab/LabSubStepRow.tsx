@@ -4,6 +4,7 @@ import { Check, ChevronRight, Circle, Gift } from 'lucide-react';
 import { twMerge } from 'tailwind-merge';
 import { TaskRewardBadge } from '@/components/pages/tabs/tasks/TaskRewardBadge';
 import { useAppTranslations } from '@/hooks/useAppTranslations';
+import { useLocalized } from '@/hooks/useLocalized';
 import type { TaskSubStep } from '@/types/interfaces/tasks.interfaces';
 
 export interface LabSubStepRowProps {
@@ -24,6 +25,8 @@ export interface LabSubStepRowProps {
  */
 export function LabSubStepRow({ step, claimed, onClaim, onNavigate }: LabSubStepRowProps) {
   const t = useAppTranslations();
+  const localized = useLocalized();
+  const label = localized(step.label);
   const isClaimable = step.completed && !claimed;
   const isFullyClaimed = step.completed && claimed;
   const isPending = !step.completed;
@@ -75,7 +78,7 @@ export function LabSubStepRow({ step, claimed, onClaim, onNavigate }: LabSubStep
         <Circle size={18} className="shrink-0 text-white/30" />
       )}
 
-      {step.label ? (
+      {label ? (
         <span
           className={twMerge(
             'flex-1 truncate text-xs font-semibold',
@@ -84,7 +87,7 @@ export function LabSubStepRow({ step, claimed, onClaim, onNavigate }: LabSubStep
             !step.completed && 'text-white/60'
           )}
         >
-          {step.label}
+          {label}
         </span>
       ) : (
         <div className="flex-1" />

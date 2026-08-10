@@ -44,6 +44,7 @@ import { Skeleton } from '@/components/shared/seleketons/Skeleton';
 import { TasksFrequencyTabs } from './TasksFrequencyTabs';
 import { TasksCategoryNav, type CategoryNavItem } from './TasksCategoryNav';
 import { TasksCategorySection } from './TasksCategorySection';
+import { AllSetBonusCard } from './AllSetBonusCard';
 import { TournamentMilestoneSlider } from './TournamentMilestoneSlider';
 import { AdsSection } from './AdsSection';
 import { AdUnavailableModal, type AdUnavailableReason } from './AdUnavailableModal';
@@ -306,14 +307,11 @@ export function TasksContent() {
     const items: CategoryNavItem[] = [];
     if (!data) return items;
 
-    if (
+    const showAdsBlockChip =
       activeFrequency === TaskFrequency.DAILY &&
-      data.ads &&
+      !!data.ads &&
       data.ads.enabled !== false &&
-      data.ads.slots.length
-    ) {
-      items.push({ category: TaskCategory.ADS, readyCount: countClaimableAdSlots(data) });
-    }
+      !!data.ads.slots.length;
     const categoryItems: CategoryNavItem[] = [];
     const adsEnabled = data.ads?.enabled !== false;
     data.categories.forEach(cat => {
@@ -322,8 +320,22 @@ export function TasksContent() {
       if (!isCategoryVisibleForFrequency(cat.category, activeFrequency, adsEnabled)) return;
       const tasks = tasksForFrequency(cat, activeFrequency);
       if (!tasks.length) return;
+      // One chip per category, always. The daily rewarded-ads block gets its
+      // own chip, and the Ads category now also holds a daily task ("watch 3
+      // ads") — two chips reading "Ads", with the same React key and two
+      // scroll anchors a few hundred pixels apart. They are one destination to
+      // a player, so they are one chip carrying both counts.
+      if (cat.category === TaskCategory.ADS && showAdsBlockChip) return;
       categoryItems.push({ category: cat.category, readyCount: countClaimableTasks(tasks) });
     });
+    if (showAdsBlockChip) {
+      const adsCategory = data.categories.find(c => c.category === TaskCategory.ADS);
+      const adsTasks = adsCategory ? tasksForFrequency(adsCategory, activeFrequency) : [];
+      items.push({
+        category: TaskCategory.ADS,
+        readyCount: countClaimableAdSlots(data) + countClaimableTasks(adsTasks),
+      });
+    }
     items.push(...sortByCategoryOrder(categoryItems));
     return items;
   }, [data, activeFrequency]);
@@ -485,7 +497,12 @@ export function TasksContent() {
   const markTaskClaimed = (id: string, subStepIds?: string[]) => {
     dispatch(
       tasksApi.util.updateQueryData('getTasks', undefined, draft => {
-        for (const cat of draft.categories) {
+        // The all-set bonuses live outside `categories` — patch them too, or
+        // their card keeps reading "Claim" until the refetch lands.
+        const allSetTasks = [draft.allSet?.daily, draft.allSet?.weekly].filter(
+          (task): task is Task => !!task
+        );
+        for (const cat of [...draft.categories, { daily: allSetTasks, weekly: [], once: [] }]) {
           for (const list of [cat.daily, cat.weekly, cat.once]) {
             const task = list.find(item => item.id === id);
             if (!task) continue;
@@ -673,7 +690,26 @@ export function TasksContent() {
     )
   );
 
-  const allEmpty = !showAds && visibleCategories.length === 0;
+  // The period's completion bonus (DOCS §12.4), pinned above the list — it
+  // sweeps every other task of the period, so it belongs to no category. Absent
+  // on the one-time tab, and on a period too thin to hold a bonus.
+  const allSetBonus =
+    activeFrequency === TaskFrequency.DAILY
+      ? (data?.allSet?.daily ?? null)
+      : activeFrequency === TaskFrequency.WEEKLY
+        ? (data?.allSet?.weekly ?? null)
+        : null;
+
+  const allEmpty = !showAds && !allSetBonus && visibleCategories.length === 0;
+
+  /**
+   * Scroll anchor for a category chip. On the daily tab the Ads chip must land
+   * on the rewarded-ads block — the Ads *category* section renders right below
+   * it (the "watch 3 ads" task) and would otherwise overwrite the anchor,
+   * scrolling the block the player tapped for off the top of the screen.
+   */
+  const sectionRegistrarFor = (category: TaskCategory) =>
+    category === TaskCategory.ADS && showAds ? () => {} : registerSection;
 
   return (
     <div className="flex flex-col pt-3">
@@ -702,6 +738,14 @@ export function TasksContent() {
         <EmptyAllDone frequency={activeFrequency} resetAt={periodResetAt} />
       ) : (
         <div key={activeFrequency} className="flex flex-col">
+          {allSetBonus && (
+            <AllSetBonusCard
+              task={allSetBonus}
+              onClaim={handleClaimTask}
+              loading={pendingClaim.id === allSetBonus.id && pendingClaim.status === 'pending'}
+            />
+          )}
+
           {showAds && data?.ads && (
             <AdsSection
               ads={data.ads}
@@ -835,7 +879,7 @@ export function TasksContent() {
                 tasks={regularTasks}
                 onClaim={handleClaimTask}
                 onClaimSubStep={handleClaimSubStep}
-                registerSection={registerSection}
+                registerSection={sectionRegistrarFor(cat.category)}
                 emptyHint={t('no tasks here yet')}
                 // Every task of the category, not just the rows below the
                 // header: the milestone chains render through `topSlot`.

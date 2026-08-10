@@ -79,9 +79,16 @@ function SubStepRow({
   onNavigate?: () => void;
 }) {
   const t = useAppTranslations();
-  const isClaimable = step.completed && !claimed;
-  const isFullyClaimed = step.completed && claimed;
+  const localized = useLocalized();
+  // A read-only row (the all-set bonus lists the period's other tasks) carries
+  // no reward of its own — those hang on the member tasks' own cards — so it
+  // shows as done or pending and never as claimable.
+  const isReadOnly = step.claimable === false;
+  const isClaimable = step.completed && !claimed && !isReadOnly;
+  const isFullyClaimed = step.completed && claimed && !isReadOnly;
+  const isDone = step.completed && isReadOnly;
   const isPending = !step.completed;
+  const label = localized(step.label);
   const canNavigate = isPending && !!onNavigate;
   const rowAction = isClaimable ? onClaim : canNavigate ? onNavigate : undefined;
   const isInteractive = !!rowAction;
@@ -113,12 +120,12 @@ function SubStepRow({
         'flex items-center gap-2.5 rounded-lg px-2.5 py-1.5 transition-all',
         isClaimable &&
           'bg-pink/10 border border-pink/20 cursor-pointer active:scale-[0.99] hover:bg-pink/15',
-        isFullyClaimed && 'bg-success/10',
+        (isFullyClaimed || isDone) && 'bg-success/10',
         isPending && 'bg-white/5',
         canNavigate && 'cursor-pointer active:scale-[0.99] hover:bg-white/10'
       )}
     >
-      {isFullyClaimed ? (
+      {isFullyClaimed || isDone ? (
         <div className="flex-center w-5 h-5 rounded-full bg-success/30 shrink-0">
           <Check size={11} className="text-success" />
         </div>
@@ -129,21 +136,21 @@ function SubStepRow({
       ) : (
         <Circle size={18} className="text-white/30 shrink-0" />
       )}
-      {step.label ? (
+      {label ? (
         <span
           className={twMerge(
             'text-xs font-semibold flex-1 truncate',
             isFullyClaimed && 'text-white/50',
-            isClaimable && 'text-white',
+            (isClaimable || isDone) && 'text-white',
             !step.completed && 'text-white/60'
           )}
         >
-          {step.label}
+          {label}
         </span>
       ) : (
         <div className="flex-1" />
       )}
-      {step.reward && !isFullyClaimed && (
+      {step.reward && !isFullyClaimed && !isReadOnly && (
         <TaskRewardBadge reward={step.reward} tier={tier} size="sm" />
       )}
       {isPending && onNavigate && (
@@ -430,12 +437,16 @@ export function TaskItemCard({
         >
           <div className="flex items-start gap-3">
             <div className="relative shrink-0">
-              {task.category === TaskCategory.TOURNAMENTS && task.tier ? (
+              {/* A medal only for a task that really belongs to a tier. `all`
+                  used to fall back to the Gold medal, so the "complete all
+                  tournament tasks" card wore a Gold badge while asking for
+                  Bronze entries — a rank the task never had. */}
+              {task.category === TaskCategory.TOURNAMENTS && task.tier && task.tier !== 'all' ? (
                 <Medal
                   className="drop-shadow-lg drop-shadow-black/40"
                   width={56}
                   height={56}
-                  type={(task.tier === 'all' ? 'gold' : task.tier) as MedalType}
+                  type={task.tier as MedalType}
                 />
               ) : task.category === TaskCategory.SOCIAL &&
                 resolveTaskSocialBrand(task.externalLink) ? (

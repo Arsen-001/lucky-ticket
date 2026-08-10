@@ -326,6 +326,29 @@ const ADS_WATCH_MILESTONES: AdsMilestone[] = [
 
 const ADS = buildCategory({
   category: TaskCategory.ADS,
+  daily: [
+    {
+      id: 'task-daily-ads',
+      title: {
+        en: 'Watch 3 ads today',
+        hy: 'Watch 3 ads today',
+        ru: 'Посмотри 3 рекламы сегодня',
+        de: 'Sieh dir heute 3 Werbevideos an',
+      },
+      subtitle: {
+        en: 'Any rewarded view from the block above counts.',
+        hy: 'Any rewarded view from the block above counts.',
+        ru: 'Считается любой ролик из блока выше.',
+        de: 'Jedes Belohnungsvideo aus dem Block oben zählt.',
+      },
+      rewards: [lc(1.5), ap(10)],
+      // Re-synced from the live ads block on every response — see
+      // `syncAdsTaskProgress`; watching an ad has to move this card too.
+      progress: { current: Math.min(ADS_CONFIG.watchedToday, 3), target: 3 },
+      deeplink: '/tasks?frequency=daily&category=ads',
+      rarity: TaskRarity.BRONZE,
+    },
+  ],
   once: ADS_WATCH_MILESTONES.map(m => ({
     id: `ads-watch-${m.target}`,
     // Localized, unlike the rest of this mock: the backend now serves task copy
@@ -568,43 +591,89 @@ const buildWeeklyTierTask = (cfg: TierTournamentConfig): Task => {
   });
 };
 
-// ───────────────── MASTER TASKS (derived from TIER_CONFIGS) ─────────────────
-const WEEKLY_TIER_TARGET = 7;
-const MASTER_SUBSTEP_AP = 5;
-const WEEKLY_MASTER_SUBSTEP_AP = 20;
+// ───────────── ALL-SET COMPLETION BONUS (DOCS §12.4) ─────────────
+// One per period, and its condition is the OTHER tasks of that period — so it
+// is assembled from the live list at response time, not from a fixture. Mirrors
+// TasksService.allSetState, including the rule that hides it when the period
+// holds fewer than two other tasks (a "bonus" over one task is that task's
+// reward paid twice — the bug this replaced).
+const ALL_SET_MIN_MEMBERS = 2;
 
-const unlockedConfigs = () => TIER_CONFIGS.filter(c => isTierUnlocked(c.tier));
-
-const buildMasterSubSteps = () =>
-  unlockedConfigs().map(c => ({
-    id: nextId(`all-${c.tier}`),
-    label: `${cap(c.tier)} · ${c.daily.progress.current}/${c.daily.progress.target}`,
-    completed: c.daily.progress.current >= c.daily.progress.target,
-    claimed: false,
-    reward: ap(MASTER_SUBSTEP_AP),
-  }));
-
-const buildMasterProgress = () => {
-  const unlocked = unlockedConfigs();
-  const target = unlocked.reduce((sum, c) => sum + c.daily.progress.target, 0) || 1;
-  const current = unlocked.reduce((sum, c) => sum + c.daily.progress.current, 0);
-  return { current, target };
+const ALL_SET_BONUSES: Record<'daily' | 'weekly', Task> = {
+  daily: baseTask({
+    id: 't-70',
+    category: TaskCategory.QUEST,
+    frequency: TaskFrequency.DAILY,
+    title: {
+      en: 'Complete every daily task',
+      hy: 'Complete every daily task',
+      ru: 'Выполни все задания дня',
+      de: 'Erledige alle Tagesaufgaben',
+    },
+    subtitle: {
+      en: 'The full-day bonus: finish every other daily task on this screen.',
+      hy: 'The full-day bonus: finish every other daily task on this screen.',
+      ru: 'Бонус за полный день: выполни все остальные дневные задания на этом экране.',
+      de: 'Der Komplett-Bonus: erledige alle anderen Tagesaufgaben auf diesem Bildschirm.',
+    },
+    rewards: [lc(6), ap(100)],
+    progress: { current: 0, target: 1 },
+    resetAt: nextUtcMidnight(),
+    deeplink: '/tasks?frequency=daily',
+    rarity: TaskRarity.PLATINUM,
+  }),
+  weekly: baseTask({
+    id: 't-71',
+    category: TaskCategory.QUEST,
+    frequency: TaskFrequency.WEEKLY,
+    title: {
+      en: 'Complete every weekly task',
+      hy: 'Complete every weekly task',
+      ru: 'Выполни все задания недели',
+      de: 'Erledige alle Wochenaufgaben',
+    },
+    subtitle: {
+      en: 'The full-week bonus: finish every other weekly task on this screen.',
+      hy: 'The full-week bonus: finish every other weekly task on this screen.',
+      ru: 'Бонус за полную неделю: выполни все остальные недельные задания на этом экране.',
+      de: 'Der Komplett-Bonus: erledige alle anderen Wochenaufgaben auf diesem Bildschirm.',
+    },
+    rewards: [lc(80), tickets(5), ap(200)],
+    progress: { current: 0, target: 1 },
+    resetAt: nextWeekStartUtc(),
+    deeplink: '/tasks?frequency=weekly',
+    rarity: TaskRarity.PLATINUM,
+  }),
 };
 
-const buildWeeklyMasterSubSteps = () =>
-  unlockedConfigs().map(c => ({
-    id: nextId(`week-all-${c.tier}`),
-    label: `${cap(c.tier)} · ${c.weekly.progress.current}/${WEEKLY_TIER_TARGET}`,
-    completed: c.weekly.progress.current >= WEEKLY_TIER_TARGET,
-    claimed: false,
-    reward: ap(WEEKLY_MASTER_SUBSTEP_AP),
-  }));
+const buildAllSetBonus = (period: 'daily' | 'weekly', categories: CategoryTasks[]): Task | null => {
+  const bonus = ALL_SET_BONUSES[period];
+  const members = categories
+    .flatMap(c => (period === 'daily' ? c.daily : c.weekly))
+    .filter(task => task.id !== bonus.id && task.status !== TaskStatus.LOCKED);
+  if (members.length < ALL_SET_MIN_MEMBERS) return null;
 
-const buildWeeklyMasterProgress = () => {
-  const unlocked = unlockedConfigs();
-  const target = unlocked.length * WEEKLY_TIER_TARGET || 1;
-  const current = unlocked.reduce((sum, c) => sum + c.weekly.progress.current, 0);
-  return { current, target };
+  const isDone = (task: Task) =>
+    task.status === TaskStatus.COMPLETED || task.status === TaskStatus.READY_TO_CLAIM;
+  const current = members.filter(isDone).length;
+  const claimed = mockState.claimedTaskIds.has(bonus.id);
+  return {
+    ...bonus,
+    status: claimed
+      ? TaskStatus.COMPLETED
+      : current >= members.length
+        ? TaskStatus.READY_TO_CLAIM
+        : TaskStatus.IN_PROGRESS,
+    progress: { current, target: members.length },
+    // Read-only checklist: every row is another task, claimed on its own card.
+    subSteps: members.map(task => ({
+      id: `${bonus.id}::${task.id}`,
+      label: task.title,
+      completed: isDone(task),
+      claimed: isDone(task),
+      claimable: false,
+    })),
+  };
 };
 
 // ───────────────── PLACE MILESTONES (1st / 2nd / 3rd) ─────────────────
@@ -653,32 +722,11 @@ const buildPlaceMilestones = (place: PlaceKey): TaskBlueprint[] =>
 // ───────────────── CATEGORY TASKS ─────────────────
 const TOURNAMENTS = buildCategory({
   category: TaskCategory.TOURNAMENTS,
-  daily: [
-    ...TIER_CONFIGS.map(buildDailyTierTask),
-    {
-      title: 'Complete all available tournament tasks',
-      subtitle: 'Finish every unlocked tier task today. Each new tier adds steps + bigger reward.',
-      rewards: [lc(6), ap(450)],
-      progress: buildMasterProgress(),
-      deeplink: '/tournaments',
-      rarity: TaskRarity.PLATINUM,
-      tier: 'all',
-      subSteps: buildMasterSubSteps(),
-    },
-  ],
-  weekly: [
-    ...TIER_CONFIGS.map(buildWeeklyTierTask),
-    {
-      title: 'Complete all available weekly tournament tasks',
-      subtitle: 'Finish every unlocked tier weekly task. Each tier adds steps + bigger reward.',
-      rewards: [lc(80), tickets(5), ap(5000)],
-      progress: buildWeeklyMasterProgress(),
-      deeplink: '/tournaments',
-      rarity: TaskRarity.PLATINUM,
-      tier: 'all',
-      subSteps: buildWeeklyMasterSubSteps(),
-    },
-  ],
+  // The two "complete all …" tasks used to sit here, as tournament rows. They
+  // are the period's all-set bonus now (DOCS §12.4) and travel outside the
+  // categories — see ALL_SET_BONUSES below.
+  daily: TIER_CONFIGS.map(buildDailyTierTask),
+  weekly: TIER_CONFIGS.map(buildWeeklyTierTask),
   once: [
     // 2026-07 rebalance: exactly three chains (participate / podium / 1st) —
     // the 2nd/3rd and per-tier variants multi-dipped the same actions.
@@ -757,14 +805,8 @@ const SOCIAL_PLATFORMS = [
 
 const SOCIAL = buildCategory({
   category: TaskCategory.SOCIAL,
-  daily: [
-    {
-      title: 'Share your daily result',
-      rewards: [ap(15)],
-      progress: { current: 0, target: 1 },
-      externalLink: 'https://t.me/luckyticket365',
-    },
-  ],
+  // "Share your daily result" lived here and shared nothing: no mechanic, no
+  // link, 1 AP for a tap. It is the daily engine claim now (see ENGINES).
   once: SOCIAL_PLATFORMS.map(p => ({
     title: p.title,
     rewards: p.rewards,
@@ -901,6 +943,27 @@ const ENGINE_MILESTONES: EngineMilestone[] = [
 
 const ENGINES = buildCategory({
   category: TaskCategory.ENGINES,
+  daily: [
+    {
+      id: 't-246',
+      title: {
+        en: 'Claim tickets from your engine',
+        hy: 'Claim tickets from your engine',
+        ru: 'Забери билеты с двигателя',
+        de: 'Hol dir Tickets von deinem Motor',
+      },
+      subtitle: {
+        en: 'It produces around the clock — collect what it made today.',
+        hy: 'It produces around the clock — collect what it made today.',
+        ru: 'Двигатель работает круглосуточно — забери то, что он произвёл сегодня.',
+        de: 'Er produziert rund um die Uhr — hol dir, was er heute erzeugt hat.',
+      },
+      rewards: [lc(1), ap(10)],
+      progress: { current: 0, target: 1 },
+      deeplink: '/engines',
+      rarity: TaskRarity.BRONZE,
+    },
+  ],
   once: ENGINE_MILESTONES.map(m => ({
     id: `engine-collect-${m.target}`,
     title: `Own ${m.target} engines`,
@@ -1530,6 +1593,21 @@ const applyMockState = (task: Task): Task => {
   };
 };
 
+/**
+ * The daily "watch N ads" card reads the same counter the ads block does, so a
+ * view watched in this session has to move both. Without it the fixture's card
+ * sat frozen at its build-time value and dev could never see the task complete.
+ */
+const syncAdsTaskProgress = (task: Task, ads: AdsBlock): Task => {
+  if (task.id !== 'task-daily-ads' || task.status === TaskStatus.COMPLETED) return task;
+  const current = Math.min(ads.watchedToday, task.progress.target);
+  return {
+    ...task,
+    progress: { ...task.progress, current },
+    status: current >= task.progress.target ? TaskStatus.READY_TO_CLAIM : TaskStatus.IN_PROGRESS,
+  };
+};
+
 const buildLiveAds = (): AdsBlock => {
   const base = buildAds();
   const slots = base.slots.map(s => ({
@@ -1573,26 +1651,62 @@ const buildTasksResponse = (): TasksResponse => {
         once: c.once.map(resetTaskForFresh),
       }))
     : PROCESSED_CATEGORIES;
+  const ads = buildLiveAds();
   const liveCategories = sourceCategories.map(c => ({
     ...c,
-    daily: c.daily.map(applyMockState),
+    daily: c.daily.map(applyMockState).map(task => syncAdsTaskProgress(task, ads)),
     weekly: c.weekly.map(applyMockState),
     once: c.once.map(applyMockState),
   }));
+  const allSet = {
+    daily: buildAllSetBonus('daily', liveCategories),
+    weekly: buildAllSetBonus('weekly', liveCategories),
+  };
   return {
     streak: STREAK,
     dailyProgress: computeDailyProgress(liveCategories),
-    ads: buildLiveAds(),
+    ads,
     quest: fresh ? freshQuest : QUEST,
     categories: liveCategories,
+    allSet,
   };
+};
+
+/** Credit a claim to the mock balance and answer in the response shape. */
+const grantRewards = (id: string, granted: TaskReward[]): ClaimTaskResponse => {
+  const rewards = granted.length ? granted : [lc(1)];
+  const sum = (type: TaskRewardType) =>
+    rewards.filter(r => r.type === type).reduce((s, r) => s + r.amount, 0);
+
+  mockState.balance.lc += sum(TaskRewardType.LC);
+  mockState.balance.tickets += sum(TaskRewardType.TICKETS);
+  mockState.balance.activityPoints += sum(TaskRewardType.ACTIVITY_POINTS);
+
+  return { id, rewards, newBalance: { ...mockState.balance } };
 };
 
 const claimTaskHandler = (args: { body?: { id?: string; subStepIds?: string[] } }) => {
   const id = args.body?.id ?? '';
   const subStepIds = args.body?.subStepIds ?? [];
-  const allTasks = PROCESSED_CATEGORIES.flatMap(c => [...c.daily, ...c.weekly, ...c.once]);
+  // The all-set bonuses live outside the categories and are built per response,
+  // so they are resolved from a live build — otherwise claiming one 404s in dev
+  // while working in production.
+  const live = buildTasksResponse();
+  const allTasks = [
+    ...PROCESSED_CATEGORIES.flatMap(c => [...c.daily, ...c.weekly, ...c.once]),
+    ...[live.allSet?.daily, live.allSet?.weekly].filter((t): t is Task => !!t),
+  ];
   const found = allTasks.find(t => t.id === id);
+  // Mirrors the backend: the bonus pays only once the whole set is done, and it
+  // has no claimable sub-steps of its own (its rows are other tasks).
+  if (found && (found.id === 't-70' || found.id === 't-71')) {
+    if (mockState.claimedTaskIds.has(id))
+      return { error: { status: 400, data: { message: 'Task already claimed' } } };
+    if (found.status !== TaskStatus.READY_TO_CLAIM)
+      return { error: { status: 400, data: { message: 'Milestone not reached yet' } } };
+    mockState.claimedTaskIds.add(id);
+    return grantRewards(id, found.rewards ?? []);
+  }
   let rewards: TaskReward[] = [];
   const allSubSteps = allTasks.flatMap(t => t.subSteps ?? []);
 
@@ -1641,28 +1755,7 @@ const claimTaskHandler = (args: { body?: { id?: string; subStepIds?: string[] } 
     mockState.claimedTaskIds.add(id);
     rewards = found.rewards ?? [];
   }
-  if (!rewards.length) rewards = [lc(1)];
-
-  const lcDelta = rewards
-    .filter(r => r.type === TaskRewardType.LC)
-    .reduce((s, r) => s + r.amount, 0);
-  const ticketsDelta = rewards
-    .filter(r => r.type === TaskRewardType.TICKETS)
-    .reduce((s, r) => s + r.amount, 0);
-  const apDelta = rewards
-    .filter(r => r.type === TaskRewardType.ACTIVITY_POINTS)
-    .reduce((s, r) => s + r.amount, 0);
-
-  mockState.balance.lc += lcDelta;
-  mockState.balance.tickets += ticketsDelta;
-  mockState.balance.activityPoints += apDelta;
-
-  const response: ClaimTaskResponse = {
-    id,
-    rewards,
-    newBalance: { ...mockState.balance },
-  };
-  return response;
+  return grantRewards(id, rewards);
 };
 
 export const tasksMock = {

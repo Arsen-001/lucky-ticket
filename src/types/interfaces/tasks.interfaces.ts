@@ -17,10 +17,22 @@ export interface TaskReward {
 
 export interface TaskSubStep {
   id: string;
-  label: string;
+  /**
+   * Server-authored, so localized like every other task string. Counter-driven
+   * steps send a bare `"2 / 4"`; the all-set bonus sends the member task's own
+   * title, which has to be readable in the player's language. Render with
+   * `useLocalized()`, never directly.
+   */
+  label: LocalizedText | string;
   completed: boolean;
   claimed?: boolean;
   reward?: TaskReward;
+  /**
+   * `false` marks a read-only checklist row — the all-set bonus lists the
+   * other tasks of the period, and those are claimed on their own cards.
+   * Absent means claimable, the shape every other task sends.
+   */
+  claimable?: boolean;
 }
 
 export interface TaskChainContribution {
@@ -160,6 +172,16 @@ export interface TasksResponse {
   ads: AdsBlock;
   quest: Quest | null;
   categories: CategoryTasks[];
+  /**
+   * The all-set completion bonus of each period (DOCS §12.4) — "complete every
+   * daily task" and its weekly twin. They travel outside `categories` because
+   * they sweep the whole period rather than one category, and the client pins
+   * them above the list.
+   *
+   * `null` on a side means the period has too few tasks to bonus; the whole
+   * field is absent on an older backend, and the card simply is not drawn.
+   */
+  allSet?: { daily: Task | null; weekly: Task | null };
 }
 
 export interface ClaimTaskRequest {
