@@ -813,7 +813,11 @@ export function TaskItemCard({
             <span className="text-[10px] uppercase tracking-wider font-bold text-white/40">
               {t('substeps progress', { completed: completedSteps, total: totalSteps })}
             </span>
-            {!isCompleted && (
+            {/* Only when there is somewhere to go: `handleStepNavigate` is a
+                no-op without a link, and the all-set bonus — a checklist of
+                other tasks — has none. A link that does nothing is worse than
+                no link. */}
+            {!isCompleted && (task.deeplink || task.externalLink) && (
               <button
                 type="button"
                 onClick={e => {

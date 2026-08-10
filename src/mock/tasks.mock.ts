@@ -626,7 +626,9 @@ const ALL_SET_BONUSES: Record<'daily' | 'weekly', Task> = {
     rewards: [lc(6), ap(100)],
     progress: { current: 0, target: 1 },
     resetAt: nextUtcMidnight(),
-    deeplink: '/tasks?frequency=daily',
+    // No deeplink: it pointed at the tasks screen this card lives on, and the
+    // shared card turns that into an «Открыть» link going nowhere. See t-70
+    // in the backend catalog.
     rarity: TaskRarity.PLATINUM,
   }),
   weekly: baseTask({
@@ -648,7 +650,6 @@ const ALL_SET_BONUSES: Record<'daily' | 'weekly', Task> = {
     rewards: [lc(80), tickets(5), ap(200)],
     progress: { current: 0, target: 1 },
     resetAt: nextWeekStartUtc(),
-    deeplink: '/tasks?frequency=weekly',
     rarity: TaskRarity.PLATINUM,
   }),
 };
