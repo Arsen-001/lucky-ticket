@@ -25,7 +25,7 @@ export default function TabsLayout({ children }: ChildrenProps) {
           transition: 'padding 220ms ease-out',
         }}
       >
-        <div className="h-full overflow-hidden inset-container-background">
+        <div className="h-full overflow-hidden scroll-fade-top-background">
           <div
             key={pathname}
             className="h-full overflow-auto scrollbar-hidden flex-col-stretch animate-fade-in animate-slide-in-bottom"
@@ -34,7 +34,7 @@ export default function TabsLayout({ children }: ChildrenProps) {
           </div>
         </div>
       </main>
-      <TabBar className="fixed bottom-0 left-[var(--app-gutter)] right-[var(--app-gutter)] z-50 shadow-xs" />
+      <TabBar className="fixed bottom-0 left-[var(--app-gutter)] right-[var(--app-gutter)] z-50" />
       <Drawer />
       <NotificationAutoSurface />
       <DailyGiftAutoSurface />

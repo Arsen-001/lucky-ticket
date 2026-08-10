@@ -119,6 +119,29 @@
   }
 }
 
+/**
+ * `inset-container-*` with the bottom fade left off. The tabs scroller ends
+ * exactly on the tab bar's top edge, and a 10px darkening sitting there does not
+ * read as "content runs out" — on the dark theme it reads as a shadow cast by
+ * the bar. The top edge keeps its fade: there the content really does run out,
+ * under the header.
+ */
+@utility scroll-fade-top-* {
+  position: relative;
+  overflow-y: auto;
+  &::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 10px;
+    pointer-events: none;
+    z-index: 2;
+    background: linear-gradient(to bottom, --value(--color-*, [color]), rgba(0, 0, 0, 0));
+  }
+}
+
 @utility shine-* {
   position: relative;
   display: flex;
