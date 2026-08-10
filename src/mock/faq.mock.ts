@@ -337,10 +337,10 @@ const articles: FaqArticle[] = [
       'Produktion, Markt und Belohnungen.'
     ),
     content: tx(
-      'Tickets are minted by your producer engines on a cycle and collected by claiming. You can also buy tickets directly in the Market with LC, or receive them as task rewards, tournament prizes and referral commission. Higher-tier tickets require their tier to be AP-unlocked.',
-      'Билеты производятся вашими двигателями по циклу и собираются нажатием «Забрать». Также билеты можно покупать прямо в Маркете за LC или получать как награды заданий, призы турниров и реферальную комиссию. Билеты высоких уровней требуют, чтобы их уровень был открыт по AP.',
-      'Տոմսերն արտադրվում են ձեր շարժիչների կողմից ցիկլով և հավաքվում «Ստանալ» սեղմելով։ Կարող եք նաև տոմսեր գնել ուղղակիորեն Շուկայում LC-ով կամ ստանալ որպես առաջադրանքների պարգևներ, մրցաշարերի մրցանակներ և ռեֆերալ միջնորդավճար։ Բարձր մակարդակի տոմսերը պահանջում են, որ իրենց մակարդակը AP-ով ապակողպված լինի։',
-      'Tickets werden von deinen Engines zyklisch erzeugt und durch Einlösen eingesammelt. Du kannst Tickets auch direkt im Markt mit LC kaufen oder als Aufgabenbelohnungen, Turnierpreise und Empfehlungsprovision erhalten. Tickets höherer Stufen erfordern, dass ihre Stufe per AP freigeschaltet ist.'
+      'Tickets are minted by your producer engines on a cycle and collected by claiming. You can also buy tickets directly in the Market with LC, or receive them as task rewards and tournament prizes. Higher-tier tickets require their tier to be AP-unlocked.',
+      'Билеты производятся вашими двигателями по циклу и собираются нажатием «Забрать». Также билеты можно покупать прямо в Маркете за LC или получать как награды заданий и призы турниров. Билеты высоких уровней требуют, чтобы их уровень был открыт по AP.',
+      'Տոմսերն արտադրվում են ձեր շարժիչների կողմից ցիկլով և հավաքվում «Ստանալ» սեղմելով։ Կարող եք նաև տոմսեր գնել ուղղակիորեն Շուկայում LC-ով կամ ստանալ որպես առաջադրանքների պարգևներ և մրցաշարերի մրցանակներ։ Բարձր մակարդակի տոմսերը պահանջում են, որ իրենց մակարդակը AP-ով ապակողպված լինի։',
+      'Tickets werden von deinen Engines zyklisch erzeugt und durch Einlösen eingesammelt. Du kannst Tickets auch direkt im Markt mit LC kaufen oder als Aufgabenbelohnungen und Turnierpreise erhalten. Tickets höherer Stufen erfordern, dass ihre Stufe per AP freigeschaltet ist.'
     ),
   },
   {
@@ -1211,16 +1211,16 @@ const articles: FaqArticle[] = [
       'Wie funktionieren Empfehlungen?'
     ),
     description: tx(
-      "Earn a share of friends' tickets.",
-      'Зарабатывайте долю билетов друзей.',
-      'Վաստակեք ընկերների տոմսերի բաժինը',
-      'Verdiene einen Anteil an Freundes-Tickets.'
+      'A cut of what your friends win.',
+      'Доля от того, что выигрывают друзья.',
+      'Բաժին այն ամենից, ինչ շահում են ընկերները',
+      'Ein Anteil an den Gewinnen deiner Freunde.'
     ),
     content: tx(
-      "When a friend you invited claims tickets, you accumulate a percentage of those tickets as claimable tickets of the same type. The rate depends on the friend's account: 5% for a regular friend, 10% for Telegram Premium, 15% for a Lucky Player. For example, a regular friend claiming 20 Bronze tickets earns you 1 Bronze ticket.",
-      'Когда приглашённый вами друг забирает билеты, вы накапливаете процент от этих билетов как доступные к сбору билеты того же типа. Ставка зависит от аккаунта друга: 5% за обычного, 10% за Telegram Premium, 15% за Lucky Player. Например, обычный друг, забравший 20 Bronze-билетов, приносит вам 1 Bronze-билет.',
-      'Երբ ձեր հրավիրած ընկերը վերցնում է տոմսեր, դուք կուտակում եք այդ տոմսերի տոկոսը՝ որպես նույն տեսակի վերցնելու ենթակա տոմսեր։ Դրույքը կախված է ընկերոջ հաշվից՝ 5% սովորական ընկերոջ, 10% Telegram Premium-ի, 15% Lucky Player-ի համար։ Օրինակ՝ սովորական ընկերը, ով վերցնում է 20 Bronze տոմս, ձեզ բերում է 1 Bronze տոմս։',
-      'Wenn ein von dir eingeladener Freund Tickets einlöst, sammelst du einen Prozentsatz dieser Tickets als einlösbare Tickets desselben Typs an. Die Rate hängt vom Konto des Freundes ab: 5% für einen regulären Freund, 10% für Telegram Premium, 15% für einen Lucky Player. Zum Beispiel bringt dir ein regulärer Freund, der 20 Bronze-Tickets einlöst, 1 Bronze-Ticket.'
+      'Share your invite link: everyone who opens the game through it becomes your friend permanently. When a friend takes a prize in a tournament, 4% of that prize accrues to you in LC — and 1% of a prize won by someone THEY invited, so a second level pays you too (it stops there). The money is minted on top: your friend loses nothing, and the jackpot is not included. A friend counts as a referral — and pays — while they stay subscribed to the official channel and have not blocked the bot; if they drop out they remain your friend and keep whatever they already earned you, but stop paying until they return.',
+      'Поделитесь своей ссылкой: каждый, кто откроет игру через неё, навсегда становится вашим другом. Когда друг берёт приз в турнире, вам начисляется 4% от этого приза в LC — и 1% от приза того, кого пригласил уже сам друг, то есть второй уровень тоже платит (дальше он не идёт). Деньги допечатываются сверху: друг ничего не теряет, джекпот не считается. Друг засчитывается как реферал — и платит — пока подписан на официальный канал и не заблокировал бота; если он выпал, он остаётся другом и всё уже заработанное сохраняется, но выплаты замирают до его возвращения.',
+      'Կիսվեք ձեր հրավերի հղումով. բոլորը, ովքեր դրանով բացում են խաղը, ընդմիշտ դառնում են ձեր ընկերը։ Երբ ընկերը մրցանակ է վերցնում մրցաշարում, ձեզ հաշվեգրվում է այդ մրցանակի 4%-ը LC-ով, իսկ ընկերոջ հրավիրածի շահած մրցանակից՝ 1%, այսինքն երկրորդ մակարդակը նույնպես վճարում է (դրանից այն կողմ չի գնում)։ Գումարը լրացուցիչ է թողարկվում. ընկերը ոչինչ չի կորցնում, ջեքփոթը հաշվի չի առնվում։ Ընկերը հաշվվում է որպես ռեֆերալ և վճարում է այնքան ժամանակ, քանի դեռ բաժանորդագրված է պաշտոնական ալիքին և չի արգելափակել բոտը. եթե նա դուրս է մնացել, մնում է ձեր ընկերը և արդեն վաստակածը պահպանվում է, բայց վճարումները սառչում են մինչև նրա վերադարձը։',
+      'Teile deinen Einladungslink: Wer das Spiel darüber öffnet, wird dauerhaft dein Freund. Nimmt ein Freund einen Turnierpreis mit, werden dir 4% davon in LC gutgeschrieben — und 1% eines Preises, den jemand gewinnt, den DIESER Freund eingeladen hat, also zahlt auch eine zweite Ebene (weiter geht es nicht). Das Geld wird obendrauf erzeugt: dein Freund verliert nichts, der Jackpot zählt nicht mit. Ein Freund gilt als Empfehlung — und zahlt —, solange er den offiziellen Kanal abonniert hat und den Bot nicht blockiert; fällt er heraus, bleibt er dein Freund und alles bereits Verdiente bleibt erhalten, doch die Auszahlungen ruhen bis zu seiner Rückkehr.'
     ),
   },
   {
@@ -1233,16 +1233,16 @@ const articles: FaqArticle[] = [
       'Wie erhalte ich meine Empfehlungsbelohnungen?'
     ),
     description: tx(
-      'Tickets only, actively claimed.',
-      'Только билеты, собираются вручную.',
-      'Միայն տոմսեր, ակտիվ վերցվող',
-      'Nur Tickets, aktiv eingelöst.'
+      'It accumulates, then you claim it.',
+      'Копится, потом забираете.',
+      'Կուտակվում է, հետո վերցնում եք',
+      'Es sammelt sich an, dann holst du es ab.'
     ),
     content: tx(
-      'Referral rewards are tickets only — there is no commission on LC or any other currency. They are not credited instantly; they accumulate and must be actively claimed, the same way you claim regular tickets. Inviting a friend also grants you AP (10, or 20 for a Telegram Premium friend).',
-      'Реферальные награды — только билеты, комиссии на LC или другую валюту нет. Они не зачисляются мгновенно; они копятся и должны быть активно собраны, как обычные билеты. Приглашение друга также даёт вам AP (10, или 20 за друга с Telegram Premium).',
-      'Ռեֆերալ պարգևները միայն տոմսեր են. LC-ի կամ այլ արժույթի վրա միջնորդավճար չկա։ Դրանք ակնթարթորեն չեն մուտքագրվում. դրանք կուտակվում են և պետք է ակտիվ վերցվեն՝ ինչպես սովորական տոմսերը։ Ընկեր հրավիրելը նաև տալիս է ձեզ AP (10, կամ 20՝ Telegram Premium ընկերոջ համար)։',
-      'Empfehlungsbelohnungen sind nur Tickets — es gibt keine Provision auf LC oder andere Währungen. Sie werden nicht sofort gutgeschrieben; sie sammeln sich an und müssen aktiv eingelöst werden, genau wie reguläre Tickets. Einen Freund einzuladen gewährt dir zudem AP (10, oder 20 für einen Telegram-Premium-Freund).'
+      "The LC is not credited instantly: it accumulates per friend on the Invite Friends screen and is claimed there, one friend at a time or with «Claim all». One press pays both halves at once — that friend's own cut and everything their own invitees have brought in — and it only pays while they still count as a referral. Inviting a friend also pays a one-off 10 AP + 1 Lucky Star immediately, the same for every friend, with no condition attached.",
+      'LC не зачисляются мгновенно: они копятся по каждому другу на экране «Пригласить друзей» и забираются там же — по одному другу или кнопкой «Забрать всё». Одно нажатие выплачивает обе половины сразу: собственную долю друга и всё, что принесли приглашённые им, — и только пока он засчитывается как реферал. За само приглашение друга сразу начисляются 10 AP + 1 Lucky Star, одинаково за каждого и без всяких условий.',
+      'LC-ն ակնթարթորեն չի մուտքագրվում. այն կուտակվում է ըստ յուրաքանչյուր ընկերոջ «Հրավիրել ընկերներին» էջում և վերցվում է այնտեղ՝ ընկեր առ ընկեր կամ «Վերցնել բոլորը» կոճակով։ Մեկ սեղմումը վճարում է երկու կեսն էլ միանգամից՝ ընկերոջ սեփական բաժինը և այն ամենը, ինչ բերել են նրա հրավիրածները, և վճարում է միայն այնքան ժամանակ, քանի դեռ նա հաշվվում է որպես ռեֆերալ։ Ընկեր հրավիրելու համար անմիջապես տրվում է 10 AP + 1 Lucky Star՝ նույնը յուրաքանչյուրի համար և առանց որևէ պայմանի։',
+      'Die LC werden nicht sofort gutgeschrieben: Sie sammeln sich pro Freund im Bereich «Freunde einladen» an und werden dort abgeholt — einzeln oder mit «Alles abholen». Ein Druck zahlt beide Hälften auf einmal: den eigenen Anteil dieses Freundes und alles, was die von ihm Eingeladenen eingebracht haben — und nur, solange er noch als Empfehlung zählt. Für die Einladung selbst gibt es sofort einmalig 10 AP + 1 Lucky Star, für jeden Freund gleich und ohne jede Bedingung.'
     ),
   },
 
