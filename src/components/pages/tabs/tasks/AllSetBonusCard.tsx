@@ -8,8 +8,11 @@ import { Progress } from '@/components/shared/Progress';
 import { useAppTranslations } from '@/hooks/useAppTranslations';
 import { useCountDown } from '@/hooks/useCountDown';
 import { useLocalized } from '@/hooks/useLocalized';
-import { TaskStatus } from '@/types/enums/tasks.enums';
+import { TaskRewardType, TaskStatus } from '@/types/enums/tasks.enums';
 import type { Task } from '@/types/interfaces/tasks.interfaces';
+import { LcLabel } from '@/components/shared/icons/LcLabel';
+import { GoldenText } from '@/components/shared/typography/GoldenText';
+import { formatNumber } from '@/utils/global/number.utils';
 import { TaskRewardRow } from './TaskRewardRow';
 
 export interface AllSetBonusCardProps {
@@ -60,6 +63,18 @@ export function AllSetBonusCard({
   const steps = task.subSteps ?? [];
   const hasSteps = steps.length > 0;
 
+  /**
+   * The payout as the hero number, the same split every full-size task card
+   * makes (`TaskItemCard`): the LC leads in gold under the title, the rest
+   * stays a chip row. This is the biggest single reward on the daily tab and
+   * it was reading as two small chips in a corner — smaller than the payout of
+   * the tasks it is a bonus over.
+   */
+  const heroReward = task.rewards.find(reward => reward.type === TaskRewardType.LC) ?? null;
+  const restRewards = heroReward
+    ? task.rewards.filter(reward => reward !== heroReward)
+    : task.rewards;
+
   const [expanded, setExpanded] = useState(false);
 
   return (
@@ -89,10 +104,21 @@ export function AllSetBonusCard({
             <Sparkles size={21} className="text-white" strokeWidth={2.2} />
           </span>
 
-          <div className="flex min-w-0 flex-1 flex-col gap-0.5">
+          <div className="flex min-w-0 flex-1 flex-col gap-1">
             <span className="text-[13px] leading-tight font-extrabold">
               {localized(task.title)}
             </span>
+
+            {heroReward && (
+              <GoldenText
+                className="inline-flex items-center gap-1.5 text-2xl leading-none font-extrabold tabular-nums"
+                style={{ textShadow: '0 1px 6px rgba(248, 189, 62, 0.45)' }}
+              >
+                +{formatNumber(heroReward.amount)}
+                <LcLabel size={18} />
+              </GoldenText>
+            )}
+
             {task.subtitle && (
               <span className="text-[10px] leading-tight text-white/50">
                 {localized(task.subtitle)}
@@ -116,7 +142,11 @@ export function AllSetBonusCard({
             <span className="text-[10px] font-bold tracking-[0.14em] text-white/40 uppercase">
               {t('reward')}
             </span>
-            <TaskRewardRow rewards={task.rewards} tier={task.tier} size="sm" />
+            <TaskRewardRow
+              rewards={restRewards.length ? restRewards : task.rewards}
+              tier={task.tier}
+              size="sm"
+            />
           </div>
           <Progress percentage={pct} className="h-2" />
         </div>
