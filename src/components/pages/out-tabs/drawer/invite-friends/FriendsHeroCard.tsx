@@ -1,6 +1,6 @@
 'use client';
 
-import { Check, Copy, Network, Share2, Star, UserPlus, Users } from 'lucide-react';
+import { Check, Copy, Share2, Star, UserPlus } from 'lucide-react';
 import { BoltIcon } from '@/components/shared/icons/BoltIcon';
 import type { ReactNode } from 'react';
 import { twMerge } from 'tailwind-merge';
@@ -20,8 +20,6 @@ import { useAppTranslations } from '@/hooks/useAppTranslations';
 import { useInviteRewards } from '@/hooks/useInviteRewards';
 import { useInviteShare } from '@/hooks/useInviteShare';
 import { useReferralCounts } from '@/hooks/useReferralCounts';
-import { GlobalConstants } from '@/constants/global.constants';
-import { formatCompact } from '@/utils/global/number.utils';
 import { getRefererLink } from '@/utils/pages/referral.utils';
 import type { LocaleType } from '@/types/types/locale.types';
 
@@ -127,38 +125,6 @@ export function FriendsHeroCard() {
             <div className="flex flex-shrink-0 items-center gap-1.5">
               <RewardChip icon={<BoltIcon size={16} />} value={`+${rewards.ap}`} />
               <RewardChip icon={<TelegramStarIcon size={11} />} value={`+${rewards.stars}`} />
-            </div>
-          </div>
-        )}
-
-        {/* The second level, on its own full-width line rather than as a third
-            number beside the two above — at 390px three labelled stats push the
-            title into an ellipsis. Money leads and the headcount follows: the
-            count grows on its own and would read as a promise the payout has
-            not kept.
-            Drawn for anyone who has invited ANYBODY, not only once a branch
-            exists: on prod just 20 players out of 876 have a second level
-            (measured 2026-08-10), so hiding the line at zero hid the mechanic
-            from everyone who could still go and build one. @see ReferralCounts */}
-        {referrals.invited > 0 && (
-          <div className="flex items-center gap-2 rounded-lg px-2 py-2">
-            <div className="bg-electric-purple/15 flex-center h-6 w-6 flex-shrink-0 rounded-md">
-              <Network size={12} className="text-electric-purple" strokeWidth={2.4} />
-            </div>
-            <span className="flex-1 truncate text-[11px] font-semibold text-white/85">
-              {t('friends network')}
-            </span>
-            <div className="flex flex-shrink-0 items-center gap-1.5">
-              {referrals.networkLc > 0 && (
-                <RewardChip
-                  icon={<span className="text-gold text-[10px]">{GlobalConstants.coinName}</span>}
-                  value={formatCompact(referrals.networkLc)}
-                />
-              )}
-              <span className="text-pink-secondary inline-flex items-center gap-1 text-[11px] font-extrabold tabular-nums">
-                <Users size={11} />
-                {referrals.network}
-              </span>
             </div>
           </div>
         )}

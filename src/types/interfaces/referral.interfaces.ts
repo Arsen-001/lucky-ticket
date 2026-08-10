@@ -81,6 +81,13 @@ export interface BranchMember {
   joinedAt: string;
   /** How many they brought in turn — a number only; the reward stops here. */
   broughtCount?: number;
+  /**
+   * Which of YOUR friends brought them. Only sent by the flat «Их друзья» list
+   * (`GET referral/network`), where it is the row's one anchor — inside a
+   * single friend's dropdown the answer is already the row above.
+   */
+  viaFriendId?: string;
+  viaName?: string;
 }
 
 export interface ReferralStats {

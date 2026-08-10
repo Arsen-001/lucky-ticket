@@ -3,8 +3,11 @@
 import { twMerge } from 'tailwind-merge';
 import { useAppTranslations } from '@/hooks/useAppTranslations';
 
-/** «Друзья» = everyone who arrived through the link; «Рефералы» = the ones who pay. */
-export type FriendsTab = 'friends' | 'referrals';
+/**
+ * «Друзья» = everyone who arrived through the link; «Рефералы» = the ones who
+ * pay; «Их друзья» = the second level — who your friends invited in turn.
+ */
+export type FriendsTab = 'friends' | 'referrals' | 'network';
 
 export interface FriendsTabsProps {
   active: FriendsTab;
@@ -13,13 +16,14 @@ export interface FriendsTabsProps {
 }
 
 /**
- * The friends screen has exactly two lists, and the split is the whole point:
- * a referral earns you a cut of their tournament wins, a friend who fell out
- * does not.
+ * The friends screen has three lists, and each answers a different question:
+ * «Друзья» — who arrived through my link; «Рефералы» — which of them pay right
+ * now; «Их друзья» — the second level, everyone my friends brought in turn.
  *
- * Two tabs rather than the five filter chips this replaced — «с наградами»,
- * «premium» and «не засчитаны» sliced the same people three more ways without
- * answering the only question the screen exists to answer.
+ * Still not the five filter chips this replaced — «с наградами», «premium» and
+ * «не засчитаны» sliced the SAME people three more ways. The third tab is not
+ * another slice: it is a different set of people entirely, and without it the
+ * second level had nowhere on the screen to live.
  */
 export function FriendsTabs({ active, onChange, counts }: FriendsTabsProps) {
   const t = useAppTranslations();
@@ -27,6 +31,7 @@ export function FriendsTabs({ active, onChange, counts }: FriendsTabsProps) {
   const items: { key: FriendsTab; label: string }[] = [
     { key: 'friends', label: t('friends') },
     { key: 'referrals', label: t('referrals') },
+    { key: 'network', label: t('their friends') },
   ];
 
   return (
@@ -41,7 +46,10 @@ export function FriendsTabs({ active, onChange, counts }: FriendsTabsProps) {
             aria-selected={isActive}
             onClick={() => onChange(key)}
             className={twMerge(
-              'flex flex-1 cursor-pointer items-center justify-center gap-1.5 rounded-lg px-3 py-2 text-xs font-bold transition-colors',
+              // `whitespace-nowrap` and the tighter padding are what let a
+              // third tab in: at 390px «Their friends» wrapped to two lines and
+              // made that one tab taller than its neighbours.
+              'flex flex-1 cursor-pointer items-center justify-center gap-1 whitespace-nowrap rounded-lg px-1.5 py-2 text-[11px] font-bold transition-colors',
               isActive
                 ? 'bg-pink-gradient text-white shadow-[0_4px_12px_rgba(222,0,155,0.28)]'
                 : 'text-pink-secondary hover:bg-white/5'

@@ -224,6 +224,20 @@ export const friendBranchesMock: Record<string, BranchMember[]> = Object.fromEnt
   baseFriends.map(friend => [friend.id, branchOf(friend.id, friend.broughtCount ?? 0)])
 );
 
+/**
+ * The flat «Их друзья» tab: every branch at once, each row stamped with the
+ * friend it came through. Built from the same per-friend branches the
+ * dropdowns show, so the tab badge, the row badges and the two lists cannot
+ * drift apart.
+ */
+export const referralNetworkMock: BranchMember[] = baseFriends.flatMap(friend =>
+  (friendBranchesMock[friend.id] ?? []).map(member => ({
+    ...member,
+    viaFriendId: friend.id,
+    viaName: friend.displayName ?? friend.username,
+  }))
+);
+
 export const referralStatsMock: ReferralStats = {
   totalInvited: invitedFriendsMock.length,
   // No `counted` here on purpose — it is derived from the friends roster, so
@@ -283,6 +297,7 @@ export const preLaunchGiftMock: PreLaunchGiftState = {
 
 export const referralMock = {
   'referral/friends': invitedFriendsMock,
+  'referral/network': referralNetworkMock,
   'referral/stats': referralStatsMock,
   'referral/prelaunch-gift': preLaunchGiftMock,
   'POST referral/prepare-share': preparedShareMessageMock,

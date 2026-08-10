@@ -25,6 +25,12 @@ export const referralApi = api.injectEndpoints({
       query: ({ friendId }) => ({ url: `referral/friends/${friendId}/branch` }),
       providesTags: [rtkTags.referral],
     }),
+    // The whole second level, flat — the «Их друзья» tab. One request rather
+    // than one per friend, and skipped until that tab is actually opened.
+    getReferralNetwork: builder.query<BranchMember[], void>({
+      query: () => ({ url: 'referral/network' }),
+      providesTags: [rtkTags.referral],
+    }),
     // No cache tags: the prepared message is single-use and cache-irrelevant —
     // a fresh one is created on every share tap.
     prepareShareMessage: builder.mutation<PreparedShareMessage, { lang: LocaleType }>({
@@ -74,6 +80,7 @@ export const referralApi = api.injectEndpoints({
 export const {
   useGetInvitedFriendsQuery,
   useGetFriendBranchQuery,
+  useGetReferralNetworkQuery,
   useGetReferralStatsQuery,
   useClaimFriendMutation,
   usePrepareShareMessageMutation,

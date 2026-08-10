@@ -14,9 +14,11 @@ import {
   type FriendsTab,
 } from '@/components/pages/out-tabs/drawer/invite-friends/FriendsTabs';
 import { FriendBranchList } from '@/components/pages/out-tabs/drawer/invite-friends/FriendBranchList';
+import { NetworkList } from '@/components/pages/out-tabs/drawer/invite-friends/NetworkList';
 import { FriendsClaimSummaryCard } from '@/components/pages/out-tabs/drawer/invite-friends/FriendsClaimSummaryCard';
 import { FriendsQualificationNote } from '@/components/pages/out-tabs/drawer/invite-friends/FriendsQualificationNote';
 import { useAppTranslations } from '@/hooks/useAppTranslations';
+import { useReferralCounts } from '@/hooks/useReferralCounts';
 import { countsAsReferral, totalClaimableLcOf } from '@/utils/pages/referral.utils';
 import type { BranchMember, InvitedFriend } from '@/types/interfaces/referral.interfaces';
 import type { TicketType } from '@/types/types/ticket.types';
@@ -48,6 +50,9 @@ export const InvitedFriendsList = () => {
   const toast = useToast();
   const { data: friends = [], isLoading, isError, refetch } = useGetInvitedFriendsQuery();
   const [claimFriend, { isLoading: isClaiming }] = useClaimFriendMutation();
+  // The tab badge, off the same per-friend counts the rows draw — so the number
+  // on the tab can never disagree with the badges under it.
+  const referralCounts = useReferralCounts();
   const [selectedFriend, setSelectedFriend] = useState<InvitedFriend | null>(null);
   const [cardFriend, setCardFriend] = useState<InvitedFriend | BranchMember | null>(null);
   const [cardOpen, setCardOpen] = useState(false);
@@ -170,7 +175,11 @@ export const InvitedFriendsList = () => {
         <FriendsTabs
           active={tab}
           onChange={setTab}
-          counts={{ friends: counts.friends, referrals: counts.referrals }}
+          counts={{
+            friends: counts.friends,
+            referrals: counts.referrals,
+            network: referralCounts.network,
+          }}
         />
       )}
 
@@ -180,7 +189,9 @@ export const InvitedFriendsList = () => {
       {counts.notCounted > 0 && <FriendsQualificationNote notCounted={counts.notCounted} />}
 
       <div className="flex flex-col gap-2">
-        {isLoading ? (
+        {tab === 'network' ? (
+          <NetworkList onOpenCard={openCard} />
+        ) : isLoading ? (
           Array.from({ length: 3 }).map((_, i) => <InvitedFriendRow key={i} loading />)
         ) : visibleFriends.length ? (
           visibleFriends.map((friend, index) => (
