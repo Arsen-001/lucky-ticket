@@ -450,13 +450,11 @@ interface TierTournamentConfig {
     rewards: TaskReward[];
     progress: { current: number; target: number };
     rarity: TaskRarity;
-    subStepAp: number;
   };
   weekly: {
     rewards: TaskReward[];
     progress: { current: number; target: number };
     rarity: TaskRarity;
-    subStepAp: number;
   };
 }
 
@@ -470,13 +468,11 @@ const TIER_CONFIGS: TierTournamentConfig[] = [
       rewards: [lc(1), ap(120)],
       progress: { current: 4, target: 4 },
       rarity: TaskRarity.BRONZE,
-      subStepAp: 5,
     },
     weekly: {
       rewards: [lc(8), ap(900)],
       progress: { current: 2, target: 7 },
       rarity: TaskRarity.SILVER,
-      subStepAp: 5,
     },
   },
   {
@@ -488,13 +484,11 @@ const TIER_CONFIGS: TierTournamentConfig[] = [
       rewards: [lc(2), ap(160)],
       progress: { current: 1, target: 2 },
       rarity: TaskRarity.SILVER,
-      subStepAp: 5,
     },
     weekly: {
       rewards: [lc(15), tickets(1), ap(1200)],
       progress: { current: 1, target: 7 },
       rarity: TaskRarity.GOLD,
-      subStepAp: 5,
     },
   },
   {
@@ -506,13 +500,11 @@ const TIER_CONFIGS: TierTournamentConfig[] = [
       rewards: [lc(2), ap(180)],
       progress: { current: 0, target: 1 },
       rarity: TaskRarity.SILVER,
-      subStepAp: 5,
     },
     weekly: {
       rewards: [lc(25), tickets(2), ap(1500)],
       progress: { current: 0, target: 7 },
       rarity: TaskRarity.GOLD,
-      subStepAp: 5,
     },
   },
   {
@@ -524,13 +516,11 @@ const TIER_CONFIGS: TierTournamentConfig[] = [
       rewards: [lc(4), ap(260)],
       progress: { current: 0, target: 1 },
       rarity: TaskRarity.GOLD,
-      subStepAp: 5,
     },
     weekly: {
       rewards: [lc(30), tickets(2), ap(2000)],
       progress: { current: 0, target: 7 },
       rarity: TaskRarity.GOLD,
-      subStepAp: 5,
     },
   },
   {
@@ -542,13 +532,11 @@ const TIER_CONFIGS: TierTournamentConfig[] = [
       rewards: [lc(8), tickets(1), ap(400)],
       progress: { current: 0, target: 1 },
       rarity: TaskRarity.PLATINUM,
-      subStepAp: 5,
     },
     weekly: {
       rewards: [lc(50), tickets(3), ap(2800)],
       progress: { current: 0, target: 7 },
       rarity: TaskRarity.PLATINUM,
-      subStepAp: 5,
     },
   },
 ];
