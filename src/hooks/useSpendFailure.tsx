@@ -47,8 +47,9 @@ export interface UseSpendFailure {
  * which reads as a broken button rather than as a price.
  *
  * So the refusal is classified once (@see spendFailure) and answered with the
- * screen that fixes it: LC → the LC wallet, Stars → the buy-Stars sheet in
- * place, TON → the wallet, tickets and shards → their market shelf. Reasons
+ * screen that fixes it: LC → the tournaments (it is won, never sold), Stars →
+ * the buy-Stars sheet in place, TON → the wallet, tickets and shards → their
+ * market shelf. Reasons
  * with no way out still get a modal, never a toast — the point is that a
  * refusal is readable and has somewhere to go, not that it is loud.
  */

@@ -1331,7 +1331,6 @@
   "capacity shards {count}": "{count, plural, one {осколок вместимости} few {осколка вместимости} many {осколков вместимости} other {осколков вместимости}}",
   "ads watched {count}": "{count, plural, one {реклама просмотрена} few {рекламы просмотрено} many {реклам просмотрено} other {реклам просмотрено}}",
   "friends invited {count}": "{count, plural, one {друг приглашён} few {друга приглашено} many {друзей приглашено} other {друзей приглашено}}",
-  "top up {coin}": "Пополнить {coin}",
   "purchase not completed": "Покупка не прошла",
   "purchase error out of stock": "Товар только что закончился. Списания не было.",
   "purchase error item gone": "Это предложение больше недоступно. Списания не было.",
@@ -1342,12 +1341,13 @@
   "purchase error already owned": "Этот товар у вас уже есть. Списания не было.",
   "purchase error network": "Не удалось связаться с сервером. Списания не было — попробуйте ещё раз.",
   "balance changed description": "Баланс изменился, пока шла покупка. Списания не было — проверьте его и попробуйте снова.",
-  "not enough coins short description": "На это не хватает LC. Пополните баланс и попробуйте снова.",
+  "not enough coins short description": "На это не хватает LC. Выиграйте их в турнире и попробуйте снова.",
   "not enough ton description": "На это не хватает TON. Списания не было — пополните кошелёк и попробуйте снова.",
   "not enough tickets": "Не хватает билетов",
   "not enough tickets description": "Билетов этого уровня не хватает. Списания не было — купить их можно в маркете.",
   "not enough shards": "Не хватает осколков",
   "not enough shards description": "На это не хватает осколков. Списания не было — купить их можно в маркете.",
   "go to wallet": "В кошелёк",
-  "go to market": "В маркет"
+  "go to market": "В маркет",
+  "win {coin}": "Выиграть {coin}"
 }

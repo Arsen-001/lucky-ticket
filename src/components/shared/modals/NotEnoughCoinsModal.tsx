@@ -23,11 +23,12 @@ export interface NotEnoughCoinsModalProps {
  * "Not enough LC" used to be an OK button and nothing else — the balance is
  * named, but where LC comes from is not.
  *
- * The way out is the LC screen: it is the one place that holds the balance, the
- * conversion in, and the routes to every source of coins, so "top up" lands
- * somewhere that can actually answer the question rather than on one source of
- * many. Tasks stays as the second line, because unclaimed rewards are LC the
- * player has already earned — a shorter errand than any top-up.
+ * The way out is a TOURNAMENT, not a top-up. LC is not sold: it is won, and the
+ * button said "Top up LC" for a day, pointing at the LC wallet — a screen that
+ * shows the balance and its history but has nothing to sell, so the one player
+ * who followed it arrived exactly where they started. Tasks stays as the second
+ * line, because unclaimed rewards are LC already earned — a shorter errand than
+ * playing for it.
  */
 export function NotEnoughCoinsModal({
   open,
@@ -72,7 +73,10 @@ export function NotEnoughCoinsModal({
       title={t('not enough {coin}', { coin: GlobalConstants.coinName })}
       description={description}
       progress={known && !stale ? { label: t('balance'), current, required } : undefined}
-      action={{ label: t('top up {coin}', { coin: GlobalConstants.coinName }), href: routes.lc }}
+      action={{
+        label: t('win {coin}', { coin: GlobalConstants.coinName }),
+        href: routes.tournaments.index,
+      }}
       secondaryAction={{
         label: t('go to tasks'),
         href: claimRoute,
