@@ -739,14 +739,6 @@ export function TasksContent() {
         <EmptyAllDone frequency={activeFrequency} resetAt={periodResetAt} />
       ) : (
         <div key={activeFrequency} className="flex flex-col">
-          {allSetBonus && (
-            <AllSetBonusCard
-              task={allSetBonus}
-              onClaim={handleClaimTask}
-              loading={pendingClaim.id === allSetBonus.id && pendingClaim.status === 'pending'}
-            />
-          )}
-
           {showAds && data?.ads && (
             <AdsSection
               ads={data.ads}
@@ -1057,6 +1049,17 @@ export function TasksContent() {
               />
             );
           })}
+
+          {/* Last, under every category: the bonus is a summary of the whole
+              period, and it is the only card here nothing can be claimed from
+              directly — its rows are collected on their own cards. */}
+          {allSetBonus && (
+            <AllSetBonusCard
+              task={allSetBonus}
+              onClaim={handleClaimTask}
+              loading={pendingClaim.id === allSetBonus.id && pendingClaim.status === 'pending'}
+            />
+          )}
 
           <div className="h-12" />
         </div>
