@@ -110,19 +110,11 @@ export function AllSetBonusCard({
 
         <div className="flex flex-col gap-1.5">
           <div className="flex items-center justify-between gap-2">
-            {/* The chevron rides the count the card already prints rather than
-                a strip of its own — a second «3 / 7» under the first one is the
-                same fact twice, and the progress line is what the checklist
-                expands. */}
-            <span className="flex items-center gap-1 text-[10px] font-bold tracking-[0.14em] text-white/40 uppercase">
-              {hasSteps && (
-                <ChevronDown
-                  size={11}
-                  strokeWidth={2.6}
-                  className={twMerge('transition-transform', expanded && 'rotate-180')}
-                />
-              )}
-              {t('all set progress', { done: current, total: target })}
+            {/* The count is on the action below, where every other card keeps
+                it. Printed here as well it was the same fact twice on one
+                card. */}
+            <span className="text-[10px] font-bold tracking-[0.14em] text-white/40 uppercase">
+              {t('reward')}
             </span>
             <TaskRewardRow rewards={task.rewards} tier={task.tier} size="sm" />
           </div>
@@ -159,23 +151,45 @@ export function AllSetBonusCard({
           </ul>
         )}
 
+        {/* Same three states, in the same order, as every other task card:
+            «Забрать» only when there is something to take, «Получено» after,
+            and otherwise the count of what is still missing. A greyed-out
+            claim button read as a broken control — the card looked collectable
+            all day and refused every tap. */}
         {isCompleted ? (
-          <span className="flex items-center justify-center gap-1.5 text-[11px] font-bold tracking-wider text-success uppercase">
+          <span className="text-success flex items-center justify-center gap-1.5 text-[11px] font-bold tracking-wider uppercase">
             <Check size={12} strokeWidth={3} />
             {t('claimed')}
           </span>
-        ) : (
+        ) : isReady ? (
           <Button
             onClick={event => {
               event.stopPropagation();
               onClaim(task);
             }}
-            disabled={!isReady}
             loading={loading}
-            className={twMerge('w-full py-2 text-[13px]', !isReady && 'opacity-40')}
+            className="w-full py-2 text-[13px]"
           >
             {t('claim')}
           </Button>
+        ) : (
+          <button
+            type="button"
+            onClick={event => {
+              event.stopPropagation();
+              setExpanded(prev => !prev);
+            }}
+            className="flex-center w-full gap-1.5 rounded-xl border border-white/10 bg-white/5 py-2.5 text-[12px] leading-none font-extrabold tracking-[0.14em] text-white/70 uppercase"
+          >
+            {hasSteps && (
+              <ChevronDown
+                size={13}
+                strokeWidth={2.6}
+                className={twMerge('transition-transform', expanded && 'rotate-180')}
+              />
+            )}
+            {t('substeps progress', { completed: current, total: target })}
+          </button>
         )}
       </div>
     </section>
