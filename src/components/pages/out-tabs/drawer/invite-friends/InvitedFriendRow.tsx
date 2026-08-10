@@ -1,7 +1,7 @@
 'use client';
 
 import Image from 'next/image';
-import { ChevronRight, Lock, Star, Users } from 'lucide-react';
+import { ChevronDown, ChevronRight, Lock, Star, Users } from 'lucide-react';
 import { twMerge } from 'tailwind-merge';
 import { Skeleton } from '@/components/shared/seleketons/Skeleton';
 import { SkeletonSuspense } from '@/components/shared/seleketons/SkeletonSuspense';
@@ -24,6 +24,10 @@ export interface InvitedFriendRowProps {
   /** Opens the shared player quick-card — the avatar always, and the whole
    *  row when there's nothing to claim (a claimable row's click claims). */
   onOpenCard?: (friend: InvitedFriend) => void;
+  /** Expands/collapses the branch — who this friend invited in turn. */
+  onToggleBranch?: (friend: InvitedFriend) => void;
+  /** Is that branch open right now? Owned by the list, not the row. */
+  branchOpen?: boolean;
   loading?: boolean;
   className?: string;
   style?: CSSProperties;
@@ -33,6 +37,8 @@ export function InvitedFriendRow({
   friend,
   onClaim,
   onOpenCard,
+  onToggleBranch,
+  branchOpen = false,
   loading,
   className,
   style,
@@ -153,17 +159,47 @@ export function InvitedFriendRow({
                 <BoltIcon size={16} />
                 {formatCompact(friend?.points ?? 0)}
               </span>
-              {/* The second level, as the only thing about it the inviter can
-                  act on: WHICH friends build a network. A count and never a
-                  list — the people in a branch are strangers to whoever is
-                  reading this row. @see InvitedFriend.broughtCount */}
-              {brought > 0 && (
+              {/* The second level. ALWAYS drawn, zero included: only 20 of 876
+                  players on prod have any of it (measured 2026-08-10), so a
+                  badge that appeared above zero was a mechanic almost nobody
+                  could discover. Above zero it also opens the branch — the
+                  chevron is what says so. */}
+              {friend && (
                 <span
-                  className="text-pink-secondary flex flex-shrink-0 items-center gap-1 font-semibold tabular-nums"
+                  role={brought > 0 ? 'button' : undefined}
+                  tabIndex={brought > 0 ? 0 : undefined}
+                  aria-expanded={brought > 0 ? branchOpen : undefined}
                   aria-label={t('brought {count} friends', { count: brought })}
+                  onClick={e => {
+                    if (brought === 0) return;
+                    e.stopPropagation();
+                    onToggleBranch?.(friend);
+                  }}
+                  onKeyDown={e => {
+                    if (brought === 0) return;
+                    if (e.key !== 'Enter' && e.key !== ' ') return;
+                    e.preventDefault();
+                    e.stopPropagation();
+                    onToggleBranch?.(friend);
+                  }}
+                  className={twMerge(
+                    'flex flex-shrink-0 items-center gap-1 font-semibold tabular-nums',
+                    brought > 0
+                      ? 'text-electric-purple cursor-pointer rounded-md bg-white/5 px-1.5 py-0.5 hover:bg-white/10'
+                      : 'text-pink-secondary/60'
+                  )}
                 >
                   <Users size={12} className="flex-shrink-0" />
                   {brought}
+                  {brought > 0 && (
+                    <ChevronDown
+                      size={11}
+                      className={twMerge(
+                        'flex-shrink-0 transition-transform',
+                        branchOpen && 'rotate-180'
+                      )}
+                    />
+                  )}
                 </span>
               )}
               {/* Dropped whenever the row is tight — when a legacy ticket

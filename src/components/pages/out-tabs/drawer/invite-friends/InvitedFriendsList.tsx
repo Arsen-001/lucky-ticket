@@ -13,11 +13,12 @@ import {
   FriendsTabs,
   type FriendsTab,
 } from '@/components/pages/out-tabs/drawer/invite-friends/FriendsTabs';
+import { FriendBranchList } from '@/components/pages/out-tabs/drawer/invite-friends/FriendBranchList';
 import { FriendsClaimSummaryCard } from '@/components/pages/out-tabs/drawer/invite-friends/FriendsClaimSummaryCard';
 import { FriendsQualificationNote } from '@/components/pages/out-tabs/drawer/invite-friends/FriendsQualificationNote';
 import { useAppTranslations } from '@/hooks/useAppTranslations';
 import { countsAsReferral, totalClaimableLcOf } from '@/utils/pages/referral.utils';
-import type { InvitedFriend } from '@/types/interfaces/referral.interfaces';
+import type { BranchMember, InvitedFriend } from '@/types/interfaces/referral.interfaces';
 import type { TicketType } from '@/types/types/ticket.types';
 import { useToast } from '@/hooks/useToast';
 import { displayNameOf } from '@/utils/global/user.utils';
@@ -48,8 +49,9 @@ export const InvitedFriendsList = () => {
   const { data: friends = [], isLoading, isError, refetch } = useGetInvitedFriendsQuery();
   const [claimFriend, { isLoading: isClaiming }] = useClaimFriendMutation();
   const [selectedFriend, setSelectedFriend] = useState<InvitedFriend | null>(null);
-  const [cardFriend, setCardFriend] = useState<InvitedFriend | null>(null);
+  const [cardFriend, setCardFriend] = useState<InvitedFriend | BranchMember | null>(null);
   const [cardOpen, setCardOpen] = useState(false);
+  const [openBranchId, setOpenBranchId] = useState<string | null>(null);
   const [tab, setTab] = useState<FriendsTab>('friends');
   const [isClaimingAll, setIsClaimingAll] = useState(false);
   const [claimAllSnapshot, setClaimAllSnapshot] = useState<{
@@ -93,10 +95,19 @@ export const InvitedFriendsList = () => {
     });
   }, [friends, tab]);
 
-  const openCard = (friend: InvitedFriend) => {
-    setCardFriend(friend);
+  /**
+   * The quick-card takes anyone with a profile, so a branch member opens the
+   * same sheet a friend does — `BranchMember` carries the fields it reads.
+   */
+  const openCard = (player: InvitedFriend | BranchMember) => {
+    setCardFriend(player);
     setCardOpen(true);
   };
+
+  // One branch open at a time: two expanded lists on a 390px screen push the
+  // rows below them off the fold, and nobody compares two branches at once.
+  const toggleBranch = (friend: InvitedFriend) =>
+    setOpenBranchId(current => (current === friend.id ? null : friend.id));
 
   const handleClaim = async (friendId: string) => {
     // `claimFriend` without `.unwrap()` RESOLVES with `{error}` instead of
@@ -173,14 +184,28 @@ export const InvitedFriendsList = () => {
           Array.from({ length: 3 }).map((_, i) => <InvitedFriendRow key={i} loading />)
         ) : visibleFriends.length ? (
           visibleFriends.map((friend, index) => (
-            <InvitedFriendRow
-              key={friend.id}
-              friend={friend}
-              onClaim={setSelectedFriend}
-              onOpenCard={openCard}
-              className="animate-slide-in-bottom"
-              style={{ animationDelay: `${staggerMs(index, 60)}ms` }}
-            />
+            // The branch renders BESIDE the row, not inside it: a row is a
+            // <button> whenever it has an action, and the branch is a list of
+            // buttons — nesting them is invalid and swallows the inner taps.
+            <div key={friend.id} className="flex flex-col gap-1.5">
+              <InvitedFriendRow
+                friend={friend}
+                onClaim={setSelectedFriend}
+                onOpenCard={openCard}
+                onToggleBranch={toggleBranch}
+                branchOpen={openBranchId === friend.id}
+                className="animate-slide-in-bottom"
+                style={{ animationDelay: `${staggerMs(index, 60)}ms` }}
+              />
+              {openBranchId === friend.id && (
+                <FriendBranchList
+                  friendId={friend.id}
+                  open
+                  onOpenMember={openCard}
+                  className="animate-slide-in-bottom"
+                />
+              )}
+            </div>
           ))
         ) : friends.length > 0 ? (
           <EmptyDataInfo className="mt-6" description={t('no referrals yet')} />
@@ -213,6 +238,10 @@ export const InvitedFriendsList = () => {
         />
       )}
 
+      {/* A branch member carries no like state — the friends endpoint resolves
+          that only for people you invited yourself — so those two props fall
+          back to neutral values and the card opens unliked rather than not at
+          all. */}
       {cardFriend && (
         <PlayerQuickCard
           key={cardFriend.id}
@@ -221,8 +250,8 @@ export const InvitedFriendsList = () => {
           userId={cardFriend.id}
           username={displayNameOf(cardFriend)}
           avatar={cardFriend.avatar}
-          liked={cardFriend.liked}
-          likesReceived={cardFriend.likesReceived}
+          liked={'liked' in cardFriend ? cardFriend.liked : false}
+          likesReceived={'likesReceived' in cardFriend ? cardFriend.likesReceived : 0}
           points={cardFriend.points}
           isVerified={cardFriend.isVerified}
           isLuckyPlayer={cardFriend.isLuckyPlayer}

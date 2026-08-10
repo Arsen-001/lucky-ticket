@@ -1,6 +1,7 @@
 import { api } from '@/api/index.api';
 import { rtkTags } from '@/constants/rtk-tags';
 import type {
+  BranchMember,
   InvitedFriend,
   PreparedShareMessage,
   ReferralStats,
@@ -15,6 +16,13 @@ export const referralApi = api.injectEndpoints({
     }),
     getReferralStats: builder.query<ReferralStats, void>({
       query: () => ({ url: 'referral/stats' }),
+      providesTags: [rtkTags.referral],
+    }),
+    // Who a friend invited in turn. Fetched only when a row is expanded — a
+    // branch can be many times the size of the list above it, and almost
+    // nobody opens one. The backend refuses for anyone who is not your friend.
+    getFriendBranch: builder.query<BranchMember[], { friendId: string }>({
+      query: ({ friendId }) => ({ url: `referral/friends/${friendId}/branch` }),
       providesTags: [rtkTags.referral],
     }),
     // No cache tags: the prepared message is single-use and cache-irrelevant —
@@ -65,6 +73,7 @@ export const referralApi = api.injectEndpoints({
 
 export const {
   useGetInvitedFriendsQuery,
+  useGetFriendBranchQuery,
   useGetReferralStatsQuery,
   useClaimFriendMutation,
   usePrepareShareMessageMutation,

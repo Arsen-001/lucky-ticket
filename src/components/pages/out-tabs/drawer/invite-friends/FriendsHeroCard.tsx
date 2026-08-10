@@ -135,8 +135,12 @@ export function FriendsHeroCard() {
             number beside the two above — at 390px three labelled stats push the
             title into an ellipsis. Money leads and the headcount follows: the
             count grows on its own and would read as a promise the payout has
-            not kept. Drawn only once a branch exists. @see ReferralCounts */}
-        {referrals.network > 0 && (
+            not kept.
+            Drawn for anyone who has invited ANYBODY, not only once a branch
+            exists: on prod just 20 players out of 876 have a second level
+            (measured 2026-08-10), so hiding the line at zero hid the mechanic
+            from everyone who could still go and build one. @see ReferralCounts */}
+        {referrals.invited > 0 && (
           <div className="flex items-center gap-2 rounded-lg px-2 py-2">
             <div className="bg-electric-purple/15 flex-center h-6 w-6 flex-shrink-0 rounded-md">
               <Network size={12} className="text-electric-purple" strokeWidth={2.4} />

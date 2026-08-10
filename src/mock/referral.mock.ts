@@ -1,5 +1,6 @@
 import { images } from '@/constants/images';
 import {
+  BranchMember,
   InvitedFriend,
   PreLaunchGiftState,
   PreparedShareMessage,
@@ -179,6 +180,50 @@ export const invitedFriendsMock: InvitedFriend[] = appConfig.account.fresh
       countsAsReferral: !MOCK_NOT_COUNTED.has(friend.id),
     }));
 
+const BRANCH_NAMES = [
+  'ruben_t',
+  'ani.k',
+  'davit_99',
+  'mher',
+  'sona_x',
+  'tigran.b',
+  'lilit',
+  'gor_a',
+  'narek',
+  'meline',
+  'vahe_k',
+  'arpi',
+];
+
+/**
+ * Who each friend went on to invite — the second level, keyed by friend id.
+ *
+ * Sized from each friend's own `broughtCount` so the badge on a row and the
+ * list it opens can never disagree. Most branches are empty on purpose: on
+ * prod only 20 players out of 876 have a second level at all, so a fixture
+ * where everyone has one would hide exactly the state most players see.
+ */
+const branchOf = (friendId: string, size: number): BranchMember[] =>
+  Array.from({ length: size }, (_, i) => ({
+    id: `${friendId}-b${i + 1}`,
+    username: BRANCH_NAMES[(Number(friendId) * 3 + i) % BRANCH_NAMES.length],
+    avatar: avatar(Number(friendId) * 7 + i * 5),
+    points: 120 + ((i * 137) % 900),
+    isVerified: i % 3 === 0,
+    isLuckyPlayer: i % 5 === 0,
+    isVIP: i === 0 && friendId === '1',
+    // Spread back from "now" by whole days, but as a FIXED string per row:
+    // a fixture computed from the clock makes every screenshot differ.
+    joinedAt: `2026-08-${String(2 + (i % 8)).padStart(2, '0')}T12:00:00.000Z`,
+    // The third level exists as a number and nothing more — the reward stops
+    // at the second, so there is no deeper list to open.
+    broughtCount: i === 0 ? 2 : 0,
+  }));
+
+export const friendBranchesMock: Record<string, BranchMember[]> = Object.fromEntries(
+  baseFriends.map(friend => [friend.id, branchOf(friend.id, friend.broughtCount ?? 0)])
+);
+
 export const referralStatsMock: ReferralStats = {
   totalInvited: invitedFriendsMock.length,
   // No `counted` here on purpose — it is derived from the friends roster, so
@@ -247,6 +292,15 @@ export const referralMock = {
   // handler should exist either way.
   ...Object.fromEntries(
     baseFriends.map(friend => [`POST referral/claim/${friend.id}`, () => ({})])
+  ),
+  // Same reason as the claim keys above: a branch is read per friend id and the
+  // resolver has no wildcards, so every friend gets a key — including the ones
+  // whose branch is empty, which is most of them.
+  ...Object.fromEntries(
+    baseFriends.map(friend => [
+      `referral/friends/${friend.id}/branch`,
+      friendBranchesMock[friend.id] ?? [],
+    ])
   ),
   'POST referral/shared': () => {
     console.log('[mock] referral/shared — player sent a referral share');

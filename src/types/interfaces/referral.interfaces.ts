@@ -35,9 +35,11 @@ export interface InvitedFriend {
    */
   branchLc?: number;
   /**
-   * How many people this friend went on to invite. A COUNT, never a list —
-   * it answers "which of my friends actually build a network", which is the
-   * only thing about the second level the inviter can act on.
+   * How many people this friend went on to invite. Always rendered, `0`
+   * included: on prod only 20 players out of 876 have any second level at all
+   * (measured 2026-08-10), so a badge that appeared only above zero was a
+   * mechanic nobody could discover. Who those people are loads on demand.
+   * @see BranchMember
    */
   broughtCount?: number;
   /**
@@ -56,6 +58,29 @@ export interface InvitedFriend {
    * "counts" rather than painting every existing friend as disqualified.
    */
   countsAsReferral?: boolean;
+}
+
+/**
+ * One person from a friend's branch — someone that friend invited, i.e. the
+ * second level (`GET referral/friends/:friendId/branch`).
+ *
+ * Carries no money of its own: the branch pays as one pooled figure through
+ * the friend it hangs off, so a per-person amount here would imply a claim
+ * that does not exist. @see InvitedFriend.branchLc
+ */
+export interface BranchMember {
+  id: string;
+  username: string;
+  displayName?: string;
+  avatar: string;
+  points: number;
+  isVerified: boolean;
+  isLuckyPlayer: boolean;
+  isVIP?: boolean;
+  /** ISO timestamp of when they joined through that friend's link. */
+  joinedAt: string;
+  /** How many they brought in turn — a number only; the reward stops here. */
+  broughtCount?: number;
 }
 
 export interface ReferralStats {
