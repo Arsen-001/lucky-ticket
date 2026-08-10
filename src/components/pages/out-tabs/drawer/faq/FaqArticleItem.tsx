@@ -26,15 +26,13 @@ export function FaqArticleItem({
   className,
   style,
 }: FaqArticleItemProps) {
-  return (
-    <NextLink
-      href={loading ? routes.faq.index : routes.faq.getById(article.id)}
-      style={style}
-      className={twMerge(
-        'group bg-background-overlay/50 hover:bg-white/5 flex items-center gap-3 rounded-2xl border border-white/5 p-3 transition-colors active:scale-99',
-        className
-      )}
-    >
+  const rowClassName = twMerge(
+    'group bg-background-overlay/50 hover:bg-white/5 flex items-center gap-3 rounded-2xl border border-white/5 p-3 transition-colors active:scale-99',
+    className
+  );
+
+  const face = (
+    <>
       <div className="bg-electric-pink/15 border-electric-pink/30 flex-center h-9 w-9 flex-shrink-0 rounded-lg border">
         <FileText size={16} className="text-electric-pink" strokeWidth={2.2} />
       </div>
@@ -67,6 +65,27 @@ export function FaqArticleItem({
         className="text-pink-secondary group-hover:text-white flex-shrink-0 transition-colors"
         strokeWidth={2.2}
       />
+    </>
+  );
+
+  // A placeholder row is NOT a link. It used to be one pointing at /faq itself,
+  // so a tap on a skeleton reloaded the screen the player was already on — and,
+  // because the title is the only text a row carries, a screen reader met eight
+  // links in a row with no name at all. `a11y.spec.ts` caught that on a loaded
+  // CI runner, where the list is still loading 1.5s in; on a fast machine the
+  // data always won the race and the defect was invisible. `aria-hidden`
+  // because a skeleton has nothing to announce.
+  if (loading) {
+    return (
+      <div style={style} className={rowClassName} aria-hidden>
+        {face}
+      </div>
+    );
+  }
+
+  return (
+    <NextLink href={routes.faq.getById(article.id)} style={style} className={rowClassName}>
+      {face}
     </NextLink>
   );
 }

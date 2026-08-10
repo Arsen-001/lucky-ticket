@@ -65,6 +65,11 @@ export function TicketsTierSummary({
                 }}
                 onClick={() => onChange(tab.key)}
                 aria-pressed={isActive}
+                // The tier name is the only text on the chip, and while the
+                // counts load it is a skeleton — leaving a row of buttons a
+                // screen reader can only call "button". The name itself never
+                // depended on the data, so it can be stated outright.
+                aria-label={isPartners ? t('partners') : t(tab.key as TicketType)}
                 className={twMerge(
                   'relative flex w-[72px] shrink-0 flex-col items-center justify-center gap-1 overflow-hidden rounded-xl px-2 py-2 transition-colors duration-300 active:scale-[0.96]',
                   isActive

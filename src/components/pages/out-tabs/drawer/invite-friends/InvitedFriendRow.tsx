@@ -86,9 +86,13 @@ export function InvitedFriendRow({
       )}
     >
       <div className="flex w-full items-center gap-3">
+        {/* A placeholder avatar is not a control: without a friend there is no
+            name to announce and nothing to open, so it used to sit in the tree
+            as a `role="button"` with no accessible name at all. The role goes
+            away with the data it describes. */}
         <div
-          role="button"
-          tabIndex={friend ? 0 : -1}
+          role={friend ? 'button' : undefined}
+          tabIndex={friend ? 0 : undefined}
           aria-label={friend ? t('open player card', { name: displayNameOf(friend) }) : undefined}
           onClick={e => {
             e.stopPropagation();
@@ -101,7 +105,10 @@ export function InvitedFriendRow({
               onOpenCard?.(friend);
             }
           }}
-          className="relative flex-shrink-0 cursor-pointer transition-transform active:scale-95"
+          className={twMerge(
+            'relative flex-shrink-0 transition-transform',
+            friend && 'cursor-pointer active:scale-95'
+          )}
         >
           <div className="h-11 w-11 overflow-hidden rounded-full">
             <SkeletonSuspense
