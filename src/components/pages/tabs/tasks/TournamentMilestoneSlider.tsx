@@ -44,8 +44,13 @@ export interface TournamentMilestoneSliderProps {
   title: string;
   /** Section subtitle shown beneath the title. */
   blurb: string;
-  /** Word displayed under the big number on each card (e.g. "prize place" / "tournaments"). */
-  unitLabel: string;
+  /**
+   * Word displayed under the big number on each card (e.g. "prize place" /
+   * "tournaments"). Takes the card's target, because one chain draws several
+   * targets (1, 2, 5, 25…) and a language with count agreement needs a
+   * different form for each — a fixed string printed «2 двигателей» in Russian.
+   */
+  unitLabel: (count: number) => string;
   /** Header icon (defaults to Trophy). */
   headerIcon?: LucideIcon;
   /** Header icon background gradient (Tailwind classes, e.g. "from-gold to-orange"). */
@@ -329,7 +334,7 @@ function MilestoneCard({
   task: Task;
   onClaim: (task: Task) => void;
   active: boolean;
-  unitLabel: string;
+  unitLabel: (count: number) => string;
   numberIcon?: LucideIcon;
   cardIconType?: TicketType;
   cardMedalType?: MedalType;
@@ -345,6 +350,7 @@ function MilestoneCard({
   const isLocked = task.status === TaskStatus.LOCKED;
   const isCompleted = task.status === TaskStatus.COMPLETED;
   const showProgress = task.progress.target > 1 && !isCompleted && !isLocked;
+  const unit = unitLabel(task.progress.target);
   const pct =
     task.progress.target > 0
       ? Math.min(100, Math.round((task.progress.current / task.progress.target) * 100))
@@ -468,7 +474,7 @@ function MilestoneCard({
       <div className="my-auto flex flex-col gap-2">
         {cardIconType || cardMedalType || cardImageSrc || CardLucideIcon ? (
           <span className="text-[10px] font-bold uppercase tracking-wider text-white/50">
-            {unitLabel}
+            {unit}
           </span>
         ) : NumberIcon ? (
           <div className="flex flex-col gap-0.5">
@@ -476,7 +482,7 @@ function MilestoneCard({
               {task.progress.target}
             </span>
             <span className="text-[10px] font-bold uppercase tracking-wider text-white/50">
-              {unitLabel}
+              {unit}
             </span>
           </div>
         ) : (
@@ -485,7 +491,7 @@ function MilestoneCard({
               {task.progress.target}
             </span>
             <span className="text-[10px] font-bold uppercase tracking-wider text-white/50">
-              {unitLabel}
+              {unit}
             </span>
           </div>
         )}

@@ -811,19 +811,19 @@ export function TasksContent() {
                 prefix: 'tournament-podium-',
                 title: t('podium milestones title'),
                 blurb: t('podium milestones blurb'),
-                unitLabel: t('podium'),
+                unitLabel: (count: number) => t('podium', { count }),
               },
               {
                 prefix: 'tournament-played-',
                 title: t('play count title'),
                 blurb: t('play count blurb'),
-                unitLabel: t('tournament participation'),
+                unitLabel: (count: number) => t('tournament participation', { count }),
               },
               {
                 prefix: 'tournament-1st-',
                 title: t('place 1st title'),
                 blurb: t('place 1st blurb'),
-                unitLabel: t('place 1st'),
+                unitLabel: (count: number) => t('place 1st', { count }),
               },
             ];
 
@@ -911,7 +911,7 @@ export function TasksContent() {
                         onClaim={handleClaimTask}
                         title={t('tickets collected title')}
                         blurb={t('tickets collected blurb')}
-                        unitLabel={t('tickets collected')}
+                        unitLabel={count => t('tickets collected', { count })}
                         headerIcon={Ticket}
                         headerGradient="from-electric-pink to-pink"
                         numberIcon={Ticket}
@@ -925,7 +925,7 @@ export function TasksContent() {
                         onClaim={handleClaimTask}
                         title={t('engines owned title')}
                         blurb={t('engines owned blurb')}
-                        unitLabel={t('engines owned')}
+                        unitLabel={count => t('engines owned', { count })}
                         headerIcon={Cog}
                         headerGradient="from-platinum to-electric-purple"
                         numberIcon={Cog}
@@ -939,7 +939,7 @@ export function TasksContent() {
                         onClaim={handleClaimTask}
                         title={t('leaderboard rank title period', { period: t('all time') })}
                         blurb={t('leaderboard rank blurb')}
-                        unitLabel={t('leaderboard rank')}
+                        unitLabel={() => t('leaderboard rank')}
                         headerIcon={BarChart3}
                         headerGradient="from-diamond to-electric-purple"
                         numberIcon={BarChart3}
@@ -953,7 +953,7 @@ export function TasksContent() {
                       onClaim={handleClaimTask}
                       title={t('friends invited title')}
                       blurb={t('friends invited blurb')}
-                      unitLabel={t('friends invited')}
+                      unitLabel={count => t('friends invited {count}', { count })}
                       headerIcon={Users}
                       headerGradient="from-pink to-electric-pink"
                       numberIcon={Users}
@@ -965,7 +965,7 @@ export function TasksContent() {
                       onClaim={handleClaimTask}
                       title={t('ads watched title')}
                       blurb={t('ads watched blurb')}
-                      unitLabel={t('ads watched')}
+                      unitLabel={count => t('ads watched {count}', { count })}
                       headerIcon={Eye}
                       headerGradient="from-teal to-electric-purple"
                       numberIcon={Eye}
@@ -978,7 +978,7 @@ export function TasksContent() {
                       onClaim={handleClaimTask}
                       title={t('level up vip title')}
                       blurb={t('level up vip blurb')}
-                      unitLabel={t('level up vip')}
+                      unitLabel={() => t('level up vip')}
                       headerIcon={Crown}
                       headerGradient="from-gold to-platinum"
                       numberIcon={Crown}
@@ -991,7 +991,7 @@ export function TasksContent() {
                         onClaim={handleClaimTask}
                         title={t('stars purchased title')}
                         blurb={t('stars purchased blurb')}
-                        unitLabel={t('stars purchased')}
+                        unitLabel={() => t('stars purchased')}
                         headerIcon={Star}
                         headerGradient="from-warning to-gold"
                         numberIcon={Star}
@@ -1006,7 +1006,7 @@ export function TasksContent() {
                           onClaim={handleClaimTask}
                           title={t('stakes count title')}
                           blurb={t('stakes count blurb')}
-                          unitLabel={t('stakes count')}
+                          unitLabel={count => t('stakes count', { count })}
                           headerIcon={PiggyBank}
                           headerGradient="from-teal to-diamond"
                           numberIcon={PiggyBank}
@@ -1019,7 +1019,7 @@ export function TasksContent() {
                           onClaim={handleClaimTask}
                           title={t('stakes volume title')}
                           blurb={t('stakes volume blurb')}
-                          unitLabel={t('stakes volume')}
+                          unitLabel={() => t('stakes volume')}
                           headerIcon={Coins}
                           headerGradient="from-warning to-gold"
                           numberIcon={Coins}
