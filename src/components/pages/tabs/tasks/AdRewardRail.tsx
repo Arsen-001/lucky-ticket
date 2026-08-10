@@ -7,7 +7,7 @@ import { useAppTranslations } from '@/hooks/useAppTranslations';
 import { triggerHaptic } from '@/utils/global/haptic.utils';
 import { TaskRewardType } from '@/types/enums/tasks.enums';
 import type { AdSlot } from '@/types/interfaces/tasks.interfaces';
-import { AdRailLens, adLensWidth } from './AdRailLens';
+import { AdRailLens } from './AdRailLens';
 
 /** Currencies an ordinary view never pays — what makes a slot worth marking. */
 const RARE_TYPES: TaskRewardType[] = [TaskRewardType.STARS, TaskRewardType.TICKETS];
@@ -148,19 +148,10 @@ export function AdRewardRail({ slots, activeIndex, className }: AdRewardRailProp
   const shownIndex = scrub?.index ?? (activeIndex >= 0 ? activeIndex : slots.length - 1);
   const showIcons = slots.length <= ICON_LIMIT;
 
-  // Centre of the scrubbed tick, pulled inside the track so the lens never hangs
-  // off the card. The lens widens for a three-reward view, so its own width is
-  // the authority here. A track narrower than the lens can only ever centre it.
-  const lensW = scrubSlot ? adLensWidth(scrubSlot) : 0;
-  const lensLeft =
-    scrub && scrubSlot
-      ? scrub.trackW <= lensW
-        ? scrub.trackW / 2
-        : Math.min(
-            Math.max(((scrub.index + 0.5) / slots.length) * scrub.trackW, lensW / 2),
-            scrub.trackW - lensW / 2
-          )
-      : 0;
+  // Centre of the scrubbed tick. Keeping it inside the card is the lens's own
+  // job — only it knows how wide the day's rewards and the locale's wording
+  // made it, and that is a measurement, not a number this file can predict.
+  const tickCenter = scrub ? ((scrub.index + 0.5) / slots.length) * scrub.trackW : 0;
 
   return (
     <div
@@ -252,12 +243,13 @@ export function AdRewardRail({ slots, activeIndex, className }: AdRewardRailProp
           );
         })}
 
-        {scrubSlot && (
+        {scrub && scrubSlot && (
           <AdRailLens
             slot={scrubSlot}
             offset={activeIndex >= 0 ? scrubSlot.index - activeIndex : -1}
             rich={standout.has(scrubSlot.id)}
-            left={lensLeft}
+            center={tickCenter}
+            trackW={scrub.trackW}
           />
         )}
       </div>

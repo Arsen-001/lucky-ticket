@@ -1,5 +1,6 @@
 import { expect, test, type Page } from '@playwright/test';
 import { STATIC_ROUTES } from './routes';
+import { appDialogs } from './helpers';
 
 /**
  * Engine-agnostic layout invariants — the net that catches a rendering engine
@@ -186,6 +187,94 @@ for (const width of WIDTHS) {
     });
   });
 }
+
+/**
+ * The ad rail's scrub lens, against the widest wording the app ships.
+ *
+ * It carried a hard-coded width (176px, 216 for a three-reward view) sized on
+ * the English header — "View #20 · in 19 views". Russian says the same thing in
+ * "Просмотр №20 · через 19 показов", half again as long, so the status ran
+ * straight out through the rounded border and the title broke mid-word. Nothing
+ * in a type-check, a lint or the English smoke can see that: the strings live
+ * in `messages/*.json` and the box was a number in a `.tsx`.
+ *
+ * So this asserts the contract, not the number — whatever the lens ends up
+ * measuring, it stays inside the rail it belongs to and its header stays on one
+ * line. Narrowest phone, Russian locale, dragged end to end: that is the worst
+ * case the app can produce.
+ */
+test.describe('ad rail lens', () => {
+  test.use({ viewport: { width: SWEEP_WIDTH, height: 900 } });
+
+  test('scrub bubble stays inside the rail in every locale it ships', async ({
+    page,
+    context,
+    baseURL,
+  }) => {
+    await context.addCookies([{ name: 'locale', value: 'ru', url: baseURL ?? '' }]);
+    await page.goto('/tasks', { waitUntil: 'domcontentloaded' });
+    await page.getByTestId('app-shell').waitFor({ timeout: SLOW });
+
+    const track = page.locator('[role="slider"] > div').first();
+    await track.waitFor({ timeout: SLOW });
+
+    // The daily-gift sheet rides in on its own query, i.e. AFTER the rail is
+    // already on screen — dismissing once at load finds nothing and then a
+    // fixed overlay silently eats the drag. Keep sweeping for a few seconds.
+    for (let i = 0; i < 6; i++) {
+      await page.waitForTimeout(500);
+      if (await appDialogs(page).count()) await page.keyboard.press('Escape');
+    }
+    expect(await appDialogs(page).count(), 'a modal is covering the ad rail').toBe(0);
+
+    await track.scrollIntoViewIfNeeded();
+    await page.waitForTimeout(600);
+
+    const box = await track.boundingBox();
+    expect(box, 'ad rail never laid out').not.toBeNull();
+    if (!box) return;
+    const y = box.y + box.height / 2;
+
+    await page.mouse.move(box.x + box.width * 0.02, y);
+    await page.mouse.down();
+
+    for (const fraction of [0.02, 0.25, 0.5, 0.75, 0.98]) {
+      await page.mouse.move(box.x + box.width * fraction, y);
+      await page.waitForTimeout(150);
+
+      const lens = await page.evaluate(() => {
+        const rail = document.querySelector('[role="slider"]');
+        const track = rail?.firstElementChild as HTMLElement | undefined;
+        const lens = rail?.querySelector('[class*="bottom-full"]') as HTMLElement | null;
+        if (!track || !lens) return null;
+        const header = lens.firstElementChild as HTMLElement;
+        const l = lens.getBoundingClientRect();
+        const t = track.getBoundingClientRect();
+        return {
+          text: lens.innerText.replace(/\n/g, ' · '),
+          spillLeft: t.left - l.left,
+          spillRight: l.right - t.right,
+          headerClipped: header.scrollWidth - header.clientWidth,
+          headerHeight: header.getBoundingClientRect().height,
+        };
+      });
+
+      expect(lens, `no lens at ${fraction} of the rail`).not.toBeNull();
+      if (!lens) continue;
+      const where = `"${lens.text}"`;
+      expect(lens.spillLeft, `lens hangs off the left of the rail — ${where}`).toBeLessThan(1);
+      expect(lens.spillRight, `lens hangs off the right of the rail — ${where}`).toBeLessThan(1);
+      expect(lens.headerClipped, `lens header is clipped — ${where}`).toBeLessThan(1);
+      // One line of an 11/13px header is ~20px; two are ~36. Anything past 26
+      // means the title wrapped, which is the same defect seen from the inside.
+      expect(lens.headerHeight, `lens header wrapped onto a second line — ${where}`).toBeLessThan(
+        26
+      );
+    }
+
+    await page.mouse.up();
+  });
+});
 
 test.describe(`no screen scrolls sideways at ${SWEEP_WIDTH}px`, () => {
   test.use({ viewport: { width: SWEEP_WIDTH, height: 900 } });
