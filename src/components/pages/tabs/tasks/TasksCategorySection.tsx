@@ -13,6 +13,7 @@ import { TaskItemRow } from './TaskItemRow';
 import { SectionShine } from './SectionShine';
 import { staggerMs } from '@/utils/global/animation.utils';
 import { ClaimableDot } from '@/components/shared/badges/ClaimableDot';
+import { layoutForTask } from '@/utils/pages/task-layout.utils';
 
 export interface TasksCategorySectionProps {
   category: TaskCategory;
@@ -201,7 +202,11 @@ export function TasksCategorySection({
                 ? undefined
                 : { animationDelay: `${staggerMs(i, 60)}ms` };
               const taskShine = taskHighlight?.id === task.id ? taskHighlight.nonce : null;
-              if (layout === 'grid') {
+              // Not the section's `layout` directly: a task carrying sub-steps
+              // is drawn as a card wherever it sits, because the other two
+              // shapes drop its steps without a word. @see layoutForTask
+              const taskLayout = layoutForTask(task, layout);
+              if (taskLayout === 'grid') {
                 return (
                   <TaskItemCardCompact
                     key={task.id}
@@ -216,7 +221,7 @@ export function TasksCategorySection({
                   />
                 );
               }
-              if (layout === 'rows') {
+              if (taskLayout === 'rows') {
                 return (
                   <TaskItemRow
                     key={task.id}
@@ -239,7 +244,9 @@ export function TasksCategorySection({
                     setOpenTaskId(prev => (prev === task.id ? null : task.id))
                   }
                   highlightToken={taskShine}
-                  className={animationClass}
+                  // A card promoted out of a two-column grid takes the full
+                  // width — at half of it the accordion's rows are unreadable.
+                  className={twMerge(animationClass, layout === 'grid' && 'col-span-2')}
                   style={animationStyle}
                   pinned={isPinned}
                   pinDisabled={pinDisabled}
