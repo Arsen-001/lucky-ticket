@@ -16,7 +16,7 @@ import {
 import { FriendsClaimSummaryCard } from '@/components/pages/out-tabs/drawer/invite-friends/FriendsClaimSummaryCard';
 import { FriendsQualificationNote } from '@/components/pages/out-tabs/drawer/invite-friends/FriendsQualificationNote';
 import { useAppTranslations } from '@/hooks/useAppTranslations';
-import { claimableLcOf, countsAsReferral } from '@/utils/pages/referral.utils';
+import { countsAsReferral, totalClaimableLcOf } from '@/utils/pages/referral.utils';
 import type { InvitedFriend } from '@/types/interfaces/referral.interfaces';
 import type { TicketType } from '@/types/types/ticket.types';
 import { useToast } from '@/hooks/useToast';
@@ -40,7 +40,7 @@ const sumTickets = (friend: InvitedFriend) =>
  * a button the API is about to 403 is worse than no button.
  */
 const hasSomethingToClaim = (friend: InvitedFriend) =>
-  (claimableLcOf(friend) > 0 && countsAsReferral(friend)) || sumTickets(friend) > 0;
+  (totalClaimableLcOf(friend) > 0 && countsAsReferral(friend)) || sumTickets(friend) > 0;
 
 export const InvitedFriendsList = () => {
   const t = useAppTranslations();
@@ -68,7 +68,8 @@ export const InvitedFriendsList = () => {
   }, [friends]);
 
   const claimableLc = useMemo(
-    () => friends.filter(countsAsReferral).reduce((sum, friend) => sum + claimableLcOf(friend), 0),
+    () =>
+      friends.filter(countsAsReferral).reduce((sum, friend) => sum + totalClaimableLcOf(friend), 0),
     [friends]
   );
 
@@ -88,7 +89,7 @@ export const InvitedFriendsList = () => {
       const aReady = hasSomethingToClaim(a) ? 1 : 0;
       const bReady = hasSomethingToClaim(b) ? 1 : 0;
       if (aReady !== bReady) return bReady - aReady;
-      return claimableLcOf(b) - claimableLcOf(a) || b.points - a.points;
+      return totalClaimableLcOf(b) - totalClaimableLcOf(a) || b.points - a.points;
     });
   }, [friends, tab]);
 
@@ -110,7 +111,7 @@ export const InvitedFriendsList = () => {
 
     const totalLc = targets
       .filter(countsAsReferral)
-      .reduce((sum, friend) => sum + claimableLcOf(friend), 0);
+      .reduce((sum, friend) => sum + totalClaimableLcOf(friend), 0);
 
     setIsClaimingAll(true);
     let claimed = 0;

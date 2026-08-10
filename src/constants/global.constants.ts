@@ -81,7 +81,16 @@ export const GlobalConstants = {
    * live value rides on `GET /config` (`referral.tournamentLcPct`) so an admin
    * retune reaches the screen without a deploy. @see useReferralReward
    */
-  referralTournamentLcPercentage: 5,
+  referralTournamentLcPercentage: 4,
+  /**
+   * The SECOND level: this % of a friend-of-a-friend's tournament prize goes to
+   * whoever invited the middle link.
+   *
+   * Carved out of the number above rather than added to it — the pair is the
+   * flat 5% that used to be one level. Display fallback only; the live value
+   * rides on `GET /config` (`referral.tournamentLcL2Pct`).
+   */
+  referralTournamentLcL2Percentage: 1,
   /** Engine cycle speed reduction granted by Lucky Player status (stacks with chips/boosters). */
   luckyPlayerEngineSpeedBoostPct: 10,
   /** Flat discount applied to every Market item price for Lucky Player holders (DOCS §7.3). */

@@ -1,7 +1,7 @@
 'use client';
 
 import Image from 'next/image';
-import { ChevronRight, Lock, Star } from 'lucide-react';
+import { ChevronRight, Lock, Star, Users } from 'lucide-react';
 import { twMerge } from 'tailwind-merge';
 import { Skeleton } from '@/components/shared/seleketons/Skeleton';
 import { SkeletonSuspense } from '@/components/shared/seleketons/SkeletonSuspense';
@@ -13,7 +13,7 @@ import { FriendNotCountedBadge } from '@/components/pages/out-tabs/drawer/invite
 import { useAppTranslations } from '@/hooks/useAppTranslations';
 import { formatCompact } from '@/utils/global/number.utils';
 import { GlobalConstants } from '@/constants/global.constants';
-import { claimableLcOf, countsAsReferral } from '@/utils/pages/referral.utils';
+import { broughtCountOf, countsAsReferral, totalClaimableLcOf } from '@/utils/pages/referral.utils';
 import type { InvitedFriend } from '@/types/interfaces/referral.interfaces';
 import { displayNameOf } from '@/utils/global/user.utils';
 import type { CSSProperties } from 'react';
@@ -39,7 +39,10 @@ export function InvitedFriendRow({
 }: InvitedFriendRowProps) {
   const t = useAppTranslations();
 
-  const lc = claimableLcOf(friend);
+  // Their own wins and their branch, as one figure — one button pays both.
+  // @see totalClaimableLcOf
+  const lc = totalClaimableLcOf(friend);
+  const brought = broughtCountOf(friend);
   const legacyTickets = friend?.claimableTickets ?? [];
   const legacyTicketCount = legacyTickets.reduce((sum, ticket) => sum + ticket.amount, 0);
   const isReferral = !friend || countsAsReferral(friend);
@@ -150,11 +153,25 @@ export function InvitedFriendRow({
                 <BoltIcon size={16} />
                 {formatCompact(friend?.points ?? 0)}
               </span>
+              {/* The second level, as the only thing about it the inviter can
+                  act on: WHICH friends build a network. A count and never a
+                  list — the people in a branch are strangers to whoever is
+                  reading this row. @see InvitedFriend.broughtCount */}
+              {brought > 0 && (
+                <span
+                  className="text-pink-secondary flex flex-shrink-0 items-center gap-1 font-semibold tabular-nums"
+                  aria-label={t('brought {count} friends', { count: brought })}
+                >
+                  <Users size={12} className="flex-shrink-0" />
+                  {brought}
+                </span>
+              )}
               {/* Dropped whenever the row is tight — when a legacy ticket
-                  stack shares the right column, and on 320px screens. The gold
-                  border and the amount already say "ready"; keeping the words
-                  cost the NAME its width and rendered «Д…» in German. */}
-              {claimableNow && legacyTicketCount === 0 && (
+                  stack shares the right column, on 320px screens, and now also
+                  when the branch badge is using that width. The gold border and
+                  the amount already say "ready"; keeping the words cost the
+                  NAME its width and rendered «Д…» in German. */}
+              {claimableNow && legacyTicketCount === 0 && brought === 0 && (
                 <span className="text-pink-secondary hidden truncate min-[360px]:inline">
                   · {t('ready to claim')}
                 </span>

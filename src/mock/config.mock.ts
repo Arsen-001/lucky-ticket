@@ -37,6 +37,7 @@ const getPublicConfig = (): PublicConfig => ({
     },
     hasRewardLadder: false,
     tournamentLcPct: GlobalConstants.referralTournamentLcPercentage,
+    tournamentLcL2Pct: GlobalConstants.referralTournamentLcL2Percentage,
   },
   jackpot: {
     accrualPercent: appConfig.jackpot.accrualPercent,

@@ -42,6 +42,12 @@ export interface PublicConfig {
      * not change it.
      */
     tournamentLcPct?: number;
+    /**
+     * The second level: this % of a friend-of-a-friend's tournament prize goes
+     * to whoever invited the middle link. `0` = the second level is off and the
+     * screen stops mentioning it.
+     */
+    tournamentLcL2Pct?: number;
   };
   /** Jackpot split display values (admin-editable, DOCS §20). */
   jackpot?: {

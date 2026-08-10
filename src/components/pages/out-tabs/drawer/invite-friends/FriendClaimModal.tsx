@@ -11,7 +11,7 @@ import { Ticket } from '@/components/shared/icons/Ticket';
 import { VipIcon } from '@/components/shared/icons/VipIcon';
 import { GlobalConstants } from '@/constants/global.constants';
 import { useAppTranslations } from '@/hooks/useAppTranslations';
-import { claimableLcOf } from '@/utils/pages/referral.utils';
+import { branchLcOf, claimableLcOf, totalClaimableLcOf } from '@/utils/pages/referral.utils';
 import type { ClaimableTicket, InvitedFriend } from '@/types/interfaces/referral.interfaces';
 import { displayNameOf } from '@/utils/global/user.utils';
 import { staggerMs } from '@/utils/global/animation.utils';
@@ -36,6 +36,7 @@ export function FriendClaimModal({
   // so reading it live would blank the celebration the moment it opens.
   const [snapshot, setSnapshot] = useState<{
     lc: number;
+    branchLc: number;
     tickets: ClaimableTicket[];
   } | null>(null);
   const triggeredRef = useRef(false);
@@ -47,13 +48,19 @@ export function FriendClaimModal({
       return;
     }
     if (triggeredRef.current) return;
-    if (claimableLcOf(friend) === 0 && friend.claimableTickets.length === 0) return;
+    if (totalClaimableLcOf(friend) === 0 && friend.claimableTickets.length === 0) return;
     triggeredRef.current = true;
-    setSnapshot({ lc: claimableLcOf(friend), tickets: friend.claimableTickets });
+    setSnapshot({
+      lc: claimableLcOf(friend),
+      branchLc: branchLcOf(friend),
+      tickets: friend.claimableTickets,
+    });
     void onClaim(friend.id);
   }, [open, friend, onClaim]);
 
-  const lc = snapshot?.lc ?? claimableLcOf(friend);
+  const ownLc = snapshot?.lc ?? claimableLcOf(friend);
+  const branchLc = snapshot?.branchLc ?? branchLcOf(friend);
+  const lc = ownLc + branchLc;
   const tickets = snapshot?.tickets ?? friend.claimableTickets;
 
   return (
@@ -119,6 +126,17 @@ export function FriendClaimModal({
             <span className="mt-0.5 text-xs text-white/85">
               {t('rewards from {name}', { name: displayNameOf(friend) })}
             </span>
+            {/* The one place the two levels are stated apart. The row and the
+                header show a single figure because a single button pays it;
+                here there is room to say where it came from. */}
+            {branchLc > 0 && (
+              <span className="mt-1 text-[11px] font-semibold text-white/70 tabular-nums">
+                {t('own {own} · network {network}', {
+                  own: ownLc.toLocaleString(),
+                  network: branchLc.toLocaleString(),
+                })}
+              </span>
+            )}
             <div className="mt-2 flex flex-wrap items-center justify-center gap-1.5">
               {friend.isVerified && (
                 <span className="inline-flex items-center gap-1 rounded-full bg-white/15 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider text-white">

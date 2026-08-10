@@ -25,6 +25,22 @@ export interface InvitedFriend {
    */
   claimableLc?: number;
   /**
+   * The SECOND level: your cut of what everyone THIS friend invited has won,
+   * pooled into one number (DOCS §17.2).
+   *
+   * Deliberately never broken down per person — you have no relationship with
+   * the players in a friend's branch and the screen does not name them. It is
+   * paid by the same button and frozen by the same verdict as the friend's own
+   * reward, because the branch only exists through them.
+   */
+  branchLc?: number;
+  /**
+   * How many people this friend went on to invite. A COUNT, never a list —
+   * it answers "which of my friends actually build a network", which is the
+   * only thing about the second level the inviter can act on.
+   */
+  broughtCount?: number;
+  /**
    * LEGACY: leftover commission from the ticket rule this replaced. Nothing
    * accrues here any more; it drains to zero as people claim it, and the UI
    * shows it only while a friend still has some.

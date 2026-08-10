@@ -25,6 +25,10 @@ const baseFriends: Omit<InvitedFriend, 'liked' | 'likesReceived'>[] = [
   {
     id: '1',
     claimableLc: 4820,
+    // The rare friend who actually builds: brought people AND some of them
+    // have won. On prod only ~10% of invited players ever invite anybody.
+    broughtCount: 7,
+    branchLc: 1240,
     username: 'john_doe',
     displayName: 'Джон 🎰',
     avatar: avatar(12),
@@ -78,6 +82,12 @@ const baseFriends: Omit<InvitedFriend, 'liked' | 'likesReceived'>[] = [
   {
     id: '5',
     claimableLc: 27650,
+    // The COMMON shape, and the one the layout has to survive: a visible
+    // branch that has produced nothing yet, because tournament prizes reach a
+    // small fraction of players. A big count beside an empty amount is the
+    // realistic case, not the polished one.
+    broughtCount: 12,
+    branchLc: 0,
     username: 'mike_brown',
     avatar: avatar(60),
     isLuckyPlayer: true,
@@ -101,6 +111,8 @@ const baseFriends: Omit<InvitedFriend, 'liked' | 'likesReceived'>[] = [
   {
     id: '7',
     claimableLc: 3090,
+    broughtCount: 2,
+    branchLc: 260,
     username: 'omar_amini',
     avatar: avatar(15),
     isLuckyPlayer: true,

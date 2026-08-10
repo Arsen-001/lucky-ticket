@@ -14,3 +14,16 @@ export function useReferralTournamentPct(): number {
   const { data } = useGetPublicConfigQuery();
   return data?.referral?.tournamentLcPct ?? GlobalConstants.referralTournamentLcPercentage;
 }
+
+/**
+ * The second level (DOCS §17.2): a friend-of-a-friend's tournament prize pays
+ * this % to whoever invited the middle link.
+ *
+ * `0` means the second level is switched off, and the screen must then stop
+ * mentioning it — which is why this reads the live value and never assumes the
+ * bundled fallback is what an operator actually left running.
+ */
+export function useReferralTournamentL2Pct(): number {
+  const { data } = useGetPublicConfigQuery();
+  return data?.referral?.tournamentLcL2Pct ?? GlobalConstants.referralTournamentLcL2Percentage;
+}

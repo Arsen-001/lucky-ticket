@@ -1,9 +1,9 @@
 'use client';
 
-import { Coins, Trophy, UserPlus } from 'lucide-react';
+import { Coins, Network, Trophy, UserPlus } from 'lucide-react';
 import type { ReactNode } from 'react';
 import { useAppTranslations } from '@/hooks/useAppTranslations';
-import { useReferralTournamentPct } from '@/hooks/useReferralReward';
+import { useReferralTournamentL2Pct, useReferralTournamentPct } from '@/hooks/useReferralReward';
 
 interface RewardStep {
   key: string;
@@ -24,6 +24,7 @@ interface RewardStep {
 export const ReferralInfoSection = () => {
   const t = useAppTranslations();
   const pct = useReferralTournamentPct();
+  const l2Pct = useReferralTournamentL2Pct();
 
   const steps: RewardStep[] = [
     {
@@ -47,6 +48,20 @@ export const ReferralInfoSection = () => {
       icon: <Coins size={14} className="text-success" strokeWidth={2.4} />,
       iconWrapClass: 'bg-success/20',
     },
+    // The fourth step exists only while the second level actually pays. An
+    // operator who sets it to 0 must take the promise down with it, which is
+    // why the percentage is read live rather than assumed from the bundle.
+    ...(l2Pct > 0
+      ? [
+          {
+            key: 'network',
+            title: t('referral step network title', { percent: l2Pct }),
+            body: t('referral step network body'),
+            icon: <Network size={14} className="text-electric-purple" strokeWidth={2.4} />,
+            iconWrapClass: 'bg-electric-purple/20',
+          },
+        ]
+      : []),
   ];
 
   return (
@@ -58,8 +73,11 @@ export const ReferralInfoSection = () => {
         <h3 className="text-pink-secondary text-xs font-bold uppercase tracking-wider">
           {t('rewards explained')}
         </h3>
+        {/* Both levels, because one number alone understates what the screen
+            below promises — and the smaller one is drawn smaller so the badge
+            still reads as "what a direct friend pays" at a glance. */}
         <span className="text-success text-base font-extrabold leading-none tabular-nums">
-          +{pct}%
+          +{pct}%{l2Pct > 0 && <span className="text-electric-purple ml-1 text-xs">+{l2Pct}%</span>}
         </span>
       </div>
 
