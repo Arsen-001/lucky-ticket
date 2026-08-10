@@ -382,19 +382,21 @@ const joinTournament = (args: { body?: unknown }) => {
 // non-undefined body — `undefined` reads as "no mock" (404) in the base query,
 // which undid the optimistic patch and re-opened the result popup every boot.
 //
-// Once served, each tournament object is deep-frozen by Immer's auto-freeze as
-// it enters the RTK store, so assigning `resultSeen` in place throws
-// ("Cannot assign to read only property 'resultSeen'"). That rejection made the
-// POST 500, which undid the optimistic patch — the exact popup-replay this was
-// meant to prevent. Swap the array slot for a fresh (unfrozen) copy instead: the
-// list handler and the by-id detail traversal share this array reference, so
-// both pick up the change on their next refetch.
+// NOTHING THE MOCK HAS SERVED IS WRITABLE. Immer's auto-freeze deep-freezes
+// every response on its way into the RTK store, and the fixtures are handed out
+// by reference — so the freeze reaches the module-level array itself, not just
+// the objects in it. Round one of this bug assigned `resultSeen` on the object
+// ("Cannot assign to read only property 'resultSeen'"); round two swapped the
+// array slot instead and moved the throw one level out, to
+// "Cannot assign to read only property '17' of object '[object Array]'" — same
+// 500, same popup replay, and in CI it also left a dev error overlay on screen
+// that swallowed clicks meant for the app's own dialogs.
+//
+// So mutable state lives OUTSIDE the fixture and is applied on read, and every
+// handler returns a fresh array (see `serveTournaments`).
 const markTournamentResultSeen = (args: { body?: unknown }) => {
   const body = (args.body ?? {}) as { tournamentId?: string };
-  const index = servedTournaments.findIndex(tour => tour.id === body.tournamentId);
-  if (index !== -1) {
-    servedTournaments[index] = { ...servedTournaments[index], resultSeen: true };
-  }
+  if (body.tournamentId) resultSeenIds.add(body.tournamentId);
   return {};
 };
 
@@ -450,7 +452,7 @@ const createSponsoredTournament = (args: { body?: unknown }) => {
     },
   };
 
-  tournaments.unshift(tournament);
+  createdTournaments.unshift(tournament);
   const response: CreateSponsoredTournamentResponse = { success: true, tournament };
   return response;
 };
@@ -461,10 +463,10 @@ const createSponsoredTournament = (args: { body?: unknown }) => {
  */
 const approveSponsoredTournament = (args: { body?: unknown }) => {
   const body = (args.body ?? {}) as { tournamentId?: string };
-  const tournament = tournaments.find(
+  const tournament = serveTournaments().find(
     tour => tour.id === body.tournamentId && tour.status === 'moderation'
   );
-  if (tournament) tournament.status = 'upcoming';
+  if (tournament) approvedIds.add(tournament.id);
   return { success: Boolean(tournament) };
 };
 
@@ -480,19 +482,46 @@ const freshTournaments: PersonalTournament[] = tournaments.map(tournament => ({
 
 const servedTournaments = fresh ? freshTournaments : tournaments;
 
+// ── mock backend state ──────────────────────────────────────────────────────
+// The catalog fixture is read-only once served (see `markTournamentResultSeen`),
+// so everything a session changes about it is kept here and applied on read.
+/** Finished tournaments whose result popup the player has already dismissed. */
+const resultSeenIds = new Set<string>();
+/** Sponsored tournaments approved out of moderation this session. */
+const approvedIds = new Set<string>();
+/** Sponsored tournaments created this session — newest first, like the server. */
+const createdTournaments: PersonalTournament[] = [];
+
+/**
+ * The catalog as the server would render it right now. Always a NEW array: what
+ * a handler returns is frozen on arrival in the store, so returning the fixture
+ * by reference is what made it unwritable in the first place.
+ */
+const serveTournaments = (): PersonalTournament[] =>
+  [...createdTournaments, ...servedTournaments].map(tournament => {
+    const seen = resultSeenIds.has(tournament.id);
+    const approved = approvedIds.has(tournament.id);
+    if (!seen && !approved) return tournament;
+    return {
+      ...tournament,
+      ...(seen ? { resultSeen: true } : {}),
+      ...(approved ? { status: 'upcoming' as const } : {}),
+    };
+  });
+
 // Sponsored tournaments (DOCS §11.8) are real joinable tournaments that carry
 // advertiser branding via a `sponsor` field; the demo seeds several above
 // (createdByMe). The partner cabinet only owns the advertiser balance now.
 
 export const tournamentsMock = {
-  // `GET tournaments` wins over the raw `tournaments` array, which is kept for
+  // `GET tournaments` wins over the `tournaments` thunk, which is kept for
   // `tournaments/{id}` + `/places` path traversal.
-  'GET tournaments': () => servedTournaments,
+  'GET tournaments': () => serveTournaments(),
   topTournaments: () =>
-    servedTournaments.filter(
+    serveTournaments().filter(
       tournament => tournament.status === 'upcoming' && !tournament.participated
     ),
-  tournaments: servedTournaments,
+  tournaments: () => serveTournaments(),
   'POST tournaments/join': joinTournament,
   'POST tournaments/result-seen': markTournamentResultSeen,
   'POST tournaments/sponsored': createSponsoredTournament,

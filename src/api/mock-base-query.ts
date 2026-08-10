@@ -57,6 +57,13 @@ export const mockBaseQuery =
       for (const segment of segments) {
         if (!current) return undefined;
 
+        // A collection mid-path may be a thunk, so a fixture that carries
+        // session state (a created tournament, a dismissed result) can hand out
+        // a fresh array per request instead of a shared — and, once served,
+        // frozen — one. `tournaments/{id}` traverses through exactly that.
+        if (typeof current === 'function') current = (current as () => unknown)();
+        if (!current) return undefined;
+
         if (Array.isArray(current)) {
           // If we encounter an array, we assume the segment is an ID
           current = current.find(item => {
@@ -97,7 +104,10 @@ export const mockBaseQuery =
 
       return { data: result };
     } catch (error) {
-      console.error(`[MockBaseQuery] Execution error:`, error);
+      // The endpoint belongs in the message: without it a fixture bug reads as
+      // an anonymous `TypeError` repeated across every screen, and finding the
+      // handler behind it costs an afternoon.
+      console.error(`[MockBaseQuery] Execution error: ${method} ${url}`, error);
       return {
         error: {
           status: 500,

@@ -1,5 +1,6 @@
 import { test, expect, type Page } from '@playwright/test';
 import { STATIC_ROUTES } from './routes';
+import { appDialogs } from './helpers';
 
 /**
  * Two things that are invisible in review and invisible on screen, so they only
@@ -25,7 +26,7 @@ import { STATIC_ROUTES } from './routes';
  */
 async function dismissAutoDialogs(page: Page) {
   for (let i = 0; i < 5; i++) {
-    const dialog = page.locator('[role="dialog"]').first();
+    const dialog = appDialogs(page).first();
     if (!(await dialog.isVisible().catch(() => false))) return;
     const buttons = dialog.locator('button');
     const count = await buttons.count();

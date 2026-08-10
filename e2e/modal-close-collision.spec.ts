@@ -1,4 +1,5 @@
 import { expect, test, type Page } from '@playwright/test';
+import { appDialogs } from './helpers';
 
 /**
  * Nothing inside a dialog may be painted under its close button.
@@ -105,7 +106,7 @@ async function collisionInOpenDialog(page: Page): Promise<Collision | null> {
  * @see overlay-touch.spec.ts, which clears them the same way
  */
 async function clearAutoPopups(page: Page) {
-  const dialogs = page.getByRole('dialog');
+  const dialogs = appDialogs(page);
   let quiet = 0;
   for (let i = 0; i < 30 && quiet < 2; i++) {
     if ((await dialogs.count()) === 0) {
@@ -160,10 +161,9 @@ for (const locale of LOCALES) {
           await control.click({ timeout: 2000 }).catch(() => {});
           await page.waitForTimeout(800);
 
-          if ((await page.getByRole('dialog').count()) === 0) continue;
+          if ((await appDialogs(page).count()) === 0) continue;
 
-          const label =
-            (await page.getByRole('dialog').first().getAttribute('aria-label')) || `#${i}`;
+          const label = (await appDialogs(page).first().getAttribute('aria-label')) || `#${i}`;
           if (seen.has(label)) continue;
           seen.add(label);
 

@@ -1,4 +1,5 @@
 import { expect, test, type Page } from '@playwright/test';
+import { appDialogs } from './helpers';
 
 /**
  * The two contracts of the Stars sheet, driven by touch instead of a mouse:
@@ -31,7 +32,7 @@ const SHEET_HEADING = /stars|звёзды/i;
 async function clearAutoPopups(page: Page) {
   // Dialogs, not the portal's children: `ToastViewport` lives in `#portal-root`
   // permanently, so "the portal is empty" is never true.
-  const portal = page.getByRole('dialog');
+  const portal = appDialogs(page);
   let quietRounds = 0;
   // Emptying it once is not enough: the results arrive as a queue, and the next
   // one surfaces as soon as the previous leaves. Wait for the portal to stay

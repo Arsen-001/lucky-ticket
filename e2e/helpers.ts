@@ -3,6 +3,19 @@ import { expect, type Page } from '@playwright/test';
 // A literal ICU placeholder leaking into rendered text, e.g. "{n}" / "{percent}".
 const PLACEHOLDER_LEAK = /\{[a-zA-Z]+\}/;
 
+/**
+ * The app's own modals — never Next's dev overlay.
+ *
+ * `next dev` renders its error overlay as `role="dialog"` too, inside the shadow
+ * root of `<nextjs-portal>`, and Playwright pierces shadow DOM by default. So on
+ * any screen with a dev-time runtime error, a bare `[role="dialog"]` quietly
+ * resolves to the overlay: `.last()` clicked a hidden overlay button instead of
+ * the app's sheet, and an Escape-until-quiet loop never went quiet (both cost a
+ * red CI run on 2026-08-10). `:light()` matches light DOM only, which leaves the
+ * overlay out while every app modal — a plain React portal into body — stays.
+ */
+export const appDialogs = (page: Page) => page.locator(':light([role="dialog"])');
+
 // React's SSR→client fallback is recoverable — the screen still renders fine for
 // the user — so it isn't a crash for smoke purposes. Everything else counts.
 const RECOVERABLE = ['Switched to client rendering because the server rendering errored'];

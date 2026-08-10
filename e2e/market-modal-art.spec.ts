@@ -1,4 +1,5 @@
 import { expect, test, type Page } from '@playwright/test';
+import { appDialogs } from './helpers';
 
 /**
  * The market's product picture must never be clipped by the box that holds it.
@@ -19,7 +20,7 @@ const DECORATION = /pointer-events-none|blur-|absolute -/;
 
 const clearGreetingDialogs = async (page: Page) => {
   for (let round = 0; round < 8; round += 1) {
-    const dialogs = page.locator('[role="dialog"]');
+    const dialogs = appDialogs(page);
     if (!(await dialogs.count())) return;
     const buttons = dialogs.last().locator('button');
     const count = await buttons.count();
@@ -96,7 +97,7 @@ for (const item of ITEMS) {
     expect(await overflowingParts(page), `${item.label}: info sheet`).toEqual([]);
 
     // A price row opens the purchase confirmation.
-    const priceRows = page.locator('[role="dialog"]').last().locator('button').filter({
+    const priceRows = appDialogs(page).last().locator('button').filter({
       hasText: /\d/,
     });
     if (!(await priceRows.count())) return;
@@ -105,7 +106,7 @@ for (const item of ITEMS) {
     expect(await overflowingParts(page), `${item.label}: purchase confirmation`).toEqual([]);
 
     // …and its primary action completes the purchase, landing on the receipt.
-    await page.locator('[role="dialog"]').last().locator('button').last().click({ force: true });
+    await appDialogs(page).last().locator('button').last().click({ force: true });
     await page.waitForTimeout(2500);
     expect(await overflowingParts(page), `${item.label}: purchase receipt`).toEqual([]);
   });
