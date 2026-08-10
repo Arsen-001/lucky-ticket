@@ -890,7 +890,16 @@ export function TasksContent() {
                 }
                 taskHighlight={taskHighlight}
                 layout={
-                  cat.category === TaskCategory.SOCIAL || cat.category === TaskCategory.PROFILE
+                  // The single-line row is the shape for the LONG one-time
+                  // lists, and only for them. A daily or weekly task gets the
+                  // full card even in these categories, because only the card
+                  // opens the sub-step accordion — and the row's chevron
+                  // reveals a subtitle, which is not the same thing. Weekly
+                  // «Check in 7 days this week» ships 7 steps: as a row, five
+                  // collected days sat behind a chevron that showed one
+                  // sentence, with no way to claim them at all.
+                  activeFrequency === TaskFrequency.ONCE &&
+                  (cat.category === TaskCategory.SOCIAL || cat.category === TaskCategory.PROFILE)
                     ? 'rows'
                     : activeFrequency === TaskFrequency.ONCE &&
                         cat.category !== TaskCategory.ACHIEVEMENTS &&
