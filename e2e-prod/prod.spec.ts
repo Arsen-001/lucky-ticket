@@ -62,6 +62,71 @@ const probe = () => {
   };
 };
 
+/**
+ * Images the screen asked for and has not got yet, named well enough to act on.
+ *
+ * Two things are deliberately NOT waited for, because the browser has decided
+ * not to fetch them and no timeout can change that:
+ *
+ *  - anything outside the viewport (`next/image` is lazy by default), and
+ *  - anything inside it that is not FACING it. The home cube keeps chip art on
+ *    its bottom face, which paints a 72×72 icon as 46×5; Chrome never requests
+ *    those (measured 10.08.2026: five such slivers at ratio 0.07 while the front
+ *    face sat at 0.72 and loaded normally).
+ */
+const imagesInFlight = (page: Page) =>
+  page.locator('img').evaluateAll((els: HTMLImageElement[]) =>
+    els
+      .filter(el => {
+        const box = el.getBoundingClientRect();
+        if (!(box.bottom > 0 && box.top < window.innerHeight)) return false;
+        return box.height >= el.offsetHeight / 2 && box.width >= el.offsetWidth / 2;
+      })
+      .filter(el => !el.complete)
+      // Name the offender. This used to assert a bare `true`, so a red said only
+      // "images in flight" and every diagnosis after it was guesswork — the
+      // file, its size and whether the request had even been made all had to be
+      // re-derived by hand.
+      .map(el => {
+        const box = el.getBoundingClientRect();
+        const file =
+          decodeURIComponent(el.currentSrc || el.src)
+            .split('/')
+            .pop() ?? '?';
+        return `${file.slice(0, 70)} [${Math.round(box.width)}×${Math.round(box.height)}, loading=${el.loading}, natural=${el.naturalWidth}, currentSrc=${el.currentSrc ? 'set' : 'EMPTY'}]`;
+      })
+  );
+
+/**
+ * Poll until nothing is in flight, and return what still is when time runs out.
+ *
+ * 20s, not the old 45s: the optimizer answers in 10–64 ms even cold (measured
+ * from the CI trace of the run this was written for — 24 requests on
+ * /invite-friends, 21 answered in that band). What the long timeout was really
+ * waiting on was a request that gets CANCELLED mid-flight when the element
+ * holding it is swapped out (a skeleton giving way to data does exactly that).
+ * Chrome then never issues that URL again for the page: measured here on a
+ * production build, neither re-assigning `src`/`srcset` nor appending a BRAND
+ * NEW `img` with the same URL loads it — `currentSrc` stays empty forever. So
+ * no timeout and no in-page retry can rescue that state, and waiting 45s for it
+ * only bought a slower red.
+ *
+ * The caller therefore reloads and asks again. A screen whose images production
+ * genuinely cannot serve fails both times; the cancelled-request artifact
+ * cannot survive a fresh document, because the poisoning is per-page.
+ */
+const waitForImages = async (page: Page, label: string) => {
+  const deadline = Date.now() + 20_000;
+  let inFlight = await imagesInFlight(page);
+  while (inFlight.length && Date.now() < deadline) {
+    await page.waitForTimeout(500);
+    inFlight = await imagesInFlight(page);
+  }
+  if (inFlight.length)
+    console.log(`[${label}] images in flight after 20s: ${inFlight.join(' | ')}`);
+  return inFlight;
+};
+
 async function assertLooksRightBuilt(page: Page, label: string, url: string) {
   const failedRequests: string[] = [];
   const crashes: string[] = [];
@@ -96,65 +161,24 @@ async function assertLooksRightBuilt(page: Page, label: string, url: string) {
     `${label} did not render the app itself`
   ).toBeAttached({ timeout: 15_000 });
 
-  await expect
-    .poll(
-      async () =>
-        page.locator('img').evaluateAll((els: HTMLImageElement[]) =>
-          els
-            // Only what the viewport actually asked for: `next/image` is lazy by
-            // default, so an image below the fold never starts loading and its
-            // `complete` stays false forever. Waiting on every image made this
-            // suite unsatisfiable on any long list — /activity, in CI.
-            .filter(el => {
-              const box = el.getBoundingClientRect();
-              if (!(box.bottom > 0 && box.top < window.innerHeight)) return false;
-              // …and only what is actually FACING the viewport. The home cube
-              // keeps chip and booster art on its bottom face, which paints a
-              // 72×72 icon as 46×5 — inside the viewport by the box test, seen
-              // by nobody. Chrome's own lazy-loading agrees and never requests
-              // them, so `complete` stays false for as long as the poll cares
-              // to wait: measured 10.08.2026, five such slivers at a ratio of
-              // 0.07 while the front face sat at 0.72 and loaded normally.
-              // That is the whole of this check's flakiness — waiting on
-              // images the browser had decided not to fetch.
-              return box.height >= el.offsetHeight / 2 && box.width >= el.offsetWidth / 2;
-            })
-            .filter(el => !el.complete)
-            // Name the offender. This used to assert a bare `true`, so a red
-            // said only "images in flight" and every diagnosis after it was
-            // guesswork — the file, its size and whether the request had even
-            // been made all had to be re-derived by hand, and the condition is
-            // rare enough (once in ~40 loads of a production build, measured
-            // 10.08.2026) that it may not reproduce at all. The poll's own
-            // output now carries the evidence.
-            .map(el => {
-              const box = el.getBoundingClientRect();
-              const file =
-                decodeURIComponent(el.currentSrc || el.src)
-                  .split('/')
-                  .pop() ?? '?';
-              return `${file.slice(0, 70)} [${Math.round(box.width)}×${Math.round(box.height)}, loading=${el.loading}, natural=${el.naturalWidth}]`;
-            })
-        ),
-      {
-        message: `${label} still had images in flight`,
-        // Longer than the suite's 15s default, but NOT because the optimizer is
-        // slow — that was the first, wrong reading of this timeout. Measured on
-        // the CI run it was blamed for: every `/_next/image` optimize answered
-        // in 5-20 ms, cold. What actually hung was one medal on /activity whose
-        // request was cancelled mid-flight by a re-render; Chrome then never
-        // resolved that URL again for the page, so no timeout would ever have
-        // been long enough (fixed in ActivityHeroCard — see
-        // ActivityTierLadderSkeleton for the mechanism).
-        //
-        // Kept generous anyway: a slow green costs nothing here (the poll
-        // returns the moment it is true), while a non-deterministic red teaches
-        // people to re-run instead of reading the log — which is exactly how
-        // the sibling backend stayed red for three and a half weeks unnoticed.
-        timeout: 45_000,
-      }
-    )
-    .toEqual([]);
+  // A stuck image is not always a broken one, so this asks twice: once on the
+  // load under test, and — only if something is still open — once on a fresh
+  // load of the same URL. See `imagesInFlight` for why the second ask is the
+  // honest arbiter and not a re-run in disguise.
+  let inFlight = await waitForImages(page, label);
+  if (inFlight.length) {
+    await page.reload({ waitUntil: 'load' });
+    await expect(
+      page.getByTestId('app-shell'),
+      `${label} did not render the app itself after a reload`
+    ).toBeAttached({ timeout: 15_000 });
+    inFlight = await waitForImages(page, label);
+  }
+
+  expect(
+    inFlight,
+    `${label} still had images in flight after a second, fresh load — production cannot serve them`
+  ).toEqual([]);
 
   const { blankImages, strayTracks, sidewaysScroll } = await page.evaluate(probe);
 
