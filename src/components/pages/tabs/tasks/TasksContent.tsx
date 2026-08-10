@@ -25,7 +25,15 @@ import {
 } from '@/api/tasks.api';
 import { useAppDispatch } from '@/lib/rtk/hooks';
 import { TaskCategory, TaskFrequency, TaskStatus } from '@/types/enums/tasks.enums';
-import type { AdSlot, CategoryTasks, Task, TaskSubStep } from '@/types/interfaces/tasks.interfaces';
+import type { AdSlot, Task, TaskSubStep } from '@/types/interfaces/tasks.interfaces';
+import {
+  claimableCountsByFrequency,
+  countClaimableAdSlots,
+  countClaimableTasks,
+  hasClaimableTask,
+  isCategoryVisibleForFrequency,
+  tasksForFrequency,
+} from '@/utils/global/tasks-claimable.utils';
 import type { AdProviderId } from '@/lib/ads';
 import { useAppTranslations } from '@/hooks/useAppTranslations';
 import { useCountDown } from '@/hooks/useCountDown';
@@ -109,12 +117,6 @@ function TasksLoadError({ onRetry }: { onRetry: () => void }) {
   );
 }
 
-const tasksForFrequency = (cat: CategoryTasks, frequency: TaskFrequency): Task[] => {
-  if (frequency === TaskFrequency.DAILY) return cat.daily;
-  if (frequency === TaskFrequency.WEEKLY) return cat.weekly;
-  return cat.once;
-};
-
 // Canonical category order for every frequency tab (daily / weekly / once).
 // Ads leads, Tournaments right after, then the rest. In the daily tab the Ads
 // block is a separate prepended section, so Tournaments is the first category.
@@ -142,11 +144,6 @@ const sortByCategoryOrder = <T extends { category: TaskCategory }>(items: T[]): 
   return [...items].sort((a, b) => rank(a.category) - rank(b.category));
 };
 
-// Profile and Partners are intentionally absent from the one-time tab — Profile
-// setup lives in Settings, Partners in the advertiser cabinet. Hiding them in
-// exactly one place (here) keeps the frequency-tab badge, the category chips and
-// the section list in agreement: the "one-time" count never advertises tasks the
-// user can't actually reach in this tab.
 /**
  * Clock reads for the pause between ads, kept at module scope on purpose:
  * `react-hooks/purity` rejects `Date.now()` anywhere inside a component body,
@@ -156,11 +153,6 @@ const sortByCategoryOrder = <T extends { category: TaskCategory }>(items: T[]): 
 const adPauseDeadline = (): number => Date.now() + GlobalConstants.adCooldownSeconds * 1000;
 const isAdPauseOver = (readyAt: number | null): boolean =>
   readyAt === null || Date.now() >= readyAt;
-
-const HIDDEN_ONCE_CATEGORIES = new Set<TaskCategory>([TaskCategory.PROFILE, TaskCategory.PARTNERS]);
-
-const isCategoryVisibleForFrequency = (category: TaskCategory, frequency: TaskFrequency): boolean =>
-  !(frequency === TaskFrequency.ONCE && HIDDEN_ONCE_CATEGORIES.has(category));
 
 export function TasksContent() {
   const t = useAppTranslations();
@@ -288,30 +280,12 @@ export function TasksContent() {
     return null;
   };
 
-  // Counts for the frequency tabs (number of ready-to-claim across all categories per frequency)
-  const frequencyCounts = useMemo<Record<TaskFrequency, number>>(() => {
-    const counts: Record<TaskFrequency, number> = {
-      [TaskFrequency.DAILY]: 0,
-      [TaskFrequency.WEEKLY]: 0,
-      [TaskFrequency.ONCE]: 0,
-    };
-    if (!data) return counts;
-    const isReady = (t: Task) => t.status === TaskStatus.READY_TO_CLAIM;
-    // Count only what each tab actually renders — a category hidden from a
-    // frequency (Profile/Partners in one-time) must not inflate its badge.
-    data.categories.forEach(cat => {
-      if (isCategoryVisibleForFrequency(cat.category, TaskFrequency.DAILY))
-        counts[TaskFrequency.DAILY] += cat.daily.filter(isReady).length;
-      if (isCategoryVisibleForFrequency(cat.category, TaskFrequency.WEEKLY))
-        counts[TaskFrequency.WEEKLY] += cat.weekly.filter(isReady).length;
-      if (isCategoryVisibleForFrequency(cat.category, TaskFrequency.ONCE))
-        counts[TaskFrequency.ONCE] += cat.once.filter(isReady).length;
-    });
-    if (data.ads && data.ads.enabled !== false) {
-      counts[TaskFrequency.DAILY] += data.ads.slots.filter(s => !s.watched).length;
-    }
-    return counts;
-  }, [data]);
+  // Counts for the frequency tabs — everything collectable in each tab, which
+  // is the same rule the dots on the cards and the one on the tab bar use.
+  const frequencyCounts = useMemo<Record<TaskFrequency, number>>(
+    () => claimableCountsByFrequency(data),
+    [data]
+  );
 
   // Earliest period boundary across the active tab's tasks — drives the reset
   // countdown under the frequency tabs. Daily/weekly only; one-time never resets.
@@ -338,21 +312,17 @@ export function TasksContent() {
       data.ads.enabled !== false &&
       data.ads.slots.length
     ) {
-      items.push({
-        category: TaskCategory.ADS,
-        readyCount: data.ads.slots.filter(s => !s.watched).length,
-      });
+      items.push({ category: TaskCategory.ADS, readyCount: countClaimableAdSlots(data) });
     }
     const categoryItems: CategoryNavItem[] = [];
+    const adsEnabled = data.ads?.enabled !== false;
     data.categories.forEach(cat => {
-      // Hide Profile and Partners chips from the one-time tab — same as the section list.
-      if (!isCategoryVisibleForFrequency(cat.category, activeFrequency)) return;
-      // Ads chips follow the admin ads kill switch — same as the section list.
-      if (cat.category === TaskCategory.ADS && data.ads?.enabled === false) return;
+      // Hide Profile and Partners chips from the one-time tab, and every ads
+      // chip when the kill switch is off — same as the section list.
+      if (!isCategoryVisibleForFrequency(cat.category, activeFrequency, adsEnabled)) return;
       const tasks = tasksForFrequency(cat, activeFrequency);
       if (!tasks.length) return;
-      const ready = tasks.filter(t => t.status === TaskStatus.READY_TO_CLAIM).length;
-      categoryItems.push({ category: cat.category, readyCount: ready });
+      categoryItems.push({ category: cat.category, readyCount: countClaimableTasks(tasks) });
     });
     items.push(...sortByCategoryOrder(categoryItems));
     return items;
@@ -698,10 +668,8 @@ export function TasksContent() {
   // The Ads category (once-tab watch milestones) follows the same admin kill
   // switch as the daily rewarded slots — no ad surface survives it.
   const visibleCategories = sortByCategoryOrder(
-    filteredCategories.filter(
-      c =>
-        isCategoryVisibleForFrequency(c.category, activeFrequency) &&
-        (adsEnabled || c.category !== TaskCategory.ADS)
+    filteredCategories.filter(c =>
+      isCategoryVisibleForFrequency(c.category, activeFrequency, adsEnabled)
     )
   );
 
@@ -869,6 +837,9 @@ export function TasksContent() {
                 onClaimSubStep={handleClaimSubStep}
                 registerSection={registerSection}
                 emptyHint={t('no tasks here yet')}
+                // Every task of the category, not just the rows below the
+                // header: the milestone chains render through `topSlot`.
+                hasClaimable={hasClaimableTask(allTasks)}
                 highlightToken={
                   highlightToken?.category === cat.category ? highlightToken.nonce : null
                 }

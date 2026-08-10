@@ -16,6 +16,8 @@ import { openExternalUrl } from '@/lib/telegram/telegram';
 import { TaskCategoryIcon } from './TaskCategoryIcon';
 import { TaskRewardRow } from './TaskRewardRow';
 import { SectionShine } from './SectionShine';
+import { ClaimableDot } from '@/components/shared/badges/ClaimableDot';
+import { isTaskClaimable } from '@/utils/global/tasks-claimable.utils';
 
 // useLayoutEffect warns during SSR; fall back to useEffect on the server. The
 // row only ever animates in response to a client-side tap, so this is safe.
@@ -190,18 +192,29 @@ export function TaskItemRow({ task, onClaim, highlightToken, className, style }:
           same sparkle glyph, so Telegram, X, Discord and YouTube were
           indistinguishable until you read the title. The link was in the data
           all along — this row simply never looked at it. */}
-      {socialBrand ? (
-        <div
-          className={twMerge(
-            'flex-center size-9 shrink-0 rounded-xl bg-gradient-to-br shadow-md shadow-black/20',
-            socialBrand.gradient
-          )}
-        >
-          <socialBrand.icon size={18} className="text-white" strokeWidth={2.4} />
-        </div>
-      ) : (
-        <TaskCategoryIcon category={task.category} size={18} />
-      )}
+      {/* The icon carries the «есть что забрать» dot, same as the cards above —
+          this row's own claim button is at the far end of a wide strip. */}
+      <div className="relative shrink-0">
+        {socialBrand ? (
+          <div
+            className={twMerge(
+              'flex-center size-9 rounded-xl bg-gradient-to-br shadow-md shadow-black/20',
+              socialBrand.gradient
+            )}
+          >
+            <socialBrand.icon size={18} className="text-white" strokeWidth={2.4} />
+          </div>
+        ) : (
+          <TaskCategoryIcon category={task.category} size={18} />
+        )}
+        {isTaskClaimable(task) && (
+          <ClaimableDot
+            label={t('something to claim')}
+            size="sm"
+            className="absolute -top-0.5 -right-0.5"
+          />
+        )}
+      </div>
 
       <div ref={bodyRef} className="flex min-w-0 flex-1 flex-col gap-0.5 overflow-hidden">
         <h4

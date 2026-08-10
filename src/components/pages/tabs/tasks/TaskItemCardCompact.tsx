@@ -15,6 +15,8 @@ import { openExternalUrl } from '@/lib/telegram/telegram';
 import { TaskCategoryIcon } from './TaskCategoryIcon';
 import { TaskRewardRow } from './TaskRewardRow';
 import { SectionShine } from './SectionShine';
+import { ClaimableDot } from '@/components/shared/badges/ClaimableDot';
+import { isTaskClaimable } from '@/utils/global/tasks-claimable.utils';
 
 const RARITY_FRAME: Record<TaskRarity, string> = {
   [TaskRarity.BRONZE]: 'task-card-default',
@@ -98,7 +100,16 @@ export function TaskItemCardCompact({
 
       {/* Header: category icon + (pin button) + status / navigate badge */}
       <div className="relative flex items-start justify-between">
-        <TaskCategoryIcon category={task.category} size={16} />
+        <div className="relative shrink-0">
+          <TaskCategoryIcon category={task.category} size={16} />
+          {isTaskClaimable(task) && (
+            <ClaimableDot
+              label={t('something to claim')}
+              size="sm"
+              className="absolute -top-0.5 -right-0.5"
+            />
+          )}
+        </div>
         <div className="flex items-center gap-1.5 shrink-0">
           {onTogglePin && !isCompleted && !isLocked && !isReady && (
             <button

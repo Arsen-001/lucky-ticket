@@ -5,7 +5,9 @@ import Link from 'next/link';
 import { twMerge } from 'tailwind-merge';
 import { useAppTranslations } from '@/hooks/useAppTranslations';
 import { useWalletLimits } from '@/hooks/useWalletLimits';
+import { useClaimableTasks } from '@/hooks/useClaimableTasks';
 import { routes } from '@/constants/routes';
+import { ClaimableDot } from '@/components/shared/badges/ClaimableDot';
 import { LcActionCell } from './LcActionCell';
 import type { LucideIcon } from 'lucide-react';
 import type { Route } from '@/constants/routes';
@@ -26,6 +28,9 @@ const CELL =
 export function LcActionRow({ onConvertTon, className }: LcActionRowProps) {
   const t = useAppTranslations();
   const { withdrawalsEnabled } = useWalletLimits();
+  // "Where do I get more LC" is what this footer answers — so it says when the
+  // answer is already sitting there, unclaimed.
+  const { hasAny: hasClaimableTasks } = useClaimableTasks();
 
   const links: { href: Route; Icon: LucideIcon; label: string }[] = [
     { href: routes.tasks, Icon: Sparkles, label: t('tasks') },
@@ -46,6 +51,9 @@ export function LcActionRow({ onConvertTon, className }: LcActionRowProps) {
       {links.map(link => (
         <Link key={link.href} href={link.href} className={CELL}>
           <LcActionCell Icon={link.Icon} label={link.label} />
+          {link.href === routes.tasks && hasClaimableTasks && (
+            <ClaimableDot label={t('something to claim')} size="sm" />
+          )}
         </Link>
       ))}
     </div>

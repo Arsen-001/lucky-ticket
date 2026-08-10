@@ -2,6 +2,7 @@ import { cloneElement, type CSSProperties, type ReactElement } from 'react';
 import { Button } from '@/components/shared/buttons/Button';
 import { twMerge } from 'tailwind-merge';
 import type { LucideProps } from 'lucide-react';
+import { ClaimableDot } from '@/components/shared/badges/ClaimableDot';
 
 export interface TabBarItemProps {
   active: boolean;
@@ -11,6 +12,10 @@ export interface TabBarItemProps {
   className?: string;
   style?: CSSProperties;
   flightTarget?: string;
+  /** There is something to collect on the screen behind this tab. */
+  claimable?: boolean;
+  /** Accessible name for the claimable dot — already translated. */
+  claimableLabel?: string;
 }
 
 /**
@@ -27,6 +32,8 @@ export function TabBarItem({
   className,
   style,
   flightTarget,
+  claimable = false,
+  claimableLabel,
 }: TabBarItemProps) {
   return (
     <Button
@@ -49,6 +56,12 @@ export function TabBarItem({
           active ? 'opacity-0 duration-100' : 'opacity-100 delay-200 duration-200'
         ),
       })}
+      {/* Badged onto the tab's own icon, so it goes when the disc takes the
+          icon over: the player is already standing on that screen, where every
+          claimable row carries the same dot. */}
+      {claimable && !active && (
+        <ClaimableDot label={claimableLabel} className="absolute top-0 left-1/2 ml-1.5" />
+      )}
       <span
         className={twMerge(
           'max-w-full truncate text-[13px] leading-none font-bold transition-colors duration-300',

@@ -4,6 +4,8 @@ import { Sparkles, Store, Swords } from 'lucide-react';
 import { twMerge } from 'tailwind-merge';
 import { Link } from '@/components/shared/links/Link';
 import { useAppTranslations } from '@/hooks/useAppTranslations';
+import { useClaimableTasks } from '@/hooks/useClaimableTasks';
+import { ClaimableDot } from '@/components/shared/badges/ClaimableDot';
 import { routes } from '@/constants/routes';
 import type { LucideIcon } from 'lucide-react';
 import type { Route } from '@/constants/routes';
@@ -22,6 +24,7 @@ const CELL =
  */
 export function JackpotActionRow({ className }: JackpotActionRowProps) {
   const t = useAppTranslations();
+  const { hasAny: hasClaimableTasks } = useClaimableTasks();
 
   const links: { href: Route; Icon: LucideIcon; label: string }[] = [
     { href: routes.tournaments.index, Icon: Swords, label: t('tournaments') },
@@ -40,6 +43,9 @@ export function JackpotActionRow({ className }: JackpotActionRowProps) {
         <Link key={link.href} href={link.href} className={CELL}>
           <link.Icon size={15} strokeWidth={2.5} className="text-gold flex-shrink-0" />
           <span className="truncate text-white/85">{link.label}</span>
+          {link.href === routes.tasks && hasClaimableTasks && (
+            <ClaimableDot label={t('something to claim')} size="sm" />
+          )}
         </Link>
       ))}
     </div>

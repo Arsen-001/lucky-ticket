@@ -144,8 +144,11 @@ export function TasksCategoryNav({
                 <span>{t(CATEGORY_LABEL_KEY[category])}</span>
                 {readyCount > 0 && (
                   <span
+                    // Same blink as the frequency tabs and the dots on the
+                    // cards: a number on a chip is a filter count, the blink is
+                    // what says the count is collectable.
                     className={twMerge(
-                      'flex-center min-w-5 h-5 px-1.5 rounded-full text-[11px] font-bold tabular-nums transition-colors duration-300',
+                      'flex-center animation-blink min-w-5 h-5 px-1.5 rounded-full text-[11px] font-bold tabular-nums transition-colors duration-300',
                       active ? 'bg-white text-electric-pink' : 'bg-electric-pink text-white'
                     )}
                   >

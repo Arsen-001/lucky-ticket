@@ -5,6 +5,7 @@ import { RequirementModal } from '@/components/shared/modals/RequirementModal';
 import { GlobalConstants } from '@/constants/global.constants';
 import { routes } from '@/constants/routes';
 import { useAppTranslations } from '@/hooks/useAppTranslations';
+import { useClaimableTasks } from '@/hooks/useClaimableTasks';
 
 export interface NotEnoughCoinsModalProps {
   open: boolean;
@@ -25,6 +26,9 @@ export function NotEnoughCoinsModal({
   current,
 }: NotEnoughCoinsModalProps) {
   const t = useAppTranslations();
+  // The modal is about missing LC, and unclaimed tasks are LC already earned —
+  // the dot says the shortfall may be covered by collecting, not by grinding.
+  const { hasAny: hasClaimableTasks } = useClaimableTasks();
 
   // Grouped, not raw: "10000" in a money modal reads as an unformatted debug
   // value next to every other price on the screen.
@@ -41,7 +45,7 @@ export function NotEnoughCoinsModal({
       title={t('not enough {coin}', { coin: GlobalConstants.coinName })}
       description={description}
       progress={{ label: t('balance'), current, required }}
-      action={{ label: t('go to tasks'), href: routes.tasks }}
+      action={{ label: t('go to tasks'), href: routes.tasks, claimable: hasClaimableTasks }}
     />
   );
 }

@@ -34,6 +34,7 @@ import { TaskRewardRow } from './TaskRewardRow';
 import { openExternalUrl } from '@/lib/telegram/telegram';
 import { TaskRewardBadge } from './TaskRewardBadge';
 import { SectionShine } from './SectionShine';
+import { ClaimableDot } from '@/components/shared/badges/ClaimableDot';
 
 export interface TaskItemCardProps {
   task: Task;
@@ -328,6 +329,13 @@ export function TaskItemCard({
   const isClaimAction = (isReady || allStepsDone) && !isCompleted;
 
   /**
+   * «Здесь есть что забрать» — the numberless mark that rides the card's icon.
+   * A ready sub-step counts: its reward is as collectable as the task's own,
+   * and the card is collapsed by default, so nothing else on the row says so.
+   */
+  const hasSomethingToClaim = !isLocked && !isCompleted && (isClaimAction || hasClaimableSubStep);
+
+  /**
    * One headline figure and «the rest». LC is the headline when a task pays it:
    * it is the number tasks get compared by, the role the prize pool plays on a
    * tournament card.
@@ -457,6 +465,12 @@ export function TaskItemCard({
                 <div className="flex-center bg-background border-success absolute -right-1 -bottom-1 size-5 rounded-full border">
                   <Check size={10} className="text-success" />
                 </div>
+              )}
+              {hasSomethingToClaim && (
+                <ClaimableDot
+                  label={t('something to claim')}
+                  className="absolute -top-1 -right-1"
+                />
               )}
             </div>
 
@@ -619,14 +633,12 @@ export function TaskItemCard({
                 </>
               )}
 
-              {/* «Внутри есть что забрать» — the pulsing dot that used to sit on
-                  the chevron. Without it a task with a ready sub-step looks
-                  identical to one without, and the reward goes uncollected. */}
+              {/* «Внутри есть что забрать» — the same dot the icon carries,
+                  repeated on the control that opens the accordion, so the mark
+                  also says where to tap. Unlabelled: the card's own dot already
+                  announces it once, and twice is noise in a screen reader. */}
               {hasClaimableSubStep && !isClaimAction && (
-                <span className="pointer-events-none absolute top-1.5 right-1.5 flex h-2.5 w-2.5">
-                  <span className="bg-electric-pink absolute inset-0 animate-ping rounded-full opacity-75" />
-                  <span className="bg-electric-pink border-background-overlay relative h-2.5 w-2.5 rounded-full border" />
-                </span>
+                <ClaimableDot className="absolute top-1.5 right-1.5" />
               )}
             </button>
           </div>
@@ -686,6 +698,13 @@ export function TaskItemCard({
               <div className="flex-center bg-background border-success absolute -right-1 -bottom-1 size-5 rounded-full border">
                 <Check size={10} className="text-success" />
               </div>
+            )}
+            {hasSomethingToClaim && (
+              <ClaimableDot
+                label={t('something to claim')}
+                size="sm"
+                className="absolute -top-0.5 -right-0.5"
+              />
             )}
           </div>
 

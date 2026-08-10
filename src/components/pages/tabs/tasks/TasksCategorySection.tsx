@@ -12,6 +12,7 @@ import { TaskItemCardCompact } from './TaskItemCardCompact';
 import { TaskItemRow } from './TaskItemRow';
 import { SectionShine } from './SectionShine';
 import { staggerMs } from '@/utils/global/animation.utils';
+import { ClaimableDot } from '@/components/shared/badges/ClaimableDot';
 
 export interface TasksCategorySectionProps {
   category: TaskCategory;
@@ -41,6 +42,12 @@ export interface TasksCategorySectionProps {
   onTogglePin?: (taskId: string) => void;
   /** Maximum number of tasks the user is allowed to pin (used to disable the button at limit). */
   pinLimit?: number;
+  /**
+   * Something in this category can be collected right now. Passed in rather
+   * than read off `tasks`: the milestone chains render through `topSlot`, so a
+   * section can hold a claimable card that never appears in this list.
+   */
+  hasClaimable?: boolean;
 }
 
 const STATUS_ORDER: Record<TaskStatus, number> = {
@@ -113,6 +120,7 @@ export function TasksCategorySection({
   pinnedIds,
   onTogglePin,
   pinLimit,
+  hasClaimable = false,
 }: TasksCategorySectionProps) {
   const t = useAppTranslations();
 
@@ -160,8 +168,11 @@ export function TasksCategorySection({
         <SectionShine token={highlightToken ?? null} />
         <TaskCategoryIcon category={category} size={20} />
         <div className="min-w-0 flex-1">
-          <h2 className="text-base font-extrabold leading-tight">
-            {t(CATEGORY_LABEL_KEY[category])}
+          <h2 className="flex items-center gap-1.5 text-base font-extrabold leading-tight">
+            <span className="min-w-0 truncate">{t(CATEGORY_LABEL_KEY[category])}</span>
+            {/* Sections are tall and the ready row can sit far below the fold —
+                the header says there is one before the scroll does. */}
+            {hasClaimable && <ClaimableDot label={t('something to claim')} />}
           </h2>
           <p className="text-[11px] text-pink-secondary line-clamp-1">
             {t(CATEGORY_BLURB_KEY[category])}

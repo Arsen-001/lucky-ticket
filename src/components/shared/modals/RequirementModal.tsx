@@ -6,6 +6,7 @@ import { ArrowRight, Lock } from 'lucide-react';
 import { Modal } from '@/components/shared/modals/Modal';
 import { Button } from '@/components/shared/buttons/Button';
 import { Progress } from '@/components/shared/Progress';
+import { ClaimableDot } from '@/components/shared/badges/ClaimableDot';
 import { useAppTranslations } from '@/hooks/useAppTranslations';
 import { formatCompact } from '@/utils/global/number.utils';
 import type { Route } from '@/constants/routes';
@@ -19,6 +20,12 @@ const formatCount = (value: number) =>
 export interface RequirementAction {
   label: string;
   href: Route;
+  /**
+   * There is already something to collect on the screen this button leads to.
+   * Badges the button with the app's «есть что забрать» dot, which turns "go
+   * and earn it" into "go and take it" — a different errand.
+   */
+  claimable?: boolean;
 }
 
 export interface RequirementProgress {
@@ -115,9 +122,15 @@ export function RequirementModal({
             icon={<ArrowRight />}
             iconPosition="right"
             iconSize={16}
-            className="w-full rounded-xl py-3 text-sm font-bold"
+            className="relative w-full rounded-xl py-3 text-sm font-bold"
           >
             {action.label}
+            {/* Hung on the corner rather than laid inside the row: the button
+                is pink, and a pink dot on it disappears. Half of it sits over
+                the modal's dark surface, which is what makes it visible. */}
+            {action.claimable && (
+              <ClaimableDot label={t('something to claim')} className="absolute -top-1 -right-1" />
+            )}
           </Button>
           {secondaryAction && (
             <Button

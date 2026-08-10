@@ -27,6 +27,8 @@ import type { Task } from '@/types/interfaces/tasks.interfaces';
 import { type Route, routes } from '@/constants/routes';
 import { openExternalUrl } from '@/lib/telegram/telegram';
 import { TaskRewardRow } from './TaskRewardRow';
+import { ClaimableDot } from '@/components/shared/badges/ClaimableDot';
+import { isTaskClaimable } from '@/utils/global/tasks-claimable.utils';
 
 const RARITY_FRAME: Record<TaskRarity, string> = {
   [TaskRarity.BRONZE]: 'task-card-default',
@@ -106,6 +108,7 @@ export function TournamentMilestoneSlider({
   cardLucideGradient,
   className,
 }: TournamentMilestoneSliderProps) {
+  const t = useAppTranslations();
   const scrollerRef = useRef<HTMLDivElement>(null);
   const [activeIndex, setActiveIndex] = useState(0);
 
@@ -174,7 +177,13 @@ export function TournamentMilestoneSlider({
           <HeaderIcon size={14} className="text-white" />
         </div>
         <div className="min-w-0 flex-1">
-          <h3 className="text-sm font-extrabold leading-tight">{title}</h3>
+          <h3 className="flex items-center gap-1.5 text-sm font-extrabold leading-tight">
+            <span className="min-w-0 truncate">{title}</span>
+            {/* The claimable card is often scrolled off the strip — one card is
+                centred and the rest sit past the edge, so without this the
+                chain looks finished from the outside. */}
+            {tasks.some(isTaskClaimable) && <ClaimableDot label={t('something to claim')} />}
+          </h3>
           <p className="text-[11px] text-pink-secondary line-clamp-1">{blurb}</p>
         </div>
       </div>
@@ -460,7 +469,9 @@ function MilestoneCard({
           <div className="flex-center w-6 h-6 rounded-full bg-white/5 shrink-0">
             <Lock size={12} className="text-white/40" />
           </div>
-        ) : !isReady && (task.deeplink || task.externalLink) ? (
+        ) : isReady ? (
+          <ClaimableDot label={t('something to claim')} className="mt-1 mr-1" />
+        ) : task.deeplink || task.externalLink ? (
           <div className="flex-center w-6 h-6 rounded-full bg-electric-pink/15 border border-electric-pink/30 shrink-0">
             <ChevronRight size={12} className="text-electric-pink" strokeWidth={2.5} />
           </div>

@@ -4,6 +4,8 @@ import { Sparkles, Swords, UserPlus } from 'lucide-react';
 import { twMerge } from 'tailwind-merge';
 import { Link } from '@/components/shared/links/Link';
 import { useAppTranslations } from '@/hooks/useAppTranslations';
+import { useClaimableTasks } from '@/hooks/useClaimableTasks';
+import { ClaimableDot } from '@/components/shared/badges/ClaimableDot';
 import { routes } from '@/constants/routes';
 import type { LucideIcon } from 'lucide-react';
 import type { Route } from '@/constants/routes';
@@ -24,6 +26,7 @@ const CELL =
  */
 export function ActivityActionRow({ accent, className }: ActivityActionRowProps) {
   const t = useAppTranslations();
+  const { hasAny: hasClaimableTasks } = useClaimableTasks();
 
   const links: { href: Route; Icon: LucideIcon; label: string }[] = [
     { href: routes.tasks, Icon: Sparkles, label: t('tasks') },
@@ -47,6 +50,9 @@ export function ActivityActionRow({ accent, className }: ActivityActionRowProps)
             style={{ color: accent }}
           />
           <span className="truncate text-white/85">{link.label}</span>
+          {link.href === routes.tasks && hasClaimableTasks && (
+            <ClaimableDot label={t('something to claim')} size="sm" />
+          )}
         </Link>
       ))}
     </div>

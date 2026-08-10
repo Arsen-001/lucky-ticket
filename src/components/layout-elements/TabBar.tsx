@@ -11,6 +11,7 @@ import { FileText, House, type LucideProps, ShoppingBag, Ticket, Trophy } from '
 import { useRouter } from 'next/navigation';
 import { useLocation } from '@/hooks/useLocation';
 import { staggerMs } from '@/utils/global/animation.utils';
+import { useClaimableTasks } from '@/hooks/useClaimableTasks';
 
 export type Tab = {
   route: Route;
@@ -24,6 +25,11 @@ export function TabBar({ className }: ClassNameProps) {
   const location = useLocation();
   const router = useRouter();
   const [, startTransition] = useTransition();
+
+  // The one thing the bar says beyond "where am I": there is a reward waiting
+  // behind the Tasks tab. Without it the daily rewards are only ever found by
+  // players who go looking for them.
+  const { hasAny: hasClaimableTasks } = useClaimableTasks();
 
   // First path segment (e.g. "/market"). Drives the active tab once a
   // navigation has committed.
@@ -129,6 +135,8 @@ export function TabBar({ className }: ClassNameProps) {
           name={name}
           onClick={() => handleTabClick(route)}
           active={activeRoute === route}
+          claimable={route === routes.tasks && hasClaimableTasks}
+          claimableLabel={t('something to claim')}
           flightTarget={route === routes.tickets.index ? 'tickets' : undefined}
           className="relative z-1 animate-slide-in-bottom"
           style={{

@@ -75,8 +75,11 @@ export function TasksFrequencyTabs({
               <span className="capitalize leading-none">{t(FREQUENCY_LABEL_KEY[frequency])}</span>
               {ready > 0 && (
                 <span
+                  // Blinks like the dots below it: the count already said "how
+                  // many", never "and you can take them now" — the tab looked
+                  // the same whether the tasks were ready or merely open.
                   className={twMerge(
-                    'flex-center h-5 min-w-5 rounded-full px-[5px] text-[11px] font-bold tabular-nums transition-colors duration-300',
+                    'flex-center animation-blink h-5 min-w-5 rounded-full px-[5px] text-[11px] font-bold tabular-nums transition-colors duration-300',
                     isActive ? 'bg-electric-pink text-white' : 'bg-white/10 text-white-secondary'
                   )}
                 >
