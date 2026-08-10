@@ -53,7 +53,10 @@ export function MarketBuyModal({
       content={
         <div className="text-white/80 text-center flex flex-col gap-4 mt-2">
           <div className="flex items-center gap-4 bg-white/5 p-4 rounded-xl border border-white/5">
-            <div className="p-2 bg-white/5 rounded-lg shrink-0">{icon}</div>
+            {/* The same 80px stage the Market's purchase sheet gives an item
+                (`MarketPurchaseModal`), so the identical purchase does not
+                shrink when it is made from the status page instead. */}
+            <div className="flex-center size-20 shrink-0 rounded-2xl bg-white/5">{icon}</div>
             <div className="flex flex-col gap-1 text-left">
               <span className="text-sm text-white/60 leading-[1.2]">{description}</span>
             </div>
