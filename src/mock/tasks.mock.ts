@@ -242,6 +242,14 @@ const flatAdReward: TaskReward[] = [ap(GlobalConstants.apRewards.watchVideo)];
  */
 const rawLc = (amount: number): TaskReward => ({ type: TaskRewardType.LC, amount });
 
+/**
+ * The daily ads task asks for the whole free round, not a slice of it — same
+ * number as the catalog's `task-daily-ads` (backend `milestones.data.ts`). Kept
+ * next to the cap it mirrors: the two drifting apart is a card that completes
+ * with views still left in the block, or one that can never complete at all.
+ */
+const DAILY_ADS_TARGET = 10;
+
 const ADS_CONFIG: AdsConfig = {
   // Default status cap. Lucky Player gets 20, VIP 40 — the ladder just keeps
   // cycling through them.
@@ -342,10 +350,10 @@ const ADS = buildCategory({
     {
       id: 'task-daily-ads',
       title: {
-        en: 'Watch 3 ads today',
-        hy: 'Watch 3 ads today',
-        ru: 'Посмотри 3 рекламы сегодня',
-        de: 'Sieh dir heute 3 Werbevideos an',
+        en: 'Watch 10 ads today',
+        hy: 'Watch 10 ads today',
+        ru: 'Посмотри 10 реклам сегодня',
+        de: 'Sieh dir heute 10 Werbevideos an',
       },
       subtitle: {
         en: 'Any rewarded view from the block above counts.',
@@ -356,7 +364,11 @@ const ADS = buildCategory({
       rewards: [lc(1.5), ap(10)],
       // Re-synced from the live ads block on every response — see
       // `syncAdsTaskProgress`; watching an ad has to move this card too.
-      progress: { current: Math.min(ADS_CONFIG.watchedToday, 3), target: 3 },
+      // The target is the whole free daily cap, same as the catalog.
+      progress: {
+        current: Math.min(ADS_CONFIG.watchedToday, DAILY_ADS_TARGET),
+        target: DAILY_ADS_TARGET,
+      },
       deeplink: '/tasks?frequency=daily&category=ads',
       rarity: TaskRarity.BRONZE,
     },
