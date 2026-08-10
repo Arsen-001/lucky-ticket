@@ -12,14 +12,14 @@ import { SettingsStatusActionButton } from '@/components/pages/out-tabs/drawer/s
 import { SettingsStatusHero } from '@/components/pages/out-tabs/drawer/settings/SettingsStatusHero';
 import { SettingsStatusPriceRow } from '@/components/pages/out-tabs/drawer/settings/SettingsStatusPriceRow';
 import { useAppTranslations } from '@/hooks/useAppTranslations';
-import { useToast } from '@/hooks/useToast';
+import { useSpendFailure } from '@/hooks/useSpendFailure';
 import { QueryErrorState } from '@/components/shared/error/QueryErrorState';
 import { MarketPriceType, MarketStatusType } from '@/types/enums/market.enums';
 import { buildStatusPerkRows } from '@/utils/global/status-perks.utils';
 
 export function LuckyPlayerContainer() {
   const t = useAppTranslations();
-  const toast = useToast();
+  const spend = useSpendFailure();
   const { data: me, isLoading: isMeLoading } = useGetMeQuery();
   const { data: market, isLoading: isMarketLoading, isError, refetch } = useGetMarketDataQuery();
   const [buyStatus, { isLoading: isBuying }] = useBuyStatusMutation();
@@ -74,8 +74,11 @@ export function LuckyPlayerContainer() {
         priceType: primaryPrice.type,
       }).unwrap();
       setBuyOpen(false);
-    } catch {
-      toast.error(t('action failed'));
+    } catch (error) {
+      // The confirm sheet closes first: a "top up" modal must not stack on the
+      // sheet that raised it, and a sheet left open invites a second doomed tap.
+      setBuyOpen(false);
+      await spend.report(error, { required: primaryPrice.amount });
     }
   };
 
@@ -154,6 +157,8 @@ export function LuckyPlayerContainer() {
           )}
         </MarketBuyModal>
       )}
+
+      {spend.modals}
     </div>
   );
 }

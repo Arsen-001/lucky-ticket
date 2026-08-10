@@ -425,7 +425,9 @@ const createSponsoredTournament = (args: { body?: unknown }) => {
   // Recompute the price server-side — the client total is never trusted.
   const cost = computeSponsoredTournamentCost(body.prizePool ?? 0);
   if (mockDb.advertiser.balanceTon < cost.totalTon) {
-    return { error: { status: 402, data: 'INSUFFICIENT_FUNDS' } };
+    // The backend's own wording and status (partners.service.ts) — a mock that
+    // invents its own refusal string exercises no branch the client really has.
+    return { error: { status: 400, data: { message: 'Not enough TON balance' } } };
   }
   mockDb.advertiser.balanceTon = roundTon(mockDb.advertiser.balanceTon - cost.totalTon);
 

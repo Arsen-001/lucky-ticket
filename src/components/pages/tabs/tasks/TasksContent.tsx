@@ -25,7 +25,7 @@ import {
 } from '@/api/tasks.api';
 import { useAppDispatch } from '@/lib/rtk/hooks';
 import { TaskCategory, TaskFrequency, TaskStatus } from '@/types/enums/tasks.enums';
-import type { AdSlot, Task, TaskSubStep } from '@/types/interfaces/tasks.interfaces';
+import type { AdSlot, Task, TasksResponse, TaskSubStep } from '@/types/interfaces/tasks.interfaces';
 import {
   countClaimableAdSlots,
   countClaimableTasks,
@@ -38,13 +38,13 @@ import type { AdProviderId } from '@/lib/ads';
 import { useAppTranslations } from '@/hooks/useAppTranslations';
 import { useCountDown } from '@/hooks/useCountDown';
 import { useToast } from '@/hooks/useToast';
+import { useSpendFailure } from '@/hooks/useSpendFailure';
 import { useRewardedAd } from '@/hooks/useRewardedAd';
 import { GlobalConstants } from '@/constants/global.constants';
 import { Skeleton } from '@/components/shared/seleketons/Skeleton';
 import { TasksFrequencyTabs } from './TasksFrequencyTabs';
 import { TasksCategoryNav, type CategoryNavItem } from './TasksCategoryNav';
 import { TasksCategorySection } from './TasksCategorySection';
-import { AllSetBonusCard } from './AllSetBonusCard';
 import { TournamentMilestoneSlider } from './TournamentMilestoneSlider';
 import { AdsSection } from './AdsSection';
 import { AdUnavailableModal, type AdUnavailableReason } from './AdUnavailableModal';
@@ -137,6 +137,17 @@ const CATEGORY_ORDER: TaskCategory[] = [
   TaskCategory.PARTNERS,
 ];
 
+/**
+ * The period's completion bonus (DOCS §12.4). It is served outside
+ * `categories` — it sweeps the whole period rather than one category — so both
+ * the chip row and the section list have to reach for it by hand.
+ */
+const allSetBonusFor = (data: TasksResponse | undefined, frequency: TaskFrequency): Task | null => {
+  if (frequency === TaskFrequency.DAILY) return data?.allSet?.daily ?? null;
+  if (frequency === TaskFrequency.WEEKLY) return data?.allSet?.weekly ?? null;
+  return null;
+};
+
 const sortByCategoryOrder = <T extends { category: TaskCategory }>(items: T[]): T[] => {
   const rank = (c: TaskCategory) => {
     const i = CATEGORY_ORDER.indexOf(c);
@@ -167,6 +178,7 @@ export function TasksContent() {
   const [buyExtraAdViews, buyExtraState] = useBuyExtraAdViewsMutation();
   const [buyExtraOpen, setBuyExtraOpen] = useState(false);
   const toast = useToast();
+  const spend = useSpendFailure();
   const { show: showRewardedAd, showing: adShowing, preload: preloadAd } = useRewardedAd();
   /**
    * When the next ad may be requested — set after every completed view.
@@ -338,6 +350,14 @@ export function TasksContent() {
       });
     }
     items.push(...sortByCategoryOrder(categoryItems));
+    // The period's all-set bonus closes the list in a section of its own, so it
+    // gets a chip like every other destination on the tab. It travels outside
+    // `categories`, which is why it is appended here rather than swept up by
+    // the loop above — and appended last, matching where it renders.
+    const bonus = allSetBonusFor(data, activeFrequency);
+    if (bonus) {
+      items.push({ category: bonus.category, readyCount: countClaimableTasks([bonus]) });
+    }
     return items;
   }, [data, activeFrequency]);
 
@@ -663,8 +683,11 @@ export function TasksContent() {
       await buyExtraAdViews({ count, currency }).unwrap();
       setBuyExtraOpen(false);
       toast.success(t('extra ads bought', { n: count }));
-    } catch {
-      toast.error(t('extra ads purchase failed'));
+    } catch (error) {
+      // Closes first: the "top up" modal must not stack on the sheet that
+      // raised it, and a sheet left open invites a second doomed tap.
+      setBuyExtraOpen(false);
+      await spend.report(error);
     }
   };
 
@@ -691,15 +714,8 @@ export function TasksContent() {
     )
   );
 
-  // The period's completion bonus (DOCS §12.4), pinned above the list — it
-  // sweeps every other task of the period, so it belongs to no category. Absent
-  // on the one-time tab, and on a period too thin to hold a bonus.
-  const allSetBonus =
-    activeFrequency === TaskFrequency.DAILY
-      ? (data?.allSet?.daily ?? null)
-      : activeFrequency === TaskFrequency.WEEKLY
-        ? (data?.allSet?.weekly ?? null)
-        : null;
+  // Absent on the one-time tab, and on a period too thin to hold a bonus.
+  const allSetBonus = allSetBonusFor(data, activeFrequency);
 
   const allEmpty = !showAds && !allSetBonus && visibleCategories.length === 0;
 
@@ -1050,14 +1066,24 @@ export function TasksContent() {
             );
           })}
 
-          {/* Last, under every category: the bonus is a summary of the whole
-              period, and it is the only card here nothing can be claimed from
-              directly — its rows are collected on their own cards. */}
+          {/* Last, under every category, and drawn by the same section and the
+              same card as everything above it. It had a bespoke card for a
+              while; the only thing that made it special was the checklist, and
+              `TaskItemCard` already renders one — with the sub-step rows,
+              the hero payout, the two-cell reward/progress block and the claim
+              states that the copy of them kept drifting away from. */}
           {allSetBonus && (
-            <AllSetBonusCard
-              task={allSetBonus}
+            <TasksCategorySection
+              category={allSetBonus.category}
+              tasks={[allSetBonus]}
               onClaim={handleClaimTask}
-              loading={pendingClaim.id === allSetBonus.id && pendingClaim.status === 'pending'}
+              onClaimSubStep={handleClaimSubStep}
+              registerSection={registerSection}
+              hasClaimable={hasClaimableTask([allSetBonus])}
+              highlightToken={
+                highlightToken?.category === allSetBonus.category ? highlightToken.nonce : null
+              }
+              taskHighlight={taskHighlight}
             />
           )}
 
@@ -1100,6 +1126,8 @@ export function TasksContent() {
         }}
         onRetry={() => retryRef.current?.()}
       />
+
+      {spend.modals}
     </div>
   );
 }

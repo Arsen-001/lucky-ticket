@@ -22,7 +22,7 @@ import { Skeleton } from '@/components/shared/seleketons/Skeleton';
 import { SkeletonSuspense } from '@/components/shared/seleketons/SkeletonSuspense';
 import { GoldenText } from '@/components/shared/typography/GoldenText';
 import { useAppTranslations } from '@/hooks/useAppTranslations';
-import { useToast } from '@/hooks/useToast';
+import { useSpendFailure } from '@/hooks/useSpendFailure';
 import {
   useJoinTournamentMutation,
   useMarkTournamentResultSeenMutation,
@@ -122,7 +122,7 @@ export function TournamentCard({
 }: TournamentCardProps) {
   const t = useAppTranslations();
   const router = useRouter();
-  const toast = useToast();
+  const spend = useSpendFailure();
   const isDetail = variant === 'detail';
   const { isTierUnlocked } = useUnlockedTiers();
   const { shardRewards } = useTournamentConfig();
@@ -167,8 +167,9 @@ export function TournamentCard({
     if (!id) return;
     try {
       await joinTournament({ tournamentId: id, ticketsCount }).unwrap();
-    } catch {
-      toast.error(t('action failed'));
+    } catch (error) {
+      setIsBetModalOpen(false);
+      await spend.report(error, { required: ticketsCount });
     }
   };
 
@@ -543,6 +544,8 @@ export function TournamentCard({
         tier={type ?? 'bronze'}
         titleId="tournament locked"
       />
+
+      {spend.modals}
     </>
   );
 }

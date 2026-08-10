@@ -1341,5 +1341,13 @@
   "purchase error avatars off": "Avatars are temporarily unavailable. Nothing was charged.",
   "purchase error already owned": "You already own this item. Nothing was charged.",
   "purchase error network": "Could not reach the server. Nothing was charged — try again.",
-  "balance changed description": "Your balance changed while the purchase was going through. Nothing was charged — check it and try again."
+  "balance changed description": "Your balance changed while the purchase was going through. Nothing was charged — check it and try again.",
+  "not enough coins short description": "You don't have enough LC for this. Top up your balance and try again.",
+  "not enough ton description": "You don't have enough TON for this. Nothing was charged — top up your wallet and try again.",
+  "not enough tickets": "Not enough tickets",
+  "not enough tickets description": "You don't have enough tickets of this tier. Nothing was charged — get more in the market.",
+  "not enough shards": "Not enough shards",
+  "not enough shards description": "You don't have enough shards for this. Nothing was charged — get more in the market.",
+  "go to wallet": "Go to wallet",
+  "go to market": "Go to market"
 }

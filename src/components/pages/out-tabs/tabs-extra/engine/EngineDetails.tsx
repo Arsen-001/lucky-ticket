@@ -20,9 +20,9 @@ import { EmptyDataInfo } from '@/components/shared/EmptyDataInfo';
 import { QueryErrorState } from '@/components/shared/error/QueryErrorState';
 import { ConfirmModal } from '@/components/shared/modals/ConfirmModal';
 import { EngineSlotPickerModal } from '@/components/pages/tabs/home/EngineSlotPickerModal';
-import { StarsTopUpFlow } from '@/components/pages/tabs/home/StarsTopUpFlow';
 import { useAppTranslations } from '@/hooks/useAppTranslations';
 import { useToast } from '@/hooks/useToast';
+import { useSpendFailure } from '@/hooks/useSpendFailure';
 import { useEngineSpeedAvatarBoostPct } from '@/hooks/useEngineSpeedAvatarBoostPct';
 import { useTestBadgeSpeedBoostPct } from '@/hooks/useTestBadgeSpeedBoostPct';
 import { useEngineConfig } from '@/hooks/useEngineConfig';
@@ -57,6 +57,7 @@ export interface EngineDetailsProps {
 export function EngineDetails({ id }: EngineDetailsProps) {
   const t = useAppTranslations();
   const toast = useToast();
+  const spend = useSpendFailure();
   const launchTicketFlight = useTicketFlight();
   const { data: tickets, isLoading, isError, refetch } = useGetTicketsQuery();
   const { data: me } = useGetMeQuery();
@@ -87,10 +88,6 @@ export function EngineDetails({ id }: EngineDetailsProps) {
     type: InventoryChipType;
     itemId: string;
   } | null>(null);
-  const [starsModal, setStarsModal] = useState<{ open: boolean; required: number }>({
-    open: false,
-    required: 0,
-  });
 
   const location = findEngineLocation(tickets, id);
   const engine = location?.engine ?? null;
@@ -234,7 +231,7 @@ export function EngineDetails({ id }: EngineDetailsProps) {
 
   const requireStars = (cost: number, onPaid: () => void) => {
     if (currentStars < cost) {
-      setStarsModal({ open: true, required: cost });
+      spend.show('stars', { required: cost });
       return;
     }
     onPaid();
@@ -269,8 +266,8 @@ export function EngineDetails({ id }: EngineDetailsProps) {
       setElapsedSeconds(0);
       try {
         await instantClaimEngine({ engineId: engine.id, cost: instantClaimCost }).unwrap();
-      } catch {
-        toast.error(t('action failed'));
+      } catch (error) {
+        await spend.report(error, { required: instantClaimCost });
       }
     });
   };
@@ -280,8 +277,8 @@ export function EngineDetails({ id }: EngineDetailsProps) {
     requireStars(cost, async () => {
       try {
         await upgradeEngineSpeed({ engineId: engine.id, cost }).unwrap();
-      } catch {
-        toast.error(t('action failed'));
+      } catch (error) {
+        await spend.report(error, { required: cost });
       }
     });
   };
@@ -291,8 +288,8 @@ export function EngineDetails({ id }: EngineDetailsProps) {
     requireStars(cost, async () => {
       try {
         await upgradeEngineCapacity({ engineId: engine.id, cost }).unwrap();
-      } catch {
-        toast.error(t('action failed'));
+      } catch (error) {
+        await spend.report(error, { required: cost });
       }
     });
   };
@@ -465,18 +462,14 @@ export function EngineDetails({ id }: EngineDetailsProps) {
           try {
             await unequipChip({ chipId: chipToUnequip.id }).unwrap();
             setChipToUnequip(null);
-          } catch {
-            toast.error(t('action failed'));
+          } catch (error) {
+            setChipToUnequip(null);
+            await spend.report(error, { required: chipEquipStarsCost(chipToUnequip.level) });
           }
         }}
       />
 
-      <StarsTopUpFlow
-        open={starsModal.open}
-        onClose={() => setStarsModal(prev => ({ ...prev, open: false }))}
-        requiredStars={starsModal.required}
-        currentStars={currentStars}
-      />
+      {spend.modals}
     </div>
   );
 }

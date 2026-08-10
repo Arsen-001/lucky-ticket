@@ -21,6 +21,8 @@ import { useAppTranslations } from '@/hooks/useAppTranslations';
 import { usePartnersEnabled } from '@/hooks/usePartnersEnabled';
 import { useTonUsdRate } from '@/hooks/useTonUsdRate';
 import { useToast } from '@/hooks/useToast';
+import { useSpendFailure } from '@/hooks/useSpendFailure';
+import { spendFailure } from '@/utils/global/spend-failure.utils';
 import { getCreateSponsoredTournamentSchema } from '@/lib/yup/partners.schemes';
 import { computeSponsoredTournamentCost } from '@/utils/global/partners.utils';
 import { formatCompact } from '@/utils/global/number.utils';
@@ -39,6 +41,7 @@ export function NewSponsoredTournamentContent() {
   const partnersEnabled = usePartnersEnabled();
   const router = useRouter();
   const toast = useToast();
+  const spend = useSpendFailure();
   const [createTournament, { isLoading }] = useCreateSponsoredTournamentMutation();
   const { data: stats } = useGetPartnerStatsQuery();
 
@@ -87,12 +90,12 @@ export function NewSponsoredTournamentContent() {
       // tournament shows under "My Tournaments" as "In Review" until approved.
       toast.success(t('tournament submitted'));
       router.push(routes.partners.index);
-    } catch (err) {
-      // Backend rejects an underfunded advertiser with 400 "Not enough TON balance"
-      // (not 402) — match the message so the specific copy actually shows.
-      const error = err as { status?: number; data?: { message?: string } };
-      const isBalance = error.data?.message === 'Not enough TON balance';
-      toast.error(isBalance ? t('insufficient balance') : t('failed to create tournament'));
+    } catch (error) {
+      // A TON shortfall opens the wallet rather than stating the problem and
+      // stopping there; anything else keeps the specific "couldn't create it".
+      const failure = spendFailure(error, t);
+      if (failure.kind === 'message') toast.error(t('failed to create tournament'));
+      else await spend.report(error, { required: cost.totalTon });
     }
   };
 
@@ -257,6 +260,8 @@ export function NewSponsoredTournamentContent() {
           </p>
         )}
       </div>
+
+      {spend.modals}
     </Form>
   );
 }

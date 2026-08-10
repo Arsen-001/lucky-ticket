@@ -10,7 +10,7 @@ import { BoltIcon } from '@/components/shared/icons/BoltIcon';
 import { useGetProfileQuery, useSendTicketMutation } from '@/api/profile.api';
 import { useGetMeQuery } from '@/api/me.api';
 import { useAppTranslations } from '@/hooks/useAppTranslations';
-import { useToast } from '@/hooks/useToast';
+import { useSpendFailure } from '@/hooks/useSpendFailure';
 import { GlobalConstants } from '@/constants/global.constants';
 import { effectiveTicketSendDailyLimit } from '@/utils/global/status.utils';
 import { TicketsEnum } from '@/types/enums/ticket.enums';
@@ -47,7 +47,7 @@ export function ProfileSendTicketModal({
   username,
 }: ProfileSendTicketModalProps) {
   const t = useAppTranslations();
-  const toast = useToast();
+  const spend = useSpendFailure();
   const { data: me } = useGetProfileQuery(undefined);
   const { data: meUser } = useGetMeQuery();
   const [sendTicket, { isLoading }] = useSendTicketMutation();
@@ -97,8 +97,9 @@ export function ProfileSendTicketModal({
       // only close on success; surface failures instead of silently "succeeding".
       await sendTicket({ userId, tier, quantity }).unwrap();
       onClose();
-    } catch {
-      toast.error(t('action failed'));
+    } catch (error) {
+      onClose();
+      await spend.report(error, { required: quantity });
     }
   };
 
@@ -211,6 +212,8 @@ export function ProfileSendTicketModal({
           </Button>
         </div>
       </div>
+
+      {spend.modals}
     </Modal>
   );
 }

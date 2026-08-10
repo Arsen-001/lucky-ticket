@@ -1,10 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import { readFileSync, readdirSync } from 'node:fs';
 import { resolve } from 'node:path';
-import {
-  marketPurchaseFailure,
-  resolvedMarketFailure,
-} from '../src/utils/pages/market-purchase.utils';
+import { spendFailure, resolvedSpendFailure } from '../src/utils/global/spend-failure.utils';
 import { giftPurchaseFailure } from '../src/utils/pages/gift.utils';
 import type { Dictionary } from '../src/types/types/i18n.types';
 
@@ -30,14 +27,28 @@ const t = ((key: string) => {
  *  2. The two refusals with a way out — LC and Lucky Stars — resolve to a
  *     top-up screen rather than to a sentence.
  */
-describe('marketPurchaseFailure', () => {
-  it('routes a balance refusal to the matching top-up screen', () => {
-    expect(marketPurchaseFailure({ status: 400, data: { message: 'Not enough LC' } }, t)).toEqual({
-      kind: 'coins',
-    });
-    expect(
-      marketPurchaseFailure({ status: 400, data: { message: 'Not enough Lucky Stars' } }, t)
-    ).toEqual({ kind: 'stars' });
+describe('spendFailure', () => {
+  /**
+   * Prefixes, not exact strings: the same shortfall is phrased five ways across
+   * the services, and an exact table quietly demotes every variant it has not
+   * seen to "something went wrong" — which is the bug this whole change is about.
+   */
+  it('routes every phrasing of a shortfall to the matching top-up screen', () => {
+    const cases: [string, string][] = [
+      ['Not enough LC', 'coins'],
+      ['Not enough Lucky Stars', 'stars'],
+      ['Not enough Lucky Stars for the stake fee', 'stars'],
+      ['Not enough Lucky Stars for the cancel fee', 'stars'],
+      ['Not enough TON', 'ton'],
+      ['Not enough TON balance', 'ton'],
+      ['Not enough TON (including network fee)', 'ton'],
+      ['Not enough shards to level up', 'shards'],
+      ['Not enough gold tickets', 'tickets'],
+      ['Not enough bronze tickets', 'tickets'],
+    ];
+    for (const [message, kind] of cases) {
+      expect(spendFailure({ status: 400, data: { message } }, t), message).toEqual({ kind });
+    }
   });
 
   it('translates the refusals that have no way out', () => {
@@ -53,7 +64,7 @@ describe('marketPurchaseFailure', () => {
       ['Unsupported price type', 400],
     ];
     for (const [message, status] of cases) {
-      const failure = marketPurchaseFailure({ status, data: { message } }, t);
+      const failure = spendFailure({ status, data: { message } }, t);
       expect(failure.kind, message).toBe('message');
       // The point of the whole mapping: never the server's own sentence.
       expect(failure.kind === 'message' && failure.text, message).not.toBe(message);
@@ -61,32 +72,31 @@ describe('marketPurchaseFailure', () => {
   });
 
   it('falls back to generic copy for a message it does not know', () => {
-    expect(
-      marketPurchaseFailure({ status: 400, data: { message: 'Some new backend rule' } }, t)
-    ).toEqual({ kind: 'message', text: en['purchase failed'] });
+    expect(spendFailure({ status: 400, data: { message: 'Some new backend rule' } }, t)).toEqual({
+      kind: 'message',
+      text: en['purchase failed'],
+    });
   });
 
   it('says "try again" when no verdict came back at all', () => {
     const retryable = { kind: 'message', text: en['purchase error network'] };
-    expect(marketPurchaseFailure({ status: 'FETCH_ERROR', error: 'Failed to fetch' }, t)).toEqual(
-      retryable
-    );
-    expect(marketPurchaseFailure({ status: 'TIMEOUT_ERROR' }, t)).toEqual(retryable);
+    expect(spendFailure({ status: 'FETCH_ERROR', error: 'Failed to fetch' }, t)).toEqual(retryable);
+    expect(spendFailure({ status: 'TIMEOUT_ERROR' }, t)).toEqual(retryable);
     // A 5xx is the server falling over, not deciding.
-    expect(marketPurchaseFailure({ status: 500, data: { message: 'Internal error' } }, t)).toEqual(
+    expect(spendFailure({ status: 500, data: { message: 'Internal error' } }, t)).toEqual(
       retryable
     );
   });
 
   it('never throws on a malformed error', () => {
     for (const error of [undefined, null, 'boom', {}, { status: 400, data: 'plain string body' }]) {
-      expect(marketPurchaseFailure(error, t).kind).toBe('message');
+      expect(spendFailure(error, t).kind).toBe('message');
     }
   });
 
   it('passes through a failure the caller already resolved', () => {
-    const failure = resolvedMarketFailure({ kind: 'message', text: 'already translated' });
-    expect(marketPurchaseFailure(failure, t)).toEqual({
+    const failure = resolvedSpendFailure({ kind: 'message', text: 'already translated' });
+    expect(spendFailure(failure, t)).toEqual({
       kind: 'message',
       text: 'already translated',
     });

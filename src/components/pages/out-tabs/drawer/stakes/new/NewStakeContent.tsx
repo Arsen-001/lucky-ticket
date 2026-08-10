@@ -32,6 +32,8 @@ import { StakesRewardsPreviewCard } from '@/components/pages/out-tabs/drawer/sta
 import { StakesSectionLabel } from '@/components/pages/out-tabs/drawer/stakes/StakesSectionLabel';
 import { StakesWalletPill } from '@/components/pages/out-tabs/drawer/stakes/StakesWalletPill';
 import { NotEnoughCoinsModal } from '@/components/shared/modals/NotEnoughCoinsModal';
+import { useSpendFailure } from '@/hooks/useSpendFailure';
+import { spendFailure } from '@/utils/global/spend-failure.utils';
 import { TierGateModal } from '@/components/shared/modals/TierGateModal';
 import { Skeleton } from '@/components/shared/seleketons/Skeleton';
 import { QueryErrorState } from '@/components/shared/error/QueryErrorState';
@@ -39,6 +41,7 @@ import type { TicketType } from '@/types/types/ticket.types';
 
 export function NewStakeContent() {
   const t = useAppTranslations();
+  const spend = useSpendFailure();
   const router = useRouter();
   const searchParams = useSearchParams();
   const { data: stakes, isLoading: stakesLoading, isError, refetch } = useGetStakesQuery();
@@ -180,7 +183,12 @@ export function NewStakeContent() {
     if ('data' in result && result.data?.success) {
       setOpenedSnapshot({ amount: safeDeposit, months: durationMonths });
     } else if ('error' in result) {
-      setErrorMessage(t('failed to start stake try again'));
+      // A shortfall the local check could not see (someone spent elsewhere, or
+      // the server prices the fee differently) gets the top-up route; anything
+      // else stays as the inline message under the form.
+      const failure = spendFailure(result.error, t);
+      if (failure.kind === 'message') setErrorMessage(t('failed to start stake try again'));
+      else await spend.report(result.error, { required: safeDeposit });
     }
   };
 
@@ -316,6 +324,8 @@ export function NewStakeContent() {
           months={openedSnapshot.months}
         />
       )}
+
+      {spend.modals}
     </div>
   );
 }

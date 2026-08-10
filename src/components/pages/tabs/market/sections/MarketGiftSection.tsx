@@ -11,7 +11,7 @@ import { useAppTranslations } from '@/hooks/useAppTranslations';
 import { MarketPriceType } from '@/types/enums/market.enums';
 import type { MarketPrice } from '@/types/interfaces/market.interfaces';
 import { giftPurchaseFailure } from '@/utils/pages/gift.utils';
-import { resolvedMarketFailure } from '@/utils/pages/market-purchase.utils';
+import { resolvedSpendFailure } from '@/utils/global/spend-failure.utils';
 
 export interface MarketGiftSectionProps {
   onSelect: (item: MarketSelectedItem) => void;
@@ -82,7 +82,7 @@ export function MarketGiftSection({ onSelect, onBuy }: MarketGiftSectionProps) {
               try {
                 return await buyGift({ giftId: gift.id }).unwrap();
               } catch (error) {
-                throw resolvedMarketFailure(giftPurchaseFailure(error, t));
+                throw resolvedSpendFailure(giftPurchaseFailure(error, t));
               }
             },
           };

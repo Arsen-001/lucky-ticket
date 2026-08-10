@@ -12,7 +12,7 @@ import { SettingsStatusHero } from '@/components/pages/out-tabs/drawer/settings/
 import { SettingsStatusPriceRow } from '@/components/pages/out-tabs/drawer/settings/SettingsStatusPriceRow';
 import { GlobalConstants } from '@/constants/global.constants';
 import { useAppTranslations } from '@/hooks/useAppTranslations';
-import { useToast } from '@/hooks/useToast';
+import { useSpendFailure } from '@/hooks/useSpendFailure';
 import { QueryErrorState } from '@/components/shared/error/QueryErrorState';
 import { MarketPriceType, MarketStatusType } from '@/types/enums/market.enums';
 import type { MarketPrice } from '@/types/interfaces/market.interfaces';
@@ -20,7 +20,7 @@ import { buildStatusPerkRows, buildVipUpgradeRows } from '@/utils/global/status-
 
 export function VipContainer() {
   const t = useAppTranslations();
-  const toast = useToast();
+  const spend = useSpendFailure();
   const { data: me, isLoading: isMeLoading } = useGetMeQuery();
   const { data: market, isLoading: isMarketLoading, isError, refetch } = useGetMarketDataQuery();
   const [buyStatus, { isLoading: isBuying }] = useBuyStatusMutation();
@@ -88,8 +88,11 @@ export function VipContainer() {
         priceType: primaryPrice.type,
       }).unwrap();
       setBuyOpen(false);
-    } catch {
-      toast.error(t('action failed'));
+    } catch (error) {
+      // The confirm sheet closes first: a "top up" modal must not stack on the
+      // sheet that raised it, and a sheet left open invites a second doomed tap.
+      setBuyOpen(false);
+      await spend.report(error, { required: primaryPrice.amount });
     }
   };
 
@@ -172,6 +175,8 @@ export function VipContainer() {
           )}
         </MarketBuyModal>
       )}
+
+      {spend.modals}
     </div>
   );
 }

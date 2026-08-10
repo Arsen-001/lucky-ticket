@@ -5,8 +5,7 @@ import { useSearchParams } from 'next/navigation';
 import { useGetMarketDataQuery } from '@/api/market.api';
 import { useGetGiftShopQuery } from '@/api/gifts.api';
 import { useGetMeQuery } from '@/api/me.api';
-import { useAppTranslations } from '@/hooks/useAppTranslations';
-import { marketPurchaseFailure } from '@/utils/pages/market-purchase.utils';
+import { useSpendFailure } from '@/hooks/useSpendFailure';
 import { QueryErrorState } from '@/components/shared/error/QueryErrorState';
 import { MarketHeroCarousel } from '@/components/pages/tabs/market/MarketHeroCarousel';
 import {
@@ -17,10 +16,7 @@ import {
 import { MarketDiscountNote } from '@/components/pages/tabs/market/MarketDiscountNote';
 import { MarketInfoModal } from '@/components/pages/tabs/market/MarketInfoModal';
 import { MarketPurchaseModal } from '@/components/pages/tabs/market/MarketPurchaseModal';
-import { MarketPurchaseFailedModal } from '@/components/pages/tabs/market/MarketPurchaseFailedModal';
 import { MarketPurchaseSuccessModal } from '@/components/pages/tabs/market/MarketPurchaseSuccessModal';
-import { NotEnoughCoinsModal } from '@/components/shared/modals/NotEnoughCoinsModal';
-import { StarsTopUpFlow } from '@/components/pages/tabs/home/StarsTopUpFlow';
 import { MarketEngineSection } from '@/components/pages/tabs/market/sections/MarketEngineSection';
 import { MarketTicketSection } from '@/components/pages/tabs/market/sections/MarketTicketSection';
 import { MarketShardSection } from '@/components/pages/tabs/market/sections/MarketShardSection';
@@ -95,11 +91,11 @@ export function MarketView() {
       ? (tabParam as MarketCategoryKey)
       : ALL_KEY;
 
-  const t = useAppTranslations();
   const [active, setActive] = useState<MarketCategoryKey>(initialTab);
   const [highlight, setHighlight] = useState(initialTab !== ALL_KEY);
   const { data, isError, refetch } = useGetMarketDataQuery();
-  const { data: me, refetch: refetchMe } = useGetMeQuery();
+  const { data: me } = useGetMeQuery();
+  const spend = useSpendFailure();
   // The gift counter is off by default and draws nothing when it is, so its
   // chip has to disappear with it — otherwise the Market shows a tab that opens
   // an empty screen, which reads as breakage rather than as "not on sale".
@@ -120,9 +116,6 @@ export function MarketView() {
     description?: ReactNode;
     renderIcon: (size: number) => ReactNode;
   } | null>(null);
-  const [insufficientStars, setInsufficientStars] = useState<{ required: number } | null>(null);
-  const [insufficientCoins, setInsufficientCoins] = useState<{ required: number } | null>(null);
-  const [failure, setFailure] = useState<string | null>(null);
 
   // Sync the active tab when the ?tab= param changes without a full remount
   // (e.g. router.push to the market while already on the market page).
@@ -154,14 +147,14 @@ export function MarketView() {
     if (price.type === MarketPriceType.TELEGRAM_STARS) {
       const balance = me?.telegramStars ?? 0;
       if (balance < price.amount) {
-        setInsufficientStars({ required: price.amount });
+        spend.show('stars', { required: price.amount });
         return;
       }
     }
     if (price.type === MarketPriceType.LC) {
       const balance = me?.coins ?? 0;
       if (balance < price.amount) {
-        setInsufficientCoins({ required: price.amount });
+        spend.show('coins', { required: price.amount });
         return;
       }
     }
@@ -209,28 +202,12 @@ export function MarketView() {
       });
       setPurchase(null);
     } catch (error) {
-      // The server's reason, said in the app's own voice. It still
-      // distinguishes "Out of stock" from "Not enough LC" from a tier gate —
-      // collapsing those into one line had players filing support tickets
-      // about coins they clearly had — but the server's English sentence is a
-      // wire format, so it is mapped to copy rather than printed.
-      const resolved = marketPurchaseFailure(error, t);
-      // The confirm sheet closes first either way: a "not enough" modal must
-      // not stack on the sheet that raised it (same rule as `handleBuy`), and
-      // a sheet left open behind an explanation invites a second doomed tap.
+      // The confirm sheet closes first: a "not enough" modal must not stack on
+      // the sheet that raised it (same rule as `handleBuy`), and a sheet left
+      // open behind an explanation invites a second doomed tap.
       const required = (purchase.price.amount || 0) * count;
       setPurchase(null);
-      if (resolved.kind === 'coins' || resolved.kind === 'stars') {
-        // The client thought the balance covered this, so it is out of date by
-        // definition. Awaited, not fired off: opening first would state a
-        // balance that contradicts the very refusal it is explaining, and the
-        // correction would then land as a number changing under the player.
-        await refetchMe();
-        if (resolved.kind === 'coins') setInsufficientCoins({ required });
-        else setInsufficientStars({ required });
-      } else {
-        setFailure(resolved.text);
-      }
+      await spend.report(error, { required });
     } finally {
       setConfirming(false);
     }
@@ -314,25 +291,7 @@ export function MarketView() {
         ownedIconNode={purchase?.ownedIconNode}
       />
 
-      <StarsTopUpFlow
-        open={!!insufficientStars}
-        onClose={() => setInsufficientStars(null)}
-        requiredStars={insufficientStars?.required}
-        currentStars={me?.telegramStars ?? 0}
-      />
-
-      <NotEnoughCoinsModal
-        open={!!insufficientCoins}
-        onClose={() => setInsufficientCoins(null)}
-        required={insufficientCoins?.required ?? 0}
-        current={me?.coins ?? 0}
-      />
-
-      <MarketPurchaseFailedModal
-        open={!!failure}
-        onClose={() => setFailure(null)}
-        reason={failure ?? undefined}
-      />
+      {spend.modals}
 
       <MarketPurchaseSuccessModal
         open={!!success}

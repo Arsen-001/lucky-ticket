@@ -12,6 +12,7 @@ import {
 } from '@/api/inventory.api';
 import { useAppTranslations } from '@/hooks/useAppTranslations';
 import { useToast } from '@/hooks/useToast';
+import { useSpendFailure } from '@/hooks/useSpendFailure';
 import type { InventoryBooster, InventoryChip } from '@/types/interfaces/inventory.interfaces';
 import { BoosterActivateModal } from './BoosterActivateModal';
 import { ChipEquipModal } from './ChipEquipModal';
@@ -26,6 +27,7 @@ import { QueryErrorState } from '@/components/shared/error/QueryErrorState';
 export function InventoryContainer() {
   const t = useAppTranslations();
   const toast = useToast();
+  const spend = useSpendFailure();
   const { data, isLoading, isError, refetch } = useGetInventoryQuery();
   const [equipChipMutation, { isLoading: equipping }] = useEquipChipMutation();
   const [unequipChipMutation] = useUnequipChipMutation();
@@ -81,8 +83,8 @@ export function InventoryContainer() {
     window.setTimeout(async () => {
       try {
         await levelUpChipMutation({ chipId: chip.id }).unwrap();
-      } catch {
-        toast.error(t('action failed'));
+      } catch (error) {
+        await spend.report(error, { required: chip.shardsForNextLevel });
       }
       setAnimatingChipId(undefined);
     }, 700);
@@ -102,8 +104,8 @@ export function InventoryContainer() {
     setUnequipPendingId(chip.id);
     try {
       await unequipChipMutation({ chipId: chip.id }).unwrap();
-    } catch {
-      toast.error(t('action failed'));
+    } catch (error) {
+      await spend.report(error);
     } finally {
       setUnequipPendingId(undefined);
     }
@@ -126,8 +128,9 @@ export function InventoryContainer() {
     try {
       await mintChipMutation(params).unwrap();
       setMintOpen(false);
-    } catch {
-      toast.error(t('action failed'));
+    } catch (error) {
+      setMintOpen(false);
+      await spend.report(error);
     }
   };
 
@@ -230,6 +233,8 @@ export function InventoryContainer() {
         onConfirm={handleMintConfirm}
         shards={shards}
       />
+
+      {spend.modals}
     </div>
   );
 }

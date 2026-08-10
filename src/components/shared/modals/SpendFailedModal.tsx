@@ -5,16 +5,16 @@ import { Modal } from '@/components/shared/modals/Modal';
 import { Button } from '@/components/shared/buttons/Button';
 import { useAppTranslations } from '@/hooks/useAppTranslations';
 
-export interface MarketPurchaseFailedModalProps {
+export interface SpendFailedModalProps {
   open: boolean;
   onClose: () => void;
-  /** Already translated — see `marketPurchaseFailure`. */
+  /** Already translated — see `spendFailure`. */
   reason?: string;
 }
 
 /**
- * A market purchase the server refused for a reason with nowhere to go — sold
- * out, no longer on sale, the market closed mid-tap.
+ * A paid action the server refused for a reason with nowhere to go — sold out,
+ * no longer on sale, the market closed mid-tap, VIP already at its ceiling.
  *
  * It exists because these used to be a toast carrying the backend's own English
  * sentence ("Out of stock"), which is a wire format and not copy: a
@@ -23,11 +23,7 @@ export interface MarketPurchaseFailedModalProps {
  * reassurance matters as much as the reason — a failed purchase reads as lost
  * coins until something says otherwise.
  */
-export function MarketPurchaseFailedModal({
-  open,
-  onClose,
-  reason,
-}: MarketPurchaseFailedModalProps) {
+export function SpendFailedModal({ open, onClose, reason }: SpendFailedModalProps) {
   const t = useAppTranslations();
   const title = t('purchase not completed');
 

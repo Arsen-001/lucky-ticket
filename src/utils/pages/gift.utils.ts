@@ -1,5 +1,5 @@
 import type { Dictionary, MessageIds } from '@/types/types/i18n.types';
-import type { MarketPurchaseFailure } from '@/utils/pages/market-purchase.utils';
+import type { SpendFailure } from '@/utils/global/spend-failure.utils';
 
 /**
  * Turn a gift-purchase failure into something a player can act on.
@@ -45,7 +45,7 @@ export function giftErrorMessage(error: unknown, t: Dictionary): string {
  * the shared "not enough LC" screen instead of a sentence that names the
  * problem and stops there.
  */
-export function giftPurchaseFailure(error: unknown, t: Dictionary): MarketPurchaseFailure {
+export function giftPurchaseFailure(error: unknown, t: Dictionary): SpendFailure {
   if (giftErrorCode(error) === 'gift-insufficient-coins') return { kind: 'coins' };
   return { kind: 'message', text: giftErrorMessage(error, t) };
 }

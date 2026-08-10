@@ -24,12 +24,12 @@ import { findActiveBooster, findEquippedChip } from '@/utils/global/inventory.ut
 import { EngineCardCube } from '@/components/pages/tabs/home/EngineCardCube';
 import { EngineSlotPickerModal } from '@/components/pages/tabs/home/EngineSlotPickerModal';
 import { HomeBuyEngineSlot } from '@/components/pages/tabs/home/HomeBuyEngineSlot';
-import { StarsTopUpFlow } from '@/components/pages/tabs/home/StarsTopUpFlow';
 import { ConfirmModal } from '@/components/shared/modals/ConfirmModal';
 import { Switch } from '@/components/shared/form-elements/Switch';
 import { TelegramStarIcon } from '@/components/shared/icons/TelegramStarIcon';
 import { useAppTranslations } from '@/hooks/useAppTranslations';
 import { useToast } from '@/hooks/useToast';
+import { useSpendFailure } from '@/hooks/useSpendFailure';
 import { useEngineSpeedAvatarBoostPct } from '@/hooks/useEngineSpeedAvatarBoostPct';
 import { useTestBadgeSpeedBoostPct } from '@/hooks/useTestBadgeSpeedBoostPct';
 import { findTicketFlightOrigin, useTicketFlight } from '@/hooks/useTicketFlight';
@@ -105,6 +105,7 @@ export function HomeEnginesSlider({ className }: ClassNameProps) {
   const { data: me } = useGetMeQuery();
   const t = useAppTranslations();
   const toast = useToast();
+  const spend = useSpendFailure();
   const launchTicketFlight = useTicketFlight();
   const { data: inventory } = useGetInventoryQuery();
   const [unequipChip, { isLoading: unequipping }] = useUnequipChipMutation();
@@ -179,10 +180,6 @@ export function HomeEnginesSlider({ className }: ClassNameProps) {
   itemsRef.current = items;
 
   const [elapsedByEngine, setElapsedByEngine] = useState<Record<string, number>>({});
-  const [starsModal, setStarsModal] = useState<{ open: boolean; required: number }>({
-    open: false,
-    required: 0,
-  });
   const [pickerSlot, setPickerSlot] = useState<{
     engineId: string;
     engineTier: TicketType;
@@ -199,7 +196,7 @@ export function HomeEnginesSlider({ className }: ClassNameProps) {
 
   const requireStars = (cost: number, onPaid: () => void) => {
     if (currentStars < cost) {
-      setStarsModal({ open: true, required: cost });
+      spend.show('stars', { required: cost });
       return;
     }
     onPaid();
@@ -429,7 +426,7 @@ export function HomeEnginesSlider({ className }: ClassNameProps) {
     setElapsedByEngine(prev => ({ ...prev, [engineId]: 0 }));
     instantClaimEngine({ engineId, cost })
       .unwrap()
-      .catch(() => toast.error(t('action failed')));
+      .catch(error => spend.report(error, { required: cost }));
   };
 
   const confirmInstantClaim = () => {
@@ -458,7 +455,7 @@ export function HomeEnginesSlider({ className }: ClassNameProps) {
         type === 'speed'
           ? upgradeEngineSpeed({ engineId, cost })
           : upgradeEngineCapacity({ engineId, cost });
-      upgrade.unwrap().catch(() => toast.error(t('action failed')));
+      upgrade.unwrap().catch(error => spend.report(error, { required: cost }));
     });
   };
 
@@ -715,8 +712,9 @@ export function HomeEnginesSlider({ className }: ClassNameProps) {
           try {
             await unequipChip({ chipId: chipToUnequip.id }).unwrap();
             setChipToUnequip(null);
-          } catch {
-            toast.error(t('action failed'));
+          } catch (error) {
+            setChipToUnequip(null);
+            await spend.report(error);
           }
         }}
       />
@@ -827,12 +825,7 @@ export function HomeEnginesSlider({ className }: ClassNameProps) {
         confirmText={t('confirm')}
       />
 
-      <StarsTopUpFlow
-        open={starsModal.open}
-        onClose={() => setStarsModal(prev => ({ ...prev, open: false }))}
-        requiredStars={starsModal.required}
-        currentStars={currentStars}
-      />
+      {spend.modals}
     </div>
   );
 }

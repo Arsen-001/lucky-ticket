@@ -10,7 +10,12 @@ import { useClaimableTasks } from '@/hooks/useClaimableTasks';
 export interface NotEnoughCoinsModalProps {
   open: boolean;
   onClose: () => void;
-  required: number;
+  /**
+   * What the action costs, when the caller knows it. Omitted by screens that
+   * only learn of the shortfall from the server's refusal, which names no
+   * figure — better to say nothing than to invent one.
+   */
+  required?: number;
   current: number;
 }
 
@@ -35,6 +40,7 @@ export function NotEnoughCoinsModal({
   // the dot says the shortfall may be covered by collecting, not by grinding.
   const { hasAny: hasClaimableTasks, route: claimRoute } = useClaimableTasks();
 
+  const known = required != null && required > 0;
   /**
    * The balance on hand says the purchase was affordable — so this refusal came
    * from the server, and the number the client is holding is the stale one.
@@ -45,16 +51,18 @@ export function NotEnoughCoinsModal({
    * opposite of the modal it sits in. (Seen 11.08.2026 the first time a market
    * purchase was refused by the backend rather than by the local check.)
    */
-  const stale = current >= required;
+  const stale = known && current >= required;
 
   // Grouped, not raw: "10000" in a money modal reads as an unformatted debug
   // value next to every other price on the screen.
-  const description = stale
-    ? t('balance changed description')
-    : t('not enough coins description', {
-        balance: current.toLocaleString(),
-        required: required.toLocaleString(),
-      });
+  const description = !known
+    ? t('not enough coins short description')
+    : stale
+      ? t('balance changed description')
+      : t('not enough coins description', {
+          balance: current.toLocaleString(),
+          required: required.toLocaleString(),
+        });
 
   return (
     <RequirementModal
@@ -63,7 +71,7 @@ export function NotEnoughCoinsModal({
       icon={<CoinIcon size={34} />}
       title={t('not enough {coin}', { coin: GlobalConstants.coinName })}
       description={description}
-      progress={stale ? undefined : { label: t('balance'), current, required }}
+      progress={known && !stale ? { label: t('balance'), current, required } : undefined}
       action={{ label: t('top up {coin}', { coin: GlobalConstants.coinName }), href: routes.lc }}
       secondaryAction={{
         label: t('go to tasks'),

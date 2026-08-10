@@ -10,7 +10,7 @@ import { LcLabel } from '@/components/shared/icons/LcLabel';
 import { icons } from '@/constants/icons';
 import { routes } from '@/constants/routes';
 import { useAppTranslations } from '@/hooks/useAppTranslations';
-import { useToast } from '@/hooks/useToast';
+import { useSpendFailure } from '@/hooks/useSpendFailure';
 import { useCountDown } from '@/hooks/useCountDown';
 import { formatDate } from '@/utils/global/date.utils';
 import { formatCompact } from '@/utils/global/number.utils';
@@ -34,7 +34,7 @@ export interface ProgressStakeContentProps {
 
 export function ProgressStakeContent({ stakeId }: ProgressStakeContentProps) {
   const t = useAppTranslations();
-  const toast = useToast();
+  const spend = useSpendFailure();
   const router = useRouter();
   const { data: stakes, isLoading, isError, refetch } = useGetStakesQuery();
   const { data: me } = useGetMeQuery();
@@ -75,9 +75,10 @@ export function ProgressStakeContent({ stakeId }: ProgressStakeContentProps) {
     const result = await cancelStake({ stakeId: stake.id });
     if ('data' in result && result.data?.success) {
       router.replace(routes.stakes.index);
-    } else {
-      // e.g. "Not enough Lucky Stars for the cancel fee" (400) — surface it.
-      toast.error(t('action failed'));
+    } else if ('error' in result) {
+      // e.g. "Not enough Lucky Stars for the cancel fee" (400) — the shared
+      // handler turns that into the buy-Stars sheet rather than a flat toast.
+      await spend.report(result.error, { required: computeStakeCancelFee(stake.lockedAmount) });
     }
   };
 
@@ -154,6 +155,8 @@ export function ProgressStakeContent({ stakeId }: ProgressStakeContentProps) {
           onCancel={handleCancel}
         />
       </div>
+
+      {spend.modals}
     </div>
   );
 }

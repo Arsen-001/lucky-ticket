@@ -1341,5 +1341,13 @@
   "purchase error avatars off": "Avatare sind vorübergehend nicht verfügbar. Es wurde nichts abgebucht.",
   "purchase error already owned": "Du besitzt diesen Artikel bereits. Es wurde nichts abgebucht.",
   "purchase error network": "Server nicht erreichbar. Es wurde nichts abgebucht — bitte erneut versuchen.",
-  "balance changed description": "Dein Guthaben hat sich während des Kaufs geändert. Es wurde nichts abgebucht — bitte prüfen und erneut versuchen."
+  "balance changed description": "Dein Guthaben hat sich während des Kaufs geändert. Es wurde nichts abgebucht — bitte prüfen und erneut versuchen.",
+  "not enough coins short description": "Dafür reicht dein LC nicht. Lade dein Guthaben auf und versuche es erneut.",
+  "not enough ton description": "Dafür reicht dein TON nicht. Es wurde nichts abgebucht — lade deine Wallet auf und versuche es erneut.",
+  "not enough tickets": "Nicht genug Tickets",
+  "not enough tickets description": "Du hast nicht genug Tickets dieser Stufe. Es wurde nichts abgebucht — im Markt gibt es Nachschub.",
+  "not enough shards": "Nicht genug Fragmente",
+  "not enough shards description": "Dafür reichen deine Fragmente nicht. Es wurde nichts abgebucht — im Markt gibt es Nachschub.",
+  "go to wallet": "Zur Wallet",
+  "go to market": "Zum Markt"
 }
