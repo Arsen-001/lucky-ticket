@@ -15,6 +15,10 @@ const BASE_URL = 'http://localhost:3100';
 
 export default defineConfig({
   testDir: './e2e-prod',
+  // Fills the image-optimizer cache before the workers start. Read the file for
+  // the failure it prevents — a coalesced optimizer job whose first requester
+  // walks away leaves a key that never answers again, for anyone.
+  globalSetup: './e2e-prod/warm-image-cache.ts',
   fullyParallel: true,
   forbidOnly: !!process.env.CI,
   retries: 1,
