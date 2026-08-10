@@ -4,6 +4,8 @@ import { resolve } from 'node:path';
 import { TaskCategory, TaskFrequency, TaskStatus } from '@/types/enums/tasks.enums';
 import type { CategoryTasks, Task, TasksResponse } from '@/types/interfaces/tasks.interfaces';
 import {
+  claimableCountsByFrequency,
+  claimableTasksRoute,
   countAllClaimable,
   frequencyTabCounts,
   isTaskClaimable,
@@ -98,6 +100,64 @@ describe('the claim mark only ever marks a reward', () => {
   it('stays dark on locked and already-claimed tasks', () => {
     expect(isTaskClaimable(task({ status: TaskStatus.LOCKED }))).toBe(false);
     expect(isTaskClaimable(task({ status: TaskStatus.COMPLETED }))).toBe(false);
+  });
+
+  /**
+   * The mark has to lead somewhere. A one-time task, once ready, stays ready
+   * until it is claimed — so a bare `/tasks`, which opens on Daily, leaves the
+   * dot lit above a tab with nothing on it, every session, for good. Measured
+   * on prod: the only two ready tasks on the account read were `reach-silver`
+   * and `reach-gold`, both one-time.
+   */
+  it('points at the tab that actually holds the reward', () => {
+    const once = response({
+      categories: [
+        category({
+          category: TaskCategory.ACHIEVEMENTS,
+          once: [
+            task({ frequency: TaskFrequency.ONCE, status: TaskStatus.READY_TO_CLAIM }),
+            task({ frequency: TaskFrequency.ONCE }),
+          ],
+        }),
+      ],
+    });
+    expect(claimableTasksRoute(claimableCountsByFrequency(once))).toBe('/tasks?frequency=once');
+
+    const weekly = response({
+      categories: [category({ weekly: [task({ status: TaskStatus.READY_TO_CLAIM })] })],
+    });
+    expect(claimableTasksRoute(claimableCountsByFrequency(weekly))).toBe('/tasks?frequency=weekly');
+  });
+
+  /**
+   * Daily is where `TasksContent` lands with no parameter, so the common path
+   * keeps a clean URL — and so does "nothing claimable anywhere".
+   */
+  it('leaves the route bare for daily and for an empty board', () => {
+    const daily = response({
+      categories: [category({ daily: [task({ status: TaskStatus.READY_TO_CLAIM })] })],
+    });
+    expect(claimableTasksRoute(claimableCountsByFrequency(daily))).toBe('/tasks');
+    expect(claimableTasksRoute(claimableCountsByFrequency(response()))).toBe('/tasks');
+  });
+
+  /**
+   * Rewarded-ad views are not a reward waiting (see above), so they must not
+   * steer the mark either — ten unwatched views every morning would pin it to
+   * Daily and hide the one-time task it exists to point at.
+   */
+  it('is not steered to daily by unwatched ad views', () => {
+    const adsPlusOnce = response({
+      categories: [
+        category({
+          once: [task({ frequency: TaskFrequency.ONCE, status: TaskStatus.READY_TO_CLAIM })],
+        }),
+      ],
+    });
+    expect(frequencyTabCounts(adsPlusOnce)[TaskFrequency.DAILY]).toBe(10);
+    expect(claimableTasksRoute(claimableCountsByFrequency(adsPlusOnce))).toBe(
+      '/tasks?frequency=once'
+    );
   });
 
   /**

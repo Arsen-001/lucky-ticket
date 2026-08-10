@@ -26,10 +26,12 @@ const CELL =
  */
 export function ActivityActionRow({ accent, className }: ActivityActionRowProps) {
   const t = useAppTranslations();
-  const { hasAny: hasClaimableTasks } = useClaimableTasks();
+  const { hasAny: hasClaimableTasks, route: claimRoute } = useClaimableTasks();
 
-  const links: { href: Route; Icon: LucideIcon; label: string }[] = [
-    { href: routes.tasks, Icon: Sparkles, label: t('tasks') },
+  // `claimable` rather than re-comparing the href: it now carries the frequency
+  // the reward is on, so it is no longer equal to `routes.tasks`.
+  const links: { href: Route; Icon: LucideIcon; label: string; claimable?: boolean }[] = [
+    { href: claimRoute, Icon: Sparkles, label: t('tasks'), claimable: hasClaimableTasks },
     { href: routes.tournaments.index, Icon: Swords, label: t('tournaments') },
     { href: routes.inviteFriends, Icon: UserPlus, label: t('friends') },
   ];
@@ -50,9 +52,7 @@ export function ActivityActionRow({ accent, className }: ActivityActionRowProps)
             style={{ color: accent }}
           />
           <span className="truncate text-white/85">{link.label}</span>
-          {link.href === routes.tasks && hasClaimableTasks && (
-            <ClaimableDot label={t('something to claim')} size="sm" />
-          )}
+          {link.claimable && <ClaimableDot label={t('something to claim')} size="sm" />}
         </Link>
       ))}
     </div>

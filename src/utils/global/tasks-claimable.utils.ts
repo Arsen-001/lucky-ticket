@@ -1,5 +1,6 @@
 import { TaskCategory, TaskFrequency, TaskStatus } from '@/types/enums/tasks.enums';
 import type { CategoryTasks, Task, TasksResponse } from '@/types/interfaces/tasks.interfaces';
+import { type Route, routes } from '@/constants/routes';
 
 /**
  * "Is there anything to take here", in one place.
@@ -111,3 +112,31 @@ export const frequencyTabCounts = (data?: TasksResponse): Record<TaskFrequency, 
 /** Everything the player can collect on the tasks screen right now. */
 export const countAllClaimable = (data?: TasksResponse): number =>
   Object.values(claimableCountsByFrequency(data)).reduce((sum, count) => sum + count, 0);
+
+/** Tab order of the tasks screen — the first one holding a reward wins. */
+const FREQUENCY_ORDER: TaskFrequency[] = [
+  TaskFrequency.DAILY,
+  TaskFrequency.WEEKLY,
+  TaskFrequency.ONCE,
+];
+
+/**
+ * Where the claim mark leads: the tasks route aimed at the tab that holds the
+ * reward.
+ *
+ * Every surface carrying the dot used to link to a bare `/tasks`, which opens
+ * on Daily — and a one-time task, once ready, stays ready until it is claimed.
+ * So the bar promised a reward, the screen opened on a tab with nothing on it,
+ * and the dot read as broken. The daily tab's own counter includes unwatched ad
+ * views, so it always shows a figure and the count on «Разовые» is easy to
+ * miss.
+ *
+ * Daily needs no parameter — it is the default `TasksContent` falls back to,
+ * and so is "nothing claimable anywhere".
+ */
+export const claimableTasksRoute = (byFrequency: Record<TaskFrequency, number>): Route => {
+  const first = FREQUENCY_ORDER.find(frequency => byFrequency[frequency] > 0);
+  return first && first !== TaskFrequency.DAILY
+    ? `${routes.tasks}?frequency=${first}`
+    : routes.tasks;
+};

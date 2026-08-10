@@ -30,10 +30,12 @@ export function LcActionRow({ onConvertTon, className }: LcActionRowProps) {
   const { withdrawalsEnabled } = useWalletLimits();
   // "Where do I get more LC" is what this footer answers — so it says when the
   // answer is already sitting there, unclaimed.
-  const { hasAny: hasClaimableTasks } = useClaimableTasks();
+  const { hasAny: hasClaimableTasks, route: claimRoute } = useClaimableTasks();
 
-  const links: { href: Route; Icon: LucideIcon; label: string }[] = [
-    { href: routes.tasks, Icon: Sparkles, label: t('tasks') },
+  // `claimable` rather than re-comparing the href: it now carries the frequency
+  // the reward is on, so it is no longer equal to `routes.tasks`.
+  const links: { href: Route; Icon: LucideIcon; label: string; claimable?: boolean }[] = [
+    { href: claimRoute, Icon: Sparkles, label: t('tasks'), claimable: hasClaimableTasks },
     { href: routes.market(), Icon: Store, label: t('market') },
   ];
 
@@ -51,9 +53,7 @@ export function LcActionRow({ onConvertTon, className }: LcActionRowProps) {
       {links.map(link => (
         <Link key={link.href} href={link.href} className={CELL}>
           <LcActionCell Icon={link.Icon} label={link.label} />
-          {link.href === routes.tasks && hasClaimableTasks && (
-            <ClaimableDot label={t('something to claim')} size="sm" />
-          )}
+          {link.claimable && <ClaimableDot label={t('something to claim')} size="sm" />}
         </Link>
       ))}
     </div>

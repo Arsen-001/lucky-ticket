@@ -24,11 +24,13 @@ const CELL =
  */
 export function JackpotActionRow({ className }: JackpotActionRowProps) {
   const t = useAppTranslations();
-  const { hasAny: hasClaimableTasks } = useClaimableTasks();
+  const { hasAny: hasClaimableTasks, route: claimRoute } = useClaimableTasks();
 
-  const links: { href: Route; Icon: LucideIcon; label: string }[] = [
+  // `claimable` rather than re-comparing the href: it now carries the frequency
+  // the reward is on, so it is no longer equal to `routes.tasks`.
+  const links: { href: Route; Icon: LucideIcon; label: string; claimable?: boolean }[] = [
     { href: routes.tournaments.index, Icon: Swords, label: t('tournaments') },
-    { href: routes.tasks, Icon: Sparkles, label: t('tasks') },
+    { href: claimRoute, Icon: Sparkles, label: t('tasks'), claimable: hasClaimableTasks },
     { href: routes.market(), Icon: Store, label: t('market') },
   ];
 
@@ -43,9 +45,7 @@ export function JackpotActionRow({ className }: JackpotActionRowProps) {
         <Link key={link.href} href={link.href} className={CELL}>
           <link.Icon size={15} strokeWidth={2.5} className="text-gold flex-shrink-0" />
           <span className="truncate text-white/85">{link.label}</span>
-          {link.href === routes.tasks && hasClaimableTasks && (
-            <ClaimableDot label={t('something to claim')} size="sm" />
-          )}
+          {link.claimable && <ClaimableDot label={t('something to claim')} size="sm" />}
         </Link>
       ))}
     </div>

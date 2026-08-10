@@ -3,13 +3,22 @@
 import { useMemo } from 'react';
 import { useGetTasksQuery } from '@/api/tasks.api';
 import type { TaskFrequency } from '@/types/enums/tasks.enums';
-import { claimableCountsByFrequency } from '@/utils/global/tasks-claimable.utils';
+import {
+  claimableCountsByFrequency,
+  claimableTasksRoute,
+} from '@/utils/global/tasks-claimable.utils';
+import type { Route } from '@/constants/routes';
 
 export interface ClaimableTasks {
   /** Everything collectable on the tasks screen right now (ad views included). */
   total: number;
   byFrequency: Record<TaskFrequency, number>;
   hasAny: boolean;
+  /**
+   * Where the mark leads — the tasks route aimed at the frequency tab that
+   * actually holds the reward. See `claimableTasksRoute`.
+   */
+  route: Route;
 }
 
 /**
@@ -28,6 +37,11 @@ export function useClaimableTasks(): ClaimableTasks {
   return useMemo(() => {
     const byFrequency = claimableCountsByFrequency(data);
     const total = Object.values(byFrequency).reduce((sum, count) => sum + count, 0);
-    return { total, byFrequency, hasAny: total > 0 };
+    return {
+      total,
+      byFrequency,
+      hasAny: total > 0,
+      route: claimableTasksRoute(byFrequency),
+    };
   }, [data]);
 }

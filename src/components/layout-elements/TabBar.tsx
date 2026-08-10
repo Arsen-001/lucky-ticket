@@ -28,8 +28,9 @@ export function TabBar({ className }: ClassNameProps) {
 
   // The one thing the bar says beyond "where am I": there is a reward waiting
   // behind the Tasks tab. Without it the daily rewards are only ever found by
-  // players who go looking for them.
-  const { hasAny: hasClaimableTasks } = useClaimableTasks();
+  // players who go looking for them. `claimRoute` is the same mark's other
+  // half — it lands on the frequency tab the reward is actually on.
+  const { hasAny: hasClaimableTasks, route: claimRoute } = useClaimableTasks();
 
   // First path segment (e.g. "/market"). Drives the active tab once a
   // navigation has committed.
@@ -89,13 +90,16 @@ export function TabBar({ className }: ClassNameProps) {
     },
   ] as const;
 
-  const handleTabClick = (route: string) => {
+  // `href` may carry a query the tab identity must not: the disc is placed by
+  // matching `route` against the five, and `/tasks?frequency=once` matches none
+  // of them — the chip would vanish for the whole navigation.
+  const handleTabClick = (route: string, href: string = route) => {
     if (route === activeRoute) return;
     // Move the chip immediately (optimistic), then run the actual navigation
     // as a transition so the current page stays interactive while it commits.
     setPendingRoute(route);
     startTransition(() => {
-      router.push(route);
+      router.push(href);
     });
   };
   // The column the disc stands on. -1 while a route outside the five is showing,
@@ -133,7 +137,7 @@ export function TabBar({ className }: ClassNameProps) {
           key={route}
           icon={icon as ReactElement<LucideProps>}
           name={name}
-          onClick={() => handleTabClick(route)}
+          onClick={() => handleTabClick(route, route === routes.tasks ? claimRoute : route)}
           active={activeRoute === route}
           claimable={route === routes.tasks && hasClaimableTasks}
           claimableLabel={t('something to claim')}
