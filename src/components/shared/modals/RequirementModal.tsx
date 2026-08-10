@@ -138,7 +138,20 @@ export function RequirementModal({
               onClick={() => handleNavigate(secondaryAction.href)}
               className="text-pink-secondary w-full rounded-xl py-2 text-[12px] font-bold"
             >
-              {secondaryAction.label}
+              {/* The dot follows the errand, not the button rank: when the
+                  thing to collect moved down here, leaving the mark upstairs
+                  would have pointed at the wrong screen.
+
+                  Inline, unlike the primary's corner badge. This row is a bare
+                  text link on the modal's own surface — nothing marks where it
+                  ends — so a corner dot floats alone at the far right, 140px
+                  from the words it belongs to (measured 11.08.2026). */}
+              <span className="inline-flex items-center gap-1.5">
+                {secondaryAction.label}
+                {secondaryAction.claimable && (
+                  <ClaimableDot label={t('something to claim')} size="sm" />
+                )}
+              </span>
             </Button>
           )}
           <button

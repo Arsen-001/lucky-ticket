@@ -10,7 +10,8 @@ import type { MarketSelectedItem } from '@/components/pages/tabs/market/MarketVi
 import { useAppTranslations } from '@/hooks/useAppTranslations';
 import { MarketPriceType } from '@/types/enums/market.enums';
 import type { MarketPrice } from '@/types/interfaces/market.interfaces';
-import { giftErrorMessage } from '@/utils/pages/gift.utils';
+import { giftPurchaseFailure } from '@/utils/pages/gift.utils';
+import { resolvedMarketFailure } from '@/utils/pages/market-purchase.utils';
 
 export interface MarketGiftSectionProps {
   onSelect: (item: MarketSelectedItem) => void;
@@ -81,7 +82,7 @@ export function MarketGiftSection({ onSelect, onBuy }: MarketGiftSectionProps) {
               try {
                 return await buyGift({ giftId: gift.id }).unwrap();
               } catch (error) {
-                throw { data: { message: giftErrorMessage(error, t) } };
+                throw resolvedMarketFailure(giftPurchaseFailure(error, t));
               }
             },
           };

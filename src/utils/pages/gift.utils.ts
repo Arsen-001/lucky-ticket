@@ -1,4 +1,5 @@
 import type { Dictionary, MessageIds } from '@/types/types/i18n.types';
+import type { MarketPurchaseFailure } from '@/utils/pages/market-purchase.utils';
 
 /**
  * Turn a gift-purchase failure into something a player can act on.
@@ -25,11 +26,26 @@ const CODE_KEYS: Record<string, MessageIds> = {
   'rate-limited': 'gift error temporarily unavailable',
 };
 
-export function giftErrorMessage(error: unknown, t: Dictionary): string {
+const giftErrorCode = (error: unknown): string => {
   const raw = (error as { data?: { message?: string } } | undefined)?.data?.message ?? '';
   // `gift-send-failed:<telegram-code>` — the part after the colon is the one
   // that says what to do about it.
-  const code = raw.startsWith('gift-send-failed:') ? raw.slice('gift-send-failed:'.length) : raw;
-  const key = CODE_KEYS[code];
+  return raw.startsWith('gift-send-failed:') ? raw.slice('gift-send-failed:'.length) : raw;
+};
+
+export function giftErrorMessage(error: unknown, t: Dictionary): string {
+  const key = CODE_KEYS[giftErrorCode(error)];
   return key ? t(key) : t('gift error send failed');
+}
+
+/**
+ * The same refusals, in the shape the storefront's confirm handler acts on.
+ *
+ * A shortfall is the one gift failure with somewhere to go, so it hands back
+ * the shared "not enough LC" screen instead of a sentence that names the
+ * problem and stops there.
+ */
+export function giftPurchaseFailure(error: unknown, t: Dictionary): MarketPurchaseFailure {
+  if (giftErrorCode(error) === 'gift-insufficient-coins') return { kind: 'coins' };
+  return { kind: 'message', text: giftErrorMessage(error, t) };
 }

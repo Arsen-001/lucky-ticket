@@ -1330,5 +1330,16 @@
   "speed shards {count}": "{count, plural, =1 {Time shard} other {Time shards}}",
   "capacity shards {count}": "{count, plural, =1 {Capacity shard} other {Capacity shards}}",
   "ads watched {count}": "{count, plural, =1 {ad watched} other {ads watched}}",
-  "friends invited {count}": "{count, plural, =1 {friend invited} other {friends invited}}"
+  "friends invited {count}": "{count, plural, =1 {friend invited} other {friends invited}}",
+  "top up {coin}": "Top up {coin}",
+  "purchase not completed": "Purchase not completed",
+  "purchase error out of stock": "This item has just sold out. Nothing was charged.",
+  "purchase error item gone": "This offer is no longer available. Nothing was charged.",
+  "purchase error market closed": "The market is temporarily closed. Nothing was charged.",
+  "purchase error tier locked": "This item is locked for your tier. Nothing was charged.",
+  "purchase error vip max": "You are already at the highest VIP level.",
+  "purchase error avatars off": "Avatars are temporarily unavailable. Nothing was charged.",
+  "purchase error already owned": "You already own this item. Nothing was charged.",
+  "purchase error network": "Could not reach the server. Nothing was charged — try again.",
+  "balance changed description": "Your balance changed while the purchase was going through. Nothing was charged — check it and try again."
 }

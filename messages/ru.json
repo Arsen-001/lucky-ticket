@@ -1330,5 +1330,16 @@
   "speed shards {count}": "{count, plural, one {осколок скорости} few {осколка скорости} many {осколков скорости} other {осколков скорости}}",
   "capacity shards {count}": "{count, plural, one {осколок вместимости} few {осколка вместимости} many {осколков вместимости} other {осколков вместимости}}",
   "ads watched {count}": "{count, plural, one {реклама просмотрена} few {рекламы просмотрено} many {реклам просмотрено} other {реклам просмотрено}}",
-  "friends invited {count}": "{count, plural, one {друг приглашён} few {друга приглашено} many {друзей приглашено} other {друзей приглашено}}"
+  "friends invited {count}": "{count, plural, one {друг приглашён} few {друга приглашено} many {друзей приглашено} other {друзей приглашено}}",
+  "top up {coin}": "Пополнить {coin}",
+  "purchase not completed": "Покупка не прошла",
+  "purchase error out of stock": "Товар только что закончился. Списания не было.",
+  "purchase error item gone": "Это предложение больше недоступно. Списания не было.",
+  "purchase error market closed": "Магазин временно закрыт. Списания не было.",
+  "purchase error tier locked": "Товар закрыт для вашего уровня. Списания не было.",
+  "purchase error vip max": "У вас уже максимальный уровень VIP.",
+  "purchase error avatars off": "Аватары временно недоступны. Списания не было.",
+  "purchase error already owned": "Этот товар у вас уже есть. Списания не было.",
+  "purchase error network": "Не удалось связаться с сервером. Списания не было — попробуйте ещё раз.",
+  "balance changed description": "Баланс изменился, пока шла покупка. Списания не было — проверьте его и попробуйте снова."
 }

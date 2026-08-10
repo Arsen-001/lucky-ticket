@@ -1330,5 +1330,16 @@
   "speed shards {count}": "{count, plural, one {Zeitfragment} other {Zeitfragmente}}",
   "capacity shards {count}": "{count, plural, one {Kapazitätsfragment} other {Kapazitätsfragmente}}",
   "ads watched {count}": "{count, plural, one {Anzeige gesehen} other {Anzeigen gesehen}}",
-  "friends invited {count}": "{count, plural, one {Freund eingeladen} other {Freunde eingeladen}}"
+  "friends invited {count}": "{count, plural, one {Freund eingeladen} other {Freunde eingeladen}}",
+  "top up {coin}": "{coin} aufladen",
+  "purchase not completed": "Kauf nicht abgeschlossen",
+  "purchase error out of stock": "Dieser Artikel ist gerade ausverkauft. Es wurde nichts abgebucht.",
+  "purchase error item gone": "Dieses Angebot ist nicht mehr verfügbar. Es wurde nichts abgebucht.",
+  "purchase error market closed": "Der Markt ist vorübergehend geschlossen. Es wurde nichts abgebucht.",
+  "purchase error tier locked": "Dieser Artikel ist für deine Stufe gesperrt. Es wurde nichts abgebucht.",
+  "purchase error vip max": "Du hast bereits die höchste VIP-Stufe.",
+  "purchase error avatars off": "Avatare sind vorübergehend nicht verfügbar. Es wurde nichts abgebucht.",
+  "purchase error already owned": "Du besitzt diesen Artikel bereits. Es wurde nichts abgebucht.",
+  "purchase error network": "Server nicht erreichbar. Es wurde nichts abgebucht — bitte erneut versuchen.",
+  "balance changed description": "Dein Guthaben hat sich während des Kaufs geändert. Es wurde nichts abgebucht — bitte prüfen und erneut versuchen."
 }

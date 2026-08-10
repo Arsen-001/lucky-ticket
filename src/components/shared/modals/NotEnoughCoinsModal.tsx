@@ -3,6 +3,7 @@
 import { CoinIcon } from '@/components/shared/icons/CoinIcon';
 import { RequirementModal } from '@/components/shared/modals/RequirementModal';
 import { GlobalConstants } from '@/constants/global.constants';
+import { routes } from '@/constants/routes';
 import { useAppTranslations } from '@/hooks/useAppTranslations';
 import { useClaimableTasks } from '@/hooks/useClaimableTasks';
 
@@ -15,8 +16,13 @@ export interface NotEnoughCoinsModalProps {
 
 /**
  * "Not enough LC" used to be an OK button and nothing else — the balance is
- * named, but where LC comes from is not. Tasks is the screen that answers that,
- * so the modal carries the player there.
+ * named, but where LC comes from is not.
+ *
+ * The way out is the LC screen: it is the one place that holds the balance, the
+ * conversion in, and the routes to every source of coins, so "top up" lands
+ * somewhere that can actually answer the question rather than on one source of
+ * many. Tasks stays as the second line, because unclaimed rewards are LC the
+ * player has already earned — a shorter errand than any top-up.
  */
 export function NotEnoughCoinsModal({
   open,
@@ -29,12 +35,26 @@ export function NotEnoughCoinsModal({
   // the dot says the shortfall may be covered by collecting, not by grinding.
   const { hasAny: hasClaimableTasks, route: claimRoute } = useClaimableTasks();
 
+  /**
+   * The balance on hand says the purchase was affordable — so this refusal came
+   * from the server, and the number the client is holding is the stale one.
+   *
+   * Saying it out loud is worse than saying nothing: "your balance is 1,600,000,
+   * but you need 1,200,000" under the heading "Not enough LC" reads as a broken
+   * app, and the progress bar under it fills to 1.2M/1.2M, which argues the
+   * opposite of the modal it sits in. (Seen 11.08.2026 the first time a market
+   * purchase was refused by the backend rather than by the local check.)
+   */
+  const stale = current >= required;
+
   // Grouped, not raw: "10000" in a money modal reads as an unformatted debug
   // value next to every other price on the screen.
-  const description = t('not enough coins description', {
-    balance: current.toLocaleString(),
-    required: required.toLocaleString(),
-  });
+  const description = stale
+    ? t('balance changed description')
+    : t('not enough coins description', {
+        balance: current.toLocaleString(),
+        required: required.toLocaleString(),
+      });
 
   return (
     <RequirementModal
@@ -43,8 +63,13 @@ export function NotEnoughCoinsModal({
       icon={<CoinIcon size={34} />}
       title={t('not enough {coin}', { coin: GlobalConstants.coinName })}
       description={description}
-      progress={{ label: t('balance'), current, required }}
-      action={{ label: t('go to tasks'), href: claimRoute, claimable: hasClaimableTasks }}
+      progress={stale ? undefined : { label: t('balance'), current, required }}
+      action={{ label: t('top up {coin}', { coin: GlobalConstants.coinName }), href: routes.lc }}
+      secondaryAction={{
+        label: t('go to tasks'),
+        href: claimRoute,
+        claimable: hasClaimableTasks,
+      }}
     />
   );
 }
