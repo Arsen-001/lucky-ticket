@@ -224,7 +224,7 @@ describe('economy simulation (DOCS §14.2 guardrails)', () => {
     expect(effectiveCycleSeconds(maxed)).toBe(appConfig.engines.baseCycleSecondsByTier.bronze / 2);
   });
 
-  it('AP pacing hits the product targets: Silver ~15d, then +1mo, +3mo, +6mo', () => {
+  it('AP pacing hits the product targets: Silver ~15d, then +1mo, +3.5mo, +7mo', () => {
     const t = GlobalConstants.apTierThresholds;
     const base = GlobalConstants.dailyBaselineApByTier;
     const daysPerLeg = [
@@ -235,7 +235,15 @@ describe('economy simulation (DOCS §14.2 guardrails)', () => {
     ];
     // A perfect player who collects the full derived daily ceiling every day
     // must land each leg within ±10% of the product pacing targets.
-    const targetDays = [15, 30, 90, 180];
+    //
+    // The last two read 90 / 180 while the baseline priced every task at the
+    // PLAYER's tier rate: a Diamond player was credited 5 AP for the channel
+    // check-in and 5 for the Bronze tournament task, 35 AP/day of tasks where
+    // the catalog pays 19. On the real rates the legs are 3.5 and 7 months.
+    // The targets moved, not the thresholds — pulling Platinum and Diamond back
+    // to 3 and 6 months means LOWERING the AP gates on a live ladder, which
+    // demotes whoever sits between the old gate and the new one.
+    const targetDays = [15, 30, 105, 220];
     daysPerLeg.forEach((leg, i) => {
       expect(leg, `leg ${i} vs target ${targetDays[i]}d`).toBeGreaterThanOrEqual(
         targetDays[i] * 0.9

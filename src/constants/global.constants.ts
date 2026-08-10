@@ -30,14 +30,50 @@ const apRewards = {
   weeklyTaskByTier: { bronze: 2, silver: 3, gold: 4, platinum: 5, diamond: 6 },
   tournamentJoinByTier: { bronze: 1, silver: 2, gold: 3, platinum: 4, diamond: 5 },
   /**
-   * How many daily / weekly tasks a player of each tier can actually complete
-   * (own-tier task ladder + the social share + the profile check-in). Used to
-   * DERIVE the daily baseline below — change the counts or the rates and the
-   * baseline, decay and tier pacing follow automatically.
+   * Recurring tasks that carry NO tier — the engine claim, the 3-ad task, the
+   * channel check-in and the all-set bonus daily; the 7-day check-in and the
+   * all-set bonus weekly. The rate follows the TASK's tier, and theirs is null,
+   * so they pay the Bronze rate to every player. The tier ladder on top is one
+   * task per rung up to the player's own tier.
    */
-  dailyTasksCountByTier: { bronze: 3, silver: 4, gold: 5, platinum: 6, diamond: 7 },
+  flatDailyTasks: 4,
+  flatWeeklyTasks: 2,
+  /**
+   * How many recurring tasks a player of each tier can complete — the flat ones
+   * plus their tier ladder. For counting ("is the set done?"), never for
+   * pricing AP: the tasks in it pay different rates.
+   */
+  dailyTasksCountByTier: { bronze: 5, silver: 6, gold: 7, platinum: 8, diamond: 9 },
   weeklyTasksCountByTier: { bronze: 3, silver: 4, gold: 5, platinum: 6, diamond: 7 },
 };
+
+/** Tiers a player of `tier` has unlocked, Bronze → their own. */
+const tiersUpTo = (tier: (typeof apTiers)[number]) => apTiers.slice(0, apTiers.indexOf(tier) + 1);
+
+/**
+ * DERIVED — AP per day / per week from recurring tasks, summed the way the
+ * catalog actually pays: each unlocked tier task at ITS OWN rate, plus the
+ * tier-less tasks at the Bronze rate.
+ *
+ * This replaced `tasksCountByTier × dailyTaskByTier[playerTier]`, which
+ * credited a Diamond player 5 AP for the channel check-in and 5 for the Bronze
+ * tournament task — 35 AP/day of tasks against the 19 the catalog pays.
+ */
+const dailyTaskApByTier = Object.fromEntries(
+  apTiers.map(tier => [
+    tier,
+    tiersUpTo(tier).reduce((ap, rung) => ap + apRewards.dailyTaskByTier[rung], 0) +
+      apRewards.flatDailyTasks * apRewards.dailyTaskByTier.bronze,
+  ])
+) as Record<(typeof apTiers)[number], number>;
+
+const weeklyTaskApByTier = Object.fromEntries(
+  apTiers.map(tier => [
+    tier,
+    tiersUpTo(tier).reduce((ap, rung) => ap + apRewards.weeklyTaskByTier[rung], 0) +
+      apRewards.flatWeeklyTasks * apRewards.weeklyTaskByTier.bronze,
+  ])
+) as Record<(typeof apTiers)[number], number>;
 
 /**
  * DERIVED — the no-donation daily AP ceiling per tier (DOCS §5.4): the sum of
@@ -46,7 +82,8 @@ const apRewards = {
  * no AP (product decision — claims pay in tickets only). Never hand-edit a
  * baseline: tune the source rates/caps above instead, so the number shown on
  * the AP dashboard, the decay rate and the tier pacing can never drift apart.
- * Currently ≈33 / 39 / 47 / 57 / 70.
+ * Currently ≈35 / 37 / 41 / 46 / 51 — it read 33/39/47/57/70 while the task
+ * term priced every task at the PLAYER's tier rate instead of the task's own.
  */
 const dailyBaselineApByTier = Object.fromEntries(
   apTiers.map(tier => [
@@ -56,8 +93,8 @@ const dailyBaselineApByTier = Object.fromEntries(
         apRewards.watchVideo * apRewards.watchVideoDailyLimit +
         apRewards.sendTicket * apRewards.sendTicketDailyLimit +
         apRewards.likeProfile * apRewards.likeProfileDailyLimit +
-        apRewards.dailyTasksCountByTier[tier] * apRewards.dailyTaskByTier[tier] +
-        (apRewards.weeklyTasksCountByTier[tier] * apRewards.weeklyTaskByTier[tier]) / 7
+        dailyTaskApByTier[tier] +
+        weeklyTaskApByTier[tier] / 7
     ),
   ])
 ) as Record<(typeof apTiers)[number], number>;
@@ -187,6 +224,9 @@ export const GlobalConstants = {
   maxVipLevel: 20,
   /** Derived from `apRewards` above — see the computation for the rationale. */
   dailyBaselineApByTier,
+  /** AP a tier earns per day / per week from recurring tasks — see above. */
+  dailyTaskApByTier,
+  weeklyTaskApByTier,
   /** Days of inactivity before AP decay begins. */
   decayGraceDays: 7,
   /**

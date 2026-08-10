@@ -168,8 +168,8 @@ AP is earned from a data-driven **source registry** — every meaningful action 
 | Source                    | AP                                    | Limit                                                                                          |
 | :------------------------ | :------------------------------------ | :--------------------------------------------------------------------------------------------- |
 | Daily login streak        | 3                                     | 1×/day                                                                                         |
-| Daily task                | 1 / 2 / 3 / 4 / 5                     | by task tier; a tier-T player completes 3–7/day (`dailyTasksCountByTier`)                      |
-| Weekly task               | 2 / 3 / 4 / 5 / 6                     | by task tier; a tier-T player completes 3–7/week (`weeklyTasksCountByTier`)                    |
+| Daily task                | 1 / 2 / 3 / 4 / 5                     | by **task** tier; a tier-T player completes 5–9/day (`dailyTasksCountByTier`) worth 5–19 AP    |
+| Weekly task               | 2 / 3 / 4 / 5 / 6                     | by **task** tier; a tier-T player completes 3–7/week (`weeklyTasksCountByTier`) worth 6–24 AP  |
 | One-time task             | varies                                | once per task                                                                                  |
 | Verify email              | 20 (admin-configurable gift, §16.3)   | one-time                                                                                       |
 | Watch a video             | 2                                     | 10×/day default · 20×/day with LP · 11→30×/day with VIP by level (daily cap = limit × 2 AP)    |
@@ -188,13 +188,17 @@ Tiered sources (daily / weekly tasks, tournament join) scale with the relevant t
 
 The **daily baseline** is the AP a fully-active player earns per day without donation. It is **DERIVED, not hand-set**: `dailyBaselineApByTier` is computed from the source registry (§5.3) as the sum of every capped recurring source — streak + ads + ticket sends + likes + daily tasks + weekly tasks averaged per day. Tune a source rate or cap and the baseline, the decay rate and the tier pacing all follow automatically. It is tier-dependent — daily and weekly tasks scale with tier:
 
-| Tier     | Daily baseline (derived) |
-| :------- | :----------------------- |
-| Bronze   | 33                       |
-| Silver   | 39                       |
-| Gold     | 47                       |
-| Platinum | 57                       |
-| Diamond  | 70                       |
+| Tier     | Daily baseline (derived) | of which recurring tasks |
+| :------- | :----------------------- | :----------------------- |
+| Bronze   | 35                       | 5/day + 6/week           |
+| Silver   | 37                       | 7/day + 9/week           |
+| Gold     | 41                       | 10/day + 13/week         |
+| Platinum | 46                       | 14/day + 18/week         |
+| Diamond  | 51                       | 19/day + 24/week         |
+
+**A task pays the rate of its OWN tier, not the player's.** The table read 33 / 39 / 47 / 57 / 70 until 2026-08-10, because the task term was `taskCount × dailyTaskByTier[playerTier]` — which credited a Diamond player 5 AP for the channel check-in and 5 more for the Bronze tournament task, 35 AP/day of tasks where the catalog pays 19. The error ran both ways: the count itself said 3 while a Bronze player had 4 recurring tasks, and now has 5. The sum is now built the way the catalog pays — every unlocked tier task at its own rate, plus the four daily / two weekly tier-less tasks (engine claim, 3 ads, check-in, all-set bonus; 7-day check-in, all-set bonus) at the Bronze rate. Ads remain the largest single term at every tier: 20 of the 35 AP a Bronze player can earn in a day.
+
+Consequence for pacing (§5.1): the legs are ~15 days to Silver, ~1 month to Gold, ~3.5 months to Platinum and ~7 months to Diamond, against the 15 / 30 / 90 / 180 the old numbers implied. **The AP thresholds were deliberately not lowered to restore 3 and 6 months** — that is a live ladder, and moving a gate down demotes every player sitting between the old gate and the new one (§5.5: frozen content, nothing lost, but still a demotion). Restoring the original pacing is a product call, not a correction.
 
 The baseline is shown on the AP dashboard and is the basis of the decay rate (Section 5.5). One-off and on-top sources — verify-email, one-time tasks, invites, tournaments, stakes — are earned above this baseline. Purchases are not among them: spending pays no AP (Section 5.3).
 
@@ -203,7 +207,7 @@ The baseline is shown on the AP dashboard and is the basis of the decay rate (Se
 If the user stops opening the app, AP decays:
 
 - **Grace period:** 7 days of inactivity with no decay.
-- **After grace:** AP drops by `0.5 ×` the player's tier daily baseline per inactive day (≈ 17 AP at Bronze, ≈ 35 at Diamond). Floor: 0.
+- **After grace:** AP drops by `0.5 ×` the player's tier daily baseline per inactive day (≈ 18 AP at Bronze, ≈ 26 at Diamond). Floor: 0.
 - Any action resets the grace timer and stops the decay.
 - Decay lowers AP → lowers tier → **freezes** (makes temporarily unusable) content above the new tier. **No assets are lost** — engines, tickets, LC remain; they are frozen until AP recovers.
 - Bronze tier is 0 AP and the decay floor is 0, so a user can never fall below Bronze — Bronze content and non-gated AP sources always remain available, so a returning user can always climb back.
@@ -1229,9 +1233,14 @@ the moment it was drawn. The same visibility rule decides what the all-set
 bonus (§12.4) sweeps, and the same numbers gate the claim, so the card and the
 server cannot disagree.
 
-**Sub-steps are a counter, not a schedule.** A daily/weekly task whose target is
-greater than 1 expands into `progressTarget` sub-steps, each claimable on its own
-for a slice of the AP. Step _n_ is completed by one rule and one only — **the
+**Sub-steps are a counter, not a schedule — and they pay nothing.** A
+daily/weekly task whose target is greater than 1 expands into `progressTarget`
+sub-steps: a read-only checklist (`claimable: false`), so **a task pays the
+reward printed on its card, once**. Each step used to grant a flat 1 AP of its
+own on top, which no rate in §5.3 documented and no baseline counted — the "+1
+AP" on "Join 4 Bronze tournaments" was really +5, and a Bronze player collecting
+the day step by step earned 13 AP from tasks against the 5 the catalog
+advertises. Removed 2026-08-10 (§5.4). Step _n_ is completed by one rule and one only — **the
 period counter reached _n_** — so the steps are labelled `1 / 4`, `2 / 4`, … and
 nothing more. They used to be named after time slots (`Morning Bronze · 06:00` …
 `Night Bronze · 00:00`) and weekdays (`Mon` … `Sun`), which the data cannot back:

@@ -43,11 +43,15 @@ export const tasksForFrequency = (cat: CategoryTasks, frequency: TaskFrequency):
  * sub-step's. The sub-step counts: the card has always marked it separately,
  * and a player who can collect something does not care which half of the row
  * it hangs on.
+ *
+ * A step the server marks `claimable: false` pays nothing, so it never makes
+ * the task collectable — that is every step since sub-steps stopped carrying
+ * AP of their own, and it is what keeps the "something to claim" dot honest.
  */
 export const isTaskClaimable = (task: Task): boolean => {
   if (task.status === TaskStatus.READY_TO_CLAIM) return true;
   if (task.status === TaskStatus.LOCKED || task.status === TaskStatus.COMPLETED) return false;
-  return !!task.subSteps?.some(step => step.completed && !step.claimed);
+  return !!task.subSteps?.some(step => step.claimable !== false && step.completed && !step.claimed);
 };
 
 export const countClaimableTasks = (tasks: Task[]): number => tasks.filter(isTaskClaimable).length;

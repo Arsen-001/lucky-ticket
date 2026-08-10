@@ -116,8 +116,15 @@ const normalizeTaskAp = (task: Task): Task => {
   const rewards = [...nonAp, ap(apValue)];
   if (!task.subSteps?.length) return { ...task, rewards };
 
-  // Each sub-step grants a flat 1 AP; the task header keeps its tier AP.
-  const subSteps = task.subSteps.map(step => ({ ...step, reward: ap(1) }));
+  // Sub-steps are a progress checklist and pay nothing — a task pays the AP
+  // printed on its card, once. Each step used to grant a flat 1 AP on top,
+  // which no rate documented and no baseline counted: the "+1 AP" on the
+  // 4-tournament card was really +5.
+  const subSteps = task.subSteps.map(step => {
+    const { reward: _dropped, ...rest } = step;
+    void _dropped;
+    return { ...rest, claimed: rest.completed, claimable: false };
+  });
   return { ...task, rewards, subSteps };
 };
 
@@ -135,13 +142,18 @@ const normalizeCategoryAp = (cat: CategoryTasks): CategoryTasks => ({
 // lit up 'Night Bronze · 00:00' at breakfast. Digits also need no translation;
 // `label` is a bare string in the FE contract, so those English names used to
 // reach RU/DE players untranslated.
-const buildSubSteps = (_prefix: string, count: number, completedCount: number, apPerStep: number) =>
+/**
+ * A progress checklist, not a reward ladder — `claimable: false`, no reward.
+ * The `apPerStep` argument is gone with the AP it used to pay; the tier configs
+ * that fed it keep the field only so the fixture reads like the old one did.
+ */
+const buildSubSteps = (_prefix: string, count: number, completedCount: number) =>
   Array.from({ length: count }, (_, i) => ({
     id: nextId('ss'),
     label: `${i + 1} / ${count}`,
     completed: i < completedCount,
-    claimed: false,
-    reward: ap(apPerStep),
+    claimed: i < completedCount,
+    claimable: false,
   }));
 
 const baseTask = (override: Partial<Task>): Task => {
@@ -557,12 +569,7 @@ const buildDailyTierTask = (cfg: TierTournamentConfig): Task => {
     deeplink: '/tournaments',
     rarity: cfg.daily.rarity,
     tier: cfg.tier,
-    subSteps: buildSubSteps(
-      tierCap,
-      cfg.daily.count,
-      cfg.daily.progress.current,
-      cfg.daily.subStepAp
-    ),
+    subSteps: buildSubSteps(tierCap, cfg.daily.count, cfg.daily.progress.current),
   });
 };
 
@@ -587,7 +594,7 @@ const buildWeeklyTierTask = (cfg: TierTournamentConfig): Task => {
     deeplink: `/tasks?frequency=daily&category=tournaments&task=task-daily-${cfg.tier}`,
     rarity: cfg.weekly.rarity,
     tier: cfg.tier,
-    subSteps: buildSubSteps(tierCap, 7, cfg.weekly.progress.current, cfg.weekly.subStepAp),
+    subSteps: buildSubSteps(tierCap, 7, cfg.weekly.progress.current),
   });
 };
 
@@ -836,7 +843,7 @@ const PROFILE = buildCategory({
       rewards: [lc(2), ap(150)],
       progress: { current: 5, target: 7 },
       rarity: TaskRarity.SILVER,
-      subSteps: buildSubSteps('profile-checkin', 7, 5, 15),
+      subSteps: buildSubSteps('profile-checkin', 7, 5),
     },
   ],
   once: [

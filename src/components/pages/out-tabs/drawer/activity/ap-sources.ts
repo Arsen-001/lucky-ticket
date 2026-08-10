@@ -188,8 +188,11 @@ export const apDailyCeilings = (
   watchVideoLimit: number
 ): Record<string, number> => ({
   watchVideo: apRewards.watchVideo * watchVideoLimit,
-  dailyTask: apRewards.dailyTaskByTier[tier] * apRewards.dailyTasksCountByTier[tier],
-  weeklyTask: (apRewards.weeklyTaskByTier[tier] * apRewards.weeklyTasksCountByTier[tier]) / 7,
+  // The same per-tier sums the baseline is built from — a task pays its own
+  // tier's rate, so counting them all at the player's rate overstated the
+  // dashboard's ceiling for everyone above Bronze.
+  dailyTask: GlobalConstants.dailyTaskApByTier[tier],
+  weeklyTask: GlobalConstants.weeklyTaskApByTier[tier] / 7,
   sendTicket: apRewards.sendTicket * apRewards.sendTicketDailyLimit,
   like: apRewards.likeProfile * apRewards.likeProfileDailyLimit,
   streak: apRewards.dailyStreak,

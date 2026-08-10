@@ -228,7 +228,16 @@ export function TaskItemCard({
   const [isSimulating, setIsSimulating] = useState(false);
 
   const isStepClaimed = (step: TaskSubStep) => locallyClaimed[step.id] ?? !!step.claimed;
-  const hasClaimableSubStep = task.subSteps?.some(s => s.completed && !isStepClaimed(s)) ?? false;
+  /**
+   * A step is collectable only if the server says it can be — sub-steps stopped
+   * paying AP of their own (a task pays what its card says, once), so every
+   * step now arrives `claimable: false` and this whole branch stays dark. Kept
+   * as a condition rather than deleted: an admin-authored task could bring
+   * paying steps back, and the card would then work without another deploy.
+   */
+  const canClaimStep = (s: TaskSubStep) =>
+    s.claimable !== false && s.completed && !isStepClaimed(s);
+  const hasClaimableSubStep = task.subSteps?.some(canClaimStep) ?? false;
 
   const handleClaimSubStep = (step: TaskSubStep) => {
     setLocallyClaimed(prev => ({ ...prev, [step.id]: true }));
@@ -237,7 +246,7 @@ export function TaskItemCard({
 
   const handleClaimMain = async () => {
     if (isSimulating) return;
-    const unclaimed = (task.subSteps ?? []).filter(s => s.completed && !isStepClaimed(s));
+    const unclaimed = (task.subSteps ?? []).filter(canClaimStep);
 
     if (unclaimed.length > 1) {
       // Run a brief simulation: keep dropdown open, mark each substep claimed
@@ -267,7 +276,7 @@ export function TaskItemCard({
 
   const handleClaimAllSubSteps = async () => {
     if (isSimulating) return;
-    const unclaimed = (task.subSteps ?? []).filter(s => s.completed && !isStepClaimed(s));
+    const unclaimed = (task.subSteps ?? []).filter(canClaimStep);
     if (unclaimed.length < 2) return;
     // Local-only batch claim — fires per-substep callback; no main task claim.
     setIsSimulating(true);
@@ -280,7 +289,7 @@ export function TaskItemCard({
     setIsSimulating(false);
   };
 
-  const claimableCount = (task.subSteps ?? []).filter(s => s.completed && !isStepClaimed(s)).length;
+  const claimableCount = (task.subSteps ?? []).filter(canClaimStep).length;
 
   const isLockedTournament = isLocked && task.category === TaskCategory.TOURNAMENTS;
 
