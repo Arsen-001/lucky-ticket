@@ -20,12 +20,10 @@ const SKELETON_TOURNAMENTS = new Array(4).fill({}) as Tournament[];
 const MIN_TOURNAMENTS_TO_LOOP = 3;
 
 /**
- * Gap between advances. The old strip ran at 2s, which read as a screen that
- * would not sit still — long enough to notice a card, too short to read one.
- * At 3.5s a full pass over seven tournaments takes ~25s and the countdown on
- * the centred card is legible before it leaves.
+ * Gap between advances, set by the product owner: 2s, the pace the strip ran at
+ * before the redesign. A full pass over seven tournaments takes ~14s.
  */
-const AUTOPLAY_DELAY_MS = 3500;
+const AUTOPLAY_DELAY_MS = 2000;
 
 /**
  * The upcoming tournaments on Home: an endless centred carousel, nearest start
