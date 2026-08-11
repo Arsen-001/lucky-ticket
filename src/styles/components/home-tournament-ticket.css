@@ -1,0 +1,68 @@
+/* Home's tournament card — a poster with a tear-off foot.
+
+   The countdown sits on a counterfoil: the card is punched at both side edges
+   on the seam line and dashed between the punches. The holes are MASKED OUT of
+   the card rather than painted on it, so the atmospheric backdrop shows through
+   them — that is the whole difference between a cut ticket and two dark dots.
+
+   `mask-composite: intersect` is the modern spelling and
+   `-webkit-mask-composite: source-in` the one older Safari understands; both
+   are listed because the app runs inside Telegram's WebView. A browser that
+   supports neither simply renders the card with square edges and the dashed
+   seam still reads — the shape degrades, nothing breaks.
+
+   `--home-ticket-seam` must equal (card height − foot height): the punches, the
+   dashes and the foot all take their position from it. @see
+   HomeUpcomingTournamentCard */
+.home-tournament-ticket {
+  --home-ticket-seam: 122px;
+  --home-ticket-notch: 8px;
+
+  -webkit-mask-image:
+    radial-gradient(
+      circle var(--home-ticket-notch) at 0 var(--home-ticket-seam),
+      transparent calc(var(--home-ticket-notch) - 0.5px),
+      black var(--home-ticket-notch)
+    ),
+    radial-gradient(
+      circle var(--home-ticket-notch) at 100% var(--home-ticket-seam),
+      transparent calc(var(--home-ticket-notch) - 0.5px),
+      black var(--home-ticket-notch)
+    );
+  -webkit-mask-composite: source-in;
+  mask-image:
+    radial-gradient(
+      circle var(--home-ticket-notch) at 0 var(--home-ticket-seam),
+      transparent calc(var(--home-ticket-notch) - 0.5px),
+      black var(--home-ticket-notch)
+    ),
+    radial-gradient(
+      circle var(--home-ticket-notch) at 100% var(--home-ticket-seam),
+      transparent calc(var(--home-ticket-notch) - 0.5px),
+      black var(--home-ticket-notch)
+    );
+  mask-composite: intersect;
+}
+
+/* Sponsored tournament (DOCS §11.8): a purple skin instead of the tier wash, so
+   a paid card is never mistaken for a tier the player has not unlocked. Lived
+   in `engine-preview-card.css` and was reachable from Home only because another
+   component on the screen happened to import that file — a sponsor's card would
+   have lost its skin the day that import moved. */
+.home-tournament-ticket-sponsored {
+  background:
+    linear-gradient(135deg, rgba(24, 20, 48, 0.97) 0%, rgba(14, 12, 30, 0.98) 100%) padding-box,
+    linear-gradient(135deg, rgba(116, 61, 245, 0.95) 0%, rgba(222, 0, 155, 0.6) 100%) border-box;
+  border: 1.5px solid transparent;
+}
+
+/* The tear line. Inset past both punches so a dash never collides with a hole. */
+.home-tournament-ticket-seam {
+  position: absolute;
+  left: 10px;
+  right: 10px;
+  top: var(--home-ticket-seam);
+  height: 0;
+  border-top: 1px dashed rgba(255, 255, 255, 0.22);
+  pointer-events: none;
+}

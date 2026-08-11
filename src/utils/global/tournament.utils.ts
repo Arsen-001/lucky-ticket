@@ -3,6 +3,19 @@ import type { StatusPerks } from '@/types/interfaces/user.interfaces';
 import { effectiveStatusPct } from '@/utils/global/status.utils';
 
 /**
+ * Nearest start first, without mutating the RTK Query cache array (`sort()` in
+ * place on `data` throws under Immer's frozen results).
+ *
+ * The endpoint does not promise an order, and on live data it does not have
+ * one: Home's strip listed Platinum in three hours before Diamond in nine and a
+ * sponsored one in five, so "which starts next" could not be read off it.
+ */
+export const byStartTime = <T extends { startTime?: string }>(items: readonly T[]): T[] =>
+  [...items].sort(
+    (a, b) => new Date(a.startTime ?? 0).getTime() - new Date(b.startTime ?? 0).getTime()
+  );
+
+/**
  * Net LC a placement actually pays out: the prize pool minus the jackpot skim
  * (DOCS §20), times the placement %, floored — mirrors the backend `finish()`
  * distribution (the base prize, before any per-winner VIP/LP status boost).

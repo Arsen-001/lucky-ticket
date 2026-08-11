@@ -5,6 +5,7 @@ import { LabEngineAliveSection } from './LabEngineAliveSection';
 import { LabEnginesSection } from './LabEnginesSection';
 import { LabTabBarSection } from './LabTabBarSection';
 import { LabTasksSection } from './LabTasksSection';
+import { LabTournamentsSliderSection } from './LabTournamentsSliderSection';
 
 /**
  * Design lab — a scratch surface for judging options on the real components,
@@ -24,6 +25,8 @@ export function LabScreen() {
           данные живые.
         </p>
       </header>
+
+      <LabTournamentsSliderSection />
 
       <LabEnginesSection />
 
