@@ -6,6 +6,7 @@ import { twMerge } from 'tailwind-merge';
 import { Modal } from '@/components/shared/modals/Modal';
 import { TelegramStarIcon } from '@/components/shared/icons/TelegramStarIcon';
 import { useAppTranslations } from '@/hooks/useAppTranslations';
+import { useConverterAmount } from '@/hooks/useConverterAmount';
 import { useToast } from '@/hooks/useToast';
 import { useTonUsdRate } from '@/hooks/useTonUsdRate';
 import { useBuyStarsMutation } from '@/api/wallet.api';
@@ -27,6 +28,9 @@ export interface ExchangeTonStarsModalProps {
 
 type Step = 'select' | 'success';
 
+/** Plain digits for an input: `formatTon` groups thousands, which types badly. */
+const tonField = (value: number) => String(Number(value.toFixed(4)));
+
 export function ExchangeTonStarsModal({
   open,
   onClose,
@@ -38,24 +42,33 @@ export function ExchangeTonStarsModal({
   const tonUsdRate = useTonUsdRate();
   const [exchange, { isLoading }] = useBuyStarsMutation();
   const [step, setStep] = useState<Step>('select');
-  const [input, setInput] = useState('');
   const [result, setResult] = useState({ ton: 0, stars: 0 });
+  // Both boxes take input: "I want 500 LS" is the question a player actually
+  // has, and answering it by guessing TON amounts against an unseen rate was
+  // the only way this screen offered.
+  const amount = useConverterAmount({
+    toRight: ton => tonToStars(ton, tonUsdRate),
+    toLeft: stars => starsToTon(stars, tonUsdRate),
+    formatLeft: tonField,
+    // Grouped, so a five-digit star count stays readable; the field strips the
+    // separators back out the moment it is typed into.
+    formatRight: formatNumber,
+  });
 
   useEffect(() => {
     if (!open) {
       setStep('select');
-      setInput('');
+      amount.reset();
       setResult({ ton: 0, stars: 0 });
     }
   }, [open]);
 
-  const tonAmount = Number(input) || 0;
-  const stars = tonToStars(tonAmount, tonUsdRate);
+  const stars = amount.to;
   const cost = starsToTon(stars, tonUsdRate); // exact TON that will be charged
-  const insufficient = tonAmount > 0 && cost > tonBalance;
+  const insufficient = stars >= 1 && cost > tonBalance;
   const canSubmit = isConnected && stars >= 1 && !insufficient && !isLoading;
 
-  const handleMax = () => setInput(String(tonBalance));
+  const handleMax = () => amount.setFrom(String(tonBalance));
 
   const handleExchange = async () => {
     try {
@@ -109,8 +122,9 @@ export function ExchangeTonStarsModal({
                   <input
                     inputMode="decimal"
                     placeholder="0.0"
-                    value={input}
-                    onChange={e => setInput(sanitizeDecimalInput(e.target.value))}
+                    aria-label={t('from')}
+                    value={amount.fromValue}
+                    onChange={e => amount.setFrom(sanitizeDecimalInput(e.target.value))}
                     className="w-full bg-transparent text-2xl font-extrabold tabular-nums text-white outline-none"
                   />
                   <button
@@ -154,9 +168,14 @@ export function ExchangeTonStarsModal({
                   <div className="bg-gold/15 border-gold/35 flex-center h-10 w-10 flex-shrink-0 rounded-xl border">
                     <TelegramStarIcon size={20} />
                   </div>
-                  <span className="flex-1 truncate text-2xl font-extrabold tabular-nums text-white">
-                    {formatNumber(stars)}
-                  </span>
+                  <input
+                    inputMode="numeric"
+                    placeholder="0"
+                    aria-label={t('to')}
+                    value={amount.toValue}
+                    onChange={e => amount.setTo(e.target.value.replace(/[^0-9]/g, ''))}
+                    className="w-full bg-transparent text-2xl font-extrabold tabular-nums text-white outline-none"
+                  />
                   <span className="text-gold text-[11px] font-extrabold uppercase tracking-wider">
                     LS
                   </span>

@@ -5,14 +5,15 @@ import { ArrowDown, CheckCircle2, Coins } from 'lucide-react';
 import { twMerge } from 'tailwind-merge';
 import { Modal } from '@/components/shared/modals/Modal';
 import { useAppTranslations } from '@/hooks/useAppTranslations';
+import { useConverterAmount } from '@/hooks/useConverterAmount';
 import { useSpendFailure } from '@/hooks/useSpendFailure';
 import { useConvertLcToTonMutation } from '@/api/lc.api';
 import { formatNumber } from '@/utils/global/number.utils';
-import { lcToTon } from '@/utils/global/lc.utils';
+import { lcToTon, tonToLc } from '@/utils/global/lc.utils';
 import { useLcUsdRate } from '@/hooks/useLcUsdRate';
 import { useTonUsdRate } from '@/hooks/useTonUsdRate';
 import { useWalletLimits } from '@/hooks/useWalletLimits';
-import { isWithdrawalsDisabledError } from '@/utils/pages/wallet.utils';
+import { isWithdrawalsDisabledError, sanitizeDecimalInput } from '@/utils/pages/wallet.utils';
 import { WalletWithdrawLocked } from '@/components/pages/out-tabs/drawer/wallet/WalletWithdrawLocked';
 
 type Step = 'select' | 'success';
@@ -31,20 +32,10 @@ export function LcConvertTonModal({ open, onClose, balance }: LcConvertTonModalP
   const spend = useSpendFailure();
   const [convert, { isLoading }] = useConvertLcToTonMutation();
   const [step, setStep] = useState<Step>('select');
-  const [lcInput, setLcInput] = useState('');
   const [submitted, setSubmitted] = useState({ lc: 0, ton: 0 });
   // The exit closed between this screen's config and the submit — the config
   // query can be minutes stale, so the refusal itself flips the lock on.
   const [lateDisabled, setLateDisabled] = useState(false);
-
-  useEffect(() => {
-    if (!open) {
-      setStep('select');
-      setLcInput('');
-      setSubmitted({ lc: 0, ton: 0 });
-      setLateDisabled(false);
-    }
-  }, [open]);
 
   // Both sides of the quote come from the live config so the preview matches
   // what the backend credits — TON's price is a market feed, not a constant.
@@ -53,16 +44,33 @@ export function LcConvertTonModal({ open, onClose, balance }: LcConvertTonModalP
   // LC→TON is the same money exit as the TON withdrawal and dies by the same
   // switch, so it gets the same lock rather than a generic failure.
   const { minWithdrawLc, withdrawalsEnabled } = useWalletLimits();
+  // Either box takes input. "Is 1 TON within reach?" is the question the player
+  // brings here, and the LC-only field made them search for it by hand.
+  const fields = useConverterAmount({
+    toRight: lc => lcToTon(lc, lcUsdRate, tonUsdRate),
+    toLeft: ton => tonToLc(ton, lcUsdRate, tonUsdRate),
+    formatLeft: formatNumber,
+    formatRight: fmtTon,
+  });
+
+  useEffect(() => {
+    if (!open) {
+      setStep('select');
+      fields.reset();
+      setSubmitted({ lc: 0, ton: 0 });
+      setLateDisabled(false);
+    }
+  }, [open]);
+
   const locked = !withdrawalsEnabled || lateDisabled;
-  const amount = Number(lcInput) || 0;
-  const tonOut = lcToTon(amount, lcUsdRate, tonUsdRate);
+  const amount = fields.from;
   const insufficient = amount > balance;
   // The backend rejects anything under the minimum with a 400. Without this the
   // form happily submitted it and the player got a generic "action failed".
   const belowMinimum = amount > 0 && amount < minWithdrawLc;
   const canSubmit = amount > 0 && !insufficient && !belowMinimum;
 
-  const handleMax = () => setLcInput(String(balance));
+  const handleMax = () => fields.setFrom(String(balance));
 
   const handleConvert = async () => {
     try {
@@ -140,8 +148,9 @@ export function LcConvertTonModal({ open, onClose, balance }: LcConvertTonModalP
                   <input
                     inputMode="numeric"
                     placeholder="0"
-                    value={lcInput}
-                    onChange={e => setLcInput(e.target.value.replace(/[^0-9]/g, ''))}
+                    aria-label={t('from')}
+                    value={fields.fromValue}
+                    onChange={e => fields.setFrom(e.target.value.replace(/[^0-9]/g, ''))}
                     className="w-full bg-transparent text-2xl font-extrabold tabular-nums text-white outline-none"
                   />
                   <button
@@ -184,9 +193,14 @@ export function LcConvertTonModal({ open, onClose, balance }: LcConvertTonModalP
                   <div className="bg-teal/20 text-teal flex-center h-10 w-10 flex-shrink-0 rounded-xl text-[11px] font-extrabold">
                     TON
                   </div>
-                  <span className="flex-1 truncate text-2xl font-extrabold tabular-nums text-white">
-                    {fmtTon(tonOut)}
-                  </span>
+                  <input
+                    inputMode="decimal"
+                    placeholder="0.0"
+                    aria-label={t('to')}
+                    value={fields.toValue}
+                    onChange={e => fields.setTo(sanitizeDecimalInput(e.target.value))}
+                    className="w-full bg-transparent text-2xl font-extrabold tabular-nums text-white outline-none"
+                  />
                   <span className="text-teal text-[11px] font-extrabold uppercase tracking-wider">
                     TON
                   </span>
