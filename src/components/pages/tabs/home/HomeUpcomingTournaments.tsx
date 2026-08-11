@@ -2,7 +2,6 @@
 
 import { twMerge } from 'tailwind-merge';
 import { useGetTopTournamentsQuery } from '@/api/tournaments.api';
-import { HomeTournamentsHeading } from '@/components/pages/tabs/home/HomeTournamentsHeading';
 import { HomeUpcomingTournamentCard } from '@/components/pages/tabs/home/HomeUpcomingTournamentCard';
 import { staggerStyle } from '@/utils/global/animation.utils';
 import { byStartTime } from '@/utils/global/tournament.utils';
@@ -21,6 +20,10 @@ const SKELETON_TOURNAMENTS = new Array(4).fill({}) as Tournament[];
  * five. Now it is a plain snap rail: a ticket and a readable half on screen,
  * nothing moves unless the player moves it, and the only thing ticking is the
  * countdowns.
+ *
+ * No heading: the tickets say what they are, and Home is short enough that a
+ * label plus a "view all" row cost more screen than they bought — the catalog
+ * is a tab away.
  */
 export function HomeUpcomingTournaments({ className }: ClassNameProps) {
   const { data: tournaments, isLoading } = useGetTopTournamentsQuery();
@@ -32,20 +35,23 @@ export function HomeUpcomingTournaments({ className }: ClassNameProps) {
   }
 
   return (
-    <div className={twMerge('flex flex-col gap-2', className)}>
-      <HomeTournamentsHeading count={isLoading ? undefined : tournaments?.length} />
-
-      <div className="scrollbar-hidden flex snap-x snap-mandatory scroll-pl-4 gap-2.5 overflow-x-auto px-4 py-[6px]">
-        {items.map((tournament, index) => (
-          <div
-            key={tournament.id ?? index}
-            className="animate-slide-in-bottom shrink-0 snap-start"
-            style={staggerStyle(index, 50)}
-          >
-            <HomeUpcomingTournamentCard {...tournament} loading={isLoading} />
-          </div>
-        ))}
-      </div>
+    <div
+      // `py` rather than nothing: the rail scrolls horizontally, which clips
+      // vertically too, and the cards' press-scale and glow need the room.
+      className={twMerge(
+        'scrollbar-hidden flex snap-x snap-mandatory scroll-pl-4 gap-2.5 overflow-x-auto px-4 py-1',
+        className
+      )}
+    >
+      {items.map((tournament, index) => (
+        <div
+          key={tournament.id ?? index}
+          className="animate-slide-in-bottom shrink-0 snap-start"
+          style={staggerStyle(index, 50)}
+        >
+          <HomeUpcomingTournamentCard {...tournament} loading={isLoading} />
+        </div>
+      ))}
     </div>
   );
 }

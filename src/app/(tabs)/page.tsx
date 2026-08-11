@@ -11,7 +11,9 @@ export default function HomePage() {
         <HomeTestQuestCard />
       </section>
 
-      <HomeUpcomingTournaments />
+      {/* Pulled tight against its neighbours: the strip is 88px of card and the
+          page's 20px rhythm around it read as two gaps rather than one block. */}
+      <HomeUpcomingTournaments className="-my-2.5" />
 
       <section className="flex flex-col gap-2">
         <HomeEnginesSlider />
