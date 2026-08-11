@@ -1,29 +1,35 @@
 'use client';
 
+import 'swiper/css';
+import '@/styles/components/home-tournament-ticket.css';
+
+import { Swiper, SwiperSlide } from 'swiper/react';
 import { twMerge } from 'tailwind-merge';
 import { useGetTopTournamentsQuery } from '@/api/tournaments.api';
 import { HomeUpcomingTournamentCard } from '@/components/pages/tabs/home/HomeUpcomingTournamentCard';
-import { staggerStyle } from '@/utils/global/animation.utils';
 import { byStartTime } from '@/utils/global/tournament.utils';
 import type { ClassNameProps } from '@/types/interfaces/component.interfcaes';
 import type { Tournament } from '@/types/interfaces/tournaments.interfaces';
 
 const SKELETON_TOURNAMENTS = new Array(4).fill({}) as Tournament[];
 
+/** Below this, Swiper cannot fill both sides with clones and refuses to loop. */
+const MIN_TOURNAMENTS_TO_LOOP = 3;
+
 /**
- * The upcoming tournaments on Home, nearest start first.
+ * The upcoming tournaments on Home: an endless centred carousel, nearest start
+ * first.
  *
- * It was a Swiper that centred one 256×64 card and pulled the next one in every
- * two seconds: six of the seven tournaments were behind a 14-second wait, the
- * two neighbours the mask left visible were faded to ~6%, and the order was
- * whatever the query returned — Platinum in three hours ahead of a sponsor in
- * five. Now it is a plain snap rail: a ticket and a readable half on screen,
- * nothing moves unless the player moves it, and the only thing ticking is the
- * countdowns.
+ * Endless is the point — a plain scroll rail runs out at both ends, so the
+ * first ticket has nothing on its left and the last nothing on its right, and
+ * the strip stops reading as a carousel exactly where the player starts. With
+ * the loop, whichever ticket is centred always has a neighbour peeking in from
+ * both sides.
  *
- * No heading: the tickets say what they are, and Home is short enough that a
- * label plus a "view all" row cost more screen than they bought — the catalog
- * is a tab away.
+ * What did NOT come back with Swiper is the autoplay: the strip used to pull
+ * the next card in every two seconds, which put six of the seven tournaments
+ * behind a 14-second wait and kept the screen moving on its own. Nothing here
+ * moves unless the player moves it; the only thing ticking is the countdowns.
  */
 export function HomeUpcomingTournaments({ className }: ClassNameProps) {
   const { data: tournaments, isLoading } = useGetTopTournamentsQuery();
@@ -35,23 +41,28 @@ export function HomeUpcomingTournaments({ className }: ClassNameProps) {
   }
 
   return (
-    <div
-      // `py` rather than nothing: the rail scrolls horizontally, which clips
-      // vertically too, and the cards' press-scale and glow need the room.
-      className={twMerge(
-        'home-tournament-rail scrollbar-hidden flex snap-x snap-mandatory gap-2.5 overflow-x-auto py-1',
-        className
-      )}
+    <Swiper
+      // Swiper builds its loop clones once, from the slides it has at init —
+      // remounting it when the data lands is what stops the strip from looping
+      // over four skeletons for the rest of the session.
+      key={isLoading ? 'loading' : 'loaded'}
+      className={twMerge('home-tournament-rail w-full', className)}
+      centeredSlides
+      grabCursor
+      observer
+      observeParents
+      watchOverflow
+      loop={!isLoading && items.length >= MIN_TOURNAMENTS_TO_LOOP}
+      slidesPerView="auto"
+      spaceBetween={10}
     >
       {items.map((tournament, index) => (
-        <div
-          key={tournament.id ?? index}
-          className="animate-slide-in-bottom shrink-0 snap-center"
-          style={staggerStyle(index, 50)}
-        >
+        // `py` rather than nothing: Swiper clips its slides, and the card's
+        // press-scale and glow need the room.
+        <SwiperSlide key={tournament.id ?? index} className="w-[238px]! py-1">
           <HomeUpcomingTournamentCard {...tournament} loading={isLoading} />
-        </div>
+        </SwiperSlide>
       ))}
-    </div>
+    </Swiper>
   );
 }

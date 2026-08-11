@@ -58,32 +58,23 @@
   border: 1.5px solid transparent;
 }
 
-/* The rail the tickets sit on — a centred carousel built out of scroll-snap
-   rather than a carousel library: the card the player is looking at sits in the
-   middle of the screen and its neighbours peek in from both sides.
+/* The rail the tickets sit on — an endless centred carousel (Swiper does the
+   looping and the centring; this only paints its edges).
 
-   The side padding IS the centring. A snapped card centres itself in the
-   scrollport, but the first and last card can only reach the middle if the rail
-   carries half a screen minus half a card of padding at each end — without it
-   they stop against the edge and the strip reads as misaligned. `max()` keeps
-   the normal 16px gutter on a screen too narrow to hold one card.
+   Fades the peeking neighbours into the screen edges. Without it the left-hand
+   peek is a countdown sliced through the middle of a digit, which reads as
+   content spilling out of the frame rather than as a deliberate peek. The ramp
+   is derived from the gutter the centring leaves — half a screen minus half a
+   card — so it covers exactly the peek and can never bleed onto the centred
+   card, including on a phone narrow enough that a fixed ramp would. It is eased
+   rather than linear: a straight ramp leaves the neighbour's countdown legible,
+   and legibly sliced, right at the frame.
 
    `--home-ticket-card` must equal the card's width. @see HomeUpcomingTournamentCard */
 .home-tournament-rail {
   --home-ticket-card: 238px;
-  --home-ticket-gutter: max(1rem, calc((100% - var(--home-ticket-card)) / 2));
+  --home-ticket-gutter: max(0px, calc((100% - var(--home-ticket-card)) / 2));
 
-  padding-inline: var(--home-ticket-gutter);
-  scroll-padding-inline: var(--home-ticket-gutter);
-}
-
-/* Fades the peeking neighbours into the screen edges. Without it the left-hand
-   peek is a countdown sliced through the middle of a digit, which reads as
-   content spilling out of the frame rather than as a deliberate peek. The ramp
-   is derived from the gutter, so it covers exactly the peek and never touches
-   the centred card, and it is eased rather than linear: a straight ramp leaves
-   the neighbour's countdown legible — and legibly sliced — right at the frame. */
-.home-tournament-rail {
   -webkit-mask-image: linear-gradient(
     to right,
     transparent 0,
