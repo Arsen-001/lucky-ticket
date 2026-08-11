@@ -11,6 +11,8 @@ import {
   computeStakeFee,
   computeStakeMonths,
   computeStakeReturnCoins,
+  findLevelDef,
+  findLevelForDeposit,
 } from '@/utils/global/stakes.utils';
 
 const nowIso = () => new Date().toISOString();
@@ -38,8 +40,10 @@ const getStakes = (): StakesData => ({
 /** POST stakes/start — lock LC from the user balance into a new active stake. */
 const startStake = (args: FetchArgs) => {
   const body = (args.body ?? {}) as Partial<StartStakeBody>;
-  const level = body.level ?? 1;
   const amount = body.amount ?? 0;
+  // Mirrors the server: the deposit decides the band, `body.level` is ignored.
+  // A deposit under the cheapest band opens at level 0 — no band, no boost.
+  const level = findLevelForDeposit(appConfig.stakes.levels, amount)?.level ?? 0;
   const months = body.durationMonths ?? appConfig.stakes.durationMinMonths;
 
   if (amount <= 0 || mockDb.user.coins < amount) {
@@ -47,13 +51,12 @@ const startStake = (args: FetchArgs) => {
   }
 
   const isLuckyPlayer = mockDb.user.isLuckyPlayer ?? false;
-  const bronzeOpened = mockDb.user.bronzeStakesOpened ?? 0;
+  const freeStartsUsed = mockDb.user.freeStakeStartsUsed ?? 0;
   const feeBreakdown = computeStakeFee(
     amount,
     months,
     isLuckyPlayer,
-    level,
-    bronzeOpened,
+    freeStartsUsed,
     mockDb.user.isVIP ?? false,
     mockDb.user.statusPerks
   );
@@ -64,7 +67,7 @@ const startStake = (args: FetchArgs) => {
 
   mockDb.user.coins -= amount;
   mockDb.user.telegramStars -= feeBreakdown.fee;
-  if (level === 1) mockDb.user.bronzeStakesOpened = bronzeOpened + 1;
+  mockDb.user.freeStakeStartsUsed = freeStartsUsed + 1;
   // Base AP credited the moment the stake starts (DOCS §5.3) — retained even if cancelled.
   mockDb.user.activityPoints += computeStakeBaseAp(amount, months);
   const start = Date.now();
@@ -122,7 +125,7 @@ const claimStake = (args: FetchArgs) => {
   }
 
   mockDb.stakes.activeStakes.splice(idx, 1);
-  const levelDef = appConfig.stakes.levels.find(l => l.level === stake.level);
+  const levelDef = findLevelDef(appConfig.stakes.levels, stake.level);
   const months = computeStakeMonths(stake.startDate, stake.endDate);
   const yieldLC = computeStakeReturnCoins(
     stake.lockedAmount,
@@ -130,11 +133,13 @@ const claimStake = (args: FetchArgs) => {
     mockDb.user.isLuckyPlayer ?? false,
     mockDb.user.isVIP ?? false,
     undefined,
-    // The mock stands in for the server, so it has to credit the same per-level
-    // boost the screens now quote — otherwise dev pays out more than it promised.
-    mockDb.user.statusPerks
+    // The mock stands in for the server, so it has to credit the same status and
+    // band boosts the screens quote — otherwise dev pays out a different number
+    // than it promised, and only production notices.
+    mockDb.user.statusPerks,
+    levelDef?.yieldBoostPct ?? 0
   );
-  const bonusLS = levelDef ? computeStakeCompletionStars(months, levelDef) : 0;
+  const bonusLS = computeStakeCompletionStars(months, levelDef);
 
   const completionBonusAp = computeStakeCompletionBonusAp(stake.lockedAmount, months);
   const baseAp = computeStakeBaseAp(stake.lockedAmount, months);

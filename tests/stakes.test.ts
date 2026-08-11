@@ -6,10 +6,11 @@ import {
   computeStakeFeeBase,
   computeStakeCancelFee,
   computeStakeVolumeDiscountPercent,
+  computeStakeReturnCoins,
   computeStakeAprPercent,
+  computeStakeEffectiveAprPercent,
   computeStakeFee,
-  computeMaxStakeable,
-  findFirstLockedLevel,
+  findLevelForDeposit,
 } from '@/utils/global/stakes.utils';
 import { computeTierGap } from '@/utils/global/activity.utils';
 
@@ -57,45 +58,56 @@ describe('stake math (DOCS §18)', () => {
     );
   });
 
-  it('first Bronze stakes are free, then charged', () => {
-    expect(computeStakeFee(10_000, 1, false, 1, 0).free).toBe(true);
-    expect(computeStakeFee(10_000, 1, false, 1, appConfig.stakes.bronzeFreeStartCount).free).toBe(
-      false
-    );
+  it('the free starts are free at any deposit, then everything is charged', () => {
+    const free = appConfig.stakes.freeStartCount;
+    // Any amount, any band — the waiver stopped being bronze-scoped when band
+    // floors became an admin knob (a bronze floor of 1,000,000 LC is normal).
+    expect(computeStakeFee(10_000, 1, false, 0).free).toBe(true);
+    expect(computeStakeFee(5_000_000, 1, false, 0).free).toBe(true);
+    expect(computeStakeFee(10_000, 1, false, free).free).toBe(false);
   });
 });
 
 /**
- * The ceiling the new-stake screen enforces (DOCS §18.2). It used to exist only
- * as a greyed-out "Locked" button below the fold: the slider ran to the full
- * balance, so a Gold player could configure a Level 4 stake in full — hero,
- * rewards preview and all — and nothing on the way said no.
+ * A level is a band the deposit falls into — never a thing the player picks,
+ * and never gated. Below the cheapest band there is no level at all, which is a
+ * valid stake earning the plain duration APR.
  */
-describe('max stakeable amount (tier ceiling)', () => {
+describe('deposit bands (DOCS §18.2)', () => {
   const levels = appConfig.stakes.levels;
-  const unlockedUpTo = (tiers: string[]) => (tier: string) => tiers.includes(tier);
 
-  it('stops one LC below the cheapest locked level', () => {
-    // Gold player: Levels 1–3 open, Platinum (250,000) is the wall.
-    const upToGold = unlockedUpTo(['bronze', 'silver', 'gold']);
-    expect(findFirstLockedLevel(levels, upToGold)?.level).toBe(4);
-    expect(computeMaxStakeable(levels, 1_600_000, upToGold)).toBe(249_999);
+  it('picks the highest band the deposit clears', () => {
+    expect(findLevelForDeposit(levels, 10_000)?.level).toBe(1);
+    expect(findLevelForDeposit(levels, 49_999)?.level).toBe(1);
+    expect(findLevelForDeposit(levels, 50_000)?.level).toBe(2);
+    expect(findLevelForDeposit(levels, 5_000_000)?.level).toBe(5);
   });
 
-  it('the balance still wins when it is the lower ceiling', () => {
-    const upToGold = unlockedUpTo(['bronze', 'silver', 'gold']);
-    expect(computeMaxStakeable(levels, 30_000, upToGold)).toBe(30_000);
+  it('returns no band under the cheapest floor instead of falling back to level 1', () => {
+    expect(findLevelForDeposit(levels, 9_999)).toBeNull();
+    expect(findLevelForDeposit(levels, 1)).toBeNull();
   });
 
-  it('a Diamond player is capped by the balance alone', () => {
-    const all = () => true;
-    expect(findFirstLockedLevel(levels, all)).toBeNull();
-    expect(computeMaxStakeable(levels, 1_600_000, all)).toBe(1_600_000);
+  it('follows admin floors, so a raised bronze floor leaves smaller stakes bandless', () => {
+    const raised = levels.map((l, i) => ({
+      ...l,
+      minDeposit: [1_000_000, 3_000_000, 10_000_000, 30_000_000, 100_000_000][i],
+    }));
+    expect(findLevelForDeposit(raised, 999_999)).toBeNull();
+    expect(findLevelForDeposit(raised, 1_000_000)?.level).toBe(1);
+    expect(findLevelForDeposit(raised, 2_999_999)?.level).toBe(1);
+    expect(findLevelForDeposit(raised, 3_000_000)?.level).toBe(2);
   });
 
-  it('a Bronze player cannot reach the Silver deposit', () => {
-    const bronzeOnly = unlockedUpTo(['bronze']);
-    expect(computeMaxStakeable(levels, 1_600_000, bronzeOnly)).toBe(49_999);
+  it('the band boost is percentage points on the rate, not a cut of the yield', () => {
+    const months = appConfig.stakes.durationMaxMonths;
+    const base = computeStakeAprPercent(months);
+    expect(computeStakeEffectiveAprPercent(months, 1)).toBe(base + 1);
+    // The distinction that matters: on 1,000,000 LC at 10% this is +10,000 LC,
+    // where a multiplicative +1% would have been +1,000.
+    expect(computeStakeReturnCoins(1_000_000, months, false, false, undefined, undefined, 1)).toBe(
+      110_000
+    );
   });
 });
 

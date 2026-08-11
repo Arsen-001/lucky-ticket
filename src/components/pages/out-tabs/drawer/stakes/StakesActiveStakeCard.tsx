@@ -20,13 +20,17 @@ import {
   computeStakeReturnCoins,
   isStakeReady,
 } from '@/utils/global/stakes.utils';
-import { StakesLevelChip } from '@/components/pages/out-tabs/drawer/stakes/StakesLevelChip';
+import {
+  StakesLevelChip,
+  stakeAccent,
+} from '@/components/pages/out-tabs/drawer/stakes/StakesLevelChip';
 import type { ActiveStake, StakeLevelDefinition } from '@/types/interfaces/stakes.interfaces';
 import { twMerge } from 'tailwind-merge';
 
 export interface StakesActiveStakeCardProps {
   stake: ActiveStake;
-  levelDef: StakeLevelDefinition;
+  /** `null` when the deposit cleared no band — the card paints neutral. */
+  levelDef: StakeLevelDefinition | null;
 }
 
 export function StakesActiveStakeCard({ stake, levelDef }: StakesActiveStakeCardProps) {
@@ -42,7 +46,8 @@ export function StakesActiveStakeCard({ stake, levelDef }: StakesActiveStakeCard
     me?.isLuckyPlayer ?? false,
     me?.isVIP ?? false,
     stakeKnobs,
-    me?.statusPerks
+    me?.statusPerks,
+    levelDef?.yieldBoostPct ?? 0
   );
   const stakeBonusAp = computeStakeCompletionBonusAp(stake.lockedAmount, months, stakeKnobs);
   const completionStars = computeStakeCompletionStars(months, levelDef);
@@ -54,11 +59,11 @@ export function StakesActiveStakeCard({ stake, levelDef }: StakesActiveStakeCard
         'stake-card-shell stake-card-border relative block p-3 text-left transition-transform duration-200',
         ready && 'stakes-ready-glow -translate-y-0.5'
       )}
-      style={{ ['--stake-card-accent' as string]: `var(--color-${levelDef.tier})` }}
+      style={{ ['--stake-card-accent' as string]: stakeAccent(levelDef) }}
     >
       <div className="relative">
         <div className="flex min-h-[22px] items-start justify-between">
-          <StakesLevelChip level={levelDef.level} tier={levelDef.tier} />
+          <StakesLevelChip level={stake.level} tier={levelDef?.tier ?? null} />
           {ready && (
             <span className="rounded-full bg-success/90 px-2 py-0.5 text-[9px] font-extrabold uppercase tracking-wider text-white shadow-[0_0_12px_rgba(74,222,128,0.6)]">
               {t('ready')}

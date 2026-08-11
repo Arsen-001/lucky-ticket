@@ -57,10 +57,7 @@ export function StakesContent() {
   const lifetimeEarned = history
     .filter(h => h.outcome === 'completed')
     .reduce((sum, h) => sum + h.yieldLC, 0);
-  const bronzeFreeRemaining = Math.max(
-    0,
-    stakeCfg.bronzeFreeStartCount - (me?.bronzeStakesOpened ?? 0)
-  );
+  const freeStartsRemaining = Math.max(0, stakeCfg.freeStartCount - (me?.freeStakeStartsUsed ?? 0));
 
   const readyStakeIds = activeStakes.filter(s => isStakeReady(s.endDate)).map(s => s.id);
 
@@ -173,7 +170,7 @@ export function StakesContent() {
         </button>
       )}
 
-      {stakes?.enabled !== false && bronzeFreeRemaining > 0 && (
+      {stakes?.enabled !== false && freeStartsRemaining > 0 && (
         <Link
           href={routes.stakes.new}
           className="border-bronze/35 bg-bronze/10 hover:bg-bronze/15 flex items-center gap-2.5 rounded-2xl border px-3.5 py-2.5 transition-colors"
@@ -184,14 +181,14 @@ export function StakesContent() {
           <div className="flex-1 leading-tight">
             <div className="flex items-center gap-2">
               <div className="text-[12px] font-extrabold text-white">
-                {t('{n} free bronze stakes left', { n: bronzeFreeRemaining })}
+                {t('{n} free stakes left', { n: freeStartsRemaining })}
               </div>
               <span className="text-bronze rounded-full bg-bronze/15 px-1.5 py-0.5 text-[9px] font-bold tabular-nums">
-                {me?.bronzeStakesOpened ?? 0}/{stakeCfg.bronzeFreeStartCount}
+                {me?.freeStakeStartsUsed ?? 0}/{stakeCfg.freeStartCount}
               </span>
             </div>
             <div className="text-white-secondary mt-0.5 text-[10px]">
-              {t('open a bronze stake without paying the fee')}
+              {t('open a stake of any amount without paying the fee')}
             </div>
           </div>
           <ChevronRight size={14} className="text-bronze shrink-0" strokeWidth={2.4} />
@@ -226,8 +223,9 @@ export function StakesContent() {
           ) : (
             <div className="grid grid-cols-2 gap-2.5">
               {activeStakes.map(stake => {
-                const levelDef = stakes && findLevelDef(stakes.levels, stake.level);
-                if (!levelDef) return null;
+                // A bandless stake (level 0) has no levelDef and must still
+                // show up — it is locked LC like any other.
+                const levelDef = stakes ? findLevelDef(stakes.levels, stake.level) : null;
                 return <StakesActiveStakeCard key={stake.id} stake={stake} levelDef={levelDef} />;
               })}
             </div>

@@ -20,9 +20,9 @@ const digitsOf = (raw: string) => raw.replace(/\D/g, '');
  * The slider and the presets stay for coarse picks, but they can't express
  * "exactly 137,500", which is what typing is for.
  *
- * Only the balance clamps on commit. A below-minimum amount is left alone on
- * purpose — the sticky CTA already answers it with "min 10,000 LC", which
- * teaches the rule instead of silently overwriting what the player typed.
+ * Only the balance clamps on commit — there is no minimum any more. A deposit
+ * under the cheapest band is a perfectly valid stake; it just earns the plain
+ * duration APR with no band boost, which the hero says out loud.
  */
 export function NewStakeAmountField({ value, max, onChange, className }: NewStakeAmountFieldProps) {
   const t = useAppTranslations();

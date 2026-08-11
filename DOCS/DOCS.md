@@ -158,7 +158,7 @@ The referral requirements (0 / 2 / 5 / 10 / 20, cumulative and monotonically non
 
 The tier (§5.1) is the universal gate. A feature of tier `T` requires `tier ≥ T`; the user can always use their own tier and every lower tier.
 
-- **Tier-gated:** producer engines, tournaments, stakes, tier-bound market items.
+- **Tier-gated:** producer engines, tournaments, tier-bound market items. (Stakes came off this list on 2026-08-11 — see Section 18.2.)
 - **Not gated:** avatars, statuses / VIP, the referral/invite screen itself (inviting must never be locked — it is a tier requirement).
 
 ### 5.3 How Activity Points Are Earned
@@ -220,7 +220,7 @@ Every row in the AP-source breakdown is a **deep link** to the screen where that
 
 ### Connections
 
-AP connects to: the tier gate on engines / tournaments / stakes / market, the leaderboard ranking, the profile (AP shown instead of a level), and the daily task surface (each task shows its AP reward).
+AP connects to: the tier gate on engines / tournaments / market, the leaderboard ranking, the profile (AP shown instead of a level), and the daily task surface (each task shows its AP reward).
 
 ---
 
@@ -2255,29 +2255,33 @@ A matured stake is **not** claimed automatically. Within five minutes of maturin
   - _Example:_ 100,000 LC locked for 12 months → +5,000 LC.
 - The APR is a small LC faucet; the locked principal is a much larger velocity sink, so stakes are net anti-inflationary. The APR curve is the primary anti-inflation tuning lever.
 
-### 18.2 Stake Tiers (deposit thresholds)
+### 18.2 Stake Levels (deposit bands)
 
-Stakes have five tiers keyed to the minimum deposit. The tier is **AP-tier gated** (a stake of tier `T` requires `AP-tier ≥ T`, Section 5.2) and determines the per-month multiplier for the completion Stars payout.
+**A level is a band of deposit size, not a tier.** Any player may stake any amount, from 1 LC to their whole balance; the amount alone decides which band the stake lands in. Level `n` covers `[minDeposit(n), minDeposit(n+1))`, the Mini App derives it for display and the server derives it again on write, so a hand-made request cannot claim a band its deposit does not reach.
 
-| Tier     | Minimum Deposit |
-| :------- | :-------------- |
-| Bronze   | 10,000 LC       |
-| Silver   | 50,000 LC       |
-| Gold     | 100,000 LC      |
-| Platinum | 250,000 LC      |
-| Diamond  | 500,000 LC      |
+| Level        | Minimum Deposit | APR boost | Completion ⭐/month |
+| :----------- | :-------------- | --------: | ------------------: |
+| 1 · Bronze   | 10,000 LC       |     +1 pp |                   2 |
+| 2 · Silver   | 50,000 LC       |     +2 pp |                   3 |
+| 3 · Gold     | 100,000 LC      |     +3 pp |                   4 |
+| 4 · Platinum | 250,000 LC      |     +4 pp |                   5 |
+| 5 · Diamond  | 500,000 LC      |     +5 pp |                   6 |
 
-The gate therefore sets a **maximum stakeable amount**: one LC below the minimum deposit of the cheapest tier the player has not reached (a Gold player caps at 249,999 LC), or their whole balance when every tier is open. The new-stake screen enforces that ceiling on the slider, the presets and the typed amount, and states it next to the amount — a player who could once configure a locked stake in full and only learn of it from a greyed-out button at the bottom of the screen.
+Every number in that table is admin-tunable per level (Admin → Настройки → Стейкинг). The tier names are the band's **label and accent colour only** — they carry no AP gate.
 
-**A level is a band, and the server enforces it.** Level `n` covers `[minDeposit(n), minDeposit(n+1))`; the Mini App derives the level from the amount and never sends anything else. The API used to check only the floor, which made the ceiling above a screen-only courtesy: a hand-made request could open 500,000 LC — a Diamond-sized deposit — as a **level 1** stake, drawing the same yield while paying Bronze completion Stars, passing the Bronze tier gate instead of Diamond's, and, inside the Bronze free-start waiver, paying **no start fee at all** against 42 ⭐ for the same deposit at level 5. `POST /stakes/start` now rejects a deposit that belongs to another level and names the level it belongs to.
+**A deposit under the cheapest band has no level.** That is a normal stake, not a refusal: it returns its principal, earns the plain duration APR (Section 18.1) and the usual AP, and pays **no band boost and no completion Stars**. The new-stake screen says "без уровня" above the amount rather than blocking the button.
+
+**The APR boost is percentage points on the rate**, not a percentage of the yield — inside the bronze band a 12-month stake pays 10% + 1 pp = **11%**. On 1,000,000 LC that is +110,000 LC against the +100,000 LC of a bandless stake; a multiplicative +1% would have been +1,000 LC and nobody would cross a band for it. Status boosts (Lucky Player / VIP, Section 7.3) then multiply the band-boosted yield.
+
+**What this replaced.** Until 2026-08-11 the five levels were AP-tier gated (a stake of tier `T` required `AP-tier ≥ T`), which set a **maximum stakeable amount** — one LC below the cheapest tier the player had not reached, so a Gold player capped at 249,999 LC however much LC they held. The gate came out because it made the admin's band floors unusable: with bronze set at 1,000,000 LC the ladder gated on tiers nobody could match to a deposit any more. Bands now sell an APR boost instead of gating access, and the boost is what makes the next one worth reaching.
 
 ### 18.3 Reward Structure
 
 Every completed stake grants:
 
 - **Principal returned** in full.
-- **APR yield** in LC (Section 18.1). Lucky Player holders receive an additive **+20%** on top of the APR yield (`luckyPlayerStakeYieldBoostPct`); VIP holders receive **+40%** (`vipStakeYieldBoostPct`). The two never stack — the higher-tier value wins (DOCS §7.3).
-- **Completion Stars:** a guaranteed Lucky Stars payout = `months × completionStarsPerMonth`, where the per-month multiplier scales by stake tier (Bronze 2 → Silver 3 → Gold 4 → Platinum 5 → Diamond 6). Forfeited on early cancellation.
+- **APR yield** in LC (Section 18.1), including the band's APR boost (Section 18.2). Lucky Player holders receive an additive **+20%** on top of the APR yield (`luckyPlayerStakeYieldBoostPct`); VIP holders receive **+40%** (`vipStakeYieldBoostPct`). The two never stack — the higher-tier value wins (DOCS §7.3).
+- **Completion Stars:** a guaranteed Lucky Stars payout = `months × completionStarsPerMonth`, where the per-month multiplier scales by band (Bronze 2 → Silver 3 → Gold 4 → Platinum 5 → Diamond 6) and is **0 for a stake in no band**. Forfeited on early cancellation.
 - **AP:** the base `LC staked × months / 5,000` Activity Points is credited the moment the stake starts, but is **revoked on early cancellation** (floored so AP decay in between can't take the balance below zero). A **+50% completion bonus** on the base is granted only when the stake runs to the end. Rationale: with the AP retained, open→cancel was a near-free infinite AP loop (the deposit returns in full, only the Stars fee is spent) — it was farmed in the wild and closed on 2026-07-07.
 
 ### 18.4 Cancellation & Concurrency
@@ -2313,13 +2317,15 @@ base = ceil(deposit / 10,000)   // 10,000 LC = 1 ⭐
 
 **Cancellation fee** — `max(2, 2 × base)`. No discounts apply; the cancel multiplier is fixed at 2 and the floor is 2 ⭐.
 
-**Bronze-tier onboarding waiver** — the **first 10 Bronze stakes** a user opens lifetime are free (stake-start fee = 0). The cancel fee still applies normally. The counter is incremented when a Bronze stake is opened (irrespective of outcome).
+**Onboarding waiver** — the **first 1 stake** a user opens lifetime is free (stake-start fee = 0), whatever the deposit and whatever band it lands in. The cancel fee still applies normally. The counter (`User.freeStakeStartsUsed`) increments on every start, irrespective of outcome.
+
+It used to be the first 10 **Bronze** stakes, back when bronze was the entry tier every player passed through. Once band floors became an admin knob that scoping inverted the intent — with bronze at 1,000,000 LC the waiver would have paid out ten times to whales and never to the players it was written for.
 
 > All rounding uses `ceil` — partial Stars never round down.
 
 ### Connections
 
-Stakes connect the LC currency system (velocity sink + APR faucet), the AP tier gate, and the Lucky Stars faucet via the guaranteed completion Stars payout. The fee schedule (Section 18.5) also routes Stars into platform revenue via stake creation and cancellation.
+Stakes connect the LC currency system (velocity sink + APR faucet) and the Lucky Stars faucet via the guaranteed completion Stars payout. The fee schedule (Section 18.5) also routes Stars into platform revenue via stake creation and cancellation.
 
 ---
 

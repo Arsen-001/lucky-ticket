@@ -53,8 +53,8 @@ export interface MeResponse {
   /** ISO timestamp of the user's last AP-earning action — drives the decay status. */
   lastActivityAt?: string;
   walletId?: string | null;
-  /** Lifetime count of Bronze-tier stakes opened — gates the "first 10 Bronze free" rule. */
-  bronzeStakesOpened?: number;
+  /** Lifetime count of stakes opened — metered against `stakes.freeStartCount`. */
+  freeStakeStartsUsed?: number;
   /** Whether the user has completed or skipped the first-run onboarding tour. */
   hasSeenTour?: boolean;
 }

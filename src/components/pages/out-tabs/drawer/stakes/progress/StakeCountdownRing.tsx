@@ -13,7 +13,8 @@ const RADIUS = (SIZE - STROKE) / 2;
 const CIRCUMFERENCE = 2 * Math.PI * RADIUS;
 
 export interface StakeCountdownRingProps {
-  levelDef: StakeLevelDefinition;
+  /** `null` when the deposit cleared no band — the ring paints neutral. */
+  levelDef: StakeLevelDefinition | null;
   leftTime: string;
   progress: number;
   ready: boolean;
@@ -27,7 +28,7 @@ export function StakeCountdownRing({
 }: StakeCountdownRingProps) {
   const t = useAppTranslations();
   const offset = CIRCUMFERENCE * (1 - (ready ? 1 : progress / 100));
-  const ringId = `stake-grad-${levelDef.level}`;
+  const ringId = `stake-grad-${levelDef?.level ?? 0}`;
 
   return (
     <div className="relative mx-auto" style={{ width: SIZE, height: SIZE }}>
@@ -91,7 +92,7 @@ export function StakeCountdownRing({
               {progress}%
             </div>
             <div className="mt-1.5">
-              <StakesLevelChip level={levelDef.level} tier={levelDef.tier} />
+              <StakesLevelChip level={levelDef?.level ?? 0} tier={levelDef?.tier ?? null} />
             </div>
           </>
         )}

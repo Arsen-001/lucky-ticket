@@ -10,80 +10,61 @@ import { GlobalConstants } from '@/constants/global.constants';
 import { twMerge } from 'tailwind-merge';
 
 export interface NewStakeStickyCtaProps {
+  /** The band the deposit falls in, or `0` when it clears none. */
   level: number;
   amount: number;
-  minDeposit: number;
   balance: number;
   stakeFee: number;
   stakeFeeFree: boolean;
-  bronzeFreeRemaining: number;
+  freeStartsRemaining: number;
   /** Hint text shown under the CTA explaining the duration trade-off. */
   hint?: string;
   /** LC balance left after this stake locks the deposit — shown as subtitle when valid. */
   balanceAfter?: number;
-  tierLocked?: boolean;
-  /** What the tier gate is still short of, already localized. */
-  tierLockedHint?: string;
   loading?: boolean;
   onConfirm: () => void;
   /**
-   * Tapped when the CTA is blocked by a gate the player can act on (an AP tier,
-   * or an LC balance) rather than by something they simply retype. Without it
-   * the button is a label that names a requirement and goes nowhere.
+   * Tapped when the CTA is blocked by something the player can act on (an LC
+   * balance). Without it the button is a label that names a requirement and
+   * goes nowhere.
    */
-  onBlocked?: (reason: 'tier' | 'coins') => void;
+  onBlocked?: (reason: 'coins') => void;
 }
 
 /**
  * The confirm button, and — when it refuses — the reason.
  *
- * A dimmed button labelled "Locked" is read as a bug, not as a rule: players
- * tapped it, scrolled past it, and asked why the screen was broken. So a
- * blocked CTA now carries an error skin, a lock, a sentence naming what is
- * missing, and an invitation to tap it for the screen that fixes it.
+ * Two of the three refusals it used to carry are gone: there is no tier gate on
+ * a band any more, and no minimum deposit to fall under. What is left is an
+ * empty amount (fixed by typing) and a balance that will not cover it (fixed
+ * elsewhere, so that one stays tappable and says where).
  */
 export function NewStakeStickyCta({
   level,
   amount,
-  minDeposit,
   balance,
   stakeFee,
   stakeFeeFree,
-  bronzeFreeRemaining,
+  freeStartsRemaining,
   hint,
   balanceAfter,
-  tierLocked = false,
-  tierLockedHint,
   loading = false,
   onConfirm,
   onBlocked,
 }: NewStakeStickyCtaProps) {
   const t = useAppTranslations();
   const stakeCfg = useStakesDisplayConfig();
-  const belowMin = amount < minDeposit;
+  const empty = amount <= 0;
   const insufficient = amount > balance;
-  const valid = !belowMin && !insufficient && !tierLocked;
-  // "Below minimum" is fixed by typing a bigger number — the slider is right
-  // there. The other two are earned elsewhere, so those stay tappable and
-  // explain where. Tier wins when both apply: it blocks every amount.
-  const blockedReason = tierLocked ? 'tier' : insufficient ? 'coins' : null;
-  const explainBlock = blockedReason && onBlocked ? () => onBlocked(blockedReason) : undefined;
+  const valid = !empty && !insufficient;
+  const explainBlock = insufficient && onBlocked ? () => onBlocked('coins') : undefined;
   const explainable = !!explainBlock && !loading;
 
   let label: string;
   let reason: string | null = null;
-  if (tierLocked) {
-    label = t('level {level} is locked', { level });
-    reason = tierLockedHint ?? null;
-  } else if (belowMin) {
-    label = t('min {amount} {coin}', {
-      amount: minDeposit.toLocaleString(),
-      coin: GlobalConstants.coinName,
-    });
-    reason = t('raise the amount to at least {amount} {coin}', {
-      amount: minDeposit.toLocaleString(),
-      coin: GlobalConstants.coinName,
-    });
+  if (empty) {
+    label = t('enter an amount');
+    reason = null;
   } else if (insufficient) {
     label = t('not enough {coin}', { coin: GlobalConstants.coinName });
     reason = t('not enough coins description', {
@@ -91,11 +72,40 @@ export function NewStakeStickyCta({
       required: `${amount.toLocaleString()} ${GlobalConstants.coinName}`,
     });
   } else {
-    label = t('confirm level {level} stake', { level });
+    // A level-0 stake is a stake, so the button confirms it by name rather than
+    // quoting "level 0" at a player who never picked a level.
+    label = level > 0 ? t('confirm level {level} stake', { level }) : t('confirm stake');
   }
 
   return (
     <div>
+      {/* Everything explanatory sits ABOVE the button so the button itself is
+          the last thing on the screen, flush against the bottom edge. With the
+          balance-after line and the duration hint underneath it, the tap target
+          floated two text rows up from the edge it is supposed to sit on. */}
+      {valid && balanceAfter !== undefined && (
+        <div className="text-white-secondary mb-1.5 text-center text-[10px] tabular-nums">
+          {t('balance after {n} {coin}', {
+            n: balanceAfter.toLocaleString(),
+            coin: GlobalConstants.coinName,
+          })}
+        </div>
+      )}
+      {hint && valid && (
+        <div className="text-pink-secondary mb-1.5 text-center text-[10px] font-semibold">
+          {hint}
+        </div>
+      )}
+      {!valid && (reason || explainable) && (
+        <div className="text-error-text mb-1.5 text-center text-[10px] font-bold leading-snug">
+          {reason}
+          {explainable && (
+            <span className="text-white-secondary block font-semibold">
+              {t('tap to see how to unlock')}
+            </span>
+          )}
+        </div>
+      )}
       <button
         type="button"
         onClick={valid && !loading ? onConfirm : explainable ? explainBlock : undefined}
@@ -120,7 +130,7 @@ export function NewStakeStickyCta({
             <span className="relative z-10 inline-flex items-center gap-1.5 text-[12px] font-extrabold uppercase tracking-wider text-white">
               <span className="leading-none">{t('free')}</span>
               <span className="text-bronze inline-flex items-center rounded-full bg-bronze/20 px-1.5 py-0.5 text-[9px] font-bold leading-none tabular-nums">
-                {bronzeFreeRemaining}/{stakeCfg.bronzeFreeStartCount}
+                {freeStartsRemaining}/{stakeCfg.freeStartCount}
               </span>
             </span>
           ) : (
@@ -133,28 +143,6 @@ export function NewStakeStickyCta({
           )
         ) : null}
       </button>
-      {/* The refusal always says why, right under the button that refused. */}
-      {!valid && (reason || explainable) && (
-        <div className="text-error-text mt-1.5 text-center text-[10px] font-bold leading-snug">
-          {reason}
-          {explainable && (
-            <span className="text-white-secondary block font-semibold">
-              {t('tap to see how to unlock')}
-            </span>
-          )}
-        </div>
-      )}
-      {valid && balanceAfter !== undefined && (
-        <div className="text-white-secondary mt-1.5 text-center text-[10px] tabular-nums">
-          {t('balance after {n} {coin}', {
-            n: balanceAfter.toLocaleString(),
-            coin: GlobalConstants.coinName,
-          })}
-        </div>
-      )}
-      {hint && valid && (
-        <div className="text-pink-secondary mt-1 text-center text-[10px] font-semibold">{hint}</div>
-      )}
     </div>
   );
 }

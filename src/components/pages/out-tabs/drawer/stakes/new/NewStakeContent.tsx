@@ -14,16 +14,12 @@ import { routes } from '@/constants/routes';
 import { useAppTranslations } from '@/hooks/useAppTranslations';
 import { useStakesDisplayConfig } from '@/hooks/useStakesDisplayConfig';
 import {
-  computeMaxStakeable,
   computeStakeActivityPoints,
   computeStakeFee,
   computeStakeReturnCoins,
-  findFirstLockedLevel,
   findLevelForDeposit,
 } from '@/utils/global/stakes.utils';
-import { formatTierGap } from '@/utils/global/activity.utils';
-import { tierNameId } from '@/constants/tier-names';
-import { useUnlockedTiers } from '@/hooks/useUnlockedTiers';
+import { ClientPortal } from '@/components/shared/ClientPortal';
 import { NewStakeHero } from '@/components/pages/out-tabs/drawer/stakes/new/NewStakeHero';
 import { NewStakeStickyCta } from '@/components/pages/out-tabs/drawer/stakes/new/NewStakeStickyCta';
 import { StakeLevelsCompareModal } from '@/components/pages/out-tabs/drawer/stakes/new/StakeLevelsCompareModal';
@@ -34,10 +30,8 @@ import { StakesWalletPill } from '@/components/pages/out-tabs/drawer/stakes/Stak
 import { NotEnoughCoinsModal } from '@/components/shared/modals/NotEnoughCoinsModal';
 import { useSpendFailure } from '@/hooks/useSpendFailure';
 import { spendFailure } from '@/utils/global/spend-failure.utils';
-import { TierGateModal } from '@/components/shared/modals/TierGateModal';
 import { Skeleton } from '@/components/shared/seleketons/Skeleton';
 import { QueryErrorState } from '@/components/shared/error/QueryErrorState';
-import type { TicketType } from '@/types/types/ticket.types';
 
 export function NewStakeContent() {
   const t = useAppTranslations();
@@ -48,19 +42,31 @@ export function NewStakeContent() {
   const { data: me, isLoading: meLoading } = useGetMeQuery();
   const stakeCfg = useStakesDisplayConfig();
   const [startStake, { isLoading: starting }] = useStartStakeMutation();
-  const { isTierUnlocked, tierGap } = useUnlockedTiers();
 
   const balance = me?.coins ?? 0;
   const levels = stakes?.levels ?? [];
-  const minDepositOfFirst = levels[0]?.minDeposit ?? 0;
-  const [deposit, setDeposit] = useState<number>(minDepositOfFirst);
+  const [deposit, setDeposit] = useState<number>(0);
   const [durationMonths, setDurationMonths] = useState<number>(1);
+  // Opens on the cheapest band when the player can afford it, on their whole
+  // balance when they cannot — either way the screen starts on a real stake
+  // instead of a zero the CTA immediately refuses.
+  const [seeded, setSeeded] = useState(false);
+
+  useEffect(() => {
+    if (seeded || levels.length === 0 || meLoading) return;
+    const suggested = Math.min(balance, levels[0].minDeposit);
+    setDeposit(suggested > 0 ? suggested : balance);
+    setSeeded(true);
+  }, [seeded, levels, balance, meLoading]);
 
   // Pre-fill from query (?amount=, ?months=) for the "re-stake" flow from history.
   useEffect(() => {
     const amountParam = Number(searchParams.get('amount'));
     const monthsParam = Number(searchParams.get('months'));
-    if (Number.isFinite(amountParam) && amountParam > 0) setDeposit(amountParam);
+    if (Number.isFinite(amountParam) && amountParam > 0) {
+      setDeposit(amountParam);
+      setSeeded(true);
+    }
     if (Number.isFinite(monthsParam) && monthsParam > 0) setDurationMonths(monthsParam);
   }, [searchParams]);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
@@ -68,9 +74,7 @@ export function NewStakeContent() {
   const [openedSnapshot, setOpenedSnapshot] = useState<{ amount: number; months: number } | null>(
     null
   );
-  // Which gate the blocked CTA was tapped through — each opens the screen that
-  // moves it (AP page / invites for a tier, tasks for a balance).
-  const [blocked, setBlocked] = useState<'tier' | 'coins' | null>(null);
+  const [blocked, setBlocked] = useState<'coins' | null>(null);
 
   if (isError) return <QueryErrorState onRetry={() => refetch()} />;
 
@@ -94,54 +98,36 @@ export function NewStakeContent() {
     );
   }
 
-  const safeDeposit = deposit || minDepositOfFirst;
-  const activeLevel = findLevelForDeposit(levels, safeDeposit);
-  const tierLocked = !isTierUnlocked(activeLevel.tier);
-  // The balance is the only ceiling the backend enforces (`StakesService.start`
-  // checks `user.coins >= amount` and nothing above it), so the track runs to
-  // the full balance — a fixed UI cap used to hide the rest.
-  const sliderMax = Math.max(balance, minDepositOfFirst);
-  // …but the tier gate is a second ceiling, and it used to exist only as a
-  // greyed-out button at the far end of the screen. `maxStakeable` is where the
-  // controls stop; `lockedLevel` is the level that put the wall there.
-  const lockedLevel = findFirstLockedLevel(levels, isTierUnlocked);
-  const maxStakeable = computeMaxStakeable(levels, balance, isTierUnlocked);
-  const lockedLevelHint = lockedLevel ? formatTierGap(tierGap(lockedLevel.tier), t) : undefined;
+  // The deposit alone decides the band, and it may decide there is none.
+  const activeLevel = findLevelForDeposit(levels, deposit);
+  const boostPct = activeLevel?.yieldBoostPct ?? 0;
+  const freeStartsUsed = me?.freeStakeStartsUsed ?? 0;
   const stakeFee = computeStakeFee(
-    safeDeposit,
+    deposit,
     durationMonths,
     me?.isLuckyPlayer ?? false,
-    activeLevel.level,
-    me?.bronzeStakesOpened ?? 0,
+    freeStartsUsed,
     me?.isVIP ?? false,
-    me?.statusPerks
+    me?.statusPerks,
+    stakeCfg.freeStartCount
   );
-  const bronzeFreeRemaining = Math.max(
-    0,
-    stakeCfg.bronzeFreeStartCount - (me?.bronzeStakesOpened ?? 0)
-  );
+  const freeStartsRemaining = Math.max(0, stakeCfg.freeStartCount - freeStartsUsed);
 
   const maxMonths = stakeCfg.durationMaxMonths;
-  const apAtMax = computeStakeActivityPoints(safeDeposit, maxMonths, stakeCfg);
-  const apNow = computeStakeActivityPoints(safeDeposit, durationMonths, stakeCfg);
+  const apAtMax = computeStakeActivityPoints(deposit, maxMonths, stakeCfg);
+  const apNow = computeStakeActivityPoints(deposit, durationMonths, stakeCfg);
   const apDelta = apAtMax - apNow;
-  const lcAtMax = computeStakeReturnCoins(
-    safeDeposit,
-    maxMonths,
-    me?.isLuckyPlayer ?? false,
-    me?.isVIP ?? false,
-    stakeCfg,
-    me?.statusPerks
-  );
-  const lcNow = computeStakeReturnCoins(
-    safeDeposit,
-    durationMonths,
-    me?.isLuckyPlayer ?? false,
-    me?.isVIP ?? false,
-    stakeCfg,
-    me?.statusPerks
-  );
-  const lcDelta = lcAtMax - lcNow;
+  const yieldAt = (months: number) =>
+    computeStakeReturnCoins(
+      deposit,
+      months,
+      me?.isLuckyPlayer ?? false,
+      me?.isVIP ?? false,
+      stakeCfg,
+      me?.statusPerks,
+      boostPct
+    );
+  const lcDelta = yieldAt(maxMonths) - yieldAt(durationMonths);
   const ctaHint =
     durationMonths < maxMonths && apDelta > 0
       ? t('extend to {n} months for {ap} more AP and {lc} more LC', {
@@ -154,41 +140,29 @@ export function NewStakeContent() {
   const starsBalance = me?.telegramStars ?? 0;
   const notEnoughStars = !stakeFee.free && starsBalance < stakeFee.fee;
 
-  // Both halves of the gate, and only the ones actually missing. Naming AP
-  // unconditionally is how a stake blocked on friends said "need 0 more AP".
-  const tierLockedHint = tierLocked
-    ? [
-        t('level {level} needs {tier} tier', {
-          level: activeLevel.level,
-          tier: t(tierNameId[activeLevel.tier]),
-        }),
-        formatTierGap(tierGap(activeLevel.tier), t),
-      ]
-        .filter(Boolean)
-        .join(' · ')
-    : undefined;
-
   const handleConfirm = async () => {
-    if (tierLocked || safeDeposit < activeLevel.minDeposit || safeDeposit > maxStakeable) return;
+    if (deposit <= 0 || deposit > balance) return;
     if (notEnoughStars) {
       setErrorMessage(t('not enough stars for fee {n}', { n: stakeFee.fee - starsBalance }));
       return;
     }
     setErrorMessage(null);
     const result = await startStake({
-      level: activeLevel.level,
-      amount: safeDeposit,
+      // Sent for older-server compatibility; the server re-derives it from the
+      // amount and ignores this field.
+      level: activeLevel?.level ?? 0,
+      amount: deposit,
       durationMonths,
     });
     if ('data' in result && result.data?.success) {
-      setOpenedSnapshot({ amount: safeDeposit, months: durationMonths });
+      setOpenedSnapshot({ amount: deposit, months: durationMonths });
     } else if ('error' in result) {
       // A shortfall the local check could not see (someone spent elsewhere, or
       // the server prices the fee differently) gets the top-up route; anything
       // else stays as the inline message under the form.
       const failure = spendFailure(result.error, t);
       if (failure.kind === 'message') setErrorMessage(t('failed to start stake try again'));
-      else await spend.report(result.error, { required: safeDeposit });
+      else await spend.report(result.error, { required: deposit });
     }
   };
 
@@ -198,7 +172,7 @@ export function NewStakeContent() {
   };
 
   return (
-    <div className="flex flex-col gap-1 pb-4">
+    <div className="flex flex-col gap-1 pb-32">
       <div className="mb-3 flex items-center justify-between gap-2">
         <button
           type="button"
@@ -226,20 +200,14 @@ export function NewStakeContent() {
       <NewStakeHero
         levels={levels}
         activeLevel={activeLevel}
-        deposit={safeDeposit}
+        deposit={deposit}
         balance={balance}
-        sliderMin={minDepositOfFirst}
-        sliderMax={sliderMax}
-        maxStakeable={maxStakeable}
-        lockedLevel={lockedLevel}
-        lockedLevelHint={lockedLevelHint}
-        onExplainLock={() => setBlocked('tier')}
         durationMonths={durationMonths}
         onDepositChange={setDeposit}
         onDurationChange={setDurationMonths}
       />
 
-      {!me?.isLuckyPlayer && safeDeposit >= 100_000 && (
+      {!me?.isLuckyPlayer && deposit >= 100_000 && (
         <Link
           href={routes.settings.luckyPlayer}
           className="border-electric-pink/35 bg-electric-pink/10 hover:bg-electric-pink/15 mt-2 flex items-center gap-2 rounded-xl border px-3 py-2 transition-colors"
@@ -253,43 +221,49 @@ export function NewStakeContent() {
       )}
 
       <StakesSectionLabel>
-        {t('what you will get level {level}', { level: activeLevel.level })}
+        {activeLevel
+          ? t('what you will get level {level}', { level: activeLevel.level })
+          : t('what you will get')}
       </StakesSectionLabel>
       <StakesRewardsPreviewCard
         levelDef={activeLevel}
-        deposit={safeDeposit}
+        deposit={deposit}
         durationMonths={durationMonths}
       />
 
-      {/* Pinned to the bottom of the scroller: the answer to "can I stake this?"
-          has to be on screen while the amount is being set, not two scrolls
-          under the rewards preview. */}
-      <div
-        className="from-background via-background sticky z-20 -mx-5 mt-3 bg-gradient-to-t via-70% to-transparent px-5 pb-2 pt-6"
-        style={{ bottom: 'var(--tg-inset-bottom)' }}
-      >
-        {errorMessage && (
-          <div className="border-error/40 bg-error/15 text-error-text mb-2 rounded-xl border px-3 py-2 text-center text-[11px] font-bold">
-            {errorMessage}
+      {/* Portalled and fixed rather than sticky inside the scroller: the
+          scroller carries `padding-bottom: 2.5rem + inset`, so a sticky child
+          pinned at `bottom: 0` still floated that padding above the screen
+          edge. The CTA now sits on the edge itself and only the safe-area inset
+          lifts the button; `pb-32` on the content above keeps the last card
+          from scrolling underneath it. */}
+      <ClientPortal>
+        <div
+          className="from-background via-background pointer-events-none fixed inset-x-0 bottom-0 z-20 mx-auto max-w-[var(--app-max-w)] bg-gradient-to-t via-70% to-transparent px-5 pt-8"
+          style={{ paddingBottom: 'calc(0.5rem + var(--tg-inset-bottom))' }}
+        >
+          <div className="pointer-events-auto">
+            {errorMessage && (
+              <div className="border-error/40 bg-error/15 text-error-text mb-2 rounded-xl border px-3 py-2 text-center text-[11px] font-bold">
+                {errorMessage}
+              </div>
+            )}
+            <NewStakeStickyCta
+              level={activeLevel?.level ?? 0}
+              amount={deposit}
+              balance={balance}
+              stakeFee={stakeFee.fee}
+              stakeFeeFree={stakeFee.free}
+              freeStartsRemaining={freeStartsRemaining}
+              hint={ctaHint}
+              balanceAfter={Math.max(0, balance - deposit)}
+              loading={starting}
+              onConfirm={handleConfirm}
+              onBlocked={setBlocked}
+            />
           </div>
-        )}
-        <NewStakeStickyCta
-          level={activeLevel.level}
-          amount={safeDeposit}
-          minDeposit={activeLevel.minDeposit}
-          balance={balance}
-          stakeFee={stakeFee.fee}
-          stakeFeeFree={stakeFee.free}
-          bronzeFreeRemaining={bronzeFreeRemaining}
-          hint={ctaHint}
-          balanceAfter={Math.max(0, balance - safeDeposit)}
-          tierLocked={tierLocked}
-          tierLockedHint={tierLockedHint}
-          loading={starting}
-          onConfirm={handleConfirm}
-          onBlocked={setBlocked}
-        />
-      </div>
+        </div>
+      </ClientPortal>
 
       <StakeLevelsCompareModal
         open={compareOpen}
@@ -297,22 +271,10 @@ export function NewStakeContent() {
         levels={levels}
       />
 
-      <TierGateModal
-        open={blocked === 'tier'}
-        onClose={() => setBlocked(null)}
-        // Blocked → the level being configured is the gated one. Otherwise the
-        // gate was opened from the ceiling notice, which is about the level
-        // above the wall, not the (unlocked) one currently selected.
-        tier={
-          (tierLocked ? activeLevel.tier : (lockedLevel?.tier ?? activeLevel.tier)) as TicketType
-        }
-        titleId="stake level locked"
-      />
-
       <NotEnoughCoinsModal
         open={blocked === 'coins'}
         onClose={() => setBlocked(null)}
-        required={safeDeposit}
+        required={deposit}
         current={balance}
       />
 

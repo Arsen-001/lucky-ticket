@@ -8,7 +8,10 @@ import { BoltIcon } from '@/components/shared/icons/BoltIcon';
 import { routes } from '@/constants/routes';
 import { useAppTranslations } from '@/hooks/useAppTranslations';
 import { findLevelDef, formatStakeRelative } from '@/utils/global/stakes.utils';
-import { StakesLevelChip } from '@/components/pages/out-tabs/drawer/stakes/StakesLevelChip';
+import {
+  StakesLevelChip,
+  stakeAccent,
+} from '@/components/pages/out-tabs/drawer/stakes/StakesLevelChip';
 import { formatNumber } from '@/utils/global/number.utils';
 import type { StakeHistoryEntry, StakeLevelDefinition } from '@/types/interfaces/stakes.interfaces';
 
@@ -19,9 +22,11 @@ export interface StakesHistoryRowProps {
 
 export function StakesHistoryRow({ entry, levels }: StakesHistoryRowProps) {
   const t = useAppTranslations();
+  // `null` = the deposit cleared no band. That is a real stake in the player's
+  // history, so it renders in neutral colours — returning null here is how a
+  // completed stake would silently disappear from the list that proves it ran.
   const levelDef = findLevelDef(levels, entry.level);
-
-  if (!levelDef) return null;
+  const accent = stakeAccent(levelDef);
 
   const restakeHref =
     `${routes.stakes.new}?level=${entry.level}&amount=${entry.amount}&months=${entry.durationMonths}` as const;
@@ -29,17 +34,17 @@ export function StakesHistoryRow({ entry, levels }: StakesHistoryRowProps) {
   return (
     <div
       className="stake-card-shell stake-card-border group relative flex items-center gap-3 overflow-hidden px-3 py-2.5 transition-colors hover:bg-white/[0.02]"
-      style={{ ['--stake-card-accent' as string]: `var(--color-${levelDef.tier})` }}
+      style={{ ['--stake-card-accent' as string]: accent }}
     >
       <span
         aria-hidden
         className="absolute inset-y-0 left-0 w-0.5"
-        style={{ background: `var(--color-${levelDef.tier})` }}
+        style={{ background: accent }}
       />
 
       <div className="relative min-w-0 flex-1">
         <div className="flex items-center gap-1.5">
-          <StakesLevelChip level={levelDef.level} tier={levelDef.tier} size="sm" />
+          <StakesLevelChip level={entry.level} tier={levelDef?.tier ?? null} size="sm" />
           <span className="text-pink-secondary text-[10px] font-semibold">
             {t('{n} months', { n: entry.durationMonths })}
           </span>

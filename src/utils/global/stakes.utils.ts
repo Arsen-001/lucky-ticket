@@ -42,15 +42,28 @@ export const computeStakeAprPercent = (
   return minApr + ratio * (maxApr - minApr);
 };
 
+/**
+ * The rate a stake actually earns: the duration APR **plus the band's boost in
+ * percentage points** (DOCS §18.1). A deposit in no band earns the duration APR
+ * alone. Additive, not multiplicative, on purpose — a band has to be worth
+ * reaching, and 1% of a 3–10% yield is not felt.
+ */
+export const computeStakeEffectiveAprPercent = (
+  months: number,
+  levelBoostPct = 0,
+  knobs: StakeMathKnobs = defaultStakeKnobs
+) => computeStakeAprPercent(months, knobs) + Math.max(0, levelBoostPct);
+
 export const computeStakeReturnCoins = (
   deposit: number,
   months: number,
   isLuckyPlayer = false,
   isVip = false,
   knobs: StakeMathKnobs = defaultStakeKnobs,
-  perks?: Pick<StatusPerks, 'stakeYieldBoostPct'>
+  perks?: Pick<StatusPerks, 'stakeYieldBoostPct'>,
+  levelBoostPct = 0
 ) => {
-  const ratePercent = computeStakeAprPercent(months, knobs);
+  const ratePercent = computeStakeEffectiveAprPercent(months, levelBoostPct, knobs);
   const base = (deposit * ratePercent) / 100;
   // VIP supersedes LP — the higher-tier yield boost wins, never stacks. Pass
   // `me.statusPerks` from anywhere that shows this number to a player: VIP's
@@ -92,9 +105,14 @@ export const computeStakeActivityPoints = (
   computeStakeBaseAp(deposit, months, knobs) +
   computeStakeCompletionBonusAp(deposit, months, knobs);
 
-/** Guaranteed Stars paid out on full completion (forfeited on cancel). */
-export const computeStakeCompletionStars = (months: number, levelDef: StakeLevelDefinition) =>
-  months * levelDef.completionStarsPerMonth;
+/**
+ * Guaranteed Stars paid out on full completion (forfeited on cancel). A stake
+ * that cleared no band pays none — there is no band to pay them.
+ */
+export const computeStakeCompletionStars = (
+  months: number,
+  levelDef: StakeLevelDefinition | null
+) => (levelDef ? months * levelDef.completionStarsPerMonth : 0);
 
 /** Whole-Star base used by both stake fee and cancel fee: `ceil(deposit / feeStep)`. */
 export const computeStakeFeeBase = (deposit: number) =>
@@ -123,17 +141,18 @@ export interface StakeFeeBreakdown {
 }
 
 /**
- * Stake-start fee in Stars. The first `bronzeFreeStartCount` Bronze stakes
- * opened lifetime cost nothing; everything else: `max(feeMin, ceil(base × (1 − total/100)))`.
+ * Stake-start fee in Stars. The first `freeStartCount` stakes an account opens
+ * are free — any deposit, any band; everything else:
+ * `max(feeMin, ceil(base × (1 − total/100)))`.
  */
 export const computeStakeFee = (
   deposit: number,
   months: number,
   isLuckyPlayer: boolean,
-  level: number,
-  bronzeStakesOpened: number,
+  freeStartsUsed: number,
   isVip = false,
-  perks?: Pick<StatusPerks, 'stakeFeeDiscountBonusPct'>
+  perks?: Pick<StatusPerks, 'stakeFeeDiscountBonusPct'>,
+  freeStartCount: number = GlobalConstants.stakeFreeStartCount
 ): StakeFeeBreakdown => {
   const base = computeStakeFeeBase(deposit);
   const volumeDiscountPercent = computeStakeVolumeDiscountPercent(
@@ -142,7 +161,7 @@ export const computeStakeFee = (
   );
   const monthDiscountPercent = months * GlobalConstants.stakeFeeMonthDiscountPercent;
   const totalDiscountPercent = Math.min(99, volumeDiscountPercent + monthDiscountPercent);
-  const free = level === 1 && bronzeStakesOpened < GlobalConstants.stakeBronzeFreeStartCount;
+  const free = freeStartsUsed < freeStartCount;
   const fee = free
     ? 0
     : Math.max(
@@ -168,44 +187,29 @@ export const computeStakeMonths = (start: string, end: string) =>
     Math.round((new Date(end).getTime() - new Date(start).getTime()) / (30 * 86_400_000))
   );
 
+/** The band a stake was opened in — `null` for a level-0 (no band) stake. */
 export const findLevelDef = (levels: StakeLevelDefinition[], level: number) =>
-  levels.find(l => l.level === level);
-
-export const findLevelForDeposit = (levels: StakeLevelDefinition[], amount: number) => {
-  const sorted = [...levels].sort((a, b) => a.minDeposit - b.minDeposit);
-  let chosen = sorted[0];
-  for (const lv of sorted) {
-    if (amount >= lv.minDeposit) chosen = lv;
-  }
-  return chosen;
-};
+  levels.find(l => l.level === level) ?? null;
 
 /**
- * The cheapest level the player's tier does not open — the wall the deposit
- * controls stop at. `null` when every level is unlocked.
+ * The band a deposit falls into — the highest `minDeposit` it clears — or
+ * `null` when it clears none. This is the ONLY definition of a stake's level:
+ * the player never picks one, and the server derives it again on write, so the
+ * screen and the ledger cannot disagree.
+ *
+ * It used to fall back to the cheapest level for any amount, which is what made
+ * "below the minimum" a state the confirm button had to refuse. There is no
+ * minimum any more — a deposit under the first band is a valid stake that
+ * simply earns the plain duration APR.
  */
-export const findFirstLockedLevel = (
+export const findLevelForDeposit = (
   levels: StakeLevelDefinition[],
-  isTierUnlocked: (tier: StakeLevelDefinition['tier']) => boolean
-) =>
-  [...levels].sort((a, b) => a.minDeposit - b.minDeposit).find(lv => !isTierUnlocked(lv.tier)) ??
-  null;
-
-/**
- * Largest deposit the player can actually stake right now: their balance, and
- * never into a level their tier has not opened. Returning the ceiling instead
- * of letting the slider run to the balance is the difference between "the
- * thumb stops here, and here is why" and a screen that looks fine until a
- * greyed-out button two scrolls below says "Locked".
- */
-export const computeMaxStakeable = (
-  levels: StakeLevelDefinition[],
-  balance: number,
-  isTierUnlocked: (tier: StakeLevelDefinition['tier']) => boolean
-) => {
-  const locked = findFirstLockedLevel(levels, isTierUnlocked);
-  return locked ? Math.min(balance, locked.minDeposit - 1) : balance;
-};
+  amount: number
+): StakeLevelDefinition | null =>
+  [...levels]
+    .sort((a, b) => a.minDeposit - b.minDeposit)
+    .filter(lv => amount >= lv.minDeposit)
+    .pop() ?? null;
 
 export const findNextLevelOver = (levels: StakeLevelDefinition[], amount: number) => {
   const sorted = [...levels].sort((a, b) => a.minDeposit - b.minDeposit);

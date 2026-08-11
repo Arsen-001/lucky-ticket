@@ -21,8 +21,8 @@ describe('DOCS ↔ constants (no drift)', () => {
     }
   });
 
-  it('documents the bronze free-stake count from config', () => {
-    expect(docs).toContain(`first ${appConfig.stakes.bronzeFreeStartCount} Bronze stakes`);
+  it('documents the free-stake count from config', () => {
+    expect(docs).toContain(`first ${appConfig.stakes.freeStartCount} stake`);
   });
 
   it('documents the §14.2 engine price ladder from config', () => {

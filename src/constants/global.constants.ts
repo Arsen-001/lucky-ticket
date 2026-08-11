@@ -196,7 +196,7 @@ export const GlobalConstants = {
   stakeFeeMinStars: appConfig.stakes.feeMinStars,
   stakeCancelFeeMinStars: appConfig.stakes.cancelFeeMinStars,
   stakeCancelFeeMultiplier: appConfig.stakes.cancelFeeMultiplier,
-  stakeBronzeFreeStartCount: appConfig.stakes.bronzeFreeStartCount,
+  stakeFreeStartCount: appConfig.stakes.freeStartCount,
   /** Max units of a countable Market item (tickets) purchasable in one order. */
   marketMaxPurchaseQuantity: 999,
   /**

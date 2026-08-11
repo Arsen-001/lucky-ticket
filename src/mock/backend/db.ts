@@ -111,8 +111,8 @@ export const mockDb = {
     referralsCount: fresh ? 0 : 7,
     telegramStars: fresh ? 0 : 10_000,
     lastActivityAt: new Date(Date.now() - 2 * 24 * 3_600_000).toISOString(),
-    // Lifetime count of Bronze-tier stakes opened — gates "first 10 Bronze free" (DOCS §18.4).
-    bronzeStakesOpened: 0,
+    // Lifetime stake starts — metered against `freeStartCount` (DOCS §18.5).
+    freeStakeStartsUsed: 0,
     // First-run onboarding tour: auto-shows only for a level-zero account
     // (activityPoints === 0) that hasn't seen it.
     hasSeenTour: false,

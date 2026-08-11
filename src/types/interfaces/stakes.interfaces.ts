@@ -1,17 +1,25 @@
 import type { TicketType } from '@/types/types/ticket.types';
 import type { StakeStatus } from '@/types/enums/stakes.enums';
 
+/**
+ * A deposit BAND. `level` is derived from the amount and nothing else — there
+ * is no level to pick, and no tier gate on reaching one. A deposit below the
+ * cheapest band's `minDeposit` has no level at all (`level: 0` on a stake).
+ */
 export interface StakeLevelDefinition {
   level: number;
   minDeposit: number;
-  /** Tier identity of this stake level — drives accent colour and the AP-tier gate. */
+  /** Band identity — accent colour and label only. Gates nothing. */
   tier: TicketType;
   /** Stars awarded on full completion = `months × completionStarsPerMonth`. Forfeited on cancel. */
   completionStarsPerMonth: number;
+  /** Percentage points added onto the duration APR inside this band. */
+  yieldBoostPct: number;
 }
 
 export interface ActiveStake {
   id: string;
+  /** Deposit band, or `0` when the deposit cleared none. */
   level: number;
   lockedAmount: number;
   startDate: string;
@@ -56,6 +64,10 @@ export interface StakesData {
 }
 
 export interface StartStakeBody {
+  /**
+   * Sent for older-server compatibility only — the server re-derives the band
+   * from `amount` and ignores whatever is claimed here.
+   */
   level: number;
   amount: number;
   durationMonths: number;

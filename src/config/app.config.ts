@@ -10,12 +10,18 @@ import { WalletProvider } from '@/types/enums/wallet.enums';
  * domain is migrated onto this config. Migrated domains: `stakes`, `wallet`.
  */
 
+/**
+ * Stake levels are deposit BANDS, not tiers. `tier` names the band and paints
+ * its card; it gates nobody. A deposit under the cheapest band's `minDeposit`
+ * has no level at all — plain duration APR, no boost, no completion Stars.
+ * `yieldBoostPct` is added onto the APR in percentage points (DOCS §18.2).
+ */
 const stakeLevels: StakeLevelDefinition[] = [
-  { level: 1, minDeposit: 10_000, tier: 'bronze', completionStarsPerMonth: 2 },
-  { level: 2, minDeposit: 50_000, tier: 'silver', completionStarsPerMonth: 3 },
-  { level: 3, minDeposit: 100_000, tier: 'gold', completionStarsPerMonth: 4 },
-  { level: 4, minDeposit: 250_000, tier: 'platinum', completionStarsPerMonth: 5 },
-  { level: 5, minDeposit: 500_000, tier: 'diamond', completionStarsPerMonth: 6 },
+  { level: 1, minDeposit: 10_000, tier: 'bronze', completionStarsPerMonth: 2, yieldBoostPct: 1 },
+  { level: 2, minDeposit: 50_000, tier: 'silver', completionStarsPerMonth: 3, yieldBoostPct: 2 },
+  { level: 3, minDeposit: 100_000, tier: 'gold', completionStarsPerMonth: 4, yieldBoostPct: 3 },
+  { level: 4, minDeposit: 250_000, tier: 'platinum', completionStarsPerMonth: 5, yieldBoostPct: 4 },
+  { level: 5, minDeposit: 500_000, tier: 'diamond', completionStarsPerMonth: 6, yieldBoostPct: 5 },
 ];
 
 const supportedWallets: SupportedWallet[] = [
@@ -124,9 +130,14 @@ export const appConfig = {
     cancelFeeMinStars: 2,
     /** Cancel fee = `cancelFeeMultiplier × base` (no discounts). */
     cancelFeeMultiplier: 2,
-    /** First N stakes opened at the Bronze tier are free (cancel fee still applies). */
-    bronzeFreeStartCount: 10,
-    /** Stake tier definitions — deposit thresholds + bonus-draw values. */
+    /**
+     * First N stakes an account opens are free — any deposit, any band (the
+     * cancel fee still applies). Was a bronze-only waiver of 10 back when
+     * bronze was the tier everyone entered through; with band floors now an
+     * admin knob that would have been a whale perk.
+     */
+    freeStartCount: 1,
+    /** Deposit bands — thresholds, APR boost and completion-Stars rate. */
     levels: stakeLevels,
   },
   engines: {

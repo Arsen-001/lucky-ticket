@@ -116,8 +116,7 @@ describe('economy edges', () => {
           deposit,
           months,
           true,
-          2,
-          GlobalConstants.stakeBronzeFreeStartCount
+          GlobalConstants.stakeFreeStartCount
         );
         expect(totalDiscountPercent, `${deposit}×${months} discount`).toBeLessThanOrEqual(99);
         expect(free, `${deposit}×${months} free`).toBe(false);

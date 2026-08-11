@@ -21,6 +21,7 @@ import {
   findLevelDef,
   isStakeReady,
 } from '@/utils/global/stakes.utils';
+import { stakeAccent } from '@/components/pages/out-tabs/drawer/stakes/StakesLevelChip';
 import { StakeCancelSection } from '@/components/pages/out-tabs/drawer/stakes/progress/StakeCancelSection';
 import { StakeCountdownRing } from '@/components/pages/out-tabs/drawer/stakes/progress/StakeCountdownRing';
 import { StakesRewardsPreviewCard } from '@/components/pages/out-tabs/drawer/stakes/StakesRewardsPreviewCard';
@@ -41,7 +42,10 @@ export function ProgressStakeContent({ stakeId }: ProgressStakeContentProps) {
   const [cancelStake, { isLoading: cancelling }] = useCancelStakeMutation();
 
   const stake = stakes?.activeStakes.find(s => s.id === stakeId);
-  const levelDef = stake && stakes ? findLevelDef(stakes.levels, stake.level) : undefined;
+  // `null` is a valid answer here (a stake below the cheapest band), so only a
+  // missing STAKE is "not found" — keying the guard on the band is how a real
+  // stake became an untappable card that opened an error page.
+  const levelDef = stake && stakes ? findLevelDef(stakes.levels, stake.level) : null;
 
   const countdown = useCountDown(stake?.endDate);
   const ready = stake ? countdown.expired || isStakeReady(stake.endDate) : false;
@@ -63,7 +67,7 @@ export function ProgressStakeContent({ stakeId }: ProgressStakeContentProps) {
 
   if (isError) return <QueryErrorState onRetry={() => refetch()} />;
 
-  if (!stake || !levelDef) {
+  if (!stake) {
     return (
       <div className="text-white-secondary py-12 text-center text-sm">{t('stake not found')}</div>
     );
@@ -89,7 +93,7 @@ export function ProgressStakeContent({ stakeId }: ProgressStakeContentProps) {
     <div className="flex flex-col gap-1 pb-4">
       <div className="mb-3 flex items-center justify-between gap-2">
         <div className="text-pink-secondary text-[10px] font-bold uppercase tracking-wider">
-          {t('level {level}', { level: levelDef.level })}
+          {levelDef ? t('level {level}', { level: levelDef.level }) : t('no level')}
         </div>
         <div className="inline-flex items-center gap-1 rounded-full border border-white/10 bg-back-button-background/60 px-2.5 py-1.5">
           <Image src={icons.telegramStar} alt="" className="h-3.5 w-auto" />
@@ -104,7 +108,7 @@ export function ProgressStakeContent({ stakeId }: ProgressStakeContentProps) {
 
       <div
         className="stake-card-shell stake-card-border px-5 py-6"
-        style={{ ['--stake-card-accent' as string]: `var(--color-${levelDef.tier})` }}
+        style={{ ['--stake-card-accent' as string]: stakeAccent(levelDef) }}
       >
         <div className="relative text-center">
           <StakeCountdownRing

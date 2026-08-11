@@ -64,7 +64,7 @@ const getPublicConfig = (): PublicConfig => ({
     aprMaxPercent: GlobalConstants.stakeAprMaxPercent,
     apDivisor: GlobalConstants.stakeApDivisor,
     apCompletionBonusPercent: GlobalConstants.stakeApCompletionBonusPercent,
-    bronzeFreeStartCount: GlobalConstants.stakeBronzeFreeStartCount,
+    freeStartCount: GlobalConstants.stakeFreeStartCount,
   },
 });
 

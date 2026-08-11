@@ -13,13 +13,15 @@ import {
   computeStakeBaseAp,
   computeStakeCompletionBonusAp,
   computeStakeCompletionStars,
-  computeStakeAprPercent,
+  computeStakeEffectiveAprPercent,
   computeStakeReturnCoins,
 } from '@/utils/global/stakes.utils';
+import { stakeAccent } from '@/components/pages/out-tabs/drawer/stakes/StakesLevelChip';
 import type { StakeLevelDefinition } from '@/types/interfaces/stakes.interfaces';
 
 export interface StakesRewardsPreviewCardProps {
-  levelDef: StakeLevelDefinition;
+  /** The deposit's band — `null` when it clears none (no boost, no Stars). */
+  levelDef: StakeLevelDefinition | null;
   deposit: number;
   durationMonths: number;
 }
@@ -32,14 +34,16 @@ export function StakesRewardsPreviewCard({
   const t = useAppTranslations();
   const { data: me } = useGetMeQuery();
   const stakeKnobs = useStakesDisplayConfig();
-  const ratePercent = computeStakeAprPercent(durationMonths, stakeKnobs);
+  const boostPct = levelDef?.yieldBoostPct ?? 0;
+  const ratePercent = computeStakeEffectiveAprPercent(durationMonths, boostPct, stakeKnobs);
   const yieldLC = computeStakeReturnCoins(
     deposit,
     durationMonths,
     me?.isLuckyPlayer ?? false,
     me?.isVIP ?? false,
     stakeKnobs,
-    me?.statusPerks
+    me?.statusPerks,
+    boostPct
   );
   const stakeBaseAp = computeStakeBaseAp(deposit, durationMonths, stakeKnobs);
   const stakeBonusAp = computeStakeCompletionBonusAp(deposit, durationMonths, stakeKnobs);
@@ -49,7 +53,7 @@ export function StakesRewardsPreviewCard({
   return (
     <div
       className="stake-card-shell stake-card-border p-3.5"
-      style={{ ['--stake-card-accent' as string]: `var(--color-${levelDef.tier})` }}
+      style={{ ['--stake-card-accent' as string]: stakeAccent(levelDef) }}
     >
       <div className="relative flex flex-col gap-2">
         <div className="flex items-center gap-2.5 rounded-xl border border-white/5 bg-black/30 px-3 py-2.5">
@@ -97,19 +101,21 @@ export function StakesRewardsPreviewCard({
           </span>
         </div>
 
-        <div className="border-gold/25 bg-gold/5 flex items-center gap-2.5 rounded-xl border px-3 py-2.5">
-          <div className="flex-center border-gold/35 bg-gold/15 h-7 w-7 shrink-0 rounded-full border">
-            <Image src={icons.telegramStar} alt="" className="h-4 w-auto" />
+        {completionStars > 0 && (
+          <div className="border-gold/25 bg-gold/5 flex items-center gap-2.5 rounded-xl border px-3 py-2.5">
+            <div className="flex-center border-gold/35 bg-gold/15 h-7 w-7 shrink-0 rounded-full border">
+              <Image src={icons.telegramStar} alt="" className="h-4 w-auto" />
+            </div>
+            <div className="flex-1 leading-tight">
+              <div className="text-[11px] font-bold text-white">{t('stars on completion')}</div>
+              <div className="text-white-secondary text-[10px]">{t('on stake completion')}</div>
+            </div>
+            <span className="text-gold inline-flex items-center gap-1 text-[13px] font-extrabold tabular-nums">
+              +{completionStars}
+              <Image src={icons.telegramStar} alt="" className="h-3 w-auto" />
+            </span>
           </div>
-          <div className="flex-1 leading-tight">
-            <div className="text-[11px] font-bold text-white">{t('stars on completion')}</div>
-            <div className="text-white-secondary text-[10px]">{t('on stake completion')}</div>
-          </div>
-          <span className="text-gold inline-flex items-center gap-1 text-[13px] font-extrabold tabular-nums">
-            +{completionStars}
-            <Image src={icons.telegramStar} alt="" className="h-3 w-auto" />
-          </span>
-        </div>
+        )}
       </div>
     </div>
   );

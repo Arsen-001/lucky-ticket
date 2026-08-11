@@ -17,7 +17,7 @@ import { useStakesDisplayConfig } from '@/hooks/useStakesDisplayConfig';
 import { useToast } from '@/hooks/useToast';
 import { formatCompact } from '@/utils/global/number.utils';
 import {
-  computeStakeAprPercent,
+  computeStakeEffectiveAprPercent,
   computeStakeCompletionBonusAp,
   computeStakeCompletionStars,
   computeStakeMonths,
@@ -68,7 +68,9 @@ export function ReadyStakeContent({ stakeId }: ReadyStakeContentProps) {
   const [claimStake, { isLoading: claiming }] = useClaimStakeMutation();
 
   const stake = stakes?.activeStakes.find(s => s.id === stakeId);
-  const levelDef = stake && stakes ? findLevelDef(stakes.levels, stake.level) : undefined;
+  // A bandless stake still matures and still pays its principal + APR, so the
+  // claim screen must open for it; only a missing stake is "not found".
+  const levelDef = stake && stakes ? findLevelDef(stakes.levels, stake.level) : null;
   const ready = stake ? isStakeReady(stake.endDate) : false;
 
   const [claimedSnapshot, setClaimedSnapshot] = useState<{
@@ -110,7 +112,7 @@ export function ReadyStakeContent({ stakeId }: ReadyStakeContentProps) {
 
   if (isError) return <QueryErrorState onRetry={() => refetch()} />;
 
-  if (!stake || !levelDef) {
+  if (!stake) {
     return (
       <div className="text-white-secondary py-12 text-center text-sm">{t('stake not found')}</div>
     );
@@ -123,9 +125,14 @@ export function ReadyStakeContent({ stakeId }: ReadyStakeContentProps) {
     me?.isLuckyPlayer ?? false,
     me?.isVIP ?? false,
     stakeKnobs,
-    me?.statusPerks
+    me?.statusPerks,
+    levelDef?.yieldBoostPct ?? 0
   );
-  const ratePercent = computeStakeAprPercent(months, stakeKnobs);
+  const ratePercent = computeStakeEffectiveAprPercent(
+    months,
+    levelDef?.yieldBoostPct ?? 0,
+    stakeKnobs
+  );
   const rateLabel = ratePercent.toFixed(ratePercent % 1 === 0 ? 0 : 1);
   const bonusAp = computeStakeCompletionBonusAp(stake.lockedAmount, months, stakeKnobs);
   const completionStars = computeStakeCompletionStars(months, levelDef);

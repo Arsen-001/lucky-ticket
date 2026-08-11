@@ -1,13 +1,15 @@
 import { Star } from 'lucide-react';
 import { useAppTranslations } from '@/hooks/useAppTranslations';
 import { twMerge } from 'tailwind-merge';
+import type { StakeLevelDefinition } from '@/types/interfaces/stakes.interfaces';
 import type { TicketType } from '@/types/types/ticket.types';
 
 export type StakesLevelChipSize = 'sm' | 'md' | 'lg';
 
 export interface StakesLevelChipProps {
+  /** Band number, or `0`/`null` band for a deposit that cleared none. */
   level: number;
-  tier: TicketType;
+  tier: TicketType | null;
   size?: StakesLevelChipSize;
   className?: string;
 }
@@ -32,8 +34,32 @@ const iconSize: Record<StakesLevelChipSize, number> = {
   lg: 12,
 };
 
+/**
+ * The accent a stake card paints itself with — its band's tier colour, or a
+ * neutral purple when the deposit cleared no band. Every stake surface reads
+ * this so a bandless stake looks deliberate instead of borrowing bronze.
+ */
+export const stakeAccent = (levelDef: StakeLevelDefinition | null) =>
+  levelDef ? `var(--color-${levelDef.tier})` : 'var(--color-electric-purple)';
+
 export function StakesLevelChip({ level, tier, size = 'md', className }: StakesLevelChipProps) {
   const t = useAppTranslations();
+
+  // A stake below the cheapest band is a stake, not an error: it says "no
+  // level" rather than disappearing or claiming a band it never reached.
+  if (!tier || level <= 0) {
+    return (
+      <span
+        className={twMerge(
+          'inline-flex items-center gap-1 rounded-full border border-white/15 bg-white/5 font-extrabold uppercase tracking-wider text-white/50',
+          sizeClass[size],
+          className
+        )}
+      >
+        {t('no level')}
+      </span>
+    );
+  }
 
   return (
     <span

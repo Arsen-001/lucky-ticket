@@ -3,7 +3,7 @@ import { defaultStakeKnobs, type StakeMathKnobs } from '@/utils/global/stakes.ut
 import { GlobalConstants } from '@/constants/global.constants';
 
 export interface StakesDisplayConfig extends StakeMathKnobs {
-  bronzeFreeStartCount: number;
+  freeStartCount: number;
 }
 
 /**
@@ -19,7 +19,7 @@ export function useStakesDisplayConfig(): StakesDisplayConfig {
   if (!s) {
     return {
       ...defaultStakeKnobs,
-      bronzeFreeStartCount: GlobalConstants.stakeBronzeFreeStartCount,
+      freeStartCount: GlobalConstants.stakeFreeStartCount,
     };
   }
   return {
@@ -29,6 +29,6 @@ export function useStakesDisplayConfig(): StakesDisplayConfig {
     aprMaxPercent: s.aprMaxPercent,
     apDivisor: s.apDivisor,
     apCompletionBonusPercent: s.apCompletionBonusPercent,
-    bronzeFreeStartCount: s.bronzeFreeStartCount,
+    freeStartCount: s.freeStartCount,
   };
 }

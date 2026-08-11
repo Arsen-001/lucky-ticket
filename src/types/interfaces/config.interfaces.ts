@@ -129,6 +129,6 @@ export interface PublicConfig {
     aprMaxPercent: number;
     apDivisor: number;
     apCompletionBonusPercent: number;
-    bronzeFreeStartCount: number;
+    freeStartCount: number;
   };
 }
