@@ -18,8 +18,9 @@ const SKELETON_TOURNAMENTS = new Array(4).fill({}) as Tournament[];
  * two seconds: six of the seven tournaments were behind a 14-second wait, the
  * two neighbours the mask left visible were faded to ~6%, and the order was
  * whatever the query returned — Platinum in three hours ahead of a sponsor in
- * five. Now it is a plain snap rail: 2.3 cards on screen at once, nothing moves
- * unless the player moves it, and the only thing ticking is the countdowns.
+ * five. Now it is a plain snap rail: a ticket and a readable half on screen,
+ * nothing moves unless the player moves it, and the only thing ticking is the
+ * countdowns.
  */
 export function HomeUpcomingTournaments({ className }: ClassNameProps) {
   const { data: tournaments, isLoading } = useGetTopTournamentsQuery();

@@ -2,7 +2,7 @@
 
 import { LabTournamentPosterCard } from './LabTournamentPosterCard';
 import { LabTournamentsHeading } from './LabTournamentsHeading';
-import { byStartTime } from './labTournamentTier.utils';
+import { byStartTime } from '@/utils/global/tournament.utils';
 import { staggerMs } from '@/utils/global/animation.utils';
 import type { Tournament } from '@/types/interfaces/tournaments.interfaces';
 

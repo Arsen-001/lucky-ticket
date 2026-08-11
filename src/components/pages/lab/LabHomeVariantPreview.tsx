@@ -4,8 +4,9 @@ import { useGetTopTournamentsQuery } from '@/api/tournaments.api';
 import { LabTournamentBoard } from './LabTournamentBoard';
 import { LabTournamentHeroBlock } from './LabTournamentHeroBlock';
 import { LabTournamentPosterStrip } from './LabTournamentPosterStrip';
-import { LabTournamentTicketStrip } from './LabTournamentTicketStrip';
+import { LabTournamentPosterTicketStrip } from './LabTournamentPosterTicketStrip';
 
+/** `c` is the A+C hybrid; plain option C is what the screen already renders. */
 export type LabHomeVariant = 'a' | 'b' | 'c' | 'd';
 
 export interface LabHomeVariantPreviewProps {
@@ -26,6 +27,6 @@ export function LabHomeVariantPreview({ variant }: LabHomeVariantPreviewProps) {
 
   if (variant === 'a') return <LabTournamentPosterStrip tournaments={items} />;
   if (variant === 'b') return <LabTournamentHeroBlock tournaments={items} />;
-  if (variant === 'c') return <LabTournamentTicketStrip tournaments={items} />;
+  if (variant === 'c') return <LabTournamentPosterTicketStrip tournaments={items} />;
   return <LabTournamentBoard tournaments={items} />;
 }

@@ -1,22 +1,19 @@
 'use client';
 
-import { LabTournamentTicketCard } from './LabTournamentTicketCard';
+import { LabTournamentPosterTicketCard } from './LabTournamentPosterTicketCard';
 import { LabTournamentsHeading } from './LabTournamentsHeading';
-import { byStartTime } from './labTournamentTier.utils';
+import { byStartTime } from '@/utils/global/tournament.utils';
 import { staggerMs } from '@/utils/global/animation.utils';
 import type { Tournament } from '@/types/interfaces/tournaments.interfaces';
 
-export interface LabTournamentTicketStripProps {
+export interface LabTournamentPosterTicketStripProps {
   tournaments: Tournament[];
 }
 
-/**
- * Option C's rail. One and a half tickets fit, which is the cheapest possible
- * "there is more to the right" — and the half is a readable half, because the
- * stub is on the left: the neighbour shows its tier and its name, not a sliced
- * countdown like the current fade does.
- */
-export function LabTournamentTicketStrip({ tournaments }: LabTournamentTicketStripProps) {
+/** Hybrid A+C on the same snap rail as the live strip: nearest start first, no autoplay. */
+export function LabTournamentPosterTicketStrip({
+  tournaments,
+}: LabTournamentPosterTicketStripProps) {
   const items = byStartTime(tournaments);
 
   return (
@@ -30,7 +27,7 @@ export function LabTournamentTicketStrip({ tournaments }: LabTournamentTicketStr
             className="animate-slide-in-bottom shrink-0 snap-start"
             style={{ animationDelay: `${staggerMs(index, 50)}ms` }}
           >
-            <LabTournamentTicketCard tournament={tournament} />
+            <LabTournamentPosterTicketCard tournament={tournament} />
           </div>
         ))}
       </div>

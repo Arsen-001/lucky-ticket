@@ -1,50 +1,52 @@
-/* Home's tournament card — a poster with a tear-off foot.
+/* Home's tournament card — a ticket with a torn-off stub.
 
-   The countdown sits on a counterfoil: the card is punched at both side edges
-   on the seam line and dashed between the punches. The holes are MASKED OUT of
-   the card rather than painted on it, so the atmospheric backdrop shows through
-   them — that is the whole difference between a cut ticket and two dark dots.
+   The seam runs down the card: the tier medal sits on the stub, the tournament
+   itself on the body. The two notches are punched at the top and bottom of the
+   seam line and the dashes run between them.
+
+   The holes are MASKED OUT of the card rather than painted on it, so the
+   atmospheric backdrop shows through them — that is the whole difference
+   between a cut ticket and two dark dots.
 
    `mask-composite: intersect` is the modern spelling and
    `-webkit-mask-composite: source-in` the one older Safari understands; both
    are listed because the app runs inside Telegram's WebView. A browser that
-   supports neither simply renders the card with square edges and the dashed
+   supports neither simply renders the card with a straight edge and the dashed
    seam still reads — the shape degrades, nothing breaks.
 
-   `--home-ticket-seam` must equal (card height − foot height): the punches, the
-   dashes and the foot all take their position from it. @see
-   HomeUpcomingTournamentCard */
+   `--home-ticket-stub` is the stub's width: the punches, the dashes and the
+   medal column all take their position from it. @see HomeUpcomingTournamentCard */
 .home-tournament-ticket {
-  --home-ticket-seam: 122px;
-  --home-ticket-notch: 8px;
+  --home-ticket-stub: 62px;
+  --home-ticket-notch: 7px;
 
   -webkit-mask-image:
     radial-gradient(
-      circle var(--home-ticket-notch) at 0 var(--home-ticket-seam),
+      circle var(--home-ticket-notch) at var(--home-ticket-stub) 0,
       transparent calc(var(--home-ticket-notch) - 0.5px),
       black var(--home-ticket-notch)
     ),
     radial-gradient(
-      circle var(--home-ticket-notch) at 100% var(--home-ticket-seam),
+      circle var(--home-ticket-notch) at var(--home-ticket-stub) 100%,
       transparent calc(var(--home-ticket-notch) - 0.5px),
       black var(--home-ticket-notch)
     );
   -webkit-mask-composite: source-in;
   mask-image:
     radial-gradient(
-      circle var(--home-ticket-notch) at 0 var(--home-ticket-seam),
+      circle var(--home-ticket-notch) at var(--home-ticket-stub) 0,
       transparent calc(var(--home-ticket-notch) - 0.5px),
       black var(--home-ticket-notch)
     ),
     radial-gradient(
-      circle var(--home-ticket-notch) at 100% var(--home-ticket-seam),
+      circle var(--home-ticket-notch) at var(--home-ticket-stub) 100%,
       transparent calc(var(--home-ticket-notch) - 0.5px),
       black var(--home-ticket-notch)
     );
   mask-composite: intersect;
 }
 
-/* Sponsored tournament (DOCS §11.8): a purple skin instead of the tier wash, so
+/* Sponsored tournament (DOCS §11.8): a purple skin instead of the tier tint, so
    a paid card is never mistaken for a tier the player has not unlocked. Lived
    in `engine-preview-card.css` and was reachable from Home only because another
    component on the screen happened to import that file — a sponsor's card would
@@ -59,10 +61,10 @@
 /* The tear line. Inset past both punches so a dash never collides with a hole. */
 .home-tournament-ticket-seam {
   position: absolute;
-  left: 10px;
-  right: 10px;
-  top: var(--home-ticket-seam);
-  height: 0;
-  border-top: 1px dashed rgba(255, 255, 255, 0.22);
+  top: 9px;
+  bottom: 9px;
+  left: var(--home-ticket-stub);
+  width: 0;
+  border-left: 1px dashed rgba(255, 255, 255, 0.22);
   pointer-events: none;
 }

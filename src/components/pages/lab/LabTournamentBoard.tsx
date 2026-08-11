@@ -2,7 +2,7 @@
 
 import { LabTournamentBoardGroup } from './LabTournamentBoardGroup';
 import { LabTournamentsHeading } from './LabTournamentsHeading';
-import { byStartTime } from './labTournamentTier.utils';
+import { byStartTime } from '@/utils/global/tournament.utils';
 import type { Tournament } from '@/types/interfaces/tournaments.interfaces';
 
 export interface LabTournamentBoardProps {

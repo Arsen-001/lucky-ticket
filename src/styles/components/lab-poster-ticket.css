@@ -1,0 +1,45 @@
+/* Lab-only — the A+C hybrid the strip briefly shipped as: a poster with the
+   countdown on a tear-off foot. Kept so the option can still be compared with
+   what is live (option C, the horizontal ticket) instead of being reconstructed
+   from git history. The live card's cut runs down the card; this one's runs
+   across it. @see LabTournamentPosterTicketCard */
+.lab-poster-ticket {
+  --lab-poster-seam: 122px;
+  --lab-poster-notch: 8px;
+
+  -webkit-mask-image:
+    radial-gradient(
+      circle var(--lab-poster-notch) at 0 var(--lab-poster-seam),
+      transparent calc(var(--lab-poster-notch) - 0.5px),
+      black var(--lab-poster-notch)
+    ),
+    radial-gradient(
+      circle var(--lab-poster-notch) at 100% var(--lab-poster-seam),
+      transparent calc(var(--lab-poster-notch) - 0.5px),
+      black var(--lab-poster-notch)
+    );
+  -webkit-mask-composite: source-in;
+  mask-image:
+    radial-gradient(
+      circle var(--lab-poster-notch) at 0 var(--lab-poster-seam),
+      transparent calc(var(--lab-poster-notch) - 0.5px),
+      black var(--lab-poster-notch)
+    ),
+    radial-gradient(
+      circle var(--lab-poster-notch) at 100% var(--lab-poster-seam),
+      transparent calc(var(--lab-poster-notch) - 0.5px),
+      black var(--lab-poster-notch)
+    );
+  mask-composite: intersect;
+}
+
+/* The tear line. Inset past both punches so a dash never collides with a hole. */
+.lab-poster-ticket-seam {
+  position: absolute;
+  left: 10px;
+  right: 10px;
+  top: var(--lab-poster-seam);
+  height: 0;
+  border-top: 1px dashed rgba(255, 255, 255, 0.22);
+  pointer-events: none;
+}

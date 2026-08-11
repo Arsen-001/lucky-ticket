@@ -11,7 +11,8 @@ import { formatCompact } from '@/utils/global/number.utils';
 import { pad } from '@/utils/global/date.utils';
 import { LabTournamentQueueChip } from './LabTournamentQueueChip';
 import { LabTournamentsHeading } from './LabTournamentsHeading';
-import { LAB_TIER_RGB, byStartTime } from './labTournamentTier.utils';
+import { LAB_TIER_RGB } from './labTournamentTier.utils';
+import { byStartTime } from '@/utils/global/tournament.utils';
 import type { Tournament } from '@/types/interfaces/tournaments.interfaces';
 
 export interface LabTournamentHeroBlockProps {
