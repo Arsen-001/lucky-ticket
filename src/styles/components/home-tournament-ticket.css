@@ -58,6 +58,52 @@
   border: 1.5px solid transparent;
 }
 
+/* The rail the tickets sit on — a centred carousel built out of scroll-snap
+   rather than a carousel library: the card the player is looking at sits in the
+   middle of the screen and its neighbours peek in from both sides.
+
+   The side padding IS the centring. A snapped card centres itself in the
+   scrollport, but the first and last card can only reach the middle if the rail
+   carries half a screen minus half a card of padding at each end — without it
+   they stop against the edge and the strip reads as misaligned. `max()` keeps
+   the normal 16px gutter on a screen too narrow to hold one card.
+
+   `--home-ticket-card` must equal the card's width. @see HomeUpcomingTournamentCard */
+.home-tournament-rail {
+  --home-ticket-card: 238px;
+  --home-ticket-gutter: max(1rem, calc((100% - var(--home-ticket-card)) / 2));
+
+  padding-inline: var(--home-ticket-gutter);
+  scroll-padding-inline: var(--home-ticket-gutter);
+}
+
+/* Fades the peeking neighbours into the screen edges. Without it the left-hand
+   peek is a countdown sliced through the middle of a digit, which reads as
+   content spilling out of the frame rather than as a deliberate peek. The ramp
+   is derived from the gutter, so it covers exactly the peek and never touches
+   the centred card, and it is eased rather than linear: a straight ramp leaves
+   the neighbour's countdown legible — and legibly sliced — right at the frame. */
+.home-tournament-rail {
+  -webkit-mask-image: linear-gradient(
+    to right,
+    transparent 0,
+    rgb(0 0 0 / 18%) calc(var(--home-ticket-gutter) * 0.55),
+    black var(--home-ticket-gutter),
+    black calc(100% - var(--home-ticket-gutter)),
+    rgb(0 0 0 / 18%) calc(100% - var(--home-ticket-gutter) * 0.55),
+    transparent 100%
+  );
+  mask-image: linear-gradient(
+    to right,
+    transparent 0,
+    rgb(0 0 0 / 18%) calc(var(--home-ticket-gutter) * 0.55),
+    black var(--home-ticket-gutter),
+    black calc(100% - var(--home-ticket-gutter)),
+    rgb(0 0 0 / 18%) calc(100% - var(--home-ticket-gutter) * 0.55),
+    transparent 100%
+  );
+}
+
 /* The tear line. Inset past both punches so a dash never collides with a hole. */
 .home-tournament-ticket-seam {
   position: absolute;

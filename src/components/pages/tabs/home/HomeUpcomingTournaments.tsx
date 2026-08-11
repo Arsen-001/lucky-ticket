@@ -39,14 +39,14 @@ export function HomeUpcomingTournaments({ className }: ClassNameProps) {
       // `py` rather than nothing: the rail scrolls horizontally, which clips
       // vertically too, and the cards' press-scale and glow need the room.
       className={twMerge(
-        'scrollbar-hidden flex snap-x snap-mandatory scroll-pl-4 gap-2.5 overflow-x-auto px-4 py-1',
+        'home-tournament-rail scrollbar-hidden flex snap-x snap-mandatory gap-2.5 overflow-x-auto py-1',
         className
       )}
     >
       {items.map((tournament, index) => (
         <div
           key={tournament.id ?? index}
-          className="animate-slide-in-bottom shrink-0 snap-start"
+          className="animate-slide-in-bottom shrink-0 snap-center"
           style={staggerStyle(index, 50)}
         >
           <HomeUpcomingTournamentCard {...tournament} loading={isLoading} />
