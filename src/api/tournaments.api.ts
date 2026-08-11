@@ -1,4 +1,6 @@
 import { api } from '@/api/index.api';
+import { tasksApi } from '@/api/tasks.api';
+import { testQuestApi } from '@/api/testQuest.api';
 import { rtkTags } from '@/constants/rtk-tags';
 import type { AppDispatch } from '@/lib/rtk/store';
 import type {
@@ -45,6 +47,37 @@ const patchTournamentCaches = (
   ),
 ];
 
+/**
+ * Pull the screens that count tournament entries back from the server.
+ *
+ * Entering advances real state the client can't derive: the backend bumps every
+ * TOURNAMENTS-category task on a first entry (`earn.onTournamentJoin`), and the
+ * counter-driven ones — including the test-quest card pinned to the same Tasks
+ * screen, which sums entered tickets — recompute on every entry. Nothing on the
+ * client refetched either, so the tasks screen kept its pre-join numbers until
+ * the app was restarted: the player entered a tournament and the task still
+ * read "0/4".
+ *
+ * Refetched, not invalidated. `invalidatesTags` REMOVES an entry that has no
+ * subscriber, and the tournament detail page lives in `(out-tabs)`, outside the
+ * tab bar that holds the only always-mounted `getTasks` subscription — so
+ * joining from there would evict the cache and make the next visit to /tasks
+ * replay the full skeleton (the same trap this file avoids for
+ * `rtkTags.tournaments`). A forced refetch writes the fresh response into the
+ * existing entry instead: subscribers keep their data on screen while it lands.
+ */
+const refetchTournamentProgress = (dispatch: AppDispatch) => {
+  dispatch(
+    tasksApi.endpoints.getTasks.initiate(undefined, { subscribe: false, forceRefetch: true })
+  );
+  dispatch(
+    testQuestApi.endpoints.getTestQuest.initiate(undefined, {
+      subscribe: false,
+      forceRefetch: true,
+    })
+  );
+};
+
 export const tournamentsApi = api.injectEndpoints({
   endpoints: builder => ({
     getTournaments: builder.query<PersonalTournament[], void>({
@@ -79,6 +112,13 @@ export const tournamentsApi = api.injectEndpoints({
         try {
           const { data } = await queryFulfilled;
           patchTournamentCaches(dispatch, tournamentId, tournament => {
+            // "Seats taken" counts distinct participants, not tickets: the
+            // viewer's FIRST entry takes a seat, adding more tickets to a
+            // tournament already joined does not. Without this the card kept
+            // showing the pre-join number until something refetched the list,
+            // so joining looked like it hadn't registered.
+            if (!tournament.participated && tournament.participantsCount != null)
+              tournament.participantsCount += 1;
             tournament.participated = true;
             tournament.participatedTicketsCount = data.participatedTicketsCount;
           });
@@ -89,6 +129,7 @@ export const tournamentsApi = api.injectEndpoints({
               if (index !== -1) draft.splice(index, 1);
             })
           );
+          refetchTournamentProgress(dispatch);
         } catch {
           // Join failed — the caller surfaces a toast; caches stay untouched.
         }

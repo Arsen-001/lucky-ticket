@@ -24,8 +24,8 @@ export interface WalletTransactionHistoryProps {
   loading?: boolean;
   isConnected?: boolean;
   /**
-   * Binding is closed for the test period, so the empty list must not answer
-   * "connect a wallet to start" — that is advice the screen above it refuses.
+   * The binding kill switch is on, so the empty list must not answer "connect a
+   * wallet to start" — that is advice the screen above it refuses.
    */
   connectClosed?: boolean;
   /** Suppress the section title when embedded under a shared header. */

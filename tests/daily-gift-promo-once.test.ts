@@ -39,11 +39,12 @@ describe('the Lucky Player offer is spent, not repeated', () => {
     const effect = source.slice(source.indexOf('promoBurned'));
 
     expect(effect).toMatch(/if \(!canShow \|\|/);
-    expect(effect, 'only the promo audience may burn it').toMatch(
-      /surfaceReason !== 'promo'/
-    );
+    expect(effect, 'only the promo audience may burn it').toMatch(/surfaceReason !== 'promo'/);
     // The guard must not sit in `close()` — that is the dismissal path.
-    const close = source.slice(source.indexOf('const close ='), source.indexOf('const handleClaim'));
+    const close = source.slice(
+      source.indexOf('const close ='),
+      source.indexOf('const handleClaim')
+    );
     expect(close).not.toMatch(/markPromoSeen/);
   });
 

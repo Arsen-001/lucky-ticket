@@ -9,7 +9,7 @@ export interface WalletWithdrawLockedProps {
 }
 
 /**
- * The exit closed for the test period, rendered as a state of the screen.
+ * The exit closed, rendered as a state of the screen.
  *
  * Both money exits (TON withdrawal, LC→TON conversion) answer 403
  * `withdrawals-disabled` while `walletConfig.withdrawalsEnabled` is off. Until
@@ -18,8 +18,10 @@ export interface WalletWithdrawLockedProps {
  * "action failed", which reads as a broken button rather than a closed door.
  *
  * There is no progress bar and no call to action on purpose: unlike the invite
- * gates, nothing the player does opens this one — the door and its opening date
- * are the whole message.
+ * gates, nothing the player does opens this one. Nor does the copy name a date —
+ * it used to say "after the test period", which is a promise the switch does not
+ * make: the way IN (binding a wallet, deposits) is open regardless, and only
+ * this way OUT is closed, until it is opened by hand.
  */
 export function WalletWithdrawLocked({ className }: WalletWithdrawLockedProps) {
   const t = useAppTranslations();
@@ -30,10 +32,10 @@ export function WalletWithdrawLocked({ className }: WalletWithdrawLockedProps) {
         <Lock size={26} className="text-pink-secondary" strokeWidth={2.2} />
       </div>
       <h2 className="text-lg font-extrabold leading-tight text-white">
-        {t('withdrawals open after the test')}
+        {t('withdrawals temporarily closed')}
       </h2>
       <p className="text-pink-secondary max-w-[280px] text-[12px]">
-        {t('withdrawals closed during the test')}
+        {t('withdrawals closed for now note')}
       </p>
     </div>
   );

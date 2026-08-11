@@ -6,7 +6,8 @@ export interface WalletLimits {
   /**
    * Whether money may leave the platform at all — false closes the TON
    * withdrawal AND the LC→TON conversion (it is one switch server-side), and
-   * both screens render the "opens after the test period" lock.
+   * both screens render the "temporarily closed" lock. Off in production — the
+   * way IN (binding, deposits) is open, only this way OUT is shut.
    */
   withdrawalsEnabled: boolean;
   /** Flat fee charged ON TOP of a withdrawal — the recipient gets the amount. */

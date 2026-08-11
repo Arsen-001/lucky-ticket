@@ -6,7 +6,7 @@ import { twMerge } from 'tailwind-merge';
 import { Skeleton } from '@/components/shared/seleketons/Skeleton';
 import { SkeletonSuspense } from '@/components/shared/seleketons/SkeletonSuspense';
 import { useAppTranslations } from '@/hooks/useAppTranslations';
-import { formatTon, formatUsd, providerLabel, truncateAddress } from '@/utils/pages/wallet.utils';
+import { formatTon, providerLabel, truncateAddress } from '@/utils/pages/wallet.utils';
 import { TonWalletClosed } from './TonWalletClosed';
 import { TonWalletLocked } from './TonWalletLocked';
 import { WalletAccountTonNote } from './WalletAccountTonNote';
@@ -40,11 +40,12 @@ export function TonWalletHero({
     );
   }
 
-  // Binding closed for the test period (`walletConfig.connectEnabled`). Checked
+  // Binding kill switch (`walletConfig.connectEnabled`), on in production so
+  // this branch is the incident case rather than the everyday one. Checked
   // BEFORE the invite gate: with the switch off `canConnect` is false too, and
   // "invite 1 friend" would promise an unlock the switch does not grant.
   if (!isConnected && state?.connectEnabled === false) {
-    return <TonWalletClosed tonBalance={state.tonBalance} usdRate={state.usdRate} />;
+    return <TonWalletClosed tonBalance={state.tonBalance} />;
   }
 
   // Invite gate (admin-editable, enforced by the backend): show what it takes
@@ -56,19 +57,12 @@ export function TonWalletHero({
         required={state.connectMinReferrals ?? 0}
         current={state.referralsCount ?? 0}
         tonBalance={state.tonBalance}
-        usdRate={state.usdRate}
       />
     );
   }
 
   if (!isConnected) {
-    return (
-      <TonWalletDisconnected
-        onConnect={onConnect}
-        tonBalance={state?.tonBalance ?? 0}
-        usdRate={state?.usdRate ?? 0}
-      />
-    );
+    return <TonWalletDisconnected onConnect={onConnect} tonBalance={state?.tonBalance ?? 0} />;
   }
 
   return (
@@ -80,10 +74,9 @@ interface TonWalletDisconnectedProps {
   onConnect: () => void;
   /** The account's TON — kept when a binding is removed, so it is shown here too. */
   tonBalance: number;
-  usdRate: number;
 }
 
-function TonWalletDisconnected({ onConnect, tonBalance, usdRate }: TonWalletDisconnectedProps) {
+function TonWalletDisconnected({ onConnect, tonBalance }: TonWalletDisconnectedProps) {
   const t = useAppTranslations();
 
   return (
@@ -117,7 +110,7 @@ function TonWalletDisconnected({ onConnect, tonBalance, usdRate }: TonWalletDisc
         >
           {t('connect wallet')}
         </button>
-        <WalletAccountTonNote balance={tonBalance} usdRate={usdRate} />
+        <WalletAccountTonNote balance={tonBalance} />
       </div>
     </div>
   );
@@ -132,7 +125,6 @@ interface TonWalletConnectedProps {
 function TonWalletConnected({ state, onDisconnect, disconnecting }: TonWalletConnectedProps) {
   const t = useAppTranslations();
   const [copied, setCopied] = useState(false);
-  const usdValue = state.tonBalance * state.usdRate;
 
   const handleCopy = async () => {
     if (!state.address) return;
@@ -205,9 +197,6 @@ function TonWalletConnected({ state, onDisconnect, disconnecting }: TonWalletCon
         </SkeletonSuspense>
         <span className="text-gold/80 mb-0.5 text-sm font-extrabold uppercase tracking-wider">
           TON
-        </span>
-        <span className="text-pink-secondary mb-1 ml-auto text-[12px] font-semibold tabular-nums">
-          ≈ {formatUsd(usdValue)}
         </span>
       </div>
       {/* Removing used to be an unlabelled door-with-an-arrow icon in the card's

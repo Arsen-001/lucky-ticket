@@ -11,7 +11,6 @@ export interface TonWalletLockedProps {
   current: number;
   /** The account's TON — an LC→TON conversion credits it with no wallet bound. */
   tonBalance?: number;
-  usdRate?: number;
 }
 
 /**
@@ -20,12 +19,7 @@ export interface TonWalletLockedProps {
  * screen shows the requirement and how far along the player is instead of
  * opening a TON Connect sheet that is going to be rejected.
  */
-export function TonWalletLocked({
-  required,
-  current,
-  tonBalance = 0,
-  usdRate = 0,
-}: TonWalletLockedProps) {
+export function TonWalletLocked({ required, current, tonBalance = 0 }: TonWalletLockedProps) {
   const t = useAppTranslations();
 
   return (
@@ -46,7 +40,7 @@ export function TonWalletLocked({
         className="relative"
       />
       <div className="relative">
-        <WalletAccountTonNote balance={tonBalance} usdRate={usdRate} />
+        <WalletAccountTonNote balance={tonBalance} />
       </div>
     </div>
   );

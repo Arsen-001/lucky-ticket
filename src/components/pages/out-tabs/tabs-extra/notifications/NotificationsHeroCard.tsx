@@ -63,22 +63,28 @@ export function NotificationsHeroCard({
         </div>
       </div>
 
+      {/* The label sits on its own full-width row, never beside the counter:
+          "Отметить все как прочитанные" / "Alle als gelesen markieren" are
+          twice the length of the English one and wrapped inside a fixed-height
+          h-7 button, spilling the second line outside it. */}
       {!allCaughtUp && (
-        <div className="relative mt-2.5 flex items-center gap-2 rounded-xl bg-black/25 px-3 py-2">
-          <span className="bg-gold/20 flex-center h-7 w-7 rounded-lg">
-            <span className="bg-gold h-2 w-2 rounded-full" />
-          </span>
-          <span className="text-gold flex-1 text-xs font-bold tabular-nums">
-            {t('{count} unread', { count: unread })}
-          </span>
+        <div className="relative mt-2.5 flex flex-col gap-2 rounded-xl bg-black/25 px-3 py-2">
+          <div className="flex items-center gap-2">
+            <span className="bg-gold/20 flex-center h-7 w-7 flex-shrink-0 rounded-lg">
+              <span className="bg-gold h-2 w-2 rounded-full" />
+            </span>
+            <span className="text-gold flex-1 text-xs font-bold tabular-nums">
+              {t('{count} unread', { count: unread })}
+            </span>
+          </div>
           {onMarkAllAsRead && (
             <Button
               variant="primary"
               loading={isMarkingAll}
               onClick={onMarkAllAsRead}
               icon={<CheckCheck />}
-              iconSize={13}
-              className="bg-pink-gradient h-7 rounded-lg px-2.5 py-0 text-[11px] font-extrabold text-white"
+              iconSize={14}
+              className="bg-pink-gradient min-h-9 w-full rounded-lg px-3 py-1.5 text-[11px] font-extrabold leading-tight text-white"
             >
               {t('mark all as read')}
             </Button>

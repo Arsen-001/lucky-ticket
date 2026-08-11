@@ -1,11 +1,10 @@
 'use client';
 
 import { useAppTranslations } from '@/hooks/useAppTranslations';
-import { formatTon, formatUsd } from '@/utils/pages/wallet.utils';
+import { formatTon } from '@/utils/pages/wallet.utils';
 
 export interface WalletAccountTonNoteProps {
   balance: number;
-  usdRate: number;
 }
 
 /**
@@ -17,7 +16,7 @@ export interface WalletAccountTonNoteProps {
  * all, so a player who converted coins (or simply swapped wallets) opened the
  * wallet screen and saw no trace of their own money.
  */
-export function WalletAccountTonNote({ balance, usdRate }: WalletAccountTonNoteProps) {
+export function WalletAccountTonNote({ balance }: WalletAccountTonNoteProps) {
   const t = useAppTranslations();
   if (balance <= 0) return null;
 
@@ -26,13 +25,8 @@ export function WalletAccountTonNote({ balance, usdRate }: WalletAccountTonNoteP
       <span className="text-pink-secondary text-[10px] font-bold uppercase tracking-wider">
         {t('ton on account')}
       </span>
-      <span className="flex items-baseline gap-1.5">
-        <span className="text-gold text-sm font-extrabold tabular-nums">
-          {formatTon(balance, 4)} TON
-        </span>
-        <span className="text-pink-secondary text-[11px] tabular-nums">
-          ≈ {formatUsd(balance * usdRate)}
-        </span>
+      <span className="text-gold text-sm font-extrabold tabular-nums">
+        {formatTon(balance, 4)} TON
       </span>
     </div>
   );

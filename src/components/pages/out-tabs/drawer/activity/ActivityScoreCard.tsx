@@ -12,7 +12,7 @@ import type { ActivityTier } from '@/constants/global.constants';
 export interface ActivityScoreCardProps {
   tier: ActivityTier;
   activityPoints?: number;
-  /** The line under the number — where the LC card spends "≈ $1.60". */
+  /** The line under the number — the LC card's slot for a caption. */
   subline?: ReactNode;
   /** Chip on the right of the header row (pace, decay, …). */
   chip?: ReactNode;

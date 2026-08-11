@@ -6,10 +6,8 @@ import { Skeleton } from '@/components/shared/seleketons/Skeleton';
 import { SkeletonSuspense } from '@/components/shared/seleketons/SkeletonSuspense';
 import { CoinIcon } from '@/components/shared/icons/CoinIcon';
 import { GlobalConstants } from '@/constants/global.constants';
-import { formatCompact, formatNumber, formatUsdPrice } from '@/utils/global/number.utils';
-import { lcToUsd } from '@/utils/global/lc.utils';
+import { formatCompact, formatNumber } from '@/utils/global/number.utils';
 import { useAppTranslations } from '@/hooks/useAppTranslations';
-import { useLcUsdRate } from '@/hooks/useLcUsdRate';
 import { lcDailyBalanceSeries } from '@/utils/pages/lc.utils';
 import { LcChartBand } from './LcChartBand';
 import { LcActionRow } from './LcActionRow';
@@ -41,7 +39,6 @@ export function LcBalanceCard({
   className,
 }: LcBalanceCardProps) {
   const t = useAppTranslations();
-  const lcUsdRate = useLcUsdRate();
 
   const balance = state?.balance ?? 0;
   const change = state?.change24h ?? 0;
@@ -111,10 +108,6 @@ export function LcBalanceCard({
             </span>
           </div>
         </SkeletonSuspense>
-
-        <span className="mt-1 block text-[11.5px] font-semibold tabular-nums text-white/55">
-          ≈ {formatUsdPrice(lcToUsd(balance, lcUsdRate))}
-        </span>
       </div>
 
       <LcChartBand values={series} />

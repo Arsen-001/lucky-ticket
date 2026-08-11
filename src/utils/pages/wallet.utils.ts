@@ -93,14 +93,6 @@ export const formatTon = (value: number, fractionDigits = 4): string =>
     maximumFractionDigits: fractionDigits,
   });
 
-export const formatUsd = (value: number): string =>
-  value.toLocaleString('en-US', {
-    style: 'currency',
-    currency: 'USD',
-    minimumFractionDigits: 2,
-    maximumFractionDigits: 2,
-  });
-
 /**
  * Explorer links must follow the chain the backend is on — a testnet hash on
  * mainnet tonscan renders a "not found" page.

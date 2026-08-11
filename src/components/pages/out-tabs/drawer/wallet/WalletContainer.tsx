@@ -7,6 +7,7 @@ import { useGetWalletStateQuery, useGetWalletTransactionsQuery } from '@/api/wal
 import { useGetLcStateQuery } from '@/api/lc.api';
 import { routes } from '@/constants/routes';
 import { useTonWalletConnect } from '@/hooks/useTonWalletConnect';
+import { useWalletLimits } from '@/hooks/useWalletLimits';
 import { TonWalletHero } from './TonWalletHero';
 import { WalletActionButtons } from './WalletActionButtons';
 import { StarsBalanceCard } from './StarsBalanceCard';
@@ -45,6 +46,7 @@ export function WalletContainer() {
   const { data: lcState } = useGetLcStateQuery();
   const { connect, disconnect, isDisconnecting, referralGate, dismissReferralGate } =
     useTonWalletConnect();
+  const { withdrawalsEnabled } = useWalletLimits();
   const [modal, setModal] = useState<WalletModal>(null);
   const [pendingTopUp, setPendingTopUp] = useState<number | undefined>(undefined);
   const [depositWatch, setDepositWatch] = useState<{ polls: number; fromBalance: number } | null>(
@@ -53,9 +55,10 @@ export function WalletContainer() {
 
   const isConnected = !!state?.isConnected;
   const tonBalance = state?.tonBalance ?? 0;
-  // Binding closed for the test period (`walletConfig.connectEnabled`). Unlike
-  // the invite gate below, no action of the player's opens it, so the screen
-  // offers none: the TON row goes away instead of sitting there refusing taps.
+  // Binding kill switch (`walletConfig.connectEnabled`), off by default — the
+  // way IN is open. When it is thrown, no action of the player's opens it,
+  // unlike the invite gate below, so the screen offers none: the TON row goes
+  // away instead of sitting there refusing taps.
   const isConnectClosed = state?.connectEnabled === false && !isConnected;
   // Invite gate on binding a wallet (`walletConfig.connectMinReferrals`), the
   // server's own verdict — an older backend omits it and nothing is gated.
@@ -100,7 +103,11 @@ export function WalletContainer() {
   // unmet the backend rejects that connect, so show the gate — what is missing
   // AND the way to it — instead of a sheet whose only outcome is an error.
   const requireConnected = (next: WalletModal) => {
-    if (isConnected) setModal(next);
+    // The exit is closed for everyone: open the modal that says so instead of a
+    // TON Connect sheet. Binding a wallet does not open this door, so asking for
+    // one first would collect a signature and then refuse.
+    if (next === 'withdraw' && !withdrawalsEnabled) setModal('withdraw');
+    else if (isConnected) setModal(next);
     // The switch is off: no sheet, and above all no invite gate — its progress
     // bar would promise an unlock that inviting friends cannot deliver.
     else if (isConnectClosed) return;
@@ -142,11 +149,16 @@ export function WalletContainer() {
       {/*
         Deposit / withdraw / exchange are all TON-only, so with binding closed
         every one of them is a dead button. Stars and LC below keep working —
-        the test period closes the TON wallet, not the account.
+        the switch closes the TON wallet, not the account.
+
+        Withdrawal is the one that is closed today, and it is marked here rather
+        than only inside its modal: the two buttons beside it work, so an
+        unmarked one that answers "closed" reads as this screen being broken.
       */}
       {!isConnectClosed && (
         <WalletActionButtons
           disabled={isLoading}
+          withdrawLocked={!withdrawalsEnabled}
           onDeposit={() => requireConnected('deposit')}
           onWithdraw={() => requireConnected('withdraw')}
           onExchange={() => requireConnected('exchange')}
@@ -160,7 +172,7 @@ export function WalletContainer() {
         onBuyMore={() => setModal('buyStars')}
       />
 
-      <WalletLcCard onConvert={() => setModal('convertLc')} />
+      <WalletLcCard onConvert={() => setModal('convertLc')} locked={!withdrawalsEnabled} />
 
       {/*
         Our own ledger only. The wallet's blockchain history used to sit next to

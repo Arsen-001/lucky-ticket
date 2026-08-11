@@ -1,7 +1,8 @@
 'use client';
 
-import { ArrowLeftRight, ArrowRight, Coins } from 'lucide-react';
+import { ArrowLeftRight, ArrowRight, Coins, Lock } from 'lucide-react';
 import { useRouter } from 'next/navigation';
+import { twMerge } from 'tailwind-merge';
 import { useGetLcStateQuery } from '@/api/lc.api';
 import { LcLabel } from '@/components/shared/icons/LcLabel';
 import { useAppTranslations } from '@/hooks/useAppTranslations';
@@ -11,13 +12,20 @@ import { formatNumber } from '@/utils/global/number.utils';
 export interface WalletLcCardProps {
   /** Open the LC → TON convert modal (rendered by the wallet container). */
   onConvert: () => void;
+  /**
+   * LC→TON is closed — it is the same exit as a TON withdrawal, one switch
+   * server-side (`walletConfig.withdrawalsEnabled`). Marked rather than hidden
+   * or disabled: this is the brightest button on the screen, so leaving it in
+   * full pink makes the closed door look like a broken one.
+   */
+  locked?: boolean;
 }
 
 /**
  * LC summary on the wallet screen: shows the $LC balance, a direct
  * "Convert to TON" action, and a tap-through to the full LC screen (history).
  */
-export function WalletLcCard({ onConvert }: WalletLcCardProps) {
+export function WalletLcCard({ onConvert, locked }: WalletLcCardProps) {
   const t = useAppTranslations();
   const router = useRouter();
   const { data: state, isLoading } = useGetLcStateQuery();
@@ -80,10 +88,25 @@ export function WalletLcCard({ onConvert }: WalletLcCardProps) {
         type="button"
         onClick={onConvert}
         disabled={isLoading}
-        className="bg-pink-gradient relative mt-3 flex w-full items-center justify-center gap-2 rounded-xl px-4 py-3 text-[13px] font-extrabold uppercase tracking-wider text-white transition-transform active:scale-99 cursor-pointer disabled:cursor-not-allowed disabled:opacity-50"
+        className={twMerge(
+          'relative mt-3 flex w-full items-center justify-center gap-2 rounded-xl px-4 py-3 text-[13px] font-extrabold uppercase tracking-wider text-white transition-transform active:scale-99 cursor-pointer disabled:cursor-not-allowed disabled:opacity-50',
+          locked ? 'border border-white/10 bg-white/6 text-white/55' : 'bg-pink-gradient'
+        )}
       >
-        <ArrowLeftRight size={15} strokeWidth={2.6} />
+        <ArrowLeftRight
+          size={15}
+          strokeWidth={2.6}
+          className={locked ? 'text-white/45' : undefined}
+        />
         {t('convert to ton')}
+        {locked && (
+          <Lock
+            size={12}
+            strokeWidth={3}
+            aria-hidden
+            className="absolute right-3 top-1/2 -translate-y-1/2 text-white/45"
+          />
+        )}
       </button>
     </div>
   );

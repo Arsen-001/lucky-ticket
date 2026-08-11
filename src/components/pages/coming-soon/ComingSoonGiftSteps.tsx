@@ -207,6 +207,19 @@ export function ComingSoonGiftSteps({
           <p className="text-white-secondary max-w-[22rem] text-[13px] font-semibold leading-snug">
             {caption}
           </p>
+          {/* The half of the deal that outlives the promo: the gift is one-off,
+              the referral cut is not. Said here, next to the ladder, because
+              this is where a visitor decides whether the seventh friend was the
+              last one worth sending — and it is the only line on the screen that
+              gives them a reason to keep going after the gift is claimed.
+              Deliberately shown in EVERY ladder state, and deliberately without
+              a percentage: the live cut is `referral.tournamentLcPct` off
+              `GET /config`, which this screen never fetches (no store behind the
+              gate), so a hardcoded number here would be a promise nobody keeps
+              after an admin retune. @see GlobalConstants.referralTournamentLcPercentage */}
+          <p className="max-w-[22rem] text-balance text-[13px] font-extrabold leading-snug text-white">
+            {t('coming soon gift friends profit')}
+          </p>
           {channelRule && (
             <p className="flex items-center justify-center gap-1.5 text-balance max-w-[21rem] text-[11.5px] font-semibold leading-snug text-white/60">
               <Megaphone size={13} className="text-electric-pink flex-shrink-0" strokeWidth={2.4} />

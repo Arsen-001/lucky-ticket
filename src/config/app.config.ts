@@ -261,17 +261,20 @@ export const appConfig = {
     /**
      * Fallback for the exit kill switch (`walletConfig.withdrawalsEnabled`).
      * The live value is served by `GET /config` and enforced by the backend on
-     * both exits — the TON withdrawal and the LC→TON conversion. This feeds the
-     * mock layer: flip it to `false` to see the "opens after the test period"
-     * lock on both screens without touching a server.
+     * both exits — the TON withdrawal and the LC→TON conversion. **It is `false`
+     * in production** and opens by hand; the fallback stays `true` on purpose,
+     * because a query still in flight must not lock a feature the server may
+     * well be serving. This feeds the mock layer: flip it to `false` to see the
+     * "temporarily closed" lock on both screens without touching a server.
      */
     withdrawalsEnabled: true,
     /**
      * Fallback for the connect master switch (`walletConfig.connectEnabled`),
      * served with the wallet state and enforced on `POST /wallet/connect`. The
      * exit switch above leaves the wallet usable and only shuts the way out;
-     * this one shuts binding itself, which is what "the wallet opens after the
-     * test" actually means. Flip it to `false` to see that screen on mocks.
+     * this one shuts binding itself. On by default — the way IN (bind a wallet,
+     * deposit) is open to everyone, and only the way OUT is closed. Flip it to
+     * `false` to see the kill-switch screen on mocks.
      */
     connectEnabled: true,
     /** Flat TON network fee charged on a withdrawal. */
@@ -288,13 +291,15 @@ export const appConfig = {
     lsUsdRate: 0.02,
     /**
      * Fallback invite gate on binding a wallet: how many friends a player must
-     * have invited before TON Connect is offered. Binding only opens the way
-     * IN (deposit / buy), so it is the cheap gate. The live value is served with
-     * the wallet state (`walletConfig.connectMinReferrals`, admin-editable) and
-     * the backend enforces it — this only feeds the mock layer and the copy
-     * shown before that query resolves.
+     * have invited before TON Connect is offered. `0` = no gate, which is where
+     * production stands — binding only opens the way IN (deposit / buy), and
+     * money cannot leave regardless while the exit switch is off, so making a
+     * player earn the right to hand us TON bought nothing. The live value is
+     * served with the wallet state (`walletConfig.connectMinReferrals`,
+     * admin-editable) and the backend enforces it — this only feeds the mock
+     * layer and the copy shown before that query resolves.
      */
-    connectMinReferrals: 1,
+    connectMinReferrals: 0,
     /**
      * Fallback invite gate on withdrawing TON — the way OUT, and the one a
      * throwaway account is actually after, so it costs more friends. Not

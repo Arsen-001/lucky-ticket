@@ -252,10 +252,10 @@ const articles: FaqArticle[] = [
       'Die interne Belohnungswährung.'
     ),
     content: tx(
-      'LC is the internal reward currency, earned only by playing — tournament prizes, stake yield, task and ad rewards. It is spent on tickets, engines, speed boosts and status upgrades. LC cannot be bought with real money; it reaches real value by converting to TON at a fixed $0.000001/LC valuation, which is then withdrawn. A direct LC withdrawal is coming soon.',
-      'LC — внутренняя валюта вознаграждений, зарабатывается только игрой: призы турниров, доход со стейков, награды заданий и рекламы. Тратится на билеты, двигатели, бусты скорости и улучшения статусов. LC нельзя купить за реальные деньги; реальную ценность она получает при конвертации в TON по фиксированной оценке $0,00001 за LC с последующим выводом. Прямой вывод LC скоро появится.',
-      'LC-ն ներքին պարգևային արժույթն է, վաստակվում է միայն խաղալով՝ մրցաշարերի մրցանակներ, սթեյքի եկամուտ, առաջադրանքների և գովազդի պարգևներ։ Ծախսվում է տոմսերի, շարժիչների, արագության ուժեղացումների և կարգավիճակի բարելավումների վրա։ LC-ն հնարավոր չէ գնել իրական փողով. այն իրական արժեք է ստանում TON-ի փոխարկվելով՝ ֆիքսված $0.00001/LC գնահատմամբ, որն ապա դուրս է բերվում։ LC-ի ուղղակի դուրսբերումը շուտով կլինի։',
-      'LC ist die interne Belohnungswährung, die nur durch Spielen verdient wird — Turnierpreise, Stake-Rendite, Aufgaben- und Werbebelohnungen. Sie wird für Tickets, Engines, Geschwindigkeits-Boosts und Status-Upgrades ausgegeben. LC kann nicht mit echtem Geld gekauft werden; sie erhält echten Wert durch Umwandlung in TON zum festen Kurs von $0,00001/LC, das dann ausgezahlt wird. Eine direkte LC-Auszahlung kommt bald.'
+      'LC is the internal reward currency, earned only by playing — tournament prizes, stake yield, task and ad rewards. It is spent on tickets, engines, speed boosts and status upgrades. LC cannot be bought with real money; it reaches real value by converting to TON at a fixed platform rate, which is then withdrawn. A direct LC withdrawal is coming soon.',
+      'LC — внутренняя валюта вознаграждений, зарабатывается только игрой: призы турниров, доход со стейков, награды заданий и рекламы. Тратится на билеты, двигатели, бусты скорости и улучшения статусов. LC нельзя купить за реальные деньги; реальную ценность она получает при конвертации в TON по фиксированному курсу платформы с последующим выводом. Прямой вывод LC скоро появится.',
+      'LC-ն ներքին պարգևային արժույթն է, վաստակվում է միայն խաղալով՝ մրցաշարերի մրցանակներ, սթեյքի եկամուտ, առաջադրանքների և գովազդի պարգևներ։ Ծախսվում է տոմսերի, շարժիչների, արագության ուժեղացումների և կարգավիճակի բարելավումների վրա։ LC-ն հնարավոր չէ գնել իրական փողով. այն իրական արժեք է ստանում TON-ի փոխարկվելով՝ հարթակի ֆիքսված դրույքով, որն ապա դուրս է բերվում։ LC-ի ուղղակի դուրսբերումը շուտով կլինի։',
+      'LC ist die interne Belohnungswährung, die nur durch Spielen verdient wird — Turnierpreise, Stake-Rendite, Aufgaben- und Werbebelohnungen. Sie wird für Tickets, Engines, Geschwindigkeits-Boosts und Status-Upgrades ausgegeben. LC kann nicht mit echtem Geld gekauft werden; sie erhält echten Wert durch Umwandlung in TON zum festen Kurs der Plattform, das dann ausgezahlt wird. Eine direkte LC-Auszahlung kommt bald.'
     ),
   },
   {
@@ -1011,10 +1011,10 @@ const articles: FaqArticle[] = [
       'Telegram Stars oder TON.'
     ),
     content: tx(
-      'Two ways: with Telegram Stars (XTR) at a fixed 1:1 rate (1 Telegram Star = 1 Lucky Star, via the Telegram Bot Payments API), or with TON at the live TON→USD rate anchored to ~$0.02 per LS, with a volume bonus on larger packages (e.g. +0% / +5% / +10% / +15%). Buying is one-directional — Lucky Stars are not converted back.',
-      'Два способа: за Telegram Stars (XTR) по фиксированному курсу 1:1 (1 Telegram Star = 1 Lucky Star, через Telegram Bot Payments API), или за TON по текущему курсу TON→USD с привязкой к ~$0,02 за LS и бонусом за объём на больших пакетах (например, +0% / +5% / +10% / +15%). Покупка односторонняя — Lucky Stars обратно не конвертируются.',
-      'Երկու եղանակ՝ Telegram Stars-ով (XTR) ֆիքսված 1:1 դրույքով (1 Telegram Star = 1 Lucky Star, Telegram Bot Payments API-ի միջոցով), կամ TON-ով՝ ընթացիկ TON→USD դրույքով՝ կապված ~$0.02-ին մեկ LS-ի համար, ծավալի բոնուսով ավելի մեծ փաթեթների վրա (օրինակ՝ +0% / +5% / +10% / +15%)։ Գնումը միակողմանի է. Lucky Stars-ը հետ չի փոխարկվում։',
-      'Zwei Wege: mit Telegram Stars (XTR) zum festen 1:1-Kurs (1 Telegram Star = 1 Lucky Star, über die Telegram Bot Payments API) oder mit TON zum aktuellen TON→USD-Kurs, verankert bei ~$0,02 pro LS, mit einem Mengenbonus bei größeren Paketen (z. B. +0% / +5% / +10% / +15%). Der Kauf ist einseitig — Lucky Stars werden nicht zurückgewandelt.'
+      'Two ways: with Telegram Stars (XTR) at a fixed 1:1 rate (1 Telegram Star = 1 Lucky Star, via the Telegram Bot Payments API), or with TON at the live TON rate, with a volume bonus on larger packages (e.g. +0% / +5% / +10% / +15%). Buying is one-directional — Lucky Stars are not converted back.',
+      'Два способа: за Telegram Stars (XTR) по фиксированному курсу 1:1 (1 Telegram Star = 1 Lucky Star, через Telegram Bot Payments API), или за TON по текущему курсу TON с бонусом за объём на больших пакетах (например, +0% / +5% / +10% / +15%). Покупка односторонняя — Lucky Stars обратно не конвертируются.',
+      'Երկու եղանակ՝ Telegram Stars-ով (XTR) ֆիքսված 1:1 դրույքով (1 Telegram Star = 1 Lucky Star, Telegram Bot Payments API-ի միջոցով), կամ TON-ով՝ ընթացիկ TON դրույքով, ծավալի բոնուսով ավելի մեծ փաթեթների վրա (օրինակ՝ +0% / +5% / +10% / +15%)։ Գնումը միակողմանի է. Lucky Stars-ը հետ չի փոխարկվում։',
+      'Zwei Wege: mit Telegram Stars (XTR) zum festen 1:1-Kurs (1 Telegram Star = 1 Lucky Star, über die Telegram Bot Payments API) oder mit TON zum aktuellen TON-Kurs, mit einem Mengenbonus bei größeren Paketen (z. B. +0% / +5% / +10% / +15%). Der Kauf ist einseitig — Lucky Stars werden nicht zurückgewandelt.'
     ),
   },
   {
@@ -1033,10 +1033,10 @@ const articles: FaqArticle[] = [
       'In TON umwandeln, dann auszahlen.'
     ),
     content: tx(
-      'LC reaches real money through TON. You convert LC to TON at the fixed $0.000001/LC valuation (priced against the live TON→USD rate); the TON lands in your wallet and is withdrawn from there. Withdrawals handle TON only — LC is never withdrawn directly. A direct LC withdrawal (to fiat/USDT) is coming soon.',
-      'LC превращается в реальные деньги через TON. Вы конвертируете LC в TON по фиксированной оценке $0,00001 за LC (с учётом текущего курса TON→USD); TON попадает в кошелёк и выводится оттуда. Вывод работает только с TON — LC напрямую не выводится. Прямой вывод LC (в фиат/USDT) скоро появится.',
-      'LC-ն իրական փող է դառնում TON-ի միջոցով։ Փոխարկում եք LC-ն TON-ի՝ ֆիքսված $0.00001/LC գնահատմամբ (ընթացիկ TON→USD դրույքով). TON-ը հայտնվում է ձեր դրամապանակում և դուրս բերվում այնտեղից։ Դուրսբերումներն աշխատում են միայն TON-ով. LC-ն երբեք ուղղակիորեն դուրս չի բերվում։ LC-ի ուղղակի դուրսբերումը (ֆիատ/USDT) շուտով կլինի։',
-      'LC erreicht echtes Geld über TON. Du wandelst LC in TON zur festen Bewertung von $0,00001/LC um (gegen den aktuellen TON→USD-Kurs); das TON landet in deiner Wallet und wird von dort ausgezahlt. Auszahlungen verarbeiten nur TON — LC wird nie direkt ausgezahlt. Eine direkte LC-Auszahlung (in Fiat/USDT) kommt bald.'
+      'LC reaches real money through TON. You convert LC to TON at a fixed platform rate; the TON lands in your wallet and is withdrawn from there. Withdrawals handle TON only — LC is never withdrawn directly. A direct LC withdrawal (to fiat/USDT) is coming soon.',
+      'LC превращается в реальные деньги через TON. Вы конвертируете LC в TON по фиксированному курсу платформы; TON попадает в кошелёк и выводится оттуда. Вывод работает только с TON — LC напрямую не выводится. Прямой вывод LC (в фиат/USDT) скоро появится.',
+      'LC-ն իրական փող է դառնում TON-ի միջոցով։ Փոխարկում եք LC-ն TON-ի՝ հարթակի ֆիքսված դրույքով։ TON-ը հայտնվում է ձեր դրամապանակում և դուրս բերվում այնտեղից։ Դուրսբերումներն աշխատում են միայն TON-ով. LC-ն երբեք ուղղակիորեն դուրս չի բերվում։ LC-ի ուղղակի դուրսբերումը (ֆիատ/USDT) շուտով կլինի։',
+      'LC erreicht echtes Geld über TON. Du wandelst LC in TON zum festen Kurs der Plattform um; das TON landet in deiner Wallet und wird von dort ausgezahlt. Auszahlungen verarbeiten nur TON — LC wird nie direkt ausgezahlt. Eine direkte LC-Auszahlung (in Fiat/USDT) kommt bald.'
     ),
   },
 
@@ -1169,10 +1169,10 @@ const articles: FaqArticle[] = [
       'Eine lebenslange Werbe-Kette.'
     ),
     content: tx(
-      'The Ads one-time task is a milestone chain rewarding cumulative ads watched (never resets): 10, 25, 50, 100, 200, 400, 800 ads. Rewards grow from 1,000 LC + 50 AP at level 1 up to 100,000 LC + 10 tickets + 20 Stars + 5,000 AP at level 7, with extra levels coming soon.',
-      'Разовое задание «Реклама» — это цепочка вех за суммарно просмотренную рекламу (не сбрасывается): 10, 25, 50, 100, 200, 400, 800 просмотров. Награды растут от 1 000 LC + 50 AP на 1 уровне до 100 000 LC + 10 билетов + 20 звёзд + 5 000 AP на 7 уровне, дополнительные уровни скоро.',
-      'Գովազդի միանգամյա առաջադրանքը վեխերի շղթա է՝ դիտված գովազդի գումարի դիմաց (երբեք չի զրոյանում)՝ 10, 25, 50, 100, 200, 400, 800 գովազդ։ Պարգևներն աճում են 1,000 LC + 50 AP 1-ին մակարդակում մինչև 100,000 LC + 10 տոմս + 20 աստղ + 5,000 AP 7-րդ մակարդակում, լրացուցիչ մակարդակները շուտով։',
-      'Die einmalige Werbe-Aufgabe ist eine Meilenstein-Kette, die kumulativ angesehene Werbung belohnt (setzt nie zurück): 10, 25, 50, 100, 200, 400, 800 Anzeigen. Belohnungen wachsen von 1.000 LC + 50 AP auf Stufe 1 bis 100.000 LC + 10 Tickets + 20 Sterne + 5.000 AP auf Stufe 7, weitere Stufen kommen bald.'
+      'The Ads one-time task is a milestone chain rewarding cumulative ads watched (never resets): 10, 25, 50, 100, 200, 400, 800 ads. Rewards grow from 200 LC + 5 AP at level 1 up to 15,000 LC + 5 tickets + 15 Stars + 60 AP at level 7, with extra levels coming soon.',
+      'Разовое задание «Реклама» — это цепочка вех за суммарно просмотренную рекламу (не сбрасывается): 10, 25, 50, 100, 200, 400, 800 просмотров. Награды растут от 200 LC + 5 AP на 1 уровне до 15 000 LC + 5 билетов + 15 звёзд + 60 AP на 7 уровне, дополнительные уровни скоро.',
+      'Գովազդի միանգամյա առաջադրանքը վեխերի շղթա է՝ դիտված գովազդի գումարի դիմաց (երբեք չի զրոյանում)՝ 10, 25, 50, 100, 200, 400, 800 գովազդ։ Պարգևներն աճում են 200 LC + 5 AP 1-ին մակարդակում մինչև 15,000 LC + 5 տոմս + 15 աստղ + 60 AP 7-րդ մակարդակում, լրացուցիչ մակարդակները շուտով։',
+      'Die einmalige Werbe-Aufgabe ist eine Meilenstein-Kette, die kumulativ angesehene Werbung belohnt (setzt nie zurück): 10, 25, 50, 100, 200, 400, 800 Anzeigen. Belohnungen wachsen von 200 LC + 5 AP auf Stufe 1 bis 15.000 LC + 5 Tickets + 15 Sterne + 60 AP auf Stufe 7, weitere Stufen kommen bald.'
     ),
   },
 
