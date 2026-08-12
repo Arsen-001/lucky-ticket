@@ -48,7 +48,7 @@ export function OpenInTelegramScreen({ deviceKind }: OpenInTelegramScreenProps) 
     <main className="mx-auto flex min-h-full max-w-[var(--app-max-w)] flex-col items-center justify-center gap-6 px-6 pb-[calc(var(--tg-inset-bottom)+2rem)] pt-[calc(var(--tg-inset-top)+2rem)] text-center">
       <h1 className="animate-fade-in w-full max-w-[230px]">
         <Image
-          sizes="100vw"
+          sizes="230px"
           src={logo}
           alt={GlobalConstants.projectName}
           priority

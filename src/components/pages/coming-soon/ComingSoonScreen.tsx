@@ -70,7 +70,7 @@ export function ComingSoonScreen({ launchAt, session }: ComingSoonScreenProps) {
       <div className="mb-auto flex w-full flex-col items-center gap-7">
         <h1 className="animate-fade-in w-full max-w-[270px]">
           <Image
-            sizes="100vw"
+            sizes="270px"
             src={logo}
             alt={GlobalConstants.projectName}
             priority
