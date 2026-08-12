@@ -21,10 +21,6 @@ import goldenMedal from '@assets/icons/medals/gold-medal.webp';
 import platinumMedal from '@assets/icons/medals/platinum-medal.webp';
 import diamondMedal from '@assets/icons/medals/diamond-medal.webp';
 
-import bronzeTrophy from '@assets/icons/trophies/bronze-trophy.webp';
-import silverTrophy from '@assets/icons/trophies/silver-trophy.webp';
-import goldenTrophy from '@assets/icons/trophies/golden-trophy.webp';
-
 import bronzeCapacityChip from '@assets/icons/chips/bronze-capacity-chip.webp';
 import bronzeTimeChip from '@assets/icons/chips/bronze-time-chip.webp';
 import silverCapacityChip from '@assets/icons/chips/silver-capacity-chip.webp';
@@ -62,7 +58,6 @@ export const icons = {
   bronzeMedal,
   bronzeTicket,
   bronzeTicketOverlap,
-  bronzeTrophy,
   bronzeEngine,
   bronzeCapacityChip,
   bronzeCapacityShard,
@@ -84,7 +79,6 @@ export const icons = {
   goldenMedal,
   goldenTicket,
   goldenTicketOverlap,
-  goldenTrophy,
   goldenEngine,
   goldenCapacityChip,
   goldenCapacityShard,
@@ -103,7 +97,6 @@ export const icons = {
   silverMedal,
   silverTicket,
   silverTicketOverlap,
-  silverTrophy,
   silverEngine,
   silverCapacityChip,
   silverCapacityShard,
