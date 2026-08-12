@@ -612,7 +612,7 @@ export function TaskItemCard({
                   handleCardClick();
                 }}
                 className={twMerge(
-                  'flex-center relative flex-1 gap-1.5 rounded-xl py-2.5 text-[12px] leading-none font-extrabold tracking-[0.14em] uppercase',
+                  'tap-target flex-center relative flex-1 gap-1.5 rounded-xl py-2.5 text-[12px] leading-none font-extrabold tracking-[0.14em] uppercase',
                   isSimulating && 'cursor-wait opacity-70',
                   isClaimAction && 'bg-pink-gradient animate-task-pulse text-white',
                   isCompleted && 'bg-success/15 text-success',

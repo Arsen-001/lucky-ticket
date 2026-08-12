@@ -68,7 +68,7 @@ export function TasksFrequencyTabs({
               }}
               onClick={() => onChange(frequency)}
               className={twMerge(
-                'relative flex items-center gap-1.5 pb-2.5 text-[15px] font-bold whitespace-nowrap transition-colors duration-300 active:scale-95',
+                'tap-target relative flex items-center gap-1.5 pb-2.5 text-[15px] font-bold whitespace-nowrap transition-colors duration-300 active:scale-95',
                 isActive ? 'text-white' : 'text-white-secondary/70'
               )}
             >

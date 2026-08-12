@@ -108,44 +108,64 @@ for (const route of STATIC_ROUTES) {
   test(`tap-target controls on ${route} own their 44px zone`, async ({ page }) => {
     await openScreen(page, route);
 
-    const short = await page.evaluate(() => {
+    const short = await page.evaluate(async () => {
       // 44/2 minus a pixel, so every sample sits inside the required square.
       const REACH = 21;
       const owns = (el: Element, hit: Element | null) =>
         // An ancestor swallowing the point is NOT the control owning it.
         !!hit && (hit === el || el.contains(hit));
 
-      return [...document.querySelectorAll('.tap-target')]
-        .filter(el => {
-          const rect = el.getBoundingClientRect();
-          if (!(rect.width > 0 && rect.top >= 0 && rect.bottom <= window.innerHeight)) return false;
-          // A control on a 3D face turned away from the viewer still reports a
-          // box — a sliver. The home cube keeps its chip and booster slots on
-          // its bottom face, so each "Unequip" paints its 20×20 as 18×2 and
-          // loses all five sample points to the faces in front of it. Nothing
-          // there is touchable until the player rotates the cube, so that
-          // reading is about the cube, not about hit zones. Half the CSS box
-          // separates the cases with room to spare: the cube draws its facing
-          // side at 0.81 scale and an edge-on side at ~0.1.
-          return rect.height >= el.clientHeight / 2 && rect.width >= el.clientWidth / 2;
-        })
-        .map(el => {
-          const rect = el.getBoundingClientRect();
-          const cx = rect.left + rect.width / 2;
-          const cy = rect.top + rect.height / 2;
-          const points: Array<[number, number]> = [
-            [cx, cy],
-            [cx - REACH, cy],
-            [cx + REACH, cy],
-            [cx, cy - REACH],
-            [cx, cy + REACH],
-          ];
-          const missed = points.filter(([x, y]) => !owns(el, document.elementFromPoint(x, y)));
-          return {
-            who: el.getAttribute('aria-label') ?? (el.textContent ?? '').trim().slice(0, 20),
-            missed: missed.length,
-          };
-        })
+      const results: Array<{ who: string; missed: number }> = [];
+
+      for (const el of document.querySelectorAll('.tap-target')) {
+        /**
+         * Measured where the control is USABLE, not where it happens to sit.
+         *
+         * Taking the reading at the current scroll position asks the wrong
+         * question: a card resting under the fixed tab bar, or clipped by the
+         * bottom edge of its own scroller, owns none of its points — and that is
+         * the bar and the scroller doing their job, not a broken hit zone. One
+         * flick of the thumb and the same control is fully tappable.
+         *
+         * Scrolling it to the middle first removes both, and needs no special
+         * cases: nothing fixed lives in the middle of the screen. Two earlier
+         * attempts to filter those cases out by geometry were worse than the
+         * disease — one of them dropped EVERY control on every screen (the shell
+         * wraps the app in a full-screen fixed layer) and still reported 80
+         * green while measuring nothing.
+         */
+        el.scrollIntoView({ block: 'center', behavior: 'instant' });
+        await new Promise(resolve => setTimeout(resolve, 40));
+
+        const rect = el.getBoundingClientRect();
+        if (!(rect.width > 0 && rect.top >= 0 && rect.bottom <= window.innerHeight)) continue;
+        // A control on a 3D face turned away from the viewer still reports a
+        // box — a sliver. The home cube keeps its chip and booster slots on
+        // its bottom face, so each "Unequip" paints its 20×20 as 18×2 and
+        // loses all five sample points to the faces in front of it. Nothing
+        // there is touchable until the player rotates the cube, so that
+        // reading is about the cube, not about hit zones. Half the CSS box
+        // separates the cases with room to spare: the cube draws its facing
+        // side at 0.81 scale and an edge-on side at ~0.1.
+        if (!(rect.height >= el.clientHeight / 2 && rect.width >= el.clientWidth / 2)) continue;
+
+        const cx = rect.left + rect.width / 2;
+        const cy = rect.top + rect.height / 2;
+        const points: Array<[number, number]> = [
+          [cx, cy],
+          [cx - REACH, cy],
+          [cx + REACH, cy],
+          [cx, cy - REACH],
+          [cx, cy + REACH],
+        ];
+        const missed = points.filter(([x, y]) => !owns(el, document.elementFromPoint(x, y)));
+        results.push({
+          who: el.getAttribute('aria-label') ?? (el.textContent ?? '').trim().slice(0, 20),
+          missed: missed.length,
+        });
+      }
+
+      return results
         .filter(result => result.missed > 0)
         .map(result => `${result.who} (${result.missed} of 5 sample points lost)`);
     });
