@@ -29,7 +29,7 @@ export function PasswordInput({ prefix, ...rest }: PasswordInputProps) {
           // "button" on every auth screen.
           aria-label={show ? t('hide password') : t('show password')}
           onClick={() => setShow(!show)}
-          className="outline-none p-1"
+          className="tap-target relative outline-none p-1"
         >
           {show ? (
             <EyeOff className="size-5 text-white/60" />
