@@ -41,7 +41,7 @@ export function SegmentToggle<T extends string>({
             aria-selected={active}
             onClick={() => onChange(option.value)}
             className={twMerge(
-              'flex-center flex-1 gap-1.5 rounded-lg px-3 py-2 text-[13px] font-bold transition active:scale-[0.98]',
+              'tap-target relative flex-center flex-1 gap-1.5 rounded-lg px-3 py-2 text-[13px] font-bold transition active:scale-[0.98]',
               active
                 ? twMerge('bg-pink-gradient text-white shadow', classNames?.active)
                 : twMerge('text-white-secondary hover:text-white', classNames?.button)

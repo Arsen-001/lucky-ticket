@@ -50,7 +50,7 @@ export function ProfileSupportIds({ userId }: ProfileSupportIdsProps) {
             type="button"
             onClick={() => handleCopy(row)}
             aria-label={t('copy {label}', { label: row.label })}
-            className="flex items-center justify-between gap-3 rounded-lg px-1 py-1.5 text-left transition-colors active:bg-white/6"
+            className="tap-target relative flex items-center justify-between gap-3 rounded-lg px-1 py-1.5 text-left transition-colors active:bg-white/6"
           >
             <span className="text-[11px] font-medium text-white/45">{row.label}</span>
             <span className="flex min-w-0 items-center gap-1.5">
