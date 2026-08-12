@@ -209,7 +209,11 @@ function PriceButton({ price, accent, onClick, fullWidth }: PriceButtonProps) {
         onClick();
       }}
       className={twMerge(
-        'flex-center relative gap-0.5 overflow-hidden whitespace-nowrap rounded-lg px-1.5 py-2 text-xs font-semibold text-white transition-transform active:scale-[0.97] hover:brightness-110',
+        // 44px by its own height, not by a `tap-target` overlay: this button keeps
+        // `overflow-hidden`, which clips its own `::after`, and the clip is
+        // load-bearing — without it a star price of «1» spills 5px out of its
+        // rounded box on a 320px phone (measured 13.08.2026).
+        'flex-center relative min-h-[44px] gap-0.5 overflow-hidden whitespace-nowrap rounded-lg px-1.5 py-2 text-xs font-semibold text-white transition-transform active:scale-[0.97] hover:brightness-110',
         // `min-w-fit` is what makes the row wrap: the button refuses to shrink
         // below its own content, so a pair that cannot share a row breaks onto
         // two full-width rows instead of clipping.
