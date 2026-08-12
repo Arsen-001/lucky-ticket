@@ -70,6 +70,14 @@ const CENTRED_CARD = () => {
 test.describe('home ticket seam', () => {
   test('both punches are cut out of the card', async ({ page }) => {
     test.setTimeout(SLOW_TEST_TIMEOUT);
+    // Ask the app not to move, instead of asking it to stop after it already
+    // has. Autoplay here is JS and gated on `prefers-reduced-motion` (see
+    // `HomeUpcomingTournaments`), so emulating the preference means the strip
+    // never starts travelling — where `swiper.autoplay.stop()` below only ever
+    // caught it between slides, and never at all on a loaded CI runner: this
+    // test failed there with "never held still" after 15 attempts (12.08.2026)
+    // while passing every time on a laptop.
+    await page.emulateMedia({ reducedMotion: 'reduce' });
     await page.goto('/', { waitUntil: 'domcontentloaded' });
     await page.getByTestId('app-shell').waitFor({ timeout: SLOW });
     await page.locator('.home-tournament-ticket').first().waitFor({ timeout: SLOW });
