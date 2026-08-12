@@ -56,7 +56,7 @@ Users can change their language at any time via settings. Language choice affect
 
 Two conventions coexist and are easy to confuse: the Mini App, the locale cookie and the admin API contract use **lower case** (`de`), while the Prisma enum, `User.locale` and the panel's filters use **UPPER case** (`DE`). A mismatched case does not throw — it just fails to match and quietly serves English.
 
-> **Adding or dropping a language touches ~20 places across all three repos.** The verified checklist, with deploy order, is [`ADDING_A_LANGUAGE.md`](ADDING_A_LANGUAGE.md). Keep it current whenever a new language-dependent surface appears.
+> **Adding or dropping a language touches 42 files across all four repos** (Mini App, backend, admin panel, landing). The verified checklist, with deploy order and what the compiler will/won't catch, is [`ADDING_A_LANGUAGE.md`](ADDING_A_LANGUAGE.md). Keep it current whenever a new language-dependent surface appears.
 
 ---
 

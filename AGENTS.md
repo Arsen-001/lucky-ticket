@@ -327,7 +327,7 @@ Any prop that holds a navigation path must use the `Route` type from `src/consta
 
 ## Internationalization
 
-> **Adding or removing a language? Read [`DOCS/ADDING_A_LANGUAGE.md`](DOCS/ADDING_A_LANGUAGE.md) first.** A language lives in ~20 places across all three repos (Mini App, backend, admin panel), including two that use the OPPOSITE case (`en` vs `EN`). Missing one of them does not fail the build — it silently falls back to English, so only a player notices.
+> **Adding or removing a language? Read [`DOCS/ADDING_A_LANGUAGE.md`](DOCS/ADDING_A_LANGUAGE.md) first.** A language lives in 42 files across all **four** repos (Mini App, backend, admin panel, landing), including layers that use the OPPOSITE case (`en` vs `EN`). Missing one of them does not fail the build — it silently falls back to English, so only a player notices. The real cost is the copy, not the files: 292 `tx()` calls in the backend and a ~210-line landing dictionary.
 
 **Never hardcode user-visible text** — every string rendered in the UI (labels, placeholders, error messages, button text, headings, empty states) must go through `t()`. Hardcoded English strings in JSX are a bug.
 
