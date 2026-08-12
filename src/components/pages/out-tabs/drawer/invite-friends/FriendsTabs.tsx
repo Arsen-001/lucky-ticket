@@ -49,7 +49,7 @@ export function FriendsTabs({ active, onChange, counts }: FriendsTabsProps) {
               // `whitespace-nowrap` and the tighter padding are what let a
               // third tab in: at 390px «Their friends» wrapped to two lines and
               // made that one tab taller than its neighbours.
-              'flex flex-1 cursor-pointer items-center justify-center gap-1 whitespace-nowrap rounded-lg px-1.5 py-2 text-[11px] font-bold transition-colors',
+              'tap-target relative flex flex-1 cursor-pointer items-center justify-center gap-1 whitespace-nowrap rounded-lg px-1.5 py-2 text-[11px] font-bold transition-colors',
               isActive
                 ? 'bg-pink-gradient text-white shadow-[0_4px_12px_rgba(222,0,155,0.28)]'
                 : 'text-pink-secondary hover:bg-white/5'

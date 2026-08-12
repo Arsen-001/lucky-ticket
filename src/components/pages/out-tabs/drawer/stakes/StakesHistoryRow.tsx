@@ -87,7 +87,7 @@ export function StakesHistoryRow({ entry, levels }: StakesHistoryRowProps) {
         <Link
           href={restakeHref}
           aria-label={t('restake same params')}
-          className="border-electric-pink/30 bg-electric-pink/10 text-electric-pink hover:bg-electric-pink/20 inline-flex items-center gap-0.5 rounded-full border px-1.5 py-2 text-[9px] font-extrabold uppercase tracking-wider transition-colors active:scale-95"
+          className="border-electric-pink/30 bg-electric-pink/10 text-electric-pink hover:bg-electric-pink/20 tap-target relative inline-flex items-center gap-0.5 rounded-full border px-1.5 py-2 text-[9px] font-extrabold uppercase tracking-wider transition-colors active:scale-95"
         >
           <Repeat size={9} strokeWidth={2.4} />
           {t('restake')}
