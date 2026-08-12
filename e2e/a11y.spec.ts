@@ -36,15 +36,25 @@ import { appDialogs } from './helpers';
  * So an empty screen is not the end condition: two consecutive empty looks are.
  */
 async function dismissAutoDialogs(page: Page) {
-  let quiet = 0;
-  for (let i = 0; i < 12 && quiet < 2; i++) {
-    const dialog = appDialogs(page).first();
-    if (!(await dialog.isVisible().catch(() => false))) {
-      quiet += 1;
-      await page.waitForTimeout(600);
-      continue;
+  // Polled in short steps rather than slept in long ones: the queue is four
+  // deep, and a fixed 600ms per look cost the suite ~35% of its runtime waiting
+  // on nothing. A dialog either appears within the settle window or there is
+  // none coming.
+  const SETTLE_MS = 900;
+  const STEP_MS = 100;
+
+  const nextDialog = async () => {
+    for (let waited = 0; waited < SETTLE_MS; waited += STEP_MS) {
+      const dialog = appDialogs(page).first();
+      if (await dialog.isVisible().catch(() => false)) return dialog;
+      await page.waitForTimeout(STEP_MS);
     }
-    quiet = 0;
+    return null;
+  };
+
+  for (let i = 0; i < 8; i++) {
+    const dialog = await nextDialog();
+    if (!dialog) return;
     const buttons = dialog.locator('button');
     const count = await buttons.count();
     if (count === 0) {
@@ -55,7 +65,8 @@ async function dismissAutoDialogs(page: Page) {
         .click({ timeout: 5000 })
         .catch(() => {});
     }
-    await page.waitForTimeout(600);
+    // Let the dismissal animation finish before looking for the next one.
+    await page.waitForTimeout(250);
   }
 }
 
