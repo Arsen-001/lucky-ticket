@@ -30,6 +30,16 @@ import { expect, test } from '@playwright/test';
 
 const SLOW = 45_000;
 
+/**
+ * WebKit on a CI runner is a different machine from WebKit on a laptop: this
+ * screen costs 3.5–7.2s locally and 18–21s there, and the whole dev-server job
+ * runs three workers compiling routes on demand. The first run of this test
+ * failed at the default 90s — not on the mask, on never getting far enough to
+ * look at it — and its retry timed out inside `goto`. The cube tests in
+ * `layout-invariants` already carry the same allowance for the same reason.
+ */
+const SLOW_TEST_TIMEOUT = 180_000;
+
 /** The centred ticket's box plus the two custom properties the punches use. */
 type Card = { x: number; y: number; width: number; height: number; stub: number; notch: number };
 
@@ -59,6 +69,7 @@ const CENTRED_CARD = () => {
 
 test.describe('home ticket seam', () => {
   test('both punches are cut out of the card', async ({ page }) => {
+    test.setTimeout(SLOW_TEST_TIMEOUT);
     await page.goto('/', { waitUntil: 'domcontentloaded' });
     await page.getByTestId('app-shell').waitFor({ timeout: SLOW });
     await page.locator('.home-tournament-ticket').first().waitFor({ timeout: SLOW });
@@ -105,9 +116,15 @@ test.describe('home ticket seam', () => {
     let card: Card | null = null;
     let painted: Record<string, number[]> | null = null;
 
-    // Locate, shoot, then locate again — and only trust the pair when the card
-    // sat still across the shot.
-    for (let attempt = 0; attempt < 6 && !painted; attempt++) {
+    // Locate, shoot, then check the shot actually caught the card.
+    //
+    // The first version demanded that the rect be IDENTICAL before and after
+    // the screenshot, which on a loaded runner never converged — Swiper's
+    // transform drifts by a fraction of a pixel and React re-renders under it.
+    // The colour check below is the stronger guarantee anyway: if the crop had
+    // moved off the card, the "solid" sample would not be red. So drift is
+    // tolerated within a pixel and the frame is judged by what it contains.
+    for (let attempt = 0; attempt < 15 && !painted; attempt++) {
       await page.waitForTimeout(400);
       await clearTheScreen();
       const before = (await page.evaluate(CENTRED_CARD)) as Card | null;
@@ -129,7 +146,7 @@ test.describe('home ticket seam', () => {
       }
 
       const after = (await page.evaluate(CENTRED_CARD)) as Card | null;
-      if (!after || after.x !== before.x || after.y !== before.y) continue;
+      if (!after || Math.abs(after.x - before.x) > 1 || Math.abs(after.y - before.y) > 1) continue;
 
       const x = before.stub + 2; // clear of the seam's own dashed border
       const points = {
