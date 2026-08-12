@@ -435,6 +435,30 @@ Run `type-check` before committing non-trivial changes.
 
 ---
 
+## Deploying the frontend
+
+```bash
+npm run deploy:slice          # deploy HEAD to production
+npm run deploy:slice -- --dry # show what would go, deploy nothing
+```
+
+**Never run `vercel --prod` from the repository root.** This Vercel project has no
+Git integration, so that command uploads the _working directory_ — and in a repo
+where several sessions edit at once, it ships whoever else's half-finished work
+happens to be lying around. That is not hypothetical: `BoostRow`,
+`HomeUpcomingTournaments` and `TelegramStarIcon` all reached production that way
+on 03.08.2026, uncommitted and unreviewed.
+
+`deploy:slice` builds the upload from a detached worktree at HEAD, so only
+committed code can ship, and prints everything your tree is holding back so
+"deployed" is never mistaken for "everything I have is live".
+
+The corollary is worth stating: a green CI run says nothing about production
+here. CI tests commits; the deploy uploads files. `deploy:slice` is what makes
+the two describe the same thing.
+
+---
+
 ## Key Project Notes
 
 **Build & runtime**
