@@ -137,7 +137,7 @@ export function FriendsHeroCard() {
           icon={copied ? <Check /> : <Share2 />}
           iconSize={13}
           onClick={handleShare}
-          className="bg-pink-gradient h-9 flex-1 rounded-lg py-0 text-xs font-extrabold text-white"
+          className="bg-pink-gradient tap-target relative h-9 flex-1 rounded-lg py-0 text-xs font-extrabold text-white"
         >
           {copied ? t('link copied') : t('share invite')}
         </Button>

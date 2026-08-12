@@ -84,7 +84,7 @@ export function NotificationsHeroCard({
               onClick={onMarkAllAsRead}
               icon={<CheckCheck />}
               iconSize={14}
-              className="bg-pink-gradient min-h-9 w-full rounded-lg px-3 py-1.5 text-[11px] font-extrabold leading-tight text-white"
+              className="bg-pink-gradient tap-target relative min-h-9 w-full rounded-lg px-3 py-1.5 text-[11px] font-extrabold leading-tight text-white"
             >
               {t('mark all as read')}
             </Button>

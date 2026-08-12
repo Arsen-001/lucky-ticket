@@ -76,7 +76,7 @@ export function InventoryTierFilter({ value, onChange, className }: InventoryTie
                 onClick={() => onChange(tier)}
                 aria-pressed={active}
                 className={twMerge(
-                  'relative z-1 flex shrink-0 items-center gap-2 whitespace-nowrap rounded-full px-3.5 py-2 text-[12px] font-extrabold uppercase tracking-wider transition-colors duration-300 active:scale-95',
+                  'tap-target relative z-1 flex shrink-0 items-center gap-2 whitespace-nowrap rounded-full px-3.5 py-2 text-[12px] font-extrabold uppercase tracking-wider transition-colors duration-300 active:scale-95',
                   active ? 'text-white' : 'text-white-secondary bg-white/5 hover:bg-white/10'
                 )}
               >
