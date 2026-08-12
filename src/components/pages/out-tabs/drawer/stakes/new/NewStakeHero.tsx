@@ -158,7 +158,7 @@ export function NewStakeHero({
               key={preset.label}
               type="button"
               onClick={() => onDepositChange(preset.value)}
-              className="border-electric-pink/25 bg-electric-pink/10 text-electric-pink hover:bg-electric-pink/15 flex-1 rounded-full border px-2 py-1 text-[10px] font-extrabold uppercase tracking-wider transition-colors"
+              className="border-electric-pink/25 bg-electric-pink/10 text-electric-pink hover:bg-electric-pink/15 tap-target relative flex-1 rounded-full border px-2 py-1 text-[10px] font-extrabold uppercase tracking-wider transition-colors"
             >
               {preset.label}
             </button>
