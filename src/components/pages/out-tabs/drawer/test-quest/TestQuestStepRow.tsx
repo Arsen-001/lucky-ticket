@@ -138,7 +138,12 @@ export function TestQuestStepRow({ step, done = false, count }: TestQuestStepRow
             <Link
               href={href}
               aria-label={t('go')}
-              className="flex-center -my-0.5 shrink-0 rounded-lg px-1 py-0.5 text-electric-pink active:scale-95"
+              // Same 23x19 arrow as the channel button above, in the same row —
+              // and it was the only one of the pair without a 44px zone. The
+              // widening is invisible (`tap-target` is an absolute ::after) and
+              // the only thing it overlaps is the step's own counter, which is
+              // a label, not a control.
+              className="tap-target relative flex-center -my-0.5 shrink-0 rounded-lg px-1 py-0.5 text-electric-pink active:scale-95"
             >
               <ArrowUpRight size={15} />
             </Link>
