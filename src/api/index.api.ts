@@ -4,6 +4,7 @@ import type { BaseQueryFn, FetchArgs, FetchBaseQueryError } from '@reduxjs/toolk
 import { isTelegramEnv } from '@/lib/telegram/telegram';
 import { setBanned } from '@/lib/rtk/features/ban.slice';
 import { setServerMaintenance } from '@/lib/rtk/features/maintenance.slice';
+import { adoptCookieTransportIfProven } from '@/services/auth-transport.service';
 import {
   getAccessTokenCk,
   getRefreshTokenCk,
@@ -124,6 +125,7 @@ const refreshSession = async (
     setAccessTokenCk(tokens.accessToken);
     if (tokens.refreshToken) setRefreshTokenCk(tokens.refreshToken);
     setSessionFlagCk();
+    void adoptCookieTransportIfProven();
     return true;
   }
   // A cookie-only rotation answers 200 with no tokens in the body — the new

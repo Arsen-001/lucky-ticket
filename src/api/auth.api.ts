@@ -1,5 +1,6 @@
 import { api } from '@/api/index.api';
 import { rtkTags } from '@/constants/rtk-tags';
+import { adoptCookieTransportIfProven } from '@/services/auth-transport.service';
 import {
   getRefreshTokenCk,
   removeAccessTokenCk,
@@ -29,6 +30,9 @@ function persistTokens(tokens: AuthTokens) {
   // there a session?" once the tokens themselves become `httpOnly` and vanish
   // from JavaScript. @see cookie.service
   setSessionFlagCk();
+  // And immediately try to stop keeping a readable copy at all — but only if
+  // the cookie transport can be PROVEN to work. @see auth-transport.service
+  void adoptCookieTransportIfProven();
 }
 
 export const authApi = api.injectEndpoints({
