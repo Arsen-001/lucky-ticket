@@ -85,7 +85,7 @@ export function TicketRewardIcon({
         onKeyDown={handleKey}
         aria-label={t(tierTicketNameId[tier])}
         className={twMerge(
-          'relative inline-flex shrink-0 items-center transition-transform active:scale-90',
+          'tap-target relative inline-flex shrink-0 items-center transition-transform active:scale-90',
           className
         )}
       >

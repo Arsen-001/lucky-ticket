@@ -33,7 +33,7 @@ export function StarsBalanceCard({ balance, loading, onBuyMore, disabled }: Star
       <button
         type="button"
         onClick={() => router.push(routes.stars)}
-        className="relative flex min-w-0 flex-1 items-center gap-3 text-left transition-transform active:scale-99 cursor-pointer"
+        className="tap-target relative flex min-w-0 flex-1 items-center gap-3 text-left transition-transform active:scale-99 cursor-pointer"
       >
         <div className="bg-electric-purple/15 flex-center h-9 w-9 flex-shrink-0 rounded-xl">
           <Star size={16} className="text-gold fill-gold" strokeWidth={2.2} />
