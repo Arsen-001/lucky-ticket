@@ -52,7 +52,7 @@ export default defineConfig({
       // identical to the pixel. Judge the cube's LOOK on a device or in real
       // Safari; never from a `playwright.webkit` screenshot.
       name: 'webkit',
-      testMatch: /layout-invariants\.spec\.ts/,
+      testMatch: /(layout-invariants|home-ticket-seam)\.spec\.ts/,
       grepInvert: /no screen scrolls sideways/,
       use: { ...devices['iPhone 14 Pro Max'] },
     },
