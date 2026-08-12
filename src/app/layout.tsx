@@ -4,7 +4,6 @@ import { AppLifecycleProvider } from '@/providers/AppLifecycleProvider';
 import { NavigationHistoryProvider } from '@/providers/NavigationHistoryProvider';
 import { TelegramProvider } from '@/providers/TelegramProvider';
 import { ContentProtectionProvider } from '@/providers/ContentProtectionProvider';
-import { TonConnectProvider } from '@/providers/TonConnectProvider';
 import { Onboarding } from '@/components/onboarding/Onboarding';
 import { TournamentResultWatcher } from '@/components/pages/tabs/tournaments/TournamentResultWatcher';
 import { TicketFlightViewport } from '@/components/shared/ticket-flight/TicketFlightViewport';
@@ -169,24 +168,22 @@ export default async function RootLayout({ children }: ChildrenProps) {
                   <StoreProvider>
                     <AppLifecycleProvider />
                     <NavigationHistoryProvider>
-                      <TonConnectProvider>
-                        <TelegramProvider>
-                          {/* The one element that exists only when the app truly
+                      <TelegramProvider>
+                        {/* The one element that exists only when the app truly
                             booted: it lives inside PreLaunchGate, so the
                             countdown, the maintenance wall, the boot splash and
                             the open-on-your-phone screen all render *instead* of
                             it. The smoke suites assert it, because "the page
                             rendered some text" is equally true of all five. */}
-                          <div
-                            data-testid="app-shell"
-                            className="max-w-[var(--app-max-w)] m-auto h-full overflow-hidden"
-                          >
-                            {children}
-                          </div>
-                          <Onboarding />
-                          <TournamentResultWatcher />
-                        </TelegramProvider>
-                      </TonConnectProvider>
+                        <div
+                          data-testid="app-shell"
+                          className="max-w-[var(--app-max-w)] m-auto h-full overflow-hidden"
+                        >
+                          {children}
+                        </div>
+                        <Onboarding />
+                        <TournamentResultWatcher />
+                      </TelegramProvider>
                       <FullscreenBrandBar />
                       <TicketFlightViewport />
                       <ToastViewport />
