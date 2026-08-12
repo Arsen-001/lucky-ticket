@@ -23,11 +23,28 @@ import { appDialogs } from './helpers';
  * A fresh mock account greets several screens with an auto-surfaced dialog
  * (tournament result, reward claim). Its backdrop owns every point on the
  * screen, so any hit test taken through it measures the backdrop instead.
+ *
+ * They arrive as a QUEUE, not one at a time — `/tasks` opens four in a row:
+ * tournament win, place result, "better luck next time", daily gift. Between
+ * two of them there is a gap where none is on screen, and the first version of
+ * this returned on that gap: the remaining dialogs then opened AFTER dismissal
+ * finished and every measurement went through their backdrop. `/tasks` failed
+ * deterministically once anything on it wore `tap-target`, which is how the gap
+ * was found (13.08.2026) — before that, nothing measured there, so a screen the
+ * suite could not see at all was passing.
+ *
+ * So an empty screen is not the end condition: two consecutive empty looks are.
  */
 async function dismissAutoDialogs(page: Page) {
-  for (let i = 0; i < 5; i++) {
+  let quiet = 0;
+  for (let i = 0; i < 12 && quiet < 2; i++) {
     const dialog = appDialogs(page).first();
-    if (!(await dialog.isVisible().catch(() => false))) return;
+    if (!(await dialog.isVisible().catch(() => false))) {
+      quiet += 1;
+      await page.waitForTimeout(600);
+      continue;
+    }
+    quiet = 0;
     const buttons = dialog.locator('button');
     const count = await buttons.count();
     if (count === 0) {
@@ -38,7 +55,7 @@ async function dismissAutoDialogs(page: Page) {
         .click({ timeout: 5000 })
         .catch(() => {});
     }
-    await page.waitForTimeout(500);
+    await page.waitForTimeout(600);
   }
 }
 
