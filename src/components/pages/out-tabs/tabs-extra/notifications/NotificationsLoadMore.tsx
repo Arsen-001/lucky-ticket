@@ -51,7 +51,7 @@ export function NotificationsLoadMore({ onLoadMore, loading }: NotificationsLoad
         variant="transparent"
         loading={loading}
         onClick={onLoadMore}
-        className="text-pink-secondary h-9 rounded-xl border border-white/10 px-4 py-0 text-xs font-bold"
+        className="text-pink-secondary tap-target relative h-9 rounded-xl border border-white/10 px-4 py-0 text-xs font-bold"
       >
         {t('load more')}
       </Button>

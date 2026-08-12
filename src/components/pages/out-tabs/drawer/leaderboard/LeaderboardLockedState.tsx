@@ -38,7 +38,7 @@ export function LeaderboardLockedState() {
 
         <Link
           href={routes.home}
-          className="bg-electric-pink mt-1 inline-flex items-center justify-center rounded-full px-4 py-2 text-xs font-extrabold uppercase tracking-wider text-white"
+          className="bg-electric-pink tap-target relative mt-1 inline-flex items-center justify-center rounded-full px-4 py-2 text-xs font-extrabold uppercase tracking-wider text-white"
         >
           {t('play now')}
         </Link>
