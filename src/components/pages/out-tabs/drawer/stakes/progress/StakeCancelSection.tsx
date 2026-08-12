@@ -17,6 +17,7 @@ import {
 } from '@/utils/global/stakes.utils';
 import { Modal } from '@/components/shared/modals/Modal';
 import { Button } from '@/components/shared/buttons/Button';
+import { gilroyItalic } from '@/fonts/index.fonts';
 
 export interface StakeCancelSectionProps {
   lockedAmount: number;
@@ -99,7 +100,9 @@ export function StakeCancelSection({
                 {cancelFee} {t('stars')}
               </span>
             </div>
-            <div className="text-pink-secondary mt-1.5 text-[9px] italic leading-relaxed">
+            <div
+              className={`${gilroyItalic.className} text-pink-secondary mt-1.5 text-[9px] italic leading-relaxed`}
+            >
               {t('paid via stars')}
             </div>
           </div>
