@@ -116,13 +116,18 @@ export function InventoryItem({
               disabled={!canAffordUnequip || isUnequipping}
               loading={isUnequipping}
               onClick={() => onUnequip?.(chip)}
-              className={twMerge('flex flex-col items-center gap-0 px-3 py-1.5 text-[11px]')}
+              className={twMerge(
+                'tap-target relative flex flex-col items-center gap-0 px-3 py-1.5 text-[11px]'
+              )}
             >
               <span>{t('unequip')}</span>
               <span className="text-[9px] font-bold tabular-nums opacity-85">{unequipCost} ★</span>
             </Button>
           ) : (
-            <Button onClick={() => onEquip?.(chip)} className={twMerge('px-3 py-2 text-[11px]')}>
+            <Button
+              onClick={() => onEquip?.(chip)}
+              className={twMerge('tap-target relative px-3 py-2 text-[11px]')}
+            >
               {t('equip')}
             </Button>
           )}
@@ -154,7 +159,7 @@ export function InventoryItem({
             type="button"
             disabled={isLevelingUp}
             onClick={() => onLevelUp?.(chip)}
-            className="flex-center mt-1.5 cursor-pointer gap-2 rounded-xl py-2.5 text-[12px] font-extrabold uppercase tracking-[0.16em] text-white shadow-[0_6px_18px_rgba(0,0,0,0.35),inset_0_1px_0_rgba(255,255,255,0.25)] transition-transform active:scale-99 disabled:cursor-default disabled:opacity-70"
+            className="tap-target relative flex-center mt-1.5 cursor-pointer gap-2 rounded-xl py-2.5 text-[12px] font-extrabold uppercase tracking-[0.16em] text-white shadow-[0_6px_18px_rgba(0,0,0,0.35),inset_0_1px_0_rgba(255,255,255,0.25)] transition-transform active:scale-99 disabled:cursor-default disabled:opacity-70"
             style={{
               background: `linear-gradient(135deg, ${accent} 0%, color-mix(in srgb, ${accent} 65%, white) 100%)`,
             }}
