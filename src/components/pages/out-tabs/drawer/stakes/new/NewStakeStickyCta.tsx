@@ -135,7 +135,7 @@ export function NewStakeStickyCta({
             </span>
           ) : (
             <span className="relative z-10 inline-flex items-center gap-1.5 text-base">
-              <Image src={icons.telegramStar} alt="" className="h-3.5 w-auto" />
+              <Image sizes="14px" src={icons.telegramStar} alt="" className="h-3.5 w-auto" />
               <span className="font-bold leading-none tabular-nums">
                 {stakeFee.toLocaleString()}
               </span>

@@ -48,7 +48,7 @@ export function StakeCancelSection({
         <span>{t('cancel stake')}</span>
         <span className="inline-flex items-center gap-1 text-error-text/90 text-[12px] font-bold">
           <span>{t('costs')}</span>
-          <Image src={icons.telegramStar} alt="" className="h-3 w-auto" />
+          <Image sizes="12px" src={icons.telegramStar} alt="" className="h-3 w-auto" />
           <span className="text-gold tabular-nums">{cancelFee}</span>
         </span>
       </button>
@@ -95,7 +95,7 @@ export function StakeCancelSection({
             <div className="text-white-secondary mt-1.5 flex items-center justify-between text-[11px]">
               <span>{t('cancellation fee')}</span>
               <span className="text-gold inline-flex items-center gap-1 font-extrabold tabular-nums">
-                <Image src={icons.telegramStar} alt="" className="h-3.5 w-auto" />
+                <Image sizes="14px" src={icons.telegramStar} alt="" className="h-3.5 w-auto" />
                 {cancelFee} {t('stars')}
               </span>
             </div>
@@ -124,7 +124,7 @@ export function StakeCancelSection({
             >
               <span className="inline-flex items-center justify-center gap-1.5">
                 <span>{t('pay')}</span>
-                <Image src={icons.telegramStar} alt="" className="h-3.5 w-auto" />
+                <Image sizes="14px" src={icons.telegramStar} alt="" className="h-3.5 w-auto" />
                 <span className="tabular-nums">{cancelFee}</span>
                 <span>· {t('cancel')}</span>
               </span>

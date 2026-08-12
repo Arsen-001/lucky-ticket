@@ -113,7 +113,7 @@ export function StakesHistoryContent() {
               <div className="flex flex-col gap-0.5">
                 <span className="text-gold inline-flex items-center gap-1 text-[15px] font-extrabold tabular-nums">
                   +{totals.stars.toLocaleString()}
-                  <Image src={icons.telegramStar} alt="" className="h-3 w-auto" />
+                  <Image sizes="12px" src={icons.telegramStar} alt="" className="h-3 w-auto" />
                 </span>
                 <span className="text-pink-secondary text-[9px] font-semibold uppercase tracking-wider">
                   {t('stars')}

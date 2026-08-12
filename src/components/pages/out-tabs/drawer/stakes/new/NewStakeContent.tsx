@@ -188,7 +188,7 @@ export function NewStakeContent() {
             aria-label={t('go to wallet to buy stars')}
             className="hover:bg-back-button-background/80 inline-flex items-center gap-1 rounded-full border border-white/10 bg-back-button-background/60 px-2.5 py-1.5 transition-colors"
           >
-            <Image src={icons.telegramStar} alt="" className="h-3.5 w-auto" />
+            <Image sizes="14px" src={icons.telegramStar} alt="" className="h-3.5 w-auto" />
             <span className="text-gold text-[12px] font-extrabold tabular-nums">
               {formatCompact(starsBalance)}
             </span>

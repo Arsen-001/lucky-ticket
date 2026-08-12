@@ -104,7 +104,7 @@ export function StakesRewardsPreviewCard({
         {completionStars > 0 && (
           <div className="border-gold/25 bg-gold/5 flex items-center gap-2.5 rounded-xl border px-3 py-2.5">
             <div className="flex-center border-gold/35 bg-gold/15 h-7 w-7 shrink-0 rounded-full border">
-              <Image src={icons.telegramStar} alt="" className="h-4 w-auto" />
+              <Image sizes="16px" src={icons.telegramStar} alt="" className="h-4 w-auto" />
             </div>
             <div className="flex-1 leading-tight">
               <div className="text-[11px] font-bold text-white">{t('stars on completion')}</div>
@@ -112,7 +112,7 @@ export function StakesRewardsPreviewCard({
             </div>
             <span className="text-gold inline-flex items-center gap-1 text-[13px] font-extrabold tabular-nums">
               +{completionStars}
-              <Image src={icons.telegramStar} alt="" className="h-3 w-auto" />
+              <Image sizes="12px" src={icons.telegramStar} alt="" className="h-3 w-auto" />
             </span>
           </div>
         )}

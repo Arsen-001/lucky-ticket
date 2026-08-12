@@ -150,7 +150,12 @@ export function MarketUniversalCard({
               {owned ? (
                 <Check size={13} strokeWidth={3} />
               ) : (
-                <Image src={icons.lock} alt="" className="h-3.5 w-auto object-contain" />
+                <Image
+                  sizes="14px"
+                  src={icons.lock}
+                  alt=""
+                  className="h-3.5 w-auto object-contain"
+                />
               )}
               {disabledLabel ?? t('locked')}
             </div>

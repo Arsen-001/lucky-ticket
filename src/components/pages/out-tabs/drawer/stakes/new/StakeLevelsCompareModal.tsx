@@ -76,7 +76,12 @@ export function StakeLevelsCompareModal({ open, onClose, levels }: StakeLevelsCo
                     </span>
                     <span className="text-gold inline-flex items-center gap-0.5 font-extrabold tabular-nums">
                       +{yearStars}
-                      <Image src={icons.telegramStar} alt="" className="h-2.5 w-auto" />
+                      <Image
+                        sizes="10px"
+                        src={icons.telegramStar}
+                        alt=""
+                        className="h-2.5 w-auto"
+                      />
                     </span>
                   </div>
                 </div>

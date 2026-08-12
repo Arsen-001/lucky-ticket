@@ -58,7 +58,7 @@ export function StakesClaimSuccessModal({
             </span>
           </div>
           <div className="flex flex-col items-center gap-1 rounded-xl border border-white/10 bg-black/25 px-2 py-2.5">
-            <Image src={icons.telegramStar} alt="" className="h-5 w-auto" />
+            <Image sizes="20px" src={icons.telegramStar} alt="" className="h-5 w-auto" />
             <span className="text-gold text-[13px] font-extrabold leading-none tabular-nums">
               +{stars}
             </span>

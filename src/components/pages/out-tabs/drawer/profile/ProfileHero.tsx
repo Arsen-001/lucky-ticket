@@ -149,6 +149,7 @@ export function ProfileHero({ profile, loading, isPreview, onTogglePreview }: Pr
         <div className="profile-banner-stars" />
         {profile?.banner && (
           <Image
+            sizes="100vw"
             src={profile.banner}
             alt=""
             fill

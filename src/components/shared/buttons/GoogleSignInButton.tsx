@@ -11,7 +11,7 @@ export function GoogleSignInButton({ ...rest }: GoogleSignInButtonProps) {
   return (
     <Button variant="secondary" {...rest}>
       <div className="flex items-start justify-center gap-2">
-        <Image className="h-6 w-6" src={icons.google} alt="" />
+        <Image sizes="24px" className="h-6 w-6" src={icons.google} alt="" />
         <span>{t('sign in with google')}</span>
       </div>
     </Button>

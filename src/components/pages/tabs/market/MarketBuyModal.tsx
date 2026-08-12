@@ -79,6 +79,7 @@ export function MarketBuyModal({
                 )}
                 {price.type === MarketPriceType.TELEGRAM_STARS && (
                   <Image
+                    sizes="18px"
                     src={icons.telegramStar}
                     alt=""
                     className="w-4.5 pb-1 h-auto object-contain"

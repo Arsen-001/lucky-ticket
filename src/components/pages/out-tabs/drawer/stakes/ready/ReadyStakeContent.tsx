@@ -194,13 +194,13 @@ export function ReadyStakeContent({ stakeId }: ReadyStakeContentProps) {
       ),
     },
     {
-      icon: <Image src={icons.telegramStar} alt="" className="h-7 w-auto" />,
+      icon: <Image sizes="28px" src={icons.telegramStar} alt="" className="h-7 w-auto" />,
       label: t('stars on completion'),
       accentClass: 'border-gold/40 bg-gold/10',
       value: (
         <span className="text-gold inline-flex items-center gap-1 text-[18px] font-extrabold tabular-nums">
           +{completionStars}
-          <Image src={icons.telegramStar} alt="" className="h-3.5 w-auto" />
+          <Image sizes="14px" src={icons.telegramStar} alt="" className="h-3.5 w-auto" />
         </span>
       ),
     },

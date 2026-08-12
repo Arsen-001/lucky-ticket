@@ -110,7 +110,7 @@ export function StakesActiveStakeCard({ stake, levelDef }: StakesActiveStakeCard
             {t('stars on completion')}
           </div>
           <div className="mt-0.5 flex items-center gap-1">
-            <Image src={icons.telegramStar} alt="" className="h-4 w-auto" />
+            <Image sizes="16px" src={icons.telegramStar} alt="" className="h-4 w-auto" />
             <span className="text-gold text-[15px] font-extrabold leading-none tabular-nums">
               +{completionStars}
             </span>
