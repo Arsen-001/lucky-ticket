@@ -180,7 +180,7 @@ AP is earned from a data-driven **source registry** — every meaningful action 
 | Spend LC or LS            | **0 — buying pays no AP**             | —                                                                                              |
 | Complete a stake          | `LC staked × months / 5,000`          | base credited on start (retained on cancel), +50% bonus on completion (forfeited if cancelled) |
 
-Tiered sources (daily / weekly tasks, tournament join) scale with the relevant tier — Bronze→Diamond — and recurring daily sources carry per-day caps. **Claiming engine output awards no AP** — claims pay in tickets only, so farming the claim button cannot drive progression. For the same reason **a tournament pays its join AP once**, however many times the player re-enters it to add tickets (Section 11). **One-off and on-top sources** — verify-email, one-time tasks, friend invites, tournament joins, stake completion — are earned above the daily baseline (Section 5.4).
+Tiered sources (daily / weekly tasks, tournament join) scale with the relevant tier — Bronze→Diamond — and recurring daily sources carry per-day caps. **Claiming engine output awards no AP** — claims pay in tickets only, so farming the claim button cannot drive progression. For the same reason **a tournament pays its join AP once**, however many times the player re-enters it to add tickets (Section 11). **One-off and on-top sources** — one-time tasks, friend invites, tournament joins, stake completion — are earned above the daily baseline (Section 5.4). Email verification is **not** among them: the task paid LC only, never AP, and it is switched off entirely since 2026-08-12 (§12.6.1).
 
 **Spending pays no AP, in either currency.** Until 2026-08-10 this table promised 1 AP per 10 LS and 1 AP per 2,500 LC spent, uncapped — the backend never granted a point for a purchase in its life, and the market's purchase modal previewed AP the player then never received. The product call was to delete the promise rather than build it: tiers are earned by playing, not by paying, which is the same rule the one-time catalog already applies to paid milestones (Section 12.6). The one spend-shaped source that survives is the **stake** — it pays for locking coins up for months, not for handing them over. Money still buys advantage everywhere else it should (status perks, engines, boosts, extra ad views); it just cannot buy tier progression.
 
@@ -200,7 +200,7 @@ The **daily baseline** is the AP a fully-active player earns per day without don
 
 Consequence for pacing (§5.1): the legs are ~15 days to Silver, ~1 month to Gold, ~3.5 months to Platinum and ~7 months to Diamond, against the 15 / 30 / 90 / 180 the old numbers implied. **The AP thresholds were deliberately not lowered to restore 3 and 6 months** — that is a live ladder, and moving a gate down demotes every player sitting between the old gate and the new one (§5.5: frozen content, nothing lost, but still a demotion). Restoring the original pacing is a product call, not a correction.
 
-The baseline is shown on the AP dashboard and is the basis of the decay rate (Section 5.5). One-off and on-top sources — verify-email, one-time tasks, invites, tournaments, stakes — are earned above this baseline. Purchases are not among them: spending pays no AP (Section 5.3).
+The baseline is shown on the AP dashboard and is the basis of the decay rate (Section 5.5). One-off and on-top sources — one-time tasks, invites, tournaments, stakes — are earned above this baseline (email verification is not one: it paid no AP and is switched off, §12.6.1). Purchases are not among them: spending pays no AP (Section 5.3).
 
 ### 5.5 Activity Decay
 
@@ -1417,7 +1417,33 @@ Plus ~35 single achievements: onboarding (email, username, 2FA, avatar, wallet, 
 
 Deliberately **removed** in the rebalance (multi-dipping or stale old-economy scale): the 2nd/3rd-place chains, all per-tier tournament chains, per-tier engine/ticket/stake chains, daily/weekly/monthly leaderboard chains, the star-earn chain, the “10K/100K/1M AP” achievements (replaced by Reach Silver/Gold/Platinum), and duplicate achievements for email/wallet/deposit/status actions.
 
-**Switched off, not removed — the all-time leaderboard rank chain** (top 1000/500/100/50/10/1). Since **2026-08-10** the six tasks are commented out of the catalog and of the mock fixture, so the Leaderboard category does not appear in the one-time tab at all. Two reasons: they deep-link to a screen that renders locked while `leaderboardEnabled` is off (§13), and rank counts **down** — on the closed-test player base every player already sits inside top-1000/500/100, so the first three steps paid for standing still. They come back **together with the board**, by uncommenting both blocks (grep `LEADERBOARD TASKS OFF`); the boot sync then re-upserts them verbatim. The catalog is **113 one-time tasks** without them.
+**Switched off, not removed — the all-time leaderboard rank chain** (top 1000/500/100/50/10/1). Since **2026-08-10** the six tasks are commented out of the catalog and of the mock fixture, so the Leaderboard category does not appear in the one-time tab at all. Two reasons: they deep-link to a screen that renders locked while `leaderboardEnabled` is off (§13), and rank counts **down** — on the closed-test player base every player already sits inside top-1000/500/100, so the first three steps paid for standing still. They come back **together with the board**, by uncommenting both blocks (grep `LEADERBOARD TASKS OFF`); the boot sync then re-upserts them verbatim. The catalog is **111 one-time tasks** without them — 113 minus the two profile tasks switched off on **2026-08-12** (§12.6.1).
+
+#### 12.6.1 Switched off — the two profile tasks (2026-08-12)
+
+Both were commented out of the catalog **and** of the mock fixture, so neither
+production nor dev offers them. Neither carried AP, tickets or Stars, so only
+the LC totals move: the one-time catalog goes from 113 tasks / 986 500 LC to
+**111 tasks / 985 900 LC**.
+
+**«Verify your email» (`t-260`, 300 LC) — nobody could complete it.** Its counter
+is `verified`, and the only player-facing route to that flag is the email
+confirmation flow, which **does not exist on production**: `me/email/request-code`
+and `me/email/confirm` both answer 404 (measured with controls — a live `me`
+answers 401, a made-up route answers 404). The code never left its branch; the
+blocker is SMTP (§16.2). The effect was visible in the data: **2 of 1 209 players
+are verified**. Meanwhile the card sat in the list promising LC and deep-linking
+to `/settings/email`, where the button fails. Returns with the flow — grep
+`EMAIL TASK OFF`.
+
+**«Customize your avatar» (`t-263`, 300 LC) — completed itself.** Its counter is
+`has_avatar`, which reads `profile.avatarUrl`, and that column is filled from
+Telegram's own `photo_url` at first login. Any player with a photo in Telegram
+had it done before opening the app: 300 LC for an instruction nobody followed.
+The title also asks to CUSTOMIZE an avatar, and avatar cosmetics have been off
+since 2026-08-09 (§9.4). Bringing it back means choosing a counter that means
+"changed the default" — one that does not exist today — or re-wording it around
+something the player actually does. Grep `AVATARS OFF`.
 
 The catalog is **code-canonical**: the backend upserts it on every boot (code wins over DB/admin edits to seeded tasks — same policy as market ladder prices and periodic task AP) and deletes seeded tasks that were removed from the catalog. Admin-created tasks (UUID ids) are never touched.
 
@@ -2371,7 +2397,7 @@ A completed stake (no early cancellation — Section 18) pays a **guaranteed** L
 
 #### Task Completion
 
-Stars come from **one-time milestone tasks only**, in fixed amounts printed on the task itself — there is no randomness anywhere in task rewards. 32 of the 113 one-time tasks carry an LS reward, **745 LS across the whole catalog**: the friend chain below, the star-purchase and VIP-level ladders, and the long-haul counters (800 ads watched, 50,000 tickets collected, 30 stakes). The all-time leaderboard ranks used to add another 100 LS; they are switched off with the board (§12.6) and return with it.
+Stars come from **one-time milestone tasks only**, in fixed amounts printed on the task itself — there is no randomness anywhere in task rewards. 32 of the 111 one-time tasks carry an LS reward, **745 LS across the whole catalog**: the friend chain below, the star-purchase and VIP-level ladders, and the long-haul counters (800 ads watched, 50,000 tickets collected, 30 stakes). The all-time leaderboard ranks used to add another 100 LS; they are switched off with the board (§12.6) and return with it.
 
 **Daily and weekly tasks pay LC, AP and tickets — never stars.** Measured against the catalog on 2026-08-10: the 8 daily tasks pay **2,300 LC + 18 AP + 1 ticket** a day between them, the 7 weekly ones **21,000 LC + 24 AP + 13 tickets** a week, and zero LS in either column. (A player never sees all 8 dailies at once — the set is tier-gated to 3–7, so those are ceilings, not takings.)
 

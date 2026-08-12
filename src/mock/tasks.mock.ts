@@ -860,6 +860,14 @@ const PROFILE = buildCategory({
   ],
   once: [
     // Instant one-click actions award LC only (0 AP) — see milestones.data.ts.
+    // EMAIL TASK OFF (2026-08-12) — switched off in the backend catalog, so the
+    // mock must not keep offering it or dev shows a card production does not
+    // have. Nobody could complete it: the counter is `verified`, and the only
+    // player-facing route to that flag is the email confirmation flow, which
+    // does not exist on production (`me/email/request-code` and
+    // `me/email/confirm` both answer 404 — blocked on SMTP). Uncomment together
+    // with the backend block, grep `EMAIL TASK OFF`.
+    /*
     {
       id: 't-260',
       title: 'Verify your email',
@@ -868,6 +876,7 @@ const PROFILE = buildCategory({
       progress: { current: 0, target: 1 },
       deeplink: '/settings/email',
     },
+    */
     {
       id: 't-261',
       title: 'Set a username',
@@ -886,6 +895,13 @@ const PROFILE = buildCategory({
       deeplink: '/settings/security',
       rarity: TaskRarity.SILVER,
     },
+    // AVATARS OFF (2026-08-12) — switched off in the backend catalog too. It paid
+    // for nothing: the counter is `has_avatar`, which reads `profile.avatarUrl`,
+    // and that is filled from Telegram's own `photo_url` at first login — so any
+    // player with a photo in Telegram completed it before opening the app. The
+    // title also asks to CUSTOMIZE an avatar, and avatar cosmetics have been off
+    // since 2026-08-09. Grep `AVATARS OFF`.
+    /*
     {
       id: 't-263',
       title: 'Customize your avatar',
@@ -895,6 +911,7 @@ const PROFILE = buildCategory({
       deeplink: '/profile',
       rarity: TaskRarity.BRONZE,
     },
+    */
     {
       id: 't-264',
       title: 'Connect TON wallet',
