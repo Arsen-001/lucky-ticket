@@ -45,7 +45,7 @@ export function TabBarItem({
       className={twMerge(
         // No padding of its own and a tight gap: the label has to sit close
         // under the disc, and every pixel above it pushes the two apart.
-        'relative flex min-w-0 flex-1 flex-col items-center gap-1 rounded-none px-1 py-0',
+        'tap-target relative flex min-w-0 flex-1 flex-col items-center gap-1 rounded-none px-1 py-0',
         className
       )}
     >
