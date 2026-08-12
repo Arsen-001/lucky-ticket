@@ -4,8 +4,10 @@ import {
   getRefreshTokenCk,
   removeAccessTokenCk,
   removeRefreshTokenCk,
+  removeSessionFlagCk,
   setAccessTokenCk,
   setRefreshTokenCk,
+  setSessionFlagCk,
 } from '@/services/cookie.service';
 import type { LoginRequest } from '@/types/interfaces/auth.interfaces';
 
@@ -23,6 +25,10 @@ interface RegisterBody {
 function persistTokens(tokens: AuthTokens) {
   setAccessTokenCk(tokens.accessToken);
   setRefreshTokenCk(tokens.refreshToken);
+  // Raised on the same event as the tokens, so the app can keep answering "is
+  // there a session?" once the tokens themselves become `httpOnly` and vanish
+  // from JavaScript. @see cookie.service
+  setSessionFlagCk();
 }
 
 export const authApi = api.injectEndpoints({
@@ -73,6 +79,7 @@ export const authApi = api.injectEndpoints({
         } finally {
           removeAccessTokenCk();
           removeRefreshTokenCk();
+          removeSessionFlagCk();
           dispatch(api.util.invalidateTags([rtkTags.me]));
         }
       },

@@ -5,7 +5,7 @@ import { usePathname, useRouter } from 'next/navigation';
 import { twMerge } from 'tailwind-merge';
 import { useTelegramLoginMutation } from '@/api/auth.api';
 import { getTelegramWebApp } from '@/lib/telegram/telegram';
-import { getAccessTokenCk, getRefreshTokenCk } from '@/services/cookie.service';
+import { hasSessionCk } from '@/services/cookie.service';
 import { routes } from '@/constants/routes';
 import { resolveStartParamRoute } from '@/utils/global/deep-link.utils';
 import { TelegramSplash } from '@/components/telegram/TelegramSplash';
@@ -78,7 +78,9 @@ export function TelegramProvider({ children }: { children: ReactNode }) {
         //
         // We still ATTEMPT the sign-in on every mount: it is what refreshes the
         // Telegram avatar and username. It just no longer has to succeed.
-        if (getAccessTokenCk() || getRefreshTokenCk()) {
+        // Asks the session flag, not the tokens: they are on their way to
+        // `httpOnly` and will stop being readable here. @see cookie.service
+        if (hasSessionCk()) {
           setPhase('ready');
           return;
         }
@@ -93,7 +95,7 @@ export function TelegramProvider({ children }: { children: ReactNode }) {
       // Web against the real backend with no session at all → go to the login
       // page instead of rendering an app where every query fails with
       // "Couldn't load data". Mock mode (no API URL) stays freely browsable.
-      const hasSession = !!getAccessTokenCk() || !!getRefreshTokenCk();
+      const hasSession = hasSessionCk();
       const onAuthPage = AUTH_PATHS.some(p => pathname === p || pathname.startsWith(`${p}/`));
       if (process.env.NEXT_PUBLIC_API_URL && !hasSession && !onAuthPage) {
         router.replace(routes.login);

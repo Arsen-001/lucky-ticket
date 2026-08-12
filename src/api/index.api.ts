@@ -7,10 +7,13 @@ import { setServerMaintenance } from '@/lib/rtk/features/maintenance.slice';
 import {
   getAccessTokenCk,
   getRefreshTokenCk,
+  hasSessionCk,
   removeAccessTokenCk,
   removeRefreshTokenCk,
+  removeSessionFlagCk,
   setAccessTokenCk,
   setRefreshTokenCk,
+  setSessionFlagCk,
 } from '@/services/cookie.service';
 
 /**
@@ -89,12 +92,26 @@ const refreshSession = async (
   extra: Parameters<typeof rawBaseQuery>[2]
 ): Promise<boolean> => {
   const refreshToken = getRefreshTokenCk();
-  if (!refreshToken) return false;
+  // Two eras, one code path. Today the refresh token is a cookie JavaScript can
+  // read, so it travels in the body as before. Once the server issues it as
+  // `httpOnly` it is invisible here — and the request must still go out,
+  // because the browser attaches the cookie itself and the server reads it
+  // there. Bailing on "no token in JS" would then log everyone out at the first
+  // 401 they hit.
+  //
+  // The guard is the session FLAG, not the token: without it this is an
+  // anonymous visitor and there is nothing to refresh.
+  if (!refreshToken && !hasSessionCk()) return false;
   // Detach from the triggering query's abort signal: the refresh is shared by
   // every waiter, so one unmounting component must not cancel it (a cancelled
   // rotation may still reach the server and revoke the token we'd retry with).
   const refresh = await rawBaseQuery(
-    { url: 'auth/refresh', method: 'POST', body: { refreshToken } },
+    {
+      url: 'auth/refresh',
+      method: 'POST',
+      // An empty body is the signal to read the cookie server-side.
+      body: refreshToken ? { refreshToken } : {},
+    },
     { ...store, signal: new AbortController().signal },
     extra
   );
@@ -106,6 +123,13 @@ const refreshSession = async (
   if (tokens?.accessToken) {
     setAccessTokenCk(tokens.accessToken);
     if (tokens.refreshToken) setRefreshTokenCk(tokens.refreshToken);
+    setSessionFlagCk();
+    return true;
+  }
+  // A cookie-only rotation answers 200 with no tokens in the body — the new
+  // pair arrived as `Set-Cookie`. Nothing to persist, and the session lives on.
+  if (!refresh.error) {
+    setSessionFlagCk();
     return true;
   }
   // Drop the session only when the backend definitively rejected the token.
@@ -114,6 +138,7 @@ const refreshSession = async (
   if (refresh.error?.status === 401) {
     removeAccessTokenCk();
     removeRefreshTokenCk();
+    removeSessionFlagCk();
     // On the web the session is unrecoverable now — take the user to the login
     // page instead of leaving every screen stuck on "Couldn't load data".
     // Inside Telegram re-auth happens via initData, so never redirect there.

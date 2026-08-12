@@ -3,6 +3,7 @@ import Cookies from 'js-cookie';
 const accessTokenKey = 'accessToken';
 const refreshTokenKey = 'refreshToken';
 const localKey = 'local';
+const sessionFlagKey = 'session';
 
 /**
  * Attributes for the two auth cookies, which until now were written bare.
@@ -35,6 +36,32 @@ export const setRefreshTokenCk = (token: string) =>
   Cookies.set(refreshTokenKey, token, tokenCookieOptions());
 export const getRefreshTokenCk = () => Cookies.get(refreshTokenKey);
 export const removeRefreshTokenCk = () => Cookies.remove(refreshTokenKey);
+
+/**
+ * "This browser has a session" — a flag, not a credential. It carries the
+ * string `1` and nothing else, so reading it tells an attacker what they could
+ * already tell from the app rendering a logged-in screen.
+ *
+ * It exists because the two token cookies are on their way to `httpOnly`, and
+ * the day the server starts issuing them JavaScript stops being able to see a
+ * session at all. Everything that used to ask "is there a token?" has to ask
+ * something else BEFORE that day, or the app decides the player is logged out
+ * the moment the tokens become invisible — and on the web that means a redirect
+ * to the login page for someone who is perfectly signed in.
+ *
+ * Deliberately written by the client, on the same events that persist tokens,
+ * so this half works against today's backend unchanged.
+ */
+export const setSessionFlagCk = () => Cookies.set(sessionFlagKey, '1', tokenCookieOptions());
+export const removeSessionFlagCk = () => Cookies.remove(sessionFlagKey);
+
+/**
+ * The one question the app should ask about being signed in. True while either
+ * token is still visible (today) and while only the flag remains (after the
+ * cookies turn `httpOnly`).
+ */
+export const hasSessionCk = () =>
+  !!Cookies.get(sessionFlagKey) || !!Cookies.get(accessTokenKey) || !!Cookies.get(refreshTokenKey);
 
 export const setLocalCk = (value: string) => Cookies.set(localKey, value);
 export const getLocalCk = () => Cookies.get(localKey);
