@@ -205,6 +205,19 @@ export const GlobalConstants = {
    */
   marketMaxShardPurchaseQuantity: 10,
   telegramBotUrl: 'https://t.me/luckyticket365_bot',
+  /**
+   * The link that opens THIS app, not the bot chat.
+   *
+   * `?startapp=` with an empty value is the documented way into a bot's Main
+   * Mini App, and this bot has one (verified live via `getMe`:
+   * `has_main_web_app`). Lives here rather than at either call site because two
+   * unrelated places need the same string — the QR wall a computer sees, and the
+   * address TON Connect hands to an external wallet to bounce the player back —
+   * and a drift between them is invisible until someone is stranded in Tonkeeper.
+   */
+  // `as const` is load-bearing: TON Connect types the return address as
+  // `${string}://${string}`, and a widened `string` does not satisfy it.
+  telegramMiniAppUrl: 'https://t.me/luckyticket365_bot?startapp=' as const,
   telegramSupportUrl: 'https://t.me/luckyticket365_support',
   telegramChannelUrl: 'https://t.me/luckyticket365',
 

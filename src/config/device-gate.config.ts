@@ -21,7 +21,7 @@ import { GlobalConstants } from '@/constants/global.constants';
  * `/start` reply carries the same button — the failure mode is one extra tap,
  * never a dead end.
  */
-const OPEN_IN_TELEGRAM_URL = `${GlobalConstants.telegramBotUrl}?startapp=`;
+const OPEN_IN_TELEGRAM_URL = GlobalConstants.telegramMiniAppUrl;
 
 /**
  * `?desktop=<key>` — the one way into the app from a plain browser, where no
