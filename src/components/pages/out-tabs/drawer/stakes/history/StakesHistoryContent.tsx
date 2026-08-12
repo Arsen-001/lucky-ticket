@@ -169,7 +169,7 @@ export function StakesHistoryContent() {
           onClick={() => setSortOpen(true)}
           aria-haspopup="dialog"
           aria-label={t('sort by')}
-          className="text-white-secondary inline-flex shrink-0 items-center gap-1.5 rounded-full border border-white/10 bg-background-overlay px-3 py-1.5 text-[11px] font-bold uppercase tracking-wider transition-colors active:scale-95"
+          className="text-white-secondary tap-target relative inline-flex shrink-0 items-center gap-1.5 rounded-full border border-white/10 bg-background-overlay px-3 py-1.5 text-[11px] font-bold uppercase tracking-wider transition-colors active:scale-95"
         >
           <span>{t(sortLabelKey)}</span>
           <ChevronDown size={14} className="text-white/60" />

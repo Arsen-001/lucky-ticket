@@ -167,7 +167,7 @@ function TonWalletConnected({ state, onDisconnect, disconnecting }: TonWalletCon
             <button
               type="button"
               onClick={handleCopy}
-              className="group flex items-center gap-1 text-left"
+              className="tap-target group relative flex items-center gap-1 text-left"
             >
               <span className="font-mono text-[13px] font-semibold text-white">
                 {truncateAddress(state.address)}
@@ -212,7 +212,7 @@ function TonWalletConnected({ state, onDisconnect, disconnecting }: TonWalletCon
           onClick={onDisconnect}
           disabled={disconnecting}
           className={twMerge(
-            'flex items-center gap-1.5 rounded-lg bg-white/5 px-2.5 py-1.5 text-pink-secondary transition-colors',
+            'tap-target relative flex items-center gap-1.5 rounded-lg bg-white/5 px-2.5 py-1.5 text-pink-secondary transition-colors',
             'hover:bg-white/10 hover:text-white disabled:opacity-50'
           )}
         >
