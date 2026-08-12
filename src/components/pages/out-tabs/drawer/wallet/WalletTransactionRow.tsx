@@ -165,7 +165,7 @@ export function WalletTransactionRow({
             href={tonScanUrl(transaction.txHash, network)}
             target="_blank"
             rel="noopener noreferrer"
-            className="text-pink-secondary hover:text-white inline-flex items-center gap-0.5 text-[10px] font-semibold transition-colors"
+            className="text-pink-secondary hover:text-white tap-target relative inline-flex items-center gap-0.5 text-[10px] font-semibold transition-colors"
           >
             {t('tonscan')}
             <ExternalLink size={9} strokeWidth={2.6} />

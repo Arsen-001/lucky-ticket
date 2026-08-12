@@ -491,7 +491,7 @@ export function TournamentCard({
                 disabled={loading}
                 onClick={handleActionClick}
                 className={twMerge(
-                  'flex-1 rounded-xl py-2.5 text-[12px] leading-none font-extrabold tracking-[0.14em] uppercase',
+                  'tap-target relative flex-1 rounded-xl py-2.5 text-[12px] leading-none font-extrabold tracking-[0.14em] uppercase',
                   'transition-transform active:scale-95',
                   participated && 'bg-success',
                   !participated && isStartingSoon && 'animate-pulse'
