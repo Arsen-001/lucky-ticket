@@ -70,7 +70,10 @@ export function HeaderStatPill({
         data-tour={dataTour}
         onClick={onClick}
         aria-label={ariaLabel}
-        className={twMerge(baseClassName, 'transition-all hover:bg-white/10 active:scale-95')}
+        className={twMerge(
+          baseClassName,
+          'tap-target relative transition-all hover:bg-white/10 active:scale-95'
+        )}
         style={style}
       >
         {content}

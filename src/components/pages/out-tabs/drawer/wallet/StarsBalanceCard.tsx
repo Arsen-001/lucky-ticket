@@ -58,7 +58,7 @@ export function StarsBalanceCard({ balance, loading, onBuyMore, disabled }: Star
         type="button"
         onClick={onBuyMore}
         disabled={disabled}
-        className="bg-electric-purple/20 hover:bg-electric-purple/30 text-electric-purple relative inline-flex items-center gap-1 rounded-full px-3 py-1.5 text-[11px] font-bold uppercase tracking-wider transition-colors disabled:opacity-50"
+        className="bg-electric-purple/20 hover:bg-electric-purple/30 text-electric-purple tap-target relative inline-flex items-center gap-1 rounded-full px-3 py-1.5 text-[11px] font-bold uppercase tracking-wider transition-colors disabled:opacity-50"
       >
         <Plus size={12} strokeWidth={3} />
         {t('buy more')}

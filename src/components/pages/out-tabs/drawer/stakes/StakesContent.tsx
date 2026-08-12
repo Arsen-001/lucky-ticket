@@ -255,7 +255,7 @@ export function StakesContent() {
               {hasMoreHistory && (
                 <Link
                   href={routes.stakes.history}
-                  className="text-pink-secondary hover:text-white inline-flex items-center justify-center gap-1 self-center rounded-full border border-white/10 px-4 py-2 text-[11px] font-bold uppercase tracking-wider transition-colors"
+                  className="text-pink-secondary hover:text-white tap-target relative inline-flex items-center justify-center gap-1 self-center rounded-full border border-white/10 px-4 py-2 text-[11px] font-bold uppercase tracking-wider transition-colors"
                 >
                   {t('see all')}
                   <ChevronRight size={12} strokeWidth={2.4} />
