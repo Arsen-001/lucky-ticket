@@ -50,7 +50,7 @@ export function TournamentSection({ items, allItems, onSelect, onPin }: Tourname
               type="button"
               onClick={() => setActiveTab(tab.id)}
               className={twMerge(
-                'flex-1 rounded-lg py-1.5 text-xs font-extrabold uppercase tracking-wider transition-all',
+                'tap-target relative flex-1 rounded-lg py-1.5 text-xs font-extrabold uppercase tracking-wider transition-all',
                 activeTab === tab.id
                   ? 'bg-electric-pink/20 text-electric-pink border border-electric-pink/40'
                   : 'text-white/45 hover:text-white/70'

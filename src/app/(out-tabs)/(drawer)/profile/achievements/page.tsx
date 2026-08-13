@@ -91,7 +91,12 @@ export default function Page() {
         )}
       </header>
 
-      <div className="flex flex-col gap-2.5 px-5">
+      {/* 14px, not 10: the pills are 30px tall, so a 10px gap puts three rows
+          on a 40px pitch and each row's 44px hit zone reaches 4px into the one
+          above and below — measured, the middle rows lost 5 sample points of 25
+          to their neighbours. At 14px the pitch is exactly 44 and the zones
+          meet without overlapping. */}
+      <div className="flex flex-col gap-3.5 px-5">
         <FilterPills
           options={[
             { value: 'all', label: t('all') },

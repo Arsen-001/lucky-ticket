@@ -641,7 +641,11 @@ export function HomeEnginesSlider({ className }: ClassNameProps) {
                   aria-label={`Slide ${index + 1}`}
                   onClick={() => scrollToIndex(index)}
                   className={twMerge(
-                    'eng-cube-perspective relative flex-shrink-0 cursor-pointer p-0',
+                    // 16px of cube, 30px of gap — a 44px zone lands 2px short of
+                    // its neighbour's, so the dots take one after all. Measured
+                    // 13.08.2026 on a prod build: 5 points of 25 before, the full
+                    // 44×44 after, and no point ever stolen by another dot.
+                    'tap-target eng-cube-perspective relative flex-shrink-0 cursor-pointer p-0',
                     isActive ? 'h-[26px] w-[26px]' : 'h-[16px] w-[16px]'
                   )}
                 >

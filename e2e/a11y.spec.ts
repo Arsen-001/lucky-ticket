@@ -133,12 +133,23 @@ for (const route of STATIC_ROUTES) {
          * disease — one of them dropped EVERY control on every screen (the shell
          * wraps the app in a full-screen fixed layer) and still reported 80
          * green while measuring nothing.
+         *
+         * `inline: 'center'` for the same reason on the other axis, and it is
+         * not decoration: the default `nearest` parks a control that lives in a
+         * horizontally scrolling rail flush against the screen edge, where the
+         * sample at cx+21 falls outside the viewport and `elementFromPoint`
+         * answers null — a lost point that says nothing about the hit zone.
+         * Measured 13.08.2026: with `nearest`, engine dots 9 through 21 each
+         * reported one point lost while owning their full 44×44.
          */
-        el.scrollIntoView({ block: 'center', behavior: 'instant' });
+        el.scrollIntoView({ block: 'center', inline: 'center', behavior: 'instant' });
         await new Promise(resolve => setTimeout(resolve, 40));
 
         const rect = el.getBoundingClientRect();
         if (!(rect.width > 0 && rect.top >= 0 && rect.bottom <= window.innerHeight)) continue;
+        // Same guard horizontally: a rail wider than the screen can leave its
+        // first and last control half off the edge even after centring.
+        if (!(rect.left >= 0 && rect.right <= window.innerWidth)) continue;
         // A control on a 3D face turned away from the viewer still reports a
         // box — a sliver. The home cube keeps its chip and booster slots on
         // its bottom face, so each "Unequip" paints its 20×20 as 18×2 and

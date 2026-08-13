@@ -114,7 +114,12 @@ export function AchievementCard({
             e.stopPropagation();
             onPin();
           }}
-          className="absolute right-0 top-0 z-2 flex h-7.5 w-7.5 cursor-pointer items-center justify-center rounded-full border border-white/15 bg-black/55 backdrop-blur-sm transition-colors hover:border-electric-pink/50 hover:bg-electric-pink/15"
+          // 30px in the corner of a card that is itself a button, so it owned
+          // 8 points of 25 — the card took the rest. A 44px zone reaches 7px
+          // past the card edge, which is inside the grid's 12px gutter: it
+          // never touches the neighbouring card, only the corner of its own,
+          // and that corner is where the bookmark already sits.
+          className="tap-target absolute right-0 top-0 z-2 flex h-7.5 w-7.5 cursor-pointer items-center justify-center rounded-full border border-white/15 bg-black/55 backdrop-blur-sm transition-colors hover:border-electric-pink/50 hover:bg-electric-pink/15"
           style={
             achievement.isPinned
               ? { borderColor: 'rgba(255,95,200,0.5)', background: 'rgba(255,95,200,0.18)' }
