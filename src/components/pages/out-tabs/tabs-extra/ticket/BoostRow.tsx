@@ -43,7 +43,7 @@ export function BoostRow({
       )}
     >
       <div
-        className="w-7.5 h-7.5 rounded-lg flex-center shrink-0"
+        className="w-7 h-7 rounded-lg flex-center shrink-0"
         style={{
           background: `${accent}1a`,
           border: `1px solid ${accent}55`,
@@ -60,7 +60,7 @@ export function BoostRow({
           <span
             className={twMerge(
               'font-bold text-white tracking-wide',
-              compact ? 'text-[14px]' : 'text-[11px]'
+              compact ? 'text-[13px]' : 'text-[11px]'
             )}
           >
             {label}
@@ -68,7 +68,7 @@ export function BoostRow({
           <span
             className={twMerge(
               'font-extrabold tabular-nums tracking-wider px-1 py-px rounded',
-              compact ? 'text-[13px]' : 'text-[9px]'
+              compact ? 'text-[12px]' : 'text-[9px]'
             )}
             style={{ color: accent, background: `${accent}1f` }}
           >
@@ -77,7 +77,7 @@ export function BoostRow({
           <span
             className={twMerge(
               'ml-auto font-semibold text-pink-secondary truncate',
-              compact ? 'text-[14px]' : 'text-[10px]'
+              compact ? 'text-[13px]' : 'text-[10px]'
             )}
           >
             {valueText}
@@ -90,7 +90,7 @@ export function BoostRow({
         disabled={maxed}
         className={twMerge(
           compact
-            ? 'min-w-16 shrink-0 h-9 px-2.5 rounded-lg text-[14px] font-extrabold tracking-wider flex-center gap-1 transition-all duration-100'
+            ? 'min-w-16 shrink-0 h-8 px-2.5 rounded-lg text-[13px] font-extrabold tracking-wider flex-center gap-1 transition-all duration-100'
             : 'min-w-16 shrink-0 h-7.5 px-2.5 rounded-lg text-[10px] font-extrabold tracking-wider flex-center gap-1 transition-all duration-100',
           maxed
             ? 'bg-white/3 border border-white/5 text-pink-secondary cursor-default'
@@ -114,7 +114,7 @@ export function BoostRow({
                 the home cube's 3D context (`preserve-3d` + `backface-visibility`),
                 which is where iOS drops the icon. The star reads fine on both
                 accents at this size — the button fill is only 12% tint. */}
-            <TelegramStarIcon size={compact ? 15 : 12} />
+            <TelegramStarIcon size={compact ? 14 : 12} />
             <span className="tabular-nums">{costStars}</span>
           </>
         )}

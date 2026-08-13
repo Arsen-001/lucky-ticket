@@ -69,7 +69,7 @@ function EngineCardStatsHeaderImpl({
           <EngineLevelBadge
             level={engineLevel}
             tier={tier}
-            className={compact ? 'text-[14px] px-3' : undefined}
+            className={compact ? 'text-[13px] px-2.5' : undefined}
           />
         </div>
         <div
@@ -88,11 +88,11 @@ function EngineCardStatsHeaderImpl({
               compact ? 'justify-center px-2.5 py-1' : 'justify-center px-2'
             )}
           >
-            <Clock size={compact ? 17 : 14} stroke={SPEED_ACCENT} strokeWidth={2.4} />
+            <Clock size={compact ? 16 : 14} stroke={SPEED_ACCENT} strokeWidth={2.4} />
             <span
               className={twMerge(
                 'font-extrabold tabular-nums',
-                compact ? 'text-[17px]' : 'text-[13px]'
+                compact ? 'text-[16px]' : 'text-[13px]'
               )}
               style={{ color: SPEED_ACCENT }}
             >
@@ -107,11 +107,11 @@ function EngineCardStatsHeaderImpl({
               compact ? 'justify-center px-2.5 py-1' : 'justify-center px-2'
             )}
           >
-            <Layers size={compact ? 17 : 14} stroke={CAPACITY_ACCENT} strokeWidth={2.4} />
+            <Layers size={compact ? 16 : 14} stroke={CAPACITY_ACCENT} strokeWidth={2.4} />
             <span
               className={twMerge(
                 'font-extrabold tabular-nums',
-                compact ? 'text-[17px]' : 'text-[13px]'
+                compact ? 'text-[16px]' : 'text-[13px]'
               )}
               style={{ color: CAPACITY_ACCENT }}
             >

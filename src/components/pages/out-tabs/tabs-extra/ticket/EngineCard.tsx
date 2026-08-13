@@ -30,15 +30,15 @@ export interface EngineCardProps {
   /**
    * Home-cube face layout. The card is laid out inside the cube's 300px design
    * square and the whole square is then SCALED to the cube's footprint
-   * (`--engine-cube-scale`, 0.907 on a 390px phone), so a size written here is
+   * (`--engine-cube-scale`, 0.859 on a 390px phone), so a size written here is
    * not the size the player sees — multiply by that scale first. Type in this
    * branch is therefore deliberately LARGER than the full-size card's, which is
-   * never scaled: 14px here lands at 12.7px on the device.
+   * never scaled: 14px here lands at 12.0px on the device.
    *
    * Sizing it "small because it's compact" is what made this face unreadable
-   * twice — 8px declared arrived as 7.4px. The square is full (7px of slack out
-   * of 300), so the room for the current sizes came from the scale, not from
-   * here. Floor guarded by `tests/engine-cube-face-type.test.ts`.
+   * twice — 8px declared arrived as 6.5px. The square is nearly full (16px of
+   * slack out of 300), so most of the room for the current sizes came from the
+   * scale, not from here. Floor guarded by `tests/engine-cube-face-type.test.ts`.
    */
   compact?: boolean;
   /** What to show in the reactor circle — defaults to tickets */
@@ -121,7 +121,7 @@ export function EngineCard({
     <div
       className={twMerge(
         compact
-          ? 'flex flex-col justify-between h-full overflow-hidden rounded-2xl p-[9px] animate-slide-in-bottom'
+          ? 'flex flex-col justify-between h-full overflow-hidden rounded-2xl p-[10px] animate-slide-in-bottom'
           : 'card-outlined bg-purple-gradient rounded-2xl p-[17px] animate-slide-in-bottom',
         className
       )}
@@ -137,7 +137,7 @@ export function EngineCard({
         tourAnchor={tourAnchor}
       />
 
-      <div className={twMerge('flex flex-col', compact ? 'gap-1' : 'mt-3 gap-2')}>
+      <div className={twMerge('flex flex-col', compact ? 'gap-[5px]' : 'mt-3 gap-2')}>
         <EngineCardCycleRow
           engineId={engine.id}
           pendingCount={engine.pendingCount}

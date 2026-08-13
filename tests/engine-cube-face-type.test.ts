@@ -9,7 +9,7 @@ import { resolve } from 'node:path';
  * player sees: on-screen size = declared size x `--engine-cube-scale`.
  *
  * That multiplier is why this guard exists. The face was twice sized as if
- * "compact" meant "small" — 8-12px declared, which arrived as 7.4-9.8px on a
+ * "compact" meant "small" — 8-12px declared, which arrived as 6.5-9.8px on a
  * 390px phone — and twice had to be enlarged by hand. The floor below is the
  * declared size that still reads at the tightest rung, and it is deliberately
  * LARGER than the full-size card's type, which is not scaled at all.
@@ -21,7 +21,7 @@ const FACE_FILES = [
 ];
 
 /** Declared px in the compact branch. Below this the face stops being readable. */
-const MIN_COMPACT_PX = 13;
+const MIN_COMPACT_PX = 12;
 
 /**
  * `compact ? 'text-[Npx]…' : …` — the ternary is how every one of these files
@@ -56,6 +56,6 @@ describe('home cube front face type', () => {
     // reference shrinks every one of these sizes without touching this file.
     const css = readFileSync(resolve(process.cwd(), 'src/styles/global/base-layer.css'), 'utf8');
     const reference = Number(css.match(/--engine-cube-reference:\s*(\d+)px/)?.[1]);
-    expect(reference).toBeLessThanOrEqual(430);
+    expect(reference).toBeLessThanOrEqual(454);
   });
 });

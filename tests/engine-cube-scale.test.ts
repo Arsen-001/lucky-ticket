@@ -20,7 +20,7 @@ const DESIGN_PX = 300;
  * scales down. Raising this number shrinks the cube — and with it every piece of
  * type on the front face, which is laid out once and only scaled.
  */
-const REFERENCE_PX = 430;
+const REFERENCE_PX = 454;
 /** `--app-max-w` — the app stops widening here, so the ladder does too. */
 const COLUMN_PX = 430;
 

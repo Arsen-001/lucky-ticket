@@ -59,7 +59,7 @@ function EngineCardBoostControlsImpl({
         compact={compact}
         icon={
           <Zap
-            size={compact ? 17 : 14}
+            size={compact ? 16 : 14}
             fill={SPEED_ACCENT}
             fillOpacity={0.3}
             stroke={SPEED_ACCENT}
@@ -78,7 +78,7 @@ function EngineCardBoostControlsImpl({
         compact={compact}
         icon={
           <Package
-            size={compact ? 17 : 14}
+            size={compact ? 16 : 14}
             fill={CAPACITY_ACCENT}
             fillOpacity={0.18}
             stroke={CAPACITY_ACCENT}

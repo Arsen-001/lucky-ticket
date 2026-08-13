@@ -65,22 +65,26 @@
    320px device a 193px box held 269px of content, so the whole Capacity row and
    half the Speed row were cut off by the face's `overflow-hidden`.
 
-   scale(1) is defined at 430px — `--app-max-w`, the widest the app column ever
-   gets. Every narrower screen scales DOWN, so the cube occupies the same share
-   of the width everywhere: 69.8% as a footprint, 79% as the face actually paints
-   (the perspective gain). Nothing is ever enlarged past the design square.
+   The reference is 454px, so the cube occupies the same share of the width on
+   every phone: 66.1% as a footprint, 74.9% as the face actually paints (the
+   perspective gain). It is wider than the app column itself, so the ladder tops
+   out at 0.947 and the design square is never drawn at full size, let alone
+   enlarged — enlarging is what made it read as oversized.
 
    ⚠️ The reference is the ONE number that sets how big the cube reads, and with
    it every piece of type on the front face — the face is laid out once at 300px
    and only scaled, so on-screen size = declared size × this scale. It was 480px
-   ("the widest phone there is"), which put the front face at 8.9–12.2px on a
-   390px phone: the card was legible on a laptop and small on the device. Raising
-   type inside the square could not fix that — the square was already full, with
-   19px of slack out of 300. Anything about how big this cube LOOKS is tuned
-   here first, and only then in the card.
+   ("the widest phone there is", a width no device has), which put the front face
+   at 6.5–9.8px on a 390px phone: legible on a laptop, small on the device.
+   Raising type inside the square could not fix that — the square was already
+   full, with 19px of slack out of 300. Anything about how big this cube LOOKS is
+   tuned HERE first, and only then in the card.
+
+   454 is itself a chosen midpoint: 430 (the app column) was tried on prod and
+   read too big, 480 too small, and the user picked the half-step between them.
 
    The rungs ARE the mechanism, not a fallback: each one is its own min-width over
-   480, and the footprint is derived from the scale
+   the reference, and the footprint is derived from the scale
    (`box = design * scale`) so the two cannot disagree on any engine.
 
    ⚠️ Do NOT go back to `tan(atan2(box, design))`, the usual CSS trick for dividing
@@ -91,8 +95,8 @@
    wrong. Chromium computes it correctly, so no desktop check can see it. */
 :root {
   --engine-cube-design: 300px;
-  --engine-cube-reference: 430px;
-  --engine-cube-scale: 0.5581;
+  --engine-cube-reference: 454px;
+  --engine-cube-scale: 0.5286;
   --engine-cube-box: calc(var(--engine-cube-design) * var(--engine-cube-scale));
   /* Width the front face actually PAINTS. It sits `--cube-half` (design/2 + 15px
      = 165px) nearer the viewer than the cube's centre, so the 1400px perspective
@@ -108,122 +112,122 @@
 }
 @media (min-width: 280px) {
   :root {
-    --engine-cube-scale: 0.6512;
+    --engine-cube-scale: 0.6167;
   }
 }
 @media (min-width: 290px) {
   :root {
-    --engine-cube-scale: 0.6744;
+    --engine-cube-scale: 0.6388;
   }
 }
 @media (min-width: 300px) {
   :root {
-    --engine-cube-scale: 0.6977;
+    --engine-cube-scale: 0.6608;
   }
 }
 @media (min-width: 310px) {
   :root {
-    --engine-cube-scale: 0.7209;
+    --engine-cube-scale: 0.6828;
   }
 }
 @media (min-width: 320px) {
   :root {
-    --engine-cube-scale: 0.7442;
+    --engine-cube-scale: 0.7048;
   }
 }
 @media (min-width: 330px) {
   :root {
-    --engine-cube-scale: 0.7674;
+    --engine-cube-scale: 0.7269;
   }
 }
 @media (min-width: 340px) {
   :root {
-    --engine-cube-scale: 0.7907;
+    --engine-cube-scale: 0.7489;
   }
 }
 @media (min-width: 350px) {
   :root {
-    --engine-cube-scale: 0.814;
+    --engine-cube-scale: 0.7709;
   }
 }
 @media (min-width: 353px) {
   :root {
-    --engine-cube-scale: 0.8209;
+    --engine-cube-scale: 0.7775;
   }
 }
 @media (min-width: 360px) {
   :root {
-    --engine-cube-scale: 0.8372;
+    --engine-cube-scale: 0.793;
   }
 }
 @media (min-width: 370px) {
   :root {
-    --engine-cube-scale: 0.8605;
+    --engine-cube-scale: 0.815;
   }
 }
 @media (min-width: 375px) {
   :root {
-    --engine-cube-scale: 0.8721;
+    --engine-cube-scale: 0.826;
   }
 }
 @media (min-width: 380px) {
   :root {
-    --engine-cube-scale: 0.8837;
+    --engine-cube-scale: 0.837;
   }
 }
 @media (min-width: 384px) {
   :root {
-    --engine-cube-scale: 0.893;
+    --engine-cube-scale: 0.8458;
   }
 }
 @media (min-width: 390px) {
   :root {
-    --engine-cube-scale: 0.907;
+    --engine-cube-scale: 0.859;
   }
 }
 @media (min-width: 393px) {
   :root {
-    --engine-cube-scale: 0.914;
+    --engine-cube-scale: 0.8656;
   }
 }
 @media (min-width: 400px) {
   :root {
-    --engine-cube-scale: 0.9302;
+    --engine-cube-scale: 0.8811;
   }
 }
 @media (min-width: 410px) {
   :root {
-    --engine-cube-scale: 0.9535;
+    --engine-cube-scale: 0.9031;
   }
 }
 @media (min-width: 411px) {
   :root {
-    --engine-cube-scale: 0.9558;
+    --engine-cube-scale: 0.9053;
   }
 }
 @media (min-width: 412px) {
   :root {
-    --engine-cube-scale: 0.9581;
+    --engine-cube-scale: 0.9075;
   }
 }
 @media (min-width: 414px) {
   :root {
-    --engine-cube-scale: 0.9628;
+    --engine-cube-scale: 0.9119;
   }
 }
 @media (min-width: 420px) {
   :root {
-    --engine-cube-scale: 0.9767;
+    --engine-cube-scale: 0.9251;
   }
 }
 @media (min-width: 428px) {
   :root {
-    --engine-cube-scale: 0.9953;
+    --engine-cube-scale: 0.9427;
   }
 }
 @media (min-width: 430px) {
   :root {
-    --engine-cube-scale: 1;
+    --engine-cube-scale: 0.9471;
   }
 }
 
