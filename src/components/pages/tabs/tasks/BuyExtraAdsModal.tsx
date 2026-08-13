@@ -14,6 +14,13 @@ import type { AdsExtraOffer } from '@/types/interfaces/tasks.interfaces';
 
 type Currency = 'lc' | 'ls';
 
+/**
+ * Stepper ceiling when the server reports no daily ceiling at all. It mirrors
+ * the server's own per-request guard — the point is that one purchase stays a
+ * bounded number, not that the day is capped.
+ */
+const MAX_PER_PURCHASE = 100;
+
 export interface BuyExtraAdsModalProps {
   open: boolean;
   onClose: () => void;
@@ -45,7 +52,10 @@ export function BuyExtraAdsModal({
     if (open) setCount(1);
   }, [open]);
 
-  const max = Math.max(1, extra.remaining);
+  // No ceiling on the server means the stepper needs one anyway — a single
+  // purchase is capped server-side, and an unbounded stepper offers a number
+  // the request would refuse.
+  const max = extra.remaining === null ? MAX_PER_PURCHASE : Math.max(1, extra.remaining);
   const unit = currency === 'ls' ? extra.priceLs : extra.priceLc;
   const total = unit * count;
   const balance = currency === 'ls' ? (me?.telegramStars ?? 0) : (me?.coins ?? 0);

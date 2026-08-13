@@ -320,6 +320,9 @@ const buildAds = (): AdsBlock => {
       purchasedToday: ADS_EXTRA.purchasedToday,
       watchedToday: ADS_EXTRA.watchedToday,
       remaining: Math.max(0, ADS_EXTRA.maxPerDay - ADS_EXTRA.purchasedToday),
+      // Flip to `unlimited: true` with `remaining: null` to see the uncapped
+      // offer the panel can now switch on — the mock has no admin to ask.
+      unlimited: false,
       grantsAp: true,
     },
   };

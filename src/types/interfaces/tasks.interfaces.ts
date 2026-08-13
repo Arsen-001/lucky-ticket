@@ -97,13 +97,19 @@ export interface AdsExtraOffer {
   enabled: boolean;
   priceLc: number;
   priceLs: number;
-  /** Ceiling on slots bought per day, on top of the free cap. */
-  maxPerDay: number;
+  /** Ceiling on slots bought per day, on top of the free cap; null = none. */
+  maxPerDay: number | null;
   purchasedToday: number;
   /** How many of the bought slots have already been watched. */
   watchedToday: number;
-  /** Still buyable today — the client must never offer more than this. */
-  remaining: number;
+  /**
+   * Still buyable today — the client must never offer more than this. `null`
+   * means the ceiling is off entirely, and the only limit is the balance; it
+   * is deliberately not a large number, so "∞" can never render as "999 left".
+   */
+  remaining: number | null;
+  /** The ceiling is lifted — buy as much as the balance allows. */
+  unlimited?: boolean;
   /** A bought view pays AP too. Off = everything except AP. */
   grantsAp: boolean;
 }

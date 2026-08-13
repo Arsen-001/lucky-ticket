@@ -21,7 +21,9 @@ export interface AdBuyMoreCardProps {
  */
 export function AdBuyMoreCard({ extra, onOpen, className }: AdBuyMoreCardProps) {
   const t = useAppTranslations();
-  const soldOut = extra.remaining <= 0;
+  // `remaining: null` is "no ceiling", not "nothing left" — the card must stay
+  // buyable there, so the null case is spelled out rather than coerced.
+  const soldOut = extra.remaining !== null && extra.remaining <= 0;
 
   return (
     <button
