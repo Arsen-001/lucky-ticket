@@ -66,7 +66,11 @@ function EngineCardStatsHeaderImpl({
             compact ? 'flex flex-col items-center gap-1' : 'flex items-center flex-wrap gap-1.5'
           )}
         >
-          <EngineLevelBadge level={engineLevel} tier={tier} />
+          <EngineLevelBadge
+            level={engineLevel}
+            tier={tier}
+            className={compact ? 'text-[14px] px-3' : undefined}
+          />
         </div>
         <div
           className={twMerge(
@@ -81,14 +85,14 @@ function EngineCardStatsHeaderImpl({
             title={t('cycle full', { time: formatCycleTime(cycle) })}
             className={twMerge(
               'flex cursor-help items-center gap-1.5',
-              compact ? 'justify-center px-2 py-0.5' : 'justify-center px-2'
+              compact ? 'justify-center px-2.5 py-1' : 'justify-center px-2'
             )}
           >
-            <Clock size={compact ? 12 : 14} stroke={SPEED_ACCENT} strokeWidth={2.4} />
+            <Clock size={compact ? 17 : 14} stroke={SPEED_ACCENT} strokeWidth={2.4} />
             <span
               className={twMerge(
                 'font-extrabold tabular-nums',
-                compact ? 'text-[12px]' : 'text-[13px]'
+                compact ? 'text-[17px]' : 'text-[13px]'
               )}
               style={{ color: SPEED_ACCENT }}
             >
@@ -100,14 +104,14 @@ function EngineCardStatsHeaderImpl({
             title={t('per cycle full', { capacity })}
             className={twMerge(
               'flex cursor-help items-center gap-1.5',
-              compact ? 'justify-center px-2 py-0.5' : 'justify-center px-2'
+              compact ? 'justify-center px-2.5 py-1' : 'justify-center px-2'
             )}
           >
-            <Layers size={compact ? 12 : 14} stroke={CAPACITY_ACCENT} strokeWidth={2.4} />
+            <Layers size={compact ? 17 : 14} stroke={CAPACITY_ACCENT} strokeWidth={2.4} />
             <span
               className={twMerge(
                 'font-extrabold tabular-nums',
-                compact ? 'text-[12px]' : 'text-[13px]'
+                compact ? 'text-[17px]' : 'text-[13px]'
               )}
               style={{ color: CAPACITY_ACCENT }}
             >

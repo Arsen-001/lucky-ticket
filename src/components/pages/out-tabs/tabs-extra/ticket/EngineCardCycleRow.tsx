@@ -121,7 +121,7 @@ export function EngineCardCycleRow({
           <span
             className={twMerge(
               'font-extrabold tabular-nums rounded-full',
-              compact ? 'text-[10px] px-1.5 py-px' : 'text-[11px] px-2 py-0.5'
+              compact ? 'text-[14px] px-2 py-0.5' : 'text-[11px] px-2 py-0.5'
             )}
             style={{
               color: glow,
@@ -139,22 +139,33 @@ export function EngineCardCycleRow({
           <span
             className={twMerge(
               'font-extrabold text-white leading-none truncate',
-              compact ? 'text-[11px]' : 'text-[12px]'
+              compact ? 'text-[15px]' : 'text-[12px]'
             )}
           >
             {t(`${tier} ticket` as Parameters<typeof t>[0])}
-            <span className="ml-1 tabular-nums text-white/65 font-bold">
-              {pendingCount}/{capacity}
-            </span>
+            {/* On the cube face the fill count moves down to the clock line:
+                at readable type the tier name alone fills this line in Russian
+                ("Бронзовый билет"), and keeping the count here truncated the
+                pair to "Бронзовы…" — losing the number, the more useful half. */}
+            {!compact && (
+              <span className="ml-1 tabular-nums text-white/65 font-bold">
+                {pendingCount}/{capacity}
+              </span>
+            )}
           </span>
           <span
             className={twMerge(
               'text-white inline-flex items-center gap-1 leading-none tabular-nums font-bold',
-              compact ? 'text-[10px]' : 'text-[11px]'
+              compact ? 'text-[14px]' : 'text-[11px]'
             )}
           >
-            <Clock size={compact ? 9 : 10} strokeWidth={2.4} />
+            <Clock size={compact ? 14 : 10} strokeWidth={2.4} />
             {formatCycleTime(remaining)}
+            {compact && (
+              <span className="text-white/65">
+                · {pendingCount}/{capacity}
+              </span>
+            )}
           </span>
         </div>
       </div>
@@ -168,7 +179,7 @@ export function EngineCardCycleRow({
         className={twMerge(
           'engine-claim-button engine-claim-flow relative z-10 cursor-pointer overflow-hidden text-white font-extrabold uppercase tracking-wider flex-center shrink-0 active:scale-99 transition-transform duration-100 disabled:opacity-70',
           compact
-            ? 'min-w-14 h-6.5 px-2 rounded-md text-[9px]'
+            ? 'min-w-16 h-9 px-2.5 rounded-lg text-[14px]'
             : 'min-w-16 h-7.5 px-2.5 rounded-lg text-[10px]',
           !pending && 'hidden'
         )}
@@ -189,14 +200,19 @@ export function EngineCardCycleRow({
         className={twMerge(
           'relative z-20 border border-gold/40 bg-gold/10 text-gold font-extrabold tracking-wider flex-center shrink-0 cursor-pointer hover:bg-gold/15 active:scale-99 transition-all duration-100 gap-1',
           compact
-            ? 'min-w-14 h-6.5 px-2 rounded-md text-[9px]'
+            ? 'min-w-16 h-9 px-2 rounded-lg text-[13px]'
             : 'min-w-16 h-7.5 px-2.5 rounded-lg text-[10px]',
           pending && 'hidden'
         )}
       >
-        <TelegramStarIcon size={compact ? 10 : 11} />
-        <span>
-          {t('claim now')} · {instantClaimCost}
+        <TelegramStarIcon size={compact ? 14 : 11} />
+        {/* The cube face keeps the verb but not the adverb: at readable type
+            "Забрать сейчас · 1" is 133px of the row's 260 and squeezes the
+            ticket name off the strip, while "Забрать · 1" leaves every locale
+            whole. The star and the price say the "сейчас" part, and the full
+            phrase is still the `title` and the confirm modal's heading. */}
+        <span className="tabular-nums">
+          {compact ? t('claim') : t('claim now')} · {instantClaimCost}
         </span>
       </button>
     </div>

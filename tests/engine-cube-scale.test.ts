@@ -15,8 +15,12 @@ const ladder = [
 /** The face is painted 1.134x its footprint — see `--engine-cube-face-w`. */
 const PERSPECTIVE_GAIN = 1.134;
 const DESIGN_PX = 300;
-/** scale(1) is defined at the widest phone there is; every screen scales down. */
-const REFERENCE_PX = 480;
+/**
+ * scale(1) is defined at the app column's own max width, so every real screen
+ * scales down. Raising this number shrinks the cube — and with it every piece of
+ * type on the front face, which is laid out once and only scaled.
+ */
+const REFERENCE_PX = 430;
 /** `--app-max-w` — the app stops widening here, so the ladder does too. */
 const COLUMN_PX = 430;
 
