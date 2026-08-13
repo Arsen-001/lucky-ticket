@@ -530,7 +530,15 @@ external service's state.
 
 ## Business Logic Documentation
 
-Full product and business logic documentation is located in [`documentation.md`](DOCS/DOCS.md). It covers all platform systems: tickets, tournaments, tasks, stakes, leaderboard, market, wallet, statuses, Telegram Stars, and referral mechanics.
+Full product and business logic documentation is located in `DOCS/DOCS.md`. It covers all platform systems: tickets, tournaments, tasks, stakes, leaderboard, market, wallet, statuses, Telegram Stars, and referral mechanics.
+
+> **The `DOCS/` folder is no longer part of this repository.** This repo is public, and those files carried the economy formulas, the ad-unit number, day-by-day revenue, CPM and the traffic buy. They live in the private repo **`Arsen-001/lucky-ticket-docs`** since 13.08.2026 and `DOCS/` is gitignored here, so every path above still resolves once you clone it into place:
+>
+> ```bash
+> git clone git@github.com:Arsen-001/lucky-ticket-docs.git DOCS
+> ```
+>
+> Without that checkout `tests/docs-constants.test.ts` skips instead of failing, and `/docs-drift` has nothing to compare against — the drift guard is only as live as your clone. Doc changes are committed and pushed in that repo, not this one. Past versions stay readable in this repo's history (182 commits touched them); the move stops the flow forward, it does not erase the past.
 
 **Any change that affects business logic — new features, modified rules, updated flows, or removed mechanics — must be reflected in `documentation.md`.** Keep it in sync with the implementation; treat it as the source of truth for product behavior.
 

@@ -86,3 +86,8 @@ tmp/
 
 # ── GSD baseline (auto-generated) ──
 .mcp.json
+
+# Product and economy docs live in the private repo Arsen-001/lucky-ticket-docs.
+# This repo is public; those files carried revenue, CPM and ad-unit numbers.
+# Clone it into DOCS/ to keep every local path and skill working unchanged.
+DOCS/

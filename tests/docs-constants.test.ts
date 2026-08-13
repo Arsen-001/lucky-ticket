@@ -1,13 +1,26 @@
 import { describe, it, expect } from 'vitest';
-import { readFileSync } from 'node:fs';
+import { existsSync, readFileSync } from 'node:fs';
 import { resolve } from 'node:path';
 import { appConfig } from '@/config/app.config';
 import { GlobalConstants } from '@/constants/global.constants';
 import { getJackpotWholePotSplit } from '@/utils/global/jackpot.utils';
 
-const docs = readFileSync(resolve(process.cwd(), 'DOCS/DOCS.md'), 'utf8');
+/**
+ * The docs moved to the private repo `Arsen-001/lucky-ticket-docs` on
+ * 13.08.2026 — this repo is public, and DOCS carried the economy formulas, the
+ * ad-unit number, day-by-day revenue and CPM. Clone that repo into `DOCS/`
+ * (it is gitignored here) and this suite runs exactly as before; without it,
+ * it skips rather than fails, the same bargain `enum-parity.test.ts` strikes
+ * with the backend checkout.
+ *
+ * The drift it guards is real, so a silent skip is a cost: a fresh clone and
+ * CI check nothing here. That is the price of the docs not being public.
+ */
+const docsPath = resolve(process.cwd(), 'DOCS/DOCS.md');
+const hasDocs = existsSync(docsPath);
+const docs = hasDocs ? readFileSync(docsPath, 'utf8') : '';
 
-describe('DOCS ↔ constants (no drift)', () => {
+describe.skipIf(!hasDocs)('DOCS ↔ constants (no drift)', () => {
   it('documents the jackpot accrual percent from config', () => {
     expect(docs).toContain(`${appConfig.jackpot.accrualPercent}% of every tournament's prize pool`);
   });
