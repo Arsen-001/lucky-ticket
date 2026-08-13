@@ -338,13 +338,13 @@ const ADS_WATCHED_TOTAL = 60;
 type AdsMilestone = { target: number; rewards: TaskReward[] };
 
 const ADS_WATCH_MILESTONES: AdsMilestone[] = [
-  { target: 10, rewards: [lc(2), ap(5)] },
-  { target: 25, rewards: [lc(5), ap(10)] },
-  { target: 50, rewards: [lc(10), tickets(1), ap(15)] },
-  { target: 100, rewards: [lc(20), tickets(1), ap(20)] },
-  { target: 200, rewards: [lc(40), tickets(2), ap(30)] },
-  { target: 400, rewards: [lc(80), tickets(3), ap(45)] },
-  { target: 800, rewards: [lc(150), tickets(5), stars(15), ap(60)] },
+  { target: 10, rewards: [lc(2), tickets(1), ap(1)] },
+  { target: 25, rewards: [lc(5), tickets(2), stars(1), ap(2)] },
+  { target: 50, rewards: [lc(10), tickets(3), stars(1), ap(3)] },
+  { target: 100, rewards: [lc(20), tickets(4), stars(2), ap(5)] },
+  { target: 200, rewards: [lc(40), tickets(5), stars(2), ap(8)] },
+  { target: 400, rewards: [lc(80), tickets(6), stars(3), ap(13)] },
+  { target: 800, rewards: [lc(150), tickets(10), stars(3), ap(21)] },
 ];
 
 const ADS = buildCategory({
@@ -693,30 +693,30 @@ const buildAllSetBonus = (period: 'daily' | 'weekly', categories: CategoryTasks[
 type PlaceKey = '1st' | '2nd' | '3rd';
 
 const PLACE_MILESTONES: { target: number; rewards: TaskReward[]; rarity: TaskRarity }[] = [
-  { target: 1, rewards: [lc(5), ap(5)], rarity: TaskRarity.BRONZE },
-  { target: 5, rewards: [lc(10), tickets(1), ap(10)], rarity: TaskRarity.SILVER },
-  { target: 10, rewards: [lc(20), tickets(1), ap(20)], rarity: TaskRarity.SILVER },
-  { target: 25, rewards: [lc(40), tickets(2), ap(30)], rarity: TaskRarity.GOLD },
-  { target: 50, rewards: [lc(80), tickets(4), ap(50)], rarity: TaskRarity.GOLD },
-  { target: 100, rewards: [lc(160), tickets(6), stars(20), ap(75)], rarity: TaskRarity.PLATINUM },
+  { target: 1, rewards: [lc(1), tickets(1), stars(1), ap(1)], rarity: TaskRarity.BRONZE },
+  { target: 5, rewards: [lc(2), tickets(2), stars(1), ap(2)], rarity: TaskRarity.SILVER },
+  { target: 10, rewards: [lc(3), tickets(3), stars(1), ap(3)], rarity: TaskRarity.SILVER },
+  { target: 25, rewards: [lc(5), tickets(4), stars(2), ap(5)], rarity: TaskRarity.GOLD },
+  { target: 50, rewards: [lc(8), tickets(5), stars(2), ap(8)], rarity: TaskRarity.GOLD },
+  { target: 100, rewards: [lc(13), tickets(6), stars(2), ap(13)], rarity: TaskRarity.PLATINUM },
 ];
 
 const PODIUM_MILESTONES: { target: number; rewards: TaskReward[]; rarity: TaskRarity }[] = [
-  { target: 1, rewards: [lc(4), ap(5)], rarity: TaskRarity.BRONZE },
-  { target: 5, rewards: [lc(10), ap(10)], rarity: TaskRarity.SILVER },
-  { target: 10, rewards: [lc(18), tickets(1), ap(15)], rarity: TaskRarity.SILVER },
-  { target: 25, rewards: [lc(35), tickets(2), ap(25)], rarity: TaskRarity.GOLD },
-  { target: 50, rewards: [lc(70), tickets(3), ap(40)], rarity: TaskRarity.GOLD },
-  { target: 100, rewards: [lc(140), tickets(5), stars(15), ap(60)], rarity: TaskRarity.PLATINUM },
+  { target: 1, rewards: [lc(1), tickets(1), stars(1), ap(1)], rarity: TaskRarity.BRONZE },
+  { target: 5, rewards: [lc(2), tickets(2), stars(1), ap(2)], rarity: TaskRarity.SILVER },
+  { target: 10, rewards: [lc(3), tickets(3), stars(1), ap(3)], rarity: TaskRarity.SILVER },
+  { target: 25, rewards: [lc(5), tickets(4), stars(2), ap(5)], rarity: TaskRarity.GOLD },
+  { target: 50, rewards: [lc(8), tickets(5), stars(2), ap(8)], rarity: TaskRarity.GOLD },
+  { target: 100, rewards: [lc(13), tickets(6), stars(2), ap(13)], rarity: TaskRarity.PLATINUM },
 ];
 
 const PARTICIPATION_MILESTONES: { target: number; rewards: TaskReward[]; rarity: TaskRarity }[] = [
-  { target: 1, rewards: [lc(3), ap(5)], rarity: TaskRarity.BRONZE },
-  { target: 5, rewards: [lc(8), ap(10)], rarity: TaskRarity.SILVER },
-  { target: 10, rewards: [lc(15), tickets(1), ap(15)], rarity: TaskRarity.SILVER },
-  { target: 25, rewards: [lc(30), tickets(2), ap(25)], rarity: TaskRarity.GOLD },
-  { target: 50, rewards: [lc(60), tickets(3), ap(40)], rarity: TaskRarity.GOLD },
-  { target: 100, rewards: [lc(120), tickets(5), stars(15), ap(60)], rarity: TaskRarity.PLATINUM },
+  { target: 1, rewards: [lc(1), tickets(1), stars(1), ap(1)], rarity: TaskRarity.BRONZE },
+  { target: 5, rewards: [lc(2), tickets(2), stars(1), ap(2)], rarity: TaskRarity.SILVER },
+  { target: 10, rewards: [lc(3), tickets(3), stars(1), ap(3)], rarity: TaskRarity.SILVER },
+  { target: 25, rewards: [lc(5), tickets(4), stars(2), ap(5)], rarity: TaskRarity.GOLD },
+  { target: 50, rewards: [lc(8), tickets(5), stars(2), ap(8)], rarity: TaskRarity.GOLD },
+  { target: 100, rewards: [lc(13), tickets(6), stars(2), ap(13)], rarity: TaskRarity.PLATINUM },
 ];
 
 const buildPlaceMilestones = (place: PlaceKey): TaskBlueprint[] =>
@@ -889,6 +889,13 @@ const PROFILE = buildCategory({
       status: TaskStatus.COMPLETED,
       deeplink: '/settings/username',
     },
+    // 2FA OFF (2026-08-13) — removed from the backend catalog too. It paid
+    // 500 LC for flipping a switch that protects nothing: `PATCH /me` writes
+    // `twoFactorEnabled` with no verification, no secret is ever generated,
+    // and /settings/security renders that boolean as a plain toggle — which is
+    // exactly where this task's deeplink pointed. One tap, counter 0 → 1. It
+    // returns when 2FA ships a real setup flow; grep `2FA OFF` in both repos.
+    /*
     {
       id: 't-262',
       title: 'Enable 2FA',
@@ -898,6 +905,7 @@ const PROFILE = buildCategory({
       deeplink: '/settings/security',
       rarity: TaskRarity.SILVER,
     },
+    */
     // AVATARS OFF (2026-08-12) — switched off in the backend catalog too. It paid
     // for nothing: the counter is `has_avatar`, which reads `profile.avatarUrl`,
     // and that is filled from Telegram's own `photo_url` at first login — so any
@@ -919,7 +927,7 @@ const PROFILE = buildCategory({
       id: 't-264',
       title: 'Connect TON wallet',
       subtitle: 'Link a TON wallet to your account.',
-      rewards: [lc(5)],
+      rewards: [lc(5), tickets(10), stars(1), ap(10)],
       progress: { current: 0, target: 1 },
       deeplink: '/wallet',
       rarity: TaskRarity.SILVER,
@@ -943,13 +951,13 @@ type FriendMilestone = { target: number; rewards: TaskReward[]; rarity: TaskRari
 // Steps 2/5/10/20 mirror tierReferralRequirements (DOCS §5.1) — every
 // mandatory invite threshold doubles as a milestone reward checkpoint.
 const FRIEND_INVITE_MILESTONES: FriendMilestone[] = [
-  { target: 1, rewards: [lc(5), ap(5)], rarity: TaskRarity.BRONZE },
-  { target: 2, rewards: [lc(8), ap(10)], rarity: TaskRarity.BRONZE },
-  { target: 5, rewards: [lc(20), tickets(1), ap(20)], rarity: TaskRarity.SILVER },
-  { target: 10, rewards: [lc(50), tickets(2), stars(5), ap(30)], rarity: TaskRarity.SILVER },
-  { target: 20, rewards: [lc(120), tickets(4), stars(10), ap(50)], rarity: TaskRarity.GOLD },
-  { target: 50, rewards: [lc(300), tickets(8), stars(20), ap(75)], rarity: TaskRarity.GOLD },
-  { target: 100, rewards: [lc(600), tickets(15), stars(40), ap(100)], rarity: TaskRarity.PLATINUM },
+  { target: 1, rewards: [lc(5), tickets(1), stars(1), ap(1)], rarity: TaskRarity.BRONZE },
+  { target: 2, rewards: [lc(8), tickets(2), stars(2), ap(2)], rarity: TaskRarity.BRONZE },
+  { target: 5, rewards: [lc(20), tickets(5), stars(5), ap(3)], rarity: TaskRarity.SILVER },
+  { target: 10, rewards: [lc(50), tickets(10), stars(7), ap(5)], rarity: TaskRarity.SILVER },
+  { target: 20, rewards: [lc(120), tickets(20), stars(12), ap(8)], rarity: TaskRarity.GOLD },
+  { target: 50, rewards: [lc(300), tickets(50), stars(21), ap(13)], rarity: TaskRarity.GOLD },
+  { target: 100, rewards: [lc(600), tickets(100), stars(33), ap(21)], rarity: TaskRarity.PLATINUM },
 ];
 
 const FRIENDS = buildCategory({
@@ -972,12 +980,12 @@ const FRIENDS = buildCategory({
 type EngineMilestone = { target: number; rewards: TaskReward[]; rarity: TaskRarity };
 
 const ENGINE_MILESTONES: EngineMilestone[] = [
-  { target: 2, rewards: [lc(10), ap(10)], rarity: TaskRarity.BRONZE },
-  { target: 5, rewards: [lc(20), tickets(1), ap(15)], rarity: TaskRarity.SILVER },
-  { target: 10, rewards: [lc(40), tickets(2), ap(20)], rarity: TaskRarity.SILVER },
-  { target: 15, rewards: [lc(80), tickets(3), ap(30)], rarity: TaskRarity.GOLD },
-  { target: 20, rewards: [lc(150), tickets(5), ap(45)], rarity: TaskRarity.GOLD },
-  { target: 30, rewards: [lc(300), tickets(8), stars(20), ap(60)], rarity: TaskRarity.PLATINUM },
+  { target: 2, rewards: [lc(10), tickets(2), stars(1), ap(10)], rarity: TaskRarity.BRONZE },
+  { target: 5, rewards: [lc(20), tickets(5), stars(2), ap(15)], rarity: TaskRarity.SILVER },
+  { target: 10, rewards: [lc(40), tickets(7), stars(3), ap(20)], rarity: TaskRarity.SILVER },
+  { target: 15, rewards: [lc(80), tickets(12), stars(4), ap(30)], rarity: TaskRarity.GOLD },
+  { target: 20, rewards: [lc(150), tickets(21), stars(5), ap(45)], rarity: TaskRarity.GOLD },
+  { target: 30, rewards: [lc(300), tickets(33), stars(6), ap(60)], rarity: TaskRarity.PLATINUM },
 ];
 
 const ENGINES = buildCategory({
@@ -1020,23 +1028,23 @@ const ENGINES = buildCategory({
 type StakeMilestone = { target: number; rewards: TaskReward[]; rarity: TaskRarity };
 
 const STAKE_COUNT_MILESTONES: StakeMilestone[] = [
-  { target: 3, rewards: [lc(5), ap(5)], rarity: TaskRarity.BRONZE },
-  { target: 5, rewards: [lc(10), ap(10)], rarity: TaskRarity.SILVER },
-  { target: 10, rewards: [lc(20), tickets(1), ap(15)], rarity: TaskRarity.SILVER },
-  { target: 15, rewards: [lc(40), tickets(2), ap(25)], rarity: TaskRarity.GOLD },
-  { target: 20, rewards: [lc(80), tickets(3), ap(40)], rarity: TaskRarity.GOLD },
-  { target: 30, rewards: [lc(150), tickets(5), stars(10), ap(60)], rarity: TaskRarity.PLATINUM },
+  { target: 3, rewards: [lc(5), tickets(1), stars(1), ap(5)], rarity: TaskRarity.BRONZE },
+  { target: 5, rewards: [lc(10), tickets(2), stars(1), ap(10)], rarity: TaskRarity.SILVER },
+  { target: 10, rewards: [lc(20), tickets(3), stars(1), ap(15)], rarity: TaskRarity.SILVER },
+  { target: 15, rewards: [lc(40), tickets(5), stars(2), ap(25)], rarity: TaskRarity.GOLD },
+  { target: 20, rewards: [lc(80), tickets(8), stars(2), ap(40)], rarity: TaskRarity.GOLD },
+  { target: 30, rewards: [lc(150), tickets(13), stars(3), ap(60)], rarity: TaskRarity.PLATINUM },
 ];
 
 const STAKE_VOLUME_MILESTONES: StakeMilestone[] = [
-  { target: 10000, rewards: [lc(5), ap(10)], rarity: TaskRarity.BRONZE },
-  { target: 50000, rewards: [lc(15), tickets(1), ap(15)], rarity: TaskRarity.SILVER },
-  { target: 200000, rewards: [lc(40), tickets(2), ap(25)], rarity: TaskRarity.SILVER },
-  { target: 500000, rewards: [lc(80), tickets(3), ap(35)], rarity: TaskRarity.GOLD },
-  { target: 2000000, rewards: [lc(200), tickets(5), ap(50)], rarity: TaskRarity.GOLD },
+  { target: 10000, rewards: [lc(5), tickets(1), stars(1), ap(10)], rarity: TaskRarity.BRONZE },
+  { target: 50000, rewards: [lc(15), tickets(2), stars(1), ap(15)], rarity: TaskRarity.SILVER },
+  { target: 200000, rewards: [lc(40), tickets(3), stars(1), ap(25)], rarity: TaskRarity.SILVER },
+  { target: 500000, rewards: [lc(80), tickets(5), stars(2), ap(35)], rarity: TaskRarity.GOLD },
+  { target: 2000000, rewards: [lc(200), tickets(8), stars(2), ap(50)], rarity: TaskRarity.GOLD },
   {
     target: 5000000,
-    rewards: [lc(500), tickets(8), stars(20), ap(70)],
+    rewards: [lc(500), tickets(13), stars(3), ap(70)],
     rarity: TaskRarity.PLATINUM,
   },
 ];
@@ -1074,12 +1082,12 @@ const STAKES = buildCategory({
 type StarMilestone = { target: number; rewards: TaskReward[]; rarity: TaskRarity };
 
 const STAR_PURCHASE_MILESTONES: StarMilestone[] = [
-  { target: 100, rewards: [lc(10), tickets(1), stars(5)], rarity: TaskRarity.BRONZE },
-  { target: 250, rewards: [lc(25), tickets(1), stars(10)], rarity: TaskRarity.SILVER },
-  { target: 500, rewards: [lc(50), tickets(2), stars(15)], rarity: TaskRarity.SILVER },
-  { target: 1000, rewards: [lc(100), tickets(4), stars(25)], rarity: TaskRarity.GOLD },
-  { target: 2500, rewards: [lc(250), tickets(8), stars(40)], rarity: TaskRarity.GOLD },
-  { target: 5000, rewards: [lc(500), tickets(12), stars(60)], rarity: TaskRarity.PLATINUM },
+  { target: 100, rewards: [lc(10), tickets(2), stars(5), ap(2)], rarity: TaskRarity.BRONZE },
+  { target: 250, rewards: [lc(25), tickets(4), stars(10), ap(4)], rarity: TaskRarity.SILVER },
+  { target: 500, rewards: [lc(50), tickets(6), stars(15), ap(6)], rarity: TaskRarity.SILVER },
+  { target: 1000, rewards: [lc(100), tickets(10), stars(25), ap(10)], rarity: TaskRarity.GOLD },
+  { target: 2500, rewards: [lc(250), tickets(16), stars(40), ap(16)], rarity: TaskRarity.GOLD },
+  { target: 5000, rewards: [lc(500), tickets(26), stars(60), ap(26)], rarity: TaskRarity.PLATINUM },
 ];
 
 const STARS = buildCategory({
@@ -1102,14 +1110,14 @@ const STARS = buildCategory({
 type TicketMilestone = { target: number; rewards: TaskReward[]; rarity: TaskRarity };
 
 const TICKET_MILESTONES: TicketMilestone[] = [
-  { target: 250, rewards: [lc(10), tickets(1), ap(5)], rarity: TaskRarity.BRONZE },
-  { target: 1000, rewards: [lc(20), tickets(2), ap(10)], rarity: TaskRarity.SILVER },
-  { target: 2500, rewards: [lc(40), tickets(3), ap(15)], rarity: TaskRarity.SILVER },
-  { target: 10000, rewards: [lc(80), tickets(5), ap(25)], rarity: TaskRarity.GOLD },
-  { target: 25000, rewards: [lc(150), tickets(8), ap(40)], rarity: TaskRarity.GOLD },
+  { target: 250, rewards: [lc(10), tickets(1), stars(1), ap(5)], rarity: TaskRarity.BRONZE },
+  { target: 1000, rewards: [lc(20), tickets(2), stars(2), ap(10)], rarity: TaskRarity.SILVER },
+  { target: 2500, rewards: [lc(40), tickets(3), stars(3), ap(15)], rarity: TaskRarity.SILVER },
+  { target: 10000, rewards: [lc(80), tickets(5), stars(4), ap(25)], rarity: TaskRarity.GOLD },
+  { target: 25000, rewards: [lc(150), tickets(8), stars(5), ap(40)], rarity: TaskRarity.GOLD },
   {
     target: 50000,
-    rewards: [lc(300), tickets(12), stars(15), ap(60)],
+    rewards: [lc(300), tickets(12), stars(6), ap(60)],
     rarity: TaskRarity.PLATINUM,
   },
 ];
@@ -1139,34 +1147,64 @@ interface VipLevelConfig {
 }
 
 const VIP_LEVELS: VipLevelConfig[] = [
-  { level: 1, target: 100, rewards: [lc(5), tickets(1)], rarity: TaskRarity.BRONZE },
-  { level: 2, target: 500, rewards: [lc(10), tickets(1)], rarity: TaskRarity.SILVER },
-  { level: 3, target: 2000, rewards: [lc(20), tickets(2)], rarity: TaskRarity.SILVER },
-  { level: 4, target: 5000, rewards: [lc(35), tickets(2), stars(5)], rarity: TaskRarity.GOLD },
-  { level: 5, target: 10000, rewards: [lc(60), tickets(3), stars(10)], rarity: TaskRarity.GOLD },
-  { level: 6, target: 25000, rewards: [lc(100), tickets(4), stars(15)], rarity: TaskRarity.GOLD },
+  {
+    level: 1,
+    target: 100,
+    rewards: [lc(5), tickets(4), stars(1), ap(1)],
+    rarity: TaskRarity.BRONZE,
+  },
+  {
+    level: 2,
+    target: 500,
+    rewards: [lc(10), tickets(6), stars(2), ap(2)],
+    rarity: TaskRarity.SILVER,
+  },
+  {
+    level: 3,
+    target: 2000,
+    rewards: [lc(15), tickets(8), stars(3), ap(3)],
+    rarity: TaskRarity.SILVER,
+  },
+  {
+    level: 4,
+    target: 5000,
+    rewards: [lc(25), tickets(12), stars(4), ap(5)],
+    rarity: TaskRarity.GOLD,
+  },
+  {
+    level: 5,
+    target: 10000,
+    rewards: [lc(40), tickets(18), stars(5), ap(8)],
+    rarity: TaskRarity.GOLD,
+  },
+  {
+    level: 6,
+    target: 25000,
+    rewards: [lc(65), tickets(28), stars(6), ap(13)],
+    rarity: TaskRarity.GOLD,
+  },
   {
     level: 7,
     target: 50000,
-    rewards: [lc(175), tickets(6), stars(25)],
+    rewards: [lc(105), tickets(44), stars(7), ap(21)],
     rarity: TaskRarity.PLATINUM,
   },
   {
     level: 8,
     target: 100000,
-    rewards: [lc(300), tickets(8), stars(40)],
+    rewards: [lc(170), tickets(70), stars(8), ap(34)],
     rarity: TaskRarity.PLATINUM,
   },
   {
     level: 9,
     target: 250000,
-    rewards: [lc(500), tickets(10), stars(60)],
+    rewards: [lc(275), tickets(112), stars(9), ap(55)],
     rarity: TaskRarity.PLATINUM,
   },
   {
     level: 10,
     target: 500000,
-    rewards: [lc(1000), tickets(15), stars(100)],
+    rewards: [lc(445), tickets(180), stars(10), ap(89)],
     rarity: TaskRarity.PLATINUM,
   },
 ];
@@ -1230,7 +1268,7 @@ const ACHIEVEMENTS = buildCategory({
       deeplink: '/tickets',
       title: 'First claim',
       subtitle: 'Claim tickets from an engine.',
-      rewards: [lc(2)],
+      rewards: [lc(2), tickets(1), stars(1), ap(1)],
       progress: { current: 1, target: 1 },
       status: TaskStatus.COMPLETED,
     },
@@ -1239,7 +1277,7 @@ const ACHIEVEMENTS = buildCategory({
       deeplink: '/tournaments',
       title: 'First tournament',
       subtitle: 'Join your first tournament.',
-      rewards: [lc(2)],
+      rewards: [lc(2), tickets(1), stars(1), ap(2)],
       progress: { current: 1, target: 1 },
       status: TaskStatus.COMPLETED,
     },
@@ -1248,7 +1286,7 @@ const ACHIEVEMENTS = buildCategory({
       deeplink: '/tournaments',
       title: 'First win',
       subtitle: 'Win your first tournament.',
-      rewards: [lc(5)],
+      rewards: [lc(5), tickets(2), stars(1), ap(2)],
       progress: { current: 1, target: 1 },
       status: TaskStatus.COMPLETED,
     },
@@ -1257,7 +1295,7 @@ const ACHIEVEMENTS = buildCategory({
       deeplink: '/stakes',
       title: 'First stake',
       subtitle: 'Start your first stake.',
-      rewards: [lc(5)],
+      rewards: [lc(5), tickets(2), stars(1), ap(3)],
       progress: { current: 1, target: 1 },
       status: TaskStatus.COMPLETED,
     },
@@ -1266,7 +1304,7 @@ const ACHIEVEMENTS = buildCategory({
       deeplink: '/invite-friends',
       title: 'First friend',
       subtitle: 'Invite your first friend.',
-      rewards: [lc(5)],
+      rewards: [lc(5), tickets(3), stars(1), ap(3)],
       progress: { current: 1, target: 1 },
       status: TaskStatus.COMPLETED,
     },
@@ -1277,7 +1315,7 @@ const ACHIEVEMENTS = buildCategory({
       deeplink: '/market?tab=engines',
       title: 'Unlock Silver engine',
       subtitle: 'Own your first Silver engine.',
-      rewards: [lc(15), ap(15)],
+      rewards: [lc(15), tickets(5), stars(2), ap(5)],
       progress: { current: 1, target: 1 },
       status: TaskStatus.COMPLETED,
       rarity: TaskRarity.SILVER,
@@ -1287,7 +1325,7 @@ const ACHIEVEMENTS = buildCategory({
       deeplink: '/market?tab=engines',
       title: 'Unlock Gold engine',
       subtitle: 'Own your first Gold engine.',
-      rewards: [lc(30), tickets(1), ap(25)],
+      rewards: [lc(30), tickets(8), stars(3), ap(8)],
       progress: { current: 1, target: 1 },
       status: TaskStatus.COMPLETED,
       rarity: TaskRarity.GOLD,
@@ -1297,7 +1335,7 @@ const ACHIEVEMENTS = buildCategory({
       deeplink: '/market?tab=engines',
       title: 'Unlock Platinum engine',
       subtitle: 'Own your first Platinum engine.',
-      rewards: [lc(60), tickets(2), ap(40)],
+      rewards: [lc(60), tickets(13), stars(5), ap(13)],
       progress: { current: 0, target: 1 },
       rarity: TaskRarity.GOLD,
     },
@@ -1306,7 +1344,7 @@ const ACHIEVEMENTS = buildCategory({
       deeplink: '/market?tab=engines',
       title: 'Unlock Diamond engine',
       subtitle: 'Own your first Diamond engine.',
-      rewards: [lc(120), tickets(4), stars(10), ap(60)],
+      rewards: [lc(120), tickets(21), stars(8), ap(21)],
       progress: { current: 0, target: 1 },
       rarity: TaskRarity.PLATINUM,
     },
@@ -1315,7 +1353,7 @@ const ACHIEVEMENTS = buildCategory({
       deeplink: '/tickets',
       title: 'Parallel producer',
       subtitle: 'Run 5 engines at the same time.',
-      rewards: [lc(20), tickets(1), ap(25)],
+      rewards: [lc(20), tickets(5), stars(2), ap(8)],
       progress: { current: 3, target: 5 },
       rarity: TaskRarity.GOLD,
     },
@@ -1324,7 +1362,7 @@ const ACHIEVEMENTS = buildCategory({
       deeplink: '/tickets',
       title: 'First Speed Boost',
       subtitle: 'Upgrade an engine’s speed.',
-      rewards: [lc(8), ap(10)],
+      rewards: [lc(8), tickets(2), stars(1), ap(3)],
       progress: { current: 1, target: 1 },
       status: TaskStatus.READY_TO_CLAIM,
       rarity: TaskRarity.SILVER,
@@ -1334,7 +1372,7 @@ const ACHIEVEMENTS = buildCategory({
       deeplink: '/tickets',
       title: 'Capacity Upgrade',
       subtitle: 'Upgrade an engine’s capacity.',
-      rewards: [lc(12), ap(15)],
+      rewards: [lc(12), tickets(3), stars(1), ap(5)],
       progress: { current: 0, target: 1 },
       rarity: TaskRarity.SILVER,
     },
@@ -1343,7 +1381,7 @@ const ACHIEVEMENTS = buildCategory({
       deeplink: '/tickets',
       title: 'Stack Boosts',
       subtitle: 'Speed + capacity on one engine.',
-      rewards: [lc(25), tickets(1), ap(25)],
+      rewards: [lc(25), tickets(5), stars(2), ap(8)],
       progress: { current: 0, target: 1 },
       rarity: TaskRarity.GOLD,
     },
@@ -1354,7 +1392,7 @@ const ACHIEVEMENTS = buildCategory({
       deeplink: '/tournaments',
       title: 'Project tournament win',
       subtitle: 'Win a project tournament.',
-      rewards: [lc(25), tickets(1), ap(25)],
+      rewards: [lc(25), tickets(5), stars(2), ap(8)],
       progress: { current: 1, target: 1 },
       status: TaskStatus.COMPLETED,
       rarity: TaskRarity.GOLD,
@@ -1364,7 +1402,7 @@ const ACHIEVEMENTS = buildCategory({
       deeplink: '/tournaments',
       title: 'Partner tournament win',
       subtitle: 'Win a partner tournament.',
-      rewards: [lc(25), tickets(1), ap(25)],
+      rewards: [lc(25), tickets(5), stars(2), ap(8)],
       progress: { current: 0, target: 1 },
       rarity: TaskRarity.GOLD,
     },
@@ -1373,7 +1411,7 @@ const ACHIEVEMENTS = buildCategory({
       deeplink: '/tournaments',
       title: 'All-tier winner',
       subtitle: 'Win 1st place in every tier.',
-      rewards: [lc(100), tickets(3), ap(60)],
+      rewards: [lc(100), tickets(21), stars(8), ap(21)],
       progress: { current: 3, target: 5 },
       rarity: TaskRarity.PLATINUM,
     },
@@ -1382,7 +1420,7 @@ const ACHIEVEMENTS = buildCategory({
       deeplink: '/tournaments',
       title: 'Platinum winner',
       subtitle: 'Win a Platinum tournament.',
-      rewards: [lc(80), tickets(2), ap(40)],
+      rewards: [lc(80), tickets(13), stars(5), ap(13)],
       progress: { current: 0, target: 1 },
       rarity: TaskRarity.GOLD,
     },
@@ -1391,7 +1429,7 @@ const ACHIEVEMENTS = buildCategory({
       deeplink: '/tournaments',
       title: 'Diamond winner',
       subtitle: 'Win a Diamond tournament.',
-      rewards: [lc(150), tickets(4), stars(10), ap(60)],
+      rewards: [lc(150), tickets(21), stars(8), ap(21)],
       progress: { current: 0, target: 1 },
       rarity: TaskRarity.PLATINUM,
     },
@@ -1402,7 +1440,7 @@ const ACHIEVEMENTS = buildCategory({
       deeplink: '/profile',
       title: 'Reach Silver',
       subtitle: 'Earn 500 activity points.',
-      rewards: [lc(15), tickets(1)],
+      rewards: [lc(15), tickets(5), stars(2)],
       progress: { current: 500, target: 500 },
       status: TaskStatus.COMPLETED,
       rarity: TaskRarity.SILVER,
@@ -1412,7 +1450,7 @@ const ACHIEVEMENTS = buildCategory({
       deeplink: '/profile',
       title: 'Reach Gold',
       subtitle: 'Earn 1 650 activity points.',
-      rewards: [lc(40), tickets(2)],
+      rewards: [lc(40), tickets(13), stars(3)],
       progress: { current: 1650, target: 1650 },
       status: TaskStatus.COMPLETED,
       rarity: TaskRarity.GOLD,
@@ -1422,7 +1460,7 @@ const ACHIEVEMENTS = buildCategory({
       deeplink: '/profile',
       title: 'Reach Platinum',
       subtitle: 'Earn 5 900 activity points.',
-      rewards: [lc(100), tickets(4), stars(10)],
+      rewards: [lc(100), tickets(34), stars(5)],
       progress: { current: 4500, target: 5900 },
       rarity: TaskRarity.GOLD,
     },
@@ -1431,7 +1469,7 @@ const ACHIEVEMENTS = buildCategory({
       deeplink: '/profile',
       title: 'Reach Diamond',
       subtitle: 'Enter the highest tier.',
-      rewards: [lc(250), tickets(8), stars(25)],
+      rewards: [lc(250), tickets(89), stars(13)],
       progress: { current: 0, target: 1 },
       rarity: TaskRarity.PLATINUM,
     },
@@ -1442,7 +1480,7 @@ const ACHIEVEMENTS = buildCategory({
       deeplink: '/stakes',
       title: 'Diamond Staker',
       subtitle: 'Start a Diamond-tier stake.',
-      rewards: [lc(50), tickets(2), ap(30)],
+      rewards: [lc(50), tickets(13), stars(5), ap(13)],
       progress: { current: 0, target: 1 },
       rarity: TaskRarity.GOLD,
     },
@@ -1451,7 +1489,7 @@ const ACHIEVEMENTS = buildCategory({
       deeplink: '/invite-friends',
       title: 'Referral claimer',
       subtitle: 'Claim referral rewards 100 times.',
-      rewards: [lc(50), tickets(2), ap(30)],
+      rewards: [lc(50), tickets(34), stars(13), ap(21)],
       progress: { current: 12, target: 100 },
       rarity: TaskRarity.GOLD,
     },
@@ -1460,7 +1498,7 @@ const ACHIEVEMENTS = buildCategory({
       deeplink: '/invite-friends',
       title: 'Verified referrals',
       subtitle: '3 invited friends verified.',
-      rewards: [lc(60), tickets(2), ap(40)],
+      rewards: [lc(60), tickets(13), stars(5), ap(13)],
       progress: { current: 0, target: 3 },
       rarity: TaskRarity.GOLD,
     },
@@ -1469,7 +1507,7 @@ const ACHIEVEMENTS = buildCategory({
       deeplink: '/invite-friends',
       title: 'VIP referral',
       subtitle: 'An invited friend became VIP.',
-      rewards: [lc(120), tickets(4), stars(10), ap(50)],
+      rewards: [lc(120), tickets(34), stars(13), ap(21)],
       progress: { current: 0, target: 1 },
       rarity: TaskRarity.PLATINUM,
     },
@@ -1478,7 +1516,7 @@ const ACHIEVEMENTS = buildCategory({
       deeplink: '/wallet',
       title: 'First withdrawal',
       subtitle: 'Withdraw TON for the first time.',
-      rewards: [lc(10), ap(10)],
+      rewards: [lc(10), tickets(5), stars(2), ap(5)],
       progress: { current: 0, target: 1 },
       rarity: TaskRarity.SILVER,
     },
@@ -1487,7 +1525,7 @@ const ACHIEVEMENTS = buildCategory({
       deeplink: '/wallet',
       title: 'Stars → LC swap',
       subtitle: 'Convert Stars into LC.',
-      rewards: [lc(5), ap(5)],
+      rewards: [lc(5), tickets(3), stars(1), ap(3)],
       progress: { current: 0, target: 1 },
       rarity: TaskRarity.BRONZE,
     },
@@ -1498,7 +1536,7 @@ const ACHIEVEMENTS = buildCategory({
       deeplink: '/tasks?frequency=daily&category=ads',
       title: 'Ad Maxer',
       subtitle: 'Watch every daily ad 7 days in a row.',
-      rewards: [lc(25), tickets(1), ap(30)],
+      rewards: [lc(25), tickets(5), stars(2), ap(5)],
       progress: { current: 2, target: 7 },
       rarity: TaskRarity.GOLD,
     },
@@ -1507,7 +1545,7 @@ const ACHIEVEMENTS = buildCategory({
       deeplink: '/tasks?frequency=daily&category=profile',
       title: '7-day streak',
       subtitle: 'Log in 7 days in a row.',
-      rewards: [lc(10), ap(15)],
+      rewards: [lc(10), tickets(3), stars(2), ap(8)],
       progress: { current: 7, target: 7 },
       status: TaskStatus.READY_TO_CLAIM,
       rarity: TaskRarity.SILVER,
@@ -1517,7 +1555,7 @@ const ACHIEVEMENTS = buildCategory({
       deeplink: '/tasks?frequency=daily&category=profile',
       title: '30-day streak',
       subtitle: 'Log in 30 days in a row.',
-      rewards: [lc(40), tickets(2), ap(40)],
+      rewards: [lc(50), tickets(13), stars(5), ap(21)],
       progress: { current: 5, target: 30 },
       rarity: TaskRarity.GOLD,
     },
@@ -1526,7 +1564,7 @@ const ACHIEVEMENTS = buildCategory({
       deeplink: '/tasks?frequency=daily&category=profile',
       title: '90-day streak',
       subtitle: 'Log in 90 days in a row.',
-      rewards: [lc(120), tickets(4), stars(15), ap(80)],
+      rewards: [lc(200), tickets(34), stars(13), ap(34)],
       progress: { current: 5, target: 90 },
       rarity: TaskRarity.GOLD,
     },
@@ -1535,7 +1573,7 @@ const ACHIEVEMENTS = buildCategory({
       deeplink: '/tasks?frequency=daily&category=profile',
       title: '365-day streak',
       subtitle: 'A full year of daily logins.',
-      rewards: [lc(500), tickets(10), stars(50), ap(150)],
+      rewards: [lc(1000), tickets(89), stars(34), ap(89)],
       progress: { current: 5, target: 365 },
       rarity: TaskRarity.PLATINUM,
     },
