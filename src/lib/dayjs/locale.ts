@@ -1,7 +1,22 @@
 import dayjs from 'dayjs';
 import type { Dayjs } from 'dayjs';
+import 'dayjs/locale/ar';
 import 'dayjs/locale/de';
+import 'dayjs/locale/es';
+import 'dayjs/locale/fa';
+import 'dayjs/locale/fr';
+import 'dayjs/locale/hy-am';
+import 'dayjs/locale/ja';
+import 'dayjs/locale/kk';
+import 'dayjs/locale/ko';
+import 'dayjs/locale/ky';
+import 'dayjs/locale/pt-br';
 import 'dayjs/locale/ru';
+import 'dayjs/locale/tg';
+import 'dayjs/locale/tr';
+import 'dayjs/locale/uk';
+import 'dayjs/locale/uz';
+import 'dayjs/locale/zh-cn';
 import localizedFormat from 'dayjs/plugin/localizedFormat';
 import { Locale } from '@/types/enums/locale.enums';
 import { defaultLocale, locales } from '@/i18n/config';
@@ -10,6 +25,22 @@ import type { LocaleType } from '@/types/types/locale.types';
 // `L`/`ll`/`LT` — the per-locale date patterns. Without this plugin every
 // localized format string renders as the literal letters.
 dayjs.extend(localizedFormat);
+
+/**
+ * Our locale code → dayjs's, where they disagree.
+ *
+ * dayjs names some locales by region rather than by language, and picking the
+ * wrong half is silent: `dayjs.locale('hy')` matches nothing, so dayjs keeps
+ * whatever was set before and the dates render in the *previous* reader's
+ * language. Only three of ours differ, and each is a deliberate variant choice
+ * made when the language list was agreed: Brazilian Portuguese, Simplified
+ * Chinese, and Armenian (which dayjs only ships as `hy-am`).
+ */
+const DAYJS_LOCALE: Partial<Record<Locale, string>> = {
+  [Locale.ARMENIAN]: 'hy-am',
+  [Locale.PORTUGUESE]: 'pt-br',
+  [Locale.CHINESE]: 'zh-cn',
+};
 
 /**
  * dayjs ships English only; every other locale is an opt-in import. Nothing
@@ -22,7 +53,7 @@ dayjs.extend(localizedFormat);
  */
 export const setDayjsLocale = (locale: string): void => {
   const known = (locales as string[]).includes(locale) ? locale : defaultLocale;
-  dayjs.locale(known as LocaleType);
+  dayjs.locale(DAYJS_LOCALE[known as Locale] ?? (known as LocaleType));
 };
 
 /**

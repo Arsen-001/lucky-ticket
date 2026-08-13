@@ -4,6 +4,7 @@ import { resolve } from 'node:path';
 import dayjs from 'dayjs';
 import { englishMonthKey, setDayjsLocale } from '@/lib/dayjs/locale';
 import { formatLocalDate } from '@/utils/global/date.utils';
+import { locales } from '@/i18n/config';
 
 const root = process.cwd();
 
@@ -50,8 +51,29 @@ describe('localized dates', () => {
   });
 
   it('falls back to the default language for an unknown locale', () => {
-    setDayjsLocale('hy');
+    setDayjsLocale('xx');
     expect(dayjs(SAMPLE).format('MMMM')).toBe('August');
+  });
+
+  /**
+   * Every selectable language must actually have its dayjs locale imported.
+   *
+   * This is the one that would otherwise ship broken. dayjs locales are opt-in
+   * imports, and `dayjs.locale('es')` with nothing imported does not throw and
+   * does not fall back — it leaves the *previous* locale in place. So a missing
+   * import shows up as dates in whatever language the last reader had, which
+   * looks like a caching bug rather than a missing import.
+   *
+   * Asserting on the prefix rather than equality covers the three codes where
+   * dayjs names the locale by region: `hy-am`, `pt-br`, `zh-cn`.
+   */
+  it('has a dayjs locale loaded for every selectable language', () => {
+    const unloaded = locales.filter(code => {
+      setDayjsLocale('en');
+      setDayjsLocale(code);
+      return !dayjs.locale().startsWith(code);
+    });
+    expect(unloaded).toEqual([]);
   });
 
   /**
@@ -60,7 +82,7 @@ describe('localized dates', () => {
    * rendered the raw key on screen. This is the guard on that.
    */
   it('keeps the month translation key English in every locale', () => {
-    for (const locale of ['en', 'ru', 'de']) {
+    for (const locale of locales) {
       setDayjsLocale(locale);
       expect(englishMonthKey(dayjs(SAMPLE))).toBe('august');
     }
