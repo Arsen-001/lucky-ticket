@@ -45,6 +45,20 @@ function stubAdsgram(reject: unknown) {
   };
 }
 
+/**
+ * A placeholder, not the live unit. These tests only care that SOME block id is
+ * set — the waterfall branches on presence, never on the value — and the real
+ * one used to sit here in six places, in a repository that is public.
+ *
+ * Worth being honest about what this buys: almost nothing on its own. The
+ * Adsgram SDK sends the block id from the player's browser, so anyone who opens
+ * the Mini App can read it off the network tab; it is a public identifier by
+ * construction, not a secret. What it does buy is that the number is no longer
+ * greppable next to the project name in a public repo, which is the same reason
+ * the revenue docs moved out (13.08.2026).
+ */
+const BLOCK_ID = '00000';
+
 beforeEach(() => {
   delete (globalThis as Record<string, unknown>).window;
 });
@@ -65,7 +79,7 @@ describe('rewarded-ad waterfall', () => {
   });
 
   it('falls through a failing network to the house ad', async () => {
-    const { ads, house } = await loadAds({ NEXT_PUBLIC_ADSGRAM_BLOCK_ID: '37750' });
+    const { ads, house } = await loadAds({ NEXT_PUBLIC_ADSGRAM_BLOCK_ID: BLOCK_ID });
     house.registerHousePresenter(async () => 'retry');
 
     // No SDK on the page → the Adsgram provider fails, and the chain continues.
@@ -77,7 +91,7 @@ describe('rewarded-ad waterfall', () => {
   it('stops on a user skip instead of offering the next provider', async () => {
     // Adsgram rejects with error=false when the user closed the ad early.
     stubAdsgram({ done: false, error: false, state: 'destroy', description: 'closed' });
-    const { ads, house } = await loadAds({ NEXT_PUBLIC_ADSGRAM_BLOCK_ID: '37750' });
+    const { ads, house } = await loadAds({ NEXT_PUBLIC_ADSGRAM_BLOCK_ID: BLOCK_ID });
 
     let housePlayed = false;
     house.registerHousePresenter(async () => {
@@ -91,7 +105,7 @@ describe('rewarded-ad waterfall', () => {
 
   it('treats a playback failure as a fall-through, not a skip', async () => {
     stubAdsgram({ done: false, error: true, state: 'playing', description: 'failed' });
-    const { ads, house } = await loadAds({ NEXT_PUBLIC_ADSGRAM_BLOCK_ID: '37750' });
+    const { ads, house } = await loadAds({ NEXT_PUBLIC_ADSGRAM_BLOCK_ID: BLOCK_ID });
     house.registerHousePresenter(async () => 'retry');
 
     expect(await ads.showRewardedAd()).toEqual({ outcome: 'noAd', provider: 'house' });
@@ -101,7 +115,7 @@ describe('rewarded-ad waterfall', () => {
     // The money rule: an unpaid impression must not be able to pay out. Both
     // exits are checked, so adding a third one to the overlay fails here first.
     for (const exit of ['retry', 'skipped'] as const) {
-      const { ads, house } = await loadAds({ NEXT_PUBLIC_ADSGRAM_BLOCK_ID: '37750' });
+      const { ads, house } = await loadAds({ NEXT_PUBLIC_ADSGRAM_BLOCK_ID: BLOCK_ID });
       house.registerHousePresenter(async () => exit);
 
       const result = await ads.showRewardedAd();
@@ -112,7 +126,7 @@ describe('rewarded-ad waterfall', () => {
 
   it('honours the order in NEXT_PUBLIC_AD_PROVIDERS and drops unknown ids', async () => {
     const { ads, house } = await loadAds({
-      NEXT_PUBLIC_ADSGRAM_BLOCK_ID: '37750',
+      NEXT_PUBLIC_ADSGRAM_BLOCK_ID: BLOCK_ID,
       NEXT_PUBLIC_MONETAG_ZONE_ID: '123',
       NEXT_PUBLIC_AD_PROVIDERS: 'monetag, nonsense ,adsgram',
     });
@@ -125,7 +139,7 @@ describe('rewarded-ad waterfall', () => {
   });
 
   it('ends on the last network failure when the house ad is not mounted', async () => {
-    const { ads } = await loadAds({ NEXT_PUBLIC_ADSGRAM_BLOCK_ID: '37750' });
+    const { ads } = await loadAds({ NEXT_PUBLIC_ADSGRAM_BLOCK_ID: BLOCK_ID });
 
     expect(await ads.showRewardedAd()).toEqual({ outcome: 'error', provider: 'adsgram' });
   });
