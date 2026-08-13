@@ -259,9 +259,14 @@ export function ComingSoonGiftSteps({
       {/* What arrived, else what the promo is set to right now, else the built-in
           default. The middle term is the one that matters: an admin repointing
           the promo at another gift has to change what this screen promises, or
-          the ladder keeps advertising something Telegram no longer carries. */}
+          the ladder keeps advertising something Telegram no longer carries.
+
+          The picture wins over the emoji wherever there is one — Telegram's
+          emoji can belong to a different gift entirely (its teddy bear says
+          '🎂'), and only the sticker is the gift. */}
       <GiftPrize
         emoji={gift.emoji || gift.giftEmoji || PRIZE_EMOJI}
+        image={gift.giftImage}
         state={prizeState}
         onClaim={onClaim}
         claiming={claiming}

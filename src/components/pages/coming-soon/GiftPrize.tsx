@@ -16,8 +16,15 @@ import '@/styles/components/coming-soon-gift.css';
 export type GiftPrizeState = 'locked' | 'ready' | 'closed' | 'claimed' | 'paused' | 'sent';
 
 export interface GiftPrizeProps {
-  /** What the bot hands out — the emoji, drawn large. */
+  /** What the bot hands out — the emoji, drawn large when there is no picture. */
   emoji: string;
+  /**
+   * The gift's own sticker, when the server knows it. Preferred over the emoji
+   * because Telegram's emoji does not identify a gift: its teddy bear reports
+   * '🎂', so a ladder drawn from the emoji would promise a cake and deliver a
+   * bear. @see PreLaunchGiftState.giftImage
+   */
+  image?: string | null;
   state: GiftPrizeState;
   /** Files the claim. Only ever called in the `ready` state. */
   onClaim?: () => void;
@@ -38,7 +45,7 @@ export interface GiftPrizeProps {
  * A `button` only while it can actually be pressed — a disabled-looking control
  * that still takes taps is how a player concludes the screen is broken.
  */
-export function GiftPrize({ emoji, state, onClaim, claiming, className }: GiftPrizeProps) {
+export function GiftPrize({ emoji, image, state, onClaim, claiming, className }: GiftPrizeProps) {
   const t = useAppTranslations();
 
   const ready = state === 'ready';
@@ -70,7 +77,14 @@ export function GiftPrize({ emoji, state, onClaim, claiming, className }: GiftPr
         state === 'paused' && 'border-warning/50 bg-warning/10 opacity-80'
       )}
     >
-      <span aria-hidden>{emoji}</span>
+      {image ? (
+        // A data: URI from our own backend — `next/image` has nothing to
+        // optimise here and its loader rejects the scheme.
+        // eslint-disable-next-line @next/next/no-img-element
+        <img aria-hidden alt="" src={image} className="h-20 w-20 object-contain" />
+      ) : (
+        <span aria-hidden>{emoji}</span>
+      )}
 
       {state === 'locked' && (
         <span className="flex-center absolute -bottom-2 -right-2 h-8 w-8 rounded-full border border-white/12 bg-[var(--color-background)] text-white/60">

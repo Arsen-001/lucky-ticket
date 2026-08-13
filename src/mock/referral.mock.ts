@@ -288,6 +288,9 @@ export const preLaunchGiftMock: PreLaunchGiftState = {
   // fixture carries it too; without it the screen would silently fall back to
   // its own default and the mock would stop exercising the live path.
   giftEmoji: '💝',
+  // Null on purpose: in production this is a base64 sticker from Telegram, and
+  // null is the state the screen has to survive — it falls back to the emoji.
+  giftImage: null,
   counted: countedFriends,
   notCountedFriendIds,
   // On, as it is in production — the ladder states it as a condition.

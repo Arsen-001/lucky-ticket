@@ -139,6 +139,13 @@ export interface PreLaunchGiftState {
    */
   giftEmoji?: string | null;
   /**
+   * The promo gift's own sticker, as a `data:` URI. Preferred over the emoji
+   * wherever it is present: Telegram's `sticker.emoji` does not identify a gift
+   * (its teddy bear reports '🎂'), so the emoji alone can promise the wrong
+   * present. Undefined/null = draw the emoji, as before.
+   */
+  giftImage?: string | null;
+  /**
    * Friends that COUNT toward the ladder — invited *and* subscribed to the
    * channel, which is the rule the backend files claims by. The ladder draws
    * this, not the length of the friends list, or the screen would promise a
