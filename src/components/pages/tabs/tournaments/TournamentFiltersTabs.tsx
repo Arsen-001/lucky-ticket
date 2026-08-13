@@ -77,7 +77,13 @@ export function TournamentFiltersTabs({
 
   return (
     <div ref={containerRef} className={twMerge('relative', className)}>
-      <div ref={scrollRef} className="scrollbar-hidden relative overflow-x-auto scroll-smooth">
+      {/* Second clipper on the same zone: `overflow-x` computes `overflow-y:
+          auto` with it. The collapsing wrapper in TournamentFilters needs the
+          same padding, or this one alone changes nothing. */}
+      <div
+        ref={scrollRef}
+        className="scrollbar-hidden relative -my-[7px] overflow-x-auto py-[7px] scroll-smooth"
+      >
         <div ref={trackRef} className="relative inline-flex items-center gap-2">
           {indicator && (
             <span
@@ -104,7 +110,7 @@ export function TournamentFiltersTabs({
                 onClick={() => onChange(key)}
                 aria-pressed={isActive}
                 className={twMerge(
-                  'relative z-1 flex items-center gap-1 rounded-full px-2.5 py-1.5 text-[12px] font-semibold whitespace-nowrap shrink-0 active:scale-95 transition-colors duration-300',
+                  'tap-target relative z-1 flex items-center gap-1 rounded-full px-2.5 py-1.5 text-[12px] font-semibold whitespace-nowrap shrink-0 active:scale-95 transition-colors duration-300',
                   isActive
                     ? 'text-white'
                     : 'bg-background-overlay text-white-secondary hover:bg-surface-hover'

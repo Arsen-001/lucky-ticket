@@ -40,9 +40,17 @@ export function TournamentFilters({
 
   return (
     <div className="flex items-center justify-between gap-2 min-w-0">
+      {/* This `overflow-hidden` is what collapses the strip when search opens,
+          and it is also what silently ate the chips' 44px hit zone: it clips
+          vertically as well, one level above the scroller. Measured 13.08.2026 —
+          the zone painted exactly the chip's 30px and owned nothing beyond it,
+          while `getComputedStyle` cheerfully reported `min-height: 44px`. The
+          padding gives the zone its room; `-my` gives the layout back, so
+          nothing moves and the collapse animation is untouched (it animates
+          max-width). */}
       <div
         className={twMerge(
-          'min-w-0 flex-1 transition-all duration-300 ease-in-out origin-left flex items-center overflow-hidden',
+          'min-w-0 flex-1 -my-[7px] py-[7px] transition-all duration-300 ease-in-out origin-left flex items-center overflow-hidden',
           isSearchOpen ? 'max-w-0 opacity-0 invisible' : 'max-w-full opacity-100 visible'
         )}
       >

@@ -13,7 +13,14 @@ export interface MarketHeroThumbsProps {
 /**
  * The showcase's navigation: the offers themselves, small. It replaces a row of
  * dots, which said only "there are five of something" and gave a 5px target;
- * a thumbnail says what each slide holds and is 34px wide to tap.
+ * a thumbnail says what each slide holds and is 44px wide to tap.
+ *
+ * 44, not 34, since 13.08.2026 — and by its own size, because the thumbnail
+ * crops its artwork with `overflow-hidden` and that clips the invisible
+ * `tap-target` zone the rest of the app uses. Measured before the change: 10px
+ * of clear space above and 16px below, against the 5px each side a 44px zone
+ * would have needed, so the row had the room either way; growing the box is
+ * simply the option that works here.
  */
 export function MarketHeroThumbs({ items, activeIndex, onPick, className }: MarketHeroThumbsProps) {
   if (items.length < 2) return null;
@@ -29,7 +36,7 @@ export function MarketHeroThumbs({ items, activeIndex, onPick, className }: Mark
           onClick={() => onPick(index)}
           style={{ '--hero-accent': item.accentColor } as React.CSSProperties}
           className={twMerge(
-            'market-hero-thumb h-[34px] w-[34px] shrink-0 overflow-hidden rounded-[10px] transition-all',
+            'market-hero-thumb h-11 w-11 shrink-0 overflow-hidden rounded-[10px] transition-all',
             index === activeIndex ? 'market-hero-thumb-active' : 'opacity-55'
           )}
         >
