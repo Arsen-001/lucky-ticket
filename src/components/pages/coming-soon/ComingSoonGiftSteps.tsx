@@ -14,17 +14,20 @@ import type { CSSProperties } from 'react';
 import type { PreLaunchGiftState } from '@/types/interfaces/referral.interfaces';
 
 /**
- * What the bot sends. One gift since 2026-08-04 — it used to be a four-way
- * draw — so the screen shows the thing itself instead of hedging with a pool.
+ * What the bot sends when the server has not said — the FALLBACK, not the
+ * answer. The promo's gift is an admin setting now (it had to become one: on
+ * 13.08.2026 Telegram retired the gift this screen was promising, and the bot
+ * could not send it to anybody), and `gift.giftEmoji` carries the live one.
  *
  * Emoji rather than the Telegram sticker art: the art belongs to whichever gift
  * id Telegram has in stock at approval time, and this must not turn into a
  * promise of one particular sticker. Kept equal to the backend's
- * `PRE_LAUNCH_GIFT_EMOJI` by the guardrail suite, which reads this array.
+ * `PRE_LAUNCH_GIFT_EMOJI` default by the guardrail suite, which reads this
+ * array.
  */
-const GIFT_POOL = ['🧸'];
+const GIFT_POOL = ['💝'];
 
-/** The one gift, for the big prize face. @see GiftPrize */
+/** Where the ladder lands when the server is still silent. @see GiftPrize */
 const PRIZE_EMOJI = GIFT_POOL[0];
 
 export interface ComingSoonGiftStepsProps {
@@ -253,8 +256,12 @@ export function ComingSoonGiftSteps({
           asks for it. It replaces the row of little emoji chips: with one gift
           and a claim to make, a legend of the pool said nothing and did
           nothing. @see GiftPrize */}
+      {/* What arrived, else what the promo is set to right now, else the built-in
+          default. The middle term is the one that matters: an admin repointing
+          the promo at another gift has to change what this screen promises, or
+          the ladder keeps advertising something Telegram no longer carries. */}
       <GiftPrize
-        emoji={gift.emoji ?? PRIZE_EMOJI}
+        emoji={gift.emoji || gift.giftEmoji || PRIZE_EMOJI}
         state={prizeState}
         onClaim={onClaim}
         claiming={claiming}

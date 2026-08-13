@@ -44,7 +44,13 @@ describe('pre-launch gift ladder', () => {
     // One gift since 2026-08-04 — the four-way draw is gone. Written as the
     // literal pool rather than a length check: the point is that the screen and
     // the bot name the SAME thing, not that they name equally many.
-    expect(componentPool.map(bare)).toEqual(['🧸']);
+    //
+    // 💝 since 2026-08-13, and it is a FALLBACK on both sides now: the live
+    // gift travels with the promo state (`giftEmoji`), because Telegram had
+    // just retired the hardcoded one and nothing could repoint the promo
+    // without a deploy. What still has to agree is where each side lands when
+    // the server says nothing.
+    expect(componentPool.map(bare)).toEqual(['💝']);
   });
 
   it.runIf(hasBackend)('threshold matches the backend', () => {

@@ -284,6 +284,10 @@ export const preLaunchGiftMock: PreLaunchGiftState = {
   required: comingSoonConfig.giftFriendsRequired,
   status: null,
   emoji: null,
+  // What the promo is set to hand out — an admin setting on the server, so the
+  // fixture carries it too; without it the screen would silently fall back to
+  // its own default and the mock would stop exercising the live path.
+  giftEmoji: '💝',
   counted: countedFriends,
   notCountedFriendIds,
   // On, as it is in production — the ladder states it as a condition.

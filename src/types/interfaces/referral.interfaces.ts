@@ -131,6 +131,14 @@ export interface PreLaunchGiftState {
   /** Which gift actually arrived. Only ever set once `status` is `SENT`. */
   emoji: string | null;
   /**
+   * Which gift the promo is set to send RIGHT NOW — the promise, where `emoji`
+   * is the history. An admin setting since 13.08.2026, when Telegram retired
+   * the gift the screen had hardcoded and the bot could not send it to anyone.
+   * Undefined = a backend too old to say; the screen falls back to its own
+   * default. @see ComingSoonGiftSteps
+   */
+  giftEmoji?: string | null;
+  /**
    * Friends that COUNT toward the ladder — invited *and* subscribed to the
    * channel, which is the rule the backend files claims by. The ladder draws
    * this, not the length of the friends list, or the screen would promise a
