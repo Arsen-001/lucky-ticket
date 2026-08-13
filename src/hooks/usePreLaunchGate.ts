@@ -6,6 +6,7 @@ import { comingSoonConfig } from '@/config/coming-soon.config';
 import { readDesktopAccessKey } from '@/config/device-gate.config';
 import { getTelegramWebApp } from '@/lib/telegram/telegram';
 import { getDeviceKind } from '@/lib/telegram/platform';
+import { getDeviceTimezone } from '@/utils/global/timezone.utils';
 
 export type PreLaunchStatus = 'checking' | 'gated' | 'open';
 
@@ -195,7 +196,13 @@ export function usePreLaunchGate(): PreLaunchGateState {
         const response = await fetch(`${base}/auth/telegram`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ initData }),
+          // The device zone goes with THIS sign-in too, not only the one in
+          // TelegramProvider — and while the gate is up this is the only one
+          // most people ever reach. As the comment above says, it is the call
+          // that creates the account; sending the zone from the other one
+          // alone would have left the whole pre-launch cohort country-less
+          // and made the panel's new column look broken rather than empty.
+          body: JSON.stringify({ initData, timezone: getDeviceTimezone() }),
         });
         if (response.ok) {
           const body: unknown = await response.json();
