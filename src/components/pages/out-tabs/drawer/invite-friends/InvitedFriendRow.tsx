@@ -190,7 +190,7 @@ export function InvitedFriendRow({
                     onToggleBranch?.(friend);
                   }}
                   className={twMerge(
-                    'flex flex-shrink-0 items-center gap-1 font-semibold tabular-nums',
+                    'tap-target relative flex flex-shrink-0 items-center gap-1 font-semibold tabular-nums',
                     brought > 0
                       ? 'text-electric-purple cursor-pointer rounded-md bg-white/5 px-1.5 py-0.5 hover:bg-white/10'
                       : 'text-pink-secondary/60'

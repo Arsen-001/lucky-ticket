@@ -40,7 +40,7 @@ export function MarketDiscountNote({ className }: MarketDiscountNoteProps) {
     <Link
       href={routes.market('status')}
       className={twMerge(
-        'bg-background-overlay flex items-center gap-2 rounded-xl border border-white/8 px-3 py-2 transition-transform active:scale-99',
+        'bg-background-overlay tap-target relative flex items-center gap-2 rounded-xl border border-white/8 px-3 py-2 transition-transform active:scale-99',
         className
       )}
     >

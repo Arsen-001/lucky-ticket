@@ -50,7 +50,7 @@ export function PageHeader({
                 iconSize={18}
                 variant="secondary"
                 {...extraButtonProps}
-                className={twMerge('p-2 text-sm', extraButtonProps?.className)}
+                className={twMerge('tap-target relative p-2 text-sm', extraButtonProps?.className)}
               />
             )}
       </div>

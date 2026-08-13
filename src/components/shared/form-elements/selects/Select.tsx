@@ -108,7 +108,7 @@ export function Select({
         ref={buttonRef}
         variant="purpleGradient"
         className={twMerge(
-          'inline-flex justify-between items-center w-full rounded-full border-none px-3 py-1.5 text-xs font-medium text-white-secondary',
+          'tap-target relative inline-flex justify-between items-center w-full rounded-full border-none px-3 py-1.5 text-xs font-medium text-white-secondary',
           className
         )}
         onClick={() => {
