@@ -171,7 +171,12 @@ export function EnginePreviewCard({
             e.stopPropagation();
             onClaim?.();
           }}
-          className="bg-pink-gradient flex-center relative w-full cursor-pointer gap-1.5 overflow-hidden rounded-lg px-2 py-2 transition-transform hover:brightness-110 active:scale-[0.97]"
+          // 44px by its own height, not by `tap-target`: the button needs
+          // `overflow-hidden` for the shine sweep, and that clips its own
+          // `::after` — the same trade the market price buttons made. It was
+          // 31px, and there are 274px of clear space above it, so nothing else
+          // has to move.
+          className="bg-pink-gradient flex-center relative min-h-11 w-full cursor-pointer gap-1.5 overflow-hidden rounded-lg px-2 py-2 transition-transform hover:brightness-110 active:scale-[0.97]"
         >
           <span
             aria-hidden

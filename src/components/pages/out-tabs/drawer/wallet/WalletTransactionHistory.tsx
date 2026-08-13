@@ -60,7 +60,9 @@ export function WalletTransactionHistory({
         </div>
       )}
 
-      <div className="flex gap-1.5 overflow-x-auto scrollbar-hidden -mx-1 px-1">
+      {/* py/-my so the 44px hit zone is not clipped by the strip: `overflow-x`
+          computes `overflow-y: auto` alongside it. Nothing moves on screen. */}
+      <div className="scrollbar-hidden -mx-1 -my-[7px] flex gap-1.5 overflow-x-auto px-1 py-[7px]">
         {FILTERS.map(f => (
           <button
             key={f}
@@ -70,7 +72,7 @@ export function WalletTransactionHistory({
               setPage(1);
             }}
             className={twMerge(
-              'flex-shrink-0 rounded-full px-3 py-1.5 text-[11px] font-bold uppercase tracking-wider transition-colors',
+              'tap-target relative flex-shrink-0 rounded-full px-3 py-1.5 text-[11px] font-bold uppercase tracking-wider transition-colors',
               filter === f
                 ? 'bg-pink-gradient text-white'
                 : 'bg-background-overlay/60 text-pink-secondary hover:text-white border border-white/5'

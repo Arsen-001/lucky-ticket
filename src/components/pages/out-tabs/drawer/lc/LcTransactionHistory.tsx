@@ -71,7 +71,11 @@ export function LcTransactionHistory({
         {!loading && <LcLifetimeTotals state={state} />}
       </div>
 
-      <div className="scrollbar-hidden -mx-1 flex gap-1.5 overflow-x-auto px-1">
+      {/* py/-my gives the chips' hit zone the 2px it needs on each side without
+          moving anything on screen. The strip's `overflow-x` computes
+          `overflow-y: auto` with it, and a zone taller than the strip is clipped
+          — which is why the note below used to say the zone was pointless here. */}
+      <div className="scrollbar-hidden -mx-1 -my-[2px] flex gap-1.5 overflow-x-auto px-1 py-[2px]">
         {FILTERS.map(f => (
           <button
             key={f}
@@ -81,12 +85,11 @@ export function LcTransactionHistory({
               setPage(1);
             }}
             className={twMerge(
-              // 40px, up from 28: these were the smallest targets on the screen.
-              // Not 44 — the chips are ~100px wide, and width is what makes a
-              // control easy to hit (the same reasoning `tap-target` is written
-              // on); the last 4px cost a whole row of history off the fold, and
-              // that zone would be clipped here anyway by the overflow-x strip.
-              'flex min-h-10 flex-shrink-0 items-center rounded-full px-4 text-[11px] font-bold uppercase tracking-wider transition-colors cursor-pointer',
+              // Drawn 40px, up from 28: these were the smallest targets on the
+              // screen. Still not drawn at 44 — the last 4px cost a whole row of
+              // history off the fold — but the FINGER now gets 44 anyway, via
+              // the invisible zone the strip above stopped clipping.
+              'tap-target relative flex min-h-10 flex-shrink-0 items-center rounded-full px-4 text-[11px] font-bold uppercase tracking-wider transition-colors cursor-pointer',
               filter === f
                 ? 'bg-pink-gradient text-white'
                 : 'bg-background-overlay/60 text-pink-secondary hover:text-white border border-white/5'

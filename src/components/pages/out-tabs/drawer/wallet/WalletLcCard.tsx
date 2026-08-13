@@ -89,7 +89,9 @@ export function WalletLcCard({ onConvert, locked }: WalletLcCardProps) {
         onClick={onConvert}
         disabled={isLoading}
         className={twMerge(
-          'relative mt-3 flex w-full items-center justify-center gap-2 rounded-xl px-4 py-3 text-[13px] font-extrabold uppercase tracking-wider text-white transition-transform active:scale-99 cursor-pointer disabled:cursor-not-allowed disabled:opacity-50',
+          // 43.5px drawn — half a pixel short of the 44 a finger is owed, and
+          // there are 65px of clear space below. The zone costs nothing here.
+          'tap-target relative mt-3 flex w-full items-center justify-center gap-2 rounded-xl px-4 py-3 text-[13px] font-extrabold uppercase tracking-wider text-white transition-transform active:scale-99 cursor-pointer disabled:cursor-not-allowed disabled:opacity-50',
           locked ? 'border border-white/10 bg-white/6 text-white/55' : 'bg-pink-gradient'
         )}
       >
