@@ -457,6 +457,20 @@ The corollary is worth stating: a green CI run says nothing about production
 here. CI tests commits; the deploy uploads files. `deploy:slice` is what makes
 the two describe the same thing.
 
+Since 13.08.2026 it also **asks GitHub what CI made of the exact commit** and
+prints the verdict before uploading. It refuses on one case only — a run that
+concluded `failure` — because that is the one that is never intentional:
+
+```bash
+npm run deploy:slice -- --no-ci-check   # ship anyway, verdict ignored
+```
+
+A commit CI has never seen (not pushed yet) does **not** block: slicing an
+unpushed commit is a sanctioned flow when `main` is ahead with other people's
+work, and the pre-commit hook has already run type-check, tests and a build on
+it. It ships with `едет непроверенным` printed, so the risk is stated rather
+than hidden.
+
 ---
 
 ## Key Project Notes
