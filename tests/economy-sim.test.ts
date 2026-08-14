@@ -34,6 +34,38 @@ import type { TicketType } from '@/types/types/ticket.types';
 const TIERS: TicketType[] = ['bronze', 'silver', 'gold', 'platinum', 'diamond'];
 
 /**
+ * Activity Points sitting in the one-time task catalog.
+ *
+ * Read from the backend's `milestones.data.ts`, which is the source of truth
+ * (`seedCatalog` overwrites the database from it on every boot), and skipped
+ * when the backend is not checked out beside this repo — the same arrangement
+ * `enum-parity` uses.
+ *
+ * Two traps, both of which have produced wrong catalog totals before:
+ *
+ *  - the reward type is `TICKETS`/`ACTIVITY_POINTS`, and a task can list
+ *    several rewards, so every match in a block has to be summed rather than
+ *    the first one taken;
+ *  - **disabled tasks live inside `/* … *\/`** and a naive scan counts them as
+ *    live. Comments are stripped first.
+ */
+const oneTimeCatalogAp = (): number | null => {
+  const path = resolve(process.cwd(), '../lucky-ticket-backend/src/tasks/milestones.data.ts');
+  if (!existsSync(path)) return null;
+
+  const src = readFileSync(path, 'utf8').replace(/\/\*[\s\S]*?\*\//g, '');
+  const starts = [...src.matchAll(/^\s{4}id: '([^']+)',/gm)];
+
+  let total = 0;
+  for (let i = 0; i < starts.length; i++) {
+    const block = src.slice(starts[i].index, starts[i + 1]?.index ?? src.length);
+    if (!/frequency: 'ONCE'/.test(block)) continue;
+    for (const m of block.matchAll(/'ACTIVITY_POINTS',\s*amount:\s*(\d+)/g)) total += Number(m[1]);
+  }
+  return total;
+};
+
+/**
  * Economy guardrail simulation (DOCS §14.2).
  *
  * Models a perfectly-played FREE account over a year: the welcome-pack Bronze
@@ -61,9 +93,21 @@ interface SimResult {
   ownedByTier: Record<TicketType, number>;
 }
 
-const simulateGreedyYear = (knobs: SimKnobs, days = 365): SimResult => {
+/**
+ * @param startingAp Activity Points the player already holds on day 1.
+ *
+ * Zero is the slow end of the AP gate: nothing but the daily baseline, which is
+ * what this sim assumed for its whole life. The fast end is the entire one-time
+ * task catalog banked up front. A real player is somewhere between — they work
+ * through the catalog while the days pass — and because more AP earlier can only
+ * open tier gates sooner, and sooner gates can only mean more production, the
+ * two ends bracket every real path. Running both is how the inflation bound
+ * gets tested against the world the player actually lives in rather than a
+ * slower one invented by leaving tasks out.
+ */
+const simulateGreedyYear = (knobs: SimKnobs, days = 365, startingAp = 0): SimResult => {
   let lc = 0;
-  let ap = 0;
+  let ap = startingAp;
   // Welcome pack: every account starts with one Bronze engine (DOCS §9.2).
   const owned: Record<TicketType, number> = {
     bronze: 1,
@@ -192,16 +236,35 @@ describe('economy simulation (DOCS §14.2 guardrails)', () => {
   });
 
   it('no money printer: a year of perfect greedy free play stays inside the inflation bound', () => {
-    const { productionByDay } = simulateGreedyYear(configuredKnobs());
-    const p30 = productionByDay[29];
-    const p365 = productionByDay[364];
-    // Sub-exponential growth: the whole back-335-days multiple stays small.
-    // (At the shipped knobs the sim lands at ≈×5 — ≈470k → ≈2.37M LC/day.)
-    expect(p365 / p30).toBeLessThanOrEqual(25);
-    // Absolute faucet bound: even a perfect player mints a bounded LC value
-    // (≈$2.37/day at the shipped scale — real withdrawal is separately capped at
-    // $10/day, DOCS §14.2). Bound is a loose sanity ceiling, not a tight target.
-    expect(p365 * appConfig.wallet.lcUsdRate).toBeLessThanOrEqual(50_000);
+    /**
+     * Both ends of the AP gate, not just the slow one.
+     *
+     * This assertion ran for months against `startingAp = 0` — a player who
+     * earns nothing but the daily baseline. That is not the player the catalog
+     * describes: the one-time tasks hold enough AP to clear Silver outright and
+     * very nearly Gold, so the real gate opens far sooner than the sim assumed,
+     * and "conservative" was pointing the wrong way. Banking the whole catalog
+     * on day 1 is the fastest the gate can possibly open; the truth sits
+     * between, and the bound has to hold at both ends.
+     */
+    const catalogAp = oneTimeCatalogAp();
+    const starts = catalogAp === null ? [0] : [0, catalogAp];
+
+    for (const startingAp of starts) {
+      const { productionByDay } = simulateGreedyYear(configuredKnobs(), 365, startingAp);
+      const p30 = productionByDay[29];
+      const p365 = productionByDay[364];
+      // Sub-exponential growth: the whole back-335-days multiple stays small.
+      // (At the shipped knobs the sim lands at ≈×5 — ≈470k → ≈2.37M LC/day.)
+      expect(p365 / p30, `growth at startingAp=${startingAp}`).toBeLessThanOrEqual(25);
+      // Absolute faucet bound: even a perfect player mints a bounded LC value
+      // (≈$2.37/day at the shipped scale — real withdrawal is separately capped
+      // at $10/day, DOCS §14.2). A loose sanity ceiling, not a tight target.
+      expect(
+        p365 * appConfig.wallet.lcUsdRate,
+        `faucet at startingAp=${startingAp}`
+      ).toBeLessThanOrEqual(50_000);
+    }
   });
 
   it('legacy flat pricing WAS a money printer (why engineRepeatPriceGrowth exists)', () => {
@@ -254,6 +317,49 @@ describe('economy simulation (DOCS §14.2 guardrails)', () => {
     for (let i = 1; i < daysPerLeg.length; i++) {
       expect(daysPerLeg[i]).toBeGreaterThan(daysPerLeg[i - 1]);
     }
+  });
+
+  /**
+   * The pacing above is a FLOOR, and for the first two tiers it is not the
+   * number anyone experiences.
+   *
+   * It divides each threshold gap by the daily baseline alone — the pace of a
+   * player who logs in, collects, and never finishes a milestone. The one-time
+   * catalog holds enough Activity Points to clear Silver several times over and
+   * to very nearly reach Gold on its own, so "Silver in ~15 days" describes a
+   * player who is deliberately ignoring most of the game.
+   *
+   * Nothing here argues for moving the thresholds — that is a live ladder and
+   * lowering a gate demotes whoever sits between the old one and the new. What
+   * this pins is the SHAPE, so the gap stops being invisible: if the catalog is
+   * rebalanced until it no longer covers Silver, or grows until it covers
+   * Platinum, that is a pacing change and it should be a decision rather than a
+   * side effect.
+   */
+  it('one-time tasks alone clear Silver and nearly reach Gold — the baseline pace is a floor', () => {
+    const catalogAp = oneTimeCatalogAp();
+    if (catalogAp === null) return; // backend not checked out; same as enum-parity
+
+    const t = GlobalConstants.apTierThresholds;
+
+    // A real total, not a plausible one: 1,593 AP across 110 live one-time
+    // tasks as of 14.08.2026. Pinned loosely so ordinary catalog edits pass and
+    // a structural change does not slip by unnoticed.
+    expect(catalogAp, 'one-time catalog AP').toBeGreaterThan(1_200);
+    expect(catalogAp, 'one-time catalog AP').toBeLessThan(2_200);
+
+    // Silver is not a time gate at all — the catalog covers it outright.
+    expect(catalogAp, 'catalog vs Silver').toBeGreaterThan(t.silver);
+
+    // Gold is within reach of the catalog alone; Platinum is firmly not.
+    expect(catalogAp / t.gold, 'catalog vs Gold').toBeGreaterThan(0.8);
+    expect(catalogAp / t.platinum, 'catalog vs Platinum').toBeLessThan(0.5);
+
+    // And the two halves are the same order of magnitude over a year, so
+    // neither can be left out of a pacing claim: the baseline pays ~35/day at
+    // Bronze, the catalog ~1.6k once.
+    const baselineYear = GlobalConstants.dailyBaselineApByTier.bronze * 365;
+    expect(catalogAp / baselineYear).toBeGreaterThan(0.05);
   });
 
   it('referral tier gate: requirements pinned, monotone, and enforced (DOCS §5.1)', () => {
