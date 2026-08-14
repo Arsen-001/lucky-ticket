@@ -400,7 +400,7 @@ export function TaskItemCard({
       {isCompactRow &&
       ((task.resetAt && !isLocked && !expired) ||
         (onTogglePin && !isCompleted && !isLocked && !isReady)) ? (
-        <div className="absolute top-1.5 right-1.5 z-[3] flex items-center gap-1.5">
+        <div className="absolute top-1.5 end-1.5 z-[3] flex items-center gap-1.5">
           {task.resetAt && !isLocked && !expired && (
             <span className="pointer-events-none flex items-center gap-1 text-[10px] text-white/40 font-medium tabular-nums">
               <Clock3 size={10} />
@@ -672,7 +672,7 @@ export function TaskItemCard({
                     also says where to tap. Unlabelled: the card's own dot already
                     announces it once, and twice is noise in a screen reader. */}
                 {hasClaimableSubStep && !isClaimAction && (
-                  <ClaimableDot className="absolute top-1.5 right-1.5" />
+                  <ClaimableDot className="absolute top-1.5 end-1.5" />
                 )}
               </button>
             )}

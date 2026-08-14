@@ -224,7 +224,7 @@ function AvatarTile({ avatar, selected, onSelect }: AvatarTileProps) {
       {selected && (
         <span
           className={twMerge(
-            'absolute bottom-1 right-1 flex-center h-5 w-5 rounded-full text-white shadow-md',
+            'absolute bottom-1 end-1 flex-center h-5 w-5 rounded-full text-white shadow-md',
             locked ? 'bg-error' : 'bg-electric-pink'
           )}
         >

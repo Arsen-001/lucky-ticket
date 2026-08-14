@@ -10,7 +10,7 @@ import { useAppTranslations } from '@/hooks/useAppTranslations';
 /**
  * The "new stake" button — pinned to the app column, not to the window.
  *
- * It used to be a bare `fixed right-5 bottom-14`, which anchors to the
+ * It used to be a bare `fixed end-5 bottom-14`, which anchors to the
  * VIEWPORT. The app renders as a centred `--app-max-w` (430px) column, so the
  * moment the window is wider than that the button tears away from the content
  * and rides the window's right edge: measured at 1728px wide it sat 629px to

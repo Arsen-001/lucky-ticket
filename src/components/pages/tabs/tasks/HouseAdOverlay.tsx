@@ -82,7 +82,7 @@ export function HouseAdOverlay() {
           type="button"
           onClick={() => finish('skipped')}
           aria-label={t('close')}
-          className="absolute right-3 top-3 z-10 flex-center h-8 w-8 rounded-full bg-black/25 text-white-secondary"
+          className="absolute end-3 top-3 z-10 flex-center h-8 w-8 rounded-full bg-black/25 text-white-secondary"
         >
           <X size={16} />
         </button>

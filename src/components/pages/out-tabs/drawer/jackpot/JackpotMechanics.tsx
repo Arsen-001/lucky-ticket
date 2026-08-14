@@ -30,7 +30,7 @@ export function JackpotMechanics() {
         type="button"
         onClick={() => setOpen(value => !value)}
         aria-expanded={open}
-        className="flex w-full items-center justify-between gap-3 py-4 text-left"
+        className="flex w-full items-center justify-between gap-3 py-4 text-start"
       >
         <span className="text-[13px] font-bold text-white">{t('how it works')}</span>
         <ChevronDown

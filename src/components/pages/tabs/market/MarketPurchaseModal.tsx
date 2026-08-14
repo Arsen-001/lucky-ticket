@@ -95,7 +95,7 @@ export function MarketPurchaseModal({
                 {renderIcon(64)}
               </div>
             )}
-            <div className="flex min-w-0 flex-1 flex-col gap-1 text-left">
+            <div className="flex min-w-0 flex-1 flex-col gap-1 text-start">
               <span className="text-sm font-bold text-white leading-tight">{title}</span>
               {description && (
                 <span className="text-[12px] leading-snug text-white/60">{description}</span>

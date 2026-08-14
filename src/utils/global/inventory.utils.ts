@@ -66,6 +66,110 @@ export const chipShardsForNextLevel = (currentLevel: number) => {
 
 export const tierRank = (tier: TicketType): number => QUALITY_TIERS.indexOf(tier);
 
+/**
+ * How long a time-limited chip has left, at the coarsest unit that still says
+ * something: days until the last day, then hours, then minutes.
+ */
+export const formatChipRemaining = (
+  remainingMs: number,
+  t: import('@/types/types/i18n.types').Dictionary
+) => {
+  const totalSeconds = Math.max(0, Math.floor(remainingMs / 1000));
+  const days = Math.floor(totalSeconds / 86400);
+  const hours = Math.floor((totalSeconds % 86400) / 3600);
+  const minutes = Math.floor((totalSeconds % 3600) / 60);
+  if (days > 0) return t('{n}d left', { n: days });
+  if (hours > 0) return t('{n}h left', { n: hours });
+  return t('{n}m left', { n: minutes });
+};
+
+/**
+ * Every engine the player owns, paired with the chips sitting in its two slots.
+ *
+ * The inventory screen needs the same list the equip modal builds (tickets →
+ * engines, strongest tier first), but with the installed chips resolved: a chip
+ * card that says "equipped" without saying WHERE is the one thing the old
+ * screen could not answer, and "1 of 4 slots" is only meaningful next to the
+ * engines that own those slots.
+ */
+export interface EngineSlotInfo {
+  id: string;
+  tier: TicketType;
+  /** 1-based number shown to the player — engines have no name of their own. */
+  number: number;
+  speedChip?: import('@/types/interfaces/inventory.interfaces').InventoryChip;
+  capacityChip?: import('@/types/interfaces/inventory.interfaces').InventoryChip;
+}
+
+export const buildEngineSlots = (
+  tickets: { blocked?: boolean; ticketType: TicketType; engines?: { id: string }[] }[] | undefined,
+  chips: import('@/types/interfaces/inventory.interfaces').InventoryChip[] | undefined
+): EngineSlotInfo[] =>
+  (tickets ?? [])
+    .filter(ticket => !ticket.blocked && ticket.engines?.length)
+    .flatMap(ticket =>
+      (ticket.engines ?? []).map(engine => ({ id: engine.id, tier: ticket.ticketType }))
+    )
+    .sort((a, b) => tierRank(b.tier) - tierRank(a.tier))
+    .map((engine, index) => ({
+      ...engine,
+      number: index + 1,
+      speedChip: findEquippedChip(chips, engine.id, 'speed'),
+      capacityChip: findEquippedChip(chips, engine.id, 'capacity'),
+    }));
+
+export interface InventoryTypeStats {
+  /** Summed effect of every chip of this type currently in a slot. */
+  totalPct: number;
+  /** Slots of this type filled, out of one per engine. */
+  filled: number;
+  slots: number;
+}
+
+export const inventoryTypeStats = (
+  slots: EngineSlotInfo[],
+  type: InventoryChipType
+): InventoryTypeStats => {
+  const installed = slots
+    .map(slot => (type === 'speed' ? slot.speedChip : slot.capacityChip))
+    .filter(Boolean);
+  return {
+    totalPct: installed.reduce((sum, chip) => sum + (chip?.effectPct ?? 0), 0),
+    filled: installed.length,
+    slots: slots.length,
+  };
+};
+
+/**
+ * Display order for a chip collection: what can be acted on first.
+ *
+ * A flat list in whatever order the backend returned buries the one chip whose
+ * upgrade is already paid for behind six that are not. Ready-to-level first,
+ * then the ones actually installed, then by tier and level.
+ */
+export const sortChipsForDisplay = (
+  chips: import('@/types/interfaces/inventory.interfaces').InventoryChip[],
+  shards: import('@/types/interfaces/inventory.interfaces').InventoryShardCount[]
+) =>
+  [...chips].sort((a, b) => {
+    const readyDelta =
+      Number(isChipReadyToLevelUp(b, shards)) - Number(isChipReadyToLevelUp(a, shards));
+    if (readyDelta !== 0) return readyDelta;
+    const equippedDelta = Number(!!b.equippedOnEngineId) - Number(!!a.equippedOnEngineId);
+    if (equippedDelta !== 0) return equippedDelta;
+    const tierDelta = tierRank(b.quality) - tierRank(a.quality);
+    if (tierDelta !== 0) return tierDelta;
+    return b.level - a.level;
+  });
+
+/** A chip whose next level is already paid for by the shards on hand. */
+export const isChipReadyToLevelUp = (
+  chip: import('@/types/interfaces/inventory.interfaces').InventoryChip,
+  shards: import('@/types/interfaces/inventory.interfaces').InventoryShardCount[]
+): boolean =>
+  (shards.find(s => s.type === chip.type && s.quality === chip.quality)?.count ?? 0) >=
+  chip.shardsForNextLevel;
+
 export const canEquipChipOnTier = (chipQuality: TicketType, engineTier: TicketType): boolean =>
   chipQuality === engineTier;
 

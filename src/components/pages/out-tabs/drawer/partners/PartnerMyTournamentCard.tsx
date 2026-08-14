@@ -50,7 +50,7 @@ export function PartnerMyTournamentCard({
     <div
       style={style}
       className={twMerge(
-        'bg-background-overlay border-l-electric-purple/60 flex items-center gap-3 rounded-2xl border-l-[3px] p-3',
+        'bg-background-overlay border-l-electric-purple/60 flex items-center gap-3 rounded-2xl border-s-[3px] p-3',
         className
       )}
     >

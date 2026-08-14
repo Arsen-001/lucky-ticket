@@ -124,7 +124,7 @@ export function LeaderboardListItem({
               {displayNameOf(entry)}
             </span>
             {isMe && (
-              <span className="bg-electric-pink/30 ml-0.5 inline-flex items-center rounded-full px-1.5 py-0.5 text-[9px] font-extrabold uppercase tracking-wider text-white">
+              <span className="bg-electric-pink/30 ms-0.5 inline-flex items-center rounded-full px-1.5 py-0.5 text-[9px] font-extrabold uppercase tracking-wider text-white">
                 {t('you')}
               </span>
             )}

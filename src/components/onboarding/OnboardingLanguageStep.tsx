@@ -90,7 +90,7 @@ export function OnboardingLanguageStep({ onConfirm }: OnboardingLanguageStepProp
             classNames={{ input: 'text-sm font-medium placeholder:text-white/45' }}
           />
 
-          <div className="main-scrollbar max-h-[42vh] overflow-y-auto pr-1">
+          <div className="main-scrollbar max-h-[42vh] overflow-y-auto pe-1">
             {filtered.length === 0 ? (
               <p className="py-8 text-center text-sm text-white/50">{t('no results found')}</p>
             ) : (
@@ -105,7 +105,7 @@ export function OnboardingLanguageStep({ onConfirm }: OnboardingLanguageStepProp
                         disabled={isPending}
                         style={{ animationDelay: `${staggerMs(index, 60)}ms` }}
                         className={twMerge(
-                          'animate-slide-in-bottom flex w-full items-center gap-3 rounded-2xl border p-3 text-left transition-all active:scale-99 disabled:opacity-60',
+                          'animate-slide-in-bottom flex w-full items-center gap-3 rounded-2xl border p-3 text-start transition-all active:scale-99 disabled:opacity-60',
                           isActive
                             ? 'border-electric-pink/60 bg-electric-pink/10'
                             : 'border-white/10 bg-background-overlay'

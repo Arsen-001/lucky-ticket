@@ -158,7 +158,7 @@ export function EngineSlotPickerModal({
                   type="button"
                   disabled={!!pendingId}
                   onClick={() => handlePickChip(chip)}
-                  className="flex items-center gap-3 rounded-xl border bg-black/20 px-3 py-2.5 text-left transition-colors hover:bg-black/35 disabled:cursor-default disabled:opacity-50"
+                  className="flex items-center gap-3 rounded-xl border bg-black/20 px-3 py-2.5 text-start transition-colors hover:bg-black/35 disabled:cursor-default disabled:opacity-50"
                   style={{
                     borderColor: `color-mix(in srgb, ${accent} 55%, transparent)`,
                   }}
@@ -202,7 +202,7 @@ export function EngineSlotPickerModal({
                   type="button"
                   disabled={!!pendingId}
                   onClick={() => handlePickBooster(booster)}
-                  className="flex items-center gap-3 rounded-xl border bg-black/20 px-3 py-2.5 text-left transition-colors hover:bg-black/35 disabled:cursor-default disabled:opacity-50"
+                  className="flex items-center gap-3 rounded-xl border bg-black/20 px-3 py-2.5 text-start transition-colors hover:bg-black/35 disabled:cursor-default disabled:opacity-50"
                   style={{
                     borderColor: `color-mix(in srgb, ${accent} 55%, transparent)`,
                   }}

@@ -55,7 +55,7 @@ export function MarketPurchaseSuccessModal({
               {renderItemIcon(44)}
             </div>
           )}
-          <div className="flex min-w-0 flex-1 flex-col gap-0.5 text-left">
+          <div className="flex min-w-0 flex-1 flex-col gap-0.5 text-start">
             {itemName && (
               <span className="text-[14px] font-extrabold leading-tight text-white">
                 {itemName}

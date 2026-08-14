@@ -63,7 +63,7 @@ export function EngineCubeSlot({
         }}
       >
         <span
-          className="flex-center absolute top-1 right-1 z-10 h-5 w-5 rounded-full border"
+          className="flex-center absolute top-1 end-1 z-10 h-5 w-5 rounded-full border"
           style={{ backgroundColor: accent, borderColor: 'rgba(0,0,0,0.6)' }}
         >
           <Plus size={12} strokeWidth={3} stroke="white" />
@@ -136,7 +136,7 @@ export function EngineCubeSlot({
           }}
           aria-label={t('unequip')}
           className={twMerge(
-            'tap-target flex-center absolute top-1 right-1 z-10 h-5 w-5 cursor-pointer rounded-full border bg-black/60 text-white/80 transition-colors hover:bg-black/80 hover:text-white'
+            'tap-target flex-center absolute top-1 end-1 z-10 h-5 w-5 cursor-pointer rounded-full border bg-black/60 text-white/80 transition-colors hover:bg-black/80 hover:text-white'
           )}
           style={{
             borderColor: `color-mix(in srgb, ${accent} 70%, transparent)`,

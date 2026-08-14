@@ -18,7 +18,7 @@ export function ModalCloseButton({ onClick, className, ...props }: ButtonProps) 
       // caller can still say something more specific.
       aria-label={t('close')}
       className={twMerge(
-        'absolute right-2 top-2 p-2 text-white/70 hover:text-white transition-colors',
+        'absolute end-2 top-2 p-2 text-white/70 hover:text-white transition-colors',
         className
       )}
       {...props}

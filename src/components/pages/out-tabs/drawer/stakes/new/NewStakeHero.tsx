@@ -189,7 +189,7 @@ export function NewStakeHero({
         />
 
         <div className="border-gold/30 bg-gold/10 mt-4 flex items-center justify-between rounded-xl border px-3 py-2.5">
-          <div className="flex min-w-0 items-center gap-2 text-left">
+          <div className="flex min-w-0 items-center gap-2 text-start">
             <div className="flex-center border-gold/40 bg-gold/20 h-7 w-7 rounded-full border">
               <Star size={12} className="text-gold" fill="currentColor" strokeWidth={0} />
             </div>
@@ -214,7 +214,7 @@ export function NewStakeHero({
               </div>
             </div>
           </div>
-          <div className="shrink-0 text-right leading-tight">
+          <div className="shrink-0 text-end leading-tight">
             <div className="text-gold text-[15px] font-extrabold tabular-nums">
               {fmtPct(aprPercent)}%
             </div>

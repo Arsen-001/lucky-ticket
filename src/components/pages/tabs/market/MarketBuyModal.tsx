@@ -57,7 +57,7 @@ export function MarketBuyModal({
                 (`MarketPurchaseModal`), so the identical purchase does not
                 shrink when it is made from the status page instead. */}
             <div className="flex-center size-20 shrink-0 rounded-2xl bg-white/5">{icon}</div>
-            <div className="flex flex-col gap-1 text-left">
+            <div className="flex flex-col gap-1 text-start">
               <span className="text-sm text-white/60 leading-[1.2]">{description}</span>
             </div>
           </div>

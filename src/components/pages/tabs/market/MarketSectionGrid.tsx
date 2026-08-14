@@ -67,7 +67,7 @@ export function MarketSectionGrid({
 
         <span
           aria-hidden
-          className="pointer-events-none absolute -bottom-1 left-0 right-0 h-px"
+          className="pointer-events-none absolute -bottom-1 start-0 end-0 h-px"
           style={{
             background: `linear-gradient(90deg, color-mix(in srgb, ${accent} 65%, transparent) 0%, transparent 60%)`,
           }}

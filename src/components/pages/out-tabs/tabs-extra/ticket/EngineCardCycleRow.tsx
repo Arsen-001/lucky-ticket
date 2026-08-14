@@ -148,7 +148,7 @@ export function EngineCardCycleRow({
                 ("Бронзовый билет"), and keeping the count here truncated the
                 pair to "Бронзовы…" — losing the number, the more useful half. */}
             {!compact && (
-              <span className="ml-1 tabular-nums text-white/65 font-bold">
+              <span className="ms-1 tabular-nums text-white/65 font-bold">
                 {pendingCount}/{capacity}
               </span>
             )}

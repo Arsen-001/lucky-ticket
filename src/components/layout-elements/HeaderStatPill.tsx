@@ -43,7 +43,7 @@ export function HeaderStatPill({
   dataTour,
 }: HeaderStatPillProps) {
   const baseClassName = twMerge(
-    'inline-flex h-7 shrink-0 items-center gap-1 rounded-full border bg-white/5 pl-0.5 pr-2.5 text-xs font-bold text-white backdrop-blur-sm',
+    'inline-flex h-7 shrink-0 items-center gap-1 rounded-full border bg-white/5 ps-0.5 pe-2.5 text-xs font-bold text-white backdrop-blur-sm',
     ACCENT_BORDER[accent]
   );
 

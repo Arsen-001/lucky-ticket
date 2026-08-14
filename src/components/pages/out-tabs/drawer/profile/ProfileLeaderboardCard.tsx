@@ -47,7 +47,7 @@ export function ProfileLeaderboardCard({ profile, loading }: ProfileLeaderboardC
           disabled={showSkeleton || !leaderboardEnabled}
           aria-label={leaderboardEnabled ? t('view leaderboard') : t('leaderboard locked title')}
           className={twMerge(
-            'bg-background-overlay relative flex items-center gap-2.5 rounded-2xl p-0 text-left transition-all',
+            'bg-background-overlay relative flex items-center gap-2.5 rounded-2xl p-0 text-start transition-all',
             !showSkeleton && leaderboardEnabled && 'cursor-pointer active:scale-99 hover:bg-white/4'
           )}
         >
@@ -55,7 +55,7 @@ export function ProfileLeaderboardCard({ profile, loading }: ProfileLeaderboardC
             <BoltIcon size={80} className="m-0 p-0" />
           </div>
 
-          <div className="-ml-4 flex flex-1 items-center justify-between py-3 pr-4">
+          <div className="-ms-4 flex flex-1 items-center justify-between py-3 pe-4">
             <div className="flex flex-col gap-0.5">
               <span className="text-[9px] font-extrabold uppercase tracking-wider text-white/45">
                 {t('activity points')}

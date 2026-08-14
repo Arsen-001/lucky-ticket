@@ -38,7 +38,7 @@ export function StakesHistoryRow({ entry, levels }: StakesHistoryRowProps) {
     >
       <span
         aria-hidden
-        className="absolute inset-y-0 left-0 w-0.5"
+        className="absolute inset-y-0 start-0 w-0.5"
         style={{ background: accent }}
       />
 

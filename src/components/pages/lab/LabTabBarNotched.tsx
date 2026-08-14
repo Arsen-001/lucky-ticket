@@ -96,12 +96,12 @@ export function LabTabBarNotched({ variant, className }: LabTabBarNotchedProps) 
         <>
           <span
             aria-hidden
-            className="bg-header absolute top-0 bottom-0 left-0 rounded-r-2xl"
+            className="bg-header absolute top-0 bottom-0 start-0 rounded-e-2xl"
             style={{ width: `calc(${centre}% - ${GAP_W / 2}px)`, transition: travel }}
           />
           <span
             aria-hidden
-            className="bg-header absolute top-0 right-0 bottom-0 rounded-l-2xl"
+            className="bg-header absolute top-0 end-0 bottom-0 rounded-s-2xl"
             style={{ left: `calc(${centre}% + ${GAP_W / 2}px)`, transition: travel }}
           />
         </>
@@ -109,7 +109,7 @@ export function LabTabBarNotched({ variant, className }: LabTabBarNotchedProps) 
         <>
           <span
             aria-hidden
-            className="bg-header absolute top-0 bottom-0 left-0"
+            className="bg-header absolute top-0 bottom-0 start-0"
             style={{ width: `calc(${centre}% - ${PIECE_W / 2}px)`, transition: travel }}
           />
           <svg
@@ -124,7 +124,7 @@ export function LabTabBarNotched({ variant, className }: LabTabBarNotchedProps) 
           </svg>
           <span
             aria-hidden
-            className="bg-header absolute top-0 right-0 bottom-0"
+            className="bg-header absolute top-0 end-0 bottom-0"
             style={{ left: `calc(${centre}% + ${PIECE_W / 2}px)`, transition: travel }}
           />
         </>

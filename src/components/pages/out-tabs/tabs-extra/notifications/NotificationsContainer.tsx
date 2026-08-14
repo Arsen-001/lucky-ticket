@@ -131,7 +131,7 @@ export function NotificationsContainer() {
                 skeleton={<Skeleton variant="line" textSize="xs" className="w-32" />}
               >
                 <h3
-                  className="text-pink-secondary ml-1 animate-slide-in-bottom text-[10px] font-bold uppercase tracking-widest"
+                  className="text-pink-secondary ms-1 animate-slide-in-bottom text-[10px] font-bold uppercase tracking-widest"
                   style={{ animationDelay: `${staggerMs(groupOffset)}ms` }}
                 >
                   {getNotificationsGroupTitle(date, t)}

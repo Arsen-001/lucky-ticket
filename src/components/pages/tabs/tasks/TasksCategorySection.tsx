@@ -282,7 +282,7 @@ export function TasksCategorySection({
               >
                 {t('see more')}
                 {hasMore && (
-                  <span className="text-white ml-1">
+                  <span className="text-white ms-1">
                     (+{Math.min(collapsible.step, remaining)})
                   </span>
                 )}
@@ -308,7 +308,7 @@ export function TasksCategorySection({
                 )}
               >
                 {t('see all')}
-                {hasMore && <span className="text-white ml-1">({remaining})</span>}
+                {hasMore && <span className="text-white ms-1">({remaining})</span>}
               </button>
             </div>
           )}

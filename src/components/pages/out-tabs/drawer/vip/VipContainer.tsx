@@ -153,7 +153,7 @@ export function VipContainer() {
           confirmText={isVIP ? t('upgrade vip') : t('unlock vip')}
           icon={<StatusIcon type={vipStatus.statusType} />}
           description={
-            <div className="flex flex-col gap-1 text-left">
+            <div className="flex flex-col gap-1 text-start">
               <span className="text-white font-bold">{vipStatus.name}</span>
               <span className="text-xs text-white/60 leading-relaxed">
                 {isVIP
@@ -165,7 +165,7 @@ export function VipContainer() {
         >
           {offerRows.length > 0 && (
             <div className="flex flex-col gap-2.5 bg-white/5 p-3.5 rounded-xl border border-white/5">
-              <span className="text-[10px] text-white/40 uppercase font-bold tracking-widest text-left px-1">
+              <span className="text-[10px] text-white/40 uppercase font-bold tracking-widest text-start px-1">
                 {isVIP
                   ? t('what level {level} adds', { level: vipLevel + 1 })
                   : t('included privileges')}

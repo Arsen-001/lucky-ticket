@@ -102,7 +102,7 @@ export function Select({
   }, [focusedIndex, isOpen]);
 
   return (
-    <div className={twMerge('relative inline-block text-left', className)} ref={selectRef}>
+    <div className={twMerge('relative inline-block text-start', className)} ref={selectRef}>
       {/* Select button */}
       <Button
         ref={buttonRef}
@@ -125,7 +125,7 @@ export function Select({
           {selectedOption ? selectedOption.label || selectedOption.value : placeholder}
         </span>
         <ChevronDown
-          className={`-mr-1 ml-2 h-4.5 w-4.5 transition-transform duration-200 ${isOpen ? 'rotate-180' : 'rotate-0'}`}
+          className={`-me-1 ms-2 h-4.5 w-4.5 transition-transform duration-200 ${isOpen ? 'rotate-180' : 'rotate-0'}`}
           aria-hidden="true"
         />
       </Button>

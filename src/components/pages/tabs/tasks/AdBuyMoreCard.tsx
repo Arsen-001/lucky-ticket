@@ -39,7 +39,7 @@ export function AdBuyMoreCard({ extra, onOpen, className }: AdBuyMoreCardProps) 
         <ShoppingCart size={16} />
       </span>
 
-      <span className="min-w-0 flex-1 text-left">
+      <span className="min-w-0 flex-1 text-start">
         <span className="block text-sm leading-tight font-bold text-white">
           {soldOut ? t('extra ads sold out') : t('buy more ads')}
         </span>

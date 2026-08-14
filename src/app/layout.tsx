@@ -150,7 +150,7 @@ export default async function RootLayout({ children }: ChildrenProps) {
           {/* The app's sky, behind every screen. Mounted here rather than in a
               route layout so drawer and auth screens get it too, and pinned to
               the phone column so it never spills into the desktop gutters. */}
-          <AtmosphericBackground className="left-[var(--app-gutter)] right-[var(--app-gutter)]" />
+          <AtmosphericBackground className="start-[var(--app-gutter)] end-[var(--app-gutter)]" />
           <div id="scroll-container">
             <NextIntlClientProvider>
               {/* Dates speak the reader's language from the first paint — it

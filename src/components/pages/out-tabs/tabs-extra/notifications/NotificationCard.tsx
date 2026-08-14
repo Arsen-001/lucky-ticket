@@ -42,7 +42,7 @@ export function NotificationCard({
       }
       style={{ animationDelay: `${staggerMs(index)}ms` }}
       className={twMerge(
-        'group relative flex w-full animate-slide-in-bottom items-start gap-3 rounded-2xl border p-3 text-left transition-all',
+        'group relative flex w-full animate-slide-in-bottom items-start gap-3 rounded-2xl border p-3 text-start transition-all',
         isUnread
           ? 'border-electric-pink/25 bg-electric-pink/5 hover:bg-electric-pink/10'
           : 'bg-background-overlay/50 border-white/5 hover:bg-white/5'

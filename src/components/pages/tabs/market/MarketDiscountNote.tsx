@@ -62,7 +62,7 @@ export function MarketDiscountNote({ className }: MarketDiscountNoteProps) {
           {t('get market discount {pct}', { pct: GlobalConstants.luckyPlayerMarketDiscountPct })}
         </span>
       )}
-      <ChevronRight size={15} className="text-pink-secondary ml-auto shrink-0" />
+      <ChevronRight size={15} className="text-pink-secondary ms-auto shrink-0" />
     </Link>
   );
 }

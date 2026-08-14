@@ -60,7 +60,7 @@ export function ComingSoonFriendRow({
         )}
       </span>
 
-      <span className="min-w-0 flex-1 truncate text-left text-[13px] font-bold text-white">
+      <span className="min-w-0 flex-1 truncate text-start text-[13px] font-bold text-white">
         {username}
       </span>
 

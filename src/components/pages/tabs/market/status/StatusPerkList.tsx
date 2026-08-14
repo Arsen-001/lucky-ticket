@@ -62,7 +62,7 @@ export function StatusPerkList({
             <div className="flex-available flex min-w-0 flex-wrap items-baseline gap-x-3">
               <span
                 className={twMerge(
-                  'text-left text-white/85 leading-relaxed',
+                  'text-start text-white/85 leading-relaxed',
                   isSmall ? 'text-xs' : 'text-sm',
                   classNames?.label
                 )}
@@ -72,7 +72,7 @@ export function StatusPerkList({
               {row.tiers ? (
                 <span
                   className={twMerge(
-                    'ml-auto flex flex-wrap items-center justify-end gap-x-2.5 gap-y-1 font-bold text-white',
+                    'ms-auto flex flex-wrap items-center justify-end gap-x-2.5 gap-y-1 font-bold text-white',
                     isSmall ? 'text-xs' : 'text-sm',
                     classNames?.value
                   )}
@@ -88,7 +88,7 @@ export function StatusPerkList({
                 row.value && (
                   <span
                     className={twMerge(
-                      'ml-auto flex flex-wrap items-baseline justify-end gap-x-1 text-right font-bold text-white',
+                      'ms-auto flex flex-wrap items-baseline justify-end gap-x-1 text-end font-bold text-white',
                       isSmall ? 'text-xs' : 'text-sm',
                       classNames?.value
                     )}

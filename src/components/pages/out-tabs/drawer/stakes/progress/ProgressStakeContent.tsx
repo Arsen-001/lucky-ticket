@@ -118,7 +118,7 @@ export function ProgressStakeContent({ stakeId }: ProgressStakeContentProps) {
             ready={false}
           />
 
-          <div className="mt-5 grid grid-cols-2 gap-2.5 text-left">
+          <div className="mt-5 grid grid-cols-2 gap-2.5 text-start">
             <div className="rounded-xl border border-white/5 bg-black/30 px-3 py-2.5">
               <div className="text-pink-secondary text-[9px] font-bold uppercase tracking-wider">
                 {t('locked')}

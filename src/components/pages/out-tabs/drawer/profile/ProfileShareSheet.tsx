@@ -177,7 +177,7 @@ export function ProfileShareSheet({ open, onClose, url, username }: ProfileShare
                   key={option.key}
                   type="button"
                   onClick={option.onClick}
-                  className="animate-slide-in-bottom flex items-center gap-3 rounded-xl border border-white/8 bg-white/4 p-3 text-left transition-all active:scale-99 hover:bg-white/8"
+                  className="animate-slide-in-bottom flex items-center gap-3 rounded-xl border border-white/8 bg-white/4 p-3 text-start transition-all active:scale-99 hover:bg-white/8"
                   style={{ animationDelay: `${staggerMs(index, 60)}ms` }}
                 >
                   <span

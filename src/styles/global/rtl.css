@@ -1,0 +1,74 @@
+/*
+ * Right-to-left corrections that logical properties cannot make on their own.
+ *
+ * The bulk of the layout follows `dir` already: the physical Tailwind
+ * utilities (`ml-`, `pl-`, `left-`, `text-left`, …) were converted to their
+ * logical twins, which resolve identically under `dir="ltr"` and mirror
+ * themselves under `dir="rtl"`. What is left here is everything CSS logical
+ * properties do NOT cover.
+ */
+
+/*
+ * Directional icons.
+ *
+ * A chevron pointing right means "forward" in a left-to-right language and
+ * "backward" in a right-to-left one — the glyph has to mirror, and no logical
+ * property does that. lucide-react stamps each icon with its own class
+ * (`lucide-chevron-right`, verified in `createLucideIcon.js`), so one rule
+ * covers all 101 directional icons in the app without touching a single
+ * component.
+ *
+ * Purely vertical icons (chevron-up/down) and non-directional ones are
+ * deliberately absent: mirroring them would be wrong.
+ */
+[dir='rtl'] .lucide-chevron-left,
+[dir='rtl'] .lucide-chevron-right,
+[dir='rtl'] .lucide-chevrons-left,
+[dir='rtl'] .lucide-chevrons-right,
+[dir='rtl'] .lucide-arrow-left,
+[dir='rtl'] .lucide-arrow-right,
+[dir='rtl'] .lucide-arrow-up-right,
+[dir='rtl'] .lucide-arrow-up-left,
+[dir='rtl'] .lucide-arrow-down-right,
+[dir='rtl'] .lucide-arrow-down-left,
+[dir='rtl'] .lucide-move-left,
+[dir='rtl'] .lucide-move-right,
+[dir='rtl'] .lucide-corner-down-left,
+[dir='rtl'] .lucide-corner-down-right,
+[dir='rtl'] .lucide-log-out,
+[dir='rtl'] .lucide-external-link,
+[dir='rtl'] .lucide-reply,
+[dir='rtl'] .lucide-share-2,
+[dir='rtl'] .lucide-trending-up,
+[dir='rtl'] .lucide-trending-down {
+  transform: scaleX(-1);
+}
+
+/*
+ * Numbers stay left-to-right inside right-to-left text.
+ *
+ * The Unicode bidi algorithm mostly handles this, but a run that begins with a
+ * digit and mixes punctuation — `1 234,56 LC`, `+50%`, `12/31` — can flip its
+ * pieces around and read as a different number. Isolating the digits keeps the
+ * value intact regardless of the surrounding direction.
+ *
+ * The `latn` numbering system is enforced separately in the formatters: an
+ * Arabic reader sees `1,234` and not `١٢٣٤`, by explicit decision.
+ */
+[dir='rtl'] .tabular-nums,
+[dir='rtl'] [data-numeric] {
+  unicode-bidi: isolate;
+  direction: ltr;
+}
+
+/*
+ * Progress bars and meters fill from the reading edge.
+ *
+ * A bar whose width grows from `left` looks like it is draining rather than
+ * filling to a right-to-left reader. The fills in this app are absolutely
+ * positioned with a logical inset already; this covers the ones that grow from
+ * a transform instead, where `scaleX` has no logical equivalent.
+ */
+[dir='rtl'] [data-fill-origin] {
+  transform-origin: right center;
+}

@@ -100,12 +100,12 @@ export function MarketHeroCard({
           <img
             src={imageUrl}
             alt={title}
-            className="market-hero-art absolute top-0 right-0 aspect-square h-full object-cover"
+            className="market-hero-art absolute top-0 end-0 aspect-square h-full object-cover"
           />
           <span aria-hidden className="market-hero-scrim" />
         </>
       ) : (
-        <div className="absolute inset-0 flex items-center justify-end pr-5">
+        <div className="absolute inset-0 flex items-center justify-end pe-5">
           <div className="h-[124px] w-[124px]">{renderIcon(116)}</div>
         </div>
       )}
@@ -114,7 +114,7 @@ export function MarketHeroCard({
           the offer is a stamp on it, and the room it used to take belongs to
           saying what the thing does. */}
       {(isNew || discountPct) && (
-        <div className="absolute top-3 right-3 z-2 flex items-center gap-1.5">
+        <div className="absolute top-3 end-3 z-2 flex items-center gap-1.5">
           {isNew && (
             <span className="bg-electric-pink rounded-full px-2 py-0.5 text-[9px] leading-none font-extrabold tracking-[0.1em] text-white uppercase">
               {t('new')}
@@ -128,7 +128,7 @@ export function MarketHeroCard({
         </div>
       )}
 
-      <div className="absolute inset-y-0 left-0 z-2 flex w-[68%] flex-col justify-center gap-2 p-4">
+      <div className="absolute inset-y-0 start-0 z-2 flex w-[68%] flex-col justify-center gap-2 p-4">
         <div className="flex min-w-0 flex-col gap-1">
           {/* Two lines: a shard's full name ("Diamond Capacity Shard") does not
               fit one, and the truncated version named a tier, not an item. */}

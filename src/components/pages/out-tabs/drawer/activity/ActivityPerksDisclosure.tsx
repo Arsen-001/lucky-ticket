@@ -30,7 +30,7 @@ export function ActivityPerksDisclosure({ tier, nextTier, refGap }: ActivityPerk
         type="button"
         onClick={() => setOpen(value => !value)}
         aria-expanded={open}
-        className="flex min-h-11 w-full cursor-pointer items-center justify-between gap-3 py-3 text-left"
+        className="flex min-h-11 w-full cursor-pointer items-center justify-between gap-3 py-3 text-start"
       >
         <span className="text-[14px] font-bold text-white">{t('what your tier unlocks')}</span>
         <ChevronDown

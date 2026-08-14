@@ -77,14 +77,14 @@ export function MarketUniversalCard({
         }
       }}
       className={twMerge(
-        'task-card-default bg-background-overlay relative flex h-full flex-col gap-2 overflow-hidden rounded-2xl p-3 text-left transition-transform active:scale-99 hover:brightness-110',
+        'task-card-default bg-background-overlay relative flex h-full flex-col gap-2 overflow-hidden rounded-2xl p-3 text-start transition-transform active:scale-99 hover:brightness-110',
         !cardClickable && 'cursor-default hover:brightness-100',
         cardClickable && 'cursor-pointer',
         className
       )}
     >
       {(isNew || discountPct || badge) && (
-        <div className="pointer-events-none absolute right-2 top-2 z-3 flex flex-col items-end gap-1">
+        <div className="pointer-events-none absolute end-2 top-2 z-3 flex flex-col items-end gap-1">
           {badge}
           {isNew && (
             <span className="bg-electric-pink rounded-full px-1.5 py-0.5 text-[9px] font-extrabold uppercase tracking-wider text-white">

@@ -183,7 +183,7 @@ export function LeaderboardPodium({
               loading={loading}
               onOpenCard={onOpenCard}
               meId={meId}
-              className="absolute bottom-3 left-2"
+              className="absolute bottom-3 start-2"
             />
             <PodiumSlot
               rank={5}
@@ -191,7 +191,7 @@ export function LeaderboardPodium({
               loading={loading}
               onOpenCard={onOpenCard}
               meId={meId}
-              className="absolute bottom-3 right-2"
+              className="absolute bottom-3 end-2"
             />
           </>
         )}
@@ -201,7 +201,7 @@ export function LeaderboardPodium({
           loading={loading}
           onOpenCard={onOpenCard}
           meId={meId}
-          className={twMerge('absolute', isTop3Only ? 'left-3 bottom-6' : 'left-1 top-6')}
+          className={twMerge('absolute', isTop3Only ? 'start-3 bottom-6' : 'start-1 top-6')}
         />
         <PodiumSlot
           rank={3}
@@ -209,7 +209,7 @@ export function LeaderboardPodium({
           loading={loading}
           onOpenCard={onOpenCard}
           meId={meId}
-          className={twMerge('absolute', isTop3Only ? 'right-3 bottom-6' : 'right-1 top-6')}
+          className={twMerge('absolute', isTop3Only ? 'end-3 bottom-6' : 'end-1 top-6')}
         />
         <PodiumSlot
           rank={1}

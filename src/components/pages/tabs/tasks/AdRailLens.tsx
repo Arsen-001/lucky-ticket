@@ -110,7 +110,7 @@ export function AdRailLens({
             line nobody asked for. `truncate` above is the last resort on a rail
             too narrow for both strings — an ellipsis inside the border, never a
             spill outside it. */}
-        <span className="ml-auto shrink-0 whitespace-nowrap tabular-nums">{status}</span>
+        <span className="ms-auto shrink-0 whitespace-nowrap tabular-nums">{status}</span>
       </div>
 
       <AdRewardRow rewards={slot.rewards} muted={slot.watched} className="mt-1.5" />

@@ -96,12 +96,12 @@ export function TasksFrequencyTabs({
         {underline && (
           <span
             aria-hidden
-            // `left-0` is load-bearing: without an explicit inset an absolutely
+            // `start-0` is load-bearing: without an explicit inset an absolutely
             // positioned child falls back to its static position, which inside
             // a `justify-center` flex row is the centre — so the measured
             // offsets would be applied on top of that and the bar would sit
             // off past the last tab.
-            className="bg-pink-gradient shadow-electric-pink/40 pointer-events-none absolute -bottom-px left-0 h-[3px] rounded-full shadow-[0_0_10px] transition-[transform,width] duration-[400ms] ease-[cubic-bezier(0.22,1,0.36,1)]"
+            className="bg-pink-gradient shadow-electric-pink/40 pointer-events-none absolute -bottom-px start-0 h-[3px] rounded-full shadow-[0_0_10px] transition-[transform,width] duration-[400ms] ease-[cubic-bezier(0.22,1,0.36,1)]"
             style={{ width: underline.width, transform: `translateX(${underline.left}px)` }}
           />
         )}

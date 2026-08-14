@@ -77,7 +77,7 @@ export function InvitedFriendRow({
       onClick={rowAction}
       style={style}
       className={twMerge(
-        'group relative flex flex-col gap-2 rounded-2xl border p-2.5 text-left transition-all',
+        'group relative flex flex-col gap-2 rounded-2xl border p-2.5 text-start transition-all',
         claimableNow
           ? 'border-gold/15 bg-gold/3 hover:bg-gold/8 cursor-pointer shadow-[0_0_10px_rgba(248,189,62,0.10)] active:scale-99'
           : 'bg-background-overlay/50 border-white/5',
@@ -238,11 +238,11 @@ export function InvitedFriendRow({
                     type={type}
                     width={22}
                     height={22}
-                    className="-ml-2 drop-shadow-md first:ml-0"
+                    className="-ms-2 drop-shadow-md first:ms-0"
                   />
                 ))}
                 {legacyTickets.length > 2 && (
-                  <span className="text-pink-secondary ml-0.5 text-[10px] font-bold">
+                  <span className="text-pink-secondary ms-0.5 text-[10px] font-bold">
                     +{legacyTickets.length - 2}
                   </span>
                 )}

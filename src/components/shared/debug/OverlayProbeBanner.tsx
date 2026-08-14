@@ -29,7 +29,7 @@ export function OverlayProbeBanner() {
     // what this is used to tap, so a read-out sitting on top of it would block
     // the gesture it exists to measure. Only `stop` takes input.
     <div
-      className="pointer-events-none fixed left-2 right-2 z-[200] flex flex-col gap-1 rounded-lg p-3 font-mono text-[11px] leading-tight text-white"
+      className="pointer-events-none fixed start-2 end-2 z-[200] flex flex-col gap-1 rounded-lg p-3 font-mono text-[11px] leading-tight text-white"
       style={{
         bottom: 'calc(5rem + var(--tg-inset-bottom) + 0.5rem)',
         backgroundColor: 'rgba(126,40,40,0.96)',

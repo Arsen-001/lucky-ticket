@@ -47,7 +47,7 @@ export function LabTabBarSignature({ variant, className }: LabTabBarSignaturePro
   if (variant === 'ticket') {
     return (
       <div className={twMerge(SHELL, 'lab-tab-ticket pt-0', className)}>
-        <span aria-hidden className="lab-tab-tear absolute top-1.5 right-0 left-0 h-px" />
+        <span aria-hidden className="lab-tab-tear absolute top-1.5 end-0 start-0 h-px" />
         {TABS.map(({ key, Icon }, index) => {
           const isActive = active === key;
           return (
@@ -63,13 +63,13 @@ export function LabTabBarSignature({ variant, className }: LabTabBarSignaturePro
               {index > 0 && (
                 <span
                   aria-hidden
-                  className="lab-tab-perforation absolute top-1 bottom-1 left-0 w-px"
+                  className="lab-tab-perforation absolute top-1 bottom-1 start-0 w-px"
                 />
               )}
               {isActive && (
                 <span
                   aria-hidden
-                  className="lab-tab-tear-lit absolute top-1.5 right-0 left-0 h-px"
+                  className="lab-tab-tear-lit absolute top-1.5 end-0 start-0 h-px"
                 />
               )}
               <Icon
@@ -99,7 +99,7 @@ export function LabTabBarSignature({ variant, className }: LabTabBarSignaturePro
   if (variant === 'ball') {
     return (
       <div className={twMerge(SHELL, 'overflow-hidden pt-5', className)}>
-        <span aria-hidden className="lab-tab-rail absolute top-2 right-4 left-4 h-px" />
+        <span aria-hidden className="lab-tab-rail absolute top-2 end-4 start-4 h-px" />
         <span
           aria-hidden
           className="lab-tab-beam pointer-events-none absolute top-2 bottom-0 w-24"

@@ -169,7 +169,7 @@ export function ProfileHero({ profile, loading, isPreview, onTogglePreview }: Pr
             drag surface, and at z-2 they sat over these two buttons and ate the
             taps — measured with elementFromPoint, both buttons lost their own
             centre to a `lucide-star`. */}
-        <div className="absolute right-4 top-4 z-4 flex flex-col items-end gap-2">
+        <div className="absolute end-4 top-4 z-4 flex flex-col items-end gap-2">
           {showPreviewToggle && (
             <button
               type="button"

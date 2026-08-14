@@ -37,7 +37,7 @@ export function LabTournamentBoardRow({ tournament }: LabTournamentBoardRowProps
         {participantsCount ?? 0}/{teamSize ?? '∞'}
       </span>
 
-      <span className="w-[62px] shrink-0 text-right text-[13px] leading-none font-extrabold tabular-nums">
+      <span className="w-[62px] shrink-0 text-end text-[13px] leading-none font-extrabold tabular-nums">
         <GoldenText>
           <span className="inline-flex items-center gap-1">
             {formatCompact(prizePool)}

@@ -144,7 +144,7 @@ export function ProfileSendTicketModal({
                       )}
                     >
                       <TicketOverlap type={tt} width={28} height={20} />
-                      <span className="flex min-w-0 flex-col text-left leading-tight">
+                      <span className="flex min-w-0 flex-col text-start leading-tight">
                         <span className="text-[12px] font-bold text-white">
                           {t(TIER_LABEL_KEY[tt])}
                         </span>

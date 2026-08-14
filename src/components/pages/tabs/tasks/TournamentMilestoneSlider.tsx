@@ -470,7 +470,7 @@ function MilestoneCard({
             <Lock size={12} className="text-white/40" />
           </div>
         ) : isReady ? (
-          <ClaimableDot label={t('something to claim')} className="mt-1 mr-1" />
+          <ClaimableDot label={t('something to claim')} className="mt-1 me-1" />
         ) : hasDestination ? (
           <div className="flex-center w-6 h-6 rounded-full bg-electric-pink/15 border border-electric-pink/30 shrink-0">
             <ChevronRight size={12} className="text-electric-pink" strokeWidth={2.5} />

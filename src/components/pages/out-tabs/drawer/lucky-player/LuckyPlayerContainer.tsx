@@ -135,7 +135,7 @@ export function LuckyPlayerContainer() {
           confirmText={isLuckyPlayer ? t('extend lucky player') : t('lucky player get')}
           icon={<StatusIcon type={luckyPlayerStatus.statusType} />}
           description={
-            <div className="flex flex-col gap-1 text-left">
+            <div className="flex flex-col gap-1 text-start">
               <span className="text-white font-bold">{luckyPlayerStatus.name}</span>
               {durationDays && (
                 <span className="text-xs text-white/60 leading-relaxed">
@@ -149,7 +149,7 @@ export function LuckyPlayerContainer() {
         >
           {perkRows.length > 0 && (
             <div className="flex flex-col gap-2.5 bg-white/5 p-3.5 rounded-xl border border-white/5">
-              <span className="text-[10px] text-white/40 uppercase font-bold tracking-widest text-left px-1">
+              <span className="text-[10px] text-white/40 uppercase font-bold tracking-widest text-start px-1">
                 {t('included privileges')}
               </span>
               <StatusPerkList rows={perkRows} isSmall />

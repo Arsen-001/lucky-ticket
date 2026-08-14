@@ -44,7 +44,7 @@ export function TestQuestRewardPanel({
           <button
             type="button"
             onClick={onBackToToday}
-            className="flex-center ml-auto gap-1 rounded-full bg-electric-pink/20 px-2 py-1 text-[10px] font-bold uppercase tracking-wider text-electric-pink active:scale-95"
+            className="flex-center ms-auto gap-1 rounded-full bg-electric-pink/20 px-2 py-1 text-[10px] font-bold uppercase tracking-wider text-electric-pink active:scale-95"
           >
             <CornerUpLeft size={10} />
             {t('today')}

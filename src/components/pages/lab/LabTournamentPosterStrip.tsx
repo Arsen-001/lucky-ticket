@@ -23,7 +23,7 @@ export function LabTournamentPosterStrip({ tournaments }: LabTournamentPosterStr
     <div className="flex flex-col gap-2">
       <LabTournamentsHeading count={items.length} />
 
-      <div className="scrollbar-hidden flex snap-x snap-mandatory scroll-pl-4 gap-2.5 overflow-x-auto px-4 pb-1">
+      <div className="scrollbar-hidden flex snap-x snap-mandatory scroll-ps-4 gap-2.5 overflow-x-auto px-4 pb-1">
         {items.map((tournament, index) => (
           <div
             key={tournament.id}

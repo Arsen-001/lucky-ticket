@@ -15,7 +15,7 @@ export function FilterPills({ options, value, onChange }: FilterPillsProps) {
     // buys the zone its room and the negative margin gives the layout back, so
     // nothing on screen moves.
     <div className="-mx-5 -my-[7px] overflow-x-auto px-5 py-[7px] scrollbar-hidden">
-      <div className="flex w-max gap-2 pr-3">
+      <div className="flex w-max gap-2 pe-3">
         {options.map(opt => (
           <button
             key={opt.value}

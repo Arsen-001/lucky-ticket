@@ -100,7 +100,7 @@ export function AchievementCard({
       {isLocked ? (
         <span
           aria-hidden
-          className="absolute right-1.5 top-1.5 z-2 flex h-5 w-5 items-center justify-center rounded-full border border-white/15 bg-black/55 text-white/85 backdrop-blur-sm"
+          className="absolute end-1.5 top-1.5 z-2 flex h-5 w-5 items-center justify-center rounded-full border border-white/15 bg-black/55 text-white/85 backdrop-blur-sm"
         >
           <Lock size={10} strokeWidth={2.6} />
         </span>
@@ -119,7 +119,7 @@ export function AchievementCard({
           // past the card edge, which is inside the grid's 12px gutter: it
           // never touches the neighbouring card, only the corner of its own,
           // and that corner is where the bookmark already sits.
-          className="tap-target absolute right-0 top-0 z-2 flex h-7.5 w-7.5 cursor-pointer items-center justify-center rounded-full border border-white/15 bg-black/55 backdrop-blur-sm transition-colors hover:border-electric-pink/50 hover:bg-electric-pink/15"
+          className="tap-target absolute end-0 top-0 z-2 flex h-7.5 w-7.5 cursor-pointer items-center justify-center rounded-full border border-white/15 bg-black/55 backdrop-blur-sm transition-colors hover:border-electric-pink/50 hover:bg-electric-pink/15"
           style={
             achievement.isPinned
               ? { borderColor: 'rgba(255,95,200,0.5)', background: 'rgba(255,95,200,0.18)' }

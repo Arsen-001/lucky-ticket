@@ -68,7 +68,7 @@ export default function LanguagesPage() {
                     : {}),
                 }}
                 className={twMerge(
-                  'animate-slide-in-bottom relative flex w-full items-center gap-3 overflow-hidden rounded-2xl p-3 text-left transition-all active:scale-99 disabled:opacity-60',
+                  'animate-slide-in-bottom relative flex w-full items-center gap-3 overflow-hidden rounded-2xl p-3 text-start transition-all active:scale-99 disabled:opacity-60',
                   isActive ? 'shine-card' : 'bg-background-overlay'
                 )}
               >

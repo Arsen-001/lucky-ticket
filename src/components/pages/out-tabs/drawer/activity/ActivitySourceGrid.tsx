@@ -93,7 +93,7 @@ export function ActivitySourceGrid({
           type="button"
           onClick={() => setOpen(value => !value)}
           aria-expanded={open}
-          className="flex min-h-11 w-full cursor-pointer items-center justify-between gap-3 border-b border-white/5 text-left"
+          className="flex min-h-11 w-full cursor-pointer items-center justify-between gap-3 border-b border-white/5 text-start"
         >
           <span className="text-[13.5px] font-bold text-white/70">
             {t('all ap sources', { n: AP_SOURCES.length })}

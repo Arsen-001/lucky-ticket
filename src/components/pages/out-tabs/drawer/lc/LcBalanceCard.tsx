@@ -75,7 +75,7 @@ export function LcBalanceCard({
           </span>
           <span
             className={twMerge(
-              'ml-auto inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[10.5px] font-extrabold tabular-nums',
+              'ms-auto inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[10.5px] font-extrabold tabular-nums',
               isUp ? 'bg-success/20 text-success' : 'bg-error/25 text-error-text'
             )}
           >

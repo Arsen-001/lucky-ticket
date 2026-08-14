@@ -41,7 +41,7 @@ export function ActivityLadderBand({
     <div className={twMerge('border-t border-white/8 px-4 pb-3 pt-3', className)}>
       <div className="relative h-1.5 rounded-full bg-white/8">
         <div
-          className="absolute inset-y-0 left-0 rounded-full transition-[width] duration-700"
+          className="absolute inset-y-0 start-0 rounded-full transition-[width] duration-700"
           style={{ width: `${fillPercent}%`, background: accent }}
         />
       </div>

@@ -42,7 +42,7 @@ export function ComingSoonInviteCard({
   return (
     <div
       className={twMerge(
-        'relative w-full overflow-hidden rounded-2xl border border-white/10 bg-white/5 p-3.5 text-left',
+        'relative w-full overflow-hidden rounded-2xl border border-white/10 bg-white/5 p-3.5 text-start',
         className
       )}
     >

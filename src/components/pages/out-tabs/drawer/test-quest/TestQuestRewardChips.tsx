@@ -40,7 +40,7 @@ export function TestQuestRewardChips({ label, crown, className }: TestQuestRewar
         return (
           <span
             key={i}
-            className="flex items-center gap-1 rounded-lg border border-white/[0.07] bg-white/[0.03] py-1 pl-1 pr-2 text-[12.5px] font-semibold tabular-nums text-white"
+            className="flex items-center gap-1 rounded-lg border border-white/[0.07] bg-white/[0.03] py-1 ps-1 pe-2 text-[12.5px] font-semibold tabular-nums text-white"
           >
             {chip.kind === 'ticket' ? (
               // Every Test-Quest level credits its tickets to Bronze

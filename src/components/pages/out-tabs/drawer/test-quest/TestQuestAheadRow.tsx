@@ -51,7 +51,7 @@ export function TestQuestAheadRow({
       <button
         type="button"
         onClick={() => onToggle(card.level)}
-        className="flex w-full items-center gap-2.5 px-2.5 py-2 text-left active:scale-[0.99]"
+        className="flex w-full items-center gap-2.5 px-2.5 py-2 text-start active:scale-[0.99]"
       >
         <span
           className={twMerge(

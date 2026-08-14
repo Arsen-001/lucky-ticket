@@ -11,19 +11,12 @@ import { TelegramStarIcon } from '@/components/shared/icons/TelegramStarIcon';
 import { useAppTranslations } from '@/hooks/useAppTranslations';
 import {
   QUALITY_ACCENT,
+  buildEngineSlots,
   canEquipChipOnTier,
   chipEquipStarsCost,
-  tierRank,
 } from '@/utils/global/inventory.utils';
 import type { InventoryChip } from '@/types/interfaces/inventory.interfaces';
-import type { TicketType } from '@/types/types/ticket.types';
-
-interface EngineOption {
-  id: string;
-  tier: TicketType;
-  index: number;
-  eligible: boolean;
-}
+import type { EngineSlotInfo } from '@/utils/global/inventory.utils';
 
 export interface ChipEquipModalProps {
   open: boolean;
@@ -45,30 +38,18 @@ export function ChipEquipModal({
   const { data: me } = useGetMeQuery();
   const [selectedEngineId, setSelectedEngineId] = useState<string | undefined>();
 
-  const engines: EngineOption[] = useMemo(() => {
-    if (!chip) return [];
-    return (tickets ?? [])
-      .filter(ticket => !ticket.blocked && ticket.engines?.length)
-      .flatMap((ticket, ticketIndex) =>
-        (ticket.engines ?? []).map((engine, engineIndex) => ({
-          id: engine.id,
-          tier: ticket.ticketType,
-          index: ticketIndex * 100 + engineIndex,
-          eligible: canEquipChipOnTier(chip.quality, ticket.ticketType),
-        }))
-      )
-      .sort((a, b) => {
-        const rankDelta = tierRank(b.tier) - tierRank(a.tier);
-        if (rankDelta !== 0) return rankDelta;
-        return a.index - b.index;
-      });
-  }, [tickets, chip]);
+  // One numbering for the whole feature: the inventory screen labels an
+  // equipped chip with the number this list picks from, so they have to come
+  // out of the same builder — they used to be computed twice, differently.
+  const engines: EngineSlotInfo[] = useMemo(() => buildEngineSlots(tickets, undefined), [tickets]);
 
   const cost = chip ? chipEquipStarsCost(chip.level) : 0;
   const userStars = me?.telegramStars ?? 0;
   const canAfford = userStars >= cost;
   const accent = chip ? QUALITY_ACCENT[chip.quality] : 'var(--color-electric-pink)';
-  const eligibleEngines = engines.filter(e => e.eligible);
+  const eligibleEngines = chip
+    ? engines.filter(engine => canEquipChipOnTier(chip.quality, engine.tier))
+    : [];
 
   return (
     <Modal open={open} onClose={onClose} label={t('equip chip')}>
@@ -109,7 +90,7 @@ export function ChipEquipModal({
                   type="button"
                   onClick={() => setSelectedEngineId(engine.id)}
                   className={twMerge(
-                    'flex items-center gap-3 rounded-xl border bg-black/20 px-3 py-2.5 text-left transition-colors',
+                    'flex items-center gap-3 rounded-xl border bg-black/20 px-3 py-2.5 text-start transition-colors',
                     selected ? 'bg-black/45' : 'hover:bg-black/35'
                   )}
                   style={{
@@ -138,7 +119,7 @@ export function ChipEquipModal({
                   </div>
                   <div className="flex flex-1 flex-col">
                     <span className="text-[13px] font-extrabold text-white">
-                      {t('engine number', { number: engine.index + 1 })}
+                      {t('engine number', { number: engine.number })}
                     </span>
                     <span
                       className="text-[10px] font-bold uppercase tracking-wider"

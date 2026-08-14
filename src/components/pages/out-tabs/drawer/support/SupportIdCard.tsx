@@ -50,7 +50,7 @@ export function SupportIdCard({ className, style }: SupportIdCardProps) {
       aria-label={t('copy {label}', { label: t('user id') })}
       style={style}
       className={twMerge(
-        'bg-background-overlay/50 flex items-center gap-3 rounded-2xl border border-white/5 p-3 text-left transition-colors active:scale-99',
+        'bg-background-overlay/50 flex items-center gap-3 rounded-2xl border border-white/5 p-3 text-start transition-colors active:scale-99',
         className
       )}
     >

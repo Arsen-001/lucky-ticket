@@ -44,7 +44,7 @@ export function SettingsStatusActionButton({
       type="button"
       disabled={isDisabled}
       className={twMerge(
-        'relative flex items-center justify-between gap-3 overflow-hidden rounded-2xl px-6 py-5 text-left font-bold transition-all duration-200 active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-60',
+        'relative flex items-center justify-between gap-3 overflow-hidden rounded-2xl px-6 py-5 text-start font-bold transition-all duration-200 active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-60',
         VARIANT_CLASSES[variant],
         'cursor-pointer',
         className

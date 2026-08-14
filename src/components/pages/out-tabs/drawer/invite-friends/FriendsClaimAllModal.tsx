@@ -48,13 +48,13 @@ export function FriendsClaimAllModal({
             aria-hidden
             className="bg-electric-purple/35 pointer-events-none absolute -bottom-16 -left-12 h-40 w-40 rounded-full blur-2xl"
           />
-          <span aria-hidden className="absolute right-5 top-5 text-white/35">
+          <span aria-hidden className="absolute end-5 top-5 text-white/35">
             <Sparkles size={16} className="animate-pulse" />
           </span>
-          <span aria-hidden className="absolute left-6 top-10 text-white/25">
+          <span aria-hidden className="absolute start-6 top-10 text-white/25">
             <Sparkles size={12} className="animate-pulse" style={{ animationDelay: '600ms' }} />
           </span>
-          <span aria-hidden className="text-gold absolute right-10 bottom-6">
+          <span aria-hidden className="text-gold absolute end-10 bottom-6">
             <Star
               size={14}
               className="fill-gold animate-pulse"
@@ -107,7 +107,7 @@ export function FriendsClaimAllModal({
             </span>
             <h3 className="text-3xl font-extrabold leading-none text-white drop-shadow-md tabular-nums">
               {totalLc.toLocaleString()}
-              <span className="ml-1.5 text-sm font-bold opacity-90">
+              <span className="ms-1.5 text-sm font-bold opacity-90">
                 {GlobalConstants.coinName}
               </span>
             </h3>

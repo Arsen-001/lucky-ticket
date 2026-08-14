@@ -60,7 +60,7 @@ export function TabBarItem({
           icon over: the player is already standing on that screen, where every
           claimable row carries the same dot. */}
       {claimable && !active && (
-        <ClaimableDot label={claimableLabel} className="absolute top-0 left-1/2 ml-1.5" />
+        <ClaimableDot label={claimableLabel} className="absolute top-0 left-1/2 ms-1.5" />
       )}
       <span
         className={twMerge(

@@ -86,7 +86,7 @@ export function EngineStatsLedger({
                     }}
                   />
                 </span>
-                <span className="w-12 shrink-0 text-right text-[11px] font-black tabular-nums text-white">
+                <span className="w-12 shrink-0 text-end text-[11px] font-black tabular-nums text-white">
                   +{Math.round(source.pct)}%
                 </span>
               </li>

@@ -38,11 +38,20 @@ describe('resolveTelegramLocale', () => {
     // derived so that promoting one of them turns this into a real check
     // instead of a stale assertion about a language that has since gone live —
     // which is what happened to `hy`, hardcoded here until it shipped.
+    // Two groups, and both must fall through to the default.
+    //
+    // Codes the platform knows but has not switched on yet: this list is empty
+    // right now — every language in the enum is live — and that is a fine state,
+    // not a broken test. It refills the moment a language is added ahead of its
+    // dictionary, which is exactly when this assertion starts earning its keep.
     const notLive = (Object.values(Locale) as string[]).filter(
       code => !(locales as string[]).includes(code)
     );
-    expect(notLive.length).toBeGreaterThan(0);
-    for (const code of [...notLive, 'nb', 'sv', '']) {
+    // Codes the platform has never heard of. Hardcoded so the loop always has
+    // something to check even when `notLive` is empty.
+    const neverKnown = ['nb', 'sv', 'xx', ''];
+
+    for (const code of [...notLive, ...neverKnown]) {
       expect(resolveTelegramLocale({ languageCode: code })).toBeNull();
     }
   });

@@ -29,7 +29,7 @@ export function LcChartBand({ values, className }: LcChartBandProps) {
       <LcSparkline values={values} className="absolute inset-0" />
       {/* Chip, not bare text: the curve is free to pass through any corner of
           its own band, and it struck the label through on the first render. */}
-      <span className="absolute left-4 top-1.5 rounded bg-black/35 px-1.5 py-0.5 text-[9px] font-bold uppercase tracking-widest text-white/55">
+      <span className="absolute start-4 top-1.5 rounded bg-black/35 px-1.5 py-0.5 text-[9px] font-bold uppercase tracking-widest text-white/55">
         {t('lc last 7 days')}
       </span>
     </div>

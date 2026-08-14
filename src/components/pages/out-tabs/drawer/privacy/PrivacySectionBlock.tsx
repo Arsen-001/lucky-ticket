@@ -33,14 +33,14 @@ export function PrivacySectionBlock({ section, loading, index, locale }: Privacy
       <SkeletonSuspense
         loading={loading}
         skeleton={
-          <div className="flex flex-col gap-1.5 pl-8.5">
+          <div className="flex flex-col gap-1.5 ps-8.5">
             <Skeleton variant="line" textSize="xs" className="h-3 w-full" />
             <Skeleton variant="line" textSize="xs" className="h-3 w-full" />
             <Skeleton variant="line" textSize="xs" className="h-3 w-3/4" />
           </div>
         }
       >
-        <p className="text-white-secondary pl-8.5 text-[13px] leading-relaxed">
+        <p className="text-white-secondary ps-8.5 text-[13px] leading-relaxed">
           {getLocalizedText(section?.body, locale)}
         </p>
       </SkeletonSuspense>

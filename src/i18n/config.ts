@@ -41,6 +41,8 @@ export const locales = [
   Locale.JAPANESE,
   Locale.KOREAN,
   Locale.CHINESE,
+  Locale.ARABIC,
+  Locale.PERSIAN,
 ] as LocaleType[];
 
 export const defaultLocale = Locale.ENGLISH;

@@ -69,7 +69,7 @@ export function TabBarCut({ centre, className }: TabBarCutProps) {
   return (
     <span aria-hidden className={twMerge('absolute inset-0', className)}>
       <span
-        className="bg-header absolute top-0 left-0"
+        className="bg-header absolute top-0 start-0"
         style={{ height: BAND, width: pieceLeft, transition: TRAVEL }}
       />
       <svg
@@ -82,7 +82,7 @@ export function TabBarCut({ centre, className }: TabBarCutProps) {
         <path d={CUT_PATH} fill="var(--color-header)" />
       </svg>
       <span
-        className="bg-header absolute top-0 right-0"
+        className="bg-header absolute top-0 end-0"
         style={{
           height: BAND,
           left: `calc(${centre}% + ${PIECE_W / 2}px)`,
@@ -93,11 +93,11 @@ export function TabBarCut({ centre, className }: TabBarCutProps) {
           gradients are laid out over the whole bar and shifted up by the band,
           so they land where they did when the bar was a single block. */}
       <span
-        className="bg-header absolute right-0 bottom-0 left-0 overflow-hidden"
+        className="bg-header absolute end-0 bottom-0 start-0 overflow-hidden"
         style={{ top: BAND }}
       >
         <span
-          className="absolute right-0 bottom-0 left-0 bg-[radial-gradient(120%_80%_at_0%_100%,rgba(222,0,155,0.08),transparent_60%),radial-gradient(120%_80%_at_100%_0%,rgba(248,189,62,0.06),transparent_55%)]"
+          className="absolute end-0 bottom-0 start-0 bg-[radial-gradient(120%_80%_at_0%_100%,rgba(222,0,155,0.08),transparent_60%),radial-gradient(120%_80%_at_100%_0%,rgba(248,189,62,0.06),transparent_55%)]"
           style={{ top: -BAND }}
         />
       </span>

@@ -69,7 +69,7 @@ export function ProfileInviteTournamentModal({
                   type="button"
                   onClick={() => setSelected(x.id)}
                   className={twMerge(
-                    'flex items-center gap-3 rounded-xl border px-3 py-2.5 text-left transition-all active:scale-99',
+                    'flex items-center gap-3 rounded-xl border px-3 py-2.5 text-start transition-all active:scale-99',
                     selected === x.id
                       ? 'border-electric-pink/50 bg-electric-pink/12'
                       : 'border-white/10 bg-white/5 hover:bg-white/8'

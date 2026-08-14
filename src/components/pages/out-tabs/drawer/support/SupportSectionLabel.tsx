@@ -12,7 +12,7 @@ export function SupportSectionLabel({ children, className, style }: SupportSecti
     <h4
       style={style}
       className={twMerge(
-        'text-pink-secondary ml-1 text-[10px] font-bold uppercase tracking-widest',
+        'text-pink-secondary ms-1 text-[10px] font-bold uppercase tracking-widest',
         className
       )}
     >

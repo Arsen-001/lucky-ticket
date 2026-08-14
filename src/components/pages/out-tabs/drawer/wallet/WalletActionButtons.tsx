@@ -106,7 +106,7 @@ function ActionButton({
           size={11}
           strokeWidth={3}
           aria-hidden
-          className="absolute right-2 top-2 text-white/45"
+          className="absolute end-2 top-2 text-white/45"
         />
       )}
     </button>

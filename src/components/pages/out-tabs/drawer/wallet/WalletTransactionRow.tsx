@@ -155,7 +155,7 @@ export function WalletTransactionRow({
             {transaction.currency === WalletCurrency.TON
               ? formatTon(transaction.amount, 4)
               : formatNumber(transaction.amount)}
-            <span className="text-pink-secondary ml-1 text-[10px] font-bold uppercase">
+            <span className="text-pink-secondary ms-1 text-[10px] font-bold uppercase">
               {transaction.currency}
             </span>
           </span>

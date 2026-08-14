@@ -48,7 +48,7 @@ export function NewStakeLimitNotice({
     <Tag
       {...(onClick ? { type: 'button' as const, onClick } : {})}
       className={twMerge(
-        'flex w-full items-center gap-2 rounded-xl border px-3 py-2 text-left transition-colors',
+        'flex w-full items-center gap-2 rounded-xl border px-3 py-2 text-start transition-colors',
         toneClasses[tone],
         onClick && 'hover:bg-white/[0.07] active:scale-[0.99]',
         className

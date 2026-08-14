@@ -52,7 +52,7 @@ export function ProfileLikeButton({
       <Heart size={14} strokeWidth={2.6} fill={liked ? 'currentColor' : 'none'} />
       <span className="tabular-nums">{formatNumber(likesReceived)}</span>
       {!liked && (
-        <span className="text-teal flex items-center gap-0.5 border-l border-white/15 pl-1.5">
+        <span className="text-teal flex items-center gap-0.5 border-l border-white/15 ps-1.5">
           <BoltIcon size={11} />
           <span className="tabular-nums">+{GlobalConstants.apRewards.likeProfile}</span>
         </span>

@@ -330,7 +330,7 @@ export function Drawer() {
             } satisfies CSSProperties
           }
           className={twMerge(
-            'bg-background-overlay fixed bottom-0 right-[var(--app-gutter)] top-0 z-1 flex w-[78vw] max-w-[340px] flex-col rounded-l-3xl shadow-[-12px_0_40px_rgba(0,0,0,0.45)] transition-transform duration-300 ease-out touch-pan-y',
+            'bg-background-overlay fixed bottom-0 end-[var(--app-gutter)] top-0 z-1 flex w-[78vw] max-w-[340px] flex-col rounded-s-3xl shadow-[-12px_0_40px_rgba(0,0,0,0.45)] transition-transform duration-300 ease-out touch-pan-y',
             // Closed: clear the viewport at ANY width. On a phone the gutter is 0
             // so this is just `translate-x-full` (off the right edge); on desktop the
             // panel is pinned to the column's right edge (`right: gutter`), so it must

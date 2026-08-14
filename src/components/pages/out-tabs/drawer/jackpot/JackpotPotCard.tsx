@@ -56,7 +56,7 @@ export function JackpotPotCard({ pot, loading, chip, children, className }: Jack
           <span className="text-[10px] font-bold uppercase tracking-[0.22em] text-white/60">
             {t('total pot')}
           </span>
-          {chip && <span className="ml-auto">{chip}</span>}
+          {chip && <span className="ms-auto">{chip}</span>}
         </div>
 
         <SkeletonSuspense

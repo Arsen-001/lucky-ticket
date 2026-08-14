@@ -167,7 +167,7 @@ function TonWalletConnected({ state, onDisconnect, disconnecting }: TonWalletCon
             <button
               type="button"
               onClick={handleCopy}
-              className="tap-target group relative flex items-center gap-1 text-left"
+              className="tap-target group relative flex items-center gap-1 text-start"
             >
               <span className="font-mono text-[13px] font-semibold text-white">
                 {truncateAddress(state.address)}

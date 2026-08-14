@@ -46,7 +46,7 @@ export function MarketInfoModal({ open, item, onClose, onBuy }: MarketInfoModalP
           <div className="relative">{item.renderIcon(156)}</div>
 
           {item.locked && (
-            <span className="text-pink-secondary bg-pink-secondary/18 border-pink-secondary/40 absolute left-3 top-3 z-3 inline-flex items-center gap-1 rounded-full border px-2 py-0.5 text-[10px] font-extrabold uppercase tracking-wider">
+            <span className="text-pink-secondary bg-pink-secondary/18 border-pink-secondary/40 absolute start-3 top-3 z-3 inline-flex items-center gap-1 rounded-full border px-2 py-0.5 text-[10px] font-extrabold uppercase tracking-wider">
               <Lock size={11} strokeWidth={2.6} />
               {t('locked')}
             </span>
@@ -56,7 +56,7 @@ export function MarketInfoModal({ open, item, onClose, onBuy }: MarketInfoModalP
             // Held left of the modal's close button, which sits in the same
             // corner — the "NEW" pill and the X were painted on top of each
             // other (measured 09.08.2026).
-            <div className="absolute right-12 top-3 z-3 flex flex-col items-end gap-1">
+            <div className="absolute end-12 top-3 z-3 flex flex-col items-end gap-1">
               {item.isNew && (
                 <span className="bg-electric-pink rounded-full px-1.5 py-0.5 text-[10px] font-extrabold uppercase tracking-wider text-white">
                   {t('new')}

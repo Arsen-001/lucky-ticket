@@ -48,7 +48,7 @@ export function WalletLcCard({ onConvert, locked }: WalletLcCardProps) {
       <button
         type="button"
         onClick={() => router.push(routes.lc)}
-        className="relative flex w-full items-center gap-3 text-left transition-transform active:scale-99 cursor-pointer"
+        className="relative flex w-full items-center gap-3 text-start transition-transform active:scale-99 cursor-pointer"
       >
         <div className="bg-gold/15 ring-gold/35 flex-center h-11 w-11 flex-shrink-0 rounded-xl ring-1">
           <Coins size={22} className="text-gold" strokeWidth={2.4} fill="rgba(248,189,62,0.35)" />
@@ -106,7 +106,7 @@ export function WalletLcCard({ onConvert, locked }: WalletLcCardProps) {
             size={12}
             strokeWidth={3}
             aria-hidden
-            className="absolute right-3 top-1/2 -translate-y-1/2 text-white/45"
+            className="absolute end-3 top-1/2 -translate-y-1/2 text-white/45"
           />
         )}
       </button>

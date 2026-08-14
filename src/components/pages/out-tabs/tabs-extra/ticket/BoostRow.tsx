@@ -76,7 +76,7 @@ export function BoostRow({
           </span>
           <span
             className={twMerge(
-              'ml-auto font-semibold text-pink-secondary truncate',
+              'ms-auto font-semibold text-pink-secondary truncate',
               compact ? 'text-[13px]' : 'text-[10px]'
             )}
           >

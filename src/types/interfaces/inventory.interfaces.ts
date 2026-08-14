@@ -22,6 +22,28 @@ export interface InventoryShardCount {
   count: number;
 }
 
+/**
+ * What every inventory layout needs from the container.
+ *
+ * The screen's data and mutations stay in one place (`InventoryContainer`);
+ * a view is pure presentation, so swapping the layout can never change what
+ * equipping a chip does.
+ */
+export interface InventoryViewProps {
+  chips: InventoryChip[];
+  shards: InventoryShardCount[];
+  boosters: InventoryBooster[];
+  slots: import('@/utils/global/inventory.utils').EngineSlotInfo[];
+  isLoading: boolean;
+  levelingUpChipId?: string;
+  unequippingChipId?: string;
+  onEquip: (chip: InventoryChip) => void;
+  onUnequip: (chip: InventoryChip) => void;
+  onLevelUp: (chip: InventoryChip) => void;
+  onActivateBooster: (booster: InventoryBooster) => void;
+  onMint: () => void;
+}
+
 export type InventoryBoosterDuration = 3 | 4 | 6 | 12 | 24 | 48;
 
 export interface InventoryBooster {

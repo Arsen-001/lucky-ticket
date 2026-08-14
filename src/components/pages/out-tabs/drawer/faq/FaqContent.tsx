@@ -52,7 +52,7 @@ export function FaqContent() {
                 skeleton={<Skeleton variant="line" textSize="xs" className="h-3 w-32" />}
               >
                 <h4
-                  className="text-pink-secondary ml-1 animate-slide-in-bottom text-[10px] font-bold uppercase tracking-widest"
+                  className="text-pink-secondary ms-1 animate-slide-in-bottom text-[10px] font-bold uppercase tracking-widest"
                   style={{ animationDelay: `${staggerMs(sectionOffset, 60)}ms` }}
                 >
                   {getLocalizedText(section.title, locale)}

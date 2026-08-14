@@ -68,7 +68,7 @@ export function TierUnlockedContent({
             <span className="text-[11px] text-white-secondary">{t('tickets')}</span>
           </div>
         </div>
-        <div className="text-right">
+        <div className="text-end">
           <div className="text-[10px] font-bold uppercase tracking-[1.2px] text-pink-secondary">
             {t('engines')}
           </div>
@@ -97,7 +97,7 @@ export function TierUnlockedContent({
             <button
               type="button"
               onClick={onClaimAll}
-              className="relative ml-auto rounded-full bg-success px-3 py-1 text-[11px] font-extrabold uppercase tracking-wider text-white cursor-pointer active:scale-95 transition-transform overflow-hidden"
+              className="relative ms-auto rounded-full bg-success px-3 py-1 text-[11px] font-extrabold uppercase tracking-wider text-white cursor-pointer active:scale-95 transition-transform overflow-hidden"
             >
               <span
                 aria-hidden

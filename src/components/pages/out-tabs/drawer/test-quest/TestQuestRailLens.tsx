@@ -28,7 +28,7 @@ export function TestQuestRailLens({ card, offsetDays, top, className }: TestQues
     <div
       style={{ top }}
       className={twMerge(
-        'pointer-events-none absolute left-full z-40 ml-2 w-[176px] -translate-y-1/2 rounded-2xl border p-2.5 shadow-2xl shadow-black/60 backdrop-blur-sm',
+        'pointer-events-none absolute left-full z-40 ms-2 w-[176px] -translate-y-1/2 rounded-2xl border p-2.5 shadow-2xl shadow-black/60 backdrop-blur-sm',
         card.crown || card.wall
           ? 'border-gold/50 bg-[#241F42]/95'
           : 'border-electric-pink/40 bg-background-overlay/95',
@@ -44,7 +44,7 @@ export function TestQuestRailLens({ card, offsetDays, top, className }: TestQues
         <span className="text-[13px] font-extrabold capitalize tracking-normal tabular-nums text-white">
           {t('day')} {card.day}
         </span>
-        <span className="ml-auto tabular-nums">
+        <span className="ms-auto tabular-nums">
           {offsetDays === 0
             ? t('today')
             : offsetDays > 0

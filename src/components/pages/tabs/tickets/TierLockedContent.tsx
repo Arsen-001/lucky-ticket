@@ -48,7 +48,7 @@ export function TierLockedContent({ ticket, className }: TierLockedContentProps)
               alt=""
               height={22}
               width={22}
-              className="absolute bottom-1 right-1"
+              className="absolute bottom-1 end-1"
             />
           </div>
           <div className="flex-1 min-w-0">

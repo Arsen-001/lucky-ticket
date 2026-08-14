@@ -1,7 +1,6 @@
 'use client';
 
-import { useMemo, useRef, useState } from 'react';
-import { Plus, Sparkles, Zap } from 'lucide-react';
+import { useState } from 'react';
 import {
   useActivateBoosterMutation,
   useEquipChipMutation,
@@ -10,18 +9,16 @@ import {
   useMintChipMutation,
   useUnequipChipMutation,
 } from '@/api/inventory.api';
+import { useGetTicketsQuery } from '@/api/tickets.api';
 import { useAppTranslations } from '@/hooks/useAppTranslations';
 import { useToast } from '@/hooks/useToast';
 import { useSpendFailure } from '@/hooks/useSpendFailure';
+import { buildEngineSlots } from '@/utils/global/inventory.utils';
 import type { InventoryBooster, InventoryChip } from '@/types/interfaces/inventory.interfaces';
 import { BoosterActivateModal } from './BoosterActivateModal';
 import { ChipEquipModal } from './ChipEquipModal';
 import { ChipMintModal } from './ChipMintModal';
-import { InventoryBoosterItem } from './InventoryBoosterItem';
-import { InventoryItem } from './InventoryItem';
-import { InventoryTierFilter, type InventoryTierFilterValue } from './InventoryTierFilter';
-import { InventoryShardsStrip } from './InventoryShardsStrip';
-import { InventoryTypeFilter, type InventoryTypeFilterValue } from './InventoryTypeFilter';
+import { InventoryScreen } from './InventoryScreen';
 import { QueryErrorState } from '@/components/shared/error/QueryErrorState';
 
 export function InventoryContainer() {
@@ -29,49 +26,25 @@ export function InventoryContainer() {
   const toast = useToast();
   const spend = useSpendFailure();
   const { data, isLoading, isError, refetch } = useGetInventoryQuery();
+  const { data: tickets } = useGetTicketsQuery();
   const [equipChipMutation, { isLoading: equipping }] = useEquipChipMutation();
   const [unequipChipMutation] = useUnequipChipMutation();
   const [levelUpChipMutation] = useLevelUpChipMutation();
   const [mintChipMutation, { isLoading: minting }] = useMintChipMutation();
   const [activateBoosterMutation, { isLoading: activating }] = useActivateBoosterMutation();
 
-  const [tierFilter, setTierFilter] = useState<InventoryTierFilterValue>('all');
-  const [typeFilter, setTypeFilter] = useState<InventoryTypeFilterValue>('all');
   const [equipChip, setEquipChip] = useState<InventoryChip | undefined>(undefined);
   const [activateBooster, setActivateBooster] = useState<InventoryBooster | undefined>(undefined);
   const [mintOpen, setMintOpen] = useState(false);
   const [animatingChipId, setAnimatingChipId] = useState<string | undefined>(undefined);
   const [unequipPendingId, setUnequipPendingId] = useState<string | undefined>(undefined);
 
-  const rawChips = data?.chips ?? [];
-  const chipOrderRef = useRef<string[]>([]);
-  const chips = useMemo(() => {
-    const byId = new Map(rawChips.map(c => [c.id, c]));
-    const stable = chipOrderRef.current.filter(id => byId.has(id));
-    const fresh = rawChips.map(c => c.id).filter(id => !stable.includes(id));
-    const order = [...stable, ...fresh];
-    chipOrderRef.current = order;
-    return order.map(id => byId.get(id)!).filter(Boolean);
-  }, [rawChips]);
+  const chips = data?.chips ?? [];
   const shards = data?.shards ?? [];
   const boosters = data?.boosters ?? [];
+  const slots = buildEngineSlots(tickets, chips);
 
   if (isError) return <QueryErrorState onRetry={() => refetch()} />;
-
-  const isBoostersView = typeFilter === 'boosters';
-  const chipTypeFilter: 'all' | 'speed' | 'capacity' =
-    typeFilter === 'speed' || typeFilter === 'capacity' ? typeFilter : 'all';
-
-  const visibleChips = chips.filter(c => {
-    const tierOk = tierFilter === 'all' || c.quality === tierFilter;
-    const typeOk = chipTypeFilter === 'all' || c.type === chipTypeFilter;
-    return tierOk && typeOk;
-  });
-
-  const visibleBoosters = boosters.filter(b => {
-    const tierOk = tierFilter === 'all' || b.quality === tierFilter;
-    return tierOk;
-  });
 
   const shardsAvailableFor = (chip: InventoryChip) =>
     shards.find(s => s.type === chip.type && s.quality === chip.quality)?.count ?? 0;
@@ -135,82 +108,21 @@ export function InventoryContainer() {
   };
 
   return (
-    <div className="flex flex-col gap-1 pb-8">
-      <InventoryTierFilter value={tierFilter} onChange={setTierFilter} />
-
-      <div className="flex flex-col gap-4">
-        <InventoryTypeFilter value={typeFilter} onChange={setTypeFilter} />
-
-        {isBoostersView ? (
-          visibleBoosters.length === 0 ? (
-            <div className="flex flex-col items-center gap-2 rounded-2xl border border-white/8 bg-black/25 p-6 text-center">
-              <Zap size={36} className="text-electric-purple" />
-              <p className="text-xs text-white/65">{t('boosters empty')}</p>
-            </div>
-          ) : (
-            <section className="flex flex-col gap-2">
-              <span className="text-pink-secondary text-[10px] font-extrabold uppercase tracking-wider">
-                {t('your boosters')}
-              </span>
-              <div className="flex flex-col gap-2.5">
-                {visibleBoosters.map((booster, i) => (
-                  <InventoryBoosterItem
-                    key={booster.id}
-                    booster={booster}
-                    index={i}
-                    onActivate={setActivateBooster}
-                  />
-                ))}
-              </div>
-            </section>
-          )
-        ) : (
-          <>
-            <InventoryShardsStrip
-              shards={shards}
-              tierFilter={tierFilter}
-              typeFilter={chipTypeFilter}
-            />
-
-            {visibleChips.length === 0 && !isLoading ? (
-              <div className="flex flex-col items-center gap-2 rounded-2xl border border-white/8 bg-black/25 p-6 text-center">
-                <Sparkles size={28} className="text-gold" />
-                <p className="text-xs text-white/65">{t('inventory empty')}</p>
-              </div>
-            ) : (
-              <section className="flex flex-col gap-2">
-                <span className="text-pink-secondary text-[10px] font-extrabold uppercase tracking-wider">
-                  {t('your chips')}
-                </span>
-                <div className="flex flex-col gap-2.5">
-                  {visibleChips.map((chip, i) => (
-                    <InventoryItem
-                      key={chip.id}
-                      chip={chip}
-                      index={i}
-                      availableShards={shardsAvailableFor(chip)}
-                      isLevelingUp={animatingChipId === chip.id}
-                      isUnequipping={unequipPendingId === chip.id}
-                      onEquip={setEquipChip}
-                      onUnequip={handleUnequip}
-                      onLevelUp={handleLevelUp}
-                    />
-                  ))}
-                </div>
-              </section>
-            )}
-
-            <button
-              type="button"
-              onClick={() => setMintOpen(true)}
-              className="bg-pink-gradient flex-center mt-2 w-full cursor-pointer gap-2 rounded-2xl px-4 py-4 text-[13px] font-extrabold uppercase tracking-wider text-white shadow-[0_8px_24px_rgba(222,0,155,0.35),inset_0_1px_0_rgba(255,255,255,0.25)] transition-transform active:scale-99"
-            >
-              <Plus size={18} strokeWidth={2.6} />
-              {t('create new chip')}
-            </button>
-          </>
-        )}
-      </div>
+    <>
+      <InventoryScreen
+        chips={chips}
+        shards={shards}
+        boosters={boosters}
+        slots={slots}
+        isLoading={isLoading}
+        levelingUpChipId={animatingChipId}
+        unequippingChipId={unequipPendingId}
+        onEquip={setEquipChip}
+        onUnequip={handleUnequip}
+        onLevelUp={handleLevelUp}
+        onActivateBooster={setActivateBooster}
+        onMint={() => setMintOpen(true)}
+      />
 
       <ChipEquipModal
         open={!!equipChip}
@@ -235,6 +147,6 @@ export function InventoryContainer() {
       />
 
       {spend.modals}
-    </div>
+    </>
   );
 }

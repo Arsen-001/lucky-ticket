@@ -45,7 +45,7 @@ export function FriendBranchList({
   const { data: members = [], isLoading } = useGetFriendBranchQuery({ friendId }, { skip: !open });
 
   return (
-    <div className={twMerge('flex flex-col gap-1.5 pl-3', className)}>
+    <div className={twMerge('flex flex-col gap-1.5 ps-3', className)}>
       {isLoading ? (
         Array.from({ length: 2 }).map((_, i) => (
           <div key={i} className="flex items-center gap-2 py-1">
@@ -88,7 +88,7 @@ function FriendBranchRow({ member, onOpen, style }: FriendBranchRowProps) {
       type="button"
       onClick={() => onOpen?.(member)}
       style={style}
-      className="animate-slide-in-bottom border-l-white/8 flex w-full cursor-pointer items-center gap-2 rounded-lg border-l-2 bg-white/3 px-2 py-1.5 text-left transition-colors hover:bg-white/6 active:scale-99"
+      className="animate-slide-in-bottom border-l-white/8 flex w-full cursor-pointer items-center gap-2 rounded-lg border-s-2 bg-white/3 px-2 py-1.5 text-start transition-colors hover:bg-white/6 active:scale-99"
     >
       <div className="h-7 w-7 flex-shrink-0 overflow-hidden rounded-full">
         {member.avatar ? (

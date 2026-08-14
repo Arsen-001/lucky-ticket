@@ -77,7 +77,7 @@ export const ReferralInfoSection = () => {
             below promises — and the smaller one is drawn smaller so the badge
             still reads as "what a direct friend pays" at a glance. */}
         <span className="text-success text-base font-extrabold leading-none tabular-nums">
-          +{pct}%{l2Pct > 0 && <span className="text-electric-purple ml-1 text-xs">+{l2Pct}%</span>}
+          +{pct}%{l2Pct > 0 && <span className="text-electric-purple ms-1 text-xs">+{l2Pct}%</span>}
         </span>
       </div>
 

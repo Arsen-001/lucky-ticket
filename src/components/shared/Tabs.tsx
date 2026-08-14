@@ -141,7 +141,7 @@ export function Tabs({
         {/* Left scroll button */}
         {showLeftScroll && (
           <Button
-            className={twMerge(buttonClassName, 'left-0')}
+            className={twMerge(buttonClassName, 'start-0')}
             onClick={() => scroll('left')}
             aria-label={t('scroll left')}
           >
@@ -209,7 +209,7 @@ export function Tabs({
         {/* Right scroll button */}
         {showRightScroll && (
           <Button
-            className={twMerge(buttonClassName, 'right-0')}
+            className={twMerge(buttonClassName, 'end-0')}
             onClick={() => scroll('right')}
             aria-label={t('scroll right')}
           >

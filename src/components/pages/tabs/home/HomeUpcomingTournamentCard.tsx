@@ -93,7 +93,7 @@ export function HomeUpcomingTournamentCard({
               ? { background: `linear-gradient(160deg, ${accent}73 0%, ${accent}1F 100%)` }
               : undefined
           }
-          className="flex-center relative z-10 w-[62px] shrink-0 rounded-l-xl"
+          className="flex-center relative z-10 w-[62px] shrink-0 rounded-s-xl"
         >
           {sponsor ? (
             sponsor.logoUrl ? (

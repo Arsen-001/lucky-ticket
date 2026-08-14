@@ -56,7 +56,7 @@ export function StakesActiveStakeCard({ stake, levelDef }: StakesActiveStakeCard
     <Link
       href={ready ? routes.stakes.getReadyById(stake.id) : routes.stakes.getById(stake.id)}
       className={twMerge(
-        'stake-card-shell stake-card-border relative block p-3 text-left transition-transform duration-200',
+        'stake-card-shell stake-card-border relative block p-3 text-start transition-transform duration-200',
         ready && 'stakes-ready-glow -translate-y-0.5'
       )}
       style={{ ['--stake-card-accent' as string]: stakeAccent(levelDef) }}
@@ -142,7 +142,7 @@ export function StakesActiveStakeCard({ stake, levelDef }: StakesActiveStakeCard
             size={12}
             strokeWidth={2.4}
             className={twMerge(
-              'absolute right-2.5 top-1/2 -translate-y-1/2',
+              'absolute end-2.5 top-1/2 -translate-y-1/2',
               ready ? 'text-success' : 'text-pink-secondary'
             )}
           />

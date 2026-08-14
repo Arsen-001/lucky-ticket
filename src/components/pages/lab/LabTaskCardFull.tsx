@@ -459,7 +459,7 @@ export function LabTaskCardFull({
                 its chevron. Without it a task whose sub-step is ready looks
                 identical to one that is not, and the reward goes uncollected. */}
             {hasClaimableSubStep && !isClaimAction && (
-              <span className="pointer-events-none absolute top-1.5 right-1.5 flex h-2.5 w-2.5">
+              <span className="pointer-events-none absolute top-1.5 end-1.5 flex h-2.5 w-2.5">
                 <span className="bg-electric-pink absolute inset-0 animate-ping rounded-full opacity-75" />
                 <span className="bg-electric-pink border-background-overlay relative h-2.5 w-2.5 rounded-full border" />
               </span>

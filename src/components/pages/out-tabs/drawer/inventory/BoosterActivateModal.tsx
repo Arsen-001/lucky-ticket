@@ -6,15 +6,9 @@ import { twMerge } from 'tailwind-merge';
 import { useGetTicketsQuery } from '@/api/tickets.api';
 import { Modal } from '@/components/shared/modals/Modal';
 import { useAppTranslations } from '@/hooks/useAppTranslations';
-import { QUALITY_ACCENT } from '@/utils/global/inventory.utils';
+import { QUALITY_ACCENT, buildEngineSlots } from '@/utils/global/inventory.utils';
 import type { InventoryBooster } from '@/types/interfaces/inventory.interfaces';
-import type { TicketType } from '@/types/types/ticket.types';
-
-interface EngineOption {
-  id: string;
-  tier: TicketType;
-  index: number;
-}
+import type { EngineSlotInfo } from '@/utils/global/inventory.utils';
 
 export interface BoosterActivateModalProps {
   open: boolean;
@@ -39,17 +33,13 @@ export function BoosterActivateModal({
     if (!loading) setPendingId(null);
   }, [loading]);
 
-  const matchingEngines: EngineOption[] = useMemo(() => {
+  // Numbered by `buildEngineSlots`, the same list the inventory screen labels
+  // its equipped chips from — the two used to number engines differently, so
+  // "Engine #12" on a chip card and "Engine #12" in this list were not the
+  // same engine.
+  const matchingEngines: EngineSlotInfo[] = useMemo(() => {
     if (!booster) return [];
-    return (tickets ?? [])
-      .filter(ticket => !ticket.blocked && ticket.ticketType === booster.quality)
-      .flatMap((ticket, ticketIndex) =>
-        (ticket.engines ?? []).map((engine, engineIndex) => ({
-          id: engine.id,
-          tier: ticket.ticketType,
-          index: ticketIndex * 100 + engineIndex,
-        }))
-      );
+    return buildEngineSlots(tickets, undefined).filter(slot => slot.tier === booster.quality);
   }, [tickets, booster]);
 
   const accent = booster ? QUALITY_ACCENT[booster.quality] : 'var(--color-electric-pink)';
@@ -87,7 +77,7 @@ export function BoosterActivateModal({
                     onConfirm(engine.id);
                   }}
                   className={twMerge(
-                    'flex items-center gap-3 rounded-xl border bg-black/20 px-3 py-2.5 text-left transition-colors hover:bg-black/35 disabled:cursor-default disabled:opacity-50'
+                    'flex items-center gap-3 rounded-xl border bg-black/20 px-3 py-2.5 text-start transition-colors hover:bg-black/35 disabled:cursor-default disabled:opacity-50'
                   )}
                   style={{
                     borderColor: `color-mix(in srgb, ${tierAccent} 50%, transparent)`,
@@ -110,7 +100,7 @@ export function BoosterActivateModal({
                   </div>
                   <div className="flex flex-1 flex-col">
                     <span className="text-[13px] font-extrabold text-white">
-                      {t('engine number', { number: engine.index + 1 })}
+                      {t('engine number', { number: engine.number })}
                     </span>
                     <span
                       className="text-[10px] font-bold uppercase tracking-wider"

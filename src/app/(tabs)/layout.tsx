@@ -13,7 +13,7 @@ export default function TabsLayout({ children }: ChildrenProps) {
 
   return (
     <>
-      <Header className="fixed top-0 left-[var(--app-gutter)] right-[var(--app-gutter)] z-50 shadow-xs" />
+      <Header className="fixed top-0 start-[var(--app-gutter)] end-[var(--app-gutter)] z-50 shadow-xs" />
       <main
         className="h-full"
         style={{
@@ -34,7 +34,7 @@ export default function TabsLayout({ children }: ChildrenProps) {
           </div>
         </div>
       </main>
-      <TabBar className="fixed bottom-0 left-[var(--app-gutter)] right-[var(--app-gutter)] z-50" />
+      <TabBar className="fixed bottom-0 start-[var(--app-gutter)] end-[var(--app-gutter)] z-50" />
       <Drawer />
       <NotificationAutoSurface />
       <DailyGiftAutoSurface />

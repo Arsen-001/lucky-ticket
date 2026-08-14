@@ -37,7 +37,7 @@ export function NotificationBanner({ notification, onDismiss }: NotificationBann
     <div
       role="status"
       // `inset-x-0` + `mx-auto max-w-[--app-max-w]`: a fixed box anchors to the
-      // WINDOW, not to the app's centred column, so `left-0 right-0` alone made
+      // WINDOW, not to the app's centred column, so `start-0 end-0` alone made
       // the banner as wide as the browser — measured at 1728px it spilled 649px
       // past the column on each side and floated over the page background. The
       // cap keeps it on the app; on a phone the two edges coincide, which is
@@ -59,7 +59,7 @@ export function NotificationBanner({ notification, onDismiss }: NotificationBann
         </div>
 
         {actionRoute ? (
-          <button type="button" onClick={handleAction} className="min-w-0 flex-1 text-left">
+          <button type="button" onClick={handleAction} className="min-w-0 flex-1 text-start">
             {content}
           </button>
         ) : (

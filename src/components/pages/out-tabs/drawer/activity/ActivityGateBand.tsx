@@ -72,7 +72,7 @@ export function ActivityGateBand({
               <span className="text-[11.5px] font-bold uppercase tracking-wider text-white/55">
                 {meter.label}
               </span>
-              <span className="ml-auto text-[13px] font-extrabold tabular-nums text-white">
+              <span className="ms-auto text-[13px] font-extrabold tabular-nums text-white">
                 {meter.format(meter.value)}
                 <span className="text-white/35"> / {meter.format(meter.required)}</span>
               </span>

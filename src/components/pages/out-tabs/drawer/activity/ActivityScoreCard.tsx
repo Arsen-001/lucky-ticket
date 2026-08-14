@@ -75,7 +75,7 @@ export function ActivityScoreCard({
           </span>
           {/* The chip keeps its line; the eyebrow beside it is the one that may
               shrink. Both wrapping is how "Decay in 5 / days" got two rows. */}
-          {chip && <span className="ml-auto shrink-0">{chip}</span>}
+          {chip && <span className="ms-auto shrink-0">{chip}</span>}
         </div>
 
         <SkeletonSuspense

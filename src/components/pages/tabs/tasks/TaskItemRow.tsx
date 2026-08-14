@@ -301,7 +301,7 @@ export function TaskItemRow({ task, onClaim, highlightToken, className, style }:
       {showProgress && (
         <span
           aria-hidden
-          className="bg-pink-gradient pointer-events-none absolute bottom-0 left-0 h-[3px]"
+          className="bg-pink-gradient pointer-events-none absolute bottom-0 start-0 h-[3px]"
           style={{ width: `${pct}%` }}
         />
       )}

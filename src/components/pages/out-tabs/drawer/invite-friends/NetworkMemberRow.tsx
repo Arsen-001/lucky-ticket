@@ -46,7 +46,7 @@ export function NetworkMemberRow({
       onClick={() => member && onOpenCard?.(member)}
       style={style}
       className={twMerge(
-        'bg-background-overlay/50 flex w-full items-center gap-3 rounded-2xl border border-white/5 p-2.5 text-left transition-colors',
+        'bg-background-overlay/50 flex w-full items-center gap-3 rounded-2xl border border-white/5 p-2.5 text-start transition-colors',
         member && 'active:scale-99 cursor-pointer hover:bg-white/5',
         className
       )}

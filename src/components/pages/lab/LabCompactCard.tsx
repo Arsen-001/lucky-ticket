@@ -190,7 +190,7 @@ export function LabCompactCard({
   if (variant === 'current') {
     return (
       <div style={style} className={frame} onClick={handleClick} role="button">
-        <div className="relative z-[2] flex min-h-[60px] cursor-pointer items-center gap-2.5 py-2 pr-3 pl-1.5 active:scale-[0.99]">
+        <div className="relative z-[2] flex min-h-[60px] cursor-pointer items-center gap-2.5 py-2 pe-3 ps-1.5 active:scale-[0.99]">
           {icon(32)}
           <h4 className="w-max max-w-full flex-1 truncate text-sm leading-snug font-extrabold">
             {localized(task.title)}
