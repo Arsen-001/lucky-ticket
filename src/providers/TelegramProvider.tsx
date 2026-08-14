@@ -198,6 +198,26 @@ export function TelegramProvider({ children }: { children: ReactNode }) {
     };
   }, [phase, booted]);
 
+  // Keep the window open at full height.
+  //
+  // The Mini App is laid out for the whole sheet — a header pinned to the top
+  // inset, a tab bar on the bottom one — so a collapsed window is not a smaller
+  // version of the app, it is a cropped one. `disableVerticalSwipes` stops the
+  // player's own drag, but the client also collapses on gestures the app does
+  // not own, and there is no event that says "you were folded": only the
+  // viewport changing height. So re-expand whenever it comes back short.
+  // Cannot loop — `expand()` on an expanded window is a no-op.
+  useEffect(() => {
+    const tg = getTelegramWebApp();
+    if (!tg || !tg.initData) return;
+
+    const keepExpanded = () => {
+      if (!tg.isExpanded) tg.expand();
+    };
+    tg.onEvent?.('viewportChanged', keepExpanded);
+    return () => tg.offEvent?.('viewportChanged', keepExpanded);
+  }, []);
+
   // Deep link: a shared in-app link opens the app via `t.me/<bot>?startapp=<param>`,
   // which arrives as `start_param`. Once the app is up, route to the target it
   // names. A non-deep-link param (e.g. a referral id) resolves to null and is

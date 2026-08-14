@@ -162,6 +162,8 @@
   "purchase failed": "خرید انجام نشد. دوباره تلاش کن.",
   "stars added": "{stars} Lucky Stars به موجودی‌ات اضافه شد",
   "cancel": "لغو",
+  "leave the game?": "Leave the game?",
+  "leave": "Leave",
   "cancel forfeits bonus": "لغو باعث از دست رفتن AP اعطاشده، پاداش +50% و بازده می‌شود.",
   "cancel forfeits description": "{amount} {coin} به تو برمی‌گردد. AP اعطاشده پس گرفته می‌شود؛ بازده، پاداش +50% AP و ستاره‌های تکمیل از بین می‌روند.",
   "base": "پایه",

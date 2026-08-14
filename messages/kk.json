@@ -162,6 +162,8 @@
   "purchase failed": "Сатып алу сәтсіз аяқталды. Қайта көр.",
   "stars added": "Балансыңа {stars} Lucky Stars қосылды",
   "cancel": "Болдырмау",
+  "leave the game?": "Leave the game?",
+  "leave": "Leave",
   "cancel forfeits bonus": "Болдырмасаң берілген AP, +50% бонус және табыс жоғалады.",
   "cancel forfeits description": "{amount} {coin} саған қайтады. Берілген AP қайтарылып алынады; табыс, +50% AP бонусы және аяқтау жұлдыздары жоғалады.",
   "base": "Негізгі",

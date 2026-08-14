@@ -29,12 +29,6 @@ interface BackEntry {
 }
 
 const entries: BackEntry[] = [];
-const listeners = new Set<() => void>();
-
-function emit(): void {
-  // Copied: a listener may unsubscribe itself while being notified.
-  for (const listener of [...listeners]) listener();
-}
 
 /**
  * Registers a dismiss handler as the current meaning of Back.
@@ -43,7 +37,6 @@ function emit(): void {
 export function pushBackHandler(run: BackHandler): () => void {
   const entry: BackEntry = { run };
   entries.push(entry);
-  emit();
 
   let released = false;
   return () => {
@@ -51,13 +44,7 @@ export function pushBackHandler(run: BackHandler): () => void {
     released = true;
     const index = entries.indexOf(entry);
     if (index !== -1) entries.splice(index, 1);
-    emit();
   };
-}
-
-/** How many overlays currently claim Back. Drives whether the button is shown. */
-export function backHandlerCount(): number {
-  return entries.length;
 }
 
 /** Runs the topmost handler. `false` means nothing claimed the press. */
@@ -66,12 +53,4 @@ export function runTopBackHandler(): boolean {
   if (!top) return false;
   top.run();
   return true;
-}
-
-/** Subscribe to pushes/pops — the `useSyncExternalStore` half of the count. */
-export function subscribeBackHandlers(listener: () => void): () => void {
-  listeners.add(listener);
-  return () => {
-    listeners.delete(listener);
-  };
 }

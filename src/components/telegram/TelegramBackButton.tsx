@@ -1,19 +1,17 @@
 'use client';
 
-import { useEffect, useRef, useSyncExternalStore } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { usePathname, useRouter } from 'next/navigation';
+import { ConfirmModal } from '@/components/shared/modals/ConfirmModal';
 import { routes } from '@/constants/routes';
+import { useAppTranslations } from '@/hooks/useAppTranslations';
+import { runTopBackHandler } from '@/lib/telegram/back-stack';
 import { getTelegramWebApp, isTelegramVersionAtLeast } from '@/lib/telegram/telegram';
-import {
-  backHandlerCount,
-  runTopBackHandler,
-  subscribeBackHandlers,
-} from '@/lib/telegram/back-stack';
 import { useNavigationHistory } from '@/providers/NavigationHistoryProvider';
 
 /**
  * `BackButton` landed in Bot API 6.1. Below that the SDK warns to the console
- * and drops the call, and this runs on every navigation — so ask first.
+ * and drops the call, so ask before touching it.
  */
 const MIN_VERSION = '6.1';
 
@@ -24,38 +22,39 @@ function getBackButton() {
 }
 
 /**
- * Makes Back mean "back inside the app" instead of "close the game".
+ * Makes Back mean "back inside the app" instead of "put the game away".
  *
- * Android routes the system back gesture to the Mini App **only while
- * Telegram's own back arrow is visible** — with it hidden (which is what the
- * app shipped, since nothing ever called `show()`) the client closes the Mini
- * App on the first press, from any screen, mid-flow. So the arrow is kept in
- * sync with whether there is anywhere to go: any screen but Home, or any open
- * overlay.
+ * The client hands the Android back gesture to a Mini App **only while its
+ * header arrow is visible**. With the arrow hidden the press belongs to
+ * Telegram, and what Telegram does with it is not one behaviour: older builds
+ * close the Mini App, current ones fold it into the collapsed bar, and
+ * `enableClosingConfirmation` guards neither (measured on a device 15.08.2026 —
+ * the window folded away without a word). Consuming the press is the only lever
+ * the app has over any of that, so the arrow now stays up on **every** screen,
+ * the root included.
  *
- * A press resolves in the same order the player perceives the layers:
+ * A press resolves in the order the player perceives the layers:
  *
  *  1. the topmost open overlay closes (@see back-stack) — a dialog must never
  *     let the page navigate out from under it;
  *  2. otherwise the in-app history is stepped back;
- *  3. with no history — a deep link opened straight onto a detail page — Home,
- *     so back never escapes to a blank tab. Same rule as {@link useSafeBack}.
+ *  3. with no history left but somewhere still to go — a deep link opened
+ *     straight onto a detail page — Home. Same rule as {@link useSafeBack};
+ *  4. at the end of the road, an explicit "leave the game?" — because that is
+ *     the press the player used to lose the session to.
  *
- * On Home with nothing open the arrow is hidden and back closes the Mini App,
- * which is the platform behaviour players expect at the root.
+ * So the arrow is never a dead tap on Home: it is the way out, asked for out
+ * loud. Leaving is still one press plus one tap; it just cannot happen by
+ * accident any more.
  *
- * Renders nothing; it only drives the client's chrome.
+ * Renders only that dialog; the rest is the client's chrome.
  */
 export function TelegramBackButton() {
+  const t = useAppTranslations();
   const pathname = usePathname();
   const router = useRouter();
   const { canGoBack } = useNavigationHistory();
-
-  const overlayCount = useSyncExternalStore(
-    subscribeBackHandlers,
-    backHandlerCount,
-    () => 0 // SSR: no overlay can be open before hydration
-  );
+  const [exitOpen, setExitOpen] = useState(false);
 
   const handleBack = () => {
     if (runTopBackHandler()) return;
@@ -63,10 +62,14 @@ export function TelegramBackButton() {
       router.back();
       return;
     }
-    router.push(routes.home);
+    if (pathname !== routes.home) {
+      router.push(routes.home);
+      return;
+    }
+    setExitOpen(true);
   };
 
-  // The SDK keeps the handler it was given, so it must be one stable function
+  // The SDK keeps the handler it is given, so it must be one stable function
   // registered once — re-registering per render would leak listeners into the
   // client. The fresh closure is read through the ref at press time.
   const latest = useRef(handleBack);
@@ -80,6 +83,7 @@ export function TelegramBackButton() {
 
     const onClick = () => latest.current();
     backButton.onClick(onClick);
+    backButton.show();
     return () => {
       backButton.offClick(onClick);
       // The Mini App outlives this component (the app is one webview session):
@@ -88,13 +92,16 @@ export function TelegramBackButton() {
     };
   }, []);
 
-  useEffect(() => {
-    const backButton = getBackButton();
-    if (!backButton) return;
-
-    if (overlayCount > 0 || pathname !== routes.home) backButton.show();
-    else backButton.hide();
-  }, [pathname, overlayCount]);
-
-  return null;
+  return (
+    <ConfirmModal
+      open={exitOpen}
+      onClose={() => setExitOpen(false)}
+      onConfirm={() => {
+        setExitOpen(false);
+        getTelegramWebApp()?.close();
+      }}
+      title={t('leave the game?')}
+      confirmText={t('leave')}
+    />
+  );
 }

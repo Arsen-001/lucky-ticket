@@ -162,6 +162,8 @@
   "purchase failed": "购买失败，请重试。",
   "stars added": "{stars} Lucky Stars 已加入你的余额",
   "cancel": "取消",
+  "leave the game?": "Leave the game?",
+  "leave": "Leave",
   "cancel forfeits bonus": "取消会失去已发放的 AP、+50% 加成和收益。",
   "cancel forfeits description": "{amount} {coin} 会退还给你。已发放的 AP 将被收回；收益、+50% AP 加成和完成星星都会失去。",
   "base": "基础",

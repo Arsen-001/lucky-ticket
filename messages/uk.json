@@ -162,6 +162,8 @@
   "purchase failed": "Купівля не вдалася. Спробуй ще раз.",
   "stars added": "{stars} Lucky Stars зараховано на твій баланс",
   "cancel": "Скасувати",
+  "leave the game?": "Leave the game?",
+  "leave": "Leave",
   "cancel forfeits bonus": "Скасування забирає нараховані AP, бонус +50% і дохідність.",
   "cancel forfeits description": "Твої {amount} {coin} повертаються. Нараховані AP знімаються; дохідність, бонус +50% AP і зірки за завершення втрачаються.",
   "base": "База",

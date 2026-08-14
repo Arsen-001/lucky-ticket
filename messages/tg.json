@@ -162,6 +162,8 @@
   "purchase failed": "Харид анҷом наёфт. Бори дигар кӯшиш кун.",
   "stars added": "Ба ҳисобат {stars} Lucky Stars илова шуд",
   "cancel": "Бекор кардан",
+  "leave the game?": "Leave the game?",
+  "leave": "Leave",
   "cancel forfeits bonus": "Бекор кардан AP-и додашуда, бонуси +50% ва даромадро аз байн мебарад.",
   "cancel forfeits description": "{amount} {coin}-и ту бармегардад. AP-и додашуда пас гирифта мешавад; даромад, бонуси +50% AP ва ситораҳои анҷом аз байн мераванд.",
   "base": "Асосӣ",

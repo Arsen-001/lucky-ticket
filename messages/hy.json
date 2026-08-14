@@ -162,6 +162,8 @@
   "purchase failed": "Գնումը չկայացավ։ Փորձիր նորից։",
   "stars added": "{stars} Lucky Stars ավելացվեց հաշվեկշռիդ",
   "cancel": "Չեղարկել",
+  "leave the game?": "Leave the game?",
+  "leave": "Leave",
   "cancel forfeits bonus": "Չեղարկելիս կորչում են հաշվեգրված AP-ն, +50% բոնուսը և եկամտաբերությունը։",
   "cancel forfeits description": "Քո {amount} {coin}-ը վերադարձվում է։ Հաշվեգրված AP-ն հետ է վերցվում, իսկ եկամտաբերությունը, +50% AP բոնուսը և ավարտի աստղերը կորչում են։",
   "base": "Բազային",

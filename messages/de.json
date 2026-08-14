@@ -161,6 +161,8 @@
   "purchase failed": "Kauf fehlgeschlagen. Bitte versuche es erneut.",
   "stars added": "{stars} Lucky Stars deinem Guthaben gutgeschrieben",
   "cancel": "Abbrechen",
+  "leave the game?": "Leave the game?",
+  "leave": "Leave",
   "cancel forfeits bonus": "Abbruch verwirkt die gutgeschriebenen AP, den +50%-Bonus und den Ertrag.",
   "cancel forfeits description": "Deine {amount} {coin} werden zurückerstattet. Die gutgeschriebenen AP werden entzogen; der Ertrag, der +50%-AP-Bonus und die Abschluss-Stars verfallen.",
   "base": "Basis",

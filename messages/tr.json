@@ -162,6 +162,8 @@
   "purchase failed": "Satın alma başarısız. Tekrar dene.",
   "stars added": "Bakiyene {stars} Lucky Stars eklendi",
   "cancel": "İptal",
+  "leave the game?": "Leave the game?",
+  "leave": "Leave",
   "cancel forfeits bonus": "İptal edersen verilen AP, +%50 bonus ve getiri kaybolur.",
   "cancel forfeits description": "{amount} {coin} sana geri döner. Verilen AP geri alınır; getiri, +%50 AP bonusu ve tamamlama yıldızları kaybolur.",
   "base": "Temel",
