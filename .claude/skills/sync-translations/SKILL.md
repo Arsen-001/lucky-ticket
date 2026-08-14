@@ -21,6 +21,25 @@ would have quietly skipped any language added since.
 ls messages/*.json
 ```
 
+## Two phases — do not translate mid-flight
+
+**While a feature is still being decided, only `en.json` and `ru.json` are
+written by hand.** The other 16 dictionaries are drafted from English by
+`npm run i18n:draft` (which keeps `tests/i18n.test.ts` green and records the
+keys in `.claude/i18n-pending.json`), and get real translations **only once the
+wording is final**.
+
+So this skill has two jobs, and they are not interchangeable:
+
+- **mid-work** — check parity, fill nothing by hand; if `en` gained keys, run
+  `npm run i18n:draft` and stop there
+- **final pass** — `npm run i18n:draft -- --list` names exactly which keys owe a
+  translation; translate those in the 16, then `npm run i18n:draft -- --clear`
+
+Translating everything on every edit is the failure mode this exists to
+prevent — the same string gets translated 18 ways, then reworded, then
+translated 18 ways again.
+
 ## When to use
 
 - After editing any `messages/*.json` file

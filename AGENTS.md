@@ -331,6 +331,36 @@ Any prop that holds a navigation path must use the `Route` type from `src/consta
 
 **Never hardcode user-visible text** — every string rendered in the UI (labels, placeholders, error messages, button text, headings, empty states) must go through `t()`. Hardcoded English strings in JSX are a bug.
 
+### While the copy is still being decided: en + ru only
+
+18 dictionaries live in `messages/`. Translating a new string into all of them
+and then rewording it twice is the same work done three times, so **during
+work only `en.json` and `ru.json` are written by hand.** The other 16 are
+filled at the end — **once the wording is final and will not change again.**
+
+That collides with `tests/i18n.test.ts`, which requires every dictionary to
+hold the exact `en` key set, and the pre-commit hook runs it: an en+ru-only key
+cannot be committed at all. So the other 16 get the **English string as a
+draft** — never a raw key on screen, never an empty value — and the key is
+recorded in a ledger:
+
+```bash
+npm run i18n:draft           # fill the 16 from English, record what was filled
+npm run i18n:draft -- --list # what is still waiting for real translation
+npm run i18n:draft -- --clear # after the final pass: nothing is owed
+```
+
+The ledger is `.claude/i18n-pending.json`. It **warns, it does not block** —
+nothing is wired into the suite, because blocking commits is the thing being
+avoided. Run `--list` when a feature is finished and the wording is settled,
+translate exactly those keys, then `--clear`.
+
+Two things this does not excuse: `ru.json` is authored, so the script refuses
+to draft anything if Russian is missing a key; and English drafts do reach
+production for those 16 languages until the final pass runs — that is a
+deliberate trade (readable English beats `min length is {num}`), not a state to
+leave standing after a feature ships.
+
 Always use the custom hook, never raw `useTranslations`:
 
 ```typescript

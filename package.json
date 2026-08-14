@@ -20,6 +20,7 @@
     "test:e2e": "playwright test",
     "test:e2e:prod": "playwright test --config playwright.prod.config.ts",
     "e2e:prod-server": "NEXT_PUBLIC_API_URL= NEXT_DIST_DIR=.next-e2e-prod next build && NEXT_PUBLIC_API_URL= NEXT_DIST_DIR=.next-e2e-prod next start --port 3100",
+    "i18n:draft": "node scripts/i18n-draft.mjs",
     "prepare": "husky",
     "deploy:slice": "bash scripts/deploy-slice.sh"
   },

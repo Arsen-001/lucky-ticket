@@ -126,9 +126,19 @@ Every schema file in `src/lib/yup/` exports `getXSchema(t: Dictionary)`. Error m
 
 ## i18n Rules
 
-### R19. Three-way translation parity
+### R19. Two locales while deciding, all 18 at the end
 
-Every key added to `messages/en.json` MUST also be added to `messages/hy.json` AND `messages/ru.json`. Missing translations show as the raw key in production. Use the `/sync-translations` skill before committing changes that touch any messages file.
+`messages/` holds 18 dictionaries. **During work, write real copy only in `en.json` and `ru.json`** — a string translated 18 ways and then reworded is that work done again. Fill the other 16 **only when the wording is final and will not change**.
+
+Parity is still mandatory (`tests/i18n.test.ts` runs in the pre-commit hook), so the 16 get the English string as a draft and the key goes into a ledger:
+
+```bash
+npm run i18n:draft            # fill the 16 from en, record the keys
+npm run i18n:draft -- --list  # what still owes a real translation
+npm run i18n:draft -- --clear # after the final pass
+```
+
+Ledger: `.claude/i18n-pending.json` — advisory, not enforced. `ru.json` is never drafted; the script fails if Russian is missing a key. Use `/sync-translations` for the final pass.
 
 ### R20. No hardcoded user-visible strings
 
