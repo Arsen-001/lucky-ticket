@@ -88,6 +88,7 @@ export const mockDb = {
           marketDiscountPct: 1.4,
           referralPct: 25,
           adsDailyBonus: 2,
+          adsSkipDaily: 10,
           stakeFeeDiscountBonusPct: 0,
           ticketSendDailyBonus: {
             BRONZE: 3,

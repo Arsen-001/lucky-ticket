@@ -70,6 +70,12 @@ export function AdsSection({
   // missing reward.
   const paidWithoutAp = !!nextSlot?.paid && extra?.grantsAp === false;
 
+  // Lucky Player skips left today (DOCS §7.3). Clamped a second time here, to
+  // the views that are actually left: the allowance is counted against the
+  // day's cap, so with three of ten views spent "10 skips left" would promise
+  // three more views than the day still holds.
+  const skipsLeft = Math.min(ads?.skip?.remaining ?? 0, Math.max(0, total - watched));
+
   return (
     <section
       ref={el => registerSection?.(TaskCategory.ADS, el)}
@@ -88,7 +94,12 @@ export function AdsSection({
                 mark promises a reward for a tap, and a view is a video first. */}
             <h2 className="text-base leading-tight font-extrabold">{t('category ads')}</h2>
           </ArrivalShine>
-          <p className="text-pink-secondary text-[11px]">{t('ads progress', { watched, total })}</p>
+          <p className="text-pink-secondary text-[11px]">
+            {t('ads progress', { watched, total })}
+            {/* The allowance is a countdown a subscriber plans around, so it
+                belongs beside the day's count rather than only on the card. */}
+            {skipsLeft > 0 && ` · ${t('ad skips left {n}', { n: skipsLeft })}`}
+          </p>
         </div>
         {ads?.resetAt && !expired && (
           <span className="flex-center shrink-0 gap-1 rounded-full bg-white/5 px-2.5 py-1 text-[10px] font-bold text-white/60">
@@ -112,6 +123,7 @@ export function AdsSection({
           cooldownSeconds={cooldown}
           loading={loading}
           paidWithoutAp={paidWithoutAp}
+          skipsLeft={skipsLeft}
           resetLabel={leftTime}
           onWatch={onWatch}
         />

@@ -128,6 +128,19 @@ export const buildStatusPerkRows = (
         : `+${perks.adsDailyBonus}`,
     });
 
+  if (perks.adsSkipDaily > 0)
+    rows.push({
+      id: 'adsSkip',
+      label: t('perk ads skip'),
+      // Quoted against the cap it is bounded by, the same way the ads row
+      // quotes its total: "10 of 20" is the promise the server will keep, while
+      // a bare "10" reads as ten EXTRA views to anyone who has just read the
+      // row above it.
+      value: base
+        ? `${Math.min(perks.adsSkipDaily, base.adsDailyLimit + perks.adsDailyBonus)}${NB}/${NB}${base.adsDailyLimit + perks.adsDailyBonus}`
+        : String(perks.adsSkipDaily),
+    });
+
   const sendTiers = TIERS.filter(
     tier => (perks.ticketSendDailyBonus?.[tier.toUpperCase()] ?? 0) > 0
   );

@@ -15,6 +15,13 @@ export interface StatusPerks {
    * a bonus, not the cap itself. VIP level 1 sends `2`, meaning 10 + 2 = 12.
    */
   adsDailyBonus: number;
+  /**
+   * Rewarded-ad views the status lets the player take WITHOUT watching, per
+   * day (DOCS §7.3) — the reward is identical, only the video is gone. A count
+   * of views, not a bonus: it is bounded by the daily cap, so it never hands
+   * out a view the player did not already have.
+   */
+  adsSkipDaily: number;
   /** EXTRA percentage points on the stake-fee volume discount (DOCS §18.5). */
   stakeFeeDiscountBonusPct: number;
   /** EXTRA per-recipient daily ticket sends per tier, on top of the free table. */

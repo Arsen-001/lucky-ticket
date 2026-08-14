@@ -29,6 +29,7 @@ const perks = (over: Partial<StatusPerks> = {}): StatusPerks => ({
   marketDiscountPct: 0,
   referralPct: 0,
   adsDailyBonus: 0,
+  adsSkipDaily: 0,
   stakeFeeDiscountBonusPct: 0,
   ticketSendDailyBonus: { BRONZE: 0, SILVER: 0, GOLD: 0, PLATINUM: 0, DIAMOND: 0 },
   bulkClaimEnabled: false,
@@ -91,6 +92,22 @@ describe('status perk rows', () => {
     expect(valueOf(rows, 'ticketSend')).toBe(
       'bronze\u00A05\u00A0· silver\u00A04\u00A0· gold\u00A03\u00A0· platinum\u00A02\u00A0· diamond\u00A01'
     );
+  });
+
+  it('quotes the ad skip against the cap it is bounded by', () => {
+    // The server clamps the allowance to the player's own daily cap, so the row
+    // has to read as "10 OF 20", not "10". Quoted bare, right under a row that
+    // says "20 ad views per day", it reads as ten EXTRA views — a promise the
+    // server will not keep.
+    const rows = buildStatusPerkRows(perks({ adsDailyBonus: 10, adsSkipDaily: 10 }), BASE, t);
+    expect(valueOf(rows, 'adsSkip')).toBe('10\u00A0/\u00A020');
+
+    // An allowance above the cap is the same clamp, stated honestly.
+    const over = buildStatusPerkRows(perks({ adsSkipDaily: 999 }), BASE, t);
+    expect(valueOf(over, 'adsSkip')).toBe('10\u00A0/\u00A010');
+
+    // And zero grants nothing, like every other perk on this screen.
+    expect(ids(buildStatusPerkRows(perks({ adsSkipDaily: 0 }), BASE, t))).toEqual([]);
   });
 
   it('lists a closed tier only when the status opens it', () => {

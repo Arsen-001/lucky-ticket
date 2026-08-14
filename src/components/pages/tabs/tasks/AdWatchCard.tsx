@@ -1,6 +1,6 @@
 'use client';
 
-import { Check, Loader2, Play, Timer } from 'lucide-react';
+import { Check, Loader2, Play, SkipForward, Timer } from 'lucide-react';
 import { twMerge } from 'tailwind-merge';
 import { useAppTranslations } from '@/hooks/useAppTranslations';
 import { GlobalConstants } from '@/constants/global.constants';
@@ -24,6 +24,8 @@ export interface AdWatchCardProps {
   loading?: boolean;
   /** The next slot was bought and bought views pay no activity points. */
   paidWithoutAp?: boolean;
+  /** Skips the status has left today; 0 (or absent) hides the whole notion. */
+  skipsLeft?: number;
   /** Time until the daily reset, already formatted. */
   resetLabel?: string;
   onWatch: (slot: AdSlot) => void;
@@ -47,6 +49,7 @@ export function AdWatchCard({
   cooldownSeconds = 0,
   loading = false,
   paidWithoutAp = false,
+  skipsLeft = 0,
   resetLabel,
   onWatch,
   className,
@@ -54,7 +57,11 @@ export function AdWatchCard({
   const t = useAppTranslations();
 
   const spent = !nextSlot;
-  const cooling = !spent && !loading && cooldownSeconds > 0;
+  // A skipped view plays no ad, so the pause that exists to stop a network
+  // answering `onNonStopShow` has nothing to protect — waiting through it would
+  // be a delay invented for the player who paid to skip the wait.
+  const skipping = !spent && !!nextSlot?.skippable && skipsLeft > 0;
+  const cooling = !spent && !loading && !skipping && cooldownSeconds > 0;
   const playable = !spent && !loading && !cooling;
 
   // The ring carries the day, except during the pause, when it counts the pause
@@ -74,9 +81,11 @@ export function AdWatchCard({
       ? t('all rewards added')
       : cooling
         ? t('ad cooldown hint')
-        : paidWithoutAp
-          ? t('paid ad no ap')
-          : t('ad ready hint');
+        : skipping
+          ? t('ad skip hint {left}', { left: skipsLeft })
+          : paidWithoutAp
+            ? t('paid ad no ap')
+            : t('ad ready hint');
 
   const ctaLabel = loading
     ? t('loading')
@@ -84,7 +93,9 @@ export function AdWatchCard({
       ? t('new ads in', { time: resetLabel ?? '' })
       : cooling
         ? t('next ad in seconds', { sec: cooldownSeconds })
-        : t('watch');
+        : skipping
+          ? t('take without watching')
+          : t('watch');
 
   return (
     <div
@@ -145,6 +156,8 @@ export function AdWatchCard({
               <Check size={18} strokeWidth={2.6} />
             ) : cooling ? (
               cooldownSeconds
+            ) : skipping ? (
+              <SkipForward size={17} fill="currentColor" className="translate-x-px" />
             ) : (
               <Play size={17} fill="currentColor" className="translate-x-px" />
             )}
@@ -161,6 +174,15 @@ export function AdWatchCard({
             sliver. */}
         {nextSlot && nextSlot.rewards.length === 1 && (
           <AdRewardRow rewards={nextSlot.rewards} variant="inline" muted={!playable} />
+        )}
+
+        {/* Names the perk that is paying for this view. Without it the button
+            reads as the app skipping ads on its own — the one reading that
+            makes a subscriber wonder what they paid for. */}
+        {skipping && (
+          <span className="border-electric-purple/40 bg-electric-purple/20 text-electric-purple shrink-0 self-start rounded-full border px-1.5 py-0.5 text-[9px] font-bold">
+            {t('lucky player')}
+          </span>
         )}
 
         {nextSlot?.paid && (
@@ -194,6 +216,8 @@ export function AdWatchCard({
           <Timer size={14} strokeWidth={2.4} />
         ) : spent ? (
           <Check size={14} strokeWidth={2.6} />
+        ) : skipping ? (
+          <SkipForward size={13} fill="currentColor" />
         ) : (
           <Play size={13} fill="currentColor" />
         )}

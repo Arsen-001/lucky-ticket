@@ -80,7 +80,12 @@ export const tasksApi = api.injectEndpoints({
       // `provider` tells the backend which network served the impression —
       // it prices a house ad differently and attributes revenue per network.
       // Optional so an older client (or the dev mock flow) still works.
-      { adId: string; provider?: AdProviderId }
+      //
+      // `skipped` claims the Lucky Player skip: no ad played, pay the view
+      // anyway (DOCS §7.3). The server re-derives the allowance and refuses a
+      // claim it did not grant, so this is a request, not an instruction —
+      // and `provider` is meaningless alongside it (there was no impression).
+      { adId: string; provider?: AdProviderId; skipped?: boolean }
     >({
       query: body => ({ url: 'tasks/ads/watch', method: 'POST', body }),
       invalidatesTags: [rtkTags.tasks, rtkTags.me, rtkTags.lc],

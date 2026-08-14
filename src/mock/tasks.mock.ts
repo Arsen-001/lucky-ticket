@@ -277,6 +277,17 @@ const ADS_CONFIG: AdsConfig = {
 const getAdRewards = (index: number): TaskReward[] =>
   ADS_CONFIG.rewardLadder[index % ADS_CONFIG.rewardLadder.length] ?? flatAdReward;
 
+/**
+ * The Lucky Player skip allowance for this dev session (DOCS §7.3) — the perk
+ * that pays a view without playing anything. `total: 0` is the statusless view
+ * of the same screen, which is what a `fresh` account gets: the card must then
+ * look exactly as it did before the perk existed.
+ */
+const ADS_SKIP = {
+  total: fresh ? 0 : 10,
+  usedToday: 0,
+};
+
 /** Extra slots bought in this dev session — mirrors `AdWatchProgress`. */
 const ADS_EXTRA = {
   priceLc: 5_000,
@@ -295,6 +306,7 @@ const buildAds = (): AdsBlock => {
   // about to be watched, and `mockState.watchedAdIds` could never match a slot,
   // because `nextId()` handed out a fresh id on every rebuild — so watching an
   // ad on localhost left the day's counter exactly where it was.
+  const skipRemaining = Math.max(0, Math.min(ADS_SKIP.total, free) - ADS_SKIP.usedToday);
   const slots = Array.from({ length: total }, (_, i) => {
     const id = `ad-slot-${i}`;
     return {
@@ -305,13 +317,24 @@ const buildAds = (): AdsBlock => {
       paid: i >= free,
     };
   });
+  const watchedCount = slots.filter(slot => slot.watched).length;
   return {
     enabled: true,
     total,
     free,
-    watchedToday: slots.filter(slot => slot.watched).length,
+    watchedToday: watchedCount,
     resetAt: nextUtcMidnight(),
-    slots,
+    // The next `remaining` unwatched slots are the skippable ones — the same
+    // rule the server applies, so the card behaves here as it will in prod.
+    slots: slots.map(slot => ({
+      ...slot,
+      skippable: !slot.watched && slot.index - watchedCount < skipRemaining,
+    })),
+    skip: {
+      total: Math.min(ADS_SKIP.total, free),
+      usedToday: ADS_SKIP.usedToday,
+      remaining: skipRemaining,
+    },
     extra: {
       enabled: true,
       priceLc: ADS_EXTRA.priceLc,
@@ -1873,9 +1896,16 @@ export const tasksMock = {
   // sees mutated state (matches real backend behaviour).
   tasks: () => buildTasksResponse(),
   'POST tasks/claim': claimTaskHandler,
-  'POST tasks/ads/watch': (args: { body?: { adId?: string } }) => {
+  'POST tasks/ads/watch': (args: { body?: { adId?: string; skipped?: boolean } }) => {
     const adId = args.body?.adId ?? '';
-    const slot = buildAds().slots.find(s => s.id === adId);
+    const ads = buildAds();
+    const slot = ads.slots.find(s => s.id === adId);
+    // The server refuses a skip it did not grant, so the mock does too — a mock
+    // that always says yes is how a refusal branch ships untested.
+    if (args.body?.skipped) {
+      if ((ads.skip?.remaining ?? 0) <= 0) throw new Error('ad-skip-exhausted');
+      ADS_SKIP.usedToday += 1;
+    }
     if (adId) mockState.watchedAdIds.add(adId);
     const rewards = slot?.rewards ?? [ap(5)];
     rewards.forEach(r => {

@@ -592,6 +592,17 @@ export function TasksContent() {
   // Return type is annotated because the body calls itself (the house-ad
   // retry) — TypeScript cannot infer a self-referencing initializer.
   const handleWatchAd = async (slot: AdSlot): Promise<void> => {
+    // A Lucky Player skip (DOCS §7.3): the status pays this view outright, so
+    // no network is asked for anything and the post-view pause — which exists
+    // only because a network refuses rapid repeats — is not started either.
+    // The server re-checks the allowance and refuses a claim it did not grant,
+    // so this flag opens no door the perk hasn't already opened.
+    if (slot.skippable && (data?.ads?.skip?.remaining ?? 0) > 0) {
+      triggerHaptic('medium');
+      await grantAdReward(slot, undefined, true);
+      return;
+    }
+
     // The button is already disabled while the pause runs; this is the backstop
     // for anything that reaches the handler another way.
     if (!isAdPauseOver(adReadyAt)) return;
@@ -644,12 +655,21 @@ export function TasksContent() {
    * is spent, so replaying it would cost the player another video for a reward
    * they already earned.
    */
-  const grantAdReward = async (slot: AdSlot, provider?: AdProviderId): Promise<void> => {
-    retryRef.current = () => grantAdReward(slot, provider);
+  const grantAdReward = async (
+    slot: AdSlot,
+    provider?: AdProviderId,
+    skipped?: boolean
+  ): Promise<void> => {
+    retryRef.current = () => grantAdReward(slot, provider, skipped);
     try {
       // Show what the server actually granted (not the slot's advertised reward,
       // which can differ) — and no fabricated balance (watchAd returns none).
-      const res = await watchAd({ adId: slot.id, provider }).unwrap();
+      // A skipped view carries no provider: there was no impression to report.
+      const res = await watchAd({
+        adId: slot.id,
+        provider: skipped ? undefined : provider,
+        skipped: skipped || undefined,
+      }).unwrap();
       setPendingClaim({
         id: slot.id,
         open: true,

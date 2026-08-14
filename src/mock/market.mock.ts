@@ -73,6 +73,9 @@ const VIP_LEVEL_PERK_LADDER: VipLevelPerks[] = (
     marketDiscountPct: market,
     referralPct: 25,
     adsDailyBonus: ads,
+    // Same allowance on every VIP level: the perk is "the day may be taken
+    // without watching", and it is bounded by the level's own cap anyway.
+    adsSkipDaily: 10,
     stakeFeeDiscountBonusPct: 0,
     ticketSendDailyBonus: {
       BRONZE: send[0],
@@ -485,6 +488,7 @@ export const marketMock: MarketData = {
         marketDiscountPct: 10,
         referralPct: 15,
         adsDailyBonus: 10,
+        adsSkipDaily: 10,
         stakeFeeDiscountBonusPct: 0,
         ticketSendDailyBonus: { BRONZE: 4, SILVER: 3, GOLD: 2, PLATINUM: 2, DIAMOND: 1 },
         bulkClaimEnabled: true,

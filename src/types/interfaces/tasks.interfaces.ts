@@ -90,6 +90,27 @@ export interface AdSlot {
   watched: boolean;
   /** This slot was bought — it sits past the free daily cap. */
   paid?: boolean;
+  /**
+   * This view may be taken WITHOUT playing an ad — the Lucky Player skip
+   * (`AdsSkipAllowance`). The server decides it per slot because the allowance
+   * runs out mid-day: the next slot can be skippable while the one after it is
+   * not. Absent on an older backend = no skip.
+   */
+  skippable?: boolean;
+}
+
+/**
+ * The status skip allowance for today (DOCS §7.3): views a Lucky Player may
+ * take without watching anything, paid exactly as if they had.
+ *
+ * `total` is already clamped by the server to the player's own daily cap, so
+ * the app can print it as-is. Zeros for everyone without the status — the UI
+ * branches on `remaining > 0`, never on the status flag.
+ */
+export interface AdsSkipAllowance {
+  total: number;
+  usedToday: number;
+  remaining: number;
 }
 
 /** The paid-extra-views offer as the server currently prices it (DOCS §12.5). */
@@ -123,6 +144,8 @@ export interface AdsBlock {
   watchedToday: number;
   resetAt: string;
   slots: AdSlot[];
+  /** Absent on an older backend — treat as "no skips granted". */
+  skip?: AdsSkipAllowance;
   /** Absent on an older backend — treat as "not for sale". */
   extra?: AdsExtraOffer;
 }
