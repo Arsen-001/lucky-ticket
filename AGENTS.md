@@ -6,7 +6,8 @@
 > - `/new-component` — scaffold a component matching project conventions
 > - `/new-modal` — scaffold a modal with proper portal/inert/animation handling
 > - `/new-yup-schema` — scaffold a localized yup factory schema
-> - `/sync-translations` — verify en/hy/ru parity
+> - `/sync-translations` — verify every `messages/*.json` has the same key set
+> - `/i18n-review` — check what those keys SAY: read them, find mistranslations and wrong register, patch safely
 > - `/check-quality` — run type-check + lint + format
 > - `/docs-drift` — surface mismatches between DOCS.md and implementation
 
