@@ -1,4 +1,4 @@
-import { expect, test, type Page } from '@playwright/test';
+import { expect, test, type Locator, type Page } from '@playwright/test';
 import { appDialogs } from './helpers';
 
 /**
@@ -16,8 +16,8 @@ import { appDialogs } from './helpers';
  * What it cannot prove: that Telegram Android routes its gesture to us — that
  * is the client's half of the contract and only a device shows it.
  */
-const TELEGRAM_STUB = () => {
-  const state = { visible: false, press: null as null | (() => void) };
+const TELEGRAM_STUB = (initData: string) => {
+  const state = { visible: false, press: null as null | (() => void), closingConfirmed: false };
   const backButton = {
     get isVisible() {
       return state.visible;
@@ -36,10 +36,11 @@ const TELEGRAM_STUB = () => {
     },
   };
   const webApp = {
-    // No `initData`: this stays a plain-browser session (the mock-backend flow
-    // the rest of the suite runs in), which is exactly the point — the arrow
-    // must be driven by the app, not by having signed in.
-    initData: '',
+    // Usually empty, which keeps this a plain-browser session (the mock-backend
+    // flow the rest of the suite runs in) — and that is the point: the arrow
+    // must be driven by the app, not by having signed in. Only the
+    // closing-confirmation test needs a Telegram boot, and passes one in.
+    initData,
     initDataUnsafe: {},
     // ≥ 6.1, the version `BackButton` needs; deliberately not 8.0, which would
     // switch on fullscreen and orientation-lock paths unrelated to this test.
@@ -50,6 +51,9 @@ const TELEGRAM_STUB = () => {
     setHeaderColor: () => {},
     setBackgroundColor: () => {},
     disableVerticalSwipes: () => {},
+    enableClosingConfirmation: () => {
+      state.closingConfirmed = true;
+    },
     onEvent: () => {},
     offEvent: () => {},
     BackButton: backButton,
@@ -75,9 +79,12 @@ const TELEGRAM_STUB = () => {
 
 declare global {
   interface Window {
-    __tgBack: { visible: boolean; press: null | (() => void) };
+    __tgBack: { visible: boolean; press: null | (() => void); closingConfirmed: boolean };
   }
 }
+
+/** Installs the stub before any page script runs. */
+const installTelegram = (page: Page, initData = '') => page.addInitScript(TELEGRAM_STUB, initData);
 
 const arrowVisible = (page: Page) => page.evaluate(() => window.__tgBack.visible);
 
@@ -89,35 +96,68 @@ const pressBack = (page: Page) =>
   });
 
 /**
- * @see overlay-touch.spec.ts — auto-surfacing popups own the screen on entry.
+ * Waits until nothing is open on top of Home and the arrow is therefore hidden,
+ * dismissing what it finds on the way.
  *
- * Waits for the app to be up FIRST: on a cold route the loop otherwise counts
- * an empty portal three times before the daily-gift modal has even been
- * queried, declares the screen quiet and hands back a page that pops a dialog
- * a second later.
+ * @see overlay-touch.spec.ts — auto-surfacing popups (a won tournament, an
+ * announcement, the daily gift) arrive as a QUEUE and keep coming while their
+ * queries resolve, so "the portal was empty three checks running" is not a
+ * state that stays true: it was still true when the loop returned and false a
+ * second later, which failed this test twice under load. Polling the condition
+ * the test actually needs — no dialog, hence no overlay claiming Back —
+ * converges instead of racing it.
  */
+async function clearHome(page: Page) {
+  await expect
+    .poll(
+      async () => {
+        if (await appDialogs(page).count()) {
+          await page.keyboard.press('Escape');
+          await page.waitForTimeout(300);
+          return 'popup';
+        }
+        return (await arrowVisible(page)) ? 'arrow' : 'clear';
+      },
+      { timeout: 30_000, message: 'Home never settled with nothing open on top of it' }
+    )
+    .toBe('clear');
+}
+
 async function openHome(page: Page) {
   await page.goto('/');
   await expect(page.getByRole('button', { name: /^home$/i })).toBeVisible();
-  const portal = appDialogs(page);
-  let quietRounds = 0;
-  for (let i = 0; i < 40 && quietRounds < 3; i++) {
-    if ((await portal.count()) === 0) {
-      quietRounds += 1;
-    } else {
-      quietRounds = 0;
-      await page.keyboard.press('Escape');
-    }
-    await page.waitForTimeout(400);
-  }
-  expect(await portal.count(), 'auto-surfaced popups never stopped coming').toBe(0);
+  await clearHome(page);
 }
 
-test.beforeEach(async ({ page }) => {
-  await page.addInitScript(TELEGRAM_STUB);
-});
+/**
+ * Taps something, dismissing whatever auto-surfaced popup got in the way.
+ *
+ * Waiting for the screen to go quiet first is not enough on its own: the
+ * watchers keep querying, so a result can arrive between the last quiet check
+ * and the tap, and the backdrop then swallows it for the rest of the test (a
+ * 90s timeout on `waiting for element ... intercepts pointer events`, seen once
+ * on the tab bar). Dismissing and retrying is what makes the tap independent of
+ * that timing.
+ */
+async function tapPastPopups(page: Page, target: Locator) {
+  for (let attempt = 0; attempt < 6; attempt++) {
+    if (await appDialogs(page).count()) {
+      await page.keyboard.press('Escape');
+      await page.waitForTimeout(400);
+      continue;
+    }
+    try {
+      await target.click({ timeout: 5_000 });
+      return;
+    } catch {
+      /* a popup landed mid-tap — dismiss it on the next lap and try again */
+    }
+  }
+  throw new Error('the tap never got past the auto-surfacing popups');
+}
 
 test('the arrow is hidden at the root and shown everywhere else', async ({ page }) => {
+  await installTelegram(page);
   await page.goto('/');
   // Home is where back SHOULD close the game — that is the platform behaviour,
   // and hiding the arrow is how the client is told so.
@@ -128,6 +168,7 @@ test('the arrow is hidden at the root and shown everywhere else', async ({ page 
 });
 
 test('a press with no history lands on Home instead of closing the app', async ({ page }) => {
+  await installTelegram(page);
   // A deep link opens straight onto a screen with nothing behind it. `back()`
   // there would step out of the webview — the exact thing being fixed.
   await page.goto('/faq');
@@ -138,23 +179,27 @@ test('a press with no history lands on Home instead of closing the app', async (
 });
 
 test('a press steps back through in-app history', async ({ page }) => {
-  await openHome(page);
-  // Not `/^tasks$/`: the tab's accessible name carries the claimable dot's
-  // label when there is a reward waiting behind it.
-  await page.getByRole('button', { name: /tasks/i }).click();
-  await expect(page).toHaveURL(/\/tasks/);
+  await installTelegram(page);
+  // Two rows of the same list, not Home → a tab: the pair differs only by the
+  // history entry between them, which is the thing being tested.
+  await page.goto('/faq');
+  await tapPastPopups(page, page.locator('a[href^="/faq/"]').first());
+  await expect(page).toHaveURL(/\/faq\/.+/);
   await expect.poll(() => arrowVisible(page)).toBe(true);
 
   await pressBack(page);
-  await expect(page).toHaveURL(/\/$/);
+  // Back to the list — NOT to Home, which is where the no-history fallback
+  // would have landed. That difference is the whole assertion.
+  await expect(page).toHaveURL(/\/faq$/);
 });
 
 test('an open sheet swallows the press instead of navigating', async ({ page }) => {
+  await installTelegram(page);
+  // Lands on a Home with nothing open — and therefore with the arrow hidden,
+  // which `clearHome` has just asserted.
   await openHome(page);
-  // Home hides the arrow — until something opens on top of it.
-  await expect.poll(() => arrowVisible(page)).toBe(false);
 
-  await page.getByRole('button', { name: /stars/i }).click();
+  await tapPastPopups(page, page.getByRole('button', { name: /stars/i }));
   await expect(appDialogs(page)).toHaveCount(1);
   await expect.poll(() => arrowVisible(page)).toBe(true);
 
@@ -163,5 +208,20 @@ test('an open sheet swallows the press instead of navigating', async ({ page }) 
   // dialog is what leaves a portal stranded on the next screen.
   await expect(appDialogs(page)).toHaveCount(0);
   await expect(page).toHaveURL(/\/$/);
-  await expect.poll(() => arrowVisible(page)).toBe(false);
+  // And Home is back to hiding the arrow — modulo the next popup in the queue,
+  // which is why this settles rather than reads once.
+  await clearHome(page);
+});
+
+test('the client is asked to confirm before it closes the game', async ({ page }) => {
+  // The root press is the one `BackButton` deliberately lets through, so it is
+  // the client's confirmation that stands between a stray press and a dead
+  // session. Needs a Telegram boot (`initData`) — the browser path skips the
+  // whole chrome block, confirmation included.
+  await installTelegram(page, 'query_id=stub&auth_date=0&hash=stub');
+  await page.goto('/');
+
+  // Deliberately not waiting for the app: the sign-in behind this stub is not
+  // expected to succeed, and the chrome is set up before it is even attempted.
+  await expect.poll(() => page.evaluate(() => window.__tgBack.closingConfirmed)).toBe(true);
 });

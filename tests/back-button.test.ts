@@ -81,6 +81,16 @@ describe('the Telegram client is told to route Back to the app', () => {
     expect(read('src/app/layout.tsx')).toContain('<TelegramBackButton />');
   });
 
+  /**
+   * The root press is the one the arrow deliberately does NOT take: there it is
+   * a real "close the game", and one stray press ends the session. The client's
+   * own confirmation is what stands in front of it — and it is set up in the
+   * boot chrome, so it must survive edits to that block.
+   */
+  it('asks the client to confirm a close it does own', () => {
+    expect(read('src/providers/TelegramProvider.tsx')).toMatch(/enableClosingConfirmation\?\.\(\)/);
+  });
+
   /** Every overlay primitive claims the press while it is open. */
   it.each([
     ['src/components/shared/modals/Modal.tsx'],

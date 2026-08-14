@@ -89,6 +89,12 @@ export interface TelegramWebApp {
   setHeaderColor?: (color: string) => void;
   setBackgroundColor?: (color: string) => void;
   disableVerticalSwipes?: () => void;
+  /**
+   * Bot API 6.2+ — makes the client ask "Close this app?" before it closes on a
+   * gesture: the swipe, the ✕, and the Android back press at the root (the one
+   * press `BackButton` deliberately does NOT intercept). @see TelegramBackButton
+   */
+  enableClosingConfirmation?: () => void;
   /** Bot API 8.0+ — immersive fullscreen (Telegram chrome floats over the app). */
   isFullscreen?: boolean;
   requestFullscreen?: () => void;
