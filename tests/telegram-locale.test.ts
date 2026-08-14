@@ -1,3 +1,4 @@
+import { Locale } from '@/types/enums/locale.enums';
 import { describe, it, expect } from 'vitest';
 import { resolveTelegramLocale } from '@/utils/global/locale.utils';
 import { defaultLocale, locales } from '@/i18n/config';
@@ -32,9 +33,16 @@ describe('resolveTelegramLocale', () => {
   });
 
   it('leaves an unsupported language on the default rather than writing a bad cookie', () => {
-    // Armenian is in the backend enum but is deliberately not a live app
-    // language, so it must fall through like any other unsupported one.
-    for (const code of ['hy', 'fr', 'zh-CN', 'pt-BR', '']) {
+    // Codes that exist in the enum but are not selectable yet must fall through
+    // exactly like a language the platform has never heard of. The list is
+    // derived so that promoting one of them turns this into a real check
+    // instead of a stale assertion about a language that has since gone live —
+    // which is what happened to `hy`, hardcoded here until it shipped.
+    const notLive = (Object.values(Locale) as string[]).filter(
+      code => !(locales as string[]).includes(code)
+    );
+    expect(notLive.length).toBeGreaterThan(0);
+    for (const code of [...notLive, 'nb', 'sv', '']) {
       expect(resolveTelegramLocale({ languageCode: code })).toBeNull();
     }
   });

@@ -4,7 +4,12 @@
      drives the whole app's default font (Tailwind's base font + the `font-sans`
      utility) — swap the next/font face there to change the font everywhere. The
      Space Grotesk display accent stays available via `var(--font-display)`. */
-  --font-sans: var(--font-main), ui-sans-serif, system-ui, sans-serif;
+  /* Gilroy first, then the script faces it has no glyphs for, then the system.
+     The browser walks this list per CHARACTER, so Armenian and Arabic text
+     lands on Noto without anything having to know the player's language — and
+     a player who reads neither never fetches them (see index.fonts.ts). */
+  --font-sans:
+    var(--font-main), var(--font-armenian), var(--font-arabic), ui-sans-serif, system-ui, sans-serif;
 
   --color-bronze: rgba(172, 97, 34, 1);
   --color-silver: rgba(168, 170, 164, 1);

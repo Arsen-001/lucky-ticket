@@ -1,5 +1,5 @@
 import localFont from 'next/font/local';
-import { Space_Grotesk } from 'next/font/google';
+import { Space_Grotesk, Noto_Sans_Armenian, Noto_Sans_Arabic } from 'next/font/google';
 
 export const spaceGrotesk = Space_Grotesk({
   subsets: ['latin'],
@@ -71,4 +71,43 @@ export const gilroyItalic = localFont({
   display: 'swap',
   preload: false,
   variable: '--font-main-italic',
+});
+
+/**
+ * The scripts Gilroy has no glyphs for.
+ *
+ * Measured before adding them: the seven Gilroy faces are 41–48 KB each, which
+ * is a Latin + Cyrillic subset and nothing else. Armenian, Arabic and Persian
+ * text therefore fell through to whatever the device happened to have — legible,
+ * but a different face from the rest of the app, with different metrics.
+ *
+ * Two things keep this cheap, and both matter on a Mini App's cold open:
+ *
+ *  - `preload: false`, for the same reason `gilroyItalic` carries it — a
+ *    declared face is preloaded on EVERY route otherwise, and these are needed
+ *    on none of the routes most players ever see.
+ *  - Google serves these with `unicode-range`, so the browser fetches the file
+ *    only once a glyph in that range is actually rendered. A Russian or German
+ *    player never downloads a byte of them, even though the family is listed in
+ *    the stack below.
+ *
+ * CJK is deliberately NOT here. A Japanese, Korean or Chinese webfont is 2–5 MB
+ * even subsetted, and iOS and Android both ship excellent system faces for them
+ * (PingFang, Hiragino, Noto Sans CJK) — paying megabytes on a mobile connection
+ * to replace a good font with a similar one is a bad trade.
+ */
+export const notoArmenian = Noto_Sans_Armenian({
+  subsets: ['armenian'],
+  weight: ['400', '500', '600', '700'],
+  display: 'swap',
+  preload: false,
+  variable: '--font-armenian',
+});
+
+export const notoArabic = Noto_Sans_Arabic({
+  subsets: ['arabic'],
+  weight: ['400', '500', '600', '700'],
+  display: 'swap',
+  preload: false,
+  variable: '--font-arabic',
 });

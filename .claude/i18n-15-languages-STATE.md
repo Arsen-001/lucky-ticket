@@ -62,59 +62,86 @@ CJK весит 2–5 МБ и на мобильный канал не грузи�
 
 ## Ход работы
 
+### ✅ ФАЗА 1 ЗАВЕРШЕНА — обвязка во всех четырёх репо
+
+| Репо      | Коммит                                              | Что сделано                                             |
+| --------- | --------------------------------------------------- | ------------------------------------------------------- |
+| Мини-аппа | `271ff62` (в main)                                  | 8 мест + `LocalizedText` стал частичным + 2 новых теста |
+| Бэкенд    | `38ab9f0` (worktree на origin/main, **НЕ запушен**) | 11 мест + миграция энума + оверлей и бэкфилл заданий    |
+| Админка   | `8c4a997` (в main, **НЕ задеплоена**)               | 12 списков → один `locales.constants.ts`                |
+| Лендинг   | `ec21a64` (в main, **НЕ запушен**)                  | 8 файлов на язык → динамический `[locale]`              |
+
+Worktree бэкенда: `/private/tmp/claude-501/-Users-arsen-WebstormProjects-lucky-ticket/526ae9f4-a8be-4d70-8f14-40da36b6ffd9/scratchpad/backend-i18n`
+Пуш оттуда: `git push origin HEAD:main` (локальный main разошёлся, туда нельзя).
+
+**Находки фазы 1, о которых сказать утром:**
+
+- `seedCatalog` с 13.08 только СОЗДАЁТ задания ⇒ перевод в коде не дошёл бы до
+  268 строк в проде. Поэтому оверлей по id + `backfillTaskTranslations` на старте.
+- Тип `LocalizedText` врал про базу (требовал все языки). Компилятор на этом
+  показал 3 места, где в личку игроку ушло бы слово «undefined».
+- В русском терялся `LC` в двух перках — нашёл новый тест.
+- Пять компонентов админки чуть не уехали без `"use client"`: импорт встал выше
+  директивы, prettier переписал её в `("use client");`, сборка зелёная. Поймал линтер.
+
+**Коммит 271ff62** — обвязка мини-аппы (кроме словарей). type-check, 409 тестов и
+полная сборка зелёные. Бонусом: `LocalizedText` стал частичным (описывал строки
+из БД как полные, хотя читатель всегда делал `?? text.en`), и два новых теста —
+плейсхолдеры и бренд-токены — сразу нашли живой баг в русском (терялся LC).
+
 Формат: `[ ]` не начато · `[~]` в работе · `[x]` готово · `[!]` заблокировано
 
 ### Фаза 1 — обвязка (43 места, один проход на все 15)
 
 **Мини-аппа (8 мест)**
 
-- [ ] `src/types/enums/locale.enums.ts` — 14 новых значений в `enum Locale`
-- [ ] `src/i18n/config.ts` — `locales` (только готовые языки!)
-- [ ] `src/hooks/useGetAvailableLanguages.ts` — код/название/родное имя/флаг
-- [ ] `src/lib/dayjs/locale.ts` — 15 opt-in импортов локалей
-- [ ] `tests/i18n.test.ts` — `LOCALES` (переделать на чтение папки `messages/`)
-- [ ] `tests/date-locale.test.ts` — свой отдельный список
-- [ ] `.claude/skills/sync-translations/SKILL.md` — описание, шаги, node-скрипт
+- [x] `src/types/enums/locale.enums.ts` — 14 новых значений в `enum Locale`
+- [x] `src/i18n/config.ts` — `locales` (только готовые языки!)
+- [x] `src/hooks/useGetAvailableLanguages.ts` — код/название/родное имя/флаг
+- [x] `src/lib/dayjs/locale.ts` — 15 opt-in импортов локалей
+- [x] `tests/i18n.test.ts` — `LOCALES` (переделать на чтение папки `messages/`)
+- [x] `tests/date-locale.test.ts` — свой отдельный список
+- [x] `.claude/skills/sync-translations/SKILL.md` — описание, шаги, node-скрипт
 - [ ] `messages/<код>.json` × 15 — см. фазу 2
 
 **Бэкенд (11 мест, в worktree на origin/main)**
 
-- [ ] `prisma/schema.prisma` — `enum Locale` в ВЕРХНЕМ регистре + миграция
-- [ ] `src/common/localized-text.ts` — тип + `tx()` (решение по сигнатуре ниже)
-- [ ] `src/telegram/bot-message-catalog.ts` — 17 шаблонов × `Record<Locale,…>`
-- [ ] `src/notifications/notification-copy.ts` — 9 записей
-- [ ] `src/telegram/invite-share.service.ts` — `ShareLang` + `SHARE_TEXTS`
-- [ ] `src/telegram/dto/invite-share.dto.ts` — `@IsIn([...])`
-- [ ] `src/telegram/start.service.ts` — `pickLocale()` префиксный матчер
-- [ ] `src/common/economy.constants.ts` — `INVITE_SHARE_LOCALES`
-- [ ] `src/admin/dto/update-config.dto.ts` — `InviteShareText/ImageMapDto`
-- [ ] `src/admin/admin.types.ts` — `referral.share`, `ContractUserDetail.locale`, `BOT_PROFILE_LOCALES`
-- [ ] `src/admin/dto/user-mutations.dto.ts` — `@IsIn([...])`
+- [x] `prisma/schema.prisma` — `enum Locale` в ВЕРХНЕМ регистре + миграция
+- [x] `src/common/localized-text.ts` — тип + `tx()` (решение по сигнатуре ниже)
+- [x] `src/telegram/bot-message-catalog.ts` — 17 шаблонов × `Record<Locale,…>`
+- [x] `src/notifications/notification-copy.ts` — 9 записей
+- [x] `src/telegram/invite-share.service.ts` — `ShareLang` + `SHARE_TEXTS`
+- [x] `src/telegram/dto/invite-share.dto.ts` — `@IsIn([...])`
+- [x] `src/telegram/start.service.ts` — `pickLocale()` префиксный матчер
+- [x] `src/common/economy.constants.ts` — `INVITE_SHARE_LOCALES`
+- [x] `src/admin/dto/update-config.dto.ts` — `InviteShareText/ImageMapDto`
+- [x] `src/admin/admin.types.ts` — `referral.share`, `ContractUserDetail.locale`, `BOT_PROFILE_LOCALES`
+- [x] `src/admin/dto/user-mutations.dto.ts` — `@IsIn([...])`
 
 **Админка (12 мест)**
 
-- [ ] `src/types/admin.types.ts` — ПЯТЬ мест в одном файле
-- [ ] `src/constants/global.constants.ts` — `localeOrder`, `localeLabels` (ВЕРХНИЙ)
-- [ ] `src/utils/task-copy.utils.ts` — `TASK_LOCALES` + фолбэк в `copyLabel`
-- [ ] `src/utils/users-filters.utils.ts` — union `locale`
-- [ ] `src/lib/yup/user.schemes.ts` — два места
-- [ ] `src/components/pages/users/EditUserModal.tsx` — `LOCALE_OPTIONS`
-- [ ] `src/components/pages/config/InviteShareEditor.tsx` — `LOCALE_LABELS` + `BUILT_IN`
-- [ ] `src/components/pages/bot/BotLocaleTabs.tsx` — `BOT_LOCALE_LABELS`
-- [ ] `src/components/pages/bot/BotMessageCard.tsx` — свой `LOCALE_LABELS`
-- [ ] `src/components/pages/tasks/TaskFormModal.tsx` — `LOCALE_LABEL` + `ready`
-- [ ] `src/mock/data.mock.ts` — четыре блока
-- [ ] `src/mock/index.mock.ts` — локаль в моке игрока + PATCH
+- [x] `src/types/admin.types.ts` — ПЯТЬ мест в одном файле
+- [x] `src/constants/global.constants.ts` — `localeOrder`, `localeLabels` (ВЕРХНИЙ)
+- [x] `src/utils/task-copy.utils.ts` — `TASK_LOCALES` + фолбэк в `copyLabel`
+- [x] `src/utils/users-filters.utils.ts` — union `locale`
+- [x] `src/lib/yup/user.schemes.ts` — два места
+- [x] `src/components/pages/users/EditUserModal.tsx` — `LOCALE_OPTIONS`
+- [x] `src/components/pages/config/InviteShareEditor.tsx` — `LOCALE_LABELS` + `BUILT_IN`
+- [x] `src/components/pages/bot/BotLocaleTabs.tsx` — `BOT_LOCALE_LABELS`
+- [x] `src/components/pages/bot/BotMessageCard.tsx` — свой `LOCALE_LABELS`
+- [x] `src/components/pages/tasks/TaskFormModal.tsx` — `LOCALE_LABEL` + `ready`
+- [x] `src/mock/data.mock.ts` — четыре блока
+- [x] `src/mock/index.mock.ts` — локаль в моке игрока + PATCH
 
 **Лендинг (12 мест)**
 
-- [ ] РЕШЕНИЕ: 8 файлов на язык × 15 = 120 файлов ⇒ **переделать на динамический
+- [x] РЕШЕНИЕ: 8 файлов на язык × 15 = 120 файлов ⇒ **переделать на динамический
       сегмент `[locale]`** вместо ветки роутов на язык. Иначе не масштабируется.
-- [ ] `src/i18n/dictionaries.ts` — `locales` + 15 словарей по ~210 строк
-- [ ] `src/i18n/routes.ts` — `localePrefix`
-- [ ] `src/lib/metadata.ts` — `ogLocale` (`de` → `de_DE`)
-- [ ] `src/components/legal/LegalPage.tsx` — `intlLocale` (BCP-47 через дефис!)
-- [ ] `src/config/site.config.ts` — счётчик `locales`
+- [x] `src/i18n/dictionaries.ts` — `locales` + 15 словарей по ~210 строк
+- [x] `src/i18n/routes.ts` — `localePrefix`
+- [x] `src/lib/metadata.ts` — `ogLocale` (`de` → `de_DE`)
+- [x] `src/components/legal/LegalPage.tsx` — `intlLocale` (BCP-47 через дефис!)
+- [x] `src/config/site.config.ts` — счётчик `locales`
 - [ ] `PluralForms` — кортеж из 3; проверять на 1/2/5/21/101
 
 ### Фаза 2 — копия по языкам

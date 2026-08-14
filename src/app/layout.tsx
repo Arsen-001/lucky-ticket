@@ -1,3 +1,4 @@
+import { localeDirection } from '@/i18n/config';
 import Script from 'next/script';
 import { StoreProvider } from '@/providers/StoreProvider';
 import { AppLifecycleProvider } from '@/providers/AppLifecycleProvider';
@@ -17,7 +18,7 @@ import { PreLaunchGate } from '@/components/pages/coming-soon/PreLaunchGate';
 import { TelegramLocaleSeed } from '@/components/telegram/TelegramLocaleSeed';
 import { DayjsLocaleProvider } from '@/providers/DayjsLocaleProvider';
 import { NextIntlClientProvider } from 'next-intl';
-import { gilroy, spaceGrotesk } from '@/fonts/index.fonts';
+import { gilroy, spaceGrotesk, notoArmenian, notoArabic } from '@/fonts/index.fonts';
 import { getLocale } from 'next-intl/server';
 import { getAppTranslations } from '@/i18n/getAppTranslations';
 import { GlobalConstants } from '@/constants/global.constants';
@@ -103,7 +104,8 @@ export default async function RootLayout({ children }: ChildrenProps) {
           <html> element's own attributes (does not affect children). */}
       <html
         lang={locale}
-        className={`${gilroy.variable} ${spaceGrotesk.variable}`}
+        dir={localeDirection(locale)}
+        className={`${gilroy.variable} ${spaceGrotesk.variable} ${notoArmenian.variable} ${notoArabic.variable}`}
         suppressHydrationWarning
       >
         <head>

@@ -19,10 +19,17 @@ import { LocaleType } from '@/types/types/locale.types';
  * `messages/`, so a promoted-too-early language fails the suite rather than
  * reaching anyone.
  *
- * Armenian is the long-standing example: in the enum since the Prisma parity
- * work, off here on purpose.
+ * Armenian was the long-standing example of a code sitting in the enum with the
+ * switch off — for a year it was in the database purely for Prisma parity, and
+ * `tx()` filled it by copying English. It is a real translation now, so it has
+ * moved into this list.
  */
-export const locales = [Locale.ENGLISH, Locale.RUSSIAN, Locale.GERMAN] as LocaleType[];
+export const locales = [
+  Locale.ENGLISH,
+  Locale.RUSSIAN,
+  Locale.GERMAN,
+  Locale.ARMENIAN,
+] as LocaleType[];
 
 export const defaultLocale = Locale.ENGLISH;
 
