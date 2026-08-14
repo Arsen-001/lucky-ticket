@@ -8,6 +8,7 @@ import { useAppTranslations } from '@/hooks/useAppTranslations';
 import { useOverlayPresence } from '@/hooks/useOverlayPresence';
 import { useOverlayFocusLock } from '@/hooks/useOverlayFocusLock';
 import { useBackdropDismiss } from '@/hooks/useBackdropDismiss';
+import { useBackDismiss } from '@/hooks/useBackDismiss';
 import { GlobalConstants } from '@/constants/global.constants';
 import { staggerMs } from '@/utils/global/animation.utils';
 import { openExternalUrl } from '@/lib/telegram/telegram';
@@ -43,6 +44,8 @@ export function ProfileShareSheet({ open, onClose, url, username }: ProfileShare
   const { mounted, visible } = useOverlayPresence(open, ANIMATION_MS);
   // The opening tap's own click lands on the backdrop. @see useBackdropDismiss
   const backdropProps = useBackdropDismiss(visible, ANIMATION_MS, onClose);
+  // Back closes the sheet instead of leaving the profile. @see useBackDismiss
+  useBackDismiss(open, onClose);
 
   useEffect(() => {
     if (!open) {

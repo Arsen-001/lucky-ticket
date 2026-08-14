@@ -7,6 +7,7 @@ import { ModalCloseButton } from '@/components/shared/modals/ModalCloseButton';
 import { useOverlayPresence } from '@/hooks/useOverlayPresence';
 import { useOverlayFocusLock } from '@/hooks/useOverlayFocusLock';
 import { useBackdropDismiss } from '@/hooks/useBackdropDismiss';
+import { useBackDismiss } from '@/hooks/useBackDismiss';
 import type { ButtonProps } from '@/components/shared/buttons/Button';
 
 const ANIMATION_MS = 200;
@@ -115,6 +116,11 @@ export const Modal = ({
     ANIMATION_MS,
     closeOnOverlayClick ? onClose : undefined
   );
+
+  // Telegram's back arrow / the Android system back closes this dialog rather
+  // than navigating the page under it. Same condition as the backdrop: a modal
+  // that insists on an explicit choice is not dismissed by Back either.
+  useBackDismiss(open, closeOnOverlayClick ? onClose : undefined);
 
   if (!mounted) return null;
 

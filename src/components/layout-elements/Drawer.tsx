@@ -44,6 +44,7 @@ import { SkeletonSuspense } from '@/components/shared/seleketons/SkeletonSuspens
 import { type Route, routes } from '@/constants/routes';
 import { localeDirection } from '@/i18n/config';
 import { useAppTranslations } from '@/hooks/useAppTranslations';
+import { useBackDismiss } from '@/hooks/useBackDismiss';
 import { useLeaderboardEnabled } from '@/hooks/useLeaderboardEnabled';
 import { usePartnersEnabled } from '@/hooks/usePartnersEnabled';
 import { useLocation } from '@/hooks/useLocation';
@@ -89,6 +90,11 @@ export function Drawer() {
   const handleDrawerClose = () => {
     dispatch(closeDrawer());
   };
+
+  // Telegram's back arrow / the Android system back closes the drawer first —
+  // it is the topmost layer, and it covers the page it would otherwise navigate
+  // away from. @see useBackDismiss
+  useBackDismiss(open, handleDrawerClose);
 
   const asideRef = useRef<HTMLElement>(null);
   const swipeStart = useRef<{ x: number; y: number } | null>(null);

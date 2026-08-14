@@ -12,6 +12,7 @@ import { useAppTranslations } from '@/hooks/useAppTranslations';
 import { useOverlayPresence } from '@/hooks/useOverlayPresence';
 import { useOverlayFocusLock } from '@/hooks/useOverlayFocusLock';
 import { useBackdropDismiss } from '@/hooks/useBackdropDismiss';
+import { useBackDismiss } from '@/hooks/useBackDismiss';
 
 /** Matches the panel's `duration-300` slide. */
 const ANIMATION_MS = 300;
@@ -53,6 +54,8 @@ export function TournamentFilterSheet({
   // The opening tap's own click lands on a backdrop that did not exist when the
   // finger went down. @see useBackdropDismiss
   const backdropProps = useBackdropDismiss(visible, ANIMATION_MS, onClose);
+  // Back closes the sheet instead of leaving the tournaments tab. @see useBackDismiss
+  useBackDismiss(open, onClose);
 
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {

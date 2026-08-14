@@ -16,6 +16,7 @@ import { PortraitOnlyGate } from '@/components/layout-elements/PortraitOnlyGate'
 import { AtmosphericBackground } from '@/components/shared/AtmosphericBackground';
 import { PreLaunchGate } from '@/components/pages/coming-soon/PreLaunchGate';
 import { TelegramLocaleSeed } from '@/components/telegram/TelegramLocaleSeed';
+import { TelegramBackButton } from '@/components/telegram/TelegramBackButton';
 import { DayjsLocaleProvider } from '@/providers/DayjsLocaleProvider';
 import { NextIntlClientProvider } from 'next-intl';
 import { gilroy, spaceGrotesk, notoArmenian, notoArabic } from '@/fonts/index.fonts';
@@ -183,6 +184,11 @@ export default async function RootLayout({ children }: ChildrenProps) {
                         >
                           {children}
                         </div>
+                        {/* Back means "back inside the app", not "close the
+                            game" — and it lives here, inside the provider, so
+                            it only claims the gesture once the app has booted.
+                            @see TelegramBackButton */}
+                        <TelegramBackButton />
                         <Onboarding />
                         <TournamentResultWatcher />
                       </TelegramProvider>

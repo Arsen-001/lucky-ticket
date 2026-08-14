@@ -6,6 +6,7 @@ import { ClientPortal } from '@/components/shared/ClientPortal';
 import { useOverlayPresence } from '@/hooks/useOverlayPresence';
 import { useOverlayFocusLock } from '@/hooks/useOverlayFocusLock';
 import { useBackdropDismiss } from '@/hooks/useBackdropDismiss';
+import { useBackDismiss } from '@/hooks/useBackDismiss';
 import { noteDismissIntent, noteOverlayClose, noteOverlayOpen } from '@/lib/debug/overlay-probe';
 
 /** Matches the panel's `duration-300` slide. */
@@ -48,6 +49,8 @@ export function BottomSheet({
     ANIMATION_MS,
     closeOnOverlayClick ? onClose : undefined
   );
+  // Back closes the sheet instead of the page under it. @see useBackDismiss
+  useBackDismiss(open, closeOnOverlayClick ? onClose : undefined);
 
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {

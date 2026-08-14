@@ -30,6 +30,21 @@ export interface TelegramInset {
   right: number;
 }
 
+/**
+ * Bot API 6.1+ — the back arrow in the Mini App header. Showing it also takes
+ * over the ANDROID SYSTEM BACK gesture: while it is visible the client sends
+ * `back_button_pressed` to the app instead of closing the Mini App, which is
+ * the only way to stop back from dropping the player out of the game.
+ * @see TelegramBackButton
+ */
+export interface TelegramBackButton {
+  isVisible: boolean;
+  show: () => void;
+  hide: () => void;
+  onClick: (handler: () => void) => void;
+  offClick: (handler: () => void) => void;
+}
+
 /** The subset of Telegram WebApp events the app subscribes to. */
 export type TelegramEvent =
   | 'safeAreaChanged'
@@ -69,6 +84,8 @@ export interface TelegramWebApp {
     url: string,
     callback?: (status: 'paid' | 'cancelled' | 'failed' | 'pending') => void
   ) => void;
+  /** Bot API 6.1+ — optional so older clients (where it is simply absent) type-check. */
+  BackButton?: TelegramBackButton;
   setHeaderColor?: (color: string) => void;
   setBackgroundColor?: (color: string) => void;
   disableVerticalSwipes?: () => void;
