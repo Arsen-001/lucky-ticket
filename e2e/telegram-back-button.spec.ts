@@ -139,11 +139,35 @@ async function dismissPopups(page: Page) {
 async function openHome(page: Page) {
   await page.goto('/');
   await expect(page.getByRole('button', { name: /^home$/i })).toBeVisible();
+  await completeFirstRun(page);
   // Hydration gate: the tab bar is server-rendered, so it is on screen well
   // before any client effect has run. Under a loaded dev server that gap is
   // wide enough for a test to press a back button nobody is listening for yet.
   await expect.poll(() => arrowVisible(page), { timeout: 20_000 }).toBe(true);
   await dismissPopups(page);
+}
+
+/**
+ * Walks the first-run flow when it is on screen: language → welcome gifts →
+ * guided tour.
+ *
+ * The mock serves a level-zero account (`appConfig.account.fresh`), so the app
+ * opens on that flow, and none of its three steps closes on Escape — they are a
+ * forced choice, which is why the popup-dismissing helpers cannot get past them.
+ * Worse, "has seen the tour" lives in the DEV SERVER's memory, not the browser's:
+ * whichever test renders the app first after a server start meets the flow, and
+ * everybody else inherits a cleared one. In CI that made the welcome-gifts card
+ * mount on top of the exit dialog and swallow its click. So: walk it if it is
+ * there, ignore it if it is not.
+ */
+async function completeFirstRun(page: Page) {
+  for (const name of [/^continue$/i, /^claim gifts$/i, /^skip tour$/i]) {
+    const button = page.getByRole('button', { name });
+    if (await button.isVisible().catch(() => false)) {
+      await button.click().catch(() => {});
+      await page.waitForTimeout(600);
+    }
+  }
 }
 
 /** Taps something, dismissing whatever auto-surfaced popup got in the way. */
@@ -163,6 +187,22 @@ async function tapPastPopups(page: Page, target: Locator) {
   }
   throw new Error('the tap never got past the auto-surfacing popups');
 }
+
+test.beforeAll(async ({ browser }) => {
+  // Once per worker: get the first-run flow out of the way while nothing is
+  // being asserted. It is server-side state, so this clears it for every test
+  // that follows — the per-test call below only covers the cross-worker race.
+  const page = await browser.newPage({
+    baseURL: process.env.E2E_BASE_URL ?? 'http://localhost:3000',
+  });
+  try {
+    await page.goto('/');
+    await page.waitForTimeout(2_000);
+    await completeFirstRun(page);
+  } finally {
+    await page.close();
+  }
+});
 
 test('the arrow stays up on every screen, the root included', async ({ page }) => {
   await installTelegram(page);
@@ -191,6 +231,7 @@ test('a press steps back through in-app history', async ({ page }) => {
   // Two rows of the same list, not Home → a tab: the pair differs only by the
   // history entry between them, which is the thing being tested.
   await page.goto('/faq');
+  await completeFirstRun(page);
   // Hydration gate, and a load-bearing one: the rows are server-rendered, so
   // they are clickable BEFORE `NavigationHistoryProvider` has wrapped
   // `pushState`. A tap that lands in that window is never counted, the press
@@ -237,17 +278,26 @@ test('at the end of the road the app asks instead of vanishing', async ({ page }
           return 'popup';
         }
         await pressBack(page);
-        await page.waitForTimeout(400);
-        return (await exitDialog(page).count()) ? 'asked' : 'nothing';
+        await page.waitForTimeout(300);
+        return (await exitDialog(page).isVisible()) ? 'asked' : 'nothing';
       },
-      { timeout: 30_000, message: 'the root press never raised the exit dialog' }
+      { timeout: 20_000, message: 'the root press never raised the exit dialog' }
     )
     .toBe('asked');
 
   // Asked, not acted on: the press alone must never end the session.
   expect(await page.evaluate(() => window.__tgBack.closed)).toBe(false);
 
-  await page.getByRole('button', { name: /^leave$/i }).click();
+  // Dispatched rather than clicked, and scoped to this dialog: a popup from the
+  // auto-surface queue can still mount ON TOP of the ask a moment later, and its
+  // full-screen layer then swallows every real click — which is how this timed
+  // out in CI (a ticket-reward modal was over it). What is under test here is
+  // that the confirm is wired to `close()`, not that the panel wins a hit test;
+  // hit-testing of overlays is modal-close-collision.spec's job.
+  const dialog = page.locator(':light([role="dialog"])', { has: exitDialog(page) });
+  const leave = dialog.getByRole('button', { name: /^leave$/i });
+  await expect(leave).toBeVisible();
+  await leave.dispatchEvent('click');
   await expect.poll(() => page.evaluate(() => window.__tgBack.closed)).toBe(true);
 });
 
