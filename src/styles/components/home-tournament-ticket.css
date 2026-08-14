@@ -19,31 +19,42 @@
 .home-tournament-ticket {
   --home-ticket-stub: 62px;
   --home-ticket-notch: 7px;
+  /* Where the two holes are punched, measured from the LEFT — a gradient
+     position is physical and CSS has no logical spelling for it. The stub sits
+     on the reading-start edge, so in Arabic and Persian it is the medal that
+     moves (its column is laid out logically) while these holes would not: the
+     card came out torn down the side opposite its own stub, with the dashes
+     cutting through the countdown. @see the `[dir='rtl']` rule below. */
+  --home-ticket-punch-x: var(--home-ticket-stub);
 
   -webkit-mask-image:
     radial-gradient(
-      circle var(--home-ticket-notch) at var(--home-ticket-stub) 0,
+      circle var(--home-ticket-notch) at var(--home-ticket-punch-x) 0,
       transparent calc(var(--home-ticket-notch) - 0.5px),
       black var(--home-ticket-notch)
     ),
     radial-gradient(
-      circle var(--home-ticket-notch) at var(--home-ticket-stub) 100%,
+      circle var(--home-ticket-notch) at var(--home-ticket-punch-x) 100%,
       transparent calc(var(--home-ticket-notch) - 0.5px),
       black var(--home-ticket-notch)
     );
   -webkit-mask-composite: source-in;
   mask-image:
     radial-gradient(
-      circle var(--home-ticket-notch) at var(--home-ticket-stub) 0,
+      circle var(--home-ticket-notch) at var(--home-ticket-punch-x) 0,
       transparent calc(var(--home-ticket-notch) - 0.5px),
       black var(--home-ticket-notch)
     ),
     radial-gradient(
-      circle var(--home-ticket-notch) at var(--home-ticket-stub) 100%,
+      circle var(--home-ticket-notch) at var(--home-ticket-punch-x) 100%,
       transparent calc(var(--home-ticket-notch) - 0.5px),
       black var(--home-ticket-notch)
     );
   mask-composite: intersect;
+}
+
+[dir='rtl'] .home-tournament-ticket {
+  --home-ticket-punch-x: calc(100% - var(--home-ticket-stub));
 }
 
 /* Sponsored tournament (DOCS §11.8): a purple skin instead of the tier tint, so
@@ -95,13 +106,14 @@
   );
 }
 
-/* The tear line. Inset past both punches so a dash never collides with a hole. */
+/* The tear line. Inset past both punches so a dash never collides with a hole.
+   Logical, so it stays welded to the stub whichever edge the stub is on. */
 .home-tournament-ticket-seam {
   position: absolute;
   top: 9px;
   bottom: 9px;
-  left: var(--home-ticket-stub);
+  inset-inline-start: var(--home-ticket-stub);
   width: 0;
-  border-left: 1px dashed rgba(255, 255, 255, 0.22);
+  border-inline-start: 1px dashed rgba(255, 255, 255, 0.22);
   pointer-events: none;
 }
