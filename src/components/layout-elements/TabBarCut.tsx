@@ -45,9 +45,15 @@ const CUT_PATH = (() => {
   ].join(' ');
 })();
 
-/** How the hole travels when another tab is tapped — same curve as the disc. */
+/**
+ * How the hole travels when another tab is tapped — same curve as the disc.
+ *
+ * The offset animated here is `inset-inline-start`, not `left`: `centre` counts
+ * tab COLUMNS, and in Arabic and Persian the row is laid out from the other
+ * edge, so the hole has to be measured from the same edge the tabs start at.
+ */
 const TRAVEL =
-  'left 320ms cubic-bezier(0.22, 1, 0.36, 1), width 320ms cubic-bezier(0.22, 1, 0.36, 1)';
+  'inset-inline-start 320ms cubic-bezier(0.22, 1, 0.36, 1), width 320ms cubic-bezier(0.22, 1, 0.36, 1)';
 
 /**
  * The painted surface of the tab bar, with a hole under the active tab so the
@@ -77,7 +83,7 @@ export function TabBarCut({ centre, className }: TabBarCutProps) {
         height={BAND}
         viewBox={`0 0 ${PIECE_W} ${BAND}`}
         className="absolute top-0"
-        style={{ left: pieceLeft, transition: TRAVEL }}
+        style={{ insetInlineStart: pieceLeft, transition: TRAVEL }}
       >
         <path d={CUT_PATH} fill="var(--color-header)" />
       </svg>
@@ -85,7 +91,7 @@ export function TabBarCut({ centre, className }: TabBarCutProps) {
         className="bg-header absolute top-0 end-0"
         style={{
           height: BAND,
-          left: `calc(${centre}% + ${PIECE_W / 2}px)`,
+          insetInlineStart: `calc(${centre}% + ${PIECE_W / 2}px)`,
           transition: TRAVEL,
         }}
       />

@@ -125,7 +125,11 @@ export function NewStakeHero({
           {depositTooltip && (
             <div
               className="border-electric-pink/40 bg-background pointer-events-none absolute -top-7 -translate-x-1/2 rounded-md border px-2 py-0.5 text-[10px] font-extrabold text-white shadow-lg tabular-nums"
-              style={{ left: `${sliderProgress}%` }}
+              // Follows the thumb from the same edge the track fills from. A
+              // native range input mirrors itself under `direction: rtl`, so a
+              // physical `left` left the bubble on the opposite side of the
+              // handle in Arabic and Persian.
+              style={{ insetInlineStart: `${sliderProgress}%` }}
             >
               {formatCompact(clampedDeposit)}
             </div>

@@ -167,6 +167,12 @@ export function Tabs({
               getClassName(classNames?.indicator)
             )}
             style={{
+              // `indicatorStyle.left` is MEASURED from the container's left edge,
+              // so the pill has to hang off that same edge. Left to `auto` it
+              // starts wherever the writing direction puts it — the right edge in
+              // Arabic and Persian — and a positive translateX then carried it out
+              // of the row instead of onto the active tab.
+              left: 0,
               transform: `translateX(${indicatorStyle.left}px)`,
               width: `${indicatorStyle.width}px`,
               height: `${indicatorStyle.height}px`,

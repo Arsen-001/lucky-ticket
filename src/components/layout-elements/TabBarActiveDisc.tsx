@@ -26,6 +26,9 @@ export function TabBarActiveDisc({ icon, iconKey, className, style }: TabBarActi
   return (
     <span
       aria-hidden
+      // Read by `e2e/locale-layout.spec.ts`: the disc is `aria-hidden` and
+      // pointer-inert, so nothing else in the DOM can identify it.
+      data-testid="tab-active-disc"
       style={style}
       className={twMerge(
         'flex-center bg-pink-gradient pointer-events-none absolute z-2 size-14 rounded-full',

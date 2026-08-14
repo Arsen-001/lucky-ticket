@@ -151,6 +151,14 @@ for (const locale of LOCALES) {
            *  - **Inside something closed.** The drawer is parked off the edge
            *    while shut, carrying all 16 of its menu items — the single biggest
            *    source of noise here, and deliberate.
+           *
+           * The second exclusion is why `closed overlays really are off-screen`
+           * below exists. Excluding the drawer by IDENTITY ("it is closed, so it
+           * cannot be in the way") assumed the exact fact worth checking, and it
+           * was false: `end-…` flips with direction but `translate-x` does not, so
+           * in Arabic the shut drawer travelled INTO the screen and covered 86px
+           * of every route. This check ran green over all of it. An exclusion may
+           * not rest on the property it is hiding — so that one is now asserted.
            */
           const unreachable = (el: HTMLElement): boolean => {
             for (let node = el.parentElement; node; node = node.parentElement) {
@@ -182,5 +190,63 @@ for (const locale of LOCALES) {
         expect(clipped, `${route} in ${locale} cuts its own text`).toEqual([]);
       });
     }
+
+    /**
+     * A shut overlay must be OFF the screen, not merely marked shut.
+     *
+     * `inert` and `aria-hidden` say "you cannot reach this". They say nothing
+     * about where it is painted, and the check above trusted them to mean both.
+     * Measured, not assumed: the panel's own box against the viewport.
+     */
+    test('closed overlays really are off-screen', async ({ page }) => {
+      await openWithLocale(page, locale, '/tasks');
+
+      const intruders = await page.evaluate(() => {
+        const W = window.innerWidth;
+        const out: string[] = [];
+        // Slide-in panels only. `[inert]` is NOT the net to cast here: while a
+        // modal is up the whole page behind it is inert, and that div legitimately
+        // fills the column.
+        for (const el of document.querySelectorAll<HTMLElement>('aside')) {
+          const style = getComputedStyle(el);
+          if (style.position !== 'fixed') continue;
+          if (style.display === 'none' || style.visibility === 'hidden') continue;
+          const box = el.getBoundingClientRect();
+          if (box.width < 40 || box.height < 40) continue;
+          // Overlapping the column at all is the failure — a shut panel that
+          // pokes in by a single pixel is one that did not travel far enough.
+          const overlap = Math.min(box.right, W) - Math.max(box.left, 0);
+          if (overlap > 0)
+            out.push(
+              `${el.tagName.toLowerCase()} covers ${Math.round(overlap)}px of the ${W}px column (${Math.round(box.left)}…${Math.round(box.right)})`
+            );
+        }
+        return out;
+      });
+
+      expect(intruders, `a closed panel is sitting on the page in ${locale}`).toEqual([]);
+    });
+
+    /**
+     * The raised tab-bar disc marks which tab is open. It is placed from a
+     * percentage counted in tab ORDER, so it has to be offset from the edge the
+     * row starts at; as a physical `left` it landed on the mirror-image column
+     * and lit up Tickets while Tasks was open.
+     */
+    test('the tab-bar disc stands on the tab that is actually open', async ({ page }) => {
+      await openWithLocale(page, locale, '/tasks');
+
+      const gap = await page.evaluate(() => {
+        const disc = document.querySelector<HTMLElement>('[data-testid="tab-active-disc"]');
+        const active = document.querySelector<HTMLElement>('[aria-current="page"]');
+        if (!disc || !active) return null;
+        const d = disc.getBoundingClientRect();
+        const a = active.getBoundingClientRect();
+        return Math.round(Math.abs((d.left + d.right) / 2 - (a.left + a.right) / 2));
+      });
+
+      test.skip(gap === null, 'no disc or no active tab exposed on this screen');
+      expect(gap, `the disc is not over the open tab in ${locale}`).toBeLessThan(24);
+    });
   });
 }

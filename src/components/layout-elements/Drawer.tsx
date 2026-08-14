@@ -27,6 +27,7 @@ import {
   UserRoundPlus,
   Wallet,
 } from 'lucide-react';
+import { useLocale } from 'next-intl';
 import { twMerge } from 'tailwind-merge';
 
 import { useGetMeQuery } from '@/api/me.api';
@@ -41,6 +42,7 @@ import { Skeleton } from '@/components/shared/seleketons/Skeleton';
 import { Wordmark } from '@/components/shared/brand/Wordmark';
 import { SkeletonSuspense } from '@/components/shared/seleketons/SkeletonSuspense';
 import { type Route, routes } from '@/constants/routes';
+import { localeDirection } from '@/i18n/config';
 import { useAppTranslations } from '@/hooks/useAppTranslations';
 import { useLeaderboardEnabled } from '@/hooks/useLeaderboardEnabled';
 import { usePartnersEnabled } from '@/hooks/usePartnersEnabled';
@@ -93,6 +95,16 @@ export function Drawer() {
   const swipeAxis = useRef<'none' | 'horizontal' | 'vertical'>('none');
   const [swipeDelta, setSwipeDelta] = useState(0);
 
+  /**
+   * Which way is "away from the content" — the direction the panel leaves in.
+   *
+   * The drawer hangs off the reading-end of the column (`end-…`), so in Arabic
+   * and Persian it opens from the LEFT and has to close to the left. Everything
+   * below measures the gesture in this sign rather than in raw pixels: `dx * away`
+   * is "how far towards gone", positive in both directions of text.
+   */
+  const away = localeDirection(useLocale()) === 'rtl' ? -1 : 1;
+
   const handlePointerDown = (e: ReactPointerEvent<HTMLElement>) => {
     if (e.pointerType === 'mouse') return;
     e.currentTarget.setPointerCapture(e.pointerId);
@@ -113,7 +125,7 @@ export function Drawer() {
     }
 
     if (swipeAxis.current === 'vertical') return;
-    setSwipeDelta(Math.max(0, dx));
+    setSwipeDelta(Math.max(0, dx * away));
   };
 
   const handlePointerEnd = (e: ReactPointerEvent<HTMLElement>) => {
@@ -325,18 +337,26 @@ export function Drawer() {
               // instead, so the wordmark ends up centred in the space a player
               // actually sees rather than pinned above an empty band. See there.
               ...(swipeDelta > 0
-                ? { transform: `translateX(${swipeDelta}px)`, transition: 'none' }
+                ? { transform: `translateX(${swipeDelta * away}px)`, transition: 'none' }
                 : {}),
             } satisfies CSSProperties
           }
           className={twMerge(
-            'bg-background-overlay fixed bottom-0 end-[var(--app-gutter)] top-0 z-1 flex w-[78vw] max-w-[340px] flex-col rounded-s-3xl shadow-[-12px_0_40px_rgba(0,0,0,0.45)] transition-transform duration-300 ease-out touch-pan-y',
+            'bg-background-overlay fixed bottom-0 end-[var(--app-gutter)] top-0 z-1 flex w-[78vw] max-w-[340px] flex-col rounded-s-3xl shadow-[-12px_0_40px_rgba(0,0,0,0.45)] rtl:shadow-[12px_0_40px_rgba(0,0,0,0.45)] transition-transform duration-300 ease-out touch-pan-y',
             // Closed: clear the viewport at ANY width. On a phone the gutter is 0
-            // so this is just `translate-x-full` (off the right edge); on desktop the
-            // panel is pinned to the column's right edge (`right: gutter`), so it must
-            // also travel the gutter's width to fully leave the screen — otherwise it
-            // sits parked in the visible side margin.
-            open ? 'translate-x-0' : 'translate-x-[calc(var(--app-gutter)+100%)]'
+            // so this is just `translate-x-full` (off the reading-end edge); on
+            // desktop the panel is pinned to the column's end edge (`end: gutter`),
+            // so it must also travel the gutter's width to fully leave the screen —
+            // otherwise it sits parked in the visible side margin.
+            //
+            // The `rtl:` half is not decoration. `end-…` is logical and flips, but
+            // `translate-x` is physical and does not: in Arabic and Persian the panel
+            // anchors LEFT while a positive X still travels RIGHT, so the closed
+            // drawer walked 100% of its own width INTO the screen and sat on top of
+            // every page — 86px of menu rows over the content, on every route.
+            open
+              ? 'translate-x-0'
+              : 'translate-x-[calc(var(--app-gutter)+100%)] rtl:-translate-x-[calc(var(--app-gutter)+100%)]'
           )}
         >
           <Link

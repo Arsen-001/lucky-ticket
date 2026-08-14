@@ -156,9 +156,14 @@ export function TabBar({ className }: ClassNameProps) {
           style={{
             // Centred on the bar's own top edge: half of the disc stands above
             // the bar, half sits in the hole cut for it.
-            left: `calc(${centre}% - 1.75rem)`,
+            //
+            // Offset from the INLINE start, not from the left: `centre` counts
+            // columns in tab order, and Arabic and Persian lay that row out from
+            // the right. As a plain `left` the disc parked over the mirror image
+            // of the active tab — the fifth tab lit up while the first was open.
+            insetInlineStart: `calc(${centre}% - 1.75rem)`,
             top: '-1.75rem',
-            transition: 'left 320ms cubic-bezier(0.22, 1, 0.36, 1)',
+            transition: 'inset-inline-start 320ms cubic-bezier(0.22, 1, 0.36, 1)',
           }}
         />
       )}
