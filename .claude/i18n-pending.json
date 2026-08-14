@@ -1,3 +1,10 @@
 {
-  "keys": ["ad skip hint {left}", "ad skips left {n}", "perk ads skip", "take without watching"]
+  "keys": [
+    "ad skip hint {left}",
+    "ad skips left {n}",
+    "perk ads skip",
+    "take without watching",
+    "leave the game?",
+    "leave"
+  ]
 }
