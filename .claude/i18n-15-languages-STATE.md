@@ -163,11 +163,17 @@ Worktree бэкенда: `/private/tmp/claude-501/-Users-arsen-WebstormProjects-
 
 ### Фаза 2 — копия по языкам
 
-- [x] **hy — ГОТОВ И ЖИВОЙ** (1376/1376, коммит `0092464`) · [ ] es · [ ] pt · [ ] fr · [ ] tr · [ ] uk · [ ] uz · [ ] kk
-- [ ] ky · [ ] tg · [ ] ja · [ ] ko · [ ] zh · [ ] ar · [ ] fa
+**ГОТОВЫ И ЖИВЫЕ НА ПРОДЕ (14.08.2026, 11:55):** hy · es · pt · fr · tr · uk · uz
+Плюс исходные en · ru · de = **10 языков в переключателе**.
 
-На каждый язык: `messages/<код>.json` (1361 ключ) + вызовы `tx()` в бэкенде
-(296, из них 268 в `milestones.data.ts`) + словарь лендинга (~210 строк).
+**ОСТАЛОСЬ:** kk · ky · tg · ja · ko · zh · ar · fa
+
+Рецепт на язык (проверен 7 раз):
+
+1. 6 кусков `{start, values}` по ~250 значений, границы 0 / 253 / 503 / 751 / 951 / 1201.
+2. `node scratchpad/merge-locale.mjs . <код> chunk.json` — сверяет плейсхолдеры сам.
+3. Когда 1376/1376 — добавить `Locale.XXX` в `locales` (src/i18n/config.ts).
+4. `npm test` → коммит → `npm run deploy:slice`.
 
 ### Фаза 3 — шрифты, числа, RTL
 
