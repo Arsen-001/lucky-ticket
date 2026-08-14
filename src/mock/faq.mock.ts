@@ -1,4 +1,5 @@
 import type { FaqArticle, FaqSection, LocalizedText } from '@/types/interfaces/faq.interfaces';
+import { FAQ_TRANSLATIONS } from '@/mock/faq.i18n';
 
 /**
  * Knowledge-base content for the FAQ page, localized into every supported app
@@ -94,10 +95,10 @@ const articles: FaqArticle[] = [
       'Lokalisierung und Zugriff.'
     ),
     content: tx(
-      'LuckyTicket365 is a web app that runs as a Telegram Mini App and also in a regular browser. The interface, tasks, support articles and notifications are available in multiple languages (English, Russian, German). You can switch language any time in Settings.',
-      'LuckyTicket365 — это веб-приложение, которое работает как Telegram Mini App и в обычном браузере. Интерфейс, задания, статьи поддержки и уведомления доступны на нескольких языках (английский, русский, немецкий). Язык можно сменить в любой момент в Настройках.',
-      'LuckyTicket365-ը վեբ հավելված է, որն աշխատում է որպես Telegram Mini App, ինչպես նաև սովորական բրաուզերում։ Ինտերֆեյսը, առաջադրանքները, աջակցության հոդվածները և ծանուցումները հասանելի են մի քանի լեզուներով (անգլերեն, ռուսերեն, հայերեն, գերմաներեն)։ Կարող եք ցանկացած պահի փոխել լեզուն Կարգավորումներում։',
-      'LuckyTicket365 ist eine Web-App, die als Telegram Mini App und auch in einem normalen Browser läuft. Oberfläche, Aufgaben, Hilfeartikel und Benachrichtigungen sind in mehreren Sprachen verfügbar (Englisch, Russisch, Deutsch). Du kannst die Sprache jederzeit in den Einstellungen wechseln.'
+      'LuckyTicket365 is a web app that runs as a Telegram Mini App and also in a regular browser. The interface, tasks, support articles and notifications are available in 18 languages. You can switch language any time in Settings.',
+      'LuckyTicket365 — это веб-приложение, которое работает как Telegram Mini App и в обычном браузере. Интерфейс, задания, статьи поддержки и уведомления доступны на 18 языках. Язык можно сменить в любой момент в Настройках.',
+      'LuckyTicket365-ը վեբ հավելված է, որն աշխատում է որպես Telegram Mini App, ինչպես նաև սովորական բրաուզերում։ Ինտերֆեյսը, առաջադրանքները, աջակցության հոդվածները և ծանուցումները հասանելի են 18 լեզվով։ Կարող եք ցանկացած պահի փոխել լեզուն Կարգավորումներում։',
+      'LuckyTicket365 ist eine Web-App, die als Telegram Mini App und auch in einem normalen Browser läuft. Oberfläche, Aufgaben, Hilfeartikel und Benachrichtigungen sind in 18 Sprachen verfügbar. Du kannst die Sprache jederzeit in den Einstellungen wechseln.'
     ),
   },
 
@@ -1169,10 +1170,10 @@ const articles: FaqArticle[] = [
       'Eine lebenslange Werbe-Kette.'
     ),
     content: tx(
-      'The Ads one-time task is a milestone chain rewarding cumulative ads watched (never resets): 10, 25, 50, 100, 200, 400, 800 ads. Rewards grow from 200 LC + 5 AP at level 1 up to 15,000 LC + 5 tickets + 15 Stars + 60 AP at level 7, with extra levels coming soon.',
-      'Разовое задание «Реклама» — это цепочка вех за суммарно просмотренную рекламу (не сбрасывается): 10, 25, 50, 100, 200, 400, 800 просмотров. Награды растут от 200 LC + 5 AP на 1 уровне до 15 000 LC + 5 билетов + 15 звёзд + 60 AP на 7 уровне, дополнительные уровни скоро.',
-      'Գովազդի միանգամյա առաջադրանքը վեխերի շղթա է՝ դիտված գովազդի գումարի դիմաց (երբեք չի զրոյանում)՝ 10, 25, 50, 100, 200, 400, 800 գովազդ։ Պարգևներն աճում են 200 LC + 5 AP 1-ին մակարդակում մինչև 15,000 LC + 5 տոմս + 15 աստղ + 60 AP 7-րդ մակարդակում, լրացուցիչ մակարդակները շուտով։',
-      'Die einmalige Werbe-Aufgabe ist eine Meilenstein-Kette, die kumulativ angesehene Werbung belohnt (setzt nie zurück): 10, 25, 50, 100, 200, 400, 800 Anzeigen. Belohnungen wachsen von 200 LC + 5 AP auf Stufe 1 bis 15.000 LC + 5 Tickets + 15 Sterne + 60 AP auf Stufe 7, weitere Stufen kommen bald.'
+      'The Ads one-time task is a milestone chain rewarding cumulative ads watched (never resets): 10, 25, 50, 100, 200, 400, 800 ads. Rewards grow from 200 LC + 1 AP at level 1 up to 15,000 LC + 10 tickets + 3 Stars + 21 AP at level 7, with extra levels coming soon.',
+      'Разовое задание «Реклама» — это цепочка вех за суммарно просмотренную рекламу (не сбрасывается): 10, 25, 50, 100, 200, 400, 800 просмотров. Награды растут от 200 LC + 1 AP на 1 уровне до 15 000 LC + 10 билетов + 3 звёзд + 21 AP на 7 уровне, дополнительные уровни скоро.',
+      'Գովազդի միանգամյա առաջադրանքը վեխերի շղթա է՝ դիտված գովազդի գումարի դիմաց (երբեք չի զրոյանում)՝ 10, 25, 50, 100, 200, 400, 800 գովազդ։ Պարգևներն աճում են 200 LC + 1 AP 1-ին մակարդակում մինչև 15,000 LC + 10 տոմս + 3 աստղ + 21 AP 7-րդ մակարդակում, լրացուցիչ մակարդակները շուտով։',
+      'Die einmalige Werbe-Aufgabe ist eine Meilenstein-Kette, die kumulativ angesehene Werbung belohnt (setzt nie zurück): 10, 25, 50, 100, 200, 400, 800 Anzeigen. Belohnungen wachsen von 200 LC + 1 AP auf Stufe 1 bis 15.000 LC + 10 Tickets + 3 Sterne + 21 AP auf Stufe 7, weitere Stufen kommen bald.'
     ),
   },
 
@@ -1499,6 +1500,27 @@ const articles: FaqArticle[] = [
   },
 ];
 
+/**
+ * One localized string with the generated languages merged in.
+ *
+ * `tx()` above writes the four the knowledge base is authored in; the rest come
+ * from `faq.i18n.ts`, keyed by article and field. A key with no entry is left
+ * exactly as written, so a new article reads in English until it is translated
+ * rather than rendering blank.
+ */
+const merged = (text: LocalizedText, key: string): LocalizedText => ({
+  ...text,
+  ...FAQ_TRANSLATIONS[key],
+});
+
+/** The catalog as the app reads it: authored copy plus every generated language. */
+const localizedArticles: FaqArticle[] = articles.map(article => ({
+  ...article,
+  title: merged(article.title, `a${article.id}.title`),
+  description: merged(article.description, `a${article.id}.description`),
+  content: merged(article.content, `a${article.id}.content`),
+}));
+
 const SECTION_TITLES: Record<string, LocalizedText> = {
   '1': tx('Getting Started', 'Начало работы', 'Սկսել', 'Erste Schritte'),
   '2': tx(
@@ -1563,8 +1585,8 @@ const SECTION_TITLES: Record<string, LocalizedText> = {
 
 const sections: FaqSection[] = Object.entries(SECTION_TITLES).map(([id, title]) => ({
   id,
-  title,
-  articles: articles
+  title: merged(title, `s${id}.title`),
+  articles: localizedArticles
     .filter(article => article.sectionId === id)
     .map(article => ({
       id: article.id,
@@ -1573,4 +1595,4 @@ const sections: FaqSection[] = Object.entries(SECTION_TITLES).map(([id, title]) 
     })),
 }));
 
-export const faqMock = { articles, sections };
+export const faqMock = { articles: localizedArticles, sections };
