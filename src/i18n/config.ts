@@ -37,6 +37,8 @@ export const locales = [
   Locale.UZBEK,
   Locale.KAZAKH,
   Locale.KYRGYZ,
+  Locale.TAJIK,
+  Locale.JAPANESE,
 ] as LocaleType[];
 
 export const defaultLocale = Locale.ENGLISH;
