@@ -24,11 +24,12 @@ import type { ChildrenProps } from '@/types/interfaces/component.interfcaes';
  * app, and read it as the product being broken. The countdown appears only once
  * the answer is actually "no".
  *
- * **A computer never gets the app, and never gets the countdown either.** The
- * QR screen sits directly under the splash: the product is a phone product, so
- * a desktop visitor is sent to their phone before anything else is decided
- * about them — the countdown, its invite block and its gift ladder all live on
- * the other side of that. Phones are never affected, whatever the switch says.
+ * **A browser never gets the app, and never gets the countdown either.** The
+ * QR screen sits directly under the splash: the game runs inside a Telegram
+ * client, so a visitor in Telegram Web or a plain tab is sent to one before
+ * anything else is decided about them — the countdown, its invite block and its
+ * gift ladder all live on the other side of that. Installed clients — a phone
+ * or Telegram Desktop — are never affected, whatever the switch says.
  * @see OpenInTelegramScreen
  *
  * **Maintenance is checked first, above everything.** Turning it on in the panel
@@ -39,7 +40,7 @@ import type { ChildrenProps } from '@/types/interfaces/component.interfcaes';
  * countdown too, and the same screen the running app shows.
  */
 export function PreLaunchGate({ children }: ChildrenProps) {
-  const { status, launchAt, session, maintenance, desktopBlocked, recheck } = usePreLaunchGate();
+  const { status, launchAt, session, maintenance, webBlocked, recheck } = usePreLaunchGate();
 
   // The local flag is the dev/mock override (there is no backend to ask in mock
   // mode); the second half is the admin switch, decided per person by the
@@ -47,7 +48,7 @@ export function PreLaunchGate({ children }: ChildrenProps) {
   if (appConfig.maintenance.enabled || maintenance)
     return <MaintenanceScreen onRetry={recheck} loading={status === 'checking'} />;
   if (status === 'checking') return <TelegramSplash />;
-  if (desktopBlocked) return <OpenInTelegramScreen deviceKind={getDeviceKind()} />;
+  if (webBlocked) return <OpenInTelegramScreen deviceKind={getDeviceKind()} />;
   if (status === 'gated') return <ComingSoonScreen launchAt={launchAt} session={session} />;
   return <>{children}</>;
 }

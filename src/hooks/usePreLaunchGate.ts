@@ -5,7 +5,7 @@ import { apiBase } from '@/config/api.config';
 import { comingSoonConfig } from '@/config/coming-soon.config';
 import { readDesktopAccessKey } from '@/config/device-gate.config';
 import { getTelegramWebApp } from '@/lib/telegram/telegram';
-import { getDeviceKind } from '@/lib/telegram/platform';
+import { getDeviceKind, isWebClient } from '@/lib/telegram/platform';
 import { getDeviceTimezone } from '@/utils/global/timezone.utils';
 
 export type PreLaunchStatus = 'checking' | 'gated' | 'open';
@@ -40,15 +40,23 @@ export interface PreLaunchGateAnswer {
    */
   maintenance: boolean;
   /**
-   * This visitor is on a computer and is not one of the people allowed to play
-   * from one — so they get the QR that opens the game on their phone.
+   * This visitor opened the game in a browser — Telegram Web or a plain tab —
+   * and is not one of the people excused from the rule, so they get the screen
+   * that sends them to a real Telegram client.
    *
    * Which client is asking is decided here, in the page (`initData` is signed
    * but carries no platform); who is excused is decided by the backend. Always
-   * false on a phone in Telegram, whatever the switch says, so the rule can
-   * never cost the audience it was written for. @see getDeviceKind
+   * false in an installed Telegram client, phone or computer, whatever the
+   * switch says — the rule can never cost the audience it was written for.
+   * @see isWebClient
+   *
+   * The backend's half still speaks of "desktop" (`desktopAllowed`,
+   * `desktopAllowIds`, `?desktop=`): those names predate the narrowing of the
+   * rule from "phones only" to "no browser" and are a wire contract, not a
+   * description. The allow-list they carry now decides Telegram Web, and it is
+   * still the same list of people.
    */
-  desktopBlocked: boolean;
+  webBlocked: boolean;
 }
 
 export interface PreLaunchGateState extends PreLaunchGateAnswer {
@@ -88,7 +96,7 @@ export function usePreLaunchGate(): PreLaunchGateState {
     // Undecided until the first answer — the splash covers this moment, and
     // flashing a QR at a phone player while we ask would be the one mistake
     // this whole path is written to avoid.
-    desktopBlocked: false,
+    webBlocked: false,
   });
 
   useEffect(() => {
@@ -121,9 +129,9 @@ export function usePreLaunchGate(): PreLaunchGateState {
           maintenance: false,
           // Same reasoning, and it is what keeps the app developable: local
           // work and both e2e suites run in a desktop browser against the mock
-          // layer, and a phone-only rule with no backend to switch it off would
+          // layer, and a no-browser rule with no backend to switch it off would
           // turn every one of those into a QR code.
-          desktopBlocked: false,
+          webBlocked: false,
         })
       );
       return;
@@ -133,7 +141,11 @@ export function usePreLaunchGate(): PreLaunchGateState {
     const initData = getTelegramWebApp()?.initData;
     // Decided in the page, because only the page can: the signed payload says
     // who is asking and never from what. @see getDeviceKind
-    const onAComputer = getDeviceKind() !== 'telegram-mobile';
+    //
+    // Since 14.08.2026 this asks «браузер ли это», not «компьютер ли это»:
+    // Telegram Desktop is a real client with real Telegram chrome, so it plays
+    // like a phone. Only a browser tab — Telegram Web included — is turned away.
+    const inABrowser = isWebClient(getDeviceKind());
 
     /**
      * The browser's only way past the rule: a shared secret, checked by the
@@ -185,9 +197,9 @@ export function usePreLaunchGate(): PreLaunchGateState {
         maintenance: payload?.maintenance?.enabled === true,
         // Anonymous, so there is nobody to excuse: this arm can only read the
         // switch. Fail closed like the gate — a missing field is an older
-        // backend, and a computer waiting on an unknown answer belongs on the
+        // backend, and a browser waiting on an unknown answer belongs on the
         // QR screen, not in the game.
-        desktopBlocked: onAComputer && payload?.telegramOnly?.enabled !== false,
+        webBlocked: inABrowser && payload?.telegramOnly?.enabled !== false,
       };
     };
 
@@ -225,9 +237,9 @@ export function usePreLaunchGate(): PreLaunchGateState {
             // who really is locked out right now.
             maintenance: auth?.maintenance === true,
             // The personal answer again: the backend has already accounted for
-            // the switch being off, for staff and for the desktop allow-list,
-            // so anything short of an explicit yes sends a computer to the QR.
-            desktopBlocked: onAComputer && auth?.desktopAllowed !== true,
+            // the switch being off, for staff and for the allow-list, so
+            // anything short of an explicit yes sends a browser to the QR.
+            webBlocked: inABrowser && auth?.desktopAllowed !== true,
           };
         }
         // Refused (banned, registration closed, bad initData): fall through —
@@ -241,9 +253,7 @@ export function usePreLaunchGate(): PreLaunchGateState {
       // key — one extra request for the handful of people who have one, none
       // for everybody else.
       .then(async answer =>
-        answer.desktopBlocked && (await keyOpensApp())
-          ? { ...answer, desktopBlocked: false }
-          : answer
+        answer.webBlocked && (await keyOpensApp()) ? { ...answer, webBlocked: false } : answer
       )
       .then(answer => settle(closeIfForced(answer)))
       .catch(() =>
@@ -259,10 +269,11 @@ export function usePreLaunchGate(): PreLaunchGateState {
                 // happen while the platform is down, and answering it with the
                 // countdown would tell a player the app is merely unreleased.
                 maintenance: prev.maintenance,
-                // A phone is never blocked, whatever happened to this request;
-                // a computer with no answer waits on the QR screen, which is
-                // the same direction the gate above fails in.
-                desktopBlocked: onAComputer,
+                // An installed Telegram client is never blocked, whatever
+                // happened to this request; a browser with no answer waits on
+                // the QR screen, which is the same direction the gate above
+                // fails in.
+                webBlocked: inABrowser,
               }
         )
       );

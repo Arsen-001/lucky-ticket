@@ -1,7 +1,7 @@
 'use client';
 
 import Image from 'next/image';
-import { Smartphone } from 'lucide-react';
+import { MonitorSmartphone } from 'lucide-react';
 import { useAppTranslations } from '@/hooks/useAppTranslations';
 import { useTelegramChrome } from '@/hooks/useTelegramChrome';
 import { GlobalConstants } from '@/constants/global.constants';
@@ -15,20 +15,26 @@ import logo from '@assets/images/logo-wordmark.webp';
 
 export interface OpenInTelegramScreenProps {
   /**
-   * Where this person is standing. Only the copy and the button change: a
-   * browser can be sent to Telegram with a tap, a desktop Telegram client is
-   * already in Telegram and can only be sent to a phone.
+   * Where this person is standing. Only two kinds ever reach this screen —
+   * `browser` and `telegram-web` — and they differ in what can be offered: a
+   * plain tab can be handed to Telegram with one tap, while inside Telegram Web
+   * that same link merely reopens the web version, so there the only way out is
+   * the desktop app or the phone. @see isWebClient
    */
   deviceKind: DeviceKind;
 }
 
 /**
- * What a computer sees: a QR code that opens the game on a phone.
+ * What a browser sees: a QR code that opens the game in a real Telegram client.
  *
- * The app is a phone product — a 390px column, Telegram's own chrome, a thumb
- * — and a desktop session is also the comfortable way to run several accounts
- * at once. So instead of a shrunken game on a wide screen, a computer gets the
- * one thing it is good for here: a code big enough to scan from across a desk.
+ * The game lives inside Telegram's own shell — its chrome, its viewport, its
+ * back button, its haptics — and a browser tab has none of it, Telegram Web
+ * included. An installed client is what is being asked for, not a phone
+ * specifically: since 14.08.2026 Telegram Desktop plays like a phone does.
+ *
+ * The QR stays the headline action anyway, because it is the one that works
+ * from both sides of the screen: a person in Telegram Web is already at a
+ * computer, and scanning is faster than installing.
  *
  * Rendered by the gate, before any provider exists (@see PreLaunchGate), so it
  * may use nothing from the store — translations and a server action for the
@@ -58,11 +64,11 @@ export function OpenInTelegramScreen({ deviceKind }: OpenInTelegramScreenProps) 
 
       <div className="animate-slide-in-bottom flex flex-col items-center gap-2">
         <span className="bg-electric-purple/15 text-electric-purple flex-center h-14 w-14 rounded-full">
-          <Smartphone size={26} strokeWidth={2.2} />
+          <MonitorSmartphone size={26} strokeWidth={2.2} />
         </span>
-        <h2 className="text-xl font-extrabold text-white">{t('play from your phone')}</h2>
+        <h2 className="text-xl font-extrabold text-white">{t('open in the telegram app')}</h2>
         <p className="text-white-secondary max-w-[20rem] text-sm font-medium leading-relaxed">
-          {inBrowser ? t('open in telegram from browser') : t('open in telegram from desktop')}
+          {inBrowser ? t('open in telegram from browser') : t('open in telegram from web')}
         </p>
       </div>
 
@@ -82,9 +88,10 @@ export function OpenInTelegramScreen({ deviceKind }: OpenInTelegramScreenProps) 
         {t('scan qr with phone')}
       </p>
 
-      {/* Only in a browser — on a phone it opens Telegram right there, and on a
-          desktop browser it hands the link to the desktop client. Inside a
-          desktop Telegram client the same tap would just reopen this screen. */}
+      {/* Only in a plain tab — on a phone it opens Telegram right there, and on
+          a desktop browser it hands the link to the installed client, which is
+          exactly where this screen is sending people. Inside Telegram Web the
+          same tap only reopens the web version, i.e. this screen again. */}
       {inBrowser && (
         <a
           href={link}
