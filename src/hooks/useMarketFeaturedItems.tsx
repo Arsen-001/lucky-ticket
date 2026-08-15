@@ -19,6 +19,7 @@ import { marketShardName } from '@/utils/pages/market-name.utils';
 import { ChipShardIcon } from '@/components/shared/icons/ChipShardIcon';
 import type { AvatarBoost, AvatarDailyReward } from '@/types/interfaces/avatars.interfaces';
 import type { MarketAccent, MarketPrice } from '@/types/interfaces/market.interfaces';
+import { TicketsEnum } from '@/types/enums/ticket.enums';
 import { isTierAtOrAbove, type TierName } from '@/types/types/tier.types';
 import type { TicketType } from '@/types/types/ticket.types';
 
@@ -164,6 +165,13 @@ export function useMarketFeaturedItems(): { items: MarketFeaturedItem[]; isLoadi
     //   .filter(c => c.featured || c.avatarLevel === 10)
     //   .forEach(c => push(cosmeticToItem(c)));
     data.shards.filter(s => s.featured).forEach(s => push(shardToItem(s)));
+
+    // Bronze shards always get a slide of their own. Both feeds above and below
+    // reach for the top of the ladder — `featured` is an admin pick (Diamond, in
+    // practice) and the backfill sorts by price descending — so the showcase
+    // opened on four posters a fresh account is gated out of buying. Bronze is
+    // the one tier nobody is gated out of, so the rail sells it too.
+    data.shards.filter(s => s.quality === TicketsEnum.BRONZE).forEach(s => push(shardToItem(s)));
 
     // Backfill — guarantee at least 4 slides by adding top non-featured items
     const MIN_ITEMS = 4;
