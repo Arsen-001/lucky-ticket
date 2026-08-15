@@ -257,7 +257,14 @@ export function MarketView() {
         />
       </div>
 
-      <div key={resolvedActive} className="animate-slide-in-bottom flex flex-col gap-5 px-5">
+      {/* Named for the tests: the showcase above repeats catalogue names, and
+          Swiper parks its cloned slides off-screen, so "the card called X" has
+          to mean the grid's card and not whichever clone comes first in DOM. */}
+      <div
+        key={resolvedActive}
+        data-testid="market-sections"
+        className="animate-slide-in-bottom flex flex-col gap-5 px-5"
+      >
         {showAll ? (
           categoryOrder
             .filter(k => k !== ALL_KEY)

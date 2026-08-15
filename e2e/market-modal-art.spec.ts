@@ -90,7 +90,16 @@ for (const item of ITEMS) {
     await page.waitForTimeout(2500);
     await clearGreetingDialogs(page);
 
-    const card = page.getByText(item.text, { exact: item.exact }).first();
+    // Scoped to the grid on purpose. The showcase rail above sells items out of
+    // the same catalogue, so it carries the same names — and Swiper's `loop`
+    // clones every slide and parks the clones off-screen, where a click can
+    // never land ("Element is outside of the viewport"). A page-wide `.first()`
+    // resolved to one of those clones the moment the rail started selling
+    // Bronze shards.
+    const card = page
+      .getByTestId('market-sections')
+      .getByText(item.text, { exact: item.exact })
+      .first();
     await card.scrollIntoViewIfNeeded();
     await card.click({ force: true });
     await page.waitForTimeout(1200);
