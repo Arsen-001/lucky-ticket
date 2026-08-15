@@ -282,6 +282,11 @@ const getAdRewards = (index: number): TaskReward[] =>
  * that pays a view without playing anything. `total: 0` is the statusless view
  * of the same screen, which is what a `fresh` account gets: the card must then
  * look exactly as it did before the perk existed.
+ *
+ * Deliberately independent of the demo account's VIP level. The perk belongs to
+ * Lucky Player alone, and since perks do not stack the real server would hand a
+ * VIP their own row (zero) — but then the skip flow would be unreachable on
+ * localhost, which is the one thing a fixture must not do.
  */
 const ADS_SKIP = {
   total: fresh ? 0 : 10,

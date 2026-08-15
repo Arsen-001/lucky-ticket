@@ -88,7 +88,8 @@ export const mockDb = {
           marketDiscountPct: 1.4,
           referralPct: 25,
           adsDailyBonus: 2,
-          adsSkipDaily: 10,
+          // VIP level 2 — the ad skip is Lucky Player's perk and VIP has none.
+          adsSkipDaily: 0,
           stakeFeeDiscountBonusPct: 0,
           ticketSendDailyBonus: {
             BRONZE: 3,

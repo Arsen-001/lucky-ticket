@@ -73,9 +73,9 @@ const VIP_LEVEL_PERK_LADDER: VipLevelPerks[] = (
     marketDiscountPct: market,
     referralPct: 25,
     adsDailyBonus: ads,
-    // Same allowance on every VIP level: the perk is "the day may be taken
-    // without watching", and it is bounded by the level's own cap anyway.
-    adsSkipDaily: 10,
+    // Lucky Player's perk only — VIP grants none by default, and perks do not
+    // stack, so a VIP row of 0 is what a VIP+LP player actually resolves to.
+    adsSkipDaily: 0,
     stakeFeeDiscountBonusPct: 0,
     ticketSendDailyBonus: {
       BRONZE: send[0],
