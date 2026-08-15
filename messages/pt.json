@@ -136,6 +136,8 @@
   "leveling up": "Subindo de nível…",
   "unequip chip confirm title": "Tirar este chip?",
   "unequip chip confirm content": "Tirar é de graça, mas equipar de novo em qualquer motor vai custar {cost} ★ outra vez.",
+  "equip chip confirm title": "Equip this chip?",
+  "activate booster confirm title": "Activate this booster?",
   "mint a new chip": "Fabricar um chip novo",
   "create new chip": "Criar chip novo",
   "mint": "Fabricar",

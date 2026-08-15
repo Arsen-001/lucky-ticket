@@ -136,6 +136,8 @@
   "leveling up": "Підвищення рівня…",
   "unequip chip confirm title": "Зняти цей чип?",
   "unequip chip confirm content": "Зняти безкоштовно, але встановити його знову на будь-який двигун коштуватиме ще {cost} ★.",
+  "equip chip confirm title": "Equip this chip?",
+  "activate booster confirm title": "Activate this booster?",
   "mint a new chip": "Створити новий чип",
   "create new chip": "Створити новий чип",
   "mint": "Створити",

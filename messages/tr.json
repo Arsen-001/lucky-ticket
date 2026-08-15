@@ -136,6 +136,8 @@
   "leveling up": "Seviye atlanıyor…",
   "unequip chip confirm title": "Bu çip çıkarılsın mı?",
   "unequip chip confirm content": "Çıkarmak ücretsiz, ama herhangi bir motora tekrar takmak yine {cost} ★ tutacak.",
+  "equip chip confirm title": "Equip this chip?",
+  "activate booster confirm title": "Activate this booster?",
   "mint a new chip": "Yeni bir çip üret",
   "create new chip": "Yeni çip oluştur",
   "mint": "Üret",

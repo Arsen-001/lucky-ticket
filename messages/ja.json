@@ -136,6 +136,8 @@
   "leveling up": "レベルアップ中…",
   "unequip chip confirm title": "このチップを外しますか？",
   "unequip chip confirm content": "外すのは無料ですが、どのエンジンに付け直す場合も再び {cost} ★ かかります。",
+  "equip chip confirm title": "Equip this chip?",
+  "activate booster confirm title": "Activate this booster?",
   "mint a new chip": "新しいチップを作る",
   "create new chip": "新しいチップを作成",
   "mint": "作成",

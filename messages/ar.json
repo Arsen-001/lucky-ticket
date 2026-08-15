@@ -136,6 +136,8 @@
   "leveling up": "جارٍ رفع المستوى…",
   "unequip chip confirm title": "هل تريد نزع هذه الشريحة؟",
   "unequip chip confirm content": "النزع مجاني، لكن إعادة تركيبها على أي محرك ستكلّف {cost} ★ من جديد.",
+  "equip chip confirm title": "Equip this chip?",
+  "activate booster confirm title": "Activate this booster?",
   "mint a new chip": "صناعة شريحة جديدة",
   "create new chip": "إنشاء شريحة جديدة",
   "mint": "صناعة",

@@ -135,6 +135,8 @@
   "leveling up": "Steigt auf…",
   "unequip chip confirm title": "Chip ablegen?",
   "unequip chip confirm content": "Ablegen ist kostenlos, aber das erneute Anlegen kostet erneut {cost} ★.",
+  "equip chip confirm title": "Equip this chip?",
+  "activate booster confirm title": "Activate this booster?",
   "mint a new chip": "Neuen Chip erstellen",
   "create new chip": "Neuen Chip erstellen",
   "mint": "Erstellen",

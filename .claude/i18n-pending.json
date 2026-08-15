@@ -1,5 +1,6 @@
 {
   "keys": [
+    "activate booster confirm title",
     "ad skip hint {left}",
     "ad skips left {n}",
     "capacity chip explainer",
@@ -7,6 +8,7 @@
     "chip stars explainer",
     "chip tier rule",
     "chips explainer",
+    "equip chip confirm title",
     "leave",
     "leave the game?",
     "perk ads skip",

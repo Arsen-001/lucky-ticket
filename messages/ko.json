@@ -136,6 +136,8 @@
   "leveling up": "레벨 업 중…",
   "unequip chip confirm title": "이 칩을 분리할까요?",
   "unequip chip confirm content": "분리는 무료지만, 어느 엔진에든 다시 장착하려면 {cost} ★이 또 듭니다.",
+  "equip chip confirm title": "Equip this chip?",
+  "activate booster confirm title": "Activate this booster?",
   "mint a new chip": "새 칩 제작",
   "create new chip": "새 칩 만들기",
   "mint": "제작",

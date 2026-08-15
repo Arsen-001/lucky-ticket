@@ -136,6 +136,8 @@
   "leveling up": "Daraja koʻtarilmoqda…",
   "unequip chip confirm title": "Bu chip yechilsinmi?",
   "unequip chip confirm content": "Yechish bepul, lekin uni istalgan dvigatelga qayta oʻrnatish yana {cost} ★ turadi.",
+  "equip chip confirm title": "Equip this chip?",
+  "activate booster confirm title": "Activate this booster?",
   "mint a new chip": "Yangi chip yasash",
   "create new chip": "Yangi chip yaratish",
   "mint": "Yasash",

@@ -26,6 +26,8 @@ import { EngineSlotPickerModal } from '@/components/pages/tabs/home/EngineSlotPi
 import { HomeBuyEngineSlot } from '@/components/pages/tabs/home/HomeBuyEngineSlot';
 import { ConfirmModal } from '@/components/shared/modals/ConfirmModal';
 import { Switch } from '@/components/shared/form-elements/Switch';
+import { BoosterIcon } from '@/components/shared/icons/BoosterIcon';
+import { ChipIcon } from '@/components/shared/icons/ChipIcon';
 import { TelegramStarIcon } from '@/components/shared/icons/TelegramStarIcon';
 import { useAppTranslations } from '@/hooks/useAppTranslations';
 import { useToast } from '@/hooks/useToast';
@@ -34,7 +36,7 @@ import { useEngineSpeedAvatarBoostPct } from '@/hooks/useEngineSpeedAvatarBoostP
 import { useTestBadgeSpeedBoostPct } from '@/hooks/useTestBadgeSpeedBoostPct';
 import { findTicketFlightOrigin, useTicketFlight } from '@/hooks/useTicketFlight';
 import { chipEquipStarsCost } from '@/utils/global/inventory.utils';
-import type { InventoryChip } from '@/types/interfaces/inventory.interfaces';
+import type { InventoryBooster, InventoryChip } from '@/types/interfaces/inventory.interfaces';
 import { EmptyDataInfo } from '@/components/shared/EmptyDataInfo';
 import { QueryErrorState } from '@/components/shared/error/QueryErrorState';
 import { Skeleton } from '@/components/shared/seleketons/Skeleton';
@@ -139,6 +141,30 @@ export function HomeEnginesSlider({ className }: ClassNameProps) {
     category: 'chip' | 'booster';
     type: InventoryChipType;
     itemId: string;
+  } | null>(null);
+  /**
+   * The picker's tap used to BE the decision: one press equipped the chip and
+   * spent its Stars, or burned a booster for its whole duration, with nothing
+   * between a mis-tap and the charge. Every other paid action on this screen
+   * asks first (instant claim, boost upgrade) — this one now does too.
+   *
+   * `from` carries the slot the player was choosing in, so «Отмена» puts them
+   * back in that list instead of on a bare cube. It is also why the picker is
+   * closed rather than left under the question: two stacked dialogs is the
+   * shape that strands a portal (@see modal-close-collision).
+   */
+  const [slotConfirm, setSlotConfirm] = useState<{
+    engineId: string;
+    from: {
+      engineId: string;
+      engineTier: TicketType;
+      category: 'chip' | 'booster';
+      type: InventoryChipType;
+    };
+    chip?: InventoryChip;
+    booster?: InventoryBooster;
+    /** Stars the confirm is about to spend; 0 for a booster, which is free. */
+    cost: number;
   } | null>(null);
 
   const scrollerRef = useRef<HTMLDivElement>(null);
@@ -497,6 +523,49 @@ export function HomeEnginesSlider({ className }: ClassNameProps) {
     performUpgrade(engineId, type, cost);
   };
 
+  const runEquipChip = (engineId: string, chip: InventoryChip, cost: number) => {
+    // Gated the same way as an upgrade: a short balance opens the top-up sheet
+    // before the request, so the local price and a server refusal cannot show
+    // the player two different-looking answers.
+    requireStars(cost, async () => {
+      setPendingPick({ engineId, category: 'chip', type: chip.type, itemId: chip.id });
+      try {
+        await equipChipMutation({ chipId: chip.id, engineId }).unwrap();
+      } catch (error) {
+        // Was `toast.error(t('action failed'))` — a grey line for what is
+        // usually a price the player can still pay.
+        await spend.report(error, { required: cost });
+      } finally {
+        setPendingPick(null);
+      }
+    });
+  };
+
+  const runActivateBooster = async (engineId: string, booster: InventoryBooster) => {
+    setPendingPick({ engineId, category: 'booster', type: booster.type, itemId: booster.id });
+    try {
+      await activateBoosterMutation({ boosterId: booster.id, engineId }).unwrap();
+    } catch (error) {
+      await spend.report(error);
+    } finally {
+      setPendingPick(null);
+    }
+  };
+
+  const confirmSlotPick = () => {
+    if (!slotConfirm) return;
+    const { engineId, chip, booster, cost } = slotConfirm;
+    setSlotConfirm(null);
+    if (chip) runEquipChip(engineId, chip, cost);
+    else if (booster) runActivateBooster(engineId, booster);
+  };
+
+  const cancelSlotPick = () => {
+    const back = slotConfirm?.from ?? null;
+    setSlotConfirm(null);
+    if (back) setPickerSlot(back);
+  };
+
   if (isLoading) {
     return (
       <div className={twMerge('-mt-5 mb-0 flex w-full flex-col items-stretch', className)}>
@@ -731,46 +800,83 @@ export function HomeEnginesSlider({ className }: ClassNameProps) {
         engineTier={pickerSlot?.engineTier ?? 'bronze'}
         pendingPickId={pendingPick?.itemId ?? null}
         onClose={() => setPickerSlot(null)}
-        onPickChip={async chip => {
+        onPickChip={chip => {
           if (!pickerSlot) return;
-          setPendingPick({
+          setSlotConfirm({
             engineId: pickerSlot.engineId,
-            category: 'chip',
-            type: chip.type,
-            itemId: chip.id,
+            from: pickerSlot,
+            chip,
+            cost: chipEquipStarsCost(chip.level),
           });
           setPickerSlot(null);
-          try {
-            await equipChipMutation({
-              chipId: chip.id,
-              engineId: pickerSlot.engineId,
-            }).unwrap();
-          } catch {
-            toast.error(t('action failed'));
-          } finally {
-            setPendingPick(null);
-          }
         }}
-        onPickBooster={async booster => {
+        onPickBooster={booster => {
           if (!pickerSlot) return;
-          setPendingPick({
+          setSlotConfirm({
             engineId: pickerSlot.engineId,
-            category: 'booster',
-            type: booster.type,
-            itemId: booster.id,
+            from: pickerSlot,
+            booster,
+            cost: 0,
           });
           setPickerSlot(null);
-          try {
-            await activateBoosterMutation({
-              boosterId: booster.id,
-              engineId: pickerSlot.engineId,
-            }).unwrap();
-          } catch {
-            toast.error(t('action failed'));
-          } finally {
-            setPendingPick(null);
-          }
         }}
+      />
+
+      {/* The price rides in the gold pill inside, the way the instant-claim and
+          upgrade confirms on this same screen state theirs — so the button stays
+          one short word in every locale instead of spelling "Экипировать · 3 ★"
+          out twice on one panel. */}
+      <ConfirmModal
+        open={!!slotConfirm}
+        onClose={cancelSlotPick}
+        onConfirm={confirmSlotPick}
+        title={
+          slotConfirm?.booster ? t('activate booster confirm title') : t('equip chip confirm title')
+        }
+        content={
+          slotConfirm ? (
+            <div className="flex flex-col items-center gap-3">
+              {slotConfirm.chip ? (
+                <ChipIcon
+                  type={slotConfirm.chip.type}
+                  tier={slotConfirm.chip.quality}
+                  size={64}
+                  className="shrink-0"
+                />
+              ) : slotConfirm.booster ? (
+                <BoosterIcon
+                  type={slotConfirm.booster.type}
+                  tier={slotConfirm.booster.quality}
+                  size={64}
+                  className="shrink-0"
+                />
+              ) : null}
+              <p className="text-sm font-extrabold text-white">
+                {slotConfirm.chip
+                  ? `${t(slotConfirm.chip.quality)} · ${
+                      slotConfirm.chip.type === 'speed' ? t('time') : t('capacity')
+                    } · ${t('lvl')} ${slotConfirm.chip.level} +${slotConfirm.chip.effectPct.toFixed(1)}%`
+                  : slotConfirm.booster
+                    ? `${t(slotConfirm.booster.quality)} · ${
+                        slotConfirm.booster.type === 'speed' ? t('time') : t('capacity')
+                      } · +${slotConfirm.booster.effectPct}% · ${t('{n}h duration', {
+                        n: slotConfirm.booster.durationHours,
+                      })}`
+                    : null}
+              </p>
+              <p className="text-pink-secondary text-sm">
+                {slotConfirm.booster ? t('booster activate note') : t('chip equip note')}
+              </p>
+              {slotConfirm.cost > 0 && (
+                <div className="border-gold/40 bg-gold/10 text-gold inline-flex items-center gap-1.5 rounded-full border px-3.5 py-1.5 text-sm font-extrabold tabular-nums">
+                  <TelegramStarIcon size={14} />
+                  {slotConfirm.cost}
+                </div>
+              )}
+            </div>
+          ) : null
+        }
+        confirmText={slotConfirm?.booster ? t('activate') : t('equip')}
       />
 
       <ConfirmModal

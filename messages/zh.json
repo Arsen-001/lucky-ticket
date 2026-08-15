@@ -136,6 +136,8 @@
   "leveling up": "升级中…",
   "unequip chip confirm title": "要卸下这枚芯片吗？",
   "unequip chip confirm content": "卸下是免费的，但重新装到任意引擎上仍需 {cost} ★。",
+  "equip chip confirm title": "Equip this chip?",
+  "activate booster confirm title": "Activate this booster?",
   "mint a new chip": "制作新芯片",
   "create new chip": "创建新芯片",
   "mint": "制作",

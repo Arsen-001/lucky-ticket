@@ -136,6 +136,8 @@
   "leveling up": "Leveling up…",
   "unequip chip confirm title": "Detach this chip?",
   "unequip chip confirm content": "Detaching is free, but re-equipping it on any engine will cost {cost} ★ again.",
+  "equip chip confirm title": "Equip this chip?",
+  "activate booster confirm title": "Activate this booster?",
   "mint a new chip": "Mint a new chip",
   "create new chip": "Create new chip",
   "mint": "Mint",

@@ -136,6 +136,8 @@
   "leveling up": "Сатҳ баланд мешавад…",
   "unequip chip confirm title": "Ин чип кашида шавад?",
   "unequip chip confirm content": "Кашидан ройгон аст, аммо дубора ба ҳар муҳаррик гузоштан боз {cost} ★ меарзад.",
+  "equip chip confirm title": "Equip this chip?",
+  "activate booster confirm title": "Activate this booster?",
   "mint a new chip": "Чипи нав сохтан",
   "create new chip": "Чипи нав эҷод кардан",
   "mint": "Сохтан",

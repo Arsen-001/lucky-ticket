@@ -136,6 +136,8 @@
   "leveling up": "در حال بالا رفتن سطح…",
   "unequip chip confirm title": "این تراشه برداشته شود؟",
   "unequip chip confirm content": "برداشتن رایگان است، اما نصب دوبارهٔ آن روی هر موتوری باز {cost} ★ هزینه دارد.",
+  "equip chip confirm title": "Equip this chip?",
+  "activate booster confirm title": "Activate this booster?",
   "mint a new chip": "ساخت تراشهٔ جدید",
   "create new chip": "ایجاد تراشهٔ جدید",
   "mint": "ساخت",

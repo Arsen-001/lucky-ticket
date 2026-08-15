@@ -136,6 +136,8 @@
   "leveling up": "Прокачка…",
   "unequip chip confirm title": "Открепить чип?",
   "unequip chip confirm content": "Открепить бесплатно, но повторное крепление снова будет стоить {cost} ★.",
+  "equip chip confirm title": "Поставить чип?",
+  "activate booster confirm title": "Включить бустер?",
   "mint a new chip": "Создать новый чип",
   "create new chip": "Создать новый чип",
   "mint": "Создать",

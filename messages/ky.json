@@ -136,6 +136,8 @@
   "leveling up": "Деңгээл көтөрүлүүдө…",
   "unequip chip confirm title": "Бул чип чечилсинби?",
   "unequip chip confirm content": "Чечүү акысыз, бирок аны каалаган кыймылдаткычка кайра орнотуу дагы {cost} ★ турат.",
+  "equip chip confirm title": "Equip this chip?",
+  "activate booster confirm title": "Activate this booster?",
   "mint a new chip": "Жаңы чип жасоо",
   "create new chip": "Жаңы чип түзүү",
   "mint": "Жасоо",

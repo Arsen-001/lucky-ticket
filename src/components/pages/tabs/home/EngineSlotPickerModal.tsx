@@ -169,7 +169,7 @@ export function EngineSlotPickerModal({
                       {t(chip.quality)} · {chip.type === 'speed' ? t('time') : t('capacity')}
                     </span>
                     <span className="text-[10px] font-bold tabular-nums" style={{ color: accent }}>
-                      Lvl {chip.level} · +{chip.effectPct.toFixed(1)}%
+                      {t('lvl')} {chip.level} · +{chip.effectPct.toFixed(1)}%
                     </span>
                   </div>
                   <div className="flex items-center gap-1 text-[11px] font-extrabold tabular-nums text-white">

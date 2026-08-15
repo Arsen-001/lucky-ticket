@@ -136,6 +136,8 @@
   "leveling up": "Մակարդակը բարձրանում է…",
   "unequip chip confirm title": "Հանե՞լ այս չիպը",
   "unequip chip confirm content": "Հանելն անվճար է, բայց ցանկացած շարժիչի վրա նորից տեղադրելը կրկին կարժենա {cost} ★։",
+  "equip chip confirm title": "Equip this chip?",
+  "activate booster confirm title": "Activate this booster?",
   "mint a new chip": "Ստեղծել նոր չիպ",
   "create new chip": "Ստեղծել նոր չիպ",
   "mint": "Ստեղծել",

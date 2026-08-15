@@ -136,6 +136,8 @@
   "leveling up": "Montée de niveau…",
   "unequip chip confirm title": "Retirer cette puce ?",
   "unequip chip confirm content": "La retirer est gratuit, mais la remettre sur n'importe quel moteur coûtera de nouveau {cost} ★.",
+  "equip chip confirm title": "Equip this chip?",
+  "activate booster confirm title": "Activate this booster?",
   "mint a new chip": "Fabriquer une nouvelle puce",
   "create new chip": "Créer une nouvelle puce",
   "mint": "Fabriquer",
