@@ -54,6 +54,7 @@ import { ClaimRewardModal, type RewardModalResult } from './ClaimRewardModal';
 import { classifyClaimError, type ClaimErrorKind } from '@/utils/pages/task-claim.utils';
 import { ArrivalShine } from '@/components/shared/ArrivalShine';
 import { triggerHaptic } from '@/utils/global/haptic.utils';
+import { AchievementsCollectedBar } from './AchievementsCollectedBar';
 
 function TasksSkeleton() {
   return (
@@ -818,6 +819,9 @@ export function TasksContent() {
               ? allTasks.filter(task => task.id.startsWith('friend-invite-'))
               : [];
 
+            const isAchievementsOnce =
+              activeFrequency === TaskFrequency.ONCE && cat.category === TaskCategory.ACHIEVEMENTS;
+
             const isAdsOnce =
               activeFrequency === TaskFrequency.ONCE && cat.category === TaskCategory.ADS;
             const adsWatchTasks = isAdsOnce
@@ -918,22 +922,28 @@ export function TasksContent() {
                 }
                 taskHighlight={taskHighlight}
                 layout={
-                  // The single-line row is the shape for the LONG one-time
-                  // lists, and only for them. A daily or weekly task gets the
-                  // full card even in these categories, because only the card
-                  // opens the sub-step accordion — and the row's chevron
-                  // reveals a subtitle, which is not the same thing. Weekly
-                  // «Check in 7 days this week» ships 7 steps: as a row, five
-                  // collected days sat behind a chevron that showed one
-                  // sentence, with no way to claim them at all.
-                  activeFrequency === TaskFrequency.ONCE &&
-                  (cat.category === TaskCategory.SOCIAL || cat.category === TaskCategory.PROFILE)
-                    ? 'rows'
-                    : activeFrequency === TaskFrequency.ONCE &&
-                        cat.category !== TaskCategory.ACHIEVEMENTS &&
-                        cat.category !== TaskCategory.PROFILE_STATUS
-                      ? 'grid'
-                      : 'cards'
+                  // Achievements carry art of their own — a rarity medal — and
+                  // the longest names on the tab, so they get a row built for
+                  // both. @see AchievementTaskRow
+                  isAchievementsOnce
+                    ? 'achievement-row'
+                    : // The single-line row is the shape for the LONG one-time
+                      // lists, and only for them. A daily or weekly task gets the
+                      // full card even in these categories, because only the card
+                      // opens the sub-step accordion — and the row's chevron
+                      // reveals a subtitle, which is not the same thing. Weekly
+                      // «Check in 7 days this week» ships 7 steps: as a row, five
+                      // collected days sat behind a chevron that showed one
+                      // sentence, with no way to claim them at all.
+                      activeFrequency === TaskFrequency.ONCE &&
+                        (cat.category === TaskCategory.SOCIAL ||
+                          cat.category === TaskCategory.PROFILE)
+                      ? 'rows'
+                      : activeFrequency === TaskFrequency.ONCE &&
+                          cat.category !== TaskCategory.ACHIEVEMENTS &&
+                          cat.category !== TaskCategory.PROFILE_STATUS
+                        ? 'grid'
+                        : 'cards'
                 }
                 collapsible={
                   cat.category === TaskCategory.ACHIEVEMENTS &&
@@ -944,7 +954,12 @@ export function TasksContent() {
                 pinnedIds={cat.category === TaskCategory.ACHIEVEMENTS ? pinnedIds : undefined}
                 onTogglePin={cat.category === TaskCategory.ACHIEVEMENTS ? togglePin : undefined}
                 topSlot={
-                  isTournamentsOnce ? (
+                  // Fed every achievement of the category, not the three the
+                  // list starts unfolded with — the count answers «how much of
+                  // the wall do I own», which the visible slice cannot.
+                  isAchievementsOnce ? (
+                    <AchievementsCollectedBar tasks={allTasks} />
+                  ) : isTournamentsOnce ? (
                     <div className="flex flex-col gap-4">
                       {sliders.map(s => (
                         <TournamentMilestoneSlider

@@ -130,6 +130,7 @@
   "avatar reward collected": "Сыйлык алынды",
   "accrued over {days} days": "{days} күндө чогултулган",
   "collect": "Алуу",
+  "collected {earned} of {total}": "Collected {earned} of {total}",
   "available shards": "Жеткиликтүү сыныктар",
   "to next level": "Кийинки деңгээлге чейин",
   "level up": "Деңгээлди көтөрүү",

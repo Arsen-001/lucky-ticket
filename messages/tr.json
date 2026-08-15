@@ -130,6 +130,7 @@
   "avatar reward collected": "Ödül alındı",
   "accrued over {days} days": "{days} günde biriktirildi",
   "collect": "Al",
+  "collected {earned} of {total}": "Collected {earned} of {total}",
   "available shards": "Mevcut parçalar",
   "to next level": "Sonraki seviyeye",
   "level up": "Seviye atla",

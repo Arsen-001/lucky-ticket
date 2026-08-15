@@ -130,6 +130,7 @@
   "avatar reward collected": "پاداش دریافت شد",
   "accrued over {days} days": "انباشته در {days} روز",
   "collect": "دریافت",
+  "collected {earned} of {total}": "Collected {earned} of {total}",
   "available shards": "تکه‌های در دسترس",
   "to next level": "تا سطح بعدی",
   "level up": "بالا بردن سطح",

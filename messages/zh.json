@@ -130,6 +130,7 @@
   "avatar reward collected": "奖励已领取",
   "accrued over {days} days": "{days} 天累计",
   "collect": "领取",
+  "collected {earned} of {total}": "Collected {earned} of {total}",
   "available shards": "可用碎片",
   "to next level": "距下一级",
   "level up": "升级",

@@ -130,6 +130,7 @@
   "avatar reward collected": "報酬を受け取りました",
   "accrued over {days} days": "{days}日間の累計",
   "collect": "受け取る",
+  "collected {earned} of {total}": "Collected {earned} of {total}",
   "available shards": "所持シャード",
   "to next level": "次のレベルまで",
   "level up": "レベルアップ",

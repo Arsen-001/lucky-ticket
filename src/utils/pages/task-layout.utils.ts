@@ -6,8 +6,12 @@ import type { Task } from '@/types/interfaces/tasks.interfaces';
  * `cards` — the full `TaskItemCard`, the only shape with a sub-step accordion.
  * `grid`  — two-per-row `TaskItemCardCompact`, for the long one-time lists.
  * `rows`  — single-line `TaskItemRow`, for the lightweight one-time categories.
+ *
+ * `achievement-row` — `AchievementTaskRow`, the one-time Achievements section:
+ * a rarity medal, the headline across the full width and the reward chips
+ * beneath it. The compact row it replaced gave the headline 36px of 398.
  */
-export type TaskLayout = 'cards' | 'grid' | 'rows';
+export type TaskLayout = 'cards' | 'grid' | 'rows' | 'achievement-row';
 
 /**
  * A task that carries sub-steps is always drawn as a card, whatever shape the

@@ -130,6 +130,7 @@
   "avatar reward collected": "Recompensa coletada",
   "accrued over {days} days": "Acumulado em {days} dias",
   "collect": "Coletar",
+  "collected {earned} of {total}": "Collected {earned} of {total}",
   "available shards": "Fragmentos disponíveis",
   "to next level": "Para o próximo nível",
   "level up": "Subir de nível",

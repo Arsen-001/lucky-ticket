@@ -130,6 +130,7 @@
   "avatar reward collected": "Պարգևը ստացված է",
   "accrued over {days} days": "Կուտակվել է {days} օրում",
   "collect": "Ստանալ",
+  "collected {earned} of {total}": "Collected {earned} of {total}",
   "available shards": "Հասանելի բեկորներ",
   "to next level": "Մինչև հաջորդ մակարդակ",
   "level up": "Բարձրացնել մակարդակը",

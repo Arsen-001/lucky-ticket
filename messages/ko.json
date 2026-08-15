@@ -130,6 +130,7 @@
   "avatar reward collected": "보상을 받았습니다",
   "accrued over {days} days": "{days}일 동안 누적",
   "collect": "받기",
+  "collected {earned} of {total}": "Collected {earned} of {total}",
   "available shards": "보유 샤드",
   "to next level": "다음 레벨까지",
   "level up": "레벨 업",

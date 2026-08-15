@@ -130,6 +130,7 @@
   "avatar reward collected": "Нагороду отримано",
   "accrued over {days} days": "Накопичено за {days} днів",
   "collect": "Отримати",
+  "collected {earned} of {total}": "Collected {earned} of {total}",
   "available shards": "Доступні уламки",
   "to next level": "До наступного рівня",
   "level up": "Підвищити рівень",

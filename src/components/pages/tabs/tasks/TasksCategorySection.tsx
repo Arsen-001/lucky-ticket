@@ -13,7 +13,8 @@ import { TaskItemRow } from './TaskItemRow';
 import { SectionShine } from './SectionShine';
 import { staggerMs } from '@/utils/global/animation.utils';
 import { ClaimableDot } from '@/components/shared/badges/ClaimableDot';
-import { layoutForTask } from '@/utils/pages/task-layout.utils';
+import { layoutForTask, type TaskLayout } from '@/utils/pages/task-layout.utils';
+import { AchievementTaskRow } from './AchievementTaskRow';
 
 export interface TasksCategorySectionProps {
   category: TaskCategory;
@@ -27,9 +28,10 @@ export interface TasksCategorySectionProps {
   taskHighlight?: { id: string; nonce: number } | null;
   /**
    * Card layout: `cards` = full cards (1-col), `grid` = compact tiles (2-col),
-   * `rows` = compact single-line rows (1-col).
+   * `rows` = compact single-line rows (1-col), `achievement-*` = the badge
+   * shapes of the Achievements section (@see TaskLayout).
    */
-  layout?: 'cards' | 'grid' | 'rows';
+  layout?: TaskLayout;
   /** Optional slot rendered between the section header and the task grid (e.g. milestone slider). */
   topSlot?: ReactNode;
   /**
@@ -206,6 +208,18 @@ export function TasksCategorySection({
               // is drawn as a card wherever it sits, because the other two
               // shapes drop its steps without a word. @see layoutForTask
               const taskLayout = layoutForTask(task, layout);
+              if (taskLayout === 'achievement-row') {
+                return (
+                  <AchievementTaskRow
+                    key={task.id}
+                    task={task}
+                    onClaim={onClaim}
+                    highlightToken={taskShine}
+                    className={animationClass}
+                    style={animationStyle}
+                  />
+                );
+              }
               if (taskLayout === 'grid') {
                 return (
                   <TaskItemCardCompact

@@ -130,6 +130,7 @@
   "avatar reward collected": "تم استلام المكافأة",
   "accrued over {days} days": "متراكم خلال {days} يومًا",
   "collect": "استلام",
+  "collected {earned} of {total}": "Collected {earned} of {total}",
   "available shards": "الشظايا المتاحة",
   "to next level": "إلى المستوى التالي",
   "level up": "رفع المستوى",
