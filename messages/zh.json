@@ -1380,5 +1380,15 @@
   "installed": "已装配",
   "in reserve": "备用",
   "no shards yet": "暂无碎片",
-  "nothing matches filters": "没有符合这些筛选条件的内容"
+  "nothing matches filters": "没有符合这些筛选条件的内容",
+  "what are chips": "What are chips?",
+  "chips explainer": "Chips are permanent upgrades for your engines. Every engine has two sockets: one for Time, one for Capacity.",
+  "time chip explainer": "Speeds the engine up — the cycle gets shorter, so tickets arrive more often.",
+  "capacity chip explainer": "Widens the batch — the engine mints more tickets in every cycle.",
+  "where to get shards": "Where shards come from",
+  "shards source explainer": "Tournaments drop them: one type per tournament, Time and Capacity taking turns. The market sells them too.",
+  "shards spend explainer": "Shards are spent here — mint a new chip at Lvl 1, or level up one you already own.",
+  "chip tier rule": "A chip fits an engine of its own tier only.",
+  "chip level explainer": "Every level adds +0.5%. Levels are paid in shards, and the price grows with the level.",
+  "chip stars explainer": "Installing costs ★ and detaching costs ★ — the chip level sets both prices."
 }

@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import { Plus, Sparkles, Zap } from 'lucide-react';
+import { Button } from '@/components/shared/buttons/Button';
 import { Tabs } from '@/components/shared/Tabs';
 import { useAppTranslations } from '@/hooks/useAppTranslations';
 import {
@@ -9,7 +10,11 @@ import {
   isChipReadyToLevelUp,
   sortChipsForDisplay,
 } from '@/utils/global/inventory.utils';
-import type { InventoryViewProps } from '@/types/interfaces/inventory.interfaces';
+import type {
+  InventoryChipType,
+  InventoryViewProps,
+} from '@/types/interfaces/inventory.interfaces';
+import { ChipInfoSheet } from './ChipInfoSheet';
 import { InventoryBonusTile } from './InventoryBonusTile';
 import { InventoryBoosterItem } from './InventoryBoosterItem';
 import { InventoryChipWorkbench } from './InventoryChipWorkbench';
@@ -49,6 +54,9 @@ export function InventoryScreen({
   const t = useAppTranslations();
   const [mode, setMode] = useState<'chips' | 'boosters'>('chips');
   const [filters, setFilters] = useState<InventoryFilters>(emptyInventoryFilters);
+  // `null` closes it; a type opens it with that type's row lit, `'all'` from the
+  // places that ask the general question (empty collection, empty shard row).
+  const [info, setInfo] = useState<InventoryChipType | 'all' | null>(null);
 
   const isBoosters = mode === 'boosters';
   const sortedChips = sortChipsForDisplay(chips, shards);
@@ -61,8 +69,16 @@ export function InventoryScreen({
       <section className="flex flex-col gap-2">
         <InventorySectionHeading label={t('chip bonus')} />
         <div className="grid grid-cols-2 gap-2.5">
-          <InventoryBonusTile type="speed" stats={inventoryTypeStats(slots, 'speed')} />
-          <InventoryBonusTile type="capacity" stats={inventoryTypeStats(slots, 'capacity')} />
+          <InventoryBonusTile
+            type="speed"
+            stats={inventoryTypeStats(slots, 'speed')}
+            onInfo={setInfo}
+          />
+          <InventoryBonusTile
+            type="capacity"
+            stats={inventoryTypeStats(slots, 'capacity')}
+            onInfo={setInfo}
+          />
         </div>
       </section>
 
@@ -132,14 +148,23 @@ export function InventoryScreen({
         )
       ) : (
         <>
-          <InventoryShardVault shards={shards} />
+          <InventoryShardVault shards={shards} onInfo={() => setInfo('all')} />
 
           {visibleChips.length === 0 && !isLoading ? (
-            <div className="flex flex-col items-center gap-2 rounded-2xl border border-white/8 bg-black/25 p-6 text-center">
+            <div className="flex flex-col items-center gap-2.5 rounded-2xl border border-white/8 bg-black/25 p-6 text-center">
               <Sparkles size={28} className="text-gold" />
               <p className="text-xs text-white/65">
                 {chips.length === 0 ? t('inventory empty') : t('nothing matches filters')}
               </p>
+              {chips.length === 0 && (
+                <Button
+                  variant="secondary"
+                  onClick={() => setInfo('all')}
+                  className="px-4 py-2 text-[11px]"
+                >
+                  {t('what are chips')}
+                </Button>
+              )}
             </div>
           ) : (
             <InventoryChipWorkbench
@@ -164,6 +189,12 @@ export function InventoryScreen({
           </button>
         </>
       )}
+
+      <ChipInfoSheet
+        open={info !== null}
+        focus={info === 'all' || info === null ? undefined : info}
+        onClose={() => setInfo(null)}
+      />
     </div>
   );
 }

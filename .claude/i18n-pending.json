@@ -2,9 +2,19 @@
   "keys": [
     "ad skip hint {left}",
     "ad skips left {n}",
-    "perk ads skip",
-    "take without watching",
+    "capacity chip explainer",
+    "chip level explainer",
+    "chip stars explainer",
+    "chip tier rule",
+    "chips explainer",
+    "leave",
     "leave the game?",
-    "leave"
+    "perk ads skip",
+    "shards source explainer",
+    "shards spend explainer",
+    "take without watching",
+    "time chip explainer",
+    "what are chips",
+    "where to get shards"
   ]
 }

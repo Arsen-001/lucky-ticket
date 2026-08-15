@@ -15,6 +15,9 @@ const TYPES: InventoryChipType[] = ['speed', 'capacity'];
 
 export interface InventoryShardVaultProps {
   shards: InventoryShardCount[];
+  /** Opens the explainer — the empty row is exactly where "where do I get
+   *  these?" gets asked, and the answer is not on this screen. */
+  onInfo?: () => void;
   className?: string;
 }
 
@@ -27,7 +30,7 @@ export interface InventoryShardVaultProps {
  * exist; the full grid (including the empty tiers, which are an answer too) is
  * one tap away.
  */
-export function InventoryShardVault({ shards, className }: InventoryShardVaultProps) {
+export function InventoryShardVault({ shards, onInfo, className }: InventoryShardVaultProps) {
   const t = useAppTranslations();
   const [open, setOpen] = useState(false);
 
@@ -70,7 +73,16 @@ export function InventoryShardVault({ shards, className }: InventoryShardVaultPr
           )}
         </div>
       ) : owned.length === 0 ? (
-        <p className="text-[11px] text-white/45">{t('no shards yet')}</p>
+        <div className="flex flex-wrap items-center gap-2">
+          <p className="text-[11px] text-white/45">{t('no shards yet')}</p>
+          <button
+            type="button"
+            onClick={onInfo}
+            className="tap-target relative rounded-full border border-white/15 px-2.5 py-1 text-[10px] font-extrabold uppercase tracking-wider text-white/70 transition-colors hover:bg-white/5 active:scale-95"
+          >
+            {t('where to get shards')}
+          </button>
+        </div>
       ) : (
         <div className="scrollbar-hidden -mx-5 flex items-center gap-1.5 overflow-x-auto px-5">
           {owned.map(shard => (
