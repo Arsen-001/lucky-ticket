@@ -90,10 +90,16 @@ export function ChipActionRow({
           </span>
         </div>
 
-        <div className="flex items-center gap-2 text-[11px] font-extrabold text-white tabular-nums">
-          {t('lv {level}', { level: chip.level })} · +{chip.effectPct.toFixed(1)}%
+        {/* `flex-wrap` + `whitespace-nowrap` per item, not one nowrap line: in
+            Russian "Осталось 3 д" is three times the width of "3d left" and the
+            row broke INSIDE the badge, leaving a lone "д" on its own line. Items
+            now break between themselves and each stays whole. */}
+        <div className="flex flex-wrap items-center gap-x-2 gap-y-0.5 text-[11px] font-extrabold text-white tabular-nums">
+          <span className="whitespace-nowrap">
+            {t('lv {level}', { level: chip.level })} · +{chip.effectPct.toFixed(1)}%
+          </span>
           {remaining ? (
-            <span className="text-electric-pink flex items-center gap-0.5 text-[9px] font-bold uppercase tracking-wider">
+            <span className="text-electric-pink flex items-center gap-0.5 whitespace-nowrap text-[9px] font-bold uppercase tracking-wider">
               <Timer size={10} strokeWidth={2.6} />
               {remaining}
             </span>
@@ -102,7 +108,7 @@ export function ChipActionRow({
           )}
           {engineNumber && (
             <span
-              className="flex items-center gap-0.5 text-[9px] font-bold uppercase tracking-wider"
+              className="flex items-center gap-0.5 whitespace-nowrap text-[9px] font-bold uppercase tracking-wider"
               style={{ color: accent }}
             >
               <Cpu size={10} strokeWidth={2.6} />#{engineNumber}
