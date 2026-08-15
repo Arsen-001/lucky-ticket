@@ -237,6 +237,62 @@ for (const width of WIDTHS) {
 }
 
 /**
+ * Nothing in the cube's claim strip may wrap.
+ *
+ * The strip is two lines by design — ticket name over countdown — inside a face
+ * that is laid out once and then scaled, so a third line does not reflow, it
+ * pushes the claim button out of its row. That is exactly what shipped: the
+ * fill count sat on the clock line as `23:48:16 · 0/96`, the separator stayed
+ * with the clock and `0/96` wrapped underneath, and a player photographed the
+ * result. The count is gone from this face now and the line is `nowrap`, but
+ * the invariant worth holding is the general one — no text in this strip may
+ * take a second line box, whatever anyone adds later.
+ *
+ * Measured in Ukrainian, which owns the longest ticket wording of the 18
+ * dictionaries ("Бронзовий квиток", "Золотий"), at the narrowest phone. And
+ * measured as LINE BOXES (`getClientRects().length`), not height: a wrap is
+ * exactly a second box, while a height threshold would need re-tuning with the
+ * type scale.
+ */
+test('nothing in the cube claim strip takes a second line', async ({ page }) => {
+  test.setTimeout(CUBE_TEST_TIMEOUT);
+  await page.setViewportSize({ width: 320, height: 900 });
+  await page.context().addCookies([
+    { name: 'locale', value: 'uk', url: page.url().startsWith('http') ? page.url() : 'http://localhost:3000' },
+  ]);
+  await openHome(page);
+  await page.waitForTimeout(SETTLE_MS);
+
+  const m = await page.evaluate(() => {
+    // Both states of the strip stay mounted and toggle `hidden`, so the
+    // producing one is readable without touching the DOM: the mock's second
+    // engine is mid-cycle while the first has tickets waiting.
+    const strips = [...document.querySelectorAll('[data-engine-slide] .engine-card-cube-face--front div')]
+      .filter(d => d.querySelector('svg.lucide-clock, svg.lucide-clock-icon'))
+      .filter(d => d.getBoundingClientRect().height > 0);
+    const strip = strips[0];
+    if (!strip) return null;
+    const spans = [...strip.querySelectorAll('span')].filter(
+      s => (s.textContent ?? '').trim().length > 0
+    );
+    return {
+      count: spans.length,
+      wrapped: spans
+        .map(s => ({ text: (s.textContent ?? '').trim().slice(0, 24), boxes: s.getClientRects().length }))
+        .filter(s => s.boxes > 1),
+    };
+  });
+
+  expect(m, 'no producing claim strip on screen — the mock account owns mid-cycle engines').not.toBeNull();
+  if (!m) return;
+  expect(m.count, 'claim strip has no text to measure').toBeGreaterThan(0);
+  expect(
+    m.wrapped,
+    `these wrapped onto a second line: ${m.wrapped.map(w => `"${w.text}" (${w.boxes})`).join(', ')}`
+  ).toEqual([]);
+});
+
+/**
  * The ad rail's scrub lens, against the widest wording the app ships.
  *
  * It carried a hard-coded width (176px, 216 for a three-reward view) sized on

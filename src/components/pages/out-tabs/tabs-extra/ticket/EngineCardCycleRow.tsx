@@ -6,6 +6,7 @@ import { Clock } from 'lucide-react';
 import { TelegramStarIcon } from '@/components/shared/icons/TelegramStarIcon';
 import { TicketOverlap } from '@/components/shared/icons/TicketOverlap';
 import { formatCycleTime } from '@/utils/global/ticket-engine.utils';
+import { tierNameId, tierTicketNameId } from '@/constants/tier-names';
 import { useAppTranslations } from '@/hooks/useAppTranslations';
 import { useTicketFlight } from '@/hooks/useTicketFlight';
 import { ticketFlightOriginAttr } from '@/utils/global/ticket-flight.utils';
@@ -142,30 +143,35 @@ export function EngineCardCycleRow({
               compact ? 'text-[14px]' : 'text-[12px]'
             )}
           >
-            {t(`${tier} ticket` as Parameters<typeof t>[0])}
-            {/* On the cube face the fill count moves down to the clock line:
-                at readable type the tier name alone fills this line in Russian
-                ("Бронзовый билет"), and keeping the count here truncated the
-                pair to "Бронзовы…" — losing the number, the more useful half. */}
+            {/* The cube face names the TIER, not the ticket: at readable type
+                the full name is 15–18 characters in most locales ("Бронзовый
+                билет", "Ticket de bronce") and arrived on the card as
+                "Бронзовый б…". The tier word is at most 8 in all 18
+                dictionaries, and the ticket picture beside it already says
+                which noun is missing. The full name stays on the engine
+                screen, where the line is not scaled down. */}
+            {t(compact ? tierNameId[tier] : tierTicketNameId[tier])}
             {!compact && (
               <span className="ms-1 tabular-nums text-white/65 font-bold">
                 {pendingCount}/{capacity}
               </span>
             )}
           </span>
+          {/* `whitespace-nowrap`, and it is load-bearing: the fill count used to
+              hang off this line as "· 0/96", the separator stayed with the
+              clock and the count wrapped to a second line — which grew the whole
+              strip and pushed the claim button out of its row. The count is gone
+              from this face by the owner's call (the engine screen still shows
+              it), and nowrap is what stops any future addition from doing the
+              same on a long-worded locale. */}
           <span
             className={twMerge(
-              'text-white inline-flex items-center gap-1 leading-none tabular-nums font-bold',
+              'text-white inline-flex items-center gap-1 leading-none tabular-nums font-bold whitespace-nowrap',
               compact ? 'text-[13px]' : 'text-[11px]'
             )}
           >
             <Clock size={compact ? 13 : 10} strokeWidth={2.4} />
             {formatCycleTime(remaining)}
-            {compact && (
-              <span className="text-white/65">
-                · {pendingCount}/{capacity}
-              </span>
-            )}
           </span>
         </div>
       </div>
