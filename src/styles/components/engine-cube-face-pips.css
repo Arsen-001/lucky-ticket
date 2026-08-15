@@ -11,23 +11,39 @@
    being shrunk with the 300px design square, and it must stay out of the 3D
    `preserve-3d` context so it never rotates with the faces.
 
-   It hangs OUTSIDE the card rather than on it. All four faces run their content
-   to the padding on the right — measured, not assumed: on the card it covered
-   the claim CTA on the front, "T/H" on the passport, the +15%/+50% column on the
-   stats face and a chip tile on the slots face. There is no band that is clear
-   on all four, so the rail lives in the slide gutter, where nothing can ever
-   grow under it. The couple of pixels it leans over belong to the neighbouring
-   cube, which is dimmed to 30% and sits below the active slide's z-index. */
+   It rides the painted face's right edge, like the scrollbar it imitates.
+   ⚠️ "Outside the card" is NOT the same as "outside the footprint", and the
+   first version of this rule confused the two: `right: -9px` is measured from
+   `.engine-cube-viewport`, the un-scaled FOOTPRINT, while the front face is
+   painted 1.134x wider by the perspective (`--engine-cube-face-w`). On a 390px
+   phone that put the rail at x 323.8–332.8 against a face edge at 341 — 8px
+   INSIDE the card and 1.3px off the «Забрать» button, i.e. exactly the thing
+   the offset was written to prevent, and it read as a scrollbar glued to the
+   CTA. The offset therefore has to be the overhang, not a constant.
+
+   Landing 3px inside the painted edge is deliberate, and it is also what keeps
+   the rail readable: the slider's edge mask (home-engines-slider.css) fades
+   everything BEYOND that edge, so a rail parked in the gutter would be faded
+   along with the neighbour it was moved to avoid.
+
+   The band it occupies — the outer ~12px of the 300px design square — was
+   measured clear on all four faces (front card padding 19px, passport 24px,
+   stats face 18px, slots grid 20px); the stats face is the tightest at ~5px. */
 .engine-cube-face-pips {
   position: absolute;
   top: 50%;
-  right: -9px;
+  right: calc(3px - (var(--engine-cube-face-w) - var(--engine-cube-box)) / 2);
   z-index: 5;
   display: flex;
   flex-direction: column;
   align-items: center;
   gap: 4px;
-  padding: 4px 3px;
+  /* 7px wide in total. The rail keeps its own pixel size while the card's right
+     padding shrinks with the cube, so on the narrowest phone (320px, scale .70)
+     that padding band is only ~15px — at 3px of side padding the rail left just
+     3.2px beside the «Забрать» button. Trimming the sides buys 2px on every
+     width and costs nothing: the pips themselves are unchanged. */
+  padding: 4px 2px;
   border-radius: 999px;
   background: rgba(12, 10, 24, 0.55);
   transform: translateY(-50%);

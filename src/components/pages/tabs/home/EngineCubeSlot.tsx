@@ -117,12 +117,18 @@ export function EngineCubeSlot({
         <span className="mt-0.5 flex items-center gap-1 whitespace-nowrap text-[9px] font-extrabold tabular-nums uppercase tracking-wider text-white">
           {category === 'chip' && chip && (
             <>
-              Lvl {chip.level} +{chip.effectPct.toFixed(1)}%
+              {t('lvl')} {chip.level} +{chip.effectPct.toFixed(1)}%
             </>
           )}
           {category === 'booster' && booster && (
             <>
-              +{booster.effectPct}% {!booster.expiresAt || !expired ? leftTimeShort : t('expired')}
+              +{booster.effectPct}%{' '}
+              {/* Uppercasing the countdown is what «1ч 59м» must not go through:
+                  capital Cyrillic Ч is a digit-shaped glyph, so the remaining
+                  time read as «1Ч 59М» — i.e. as the number 14. */}
+              <span className="normal-case">
+                {!booster.expiresAt || !expired ? leftTimeShort : t('expired')}
+              </span>
             </>
           )}
         </span>

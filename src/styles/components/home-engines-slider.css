@@ -4,20 +4,41 @@
    reads as broken floating UI (most visible when the empty "buy engine" slide
    is selected and the last engine card peeks on the left). The ramp is exactly
    the gap beside the active cube's painted face (`--engine-cube-edge-fade`, see
-   base-layer.css), so it can never bleed onto the active card itself. */
+   base-layer.css), so it can never bleed onto the active card itself.
+
+   ⚠️ The ramp is EASED, not linear, and that is the whole point of it. A
+   straight ramp reaches ~80% opacity halfway across the gap — and the peek
+   lives entirely inside that gap, so the neighbour's «Скорость» / «Вместимость»
+   rows stayed legible, and legibly sliced, right beside the active cube. That
+   is what reads as "elements crawling out from under the cube". Measured on a
+   390px phone: across the 46px strip the linear ramp left a luminance spread of
+   51/255 (sd 10.3) — text-grade contrast. The same lesson was already learned
+   on the tournaments carousel (`1215e98`) and never carried over to here.
+
+   The stops hold the outer ~60% of the gap at 4%, so only a hint of the next
+   card survives, then climb to opaque exactly where the active face starts. */
 .engines-slider-edge-fade {
+  --engines-slider-fade: var(--engine-cube-edge-fade);
   -webkit-mask-image: linear-gradient(
     to right,
     transparent 0,
-    black var(--engine-cube-edge-fade),
-    black calc(100% - var(--engine-cube-edge-fade)),
+    rgb(0 0 0 / 4%) calc(var(--engines-slider-fade) * 0.6),
+    rgb(0 0 0 / 26%) calc(var(--engines-slider-fade) * 0.86),
+    black var(--engines-slider-fade),
+    black calc(100% - var(--engines-slider-fade)),
+    rgb(0 0 0 / 26%) calc(100% - var(--engines-slider-fade) * 0.86),
+    rgb(0 0 0 / 4%) calc(100% - var(--engines-slider-fade) * 0.6),
     transparent 100%
   );
   mask-image: linear-gradient(
     to right,
     transparent 0,
-    black var(--engine-cube-edge-fade),
-    black calc(100% - var(--engine-cube-edge-fade)),
+    rgb(0 0 0 / 4%) calc(var(--engines-slider-fade) * 0.6),
+    rgb(0 0 0 / 26%) calc(var(--engines-slider-fade) * 0.86),
+    black var(--engines-slider-fade),
+    black calc(100% - var(--engines-slider-fade)),
+    rgb(0 0 0 / 26%) calc(100% - var(--engines-slider-fade) * 0.86),
+    rgb(0 0 0 / 4%) calc(100% - var(--engines-slider-fade) * 0.6),
     transparent 100%
   );
 }

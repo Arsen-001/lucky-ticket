@@ -185,6 +185,54 @@ for (const width of WIDTHS) {
       // Content laid out at the design square must not be clipped by the face.
       expect(m.faceContentH, 'cube face content is clipped').toBeLessThanOrEqual(m.faceBoxH + 1);
     });
+
+    /**
+     * The face rail is offset from `.engine-cube-viewport`, the un-scaled
+     * FOOTPRINT, while the face is painted `--engine-cube-face-w` wide — 1.134x
+     * of it. A constant offset therefore lands somewhere different on every
+     * width, and the one it shipped with (`right: -9px`, written to park the
+     * rail in the gutter) put it 8px INSIDE the card and 1.3px off the «Забрать»
+     * button on a 390px phone. Only painted geometry catches that: the CSS says
+     * "outside", and it is outside — of the wrong box.
+     */
+    test('the face rail rides the card edge without crowding its controls', async ({ page }) => {
+      test.setTimeout(CUBE_TEST_TIMEOUT);
+      await openHome(page);
+      await page.waitForTimeout(SETTLE_MS);
+
+      const m = await page.evaluate(() => {
+        const slide = document.querySelector('[data-engine-slide]');
+        const face = slide?.querySelector('.engine-card-cube-face--front');
+        const rail = slide?.querySelector('.engine-cube-face-pips');
+        if (!face || !rail) return null;
+        const faceBox = face.getBoundingClientRect();
+        const railBox = rail.getBoundingClientRect();
+        // The rightmost control the player has to hit on the front face.
+        const controlRight = [...face.querySelectorAll('button')]
+          .map(b => b.getBoundingClientRect())
+          .filter(r => r.width > 0)
+          .reduce((max, r) => Math.max(max, r.right), 0);
+        return {
+          faceRight: faceBox.right,
+          railLeft: railBox.left,
+          railRight: railBox.right,
+          controlRight,
+        };
+      });
+
+      expect(m, 'engine cube missing from home').not.toBeNull();
+      if (!m) return;
+
+      expect(
+        m.railRight,
+        `rail ends at ${m.railRight.toFixed(1)} but the face is painted to ${m.faceRight.toFixed(1)} — it is hanging off the card`
+      ).toBeLessThanOrEqual(m.faceRight + 0.5);
+
+      expect(
+        m.railLeft - m.controlRight,
+        `only ${(m.railLeft - m.controlRight).toFixed(1)}px between the rail and the nearest control`
+      ).toBeGreaterThanOrEqual(4);
+    });
   });
 }
 
