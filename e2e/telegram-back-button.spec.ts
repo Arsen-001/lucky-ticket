@@ -170,6 +170,38 @@ async function completeFirstRun(page: Page) {
   }
 }
 
+/**
+ * Presses back until it actually moves, draining whatever ate the press.
+ *
+ * A press is answered by the TOPMOST layer — a popup that landed after the tap
+ * consumes it and closes instead of navigating. That is not a bug, it is the
+ * behaviour asserted two tests down; but it means ONE press is not a promise of
+ * one navigation on a screen where the popup queue is still draining, and the
+ * article page has nothing that drains it. CI failed exactly there, on a commit
+ * that touched three mock fixtures and no navigation code: the URL sat on
+ * `/faq/<id>` while the assertion polled a live page for its full ten seconds.
+ *
+ * Retrying keeps the assertion honest rather than loosening it: the URL still
+ * has to become `expected`, and it has to happen by pressing back — a press
+ * that navigated somewhere else fails on the next lap just as loudly.
+ */
+async function pressBackUntil(page: Page, expected: RegExp) {
+  for (let attempt = 0; attempt < 6; attempt++) {
+    if (await appDialogs(page).count()) {
+      await page.keyboard.press('Escape');
+      await page.waitForTimeout(400);
+    }
+    await pressBack(page);
+    try {
+      await expect(page).toHaveURL(expected, { timeout: 2_000 });
+      return;
+    } catch {
+      /* a popup ate the press — drain it and press again */
+    }
+  }
+  throw new Error(`back never reached ${String(expected)}`);
+}
+
 /** Taps something, dismissing whatever auto-surfaced popup got in the way. */
 async function tapPastPopups(page: Page, target: Locator) {
   for (let attempt = 0; attempt < 6; attempt++) {
@@ -241,10 +273,9 @@ test('a press steps back through in-app history', async ({ page }) => {
   await tapPastPopups(page, page.locator('a[href^="/faq/"]').first());
   await expect(page).toHaveURL(/\/faq\/.+/);
 
-  await pressBack(page);
   // Back to the list — NOT to Home, which is where the no-history fallback
   // would have landed. That difference is the whole assertion.
-  await expect(page).toHaveURL(/\/faq$/);
+  await pressBackUntil(page, /\/faq$/);
 });
 
 test('an open sheet swallows the press instead of navigating', async ({ page }) => {
