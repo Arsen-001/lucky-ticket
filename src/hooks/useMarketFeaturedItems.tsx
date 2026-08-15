@@ -7,7 +7,9 @@ import {
   useBuyShardMutation,
   useGetMarketDataQuery,
 } from '@/api/market.api';
+import { useGetInventoryQuery } from '@/api/inventory.api';
 import { useGetMeQuery } from '@/api/me.api';
+import { GlobalConstants } from '@/constants/global.constants';
 import { useAppTranslations } from '@/hooks/useAppTranslations';
 import { useUnlockedTiers } from '@/hooks/useUnlockedTiers';
 import {
@@ -47,7 +49,13 @@ export interface MarketFeaturedItem {
   boost?: AvatarBoost;
   dailyReward?: AvatarDailyReward;
   renderIcon: (size: number) => ReactNode;
-  mutate: (price: MarketPrice) => Promise<unknown>;
+  /** Per-order cap for the quantity stepper; omit for single-purchase items. */
+  maxQuantity?: number;
+  /** How many of this item the player already owns — the confirm sheet's pill. */
+  ownedCount?: number;
+  /** Small icon for that pill; the slide's own artwork does not fit there. */
+  ownedIconNode?: ReactNode;
+  mutate: (price: MarketPrice, count: number) => Promise<unknown>;
 }
 
 // AVATARS OFF (2026-08-09) — the avatar cosmetics feature is switched off for
@@ -92,6 +100,9 @@ export function useMarketFeaturedItems(): { items: MarketFeaturedItem[]; isLoadi
   const discountPct = effectiveMarketDiscountPct(isLp, isVip, me?.statusPerks);
   // AVATARS OFF — const [buyCosmetic] = useBuyCosmeticMutation();
   const [buyShard] = useBuyShardMutation();
+  // Already in flight for the shard grid on the same screen — RTK serves both
+  // from one request, so the confirm sheet gets its "owned" pill for free.
+  const { data: inventory } = useGetInventoryQuery();
   // The plain tier string, not `isTierUnlocked`: this list is memoized, and a
   // function identity that changes every render drops the memo entirely.
   const { maxUnlockedTier } = useUnlockedTiers();
@@ -145,14 +156,24 @@ export function useMarketFeaturedItems(): { items: MarketFeaturedItem[]; isLoadi
           <ChipShardIcon type={s.type} tier={s.quality} size={Math.round(size / 1.3)} />
         </div>
       ),
-      mutate: price =>
-        buyShard({
-          shardId: s.id,
-          shardType: s.type,
-          quality: s.quality,
-          count: s.count,
-          price,
-        }).unwrap(),
+      maxQuantity: GlobalConstants.marketMaxShardPurchaseQuantity,
+      ownedCount:
+        inventory?.shards.find(own => own.type === s.type && own.quality === s.quality)?.count ?? 0,
+      ownedIconNode: <ChipShardIcon type={s.type} tier={s.quality} size={14} />,
+      // Same loop as the grid: the shards/buy DTO rejects a count field (`count`
+      // there is the bundle size), so a quantity is N requests, not one bigger
+      // one. The per-order cap keeps the loop short.
+      mutate: async (price, count) => {
+        for (let i = 0; i < count; i += 1) {
+          await buyShard({
+            shardId: s.id,
+            shardType: s.type,
+            quality: s.quality,
+            count: s.count,
+            price,
+          }).unwrap();
+        }
+      },
     });
 
     const push = (entry: MarketFeaturedItem) => {
@@ -161,17 +182,18 @@ export function useMarketFeaturedItems(): { items: MarketFeaturedItem[]; isLoadi
       list.push(entry);
     };
 
+    // Bronze opens the showcase, ahead of the admin's own picks. Every other
+    // feed here reaches for the top of the ladder — `featured` is set in the
+    // panel (Diamond, in practice) and the backfill below sorts by price
+    // descending — so the rail used to open on four posters in a row that a
+    // fresh account is gated out of buying. Bronze is the one tier nobody is
+    // gated out of, so it goes first and the first slide is always purchasable.
+    data.shards.filter(s => s.quality === TicketsEnum.BRONZE).forEach(s => push(shardToItem(s)));
+
     // AVATARS OFF — data.cosmetics
     //   .filter(c => c.featured || c.avatarLevel === 10)
     //   .forEach(c => push(cosmeticToItem(c)));
     data.shards.filter(s => s.featured).forEach(s => push(shardToItem(s)));
-
-    // Bronze shards always get a slide of their own. Both feeds above and below
-    // reach for the top of the ladder — `featured` is an admin pick (Diamond, in
-    // practice) and the backfill sorts by price descending — so the showcase
-    // opened on four posters a fresh account is gated out of buying. Bronze is
-    // the one tier nobody is gated out of, so the rail sells it too.
-    data.shards.filter(s => s.quality === TicketsEnum.BRONZE).forEach(s => push(shardToItem(s)));
 
     // Backfill — guarantee at least 4 slides by adding top non-featured items
     const MIN_ITEMS = 4;
@@ -195,7 +217,7 @@ export function useMarketFeaturedItems(): { items: MarketFeaturedItem[]; isLoadi
 
     return list;
     // AVATARS OFF — `buyCosmetic` drops out of the deps with the avatar slide.
-  }, [data, buyShard, t, discountPct, maxUnlockedTier]);
+  }, [data, inventory, buyShard, t, discountPct, maxUnlockedTier]);
 
   return { items, isLoading };
 }

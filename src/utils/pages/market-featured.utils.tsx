@@ -19,6 +19,12 @@ export function buildMarketSelectedItem(featured: MarketFeaturedItem): MarketSel
     isNew: featured.isNew,
     discountPct: featured.discountPct,
     accent: featured.accent,
+    // Countable items (shards) buy in bulk from the showcase exactly as they do
+    // from the grid — without these three the slide dropped the quantity
+    // stepper and sold one unit per confirm, whatever the sheet was asked for.
+    maxQuantity: featured.maxQuantity,
+    ownedCount: featured.ownedCount,
+    ownedIconNode: featured.ownedIconNode,
     mutate: featured.mutate,
   };
 }
