@@ -13,7 +13,7 @@ import {
   QUALITY_ACCENT,
   buildEngineSlots,
   canEquipChipOnTier,
-  chipEquipStarsCost,
+  chipSlotStarsCost,
 } from '@/utils/global/inventory.utils';
 import type { InventoryChip } from '@/types/interfaces/inventory.interfaces';
 import type { EngineSlotInfo } from '@/utils/global/inventory.utils';
@@ -43,7 +43,9 @@ export function ChipEquipModal({
   // out of the same builder — they used to be computed twice, differently.
   const engines: EngineSlotInfo[] = useMemo(() => buildEngineSlots(tickets, undefined), [tickets]);
 
-  const cost = chip ? chipEquipStarsCost(chip.level) : 0;
+  // Depends on the engine picked below: a chip already on another engine is
+  // being MOVED, and the server bills the detach too (DOCS §10.4).
+  const cost = chip ? chipSlotStarsCost(chip, selectedEngineId) : 0;
   const userStars = me?.telegramStars ?? 0;
   const canAfford = userStars >= cost;
   const accent = chip ? QUALITY_ACCENT[chip.quality] : 'var(--color-electric-pink)';

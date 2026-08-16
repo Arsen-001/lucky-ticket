@@ -33,20 +33,63 @@ import { promoMock } from '@/mock/promo.mock';
 import { partnersMock } from '@/mock/partners.mock';
 import { configMock } from '@/mock/config.mock';
 import { authMock } from '@/mock/auth.mock';
+import { chargeMockUser } from '@/mock/backend/charge';
+import { MarketPriceType } from '@/types/enums/market.enums';
 
-const successResponse = () => ({});
+/** Every catalog item, whatever shelf it sits on — purchases arrive by id. */
+const marketCatalog = () => [
+  ...marketMock.engines,
+  ...marketMock.tickets,
+  ...marketMock.shards,
+  ...marketMock.cosmetics,
+  ...marketMock.statuses,
+];
+
+/**
+ * Take what the item costs off the shared mock player, so the balance screens
+ * have something to refresh TO. Without it every buy answered `{}` and the /lc,
+ * /stars and /wallet refetches came back with the pre-purchase number — see
+ * `chargeMockUser`.
+ */
+const buyFromCatalog = (itemId?: string) => (args: FetchArgs) => {
+  const body = (args.body ?? {}) as { priceType?: MarketPriceType; count?: number } & Record<
+    string,
+    unknown
+  >;
+  const id =
+    itemId ??
+    (body.engineId as string) ??
+    (body.shardId as string) ??
+    (body.cosmeticId as string) ??
+    (body.statusId as string);
+  const item = marketCatalog().find(entry => entry.id === id);
+  const price = item?.prices.find(p => p.type === (body.priceType ?? MarketPriceType.LC));
+  if (price) {
+    const total = price.amount * Math.max(1, Math.trunc(body.count ?? 1));
+    chargeMockUser({
+      lc: price.type === MarketPriceType.LC ? total : 0,
+      stars: price.type === MarketPriceType.TELEGRAM_STARS ? total : 0,
+      description: `Market: ${item?.name ?? id}`,
+      sourceId: id,
+    });
+  }
+  return {};
+};
 
 const marketMutationHandlers = {
-  'POST market/engines/buy': successResponse,
-  'POST market/shards/buy': successResponse,
-  'POST market/cosmetics/buy': successResponse,
-  'POST market/statuses/buy': successResponse,
+  'POST market/engines/buy': buyFromCatalog(),
+  'POST market/shards/buy': buyFromCatalog(),
+  'POST market/cosmetics/buy': buyFromCatalog(),
+  'POST market/statuses/buy': buyFromCatalog(),
   // Tickets alone are bought per id — `market/tickets/:ticketId/buy`, matching
   // the backend route — so a single static key never matches and every ticket
   // purchase in dev died on a 404 toast. The resolver has no wildcards, so the
   // keys are generated from the catalog and stay in sync with it.
   ...Object.fromEntries(
-    marketMock.tickets.map(ticket => [`POST market/tickets/${ticket.id}/buy`, successResponse])
+    marketMock.tickets.map(ticket => [
+      `POST market/tickets/${ticket.id}/buy`,
+      buyFromCatalog(ticket.id),
+    ])
   ),
 };
 

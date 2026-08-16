@@ -1,4 +1,5 @@
 import { api } from '@/api/index.api';
+import { balanceTags } from '@/api/balance-tags';
 import { rtkTags } from '@/constants/rtk-tags';
 import type {
   BranchMember,
@@ -57,7 +58,9 @@ export const referralApi = api.injectEndpoints({
         url: `referral/claim/${friendId}`,
         method: 'POST',
       }),
-      invalidatesTags: [rtkTags.referral, rtkTags.tickets, rtkTags.me],
+      // Collecting a friend pays accrued LC (one REFERRAL ledger row per level)
+      // and tickets — the LC group, not just the header pill.
+      invalidatesTags: [rtkTags.referral, rtkTags.tickets, ...balanceTags.lc],
       async onQueryStarted({ friendId }, { dispatch, queryFulfilled }) {
         const patchResult = dispatch(
           referralApi.util.updateQueryData('getInvitedFriends', undefined, draft => {

@@ -2,8 +2,8 @@
 
 import { useCallback, useState } from 'react';
 import { useCreateStarsInvoiceMutation, walletApi } from '@/api/wallet.api';
+import { balanceTags } from '@/api/balance-tags';
 import { useAppDispatch } from '@/lib/rtk/hooks';
-import { rtkTags } from '@/constants/rtk-tags';
 import { getTelegramWebApp } from '@/lib/telegram/telegram';
 
 /**
@@ -36,8 +36,11 @@ export function useBuyTelegramStars() {
         });
 
         // The webhook credits the balance server-side — refetch to reflect it.
+        // The whole Stars group, not `wallet` + `me`: the credit writes a
+        // PURCHASE row on the Stars ledger, so /stars kept showing the
+        // pre-payment balance and no sign of the payment at all.
         if (status === 'paid') {
-          dispatch(walletApi.util.invalidateTags([rtkTags.wallet, rtkTags.me]));
+          dispatch(walletApi.util.invalidateTags([...balanceTags.stars]));
         }
         return status;
       } catch {

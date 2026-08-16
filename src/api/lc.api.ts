@@ -1,4 +1,5 @@
 import { api } from '@/api/index.api';
+import { balanceTags } from '@/api/balance-tags';
 import { rtkTags } from '@/constants/rtk-tags';
 import type {
   ConvertLcToTonRequest,
@@ -21,13 +22,7 @@ export const lcApi = api.injectEndpoints({
       query: body => ({ url: 'lc/convert-ton', method: 'POST', body }),
       // Convert also writes a wallet DEPOSIT_TON transaction ("Converted from LC"),
       // so the wallet history must refresh too — not just the TON balance.
-      invalidatesTags: [
-        rtkTags.lc,
-        rtkTags.lcTransactions,
-        rtkTags.me,
-        rtkTags.wallet,
-        rtkTags.walletTransactions,
-      ],
+      invalidatesTags: [...balanceTags.lc, ...balanceTags.ton],
     }),
   }),
 });

@@ -1,4 +1,5 @@
 import { api } from '@/api/index.api';
+import { balanceTags } from '@/api/balance-tags';
 import { rtkTags } from '@/constants/rtk-tags';
 import { asTicketTier } from '@/utils/global/ticket-tier.utils';
 import type {
@@ -39,11 +40,9 @@ export const statusGiftApi = api.injectEndpoints({
       // offering a gift the server has already paid out.
       invalidatesTags: [
         rtkTags.statusDailyGift,
-        rtkTags.me,
-        rtkTags.lc,
-        rtkTags.lcTransactions,
         rtkTags.tickets,
         rtkTags.inventory,
+        ...balanceTags.lc,
       ],
     }),
 

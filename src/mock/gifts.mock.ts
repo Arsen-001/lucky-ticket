@@ -1,4 +1,6 @@
 import type { FetchArgs } from '@reduxjs/toolkit/query';
+import { chargeMockUser } from '@/mock/backend/charge';
+import { LcTransactionType } from '@/types/enums/lc.enums';
 import type { GiftShopState } from '@/types/interfaces/gift.interfaces';
 
 /**
@@ -68,11 +70,20 @@ export const giftsMock = {
     state.purchased += 1;
     state.spent += gift.starCount;
     state.awaiting += 1;
+    const priceLc = gift.starCount * LC_PER_STAR;
+    // A gift is paid in LC — take it off the shared mock player so the header,
+    // /lc and its history agree after the buy (see `chargeMockUser`).
+    chargeMockUser({
+      lc: priceLc,
+      description: `Gift: ${gift.emoji}`,
+      type: LcTransactionType.GIFT_PURCHASE,
+      sourceId: gift.id,
+    });
     return {
       ok: true as const,
       emoji: gift.emoji,
       starCount: gift.starCount,
-      priceLc: gift.starCount * LC_PER_STAR,
+      priceLc,
       status: 'pending' as const,
     };
   },

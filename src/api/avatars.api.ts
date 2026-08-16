@@ -1,4 +1,5 @@
 import { api } from '@/api/index.api';
+import { balanceTags } from '@/api/balance-tags';
 import { rtkTags } from '@/constants/rtk-tags';
 import type {
   AvatarDailyRewardState,
@@ -21,14 +22,7 @@ export const avatarsApi = api.injectEndpoints({
     claimAvatarDailyReward: builder.mutation<ClaimAvatarDailyRewardResponse, void>({
       query: () => ({ url: 'avatars/daily-reward/claim', method: 'POST' }),
       // The grant lands on the LC / LS balances and their histories.
-      invalidatesTags: [
-        rtkTags.avatarDailyReward,
-        rtkTags.me,
-        rtkTags.lc,
-        rtkTags.lcTransactions,
-        rtkTags.stars,
-        rtkTags.starsTransactions,
-      ],
+      invalidatesTags: [rtkTags.avatarDailyReward, ...balanceTags.lc, ...balanceTags.stars],
     }),
   }),
 });

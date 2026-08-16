@@ -35,7 +35,7 @@ import { useSpendFailure } from '@/hooks/useSpendFailure';
 import { useEngineSpeedAvatarBoostPct } from '@/hooks/useEngineSpeedAvatarBoostPct';
 import { useTestBadgeSpeedBoostPct } from '@/hooks/useTestBadgeSpeedBoostPct';
 import { findTicketFlightOrigin, useTicketFlight } from '@/hooks/useTicketFlight';
-import { chipEquipStarsCost } from '@/utils/global/inventory.utils';
+import { chipSlotStarsCost, chipUnequipStarsCost } from '@/utils/global/inventory.utils';
 import type { InventoryBooster, InventoryChip } from '@/types/interfaces/inventory.interfaces';
 import { EmptyDataInfo } from '@/components/shared/EmptyDataInfo';
 import { QueryErrorState } from '@/components/shared/error/QueryErrorState';
@@ -773,7 +773,7 @@ export function HomeEnginesSlider({ className }: ClassNameProps) {
           chipToUnequip ? (
             <p className="text-pink-secondary text-sm">
               {t('unequip chip confirm content', {
-                cost: chipEquipStarsCost(chipToUnequip.level),
+                cost: chipUnequipStarsCost(chipToUnequip.level),
               })}
             </p>
           ) : null
@@ -806,7 +806,9 @@ export function HomeEnginesSlider({ className }: ClassNameProps) {
             engineId: pickerSlot.engineId,
             from: pickerSlot,
             chip,
-            cost: chipEquipStarsCost(chip.level),
+            // Move-inclusive: this same number gates `requireStars` and is what
+            // the server will take (DOCS §10.4).
+            cost: chipSlotStarsCost(chip, pickerSlot.engineId),
           });
           setPickerSlot(null);
         }}

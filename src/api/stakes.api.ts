@@ -1,4 +1,5 @@
 import { api } from '@/api/index.api';
+import { balanceTags } from '@/api/balance-tags';
 import { rtkTags } from '@/constants/rtk-tags';
 import type {
   ClaimStakeResult,
@@ -15,26 +16,19 @@ export const stakesApi = api.injectEndpoints({
     }),
     startStake: builder.mutation<{ success: boolean }, StartStakeBody>({
       query: body => ({ url: 'stakes/start', method: 'POST', body }),
-      // Deposits LC + a star fee → refresh stakes, balances (me) and the wallet
-      // (stars balance) so every surface that shows them updates immediately.
-      invalidatesTags: [rtkTags.stakes, rtkTags.me, rtkTags.lc, rtkTags.wallet],
+      // Locks LC *and* charges a star fee (which writes a STAKE_FEE row on the
+      // Stars ledger) → both currency groups, not just the header.
+      invalidatesTags: [rtkTags.stakes, ...balanceTags.lc, ...balanceTags.stars],
     }),
     cancelStake: builder.mutation<{ success: boolean }, StakeIdBody>({
       query: body => ({ url: 'stakes/cancel', method: 'POST', body }),
-      // Charges a star cancel fee + returns the deposit → same balance surfaces.
-      invalidatesTags: [rtkTags.stakes, rtkTags.me, rtkTags.lc, rtkTags.wallet],
+      // Returns the LC principal and charges a star cancel fee → same two groups.
+      invalidatesTags: [rtkTags.stakes, ...balanceTags.lc, ...balanceTags.stars],
     }),
     claimStake: builder.mutation<ClaimStakeResult, StakeIdBody>({
       query: body => ({ url: 'stakes/claim', method: 'POST', body }),
-      // Credits LC yield + writes a STAKE_REWARD LC-ledger row → also refresh the
-      // LC transaction history and the wallet.
-      invalidatesTags: [
-        rtkTags.stakes,
-        rtkTags.me,
-        rtkTags.lc,
-        rtkTags.lcTransactions,
-        rtkTags.wallet,
-      ],
+      // Pays the LC yield and the completion stars, with a ledger row on each.
+      invalidatesTags: [rtkTags.stakes, ...balanceTags.lc, ...balanceTags.stars],
     }),
   }),
 });

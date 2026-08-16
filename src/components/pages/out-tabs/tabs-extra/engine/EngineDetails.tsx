@@ -28,7 +28,8 @@ import { useTestBadgeSpeedBoostPct } from '@/hooks/useTestBadgeSpeedBoostPct';
 import { useEngineConfig } from '@/hooks/useEngineConfig';
 import { findTicketFlightOrigin, useTicketFlight } from '@/hooks/useTicketFlight';
 import {
-  chipEquipStarsCost,
+  chipSlotStarsCost,
+  chipUnequipStarsCost,
   findActiveBooster,
   findEquippedChip,
 } from '@/utils/global/inventory.utils';
@@ -408,15 +409,21 @@ export function EngineDetails({ id }: EngineDetailsProps) {
         onClose={() => setPickerSlot(null)}
         onPickChip={async chip => {
           if (!pickerSlot) return;
-          setPendingPick({ category: 'chip', type: chip.type, itemId: chip.id });
+          // Equipping costs Lucky Stars (DOCS §10.4), so a short balance has to
+          // reach the top-up sheet — a toast saying "action failed" reads as a
+          // broken button rather than as a price.
+          const cost = chipSlotStarsCost(chip, engine.id);
           setPickerSlot(null);
-          try {
-            await equipChipMutation({ chipId: chip.id, engineId: engine.id }).unwrap();
-          } catch {
-            toast.error(t('action failed'));
-          } finally {
-            setPendingPick(null);
-          }
+          requireStars(cost, async () => {
+            setPendingPick({ category: 'chip', type: chip.type, itemId: chip.id });
+            try {
+              await equipChipMutation({ chipId: chip.id, engineId: engine.id }).unwrap();
+            } catch (error) {
+              await spend.report(error, { required: cost });
+            } finally {
+              setPendingPick(null);
+            }
+          });
         }}
         onPickBooster={async booster => {
           if (!pickerSlot) return;
@@ -443,7 +450,7 @@ export function EngineDetails({ id }: EngineDetailsProps) {
           chipToUnequip ? (
             <p className="text-pink-secondary text-sm">
               {t('unequip chip confirm content', {
-                cost: chipEquipStarsCost(chipToUnequip.level),
+                cost: chipUnequipStarsCost(chipToUnequip.level),
               })}
             </p>
           ) : null
@@ -457,7 +464,7 @@ export function EngineDetails({ id }: EngineDetailsProps) {
             setChipToUnequip(null);
           } catch (error) {
             setChipToUnequip(null);
-            await spend.report(error, { required: chipEquipStarsCost(chipToUnequip.level) });
+            await spend.report(error, { required: chipUnequipStarsCost(chipToUnequip.level) });
           }
         }}
       />

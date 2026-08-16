@@ -1,4 +1,5 @@
 import { api } from '@/api/index.api';
+import { balanceTags } from '@/api/balance-tags';
 import { rtkTags } from '@/constants/rtk-tags';
 import type { BuyGiftResponse, GiftShopState } from '@/types/interfaces/gift.interfaces';
 
@@ -18,7 +19,7 @@ export const giftsApi = api.injectEndpoints({
       // The shop itself too: a purchase moves both the monthly budget and this
       // player's own allowance, so the counter that was open a second ago may
       // legitimately be shut now.
-      invalidatesTags: [rtkTags.giftShop, rtkTags.me, rtkTags.lc, rtkTags.lcTransactions],
+      invalidatesTags: [rtkTags.giftShop, ...balanceTags.lc],
     }),
   }),
 });

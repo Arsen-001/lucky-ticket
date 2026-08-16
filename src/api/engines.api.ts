@@ -1,5 +1,6 @@
 import dayjs from 'dayjs';
 import { api } from '@/api/index.api';
+import { balanceTags } from '@/api/balance-tags';
 import { configApi } from '@/api/config.api';
 import { meApi } from '@/api/me.api';
 import { ticketsApi } from '@/api/tickets.api';
@@ -194,7 +195,11 @@ export const enginesApi = api.injectEndpoints({
       // No `tickets` invalidation (see claimEngine): the patch below fully updates
       // the getTickets cache, so the refetch is redundant and would refresh every
       // cube in the slider. me/tasks/achievements have their own tags.
-      invalidatesTags: [rtkTags.me, rtkTags.tasks, rtkTags.achievements],
+      //
+      // The star charge is a real debit with a ledger row behind it, so the whole
+      // Stars group refreshes — `me` alone left /stars and the wallet quoting the
+      // pre-skip balance.
+      invalidatesTags: [...balanceTags.stars, rtkTags.tasks, rtkTags.achievements],
       async onQueryStarted({ engineId, cost }, { dispatch, queryFulfilled, getState }) {
         const inventory = inventoryApi.endpoints.getInventory.select()(
           getState() as Parameters<ReturnType<typeof inventoryApi.endpoints.getInventory.select>>[0]
@@ -261,8 +266,9 @@ export const enginesApi = api.injectEndpoints({
       // No `tickets` invalidation: the onQueryStarted patch below already writes
       // the new level into the getTickets cache, so a full refetch is redundant —
       // and it would re-fetch EVERY engine, visibly refreshing the neighbouring
-      // cubes on the home slider. Only stars (me) is reconciled.
-      invalidatesTags: [rtkTags.me],
+      // cubes on the home slider. Only the Stars balance is reconciled — but all
+      // of its surfaces, not just the header pill.
+      invalidatesTags: [...balanceTags.stars],
       async onQueryStarted({ engineId, cost }, { dispatch, queryFulfilled, getState }) {
         const tables = levelTablesFromState(getState());
         const ticketsPatch = dispatch(
@@ -297,7 +303,7 @@ export const enginesApi = api.injectEndpoints({
       query: body => ({ url: 'engines/upgrade-capacity', method: 'POST', body }),
       // See upgrade-speed: the optimistic patch keeps the cache correct, so we
       // skip the all-engines `tickets` refetch that flickers neighbouring cubes.
-      invalidatesTags: [rtkTags.me],
+      invalidatesTags: [...balanceTags.stars],
       async onQueryStarted({ engineId, cost }, { dispatch, queryFulfilled, getState }) {
         const tables = levelTablesFromState(getState());
         const ticketsPatch = dispatch(

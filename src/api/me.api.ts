@@ -1,4 +1,5 @@
 import { api } from '@/api/index.api';
+import { balanceTags } from '@/api/balance-tags';
 import { profileApi } from '@/api/profile.api';
 import { rtkTags } from '@/constants/rtk-tags';
 import type {
@@ -65,14 +66,11 @@ export const meApi = api.injectEndpoints({
       // Confirming writes the address AND may credit the gift — refresh every
       // balance it can touch (same set as the promo redeem).
       invalidatesTags: [
-        rtkTags.me,
         rtkTags.profile,
         rtkTags.emailReward,
-        rtkTags.lc,
-        rtkTags.lcTransactions,
         rtkTags.tickets,
-        rtkTags.stars,
-        rtkTags.starsTransactions,
+        ...balanceTags.lc,
+        ...balanceTags.stars,
       ],
     }),
   }),

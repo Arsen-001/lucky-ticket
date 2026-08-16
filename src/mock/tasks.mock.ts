@@ -16,6 +16,8 @@ import type {
   TasksResponse,
 } from '@/types/interfaces/tasks.interfaces';
 import { type TierName, TIER_RANK, tierLabel } from '@/types/types/tier.types';
+import { chargeMockUser, creditMockUser } from '@/mock/backend/charge';
+import { LcTransactionType } from '@/types/enums/lc.enums';
 import { GlobalConstants } from '@/constants/global.constants';
 import { appConfig } from '@/config/app.config';
 
@@ -1819,6 +1821,16 @@ const grantRewards = (id: string, granted: TaskReward[]): ClaimTaskResponse => {
   mockState.balance.lc += sum(TaskRewardType.LC);
   mockState.balance.tickets += sum(TaskRewardType.TICKETS);
   mockState.balance.activityPoints += sum(TaskRewardType.ACTIVITY_POINTS);
+  // `mockState.balance` above is this fixture's own tally, reported back in
+  // `newBalance`; the header, /lc and /stars read the shared mock player, so
+  // the same reward has to land there or claiming a task moves nothing on screen.
+  creditMockUser({
+    lc: sum(TaskRewardType.LC),
+    stars: sum(TaskRewardType.STARS),
+    ap: sum(TaskRewardType.ACTIVITY_POINTS),
+    description: 'Task reward',
+    sourceId: id,
+  });
 
   return { id, rewards, newBalance: { ...mockState.balance } };
 };
@@ -1918,6 +1930,17 @@ export const tasksMock = {
       if (r.type === TaskRewardType.TICKETS) mockState.balance.tickets += r.amount;
       if (r.type === TaskRewardType.ACTIVITY_POINTS) mockState.balance.activityPoints += r.amount;
     });
+    // …and onto the shared mock player, which is what the header and the
+    // balance screens actually read (see `grantRewards`).
+    const paid = (type: TaskRewardType) =>
+      rewards.filter(r => r.type === type).reduce((s, r) => s + r.amount, 0);
+    creditMockUser({
+      lc: paid(TaskRewardType.LC),
+      stars: paid(TaskRewardType.STARS),
+      ap: paid(TaskRewardType.ACTIVITY_POINTS),
+      description: 'Rewarded ad view',
+      sourceId: adId,
+    });
     return { adId, rewards };
   },
   // Telemetry for an attempt that paid nothing. Grants nothing and touches no
@@ -1936,6 +1959,14 @@ export const tasksMock = {
       if (mockState.balance.lc < amount) throw new Error('Not enough LC');
       mockState.balance.lc -= amount;
     }
+    // The charge has to land on the shared mock player too, or the header and
+    // the balance screens show the pre-purchase number after paying.
+    chargeMockUser({
+      lc: currency === 'lc' ? amount : 0,
+      stars: currency === 'ls' ? amount : 0,
+      description: 'Extra ad views',
+      type: LcTransactionType.AD_EXTRA_VIEWS,
+    });
     ADS_EXTRA.purchasedToday += count;
 
     const ads = buildAds();

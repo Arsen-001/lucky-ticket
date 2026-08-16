@@ -3,7 +3,7 @@ import type { StaticImageData } from 'next/image';
 import { icons } from '@/constants/icons';
 import type { TicketType } from '@/types/types/ticket.types';
 import type { Dictionary, MessageIds } from '@/types/types/i18n.types';
-import type { InventoryChipType } from '@/types/interfaces/inventory.interfaces';
+import type { InventoryChip, InventoryChipType } from '@/types/interfaces/inventory.interfaces';
 
 export const QUALITY_ACCENT: Record<TicketType, string> = {
   bronze: 'var(--color-bronze)',
@@ -195,6 +195,26 @@ export const chipEquipStarsCost = (chipLevel: number): number => Math.max(1, chi
 
 export const chipUnequipStarsCost = (chipLevel: number): number =>
   Math.max(1, Math.ceil(chipLevel / 2));
+
+/**
+ * What the server will actually take to put this chip on `targetEngineId`.
+ *
+ * A chip that already sits on ANOTHER engine is a move, and a move pays the
+ * detach on top of the attach (DOCS §10.4, mirrored in
+ * `inventory.service.equipChip`) — so a screen quoting the bare equip price
+ * promises less than the balance loses. Zero when the chip is already in that
+ * slot: the server charges nothing for an equip that moves nothing.
+ */
+export const chipSlotStarsCost = (
+  chip: Pick<InventoryChip, 'level' | 'equippedOnEngineId'>,
+  targetEngineId?: string
+): number => {
+  if (chip.equippedOnEngineId && chip.equippedOnEngineId === targetEngineId) return 0;
+  return (
+    chipEquipStarsCost(chip.level) +
+    (chip.equippedOnEngineId ? chipUnequipStarsCost(chip.level) : 0)
+  );
+};
 
 export const findEquippedChip = (
   chips: import('@/types/interfaces/inventory.interfaces').InventoryChip[] | undefined,

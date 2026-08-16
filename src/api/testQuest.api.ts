@@ -1,4 +1,5 @@
 import { api } from '@/api/index.api';
+import { balanceTags } from '@/api/balance-tags';
 import { rtkTags } from '@/constants/rtk-tags';
 import type {
   ClaimTestQuestResponse,
@@ -27,13 +28,13 @@ export const testQuestApi = api.injectEndpoints({
     }),
     claimTestQuestLevel: builder.mutation<ClaimTestQuestResponse, void>({
       query: () => ({ url: 'test-quest/claim', method: 'POST' }),
+      // A level pays LC, Lucky Stars and tickets together, each with its own
+      // ledger row — both currency groups plus the ticket balance.
       invalidatesTags: [
         rtkTags.testQuest,
-        rtkTags.wallet,
-        rtkTags.me,
         rtkTags.tickets,
-        rtkTags.lc,
-        rtkTags.lcTransactions,
+        ...balanceTags.lc,
+        ...balanceTags.stars,
       ],
     }),
     // Re-reads the caller's live channel membership (getChatMember) — called

@@ -17,7 +17,7 @@ import {
   CHIP_TYPE_ICON,
   QUALITY_ACCENT,
   canEquipChipOnTier,
-  chipEquipStarsCost,
+  chipSlotStarsCost,
 } from '@/utils/global/inventory.utils';
 import type {
   InventoryBooster,
@@ -151,7 +151,9 @@ export function EngineSlotPickerModal({
           <div className="flex max-h-[55vh] flex-col gap-2 overflow-y-auto">
             {eligibleChips.map(chip => {
               const accent = QUALITY_ACCENT[chip.quality];
-              const cost = chipEquipStarsCost(chip.level);
+              // Includes the detach when this chip is on another engine — the
+              // server bills the move, so the row must quote the move.
+              const cost = chipSlotStarsCost(chip, engineId);
               return (
                 <button
                   key={chip.id}

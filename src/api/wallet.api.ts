@@ -1,4 +1,5 @@
 import { api } from '@/api/index.api';
+import { balanceTags } from '@/api/balance-tags';
 import { rtkTags } from '@/constants/rtk-tags';
 import type {
   BuyStarsRequest,
@@ -51,19 +52,13 @@ export const walletApi = api.injectEndpoints({
     }),
     withdrawTon: builder.mutation<WithdrawTonResponse, WithdrawTonRequest>({
       query: body => ({ url: 'wallet/withdraw', method: 'POST', body }),
-      invalidatesTags: [rtkTags.wallet, rtkTags.walletTransactions],
+      invalidatesTags: [...balanceTags.ton],
     }),
     buyStars: builder.mutation<BuyStarsResponse, BuyStarsRequest>({
       query: body => ({ url: 'wallet/buy-stars', method: 'POST', body }),
       // Exchanging TON → Stars moves the TON balance, the Stars balance, and
       // writes to both the wallet + Stars ledgers, so refresh all of them.
-      invalidatesTags: [
-        rtkTags.wallet,
-        rtkTags.walletTransactions,
-        rtkTags.me,
-        rtkTags.stars,
-        rtkTags.starsTransactions,
-      ],
+      invalidatesTags: [...balanceTags.ton, ...balanceTags.stars],
     }),
     // Native Telegram Stars purchase: returns an invoice link the Mini App opens
     // with `WebApp.openInvoice`. Crediting happens server-side via the payment

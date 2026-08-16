@@ -1,6 +1,7 @@
 import dayjs from 'dayjs';
 import { api } from '@/api/index.api';
 import { appConfig } from '@/config/app.config';
+import { balanceTags } from '@/api/balance-tags';
 import { inventoryApi } from '@/api/inventory.api';
 import { meApi } from '@/api/me.api';
 import { ticketsApi } from '@/api/tickets.api';
@@ -51,13 +52,15 @@ export const marketApi = api.injectEndpoints({
         method: 'POST',
         body: { count, priceType },
       }),
+      // Both currency groups: the shelf prices tickets in LC *and* in Stars, and
+      // `priceType` decides which one the server charges — so refreshing only
+      // the LC surfaces left a Stars-paid purchase invisible on /stars.
       invalidatesTags: [
         rtkTags.marketSavings,
         rtkTags.market,
-        rtkTags.me,
         rtkTags.tickets,
-        rtkTags.lc,
-        rtkTags.lcTransactions,
+        ...balanceTags.lc,
+        ...balanceTags.stars,
       ],
     }),
 
@@ -72,10 +75,9 @@ export const marketApi = api.injectEndpoints({
       invalidatesTags: [
         rtkTags.marketSavings,
         rtkTags.market,
-        rtkTags.me,
         rtkTags.profile,
-        rtkTags.lc,
-        rtkTags.lcTransactions,
+        ...balanceTags.lc,
+        ...balanceTags.stars,
       ],
     }),
 
@@ -91,10 +93,9 @@ export const marketApi = api.injectEndpoints({
       invalidatesTags: [
         rtkTags.marketSavings,
         rtkTags.market,
-        rtkTags.me,
         rtkTags.tickets,
-        rtkTags.lc,
-        rtkTags.lcTransactions,
+        ...balanceTags.lc,
+        ...balanceTags.stars,
       ],
       async onQueryStarted({ tier, engineLevel, price }, { dispatch, queryFulfilled }) {
         const mePatch = dispatch(deductBalanceUpdater(price));
@@ -144,10 +145,9 @@ export const marketApi = api.injectEndpoints({
       invalidatesTags: [
         rtkTags.marketSavings,
         rtkTags.market,
-        rtkTags.me,
         rtkTags.inventory,
-        rtkTags.lc,
-        rtkTags.lcTransactions,
+        ...balanceTags.lc,
+        ...balanceTags.stars,
       ],
       async onQueryStarted({ shardType, quality, count, price }, { dispatch, queryFulfilled }) {
         const mePatch = dispatch(deductBalanceUpdater(price));
@@ -179,10 +179,9 @@ export const marketApi = api.injectEndpoints({
       invalidatesTags: [
         rtkTags.marketSavings,
         rtkTags.market,
-        rtkTags.me,
         rtkTags.avatars,
-        rtkTags.lc,
-        rtkTags.lcTransactions,
+        ...balanceTags.lc,
+        ...balanceTags.stars,
       ],
       async onQueryStarted({ price }, { dispatch, queryFulfilled }) {
         const mePatch = dispatch(deductBalanceUpdater(price));

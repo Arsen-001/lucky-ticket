@@ -1,4 +1,5 @@
 import { api } from '@/api/index.api';
+import { balanceTags } from '@/api/balance-tags';
 import { rtkTags } from '@/constants/rtk-tags';
 import type {
   InventoryBooster,
@@ -21,22 +22,21 @@ export const inventoryApi = api.injectEndpoints({
       providesTags: [rtkTags.inventory],
     }),
 
+    /*
+     * Both slot mutations spend Lucky Stars server-side (DOCS §10.4: attach
+     * costs the chip's level, detach half of it rounded up, a move pays both),
+     * so the whole Stars group refreshes — the header pill, /stars and its
+     * ledger, and the wallet's `starsBalance`. The price the screens quote comes
+     * from `chipSlotStarsCost`, which mirrors the service's own formula.
+     */
     equipChip: builder.mutation<InventorySnapshot, { chipId: string; engineId: string }>({
       query: body => ({ url: 'inventory/chip/equip', method: 'POST', body }),
-      // `me` because this charges Lucky Stars server-side: without it the
-      // header balance and the equip modal's own `userStars / cost` gate both
-      // kept the pre-purchase number, so a second equip was armed against a
-      // balance the server no longer agreed with.
-      invalidatesTags: [rtkTags.inventory, rtkTags.tickets, rtkTags.me],
+      invalidatesTags: [rtkTags.inventory, rtkTags.tickets, ...balanceTags.stars],
     }),
 
     unequipChip: builder.mutation<InventorySnapshot, { chipId: string }>({
       query: body => ({ url: 'inventory/chip/unequip', method: 'POST', body }),
-      // `me` because this charges Lucky Stars server-side: without it the
-      // header balance and the equip modal's own `userStars / cost` gate both
-      // kept the pre-purchase number, so a second equip was armed against a
-      // balance the server no longer agreed with.
-      invalidatesTags: [rtkTags.inventory, rtkTags.tickets, rtkTags.me],
+      invalidatesTags: [rtkTags.inventory, rtkTags.tickets, ...balanceTags.stars],
     }),
 
     levelUpChip: builder.mutation<InventorySnapshot, { chipId: string }>({

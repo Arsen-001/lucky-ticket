@@ -1,4 +1,5 @@
 import { api } from '@/api/index.api';
+import { balanceTags } from '@/api/balance-tags';
 import { rtkTags } from '@/constants/rtk-tags';
 import type {
   BuyExtraAdViewsRequest,
@@ -65,15 +66,9 @@ export const tasksApi = api.injectEndpoints({
     }),
     claimTask: builder.mutation<ClaimTaskResponse, ClaimTaskRequest>({
       query: body => ({ url: 'tasks/claim', method: 'POST', body }),
-      // Claiming writes a TASK_REWARD LC-ledger row → refresh the LC history too.
-      invalidatesTags: [
-        rtkTags.tasks,
-        rtkTags.wallet,
-        rtkTags.me,
-        rtkTags.tickets,
-        rtkTags.lc,
-        rtkTags.lcTransactions,
-      ],
+      // A task reward can pay LC, Lucky Stars and tickets in one claim, each with
+      // its own ledger row — refresh both currency groups plus the ticket balance.
+      invalidatesTags: [rtkTags.tasks, rtkTags.tickets, ...balanceTags.lc, ...balanceTags.stars],
     }),
     watchAd: builder.mutation<
       { adId: string; rewards: TaskReward[] },
@@ -88,7 +83,10 @@ export const tasksApi = api.injectEndpoints({
       { adId: string; provider?: AdProviderId; skipped?: boolean }
     >({
       query: body => ({ url: 'tasks/ads/watch', method: 'POST', body }),
-      invalidatesTags: [rtkTags.tasks, rtkTags.me, rtkTags.lc],
+      // Same three payouts as a task claim (LC / Stars / tickets, ledger rows
+      // included) — `me` + `lc` alone left the ad reward missing from both
+      // histories and from the ticket balance.
+      invalidatesTags: [rtkTags.tasks, rtkTags.tickets, ...balanceTags.lc, ...balanceTags.stars],
     }),
     /**
      * POST /tasks/ads/attempt  body: { provider, outcome, adId? }
@@ -116,15 +114,9 @@ export const tasksApi = api.injectEndpoints({
      */
     buyExtraAdViews: builder.mutation<BuyExtraAdViewsResponse, BuyExtraAdViewsRequest>({
       query: body => ({ url: 'tasks/ads/extra', method: 'POST', body }),
-      // Debits a balance and writes a ledger row, so the wallet views refresh
-      // alongside the ads block.
-      invalidatesTags: [
-        rtkTags.tasks,
-        rtkTags.me,
-        rtkTags.lc,
-        rtkTags.lcTransactions,
-        rtkTags.wallet,
-      ],
+      // Charges LC *or* Lucky Stars (the caller picks `currency`) and writes the
+      // matching ledger row, so both groups refresh alongside the ads block.
+      invalidatesTags: [rtkTags.tasks, ...balanceTags.lc, ...balanceTags.stars],
     }),
   }),
 });

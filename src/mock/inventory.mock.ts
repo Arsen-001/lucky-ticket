@@ -4,7 +4,10 @@ import {
   CHIP_EFFECT_PER_LEVEL,
   CHIP_MINT_SHARD_COST,
   chipShardsForNextLevel,
+  chipSlotStarsCost,
+  chipUnequipStarsCost,
 } from '@/utils/global/inventory.utils';
+import { chargeMockUser } from '@/mock/backend/charge';
 import type {
   InventoryBooster,
   InventoryChip,
@@ -179,6 +182,15 @@ const equipChipHandler = (args: FetchArgs) => {
   if (!chipId || !engineId) return inventoryState;
   const target = inventoryState.chips.find(c => c.id === chipId);
   if (!target) return inventoryState;
+  // Same price the server takes (DOCS §10.4): attach, plus the detach when the
+  // chip is being moved off another engine. Charged here so the header and the
+  // Stars screens move in dev exactly as they do in production.
+  if (target.equippedOnEngineId !== engineId) {
+    chargeMockUser({
+      stars: chipSlotStarsCost(target, engineId),
+      description: `Chip equip (Lvl ${target.level})`,
+    });
+  }
   inventoryState = {
     ...inventoryState,
     chips: inventoryState.chips.map(c => {
@@ -196,6 +208,15 @@ const unequipChipHandler = (args: FetchArgs) => {
   const body = (args.body ?? {}) as { chipId?: string };
   const { chipId } = body;
   if (!chipId) return inventoryState;
+  // Half the equip price, rounded up — and only when something actually comes
+  // off an engine, like the service.
+  const target = inventoryState.chips.find(c => c.id === chipId);
+  if (target?.equippedOnEngineId) {
+    chargeMockUser({
+      stars: chipUnequipStarsCost(target.level),
+      description: `Chip unequip (Lvl ${target.level})`,
+    });
+  }
   inventoryState = {
     ...inventoryState,
     chips: inventoryState.chips.map(c =>

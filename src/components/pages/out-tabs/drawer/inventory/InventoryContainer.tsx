@@ -13,7 +13,11 @@ import { useGetTicketsQuery } from '@/api/tickets.api';
 import { useAppTranslations } from '@/hooks/useAppTranslations';
 import { useToast } from '@/hooks/useToast';
 import { useSpendFailure } from '@/hooks/useSpendFailure';
-import { buildEngineSlots } from '@/utils/global/inventory.utils';
+import {
+  buildEngineSlots,
+  chipSlotStarsCost,
+  chipUnequipStarsCost,
+} from '@/utils/global/inventory.utils';
 import type { InventoryBooster, InventoryChip } from '@/types/interfaces/inventory.interfaces';
 import { BoosterActivateModal } from './BoosterActivateModal';
 import { ChipEquipModal } from './ChipEquipModal';
@@ -68,8 +72,10 @@ export function InventoryContainer() {
     try {
       await equipChipMutation({ chipId: equipChip.id, engineId }).unwrap();
       setEquipChip(undefined);
-    } catch {
-      toast.error(t('action failed'));
+    } catch (error) {
+      // Equipping is a paid action (DOCS §10.4) — a short balance has to reach
+      // the top-up sheet, with the price the modal just quoted.
+      await spend.report(error, { required: chipSlotStarsCost(equipChip, engineId) });
     }
   };
 
@@ -78,7 +84,7 @@ export function InventoryContainer() {
     try {
       await unequipChipMutation({ chipId: chip.id }).unwrap();
     } catch (error) {
-      await spend.report(error);
+      await spend.report(error, { required: chipUnequipStarsCost(chip.level) });
     } finally {
       setUnequipPendingId(undefined);
     }

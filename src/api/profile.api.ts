@@ -1,4 +1,5 @@
 import { api } from '@/api/index.api';
+import { balanceTags } from '@/api/balance-tags';
 import { rtkTags } from '@/constants/rtk-tags';
 import type {
   PlayerStats,
@@ -58,8 +59,9 @@ export const profileApi = api.injectEndpoints({
 
     buyShowcaseSlot: builder.mutation<BuySlotResponse, BuyShowcaseSlotRequest>({
       query: body => ({ url: 'profile/showcase/buy-slot', method: 'POST', body }),
-      // Buying a slot debits Lucky Stars — refresh `me` so the header stars update.
-      invalidatesTags: [rtkTags.profile, rtkTags.me],
+      // Buying a slot debits Lucky Stars and writes a SHOWCASE_SLOT ledger row —
+      // refresh every Stars surface, not just the header pill.
+      invalidatesTags: [rtkTags.profile, ...balanceTags.stars],
     }),
 
     pinCollage: builder.mutation<ProfileResponse, PinAchievementRequest>({
