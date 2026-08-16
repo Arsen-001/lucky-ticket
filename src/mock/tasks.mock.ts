@@ -285,10 +285,10 @@ const getAdRewards = (index: number): TaskReward[] =>
  * of the same screen, which is what a `fresh` account gets: the card must then
  * look exactly as it did before the perk existed.
  *
- * Deliberately independent of the demo account's VIP level. The perk belongs to
- * Lucky Player alone, and since perks do not stack the real server would hand a
- * VIP their own row (zero) — but then the skip flow would be unreachable on
- * localhost, which is the one thing a fixture must not do.
+ * Independent of the demo account's VIP level, exactly as the server is: the
+ * perk belongs to Lucky Player and a subscriber keeps it as a VIP too
+ * (`statusAdsSkipDaily` takes the larger of the two figures — since 17.08.2026;
+ * before that the VIP row won and a VIP 20 with the subscription had none).
  */
 const ADS_SKIP = {
   total: fresh ? 0 : 10,
