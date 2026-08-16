@@ -1,6 +1,7 @@
 import { describe, it, expect } from 'vitest';
 import { existsSync, readFileSync } from 'node:fs';
 import { resolve } from 'node:path';
+import { CHIP_CAPACITY_TICKETS_TABLE } from '@/utils/global/inventory.utils';
 import {
   CAPACITY_LEVEL_BONUS_TICKETS_TABLE,
   ENGINE_FULL_LEVEL_BONUS_TICKETS_TABLE,
@@ -51,6 +52,7 @@ describe.skipIf(!hasBackend)('backend ↔ frontend engine table parity', () => {
     ['ENGINE_LEVEL_BASE_CAPACITY_TABLE', ENGINE_LEVEL_BASE_CAPACITY_TABLE],
     ['ENGINE_FULL_LEVEL_BONUS_TICKETS_TABLE', ENGINE_FULL_LEVEL_BONUS_TICKETS_TABLE],
     ['ENGINE_FULL_LEVEL_SPEED_BONUS_PCT_TABLE', ENGINE_FULL_LEVEL_SPEED_BONUS_PCT_TABLE],
+    ['CHIP_CAPACITY_TICKETS_TABLE', CHIP_CAPACITY_TICKETS_TABLE],
   ];
 
   it.each(PAIRS)('%s matches the backend cell-for-cell', (name, frontendTable) => {

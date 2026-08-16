@@ -20,7 +20,11 @@ import {
 } from '@/api/engines.api';
 import { useGetMeQuery } from '@/api/me.api';
 import { useGetTicketsQuery } from '@/api/tickets.api';
-import { findActiveBooster, findEquippedChip } from '@/utils/global/inventory.utils';
+import {
+  chipEffectLabel,
+  findActiveBooster,
+  findEquippedChip,
+} from '@/utils/global/inventory.utils';
 import { EngineCardCube } from '@/components/pages/tabs/home/EngineCardCube';
 import { EngineSlotPickerModal } from '@/components/pages/tabs/home/EngineSlotPickerModal';
 import { HomeBuyEngineSlot } from '@/components/pages/tabs/home/HomeBuyEngineSlot';
@@ -857,7 +861,7 @@ export function HomeEnginesSlider({ className }: ClassNameProps) {
                 {slotConfirm.chip
                   ? `${t(slotConfirm.chip.quality)} · ${
                       slotConfirm.chip.type === 'speed' ? t('time') : t('capacity')
-                    } · ${t('lvl')} ${slotConfirm.chip.level} +${slotConfirm.chip.effectPct.toFixed(1)}%`
+                    } · ${t('lvl')} ${slotConfirm.chip.level} ${chipEffectLabel(slotConfirm.chip, t)}`
                   : slotConfirm.booster
                     ? `${t(slotConfirm.booster.quality)} · ${
                         slotConfirm.booster.type === 'speed' ? t('time') : t('capacity')

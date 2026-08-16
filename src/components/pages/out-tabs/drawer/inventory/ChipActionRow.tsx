@@ -7,7 +7,9 @@ import { Button } from '@/components/shared/buttons/Button';
 import { ChipIcon } from '@/components/shared/icons/ChipIcon';
 import { useAppTranslations } from '@/hooks/useAppTranslations';
 import {
+  CHIP_MAX_LEVEL,
   QUALITY_ACCENT,
+  chipEffectLabel,
   chipUnequipStarsCost,
   formatChipRemaining,
 } from '@/utils/global/inventory.utils';
@@ -50,8 +52,13 @@ export function ChipActionRow({
   const isEquipped = !!chip.equippedOnEngineId;
   const unequipCost = chipUnequipStarsCost(chip.level);
   const canAffordUnequip = (me?.telegramStars ?? 0) >= unequipCost;
-  const ready = availableShards >= chip.shardsForNextLevel;
-  const progressPct = Math.min(100, Math.round((availableShards / chip.shardsForNextLevel) * 100));
+  // A chip at the top has no next level: nothing to be "ready" for, and the
+  // progress bar would divide by zero.
+  const maxed = chip.level >= CHIP_MAX_LEVEL || chip.shardsForNextLevel <= 0;
+  const ready = !maxed && availableShards >= chip.shardsForNextLevel;
+  const progressPct = maxed
+    ? 100
+    : Math.min(100, Math.round((availableShards / chip.shardsForNextLevel) * 100));
   const remaining =
     chip.lifetime === 'time-limited' && typeof chip.remainingMs === 'number'
       ? formatChipRemaining(chip.remainingMs, t)
@@ -96,7 +103,7 @@ export function ChipActionRow({
             now break between themselves and each stays whole. */}
         <div className="flex flex-wrap items-center gap-x-2 gap-y-0.5 text-[11px] font-extrabold text-white tabular-nums">
           <span className="whitespace-nowrap">
-            {t('lv {level}', { level: chip.level })} · +{chip.effectPct.toFixed(1)}%
+            {t('lv {level}', { level: chip.level })} · {chipEffectLabel(chip, t)}
           </span>
           {remaining ? (
             <span className="text-electric-pink flex items-center gap-0.5 whitespace-nowrap text-[9px] font-bold uppercase tracking-wider">
@@ -127,7 +134,9 @@ export function ChipActionRow({
             />
           </div>
           <span className="text-[9px] font-bold text-white/45 tabular-nums">
-            {Math.min(availableShards, chip.shardsForNextLevel)}/{chip.shardsForNextLevel}
+            {maxed
+              ? t('max')
+              : `${Math.min(availableShards, chip.shardsForNextLevel)}/${chip.shardsForNextLevel}`}
           </span>
         </div>
       </div>

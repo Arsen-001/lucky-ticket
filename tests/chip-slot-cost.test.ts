@@ -10,14 +10,14 @@ import {
 /**
  * Chip slot prices — what the screen promises must be what the server takes.
  *
- * DOCS §10.4 fixes three numbers: attach costs the chip's level, detach costs
- * `ceil(level / 2)`, and a move from engine A to engine B pays both. For a long
- * while the app quoted all three and the backend charged NOTHING (chips moved
- * around the fleet for free); when the charge landed, two screens were still
- * quoting the attach price for a detach and none of them priced a move at all.
- * Both halves of that are the same defect — a balance that drops by a number
- * nobody showed the player — so the formula is pinned here on the DOCS examples
- * and diffed against the service that does the charging.
+ * Since 17.08.2026 attaching a chip is FREE and detaching costs the chip's
+ * level in Lucky Stars; a move from engine A to engine B is a detach plus a
+ * free attach, i.e. the level once. (Before: attach cost the level, detach half
+ * of it, a move both — a player paid to USE a chip they had already earned.)
+ * For a long while the app quoted prices and the backend charged NOTHING;
+ * when the charge landed, screens quoted the wrong half. Both are the same
+ * defect — a balance that drops by a number nobody showed the player — so the
+ * formula is pinned here and diffed against the service that does the charging.
  */
 
 const backendPath = resolve(
@@ -29,24 +29,23 @@ const hasBackend = existsSync(backendPath);
 const chip = (level: number, equippedOnEngineId?: string) => ({ level, equippedOnEngineId });
 
 describe('chip slot prices (DOCS §10.4)', () => {
-  it('attach costs the chip level in Lucky Stars', () => {
-    expect(chipEquipStarsCost(1)).toBe(1);
-    expect(chipEquipStarsCost(12)).toBe(12);
-    expect(chipEquipStarsCost(200)).toBe(200);
+  it('attaching is free at every level', () => {
+    expect(chipEquipStarsCost(1)).toBe(0);
+    expect(chipEquipStarsCost(7)).toBe(0);
+    expect(chipEquipStarsCost(10)).toBe(0);
   });
 
-  it('detach costs half of that, rounded up', () => {
+  it('detaching costs the chip level in Lucky Stars', () => {
     expect(chipUnequipStarsCost(1)).toBe(1);
-    expect(chipUnequipStarsCost(11)).toBe(6);
-    expect(chipUnequipStarsCost(12)).toBe(6);
-    expect(chipUnequipStarsCost(200)).toBe(100);
+    expect(chipUnequipStarsCost(7)).toBe(7);
+    expect(chipUnequipStarsCost(10)).toBe(10);
   });
 
-  it('a move pays the detach on top of the attach', () => {
-    // Lvl 12 off engine A onto engine B: 12 + 6.
-    expect(chipSlotStarsCost(chip(12, 'engine-A'), 'engine-B')).toBe(18);
-    // Never equipped — attach only.
-    expect(chipSlotStarsCost(chip(12), 'engine-B')).toBe(12);
+  it('a move is a detach plus a free attach', () => {
+    // Lvl 7 off engine A onto engine B: 7 + 0.
+    expect(chipSlotStarsCost(chip(7, 'engine-A'), 'engine-B')).toBe(7);
+    // Never equipped — nothing to pay.
+    expect(chipSlotStarsCost(chip(7), 'engine-B')).toBe(0);
   });
 
   it('charges nothing for an equip that moves nothing', () => {
@@ -61,11 +60,9 @@ describe.skipIf(!hasBackend)('backend ↔ frontend chip price parity', () => {
     const source = readFileSync(backendPath, 'utf8');
     // Both sides compute the price independently — the app to quote it, the
     // service to take it — so drift is silent until a player is overcharged.
+    expect(source).toMatch(/equipStarsCost\s*=\s*\(\s*\)\s*=>\s*0/);
     expect(source).toMatch(
-      /equipStarsCost\s*=\s*\(\s*chipLevel[^)]*\)\s*=>\s*Math\.max\(1,\s*chipLevel\)/
-    );
-    expect(source).toMatch(
-      /unequipStarsCost\s*=\s*\(\s*chipLevel[^)]*\)\s*=>\s*\n?\s*Math\.max\(1,\s*Math\.ceil\(chipLevel\s*\/\s*2\)\)/
+      /unequipStarsCost\s*=\s*\(\s*chipLevel[^)]*\)\s*=>\s*\n?\s*Math\.max\(1,\s*chipLevel\)/
     );
   });
 });

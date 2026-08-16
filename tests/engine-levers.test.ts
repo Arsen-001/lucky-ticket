@@ -4,6 +4,12 @@ import type { InventoryBooster, InventoryChip } from '@/types/interfaces/invento
 import type { TicketEngine } from '@/types/interfaces/ticket.interfaces';
 import type { TicketType } from '@/types/types/ticket.types';
 import { effectiveCycleSeconds, engineCapacity } from '@/utils/global/ticket-engine.utils';
+import {
+  CHIP_MAX_LEVEL,
+  chipCapacityTickets,
+  chipLevelUpShards,
+  chipSpeedPct,
+} from '@/utils/global/inventory.utils';
 
 /**
  * Every lever on an engine must MOVE something.
@@ -45,13 +51,15 @@ const engineOf = (tier: TicketType, over: Partial<TicketEngine> = {}): TicketEng
 
 type BoostOptions = NonNullable<Parameters<typeof effectiveCycleSeconds>[1]>;
 
-const chip = (type: 'speed' | 'capacity', effectPct: number): InventoryChip => ({
+// A chip is its LEVEL: every helper derives the effect from it, and the
+// `effectPct` on the payload is a display cache the math never reads.
+const chip = (type: 'speed' | 'capacity', level: number): InventoryChip => ({
   id: `chip-${type}`,
   type,
   quality: 'gold',
-  level: effectPct * 2,
-  effectPct,
-  shardsForNextLevel: 10,
+  level,
+  effectPct: type === 'speed' ? chipSpeedPct(level) : chipCapacityTickets(level),
+  shardsForNextLevel: chipLevelUpShards(level),
   lifetime: 'permanent',
   source: 'tournament',
 });
@@ -101,7 +109,7 @@ const STAGES: { name: string; engine: Partial<TicketEngine> }[] = [
  * activate that booster.
  */
 const SPEED_LEVERS: { name: string; apply: (o: BoostOptions) => BoostOptions }[] = [
-  { name: 'speed chip (+50%)', apply: o => ({ ...o, speedChip: chip('speed', 50) }) },
+  { name: 'speed chip lvl 5 (×1.5)', apply: o => ({ ...o, speedChip: chip('speed', 5) }) },
   { name: 'speed booster (+25%)', apply: o => ({ ...o, speedBooster: booster('speed', 25) }) },
   {
     name: 'VIP 20 (+20% perk)',
@@ -121,7 +129,10 @@ const SPEED_LEVERS: { name: string; apply: (o: BoostOptions) => BoostOptions }[]
 
 /** Equipment that must make the collect bigger (and the wait longer with it). */
 const CAPACITY_LEVERS: { name: string; apply: (o: BoostOptions) => BoostOptions }[] = [
-  { name: 'capacity chip (+50%)', apply: o => ({ ...o, capacityChip: chip('capacity', 50) }) },
+  {
+    name: 'capacity chip lvl 5 (+25 tickets)',
+    apply: o => ({ ...o, capacityChip: chip('capacity', 5) }),
+  },
   {
     name: 'capacity booster (+25%)',
     apply: o => ({ ...o, capacityBooster: booster('capacity', 25) }),
@@ -216,9 +227,9 @@ describe('engine levers — every upgrade must move the engine', () => {
     it('the whole stack beats every single lever on its own', () => {
       const engine = engineOf(tier, { engineLevel: 3, speedLevel: 5, capacityLevel: 5 });
       const everything: BoostOptions = {
-        speedChip: chip('speed', 50),
+        speedChip: chip('speed', 5),
         speedBooster: booster('speed', 25),
-        capacityChip: chip('capacity', 50),
+        capacityChip: chip('capacity', 5),
         capacityBooster: booster('capacity', 25),
         isVip: true,
         perks: { engineSpeedBoostPct: 20 },
@@ -235,6 +246,62 @@ describe('engine levers — every upgrade must move the engine', () => {
           single.batch
         );
       }
+    });
+  });
+
+  describe('chips — "a finished chip is half an engine"', () => {
+    it('a finished capacity chip adds exactly +51 tickets on any engine', () => {
+      for (const tier of TIERS) {
+        for (const stage of STAGES) {
+          const engine = engineOf(tier, stage.engine);
+          const bare = engineCapacity(engine);
+          expect(
+            engineCapacity(engine, { capacityChip: chip('capacity', CHIP_MAX_LEVEL) }),
+            `${tier} ${stage.name}`
+          ).toBe(bare + 51);
+        }
+      }
+      // …and every level is felt: +5 a level, the tenth +6.
+      const fresh = engineOf('bronze');
+      for (let level = 1; level <= CHIP_MAX_LEVEL; level += 1) {
+        expect(engineCapacity(fresh, { capacityChip: chip('capacity', level) })).toBe(
+          1 + chipCapacityTickets(level)
+        );
+        expect(chipCapacityTickets(level) - chipCapacityTickets(level - 1)).toBe(
+          level === CHIP_MAX_LEVEL ? 6 : 5
+        );
+      }
+    });
+
+    it('a finished speed chip halves the cycle — the same ×2 on a fresh and a maxed engine', () => {
+      for (const tier of TIERS) {
+        for (const stage of STAGES) {
+          const engine = engineOf(tier, stage.engine);
+          const bare = effectiveCycleSeconds(engine);
+          expect(
+            effectiveCycleSeconds(engine, { speedChip: chip('speed', CHIP_MAX_LEVEL) }),
+            `${tier} ${stage.name}`
+          ).toBeCloseTo(bare / 2, 6);
+        }
+      }
+      // A summand into the stack could never do that: on the maxed Bronze
+      // (+750%) a +100% summand is worth ×1.12, not ×2. Pin the multiplier.
+      const maxed = engineOf('bronze', { engineLevel: 5, speedLevel: 10, capacityLevel: 10 });
+      expect(effectiveCycleSeconds(maxed)).toBe(24 * 3600);
+      expect(effectiveCycleSeconds(maxed, { speedChip: chip('speed', CHIP_MAX_LEVEL) })).toBe(
+        12 * 3600
+      );
+    });
+
+    it('costs exactly 200 shards mint-to-max, in a rising ladder', () => {
+      // Mint 20, then 12 · 14 · … · 28 — and nothing past the top.
+      let total = 20;
+      for (let level = 1; level < CHIP_MAX_LEVEL; level += 1) {
+        expect(chipLevelUpShards(level)).toBe(10 + 2 * level);
+        total += chipLevelUpShards(level);
+      }
+      expect(total).toBe(200);
+      expect(chipLevelUpShards(CHIP_MAX_LEVEL)).toBe(0);
     });
   });
 

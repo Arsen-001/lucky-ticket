@@ -41,20 +41,80 @@ export const CHIP_TYPE_ICON: Record<InventoryChipType, LucideIcon> = {
 
 export const QUALITY_TIERS: TicketType[] = ['bronze', 'silver', 'gold', 'platinum', 'diamond'];
 
-export const CHIP_EFFECT_PER_LEVEL = 0.5;
-export const CHIP_MAX_LEVEL = 200;
+/* ────────────────────────────────────────────────────────────────────────────
+ *  🔩  CHIP RULES — "a finished chip is half an engine" (17.08.2026)
+ *
+ *  Ten levels. A finished capacity chip adds +51 tickets to the batch — half
+ *  of a fully upgraded engine's 102; a finished speed chip halves the cycle —
+ *  it is a MULTIPLIER on top of the engine's additive speed stack, so it is
+ *  worth the same ×2 on a fresh engine (2 h → 1 h) and on a maxed one
+ *  (24 h → 12 h). Both are priced identically: 200 shards mint-to-max, and a
+ *  Bronze shard is 1 ⭐ (LC at parity), so a finished chip is 200 ⭐ — a
+ *  quarter of a full engine's 800 ⭐ for half its power.
+ *
+ *  Before this the effect was +0.5 % per level to a 200-level ceiling, and a
+ *  capacity chip's % rounded to the same single ticket from level 1 to 16 —
+ *  a player could sink 256 shards into it and mint nothing extra. Level, not
+ *  `effectPct`, is the source of truth: every helper below derives from it.
+ *  The backend mirrors these tables in economy.constants.ts.
+ * ──────────────────────────────────────────────────────────────────────────── */
+
+export const CHIP_MAX_LEVEL = 10;
+
+/** Shards to mint a level-1 chip — the same for every tier now: the tier
+ *  difference lives in the shard PRICE (×2 per tier), not the count. */
+export const CHIP_MINT_SHARDS = 20;
+
+/** Shards for the step from `level` to `level + 1` (12, 14, … 28). With the
+ *  mint that is exactly 200 to the top. */
+export const chipLevelUpShards = (level: number): number =>
+  level >= CHIP_MAX_LEVEL ? 0 : 10 + 2 * level;
+
+/** Extra tickets per collect a CAPACITY chip of `level` adds — the batch
+ *  grows by 5 a level, the tenth adds 6, so the top is exactly +51. */
+export const CHIP_CAPACITY_TICKETS_TABLE: readonly number[] = [
+  //  lvl0  lvl1  lvl2  lvl3  lvl4  lvl5  lvl6  lvl7  lvl8  lvl9  lvl10
+  0, 5, 10, 15, 20, 25, 30, 35, 40, 45, 51,
+];
+
+export const chipCapacityTickets = (level: number | undefined): number =>
+  CHIP_CAPACITY_TICKETS_TABLE[Math.min(CHIP_MAX_LEVEL, Math.max(0, Math.floor(level ?? 0)))];
 
 /**
- * Shards consumed to mint a fresh Lvl-1 chip of that tier — mirrors the
- * backend `CHIP_MINT_SHARD_COST` (DOCS §10.4). Lower tiers drop shards far
- * more often, so their mint is priced higher; no other cost applies.
+ * The cycle divisor a SPEED chip of `level` applies — 1.1 … 2.0. Applied AFTER
+ * the engine's additive stack, never summed into it: `cycle = baseline ÷
+ * (1 + engineStack) ÷ chipSpeedFactor`.
+ */
+export const chipSpeedFactor = (level: number | undefined): number =>
+  1 + Math.min(CHIP_MAX_LEVEL, Math.max(0, Math.floor(level ?? 0))) / 10;
+
+/** The same speed chip as a percentage — what the UI prints (+10 … +100 %). */
+export const chipSpeedPct = (level: number | undefined): number =>
+  Math.round((chipSpeedFactor(level) - 1) * 100);
+
+/**
+ * The one-line effect a chip prints on a slot, a card or a confirm — its
+ * level's worth in the chip's own unit: "+10%" for speed, "+5 tickets" for
+ * capacity. One helper so the five places that print it can never disagree.
+ */
+export const chipEffectLabel = (
+  chip: Pick<InventoryChip, 'type' | 'level'>,
+  t: (key: MessageIds, values?: Record<string, number>) => string
+): string =>
+  chip.type === 'speed'
+    ? `+${chipSpeedPct(chip.level)}%`
+    : t('chip capacity effect', { n: chipCapacityTickets(chip.level) });
+
+/**
+ * Backwards-compatible mint-cost map: the callers that read a per-tier cost
+ * still work, and every tier now reads the same number.
  */
 export const CHIP_MINT_SHARD_COST: Record<TicketType, number> = {
-  bronze: 10,
-  silver: 8,
-  gold: 6,
-  platinum: 4,
-  diamond: 2,
+  bronze: CHIP_MINT_SHARDS,
+  silver: CHIP_MINT_SHARDS,
+  gold: CHIP_MINT_SHARDS,
+  platinum: CHIP_MINT_SHARDS,
+  diamond: CHIP_MINT_SHARDS,
 };
 
 /**
@@ -74,13 +134,9 @@ export const chipShardName = (t: Dictionary, type: InventoryChipType, quality: s
     tier: t(quality.toLowerCase() as MessageIds),
   });
 
-export const chipShardsForNextLevel = (currentLevel: number) => {
-  const target = currentLevel + 1;
-  if (target <= 1) return 1;
-  if (target === 2) return 1;
-  if (target === 3) return 3;
-  return 2 * target - 3;
-};
+/** Shards the NEXT level costs from `currentLevel` — the same ladder the
+ *  server writes into `shardsForNextLevel`; 0 at the top. */
+export const chipShardsForNextLevel = (currentLevel: number) => chipLevelUpShards(currentLevel);
 
 export const tierRank = (tier: TicketType): number => QUALITY_TIERS.indexOf(tier);
 
@@ -152,7 +208,13 @@ export const inventoryTypeStats = (
     .map(slot => (type === 'speed' ? slot.speedChip : slot.capacityChip))
     .filter(Boolean);
   return {
-    totalPct: installed.reduce((sum, chip) => sum + (chip?.effectPct ?? 0), 0),
+    // Speed chips: their percentages; capacity chips: their tickets. Both are
+    // "how much this type adds across the fleet", each in its own unit.
+    totalPct: installed.reduce(
+      (sum, chip) =>
+        sum + (type === 'speed' ? chipSpeedPct(chip?.level) : chipCapacityTickets(chip?.level)),
+      0
+    ),
     filled: installed.length,
     slots: slots.length,
   };
@@ -191,10 +253,15 @@ export const isChipReadyToLevelUp = (
 export const canEquipChipOnTier = (chipQuality: TicketType, engineTier: TicketType): boolean =>
   chipQuality === engineTier;
 
-export const chipEquipStarsCost = (chipLevel: number): number => Math.max(1, chipLevel);
+/**
+ * Attaching a chip is free; only taking one OFF costs Stars, its level's worth
+ * (17.08.2026 — attach used to cost the level and detach half of it). A chip is
+ * earned once and meant to be used; the price sits on shuffling it around a
+ * fleet, not on using it at all.
+ */
+export const chipEquipStarsCost = (_chipLevel: number): number => 0;
 
-export const chipUnequipStarsCost = (chipLevel: number): number =>
-  Math.max(1, Math.ceil(chipLevel / 2));
+export const chipUnequipStarsCost = (chipLevel: number): number => Math.max(1, chipLevel);
 
 /**
  * What the server will actually take to put this chip on `targetEngineId`.

@@ -72,10 +72,15 @@ export const marketApi = api.injectEndpoints({
       }),
       // `profile` too: the profile hero renders isVIP/isLuckyPlayer/vipLevel
       // from its own query — without it the badges stay stale after a purchase.
+      // `tickets` as well: a status carries an engine-speed perk, and the engine
+      // fields the SERVER resolves with it (instant-claim cost, pending count)
+      // come from /tickets — without the refetch they quote the pre-purchase
+      // status until something else happens to invalidate them.
       invalidatesTags: [
         rtkTags.marketSavings,
         rtkTags.market,
         rtkTags.profile,
+        rtkTags.tickets,
         ...balanceTags.lc,
         ...balanceTags.stars,
       ],

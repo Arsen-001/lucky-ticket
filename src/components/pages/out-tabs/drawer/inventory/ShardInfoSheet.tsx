@@ -54,7 +54,8 @@ export function ShardInfoSheet({ open, shard, chips, onClose }: ShardInfoSheetPr
   // Cheapest upgrade first: the one row that may already be paid for is the
   // reason the player opened this.
   const matching = chips
-    .filter(chip => chip.type === type && chip.quality === quality)
+    // A chip at the top cannot take another shard — it is not a use for this stack.
+    .filter(chip => chip.type === type && chip.quality === quality && chip.shardsForNextLevel > 0)
     .sort((a, b) => a.shardsForNextLevel - b.shardsForNextLevel);
   const shown = matching.slice(0, MAX_CHIP_ROWS);
 

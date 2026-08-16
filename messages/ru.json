@@ -816,6 +816,7 @@
   "cycle full": "Полный цикл: {time}",
   "per cycle": "за цикл",
   "per cycle full": "{capacity, plural, one {# билет за цикл} few {# билета за цикл} many {# билетов за цикл} other {# билета за цикл}}",
+  "chip capacity effect": "{n, plural, one {+# билет} few {+# билета} many {+# билетов} other {+# билета}}",
   "streak": "Стрик",
   "engine details": "Двигатель",
   "engine not found": "Двигатель не найден",

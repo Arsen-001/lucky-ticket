@@ -4,6 +4,7 @@ import type { TicketEngine } from '@/types/interfaces/ticket.interfaces';
 import type { StatusPerks } from '@/types/interfaces/user.interfaces';
 import type { Ticket, TicketType } from '@/types/types/ticket.types';
 import { effectiveStatusPct } from '@/utils/global/status.utils';
+import { chipCapacityTickets, chipSpeedFactor } from '@/utils/global/inventory.utils';
 
 /* ────────────────────────────────────────────────────────────────────────────
  *  ⚙️  ENGINE LEVEL TABLES — «сколько даёт каждый уровень» (скорость / объём)
@@ -265,18 +266,22 @@ export const effectiveCycleSeconds = (
     (options?.avatarBoostPct ?? 0) +
     (options?.badgeBoostPct ?? 0);
 
-  if (options?.speedChip) totalBoostPct += options.speedChip.effectPct;
   if (options?.speedBooster && isBoosterAlive(options.speedBooster)) {
     totalBoostPct += options.speedBooster.effectPct;
   }
 
+  // The speed CHIP is not a term in that sum — it divides the result. A finished
+  // chip halves the cycle whatever the engine already runs at (2 h → 1 h on a
+  // fresh engine, 24 h → 12 h on a maxed one); as a summand it would be worth
+  // ×2 on the first and ×1.12 on the second. @see chipSpeedFactor
   return (
     baselineCycleSeconds(engine, {
       capacityChip: options?.capacityChip,
       capacityBooster: options?.capacityBooster,
       tables: options?.tables,
     }) /
-    (1 + totalBoostPct / 100)
+    (1 + totalBoostPct / 100) /
+    chipSpeedFactor(options?.speedChip?.level)
   );
 };
 
@@ -297,22 +302,23 @@ export const engineCapacity = (
     tables?: EngineLevelTables;
   }
 ) => {
-  let chipBoostPct = 0;
-  if (options?.capacityChip) chipBoostPct += options.capacityChip.effectPct;
-  if (options?.capacityBooster && isBoosterAlive(options.capacityBooster)) {
-    chipBoostPct += options.capacityBooster.effectPct;
-  }
   const batch =
     baseCapacity(engine.engineLevel || 1, options?.tables) +
     capacityLevelBonusTickets(engine.capacityLevel || 0, options?.tables) +
     // Taking BOTH sub-ladders to 10/10 pays a flat bonus on top of the taps.
-    fullLevelBonusTickets(engine, options?.tables);
-  // Round the % share UP, not the product: tickets are whole, and rounding the
-  // product killed the lever outright on a small batch — a +25% capacity
-  // booster on a fresh 1-ticket engine resolved to round(1.25) = 1, i.e. the
-  // player paid for nothing. Ceiling the share costs at most one extra ticket
-  // on a big batch and guarantees every equipped percentage is felt.
-  return Math.max(1, batch + Math.ceil((batch * chipBoostPct) / 100));
+    fullLevelBonusTickets(engine, options?.tables) +
+    // The capacity CHIP adds whole tickets, never a percentage: as a % of the
+    // batch it rounded to the same single ticket from level 1 to 16 on any
+    // engine below level 2. @see chipCapacityTickets
+    chipCapacityTickets(options?.capacityChip?.level);
+  // The time-limited booster stays a % of the whole collect (chip included).
+  // Round the share UP, not the product: tickets are whole, and rounding the
+  // product handed nothing for a +25 % booster on a 1-ticket batch.
+  const boosterPct =
+    options?.capacityBooster && isBoosterAlive(options.capacityBooster)
+      ? options.capacityBooster.effectPct
+      : 0;
+  return Math.max(1, batch + Math.ceil((batch * boosterPct) / 100));
 };
 
 export const engineElapsedSeconds = (engine: TicketEngine) => {

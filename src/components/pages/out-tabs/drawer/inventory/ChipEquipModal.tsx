@@ -13,6 +13,7 @@ import {
   QUALITY_ACCENT,
   buildEngineSlots,
   canEquipChipOnTier,
+  chipEffectLabel,
   chipSlotStarsCost,
 } from '@/utils/global/inventory.utils';
 import type { InventoryChip } from '@/types/interfaces/inventory.interfaces';
@@ -61,7 +62,7 @@ export function ChipEquipModal({
           {chip && (
             <p className="text-pink-secondary mt-1 text-[12px] font-bold">
               {t(chip.quality)} · {chip.type === 'speed' ? t('time') : t('capacity')} · Lvl{' '}
-              {chip.level} · +{chip.effectPct.toFixed(1)}%
+              {chip.level} · {chipEffectLabel(chip, t)}
             </p>
           )}
         </header>

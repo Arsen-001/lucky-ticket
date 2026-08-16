@@ -4,7 +4,7 @@ import { BoosterIcon } from '@/components/shared/icons/BoosterIcon';
 import { ChipIcon } from '@/components/shared/icons/ChipIcon';
 import { useAppTranslations } from '@/hooks/useAppTranslations';
 import { useCountDown } from '@/hooks/useCountDown';
-import { QUALITY_ACCENT, TYPE_ACCENT } from '@/utils/global/inventory.utils';
+import { QUALITY_ACCENT, TYPE_ACCENT, chipEffectLabel } from '@/utils/global/inventory.utils';
 import type {
   InventoryBooster,
   InventoryChip,
@@ -117,7 +117,7 @@ export function EngineCubeSlot({
         <span className="mt-0.5 flex items-center gap-1 whitespace-nowrap text-[9px] font-extrabold tabular-nums uppercase tracking-wider text-white">
           {category === 'chip' && chip && (
             <>
-              {t('lvl')} {chip.level} +{chip.effectPct.toFixed(1)}%
+              {t('lvl')} {chip.level} {chipEffectLabel(chip, t)}
             </>
           )}
           {category === 'booster' && booster && (

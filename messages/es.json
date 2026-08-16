@@ -816,6 +816,7 @@
   "cycle full": "Ciclo completo: {time}",
   "per cycle": "por ciclo",
   "per cycle full": "{capacity, plural, =1 {# ticket por ciclo} other {# tickets por ciclo}}",
+  "chip capacity effect": "{n, plural, =1 {+# ticket} other {+# tickets}}",
   "streak": "Racha",
   "engine details": "Detalles del motor",
   "engine not found": "Motor no encontrado",
