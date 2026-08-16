@@ -58,10 +58,15 @@ export const authApi = api.injectEndpoints({
     // Telegram Mini App auth: the signed `initData` IS the credential — the
     // backend verifies it and find-or-creates the account, so there is no
     // registration step. Called once on boot by TelegramProvider.
-    // `timezone` rides along because this is the only call every launch makes
-    // that identifies the player, and it is where the app's one geographic
-    // signal belongs. @see utils/global/timezone.utils
-    telegramLogin: builder.mutation<AuthTokens, { initData: string; timezone?: string }>({
+    // `timezone` and `locale` ride along because this is the only call every
+    // launch makes that identifies the player, and it is where the app's
+    // geographic signals belong. They are not the same signal twice: the zone
+    // says where the device is now, the locale where it was set up.
+    // @see utils/global/timezone.utils
+    telegramLogin: builder.mutation<
+      AuthTokens,
+      { initData: string; timezone?: string; locale?: string }
+    >({
       query: body => ({ url: 'auth/telegram', method: 'POST', body }),
       async onQueryStarted(_, { queryFulfilled, dispatch }) {
         const { data } = await queryFulfilled;

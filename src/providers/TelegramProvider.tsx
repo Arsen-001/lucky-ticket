@@ -8,7 +8,7 @@ import { getTelegramWebApp } from '@/lib/telegram/telegram';
 import { hasSessionCk } from '@/services/cookie.service';
 import { routes } from '@/constants/routes';
 import { resolveStartParamRoute } from '@/utils/global/deep-link.utils';
-import { getDeviceTimezone } from '@/utils/global/timezone.utils';
+import { getDeviceLocale, getDeviceTimezone } from '@/utils/global/timezone.utils';
 import { TelegramSplash } from '@/components/telegram/TelegramSplash';
 
 type Phase = 'pending' | 'authenticating' | 'ready' | 'error';
@@ -61,7 +61,11 @@ export function TelegramProvider({ children }: { children: ReactNode }) {
 
   const authenticate = (initData: string) => {
     setPhase('authenticating');
-    telegramLogin({ initData, timezone: getDeviceTimezone() })
+    telegramLogin({
+      initData,
+      timezone: getDeviceTimezone(),
+      locale: getDeviceLocale(),
+    })
       .unwrap()
       .then(() => setPhase('ready'))
       .catch(() => {
