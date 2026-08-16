@@ -3,7 +3,7 @@ import type { InventoryBooster, InventoryChip } from '@/types/interfaces/invento
 import type { TicketEngine } from '@/types/interfaces/ticket.interfaces';
 import type { StatusPerks } from '@/types/interfaces/user.interfaces';
 import type { Ticket, TicketType } from '@/types/types/ticket.types';
-import { effectiveStatusPct } from '@/utils/global/status.utils';
+import { effectiveEngineSpeedMultiplierPct, effectiveStatusPct } from '@/utils/global/status.utils';
 import { chipCapacityTickets, chipSpeedFactor } from '@/utils/global/inventory.utils';
 
 /* ────────────────────────────────────────────────────────────────────────────
@@ -244,13 +244,15 @@ export const effectiveCycleSeconds = (
      */
     badgeBoostPct?: number;
     /** `me.statusPerks` — the per-level status boost the server actually applies. */
-    perks?: Pick<StatusPerks, 'engineSpeedBoostPct'>;
+    perks?: Pick<StatusPerks, 'engineSpeedBoostPct' | 'engineSpeedMultiplierPct'>;
     tables?: EngineLevelTables;
   }
 ) => {
-  // VIP supersedes LP — higher-tier engine speed boost wins, no stacking. The
-  // per-level value comes from `me.statusPerks`; the constants are the ceiling
-  // and only stand in when the backend didn't send perks.
+  // Status is the one perk pair that STACKS, each on its own term: VIP is a
+  // summand in the additive stack below, Lucky Player a multiplier at the end
+  // (like the speed chip). The per-level value comes from `me.statusPerks`;
+  // the constants are the ceiling and only stand in when the backend didn't
+  // send perks.
   const statusBoostPct = effectiveStatusPct(
     'engineSpeedBoostPct',
     options?.isLuckyPlayer ?? false,
@@ -281,7 +283,8 @@ export const effectiveCycleSeconds = (
       tables: options?.tables,
     }) /
     (1 + totalBoostPct / 100) /
-    chipSpeedFactor(options?.speedChip?.level)
+    chipSpeedFactor(options?.speedChip?.level) /
+    (1 + effectiveEngineSpeedMultiplierPct(options?.isLuckyPlayer ?? false, options?.perks) / 100)
   );
 };
 

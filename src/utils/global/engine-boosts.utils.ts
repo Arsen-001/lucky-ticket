@@ -1,7 +1,7 @@
 import type { InventoryBooster, InventoryChip } from '@/types/interfaces/inventory.interfaces';
 import type { TicketEngine } from '@/types/interfaces/ticket.interfaces';
 import type { StatusPerks } from '@/types/interfaces/user.interfaces';
-import { effectiveStatusPct } from '@/utils/global/status.utils';
+import { effectiveEngineSpeedMultiplierPct, effectiveStatusPct } from '@/utils/global/status.utils';
 import {
   type EngineLevelTables,
   baseCapacity,
@@ -41,7 +41,7 @@ export interface EngineSpeedBoostOptions {
   speedBooster?: InventoryBooster;
   isLuckyPlayer?: boolean;
   isVip?: boolean;
-  perks?: Pick<StatusPerks, 'engineSpeedBoostPct'>;
+  perks?: Pick<StatusPerks, 'engineSpeedBoostPct' | 'engineSpeedMultiplierPct'>;
   avatarBoostPct?: number;
   badgeBoostPct?: number;
   tables?: EngineLevelTables;
@@ -83,19 +83,26 @@ export const engineSpeedBoostSources = (
     { key: 'avatar', pct: options.avatarBoostPct ?? 0 },
     { key: 'badge', pct: options.badgeBoostPct ?? 0 },
   ];
-  // The speed chip is a MULTIPLIER on the whole stack, not one more summand
-  // (@see chipSpeedFactor). The reactor face draws additive arcs and prints
-  // `baseline ÷ (1 + total) = cycle`, so the chip is shown as the additive
-  // amount it is WORTH here: (1 + others) × (factor − 1). On a fresh engine that
-  // is its own percentage; on a maxed one the same ×2 chip reads as +850 % —
-  // which is exactly what it does to that engine, and the equation still
-  // resolves to the countdown next to it.
+  // Two MULTIPLIERS sit on top of that sum — the speed chip and the Lucky
+  // Player perk (@see chipSpeedFactor, effectiveEngineSpeedMultiplierPct). The
+  // reactor face draws additive arcs and prints `baseline ÷ (1 + total) =
+  // cycle`, so each multiplier is shown as the additive amount it is WORTH
+  // here. Chip: (1 + others) × (chipF − 1). LP: (1 + others) × chipF × (lpF − 1).
+  // Together they add up to exactly (1 + others) × chipF × lpF − 1, so the
+  // equation still resolves to the countdown next to it. On a fresh engine each
+  // reads as its own percentage; on a maxed one the same ×2 chip reads as
+  // +850 % — which is exactly what it does to that engine.
   const others = additive.reduce((sum, source) => sum + source.pct, 0);
-  const chipEquivalentPct =
-    (1 + others / 100) * (chipSpeedFactor(options.speedChip?.level) - 1) * 100;
+  const chipFactor = chipSpeedFactor(options.speedChip?.level);
+  const lpFactor =
+    1 + effectiveEngineSpeedMultiplierPct(options.isLuckyPlayer ?? false, options.perks) / 100;
+  const chipEquivalentPct = (1 + others / 100) * (chipFactor - 1) * 100;
+  const lpEquivalentPct = (1 + others / 100) * chipFactor * (lpFactor - 1) * 100;
   const chip: EngineSpeedBoostSource = { key: 'chip', pct: chipEquivalentPct };
+  // The LP multiplier rides the status row, next to VIP's summand.
+  const status: EngineSpeedBoostSource = { key: 'status', pct: additive[2].pct + lpEquivalentPct };
   // Keep the UI's row order: level, taps, status, chip, booster, avatar, badge.
-  return [additive[0], additive[1], additive[2], chip, additive[3], additive[4], additive[5]];
+  return [additive[0], additive[1], status, chip, additive[3], additive[4], additive[5]];
 };
 
 export const totalSpeedBoostPct = (sources: readonly EngineSpeedBoostSource[]) =>

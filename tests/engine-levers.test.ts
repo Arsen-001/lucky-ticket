@@ -3,7 +3,12 @@ import { appConfig } from '@/config/app.config';
 import type { InventoryBooster, InventoryChip } from '@/types/interfaces/inventory.interfaces';
 import type { TicketEngine } from '@/types/interfaces/ticket.interfaces';
 import type { TicketType } from '@/types/types/ticket.types';
-import { effectiveCycleSeconds, engineCapacity } from '@/utils/global/ticket-engine.utils';
+import {
+  baselineCycleSeconds,
+  effectiveCycleSeconds,
+  engineCapacity,
+} from '@/utils/global/ticket-engine.utils';
+import { engineSpeedBoostSources } from '@/utils/global/engine-boosts.utils';
 import {
   CHIP_MAX_LEVEL,
   chipCapacityTickets,
@@ -120,8 +125,12 @@ const SPEED_LEVERS: { name: string; apply: (o: BoostOptions) => BoostOptions }[]
     apply: o => ({ ...o, isVip: true, perks: { engineSpeedBoostPct: 1 } }),
   },
   {
-    name: 'Lucky Player (+10% perk)',
-    apply: o => ({ ...o, isLuckyPlayer: true, perks: { engineSpeedBoostPct: 10 } }),
+    name: 'Lucky Player (×1.3 multiplier)',
+    apply: o => ({
+      ...o,
+      isLuckyPlayer: true,
+      perks: { engineSpeedBoostPct: 0, engineSpeedMultiplierPct: 30 },
+    }),
   },
   { name: 'test badge (+5%)', apply: o => ({ ...o, badgeBoostPct: 5 }) },
   { name: 'avatar (+8%)', apply: o => ({ ...o, avatarBoostPct: 8 }) },
@@ -232,7 +241,8 @@ describe('engine levers — every upgrade must move the engine', () => {
         capacityChip: chip('capacity', 5),
         capacityBooster: booster('capacity', 25),
         isVip: true,
-        perks: { engineSpeedBoostPct: 20 },
+        isLuckyPlayer: true,
+        perks: { engineSpeedBoostPct: 20, engineSpeedMultiplierPct: 30 },
         badgeBoostPct: 5,
         avatarBoostPct: 8,
       };
@@ -312,6 +322,57 @@ describe('engine levers — every upgrade must move the engine', () => {
     for (let i = 1; i < rates.length; i += 1) {
       expect(rates[i], `${TIERS[i]} vs ${TIERS[i - 1]}`).toBeLessThan(rates[i - 1]);
     }
+  });
+
+  describe('status — VIP is a summand, Lucky Player a multiplier, and they stack', () => {
+    it('Lucky Player is worth the same ×1.3 on a fresh and a maxed engine', () => {
+      const lp: BoostOptions = {
+        isLuckyPlayer: true,
+        perks: { engineSpeedBoostPct: 0, engineSpeedMultiplierPct: 30 },
+      };
+      for (const tier of TIERS) {
+        for (const stage of STAGES) {
+          const engine = engineOf(tier, stage.engine);
+          expect(effectiveCycleSeconds(engine, lp), `${tier} ${stage.name}`).toBeCloseTo(
+            effectiveCycleSeconds(engine) / 1.3,
+            6
+          );
+        }
+      }
+    });
+
+    it('VIP 20 (+150%) is a summand — worth ×2.5 fresh and ×1.18 on a maxed engine', () => {
+      const vip: BoostOptions = { isVip: true, perks: { engineSpeedBoostPct: 150 } };
+      const fresh = engineOf('bronze');
+      const maxed = engineOf('bronze', { engineLevel: 5, speedLevel: 10, capacityLevel: 10 });
+      expect(effectiveCycleSeconds(fresh, vip)).toBeCloseTo(effectiveCycleSeconds(fresh) / 2.5, 6);
+      // +150 on top of +750: (1 + 9) / (1 + 7.5).
+      expect(effectiveCycleSeconds(maxed, vip)).toBeCloseTo(
+        (effectiveCycleSeconds(maxed) * 8.5) / 10,
+        6
+      );
+    });
+
+    it('a VIP who also subscribes gets BOTH — the subscription used to be worth nothing to a VIP', () => {
+      const both: BoostOptions = {
+        isVip: true,
+        isLuckyPlayer: true,
+        perks: { engineSpeedBoostPct: 150, engineSpeedMultiplierPct: 30 },
+      };
+      const maxed = engineOf('bronze', { engineLevel: 5, speedLevel: 10, capacityLevel: 10 });
+      expect(effectiveCycleSeconds(maxed, both)).toBeCloseTo(
+        (effectiveCycleSeconds(maxed) * 8.5) / 10 / 1.3,
+        6
+      );
+      // The breakdown's status row is worth exactly that, so the face agrees
+      // with the countdown.
+      const sources = engineSpeedBoostSources(maxed, both);
+      const total = sources.reduce((sum, s) => sum + s.pct, 0);
+      expect(baselineCycleSeconds(maxed) / (1 + total / 100)).toBeCloseTo(
+        effectiveCycleSeconds(maxed, both),
+        6
+      );
+    });
   });
 
   it('tier keeps costing time at every stage of the ladder', () => {

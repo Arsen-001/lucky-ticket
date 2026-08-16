@@ -129,7 +129,9 @@ export const GlobalConstants = {
    */
   referralTournamentLcL2Percentage: 1,
   /** Engine cycle speed reduction granted by Lucky Player status (stacks with chips/boosters). */
-  luckyPlayerEngineSpeedBoostPct: 10,
+  /** Engine-speed MULTIPLIER of a Lucky Player, as a % (30 = ×1.3) — the same
+   *  on a fresh and a maxed engine, like the speed chip; stacks with VIP. */
+  luckyPlayerEngineSpeedBoostPct: 30,
   /** Flat discount applied to every Market item price for Lucky Player holders (DOCS §7.3). */
   luckyPlayerMarketDiscountPct: 10,
   /** Multiplier (in %) added to stake LC yield for Lucky Player holders — stacks on top of APR. */
@@ -145,7 +147,8 @@ export const GlobalConstants = {
    * §7.3). Tied to `maxVipLevel = 20` (no per-level scaling here — the listed
    * value is what a VIP holder gets regardless of their level).
    */
-  vipEngineSpeedBoostPct: 25,
+  /** VIP's engine-speed SUMMAND at level 20 (7.5 % a level on the live ladder). */
+  vipEngineSpeedBoostPct: 150,
   vipStakeYieldBoostPct: 40,
   vipMarketDiscountPct: 20,
   vipTournamentRewardBoostPct: 50,

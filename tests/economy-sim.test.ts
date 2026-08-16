@@ -517,11 +517,16 @@ describe('equipped-avatar engine-speed boost (audit finding H2)', () => {
     // +15% additive → cycle divided by 1.15 (was a no-op before the fix: the
     // advertised avatar speed boost never reached effectiveCycleSeconds).
     expect(effectiveCycleSeconds(engine, { avatarBoostPct: 15 })).toBeCloseTo(base / 1.15, 3);
-    // Stacks additively on top of VIP (25% + 15% = 40%).
+    // Stacks additively on top of VIP's summand — the level-20 fallback of 150%
+    // when no perks are passed (150% + 15% = 165%).
     const vip = effectiveCycleSeconds(engine, { isVip: true });
     const vipPlusAvatar = effectiveCycleSeconds(engine, { isVip: true, avatarBoostPct: 15 });
     expect(vipPlusAvatar).toBeLessThan(vip);
-    expect(vipPlusAvatar).toBeCloseTo(base / 1.4, 3);
+    expect(vipPlusAvatar).toBeCloseTo(base / 2.65, 3);
+    // Lucky Player is NOT in that sum — it multiplies the whole thing (×1.3):
+    // (1 + 15%) × 1.3, the same ×1.3 it would be on a maxed engine.
+    const lpPlusAvatar = effectiveCycleSeconds(engine, { isLuckyPlayer: true, avatarBoostPct: 15 });
+    expect(lpPlusAvatar).toBeCloseTo(base / 1.15 / 1.3, 3);
   });
 });
 

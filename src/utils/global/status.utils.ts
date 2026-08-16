@@ -18,7 +18,9 @@ import type { TicketType } from '@/types/types/ticket.types';
 const PCT_FALLBACK = {
   engineSpeedBoostPct: {
     vip: GlobalConstants.vipEngineSpeedBoostPct,
-    lp: GlobalConstants.luckyPlayerEngineSpeedBoostPct,
+    // Lucky Player is NOT a summand here any more — its engine speed is a
+    // multiplier, see `effectiveEngineSpeedMultiplierPct`.
+    lp: 0,
   },
   stakeYieldBoostPct: {
     vip: GlobalConstants.vipStakeYieldBoostPct,
@@ -57,6 +59,22 @@ export const effectiveStatusPct = (
   if (isVip) return PCT_FALLBACK[key].vip;
   if (isLp) return PCT_FALLBACK[key].lp;
   return 0;
+};
+
+/**
+ * Lucky Player's engine-speed MULTIPLIER, as a % (30 = ×1.3, 0 = none). Split
+ * from the additive VIP perk on 17.08.2026 so the two stack and the
+ * subscription is worth the same on a fresh and a maxed engine — as a summand
+ * into a maxed engine's +750 % it was ×1.01. Prefers the backend-resolved
+ * value; falls back to the code constant only when perks are absent.
+ */
+export const effectiveEngineSpeedMultiplierPct = (
+  isLp: boolean,
+  perks?: Pick<StatusPerks, 'engineSpeedMultiplierPct'>
+): number => {
+  const fromServer = perks?.engineSpeedMultiplierPct;
+  if (Number.isFinite(fromServer)) return fromServer as number;
+  return isLp ? GlobalConstants.luckyPlayerEngineSpeedBoostPct : 0;
 };
 
 /**

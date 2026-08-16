@@ -4,7 +4,12 @@
  * (older backend) → fall back to the code constants.
  */
 export interface StatusPerks {
+  /** VIP's engine-speed SUMMAND (0 for a non-VIP). Since 17.08.2026 the Lucky
+   *  Player half lives in `engineSpeedMultiplierPct` — the two stack. */
   engineSpeedBoostPct: number;
+  /** Lucky Player's engine-speed MULTIPLIER as a % (30 = ×1.3; 0 / absent =
+   *  none). Applied after the additive stack, like the speed chip. */
+  engineSpeedMultiplierPct?: number;
   stakeYieldBoostPct: number;
   tournamentRewardBoostPct: number;
   tournamentJoinApBoostPct: number;

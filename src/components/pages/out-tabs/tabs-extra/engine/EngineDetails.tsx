@@ -47,7 +47,6 @@ import { EngineCubeSlot } from '@/components/pages/tabs/home/EngineCubeSlot';
 import { CubeFaceCard } from '@/components/pages/out-tabs/tabs-extra/engine/CubeFaceCard';
 import { EngineStatsLedger } from '@/components/pages/out-tabs/tabs-extra/engine/EngineStatsLedger';
 import { engineSpeedBoostSources } from '@/utils/global/engine-boosts.utils';
-import { effectiveStatusPct } from '@/utils/global/status.utils';
 import { displayNameOf } from '@/utils/global/user.utils';
 import type { InventoryChip, InventoryChipType } from '@/types/interfaces/inventory.interfaces';
 
@@ -295,15 +294,10 @@ export function EngineDetails({ id }: EngineDetailsProps) {
   const tierAccent = `var(--color-${tier})`;
 
   // The passport face quotes the owner's own status, exactly as the cube does:
-  // VIP supersedes LP (never stacks, DOCS §7.3) and the boost comes from the
-  // player's VIP level rather than the level-20 constant.
+  // the status row of the same breakdown — VIP's summand plus what the Lucky
+  // Player multiplier is worth on this engine (they stack since 17.08.2026).
   const statusLabel = isVip ? 'VIP' : isLp ? 'LP' : undefined;
-  const statusEngineSpeedBoostPct = effectiveStatusPct(
-    'engineSpeedBoostPct',
-    isLp,
-    isVip,
-    me?.statusPerks
-  );
+  const statusEngineSpeedBoostPct = boosts.find(s => s.key === 'status')?.pct ?? 0;
 
   return (
     <div className="flex flex-col gap-4 px-5 pb-6">

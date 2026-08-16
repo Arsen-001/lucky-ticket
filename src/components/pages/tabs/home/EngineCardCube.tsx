@@ -23,7 +23,6 @@ import { EngineCubeReactorFace } from './EngineCubeReactorFace';
 import { EngineCubeFacePips } from './EngineCubeFacePips';
 import { EngineCubeSlot } from './EngineCubeSlot';
 import { displayNameOf } from '@/utils/global/user.utils';
-import { effectiveStatusPct } from '@/utils/global/status.utils';
 import { EngineCubeStatsFace } from './EngineCubeStatsFace';
 import '@/styles/components/engine-cube-scale.css';
 import '@/styles/components/engine-card-cube.css';
@@ -100,15 +99,6 @@ function EngineCardCubeImpl(props: EngineCardCubeProps) {
   // Real running total of tickets this engine has ever claimed (backend counter).
   const lifetimeProduced = engine.lifetimeProduced ?? 0;
 
-  // Status grants an additive engine speed boost. VIP supersedes LP — higher
-  // tier wins, never stacks (DOCS §7.3) — and its size comes from the player's
-  // own VIP level, not the level-20 constant the stats face used to show.
-  const statusEngineSpeedBoostPct = effectiveStatusPct(
-    'engineSpeedBoostPct',
-    isLp,
-    isVip,
-    statusPerks
-  );
   const avatarSpeedPct = useEngineSpeedAvatarBoostPct();
   const badgeSpeedPct = useTestBadgeSpeedBoostPct();
   const { tables } = useEngineConfig();
@@ -155,6 +145,11 @@ function EngineCardCubeImpl(props: EngineCardCubeProps) {
     badgeBoostPct: badgeSpeedPct,
     tables,
   });
+  // What the stats face prints next to the VIP / LP badge — the status row of
+  // the same breakdown the reactor draws, so it is VIP's summand plus what the
+  // Lucky Player multiplier is worth on THIS engine (they stack since
+  // 17.08.2026), and it always agrees with the countdown.
+  const statusEngineSpeedBoostPct = speedBoosts.find(s => s.key === 'status')?.pct ?? 0;
   const capacitySources = engineCapacitySources(engine, {
     capacityChip: equippedCapacityChip,
     capacityBooster: activeCapacityBooster,
