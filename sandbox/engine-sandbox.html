@@ -1,0 +1,836 @@
+<title>Раскачка движка</title>
+<style>
+  :root {
+    --ground: #141224;
+    --surface: #1f1c33;
+    --surface-2: #191630;
+    --line: #322c4f;
+    --ink: #eeebf6;
+    --muted: #9c95b4;
+    --faint: #6f688a;
+    --speed: #de009b;
+    --speed-2: #a32183;
+    --cap: #d08a4a;
+    --cap-2: #ac6122;
+    --ok: #56b294;
+    --display: 'Futura', 'Avenir Next', 'Trebuchet MS', system-ui, sans-serif;
+    --body: system-ui, -apple-system, 'Segoe UI', sans-serif;
+    --data: ui-monospace, 'SF Mono', Menlo, Consolas, monospace;
+  }
+
+  body {
+    background: var(--ground);
+    color: var(--ink);
+    font-family: var(--body);
+    line-height: 1.5;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  .wrap {
+    max-width: 940px;
+    margin: 0 auto;
+    padding: clamp(22px, 4vw, 44px) clamp(14px, 4vw, 32px) 80px;
+    display: grid;
+    grid-template-columns: minmax(300px, 380px) 1fr;
+    gap: 28px;
+    align-items: start;
+  }
+  @media (max-width: 800px) {
+    .wrap {
+      grid-template-columns: 1fr;
+    }
+  }
+
+  h1 {
+    font-family: var(--display);
+    font-size: clamp(24px, 4vw, 32px);
+    font-weight: 600;
+    letter-spacing: -0.01em;
+    grid-column: 1 / -1;
+    margin-bottom: -8px;
+  }
+  h1 small {
+    display: block;
+    font-family: var(--body);
+    font-size: 14px;
+    font-weight: 400;
+    color: var(--muted);
+    margin-top: 6px;
+    letter-spacing: 0;
+  }
+  h2 {
+    font-family: var(--display);
+    font-size: 15px;
+    letter-spacing: 0.02em;
+    font-weight: 600;
+    margin-bottom: 10px;
+  }
+
+  /* ─── engine card ─── */
+  .card {
+    background: linear-gradient(160deg, #2a2442 0%, #221e38 100%);
+    border: 1px solid #3a3358;
+    border-radius: 16px;
+    padding: 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+  }
+  .card-head {
+    display: flex;
+    align-items: center;
+    gap: 11px;
+  }
+  .cube {
+    width: 46px;
+    height: 46px;
+    border-radius: 11px;
+    background: radial-gradient(circle at 30% 25%, #e0a86e 0%, #8c5220 55%, #5b3414 100%);
+    flex: none;
+    transition: transform 0.25s ease;
+  }
+  .cube.pulse {
+    transform: scale(1.12) rotate(-4deg);
+  }
+  .card-head b {
+    font-size: 15px;
+  }
+  .tier {
+    font-family: var(--data);
+    font-size: 10px;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--cap);
+  }
+
+  .stats {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 8px;
+    text-align: center;
+  }
+  .stats div {
+    background: var(--surface-2);
+    border-radius: 9px;
+    padding: 9px 4px;
+  }
+  .stats b {
+    display: block;
+    font-family: var(--data);
+    font-variant-numeric: tabular-nums;
+    font-size: 17px;
+    font-weight: 600;
+  }
+  .stats span {
+    font-size: 9px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--faint);
+  }
+
+  .lane {
+    display: flex;
+    flex-direction: column;
+    gap: 7px;
+  }
+  .lane-head {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    font-size: 12.5px;
+  }
+  .lane-name {
+    display: flex;
+    align-items: center;
+    gap: 7px;
+    color: var(--muted);
+  }
+  .dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    flex: none;
+  }
+  .lane-head b {
+    font-family: var(--data);
+    font-variant-numeric: tabular-nums;
+  }
+  .ticks {
+    display: flex;
+    gap: 3px;
+  }
+  .ticks i {
+    height: 9px;
+    flex: 1 1 0;
+    border-radius: 2px;
+    background: #322c4f;
+    transition: background 0.2s ease;
+  }
+  .lane-foot {
+    display: flex;
+    justify-content: space-between;
+    font-family: var(--data);
+    font-size: 10.5px;
+    color: var(--faint);
+  }
+  .lane-foot em {
+    font-style: normal;
+    color: var(--ink);
+  }
+
+  .buy {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 9px;
+  }
+  .buy button {
+    font-family: var(--body);
+    font-size: 13px;
+    font-weight: 600;
+    color: #fff;
+    border: none;
+    border-radius: 10px;
+    padding: 11px 6px;
+    cursor: pointer;
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    align-items: center;
+    transition: filter 0.15s ease;
+  }
+  .buy button:hover {
+    filter: brightness(1.12);
+  }
+  .buy button:active {
+    filter: brightness(0.92);
+  }
+  .buy button span {
+    font-family: var(--data);
+    font-size: 11px;
+    opacity: 0.9;
+  }
+  .b-speed {
+    background: linear-gradient(120deg, var(--speed), var(--speed-2));
+  }
+  .b-cap {
+    background: linear-gradient(120deg, var(--cap-2), var(--cap));
+  }
+  .b-engine {
+    width: 100%;
+    font-family: var(--body);
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--ink);
+    background: var(--surface-2);
+    border: 1px solid #4a4270;
+    border-radius: 10px;
+    padding: 11px 6px;
+    cursor: pointer;
+    display: flex;
+    justify-content: center;
+    gap: 8px;
+    align-items: baseline;
+  }
+  .b-engine:hover {
+    border-color: var(--muted);
+  }
+  .b-engine span {
+    font-family: var(--data);
+    font-size: 11px;
+    color: var(--muted);
+  }
+  .buy button:disabled,
+  .b-engine:disabled {
+    opacity: 0.35;
+    cursor: default;
+    filter: none;
+  }
+  .b-promote {
+    width: 100%;
+    font-family: var(--body);
+    font-size: 13px;
+    font-weight: 700;
+    color: #1a1400;
+    background: linear-gradient(120deg, #f8bd3e, #ffe6a3 55%, #f8bd3e);
+    border: none;
+    border-radius: 10px;
+    padding: 11px 8px;
+    cursor: pointer;
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    align-items: center;
+    animation: glow 1.4s ease-in-out infinite alternate;
+  }
+  .b-promote .sub {
+    font-family: var(--data);
+    font-size: 10px;
+    font-weight: 500;
+    opacity: 0.8;
+  }
+  @keyframes glow {
+    from {
+      box-shadow: 0 0 0 0 rgba(248, 189, 62, 0.25);
+    }
+    to {
+      box-shadow: 0 0 22px 2px rgba(248, 189, 62, 0.45);
+    }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .b-promote {
+      animation: none;
+    }
+  }
+  .lvl-pips {
+    display: flex;
+    gap: 4px;
+  }
+  .lvl-pips i {
+    width: 14px;
+    height: 5px;
+    border-radius: 2px;
+    background: #322c4f;
+  }
+  .lvl-pips i.on {
+    background: #f8bd3e;
+  }
+  .fleet {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+  }
+  .fleet button {
+    font-family: var(--data);
+    font-size: 11px;
+    padding: 6px 9px;
+    border-radius: 8px;
+    border: 1px solid var(--line);
+    background: var(--surface-2);
+    color: var(--muted);
+    cursor: pointer;
+  }
+  .fleet button.on {
+    border-color: var(--cap);
+    color: var(--ink);
+  }
+  .fleet button b {
+    color: var(--ink);
+  }
+  button:focus-visible {
+    outline: 2px solid var(--ink);
+    outline-offset: 2px;
+  }
+
+  .bulk {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+  }
+  .bulk button {
+    flex: 1 1 0;
+    min-width: 96px;
+    background: var(--surface);
+    color: var(--muted);
+    border: 1px solid var(--line);
+    border-radius: 9px;
+    padding: 8px 6px;
+    font-size: 12px;
+    font-family: var(--body);
+    cursor: pointer;
+  }
+  .bulk button:hover {
+    color: var(--ink);
+    border-color: var(--faint);
+  }
+  .bulk button.on {
+    color: var(--ink);
+    border-color: var(--speed);
+    background: color-mix(in srgb, var(--speed) 14%, var(--surface));
+  }
+  .srow {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 10px;
+    margin-top: 8px;
+    font-size: 12px;
+    color: var(--muted);
+  }
+  .srow b {
+    color: var(--ink);
+    font-family: var(--data);
+  }
+  .srow input[type='range'] {
+    width: 50%;
+    accent-color: var(--speed);
+  }
+  .snote {
+    margin-top: 8px;
+    font-size: 11px;
+    line-height: 1.5;
+    color: var(--muted);
+    font-family: var(--data);
+  }
+  .snote b {
+    color: var(--ink);
+  }
+
+  /* ─── right column ─── */
+  .panel {
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: 10px;
+    padding: 16px 18px;
+    margin-bottom: 18px;
+  }
+  .kv {
+    display: flex;
+    justify-content: space-between;
+    padding: 7px 0;
+    border-bottom: 1px solid var(--line);
+    font-size: 13.5px;
+  }
+  .kv:last-child {
+    border-bottom: none;
+  }
+  .kv span {
+    color: var(--muted);
+  }
+  .kv b {
+    font-family: var(--data);
+    font-variant-numeric: tabular-nums;
+  }
+  .kv b.good {
+    color: var(--ok);
+  }
+
+  .log {
+    max-height: 260px;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    font-size: 12.5px;
+  }
+  .log p {
+    display: flex;
+    gap: 9px;
+    color: var(--muted);
+    font-family: var(--data);
+  }
+  .log p b {
+    color: var(--ink);
+  }
+  .log p.ms {
+    color: var(--cap);
+  }
+  .log p.ms b {
+    color: var(--cap);
+  }
+  .log .empty {
+    color: var(--faint);
+    font-family: var(--body);
+  }
+
+  .hint {
+    color: var(--faint);
+    font-size: 12px;
+    margin-top: 10px;
+    line-height: 1.6;
+  }
+</style>
+
+<div class="wrap">
+  <h1>
+    Раскачка движка
+    <small
+      >Нулевая бронза: 1 билет за 2 часа. Куб растёт до 5-го уровня: на каждом уровне две шкалы по
+      10, обе на максимуме → повышение. Клик скорости +2%, клик вместимости +1 билет. За полную
+      прокачку уровня — бонус билетов <b>1 · 5 · 10 · 15 · 20</b> и бонус скорости
+      <b>+15 · +65 · +125 · +190 · +255%</b>, подобранный так, что каждый прокачанный уровень выдаёт
+      всю пачку примерно за сутки, а пятый — ровно за 24 часа. Статусы —
+      <b>как на проде с 17.08</b>: VIP кладёт в тот же стек процентов 7.5% за уровень (VIP 20 =
+      +150%), Lucky Player — отдельный <b>множитель ×1.3</b> поверх всего, как чип скорости; вместе
+      складываются и действуют на каждый движок парка.</small
+    >
+  </h1>
+
+  <div>
+    <div class="fleet" id="fleet" style="margin-bottom: 10px"></div>
+    <div class="card">
+      <div class="card-head">
+        <div class="cube" id="cube"></div>
+        <div>
+          <b id="c-title">Двигатель #1</b>
+          <div class="tier">Бронза · <span id="c-level">уровень 1</span></div>
+        </div>
+      </div>
+
+      <div class="lvl-pips" id="lvl-pips"><i class="on"></i><i></i><i></i><i></i><i></i></div>
+
+      <div class="stats">
+        <div><b id="s-cap">1</b><span>за цикл</span></div>
+        <div><b id="s-cycle">2:00</b><span>цикл</span></div>
+        <div><b id="s-rate">0.50</b><span>в час</span></div>
+      </div>
+
+      <div class="lane">
+        <div class="lane-head">
+          <span class="lane-name"
+            ><i class="dot" style="background: var(--speed)"></i>Скорость</span
+          >
+          <b id="l-speed">0 · +0%</b>
+        </div>
+        <div class="ticks" id="t-speed"></div>
+        <div class="lane-foot">
+          <span id="f-speed-left">до максимума 10</span><em id="f-speed-right">каждый клик +2%</em>
+        </div>
+      </div>
+
+      <div class="lane">
+        <div class="lane-head">
+          <span class="lane-name"
+            ><i class="dot" style="background: var(--cap)"></i>Вместимость</span
+          >
+          <b id="l-cap">0 · 1 бил</b>
+        </div>
+        <div class="ticks" id="t-cap"></div>
+        <div class="lane-foot">
+          <span id="f-cap-left">до максимума 10</span><em id="f-cap-right">каждый клик +1 билет</em>
+        </div>
+      </div>
+
+      <button class="b-promote" id="promote" type="button" hidden>
+        ⬆ Повысить до уровня <span id="p-next">2</span>
+        <span class="sub" id="p-bonus">+1 билет уже начислен · откроет новые 10/10</span>
+      </button>
+
+      <div class="buy">
+        <button class="b-speed" id="buy-speed" type="button">
+          Скорость <span id="p-speed">1 ⭐</span>
+        </button>
+        <button class="b-cap" id="buy-cap" type="button">
+          Вместимость <span id="p-cap">2 ⭐</span>
+        </button>
+      </div>
+
+      <button class="b-engine" id="buy-engine" type="button">
+        Купить ещё один движок <span id="p-engine">14 ⭐</span>
+      </button>
+
+      <div class="bulk">
+        <button id="max-speed" type="button">скорость до 10</button>
+        <button id="max-cap" type="button">вместимость до 10</button>
+        <button id="reset" type="button">сброс</button>
+      </div>
+    </div>
+
+    <div class="card" style="margin-top: 10px">
+      <div class="card-head">
+        <div>
+          <b>Статус — на весь парк</b>
+          <div class="tier">VIP слагаемое · Lucky Player множитель · складываются</div>
+        </div>
+      </div>
+      <div class="bulk">
+        <button id="st-vip" type="button">VIP <span id="st-vip-pct">+150%</span></button>
+        <button id="st-lp" type="button">Lucky Player ×1.30</button>
+      </div>
+      <div class="srow" id="vip-row" hidden>
+        <span>уровень VIP <b id="vip-val">20</b> · +<b id="vip-pct">150</b>% в стек</span>
+        <input id="vip" type="range" min="1" max="20" value="20" />
+      </div>
+      <div class="snote" id="st-note"></div>
+    </div>
+
+    <p class="hint">
+      Цена клика растёт со шкалой и с уровнем куба: скорость 1+L+(ур−1) ⭐, вместимость 2+L+(ур−1)
+      ⭐. Весь путь до 5-го уровня 10/10 — 800 ⭐. Каждый следующий движок дороже в 1.35 раза: 10 ·
+      14 · 18 · 25 · 33 · 45 ⭐… Над карточкой — переключатель между твоими движками.
+    </p>
+  </div>
+
+  <div>
+    <div class="panel">
+      <h2>Итог</h2>
+      <div class="kv"><span>Потрачено всего</span><b id="k-spent">0 ⭐</b></div>
+      <div class="kv"><span>Движков</span><b id="k-engines">1</b></div>
+      <div class="kv"><span>Билетов в сутки, весь парк</span><b id="k-day">12.0</b></div>
+      <div class="kv"><span>Против одного нулевого</span><b id="k-mult" class="good">×1.00</b></div>
+      <div class="kv"><span>Окупаемость всего вложенного</span><b id="k-payback">—</b></div>
+      <div class="kv"><span>Этот движок: сборов в сутки</span><b id="k-collects">12.0</b></div>
+    </div>
+
+    <div class="panel">
+      <h2>Что происходило</h2>
+      <div class="log" id="log"><p class="empty">Пока ничего — нажми апгрейд.</p></div>
+    </div>
+  </div>
+</div>
+
+<script>
+  const TIER_CYCLE = 7200; // бронза: один билет = 2 часа
+  const MAX = 10; // подуровней на каждой шкале
+  const MAX_LEVEL = 5;
+  const SPEED_PER_CLICK = 2;
+  const FULL_BONUS = [0, 1, 5, 10, 15, 20]; // билетов за полную прокачку уровня
+  const FULL_SPEED = [0, 15, 65, 125, 190, 255]; // % скорости за полную прокачку уровня
+  // база уровня = предыдущая + 10 кликов + бонус предыдущего уровня (повышение без потерь)
+  const BASE = [0, 1];
+  const LEVEL_SPEED = [0, 0];
+  for (let l = 1; l < MAX_LEVEL; l += 1) {
+    BASE.push(BASE[l] + MAX + FULL_BONUS[l]); // → 1, 12, 27, 47, 72
+    LEVEL_SPEED.push(LEVEL_SPEED[l] + MAX * SPEED_PER_CLICK + FULL_SPEED[l]); // → 0, 35, 120, 265, 475
+  }
+  const ENGINE_BASE = 10;
+  const ENGINE_GROWTH = 1.35;
+  const TICKET_STARS = 0.2;
+  const VIP_STEP = 7.5; // прод с 17.08: VIP engineSpeedBoostPct = 7.5 × уровень — слагаемое в стек
+  const LP_MUL_PCT = 30; // прод с 17.08: Lucky Player — множитель ×1.3 поверх стека, как чип скорости
+
+  const state = {
+    engines: [{ level: 1, speed: 0, cap: 0 }],
+    cur: 0,
+    spent: 0,
+    log: [],
+    hasVip: false,
+    hasLp: false,
+    vip: 20,
+  };
+  const vipPct = () => (state.hasVip ? VIP_STEP * state.vip : 0);
+  const lpFactor = () => (state.hasLp ? 1 + LP_MUL_PCT / 100 : 1);
+
+  const isMaxed = e => e.speed >= MAX && e.cap >= MAX;
+  const capacity = e => BASE[e.level] + e.cap + (isMaxed(e) ? FULL_BONUS[e.level] : 0);
+  const speedPct = e =>
+    LEVEL_SPEED[e.level] + SPEED_PER_CLICK * e.speed + (isMaxed(e) ? FULL_SPEED[e.level] : 0);
+  // Статусы складываются: VIP — в аддитивный стек, LP — множителем сверху (оба, если оба).
+  const cycleSec = (e, bare = false) =>
+    (capacity(e) * TIER_CYCLE) /
+    (1 + (speedPct(e) + (bare ? 0 : vipPct())) / 100) /
+    (bare ? 1 : lpFactor());
+  const rate = (e, bare = false) => capacity(e) / (cycleSec(e, bare) / 3600);
+  const priceSpeed = e => 1 + e.speed + (e.level - 1);
+  const priceCap = e => 2 + e.cap + (e.level - 1);
+  const priceEngine = n => Math.round(ENGINE_BASE * Math.pow(ENGINE_GROWTH, n - 1));
+
+  const fmtCycle = sec => {
+    const h = Math.floor(sec / 3600);
+    const m = Math.round((sec % 3600) / 60);
+    return `${h}:${String(m).padStart(2, '0')}`;
+  };
+  const ticks = (el, level, color) => {
+    el.innerHTML = '';
+    for (let i = 0; i < MAX; i += 1) {
+      const t = document.createElement('i');
+      if (i < level) t.style.background = color;
+      el.appendChild(t);
+    }
+  };
+  const pushLog = (text, mark) => {
+    state.log.unshift({ text, mark });
+    state.log = state.log.slice(0, 40);
+  };
+
+  const render = () => {
+    const e = state.engines[state.cur];
+    const cap = capacity(e);
+    const pct = speedPct(e);
+    const cyc = cycleSec(e);
+    const r = rate(e);
+    const fleetRate = state.engines.reduce((s, x) => s + rate(x), 0);
+    const maxed = isMaxed(e);
+    const topLevel = e.level >= MAX_LEVEL;
+
+    document.getElementById('c-title').textContent = `Двигатель #${state.cur + 1}`;
+    document.getElementById('c-level').textContent =
+      `уровень ${e.level}${maxed && topLevel ? ' · максимум' : ''}`;
+    document
+      .querySelectorAll('#lvl-pips i')
+      .forEach((p, i) => p.classList.toggle('on', i < e.level));
+
+    document.getElementById('s-cap').textContent = cap;
+    document.getElementById('s-cycle').textContent = fmtCycle(cyc);
+    document.getElementById('s-rate').textContent = r.toFixed(2);
+
+    document.getElementById('l-speed').textContent = `${e.speed}/${MAX} · +${pct}%`;
+    document.getElementById('l-cap').textContent = `${e.cap}/${MAX} · ${cap} бил`;
+    ticks(document.getElementById('t-speed'), e.speed, 'var(--speed)');
+    ticks(document.getElementById('t-cap'), e.cap, 'var(--cap)');
+
+    const sMax = e.speed >= MAX,
+      cMax = e.cap >= MAX;
+    document.getElementById('f-speed-left').textContent = sMax
+      ? 'шкала полна'
+      : `до полной ${MAX - e.speed}`;
+    document.getElementById('f-speed-right').textContent = maxed
+      ? `бонус уровня +${FULL_SPEED[e.level]}% начислен`
+      : `клик +2% · обе шкалы полны → +${FULL_SPEED[e.level]}%`;
+    document.getElementById('f-cap-left').textContent = cMax
+      ? 'шкала полна'
+      : `до полной ${MAX - e.cap}`;
+    document.getElementById('f-cap-right').textContent = maxed
+      ? `бонус уровня +${FULL_BONUS[e.level]} билетов начислен`
+      : `обе шкалы полны → +${FULL_BONUS[e.level]} билетов`;
+
+    document.getElementById('buy-speed').disabled = sMax;
+    document.getElementById('buy-cap').disabled = cMax;
+    document.getElementById('p-speed').textContent = sMax ? 'полна' : `${priceSpeed(e)} ⭐`;
+    document.getElementById('p-cap').textContent = cMax ? 'полна' : `${priceCap(e)} ⭐`;
+    document.getElementById('p-engine').textContent = `${priceEngine(state.engines.length + 1)} ⭐`;
+
+    const pr = document.getElementById('promote');
+    pr.hidden = !(maxed && !topLevel);
+    if (!pr.hidden) {
+      document.getElementById('p-next').textContent = e.level + 1;
+      document.getElementById('p-bonus').textContent =
+        `+${FULL_BONUS[e.level]} билетов и +${FULL_SPEED[e.level]}% уже начислены · откроет новые 10/10`;
+    }
+
+    const fleet = document.getElementById('fleet');
+    fleet.innerHTML = '';
+    state.engines.forEach((x, i) => {
+      const b = document.createElement('button');
+      b.type = 'button';
+      b.className = i === state.cur ? 'on' : '';
+      b.innerHTML = `<b>#${i + 1}</b> ур${x.level} ${x.speed}/${x.cap}`;
+      b.addEventListener('click', () => {
+        state.cur = i;
+        render();
+      });
+      fleet.appendChild(b);
+    });
+
+    document.getElementById('st-vip').className = state.hasVip ? 'on' : '';
+    document.getElementById('st-lp').className = state.hasLp ? 'on' : '';
+    document.getElementById('st-vip-pct').textContent = `+${VIP_STEP * state.vip}%`;
+    document.getElementById('vip-row').hidden = !state.hasVip;
+    document.getElementById('vip-val').textContent = state.vip;
+    document.getElementById('vip-pct').textContent = VIP_STEP * state.vip;
+    const bareCyc = cycleSec(e, true),
+      bareRate = rate(e, true);
+    const fleetBare = state.engines.reduce((s, x) => s + rate(x, true), 0);
+    document.getElementById('st-note').innerHTML =
+      state.hasVip || state.hasLp
+        ? `движок сам +${pct}%${state.hasVip ? ` + VIP ${vipPct()}% = <b>+${pct + vipPct()}%</b>` : ''}${state.hasLp ? ` · затем <b>×${lpFactor().toFixed(2)}</b> Lucky Player` : ''}<br>` +
+          `цикл ${fmtCycle(bareCyc)} → <b>${fmtCycle(cyc)}</b> · ${bareRate.toFixed(2)} → <b>${r.toFixed(2)}</b> в час (×${(r / bareRate).toFixed(2)})<br>` +
+          `весь парк (${state.engines.length}): ${(fleetBare * 24).toFixed(1)} → <b>${(fleetRate * 24).toFixed(1)}</b> билетов в сутки, +${((fleetRate - fleetBare) * 24).toFixed(1)} — как ещё <b>${((fleetRate - fleetBare) / 0.5).toFixed(1)}</b> нулевых движков`
+        : 'статусов нет — движок работает на своих процентах';
+
+    document.getElementById('k-spent').textContent = `${state.spent} ⭐`;
+    document.getElementById('k-engines').textContent = state.engines.length;
+    document.getElementById('k-day').textContent = (fleetRate * 24).toFixed(1);
+    document.getElementById('k-mult').textContent = `×${(fleetRate / 0.5).toFixed(2)}`;
+    const perDay = fleetRate * 24 * TICKET_STARS;
+    document.getElementById('k-payback').textContent =
+      state.spent === 0 ? '—' : `${Math.round((state.spent + ENGINE_BASE) / perDay)} дней`;
+    document.getElementById('k-collects').textContent = (86400 / cyc).toFixed(2);
+
+    const log = document.getElementById('log');
+    log.innerHTML = state.log.length
+      ? state.log.map(l => `<p class="${l.mark ? 'ms' : ''}">${l.text}</p>`).join('')
+      : '<p class="empty">Пока ничего — нажми апгрейд.</p>';
+  };
+
+  const pulse = () => {
+    const c = document.getElementById('cube');
+    c.classList.add('pulse');
+    setTimeout(() => c.classList.remove('pulse'), 180);
+  };
+
+  const buySpeed = () => {
+    const e = state.engines[state.cur];
+    if (e.speed >= MAX) return;
+    const price = priceSpeed(e);
+    state.spent += price;
+    e.speed += 1;
+    const full = isMaxed(e);
+    pushLog(
+      `⚡ дв${state.cur + 1} ур${e.level} скорость ${e.speed}/${MAX} → <b>+${speedPct(e)}%</b>, цикл ${fmtCycle(cycleSec(e))} · ${price} ⭐` +
+        (full
+          ? ` · ОБЕ ПОЛНЫ: +${FULL_BONUS[e.level]} билетов и +${FULL_SPEED[e.level]}% → ${capacity(e)} за ${fmtCycle(cycleSec(e))}`
+          : ''),
+      full
+    );
+    pulse();
+    render();
+  };
+  const buyCap = () => {
+    const e = state.engines[state.cur];
+    if (e.cap >= MAX) return;
+    const price = priceCap(e);
+    state.spent += price;
+    e.cap += 1;
+    const full = isMaxed(e);
+    pushLog(
+      `📦 дв${state.cur + 1} ур${e.level} вместимость ${e.cap}/${MAX} → <b>${capacity(e)} за цикл</b>, цикл ${fmtCycle(cycleSec(e))} · ${price} ⭐` +
+        (full
+          ? ` · ОБЕ ПОЛНЫ: +${FULL_BONUS[e.level]} билетов и +${FULL_SPEED[e.level]}% → ${capacity(e)} за ${fmtCycle(cycleSec(e))}`
+          : ''),
+      full
+    );
+    pulse();
+    render();
+  };
+  const promote = () => {
+    const e = state.engines[state.cur];
+    if (!isMaxed(e) || e.level >= MAX_LEVEL) return;
+    const before = capacity(e);
+    e.level += 1;
+    e.speed = 0;
+    e.cap = 0;
+    pushLog(
+      `⬆ <b>дв${state.cur + 1} — УРОВЕНЬ ${e.level}</b>: ${capacity(e)} билетов за ${fmtCycle(cycleSec(e))} (без потерь), скорость +${speedPct(e)}%, две новые шкалы открыты`,
+      true
+    );
+    pulse();
+    render();
+  };
+  const buyEngine = () => {
+    const n = state.engines.length + 1;
+    const price = priceEngine(n);
+    state.spent += price;
+    state.engines.push({ level: 1, speed: 0, cap: 0 });
+    state.cur = state.engines.length - 1;
+    pushLog(
+      `🟫 <b>куплен движок #${n}</b> за ${price} ⭐ · следующий будет ${priceEngine(n + 1)} ⭐`,
+      true
+    );
+    pulse();
+    render();
+  };
+
+  document.getElementById('buy-speed').addEventListener('click', buySpeed);
+  document.getElementById('buy-cap').addEventListener('click', buyCap);
+  document.getElementById('promote').addEventListener('click', promote);
+  document.getElementById('buy-engine').addEventListener('click', buyEngine);
+  document.getElementById('max-speed').addEventListener('click', () => {
+    while (state.engines[state.cur].speed < MAX) buySpeed();
+  });
+  document.getElementById('max-cap').addEventListener('click', () => {
+    while (state.engines[state.cur].cap < MAX) buyCap();
+  });
+  document.getElementById('st-vip').addEventListener('click', () => {
+    state.hasVip = !state.hasVip;
+    render();
+  });
+  document.getElementById('st-lp').addEventListener('click', () => {
+    state.hasLp = !state.hasLp;
+    render();
+  });
+  document.getElementById('vip').addEventListener('input', ev => {
+    state.vip = Number(ev.target.value);
+    render();
+  });
+  document.getElementById('reset').addEventListener('click', () => {
+    state.engines = [{ level: 1, speed: 0, cap: 0 }];
+    state.cur = 0;
+    state.spent = 0;
+    state.log = [];
+    state.hasVip = false;
+    state.hasLp = false;
+    state.vip = 20;
+    render();
+  });
+  render();
+</script>

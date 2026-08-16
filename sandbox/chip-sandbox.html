@@ -1,0 +1,906 @@
+<title>Чипы на двигателе</title>
+<style>
+  :root {
+    --ground: #141224;
+    --surface: #1f1c33;
+    --surface-2: #191630;
+    --line: #322c4f;
+    --ink: #eeebf6;
+    --muted: #9c95b4;
+    --faint: #6f688a;
+    --speed: #de009b;
+    --speed-2: #a32183;
+    --cap: #d08a4a;
+    --cap-2: #ac6122;
+    --shard: #7dc4ff;
+    --ok: #56b294;
+    --display: 'Futura', 'Avenir Next', 'Trebuchet MS', system-ui, sans-serif;
+    --body: system-ui, -apple-system, 'Segoe UI', sans-serif;
+    --data: ui-monospace, 'SF Mono', Menlo, Consolas, monospace;
+  }
+  body {
+    background: var(--ground);
+    color: var(--ink);
+    font-family: var(--body);
+    line-height: 1.5;
+    -webkit-font-smoothing: antialiased;
+  }
+  .wrap {
+    max-width: 980px;
+    margin: 0 auto;
+    padding: clamp(22px, 4vw, 44px) clamp(14px, 4vw, 32px) 80px;
+    display: grid;
+    grid-template-columns: minmax(300px, 400px) 1fr;
+    gap: 26px;
+    align-items: start;
+  }
+  @media (max-width: 820px) {
+    .wrap {
+      grid-template-columns: 1fr;
+    }
+  }
+  h1 {
+    font-family: var(--display);
+    font-size: clamp(24px, 4vw, 32px);
+    font-weight: 600;
+    letter-spacing: -0.01em;
+    grid-column: 1 / -1;
+    margin-bottom: -8px;
+  }
+  h1 small {
+    display: block;
+    font-family: var(--body);
+    font-size: 14px;
+    font-weight: 400;
+    color: var(--muted);
+    margin-top: 6px;
+    max-width: 78ch;
+  }
+  h2 {
+    font-family: var(--display);
+    font-size: 15px;
+    letter-spacing: 0.02em;
+    font-weight: 600;
+    margin-bottom: 10px;
+  }
+
+  .card {
+    background: linear-gradient(160deg, #2a2442 0%, #221e38 100%);
+    border: 1px solid #3a3358;
+    border-radius: 16px;
+    padding: 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 13px;
+  }
+  .card + .card {
+    margin-top: 12px;
+  }
+  .card-head {
+    display: flex;
+    align-items: center;
+    gap: 11px;
+  }
+  .card-head b {
+    font-size: 15px;
+  }
+  .sub {
+    font-family: var(--data);
+    font-size: 10px;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--cap);
+  }
+  .chip-ico {
+    width: 40px;
+    height: 40px;
+    border-radius: 10px;
+    flex: none;
+    display: grid;
+    place-items: center;
+    font-size: 18px;
+  }
+  .chip-ico.cap {
+    background: linear-gradient(140deg, #6b4423, #d08a4a);
+  }
+  .chip-ico.speed {
+    background: linear-gradient(140deg, #7a1266, #de009b);
+  }
+
+  .presets {
+    display: flex;
+    gap: 6px;
+    flex-wrap: wrap;
+  }
+  .presets button {
+    font-family: var(--data);
+    font-size: 11px;
+    padding: 6px 9px;
+    border-radius: 8px;
+    border: 1px solid var(--line);
+    background: var(--surface-2);
+    color: var(--muted);
+    cursor: pointer;
+  }
+  .presets button.on {
+    border-color: var(--cap);
+    color: var(--ink);
+  }
+
+  .stats {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 8px;
+    text-align: center;
+  }
+  .stats div {
+    background: var(--surface-2);
+    border-radius: 9px;
+    padding: 9px 4px;
+  }
+  .stats b {
+    display: block;
+    font-family: var(--data);
+    font-variant-numeric: tabular-nums;
+    font-size: 17px;
+    font-weight: 600;
+  }
+  .stats span {
+    font-size: 9px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--faint);
+  }
+  .stats i {
+    display: block;
+    font-style: normal;
+    font-family: var(--data);
+    font-size: 10px;
+    color: var(--ok);
+    min-height: 13px;
+  }
+
+  .row {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    font-size: 12.5px;
+    color: var(--muted);
+  }
+  .row b {
+    color: var(--ink);
+    font-family: var(--data);
+    font-variant-numeric: tabular-nums;
+  }
+  .lvl {
+    display: flex;
+    gap: 3px;
+    flex-wrap: wrap;
+  }
+  .lvl i {
+    width: 12px;
+    height: 8px;
+    border-radius: 2px;
+    background: #322c4f;
+  }
+  .lvl i.on-cap {
+    background: var(--cap);
+  }
+  .lvl i.on-speed {
+    background: var(--speed);
+  }
+
+  .acts {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+  }
+  .acts button {
+    font-family: var(--body);
+    font-size: 12.5px;
+    font-weight: 600;
+    color: #fff;
+    border: none;
+    border-radius: 10px;
+    padding: 10px 6px;
+    cursor: pointer;
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    align-items: center;
+  }
+  .acts button span {
+    font-family: var(--data);
+    font-size: 10.5px;
+    opacity: 0.9;
+  }
+  .acts button:disabled {
+    opacity: 0.35;
+    cursor: default;
+  }
+  .b-cap {
+    background: linear-gradient(120deg, var(--cap-2), var(--cap));
+  }
+  .b-speed {
+    background: linear-gradient(120deg, var(--speed), var(--speed-2));
+  }
+  .b-equip {
+    background: var(--surface-2);
+    border: 1px solid #4a4270 !important;
+    color: var(--ink) !important;
+  }
+  .b-equip.on {
+    border-color: var(--ok) !important;
+  }
+  .b-shard {
+    background: linear-gradient(120deg, #2b5f8f, #4a8fc9);
+  }
+  button:focus-visible {
+    outline: 2px solid var(--ink);
+    outline-offset: 2px;
+  }
+
+  .panel {
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: 10px;
+    padding: 16px 18px;
+    margin-bottom: 18px;
+  }
+  .kv {
+    display: flex;
+    justify-content: space-between;
+    padding: 7px 0;
+    border-bottom: 1px solid var(--line);
+    font-size: 13.5px;
+  }
+  .kv:last-child {
+    border-bottom: none;
+  }
+  .kv span {
+    color: var(--muted);
+  }
+  .kv b {
+    font-family: var(--data);
+    font-variant-numeric: tabular-nums;
+  }
+  .kv b.good {
+    color: var(--ok);
+  }
+  .log {
+    max-height: 250px;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    font-size: 12.5px;
+  }
+  .log p {
+    color: var(--muted);
+    font-family: var(--data);
+  }
+  .log p b {
+    color: var(--ink);
+  }
+  .log .empty {
+    color: var(--faint);
+    font-family: var(--body);
+  }
+  table {
+    border-collapse: collapse;
+    width: 100%;
+    font-size: 12.5px;
+  }
+  th,
+  td {
+    padding: 6px 9px;
+    border-bottom: 1px solid var(--line);
+    text-align: right;
+    font-family: var(--data);
+    font-variant-numeric: tabular-nums;
+  }
+  th {
+    font-size: 10px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--muted);
+    font-weight: 500;
+  }
+  td:first-child,
+  th:first-child {
+    text-align: left;
+  }
+  .hint {
+    color: var(--faint);
+    font-size: 12px;
+    margin-top: 10px;
+    line-height: 1.6;
+  }
+</style>
+
+<div class="wrap">
+  <h1>
+    Чипы на двигателе
+    <small
+      >Выбери движок, вставь чипы, качай их осколками. Три правила:
+      <b>10 уровней · полный чип = 200 осколков = 200 ⭐ · на максимуме = половина движка</b>.
+      Ёмкость: +5 билетов за уровень, десятый +6 — на максимуме +51. Скорость: множитель к циклу,
+      +10% за уровень, на 10-м ×2 (24 ч → 12 ч, 2 ч → 1 ч). Цена: собрать 20 осколков, дальше 12 ·
+      14 · 16 … 28. Осколок в маркете 1 ⭐ (или 20 000 LC — паритет). Надеть — бесплатно, снять — L
+      ⭐. Один билет = один цикл тира. Статусы — <b>как на проде с 17.08</b>: VIP — слагаемое в стек
+      движка, 7.5% за уровень (VIP 20 = +150%); Lucky Player — <b>множитель ×1.3</b> поверх всего
+      стека, как чип скорости; вместе они <b>складываются</b>. Слайдеры и переключатели «слагаемое /
+      множитель» оставлены, чтобы примерять другие цифры: слагаемое тонет в стеке прокачанного
+      движка, множитель — нет. Бустер скорости добавляется к процентам движка; бустер ёмкости +25%
+      ко всей пачке, округление вверх; чип скорости — отдельный множитель. Справа «статус на весь
+      парк» пересчитывает выигрыш в «движки в подарок» для парка нужного размера.</small
+    >
+  </h1>
+
+  <div>
+    <div class="card">
+      <div class="card-head">
+        <div>
+          <b>Движок</b>
+          <div class="sub">Бронза · <span id="e-desc">свежий</span></div>
+        </div>
+      </div>
+      <div class="presets" id="presets"></div>
+      <div class="row" style="font-size: 11px">
+        <span id="e-formula" style="font-family: var(--data)"></span>
+      </div>
+      <div class="stats">
+        <div><b id="s-cap">1</b><span>за цикл</span><i id="d-cap"></i></div>
+        <div><b id="s-cycle">2:00</b><span>цикл</span><i id="d-cycle"></i></div>
+        <div><b id="s-rate">0.50</b><span>в час</span><i id="d-rate"></i></div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-head">
+        <div>
+          <b>Статус и бустеры</b>
+          <div class="sub">складываются с процентами движка</div>
+        </div>
+      </div>
+      <div class="row"><span>статусы</span><span></span></div>
+      <div class="presets">
+        <button id="st-lp" type="button">Lucky Player</button>
+        <button id="st-vip" type="button">VIP</button>
+        <button id="st-stack" type="button" class="on">складываются (как на проде)</button>
+      </div>
+      <div class="row" style="font-size: 11px" id="stack-note"></div>
+      <div class="row" id="vip-row" hidden>
+        <span>уровень VIP <b id="vip-val">20</b> · +<b id="vip-pct">150</b>%</span
+        ><input id="vip" type="range" min="1" max="20" value="20" style="width: 55%" />
+      </div>
+      <div class="row" id="vip-max-row" hidden>
+        <span
+          >VIP 20 даёт <b id="vip-max-val">+150%</b> (по <b id="vip-step">7.5</b>% за уровень)</span
+        ><input
+          id="vip-max"
+          type="range"
+          min="10"
+          max="300"
+          step="5"
+          value="150"
+          style="width: 55%"
+        />
+      </div>
+      <div class="row" id="lp-row" hidden>
+        <span>Lucky Player даёт <b id="lp-val">×1.30</b></span
+        ><input id="lp-pct" type="range" min="5" max="100" step="5" value="30" style="width: 55%" />
+      </div>
+      <div class="row" id="lp-mode-row" hidden>
+        <span>Lucky Player применяется как</span><span></span>
+      </div>
+      <div class="presets" id="lp-mode-btns" hidden>
+        <button id="lp-add" type="button">слагаемое (старое)</button>
+        <button id="lp-mul" type="button" class="on">множитель (как на проде)</button>
+      </div>
+      <div class="row" id="vip-mode-row" hidden><span>VIP применяется как</span><span></span></div>
+      <div class="presets" id="vip-mode-btns" hidden>
+        <button id="vip-add" type="button" class="on">слагаемое (как на проде)</button>
+        <button id="vip-mul" type="button">множитель (как чип)</button>
+      </div>
+      <div class="row">
+        <span>движков в парке <b id="fleet-val">1</b> — статус даёт всем</span
+        ><input id="fleet" type="range" min="1" max="15" value="1" style="width: 55%" />
+      </div>
+      <div class="row"><span>бустеры (бронза, время ограничено)</span><span></span></div>
+      <div class="presets">
+        <button id="b-speed" type="button">⚡ бустер скорости +25% · 3ч</button>
+        <button id="b-cap" type="button">📦 бустер ёмкости +25% · 3ч</button>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-head">
+        <div class="chip-ico cap">📦</div>
+        <div>
+          <b>Чип ёмкости</b>
+          <div class="sub" id="c-cap-sub">не собран</div>
+        </div>
+      </div>
+      <div class="lvl" id="l-cap"></div>
+      <div class="row"><span>эффект</span><b id="f-cap">—</b></div>
+      <div class="row"><span>осколков вложено</span><b id="sh-cap">0</b></div>
+      <div class="acts">
+        <button class="b-cap" id="up-cap" type="button">Собрать <span>10 осколков</span></button>
+        <button class="b-equip" id="eq-cap" type="button" disabled>Надеть <span>— ⭐</span></button>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-head">
+        <div class="chip-ico speed">⚡</div>
+        <div>
+          <b>Чип скорости</b>
+          <div class="sub" id="c-speed-sub">не собран</div>
+        </div>
+      </div>
+      <div class="lvl" id="l-speed"></div>
+      <div class="row"><span>эффект</span><b id="f-speed">—</b></div>
+      <div class="row"><span>осколков вложено</span><b id="sh-speed">0</b></div>
+      <div class="acts">
+        <button class="b-speed" id="up-speed" type="button">
+          Собрать <span>10 осколков</span>
+        </button>
+        <button class="b-equip" id="eq-speed" type="button" disabled>
+          Надеть <span>— ⭐</span>
+        </button>
+      </div>
+    </div>
+
+    <p class="hint">
+      Осколки здесь бесконечные — их источник в игре: 3/2/1 за места в турнире и маркет по 1 ⭐.
+      Сброс — все чипы заново.
+    </p>
+    <div class="presets" style="margin-top: 8px">
+      <button id="max-cap" type="button">ёмкость до 10</button>
+      <button id="max-speed" type="button">скорость до 10</button>
+      <button id="reset" type="button">сброс</button>
+    </div>
+  </div>
+
+  <div>
+    <div class="panel">
+      <h2>Итог</h2>
+      <div class="kv"><span>Осколков всего</span><b id="k-shards">0</b></div>
+      <div class="kv"><span>…это LC по маркету</span><b id="k-lc">0</b></div>
+      <div class="kv"><span>…или ⭐ по маркету</span><b id="k-stars-sh">0 ⭐</b></div>
+      <div class="kv"><span>⭐ за снятия (перебросы)</span><b id="k-stars-eq">0 ⭐</b></div>
+      <div class="kv">
+        <span>Билетов в сутки без чипов → с чипами</span><b id="k-day">12.0 → 12.0</b>
+      </div>
+      <div class="kv">
+        <span>Прибавка от чипов и статуса на этом движке</span><b id="k-gain" class="good">+0%</b>
+      </div>
+      <div class="kv"><span>Статус на весь парк</span><b id="k-status" class="good">—</b></div>
+    </div>
+
+    <div class="panel">
+      <h2>Чип ёмкости на разных движках</h2>
+      <table id="tbl">
+        <thead>
+          <tr>
+            <th>уровень чипа</th>
+            <th>осколков</th>
+            <th>LC</th>
+            <th>свежий 1→</th>
+            <th>ур1 полный 12→</th>
+            <th>ур5 полный 102→</th>
+          </tr>
+        </thead>
+        <tbody></tbody>
+      </table>
+    </div>
+
+    <div class="panel">
+      <h2>Чип скорости — множитель к циклу</h2>
+      <table id="tbl2">
+        <thead>
+          <tr>
+            <th>уровень чипа</th>
+            <th>осколков</th>
+            <th>LC</th>
+            <th>цикл ÷</th>
+            <th>свежий 2:00 →</th>
+            <th>ур5 полный 24:00 →</th>
+          </tr>
+        </thead>
+        <tbody></tbody>
+      </table>
+      <p class="hint" style="margin-top: 8px">
+        Множитель, а не слагаемое: чип одинаково ускоряет и свежий, и прокачанный движок. Полный чип
+        = 200 осколков = 200 ⭐ через маркет — четверть цены полного движка (800 ⭐) за половину его
+        силы.
+      </p>
+    </div>
+
+    <div class="panel">
+      <h2>Что происходило</h2>
+      <div class="log" id="log"><p class="empty">Пока ничего — собери чип.</p></div>
+    </div>
+  </div>
+</div>
+
+<script>
+  const TIER_CYCLE = 7200;
+  const MINT_SHARDS = 20;
+  const LC_PER_SHARD = 20000;
+  const STARS_PER_SHARD = 1;
+  const TICKET_STARS = 0.2;
+  const MAX_CHIP_LEVEL = 10;
+  // +5 билетов за уровень, десятый даёт +6 → ровно +51 на максимуме (половина от 102)
+  const CAP_CHIP_TICKETS = [0, 5, 10, 15, 20, 25, 30, 35, 40, 45, 51];
+  const capChipTickets = L => CAP_CHIP_TICKETS[Math.min(L, 10)];
+  const speedChipFactor = L => 1 + L / 10; // множитель к циклу: +10%/уровень, ×2 на 10-м
+
+  // движки — состояния из дизайна: base + taps + finishing bonus, скорость level + taps + bonus
+  const PRESETS = [
+    { name: 'свежий', batch: 1, speed: 0 },
+    { name: 'ур1 · 5/5', batch: 6, speed: 10 },
+    { name: 'ур1 полный', batch: 12, speed: 35 },
+    { name: 'ур2 полный', batch: 27, speed: 120 },
+    { name: 'ур3 · 5/5', batch: 32, speed: 130 },
+    { name: 'ур5 полный', batch: 102, speed: 750 },
+  ];
+
+  const state = {
+    preset: 0,
+    cap: { level: 0, shards: 0, equipped: false },
+    speed: { level: 0, shards: 0, equipped: false },
+    equipStars: 0,
+    hasVip: false,
+    hasLp: false,
+    stackStatuses: true, // true — как на проде с 17.08: складываются; false — старое «берётся сильнейший»
+    vip: 20,
+    vipMax: 150, // что даёт VIP 20 (%), уровни линейно — прод: 7.5 × уровень
+    lpPct: 30, // что даёт Lucky Player (%) — прод: множитель ×1.3
+    lpMode: 'mul', // 'add' — слагаемое в стек; 'mul' — отдельный множитель, как чип (прод)
+    vipMode: 'add', // прод: слагаемое
+    fleet: 1,
+    boostSpeed: false,
+    boostCap: false,
+    log: [],
+  };
+  const vipSpeed = L => Math.round(((L * state.vipMax) / 20) * 10) / 10; // линейно до vipMax на 20-м
+  // Какие статусы реально действуют: оба (складываются) или сильнейший по %.
+  const activeStatuses = () => {
+    const v = state.hasVip ? vipSpeed(state.vip) : 0;
+    const l = state.hasLp ? state.lpPct : 0;
+    if (state.stackStatuses) return { vip: v, lp: l };
+    return v >= l ? { vip: v, lp: 0 } : { vip: 0, lp: l };
+  };
+  const statusPct = () => {
+    const a = activeStatuses();
+    return a.vip + a.lp;
+  };
+  const statusOn = () => state.hasVip || state.hasLp;
+  // Слагаемая часть и множительная часть — по режиму каждого статуса.
+  const statusAddPct = () => {
+    const a = activeStatuses();
+    return (state.vipMode === 'add' ? a.vip : 0) + (state.lpMode === 'add' ? a.lp : 0);
+  };
+  const statusMulFactor = () => {
+    const a = activeStatuses();
+    return (
+      (1 + (state.vipMode === 'mul' ? a.vip : 0) / 100) *
+      (1 + (state.lpMode === 'mul' ? a.lp : 0) / 100)
+    );
+  };
+  const BOOSTER_SPEED = 25,
+    BOOSTER_CAP = 25; // бронзовые пресеты
+
+  const stepCost = level => (level === 0 ? MINT_SHARDS : 10 + 2 * level); // минт 20, затем 12,14,…,28 → всего 200
+  const capTickets = c => (c.equipped ? capChipTickets(c.level) : 0);
+  const speedFactor = c => (c.equipped ? speedChipFactor(c.level) : 1);
+
+  const compute = (withExtras = true) => {
+    const p = PRESETS[state.preset];
+    const core = p.batch + (withExtras ? capTickets(state.cap) : 0);
+    const batch =
+      withExtras && state.boostCap ? core + Math.ceil((core * BOOSTER_CAP) / 100) : core;
+    const addPct = withExtras ? statusAddPct() + (state.boostSpeed ? BOOSTER_SPEED : 0) : 0;
+    const statusFactor = withExtras ? statusMulFactor() : 1;
+    const factor = withExtras ? speedFactor(state.speed) : 1;
+    const cycle = (batch * TIER_CYCLE) / (1 + (p.speed + addPct) / 100) / factor / statusFactor;
+    return {
+      batch,
+      pct: p.speed,
+      addPct,
+      statusFactor,
+      factor,
+      cycle,
+      rate: batch / (cycle / 3600),
+    };
+  };
+  const fmt = sec =>
+    `${Math.floor(sec / 3600)}:${String(Math.round((sec % 3600) / 60)).padStart(2, '0')}`;
+
+  const pips = (el, level, cls) => {
+    el.innerHTML = '';
+    for (let i = 0; i < MAX_CHIP_LEVEL; i += 1) {
+      const t = document.createElement('i');
+      if (i < level) t.className = cls;
+      el.appendChild(t);
+    }
+  };
+  const push = t => {
+    state.log.unshift(t);
+    state.log = state.log.slice(0, 40);
+  };
+
+  const render = () => {
+    const p = PRESETS[state.preset];
+    document.getElementById('e-desc').textContent = p.name;
+    const pr = document.getElementById('presets');
+    pr.innerHTML = '';
+    PRESETS.forEach((x, i) => {
+      const b = document.createElement('button');
+      b.type = 'button';
+      b.className = i === state.preset ? 'on' : '';
+      b.textContent = x.name;
+      b.addEventListener('click', () => {
+        state.preset = i;
+        render();
+      });
+      pr.appendChild(b);
+    });
+
+    document.getElementById('st-lp').className = state.hasLp ? 'on' : '';
+    document.getElementById('st-vip').className = state.hasVip ? 'on' : '';
+    document.getElementById('st-stack').className = state.stackStatuses ? 'on' : '';
+    document.getElementById('st-stack').textContent = state.stackStatuses
+      ? 'складываются (как на проде)'
+      : 'берётся сильнейший (старое)';
+    const bothOn = state.hasVip && state.hasLp;
+    document.getElementById('stack-note').innerHTML = bothOn
+      ? state.stackStatuses
+        ? `<span>${state.vipMode === 'add' ? `VIP +${vipSpeed(state.vip)}% в стек` : `VIP ×${(1 + vipSpeed(state.vip) / 100).toFixed(2)}`} и ${state.lpMode === 'mul' ? `LP ×${(1 + state.lpPct / 100).toFixed(2)}` : `LP +${state.lpPct}% в стек`} — <b>оба работают</b></span>`
+        : `<span>сильнейший из VIP ${vipSpeed(state.vip)}% и LP ${state.lpPct}% → <b>${statusPct()}%</b>, второй пропадает</span>`
+      : '';
+    document.getElementById('vip-row').hidden = !state.hasVip;
+    document.getElementById('vip-max-row').hidden = !state.hasVip;
+    document.getElementById('lp-row').hidden = !state.hasLp;
+    document.getElementById('vip-val').textContent = state.vip;
+    document.getElementById('vip-pct').textContent = vipSpeed(state.vip);
+    document.getElementById('vip-max-val').textContent = `+${state.vipMax}%`;
+    document.getElementById('vip-step').textContent = (state.vipMax / 20).toFixed(1);
+    document.getElementById('lp-val').textContent =
+      state.lpMode === 'mul' ? `×${(1 + state.lpPct / 100).toFixed(2)}` : `+${state.lpPct}%`;
+    document.getElementById('lp-mode-row').hidden = !state.hasLp;
+    document.getElementById('lp-mode-btns').hidden = !state.hasLp;
+    document.getElementById('vip-mode-row').hidden = !state.hasVip;
+    document.getElementById('vip-mode-btns').hidden = !state.hasVip;
+    document.getElementById('lp-add').className = state.lpMode === 'add' ? 'on' : '';
+    document.getElementById('lp-mul').className = state.lpMode === 'mul' ? 'on' : '';
+    document.getElementById('vip-add').className = state.vipMode === 'add' ? 'on' : '';
+    document.getElementById('vip-mul').className = state.vipMode === 'mul' ? 'on' : '';
+    document.getElementById('fleet-val').textContent = state.fleet;
+    document.getElementById('b-speed').className = state.boostSpeed ? 'on' : '';
+    document.getElementById('b-cap').className = state.boostCap ? 'on' : '';
+
+    const bare = compute(false),
+      full = compute(true);
+    document.getElementById('s-cap').textContent = full.batch;
+    document.getElementById('s-cycle').textContent = fmt(full.cycle);
+    document.getElementById('s-rate').textContent = full.rate.toFixed(2);
+    document.getElementById('d-cap').textContent =
+      full.batch !== bare.batch ? `+${full.batch - bare.batch} сверх движка` : '';
+    document.getElementById('d-cycle').textContent =
+      full.cycle !== bare.cycle ? `было ${fmt(bare.cycle)}` : '';
+    document.getElementById('d-rate').textContent =
+      full.rate !== bare.rate
+        ? `${(full.rate / bare.rate - 1) * 100 >= 0 ? '+' : ''}${((full.rate / bare.rate - 1) * 100).toFixed(1)}%`
+        : '';
+    document.getElementById('e-formula').textContent =
+      `${full.batch} бил × 2ч ÷ (1 + ${full.pct}%${full.addPct ? ` + ${full.addPct}%` : ''})${full.factor !== 1 ? ` ÷ ${full.factor.toFixed(2)} чип` : ''}${full.statusFactor !== 1 ? ` ÷ ${full.statusFactor.toFixed(2)} статус` : ''} = ${fmt(full.cycle)}`;
+
+    for (const [key, cls, fmtEff] of [
+      ['cap', 'on-cap', c => (c.level ? `+${capChipTickets(c.level)} билетов за цикл` : '—')],
+      [
+        'speed',
+        'on-speed',
+        c =>
+          c.level
+            ? `цикл ÷ ${speedChipFactor(c.level).toFixed(2)} (+${((speedChipFactor(c.level) - 1) * 100).toFixed(0)}%)`
+            : '—',
+      ],
+    ]) {
+      const c = state[key];
+      pips(document.getElementById(`l-${key}`), c.level, cls);
+      document.getElementById(`c-${key}-sub`).textContent = c.level
+        ? `уровень ${c.level}/${MAX_CHIP_LEVEL}${c.equipped ? ' · на движке' : ' · в инвентаре'}`
+        : 'не собран';
+      document.getElementById(`f-${key}`).textContent = fmtEff(c);
+      document.getElementById(`sh-${key}`).textContent = c.shards;
+      const up = document.getElementById(`up-${key}`);
+      up.disabled = c.level >= MAX_CHIP_LEVEL;
+      up.innerHTML =
+        c.level >= MAX_CHIP_LEVEL
+          ? `Максимум <span>10/10</span>`
+          : c.level
+            ? `Уровень ${c.level + 1} <span>${stepCost(c.level)} осколков</span>`
+            : `Собрать <span>${MINT_SHARDS} осколков</span>`;
+      const eq = document.getElementById(`eq-${key}`);
+      eq.disabled = !c.level;
+      eq.className = `b-equip${c.equipped ? ' on' : ''}`;
+      eq.innerHTML = c.equipped
+        ? `На движке <span>снять ${Math.max(1, c.level)} ⭐</span>`
+        : `Надеть <span>бесплатно</span>`;
+    }
+
+    const shards = state.cap.shards + state.speed.shards;
+    document.getElementById('k-shards').textContent = shards;
+    document.getElementById('k-lc').textContent =
+      `${(shards * LC_PER_SHARD).toLocaleString('ru-RU')} LC`;
+    document.getElementById('k-stars-sh').textContent = `${shards * STARS_PER_SHARD} ⭐`;
+    document.getElementById('k-stars-eq').textContent = `${state.equipStars} ⭐`;
+    document.getElementById('k-day').textContent =
+      `${(bare.rate * 24).toFixed(1)} → ${(full.rate * 24).toFixed(1)}`;
+    document.getElementById('k-gain').textContent =
+      `${(full.rate / bare.rate - 1) * 100 >= 0 ? '+' : ''}${((full.rate / bare.rate - 1) * 100).toFixed(1)}% в час · +${full.batch - bare.batch} за сбор`;
+    // Вклад ОДНОГО статуса на этом движке (без чипов и бустеров), помноженный на парк.
+    const noStatus = (() => {
+      const v = state.hasVip,
+        l = state.hasLp;
+      state.hasVip = false;
+      state.hasLp = false;
+      const r = compute(true);
+      state.hasVip = v;
+      state.hasLp = l;
+      return r;
+    })();
+    const statusGain = full.rate / noStatus.rate - 1;
+    document.getElementById('k-status').textContent = !statusOn()
+      ? '—'
+      : `×${(1 + statusGain).toFixed(3)} на каждом → ≈ ${(statusGain * state.fleet).toFixed(2)} движка «в подарок» из ${state.fleet}`;
+
+    const tb = document.querySelector('#tbl tbody');
+    tb.innerHTML = '';
+    for (let L = 1; L <= MAX_CHIP_LEVEL; L += 1) {
+      let sh = MINT_SHARDS;
+      for (let k = 1; k < L; k += 1) sh += stepCost(k);
+      const add = capChipTickets(L);
+      const tr = document.createElement('tr');
+      tr.innerHTML = `<td>${L}</td><td>${sh}</td><td>${((sh * LC_PER_SHARD) / 1000).toFixed(0)}k</td><td>${1 + add}</td><td>${12 + add}</td><td>${102 + add}</td>`;
+      tb.appendChild(tr);
+    }
+
+    const tb2 = document.querySelector('#tbl2 tbody');
+    tb2.innerHTML = '';
+    for (let L = 1; L <= MAX_CHIP_LEVEL; L += 1) {
+      let sh = MINT_SHARDS;
+      for (let k = 1; k < L; k += 1) sh += stepCost(k);
+      const f = speedChipFactor(L);
+      const tr = document.createElement('tr');
+      tr.innerHTML = `<td>${L}</td><td>${sh}</td><td>${((sh * LC_PER_SHARD) / 1000).toFixed(0)}k</td><td>×${f.toFixed(1)}</td><td>${fmt(TIER_CYCLE / f)}</td><td>${fmt((24 * 3600) / f)}</td>`;
+      tb2.appendChild(tr);
+    }
+
+    const log = document.getElementById('log');
+    log.innerHTML = state.log.length
+      ? state.log.map(l => `<p>${l}</p>`).join('')
+      : '<p class="empty">Пока ничего — собери чип.</p>';
+  };
+
+  const upgrade = key => {
+    const c = state[key];
+    if (c.level >= MAX_CHIP_LEVEL) return;
+    const cost = stepCost(c.level);
+    c.shards += cost;
+    c.level += 1;
+    const label = key === 'cap' ? '📦 ёмкость' : '⚡ скорость';
+    const eff =
+      key === 'cap'
+        ? `+${capChipTickets(c.level)} билетов`
+        : `цикл ÷ ${speedChipFactor(c.level).toFixed(2)}`;
+    push(
+      `${label}: ${c.level === 1 ? 'собран' : `уровень ${c.level}`} за ${cost} осколков → <b>${eff}</b>${c.equipped ? '' : ' (в инвентаре, надень)'}`
+    );
+    render();
+  };
+  const toggleEquip = key => {
+    const c = state[key];
+    if (!c.level) return;
+    if (c.equipped) {
+      const cost = Math.max(1, c.level);
+      state.equipStars += cost;
+      c.equipped = false;
+      push(
+        `${key === 'cap' ? '📦' : '⚡'} снят за ${cost} ⭐ (в инвентаре, можно надеть на другой движок бесплатно)`
+      );
+    } else {
+      c.equipped = true;
+      const r = compute(true);
+      push(
+        `${key === 'cap' ? '📦' : '⚡'} <b>надет бесплатно</b> → ${r.batch} билетов за ${fmt(r.cycle)}`
+      );
+    }
+    render();
+  };
+
+  document.getElementById('st-lp').addEventListener('click', () => {
+    state.hasLp = !state.hasLp;
+    render();
+  });
+  document.getElementById('st-vip').addEventListener('click', () => {
+    state.hasVip = !state.hasVip;
+    render();
+  });
+  document.getElementById('st-stack').addEventListener('click', () => {
+    state.stackStatuses = !state.stackStatuses;
+    render();
+  });
+  document.getElementById('vip').addEventListener('input', e => {
+    state.vip = Number(e.target.value);
+    render();
+  });
+  document.getElementById('vip-max').addEventListener('input', e => {
+    state.vipMax = Number(e.target.value);
+    render();
+  });
+  document.getElementById('lp-pct').addEventListener('input', e => {
+    state.lpPct = Number(e.target.value);
+    render();
+  });
+  document.getElementById('fleet').addEventListener('input', e => {
+    state.fleet = Number(e.target.value);
+    render();
+  });
+  document.getElementById('lp-add').addEventListener('click', () => {
+    state.lpMode = 'add';
+    render();
+  });
+  document.getElementById('lp-mul').addEventListener('click', () => {
+    state.lpMode = 'mul';
+    render();
+  });
+  document.getElementById('vip-add').addEventListener('click', () => {
+    state.vipMode = 'add';
+    render();
+  });
+  document.getElementById('vip-mul').addEventListener('click', () => {
+    state.vipMode = 'mul';
+    render();
+  });
+  document.getElementById('b-speed').addEventListener('click', () => {
+    state.boostSpeed = !state.boostSpeed;
+    render();
+  });
+  document.getElementById('b-cap').addEventListener('click', () => {
+    state.boostCap = !state.boostCap;
+    render();
+  });
+  document.getElementById('up-cap').addEventListener('click', () => upgrade('cap'));
+  document.getElementById('up-speed').addEventListener('click', () => upgrade('speed'));
+  document.getElementById('eq-cap').addEventListener('click', () => toggleEquip('cap'));
+  document.getElementById('eq-speed').addEventListener('click', () => toggleEquip('speed'));
+  document.getElementById('max-cap').addEventListener('click', () => {
+    while (state.cap.level < MAX_CHIP_LEVEL) upgrade('cap');
+  });
+  document.getElementById('max-speed').addEventListener('click', () => {
+    while (state.speed.level < MAX_CHIP_LEVEL) upgrade('speed');
+  });
+  document.getElementById('reset').addEventListener('click', () => {
+    state.cap = { level: 0, shards: 0, equipped: false };
+    state.speed = { level: 0, shards: 0, equipped: false };
+    state.equipStars = 0;
+    state.log = [];
+    state.hasVip = false;
+    state.hasLp = false;
+    state.stackStatuses = true;
+    state.vip = 20;
+    state.vipMax = 150;
+    state.lpPct = 30;
+    state.lpMode = 'mul';
+    state.vipMode = 'add';
+    state.fleet = 1;
+    state.boostSpeed = false;
+    state.boostCap = false;
+    render();
+  });
+  render();
+</script>
