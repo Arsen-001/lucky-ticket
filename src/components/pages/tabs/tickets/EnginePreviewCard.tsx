@@ -55,9 +55,15 @@ export function EnginePreviewCard({
   const capacityChip = findEquippedChip(inventory?.chips, engine.id, 'capacity');
   const capacityBooster = findActiveBooster(inventory?.boosters, engine.id, 'capacity');
 
+  // Capacity inputs too: one ticket = one tier cycle, so the cycle is capacity
+  // × base — a card that knew the chip for the «×153» but not for the clock
+  // showed 7:51 next to a countdown the server runs at 11:46 (this page vs
+  // Home on the same engine, 17.08.2026).
   const cycle = effectiveCycleSeconds(engine, {
     speedChip,
     speedBooster,
+    capacityChip,
+    capacityBooster,
     isLuckyPlayer: me?.isLuckyPlayer ?? false,
     perks: me?.statusPerks,
     isVip: me?.isVIP ?? false,

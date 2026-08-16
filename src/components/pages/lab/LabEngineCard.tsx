@@ -79,6 +79,8 @@ export function LabEngineCard({
   const cycle = effectiveCycleSeconds(engine, {
     speedChip,
     speedBooster,
+    capacityChip,
+    capacityBooster,
     isLuckyPlayer: me?.isLuckyPlayer ?? false,
     perks: me?.statusPerks,
     isVip: me?.isVIP ?? false,

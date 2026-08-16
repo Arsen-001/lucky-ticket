@@ -94,9 +94,16 @@ export function TicketsTabsView() {
       for (const engine of allEngines) {
         const speedChip = findEquippedChip(inventory?.chips, engine.id, 'speed');
         const speedBooster = findActiveBooster(inventory?.boosters, engine.id, 'speed');
+        const capacityChip = findEquippedChip(inventory?.chips, engine.id, 'capacity');
+        const capacityBooster = findActiveBooster(inventory?.boosters, engine.id, 'capacity');
+        // Capacity inputs are part of the cycle (one ticket = one tier cycle);
+        // without them this loop declared a chipped engine «due» at 7:51 of an
+        // 11:46 cycle and pinged the server to complete it early, every 15s.
         const cycle = effectiveCycleSeconds(engine, {
           speedChip,
           speedBooster,
+          capacityChip,
+          capacityBooster,
           isLuckyPlayer: isLp,
           isVip,
           perks: me?.statusPerks,
@@ -132,6 +139,7 @@ export function TicketsTabsView() {
     inventory,
     isLp,
     isVip,
+    me?.statusPerks,
     avatarSpeedPct,
     badgeSpeedPct,
     tables,
