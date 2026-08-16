@@ -6,15 +6,19 @@ import { twMerge } from 'tailwind-merge';
 import { useAppTranslations } from '@/hooks/useAppTranslations';
 import { QUALITY_TIERS } from '@/utils/global/inventory.utils';
 import type {
+  InventoryChip,
   InventoryChipType,
   InventoryShardCount,
 } from '@/types/interfaces/inventory.interfaces';
 import { InventoryShardPill } from './InventoryShardPill';
+import { ShardInfoSheet } from './ShardInfoSheet';
 
 const TYPES: InventoryChipType[] = ['speed', 'capacity'];
 
 export interface InventoryShardVaultProps {
   shards: InventoryShardCount[];
+  /** The collection, so a tapped stack can name the chips it can be spent on. */
+  chips: InventoryChip[];
   /** Opens the explainer — the empty row is exactly where "where do I get
    *  these?" gets asked, and the answer is not on this screen. */
   onInfo?: () => void;
@@ -30,9 +34,17 @@ export interface InventoryShardVaultProps {
  * exist; the full grid (including the empty tiers, which are an answer too) is
  * one tap away.
  */
-export function InventoryShardVault({ shards, onInfo, className }: InventoryShardVaultProps) {
+export function InventoryShardVault({
+  shards,
+  chips,
+  onInfo,
+  className,
+}: InventoryShardVaultProps) {
   const t = useAppTranslations();
   const [open, setOpen] = useState(false);
+  // The tapped stack. Kept as the whole count, not a key, so the sheet reads
+  // the same number the pill is showing.
+  const [selected, setSelected] = useState<InventoryShardCount | null>(null);
 
   const total = shards.reduce((sum, s) => sum + s.count, 0);
   const owned = shards.filter(s => s.count > 0);
@@ -61,15 +73,19 @@ export function InventoryShardVault({ shards, onInfo, className }: InventoryShar
       {open ? (
         <div className="grid grid-cols-5 gap-1.5">
           {QUALITY_TIERS.map(tier =>
-            TYPES.map(type => (
-              <InventoryShardPill
-                key={`${tier}-${type}`}
-                tier={tier}
-                type={type}
-                expanded
-                count={shards.find(s => s.quality === tier && s.type === type)?.count ?? 0}
-              />
-            ))
+            TYPES.map(type => {
+              const count = shards.find(s => s.quality === tier && s.type === type)?.count ?? 0;
+              return (
+                <InventoryShardPill
+                  key={`${tier}-${type}`}
+                  tier={tier}
+                  type={type}
+                  expanded
+                  count={count}
+                  onClick={() => setSelected({ type, quality: tier, count })}
+                />
+              );
+            })
           )}
         </div>
       ) : owned.length === 0 ? (
@@ -91,10 +107,18 @@ export function InventoryShardVault({ shards, onInfo, className }: InventoryShar
               tier={shard.quality}
               type={shard.type}
               count={shard.count}
+              onClick={() => setSelected(shard)}
             />
           ))}
         </div>
       )}
+
+      <ShardInfoSheet
+        open={!!selected}
+        shard={selected ?? undefined}
+        chips={chips}
+        onClose={() => setSelected(null)}
+      />
     </section>
   );
 }

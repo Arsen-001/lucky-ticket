@@ -1393,5 +1393,9 @@
   "shards spend explainer": "Shards are spent here — mint a new chip at Lvl 1, or level up one you already own.",
   "chip tier rule": "A chip fits an engine of its own tier only.",
   "chip level explainer": "Every level adds +0.5%. Levels are paid in shards, and the price grows with the level.",
-  "chip stars explainer": "Installing costs ★ and detaching costs ★ — the chip level sets both prices."
+  "chip stars explainer": "Installing costs ★ and detaching costs ★ — the chip level sets both prices.",
+  "what this shard is for": "What it's for",
+  "shard fits rule": "Shards never cross tier or type: this one goes into that chip and no other.",
+  "no chips of this kind": "You own no such chip yet — these shards mint the first one.",
+  "more chips {count}": "+{count} more"
 }

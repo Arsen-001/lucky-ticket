@@ -1189,7 +1189,7 @@
   "try again": "Попробовать снова",
   "market engine name": "Двигатель {tier}",
   "market ticket name": "Билет {tier}",
-  "market speed shard name": "Осколок скорости {tier}",
+  "market speed shard name": "Осколок времени {tier}",
   "market capacity shard name": "Осколок вместимости {tier}",
   "my stats": "Моя статистика",
   "days in game": "Дней в игре",
@@ -1344,7 +1344,7 @@
   "expired": "Истёк",
   "partners filter active": "Активные",
   "shards unit {count}": "{count, plural, one {осколок} few {осколка} many {осколков} other {осколков}}",
-  "speed shards {count}": "{count, plural, one {осколок скорости} few {осколка скорости} many {осколков скорости} other {осколков скорости}}",
+  "speed shards {count}": "{count, plural, one {осколок времени} few {осколка времени} many {осколков времени} other {осколков времени}}",
   "capacity shards {count}": "{count, plural, one {осколок вместимости} few {осколка вместимости} many {осколков вместимости} other {осколков вместимости}}",
   "ads watched {count}": "{count, plural, one {реклама просмотрена} few {рекламы просмотрено} many {реклам просмотрено} other {реклам просмотрено}}",
   "friends invited {count}": "{count, plural, one {друг приглашён} few {друга приглашено} many {друзей приглашено} other {друзей приглашено}}",
@@ -1393,5 +1393,9 @@
   "shards spend explainer": "Тратятся здесь: собрать новый чип на 1-м уровне или поднять уровень уже собранному.",
   "chip tier rule": "Чип встаёт только на двигатель своего тира.",
   "chip level explainer": "Каждый уровень даёт +0.5%. Уровни оплачиваются осколками, цена растёт с уровнем.",
-  "chip stars explainer": "Установка стоит ★, снятие — тоже; обе цены зависят от уровня чипа."
+  "chip stars explainer": "Установка стоит ★, снятие — тоже; обе цены зависят от уровня чипа.",
+  "what this shard is for": "Для чего он",
+  "shard fits rule": "Осколки не переходят между тирами и типами: этот идёт только в такой чип.",
+  "no chips of this kind": "Такого чипа у вас пока нет — из этих осколков соберётся первый.",
+  "more chips {count}": "Ещё {count}"
 }

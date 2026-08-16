@@ -2,6 +2,7 @@ import { Cpu, type LucideIcon, MemoryStick } from 'lucide-react';
 import type { StaticImageData } from 'next/image';
 import { icons } from '@/constants/icons';
 import type { TicketType } from '@/types/types/ticket.types';
+import type { Dictionary, MessageIds } from '@/types/types/i18n.types';
 import type { InventoryChipType } from '@/types/interfaces/inventory.interfaces';
 
 export const QUALITY_ACCENT: Record<TicketType, string> = {
@@ -55,6 +56,23 @@ export const CHIP_MINT_SHARD_COST: Record<TicketType, number> = {
   platinum: 4,
   diamond: 2,
 };
+
+/**
+ * What one stack of shards is called.
+ *
+ * Not authored copy — a tier plus a type, composed through a pattern key so
+ * each language owns its own word order ("Gold Time Shard", "Осколок скорости
+ * Золото"). It is the SAME string the market prints on the card that sells
+ * them, deliberately: the vault has to name a stack the way the player last
+ * saw it named, or the two screens read as two different items.
+ *
+ * The tier arrives lowercase from the inventory and uppercase from some market
+ * payloads, and only one of those is a message key.
+ */
+export const chipShardName = (t: Dictionary, type: InventoryChipType, quality: string) =>
+  t(type === 'speed' ? 'market speed shard name' : 'market capacity shard name', {
+    tier: t(quality.toLowerCase() as MessageIds),
+  });
 
 export const chipShardsForNextLevel = (currentLevel: number) => {
   const target = currentLevel + 1;

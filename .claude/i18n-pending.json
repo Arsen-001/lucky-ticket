@@ -12,12 +12,16 @@
     "equip chip confirm title",
     "leave",
     "leave the game?",
+    "more chips {count}",
+    "no chips of this kind",
     "perk ads skip",
+    "shard fits rule",
     "shards source explainer",
     "shards spend explainer",
     "take without watching",
     "time chip explainer",
     "what are chips",
+    "what this shard is for",
     "where to get shards"
   ]
 }

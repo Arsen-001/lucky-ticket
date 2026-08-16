@@ -148,7 +148,7 @@ export function InventoryScreen({
         )
       ) : (
         <>
-          <InventoryShardVault shards={shards} onInfo={() => setInfo('all')} />
+          <InventoryShardVault shards={shards} chips={chips} onInfo={() => setInfo('all')} />
 
           {visibleChips.length === 0 && !isLoading ? (
             <div className="flex flex-col items-center gap-2.5 rounded-2xl border border-white/8 bg-black/25 p-6 text-center">

@@ -1,3 +1,4 @@
+import { chipShardName } from '@/utils/global/inventory.utils';
 import type { MarketEngine, MarketShard, MarketTicket } from '@/types/interfaces/market.interfaces';
 import type { Dictionary, MessageIds } from '@/types/types/i18n.types';
 
@@ -27,7 +28,6 @@ export const marketEngineName = (item: MarketEngine, t: Dictionary) =>
 export const marketTicketName = (item: MarketTicket, t: Dictionary) =>
   t('market ticket name', { tier: tierLabel(t, item.ticketType) });
 
+/** Shared with the inventory vault, which names the same stacks. */
 export const marketShardName = (item: MarketShard, t: Dictionary) =>
-  t(item.type === 'speed' ? 'market speed shard name' : 'market capacity shard name', {
-    tier: tierLabel(t, item.quality),
-  });
+  chipShardName(t, item.type, item.quality);
