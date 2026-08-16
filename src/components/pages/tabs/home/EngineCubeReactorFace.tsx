@@ -37,15 +37,14 @@ const CAPACITY_COLOR: Record<EngineCapacityKey, string> = {
 
 export interface EngineCubeReactorFaceProps {
   engineLevel: number;
-  /** Factory cycle before any boost. */
+  /** Batch-normalised cycle before any boost — what the boost divides. */
   baseCycleSeconds: number;
-  /** Cycle the engine actually runs, floor included. */
+  /** Cycle the engine actually runs. */
   cycleSeconds: number;
   capacity: number;
   ticketsPerHour: number;
   boosts: readonly EngineSpeedBoostSource[];
   capacitySources: readonly EngineCapacitySource[];
-  atSpeedCap?: boolean;
   accent?: string;
 }
 
@@ -75,7 +74,6 @@ export function EngineCubeReactorFace({
   ticketsPerHour,
   boosts,
   capacitySources,
-  atSpeedCap = false,
   accent = 'var(--color-electric-pink)',
 }: EngineCubeReactorFaceProps) {
   const t = useAppTranslations();
@@ -228,9 +226,7 @@ export function EngineCubeReactorFace({
         </span>
         <span className="text-[10px] font-black tabular-nums" style={{ color: accent }}>
           {formatTicketRate(ticketsPerHour)} {t('t/h')}
-          {atSpeedCap
-            ? ` · ${t('at speed cap')}`
-            : ` · ${formatTicketRate(ticketsPerHour * 24)}${t('per day short')}`}
+          {` · ${formatTicketRate(ticketsPerHour * 24)}${t('per day short')}`}
         </span>
       </div>
     </div>

@@ -142,9 +142,13 @@ export const appConfig = {
   },
   engines: {
     /**
-     * Base cycle time (seconds) for a freshly-purchased engine at engineLevel=1
-     * with no chips/boosters and capacityLevel=0 — i.e. the time to mint 1
-     * ticket of that tier. Geometric: each tier doubles the previous one.
+     * Cycle time (seconds) per tier — the time to mint ONE full batch, whatever
+     * its size. Capacity no longer stretches it (§9.7), so this is the single
+     * lever that sets how fast the whole engine economy runs.
+     *
+     * Geometric: each tier doubles the previous one. A fresh Bronze engine is
+     * deliberately the same starting point it has always been — 1 ticket in
+     * 2 hours — and the whole ladder is measured from there.
      */
     baseCycleSecondsByTier: {
       bronze: 7_200, // 2h
@@ -209,7 +213,7 @@ export const appConfig = {
      * next tier's first engine the rational buy after ~3 repeats of the
      * previous tier.
      */
-    engineRepeatPriceGrowth: 1.6,
+    engineRepeatPriceGrowth: 1.35,
     /**
      * LS cost of the permanent per-engine upgrades (paid in Lucky Stars). Cost
      * rises with the boost sub-level AND the engine level, then scales by tier —

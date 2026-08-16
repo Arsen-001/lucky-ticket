@@ -33,6 +33,7 @@ import {
   findEquippedChip,
 } from '@/utils/global/inventory.utils';
 import {
+  baselineCycleSeconds,
   effectiveCycleSeconds,
   engineCapacity,
   engineElapsedSeconds,
@@ -44,10 +45,9 @@ import { EngineCubeStatsFace } from '@/components/pages/tabs/home/EngineCubeStat
 import { EngineCubeSlot } from '@/components/pages/tabs/home/EngineCubeSlot';
 import { CubeFaceCard } from '@/components/pages/out-tabs/tabs-extra/engine/CubeFaceCard';
 import { EngineStatsLedger } from '@/components/pages/out-tabs/tabs-extra/engine/EngineStatsLedger';
-import { engineSpeedBoostSources, totalSpeedBoostPct } from '@/utils/global/engine-boosts.utils';
+import { engineSpeedBoostSources } from '@/utils/global/engine-boosts.utils';
 import { effectiveStatusPct } from '@/utils/global/status.utils';
 import { displayNameOf } from '@/utils/global/user.utils';
-import { GlobalConstants } from '@/constants/global.constants';
 import type { InventoryChip, InventoryChipType } from '@/types/interfaces/inventory.interfaces';
 
 export interface EngineDetailsProps {
@@ -180,8 +180,8 @@ export function EngineDetails({ id }: EngineDetailsProps) {
   }
 
   // Same inputs `EngineCard` uses — including the capacity chip/booster, which
-  // move the per-ticket floor. Anything less and this screen's cycle disagrees
-  // with the countdown ticking on the card right above it.
+  // move the batch and with it the baseline cycle. Anything less and this
+  // screen's cycle disagrees with the countdown ticking on the card above it.
   const cycle = effectiveCycleSeconds(engine, {
     speedChip,
     speedBooster,
@@ -213,12 +213,6 @@ export function EngineDetails({ id }: EngineDetailsProps) {
     badgeBoostPct: badgeSpeedPct,
     tables,
   });
-  // Boost past the hard 15-min-per-ticket floor buys nothing — say so instead of
-  // quoting a percentage the engine cannot deliver.
-  const atSpeedCap =
-    engine.cycleSeconds / (1 + totalSpeedBoostPct(boosts) / 100) <
-    liveCapacity * GlobalConstants.engineMinSecondsPerTicket;
-
   const speedLevel = engine.speedLevel ?? 0;
   const capacityLevel = engine.capacityLevel ?? 0;
   const engineLevel = engine.engineLevel ?? 1;
@@ -329,10 +323,9 @@ export function EngineDetails({ id }: EngineDetailsProps) {
         ticketsPerHour={liveTicketsPerHour}
         capacity={liveCapacity}
         cycleSeconds={cycle}
-        baseCycleSeconds={engine.cycleSeconds}
+        baseCycleSeconds={baselineCycleSeconds(engine, { capacityChip, capacityBooster, tables })}
         lifetimeProduced={lifetimeProduced}
         boosts={boosts}
-        atSpeedCap={atSpeedCap}
       />
 
       <CubeFaceCard accent={tierAccent}>

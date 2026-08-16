@@ -24,7 +24,6 @@ export interface EngineStatsLedgerProps {
   baseCycleSeconds: number;
   lifetimeProduced: number;
   boosts: readonly EngineSpeedBoostSource[];
-  atSpeedCap?: boolean;
   className?: string;
 }
 
@@ -41,7 +40,6 @@ export function EngineStatsLedger({
   baseCycleSeconds,
   lifetimeProduced,
   boosts,
-  atSpeedCap = false,
   className,
 }: EngineStatsLedgerProps) {
   const t = useAppTranslations();
@@ -101,18 +99,12 @@ export function EngineStatsLedger({
         <span className="text-[11px] font-semibold text-white/40">{t('cycle')}</span>
         <span className="flex items-center gap-1.5 text-[12px] font-bold tabular-nums">
           {/* The "was → now" pair only reads as a win while the boost actually
-              shortens the cycle. Past the per-ticket floor a bigger batch makes
-              the cycle LONGER (throughput stays capped), so drop the comparison
-              and say what is really happening instead. */}
+              shortens the cycle — with no speed boost equipped, baseline and
+              cycle are the same number and the struck-through twin is noise. */}
           {cycleSeconds < baseCycleSeconds && (
             <span className="text-white/35 line-through">{formatCycleTime(baseCycleSeconds)}</span>
           )}
           <span style={{ color: accent }}>{formatCycleTime(cycleSeconds)}</span>
-          {atSpeedCap && (
-            <span className="text-[9px] font-extrabold uppercase tracking-[0.14em] text-white/35">
-              {t('at speed cap')}
-            </span>
-          )}
         </span>
       </div>
 

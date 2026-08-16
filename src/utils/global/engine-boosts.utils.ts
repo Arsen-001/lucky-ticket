@@ -7,6 +7,8 @@ import {
   baseCapacity,
   capacityLevelBonusTickets,
   engineLevelBoostPct,
+  fullLevelBonusTickets,
+  fullLevelSpeedBonusPct,
   speedLevelBoostPct,
 } from '@/utils/global/ticket-engine.utils';
 
@@ -54,7 +56,15 @@ export const engineSpeedBoostSources = (
   engine: TicketEngine,
   options: EngineSpeedBoostOptions = {}
 ): EngineSpeedBoostSource[] => [
-  { key: 'engineLevel', pct: engineLevelBoostPct(engine.engineLevel || 1, options.tables) },
+  // The finished-level speed bonus is a level reward, so it rides the level's
+  // own row: a 10/10 engine shows it here, a freshly promoted one shows the
+  // same number absorbed into the next level's base.
+  {
+    key: 'engineLevel',
+    pct:
+      engineLevelBoostPct(engine.engineLevel || 1, options.tables) +
+      fullLevelSpeedBonusPct(engine, options.tables),
+  },
   { key: 'speedLevel', pct: speedLevelBoostPct(engine.speedLevel || 0, options.tables) },
   {
     key: 'status',
@@ -104,7 +114,12 @@ export const engineCapacitySources = (
   const factory = baseCapacity(1, options.tables);
   return [
     { key: 'factory', tickets: factory, pct: 0 },
-    { key: 'engineLevel', tickets: levelBase - factory, pct: 0 },
+    // Same treatment for the finished-level ticket bonus.
+    {
+      key: 'engineLevel',
+      tickets: levelBase - factory + fullLevelBonusTickets(engine, options.tables),
+      pct: 0,
+    },
     {
       key: 'capacityLevel',
       tickets: capacityLevelBonusTickets(engine.capacityLevel || 0, options.tables),

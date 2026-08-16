@@ -1,5 +1,4 @@
 import dayjs from 'dayjs';
-import { GlobalConstants } from '@/constants/global.constants';
 import type { InventoryBooster, InventoryChip } from '@/types/interfaces/inventory.interfaces';
 import type { TicketEngine } from '@/types/interfaces/ticket.interfaces';
 import type { StatusPerks } from '@/types/interfaces/user.interfaces';
@@ -24,11 +23,18 @@ import { effectiveStatusPct } from '@/utils/global/status.utils';
 /**
  * Speed-boost **%** contributed by the engine's SPEED sub-level.
  * Index = `speedLevel` (0 = no upgrade). Table length ⇒ `MAX_BOOST_LEVEL`.
- * Default: linear +10 % / level → 0…100 %.
+ * Default: linear +2 % / level → 0…20 %.
+ *
+ * Re-tuned 16.08.2026 from +10 %/level (0…100 %) together with
+ * `ENGINE_LEVEL_SPEED_BOOST_PCT_TABLE`. With the speed math fixed every percent
+ * here multiplies the mining rate, so the old +100 % from ten taps alone would
+ * have tripled ticket emission. Compression is also what makes the OTHER levers
+ * weigh something: at +500 % on a maxed engine a VIP-20 perk moved it 3 %; at
+ * these numbers the same perk moves it 10–20 %.
  */
 export const SPEED_LEVEL_BOOST_PCT_TABLE: readonly number[] = [
   //  lvl0  lvl1  lvl2  lvl3  lvl4  lvl5  lvl6  lvl7  lvl8  lvl9  lvl10
-  0, 10, 20, 30, 40, 50, 60, 70, 80, 90, 100,
+  0, 2, 4, 6, 8, 10, 12, 14, 16, 18, 20,
 ];
 
 /**
@@ -48,25 +54,63 @@ export const CAPACITY_LEVEL_BONUS_TICKETS_TABLE: readonly number[] = [
  * Speed-boost **%** contributed by the engine LEVEL itself (reached by
  * promotion — §10.2). Indexed by `engineLevel` DIRECTLY (1…`MAX_ENGINE_LEVEL`);
  * index 0 mirrors level 1 so an absent/falsy level reads as level 1.
- * Default: +100 % / level above 1 → 0 / 100 / 200 / 300 / 400.
+ * Default: 0 / 35 / 120 / 265 / 475.
+ *
+ * ⚠️ Each step is DERIVED, not chosen: level N+1 = level N + the ten speed
+ * taps (+20 %) + `ENGINE_FULL_LEVEL_SPEED_BONUS_PCT_TABLE[N]`. Promotion resets
+ * the speed sub-ladder to 0 and forfeits the full-level bonus, so the level's
+ * step must hand back exactly what was lost — otherwise promoting an engine
+ * makes it slower, which `tests/engine-levers.test.ts` fails on.
  */
 export const ENGINE_LEVEL_SPEED_BOOST_PCT_TABLE: readonly number[] = [
   //  (lvl0) lvl1  lvl2  lvl3  lvl4  lvl5
-  0, 0, 100, 200, 300, 400,
+  0, 0, 35, 120, 265, 475,
+];
+
+/**
+ * Speed **%** a level pays out the moment BOTH sub-ladders reach 10/10 — the
+ * reward for finishing the level, on top of the taps. Indexed by `engineLevel`.
+ *
+ * Fitted, not round: together with the growing ticket bonus below it makes
+ * every FULLY upgraded level mint its whole batch in about a day (18 h at
+ * level 1, ~25 h at 2–4) and the top level in exactly 24 h — 102 tickets ×
+ * 2 h of Bronze base = 204 h, divided by 1 + 750 %. "A finished level collects
+ * once a day" is the rule the numbers serve.
+ */
+export const ENGINE_FULL_LEVEL_SPEED_BONUS_PCT_TABLE: readonly number[] = [
+  //  (lvl0) lvl1  lvl2  lvl3  lvl4  lvl5
+  0, 15, 65, 125, 190, 255,
 ];
 
 /**
  * BASE per-cycle output — **absolute** ticket count before any % capacity boost —
  * at each engine LEVEL. Indexed by `engineLevel` DIRECTLY (1…`MAX_ENGINE_LEVEL`);
- * index 0 mirrors level 1. Default: 1 → 22 → 43 → 64 → 86, tuned so a FULL-maxed
- * engine (level 5, both ladders 10/10 → batch 86 + 10 = 96) hits the 900 s/ticket
- * floor at exactly 96 × 900 s = 24 h — one big batch per day. Daily throughput is
- * unchanged (the floor caps it at 4 tickets/hour regardless); only the collect
- * cadence stretches toward once-a-day as the engine matures.
+ * index 0 mirrors level 1. Default: 1 → 12 → 27 → 47 → 72.
+ *
+ * ⚠️ Each step is DERIVED, not chosen: level N+1 = level N + the ten capacity
+ * taps (+1 each) + `ENGINE_FULL_LEVEL_BONUS_TICKETS_TABLE[N]`. Promotion resets
+ * the sub-ladder and forfeits the full-level bonus, so a maxed level-N engine
+ * holds exactly the base of level N+1 and the promotion is seamless — 12
+ * tickets before, 12 after, same cycle, same rate.
+ *
+ * Every ticket here carries its own tier cycle (@see baselineCycleSeconds), so
+ * capacity sets how big and how rare a collect is.
  */
 export const ENGINE_LEVEL_BASE_CAPACITY_TABLE: readonly number[] = [
   //  (lvl0) lvl1  lvl2  lvl3  lvl4  lvl5
-  1, 1, 22, 43, 64, 86,
+  1, 1, 12, 27, 47, 72,
+];
+
+/**
+ * Tickets a level pays out the moment BOTH sub-ladders reach 10/10 — the reward
+ * for finishing the level, on top of the +1 each tap gave. Indexed by
+ * `engineLevel`. Grows with the level (1 · 5 · 10 · 15 · 20), so the fifth
+ * finished level is worth twenty taps' worth of tickets, the first one tap's.
+ * Across the whole ladder it adds +51 to a maxed Bronze engine's 102 tickets.
+ */
+export const ENGINE_FULL_LEVEL_BONUS_TICKETS_TABLE: readonly number[] = [
+  //  (lvl0) lvl1  lvl2  lvl3  lvl4  lvl5
+  0, 1, 5, 10, 15, 20,
 ];
 
 /**
@@ -154,12 +198,32 @@ const isBoosterAlive = (booster: InventoryBooster) => {
 };
 
 /**
- * Lords-Mobile-style additive boost stacking. All speed-boost sources sum
- * their percentages, and the final cycle is `base / (1 + totalBoost%)`.
+ * The engine's cycle BEFORE any speed boost: **one ticket costs one tier
+ * cycle**, so a batch of N tickets is scheduled over N × `engine.cycleSeconds`.
  *
- * The hard 15-min-per-ticket floor (`GlobalConstants.engineMinSecondsPerTicket`)
- * still applies last — no matter how much boost stacks, a single ticket can
- * never be minted faster than that.
+ * Bronze mints 1 ticket in 2:00; buy one capacity tap and it mints 2 tickets in
+ * 4:00, then 3 in 6:00. Capacity is the size of the collect — how much comes at
+ * once and how rarely — and it never changes tickets per hour. Everything on
+ * the speed side (level, speed taps, chip, booster, status, badge, avatar)
+ * divides this baseline and IS what makes the engine mine faster.
+ *
+ * Exported because the UI quotes the equation `baseline ÷ (1 + boost) = cycle`
+ * on the reactor face: reading a different baseline there would print an
+ * equation that does not resolve to the countdown next to it.
+ */
+export const baselineCycleSeconds = (
+  engine: TicketEngine,
+  options?: {
+    capacityChip?: InventoryChip;
+    capacityBooster?: InventoryBooster;
+    tables?: EngineLevelTables;
+  }
+) => engineCapacity(engine, options) * engine.cycleSeconds;
+
+/**
+ * Lords-Mobile-style additive boost stacking. All speed-boost sources sum
+ * their percentages, and the final cycle is `baseline / (1 + totalBoost%)`
+ * (@see baselineCycleSeconds).
  */
 export const effectiveCycleSeconds = (
   engine: TicketEngine,
@@ -196,6 +260,7 @@ export const effectiveCycleSeconds = (
   let totalBoostPct =
     engineLevelBoostPct(engine.engineLevel || 1, options?.tables) +
     speedLevelBoostPct(engine.speedLevel || 0, options?.tables) +
+    fullLevelSpeedBonusPct(engine, options?.tables) +
     statusBoostPct +
     (options?.avatarBoostPct ?? 0) +
     (options?.badgeBoostPct ?? 0);
@@ -205,24 +270,24 @@ export const effectiveCycleSeconds = (
     totalBoostPct += options.speedBooster.effectPct;
   }
 
-  const rawCycle = engine.cycleSeconds / (1 + totalBoostPct / 100);
-
-  // Hard floor: per-ticket time cannot drop below the global cap, no matter
-  // how many speed boosts stack. Cycle floor = capacity × cap.
-  const capacity = engineCapacity(engine, {
-    capacityChip: options?.capacityChip,
-    capacityBooster: options?.capacityBooster,
-    tables: options?.tables,
-  });
-  const floor = capacity * GlobalConstants.engineMinSecondsPerTicket;
-  return Math.max(rawCycle, floor);
+  return (
+    baselineCycleSeconds(engine, {
+      capacityChip: options?.capacityChip,
+      capacityBooster: options?.capacityBooster,
+      tables: options?.tables,
+    }) /
+    (1 + totalBoostPct / 100)
+  );
 };
 
 /**
- * Per-cycle output: `(baseCapacity + capacity-level bonus) × (1 + chips%)`.
- * The capacity sub-level adds **absolute tickets** (default +1 per paid tap —
- * the same +1 at every engine level); chips/boosters stay percentage-based
- * and scale the whole batch.
+ * Per-cycle output — everything the player collects in one cycle: the engine
+ * level's base, +1 per paid capacity tap, plus the equipped chip and booster.
+ *
+ * Each of these tickets carries its own tier cycle (@see baselineCycleSeconds),
+ * so this number sets how BIG and how RARE a collect is, never how fast the
+ * engine mines. The chip/booster share rounds UP so even a 1-ticket engine
+ * gains a whole ticket from a boost.
  */
 export const engineCapacity = (
   engine: TicketEngine,
@@ -239,8 +304,15 @@ export const engineCapacity = (
   }
   const batch =
     baseCapacity(engine.engineLevel || 1, options?.tables) +
-    capacityLevelBonusTickets(engine.capacityLevel || 0, options?.tables);
-  return Math.max(1, Math.round(batch * (1 + chipBoostPct / 100)));
+    capacityLevelBonusTickets(engine.capacityLevel || 0, options?.tables) +
+    // Taking BOTH sub-ladders to 10/10 pays a flat bonus on top of the taps.
+    fullLevelBonusTickets(engine, options?.tables);
+  // Round the % share UP, not the product: tickets are whole, and rounding the
+  // product killed the lever outright on a small batch — a +25% capacity
+  // booster on a fresh 1-ticket engine resolved to round(1.25) = 1, i.e. the
+  // player paid for nothing. Ceiling the share costs at most one extra ticket
+  // on a big batch and guarantees every equipped percentage is felt.
+  return Math.max(1, batch + Math.ceil((batch * chipBoostPct) / 100));
 };
 
 export const engineElapsedSeconds = (engine: TicketEngine) => {
@@ -252,6 +324,21 @@ export const engineElapsedSeconds = (engine: TicketEngine) => {
 export const isEngineMaxed = (engine: TicketEngine, tables?: EngineLevelTables) =>
   (engine.speedLevel || 0) >= maxBoostLevel(tables) &&
   (engine.capacityLevel || 0) >= maxBoostLevel(tables);
+
+/**
+ * The finished-level rewards — paid while BOTH sub-ladders sit at 10/10, and
+ * folded into the next level's base tables the moment the engine promotes, so
+ * they are never lost and never double-counted.
+ */
+export const fullLevelBonusTickets = (engine: TicketEngine, tables?: EngineLevelTables) =>
+  isEngineMaxed(engine, tables)
+    ? cell(ENGINE_FULL_LEVEL_BONUS_TICKETS_TABLE, engine.engineLevel || 1)
+    : 0;
+
+export const fullLevelSpeedBonusPct = (engine: TicketEngine, tables?: EngineLevelTables) =>
+  isEngineMaxed(engine, tables)
+    ? cell(ENGINE_FULL_LEVEL_SPEED_BONUS_PCT_TABLE, engine.engineLevel || 1)
+    : 0;
 
 /**
  * Engine promotion (level-up). When an engine's speed **and** capacity

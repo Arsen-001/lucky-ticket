@@ -19,6 +19,9 @@ import {
   engineCapacity,
   engineLevelBoostPct,
   promoteEngineIfMaxed,
+  speedLevelBoostPct,
+  ENGINE_FULL_LEVEL_BONUS_TICKETS_TABLE,
+  ENGINE_FULL_LEVEL_SPEED_BONUS_PCT_TABLE,
   MAX_BOOST_LEVEL,
   MAX_ENGINE_LEVEL,
 } from '@/utils/global/ticket-engine.utils';
@@ -167,16 +170,22 @@ const configuredKnobs = (): SimKnobs => ({
  * mock ladder. Kept as a pinned counter-example — it must keep FAILING the
  * inflation bound, documenting why `engineRepeatPriceGrowth` exists.
  */
+/**
+ * The same shipped prices, but with the repeat-purchase growth switched OFF —
+ * which is what "flat pricing" means and what this file exists to disprove.
+ *
+ * The prices used to be hard-coded historical literals (800k … 20M). That made
+ * the test a hostage of unrelated tuning: when engine cycles and prices were
+ * re-fitted on 16.08.2026 the frozen literals stopped matching the shipped
+ * daily value, the simulated player could no longer afford the second engine,
+ * and the runaway this test is supposed to demonstrate quietly stopped
+ * happening — the test failed while nothing was wrong with the guard it
+ * protects. Reading the live prices keeps the comparison honest: same prices,
+ * one knob different.
+ */
 const legacyFlatKnobs = (): SimKnobs => ({
-  basePriceByTier: {
-    bronze: 800_000,
-    silver: 1_800_000,
-    gold: 4_500_000,
-    platinum: 9_800_000,
-    diamond: 19_999_000,
-  },
+  ...configuredKnobs(),
   repeatGrowth: 1,
-  dailyValueByTier: configuredKnobs().dailyValueByTier,
 });
 
 const baseEngine = (over: Partial<TicketEngine>): TicketEngine =>
@@ -206,9 +215,16 @@ describe('economy simulation (DOCS §14.2 guardrails)', () => {
     }
   });
 
-  it('repeat-purchase pricing is geometric with growth ≥ 1.5', () => {
+  it('repeat-purchase pricing is geometric with growth ≥ 1.3', () => {
+    // 1.35 since 17.08.2026 (was 1.6, and this floor was 1.5). The floor is not
+    // where the inflation guard lives — that is the year-long sim below, which
+    // still holds at 1.35. What 1.6 broke was the OTHER half of the economy:
+    // the tenth engine cost 687⭐ and the upgrade ladder was a dead buy past
+    // the fourth engine. At 1.35 engines and upgrades stay comparable through
+    // ten engines (the tenth is 149⭐, and pays back in ~60 days like a
+    // level-20 speed tap does).
     const growth = appConfig.economy.engineRepeatPriceGrowth;
-    expect(growth).toBeGreaterThanOrEqual(1.5);
+    expect(growth).toBeGreaterThanOrEqual(1.3);
     for (const tier of TIERS) {
       const base = engineMarketPriceLc(tier, 0);
       expect(engineMarketPriceLc(tier, 5) / base).toBeCloseTo(Math.pow(growth, 5), 0);
@@ -282,9 +298,15 @@ describe('economy simulation (DOCS §14.2 guardrails)', () => {
     expect(engineCapacity(maxed)).toBeGreaterThan(engineCapacity(baseEngine({})));
   });
 
-  it('maxed speed levels halve the cycle (above the hard floor)', () => {
+  it('maxed speed levels take 20% off the cycle (ladder re-tuned 16.08.2026)', () => {
+    // Was "halve the cycle" while the ladder ran 0…100%. The ladders were
+    // compressed 5× when the boost math was fixed — with boosts finally
+    // multiplying the rate, +100% from ten taps alone would have tripled ticket
+    // emission. @see SPEED_LEVEL_BOOST_PCT_TABLE
     const maxed = baseEngine({ speedLevel: MAX_BOOST_LEVEL });
-    expect(effectiveCycleSeconds(maxed)).toBe(appConfig.engines.baseCycleSecondsByTier.bronze / 2);
+    expect(effectiveCycleSeconds(maxed)).toBe(
+      appConfig.engines.baseCycleSecondsByTier.bronze / 1.2
+    );
   });
 
   it('AP pacing hits the product targets: Silver ~15d, then +1mo, +3.5mo, +7mo', () => {
@@ -506,53 +528,83 @@ describe('equipped-avatar engine-speed boost (audit finding H2)', () => {
 describe('engine-level promotion & base-capacity scaling (audit finding H3)', () => {
   // The promotion loop was a large, undocumented economic lever invisible to
   // the guardrail: maxing both sub-levels promotes the engine, which permanently
-  // lifts base per-cycle output (1 → 22 → 43 → 64 → 86) and speed by +100%. These
+  // lifts base per-cycle output (1 → 11 → 21 → 31 → 41) and speed by +20%. These
   // tests pin both curves and the promotion gate to the exact code the live
   // upgrade paths run.
 
-  it('base per-cycle output follows the level table (1 → 22 → 43 → 64 → 86)', () => {
+  it('base per-cycle output follows the level table (1 → 12 → 27 → 47 → 72)', () => {
     expect(baseCapacity(1)).toBe(1);
-    expect(baseCapacity(2)).toBe(22);
-    expect(baseCapacity(3)).toBe(43);
+    expect(baseCapacity(2)).toBe(12);
+    expect(baseCapacity(3)).toBe(27);
+    // Every step is DERIVED: ten capacity taps plus that level's finishing
+    // bonus (1 · 5 · 10 · 15 · 20), so a maxed level-N engine holds exactly the
+    // base of level N+1 and promotion is seamless.
+    for (let level = 1; level < MAX_ENGINE_LEVEL; level += 1) {
+      expect(baseCapacity(level + 1), `level ${level} → ${level + 1}`).toBe(
+        baseCapacity(level) + MAX_BOOST_LEVEL + ENGINE_FULL_LEVEL_BONUS_TICKETS_TABLE[level]
+      );
+    }
     // A falsy/absent level is treated as level 1 — no phantom capacity.
     expect(baseCapacity(0)).toBe(1);
   });
 
-  it('design target: a FULL-maxed engine cycles exactly once a day', () => {
-    // Level 5, both ladders 10/10 → batch 86 + 10 = 96; the 900s/ticket floor
-    // makes the cycle 96 × 900s = 86 400s = 24h. Daily throughput is capped at
-    // 4 tickets/hour by the same floor, so this only sets the collect cadence.
+  it('design target: a FULL-maxed Bronze engine mints 102 tickets in exactly one day', () => {
+    // Level 5, both ladders 10/10 → 72 base + 10 taps + 20 finishing bonus =
+    // 102. One ticket costs one tier cycle, so that is 102 × 2h = 204h, divided
+    // by 1 + (475 level + 20 taps + 255 finishing bonus)% = 8.5 → 24h. This is
+    // the invariant the whole ladder was fitted to: a FINISHED level collects
+    // once a day, the top one exactly. The fresh engine stays the fixed point:
+    // 1 ticket in 2 hours.
     const fullMax = baseEngine({
       engineLevel: MAX_ENGINE_LEVEL,
       speedLevel: MAX_BOOST_LEVEL,
       capacityLevel: MAX_BOOST_LEVEL,
     });
-    expect(engineCapacity(fullMax)).toBe(96);
+    expect(engineCapacity(fullMax)).toBe(102);
     expect(effectiveCycleSeconds(fullMax)).toBe(24 * 3600);
+    // …and every other finished level lands within an hour or two of a day.
+    for (let level = 1; level <= MAX_ENGINE_LEVEL; level += 1) {
+      const finished = baseEngine({
+        engineLevel: level,
+        speedLevel: MAX_BOOST_LEVEL,
+        capacityLevel: MAX_BOOST_LEVEL,
+      });
+      const hours = effectiveCycleSeconds(finished) / 3600;
+      expect(hours, `finished level ${level}`).toBeGreaterThan(17);
+      expect(hours, `finished level ${level}`).toBeLessThan(27);
+    }
   });
 
-  it('each engine level adds +100% to the speed stack, but per-ticket time floors at the 900s cap', () => {
-    // The additive speed contribution is +100% per level above 1…
+  it('each engine level absorbs the finished ladder below it; capacity buys collect size', () => {
+    // A level's speed is DERIVED: the ten taps (+20%) plus the finishing bonus
+    // of the level below — exactly what promotion resets and forfeits, so the
+    // promotion is seamless and pays in headroom rather than an instant jump.
     expect(engineLevelBoostPct(1)).toBe(0);
-    expect(engineLevelBoostPct(2)).toBe(100);
-    expect(engineLevelBoostPct(3)).toBe(200);
-    // …yet because each level also lifts base capacity (+10), the per-cycle hard
-    // floor (`capacity × 900s`) rises with it and dominates the raw boosted
-    // cycle: a promoted engine trades a shorter cycle for a bigger batch, and
-    // per-ticket time bottoms out at the 900s cap. This floor↔capacity coupling
-    // is the subtle bit H3 makes explicit.
-    const lvl2 = baseEngine({ engineLevel: 2 });
-    const capacity = engineCapacity(lvl2); // baseCapacity(2) = 22
-    const cycle = effectiveCycleSeconds(lvl2);
-    expect(cycle).toBe(capacity * GlobalConstants.engineMinSecondsPerTicket); // floored, not cyc/2
-    expect(cycle / capacity).toBe(GlobalConstants.engineMinSecondsPerTicket); // 900s per ticket
+    for (let level = 1; level < MAX_ENGINE_LEVEL; level += 1) {
+      expect(engineLevelBoostPct(level + 1), `level ${level} → ${level + 1}`).toBe(
+        engineLevelBoostPct(level) +
+          speedLevelBoostPct(MAX_BOOST_LEVEL) +
+          ENGINE_FULL_LEVEL_SPEED_BONUS_PCT_TABLE[level]
+      );
+    }
+    // One ticket costs one tier cycle, so ten paid capacity taps buy ten more
+    // tickets per collect AND ten more tier cycles of waiting — the collect
+    // gets bigger and rarer, the mining rate is the speed side's job.
+    const bare = baseEngine({ engineLevel: 2 });
+    const loaded = baseEngine({ engineLevel: 2, capacityLevel: MAX_BOOST_LEVEL });
+    expect(engineCapacity(loaded)).toBe(engineCapacity(bare) + MAX_BOOST_LEVEL);
+    expect(effectiveCycleSeconds(loaded) / engineCapacity(loaded)).toBeCloseTo(
+      effectiveCycleSeconds(bare) / engineCapacity(bare),
+      6
+    );
   });
 
   it('capacity sub-level adds the same absolute +1 at every engine level', () => {
-    // Level 1: base 1 + 10 taps = 11 per cycle…
+    // Level 1: base 1 + 10 taps = 11 per cycle (the speed ladder is at 0, so no
+    // finishing bonus yet)…
     expect(engineCapacity(baseEngine({ capacityLevel: MAX_BOOST_LEVEL }))).toBe(11);
-    // …level 2: base 22 + the same 10 = 32 (absolute bonus, NOT a multiplier).
-    expect(engineCapacity(baseEngine({ engineLevel: 2, capacityLevel: MAX_BOOST_LEVEL }))).toBe(32);
+    // …level 2: base 12 + the same 10 = 22 (absolute bonus, NOT a multiplier).
+    expect(engineCapacity(baseEngine({ engineLevel: 2, capacityLevel: MAX_BOOST_LEVEL }))).toBe(22);
   });
 
   it('promotion fires only when BOTH sub-levels are maxed, then resets them', () => {
@@ -604,12 +656,10 @@ describe('engine-level promotion & base-capacity scaling (audit finding H3)', ()
     }
     expect(paidUpgrades).toBe(20); // 10 speed + 10 capacity, every step paid in LS
     expect(engine.engineLevel).toBe(2);
-    // Payoff of that spend: base output leaps 1 → 22, minting the whole batch at
-    // the 900s/ticket hard floor — the collect cadence stretches toward the
-    // once-a-day full-max target (96 × 900s = 24h).
-    expect(baseCapacity(engine.engineLevel ?? 1)).toBe(22);
-    expect(effectiveCycleSeconds(engine) / engineCapacity(engine)).toBe(
-      GlobalConstants.engineMinSecondsPerTicket
-    );
+    // Payoff of that spend: the level's base output goes 1 → 12, exactly what
+    // the ten capacity taps plus the level-1 finishing bonus had already given,
+    // so the promotion itself is seamless and what it buys is the next ten taps.
+    expect(baseCapacity(engine.engineLevel ?? 1)).toBe(12);
+    expect(engineCapacity(engine)).toBe(12);
   });
 });

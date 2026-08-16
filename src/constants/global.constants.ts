@@ -160,12 +160,6 @@ export const GlobalConstants = {
    */
   adCooldownSeconds: 5,
   /**
-   * Hard floor for engine output rate: no matter how many speed boosts stack
-   * (engine level + speed level + speed chip + speed booster), one ticket can
-   * never be minted faster than this many seconds. 900s = 15 minutes.
-   */
-  engineMinSecondsPerTicket: 900,
-  /**
    * How many ticket sprites a claim flies to the Tickets tab: one per ticket
    * collected, and never more than this. A capacity-1 engine flies one, a
    * capacity-10 engine flies ten, and anything above ten still flies ten —
