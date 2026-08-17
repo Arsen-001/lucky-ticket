@@ -15,6 +15,8 @@
   "no active tournaments": "Активних турнірів немає",
   "not counted": "Не зараховано",
   "referral requires channel explainer": "Реферал зараховується, поки лишається підписаним на канал і не заблокував бота. Другом він лишається в будь-якому разі.",
+  "referrals burned by bot block": "Your referrals were reset",
+  "referrals burned explainer": "The bot was blocked from this account, so these friends stopped counting as referrals — permanently, even after unblocking. They stay your friends and nobody else can ever invite them. Friends invited from now on count again.",
   "referrals": "Реферали",
   "select tournament": "Обери турнір",
   "to {tier}": "До {tier}",

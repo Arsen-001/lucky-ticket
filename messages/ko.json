@@ -15,6 +15,8 @@
   "no active tournaments": "진행 중인 토너먼트가 없습니다",
   "not counted": "집계 제외",
   "referral requires channel explainer": "레퍼럴은 채널 구독을 유지하고 봇을 차단하지 않은 동안에만 집계됩니다. 어느 쪽이든 친구로는 남습니다.",
+  "referrals burned by bot block": "Your referrals were reset",
+  "referrals burned explainer": "The bot was blocked from this account, so these friends stopped counting as referrals — permanently, even after unblocking. They stay your friends and nobody else can ever invite them. Friends invited from now on count again.",
   "referrals": "레퍼럴",
   "select tournament": "토너먼트 선택",
   "to {tier}": "{tier}까지",

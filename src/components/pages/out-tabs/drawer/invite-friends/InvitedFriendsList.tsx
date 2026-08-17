@@ -186,7 +186,16 @@ export const InvitedFriendsList = () => {
       {/* The rule, once, and only while it is actually costing this player
           something — a condition announced to someone it does not apply to is
           noise. @see FriendsQualificationNote */}
-      {counts.notCounted > 0 && <FriendsQualificationNote notCounted={counts.notCounted} />}
+      {counts.notCounted > 0 && (
+        <FriendsQualificationNote
+          notCounted={counts.notCounted}
+          // A single burned row switches the whole note: the burn is this
+          // player's own doing and outranks anything a friend did, so telling
+          // them «следи, чтобы друг был в канале» would point at the wrong
+          // person entirely. @see FriendsQualificationNote
+          burned={friends.some(friend => friend.notCountedReason === 'burned')}
+        />
+      )}
 
       <div className="flex flex-col gap-2">
         {tab === 'network' ? (

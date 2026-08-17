@@ -15,6 +15,8 @@
   "no active tournaments": "No hay torneos activos",
   "not counted": "No cuenta",
   "referral requires channel explainer": "Un referido cuenta mientras siga suscrito al canal y no haya bloqueado al bot. En cualquier caso siguen siendo tus amigos.",
+  "referrals burned by bot block": "Your referrals were reset",
+  "referrals burned explainer": "The bot was blocked from this account, so these friends stopped counting as referrals — permanently, even after unblocking. They stay your friends and nobody else can ever invite them. Friends invited from now on count again.",
   "referrals": "Referidos",
   "select tournament": "Elige un torneo",
   "to {tier}": "Hasta {tier}",

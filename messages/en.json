@@ -15,6 +15,8 @@
   "no active tournaments": "No active tournaments",
   "not counted": "Not counted",
   "referral requires channel explainer": "A referral counts while they stay subscribed to the channel and haven't blocked the bot. They stay your friends either way.",
+  "referrals burned by bot block": "Your referrals were reset",
+  "referrals burned explainer": "The bot was blocked from this account, so these friends stopped counting as referrals — permanently, even after unblocking. They stay your friends and nobody else can ever invite them. Friends invited from now on count again.",
   "referrals": "Referrals",
   "select tournament": "Select a tournament",
   "to {tier}": "To {tier}",

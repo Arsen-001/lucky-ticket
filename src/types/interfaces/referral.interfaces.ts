@@ -58,6 +58,18 @@ export interface InvitedFriend {
    * "counts" rather than painting every existing friend as disqualified.
    */
   countsAsReferral?: boolean;
+  /**
+   * Why this friend does not count, when they don't.
+   *
+   * The screen deliberately does not print three of these four — «не в канале»,
+   * «заблокировал бота», «не смогли спросить» are the friend's own doing and
+   * the rule above the list already covers them. `burned` is the exception and
+   * has to be told apart: it means THIS player blocked the bot and their own
+   * referrals were wiped, so the shared explainer («реферал засчитывается, пока
+   * ОН подписан…») would blame the friends for something their inviter did.
+   * @see FriendsQualificationNote
+   */
+  notCountedReason?: 'not-in-channel' | 'bot-blocked' | 'unknown' | 'burned';
 }
 
 /**

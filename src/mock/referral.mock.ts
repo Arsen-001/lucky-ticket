@@ -170,6 +170,18 @@ const baseFriends: Omit<InvitedFriend, 'liked' | 'likesReceived'>[] = [
  */
 const MOCK_NOT_COUNTED = new Set(['2', '3', '4']);
 
+/**
+ * The reason the screen actually reads. Three of the four are the friend's own
+ * doing and render identically; `burned` is the one that must not be confused
+ * with them — it means THIS player blocked the bot and their own referrals were
+ * wiped, and it rewrites the note above the list.
+ *
+ * Left as the friend-side reason here so dev shows the ordinary case by
+ * default. Swap it to `'burned'` to see the burn wording.
+ * @see FriendsQualificationNote
+ */
+const MOCK_NOT_COUNTED_REASON = 'not-in-channel' as const;
+
 // Level-zero: no invited friends yet (the demo roster stays in `baseFriends`).
 export const invitedFriendsMock: InvitedFriend[] = appConfig.account.fresh
   ? []
@@ -178,6 +190,7 @@ export const invitedFriendsMock: InvitedFriend[] = appConfig.account.fresh
       liked: i % 4 === 1,
       likesReceived: 35 + i * 44,
       countsAsReferral: !MOCK_NOT_COUNTED.has(friend.id),
+      ...(MOCK_NOT_COUNTED.has(friend.id) ? { notCountedReason: MOCK_NOT_COUNTED_REASON } : {}),
     }));
 
 const BRANCH_NAMES = [

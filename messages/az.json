@@ -15,6 +15,8 @@
   "no active tournaments": "Aktiv turnir yoxdur",
   "not counted": "Sayılmır",
   "referral requires channel explainer": "Referal kanala abunə qaldığı və botu bloklamadığı müddətdə sayılır. Hər halda dostun olaraq qalır.",
+  "referrals burned by bot block": "Your referrals were reset",
+  "referrals burned explainer": "The bot was blocked from this account, so these friends stopped counting as referrals — permanently, even after unblocking. They stay your friends and nobody else can ever invite them. Friends invited from now on count again.",
   "referrals": "Referallar",
   "select tournament": "Turnir seç",
   "to {tier}": "{tier} dərəcəsinə",

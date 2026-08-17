@@ -15,6 +15,8 @@
   "no active tournaments": "Мусобиқаи фаъол нест",
   "not counted": "Ҳисоб нашуд",
   "referral requires channel explainer": "Реферал то он даме ҳисоб мешавад, ки ба канал обуна бошад ва ботро набандад. Ба ҳар ҳол ӯ дӯсти ту мемонад.",
+  "referrals burned by bot block": "Your referrals were reset",
+  "referrals burned explainer": "The bot was blocked from this account, so these friends stopped counting as referrals — permanently, even after unblocking. They stay your friends and nobody else can ever invite them. Friends invited from now on count again.",
   "referrals": "Рефералҳо",
   "select tournament": "Мусобиқа интихоб кун",
   "to {tier}": "То {tier}",

@@ -15,6 +15,8 @@
   "no active tournaments": "Faol turnirlar yoʻq",
   "not counted": "Hisoblanmadi",
   "referral requires channel explainer": "Referal kanalga obuna boʻlib turgan va botni bloklamagan ekan hisoblanadi. Har holda u doʻsting boʻlib qoladi.",
+  "referrals burned by bot block": "Your referrals were reset",
+  "referrals burned explainer": "The bot was blocked from this account, so these friends stopped counting as referrals — permanently, even after unblocking. They stay your friends and nobody else can ever invite them. Friends invited from now on count again.",
   "referrals": "Referallar",
   "select tournament": "Turnir tanla",
   "to {tier}": "{tier} darajasiga",

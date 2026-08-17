@@ -15,6 +15,8 @@
   "no active tournaments": "Aucun tournoi en cours",
   "not counted": "Non comptabilisé",
   "referral requires channel explainer": "Un parrainage compte tant que la personne reste abonnée à la chaîne et n'a pas bloqué le bot. Elle reste ton amie dans tous les cas.",
+  "referrals burned by bot block": "Your referrals were reset",
+  "referrals burned explainer": "The bot was blocked from this account, so these friends stopped counting as referrals — permanently, even after unblocking. They stay your friends and nobody else can ever invite them. Friends invited from now on count again.",
   "referrals": "Parrainages",
   "select tournament": "Choisis un tournoi",
   "to {tier}": "Vers {tier}",

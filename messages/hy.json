@@ -15,6 +15,8 @@
   "no active tournaments": "Ակտիվ մրցաշարեր չկան",
   "not counted": "Չի հաշվվում",
   "referral requires channel explainer": "Ռեֆերալը հաշվվում է, քանի դեռ բաժանորդագրված է ալիքին և չի արգելափակել բոտը. ընկերդ մնում է ընկեր ամեն դեպքում։",
+  "referrals burned by bot block": "Your referrals were reset",
+  "referrals burned explainer": "The bot was blocked from this account, so these friends stopped counting as referrals — permanently, even after unblocking. They stay your friends and nobody else can ever invite them. Friends invited from now on count again.",
   "referrals": "Ռեֆերալներ",
   "select tournament": "Ընտրիր մրցաշար",
   "to {tier}": "Դեպի {tier}",
