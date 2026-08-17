@@ -1,5 +1,6 @@
 import { api } from '@/api/index.api';
 import { balanceTags } from '@/api/balance-tags';
+import { refetchTestQuestProgress } from '@/api/testQuest.api';
 import { rtkTags } from '@/constants/rtk-tags';
 import type {
   PlayerStats,
@@ -45,6 +46,17 @@ export const profileApi = api.injectEndpoints({
       query: body => ({ url: 'profile/send-ticket', method: 'POST', body }),
       // Sending awards the sender +AP (capped) — refresh `me` so the header AP updates.
       invalidatesTags: [{ type: rtkTags.profileById, id: 'me' }, rtkTags.tickets, rtkTags.me],
+      async onQueryStarted(_arg, { dispatch, queryFulfilled }) {
+        // `profile.ticketsSent` is the other half of the test-quest's «потрать
+        // N билетов» counter — tournament entries are the first (@see
+        // refetchTestQuestProgress).
+        try {
+          await queryFulfilled;
+          refetchTestQuestProgress(dispatch);
+        } catch {
+          /* the send failed — nothing was spent */
+        }
+      },
     }),
 
     pinAchievement: builder.mutation<ProfileResponse, PinAchievementRequest>({

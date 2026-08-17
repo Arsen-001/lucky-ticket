@@ -1,6 +1,6 @@
 import { api } from '@/api/index.api';
 import { tasksApi } from '@/api/tasks.api';
-import { testQuestApi } from '@/api/testQuest.api';
+import { refetchTestQuestProgress } from '@/api/testQuest.api';
 import { rtkTags } from '@/constants/rtk-tags';
 import type { AppDispatch } from '@/lib/rtk/store';
 import type {
@@ -70,12 +70,8 @@ const refetchTournamentProgress = (dispatch: AppDispatch) => {
   dispatch(
     tasksApi.endpoints.getTasks.initiate(undefined, { subscribe: false, forceRefetch: true })
   );
-  dispatch(
-    testQuestApi.endpoints.getTestQuest.initiate(undefined, {
-      subscribe: false,
-      forceRefetch: true,
-    })
-  );
+  // Entering spends tickets, and «потрать N билетов» counts them.
+  refetchTestQuestProgress(dispatch);
 };
 
 export const tournamentsApi = api.injectEndpoints({

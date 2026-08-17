@@ -1,5 +1,6 @@
 import { api } from '@/api/index.api';
 import { balanceTags } from '@/api/balance-tags';
+import { refetchTestQuestProgress } from '@/api/testQuest.api';
 import { rtkTags } from '@/constants/rtk-tags';
 import type {
   BranchMember,
@@ -51,10 +52,19 @@ export const referralApi = api.injectEndpoints({
         method: 'POST',
         body: { confirmed },
       }),
-      // Also the test-quest: its «поделиться с друзьями» step counts these very
-      // shares, and the screen it lives on is a different route — without this
-      // tag the badge keeps serving the number cached before the share.
-      invalidatesTags: [rtkTags.referral, rtkTags.testQuest],
+      invalidatesTags: [rtkTags.referral],
+      async onQueryStarted(_arg, { dispatch, queryFulfilled }) {
+        // The test-quest's «поделиться с друзьями» step counts these very
+        // shares. A forced refetch, not a tag: invalidation would evict the
+        // quest cache and make the screen open into skeletons
+        // (@see refetchTestQuestProgress).
+        try {
+          await queryFulfilled;
+          refetchTestQuestProgress(dispatch);
+        } catch {
+          /* the share was not recorded — nothing to refresh */
+        }
+      },
     }),
     claimFriend: builder.mutation<void, { friendId: string }>({
       query: ({ friendId }) => ({

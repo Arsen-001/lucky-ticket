@@ -3,6 +3,7 @@ import { api } from '@/api/index.api';
 import { balanceTags } from '@/api/balance-tags';
 import { configApi } from '@/api/config.api';
 import { meApi } from '@/api/me.api';
+import { refetchTestQuestProgress } from '@/api/testQuest.api';
 import { ticketsApi } from '@/api/tickets.api';
 import { rtkTags } from '@/constants/rtk-tags';
 import { appConfig } from '@/config/app.config';
@@ -309,6 +310,9 @@ export const enginesApi = api.injectEndpoints({
         );
         try {
           await queryFulfilled;
+          // Writes an ENGINE_UPGRADE Stars row, which is what the test-quest's
+          // «прокачай двигатель N раз» step counts.
+          refetchTestQuestProgress(dispatch);
         } catch {
           ticketsPatch.undo();
           mePatch.undo();
@@ -344,6 +348,8 @@ export const enginesApi = api.injectEndpoints({
         );
         try {
           await queryFulfilled;
+          // See upgrade-speed: the same ENGINE_UPGRADE row, the same quest step.
+          refetchTestQuestProgress(dispatch);
         } catch {
           ticketsPatch.undo();
           mePatch.undo();

@@ -1,5 +1,6 @@
 import { api } from '@/api/index.api';
 import { balanceTags } from '@/api/balance-tags';
+import { refetchTestQuestProgress } from '@/api/testQuest.api';
 import { rtkTags } from '@/constants/rtk-tags';
 import type {
   BuyExtraAdViewsRequest,
@@ -86,6 +87,17 @@ export const tasksApi = api.injectEndpoints({
       // included) — `me` + `lc` alone left the ad reward missing from both
       // histories and from the ticket balance.
       invalidatesTags: [rtkTags.tasks, rtkTags.tickets, ...balanceTags.lc, ...balanceTags.stars],
+      async onQueryStarted(_arg, { dispatch, queryFulfilled }) {
+        // A paid view moves `lifetimeWatched`, which is what the test-quest's
+        // «посмотри N реклам» step counts. Only after the server confirms — a
+        // refused claim moves nothing.
+        try {
+          await queryFulfilled;
+          refetchTestQuestProgress(dispatch);
+        } catch {
+          /* the caller surfaces the failure; nothing was counted */
+        }
+      },
     }),
     /**
      * POST /tasks/ads/attempt  body: { provider, outcome, adId? }

@@ -1,6 +1,7 @@
 import { api } from '@/api/index.api';
 import { balanceTags } from '@/api/balance-tags';
 import { rtkTags } from '@/constants/rtk-tags';
+import type { AppDispatch } from '@/lib/rtk/store';
 import type {
   ClaimTestQuestResponse,
   TestQuestLeaderboard,
@@ -45,6 +46,37 @@ export const testQuestApi = api.injectEndpoints({
     }),
   }),
 });
+
+/**
+ * Pull fresh `stepProgress` after an action the quest counts but does not own.
+ *
+ * The checklist's live counters are derived from five places, none of which the
+ * quest's own endpoints write: ads off `AdWatchProgress.lifetimeWatched`,
+ * tickets spent off tournament entries + `profile.ticketsSent`, engine upgrades
+ * off the ENGINE_UPGRADE Stars rows, shares and referrals off the two `User`
+ * counters. So every mutation behind one of those calls this.
+ *
+ * A forced refetch rather than `invalidatesTags: [rtkTags.testQuest]`, for the
+ * reason spelled out over `refetchTournamentProgress`: invalidation EVICTS an
+ * entry that has no live subscriber, and the next visit to the quest screen then
+ * replays the whole skeleton. `initiate(…, { forceRefetch: true })` writes the
+ * response into the existing entry instead, so the numbers change under a screen
+ * that never blinks.
+ *
+ * What it buys is narrow but real: `useTestQuestScreen` already refetches on
+ * every mount, so a stale number never lasts — but without this the refetch only
+ * STARTS when the player opens the screen, and the first paint shows the
+ * pre-action count for as long as the request takes. Starting it at the moment
+ * of the action means the screen opens already correct.
+ */
+export const refetchTestQuestProgress = (dispatch: AppDispatch) => {
+  dispatch(
+    testQuestApi.endpoints.getTestQuest.initiate(undefined, {
+      subscribe: false,
+      forceRefetch: true,
+    })
+  );
+};
 
 export const {
   useGetTestQuestQuery,
