@@ -1,6 +1,6 @@
 'use client';
 
-import { ArrowLeftRight, ArrowUp, Cpu, Infinity as InfinityIcon, Pause, Timer } from 'lucide-react';
+import { ArrowLeftRight, ArrowUp, Cpu } from 'lucide-react';
 import { twMerge } from 'tailwind-merge';
 import { useGetMeQuery } from '@/api/me.api';
 import { Button } from '@/components/shared/buttons/Button';
@@ -10,7 +10,6 @@ import {
   QUALITY_ACCENT,
   chipEffectLabel,
   chipUnequipStarsCost,
-  formatChipRemaining,
   isChipMaxed,
 } from '@/utils/global/inventory.utils';
 import { staggerMs } from '@/utils/global/animation.utils';
@@ -60,10 +59,6 @@ export function ChipActionRow({
   const progressPct = maxed
     ? 100
     : Math.min(100, Math.round((availableShards / chip.shardsForNextLevel) * 100));
-  const remaining =
-    chip.lifetime === 'time-limited' && typeof chip.remainingMs === 'number'
-      ? formatChipRemaining(chip.remainingMs, t)
-      : null;
 
   return (
     <div
@@ -99,33 +94,15 @@ export function ChipActionRow({
         </div>
 
         {/* `flex-wrap` + `whitespace-nowrap` per item, not one nowrap line: in
-            Russian "Осталось 3 д" is three times the width of "3d left" and the
-            row broke INSIDE the badge, leaving a lone "д" on its own line. Items
-            now break between themselves and each stays whole. */}
+            Russian a badge is up to three times the width of its English twin
+            and the row broke INSIDE it, leaving a lone letter on its own line.
+            Items now break between themselves and each stays whole. */}
         <div className="flex flex-wrap items-center gap-x-2 gap-y-0.5 text-[11px] font-extrabold text-white tabular-nums">
           <span className="whitespace-nowrap">
             {t('lv {level}', { level: chip.level })} · {chipEffectLabel(chip, t)}
           </span>
-          {/* A time-limited chip burns its life ONLY while it sits on an engine
-              (DOCS §10.5): off the engine the counter is stopped, and the same
-              pink "6h left" that a running chip wears read as a countdown the
-              player was losing. Stopped time gets its own icon, its own words
-              and no accent colour. */}
-          {remaining ? (
-            isEquipped ? (
-              <span className="text-electric-pink flex items-center gap-0.5 whitespace-nowrap text-[9px] font-bold uppercase tracking-wider">
-                <Timer size={10} strokeWidth={2.6} />
-                {remaining}
-              </span>
-            ) : (
-              <span className="flex items-center gap-0.5 whitespace-nowrap text-[9px] font-bold uppercase tracking-wider text-white/45">
-                <Pause size={10} strokeWidth={2.6} />
-                {remaining} · {t('chip life paused')}
-              </span>
-            )
-          ) : (
-            <InfinityIcon size={11} strokeWidth={2.6} className="text-white/30" />
-          )}
+          {/* No lifetime badge and no ∞: every chip is permanent (@see
+              InventoryChip). The clock belongs to boosters. */}
           {/* The engine badge is the MOVE control. Re-attaching costs the same
               whether it goes through "unequip, then equip" or straight across
               (DOCS §10.4: a move is a detach plus a free attach), but the

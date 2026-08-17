@@ -1,8 +1,19 @@
 import type { TicketType } from '@/types/types/ticket.types';
 
 export type InventoryChipType = 'speed' | 'capacity';
-export type InventoryChipLifetime = 'permanent' | 'time-limited';
 
+/**
+ * Chips are permanent. There is no second lifetime.
+ *
+ * The type carried `lifetime: 'permanent' | 'time-limited'` and a `remainingMs`
+ * countdown until 17.08.2026 — a mechanic no server ever implemented: both
+ * creation paths (mint, seed) wrote PERMANENT, nothing ever decremented the
+ * counter, and no reward hands out a chip at all. So the whole timed branch
+ * only ever rendered against a mock fixture, where it showed a countdown that
+ * never moved. The timed layer of engine boosts is the BOOSTER (§10.6): 3–48 h,
+ * one shot, tier-locked — see `InventoryBooster` below, which keeps every bit
+ * of it.
+ */
 export interface InventoryChip {
   id: string;
   type: InventoryChipType;
@@ -10,8 +21,6 @@ export interface InventoryChip {
   level: number;
   effectPct: number;
   shardsForNextLevel: number;
-  lifetime: InventoryChipLifetime;
-  remainingMs?: number;
   source: 'tournament';
   equippedOnEngineId?: string;
 }

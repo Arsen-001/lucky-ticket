@@ -65,7 +65,6 @@ const chip = (type: 'speed' | 'capacity', level: number): InventoryChip => ({
   level,
   effectPct: type === 'speed' ? chipSpeedPct(level) : chipCapacityTickets(level),
   shardsForNextLevel: chipLevelUpShards(level),
-  lifetime: 'permanent',
   source: 'tournament',
 });
 

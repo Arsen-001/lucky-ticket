@@ -29,7 +29,6 @@ const chip = (over: Partial<InventoryChip> = {}): InventoryChip => ({
   level: 1,
   effectPct: 10,
   shardsForNextLevel: chipShardsForNextLevel(1),
-  lifetime: 'permanent',
   source: 'tournament',
   ...over,
 });

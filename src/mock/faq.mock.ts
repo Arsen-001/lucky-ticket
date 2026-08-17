@@ -295,7 +295,7 @@ const articles: FaqArticle[] = [
     title: tx('What is the Boost Inventory?'),
     description: tx('Where your boost items live.'),
     content: tx(
-      'The Boost Inventory stores every owned-but-not-equipped boost item: Speed Boosts, Capacity Upgrades, Speed/Capacity Chips, uncommitted shards and Chip Builders. From there you level up chips by spending shards, and equip items onto engines. Items are either permanent or time-limited; time-limited items only tick down while equipped.'
+      'The Boost Inventory stores every owned-but-not-equipped boost item: Speed and Capacity Chips, the shards you have not spent yet, and your boosters. From there you mint a new chip or level one up with shards, and put chips onto engines. Chips are permanent — a chip keeps working for as long as it stays in a slot. The timed layer is the booster: it runs its 3–48 hours once and is gone.'
     ),
   },
 

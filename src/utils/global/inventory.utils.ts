@@ -140,22 +140,12 @@ export const chipShardsForNextLevel = (currentLevel: number) => chipLevelUpShard
 
 export const tierRank = (tier: TicketType): number => QUALITY_TIERS.indexOf(tier);
 
-/**
- * How long a time-limited chip has left, at the coarsest unit that still says
- * something: days until the last day, then hours, then minutes.
+/*
+ * `formatChipRemaining` lived here until 17.08.2026, for a chip lifetime that
+ * no server ever implemented (@see InventoryChip). Boosters keep their clock —
+ * they run it through `useCountDown` off a real `expiresAt`, not off a number
+ * nobody decrements.
  */
-export const formatChipRemaining = (
-  remainingMs: number,
-  t: import('@/types/types/i18n.types').Dictionary
-) => {
-  const totalSeconds = Math.max(0, Math.floor(remainingMs / 1000));
-  const days = Math.floor(totalSeconds / 86400);
-  const hours = Math.floor((totalSeconds % 86400) / 3600);
-  const minutes = Math.floor((totalSeconds % 3600) / 60);
-  if (days > 0) return t('{n}d left', { n: days });
-  if (hours > 0) return t('{n}h left', { n: hours });
-  return t('{n}m left', { n: minutes });
-};
 
 /**
  * Every engine the player owns, paired with the chips sitting in its two slots.

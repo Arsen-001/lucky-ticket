@@ -26,7 +26,6 @@ const initialChips: InventoryChip[] = [
     level: 6,
     effectPct: chipSpeedPct(6),
     shardsForNextLevel: chipShardsForNextLevel(6),
-    lifetime: 'permanent',
     source: 'tournament',
     equippedOnEngineId: 'engine-bronze-1',
   },
@@ -37,7 +36,6 @@ const initialChips: InventoryChip[] = [
     level: 3,
     effectPct: chipSpeedPct(3),
     shardsForNextLevel: chipShardsForNextLevel(3),
-    lifetime: 'permanent',
     source: 'tournament',
   },
   {
@@ -47,7 +45,6 @@ const initialChips: InventoryChip[] = [
     level: 1,
     effectPct: chipSpeedPct(1),
     shardsForNextLevel: chipShardsForNextLevel(1),
-    lifetime: 'permanent',
     source: 'tournament',
   },
   {
@@ -57,8 +54,6 @@ const initialChips: InventoryChip[] = [
     level: 8,
     effectPct: chipCapacityTickets(8),
     shardsForNextLevel: chipShardsForNextLevel(8),
-    lifetime: 'time-limited',
-    remainingMs: 3 * 86400_000 + 4 * 3600_000,
     source: 'tournament',
     equippedOnEngineId: 'engine-bronze-1',
   },
@@ -69,7 +64,6 @@ const initialChips: InventoryChip[] = [
     level: 9,
     effectPct: chipSpeedPct(9),
     shardsForNextLevel: chipShardsForNextLevel(9),
-    lifetime: 'permanent',
     source: 'tournament',
   },
   {
@@ -79,7 +73,6 @@ const initialChips: InventoryChip[] = [
     level: 10,
     effectPct: chipCapacityTickets(10),
     shardsForNextLevel: chipShardsForNextLevel(10),
-    lifetime: 'permanent',
     source: 'tournament',
   },
   {
@@ -89,8 +82,6 @@ const initialChips: InventoryChip[] = [
     level: 10,
     effectPct: chipSpeedPct(10),
     shardsForNextLevel: chipShardsForNextLevel(10),
-    lifetime: 'time-limited',
-    remainingMs: 6 * 3600_000 + 24 * 60_000,
     source: 'tournament',
   },
 ];
@@ -293,7 +284,6 @@ const mintChipHandler = (args: FetchArgs) => {
         level: 1,
         effectPct: type === 'speed' ? chipSpeedPct(1) : chipCapacityTickets(1),
         shardsForNextLevel: chipShardsForNextLevel(1),
-        lifetime: 'permanent',
         source: 'tournament',
       },
     ],
