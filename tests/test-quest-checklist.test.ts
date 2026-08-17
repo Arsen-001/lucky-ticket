@@ -211,6 +211,43 @@ describe('test-quest checklist', () => {
     );
     expect(dead).toEqual([]);
   });
+
+  /**
+   * A number on a step is a promise that it moves. Two ways to break it, both
+   * found live on 17.08.2026:
+   *
+   * - a step with a `target` but no `action` shows a badge no counter can ever
+   *   fill, so it reads `0/20` while the player does exactly what it asked
+   *   (this is what the shard ladder did — there was no shards counter at all,
+   *   and «Забери билеты 0/1» sat under it for the same reason);
+   * - a step with neither, standing among steps that have both, reads as
+   *   "nothing to do" (day 1's «Поделись с друзьями» had no `0/1` while the
+   *   four steps around it did).
+   *
+   * The rule is per LABEL, not per row: a one-off like «Подключи кошелёк» is
+   * legitimately number-less everywhere, but a label that is counted on ANY
+   * level must be counted on EVERY level.
+   */
+  it('every number on the checklist is backed by a live counter', () => {
+    const stuck = levels.flatMap(l =>
+      l.steps
+        .filter(s => s.target != null && !s.action)
+        .map(s => `L${l.level}:${s.labelKey} — ${s.target} без счётчика`)
+    );
+    expect(stuck).toEqual([]);
+  });
+
+  it('a counted label is counted on every level it appears on', () => {
+    const counted = new Set(
+      levels.flatMap(l => l.steps.filter(s => s.target != null).map(s => s.labelKey))
+    );
+    const bare = levels.flatMap(l =>
+      l.steps
+        .filter(s => s.target == null && counted.has(s.labelKey))
+        .map(s => `L${l.level}:${s.labelKey} — без числа, хотя на других уровнях с числом`)
+    );
+    expect(bare).toEqual([]);
+  });
 });
 
 describe('test-quest checklist — server-driven rendering', () => {

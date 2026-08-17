@@ -63,6 +63,11 @@ const view = () => {
       shares: 2 * climbed,
       referrals: Math.floor(climbed / 3),
       engineUpgrades: climbed,
+      shardsBought: Math.floor(climbed / 2),
+      ticketsCollected: 3 * climbed,
+      // Live, not cumulative — a stake that matured stops counting, so this one
+      // deliberately does not scale with the climb.
+      activeStakes: climbed > 10 ? 2 : climbed > 5 ? 1 : 0,
     },
   };
 };

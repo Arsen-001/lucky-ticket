@@ -53,6 +53,20 @@ export interface TestQuestProgress {
   referrals: number;
   /** Engine upgrades performed (speed + capacity). */
   engineUpgrades: number;
+  /**
+   * Shards BOUGHT in the market, lifetime. Not the shard balance: minting a chip
+   * spends 20, and a balance-backed counter would drop the step back to 0 the
+   * moment the player used what the ladder told them to buy.
+   * Optional — an older backend simply leaves the step at 0 instead of crashing.
+   */
+  shardsBought?: number;
+  /** Tickets collected off engines, lifetime (`Profile.ticketsEarned`). */
+  ticketsCollected?: number;
+  /**
+   * Stakes currently ACTIVE — the one live counter, because the step says
+   * «hold», not «make»: a matured stake stops counting, as the wording promises.
+   */
+  activeStakes?: number;
 }
 
 /** The countable checklist actions that {@link TestQuestProgress} tracks. */

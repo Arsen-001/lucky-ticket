@@ -179,10 +179,17 @@ const ads = (n: number): TestQuestStep => ({
   action: 'adsWatched',
   kind: 'ads',
 });
-const share = (n?: number): TestQuestStep => ({
+/**
+ * Always counted. It used to accept an optional `n`, and day 1 was authored
+ * without one — so the only step on that screen with no `0/1` badge sat between
+ * four steps that had one, and read as "nothing to do here". A counted ladder
+ * has to show its first rung too; `tests/test-quest-checklist.test.ts` now
+ * refuses any step whose label is counted elsewhere but bare here.
+ */
+const share = (n: number): TestQuestStep => ({
   labelKey: 'quest step share',
   target: n,
-  action: n != null ? 'shares' : undefined,
+  action: 'shares',
   kind: 'share',
 });
 const invite = (n: number): TestQuestStep => ({
@@ -200,11 +207,13 @@ const upgrade = (n: number): TestQuestStep => ({
 const collect = (n: number): TestQuestStep => ({
   labelKey: 'quest step collect tickets',
   target: n,
+  action: 'ticketsCollected',
   kind: 'engine',
 });
 const holdStakes = (n: number): TestQuestStep => ({
   labelKey: 'quest step hold stakes',
   target: n,
+  action: 'activeStakes',
   kind: 'stake',
 });
 /**
@@ -217,6 +226,7 @@ const holdStakes = (n: number): TestQuestStep => ({
 const shards = (n: number): TestQuestStep => ({
   labelKey: 'quest step buy shards',
   target: n,
+  action: 'shardsBought',
   kind: 'market',
 });
 
@@ -228,7 +238,7 @@ const shards = (n: number): TestQuestStep => ({
 // until the backend owns per-step data.
 const TEST_QUEST_STEP_OVERRIDES: Record<number, TestQuestStep[]> = {
   // 31 · entry
-  31: [collect(1), spend(1), ads(1), share(), CHANNEL_GATE],
+  31: [collect(1), spend(1), ads(1), share(1), CHANNEL_GATE],
   // 30 · day 1 — engine-upgrade special
   30: [spend(10), ads(2), share(2), upgrade(1), CHANNEL_GATE],
   // 29 · day 2 — cumulative over the whole test
@@ -310,14 +320,7 @@ const TEST_QUEST_STEP_OVERRIDES: Record<number, TestQuestStep[]> = {
   // they move on the platform's own clock rather than the test's, and the test
   // window cannot honestly promise any of them — Gold needs 1 650 AP + 5
   // referrals, Platinum 5 900 + 10, against a 35 AP/day ceiling.
-  15: [
-    spend(135),
-    ads(100),
-    share(24),
-    upgrade(16),
-    { labelKey: 'quest step keep active stake', kind: 'stake' },
-    CHANNEL_GATE,
-  ],
+  15: [spend(135), ads(100), share(24), upgrade(16), holdStakes(1), CHANNEL_GATE],
   // 14 · day 17
   14: [spend(143), ads(108), share(26), invite(6), upgrade(17), CHANNEL_GATE],
   // 13 · day 18
@@ -414,6 +417,9 @@ const KNOWN_ACTIONS: ReadonlySet<string> = new Set<TestQuestAction>([
   'shares',
   'referrals',
   'engineUpgrades',
+  'shardsBought',
+  'ticketsCollected',
+  'activeStakes',
 ]);
 
 /**
