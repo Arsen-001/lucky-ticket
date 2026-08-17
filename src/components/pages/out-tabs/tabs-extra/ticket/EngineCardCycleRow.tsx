@@ -137,22 +137,29 @@ export function EngineCardCycleRow({
       <div className={twMerge('flex-1 min-w-0 flex items-center gap-2', pending && 'hidden')}>
         <TicketOverlap type={tier} width={32} height={24} className="shrink-0" />
         <div className="flex-1 min-w-0 flex flex-col gap-0.5">
-          <span
-            className={twMerge(
-              'font-extrabold text-white leading-none truncate',
-              compact ? 'text-[14px]' : 'text-[12px]'
-            )}
-          >
-            {/* The cube face names the TIER, not the ticket: at readable type
-                the full name is 15–18 characters in most locales ("Бронзовый
-                билет", "Ticket de bronce") and arrived on the card as
-                "Бронзовый б…". The tier word is at most 8 in all 18
-                dictionaries, and the ticket picture beside it already says
-                which noun is missing. The full name stays on the engine
-                screen, where the line is not scaled down. */}
-            {t(compact ? tierNameId[tier] : tierTicketNameId[tier])}
+          {/* Name and count are SIBLINGS, not one string: measured on production
+              (RU, engine screen) the pair needed 153px and had 57, so `truncate`
+              printed «Бронзо…» and the count vanished entirely — the number was
+              inside the truncated span. The name may lose letters (the ticket art
+              beside it names the tier anyway); the count may not. */}
+          <span className="flex min-w-0 items-baseline gap-1">
+            <span
+              className={twMerge(
+                'min-w-0 truncate font-extrabold text-white leading-none',
+                compact ? 'text-[14px]' : 'text-[12px]'
+              )}
+            >
+              {/* The cube face names the TIER, not the ticket: at readable type
+                  the full name is 15–18 characters in most locales ("Бронзовый
+                  билет", "Ticket de bronce") and arrived on the card as
+                  "Бронзовый б…". The tier word is at most 8 in all 18
+                  dictionaries, and the ticket picture beside it already says
+                  which noun is missing. The full name stays on the engine
+                  screen, where the line is not scaled down. */}
+              {t(compact ? tierNameId[tier] : tierTicketNameId[tier])}
+            </span>
             {!compact && (
-              <span className="ms-1 tabular-nums text-white/65 font-bold">
+              <span className="shrink-0 whitespace-nowrap text-[11px] font-bold tabular-nums text-white/65">
                 {pendingCount}/{capacity}
               </span>
             )}
@@ -212,13 +219,15 @@ export function EngineCardCycleRow({
         )}
       >
         <TelegramStarIcon size={compact ? 13 : 11} />
-        {/* The cube face keeps the verb but not the adverb: at readable type
-            "Забрать сейчас · 1" is 133px of the row's 260 and squeezes the
-            ticket name off the strip, while "Забрать · 1" leaves every locale
-            whole. The star and the price say the "сейчас" part, and the full
-            phrase is still the `title` and the confirm modal's heading. */}
+        {/* The verb, never the adverb — on BOTH faces since 17.08.2026. At
+            readable type "Забрать сейчас · 1" is 133px of the row's 260 and
+            squeezes the ticket name off the strip; the cube face was fixed
+            first, and production then showed the engine screen doing the same
+            («Бронзо…» over a lost 0/153). The star and the price say the
+            "сейчас" part, and the full phrase is still the `title` and the
+            confirm modal's heading. */}
         <span className="tabular-nums">
-          {compact ? t('claim') : t('claim now')} · {instantClaimCost}
+          {t('claim')} · {instantClaimCost}
         </span>
       </button>
     </div>
