@@ -50,14 +50,15 @@ const levelTablesFromState = (state: unknown): EngineLevelTables =>
 const IS_REAL_BACKEND = !!process.env.NEXT_PUBLIC_API_URL;
 
 /**
- * `queryFulfilled` rejected with the server's 409 — engines.service `upgrade()`
- * lost its level CAS to a concurrent upgrade of the same engine (another
- * device, or a second tap that slipped past the in-flight guard). The
- * optimistic undo below puts the PRE-tap levels back, but the server's are
- * one step further — the one refetch of the tickets that is worth the cube
- * flicker, because without it the next tap prices and patches from a lie.
+ * `queryFulfilled` rejected with the server's 409 — engines.service lost a
+ * compare-and-swap to a concurrent request on the same engine (another
+ * device, or a second tap that slipped past the in-flight lock): the levels
+ * on an upgrade, the cycle on a claim. The optimistic undo puts the PRE-tap
+ * state back, but the server's has moved on — the one refetch of the tickets
+ * that is worth the cube flicker, because without it the next tap prices and
+ * patches from a lie.
  */
-const isUpgradeConflict = (reason: unknown): boolean =>
+const isLostRace = (reason: unknown): boolean =>
   (reason as { error?: { status?: unknown } } | null | undefined)?.error?.status === 409;
 
 // The free Bronze starter engine, granted once after the onboarding language
@@ -132,8 +133,9 @@ export const enginesApi = api.injectEndpoints({
               })
             );
           }
-        } catch {
+        } catch (reason) {
           patch.undo();
+          if (isLostRace(reason)) dispatch(api.util.invalidateTags([rtkTags.tickets]));
         }
       },
     }),
@@ -193,8 +195,9 @@ export const enginesApi = api.injectEndpoints({
               })
             );
           }
-        } catch {
+        } catch (reason) {
           patch.undo();
+          if (isLostRace(reason)) dispatch(api.util.invalidateTags([rtkTags.tickets]));
         }
       },
     }),
@@ -283,9 +286,10 @@ export const enginesApi = api.injectEndpoints({
               })
             );
           }
-        } catch {
+        } catch (reason) {
           ticketsPatch.undo();
           mePatch.undo();
+          if (isLostRace(reason)) dispatch(api.util.invalidateTags([rtkTags.tickets]));
         }
       },
     }),
@@ -327,7 +331,7 @@ export const enginesApi = api.injectEndpoints({
         } catch (reason) {
           ticketsPatch.undo();
           mePatch.undo();
-          if (isUpgradeConflict(reason)) dispatch(api.util.invalidateTags([rtkTags.tickets]));
+          if (isLostRace(reason)) dispatch(api.util.invalidateTags([rtkTags.tickets]));
         }
       },
     }),
@@ -365,7 +369,7 @@ export const enginesApi = api.injectEndpoints({
         } catch (reason) {
           ticketsPatch.undo();
           mePatch.undo();
-          if (isUpgradeConflict(reason)) dispatch(api.util.invalidateTags([rtkTags.tickets]));
+          if (isLostRace(reason)) dispatch(api.util.invalidateTags([rtkTags.tickets]));
         }
       },
     }),

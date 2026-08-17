@@ -21,6 +21,8 @@ import { QueryErrorState } from '@/components/shared/error/QueryErrorState';
 import { ConfirmModal } from '@/components/shared/modals/ConfirmModal';
 import { EngineSlotPickerModal } from '@/components/pages/tabs/home/EngineSlotPickerModal';
 import { useAppTranslations } from '@/hooks/useAppTranslations';
+import { useInFlightLock } from '@/hooks/useInFlightLock';
+import { isConflictError } from '@/utils/global/spend-failure.utils';
 import { useToast } from '@/hooks/useToast';
 import { useSpendFailure } from '@/hooks/useSpendFailure';
 import { useEngineSpeedAvatarBoostPct } from '@/hooks/useEngineSpeedAvatarBoostPct';
@@ -75,14 +77,14 @@ export function EngineDetails({ id }: EngineDetailsProps) {
   const [unequipChip, { isLoading: unequipping }] = useUnequipChipMutation();
   const [claimEngine] = useClaimEngineMutation();
   const [instantClaimEngine] = useInstantClaimEngineMutation();
-  const [upgradeEngineSpeed, { isLoading: upgradingSpeed }] = useUpgradeEngineSpeedMutation();
-  const [upgradeEngineCapacity, { isLoading: upgradingCapacity }] =
-    useUpgradeEngineCapacityMutation();
-  // The lock is a ref, not the `isLoading` above: RTK auto-batches the
-  // mutation's `pending` action, so a re-render — and with it a disabled
-  // button — can land a frame after the tap. Two taps inside that frame both
-  // reach the server, and the second loses the backend's level CAS.
-  const upgradeInFlightRef = useRef(false);
+  const [upgradeEngineSpeed] = useUpgradeEngineSpeedMutation();
+  const [upgradeEngineCapacity] = useUpgradeEngineCapacityMutation();
+  // One request per engine row at a time (@see useInFlightLock): the server
+  // compares-and-swaps the levels on an upgrade and the cycle on a claim, so a
+  // second tap racing the first can only lose. Two locks because the two CAS
+  // keys are independent — an upgrade never blocks a claim.
+  const upgradeLock = useInFlightLock();
+  const claimLock = useInFlightLock();
   const [completeEngineCycle] = useCompleteEngineCycleMutation();
 
   const [elapsedSeconds, setElapsedSeconds] = useState(0);
@@ -248,11 +250,18 @@ export function EngineDetails({ id }: EngineDetailsProps) {
 
   const handleClaim = async () => {
     if (engine.pendingCount <= 0) return;
+    if (!claimLock.acquire(engine.id)) return;
     setElapsedSeconds(0);
     try {
       await claimEngine({ engineId: engine.id }).unwrap();
-    } catch {
-      toast.error(t('action failed'));
+    } catch (error) {
+      // A lost race is not a failed claim: a request that landed first (a
+      // second device, a tap that slipped past the lock) collected the cycle,
+      // and `engines.api` has already asked for the server's state.
+      if (isConflictError(error)) toast.info(t('claim already collected'));
+      else toast.error(t('action failed'));
+    } finally {
+      claimLock.release(engine.id);
     }
   };
 
@@ -263,7 +272,13 @@ export function EngineDetails({ id }: EngineDetailsProps) {
     // a second tap to collect; that preserved the AP a claim once awarded, and
     // engine claims have awarded none since 2026-07-08.)
     // Paid action — a failure must surface, never silently refund the stars.
+    // Locked for the round trip: a second tap racing the first loses the
+    // server's cycle CAS, and a second tap AFTER it would buy the next cycle's
+    // skip for real — the button is back with the new price the moment this
+    // one answers, and only a deliberate tap should pay it.
+    if (claimLock.isLocked(engine.id)) return;
     requireStars(instantClaimCost, async () => {
+      if (!claimLock.acquire(engine.id)) return;
       // Same celebration a free claim gets (@see EngineCardCycleRow): one ticket
       // per ticket collected, flying to the Tickets tab. The count mirrors the
       // mutation's optimistic patch — pending if there is any, else a full batch.
@@ -277,6 +292,8 @@ export function EngineDetails({ id }: EngineDetailsProps) {
         await instantClaimEngine({ engineId: engine.id, cost: instantClaimCost }).unwrap();
       } catch (error) {
         await spend.report(error, { required: instantClaimCost });
+      } finally {
+        claimLock.release(engine.id);
       }
     });
   };
@@ -284,15 +301,15 @@ export function EngineDetails({ id }: EngineDetailsProps) {
   // One upgrade per engine at a time — speed and capacity share the lock,
   // because the server's CAS covers both levels of the same row.
   const performUpgrade = (cost: number, mutate: () => ReturnType<typeof upgradeEngineSpeed>) => {
-    if (upgradeInFlightRef.current) return;
+    if (upgradeLock.isLocked(engine.id)) return;
     requireStars(cost, async () => {
-      upgradeInFlightRef.current = true;
+      if (!upgradeLock.acquire(engine.id)) return;
       try {
         await mutate().unwrap();
       } catch (error) {
         await spend.report(error, { required: cost });
       } finally {
-        upgradeInFlightRef.current = false;
+        upgradeLock.release(engine.id);
       }
     });
   };
@@ -330,7 +347,8 @@ export function EngineDetails({ id }: EngineDetailsProps) {
         onInstantClaim={() => handleInstantClaim()}
         onUpgradeSpeed={() => handleUpgradeSpeed()}
         onUpgradeCapacity={() => handleUpgradeCapacity()}
-        upgradePending={upgradingSpeed || upgradingCapacity}
+        upgradePending={upgradeLock.locked.has(engine.id)}
+        claimPending={claimLock.locked.has(engine.id)}
         reactorVisual="engine"
       />
 

@@ -35,7 +35,9 @@ import { ChipIcon } from '@/components/shared/icons/ChipIcon';
 import { TelegramStarIcon } from '@/components/shared/icons/TelegramStarIcon';
 import { useAppTranslations } from '@/hooks/useAppTranslations';
 import { useToast } from '@/hooks/useToast';
+import { useInFlightLock } from '@/hooks/useInFlightLock';
 import { useSpendFailure } from '@/hooks/useSpendFailure';
+import { isConflictError } from '@/utils/global/spend-failure.utils';
 import { useEngineSpeedAvatarBoostPct } from '@/hooks/useEngineSpeedAvatarBoostPct';
 import { useTestBadgeCapacityTickets } from '@/hooks/useTestBadgeCapacityTickets';
 import { useTestBadgeSpeedBoostPct } from '@/hooks/useTestBadgeSpeedBoostPct';
@@ -123,15 +125,13 @@ export function HomeEnginesSlider({ className }: ClassNameProps) {
   const [instantClaimEngine] = useInstantClaimEngineMutation();
   const [upgradeEngineSpeed] = useUpgradeEngineSpeedMutation();
   const [upgradeEngineCapacity] = useUpgradeEngineCapacityMutation();
-  // One upgrade per engine at a time. A second request racing the first
-  // loses the backend's level CAS (speed and capacity share it — one row) and
-  // came back as «покупка не прошла» after an upgrade that had gone through.
-  // The lock is a ref because the disabled button can land a frame after the
-  // tap (RTK auto-batches the mutation's `pending`); the state only paints it.
-  const upgradingRef = useRef<Set<string>>(new Set());
-  const [upgradingEngineIds, setUpgradingEngineIds] = useState<ReadonlySet<string>>(
-    () => new Set()
-  );
+  // One request per engine row at a time (@see useInFlightLock): the server
+  // compares-and-swaps the levels on an upgrade (speed and capacity share it —
+  // one row) and the cycle on a claim, so a second tap racing the first can
+  // only lose — and used to come back as «покупка не прошла» after an action
+  // that had gone through. Two locks because the two CAS keys are independent.
+  const upgradeLock = useInFlightLock();
+  const claimLock = useInFlightLock();
   const [chipToUnequip, setChipToUnequip] = useState<InventoryChip | null>(null);
   const [instantClaimConfirm, setInstantClaimConfirm] = useState<{
     engineId: string;
@@ -391,6 +391,7 @@ export function HomeEnginesSlider({ className }: ClassNameProps) {
   };
 
   const handleClaim = (engineId: string) => {
+    if (!claimLock.acquire(engineId)) return;
     updateEngine(engineId, engine => ({
       ...engine,
       pendingCount: 0,
@@ -406,10 +407,18 @@ export function HomeEnginesSlider({ className }: ClassNameProps) {
     // spent.
     claimEngine({ engineId })
       .unwrap()
-      .catch(() => toast.error(t('claim failed')));
+      .catch(error => {
+        // A lost race is not a failed claim: a request that landed first
+        // collected the cycle, and `engines.api` has already asked for the
+        // server's state.
+        if (isConflictError(error)) toast.info(t('claim already collected'));
+        else toast.error(t('claim failed'));
+      })
+      .finally(() => claimLock.release(engineId));
   };
 
   const handleInstantClaim = (engineId: string) => {
+    if (claimLock.isLocked(engineId)) return;
     const engine = itemsRef.current.find(item => item.engine.id === engineId)?.engine;
     if (!engine) return;
     const speedChip = findEquippedChip(inventory?.chips, engine.id, 'speed');
@@ -438,6 +447,11 @@ export function HomeEnginesSlider({ className }: ClassNameProps) {
   const performInstantClaim = (engineId: string, cost: number) => {
     const item = itemsRef.current.find(item => item.engine.id === engineId);
     if (!item) return;
+    // Held for the round trip only: a second tap racing this one loses the
+    // server's cycle CAS, and a second tap AFTER it would buy the next cycle's
+    // skip for real — the button is back with the new price the moment this
+    // answers, and only a deliberate tap should pay it.
+    if (!claimLock.acquire(engineId)) return;
     const { engine, tier } = item;
     // The paid path buys the same tickets a plain claim would, so it gets the
     // same celebration — it had none, and a star charge that produced no visible
@@ -471,7 +485,8 @@ export function HomeEnginesSlider({ className }: ClassNameProps) {
     setElapsedByEngine(prev => ({ ...prev, [engineId]: 0 }));
     instantClaimEngine({ engineId, cost })
       .unwrap()
-      .catch(error => spend.report(error, { required: cost }));
+      .catch(error => spend.report(error, { required: cost }))
+      .finally(() => claimLock.release(engineId));
   };
 
   const confirmInstantClaim = () => {
@@ -481,22 +496,10 @@ export function HomeEnginesSlider({ className }: ClassNameProps) {
     requireStars(cost, () => performInstantClaim(engineId, cost));
   };
 
-  const setUpgrading = (engineId: string, on: boolean) => {
-    if (on) upgradingRef.current.add(engineId);
-    else upgradingRef.current.delete(engineId);
-    setUpgradingEngineIds(prev => {
-      if (prev.has(engineId) === on) return prev;
-      const next = new Set(prev);
-      if (on) next.add(engineId);
-      else next.delete(engineId);
-      return next;
-    });
-  };
-
   const performUpgrade = (engineId: string, type: 'speed' | 'capacity', cost: number) => {
-    if (upgradingRef.current.has(engineId)) return;
+    if (upgradeLock.isLocked(engineId)) return;
     requireStars(cost, () => {
-      setUpgrading(engineId, true);
+      if (!upgradeLock.acquire(engineId)) return;
       updateEngine(engineId, e =>
         promoteEngineIfMaxed(
           {
@@ -517,12 +520,12 @@ export function HomeEnginesSlider({ className }: ClassNameProps) {
       upgrade
         .unwrap()
         .catch(error => spend.report(error, { required: cost }))
-        .finally(() => setUpgrading(engineId, false));
+        .finally(() => upgradeLock.release(engineId));
     });
   };
 
   const handleUpgradeSpeed = (engineId: string) => {
-    if (upgradingRef.current.has(engineId)) return;
+    if (upgradeLock.isLocked(engineId)) return;
     const item = itemsRef.current.find(item => item.engine.id === engineId);
     if (!item) return;
     const { engine, tier } = item;
@@ -536,7 +539,7 @@ export function HomeEnginesSlider({ className }: ClassNameProps) {
   };
 
   const handleUpgradeCapacity = (engineId: string) => {
-    if (upgradingRef.current.has(engineId)) return;
+    if (upgradeLock.isLocked(engineId)) return;
     const item = itemsRef.current.find(item => item.engine.id === engineId);
     if (!item) return;
     const { engine, tier } = item;
@@ -689,7 +692,8 @@ export function HomeEnginesSlider({ className }: ClassNameProps) {
                 onInstantClaim={handleInstantClaim}
                 onUpgradeSpeed={handleUpgradeSpeed}
                 onUpgradeCapacity={handleUpgradeCapacity}
-                upgradePending={upgradingEngineIds.has(engine.id)}
+                upgradePending={upgradeLock.locked.has(engine.id)}
+                claimPending={claimLock.locked.has(engine.id)}
                 onSlotPick={slot =>
                   setPickerSlot({
                     engineId: engine.id,

@@ -21,7 +21,9 @@ import { TierUnlockedContent } from '@/components/pages/tabs/tickets/TierUnlocke
 import { TierLockedContent } from '@/components/pages/tabs/tickets/TierLockedContent';
 import { PartnersComingSoon } from '@/components/pages/tabs/home/PartnersComingSoon';
 import { useUnlockedTiers } from '@/hooks/useUnlockedTiers';
+import { useInFlightLock } from '@/hooks/useInFlightLock';
 import { useToast } from '@/hooks/useToast';
+import { isConflictError } from '@/utils/global/spend-failure.utils';
 import { useAppTranslations } from '@/hooks/useAppTranslations';
 import { useEngineSpeedAvatarBoostPct } from '@/hooks/useEngineSpeedAvatarBoostPct';
 import { useTestBadgeCapacityTickets } from '@/hooks/useTestBadgeCapacityTickets';
@@ -54,6 +56,8 @@ export function TicketsTabsView() {
   const { tables } = useEngineConfig();
   const [claimEngine] = useClaimEngineMutation();
   const [claimEnginesForTier] = useClaimEnginesForTierMutation();
+  // Keyed by engine id for a single claim and by tier for the bulk one.
+  const claimLock = useInFlightLock();
   const [completeEngineCycle] = useCompleteEngineCycleMutation();
   const { isTierUnlocked } = useUnlockedTiers();
 
@@ -174,6 +178,9 @@ export function TicketsTabsView() {
     const engines = enginesByTier[tier] ?? [];
     const total = engines.reduce((sum, engine) => sum + (engine.pendingCount || 0), 0);
     if (total === 0) return;
+    // The optimistic patch hides the button, but a frame late (RTK batches
+    // it); a second tap inside that frame would lose the server's cycle CAS.
+    if (!claimLock.acquire(tier)) return;
     try {
       const response = await claimEnginesForTier({ tier }).unwrap();
       const claimed = resolveClaimedCount(response, total);
@@ -187,22 +194,32 @@ export function TicketsTabsView() {
       // A confirmed zero means someone else drained the tier first — the tickets
       // cache already settled, so celebrating "+0" would be the only lie left.
       if (claimed > 0) setClaimedModal({ open: true, tier, count: claimed });
-    } catch {
-      toast.error(t('claim failed'));
+    } catch (error) {
+      // A lost race is not a failed claim: a request that landed first
+      // collected the cycle, and `engines.api` has already asked for the
+      // server's state.
+      if (isConflictError(error)) toast.info(t('claim already collected'));
+      else toast.error(t('claim failed'));
+    } finally {
+      claimLock.release(tier);
     }
   };
 
   const handleClaimEngine = async (tier: TicketType, engineId: string) => {
     const engine = (enginesByTier[tier] ?? []).find(item => item.id === engineId);
     if (!engine || engine.pendingCount <= 0) return;
+    if (!claimLock.acquire(engineId)) return;
     const pending = engine.pendingCount;
     try {
       const response = await claimEngine({ engineId }).unwrap();
       const claimed = resolveClaimedCount(response, pending);
       setElapsedByEngine(prev => ({ ...prev, [engineId]: 0 }));
       if (claimed > 0) setClaimedModal({ open: true, tier, count: claimed });
-    } catch {
-      toast.error(t('claim failed'));
+    } catch (error) {
+      if (isConflictError(error)) toast.info(t('claim already collected'));
+      else toast.error(t('claim failed'));
+    } finally {
+      claimLock.release(engineId);
     }
   };
 

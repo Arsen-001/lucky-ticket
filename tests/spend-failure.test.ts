@@ -78,24 +78,28 @@ describe('spendFailure', () => {
    * through. The backend now answers 409 with this literal, and it must read
    * as what it is, not as a network failure.
    */
-  it('translates the engine-upgrade race verdict', () => {
+  it('translates the engine race verdicts', () => {
     expect(
       spendFailure({ status: 409, data: { message: 'Upgrade already in progress' } }, t)
     ).toEqual({ kind: 'message', text: en['purchase error upgrade conflict'] });
+    // claim / claimAll / instantClaim / skipCycle share one verdict.
+    expect(
+      spendFailure({ status: 409, data: { message: 'Claim already in progress' } }, t)
+    ).toEqual({ kind: 'message', text: en['purchase error claim conflict'] });
   });
 
   /**
-   * The literal is a wire format shared with engines.service.ts. When the
-   * backend checkout is present, prove the sentence the mapper knows is the
-   * one the service throws — a reworded exception on either side would
-   * silently demote the verdict to «Не удалось выполнить покупку».
+   * The literals are a wire format shared with engines.service.ts. When the
+   * backend checkout is present, prove the sentences the mapper knows are the
+   * ones the service hands to `lostRace()` — a reworded verdict on either side
+   * would silently demote it to «Не удалось выполнить покупку».
    */
-  it('matches the sentence the backend actually throws', () => {
+  it('matches the sentences the backend actually throws', () => {
     const service = resolve(root, '../lucky-ticket-backend/src/engines/engines.service.ts');
     if (!existsSync(service)) return;
-    expect(readFileSync(service, 'utf8')).toMatch(
-      /ConflictException\('Upgrade already in progress'\)/
-    );
+    const source = readFileSync(service, 'utf8');
+    expect(source).toMatch(/lostRace\([^)]*'Upgrade already in progress'\)/);
+    expect(source).toMatch(/lostRace\([^)]*'Claim already in progress'\)/);
   });
 
   /**

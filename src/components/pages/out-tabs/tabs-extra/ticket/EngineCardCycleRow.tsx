@@ -35,6 +35,14 @@ export interface EngineCardCycleRowProps {
   glow: string;
   onClaim: (engineId: string) => void;
   onInstantClaim: (engineId: string) => void;
+  /**
+   * A claim (free or paid) of this engine is in flight: both buttons ignore
+   * taps and dim until the server answers. A second request racing the first
+   * loses the backend's cycle CAS; on the paid path a second tap AFTER the
+   * first lands would buy the next cycle's skip for real — so the button holds
+   * exactly for the round trip and no longer.
+   */
+  busy?: boolean;
 }
 
 /**
@@ -60,6 +68,7 @@ export function EngineCardCycleRow({
   glow,
   onClaim,
   onInstantClaim,
+  busy = false,
 }: EngineCardCycleRowProps) {
   const t = useAppTranslations();
   const launchTicketFlight = useTicketFlight();
@@ -75,7 +84,7 @@ export function EngineCardCycleRow({
   }, []);
 
   const handleClaim = () => {
-    if (!pending || flying) return;
+    if (!pending || flying || busy) return;
     // The tickets reach the tab bar before the balance moves, so the counter
     // ticks up as they land. `duration === 0` means nothing could be measured —
     // then there is no animation to wait on and the claim goes through at once.
@@ -188,7 +197,8 @@ export function EngineCardCycleRow({
       <button
         data-tour="claim-cta"
         onClick={handleClaim}
-        disabled={flying}
+        disabled={flying || busy}
+        aria-busy={busy || undefined}
         className={twMerge(
           'engine-claim-button engine-claim-flow relative z-10 cursor-pointer overflow-hidden text-white font-extrabold uppercase tracking-wider flex-center shrink-0 active:scale-99 transition-transform duration-100 disabled:opacity-70',
           compact
@@ -209,12 +219,15 @@ export function EngineCardCycleRow({
       </button>
       <button
         onClick={() => onInstantClaim(engineId)}
+        disabled={busy}
+        aria-busy={busy || undefined}
         title={t('instant claim with stars')}
         className={twMerge(
           'relative z-20 border border-gold/40 bg-gold/10 text-gold font-extrabold tracking-wider flex-center shrink-0 cursor-pointer hover:bg-gold/15 active:scale-99 transition-all duration-100 gap-1',
           compact
             ? 'min-w-16 h-8 px-2 rounded-lg text-[12px]'
             : 'min-w-16 h-7.5 px-2.5 rounded-lg text-[10px]',
+          busy && 'opacity-60 cursor-progress',
           pending && 'hidden'
         )}
       >

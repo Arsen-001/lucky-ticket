@@ -59,10 +59,12 @@ const MESSAGE_KEYS: Record<string, MessageIds> = {
   'vip already at max level': 'purchase error vip max',
   'avatars are temporarily unavailable': 'purchase error avatars off',
   'avatar already owned': 'purchase error already owned',
-  // engines.service upgrade(): the level CAS lost to a concurrent upgrade of
-  // the same engine — answered 409, and `engines.api` refetches the tickets so
-  // the levels on screen are the server's before the player taps again.
+  // engines.service: a compare-and-swap lost to a concurrent request on the
+  // same engine (a second tap through a slow proxy, another device) — answered
+  // 409, and `engines.api` refetches the tickets so the screen shows the
+  // server's state before the player taps again. Nothing was charged.
   'upgrade already in progress': 'purchase error upgrade conflict',
+  'claim already in progress': 'purchase error claim conflict',
 };
 
 /**
@@ -81,6 +83,14 @@ const SHORTFALL_RULES: { test: RegExp; kind: SpendShortfallKind }[] = [
   { test: /^not enough \w+ tickets\b/, kind: 'tickets' },
   { test: /^not enough tickets\b/, kind: 'tickets' },
 ];
+
+/**
+ * The server's «someone got there first» — a 409 from a lost compare-and-swap.
+ * For the free paths (`engines/claim`) that never enter `spendFailure`: a lost
+ * claim race is not a failed claim, and must not be toasted as one.
+ */
+export const isConflictError = (error: unknown): boolean =>
+  (error as { status?: unknown } | null | undefined)?.status === 409;
 
 const readServerMessage = (error: unknown): string => {
   const data = (error as { data?: unknown } | null | undefined)?.data;
