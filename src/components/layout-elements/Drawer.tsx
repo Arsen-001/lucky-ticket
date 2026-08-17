@@ -45,6 +45,7 @@ import { type Route, routes } from '@/constants/routes';
 import { localeDirection } from '@/i18n/config';
 import { useAppTranslations } from '@/hooks/useAppTranslations';
 import { useBackDismiss } from '@/hooks/useBackDismiss';
+import { useContentPagesEnabled } from '@/hooks/useContentPagesEnabled';
 import { useLeaderboardEnabled } from '@/hooks/useLeaderboardEnabled';
 import { usePartnersEnabled } from '@/hooks/usePartnersEnabled';
 import { useLocation } from '@/hooks/useLocation';
@@ -68,6 +69,7 @@ export function Drawer() {
   const t = useAppTranslations();
   const partnersEnabled = usePartnersEnabled();
   const leaderboardEnabled = useLeaderboardEnabled();
+  const contentPages = useContentPagesEnabled();
   const open = useAppSelector(selectDrawerOpen);
   const dispatch = useAppDispatch();
   const { data: me, isLoading } = useGetMeQuery();
@@ -283,26 +285,41 @@ export function Drawer() {
       badge: unreadCount,
     },
     { route: routes.settings.index, title: t('settings'), icon: <Settings size={18} /> },
-    {
-      route: routes.faq.index,
-      title: t('faq'),
-      icon: <CircleQuestionMark size={18} />,
-    },
+    // The three informational pages come and go with an admin switch, and they
+    // GO — no padlock, no "coming soon". Those belong to features waiting for a
+    // release; a policy an admin took down is not being promised for later.
+    ...(contentPages.faq
+      ? [
+          {
+            route: routes.faq.index,
+            title: t('faq'),
+            icon: <CircleQuestionMark size={18} />,
+          },
+        ]
+      : []),
     {
       route: routes.support.index,
       title: t('support'),
       icon: <LifeBuoy size={18} />,
     },
-    {
-      route: routes.privacy,
-      title: t('privacy policy'),
-      icon: <ShieldCheck size={18} />,
-    },
-    {
-      route: routes.termsOfUse,
-      title: t('terms of use'),
-      icon: <ScrollText size={18} />,
-    },
+    ...(contentPages.privacy
+      ? [
+          {
+            route: routes.privacy,
+            title: t('privacy policy'),
+            icon: <ShieldCheck size={18} />,
+          },
+        ]
+      : []),
+    ...(contentPages.terms
+      ? [
+          {
+            route: routes.termsOfUse,
+            title: t('terms of use'),
+            icon: <ScrollText size={18} />,
+          },
+        ]
+      : []),
     { route: routes.languages, title: t('languages'), icon: <Globe size={18} /> },
   ];
 

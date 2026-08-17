@@ -1,4 +1,5 @@
 import { appConfig } from '@/config/app.config';
+import { CONTENT_PAGES_FALLBACK } from '@/config/content-pages.config';
 import { GlobalConstants } from '@/constants/global.constants';
 import { DEFAULT_ENGINE_LEVEL_TABLES } from '@/utils/global/ticket-engine.utils';
 import { walletConstants } from '@/utils/pages/wallet.utils';
@@ -26,6 +27,7 @@ const getPublicConfig = (): PublicConfig => ({
   adsEnabled: true,
   partnersEnabled: appConfig.partners.enabled,
   leaderboardEnabled: appConfig.leaderboard.enabled,
+  pages: CONTENT_PAGES_FALLBACK,
   referral: {
     signup: {
       ap: GlobalConstants.inviteActivityPoints,

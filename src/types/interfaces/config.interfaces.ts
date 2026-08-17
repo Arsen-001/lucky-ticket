@@ -24,6 +24,18 @@ export interface PublicConfig {
    * test ends and an admin flips this on.
    */
   leaderboardEnabled?: boolean;
+  /**
+   * Informational pages an admin may switch off (FAQ / privacy / terms). A
+   * page that is off loses its drawer entry and renders a "switched off" stub
+   * on a direct hit; the backend stops serving its text at the same time, so
+   * this is not merely cosmetic. Optional — an older backend omits it, and
+   * every consumer then treats the pages as shown.
+   */
+  pages?: {
+    faq: boolean;
+    privacy: boolean;
+    terms: boolean;
+  };
   /** Invite reward display values (admin-editable, DOCS §17). */
   referral?: {
     signup: {

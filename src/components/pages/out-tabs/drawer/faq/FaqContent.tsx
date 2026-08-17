@@ -8,8 +8,10 @@ import { FaqArticleItem } from './FaqArticleItem';
 import { Skeleton } from '@/components/shared/seleketons/Skeleton';
 import { SkeletonSuspense } from '@/components/shared/seleketons/SkeletonSuspense';
 import { EmptyDataInfo } from '@/components/shared/EmptyDataInfo';
+import { PageDisabledState } from '@/components/shared/error/PageDisabledState';
 import { QueryErrorState } from '@/components/shared/error/QueryErrorState';
 import { useAppTranslations } from '@/hooks/useAppTranslations';
+import { useContentPagesEnabled } from '@/hooks/useContentPagesEnabled';
 import { filterSections, getLocalizedText, getSectionsSkeletonData } from '@/utils/pages/faq.utils';
 import { staggerMs } from '@/utils/global/animation.utils';
 
@@ -17,8 +19,17 @@ export function FaqContent() {
   const t = useAppTranslations();
   const locale = useLocale();
   const [searchValue, setSearchValue] = useState<string>('');
-  const { data: sections = [], isLoading, isError, refetch } = useGetFaqSectionsQuery();
+  // Switched off in the panel ⇒ the sections endpoint 404s, so skip the query
+  // and show the stub instead of a search box over an error.
+  const { faq: enabled } = useContentPagesEnabled();
+  const {
+    data: sections = [],
+    isLoading,
+    isError,
+    refetch,
+  } = useGetFaqSectionsQuery(undefined, { skip: !enabled });
 
+  if (!enabled) return <PageDisabledState />;
   if (isError) return <QueryErrorState onRetry={() => refetch()} />;
 
   const filteredContent = filterSections(sections, searchValue, locale);

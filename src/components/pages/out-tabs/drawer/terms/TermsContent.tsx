@@ -4,10 +4,12 @@ import { formatLocalDate } from '@/utils/global/date.utils';
 import { ScrollText } from 'lucide-react';
 import { useLocale } from 'next-intl';
 import { useGetTermsOfUseQuery } from '@/api/terms.api';
+import { PageDisabledState } from '@/components/shared/error/PageDisabledState';
 import { QueryErrorState } from '@/components/shared/error/QueryErrorState';
 import { Skeleton } from '@/components/shared/seleketons/Skeleton';
 import { SkeletonSuspense } from '@/components/shared/seleketons/SkeletonSuspense';
 import { useAppTranslations } from '@/hooks/useAppTranslations';
+import { useContentPagesEnabled } from '@/hooks/useContentPagesEnabled';
 import { TermsSectionBlock } from './TermsSectionBlock';
 import type { TermsSection } from '@/types/interfaces/terms.interfaces';
 
@@ -16,8 +18,14 @@ const SKELETON_SECTIONS = new Array(6).fill(undefined) as (TermsSection | undefi
 export function TermsContent() {
   const t = useAppTranslations();
   const locale = useLocale();
-  const { data, isLoading, isError, refetch } = useGetTermsOfUseQuery();
+  // See PrivacyContent: while the page is off the endpoint 404s, so the query
+  // is skipped rather than left to draw an error with a hopeless retry.
+  const { terms: enabled } = useContentPagesEnabled();
+  const { data, isLoading, isError, refetch } = useGetTermsOfUseQuery(undefined, {
+    skip: !enabled,
+  });
 
+  if (!enabled) return <PageDisabledState />;
   if (isError) return <QueryErrorState onRetry={() => refetch()} />;
 
   const sections = isLoading ? SKELETON_SECTIONS : (data?.sections ?? []);

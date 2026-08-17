@@ -4,10 +4,12 @@ import { formatLocalDate } from '@/utils/global/date.utils';
 import { ShieldCheck } from 'lucide-react';
 import { useLocale } from 'next-intl';
 import { useGetPrivacyPolicyQuery } from '@/api/privacy.api';
+import { PageDisabledState } from '@/components/shared/error/PageDisabledState';
 import { QueryErrorState } from '@/components/shared/error/QueryErrorState';
 import { Skeleton } from '@/components/shared/seleketons/Skeleton';
 import { SkeletonSuspense } from '@/components/shared/seleketons/SkeletonSuspense';
 import { useAppTranslations } from '@/hooks/useAppTranslations';
+import { useContentPagesEnabled } from '@/hooks/useContentPagesEnabled';
 import { PrivacySectionBlock } from './PrivacySectionBlock';
 import type { PrivacySection } from '@/types/interfaces/privacy.interfaces';
 
@@ -16,8 +18,14 @@ const SKELETON_SECTIONS = new Array(5).fill(undefined) as (PrivacySection | unde
 export function PrivacyContent() {
   const t = useAppTranslations();
   const locale = useLocale();
-  const { data, isLoading, isError, refetch } = useGetPrivacyPolicyQuery();
+  // Switched off in the panel ⇒ don't ask for the text: the endpoint answers
+  // 404 while the page is off, and that would draw a retry the player can't win.
+  const { privacy: enabled } = useContentPagesEnabled();
+  const { data, isLoading, isError, refetch } = useGetPrivacyPolicyQuery(undefined, {
+    skip: !enabled,
+  });
 
+  if (!enabled) return <PageDisabledState />;
   if (isError) return <QueryErrorState onRetry={() => refetch()} />;
 
   const sections = isLoading ? SKELETON_SECTIONS : (data?.sections ?? []);
