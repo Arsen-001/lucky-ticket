@@ -24,6 +24,13 @@ export function InventoryBonusTile({ type, stats, onInfo, className }: Inventory
   const Icon = CHIP_TYPE_ICON[type];
   const accent = TYPE_ACCENT[type];
   const hasBonus = stats.totalPct > 0;
+  // `totalPct` carries each type in its OWN unit (@see inventoryTypeStats):
+  // percent for speed, whole tickets for capacity since the ten-level ladder
+  // (17.08.2026). The tile printed both with a "%" — so a fleet running +40
+  // extra tickets a collect read as "+40.0%", a number the chip's own row
+  // right below it contradicted. Same plural-aware string the row uses.
+  const value =
+    type === 'speed' ? `+${stats.totalPct}%` : t('chip capacity effect', { n: stats.totalPct });
 
   return (
     <button
@@ -43,13 +50,15 @@ export function InventoryBonusTile({ type, stats, onInfo, className }: Inventory
       </span>
 
       <span
-        className="relative z-1 text-[22px] font-extrabold leading-none tabular-nums"
+        // 20px, not 22: "+1020 tickets" is the widest this line can get on a
+        // full fleet, and it has to stay on one line in a half-width tile.
+        className="relative z-1 truncate text-[20px] font-extrabold leading-none tabular-nums"
         style={{
           color: hasBonus ? accent : 'rgba(255,255,255,0.32)',
           textShadow: hasBonus ? `0 0 14px color-mix(in srgb, ${accent} 45%, transparent)` : 'none',
         }}
       >
-        +{stats.totalPct.toFixed(1)}%
+        {value}
       </span>
 
       <div className="relative z-1 flex flex-col gap-1.5">

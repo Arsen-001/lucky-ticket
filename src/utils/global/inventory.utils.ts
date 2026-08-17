@@ -242,13 +242,38 @@ export const sortChipsForDisplay = (
     return b.level - a.level;
   });
 
-/** A chip whose next level is already paid for by the shards on hand. */
+/**
+ * A chip at the top of the ladder — there is no next level to pay for.
+ *
+ * `level` is the source of truth and `shardsForNextLevel` its cache, so either
+ * one saying "top" is enough. Shared rather than re-derived per screen: the row
+ * knew this and the grouping did not (below), which is how two maxed chips came
+ * to sit under "ready to upgrade" wearing a "Max" progress label.
+ */
+export const isChipMaxed = (
+  chip: Pick<
+    import('@/types/interfaces/inventory.interfaces').InventoryChip,
+    'level' | 'shardsForNextLevel'
+  >
+): boolean => chip.level >= CHIP_MAX_LEVEL || chip.shardsForNextLevel <= 0;
+
+/**
+ * A chip whose next level is already paid for by the shards on hand.
+ *
+ * The maxed guard is load-bearing since the ten-level ladder (17.08.2026):
+ * `chipLevelUpShards` returns **0** at the top, and "shards on hand ≥ 0" is
+ * true for every account, so a finished chip counted as ready-to-upgrade — it
+ * led the sorted list, inflated the tab's `N↑` badge and headlined a group
+ * whose own row offered no upgrade button. Harmless under the old 200-level
+ * ceiling, which no chip ever reached.
+ */
 export const isChipReadyToLevelUp = (
   chip: import('@/types/interfaces/inventory.interfaces').InventoryChip,
   shards: import('@/types/interfaces/inventory.interfaces').InventoryShardCount[]
 ): boolean =>
+  !isChipMaxed(chip) &&
   (shards.find(s => s.type === chip.type && s.quality === chip.quality)?.count ?? 0) >=
-  chip.shardsForNextLevel;
+    chip.shardsForNextLevel;
 
 export const canEquipChipOnTier = (chipQuality: TicketType, engineTier: TicketType): boolean =>
   chipQuality === engineTier;

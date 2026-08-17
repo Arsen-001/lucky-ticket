@@ -7,11 +7,11 @@ import { Button } from '@/components/shared/buttons/Button';
 import { ChipIcon } from '@/components/shared/icons/ChipIcon';
 import { useAppTranslations } from '@/hooks/useAppTranslations';
 import {
-  CHIP_MAX_LEVEL,
   QUALITY_ACCENT,
   chipEffectLabel,
   chipUnequipStarsCost,
   formatChipRemaining,
+  isChipMaxed,
 } from '@/utils/global/inventory.utils';
 import { staggerMs } from '@/utils/global/animation.utils';
 import type { InventoryChip } from '@/types/interfaces/inventory.interfaces';
@@ -53,8 +53,9 @@ export function ChipActionRow({
   const unequipCost = chipUnequipStarsCost(chip.level);
   const canAffordUnequip = (me?.telegramStars ?? 0) >= unequipCost;
   // A chip at the top has no next level: nothing to be "ready" for, and the
-  // progress bar would divide by zero.
-  const maxed = chip.level >= CHIP_MAX_LEVEL || chip.shardsForNextLevel <= 0;
+  // progress bar would divide by zero. Shared with the grouping so the row and
+  // the section it sits in can never disagree about what "ready" means.
+  const maxed = isChipMaxed(chip);
   const ready = !maxed && availableShards >= chip.shardsForNextLevel;
   const progressPct = maxed
     ? 100
