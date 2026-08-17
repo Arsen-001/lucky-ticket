@@ -44,8 +44,14 @@ describe('instant claim is one tap', () => {
 
   it('the paid button promises collection, not a skipped wait', () => {
     // A button still labelled "Skip" would now be describing a claim.
+    //
+    // The visible label is the bare verb since a1c499f (17.08.2026): at readable
+    // type «Забрать сейчас · 1» took 133px of a 260px row and pushed the ticket
+    // name off the strip. The adverb did not disappear — it moved to the
+    // button's `title` and the confirm modal — so that is what this now checks.
     const row = read('src/components/pages/out-tabs/tabs-extra/ticket/EngineCardCycleRow.tsx');
-    expect(row).toMatch(/t\('claim now'\)/);
+    expect(row).toMatch(/t\('claim'\)/);
+    expect(row).toMatch(/t\('instant claim with stars'\)/);
     expect(row).not.toMatch(/t\('skip'\)/);
 
     const slider = read('src/components/pages/tabs/home/HomeEnginesSlider.tsx');
