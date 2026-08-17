@@ -49,6 +49,17 @@ const levelTablesFromState = (state: unknown): EngineLevelTables =>
 // the grant isn't persisted, so we keep the optimistic engine (no invalidation).
 const IS_REAL_BACKEND = !!process.env.NEXT_PUBLIC_API_URL;
 
+/**
+ * `queryFulfilled` rejected with the server's 409 — engines.service `upgrade()`
+ * lost its level CAS to a concurrent upgrade of the same engine (another
+ * device, or a second tap that slipped past the in-flight guard). The
+ * optimistic undo below puts the PRE-tap levels back, but the server's are
+ * one step further — the one refetch of the tickets that is worth the cube
+ * flicker, because without it the next tap prices and patches from a lie.
+ */
+const isUpgradeConflict = (reason: unknown): boolean =>
+  (reason as { error?: { status?: unknown } } | null | undefined)?.error?.status === 409;
+
 // The free Bronze starter engine, granted once after the onboarding language
 // step. Comes with one ready ticket so the tour's claim finale has something to
 // collect (DOCS §9 / §17.5).
@@ -313,9 +324,10 @@ export const enginesApi = api.injectEndpoints({
           // Writes an ENGINE_UPGRADE Stars row, which is what the test-quest's
           // «прокачай двигатель N раз» step counts.
           refetchTestQuestProgress(dispatch);
-        } catch {
+        } catch (reason) {
           ticketsPatch.undo();
           mePatch.undo();
+          if (isUpgradeConflict(reason)) dispatch(api.util.invalidateTags([rtkTags.tickets]));
         }
       },
     }),
@@ -350,9 +362,10 @@ export const enginesApi = api.injectEndpoints({
           await queryFulfilled;
           // See upgrade-speed: the same ENGINE_UPGRADE row, the same quest step.
           refetchTestQuestProgress(dispatch);
-        } catch {
+        } catch (reason) {
           ticketsPatch.undo();
           mePatch.undo();
+          if (isUpgradeConflict(reason)) dispatch(api.util.invalidateTags([rtkTags.tickets]));
         }
       },
     }),

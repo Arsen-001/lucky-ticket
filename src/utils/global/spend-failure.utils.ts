@@ -14,10 +14,19 @@ export type SpendFailure =
   | { kind: 'ton' }
   | { kind: 'tickets' }
   | { kind: 'shards' }
+  /**
+   * The server no longer knows who is asking (401 that survived the refresh
+   * retry). Not a purchase failure at all — the way out is a fresh sign-in,
+   * so it gets its own modal instead of «Покупка не прошла».
+   */
+  | { kind: 'session' }
   | { kind: 'message'; text: string };
 
 /** A currency refusal — the kinds that open a top-up route. */
-export type SpendShortfallKind = Exclude<SpendFailure, { kind: 'message' }>['kind'];
+export type SpendShortfallKind = Exclude<
+  SpendFailure,
+  { kind: 'message' } | { kind: 'session' }
+>['kind'];
 
 /**
  * A failure the caller already worked out (gifts translate their own slugs),
@@ -50,6 +59,10 @@ const MESSAGE_KEYS: Record<string, MessageIds> = {
   'vip already at max level': 'purchase error vip max',
   'avatars are temporarily unavailable': 'purchase error avatars off',
   'avatar already owned': 'purchase error already owned',
+  // engines.service upgrade(): the level CAS lost to a concurrent upgrade of
+  // the same engine — answered 409, and `engines.api` refetches the tickets so
+  // the levels on screen are the server's before the player taps again.
+  'upgrade already in progress': 'purchase error upgrade conflict',
 };
 
 /**
@@ -94,6 +107,12 @@ export function spendFailure(error: unknown, t: Dictionary): SpendFailure {
   if (typeof status !== 'number' || status >= 500) {
     return { kind: 'message', text: t('purchase error network') };
   }
+  // The base query already tried one refresh and retried; a 401 that still
+  // comes back means the session is gone (a one-use refresh token rotated by
+  // another device, an hour-old initData). Inside Telegram nothing redirects,
+  // the screen keeps living on cached data, and every paid tap used to end in
+  // «Покупка не прошла» — a broken-looking button rather than a lost session.
+  if (status === 401) return { kind: 'session' };
 
   const message = readServerMessage(error).trim().toLowerCase();
 

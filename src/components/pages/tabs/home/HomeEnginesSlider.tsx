@@ -123,6 +123,15 @@ export function HomeEnginesSlider({ className }: ClassNameProps) {
   const [instantClaimEngine] = useInstantClaimEngineMutation();
   const [upgradeEngineSpeed] = useUpgradeEngineSpeedMutation();
   const [upgradeEngineCapacity] = useUpgradeEngineCapacityMutation();
+  // One upgrade per engine at a time. A second request racing the first
+  // loses the backend's level CAS (speed and capacity share it — one row) and
+  // came back as «покупка не прошла» after an upgrade that had gone through.
+  // The lock is a ref because the disabled button can land a frame after the
+  // tap (RTK auto-batches the mutation's `pending`); the state only paints it.
+  const upgradingRef = useRef<Set<string>>(new Set());
+  const [upgradingEngineIds, setUpgradingEngineIds] = useState<ReadonlySet<string>>(
+    () => new Set()
+  );
   const [chipToUnequip, setChipToUnequip] = useState<InventoryChip | null>(null);
   const [instantClaimConfirm, setInstantClaimConfirm] = useState<{
     engineId: string;
@@ -472,8 +481,22 @@ export function HomeEnginesSlider({ className }: ClassNameProps) {
     requireStars(cost, () => performInstantClaim(engineId, cost));
   };
 
+  const setUpgrading = (engineId: string, on: boolean) => {
+    if (on) upgradingRef.current.add(engineId);
+    else upgradingRef.current.delete(engineId);
+    setUpgradingEngineIds(prev => {
+      if (prev.has(engineId) === on) return prev;
+      const next = new Set(prev);
+      if (on) next.add(engineId);
+      else next.delete(engineId);
+      return next;
+    });
+  };
+
   const performUpgrade = (engineId: string, type: 'speed' | 'capacity', cost: number) => {
+    if (upgradingRef.current.has(engineId)) return;
     requireStars(cost, () => {
+      setUpgrading(engineId, true);
       updateEngine(engineId, e =>
         promoteEngineIfMaxed(
           {
@@ -491,11 +514,15 @@ export function HomeEnginesSlider({ className }: ClassNameProps) {
         type === 'speed'
           ? upgradeEngineSpeed({ engineId, cost })
           : upgradeEngineCapacity({ engineId, cost });
-      upgrade.unwrap().catch(error => spend.report(error, { required: cost }));
+      upgrade
+        .unwrap()
+        .catch(error => spend.report(error, { required: cost }))
+        .finally(() => setUpgrading(engineId, false));
     });
   };
 
   const handleUpgradeSpeed = (engineId: string) => {
+    if (upgradingRef.current.has(engineId)) return;
     const item = itemsRef.current.find(item => item.engine.id === engineId);
     if (!item) return;
     const { engine, tier } = item;
@@ -509,6 +536,7 @@ export function HomeEnginesSlider({ className }: ClassNameProps) {
   };
 
   const handleUpgradeCapacity = (engineId: string) => {
+    if (upgradingRef.current.has(engineId)) return;
     const item = itemsRef.current.find(item => item.engine.id === engineId);
     if (!item) return;
     const { engine, tier } = item;
@@ -661,6 +689,7 @@ export function HomeEnginesSlider({ className }: ClassNameProps) {
                 onInstantClaim={handleInstantClaim}
                 onUpgradeSpeed={handleUpgradeSpeed}
                 onUpgradeCapacity={handleUpgradeCapacity}
+                upgradePending={upgradingEngineIds.has(engine.id)}
                 onSlotPick={slot =>
                   setPickerSlot({
                     engineId: engine.id,

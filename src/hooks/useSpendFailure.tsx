@@ -5,6 +5,7 @@ import { Diamond, Ticket as TicketIcon, Wallet } from 'lucide-react';
 import { useGetMeQuery } from '@/api/me.api';
 import { NotEnoughCoinsModal } from '@/components/shared/modals/NotEnoughCoinsModal';
 import { RequirementModal } from '@/components/shared/modals/RequirementModal';
+import { SessionExpiredModal } from '@/components/shared/modals/SessionExpiredModal';
 import { SpendFailedModal } from '@/components/shared/modals/SpendFailedModal';
 import { StarsTopUpFlow } from '@/components/pages/tabs/home/StarsTopUpFlow';
 import { routes } from '@/constants/routes';
@@ -49,9 +50,9 @@ export interface UseSpendFailure {
  * So the refusal is classified once (@see spendFailure) and answered with the
  * screen that fixes it: LC → the tournaments (it is won, never sold), Stars →
  * the buy-Stars sheet in place, TON → the wallet, tickets and shards → their
- * market shelf. Reasons
- * with no way out still get a modal, never a toast — the point is that a
- * refusal is readable and has somewhere to go, not that it is loud.
+ * market shelf, a lost session → a restart (the sign-in happens on mount).
+ * Reasons with no way out still get a modal, never a toast — the point is that
+ * a refusal is readable and has somewhere to go, not that it is loud.
  */
 export function useSpendFailure(): UseSpendFailure {
   const t = useAppTranslations();
@@ -62,11 +63,12 @@ export function useSpendFailure(): UseSpendFailure {
   const report = async (error: unknown, options?: SpendFailureReport) => {
     const resolved = spendFailure(error, t);
     setRequired(options?.required);
-    if (resolved.kind !== 'message') {
+    if (resolved.kind !== 'message' && resolved.kind !== 'session') {
       // The screen let the tap through, so it believed the balance covered
       // this — which makes the number it is holding the stale one. Awaited,
       // not fired off: opening first would state a balance that contradicts
-      // the very refusal it is explaining.
+      // the very refusal it is explaining. (Not for a lost session: that
+      // refetch would only 401 again.)
       await refetchMe();
     }
     setFailure(resolved);
@@ -122,6 +124,8 @@ export function useSpendFailure(): UseSpendFailure {
         description={t('not enough shards description')}
         action={{ label: t('go to market'), href: routes.market('shards') }}
       />
+
+      <SessionExpiredModal open={kind === 'session'} onClose={close} />
 
       <SpendFailedModal
         open={kind === 'message'}

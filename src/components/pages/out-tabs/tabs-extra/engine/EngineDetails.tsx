@@ -75,8 +75,14 @@ export function EngineDetails({ id }: EngineDetailsProps) {
   const [unequipChip, { isLoading: unequipping }] = useUnequipChipMutation();
   const [claimEngine] = useClaimEngineMutation();
   const [instantClaimEngine] = useInstantClaimEngineMutation();
-  const [upgradeEngineSpeed] = useUpgradeEngineSpeedMutation();
-  const [upgradeEngineCapacity] = useUpgradeEngineCapacityMutation();
+  const [upgradeEngineSpeed, { isLoading: upgradingSpeed }] = useUpgradeEngineSpeedMutation();
+  const [upgradeEngineCapacity, { isLoading: upgradingCapacity }] =
+    useUpgradeEngineCapacityMutation();
+  // The lock is a ref, not the `isLoading` above: RTK auto-batches the
+  // mutation's `pending` action, so a re-render — and with it a disabled
+  // button — can land a frame after the tap. Two taps inside that frame both
+  // reach the server, and the second loses the backend's level CAS.
+  const upgradeInFlightRef = useRef(false);
   const [completeEngineCycle] = useCompleteEngineCycleMutation();
 
   const [elapsedSeconds, setElapsedSeconds] = useState(0);
@@ -275,26 +281,30 @@ export function EngineDetails({ id }: EngineDetailsProps) {
     });
   };
 
-  const handleUpgradeSpeed = () => {
-    const cost = speedUpgradeLsCost(speedLevel, engineLevel, tier, upgrade);
+  // One upgrade per engine at a time — speed and capacity share the lock,
+  // because the server's CAS covers both levels of the same row.
+  const performUpgrade = (cost: number, mutate: () => ReturnType<typeof upgradeEngineSpeed>) => {
+    if (upgradeInFlightRef.current) return;
     requireStars(cost, async () => {
+      upgradeInFlightRef.current = true;
       try {
-        await upgradeEngineSpeed({ engineId: engine.id, cost }).unwrap();
+        await mutate().unwrap();
       } catch (error) {
         await spend.report(error, { required: cost });
+      } finally {
+        upgradeInFlightRef.current = false;
       }
     });
   };
 
+  const handleUpgradeSpeed = () => {
+    const cost = speedUpgradeLsCost(speedLevel, engineLevel, tier, upgrade);
+    performUpgrade(cost, () => upgradeEngineSpeed({ engineId: engine.id, cost }));
+  };
+
   const handleUpgradeCapacity = () => {
     const cost = capacityUpgradeLsCost(capacityLevel, engineLevel, tier, upgrade);
-    requireStars(cost, async () => {
-      try {
-        await upgradeEngineCapacity({ engineId: engine.id, cost }).unwrap();
-      } catch (error) {
-        await spend.report(error, { required: cost });
-      }
-    });
+    performUpgrade(cost, () => upgradeEngineCapacity({ engineId: engine.id, cost }));
   };
 
   const isSlotPending = (category: 'chip' | 'booster', type: InventoryChipType) =>
@@ -320,6 +330,7 @@ export function EngineDetails({ id }: EngineDetailsProps) {
         onInstantClaim={() => handleInstantClaim()}
         onUpgradeSpeed={() => handleUpgradeSpeed()}
         onUpgradeCapacity={() => handleUpgradeCapacity()}
+        upgradePending={upgradingSpeed || upgradingCapacity}
         reactorVisual="engine"
       />
 

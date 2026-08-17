@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { readFileSync, readdirSync } from 'node:fs';
+import { existsSync, readFileSync, readdirSync } from 'node:fs';
 import { resolve } from 'node:path';
 import { spendFailure, resolvedSpendFailure } from '../src/utils/global/spend-failure.utils';
 import { giftPurchaseFailure } from '../src/utils/pages/gift.utils';
@@ -69,6 +69,44 @@ describe('spendFailure', () => {
       // The point of the whole mapping: never the server's own sentence.
       expect(failure.kind === 'message' && failure.text, message).not.toBe(message);
     }
+  });
+
+  /**
+   * 18.08.2026: a double-tap on «улучшить» through a slow proxy sent two
+   * upgrades; the second lost the backend's level CAS and came back as a
+   * 500 → «не удалось связаться с сервером» — after the first had gone
+   * through. The backend now answers 409 with this literal, and it must read
+   * as what it is, not as a network failure.
+   */
+  it('translates the engine-upgrade race verdict', () => {
+    expect(
+      spendFailure({ status: 409, data: { message: 'Upgrade already in progress' } }, t)
+    ).toEqual({ kind: 'message', text: en['purchase error upgrade conflict'] });
+  });
+
+  /**
+   * The literal is a wire format shared with engines.service.ts. When the
+   * backend checkout is present, prove the sentence the mapper knows is the
+   * one the service throws — a reworded exception on either side would
+   * silently demote the verdict to «Не удалось выполнить покупку».
+   */
+  it('matches the sentence the backend actually throws', () => {
+    const service = resolve(root, '../lucky-ticket-backend/src/engines/engines.service.ts');
+    if (!existsSync(service)) return;
+    expect(readFileSync(service, 'utf8')).toMatch(
+      /ConflictException\('Upgrade already in progress'\)/
+    );
+  });
+
+  /**
+   * A 401 that survived the base query's refresh-and-retry is a lost session,
+   * not a refused purchase. It used to fall through to «Покупка не прошла.
+   * Попробуй ещё раз» — and trying again could only fail the same way.
+   */
+  it('reads a surviving 401 as a lost session', () => {
+    expect(spendFailure({ status: 401, data: { message: 'Unauthorized' } }, t)).toEqual({
+      kind: 'session',
+    });
   });
 
   it('falls back to generic copy for a message it does not know', () => {

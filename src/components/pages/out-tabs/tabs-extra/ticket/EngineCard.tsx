@@ -28,6 +28,8 @@ export interface EngineCardProps {
   onInstantClaim: (engineId: string) => void;
   onUpgradeSpeed: (engineId: string) => void;
   onUpgradeCapacity: (engineId: string) => void;
+  /** An upgrade of this engine is in flight — the boost buttons hold. */
+  upgradePending?: boolean;
   /**
    * Home-cube face layout. The card is laid out inside the cube's 300px design
    * square and the whole square is then SCALED to the cube's footprint
@@ -68,6 +70,7 @@ export function EngineCard({
   onInstantClaim,
   onUpgradeSpeed,
   onUpgradeCapacity,
+  upgradePending = false,
   compact = false,
   reactorVisual = 'ticket',
   tourAnchor = false,
@@ -169,6 +172,7 @@ export function EngineCard({
           compact={compact}
           onUpgradeSpeed={onUpgradeSpeed}
           onUpgradeCapacity={onUpgradeCapacity}
+          upgradePending={upgradePending}
         />
       </div>
     </div>

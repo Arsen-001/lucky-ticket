@@ -24,6 +24,8 @@ export interface EngineCardBoostControlsProps {
   compact: boolean;
   onUpgradeSpeed: (engineId: string) => void;
   onUpgradeCapacity: (engineId: string) => void;
+  /** An upgrade of this engine is in flight — both rows hold (@see BoostRow). */
+  upgradePending?: boolean;
 }
 
 /**
@@ -42,6 +44,7 @@ function EngineCardBoostControlsImpl({
   compact,
   onUpgradeSpeed,
   onUpgradeCapacity,
+  upgradePending = false,
 }: EngineCardBoostControlsProps) {
   const t = useAppTranslations();
   const { tables } = useEngineConfig();
@@ -56,6 +59,7 @@ function EngineCardBoostControlsImpl({
         accent={SPEED_ACCENT}
         costStars={speedCost}
         onUpgrade={() => onUpgradeSpeed(engineId)}
+        pending={upgradePending}
         compact={compact}
         icon={
           <Zap
@@ -75,6 +79,7 @@ function EngineCardBoostControlsImpl({
         accent={CAPACITY_ACCENT}
         costStars={capacityCost}
         onUpgrade={() => onUpgradeCapacity(engineId)}
+        pending={upgradePending}
         compact={compact}
         icon={
           <Package

@@ -14,6 +14,14 @@ export interface BoostRowProps {
   accent: string;
   costStars: number;
   onUpgrade: () => void;
+  /**
+   * An upgrade of this engine is in flight. The button ignores taps and dims
+   * until the server answers — a second request racing the first loses the
+   * backend's level CAS and comes back as «покупка не прошла» after an
+   * upgrade that had in fact gone through. Content stays put (no spinner): the
+   * round trip is well under a second, and the level already moved.
+   */
+  pending?: boolean;
   compact?: boolean;
   className?: string;
 }
@@ -27,6 +35,7 @@ export function BoostRow({
   accent,
   costStars,
   onUpgrade,
+  pending = false,
   compact = false,
   className,
 }: BoostRowProps) {
@@ -96,14 +105,16 @@ export function BoostRow({
       </div>
       <button
         onClick={onUpgrade}
-        disabled={maxed}
+        disabled={maxed || pending}
+        aria-busy={pending || undefined}
         className={twMerge(
           compact
             ? 'min-w-16 shrink-0 h-8 px-2.5 rounded-lg text-[13px] font-extrabold tracking-wider flex-center gap-1 transition-all duration-100'
             : 'min-w-16 shrink-0 h-7.5 px-2.5 rounded-lg text-[10px] font-extrabold tracking-wider flex-center gap-1 transition-all duration-100',
           maxed
             ? 'bg-white/3 border border-white/5 text-pink-secondary cursor-default'
-            : 'cursor-pointer hover:brightness-110 active:scale-99'
+            : 'cursor-pointer hover:brightness-110 active:scale-99',
+          !maxed && pending && 'opacity-60 cursor-progress'
         )}
         style={
           maxed
