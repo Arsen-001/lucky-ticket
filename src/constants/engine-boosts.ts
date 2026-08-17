@@ -1,4 +1,4 @@
-import { BadgeCheck, Cpu, Crown, Layers, Rocket, UserRound, Zap } from 'lucide-react';
+import { BadgeCheck, Cpu, Crown, Layers, Rocket, Sparkles, UserRound, Zap } from 'lucide-react';
 import type { LucideIcon } from 'lucide-react';
 import type { MessageIds } from '@/types/types/i18n.types';
 import type { EngineSpeedBoostKey } from '@/utils/global/engine-boosts.utils';
@@ -7,30 +7,39 @@ import type { EngineSpeedBoostKey } from '@/utils/global/engine-boosts.utils';
 export const ENGINE_BOOST_LABEL_KEY: Record<EngineSpeedBoostKey, MessageIds> = {
   engineLevel: 'engine level',
   speedLevel: 'speed upgrades',
-  status: 'status',
-  chip: 'chip',
+  vip: 'vip',
   booster: 'booster',
   avatar: 'avatar',
   badge: 'tester badge',
+  chip: 'chip',
+  luckyPlayer: 'lucky player',
 };
 
-/** One colour per contributor, so a stacked bar and its legend always agree. */
+/**
+ * One colour per contributor, so a stacked bar and its legend always agree.
+ *
+ * The two super boosts are deliberately NOT neighbours of the additive rows
+ * they used to share a colour with: Lucky Player carries its own pink (the
+ * accent of its own screen), which is why `avatar` moved to silver.
+ */
 export const ENGINE_BOOST_COLOR: Record<EngineSpeedBoostKey, string> = {
   engineLevel: 'var(--color-electric-purple)',
   speedLevel: 'var(--color-electric-pink)',
-  status: 'var(--color-gold)',
-  chip: 'var(--color-teal)',
+  vip: 'var(--color-gold)',
   booster: 'var(--color-orange)',
-  avatar: 'var(--color-pink)',
+  avatar: 'var(--color-silver)',
   badge: 'var(--color-success)',
+  chip: 'var(--color-teal)',
+  luckyPlayer: 'var(--color-pink)',
 };
 
 export const ENGINE_BOOST_ICON: Record<EngineSpeedBoostKey, LucideIcon> = {
   engineLevel: Layers,
   speedLevel: Zap,
-  status: Crown,
-  chip: Cpu,
+  vip: Crown,
   booster: Rocket,
   avatar: UserRound,
   badge: BadgeCheck,
+  chip: Cpu,
+  luckyPlayer: Sparkles,
 };

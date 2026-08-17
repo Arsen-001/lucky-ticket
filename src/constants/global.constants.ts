@@ -128,9 +128,15 @@ export const GlobalConstants = {
    * rides on `GET /config` (`referral.tournamentLcL2Pct`).
    */
   referralTournamentLcL2Percentage: 1,
-  /** Engine cycle speed reduction granted by Lucky Player status (stacks with chips/boosters). */
-  /** Engine-speed MULTIPLIER of a Lucky Player, as a % (30 = ×1.3) — the same
-   *  on a fresh and a maxed engine, like the speed chip; stacks with VIP. */
+  /**
+   * Engine-speed MULTIPLIER of a Lucky Player, as a % (30 = ×1.3) — worth the
+   * same on a fresh and on a maxed engine, like the speed chip, and applied
+   * after it: `(1 + additive stack) × chip × LP` (@see effectiveCycleSeconds).
+   *
+   * Engine speed is the ONE perk where LP and VIP stack (17.08.2026): this is a
+   * multiplier, VIP's is a summand inside the stack. Every other perk below
+   * stays exclusive — @see the VIP block.
+   */
   luckyPlayerEngineSpeedBoostPct: 30,
   /** Flat discount applied to every Market item price for Lucky Player holders (DOCS §7.3). */
   luckyPlayerMarketDiscountPct: 10,
@@ -143,9 +149,16 @@ export const GlobalConstants = {
   /**
    * VIP perk magnitudes (DOCS §7.3 — high-tier permanent status). Per design,
    * VIP values exceed Lucky Player at every category and supersede them when
-   * both are active — the higher-tier value wins, the two never stack (DOCS
+   * both are active — the higher-tier value wins, the two do not stack (DOCS
    * §7.3). Tied to `maxVipLevel = 20` (no per-level scaling here — the listed
    * value is what a VIP holder gets regardless of their level).
+   *
+   * ONE exception, since 17.08.2026: engine speed. There the two act on
+   * different terms and therefore STACK — VIP is a summand in the additive
+   * stack, Lucky Player a multiplier on top of it (@see
+   * effectiveEngineSpeedMultiplierPct, resolveEngineSpeedStatus on the
+   * backend). Exclusivity still governs every other perk in this block, which
+   * is why `effectiveStatusPct` returns `lp: 0` for engine speed.
    */
   /** VIP's engine-speed SUMMAND at level 20 (7.5 % a level on the live ladder). */
   vipEngineSpeedBoostPct: 150,

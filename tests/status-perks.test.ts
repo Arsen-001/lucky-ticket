@@ -1,5 +1,9 @@
 import { describe, it, expect } from 'vitest';
-import { buildStatusPerkRows, buildVipUpgradeRows } from '@/utils/global/status-perks.utils';
+import {
+  buildStatusPerkRows,
+  buildVipUpgradeRows,
+  luckyPlayerCatalogPerks,
+} from '@/utils/global/status-perks.utils';
 import type { StatusPerkBase } from '@/types/interfaces/market.interfaces';
 import type { StatusPerks } from '@/types/interfaces/user.interfaces';
 import type { Dictionary } from '@/types/types/i18n.types';
@@ -119,6 +123,36 @@ describe('status perk rows', () => {
       t
     );
     expect(valueOf(rows, 'ticketSend')).toBe('bronze\u00A03\u00A0· silver\u00A02');
+  });
+
+  it("quotes Lucky Player's engine speed as a FACTOR, not as another +X%", () => {
+    // The catalog still parks the subscription's engine perk in
+    // `engineSpeedBoostPct`, but since 17.08.2026 it is a multiplier: as a row
+    // reading "+30%" it sold the same thing VIP sells, which is exactly what it
+    // is not. `luckyPlayerCatalogPerks` is the boundary that fixes it.
+    const listing = perks({ engineSpeedBoostPct: 30, stakeYieldBoostPct: 20 });
+    const rows = buildStatusPerkRows(luckyPlayerCatalogPerks(listing), BASE, t);
+
+    expect(ids(rows)).toEqual(['engineSpeedMultiplier', 'stakeYield']);
+    expect(valueOf(rows, 'engineSpeedMultiplier')).toBe('×1.3');
+    // And it says why it is not one of the rows around it.
+    expect(rows.find(r => r.id === 'engineSpeedMultiplier')?.note).toBe(
+      'super boost multiplies stack'
+    );
+
+    // A VIP listing is untouched: its engine speed IS a summand.
+    expect(ids(buildStatusPerkRows(perks({ engineSpeedBoostPct: 150 }), BASE, t))).toEqual([
+      'engineSpeed',
+    ]);
+  });
+
+  it('passes a backend that already split the two straight through', () => {
+    const rows = buildStatusPerkRows(
+      luckyPlayerCatalogPerks(perks({ engineSpeedBoostPct: 0, engineSpeedMultiplierPct: 30 })),
+      BASE,
+      t
+    );
+    expect(valueOf(rows, 'engineSpeedMultiplier')).toBe('×1.3');
   });
 
   it('shows the daily gift only while it is enabled', () => {

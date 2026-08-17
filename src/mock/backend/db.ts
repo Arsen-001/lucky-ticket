@@ -85,6 +85,10 @@ export const mockDb = {
       ? undefined
       : {
           engineSpeedBoostPct: 1.9,
+          // VIP's summand above, Lucky Player's MULTIPLIER here — `/me` sends
+          // both (`resolveEngineSpeedStatus`) because since 17.08.2026 the two
+          // stack, and this demo account holds both statuses.
+          engineSpeedMultiplierPct: 30,
           stakeYieldBoostPct: 0.3,
           tournamentRewardBoostPct: 0,
           tournamentJoinApBoostPct: 0,

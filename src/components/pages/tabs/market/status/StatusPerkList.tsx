@@ -1,5 +1,6 @@
 import { ArrowRight, Check } from 'lucide-react';
 import { twMerge } from 'tailwind-merge';
+import { SuperBoostBadge } from '@/components/shared/badges/SuperBoostBadge';
 import { Ticket } from '@/components/shared/icons/Ticket';
 import type { StatusPerkRow } from '@/utils/global/status-perks.utils';
 import { staggerMs } from '@/utils/global/animation.utils';
@@ -69,6 +70,14 @@ export function StatusPerkList({
               >
                 {row.label}
               </span>
+              {/* A note owns the full width under the pair: it explains the
+                  VALUE, so it must not be squeezed into the label's column and
+                  wrap into a two-line stub beside it. */}
+              {row.note && (
+                <span className="order-last w-full text-start text-[10px] font-semibold leading-snug text-white/40">
+                  {row.note}
+                </span>
+              )}
               {row.tiers ? (
                 <span
                   className={twMerge(
@@ -106,7 +115,15 @@ export function StatusPerkList({
                         <ArrowRight size={12} className="self-center" />
                       </span>
                     )}
-                    {row.value}
+                    {row.multiplier ? (
+                      <SuperBoostBadge
+                        multiplier={row.multiplier}
+                        size={isSmall ? 'xs' : 'sm'}
+                        className="self-center"
+                      />
+                    ) : (
+                      row.value
+                    )}
                   </span>
                 )
               )}

@@ -293,11 +293,12 @@ export function EngineDetails({ id }: EngineDetailsProps) {
 
   const tierAccent = `var(--color-${tier})`;
 
-  // The passport face quotes the owner's own status, exactly as the cube does:
-  // the status row of the same breakdown — VIP's summand plus what the Lucky
-  // Player multiplier is worth on this engine (they stack since 17.08.2026).
+  // The passport face quotes the owner's own statuses, exactly as the cube does:
+  // the two status rows of the same breakdown — VIP's summand and the Lucky
+  // Player factor, separately (they stack since 17.08.2026).
   const statusLabel = isVip ? 'VIP' : isLp ? 'LP' : undefined;
-  const statusEngineSpeedBoostPct = boosts.find(s => s.key === 'status')?.pct ?? 0;
+  const vipSpeedBoostPct = boosts.find(s => s.key === 'vip')?.pct ?? 0;
+  const luckyPlayerSpeed = boosts.find(s => s.key === 'luckyPlayer');
 
   return (
     <div className="flex flex-col gap-4 px-5 pb-6">
@@ -388,7 +389,9 @@ export function EngineDetails({ id }: EngineDetailsProps) {
           createdAt={engine.createdAt}
           statusLabel={statusLabel}
           statusLevel={isVip ? me?.vipLevel : undefined}
-          statusSpeedBoostPct={statusEngineSpeedBoostPct}
+          vipSpeedBoostPct={vipSpeedBoostPct}
+          luckyPlayerSpeedMultiplier={luckyPlayerSpeed?.multiplier}
+          luckyPlayerSpeedPct={luckyPlayerSpeed?.pct}
           accent={tierAccent}
         />
       </CubeFaceCard>

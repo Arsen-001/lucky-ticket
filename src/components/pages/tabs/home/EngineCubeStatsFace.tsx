@@ -1,6 +1,7 @@
 import { formatLocalDate } from '@/utils/global/date.utils';
 import { CalendarDays, Crown, Sparkles, TrendingUp, UserRound, Zap } from 'lucide-react';
 import { useAppTranslations } from '@/hooks/useAppTranslations';
+import { SuperBoostBadge } from '@/components/shared/badges/SuperBoostBadge';
 import { formatCompact, formatTicketRate } from '@/utils/global/number.utils';
 import '@/styles/components/engine-cube-faces.css';
 
@@ -14,8 +15,15 @@ export interface EngineCubeStatsFaceProps {
   statusLabel?: string;
   /** VIP level (VIP-only concept); shown inside the status badge. */
   statusLevel?: number;
-  /** Engine-speed % this status grants (VIP 25 / LP 10) — the "what VIP gives" line. */
-  statusSpeedBoostPct?: number;
+  /** VIP's additive engine-speed % — the summand it puts into the stack. */
+  vipSpeedBoostPct?: number;
+  /**
+   * Lucky Player's engine-speed FACTOR (1.3 = ×1.3, 1 / absent = none) and what
+   * that factor is worth on this engine. Kept apart from the VIP number on
+   * purpose: the two stack, and they are not the same kind of boost.
+   */
+  luckyPlayerSpeedMultiplier?: number;
+  luckyPlayerSpeedPct?: number;
   accent?: string;
 }
 
@@ -27,12 +35,17 @@ export function EngineCubeStatsFace({
   createdAt,
   statusLabel,
   statusLevel,
-  statusSpeedBoostPct = 0,
+  vipSpeedBoostPct = 0,
+  luckyPlayerSpeedMultiplier = 1,
+  luckyPlayerSpeedPct = 0,
   accent = 'var(--color-electric-pink)',
 }: EngineCubeStatsFaceProps) {
   const t = useAppTranslations();
   const isVipStatus = statusLabel === 'VIP';
-  const statusColor = isVipStatus ? 'var(--color-gold)' : 'var(--color-teal)';
+  // Lucky Player pink, VIP gold — the same two colours the speed breakdown
+  // paints their rows with, so the passport and the ledger name one thing once.
+  const statusColor = isVipStatus ? 'var(--color-gold)' : 'var(--color-pink)';
+  const hasSuperBoost = luckyPlayerSpeedMultiplier > 1 && luckyPlayerSpeedPct > 0;
 
   const createdLabel = createdAt ? formatLocalDate(createdAt) : null;
   // The LIVE rate — running boosters included, same as the cycle the countdown
@@ -142,23 +155,46 @@ export function EngineCubeStatsFace({
             <span className="text-white tabular-nums">{createdLabel}</span>
           </div>
         )}
-        {/* What the owner's status actively grants THIS engine — the VIP (or LP)
-            permanent engine-speed boost, called out at the bottom in its accent. */}
-        {statusLabel && statusSpeedBoostPct > 0 && (
+        {/* What the owner's statuses actively grant THIS engine, one line each —
+            they are two different accelerators and they stack, so a single
+            merged number would hide both facts. VIP adds its percentage into the
+            stack; Lucky Player multiplies the finished stack, and leads with the
+            factor for the same reason the ledger does. */}
+        {(vipSpeedBoostPct > 0 || hasSuperBoost) && (
           <div
-            className="mt-1 flex items-center justify-between gap-2 rounded-md px-1.5 py-1"
-            style={{ backgroundColor: `color-mix(in srgb, ${statusColor} 14%, transparent)` }}
+            className="mt-1 flex flex-col gap-0.5 rounded-md px-1.5 py-1"
+            style={{
+              backgroundColor: `color-mix(in srgb, ${hasSuperBoost && !isVipStatus ? 'var(--color-pink)' : statusColor} 14%, transparent)`,
+            }}
           >
-            <span className="flex items-center gap-1" style={{ color: statusColor }}>
-              <Zap size={10} stroke={statusColor} strokeWidth={2.6} />
-              {statusLabel} {t('speed')}
-            </span>
-            {/* Rounded like every other boost percentage (EngineStatsLedger) —
-                the engine screen now shows this face right under that ledger,
-                and "+2%" there next to "+1.9%" here reads as two boosts. */}
-            <span className="font-black tabular-nums" style={{ color: statusColor }}>
-              +{Math.round(statusSpeedBoostPct)}%
-            </span>
+            {vipSpeedBoostPct > 0 && (
+              <div className="flex items-center justify-between gap-2">
+                <span className="flex items-center gap-1" style={{ color: 'var(--color-gold)' }}>
+                  <Zap size={10} stroke="var(--color-gold)" strokeWidth={2.6} />
+                  {t('vip')} {t('speed')}
+                </span>
+                {/* Rounded like every other boost percentage (EngineStatsLedger) —
+                    the engine screen now shows this face right under that ledger,
+                    and "+2%" there next to "+1.9%" here reads as two boosts. */}
+                <span className="font-black tabular-nums" style={{ color: 'var(--color-gold)' }}>
+                  +{Math.round(vipSpeedBoostPct)}%
+                </span>
+              </div>
+            )}
+            {hasSuperBoost && (
+              <div className="flex items-center justify-between gap-2">
+                <span className="flex items-center gap-1" style={{ color: 'var(--color-pink)' }}>
+                  <Sparkles size={10} stroke="var(--color-pink)" strokeWidth={2.6} />
+                  {t('lucky player')}
+                </span>
+                <span className="flex items-center gap-1">
+                  <SuperBoostBadge multiplier={luckyPlayerSpeedMultiplier} size="xs" />
+                  <span className="text-[8px] font-bold tabular-nums text-white/40">
+                    +{Math.round(luckyPlayerSpeedPct)}%
+                  </span>
+                </span>
+              </div>
+            )}
           </div>
         )}
       </div>

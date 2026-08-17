@@ -25,7 +25,11 @@ import {
 } from '@/types/enums/market.enums';
 import type { MarketPrice, MarketStatus } from '@/types/interfaces/market.interfaces';
 import { applyStatusMarketDiscount, effectiveMarketDiscountPct } from '@/utils/global/market.utils';
-import { buildStatusPerkRows, buildVipUpgradeRows } from '@/utils/global/status-perks.utils';
+import {
+  buildStatusPerkRows,
+  buildVipUpgradeRows,
+  luckyPlayerCatalogPerks,
+} from '@/utils/global/status-perks.utils';
 
 export interface MarketStatusSectionProps {
   onSelect: (item: MarketSelectedItem) => void;
@@ -91,9 +95,14 @@ export function MarketStatusSection({ onSelect, onBuy }: MarketStatusSectionProp
         t
       );
     }
-    return status.perks
-      ? buildStatusPerkRows(status.perks, status.perkBase, t, status.dailyGift)
-      : [];
+    if (!status.perks) return [];
+    // Lucky Player's engine-speed perk is a multiplier — the card must quote it
+    // the same way its own screen does (@see luckyPlayerCatalogPerks).
+    const perks =
+      status.statusType === MarketStatusType.LUCKY_PLAYER
+        ? luckyPlayerCatalogPerks(status.perks)
+        : status.perks;
+    return buildStatusPerkRows(perks, status.perkBase, t, status.dailyGift);
   };
 
   if (!isLoading && !statuses.length) return null;

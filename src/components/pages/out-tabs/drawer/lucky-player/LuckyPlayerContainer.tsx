@@ -15,7 +15,7 @@ import { useAppTranslations } from '@/hooks/useAppTranslations';
 import { useSpendFailure } from '@/hooks/useSpendFailure';
 import { QueryErrorState } from '@/components/shared/error/QueryErrorState';
 import { MarketPriceType, MarketStatusType } from '@/types/enums/market.enums';
-import { buildStatusPerkRows } from '@/utils/global/status-perks.utils';
+import { buildStatusPerkRows, luckyPlayerCatalogPerks } from '@/utils/global/status-perks.utils';
 
 export function LuckyPlayerContainer() {
   const t = useAppTranslations();
@@ -41,7 +41,9 @@ export function LuckyPlayerContainer() {
   // stale one.
   const perkRows = luckyPlayerStatus?.perks
     ? buildStatusPerkRows(
-        luckyPlayerStatus.perks,
+        // The engine-speed perk is a MULTIPLIER here, whatever field the catalog
+        // parks it in — @see luckyPlayerCatalogPerks.
+        luckyPlayerCatalogPerks(luckyPlayerStatus.perks),
         luckyPlayerStatus.perkBase,
         t,
         luckyPlayerStatus.dailyGift

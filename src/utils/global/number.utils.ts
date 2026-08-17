@@ -69,6 +69,16 @@ export const formatTicketRate = (value: number) => {
   return formatter({ maximumFractionDigits: 2 }).format(Math.round(rate * 100) / 100);
 };
 
+/**
+ * A boost MULTIPLIER as the player reads it — `×1.3`, `×2`. The `×` is the one
+ * mark that separates a super boost (speed chip, Lucky Player) from the additive
+ * percentages printed all around it, so every screen that shows one goes through
+ * here rather than spelling it inline. Trailing zeros are dropped: a level-10
+ * chip is `×2`, never `×2.00`.
+ */
+export const formatMultiplier = (factor: number) =>
+  `×${formatter({ maximumFractionDigits: 2 }).format(Math.round(factor * 100) / 100)}`;
+
 // Compact notation that keeps up to 2 fraction digits, so a price like 1250
 // reads as "1.25K" instead of the over-rounded "1.3K". Used for Market prices.
 export const formatCompactPrice = (value: number) =>

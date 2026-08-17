@@ -1,6 +1,7 @@
 import { Cpu, type LucideIcon, MemoryStick } from 'lucide-react';
 import type { StaticImageData } from 'next/image';
 import { icons } from '@/constants/icons';
+import { formatMultiplier } from '@/utils/global/number.utils';
 import type { TicketType } from '@/types/types/ticket.types';
 import type { Dictionary, MessageIds } from '@/types/types/i18n.types';
 import type { InventoryChip, InventoryChipType } from '@/types/interfaces/inventory.interfaces';
@@ -94,15 +95,21 @@ export const chipSpeedPct = (level: number | undefined): number =>
 
 /**
  * The one-line effect a chip prints on a slot, a card or a confirm — its
- * level's worth in the chip's own unit: "+10%" for speed, "+5 tickets" for
+ * level's worth in the chip's own unit: "×1.6" for speed, "+5 tickets" for
  * capacity. One helper so the five places that print it can never disagree.
+ *
+ * Speed reads as a FACTOR, not as "+60%", because that is what it is: the chip
+ * divides the finished cycle instead of joining the additive stack, so its worth
+ * does not shrink as the engine grows — the property that separates it (and
+ * Lucky Player) from every `+X%` on the engine screen. @see EngineStatsLedger,
+ * which groups the two under "super boosts".
  */
 export const chipEffectLabel = (
   chip: Pick<InventoryChip, 'type' | 'level'>,
   t: (key: MessageIds, values?: Record<string, number>) => string
 ): string =>
   chip.type === 'speed'
-    ? `+${chipSpeedPct(chip.level)}%`
+    ? formatMultiplier(chipSpeedFactor(chip.level))
     : t('chip capacity effect', { n: chipCapacityTickets(chip.level) });
 
 /**

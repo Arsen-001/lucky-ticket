@@ -8,7 +8,12 @@ import {
   effectiveCycleSeconds,
   engineCapacity,
 } from '@/utils/global/ticket-engine.utils';
-import { engineSpeedBoostSources } from '@/utils/global/engine-boosts.utils';
+import {
+  additiveSpeedBoostSources,
+  engineSpeedBoostSources,
+  isSuperBoost,
+  superSpeedBoostSources,
+} from '@/utils/global/engine-boosts.utils';
 import {
   CHIP_MAX_LEVEL,
   chipCapacityTickets,
@@ -363,7 +368,7 @@ describe('engine levers — every upgrade must move the engine', () => {
         (effectiveCycleSeconds(maxed) * 8.5) / 10 / 1.3,
         6
       );
-      // The breakdown's status row is worth exactly that, so the face agrees
+      // The breakdown's status rows are worth exactly that, so the face agrees
       // with the countdown.
       const sources = engineSpeedBoostSources(maxed, both);
       const total = sources.reduce((sum, s) => sum + s.pct, 0);
@@ -371,6 +376,44 @@ describe('engine levers — every upgrade must move the engine', () => {
         effectiveCycleSeconds(maxed, both),
         6
       );
+    });
+
+    it('the breakdown keeps the two apart: VIP a summand, Lucky Player a ×1.3 super boost', () => {
+      // What the screens read to say "these are different accelerators". A
+      // merged row (what shipped 17.08.2026) let a player believe the
+      // subscription was another +X% — the one thing it is not.
+      const both: BoostOptions = {
+        isVip: true,
+        isLuckyPlayer: true,
+        perks: { engineSpeedBoostPct: 150, engineSpeedMultiplierPct: 30 },
+      };
+      const sources = engineSpeedBoostSources(engineOf('bronze'), both);
+      const vip = sources.find(s => s.key === 'vip');
+      const lp = sources.find(s => s.key === 'luckyPlayer');
+
+      expect(vip).toEqual({ key: 'vip', pct: 150 });
+      expect(isSuperBoost(vip!)).toBe(false);
+      expect(lp?.multiplier).toBeCloseTo(1.3, 6);
+      expect(isSuperBoost(lp!)).toBe(true);
+      // The factor is the constant; the percentage beside it is not.
+      expect(lp?.pct).toBeCloseTo(2.5 * 30, 6);
+      expect(additiveSpeedBoostSources(sources).map(s => s.key)).not.toContain('luckyPlayer');
+      // No chip fitted, so the subscription is the only super boost on this
+      // engine — an inert ×1 chip belongs to neither half.
+      expect(superSpeedBoostSources(sources).map(s => s.key)).toEqual(['luckyPlayer']);
+      expect(additiveSpeedBoostSources(sources).map(s => s.key)).not.toContain('chip');
+    });
+
+    it('a speed chip is the other super boost — same class, factor intact at every stage', () => {
+      for (const stage of STAGES) {
+        const engine = engineOf('bronze', stage.engine);
+        const sources = engineSpeedBoostSources(engine, { speedChip: chip('speed', 10) });
+        const chipSource = superSpeedBoostSources(sources).find(s => s.key === 'chip');
+        expect(chipSource?.multiplier, stage.name).toBeCloseTo(2, 6);
+        // Its additive equivalent grows with the engine while the factor does
+        // not — the whole reason the two are labelled differently.
+        expect(chipSource!.pct, stage.name).toBeGreaterThanOrEqual(100);
+      }
     });
   });
 

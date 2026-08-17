@@ -7,7 +7,7 @@ import type { StatusPerks } from '@/types/interfaces/user.interfaces';
 import type { Dictionary } from '@/types/types/i18n.types';
 import type { TicketType } from '@/types/types/ticket.types';
 import { GlobalConstants } from '@/constants/global.constants';
-import { formatNumber } from '@/utils/global/number.utils';
+import { formatMultiplier, formatNumber } from '@/utils/global/number.utils';
 
 /**
  * Turns the LIVE status config (`market.statuses[].perks` / `levelPerks`) into
@@ -29,6 +29,19 @@ export interface StatusPerkRow {
   label: string;
   /** Already-formatted value (`+10%`, `12 (+2)`); absent for capability rows. */
   value?: string;
+  /**
+   * One line under the label, for a perk whose VALUE alone would be read wrong.
+   * The engine-speed multiplier is the case it exists for: `×1.3` next to a
+   * column of `+X%` rows needs to say why it is not one of them.
+   */
+  note?: string;
+  /**
+   * Set when the value IS a multiplier — the renderer then prints it as the
+   * gold `×N` super-boost pill instead of plain text, the same mark the engine
+   * screens use. `value` still carries the written form, which is what diffs
+   * two VIP levels.
+   */
+  multiplier?: number;
   /** Same value at the level the player holds today — set only on upgrade rows. */
   from?: string;
   /**
@@ -42,6 +55,26 @@ export interface StatusPerkRow {
 }
 
 const TIERS: TicketType[] = ['bronze', 'silver', 'gold', 'platinum', 'diamond'];
+
+/**
+ * A Lucky Player LISTING's perks, translated into the shape the rows are built
+ * from.
+ *
+ * The catalog still carries the subscription's engine-speed perk in
+ * `engineSpeedBoostPct` — the admin config field was never renamed when the perk
+ * became a multiplier (17.08.2026), and `/me` fixes it up in
+ * `resolveEngineSpeedStatus` on the server. The market listing does not, so the
+ * screen selling the subscription was advertising `+30%` for something that is
+ * a ×1.3, next to VIP rows where `+X%` means the other thing entirely.
+ *
+ * A payload that already carries the split (a newer backend) is passed through
+ * untouched.
+ */
+export const luckyPlayerCatalogPerks = (perks: StatusPerks): StatusPerks => ({
+  ...perks,
+  engineSpeedBoostPct: perks.engineSpeedMultiplierPct === undefined ? 0 : perks.engineSpeedBoostPct,
+  engineSpeedMultiplierPct: perks.engineSpeedMultiplierPct ?? perks.engineSpeedBoostPct,
+});
 
 /** `1.90` → `1.9`, `20.0` → `20` — the config stores fractional percents. */
 const num = (value: number): string => String(Math.round(value * 100) / 100);
@@ -76,6 +109,19 @@ export const buildStatusPerkRows = (
       id: 'engineSpeed',
       label: t('perk engine speed'),
       value: pct(perks.engineSpeedBoostPct),
+    });
+
+  // The MULTIPLIER form of the same perk — Lucky Player's, and quoted as `×1.3`
+  // rather than `+30%` because that is the difference the player is buying: a
+  // summand is diluted by every other boost on the engine, a factor is not.
+  // @see luckyPlayerCatalogPerks for where a Lucky Player listing gets it.
+  if ((perks.engineSpeedMultiplierPct ?? 0) > 0)
+    rows.push({
+      id: 'engineSpeedMultiplier',
+      label: t('perk engine speed'),
+      value: formatMultiplier(1 + (perks.engineSpeedMultiplierPct as number) / 100),
+      multiplier: 1 + (perks.engineSpeedMultiplierPct as number) / 100,
+      note: t('super boost multiplies stack'),
     });
 
   if (perks.stakeYieldBoostPct > 0)

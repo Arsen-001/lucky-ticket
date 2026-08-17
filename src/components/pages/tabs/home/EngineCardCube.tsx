@@ -145,19 +145,22 @@ function EngineCardCubeImpl(props: EngineCardCubeProps) {
     badgeBoostPct: badgeSpeedPct,
     tables,
   });
-  // What the stats face prints next to the VIP / LP badge — the status row of
-  // the same breakdown the reactor draws, so it is VIP's summand plus what the
-  // Lucky Player multiplier is worth on THIS engine (they stack since
-  // 17.08.2026), and it always agrees with the countdown.
-  const statusEngineSpeedBoostPct = speedBoosts.find(s => s.key === 'status')?.pct ?? 0;
+  // What the stats face prints under the VIP / LP badge — the two status rows of
+  // the same breakdown the reactor draws, kept apart because they ARE apart:
+  // VIP's summand, and the Lucky Player factor with what it is worth on THIS
+  // engine (they stack since 17.08.2026). Both agree with the countdown.
+  const vipSpeedBoostPct = speedBoosts.find(s => s.key === 'vip')?.pct ?? 0;
+  const luckyPlayerSpeed = speedBoosts.find(s => s.key === 'luckyPlayer');
   const capacitySources = engineCapacitySources(engine, {
     capacityChip: equippedCapacityChip,
     capacityBooster: activeCapacityBooster,
     tables,
   });
   // Premium status — surfaced on the stats face (its speed-boost row) and as the
-  // passport identity badge. VIP supersedes LP (never stacks); the level is a
-  // VIP-only concept, so LP carries none.
+  // passport identity badge. One badge only, so a player holding both is shown
+  // the higher tier — a labelling choice, not perk exclusivity: the speed row
+  // above carries BOTH contributions. The level is a VIP-only concept, so LP
+  // carries none.
   const statusLabel = isVip ? 'VIP' : isLp ? 'LP' : undefined;
   const statusLevel = isVip ? vipLevel : undefined;
 
@@ -366,7 +369,9 @@ function EngineCardCubeImpl(props: EngineCardCubeProps) {
               createdAt={engine.createdAt}
               statusLabel={statusLabel}
               statusLevel={statusLevel}
-              statusSpeedBoostPct={statusEngineSpeedBoostPct}
+              vipSpeedBoostPct={vipSpeedBoostPct}
+              luckyPlayerSpeedMultiplier={luckyPlayerSpeed?.multiplier}
+              luckyPlayerSpeedPct={luckyPlayerSpeed?.pct}
               accent={tierAccent}
             />
           </div>

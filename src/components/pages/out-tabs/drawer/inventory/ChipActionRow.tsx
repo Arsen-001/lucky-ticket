@@ -4,14 +4,10 @@ import { ArrowLeftRight, ArrowUp, Cpu } from 'lucide-react';
 import { twMerge } from 'tailwind-merge';
 import { useGetMeQuery } from '@/api/me.api';
 import { Button } from '@/components/shared/buttons/Button';
+import { ChipEffectValue } from '@/components/shared/badges/ChipEffectValue';
 import { ChipIcon } from '@/components/shared/icons/ChipIcon';
 import { useAppTranslations } from '@/hooks/useAppTranslations';
-import {
-  QUALITY_ACCENT,
-  chipEffectLabel,
-  chipUnequipStarsCost,
-  isChipMaxed,
-} from '@/utils/global/inventory.utils';
+import { QUALITY_ACCENT, chipUnequipStarsCost, isChipMaxed } from '@/utils/global/inventory.utils';
 import { staggerMs } from '@/utils/global/animation.utils';
 import type { InventoryChip } from '@/types/interfaces/inventory.interfaces';
 import type { Dictionary } from '@/types/types/i18n.types';
@@ -98,8 +94,11 @@ export function ChipActionRow({
             and the row broke INSIDE it, leaving a lone letter on its own line.
             Items now break between themselves and each stays whole. */}
         <div className="flex flex-wrap items-center gap-x-2 gap-y-0.5 text-[11px] font-extrabold text-white tabular-nums">
-          <span className="whitespace-nowrap">
-            {t('lv {level}', { level: chip.level })} · {chipEffectLabel(chip, t)}
+          <span className="flex items-center gap-1.5 whitespace-nowrap">
+            {t('lv {level}', { level: chip.level })}
+            {/* A Time chip's effect is a multiplier, so it wears the gold pill
+                the engine screen uses for the class — one mark, five screens. */}
+            <ChipEffectValue chip={chip} />
           </span>
           {/* No lifetime badge and no ∞: every chip is permanent (@see
               InventoryChip). The clock belongs to boosters. */}

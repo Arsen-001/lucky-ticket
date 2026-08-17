@@ -14,25 +14,39 @@ import {
 import { chipCapacityTickets, chipSpeedFactor } from '@/utils/global/inventory.utils';
 
 /**
- * Every contributor to an engine's speed stack — the same seven terms
- * `effectiveCycleSeconds` applies, in the order the UI lists them. Six are
- * additive; the chip is a multiplier and is reported as its additive
- * equivalent so the sum still equals what the countdown runs on.
+ * Every contributor to an engine's speed stack — the same eight terms
+ * `effectiveCycleSeconds` applies, in the order the UI lists them: the six that
+ * ADD up first, then the two that MULTIPLY the result (the speed chip and Lucky
+ * Player). Multipliers are additionally reported as their additive equivalent,
+ * so the sum still equals what the countdown runs on.
+ *
+ * The two classes are named apart because they behave apart, and a player who
+ * cannot tell them apart mis-buys: a +30 % row and a ×1.3 row look
+ * interchangeable, but on a maxed engine (+750 %) the first is worth ×1.04 and
+ * the second still ×1.3. @see EngineStatsLedger, which groups them under
+ * separate headings for exactly this reason.
  */
 export type EngineSpeedBoostKey =
   | 'engineLevel'
   | 'speedLevel'
-  | 'status'
-  | 'chip'
+  | 'vip'
   | 'booster'
   | 'avatar'
-  | 'badge';
+  | 'badge'
+  | 'chip'
+  | 'luckyPlayer';
 
 export interface EngineSpeedBoostSource {
   key: EngineSpeedBoostKey;
   pct: number;
   /** Time-limited (booster) — the UI separates it from permanent boosts. */
   temporary?: boolean;
+  /**
+   * Set on MULTIPLIER sources only, carrying the raw factor (`1.3` = ×1.3).
+   * Its presence is what marks a source as a super boost; `pct` stays the
+   * additive equivalent on this engine so bars, arcs and totals keep summing.
+   */
+  multiplier?: number;
 }
 
 export interface EngineSpeedBoostOptions {
@@ -70,8 +84,10 @@ export const engineSpeedBoostSources = (
         fullLevelSpeedBonusPct(engine, options.tables),
     },
     { key: 'speedLevel', pct: speedLevelBoostPct(engine.speedLevel || 0, options.tables) },
+    // VIP only: Lucky Player left the additive stack on 17.08.2026 and is a
+    // multiplier below. `effectiveStatusPct` returns 0 for an LP-only player.
     {
-      key: 'status',
+      key: 'vip',
       pct: effectiveStatusPct(
         'engineSpeedBoostPct',
         options.isLuckyPlayer ?? false,
@@ -86,7 +102,7 @@ export const engineSpeedBoostSources = (
   // Two MULTIPLIERS sit on top of that sum — the speed chip and the Lucky
   // Player perk (@see chipSpeedFactor, effectiveEngineSpeedMultiplierPct). The
   // reactor face draws additive arcs and prints `baseline ÷ (1 + total) =
-  // cycle`, so each multiplier is shown as the additive amount it is WORTH
+  // cycle`, so each multiplier ALSO carries the additive amount it is WORTH
   // here. Chip: (1 + others) × (chipF − 1). LP: (1 + others) × chipF × (lpF − 1).
   // Together they add up to exactly (1 + others) × chipF × lpF − 1, so the
   // equation still resolves to the countdown next to it. On a fresh engine each
@@ -96,13 +112,20 @@ export const engineSpeedBoostSources = (
   const chipFactor = chipSpeedFactor(options.speedChip?.level);
   const lpFactor =
     1 + effectiveEngineSpeedMultiplierPct(options.isLuckyPlayer ?? false, options.perks) / 100;
-  const chipEquivalentPct = (1 + others / 100) * (chipFactor - 1) * 100;
-  const lpEquivalentPct = (1 + others / 100) * chipFactor * (lpFactor - 1) * 100;
-  const chip: EngineSpeedBoostSource = { key: 'chip', pct: chipEquivalentPct };
-  // The LP multiplier rides the status row, next to VIP's summand.
-  const status: EngineSpeedBoostSource = { key: 'status', pct: additive[2].pct + lpEquivalentPct };
-  // Keep the UI's row order: level, taps, status, chip, booster, avatar, badge.
-  return [additive[0], additive[1], status, chip, additive[3], additive[4], additive[5]];
+  const chip: EngineSpeedBoostSource = {
+    key: 'chip',
+    pct: (1 + others / 100) * (chipFactor - 1) * 100,
+    multiplier: chipFactor,
+  };
+  const luckyPlayer: EngineSpeedBoostSource = {
+    key: 'luckyPlayer',
+    pct: (1 + others / 100) * chipFactor * (lpFactor - 1) * 100,
+    multiplier: lpFactor,
+  };
+  // Additive block first, multiplier block last — the order IS the explanation,
+  // and it is what the reactor's outermost arcs and the ledger's second group
+  // both rely on.
+  return [...additive, chip, luckyPlayer];
 };
 
 export const totalSpeedBoostPct = (sources: readonly EngineSpeedBoostSource[]) =>
@@ -162,3 +185,23 @@ export const activeCapacitySources = (sources: readonly EngineCapacitySource[]) 
 /** Only the contributors actually granting something — what the UI renders. */
 export const activeSpeedBoostSources = (sources: readonly EngineSpeedBoostSource[]) =>
   sources.filter(source => source.pct > 0);
+
+/**
+ * A super boost — one that MULTIPLIES the whole stack instead of adding to it
+ * (speed chip, Lucky Player). The single predicate every screen asks, so none
+ * of them has to know which keys those are.
+ */
+export const isSuperBoost = (source: EngineSpeedBoostSource): boolean =>
+  source.multiplier !== undefined && source.multiplier > 1;
+
+/**
+ * The additive half of the stack — everything that is summed, in row order.
+ * Keyed off the ABSENCE of a factor, not off `isSuperBoost`: an unequipped chip
+ * carries ×1 and belongs to neither half (`activeSpeedBoostSources` drops it).
+ */
+export const additiveSpeedBoostSources = (sources: readonly EngineSpeedBoostSource[]) =>
+  sources.filter(source => source.multiplier === undefined);
+
+/** The multiplier half — what the UI presents as "super boosts". */
+export const superSpeedBoostSources = (sources: readonly EngineSpeedBoostSource[]) =>
+  sources.filter(isSuperBoost);

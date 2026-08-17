@@ -1,15 +1,15 @@
 'use client';
 
+import { Sparkles } from 'lucide-react';
 import { twMerge } from 'tailwind-merge';
 import { useAppTranslations } from '@/hooks/useAppTranslations';
-import {
-  ENGINE_BOOST_COLOR,
-  ENGINE_BOOST_ICON,
-  ENGINE_BOOST_LABEL_KEY,
-} from '@/constants/engine-boosts';
+import { EngineBoostRow } from '@/components/pages/out-tabs/tabs-extra/engine/EngineBoostRow';
+import { SuperBoostBadge } from '@/components/shared/badges/SuperBoostBadge';
 import {
   activeSpeedBoostSources,
+  additiveSpeedBoostSources,
   type EngineSpeedBoostSource,
+  superSpeedBoostSources,
   totalSpeedBoostPct,
 } from '@/utils/global/engine-boosts.utils';
 import { formatCompact, formatTicketRate } from '@/utils/global/number.utils';
@@ -31,6 +31,12 @@ export interface EngineStatsLedgerProps {
  * "Разбор" — the speed stack itemised: every boost that shortened this cycle,
  * with its own share of the bar, and the before→after cycle underneath. Answers
  * "why is my engine this fast?", which nothing on the screen answered before.
+ *
+ * Split in two since 17.08.2026, because the stack is: the boosts that ADD up,
+ * then the ones that MULTIPLY what they built (speed chip, Lucky Player). One
+ * flat list of `+%` rows said they were the same kind of thing and they are not
+ * — a +30 % row is worth ×1.04 on a maxed engine while a ×1.3 row is worth ×1.3
+ * on every engine there will ever be.
  */
 export function EngineStatsLedger({
   accent,
@@ -46,6 +52,11 @@ export function EngineStatsLedger({
   const active = activeSpeedBoostSources(boosts);
   const total = totalSpeedBoostPct(active);
   const strongest = active.reduce((max, source) => Math.max(max, source.pct), 0);
+  const additive = additiveSpeedBoostSources(active);
+  const supers = superSpeedBoostSources(active);
+  // What the super boosts multiply the whole stack by, together — the headline
+  // of their block, and the one number a player can carry between engines.
+  const superFactor = supers.reduce((product, source) => product * (source.multiplier ?? 1), 1);
 
   return (
     <section
@@ -64,35 +75,56 @@ export function EngineStatsLedger({
         </span>
       </div>
 
-      {active.length > 0 ? (
-        <ul className="flex flex-col gap-1.5">
-          {active.map(source => {
-            const Icon = ENGINE_BOOST_ICON[source.key];
-            const color = ENGINE_BOOST_COLOR[source.key];
-            return (
-              <li key={source.key} className="flex items-center gap-2">
-                <Icon size={13} stroke={color} strokeWidth={2.4} className="shrink-0" />
-                <span className="w-[104px] shrink-0 truncate text-[11px] font-bold text-white/70">
-                  {t(ENGINE_BOOST_LABEL_KEY[source.key])}
-                </span>
-                <span className="bg-background h-1.5 flex-1 overflow-hidden rounded-full">
-                  <span
-                    className="block h-full rounded-full"
-                    style={{
-                      width: `${strongest > 0 ? (source.pct / strongest) * 100 : 0}%`,
-                      backgroundColor: color,
-                    }}
-                  />
-                </span>
-                <span className="w-12 shrink-0 text-end text-[11px] font-black tabular-nums text-white">
-                  +{Math.round(source.pct)}%
-                </span>
-              </li>
-            );
-          })}
-        </ul>
-      ) : (
+      {active.length === 0 && (
         <p className="text-[11px] font-semibold text-white/35">{t('no speed boosts yet')}</p>
+      )}
+
+      {additive.length > 0 && (
+        <div className="flex flex-col gap-1.5">
+          {/* The heading only earns its line once there is a second group to
+              tell this one apart from — and then it has to carry half the
+              contrast, so it gets a rule of its own rather than sitting at 35%
+              opacity where it read as a caption. */}
+          {supers.length > 0 && (
+            <span className="flex items-center gap-2 text-[9px] font-extrabold uppercase tracking-[0.18em] text-white/55">
+              {t('adds up')}
+              <span className="h-px flex-1 bg-white/10" />
+            </span>
+          )}
+          <ul className="flex flex-col gap-1.5">
+            {additive.map(source => (
+              <EngineBoostRow key={source.key} source={source} strongest={strongest} />
+            ))}
+          </ul>
+        </div>
+      )}
+
+      {/* Gold frame, gold pills, hatched bars: the block is meant to be
+          recognisable before a word of it is read. */}
+      {supers.length > 0 && (
+        <div
+          className="border-gold/25 flex flex-col gap-2 rounded-xl border p-2.5"
+          style={{
+            background:
+              'linear-gradient(180deg, color-mix(in srgb, var(--color-gold) 10%, transparent), transparent)',
+          }}
+        >
+          <div className="flex items-center justify-between gap-2">
+            <span className="text-gold flex items-center gap-1.5 text-[9px] font-extrabold uppercase tracking-[0.18em]">
+              <Sparkles size={11} stroke="var(--color-gold)" strokeWidth={2.6} />
+              {t('super boosts')}
+            </span>
+            <SuperBoostBadge multiplier={superFactor} size="md" />
+          </div>
+          <ul className="flex flex-col gap-1.5">
+            {supers.map(source => (
+              <EngineBoostRow key={source.key} source={source} strongest={strongest} />
+            ))}
+          </ul>
+          <p className="text-[10px] font-semibold leading-snug text-white/40">
+            {t('super boosts explained')}
+          </p>
+        </div>
       )}
 
       <div className="flex items-center justify-between gap-2 border-t border-white/8 pt-2.5">

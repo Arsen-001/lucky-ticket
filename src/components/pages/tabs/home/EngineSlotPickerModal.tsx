@@ -13,11 +13,11 @@ import { TelegramStarIcon } from '@/components/shared/icons/TelegramStarIcon';
 import { useAppTranslations } from '@/hooks/useAppTranslations';
 import { routes } from '@/constants/routes';
 import { useEngineConfig } from '@/hooks/useEngineConfig';
+import { ChipEffectValue } from '@/components/shared/badges/ChipEffectValue';
 import {
   CHIP_TYPE_ICON,
   QUALITY_ACCENT,
   canEquipChipOnTier,
-  chipEffectLabel,
   chipSlotStarsCost,
 } from '@/utils/global/inventory.utils';
 import type {
@@ -172,8 +172,12 @@ export function EngineSlotPickerModal({
                     <span className="text-[12px] font-extrabold text-white">
                       {t(chip.quality)} · {chip.type === 'speed' ? t('time') : t('capacity')}
                     </span>
-                    <span className="text-[10px] font-bold tabular-nums" style={{ color: accent }}>
-                      {t('lvl')} {chip.level} · {chipEffectLabel(chip, t)}
+                    <span
+                      className="flex items-center gap-1.5 text-[10px] font-bold tabular-nums"
+                      style={{ color: accent }}
+                    >
+                      {t('lvl')} {chip.level}
+                      <ChipEffectValue chip={chip} />
                     </span>
                   </div>
                   <div className="flex items-center gap-1 text-[11px] font-extrabold tabular-nums text-white">
