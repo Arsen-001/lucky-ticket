@@ -25,6 +25,7 @@ export function buildMarketSelectedItem(featured: MarketFeaturedItem): MarketSel
     maxQuantity: featured.maxQuantity,
     ownedCount: featured.ownedCount,
     ownedIconNode: featured.ownedIconNode,
+    describeOrder: featured.describeOrder,
     mutate: featured.mutate,
   };
 }

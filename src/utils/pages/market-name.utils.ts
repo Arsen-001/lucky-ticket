@@ -31,3 +31,12 @@ export const marketTicketName = (item: MarketTicket, t: Dictionary) =>
 /** Shared with the inventory vault, which names the same stacks. */
 export const marketShardName = (item: MarketShard, t: Dictionary) =>
   chipShardName(t, item.type, item.quality);
+
+/**
+ * «+N shards» — what a shard order hands over. Takes the TOTAL (bundle size ×
+ * quantity): the receipt used to print the SKU's own «+1 shard» under
+ * «Bronze Time Shard ×81», describing the bundle when the player had just
+ * bought eighty-one of them.
+ */
+export const marketShardsReceived = (count: number, t: Dictionary) =>
+  `+${count} ${t('shards unit {count}', { count })}`;

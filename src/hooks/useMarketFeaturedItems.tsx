@@ -17,7 +17,7 @@ import {
   effectiveMarketDiscountPct,
   orderMarketPrices,
 } from '@/utils/global/market.utils';
-import { marketShardName } from '@/utils/pages/market-name.utils';
+import { marketShardName, marketShardsReceived } from '@/utils/pages/market-name.utils';
 import { ChipShardIcon } from '@/components/shared/icons/ChipShardIcon';
 import type { AvatarBoost, AvatarDailyReward } from '@/types/interfaces/avatars.interfaces';
 import type { MarketAccent, MarketPrice } from '@/types/interfaces/market.interfaces';
@@ -51,6 +51,8 @@ export interface MarketFeaturedItem {
   renderIcon: (size: number) => ReactNode;
   /** Per-order cap for the quantity stepper; omit for single-purchase items. */
   maxQuantity?: number;
+  /** What a whole order of N hands over («+81 shards»); see MarketSelectedItem. */
+  describeOrder?: (count: number) => ReactNode;
   /** How many of this item the player already owns — the confirm sheet's pill. */
   ownedCount?: number;
   /** Small icon for that pill; the slide's own artwork does not fit there. */
@@ -139,7 +141,8 @@ export function useMarketFeaturedItems(): { items: MarketFeaturedItem[]; isLoadi
     const shardToItem = (s: (typeof data.shards)[number]): MarketFeaturedItem => ({
       id: s.id,
       title: marketShardName(s, t),
-      description: `+${s.count} ${t('shards unit {count}', { count: s.count })}`,
+      description: marketShardsReceived(s.count, t),
+      describeOrder: quantity => marketShardsReceived(s.count * quantity, t),
       about: t('market shard purpose'),
       // The grid gates shards by tier; the showcase used to sell the same item
       // with a live Buy button the backend would refuse.

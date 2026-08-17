@@ -13,7 +13,7 @@ import type { MarketSelectedItem } from '@/components/pages/tabs/market/MarketVi
 import { ChipShardIcon } from '@/components/shared/icons/ChipShardIcon';
 import { GlobalConstants } from '@/constants/global.constants';
 import { useAppTranslations } from '@/hooks/useAppTranslations';
-import { marketShardName } from '@/utils/pages/market-name.utils';
+import { marketShardName, marketShardsReceived } from '@/utils/pages/market-name.utils';
 import { useUnlockedTiers } from '@/hooks/useUnlockedTiers';
 import type { MarketPrice, MarketShard } from '@/types/interfaces/market.interfaces';
 import { applyStatusMarketDiscount, effectiveMarketDiscountPct } from '@/utils/global/market.utils';
@@ -48,12 +48,15 @@ export function MarketShardSection({ shards, onSelect, onBuy }: MarketShardSecti
           ) : (
             <ChipShardIcon type={shard.type} tier={shard.quality} size={size} />
           );
-        const description = `+${shard.count} ${t('shards unit {count}', { count: shard.count })}`;
+        const description = marketShardsReceived(shard.count, t);
         const discountedPrices = applyStatusMarketDiscount(shard.prices, discountPct);
         const item: MarketSelectedItem = {
           id: shard.id,
-          name: shard.name,
+          // The sheets take the same localized name the card shows — `shard.name`
+          // is the backend's English composite («Bronze Time Shard»).
+          name: marketShardName(shard, t),
           description,
+          describeOrder: quantity => marketShardsReceived(shard.count * quantity, t),
           about: t('market shard purpose'),
           locked: isLocked,
           lockNote: isLocked ? <MarketLockPanel tier={shard.quality} /> : undefined,

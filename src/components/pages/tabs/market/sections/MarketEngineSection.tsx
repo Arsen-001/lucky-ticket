@@ -51,7 +51,7 @@ export function MarketEngineSection({ engines, onSelect, onBuy }: MarketEngineSe
         const discountedPrices = applyStatusMarketDiscount(engine.prices, discountPct);
         const item: MarketSelectedItem = {
           id: engine.id,
-          name: engine.name,
+          name: marketEngineName(engine, t),
           description,
           about: t('market engine purpose', { tier: t(engine.ticketType as MessageIds) }),
           locked: isLocked,

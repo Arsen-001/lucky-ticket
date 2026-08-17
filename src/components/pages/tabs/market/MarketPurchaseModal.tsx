@@ -26,6 +26,8 @@ export interface MarketPurchaseModalProps {
   confirmText?: string;
   /** Cap for the quantity stepper; omit (or pass 1) to hide it. */
   maxQuantity?: number;
+  /** Order-sized description that follows the stepper («+81 shards»); falls back to `description`. */
+  describeOrder?: (count: number) => ReactNode;
   /** How many of this item the player already owns; omit to hide the pill. */
   ownedCount?: number;
   /** Small icon rendered inside the owned pill. */
@@ -43,6 +45,7 @@ export function MarketPurchaseModal({
   price,
   confirmText,
   maxQuantity,
+  describeOrder,
   ownedCount,
   ownedIconNode,
 }: MarketPurchaseModalProps) {
@@ -59,6 +62,11 @@ export function MarketPurchaseModal({
 
   const effectiveCount = quantityEnabled ? count : 1;
   const total = (price?.amount ?? 0) * effectiveCount;
+  // The line under the name follows the stepper: «+81 shards» at 81, not the
+  // SKU's own «+1 shard» beside a total that says otherwise. A cleared field
+  // (count 0) keeps the single-unit text rather than printing «+0».
+  const orderDescription =
+    describeOrder && effectiveCount > 0 ? describeOrder(effectiveCount) : description;
   // What the status discount takes off THIS order — the percentage alone reads
   // as rounding on a million-scale price, and it is the only number here that
   // grows with the quantity stepper.
@@ -97,8 +105,8 @@ export function MarketPurchaseModal({
             )}
             <div className="flex min-w-0 flex-1 flex-col gap-1 text-start">
               <span className="text-sm font-bold text-white leading-tight">{title}</span>
-              {description && (
-                <span className="text-[12px] leading-snug text-white/60">{description}</span>
+              {orderDescription && (
+                <span className="text-[12px] leading-snug text-white/60">{orderDescription}</span>
               )}
             </div>
           </div>

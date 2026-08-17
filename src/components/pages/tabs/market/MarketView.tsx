@@ -67,6 +67,12 @@ export interface MarketSelectedItem {
   ownedCount?: number;
   /** Small icon for the owned pill (the big picture doesn't fit there). */
   ownedIconNode?: ReactNode;
+  /**
+   * What a whole order of `count` hands over («+81 shards»), for the confirm
+   * sheet and the receipt. Falls back to `description`, which describes ONE
+   * unit — fine for single-purchase items, wrong under a «×81» headline.
+   */
+  describeOrder?: (count: number) => ReactNode;
   mutate: (price: MarketPrice, count: number) => Promise<unknown>;
 }
 
@@ -80,6 +86,7 @@ interface MarketActivePurchase {
   maxQuantity?: number;
   ownedCount?: number;
   ownedIconNode?: ReactNode;
+  describeOrder?: (count: number) => ReactNode;
   mutate: (count: number) => Promise<unknown>;
 }
 
@@ -181,6 +188,7 @@ export function MarketView() {
       maxQuantity,
       ownedCount: item.ownedCount,
       ownedIconNode: item.ownedIconNode,
+      describeOrder: item.describeOrder,
       mutate: (count: number) => item.mutate(price, count),
     });
   };
@@ -197,7 +205,7 @@ export function MarketView() {
       await purchase.mutate(count);
       setSuccess({
         name: count > 1 ? `${purchase.name} ×${count}` : purchase.name,
-        description: purchase.description,
+        description: purchase.describeOrder?.(count) ?? purchase.description,
         renderIcon: purchase.renderIcon,
       });
       setPurchase(null);
@@ -294,6 +302,7 @@ export function MarketView() {
         price={purchase?.price}
         confirmText={purchase?.confirmText}
         maxQuantity={purchase?.maxQuantity}
+        describeOrder={purchase?.describeOrder}
         ownedCount={purchase?.ownedCount}
         ownedIconNode={purchase?.ownedIconNode}
       />

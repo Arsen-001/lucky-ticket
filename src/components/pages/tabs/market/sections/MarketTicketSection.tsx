@@ -52,7 +52,7 @@ export function MarketTicketSection({ tickets, onSelect, onBuy }: MarketTicketSe
         const discountedPrices = applyStatusMarketDiscount(ticket.prices, discountPct);
         const item: MarketSelectedItem = {
           id: ticket.id,
-          name: ticket.name,
+          name: marketTicketName(ticket, t),
           description: t(ticket.ticketType),
           about: t(tierTicketDescriptionId[ticket.ticketType]),
           locked: isLocked,
