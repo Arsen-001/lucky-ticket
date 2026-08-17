@@ -106,6 +106,7 @@ export type TestQuestStepKind =
   | 'referral'
   | 'engine'
   | 'market'
+  | 'chip'
   | 'wallet'
   | 'stake'
   | 'status'
@@ -122,6 +123,7 @@ export const testQuestStepHref: Partial<Record<TestQuestStepKind, Route>> = {
   referral: routes.inviteFriends,
   engine: routes.home,
   market: routes.market(),
+  chip: routes.inventory,
   wallet: routes.wallet,
   stake: routes.stakes.index,
   status: routes.settings.vip,
@@ -202,6 +204,18 @@ const holdStakes = (n: number): TestQuestStep => ({
   target: n,
   kind: 'stake',
 });
+/**
+ * Shards, counted and cumulative like the rest of the core. The ladder is sized
+ * to land on a CHIP: `CHIP_MINT_SHARD_COST` is 20 shards of a tier, a Bronze
+ * shard is 20 000 LC (or 1 ⭐) in the market, so the full run costs 400k of the
+ * ladder's own 1M LC — affordable, and it gives the last days something to build
+ * toward instead of one more "buy a shard" checkbox.
+ */
+const shards = (n: number): TestQuestStep => ({
+  labelKey: 'quest step buy shards',
+  target: n,
+  kind: 'market',
+});
 
 // Authored, real-only checklist per level (31 → 1). Every level carries the same
 // base — engine ticket · tournament spend · ads · invite/share · channel gate —
@@ -230,7 +244,11 @@ const TEST_QUEST_STEP_OVERRIDES: Record<number, TestQuestStep[]> = {
     share(5),
     invite(1),
     upgrade(3),
-    { labelKey: 'quest step setup profile', kind: 'profile' },
+    // Was "set up profile — avatar & nickname". Avatars are switched OFF in
+    // both repos (marker `AVATARS OFF`, back ~October) and `avatarUrl` is filled
+    // from `tg.photo_url` at first login anyway — so half the step promised a
+    // screen that does not exist and the other half completed itself.
+    { labelKey: 'quest step set nickname', kind: 'profile' },
     CHANNEL_GATE,
   ],
   // 27 · day 4 — engine-speed upgrade
@@ -239,25 +257,20 @@ const TEST_QUEST_STEP_OVERRIDES: Record<number, TestQuestStep[]> = {
   26: [spend(43), ads(22), share(8), upgrade(5), CHANNEL_GATE],
   // 25 · day 6
   25: [spend(52), ads(29), share(9), invite(2), upgrade(6), CHANNEL_GATE],
-  // 24 · day 7 — wallet + stars
+  // 24 · day 7 — wallet. Connecting is free; BUYING Lucky Stars is not — the
+  // smallest package is 1 TON (`starsPackages` in the backend economy config),
+  // so "swap TON for Lucky Stars" was a real-money step standing in a free
+  // 31-day checklist. Removed; the wallet connection stays.
   24: [
     spend(60),
     ads(36),
     share(11),
     upgrade(7),
     { labelKey: 'quest step connect wallet', kind: 'wallet' },
-    { labelKey: 'quest step swap ton', kind: 'wallet' },
     CHANNEL_GATE,
   ],
   // 23 · day 8
-  23: [
-    spend(68),
-    ads(43),
-    share(12),
-    upgrade(8),
-    { labelKey: 'quest step buy engine shard market', kind: 'market' },
-    CHANNEL_GATE,
-  ],
+  23: [spend(68), ads(43), share(12), upgrade(8), shards(2), CHANNEL_GATE],
   // 22 · day 9
   22: [spend(77), ads(51), share(14), invite(3), upgrade(9), CHANNEL_GATE],
   // 21 · day 10 — first stake
@@ -269,16 +282,8 @@ const TEST_QUEST_STEP_OVERRIDES: Record<number, TestQuestStep[]> = {
     { labelKey: 'quest step first stake', kind: 'stake' },
     CHANNEL_GATE,
   ],
-  // 20 · day 11 — Silver wall
-  20: [
-    spend(93),
-    ads(65),
-    share(17),
-    upgrade(11),
-    { labelKey: 'quest step reach silver', kind: 'status' },
-    { labelKey: 'quest step buy tier ticket market', kind: 'market' },
-    CHANNEL_GATE,
-  ],
+  // 20 · day 11 — the counted core only.
+  20: [spend(93), ads(65), share(17), upgrade(11), CHANNEL_GATE],
   // 19 · day 12
   19: [spend(102), ads(72), share(18), invite(4), upgrade(12), CHANNEL_GATE],
   // 18 · day 13
@@ -286,21 +291,17 @@ const TEST_QUEST_STEP_OVERRIDES: Record<number, TestQuestStep[]> = {
   // 17 · day 14
   17: [spend(118), ads(86), share(21), invite(5), upgrade(14), CHANNEL_GATE],
   // 16 · day 15
-  16: [
-    spend(127),
-    ads(93),
-    share(23),
-    upgrade(15),
-    { labelKey: 'quest step buy shard market', kind: 'market' },
-    CHANNEL_GATE,
-  ],
-  // 15 · day 16 — Gold wall
+  16: [spend(127), ads(93), share(23), upgrade(15), shards(8), CHANNEL_GATE],
+  // 15 · day 16 — stake hold. No status line here (or anywhere else in the
+  // checklist any more): AP tiers are TWO gates at once (points AND referrals),
+  // they move on the platform's own clock rather than the test's, and the test
+  // window cannot honestly promise any of them — Gold needs 1 650 AP + 5
+  // referrals, Platinum 5 900 + 10, against a 35 AP/day ceiling.
   15: [
     spend(135),
     ads(100),
     share(24),
     upgrade(16),
-    { labelKey: 'quest step reach gold', kind: 'status' },
     { labelKey: 'quest step keep active stake', kind: 'stake' },
     CHANNEL_GATE,
   ],
@@ -321,16 +322,11 @@ const TEST_QUEST_STEP_OVERRIDES: Record<number, TestQuestStep[]> = {
   11: [spend(168), ads(129), share(30), invite(7), upgrade(20), holdStakes(2), CHANNEL_GATE],
   // 10 · day 21
   10: [spend(177), ads(136), share(32), upgrade(21), CHANNEL_GATE],
-  // 9 · day 22 — Gold
-  9: [
-    spend(185),
-    ads(143),
-    share(33),
-    upgrade(22),
-    { labelKey: 'quest step keep gold', kind: 'status' },
-    { labelKey: 'quest step buy gold shard market', kind: 'market' },
-    CHANNEL_GATE,
-  ],
+  // 9 · day 22 — the shard run continues. The Gold status step and the Gold
+  // shard that depended on it are gone: Gold is 1 650 AP + 5 referrals, which by
+  // day 22 needs roughly half the entire one-time catalogue on top of a perfect
+  // daily baseline, and the market tier-gates the Gold shard behind that status.
+  9: [spend(185), ads(143), share(33), upgrade(22), shards(14), CHANNEL_GATE],
   // 8 · day 23
   8: [
     spend(193),
@@ -343,55 +339,41 @@ const TEST_QUEST_STEP_OVERRIDES: Record<number, TestQuestStep[]> = {
   ],
   // 7 · day 24
   7: [spend(202), ads(157), share(36), upgrade(24), CHANNEL_GATE],
-  // 6 · day 25 — new engine
+  // 6 · day 25 — the shard run completes: 20 shards is exactly one chip.
   6: [
     spend(210),
     ads(164),
     share(38),
     upgrade(25),
+    shards(20),
     { labelKey: 'quest step launch another engine', kind: 'engine' },
     CHANNEL_GATE,
   ],
   // 5 · day 26
   5: [spend(218), ads(172), share(39), invite(9), upgrade(26), CHANNEL_GATE],
-  // 4 · day 27 — Platinum + qualification
+  // 4 · day 27 — the counted core only. It used to carry "reach Platinum", which
+  // is UNREACHABLE inside the test by arithmetic rather than by effort (Platinum
+  // is 5 900 AP + 10 referrals, while 27 days of the full daily AP ceiling —
+  // 35/day ⇒ 945 — plus the ENTIRE one-time catalogue tops out around 2 538 AP);
+  // and a "crown qualification" line, which stated a state, not a task.
   4: [
     spend(227),
     ads(179),
     share(41),
     upgrade(27),
-    { labelKey: 'quest step reach platinum', kind: 'status' },
-    { labelKey: 'quest step crown qualified', kind: 'rank' },
+    { labelKey: 'quest step mint chip', kind: 'chip' },
+    { labelKey: 'quest step equip chip', kind: 'chip' },
     CHANNEL_GATE,
   ],
-  // 3 → 1 · crown — the base still counts daily; the crown itself is the
-  // competitive top (topmost climbers), decided at test end.
-  3: [
-    spend(235),
-    ads(186),
-    share(42),
-    upgrade(28),
-    { labelKey: 'quest step top 50', kind: 'rank' },
-    CHANNEL_GATE,
-  ],
-  2: [
-    spend(243),
-    ads(193),
-    share(44),
-    invite(10),
-    upgrade(29),
-    { labelKey: 'quest step top 10', kind: 'rank' },
-    CHANNEL_GATE,
-  ],
-  1: [
-    spend(250),
-    ads(200),
-    share(45),
-    invite(10),
-    upgrade(30),
-    { labelKey: 'quest step become first', kind: 'rank' },
-    CHANNEL_GATE,
-  ],
+  // 3 → 1 · crown — the counted core only. No placement lines here ("top 50",
+  // "top 10", "become #1"): the crown is ASSIGNED from the Founders leaderboard
+  // when the test is frozen, and `claim()` refuses every level below
+  // `config.qualifyLevel` outright — so a placement could never be a to-do.
+  3: [spend(235), ads(186), share(42), upgrade(28), CHANNEL_GATE],
+  2: [spend(243), ads(193), share(44), invite(10), upgrade(29), CHANNEL_GATE],
+  // 1 · crown — no referral count either: level 2 already asks for 10, so
+  // repeating it made the top level no harder than the one below it.
+  1: [spend(250), ads(200), share(45), upgrade(30), CHANNEL_GATE],
 };
 
 /**
