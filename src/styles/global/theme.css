@@ -5,11 +5,20 @@
      utility) — swap the next/font face there to change the font everywhere. The
      Space Grotesk display accent stays available via `var(--font-display)`. */
   /* Gilroy first, then the script faces it has no glyphs for, then the system.
-     The browser walks this list per CHARACTER, so Armenian and Arabic text
-     lands on Noto without anything having to know the player's language — and
-     a player who reads neither never fetches them (see index.fonts.ts). */
+     The browser walks this list per CHARACTER, so Armenian, Arabic and Georgian
+     text lands on Noto without anything having to know the player's language —
+     and a player who reads none of them never fetches them (see
+     index.fonts.ts).
+
+     `--font-schwa` is the one exception to "Gilroy first", and it has to be:
+     `var(--font-main)` expands to `gilroy, "gilroy Fallback"`, and that
+     generated fallback claims every codepoint — so anything Gilroy is missing
+     stops there and never reaches Noto. That face holds exactly `ə` and `Ə`
+     (Azerbaijani), so every other character misses in it and falls through to
+     Gilroy on the very next step. */
   --font-sans:
-    var(--font-main), var(--font-armenian), var(--font-arabic), ui-sans-serif, system-ui, sans-serif;
+    var(--font-schwa), var(--font-main), var(--font-armenian), var(--font-arabic),
+    var(--font-georgian), ui-sans-serif, system-ui, sans-serif;
 
   --color-bronze: rgba(172, 97, 34, 1);
   --color-silver: rgba(168, 170, 164, 1);

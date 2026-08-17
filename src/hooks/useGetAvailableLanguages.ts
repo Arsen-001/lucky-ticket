@@ -61,6 +61,12 @@ const LANGUAGE_PRESENTATION: Record<
   [Locale.CHINESE]: { nameKey: 'chinese', nativeName: '中文', flag: flags.china },
   [Locale.ARABIC]: { nameKey: 'arabic', nativeName: 'العربية', flag: flags.saudiArabia },
   [Locale.PERSIAN]: { nameKey: 'persian', nativeName: 'فارسی', flag: flags.iran },
+  [Locale.GEORGIAN]: { nameKey: 'georgian', nativeName: 'ქართული', flag: flags.georgia },
+  [Locale.AZERBAIJANI]: {
+    nameKey: 'azerbaijani',
+    nativeName: 'Azərbaycanca',
+    flag: flags.azerbaijan,
+  },
 };
 
 export function useGetAvailableLanguages() {

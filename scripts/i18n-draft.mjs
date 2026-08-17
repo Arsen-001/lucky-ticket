@@ -3,7 +3,7 @@
  * Two-locale workflow, kept committable.
  *
  * While a feature is still being decided, copy is written by hand in **en and
- * ru only** — translating a string into 18 languages and then changing the
+ * ru only** — translating a string into 20 languages and then changing the
  * wording twice is the same work done three times. But `tests/i18n.test.ts`
  * demands every dictionary hold the exact `en` key set, and the pre-commit hook
  * runs it, so an en+ru-only key cannot be committed at all.
@@ -14,7 +14,7 @@
  * the key is written to a ledger so the final translation pass knows exactly
  * what it owes.
  *
- *   node scripts/i18n-draft.mjs          fill the 16 + record what was filled
+ *   node scripts/i18n-draft.mjs          fill the 18 + record what was filled
  *   node scripts/i18n-draft.mjs --list   show what is waiting for translation
  *   node scripts/i18n-draft.mjs --check  exit 1 if anything is waiting
  *   node scripts/i18n-draft.mjs --clear  ledger is settled (after translating)
@@ -57,7 +57,7 @@ if (mode === '--clear') {
 if (mode === '--list' || mode === '--check') {
   const ru = readJson(resolve(messagesDir, 'ru.json'));
   if (ledger.keys.length === 0) {
-    console.log('nothing pending — all 18 locales are translated');
+    console.log('nothing pending — all 20 locales are translated');
     process.exit(0);
   }
   console.log(`${ledger.keys.length} key(s) waiting for the final translation pass:\n`);

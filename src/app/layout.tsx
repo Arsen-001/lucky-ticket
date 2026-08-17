@@ -19,7 +19,14 @@ import { TelegramLocaleSeed } from '@/components/telegram/TelegramLocaleSeed';
 import { TelegramBackButton } from '@/components/telegram/TelegramBackButton';
 import { DayjsLocaleProvider } from '@/providers/DayjsLocaleProvider';
 import { NextIntlClientProvider } from 'next-intl';
-import { gilroy, spaceGrotesk, notoArmenian, notoArabic } from '@/fonts/index.fonts';
+import {
+  gilroy,
+  spaceGrotesk,
+  notoArmenian,
+  notoArabic,
+  notoGeorgian,
+  notoSchwa,
+} from '@/fonts/index.fonts';
 import { getLocale } from 'next-intl/server';
 import { getAppTranslations } from '@/i18n/getAppTranslations';
 import { GlobalConstants } from '@/constants/global.constants';
@@ -106,7 +113,7 @@ export default async function RootLayout({ children }: ChildrenProps) {
       <html
         lang={locale}
         dir={localeDirection(locale)}
-        className={`${gilroy.variable} ${spaceGrotesk.variable} ${notoArmenian.variable} ${notoArabic.variable}`}
+        className={`${gilroy.variable} ${spaceGrotesk.variable} ${notoArmenian.variable} ${notoArabic.variable} ${notoGeorgian.variable} ${notoSchwa.variable}`}
         suppressHydrationWarning
       >
         <head>

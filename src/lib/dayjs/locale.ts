@@ -1,12 +1,14 @@
 import dayjs from 'dayjs';
 import type { Dayjs } from 'dayjs';
 import 'dayjs/locale/ar';
+import 'dayjs/locale/az';
 import 'dayjs/locale/de';
 import 'dayjs/locale/es';
 import 'dayjs/locale/fa';
 import 'dayjs/locale/fr';
 import 'dayjs/locale/hy-am';
 import 'dayjs/locale/ja';
+import 'dayjs/locale/ka';
 import 'dayjs/locale/kk';
 import 'dayjs/locale/ko';
 import 'dayjs/locale/ky';

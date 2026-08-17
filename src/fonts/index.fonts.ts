@@ -1,5 +1,10 @@
 import localFont from 'next/font/local';
-import { Space_Grotesk, Noto_Sans_Armenian, Noto_Sans_Arabic } from 'next/font/google';
+import {
+  Space_Grotesk,
+  Noto_Sans_Armenian,
+  Noto_Sans_Arabic,
+  Noto_Sans_Georgian,
+} from 'next/font/google';
 
 export const spaceGrotesk = Space_Grotesk({
   subsets: ['latin'],
@@ -110,4 +115,62 @@ export const notoArabic = Noto_Sans_Arabic({
   display: 'swap',
   preload: false,
   variable: '--font-arabic',
+});
+
+/**
+ * The two Latin letters Azerbaijani cannot be written without.
+ *
+ * Gilroy's cmap was read directly (fontTools over all seven woff2 faces): it
+ * carries the Turkish set — `ğ ı İ ş ç ö ü` — but it has **no `ə` and no `Ə`**
+ * (U+0259 / U+018F). Schwa is the single most common letter in Azerbaijani, so
+ * without a face that has it, every other word on screen carries one glyph in a
+ * different typeface.
+ *
+ * Three things here were settled by measuring, and each one killed a simpler
+ * version of this fix:
+ *
+ *  1. **A `latin-ext` subset on a Noto family does not reach it.** `next/font`
+ *     composes a family list as `gilroy, "gilroy Fallback", …` — the second is
+ *     the metric-adjusted local face it generates to hold layout while Gilroy
+ *     loads, and it claims EVERY codepoint. The browser stops there, so nothing
+ *     later in the stack is ever consulted for a glyph Gilroy is missing. On the
+ *     az screen at 100px, `ə` measured 58.07px against Noto's 44.39px: the
+ *     device's own font, not ours.
+ *  2. **So the face has to come first**, which is only safe if it holds nothing
+ *     else. `next/font/google` has no `text` option in this version (its
+ *     validator does not read one) and no way to set `unicode-range`, so the
+ *     file is subset here instead — two glyphs, 1.4 KB, from the Space Grotesk
+ *     the app already ships as its display face. `unicode-range` then keeps it
+ *     off every other character in the app.
+ *  3. **`adjustFontFallback: false` matters**, for the same reason as (1): with
+ *     the generated fallback family in place, this declaration sat in front of
+ *     Gilroy and swallowed Latin and Cyrillic with it (`a` measured 56.10px
+ *     against Gilroy's 63.60px).
+ *
+ * The source file is variable (wght 300–700), so the letter tracks the weight
+ * of the text around it rather than being synthesised bold.
+ */
+export const notoSchwa = localFont({
+  src: [{ path: './noto/SpaceGrotesk-Schwa.woff2', weight: '300 700', style: 'normal' }],
+  declarations: [{ prop: 'unicode-range', value: 'U+018F, U+0259' }],
+  display: 'swap',
+  preload: false,
+  adjustFontFallback: false,
+  variable: '--font-schwa',
+});
+
+/**
+ * Georgian script — the alphabet Gilroy has no glyphs for at all.
+ *
+ * Same two economies as the Armenian and Arabic faces above: `preload: false`
+ * so it is not requested on every route, and Google's `unicode-range` so the
+ * file is fetched only once a Georgian glyph actually renders. A Russian or
+ * German player never downloads a byte of it.
+ */
+export const notoGeorgian = Noto_Sans_Georgian({
+  subsets: ['georgian'],
+  weight: ['400', '500', '600', '700'],
+  display: 'swap',
+  preload: false,
+  variable: '--font-georgian',
 });

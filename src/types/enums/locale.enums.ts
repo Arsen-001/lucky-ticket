@@ -29,6 +29,8 @@ export enum Locale {
   CHINESE = 'zh',
   ARABIC = 'ar',
   PERSIAN = 'fa',
+  GEORGIAN = 'ka',
+  AZERBAIJANI = 'az',
 }
 
 /**
