@@ -70,8 +70,10 @@ export function ChipEquipModal({
           <h2 className="text-base font-extrabold text-white">{t('equip chip')}</h2>
           {chip && (
             <p className="text-pink-secondary mt-1 text-[12px] font-bold">
-              {t(chip.quality)} · {chip.type === 'speed' ? t('time') : t('capacity')} · Lvl{' '}
-              {chip.level} · {chipEffectLabel(chip, t)}
+              {/* `t('lv {level}')`, not a hardcoded "Lvl": the chip's own row
+                  says «Ур. 8» and this modal said «Lvl 8» about the same chip. */}
+              {t(chip.quality)} · {chip.type === 'speed' ? t('time') : t('capacity')} ·{' '}
+              {t('lv {level}', { level: chip.level })} · {chipEffectLabel(chip, t)}
             </p>
           )}
         </header>
