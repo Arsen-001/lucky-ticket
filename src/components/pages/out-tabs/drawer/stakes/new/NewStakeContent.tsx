@@ -22,6 +22,7 @@ import {
 import { ClientPortal } from '@/components/shared/ClientPortal';
 import { NewStakeHero } from '@/components/pages/out-tabs/drawer/stakes/new/NewStakeHero';
 import { NewStakeStickyCta } from '@/components/pages/out-tabs/drawer/stakes/new/NewStakeStickyCta';
+import { StakeConfirmModal } from '@/components/pages/out-tabs/drawer/stakes/new/StakeConfirmModal';
 import { StakeLevelsCompareModal } from '@/components/pages/out-tabs/drawer/stakes/new/StakeLevelsCompareModal';
 import { StakeOpenedModal } from '@/components/pages/out-tabs/drawer/stakes/new/StakeOpenedModal';
 import { StakesRewardsPreviewCard } from '@/components/pages/out-tabs/drawer/stakes/StakesRewardsPreviewCard';
@@ -76,6 +77,7 @@ export function NewStakeContent() {
   }, [searchParams, prefilled]);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [compareOpen, setCompareOpen] = useState(false);
+  const [confirmOpen, setConfirmOpen] = useState(false);
   const [openedSnapshot, setOpenedSnapshot] = useState<{
     amount: number;
     months: number;
@@ -147,15 +149,26 @@ export function NewStakeContent() {
   const starsBalance = me?.telegramStars ?? 0;
   const notEnoughStars = !stakeFee.free && starsBalance < stakeFee.fee;
 
-  const handleConfirm = async () => {
+  // The CTA no longer opens the stake — it asks. Locking LC for months is
+  // irreversible short of a Stars-priced cancellation, so the tap that spends
+  // and the tap that agrees to spend are two different taps.
+  const handleRequestConfirm = () => {
     if (deposit <= 0 || deposit > balance) return;
     if (notEnoughStars) {
       // The buy-Stars sheet, not a red line under the form. A shortfall the
       // screen can see before it asks must look the same as one the server
       // reports — and a refusal has to lead somewhere (see `useSpendFailure`).
+      // Asked before the confirmation sheet: a summary the player cannot act on
+      // is a dead end.
       spend.show('stars', { required: stakeFee.fee });
       return;
     }
+    setErrorMessage(null);
+    setConfirmOpen(true);
+  };
+
+  const handleConfirm = async () => {
+    if (deposit <= 0 || deposit > balance) return;
     setErrorMessage(null);
     const result = await startStake({
       // Sent for older-server compatibility; the server re-derives it from the
@@ -164,6 +177,9 @@ export function NewStakeContent() {
       amount: deposit,
       durationMonths,
     });
+    // Closed on both branches: the answer is either the "stake opened" sheet or
+    // a message under the CTA, and neither belongs behind this one.
+    setConfirmOpen(false);
     if ('data' in result && result.data?.success) {
       // The band and end date come back from the SERVER, which re-derived them
       // from the amount; the form's own guess is only the fallback for an older
@@ -275,7 +291,7 @@ export function NewStakeContent() {
               hint={ctaHint}
               balanceAfter={Math.max(0, balance - deposit)}
               loading={starting}
-              onConfirm={handleConfirm}
+              onConfirm={handleRequestConfirm}
               onBlocked={() => spend.show('coins', { required: deposit })}
             />
           </div>
@@ -286,6 +302,20 @@ export function NewStakeContent() {
         open={compareOpen}
         onClose={() => setCompareOpen(false)}
         levels={levels}
+      />
+
+      <StakeConfirmModal
+        open={confirmOpen}
+        onClose={() => setConfirmOpen(false)}
+        onConfirm={handleConfirm}
+        levelDef={activeLevel}
+        deposit={deposit}
+        durationMonths={durationMonths}
+        stakeFee={stakeFee.fee}
+        stakeFeeFree={stakeFee.free}
+        freeStartsRemaining={freeStartsRemaining}
+        balanceAfter={Math.max(0, balance - deposit)}
+        loading={starting}
       />
 
       {/* The local "not enough LC" modal was a second copy of the one

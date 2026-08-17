@@ -1,7 +1,10 @@
 {
   "keys": [
     "adds up",
+    "balance after",
     "chip level explainer",
+    "duration",
+    "early cancel costs {n} stars and revokes ap",
     "grand prize",
     "grand prize capacity {n}",
     "grand prize for level 1",
@@ -10,7 +13,10 @@
     "multipliers",
     "multipliers explained",
     "on every bronze engine forever",
+    "open this stake?",
     "quest step boost channel",
+    "stake fee",
+    "stake lock warning",
     "time chip explainer"
   ]
 }
