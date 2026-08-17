@@ -35,10 +35,14 @@ export function EngineBoostRow({ source, strongest, className }: EngineBoostRowP
   return (
     <li className={twMerge('flex items-center gap-2', className)}>
       <Icon size={13} stroke={color} strokeWidth={2.4} className="shrink-0" />
-      <span className="w-[92px] shrink-0 truncate text-[11px] font-bold text-white/70">
+      {/* The label takes what is left, the bar is FIXED — the other way round
+          (a fixed 92px label) is what shipped on 17.08.2026, and Russian read
+          «Уровень двиг…» / «Апгрейды ск…» on production. Bars must stay equal
+          to each other to be comparable; nothing says they must be wide. */}
+      <span className="min-w-0 flex-1 truncate text-[11px] font-bold text-white/70">
         {t(ENGINE_BOOST_LABEL_KEY[source.key])}
       </span>
-      <span className="bg-background h-1.5 flex-1 overflow-hidden rounded-full">
+      <span className="bg-background h-1.5 w-[60px] shrink-0 overflow-hidden rounded-full">
         <span
           className="block h-full rounded-full"
           style={{
@@ -52,7 +56,7 @@ export function EngineBoostRow({ source, strongest, className }: EngineBoostRowP
         />
       </span>
       {isMultiplier ? (
-        <span className="flex w-16 shrink-0 flex-col items-end gap-0.5 leading-none">
+        <span className="flex w-[52px] shrink-0 flex-col items-end gap-0.5 leading-none">
           <MultiplierBadge multiplier={source.multiplier ?? 1} size="sm" />
           {/* What the factor is worth HERE — the same number the arcs and the
               total are built from, kept quiet so it reads as the consequence of
@@ -62,7 +66,7 @@ export function EngineBoostRow({ source, strongest, className }: EngineBoostRowP
           </span>
         </span>
       ) : (
-        <span className="w-16 shrink-0 text-end text-[11px] font-black tabular-nums text-white">
+        <span className="w-[52px] shrink-0 text-end text-[11px] font-black tabular-nums text-white">
           +{Math.round(source.pct)}%
         </span>
       )}
