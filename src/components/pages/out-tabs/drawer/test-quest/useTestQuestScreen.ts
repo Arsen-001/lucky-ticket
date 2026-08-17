@@ -98,8 +98,10 @@ export function useTestQuestScreen() {
   for (const entry of data?.ladder ?? []) serverSteps[entry.level] = entry.steps;
 
   // What the already-claimed levels have banked per action — the highest
-  // cumulative target reached. Seeds every level's badges so progress carries
-  // over instead of resetting to 0 when the live counter is behind.
+  // cumulative target reached. A stand-in for the live counters, drawn only when
+  // the backend sends none (@see TestQuestSteps): it assumes a claimed level's
+  // tasks were done, and nothing enforces that, so it must never outrank a real
+  // counter.
   const baselines: Partial<Record<TestQuestAction, number>> = {};
   for (const card of cards) {
     if (!card.taken) continue;

@@ -51,7 +51,10 @@ export const referralApi = api.injectEndpoints({
         method: 'POST',
         body: { confirmed },
       }),
-      invalidatesTags: [rtkTags.referral],
+      // Also the test-quest: its «поделиться с друзьями» step counts these very
+      // shares, and the screen it lives on is a different route — without this
+      // tag the badge keeps serving the number cached before the share.
+      invalidatesTags: [rtkTags.referral, rtkTags.testQuest],
     }),
     claimFriend: builder.mutation<void, { friendId: string }>({
       query: ({ friendId }) => ({

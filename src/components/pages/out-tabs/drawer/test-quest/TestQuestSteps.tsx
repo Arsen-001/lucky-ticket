@@ -32,9 +32,9 @@ export interface TestQuestStepsProps {
   verifyingChannel?: boolean;
   /** Live cumulative progress → fills the countable steps' badges (display-only). */
   progress?: TestQuestProgress;
-  /** Per-action floor already banked from claimed levels, so a level's badge
-   *  carries over the prior levels' cumulative targets (e.g. after level 29's
-   *  "spend 11", level 28 starts at 11/16 instead of 0/16). */
+  /** Per-action total already banked by the claimed levels — used ONLY when
+   *  `progress` carries no live counter for that action (older backend), never
+   *  as a floor under one: it would pin the badge above the truth. */
   baselines?: Partial<Record<TestQuestAction, number>>;
   /** Lets a host merge the panel into its own card (drop the border/background). */
   className?: string;
@@ -69,15 +69,22 @@ export function TestQuestSteps({
   const steps = resolveTestQuestSteps(level, serverSteps);
   if (!steps.length) return null;
 
-  // Effective count for a countable step: the live counter, floored by what the
-  // claimed levels already banked, so progress continues across levels instead
-  // of resetting. `undefined` when the step has no live source at all.
-  const countFor = (action?: TestQuestAction): number | undefined => {
-    if (!action) return undefined;
-    const live = progress?.[action];
-    const floor = baselines?.[action];
-    return live != null || floor != null ? Math.max(live ?? 0, floor ?? 0) : undefined;
-  };
+  // Effective count for a countable step: the live counter when there is one,
+  // and only otherwise the floor banked by the claimed levels.
+  //
+  // It used to be `Math.max(live, floor)` — and that froze the badge. The ladder
+  // targets are cumulative LIFETIME totals, so the live counter already carries
+  // over between levels on its own; the floor added nothing but an assumption
+  // that claiming a level means having done its tasks. Nothing enforces that —
+  // the checklist is display-only and the claim is gated on the channel alone —
+  // so a player who claimed day 11 (share 15) with 10 real shares saw the badge
+  // pinned at 15/17 and unmoved by six more shares. Measured on @garmartikyan:
+  // referralSharesCount=10, level 20, badge stuck at 15.
+  //
+  // The floor stays as the fallback for a backend too old to send
+  // `stepProgress` at all, which is what it was introduced for.
+  const countFor = (action?: TestQuestAction): number | undefined =>
+    action ? (progress?.[action] ?? baselines?.[action]) : undefined;
 
   // The channel gate blocks the claim until the player is subscribed.
   const gateBlocked = steps.some(s => s.gate === 'channel') && !channelSubscribed;
