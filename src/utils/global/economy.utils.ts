@@ -22,18 +22,16 @@ export const engineDailyLcValue = (tier: TicketType): number =>
   engineTicketsPerDay(tier) * ticketEvLc(tier);
 
 /**
- * LC price of the next engine of a tier given how many the user already owns —
- * geometric repeat-purchase pricing: `base × growth^owned` (DOCS §14.2).
+ * LC price of an engine of a tier. Flat since 17.08.2026: the geometric
+ * repeat-purchase multiplier (`base × growth^owned`) was removed, so the
+ * tenth engine of a tier costs exactly what the first one did.
  */
-export const engineMarketPriceLc = (tier: TicketType, ownedCount: number): number =>
-  Math.round(
-    appConfig.economy.engineBasePriceLcByTier[tier] *
-      Math.pow(appConfig.economy.engineRepeatPriceGrowth, Math.max(0, ownedCount))
-  );
+export const engineMarketPriceLc = (tier: TicketType): number =>
+  appConfig.economy.engineBasePriceLcByTier[tier];
 
-/** Days for the next engine of a tier to pay itself back at perfect claims. */
-export const enginePaybackDays = (tier: TicketType, ownedCount = 0): number =>
-  engineMarketPriceLc(tier, ownedCount) / engineDailyLcValue(tier);
+/** Days for an engine of a tier to pay itself back at perfect claims. */
+export const enginePaybackDays = (tier: TicketType): number =>
+  engineMarketPriceLc(tier) / engineDailyLcValue(tier);
 
 /**
  * LS price equivalent of an LC amount at the USD anchors — the no-arbitrage

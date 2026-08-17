@@ -4,7 +4,6 @@ import { TicketsEnum } from '@/types/enums/ticket.enums';
 import type { InventoryChipType } from '@/types/interfaces/inventory.interfaces';
 import type { MarketData, MarketPrice } from '@/types/interfaces/market.interfaces';
 import type { TicketType } from '@/types/types/ticket.types';
-import { engineMarketPriceLc, lcPriceToLsParity } from '@/utils/global/economy.utils';
 
 /**
  * Fallback status (VIP > LP) discount percent from the code constants. Used only
@@ -117,26 +116,3 @@ export const sortMarketData = (data: MarketData): MarketData => ({
     (a, b) => statusRank(a.statusType) - statusRank(b.statusType) || a.id.localeCompare(b.id)
   ),
 });
-
-/**
- * Full price pair (LC + parity LS) for a player's **next** engine of a tier,
- * with the status discount applied — the single source the Market uses to price
- * an engine purchase.
- *
- * Implements the geometric repeat-purchase pricing from DOCS §14.2: the n-th
- * engine of a tier costs `base × engineRepeatPriceGrowth^owned` (the
- * anti-inflation valve). `owned` is how many engines of the tier the player
- * already holds; the LS amount tracks the LC amount at USD parity.
- */
-export const engineNextPurchasePrices = (
-  tier: TicketType,
-  owned: number,
-  discountPct: number
-): MarketPrice[] => {
-  const lc = engineMarketPriceLc(tier, owned);
-  const base: MarketPrice[] = [
-    { type: MarketPriceType.LC, amount: lc },
-    { type: MarketPriceType.TELEGRAM_STARS, amount: lcPriceToLsParity(lc) },
-  ];
-  return applyStatusMarketDiscount(base, discountPct);
-};

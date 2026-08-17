@@ -64,13 +64,16 @@ describe('economy edges', () => {
     }
   });
 
-  it('repeat pricing grows geometrically and stays a real number', () => {
-    const growth = appConfig.economy.engineRepeatPriceGrowth;
-    const first = engineMarketPriceLc('bronze', 0);
-    expect(engineMarketPriceLc('bronze', 1)).toBeCloseTo(first * growth, 5);
-    expect(engineMarketPriceLc('bronze', 3)).toBeCloseTo(first * growth ** 3, 5);
-    // Nobody owns 200 engines, but the price must not become Infinity if they do.
-    expect(Number.isFinite(engineMarketPriceLc('bronze', 200))).toBe(true);
+  it('engine pricing is flat — owning ten does not change what the eleventh costs', () => {
+    // The geometric repeat multiplier was removed on 17.08.2026: the price of
+    // an engine is its catalog price, full stop. This test exists so the valve
+    // cannot creep back in through a helper that takes an owned count again.
+    for (const tier of TIERS) {
+      expect(engineMarketPriceLc(tier), `${tier} price`).toBe(
+        appConfig.economy.engineBasePriceLcByTier[tier]
+      );
+    }
+    expect(engineMarketPriceLc.length, 'engineMarketPriceLc takes tier only').toBe(1);
   });
 
   it('the LS parity price never rounds a paid item down to free', () => {

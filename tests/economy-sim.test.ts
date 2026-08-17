@@ -25,7 +25,6 @@ import {
   MAX_BOOST_LEVEL,
   MAX_ENGINE_LEVEL,
 } from '@/utils/global/ticket-engine.utils';
-import { engineNextPurchasePrices } from '@/utils/global/market.utils';
 import { equippedAvatarEngineSpeedPct } from '@/utils/global/avatar.utils';
 import { marketMock } from '@/mock/market.mock';
 import { avatarsMock } from '@/mock/avatars.mock';
@@ -79,16 +78,13 @@ const oneTimeCatalogAp = (): number | null => {
  * loop that must never become a money printer.
  */
 interface SimKnobs {
-  /** LC price of the first engine per tier. */
+  /** LC price of an engine per tier — flat, the same for every purchase. */
   basePriceByTier: Record<TicketType, number>;
-  /** Geometric repeat-purchase growth (1 = flat legacy pricing). */
-  repeatGrowth: number;
   /** LC value one engine mints per day at perfect claims. */
   dailyValueByTier: Record<TicketType, number>;
 }
 
-const priceOf = (knobs: SimKnobs, tier: TicketType, owned: number): number =>
-  Math.round(knobs.basePriceByTier[tier] * Math.pow(knobs.repeatGrowth, owned));
+const priceOf = (knobs: SimKnobs, tier: TicketType): number => knobs.basePriceByTier[tier];
 
 interface SimResult {
   /** Daily LC production value at the end of each simulated day (1-indexed). */
@@ -139,15 +135,15 @@ const simulateGreedyYear = (knobs: SimKnobs, days = 365, startingAp = 0): SimRes
       let best: { tier: TicketType; price: number; payback: number } | null = null;
       for (let i = 0; i <= unlockedIdx && i < TIERS.length; i++) {
         const tier = TIERS[i];
-        const price = priceOf(knobs, tier, owned[tier]);
+        const price = priceOf(knobs, tier);
         const payback = price / knobs.dailyValueByTier[tier];
         if (payback > days - day) continue;
         if (!best || payback < best.payback) best = { tier, price, payback };
       }
       if (!best || lc < best.price) break;
-      // Flat legacy pricing never changes the price, so buy the whole batch at
-      // once — one-at-a-time would loop forever once production explodes.
-      const count = knobs.repeatGrowth === 1 ? Math.floor(lc / best.price) : 1;
+      // The price never changes, so buy the whole affordable batch at once —
+      // one-at-a-time would loop forever once production explodes.
+      const count = Math.floor(lc / best.price);
       lc -= best.price * count;
       owned[best.tier] += count;
     }
@@ -159,33 +155,9 @@ const simulateGreedyYear = (knobs: SimKnobs, days = 365, startingAp = 0): SimRes
 /** Knobs as currently configured — what the app actually ships. */
 const configuredKnobs = (): SimKnobs => ({
   basePriceByTier: appConfig.economy.engineBasePriceLcByTier,
-  repeatGrowth: appConfig.economy.engineRepeatPriceGrowth,
   dailyValueByTier: Object.fromEntries(
     TIERS.map(tier => [tier, engineDailyLcValue(tier)])
   ) as Record<TicketType, number>,
-});
-
-/**
- * The pre-rebalance economy: flat engine prices (no repeat growth) at the old
- * mock ladder. Kept as a pinned counter-example — it must keep FAILING the
- * inflation bound, documenting why `engineRepeatPriceGrowth` exists.
- */
-/**
- * The same shipped prices, but with the repeat-purchase growth switched OFF —
- * which is what "flat pricing" means and what this file exists to disprove.
- *
- * The prices used to be hard-coded historical literals (800k … 20M). That made
- * the test a hostage of unrelated tuning: when engine cycles and prices were
- * re-fitted on 16.08.2026 the frozen literals stopped matching the shipped
- * daily value, the simulated player could no longer afford the second engine,
- * and the runaway this test is supposed to demonstrate quietly stopped
- * happening — the test failed while nothing was wrong with the guard it
- * protects. Reading the live prices keeps the comparison honest: same prices,
- * one knob different.
- */
-const legacyFlatKnobs = (): SimKnobs => ({
-  ...configuredKnobs(),
-  repeatGrowth: 1,
 });
 
 const baseEngine = (over: Partial<TicketEngine>): TicketEngine =>
@@ -201,12 +173,12 @@ const baseEngine = (over: Partial<TicketEngine>): TicketEngine =>
 
 describe('economy simulation (DOCS §14.2 guardrails)', () => {
   it('early game hooks: the first Bronze engine pays back within a week', () => {
-    expect(enginePaybackDays('bronze', 0)).toBeGreaterThanOrEqual(3);
-    expect(enginePaybackDays('bronze', 0)).toBeLessThanOrEqual(7);
+    expect(enginePaybackDays('bronze')).toBeGreaterThanOrEqual(3);
+    expect(enginePaybackDays('bronze')).toBeLessThanOrEqual(7);
   });
 
   it('tier ladder is monotone: each tier’s first engine pays back slower, all within 3–30 days', () => {
-    const paybacks = TIERS.map(tier => enginePaybackDays(tier, 0));
+    const paybacks = TIERS.map(tier => enginePaybackDays(tier));
     for (let i = 0; i < paybacks.length; i++) {
       expect(paybacks[i], `${TIERS[i]} payback`).toBeGreaterThanOrEqual(3);
       expect(paybacks[i], `${TIERS[i]} payback`).toBeLessThanOrEqual(30);
@@ -215,54 +187,39 @@ describe('economy simulation (DOCS §14.2 guardrails)', () => {
     }
   });
 
-  it('repeat-purchase pricing is geometric with growth ≥ 1.3', () => {
-    // 1.35 since 17.08.2026 (was 1.6, and this floor was 1.5). The floor is not
-    // where the inflation guard lives — that is the year-long sim below, which
-    // still holds at 1.35. What 1.6 broke was the OTHER half of the economy:
-    // the tenth engine cost 687⭐ and the upgrade ladder was a dead buy past
-    // the fourth engine. At 1.35 engines and upgrades stay comparable through
-    // ten engines (the tenth is 149⭐, and pays back in ~60 days like a
-    // level-20 speed tap does).
-    const growth = appConfig.economy.engineRepeatPriceGrowth;
-    expect(growth).toBeGreaterThanOrEqual(1.3);
+  it('engine pricing is flat: every engine of a tier costs the catalog price', () => {
+    // The geometric repeat-purchase multiplier was removed on 17.08.2026 by
+    // product decision — see the note on the year-long simulation below for
+    // what that costs. Nothing in the app may re-derive an engine price from
+    // an owned count: the Market renders the catalog price the server charges.
     for (const tier of TIERS) {
-      const base = engineMarketPriceLc(tier, 0);
-      expect(engineMarketPriceLc(tier, 5) / base).toBeCloseTo(Math.pow(growth, 5), 0);
+      expect(engineMarketPriceLc(tier), `${tier} price`).toBe(
+        appConfig.economy.engineBasePriceLcByTier[tier]
+      );
+      // LS side stays at USD parity with that same flat LC price.
+      expect(lcPriceToLsParity(engineMarketPriceLc(tier)), `${tier} LS parity`).toBe(
+        lcPriceToLsParity(appConfig.economy.engineBasePriceLcByTier[tier])
+      );
     }
   });
 
-  it('the Market prices the next engine at the geometric repeat price (not the flat base)', () => {
-    // Guards the integration, not just the helper: this is the exact function
-    // `MarketEngineSection` now calls to price a purchase. Before the fix the
-    // section charged the flat catalog base regardless of owned count, so the
-    // anti-inflation valve never fired in the live app (audit finding H1).
-    const growth = appConfig.economy.engineRepeatPriceGrowth;
-    for (const tier of TIERS) {
-      const lcAt = (owned: number) =>
-        engineNextPurchasePrices(tier, owned, 0).find(p => p.type === MarketPriceType.LC)!.amount;
-      // First engine == the catalog base; third engine == base × growth².
-      expect(lcAt(0), `${tier} first`).toBe(appConfig.economy.engineBasePriceLcByTier[tier]);
-      expect(lcAt(2) / lcAt(0), `${tier} 3rd/1st`).toBeCloseTo(growth ** 2, 0);
-      // LS tracks the repeat LC amount at USD parity — no cross-currency arb.
-      const third = engineNextPurchasePrices(tier, 2, 0);
-      const thirdLc = third.find(p => p.type === MarketPriceType.LC)!.amount;
-      const thirdLs = third.find(p => p.type === MarketPriceType.TELEGRAM_STARS)!.amount;
-      expect(thirdLs, `${tier} LS parity`).toBe(lcPriceToLsParity(thirdLc));
-    }
-  });
-
-  it('no money printer: a year of perfect greedy free play stays inside the inflation bound', () => {
-    /**
-     * Both ends of the AP gate, not just the slow one.
-     *
-     * This assertion ran for months against `startingAp = 0` — a player who
-     * earns nothing but the daily baseline. That is not the player the catalog
-     * describes: the one-time tasks hold enough AP to clear Silver outright and
-     * very nearly Gold, so the real gate opens far sooner than the sim assumed,
-     * and "conservative" was pointing the wrong way. Banking the whole catalog
-     * on day 1 is the fastest the gate can possibly open; the truth sits
-     * between, and the bound has to hold at both ends.
-     */
+  /**
+   * ⚠️ THIS IS NO LONGER A GUARD — it is a pinned measurement.
+   *
+   * Until 17.08.2026 the geometric repeat price (`base × 1.35^owned`) held a
+   * perfectly-played free year to ≈×5 growth in daily LC production, and the
+   * test right below this one proved that flat pricing instead compounds by
+   * six orders of magnitude. The valve was then removed by product decision:
+   * every engine of a tier costs the same, so each engine buys the next one
+   * sooner and the park grows without a price brake.
+   *
+   * What still bounds the player: the AP tier gate (DOCS §14.1) delays higher
+   * tiers, and withdrawal is separately capped (DOCS §14.2). The LC faucet
+   * itself is not bounded any more, so this number is here to be LOOKED at —
+   * if a price or an engine output changes, the diff on this figure is the
+   * fastest way to see what it did to the whole economy.
+   */
+  it('flat pricing compounds: a perfectly-played free year, measured', () => {
     const catalogAp = oneTimeCatalogAp();
     const starts = catalogAp === null ? [0] : [0, catalogAp];
 
@@ -270,24 +227,14 @@ describe('economy simulation (DOCS §14.2 guardrails)', () => {
       const { productionByDay } = simulateGreedyYear(configuredKnobs(), 365, startingAp);
       const p30 = productionByDay[29];
       const p365 = productionByDay[364];
-      // Sub-exponential growth: the whole back-335-days multiple stays small.
-      // (At the shipped knobs the sim lands at ≈×5 — ≈470k → ≈2.37M LC/day.)
-      expect(p365 / p30, `growth at startingAp=${startingAp}`).toBeLessThanOrEqual(25);
-      // Absolute faucet bound: even a perfect player mints a bounded LC value
-      // (≈$2.37/day at the shipped scale — real withdrawal is separately capped
-      // at $10/day, DOCS §14.2). A loose sanity ceiling, not a tight target.
-      expect(
-        p365 * appConfig.wallet.lcUsdRate,
-        `faucet at startingAp=${startingAp}`
-      ).toBeLessThanOrEqual(50_000);
+      const orders = Math.log10(p365 / p30);
+      console.log(
+        `[economy-sim] startingAp=${startingAp}: day30 ${Math.round(p30).toLocaleString('en-US')} LC/day → day365 ${Math.round(p365).toLocaleString('en-US')} LC/day (×10^${orders.toFixed(1)})`
+      );
+      expect(Number.isFinite(p365), `finite at startingAp=${startingAp}`).toBe(true);
+      expect(p365, `grows at startingAp=${startingAp}`).toBeGreaterThan(p30);
+      expect(orders, `orders of magnitude at startingAp=${startingAp}`).toBeGreaterThan(0);
     }
-  });
-
-  it('legacy flat pricing WAS a money printer (why engineRepeatPriceGrowth exists)', () => {
-    const { productionByDay } = simulateGreedyYear(legacyFlatKnobs());
-    const p30 = productionByDay[29];
-    const p365 = productionByDay[364];
-    expect(p365 / p30).toBeGreaterThan(1_000_000); // unmistakably exponential
   });
 
   it('paid capacity levels add +1 ticket each: maxed = 11 tickets/cycle at level 1', () => {

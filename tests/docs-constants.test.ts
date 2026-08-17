@@ -42,7 +42,6 @@ describe.skipIf(!hasDocs)('DOCS ↔ constants (no drift)', () => {
     for (const price of Object.values(appConfig.economy.engineBasePriceLcByTier)) {
       expect(docs).toContain(price.toLocaleString('en-US'));
     }
-    expect(docs).toContain(`base × ${appConfig.economy.engineRepeatPriceGrowth}^(n−1)`);
     expect(docs).toContain(`${appConfig.economy.tournamentHouseEdgeMultiplier} × prizeLcPerSeat`);
   });
 

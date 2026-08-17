@@ -598,7 +598,6 @@
     BASE.push(BASE[l] + MAX + FULL_BONUS[l]); // → 1, 12, 27, 47, 72
     LEVEL_SPEED.push(LEVEL_SPEED[l] + MAX * SPEED_PER_CLICK + FULL_SPEED[l]); // → 0, 35, 120, 265, 475
   }
-  const ENGINE_GROWTH = 1.35;
   const tier = () => TIERS[state.tier];
   const TIER_CYCLE = () => tier().cycle;
   const ENGINE_BASE = () => Math.round(tier().engineLc / LC_PER_STAR); // 10 · 18 · 34 · 59 · 113 ⭐
@@ -632,7 +631,8 @@
   const rate = (e, bare = false) => capacity(e) / (cycleSec(e, bare) / 3600);
   const priceSpeed = e => (1 + e.speed + (e.level - 1)) * tier().mult;
   const priceCap = e => (2 + e.cap + (e.level - 1)) * tier().mult;
-  const priceEngine = n => Math.round(ENGINE_BASE() * Math.pow(ENGINE_GROWTH, n - 1));
+  // Цена движка плоская с 17.08.2026: десятый стоит столько же, сколько первый.
+  const priceEngine = () => ENGINE_BASE();
 
   const fmtCycle = sec => {
     const h = Math.floor(sec / 3600);
@@ -688,9 +688,7 @@
     document.getElementById('c-tier').textContent = T.name;
     document.getElementById('h-mult').textContent = T.mult;
     document.getElementById('h-full').textContent = 800 * T.mult;
-    document.getElementById('h-engines').textContent = [1, 2, 3, 4, 5, 6]
-      .map(n => priceEngine(n))
-      .join(' · ');
+    document.getElementById('h-engines').textContent = `${priceEngine()} ⭐ за любой (цена не растёт)`;
     document.getElementById('c-title').textContent = `Двигатель #${state.cur + 1}`;
     document.getElementById('c-level').textContent =
       `уровень ${e.level}${maxed && topLevel ? ' · максимум' : ''}`;
@@ -726,7 +724,7 @@
     document.getElementById('buy-cap').disabled = cMax;
     document.getElementById('p-speed').textContent = sMax ? 'полна' : `${priceSpeed(e)} ⭐`;
     document.getElementById('p-cap').textContent = cMax ? 'полна' : `${priceCap(e)} ⭐`;
-    document.getElementById('p-engine').textContent = `${priceEngine(state.engines.length + 1)} ⭐`;
+    document.getElementById('p-engine').textContent = `${priceEngine()} ⭐`;
 
     const pr = document.getElementById('promote');
     pr.hidden = !(maxed && !topLevel);
@@ -837,12 +835,12 @@
   };
   const buyEngine = () => {
     const n = state.engines.length + 1;
-    const price = priceEngine(n);
+    const price = priceEngine();
     state.spent += price;
     state.engines.push({ level: 1, speed: 0, cap: 0 });
     state.cur = state.engines.length - 1;
     pushLog(
-      `🟫 <b>куплен движок #${n}</b> за ${price} ⭐ · следующий будет ${priceEngine(n + 1)} ⭐`,
+      `🟫 <b>куплен движок #${n}</b> за ${price} ⭐ · следующий столько же`,
       true
     );
     pulse();

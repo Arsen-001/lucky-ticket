@@ -207,14 +207,6 @@ export const appConfig = {
       diamond: 2_250_000,
     },
     /**
-     * Geometric repeat-purchase pricing: the n-th engine of a tier costs
-     * `base × growth^(n-1)`. This is the core anti-inflation valve — it turns
-     * exponential engine-spam growth into logarithmic growth and makes the
-     * next tier's first engine the rational buy after ~3 repeats of the
-     * previous tier.
-     */
-    engineRepeatPriceGrowth: 1.35,
-    /**
      * LS cost of the permanent per-engine upgrades (paid in Lucky Stars). Cost
      * rises with the boost sub-level AND the engine level, then scales by tier —
      * each engine level adds `perEngineLevel` to every price, and the whole cost

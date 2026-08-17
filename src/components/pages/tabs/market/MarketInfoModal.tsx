@@ -131,10 +131,10 @@ export function MarketInfoModal({ open, item, onClose, onBuy }: MarketInfoModalP
 /**
  * What the discount is worth in coins, under the price it applies to.
  *
- * The percentage alone under-sells the perk on this catalog: a repeat-purchase
- * engine costs millions, so "−2%" reads as rounding while the same cut is
- * 270,000 LC. Stated in the currency of the price it sits under, so an LC
- * saving is never read as stars.
+ * The percentage alone under-sells the perk on this catalog: a Diamond engine
+ * costs 2.25M LC, so "−2%" reads as rounding while the same cut is 45,000 LC.
+ * Stated in the currency of the price it sits under, so an LC saving is never
+ * read as stars.
  */
 function PriceSaving({ price }: { price: MarketPrice }) {
   const t = useAppTranslations();

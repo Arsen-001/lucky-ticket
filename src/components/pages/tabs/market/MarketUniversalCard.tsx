@@ -162,7 +162,7 @@ export function MarketUniversalCard({
           ) : prices && prices.length > 0 ? (
             // Wraps instead of squeezing: two prices share a row while they fit
             // (a ticket's "673"), and stack full-width the moment they don't (a
-            // repeat-purchase engine's "13.74M 13.47M"). Half a card is 67px on
+            // Diamond engine's "2.25M 2.21M"). Half a card is 67px on
             // a 390px phone — a discounted million-scale price needs 84px, and
             // side-by-side that difference came out as the LC coin printed over
             // the last digits.
