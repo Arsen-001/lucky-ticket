@@ -18,6 +18,7 @@ import { ChipInfoSheet } from './ChipInfoSheet';
 import { InventoryBonusTile } from './InventoryBonusTile';
 import { InventoryBoosterItem } from './InventoryBoosterItem';
 import { InventoryChipWorkbench } from './InventoryChipWorkbench';
+import { InventoryLoadingRows } from './InventoryLoadingRows';
 import {
   InventoryFilterBar,
   emptyInventoryFilters,
@@ -72,11 +73,13 @@ export function InventoryScreen({
           <InventoryBonusTile
             type="speed"
             stats={inventoryTypeStats(slots, 'speed')}
+            loading={isLoading}
             onInfo={setInfo}
           />
           <InventoryBonusTile
             type="capacity"
             stats={inventoryTypeStats(slots, 'capacity')}
+            loading={isLoading}
             onInfo={setInfo}
           />
         </div>
@@ -98,7 +101,7 @@ export function InventoryScreen({
               title: (
                 <span className="flex items-center justify-center gap-1.5">
                   {t('chips')}
-                  <span className="tabular-nums opacity-70">{chips.length}</span>
+                  {!isLoading && <span className="tabular-nums opacity-70">{chips.length}</span>}
                   {readyCount > 0 && (
                     <span className="bg-gold/20 text-gold rounded-full px-1.5 text-[10px] font-extrabold tabular-nums">
                       {readyCount}↑
@@ -112,7 +115,7 @@ export function InventoryScreen({
               title: (
                 <span className="flex items-center justify-center gap-1.5">
                   {t('boosters')}
-                  <span className="tabular-nums opacity-70">{boosters.length}</span>
+                  {!isLoading && <span className="tabular-nums opacity-70">{boosters.length}</span>}
                 </span>
               ),
             },
@@ -122,11 +125,14 @@ export function InventoryScreen({
         <InventoryFilterBar
           items={isBoosters ? boosters : chips}
           value={filters}
+          loading={isLoading}
           onChange={setFilters}
         />
       </div>
 
-      {isBoosters ? (
+      {isLoading ? (
+        <InventoryLoadingRows />
+      ) : isBoosters ? (
         visibleBoosters.length === 0 ? (
           <div className="flex flex-col items-center gap-2 rounded-2xl border border-white/8 bg-black/25 p-6 text-center">
             <Zap size={36} className="text-electric-purple" />
@@ -141,6 +147,7 @@ export function InventoryScreen({
                 key={booster.id}
                 booster={booster}
                 index={index}
+                engineNumber={slots.find(slot => slot.id === booster.activeOnEngineId)?.number}
                 onActivate={onActivateBooster}
               />
             ))}

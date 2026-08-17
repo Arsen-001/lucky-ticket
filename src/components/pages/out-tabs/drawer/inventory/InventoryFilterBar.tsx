@@ -29,6 +29,8 @@ export interface InventoryFilterBarProps {
    *  collection, deliberately not of the current selection. */
   items: { type: InventoryChipType; quality: TicketType }[];
   value: InventoryFilters;
+  /** Drops every pill's count while the collection is in flight. */
+  loading?: boolean;
   onChange: (next: InventoryFilters) => void;
 }
 
@@ -38,18 +40,26 @@ export interface InventoryFilterBarProps {
  * the number of items behind it, and a second tap on a pill clears it — no trip
  * back to "All" to undo a filter.
  */
-export function InventoryFilterBar({ items, value, onChange }: InventoryFilterBarProps) {
+export function InventoryFilterBar({
+  items,
+  value,
+  loading = false,
+  onChange,
+}: InventoryFilterBarProps) {
   const t = useAppTranslations();
   const nothingSelected = value.types.length === 0 && value.tiers.length === 0;
 
   const toggle = <T,>(list: T[], entry: T): T[] =>
     list.includes(entry) ? list.filter(e => e !== entry) : [...list, entry];
 
+  const countOf = (predicate: (item: (typeof items)[number]) => boolean) =>
+    loading ? undefined : items.filter(predicate).length;
+
   return (
     <div className="scrollbar-hidden -mx-5 flex items-center gap-2 overflow-x-auto px-5 py-1">
       <InventoryFilterFlag
         label={t('all')}
-        count={items.length}
+        count={loading ? undefined : items.length}
         active={nothingSelected}
         onClick={() => onChange(emptyInventoryFilters)}
       />
@@ -60,7 +70,7 @@ export function InventoryFilterBar({ items, value, onChange }: InventoryFilterBa
         <InventoryFilterFlag
           key={type}
           label={type === 'speed' ? t('time') : t('capacity')}
-          count={items.filter(i => i.type === type).length}
+          count={countOf(i => i.type === type)}
           active={value.types.includes(type)}
           accent={TYPE_ACCENT[type]}
           Icon={CHIP_TYPE_ICON[type]}
@@ -74,7 +84,7 @@ export function InventoryFilterBar({ items, value, onChange }: InventoryFilterBa
         <InventoryFilterFlag
           key={tier}
           label={t(tier as Parameters<Dictionary>[0])}
-          count={items.filter(i => i.quality === tier).length}
+          count={countOf(i => i.quality === tier)}
           active={value.tiers.includes(tier)}
           accent={QUALITY_ACCENT[tier]}
           onClick={() => onChange({ ...value, tiers: toggle(value.tiers, tier) })}

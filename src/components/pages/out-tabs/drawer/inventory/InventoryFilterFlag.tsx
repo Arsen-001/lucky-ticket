@@ -5,7 +5,9 @@ import { twMerge } from 'tailwind-merge';
 
 export interface InventoryFilterFlagProps {
   label: string;
-  count: number;
+  /** Omitted while the collection is still loading — a "0" caption on every
+   *  pill reads as an answer, and it is the wrong one. */
+  count?: number;
   active: boolean;
   /** Tier/type colour. Drives the dot, the active fill and the glow. */
   accent?: string;
@@ -42,6 +44,7 @@ export function InventoryFilterFlag({
           ? 'text-white'
           : 'text-white-secondary border-transparent bg-white/5 hover:bg-white/10',
         count === 0 && !active && 'opacity-50',
+        count === undefined && 'opacity-60',
         className
       )}
       style={
@@ -66,7 +69,7 @@ export function InventoryFilterFlag({
         />
       ) : null}
       <span>{label}</span>
-      <span className="tabular-nums opacity-70">{count}</span>
+      {typeof count === 'number' && <span className="tabular-nums opacity-70">{count}</span>}
     </button>
   );
 }

@@ -60,7 +60,17 @@ export function BoosterActivateModal({
           })}
         </p>
 
-        <div className="mt-3 flex flex-col gap-2">
+        {/* The list scrolls, not the card — the same fix `ChipEquipModal` got
+            and this one did not: nine Bronze engines pushed the timing note off
+            the panel's bottom edge and cut the last engine in half, so the
+            player saw a list with no visible end and no note. */}
+        <div
+          className={twMerge(
+            'mt-3 flex flex-col gap-2',
+            matchingEngines.length > 4 &&
+              'scrollbar-hidden scroll-fade-bottom max-h-[38vh] overflow-y-auto'
+          )}
+        >
           {matchingEngines.length === 0 ? (
             <p className="text-xs text-white/55">{t('no matching tier engines')}</p>
           ) : (

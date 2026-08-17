@@ -1,6 +1,6 @@
 'use client';
 
-import { Timer } from 'lucide-react';
+import { Cpu, Timer } from 'lucide-react';
 import { twMerge } from 'tailwind-merge';
 import { Button } from '@/components/shared/buttons/Button';
 import { BoosterIcon } from '@/components/shared/icons/BoosterIcon';
@@ -14,10 +14,17 @@ import { staggerMs } from '@/utils/global/animation.utils';
 export interface InventoryBoosterItemProps {
   booster: InventoryBooster;
   index: number;
+  /** 1-based number of the engine it is running on, when it is running. */
+  engineNumber?: number;
   onActivate?: (booster: InventoryBooster) => void;
 }
 
-export function InventoryBoosterItem({ booster, index, onActivate }: InventoryBoosterItemProps) {
+export function InventoryBoosterItem({
+  booster,
+  index,
+  engineNumber,
+  onActivate,
+}: InventoryBoosterItemProps) {
   const t = useAppTranslations();
   const { leftTime, expired } = useCountDown(booster.expiresAt);
   const TypeMarker = CHIP_TYPE_ICON[booster.type];
@@ -62,6 +69,17 @@ export function InventoryBoosterItem({ booster, index, onActivate }: InventoryBo
               {t('active')}
             </span>
           )}
+          {/* WHERE it runs — the chip rows have said this since they got engine
+              numbers, and a booster that only said "active" left the player to
+              guess which of twenty engines it was spending itself on. */}
+          {isActive && engineNumber && (
+            <span
+              className="flex items-center gap-0.5 whitespace-nowrap text-[9px] font-bold uppercase tracking-wider"
+              style={{ color: accent }}
+            >
+              <Cpu size={10} strokeWidth={2.6} />#{engineNumber}
+            </span>
+          )}
         </div>
         <span className="mt-0.5 flex items-center gap-1 text-[10px] font-bold uppercase tracking-wider text-white/55">
           <Timer size={11} strokeWidth={2.4} />
@@ -75,11 +93,19 @@ export function InventoryBoosterItem({ booster, index, onActivate }: InventoryBo
         </span>
       </div>
 
-      <div className="shrink-0">
-        <Button onClick={() => onActivate?.(booster)} className={twMerge('px-3 py-2 text-[11px]')}>
-          {t('activate')}
-        </Button>
-      </div>
+      {/* No button while it runs: a booster is one-shot and cannot be moved or
+          restarted (DOCS §10.6). The server refuses a second activation, so
+          offering it here was a button whose only outcome was an error. */}
+      {!isActive && (
+        <div className="shrink-0">
+          <Button
+            onClick={() => onActivate?.(booster)}
+            className={twMerge('px-3 py-2 text-[11px]')}
+          >
+            {t('activate')}
+          </Button>
+        </div>
+      )}
     </div>
   );
 }

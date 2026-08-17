@@ -175,7 +175,15 @@ export const inventoryChipsMock = inventoryState.chips;
 export const inventoryShardsMock = inventoryState.shards;
 export const inventoryBoostersMock = inventoryState.boosters;
 
-const getInventoryHandler = () => inventoryState;
+// A booster runs its window once and is gone (DOCS §10.6) — the server filters
+// spent ones out of the snapshot, so dev has to as well or the screen shows a
+// row production would not.
+const getInventoryHandler = () => ({
+  ...inventoryState,
+  boosters: inventoryState.boosters.filter(
+    b => !b.expiresAt || new Date(b.expiresAt).getTime() > Date.now()
+  ),
+});
 
 const equipChipHandler = (args: FetchArgs) => {
   const body = (args.body ?? {}) as { chipId?: string; engineId?: string };
@@ -299,6 +307,8 @@ const activateBoosterHandler = (args: FetchArgs) => {
   if (!boosterId || !engineId) return inventoryState;
   const target = inventoryState.boosters.find(b => b.id === boosterId);
   if (!target) return inventoryState;
+  // Already fired — the server answers 400 (one shot, no moving, no restart).
+  if (target.expiresAt) return inventoryState;
 
   const expiresAt = new Date(Date.now() + target.durationHours * 3600_000).toISOString();
 
