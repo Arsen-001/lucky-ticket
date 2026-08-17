@@ -116,6 +116,11 @@ export const enginesApi = api.injectEndpoints({
         );
         try {
           const { data } = await queryFulfilled;
+          // Collecting is what «забери билеты с двигателя» counts
+          // (`Profile.ticketsEarned`), and it is the FIRST step of day 1 — so the
+          // checklist learns about it at the moment of the tap, not on the next
+          // visit. @see refetchTestQuestProgress
+          refetchTestQuestProgress(dispatch);
           // Settle the prediction against the server's own count. Nothing else
           // will: these mutations skip the `tickets` invalidation on purpose, so
           // an over-predicted inventory number would otherwise just stay on
@@ -173,6 +178,11 @@ export const enginesApi = api.injectEndpoints({
         );
         try {
           const { data } = await queryFulfilled;
+          // Collecting is what «забери билеты с двигателя» counts
+          // (`Profile.ticketsEarned`), and it is the FIRST step of day 1 — so the
+          // checklist learns about it at the moment of the tap, not on the next
+          // visit. @see refetchTestQuestProgress
+          refetchTestQuestProgress(dispatch);
           // See claimEngine: without this the tier's inventory keeps whatever the
           // prediction guessed, forever.
           const delta = resolveClaimedCount(data, predicted) - predicted;
@@ -270,6 +280,11 @@ export const enginesApi = api.injectEndpoints({
         );
         try {
           const { data } = await queryFulfilled;
+          // Collecting is what «забери билеты с двигателя» counts
+          // (`Profile.ticketsEarned`), and it is the FIRST step of day 1 — so the
+          // checklist learns about it at the moment of the tap, not on the next
+          // visit. @see refetchTestQuestProgress
+          refetchTestQuestProgress(dispatch);
           // See claimEngine. Stars need no such pass — `me` is invalidated above,
           // so the real balance arrives with the refetch; only the tickets cache
           // is left to the prediction.
