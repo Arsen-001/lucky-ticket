@@ -246,6 +246,34 @@ describe('test-quest checklist', () => {
     expect(blind).toEqual([]);
   });
 
+  /**
+   * The engine ladder says «buy» three times, so it must be measured by
+   * purchases — not by how many engines the player HAS. Level 12's drop grants
+   * one (`1 ENG`), and counting ownership let that gift tick a step the player
+   * was asked to pay for. It also has to read as one ladder: three different
+   * wordings for the same act («launch a new engine» / «buy an engine» /
+   * «launch another») made day 26 look like a different task from day 24.
+   */
+  it('the engine ladder is one growing ladder of PURCHASES', () => {
+    const series = levels
+      .map(l => ({
+        level: l.level,
+        step: l.steps.find(s => s.labelKey === 'quest step buy engine market'),
+      }))
+      .filter((x): x is { level: number; step: TestQuestStep } => !!x.step);
+
+    expect(series.length, 'the engine ladder must exist').toBeGreaterThanOrEqual(3);
+    for (const { level, step } of series) {
+      expect(step.action, `level ${level} engine step`).toBe('enginesBought');
+    }
+    for (let i = 1; i < series.length; i++) {
+      expect(
+        series[i].step.target,
+        `engines: level ${series[i].level} vs ${series[i - 1].level}`
+      ).toBeGreaterThan(series[i - 1].step.target!);
+    }
+  });
+
   it('every number on the checklist is backed by a live counter', () => {
     const stuck = levels.flatMap(l =>
       l.steps

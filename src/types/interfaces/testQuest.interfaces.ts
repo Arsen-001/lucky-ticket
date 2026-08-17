@@ -71,6 +71,12 @@ export interface TestQuestProgress {
   stakesMade?: number;
   /** Engines the player owns right now (bought, granted or starter). */
   enginesOwned?: number;
+  /**
+   * Engines BOUGHT in the market, lifetime. The «buy an engine» ladder counts
+   * this and not `enginesOwned`, because level 12 GRANTS one — a gift must not
+   * tick a step that says «buy».
+   */
+  enginesBought?: number;
   /** Chips in the inventory, minted or won. */
   chipsOwned?: number;
   /** Engines carrying a chip in a slot — taking it off undoes the step. */

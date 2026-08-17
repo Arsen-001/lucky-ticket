@@ -72,6 +72,9 @@ const view = () => {
       // Starter engine + one per ~8 days climbed, so the 2 → 3 → 4 ladder is
       // reachable in mock mode without hand-editing this file.
       enginesOwned: 1 + Math.floor(climbed / 8),
+      // Purchases only — the mock's climb grants one engine on level 12, and the
+      // ladder must not tick off a gift.
+      enginesBought: Math.floor(climbed / 10),
       chipsOwned: climbed > 25 ? 1 : 0,
       chipsEquipped: climbed > 26 ? 1 : 0,
       ticketsBought: climbed > 1 ? 1 : 0,
