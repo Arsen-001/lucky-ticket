@@ -9,12 +9,8 @@ import { ChipShardIcon } from '@/components/shared/icons/ChipShardIcon';
 import { Modal } from '@/components/shared/modals/Modal';
 import { useAppTranslations } from '@/hooks/useAppTranslations';
 import { routes } from '@/constants/routes';
-import {
-  CHIP_MINT_SHARD_COST,
-  QUALITY_ACCENT,
-  QUALITY_TIERS,
-  TYPE_ACCENT,
-} from '@/utils/global/inventory.utils';
+import { useEngineConfig } from '@/hooks/useEngineConfig';
+import { QUALITY_ACCENT, QUALITY_TIERS, TYPE_ACCENT } from '@/utils/global/inventory.utils';
 import type {
   InventoryChipType,
   InventoryShardCount,
@@ -40,11 +36,14 @@ export function ChipMintModal({
 }: ChipMintModalProps) {
   const t = useAppTranslations();
   const router = useRouter();
+  // The price is admin-tunable and the server charges from the same config —
+  // quoting a bundled constant here promised whatever it was last built with.
+  const { chipMintShardCost } = useEngineConfig();
   const [type, setType] = useState<InventoryChipType>('speed');
   const [quality, setQuality] = useState<TicketType>('bronze');
 
   const availableShards = shards.find(s => s.type === type && s.quality === quality)?.count ?? 0;
-  const requiredShards = CHIP_MINT_SHARD_COST[quality];
+  const requiredShards = chipMintShardCost[quality];
   const hasShards = availableShards >= requiredShards;
 
   const accent = QUALITY_ACCENT[quality];

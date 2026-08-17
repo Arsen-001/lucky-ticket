@@ -1,6 +1,7 @@
 import { appConfig } from '@/config/app.config';
 import { CONTENT_PAGES_FALLBACK } from '@/config/content-pages.config';
 import { GlobalConstants } from '@/constants/global.constants';
+import { CHIP_MINT_SHARD_COST } from '@/utils/global/inventory.utils';
 import { DEFAULT_ENGINE_LEVEL_TABLES } from '@/utils/global/ticket-engine.utils';
 import { walletConstants } from '@/utils/pages/wallet.utils';
 import type { PublicConfig } from '@/types/interfaces/config.interfaces';
@@ -59,6 +60,9 @@ const getPublicConfig = (): PublicConfig => ({
       engineLevelSpeedBoostPct: [...DEFAULT_ENGINE_LEVEL_TABLES.engineLevelSpeedBoostPct],
       engineLevelBaseCapacity: [...DEFAULT_ENGINE_LEVEL_TABLES.engineLevelBaseCapacity],
     },
+    // Served, not bundled, exactly as in production — so the mint quote in dev
+    // travels the same path it does on the real backend.
+    chipMintShardCost: { ...CHIP_MINT_SHARD_COST },
   },
   stakes: {
     durationMinMonths: GlobalConstants.stakeDurationMinMonths,

@@ -101,6 +101,13 @@ export interface PublicConfig {
       engineLevelSpeedBoostPct: number[];
       engineLevelBaseCapacity: number[];
     };
+    /**
+     * Shards one mint takes, per tier — the number `mintChip` charges from
+     * (DOCS §10.4). Lowercased tier keys, like `tierCostMultiplier`. Optional:
+     * a backend older than 17.08.2026 doesn't serve it, and the bundled
+     * `CHIP_MINT_SHARD_COST` stands in.
+     */
+    chipMintShardCost?: Record<string, number>;
   };
   /**
    * Withdrawal limits the wallet forms validate against (admin-editable). The

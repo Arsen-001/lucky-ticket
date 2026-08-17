@@ -8,11 +8,8 @@ import { ChipShardIcon } from '@/components/shared/icons/ChipShardIcon';
 import { Modal } from '@/components/shared/modals/Modal';
 import { useAppTranslations } from '@/hooks/useAppTranslations';
 import { routes } from '@/constants/routes';
-import {
-  CHIP_MINT_SHARD_COST,
-  QUALITY_ACCENT,
-  chipShardName,
-} from '@/utils/global/inventory.utils';
+import { useEngineConfig } from '@/hooks/useEngineConfig';
+import { QUALITY_ACCENT, chipShardName } from '@/utils/global/inventory.utils';
 import type { InventoryChip, InventoryShardCount } from '@/types/interfaces/inventory.interfaces';
 import type { Dictionary } from '@/types/types/i18n.types';
 import { ChipMintCostRow } from './ChipMintCostRow';
@@ -43,13 +40,16 @@ export interface ShardInfoSheetProps {
 export function ShardInfoSheet({ open, shard, chips, onClose }: ShardInfoSheetProps) {
   const t = useAppTranslations();
   const router = useRouter();
+  // Above the early return — rules of hooks. Same served price the Mint modal
+  // quotes and the server charges.
+  const { chipMintShardCost } = useEngineConfig();
 
   if (!shard) return null;
 
   const { type, quality, count } = shard;
   const accent = QUALITY_ACCENT[quality];
   const name = chipShardName(t, type, quality);
-  const mintCost = CHIP_MINT_SHARD_COST[quality];
+  const mintCost = chipMintShardCost[quality];
 
   // Cheapest upgrade first: the one row that may already be paid for is the
   // reason the player opened this.

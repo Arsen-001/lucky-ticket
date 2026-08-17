@@ -6,13 +6,35 @@ import {
   DEFAULT_ENGINE_LEVEL_TABLES,
   type EngineLevelTables,
 } from '@/utils/global/ticket-engine.utils';
+import { CHIP_MINT_SHARD_COST, QUALITY_TIERS } from '@/utils/global/inventory.utils';
 import type { PublicConfig } from '@/types/interfaces/config.interfaces';
+import type { TicketType } from '@/types/types/ticket.types';
+
+/**
+ * Served per-tier mint price over the bundled one, tier by tier.
+ *
+ * A partial map is normal — the admin panel patches single tiers — so a missing
+ * or non-numeric entry has to fall back per tier, not drop the whole map.
+ */
+const resolveMintCost = (served?: Record<string, number>): Record<TicketType, number> =>
+  Object.fromEntries(
+    QUALITY_TIERS.map(tier => [
+      tier,
+      typeof served?.[tier] === 'number' ? served[tier] : CHIP_MINT_SHARD_COST[tier],
+    ])
+  ) as Record<TicketType, number>;
 
 export interface EngineConfig {
   /** Level-curve tables — what every engine/sub level grants (DOCS §9.7/§10). */
   tables: EngineLevelTables;
   /** Upgrade-price formula knobs (DOCS §10.1/§10.2). */
   upgrade: EngineUpgradeKnobs;
+  /**
+   * Shards a mint takes, per tier (DOCS §10.4) — admin-tunable, so it belongs
+   * here and not in a bundled constant. Every screen that quotes the price
+   * reads this one; the server charges from the same config.
+   */
+  chipMintShardCost: Record<TicketType, number>;
 }
 
 /**
@@ -25,7 +47,11 @@ export interface EngineConfig {
 export const resolveEngineConfig = (config?: PublicConfig): EngineConfig => {
   const served = config?.engines;
   if (!served) {
-    return { tables: DEFAULT_ENGINE_LEVEL_TABLES, upgrade: appConfig.economy.engineUpgrades };
+    return {
+      tables: DEFAULT_ENGINE_LEVEL_TABLES,
+      upgrade: appConfig.economy.engineUpgrades,
+      chipMintShardCost: resolveMintCost(),
+    };
   }
   // Per-table fallback: a backend serving an older/newer levelTables shape
   // (missing or renamed key) must degrade to that table's bundled default,
@@ -52,6 +78,7 @@ export const resolveEngineConfig = (config?: PublicConfig): EngineConfig => {
         ...served.upgrade.tierCostMultiplier,
       },
     },
+    chipMintShardCost: resolveMintCost(served.chipMintShardCost),
   };
 };
 

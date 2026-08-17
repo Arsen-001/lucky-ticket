@@ -12,8 +12,8 @@ import { ChipShardIcon } from '@/components/shared/icons/ChipShardIcon';
 import { TelegramStarIcon } from '@/components/shared/icons/TelegramStarIcon';
 import { useAppTranslations } from '@/hooks/useAppTranslations';
 import { routes } from '@/constants/routes';
+import { useEngineConfig } from '@/hooks/useEngineConfig';
 import {
-  CHIP_MINT_SHARD_COST,
   CHIP_TYPE_ICON,
   QUALITY_ACCENT,
   canEquipChipOnTier,
@@ -55,6 +55,7 @@ export function EngineSlotPickerModal({
   const t = useAppTranslations();
   const router = useRouter();
   const { data: inventory } = useGetInventoryQuery();
+  const { chipMintShardCost } = useEngineConfig();
 
   const chips = inventory?.chips ?? [];
   const boosters = inventory?.boosters ?? [];
@@ -92,7 +93,7 @@ export function EngineSlotPickerModal({
   // Chips are tier-locked, so a new one can only come from minting a chip of
   // the engine's own tier: enough matching shards → inventory, otherwise → market.
   const ownedShards = shards.find(s => s.type === type && s.quality === engineTier)?.count ?? 0;
-  const requiredShards = CHIP_MINT_SHARD_COST[engineTier];
+  const requiredShards = chipMintShardCost[engineTier];
   const canMint = ownedShards >= requiredShards;
 
   const handleEmptyChipsCta = () => {
