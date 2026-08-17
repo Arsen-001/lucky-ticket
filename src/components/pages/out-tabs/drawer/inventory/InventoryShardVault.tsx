@@ -71,22 +71,35 @@ export function InventoryShardVault({
       </button>
 
       {open ? (
-        <div className="grid grid-cols-5 gap-1.5">
-          {QUALITY_TIERS.map(tier =>
-            TYPES.map(type => {
-              const count = shards.find(s => s.quality === tier && s.type === type)?.count ?? 0;
-              return (
-                <InventoryShardPill
-                  key={`${tier}-${type}`}
-                  tier={tier}
-                  type={type}
-                  expanded
-                  count={count}
-                  onClick={() => setSelected({ type, quality: tier, count })}
-                />
-              );
-            })
-          )}
+        /* One row per TYPE, five tiers across — not ten cells in tier order.
+           Filled tier-major into a 5-wide grid, neither axis meant anything:
+           the first row read bronze-time, bronze-capacity, silver-time,
+           silver-capacity, gold-time, and a player looking for "my gold
+           capacity shards" had to read every cell. The pills carry no text, so
+           the grid WAS the only key to what they are. */
+        <div className="flex flex-col gap-2">
+          {TYPES.map(type => (
+            <div key={type} className="flex flex-col gap-1">
+              <span className="text-[9px] font-extrabold uppercase tracking-wider text-white/45">
+                {type === 'speed' ? t('time') : t('capacity')}
+              </span>
+              <div className="grid grid-cols-5 gap-1.5">
+                {QUALITY_TIERS.map(tier => {
+                  const count = shards.find(s => s.quality === tier && s.type === type)?.count ?? 0;
+                  return (
+                    <InventoryShardPill
+                      key={`${tier}-${type}`}
+                      tier={tier}
+                      type={type}
+                      expanded
+                      count={count}
+                      onClick={() => setSelected({ type, quality: tier, count })}
+                    />
+                  );
+                })}
+              </div>
+            </div>
+          ))}
         </div>
       ) : owned.length === 0 ? (
         <div className="flex flex-wrap items-center gap-2">
