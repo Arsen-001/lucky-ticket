@@ -57,9 +57,16 @@ export function BoostRow({
               label is Russian "Вместимость", and at 15px it pushed the "+0"
               value off its own line (6px of the 17px it needs). The value is
               what the row is read FOR — the label is guessable from the icon. */}
+          {/* The label is the part allowed to give way. Measured on production
+              (RU, capacity 10/10): the line is 142px, «Вместимость» takes 81 and
+              the «10/10» badge 39, which left 10px for a value needing 19 — the
+              row printed «Вместимость 10/10 +.», eating the one number it exists
+              to show. English never hit it («Capacity» is 24px shorter), and no
+              mock engine reaches 10/10 with a two-digit bonus, so only the live
+              screen showed it. */}
           <span
             className={twMerge(
-              'font-bold text-white tracking-wide',
+              'min-w-0 truncate font-bold text-white tracking-wide',
               compact ? 'text-[13px]' : 'text-[11px]'
             )}
           >
@@ -67,7 +74,7 @@ export function BoostRow({
           </span>
           <span
             className={twMerge(
-              'font-extrabold tabular-nums tracking-wider px-1 py-px rounded',
+              'shrink-0 font-extrabold tabular-nums tracking-wider px-1 py-px rounded',
               compact ? 'text-[12px]' : 'text-[9px]'
             )}
             style={{ color: accent, background: `${accent}1f` }}
@@ -76,7 +83,7 @@ export function BoostRow({
           </span>
           <span
             className={twMerge(
-              'ms-auto font-semibold text-pink-secondary truncate',
+              'ms-auto shrink-0 whitespace-nowrap font-semibold text-pink-secondary',
               compact ? 'text-[13px]' : 'text-[10px]'
             )}
           >
