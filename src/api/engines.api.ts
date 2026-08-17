@@ -20,7 +20,7 @@ import {
 import { findActiveBooster, findEquippedChip } from '@/utils/global/inventory.utils';
 // AVATARS OFF (2026-08-09) — see the `avatarSpeedPct` note below.
 // import { equippedAvatarEngineSpeedPct } from '@/utils/global/avatar.utils';
-import { testBadgeSpeedBoostPct } from '@/utils/global/testQuest.utils';
+import { testBadgeCapacityTickets, testBadgeSpeedBoostPct } from '@/utils/global/testQuest.utils';
 import { inventoryApi } from '@/api/inventory.api';
 // AVATARS OFF — import { avatarsApi } from '@/api/avatars.api';
 import { testQuestApi } from '@/api/testQuest.api';
@@ -205,12 +205,21 @@ export const enginesApi = api.injectEndpoints({
           getState() as Parameters<ReturnType<typeof inventoryApi.endpoints.getInventory.select>>[0]
         ).data;
         const tables = levelTablesFromState(getState());
+        // The Test-Quest crown's permanent capacity tickets are part of that
+        // batch on the server, so they are part of it here too.
+        const badgeCapacity = testBadgeCapacityTickets(
+          testQuestApi.endpoints.getTestQuest.select()(
+            getState() as Parameters<
+              ReturnType<typeof testQuestApi.endpoints.getTestQuest.select>
+            >[0]
+          ).data?.badgeLevel
+        );
         // The boldest prediction of the three claim paths: with nothing pending
         // it invents a whole batch from `engineCapacity` — client-side math over
-        // chips, boosters and admin-tunable tables — instead of summing counts
-        // the server already sent. Most likely of the three to need the
-        // reconciliation below, and it is a PAID action, so a wrong ticket count
-        // sits next to a real star charge.
+        // chips, boosters, the badge prize and admin-tunable tables — instead of
+        // summing counts the server already sent. Most likely of the three to
+        // need the reconciliation below, and it is a PAID action, so a wrong
+        // ticket count sits next to a real star charge.
         let predicted = 0;
         const ticketsPatch = dispatch(
           ticketsApi.util.updateQueryData('getTickets', undefined, draft => {
@@ -222,7 +231,12 @@ export const enginesApi = api.injectEndpoints({
               const claimAmount =
                 engine.pendingCount > 0
                   ? engine.pendingCount
-                  : engineCapacity(engine, { capacityChip, capacityBooster, tables });
+                  : engineCapacity(engine, {
+                      capacityChip,
+                      capacityBooster,
+                      badgeCapacityTickets: badgeCapacity,
+                      tables,
+                    });
               predicted = claimAmount;
               ticket.count = (ticket.count ?? 0) + claimAmount;
               engine.lifetimeProduced = (engine.lifetimeProduced ?? 0) + claimAmount;
@@ -377,6 +391,10 @@ export const enginesApi = api.injectEndpoints({
           getState() as Parameters<ReturnType<typeof testQuestApi.endpoints.getTestQuest.select>>[0]
         ).data;
         const badgeSpeedPct = testBadgeSpeedBoostPct(testQuest?.badgeLevel);
+        // Its capacity half travels with it: the crown's permanent tickets grow
+        // the batch the server mints, and — one ticket costing one tier cycle —
+        // the cycle this loop is deciding against.
+        const badgeCapacity = testBadgeCapacityTickets(testQuest?.badgeLevel);
         const tables = levelTablesFromState(getState());
         const patch = dispatch(
           ticketsApi.util.updateQueryData('getTickets', undefined, draft => {
@@ -397,6 +415,7 @@ export const enginesApi = api.injectEndpoints({
                 isVip: me?.isVIP ?? false,
                 avatarBoostPct: avatarSpeedPct,
                 badgeBoostPct: badgeSpeedPct,
+                badgeCapacityTickets: badgeCapacity,
                 tables,
               });
               const elapsed = dayjs().diff(dayjs(engine.cycleStartedAt), 'second');
@@ -404,6 +423,7 @@ export const enginesApi = api.injectEndpoints({
                 engine.pendingCount = engineCapacity(engine, {
                   capacityChip,
                   capacityBooster,
+                  badgeCapacityTickets: badgeCapacity,
                   tables,
                 });
               }

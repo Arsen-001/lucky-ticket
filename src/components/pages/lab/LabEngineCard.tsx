@@ -11,6 +11,7 @@ import { EngineNextInFill } from '@/components/pages/out-tabs/tabs-extra/ticket/
 import { useAppTranslations } from '@/hooks/useAppTranslations';
 import { useEngineConfig } from '@/hooks/useEngineConfig';
 import { useEngineSpeedAvatarBoostPct } from '@/hooks/useEngineSpeedAvatarBoostPct';
+import { useTestBadgeCapacityTickets } from '@/hooks/useTestBadgeCapacityTickets';
 import { useTestBadgeSpeedBoostPct } from '@/hooks/useTestBadgeSpeedBoostPct';
 import { routes } from '@/constants/routes';
 import { findActiveBooster, findEquippedChip } from '@/utils/global/inventory.utils';
@@ -70,6 +71,7 @@ export function LabEngineCard({
   const { data: me } = useGetMeQuery();
   const avatarSpeedPct = useEngineSpeedAvatarBoostPct();
   const badgeSpeedPct = useTestBadgeSpeedBoostPct();
+  const badgeCapacity = useTestBadgeCapacityTickets();
   const { tables } = useEngineConfig();
   const speedChip = findEquippedChip(inventory?.chips, engine.id, 'speed');
   const speedBooster = findActiveBooster(inventory?.boosters, engine.id, 'speed');
@@ -86,9 +88,15 @@ export function LabEngineCard({
     isVip: me?.isVIP ?? false,
     avatarBoostPct: avatarSpeedPct,
     badgeBoostPct: badgeSpeedPct,
+    badgeCapacityTickets: badgeCapacity,
     tables,
   });
-  const capacity = engineCapacity(engine, { capacityChip, capacityBooster, tables });
+  const capacity = engineCapacity(engine, {
+    capacityChip,
+    capacityBooster,
+    badgeCapacityTickets: badgeCapacity,
+    tables,
+  });
   const pending = engine.pendingCount > 0;
   const remaining = Math.max(0, cycle - (elapsedSeconds ?? 0));
   const pct = cycle > 0 ? Math.min(100, Math.round(((elapsedSeconds ?? 0) / cycle) * 100)) : 0;

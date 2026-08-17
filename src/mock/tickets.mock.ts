@@ -33,6 +33,7 @@ const buildEngines = (tier: 'bronze' | 'silver' | 'gold', count: number): Ticket
     const engineLevel = 1 + Math.floor(index / 5);
     return {
       id: `engine-${tier}-${index + 1}`,
+      tier,
       cycleSeconds: preset.cycleSeconds,
       cycleStartedAt: getPastIso(claimable ? preset.cycleSeconds : index + 2),
       pendingCount: claimable ? 1 + (index % 3) : 0,

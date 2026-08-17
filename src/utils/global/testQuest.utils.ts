@@ -21,3 +21,22 @@ export const testBadgeSpeedBoostPct = (badgeLevel: number | null | undefined): n
   const steps = TEST_QUEST_TOTAL_LEVELS - badgeLevel; // level 5 → 26 … level 31 → 0
   return Math.max(1, Math.round(1 + (steps / (TEST_QUEST_TOTAL_LEVELS - 5)) * 6)); // 1..7
 };
+
+/**
+ * The grand prize of the test quest: whole tickets of permanent CAPACITY on
+ * every engine, for the single player whose badge froze at level 1.
+ *
+ * EXACT mirror of the backend `testBadgeCapacityTickets` — the server mints the
+ * batch this size, so a frontend that forgot it would print a smaller collect
+ * than the one that lands, and a shorter cycle than the one the server counts.
+ *
+ * Whole tickets, never a percentage: a capacity % rounds to the same single
+ * ticket from level 1 to 16 on any engine below level 2 — the reason the
+ * capacity chip pays in tickets too.
+ */
+export const TEST_BADGE_CAPACITY_TICKETS = 3;
+
+export const testBadgeCapacityTickets = (badgeLevel: number | null | undefined): number => {
+  if (badgeLevel == null) return 0;
+  return badgeLevel <= 1 ? TEST_BADGE_CAPACITY_TICKETS : 0;
+};

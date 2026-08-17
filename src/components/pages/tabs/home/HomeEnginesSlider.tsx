@@ -37,6 +37,7 @@ import { useAppTranslations } from '@/hooks/useAppTranslations';
 import { useToast } from '@/hooks/useToast';
 import { useSpendFailure } from '@/hooks/useSpendFailure';
 import { useEngineSpeedAvatarBoostPct } from '@/hooks/useEngineSpeedAvatarBoostPct';
+import { useTestBadgeCapacityTickets } from '@/hooks/useTestBadgeCapacityTickets';
 import { useTestBadgeSpeedBoostPct } from '@/hooks/useTestBadgeSpeedBoostPct';
 import { findTicketFlightOrigin, useTicketFlight } from '@/hooks/useTicketFlight';
 import { chipSlotStarsCost, chipUnequipStarsCost } from '@/utils/global/inventory.utils';
@@ -222,6 +223,7 @@ export function HomeEnginesSlider({ className }: ClassNameProps) {
   const isVip = me?.isVIP ?? false;
   const avatarSpeedPct = useEngineSpeedAvatarBoostPct();
   const badgeSpeedPct = useTestBadgeSpeedBoostPct();
+  const badgeCapacity = useTestBadgeCapacityTickets();
   const { tables, upgrade } = useEngineConfig();
 
   const requireStars = (cost: number, onPaid: () => void) => {
@@ -259,6 +261,7 @@ export function HomeEnginesSlider({ className }: ClassNameProps) {
           perks: me?.statusPerks,
           avatarBoostPct: avatarSpeedPct,
           badgeBoostPct: badgeSpeedPct,
+          badgeCapacityTickets: badgeCapacity,
           tables,
         });
         if (engine.pendingCount > 0) {
@@ -271,6 +274,7 @@ export function HomeEnginesSlider({ className }: ClassNameProps) {
           readyCapacity[engine.id] = engineCapacity(engine, {
             capacityChip,
             capacityBooster,
+            badgeCapacityTickets: badgeCapacity,
             tables,
           });
         }
@@ -413,6 +417,7 @@ export function HomeEnginesSlider({ className }: ClassNameProps) {
       perks: me?.statusPerks,
       avatarBoostPct: avatarSpeedPct,
       badgeBoostPct: badgeSpeedPct,
+      badgeCapacityTickets: badgeCapacity,
       tables,
     });
     const elapsed = elapsedByEngine[engine.id] ?? engineElapsedSeconds(engine);
@@ -438,6 +443,7 @@ export function HomeEnginesSlider({ className }: ClassNameProps) {
         : engineCapacity(engine, {
             capacityChip: findEquippedChip(inventory?.chips, engineId, 'capacity'),
             capacityBooster: findActiveBooster(inventory?.boosters, engineId, 'capacity'),
+            badgeCapacityTickets: badgeCapacity,
             tables,
           })
     );

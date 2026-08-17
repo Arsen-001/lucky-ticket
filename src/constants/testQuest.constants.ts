@@ -46,40 +46,42 @@ export const TEST_QUEST_START_LEVEL = 31;
 /** Official channel the Test-Quest gate checks membership of. */
 export const TEST_QUEST_CHANNEL_HANDLE = '@luckyticket365';
 export const TEST_QUEST_CHANNEL_URL = 'https://t.me/luckyticket365';
+/** Telegram's boost page for the channel — where the "boost" step sends you. */
+export const TEST_QUEST_BOOST_URL = 'https://t.me/boost/luckyticket365';
 
 /** Full ladder, level 31 (entry) down to level 1 (top crown). */
 export const testQuestLadder: TestQuestLevel[] = [
-  { level: 31, day: null, drop: '5k LC · 1 LS', zone: 'entry' },
-  { level: 30, day: 1, drop: '10k LC · 2 LS', zone: 'ladder' },
-  { level: 29, day: 2, drop: '10k LC · 2 LS', zone: 'ladder' },
-  { level: 28, day: 3, drop: '10k LC · 2 LS', zone: 'ladder' },
-  { level: 27, day: 4, drop: '10k LC · 2 LS', zone: 'ladder' },
+  { level: 31, day: null, drop: '5k LC', zone: 'entry' },
+  { level: 30, day: 1, drop: '10k LC', zone: 'ladder' },
+  { level: 29, day: 2, drop: '10k LC', zone: 'ladder' },
+  { level: 28, day: 3, drop: '10k LC', zone: 'ladder' },
+  { level: 27, day: 4, drop: '10k LC', zone: 'ladder' },
   { level: 26, day: 5, drop: '25k LC · 1 TIX · 5 LS · LP 2d', zone: 'wall' },
-  { level: 25, day: 6, drop: '10k LC · 2 LS', zone: 'ladder' },
-  { level: 24, day: 7, drop: '10k LC · 2 LS', zone: 'ladder' },
-  { level: 23, day: 8, drop: '10k LC · 2 LS', zone: 'ladder' },
-  { level: 22, day: 9, drop: '15k LC · 3 LS', zone: 'ladder' },
-  { level: 21, day: 10, drop: '15k LC · 3 LS', zone: 'ladder' },
-  { level: 20, day: 11, drop: '30k LC · 1 TIX · 6 LS · LP 3d', zone: 'wall' },
-  { level: 19, day: 12, drop: '35k LC · 1 TIX · 7 LS', zone: 'wall' },
-  { level: 18, day: 13, drop: '15k LC · 1 TIX · 3 LS', zone: 'ladder' },
-  { level: 17, day: 14, drop: '15k LC · 1 TIX · 3 LS', zone: 'ladder' },
-  { level: 16, day: 15, drop: '40k LC · 1 TIX · 8 LS · LP 4d', zone: 'wall' },
-  { level: 15, day: 16, drop: '40k LC · 1 TIX · 8 LS', zone: 'wall' },
-  { level: 14, day: 17, drop: '20k LC · 1 TIX · 4 LS', zone: 'ladder' },
-  { level: 13, day: 18, drop: '20k LC · 1 TIX · 4 LS', zone: 'ladder' },
-  { level: 12, day: 19, drop: '45k LC · 1 TIX · 9 LS · 1 ENG', zone: 'wall' },
-  { level: 11, day: 20, drop: '20k LC · 1 TIX · 4 LS', zone: 'ladder' },
-  { level: 10, day: 21, drop: '45k LC · 1 TIX · 9 LS · LP 5d', zone: 'wall' },
-  { level: 9, day: 22, drop: '20k LC · 1 TIX · 4 LS', zone: 'ladder' },
-  { level: 8, day: 23, drop: '20k LC · 1 TIX · 4 LS', zone: 'ladder' },
-  { level: 7, day: 24, drop: '50k LC · 2 TIX · 10 LS', zone: 'wall' },
-  { level: 6, day: 25, drop: '25k LC · 1 TIX · 5 LS', zone: 'ladder' },
-  { level: 5, day: 26, drop: '55k LC · 2 TIX · 11 LS', zone: 'wall' },
-  { level: 4, day: 27, drop: '55k LC · 2 TIX · 11 LS · LP 6d', zone: 'wall' },
-  { level: 3, day: null, drop: '105k LC · 3 TIX · 21 LS', zone: 'crown' },
-  { level: 2, day: null, drop: '105k LC · 3 TIX · 21 LS · VIP 1', zone: 'crown' },
-  { level: 1, day: null, drop: '110k LC · 3 TIX · 22 LS · VIP 3', zone: 'crown' },
+  { level: 25, day: 6, drop: '10k LC', zone: 'ladder' },
+  { level: 24, day: 7, drop: '10k LC', zone: 'ladder' },
+  { level: 23, day: 8, drop: '10k LC', zone: 'ladder' },
+  { level: 22, day: 9, drop: '15k LC', zone: 'ladder' },
+  { level: 21, day: 10, drop: '15k LC', zone: 'ladder' },
+  { level: 20, day: 11, drop: '30k LC · 1 TIX · 5 LS · LP 3d', zone: 'wall' },
+  { level: 19, day: 12, drop: '35k LC · 1 TIX · 5 LS', zone: 'wall' },
+  { level: 18, day: 13, drop: '15k LC · 1 TIX', zone: 'ladder' },
+  { level: 17, day: 14, drop: '15k LC · 1 TIX', zone: 'ladder' },
+  { level: 16, day: 15, drop: '40k LC · 1 TIX · 5 LS · LP 4d', zone: 'wall' },
+  { level: 15, day: 16, drop: '40k LC · 1 TIX · 5 LS', zone: 'wall' },
+  { level: 14, day: 17, drop: '20k LC · 1 TIX', zone: 'ladder' },
+  { level: 13, day: 18, drop: '20k LC · 1 TIX', zone: 'ladder' },
+  { level: 12, day: 19, drop: '45k LC · 1 TIX · 5 LS · 1 ENG', zone: 'wall' },
+  { level: 11, day: 20, drop: '20k LC · 1 TIX', zone: 'ladder' },
+  { level: 10, day: 21, drop: '45k LC · 1 TIX · 5 LS · LP 5d', zone: 'wall' },
+  { level: 9, day: 22, drop: '20k LC · 1 TIX', zone: 'ladder' },
+  { level: 8, day: 23, drop: '20k LC · 1 TIX', zone: 'ladder' },
+  { level: 7, day: 24, drop: '50k LC · 2 TIX · 5 LS', zone: 'wall' },
+  { level: 6, day: 25, drop: '25k LC · 1 TIX', zone: 'ladder' },
+  { level: 5, day: 26, drop: '55k LC · 2 TIX · 5 LS', zone: 'wall' },
+  { level: 4, day: 27, drop: '55k LC · 2 TIX · 5 LS · LP 6d', zone: 'wall' },
+  { level: 3, day: null, drop: '105k LC · 3 TIX · 15 LS', zone: 'crown' },
+  { level: 2, day: null, drop: '105k LC · 3 TIX · 17 LS · VIP 1', zone: 'crown' },
+  { level: 1, day: null, drop: '110k LC · 3 TIX · 19 LS · VIP 3', zone: 'crown' },
 ];
 
 // Level → zone lookup. Walls and the crown are structural (fixed by the ladder
@@ -112,6 +114,7 @@ export type TestQuestStepKind =
   | 'status'
   | 'profile'
   | 'rank'
+  | 'boost'
   | 'channel';
 
 /** The screen a step's inline "go there" button deep-links to, by kind. Kinds
@@ -251,8 +254,18 @@ const TEST_QUEST_STEP_OVERRIDES: Record<number, TestQuestStep[]> = {
     { labelKey: 'quest step set nickname', kind: 'profile' },
     CHANNEL_GATE,
   ],
-  // 27 · day 4 — engine-speed upgrade
-  27: [spend(35), ads(15), share(6), upgrade(4), CHANNEL_GATE],
+  // 27 · day 5 on screen — channel boost. Telegram counts boosts per channel, so
+  // this is an act performed once that the room keeps; the row deep-links to the
+  // boost page, not to the channel. (`day: 4` in the ladder above counts from
+  // the first claimable day; the screen numbers the entry level as day 1.)
+  27: [
+    spend(35),
+    ads(15),
+    share(6),
+    upgrade(4),
+    { labelKey: 'quest step boost channel', kind: 'boost' },
+    CHANNEL_GATE,
+  ],
   // 26 · day 5
   26: [spend(43), ads(22), share(8), upgrade(5), CHANNEL_GATE],
   // 25 · day 6

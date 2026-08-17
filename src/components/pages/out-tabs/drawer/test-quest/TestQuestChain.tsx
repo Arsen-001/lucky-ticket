@@ -2,12 +2,14 @@
 
 import { twMerge } from 'tailwind-merge';
 import { useAppTranslations } from '@/hooks/useAppTranslations';
+import { TEST_BADGE_CAPACITY_TICKETS } from '@/utils/global/testQuest.utils';
 import { TestQuestClaimBurst } from './TestQuestClaimBurst';
 import { TestQuestFrozenSummary } from './TestQuestFrozenSummary';
 import { TestQuestSteps } from './TestQuestSteps';
 import { TestQuestRewardPanel } from './TestQuestRewardPanel';
 import { useTestQuestScreen } from './useTestQuestScreen';
 import { TestQuestAheadList } from './TestQuestAheadList';
+import { TestQuestGrandPrize } from './TestQuestGrandPrize';
 import { TestQuestRewardRail } from './TestQuestRewardRail';
 
 export interface TestQuestChainProps {
@@ -50,6 +52,17 @@ export function TestQuestChain({ className }: TestQuestChainProps) {
 
   return (
     <section className={twMerge('flex flex-col gap-2 px-2.5 pt-3', className)}>
+      {/* Above the day header on purpose: the summit prize is the reason to keep
+          climbing, so it is the first thing on the screen.
+          The number is interpolated from the shared constant rather than written
+          into the copy, so the 18 dictionaries survive a change to it — and so
+          the card can never quote a prize the engine math does not pay. */}
+      <TestQuestGrandPrize
+        day={s.totalDays}
+        title={t('grand prize capacity {n}', { n: TEST_BADGE_CAPACITY_TICKETS })}
+        note={t('on every bronze engine forever')}
+      />
+
       <div className="flex items-baseline justify-between">
         <h3 className="text-[15px] font-extrabold tabular-nums">
           {t('day {day} of {total}', { day: s.currentDay, total: s.totalDays })}

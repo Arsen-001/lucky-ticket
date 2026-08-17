@@ -24,6 +24,7 @@ import { useUnlockedTiers } from '@/hooks/useUnlockedTiers';
 import { useToast } from '@/hooks/useToast';
 import { useAppTranslations } from '@/hooks/useAppTranslations';
 import { useEngineSpeedAvatarBoostPct } from '@/hooks/useEngineSpeedAvatarBoostPct';
+import { useTestBadgeCapacityTickets } from '@/hooks/useTestBadgeCapacityTickets';
 import { useTestBadgeSpeedBoostPct } from '@/hooks/useTestBadgeSpeedBoostPct';
 import { useEngineConfig } from '@/hooks/useEngineConfig';
 import { TicketsEnum } from '@/types/enums/ticket.enums';
@@ -49,6 +50,7 @@ export function TicketsTabsView() {
   const canBulkClaim = me?.statusPerks ? me.statusPerks.bulkClaimEnabled : isLp;
   const avatarSpeedPct = useEngineSpeedAvatarBoostPct();
   const badgeSpeedPct = useTestBadgeSpeedBoostPct();
+  const badgeCapacity = useTestBadgeCapacityTickets();
   const { tables } = useEngineConfig();
   const [claimEngine] = useClaimEngineMutation();
   const [claimEnginesForTier] = useClaimEnginesForTierMutation();
@@ -109,6 +111,7 @@ export function TicketsTabsView() {
           perks: me?.statusPerks,
           avatarBoostPct: avatarSpeedPct,
           badgeBoostPct: badgeSpeedPct,
+          badgeCapacityTickets: badgeCapacity,
           tables,
         });
         next[engine.id] = engine.pendingCount > 0 ? cycle : engineElapsedSeconds(engine);

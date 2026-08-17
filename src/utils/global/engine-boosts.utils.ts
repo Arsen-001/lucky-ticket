@@ -136,7 +136,13 @@ export const totalSpeedBoostPct = (sources: readonly EngineSpeedBoostSource[]) =
  * tickets first (factory batch + engine level + capacity sub-level), then the
  * percentage scalers (chip, booster) applied to that whole batch.
  */
-export type EngineCapacityKey = 'factory' | 'engineLevel' | 'capacityLevel' | 'chip' | 'booster';
+export type EngineCapacityKey =
+  | 'factory'
+  | 'engineLevel'
+  | 'capacityLevel'
+  | 'chip'
+  | 'badge'
+  | 'booster';
 
 export interface EngineCapacitySource {
   key: EngineCapacityKey;
@@ -150,6 +156,13 @@ export interface EngineCapacityOptions {
   capacityChip?: InventoryChip;
   /** Must already be filtered for liveness (`findActiveBooster` does it). */
   capacityBooster?: InventoryBooster;
+  /**
+   * The Test-Quest crown's permanent tickets (@see useTestBadgeCapacityTickets).
+   * Itemised here for the same reason it is summed in `engineCapacity`: the
+   * breakdown has to add up to the batch, and a source left out of the list
+   * makes the reactor face contradict the number printed beside it.
+   */
+  badgeCapacityTickets?: number;
   tables?: EngineLevelTables;
 }
 
@@ -174,6 +187,9 @@ export const engineCapacitySources = (
     },
     // The capacity chip adds whole tickets now (@see chipCapacityTickets).
     { key: 'chip', tickets: chipCapacityTickets(options.capacityChip?.level), pct: 0 },
+    // Whole tickets too, and the only row here that belongs to the player
+    // rather than to this engine: the crown holder carries it onto every one.
+    { key: 'badge', tickets: options.badgeCapacityTickets ?? 0, pct: 0 },
     { key: 'booster', tickets: 0, pct: options.capacityBooster?.effectPct ?? 0 },
   ];
 };
@@ -202,6 +218,6 @@ export const isMultiplierBoost = (source: EngineSpeedBoostSource): boolean =>
 export const additiveSpeedBoostSources = (sources: readonly EngineSpeedBoostSource[]) =>
   sources.filter(source => source.multiplier === undefined);
 
-/** The multiplier half — what the UI presents as "multipliers". */
+/** The other half — what the UI groups under «Множители» / "Multipliers". */
 export const multiplierSpeedBoostSources = (sources: readonly EngineSpeedBoostSource[]) =>
   sources.filter(isMultiplierBoost);

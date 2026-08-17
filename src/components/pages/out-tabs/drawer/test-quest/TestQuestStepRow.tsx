@@ -8,6 +8,7 @@ import {
   Cpu,
   Lock,
   Medal,
+  Rocket,
   MonitorPlay,
   Share2,
   ShoppingBag,
@@ -21,6 +22,7 @@ import { twMerge } from 'tailwind-merge';
 import { Link } from '@/components/shared/links/Link';
 import { useAppTranslations } from '@/hooks/useAppTranslations';
 import {
+  TEST_QUEST_BOOST_URL,
   TEST_QUEST_CHANNEL_URL,
   testQuestStepHref,
   type TestQuestStep,
@@ -53,6 +55,7 @@ const STEP_VISUALS: Record<TestQuestStepKind, { Icon: LucideIcon; tint: string }
   status: { Icon: Medal, tint: 'bg-gold/16 text-gold' },
   profile: { Icon: Target, tint: 'bg-white/[0.08] text-white/55' },
   rank: { Icon: Medal, tint: 'bg-gold/16 text-gold' },
+  boost: { Icon: Rocket, tint: 'bg-electric-purple/18 text-electric-purple' },
   channel: { Icon: Lock, tint: 'bg-gold/[0.16] text-gold' },
 };
 
@@ -66,6 +69,9 @@ const STEP_VISUALS: Record<TestQuestStepKind, { Icon: LucideIcon; tint: string }
 export function TestQuestStepRow({ step, done = false, count }: TestQuestStepRowProps) {
   const t = useAppTranslations();
   const isChannelGate = step.gate === 'channel';
+  // The boost step leaves the app too, but to Telegram's boost page rather than
+  // to the channel — same button, different destination.
+  const isBoost = step.kind === 'boost';
   const { Icon, tint } = STEP_VISUALS[step.kind];
   const href = isChannelGate ? undefined : testQuestStepHref[step.kind];
 
@@ -78,10 +84,10 @@ export function TestQuestStepRow({ step, done = false, count }: TestQuestStepRow
   const shownCount =
     step.target == null ? null : isDone ? step.target : hasLive ? Math.min(count, step.target) : 0;
 
-  const openChannel = () => {
+  const openTelegram = (url: string) => {
     const webApp = getTelegramWebApp();
-    if (webApp?.openTelegramLink) webApp.openTelegramLink(TEST_QUEST_CHANNEL_URL);
-    else if (typeof window !== 'undefined') window.open(TEST_QUEST_CHANNEL_URL, '_blank');
+    if (webApp?.openTelegramLink) webApp.openTelegramLink(url);
+    else if (typeof window !== 'undefined') window.open(url, '_blank');
   };
 
   return (
@@ -126,10 +132,10 @@ export function TestQuestStepRow({ step, done = false, count }: TestQuestStepRow
           </span>
         )}
 
-        {isChannelGate ? (
+        {isChannelGate || isBoost ? (
           <button
             type="button"
-            onClick={openChannel}
+            onClick={() => openTelegram(isBoost ? TEST_QUEST_BOOST_URL : TEST_QUEST_CHANNEL_URL)}
             aria-label={t('open channel')}
             className="tap-target relative flex-center -my-0.5 shrink-0 rounded-lg px-1 py-0.5 text-gold active:scale-95"
           >

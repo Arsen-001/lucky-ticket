@@ -14,6 +14,7 @@ import {
   isMultiplierBoost,
   multiplierSpeedBoostSources,
 } from '@/utils/global/engine-boosts.utils';
+import { TEST_BADGE_CAPACITY_TICKETS } from '@/utils/global/testQuest.utils';
 import {
   CHIP_MAX_LEVEL,
   chipCapacityTickets,
@@ -51,6 +52,9 @@ const TIERS: TicketType[] = ['bronze', 'silver', 'gold', 'platinum', 'diamond'];
 const engineOf = (tier: TicketType, over: Partial<TicketEngine> = {}): TicketEngine =>
   ({
     id: 'lever-probe',
+    // Carried on the engine itself since 17.08.2026 — `engineCapacity` decides
+    // the crown's BRONZE-only prize from the engine alone.
+    tier,
     cycleSeconds: appConfig.engines.baseCycleSecondsByTier[tier],
     cycleStartedAt: new Date(0).toISOString(),
     engineLevel: 1,
@@ -435,5 +439,48 @@ describe('engine levers — every upgrade must move the engine', () => {
         );
       }
     }
+  });
+});
+
+/**
+ * The test quest's grand prize — the only PERMANENT capacity layer in the game,
+ * and the only one with a tier gate.
+ *
+ * BRONZE only, decided 17.08.2026 on a measurement rather than a preference:
+ * capacity buys unattended runtime (an engine stops the moment it fills), and a
+ * tier whose cycle already outlasts a day has none to buy. On a fresh diamond
+ * engine +3 moved the daily take by 0.0 tickets and stretched one collect from
+ * 27.8h to 111.3h; on a fresh bronze one it takes a once-a-day player from 1
+ * ticket to 4. The gate lives inside `engineCapacity`, not at its call sites, so
+ * this suite is what proves the call sites cannot re-open it. Server half:
+ * `test-quest.levels.spec.ts`.
+ */
+describe('test-quest crown — permanent capacity, bronze only', () => {
+  const withPrize = { badgeCapacityTickets: TEST_BADGE_CAPACITY_TICKETS };
+
+  describe.each(STAGES)('$name', stage => {
+    it('bronze gains exactly the prize', () => {
+      const engine = engineOf('bronze', stage.engine);
+      const before = measure(engine);
+      const after = measure(engine, withPrize);
+      expect(after.batch).toBe(before.batch + TEST_BADGE_CAPACITY_TICKETS);
+      // Bigger AND rarer — one ticket still costs one tier cycle.
+      expect(after.cycle).toBeGreaterThan(before.cycle);
+      notWorseThan(after.perHour, before.perHour);
+    });
+
+    it.each(TIERS.filter(t => t !== 'bronze'))('%s is untouched', tier => {
+      const engine = engineOf(tier, stage.engine);
+      const before = measure(engine);
+      const after = measure(engine, withPrize);
+      expect(after.batch).toBe(before.batch);
+      expect(after.cycle).toBe(before.cycle);
+    });
+  });
+
+  it('an engine that never said its tier gets nothing (older payload)', () => {
+    const engine = engineOf('bronze', {});
+    delete (engine as { tier?: unknown }).tier;
+    expect(measure(engine, withPrize).batch).toBe(measure(engine).batch);
   });
 });

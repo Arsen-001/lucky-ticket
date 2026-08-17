@@ -9,6 +9,7 @@ import { ReactorDial } from '@/components/pages/out-tabs/tabs-extra/ticket/React
 import { EngineLevelBadge } from '@/components/pages/out-tabs/tabs-extra/ticket/EngineLevelBadge';
 import { useAppTranslations } from '@/hooks/useAppTranslations';
 import { useEngineSpeedAvatarBoostPct } from '@/hooks/useEngineSpeedAvatarBoostPct';
+import { useTestBadgeCapacityTickets } from '@/hooks/useTestBadgeCapacityTickets';
 import { useTestBadgeSpeedBoostPct } from '@/hooks/useTestBadgeSpeedBoostPct';
 import { useEngineConfig } from '@/hooks/useEngineConfig';
 import { routes } from '@/constants/routes';
@@ -49,6 +50,7 @@ export function EnginePreviewCard({
   const { data: me } = useGetMeQuery();
   const avatarSpeedPct = useEngineSpeedAvatarBoostPct();
   const badgeSpeedPct = useTestBadgeSpeedBoostPct();
+  const badgeCapacity = useTestBadgeCapacityTickets();
   const { tables } = useEngineConfig();
   const speedChip = findEquippedChip(inventory?.chips, engine.id, 'speed');
   const speedBooster = findActiveBooster(inventory?.boosters, engine.id, 'speed');
@@ -69,9 +71,15 @@ export function EnginePreviewCard({
     isVip: me?.isVIP ?? false,
     avatarBoostPct: avatarSpeedPct,
     badgeBoostPct: badgeSpeedPct,
+    badgeCapacityTickets: badgeCapacity,
     tables,
   });
-  const capacity = engineCapacity(engine, { capacityChip, capacityBooster, tables });
+  const capacity = engineCapacity(engine, {
+    capacityChip,
+    capacityBooster,
+    badgeCapacityTickets: badgeCapacity,
+    tables,
+  });
   const pending = engine.pendingCount > 0;
   const remaining = Math.max(0, cycle - (elapsedSeconds ?? 0));
   // Undefined until the parent's first tick, so the bar starts at 0 rather

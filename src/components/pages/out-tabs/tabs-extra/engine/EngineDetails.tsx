@@ -24,6 +24,7 @@ import { useAppTranslations } from '@/hooks/useAppTranslations';
 import { useToast } from '@/hooks/useToast';
 import { useSpendFailure } from '@/hooks/useSpendFailure';
 import { useEngineSpeedAvatarBoostPct } from '@/hooks/useEngineSpeedAvatarBoostPct';
+import { useTestBadgeCapacityTickets } from '@/hooks/useTestBadgeCapacityTickets';
 import { useTestBadgeSpeedBoostPct } from '@/hooks/useTestBadgeSpeedBoostPct';
 import { useEngineConfig } from '@/hooks/useEngineConfig';
 import { findTicketFlightOrigin, useTicketFlight } from '@/hooks/useTicketFlight';
@@ -66,6 +67,7 @@ export function EngineDetails({ id }: EngineDetailsProps) {
   const isVip = me?.isVIP ?? false;
   const avatarSpeedPct = useEngineSpeedAvatarBoostPct();
   const badgeSpeedPct = useTestBadgeSpeedBoostPct();
+  const badgeCapacity = useTestBadgeCapacityTickets();
   const { tables, upgrade } = useEngineConfig();
 
   const [equipChipMutation] = useEquipChipMutation();
@@ -122,6 +124,7 @@ export function EngineDetails({ id }: EngineDetailsProps) {
         perks: me?.statusPerks,
         avatarBoostPct: avatarSpeedPct,
         badgeBoostPct: badgeSpeedPct,
+        badgeCapacityTickets: badgeCapacity,
         tables,
       });
       const elapsed =
@@ -192,13 +195,19 @@ export function EngineDetails({ id }: EngineDetailsProps) {
     perks: me?.statusPerks,
     avatarBoostPct: avatarSpeedPct,
     badgeBoostPct: badgeSpeedPct,
+    badgeCapacityTickets: badgeCapacity,
     tables,
   });
   // What the engine is doing RIGHT NOW — batch and rate off the live cycle, so
   // every number in the stats layer matches the countdown and the ×N on the card.
   // (The old passport quoted a rate computed "before the time-limited booster",
   // which disagreed with the countdown running right above it.)
-  const liveCapacity = engineCapacity(engine, { capacityChip, capacityBooster, tables });
+  const liveCapacity = engineCapacity(engine, {
+    capacityChip,
+    capacityBooster,
+    badgeCapacityTickets: badgeCapacity,
+    tables,
+  });
   const liveTicketsPerHour = cycle > 0 ? (3600 / cycle) * liveCapacity : 0;
 
   // The speed stack itemised — same terms `effectiveCycleSeconds` sums, so the
@@ -319,7 +328,12 @@ export function EngineDetails({ id }: EngineDetailsProps) {
         ticketsPerHour={liveTicketsPerHour}
         capacity={liveCapacity}
         cycleSeconds={cycle}
-        baseCycleSeconds={baselineCycleSeconds(engine, { capacityChip, capacityBooster, tables })}
+        baseCycleSeconds={baselineCycleSeconds(engine, {
+          capacityChip,
+          capacityBooster,
+          badgeCapacityTickets: badgeCapacity,
+          tables,
+        })}
         lifetimeProduced={lifetimeProduced}
         boosts={boosts}
       />

@@ -26,6 +26,7 @@ const CAPACITY_LABEL_KEY: Record<EngineCapacityKey, MessageIds> = {
   engineLevel: 'engine level',
   capacityLevel: 'capacity upgrades',
   chip: 'chip',
+  badge: 'tester badge',
   booster: 'booster',
 };
 
@@ -34,6 +35,8 @@ const CAPACITY_COLOR: Record<EngineCapacityKey, string> = {
   engineLevel: 'var(--color-electric-purple)',
   capacityLevel: CAPACITY_ACCENT,
   chip: 'var(--color-teal)',
+  // Gold — the same colour the crown carries everywhere else on this screen.
+  badge: 'var(--color-gold)',
   booster: 'var(--color-orange)',
 };
 

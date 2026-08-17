@@ -10,6 +10,7 @@ import {
   ENGINE_LEVEL_SPEED_BOOST_PCT_TABLE,
   SPEED_LEVEL_BOOST_PCT_TABLE,
 } from '@/utils/global/ticket-engine.utils';
+import { TEST_BADGE_CAPACITY_TICKETS } from '@/utils/global/testQuest.utils';
 
 /**
  * Backend ↔ frontend engine level-table parity guardrail (audit L1).
@@ -57,5 +58,22 @@ describe.skipIf(!hasBackend)('backend ↔ frontend engine table parity', () => {
 
   it.each(PAIRS)('%s matches the backend cell-for-cell', (name, frontendTable) => {
     expect(parseNumberTable(source, name)).toEqual([...frontendTable]);
+  });
+
+  /**
+   * The test quest's grand prize is a scalar, not a table, and it lives in
+   * `test-quest.levels.ts` rather than the economy constants — but it is the
+   * same class of bug: the server mints the batch, the client draws it, and two
+   * different numbers mean a crown holder is shown a collect that never lands.
+   */
+  it('TEST_BADGE_CAPACITY_TICKETS matches the backend', () => {
+    const levelsPath = resolve(
+      process.cwd(),
+      '../lucky-ticket-backend/src/test-quest/test-quest.levels.ts'
+    );
+    const levels = readFileSync(levelsPath, 'utf8');
+    const match = levels.match(/export const TEST_BADGE_CAPACITY_TICKETS\s*=\s*(\d+)/);
+    expect(match, 'TEST_BADGE_CAPACITY_TICKETS not found in the backend').not.toBeNull();
+    expect(Number(match![1])).toBe(TEST_BADGE_CAPACITY_TICKETS);
   });
 });

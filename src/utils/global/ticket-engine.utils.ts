@@ -217,6 +217,7 @@ export const baselineCycleSeconds = (
   options?: {
     capacityChip?: InventoryChip;
     capacityBooster?: InventoryBooster;
+    badgeCapacityTickets?: number;
     tables?: EngineLevelTables;
   }
 ) => engineCapacity(engine, options) * engine.cycleSeconds;
@@ -243,6 +244,13 @@ export const effectiveCycleSeconds = (
      * (it does, in `computeEngineState`) or a badge holder's cycle drifts.
      */
     badgeBoostPct?: number;
+    /**
+     * The other half of the same badge: permanent capacity tickets for the
+     * crown holder. It lengthens the cycle exactly as much as it enlarges the
+     * batch, so a call site that passes one half and not the other prints a
+     * countdown the server does not agree with. @see engineCapacity
+     */
+    badgeCapacityTickets?: number;
     /** `me.statusPerks` — the per-level status boost the server actually applies. */
     perks?: Pick<StatusPerks, 'engineSpeedBoostPct' | 'engineSpeedMultiplierPct'>;
     tables?: EngineLevelTables;
@@ -280,6 +288,7 @@ export const effectiveCycleSeconds = (
     baselineCycleSeconds(engine, {
       capacityChip: options?.capacityChip,
       capacityBooster: options?.capacityBooster,
+      badgeCapacityTickets: options?.badgeCapacityTickets,
       tables: options?.tables,
     }) /
     (1 + totalBoostPct / 100) /
@@ -302,6 +311,14 @@ export const engineCapacity = (
   options?: {
     capacityChip?: InventoryChip;
     capacityBooster?: InventoryBooster;
+    /**
+     * Permanent capacity tickets from the frozen Test-Quest badge — the quest's
+     * grand prize, held by exactly one player (@see useTestBadgeCapacityTickets).
+     * Unlike the chip and the booster it belongs to the PLAYER, not to the
+     * engine, so it applies to every engine they own and has to be passed in
+     * from a hook rather than read off the engine row.
+     */
+    badgeCapacityTickets?: number;
     tables?: EngineLevelTables;
   }
 ) => {
@@ -313,7 +330,14 @@ export const engineCapacity = (
     // The capacity CHIP adds whole tickets, never a percentage: as a % of the
     // batch it rounded to the same single ticket from level 1 to 16 on any
     // engine below level 2. @see chipCapacityTickets
-    chipCapacityTickets(options?.capacityChip?.level);
+    chipCapacityTickets(options?.capacityChip?.level) +
+    // Same units, same reason — but BRONZE only, and the gate lives here rather
+    // than at the twenty-odd call sites that pass the value: forget it once and
+    // one screen quietly promises a batch the server does not mint. On the high
+    // tiers the prize was worth nothing anyway (a fresh diamond cycle is already
+    // longer than a day, so +3 only pushed one collect out to 4.6 days at an
+    // unchanged rate). @see testBadgeCapacityTickets
+    (engine.tier === 'bronze' ? (options?.badgeCapacityTickets ?? 0) : 0);
   // The time-limited booster stays a % of the whole collect (chip included).
   // Round the share UP, not the product: tickets are whole, and rounding the
   // product handed nothing for a +25 % booster on a 1-ticket batch.
