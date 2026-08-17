@@ -10,15 +10,15 @@ import { useAppTranslations } from '@/hooks/useAppTranslations';
 import { useToast } from '@/hooks/useToast';
 import { getTelegramWebApp } from '@/lib/telegram/telegram';
 import {
-  getTestQuestSteps,
   getTestQuestZone,
+  resolveTestQuestSteps,
   TEST_QUEST_CHANNEL_URL,
   TEST_QUEST_START_LEVEL,
   TEST_QUEST_TOTAL_LEVELS,
   testQuestLadder,
   type TestQuestZone,
 } from '@/constants/testQuest.constants';
-import type { TestQuestAction } from '@/types/interfaces/testQuest.interfaces';
+import type { TestQuestAction, TestQuestStepDto } from '@/types/interfaces/testQuest.interfaces';
 import { triggerHaptic } from '@/utils/global/haptic.utils';
 
 /** One rung of the 31 → 1 climb, enriched with what a design needs to draw it. */
@@ -92,13 +92,18 @@ export function useTestQuestScreen() {
   const activeCard = cards.find(c => c.level === activeLevel);
   const isToday = activeLevel === currentLevel;
 
+  // Checklists as the server sent them, by level. The screen renders these
+  // (see `resolveTestQuestSteps`); the bundled ladder is only the fallback.
+  const serverSteps: Record<number, TestQuestStepDto[] | undefined> = {};
+  for (const entry of data?.ladder ?? []) serverSteps[entry.level] = entry.steps;
+
   // What the already-claimed levels have banked per action — the highest
   // cumulative target reached. Seeds every level's badges so progress carries
   // over instead of resetting to 0 when the live counter is behind.
   const baselines: Partial<Record<TestQuestAction, number>> = {};
   for (const card of cards) {
     if (!card.taken) continue;
-    for (const step of getTestQuestSteps(card.level)) {
+    for (const step of resolveTestQuestSteps(card.level, serverSteps[card.level])) {
       if (step.action && step.target != null) {
         baselines[step.action] = Math.max(baselines[step.action] ?? 0, step.target);
       }
@@ -139,6 +144,8 @@ export function useTestQuestScreen() {
     backToToday: () => setSelectedLevel(null),
     claimableToday,
     channelSubscribed,
+    /** Server-sent checklist for a level; undefined ⇒ the caller falls back. */
+    stepsFor: (level: number) => serverSteps[level],
     baselines,
     claiming,
     verifyingChannel,

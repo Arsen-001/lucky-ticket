@@ -78,6 +78,7 @@ export function TestQuestChain({ className }: TestQuestChainProps) {
 
           <TestQuestSteps
             level={s.activeCard.level}
+            steps={s.stepsFor(s.activeCard.level)}
             // The screen speaks days everywhere else — keep the checklist heading
             // in the same language instead of switching to level numbers.
             title={t('steps for day {day}', { day: s.activeCard.day })}
@@ -103,6 +104,7 @@ export function TestQuestChain({ className }: TestQuestChainProps) {
         currentDay={s.currentDay}
         progress={s.data.stepProgress}
         baselines={s.baselines}
+        stepsFor={s.stepsFor}
       />
     </section>
   );

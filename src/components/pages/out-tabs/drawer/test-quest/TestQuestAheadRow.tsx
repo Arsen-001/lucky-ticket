@@ -3,7 +3,11 @@
 import { ChevronDown, Lock } from 'lucide-react';
 import { twMerge } from 'tailwind-merge';
 import { useAppTranslations } from '@/hooks/useAppTranslations';
-import type { TestQuestAction, TestQuestProgress } from '@/types/interfaces/testQuest.interfaces';
+import type {
+  TestQuestAction,
+  TestQuestProgress,
+  TestQuestStepDto,
+} from '@/types/interfaces/testQuest.interfaces';
 import { TestQuestRewardChips } from './TestQuestRewardChips';
 import { TestQuestSteps } from './TestQuestSteps';
 import type { TestQuestScreenCard } from './useTestQuestScreen';
@@ -17,6 +21,8 @@ export interface TestQuestAheadRowProps {
   /** Live counters, so a future day's badges read as "35/93" — what is LEFT. */
   progress?: TestQuestProgress;
   baselines?: Partial<Record<TestQuestAction, number>>;
+  /** The level's checklist as the server sent it (falls back when absent). */
+  steps?: TestQuestStepDto[];
   className?: string;
 }
 
@@ -33,6 +39,7 @@ export function TestQuestAheadRow({
   onToggle,
   progress,
   baselines,
+  steps,
   className,
 }: TestQuestAheadRowProps) {
   const t = useAppTranslations();
@@ -84,6 +91,7 @@ export function TestQuestAheadRow({
         <div className="px-1 pb-1">
           <TestQuestSteps
             level={card.level}
+            steps={steps}
             title={t('steps for day {day}', { day: card.day })}
             progress={progress}
             baselines={baselines}

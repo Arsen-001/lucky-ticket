@@ -1,8 +1,11 @@
 import { describe, expect, it } from 'vitest';
+import { existsSync, readFileSync } from 'node:fs';
+import { resolve } from 'node:path';
 
 import { GlobalConstants } from '@/constants/global.constants';
 import {
   getTestQuestSteps,
+  resolveTestQuestSteps,
   testQuestLadder,
   type TestQuestStep,
 } from '@/constants/testQuest.constants';
@@ -207,5 +210,78 @@ describe('test-quest checklist', () => {
       l.steps.filter(s => /avatar/i.test(s.labelKey)).map(s => `L${l.level}:${s.labelKey}`)
     );
     expect(dead).toEqual([]);
+  });
+});
+
+describe('test-quest checklist — server-driven rendering', () => {
+  const known = getTestQuestSteps(30);
+
+  it('prefers the server list over the bundled one', () => {
+    const fromServer = [
+      { labelKey: 'quest step watch ads', target: 7, action: 'adsWatched', kind: 'ads' },
+      { labelKey: 'quest step channel gate', kind: 'channel', gate: 'channel' },
+    ];
+    expect(resolveTestQuestSteps(30, fromServer)).toEqual([
+      { labelKey: 'quest step watch ads', target: 7, action: 'adsWatched', kind: 'ads' },
+      { labelKey: 'quest step channel gate', kind: 'channel', gate: 'channel' },
+    ]);
+  });
+
+  it('drops rows this build cannot render instead of showing a raw key', () => {
+    // An admin typo or a key added on the server before the app ships it would
+    // otherwise reach t() and print "quest step whatever" on someone's screen.
+    const resolved = resolveTestQuestSteps(30, [
+      { labelKey: 'quest step spend tickets', target: 5, action: 'ticketsSpent', kind: 'tickets' },
+      { labelKey: 'quest step from the future', target: 3, kind: 'ads' },
+      { labelKey: 'quest step watch ads', kind: 'telepathy' },
+    ]);
+    expect(resolved).toEqual([
+      { labelKey: 'quest step spend tickets', target: 5, action: 'ticketsSpent', kind: 'tickets' },
+    ]);
+  });
+
+  it('falls back to the bundled ladder when the server sends nothing usable', () => {
+    expect(resolveTestQuestSteps(30, undefined)).toEqual(known);
+    expect(resolveTestQuestSteps(30, [])).toEqual(known);
+    expect(resolveTestQuestSteps(30, [{ labelKey: 'nope', kind: 'nope' }])).toEqual(known);
+  });
+
+  it('ignores a nonsense target or action rather than trusting it', () => {
+    const [step] = resolveTestQuestSteps(30, [
+      { labelKey: 'quest step watch ads', target: -4, action: 'mindReading', kind: 'ads' },
+    ]);
+    expect(step).toEqual({ labelKey: 'quest step watch ads', kind: 'ads' });
+  });
+});
+
+describe('test-quest checklist — backend parity', () => {
+  // The catalogue moved to the backend on 17.08.2026; this copy is the fallback
+  // for an older server. If the two drift, players on a current build see one
+  // list and the fallback path another. Skipped when the backend is not checked
+  // out next to this repo (CI that clones only the frontend).
+  const levelsPath = resolve(
+    process.cwd(),
+    '../lucky-ticket-backend/src/test-quest/test-quest.levels.ts'
+  );
+  const hasBackend = existsSync(levelsPath);
+
+  it.skipIf(!hasBackend)('the bundled ladder matches the backend defaults', () => {
+    const src = readFileSync(levelsPath, 'utf8');
+    const block = src.slice(
+      src.indexOf('export const TEST_QUEST_STEPS'),
+      src.indexOf('/** The catalog the app reads')
+    );
+    expect(block.length, 'TEST_QUEST_STEPS not found in the backend').toBeGreaterThan(0);
+
+    for (const l of testQuestLadder) {
+      const steps = getTestQuestSteps(l.level);
+      for (const s of steps) {
+        expect(block, `level ${l.level}: ${s.labelKey}`).toContain(`'${s.labelKey}'`);
+      }
+      // Same number of rows for the level, counted off its own block.
+      const start = block.indexOf(`\n  ${l.level}: [`);
+      const rows = block.slice(start, block.indexOf('\n  ],', start)).split('labelKey').length - 1;
+      expect(rows, `level ${l.level} row count`).toBe(steps.length);
+    }
   });
 });

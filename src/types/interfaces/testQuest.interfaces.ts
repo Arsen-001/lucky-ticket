@@ -7,12 +7,32 @@ export interface TestQuestReward {
   lpDays?: number;
 }
 
+/**
+ * One line of a level's checklist as the SERVER sends it.
+ *
+ * `labelKey` is an i18n key, not text — the shell resolves it, so the checklist
+ * stays translated into all 18 languages while its numbers and composition are
+ * server-owned. Typed loosely on purpose: this is untrusted wire data, and
+ * `resolveTestQuestSteps` narrows it against the keys this build actually
+ * knows before anything reaches `t()`.
+ */
+export interface TestQuestStepDto {
+  labelKey: string;
+  target?: number;
+  action?: string;
+  kind: string;
+  gate?: string;
+}
+
 /** One ladder card (31 → 1), server-provided so admin reward edits render live. */
 export interface TestQuestLadderEntry {
   level: number;
   task: string;
   /** Already-formatted drop, e.g. "300k LC · 8 билетов · LP 2д". */
   rewardLabel: string;
+  /** The level's checklist. Absent on older backends ⇒ the local prototype
+   *  ladder is used instead (see `resolveTestQuestSteps`). */
+  steps?: TestQuestStepDto[];
 }
 
 /**
@@ -53,6 +73,8 @@ export interface TestQuestState {
   reward: TestQuestReward;
   /** Human label derived server-side, e.g. "300k LC · 8 билетов · LP 2д". */
   rewardLabel: string;
+  /** Checklist of the level being climbed now (also present inside `ladder`). */
+  steps?: TestQuestStepDto[];
   claimableToday: boolean;
   /** Subscribed to the official channel @luckyticket365. Required to claim ANY
    *  level's reward — read live (getChatMember) server-side. */

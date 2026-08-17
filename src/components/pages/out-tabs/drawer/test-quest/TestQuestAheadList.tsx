@@ -4,7 +4,11 @@ import { useState } from 'react';
 import { Telescope } from 'lucide-react';
 import { twMerge } from 'tailwind-merge';
 import { useAppTranslations } from '@/hooks/useAppTranslations';
-import type { TestQuestAction, TestQuestProgress } from '@/types/interfaces/testQuest.interfaces';
+import type {
+  TestQuestAction,
+  TestQuestProgress,
+  TestQuestStepDto,
+} from '@/types/interfaces/testQuest.interfaces';
 import type { TestQuestScreenCard } from './useTestQuestScreen';
 import { TestQuestAheadRow } from './TestQuestAheadRow';
 
@@ -15,6 +19,8 @@ export interface TestQuestAheadListProps {
   currentDay: number;
   progress?: TestQuestProgress;
   baselines?: Partial<Record<TestQuestAction, number>>;
+  /** Server-sent checklist for a level — see `useTestQuestScreen().stepsFor`. */
+  stepsFor?: (level: number) => TestQuestStepDto[] | undefined;
   className?: string;
 }
 
@@ -35,6 +41,7 @@ export function TestQuestAheadList({
   currentDay,
   progress,
   baselines,
+  stepsFor,
   className,
 }: TestQuestAheadListProps) {
   const t = useAppTranslations();
@@ -68,6 +75,7 @@ export function TestQuestAheadList({
           onToggle={level => setOpenLevel(l => (l === level ? null : level))}
           progress={progress}
           baselines={baselines}
+          steps={stepsFor?.(card.level)}
         />
       ))}
 
@@ -88,6 +96,7 @@ export function TestQuestAheadList({
           onToggle={level => setOpenLevel(l => (l === level ? null : level))}
           progress={progress}
           baselines={baselines}
+          steps={stepsFor?.(card.level)}
         />
       ))}
     </div>

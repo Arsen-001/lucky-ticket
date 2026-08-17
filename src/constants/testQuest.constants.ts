@@ -1,5 +1,5 @@
 import { routes, type Route } from '@/constants/routes';
-import type { TestQuestAction } from '@/types/interfaces/testQuest.interfaces';
+import type { TestQuestAction, TestQuestStepDto } from '@/types/interfaces/testQuest.interfaces';
 import type { MessageIds } from '@/types/types/i18n.types';
 
 /**
@@ -377,10 +377,58 @@ const TEST_QUEST_STEP_OVERRIDES: Record<number, TestQuestStep[]> = {
 };
 
 /**
- * The checklist for a level (31 → 1) — the authored steps, each carrying its
- * i18n label key, live-counter target/action, and visual/nav kind. Every level
- * has an authored list; an unknown level returns []. The caller resolves each
- * `labelKey` with `t()` and each `kind` to an icon + `testQuestStepHref` link.
+ * The LOCAL checklist for a level (31 → 1) — the prototype ladder this build
+ * ships with. Since 17.08.2026 the live list comes from the server (it is the
+ * same data, ported into `test-quest.levels.ts`), and this is the fallback for
+ * an older backend or the pre-load state. Prefer {@link resolveTestQuestSteps}.
  */
 export const getTestQuestSteps = (level: number): TestQuestStep[] =>
   TEST_QUEST_STEP_OVERRIDES[level] ?? [];
+
+/** Every label key this build can render — the white-list server steps are
+ *  checked against, so a key we have no translation for never reaches `t()`. */
+const KNOWN_STEP_KEYS: ReadonlySet<string> = new Set(
+  Object.values(TEST_QUEST_STEP_OVERRIDES).flatMap(steps => steps.map(s => s.labelKey))
+);
+
+const KNOWN_KINDS: ReadonlySet<string> = new Set(
+  Object.values(TEST_QUEST_STEP_OVERRIDES).flatMap(steps => steps.map(s => s.kind))
+);
+
+const KNOWN_ACTIONS: ReadonlySet<string> = new Set<TestQuestAction>([
+  'ticketsSpent',
+  'adsWatched',
+  'shares',
+  'referrals',
+  'engineUpgrades',
+]);
+
+/**
+ * The checklist to render for a level, preferring the SERVER's list.
+ *
+ * The server owns the list so its numbers can be retuned from the admin panel
+ * without a frontend deploy. What it sends is untrusted wire data, so each row
+ * is narrowed here first: an unknown `labelKey` has no translation in this
+ * build and would render as a raw key on someone's screen, and an unknown
+ * `kind` has no icon — both are dropped rather than shown broken. A level left
+ * with nothing usable falls back to the local ladder, so the screen is never
+ * blank because of one bad row.
+ */
+export const resolveTestQuestSteps = (
+  level: number,
+  serverSteps?: TestQuestStepDto[]
+): TestQuestStep[] => {
+  if (!serverSteps?.length) return getTestQuestSteps(level);
+
+  const usable = serverSteps
+    .filter(s => KNOWN_STEP_KEYS.has(s.labelKey) && KNOWN_KINDS.has(s.kind))
+    .map<TestQuestStep>(s => ({
+      labelKey: s.labelKey as MessageIds,
+      kind: s.kind as TestQuestStepKind,
+      ...(typeof s.target === 'number' && s.target > 0 ? { target: s.target } : {}),
+      ...(s.action && KNOWN_ACTIONS.has(s.action) ? { action: s.action as TestQuestAction } : {}),
+      ...(s.gate === 'channel' ? { gate: 'channel' as const } : {}),
+    }));
+
+  return usable.length ? usable : getTestQuestSteps(level);
+};

@@ -4,13 +4,20 @@ import { Gift, ListChecks, Lock, Send } from 'lucide-react';
 import { twMerge } from 'tailwind-merge';
 import { Button } from '@/components/shared/buttons/Button';
 import { useAppTranslations } from '@/hooks/useAppTranslations';
-import { getTestQuestSteps } from '@/constants/testQuest.constants';
-import type { TestQuestAction, TestQuestProgress } from '@/types/interfaces/testQuest.interfaces';
+import { resolveTestQuestSteps } from '@/constants/testQuest.constants';
+import type {
+  TestQuestAction,
+  TestQuestProgress,
+  TestQuestStepDto,
+} from '@/types/interfaces/testQuest.interfaces';
 import { TestQuestStepRow } from './TestQuestStepRow';
 
 export interface TestQuestStepsProps {
   /** The level currently centred in the slider. */
   level: number;
+  /** The level's checklist as the server sent it. Omitted (older backend, or
+   *  before the response lands) ⇒ the bundled prototype ladder is drawn. */
+  steps?: TestQuestStepDto[];
   /** Level already claimed → every step reads as done. */
   claimed?: boolean;
   /** Level is the current claimable one → show the claim CTA at the bottom. */
@@ -38,11 +45,14 @@ export interface TestQuestStepsProps {
 
 /**
  * Checklist panel under the slider — "what to do to complete level N". Tracks
- * whichever card is centred; its steps come from {@link getTestQuestSteps}.
+ * whichever card is centred; its steps come from the server (see
+ * {@link resolveTestQuestSteps}), which is why a retune in the admin panel shows
+ * up here without a deploy.
  * The claim action lives here (bottom), so the card above stays a pure selector.
  */
 export function TestQuestSteps({
   level,
+  steps: serverSteps,
   claimed,
   ready,
   claiming,
@@ -56,7 +66,7 @@ export function TestQuestSteps({
   title,
 }: TestQuestStepsProps) {
   const t = useAppTranslations();
-  const steps = getTestQuestSteps(level);
+  const steps = resolveTestQuestSteps(level, serverSteps);
   if (!steps.length) return null;
 
   // Effective count for a countable step: the live counter, floored by what the

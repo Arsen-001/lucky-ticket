@@ -1,4 +1,5 @@
 import {
+  getTestQuestSteps,
   TEST_QUEST_START_LEVEL,
   TEST_QUEST_TOTAL_LEVELS,
   testQuestLadder,
@@ -34,9 +35,16 @@ const view = () => {
     task: '',
     reward: {},
     rewardLabel: def?.drop ?? '',
+    // Checklists ride along exactly as the real backend sends them, so mock mode
+    // exercises the server-driven path instead of the local fallback.
     ladder: [...testQuestLadder]
       .sort((a, b) => b.level - a.level)
-      .map(l => ({ level: l.level, task: '', rewardLabel: l.drop })),
+      .map(l => ({
+        level: l.level,
+        task: '',
+        rewardLabel: l.drop,
+        steps: getTestQuestSteps(l.level),
+      })),
     claimableToday: !qualified,
     channelSubscribed,
     qualified,
