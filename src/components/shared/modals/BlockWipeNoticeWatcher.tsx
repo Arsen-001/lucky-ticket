@@ -5,8 +5,8 @@ import { useAckBlockWipeNoticeMutation, useGetMeQuery } from '@/api/me.api';
 import { BlockWipeNoticeModal } from '@/components/shared/modals/BlockWipeNoticeModal';
 
 /**
- * Shows the «аккаунт обнулён» notice once, to a player who blocked the bot and
- * has come back to an empty account.
+ * Shows the «аккаунт обнулён» notice once, to a player whose account an operator
+ * reset to zero.
  *
  * Mounted at the app root rather than on the friends screen: the wipe takes the
  * whole account — coins, stars, tickets, inventory — so the first screen they

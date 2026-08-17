@@ -11,13 +11,15 @@ interface BlockWipeNoticeModalProps {
 }
 
 /**
- * Told once to a player who blocked the bot and came back to an empty account.
+ * Told once to a player who opened the app to an emptied account.
  *
  * Deliberately carries NO numbers — not how much LC burned, not how many
  * friends stopped counting. The player is owed the reason their account is
  * empty; billing them for it in the same breath turns an explanation into a
  * taunt, and the figures live in the admin panel where they are actually acted
- * on. @see AccountWipeService in the backend.
+ * on. The reset itself is an operator's decision on one player — for a day it
+ * fired automatically on any bot block, which is exactly the kind of thing this
+ * modal must not have to explain away. @see AccountWipeService in the backend.
  *
  * "Once" is decided by the server (`blockWipeNotice` on `GET /me`), not by
  * local storage: a device-local flag re-shows after a reinstall, on a second
@@ -43,7 +45,7 @@ export function BlockWipeNoticeModal({ open, onClose }: BlockWipeNoticeModalProp
         <div className="relative z-1 flex flex-col gap-2">
           <h3 className="text-xl font-bold text-white">{t('account was reset')}</h3>
           <p className="text-sm leading-relaxed text-white/70">
-            {t('account was reset because the bot was blocked')}
+            {t('account was reset explainer')}
           </p>
         </div>
 
