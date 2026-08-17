@@ -88,7 +88,7 @@
   "pick capacity chip": "选择容量芯片",
   "pick speed booster": "选择时间加速器",
   "pick capacity booster": "选择容量加速器",
-  "chip slot picker hint": "这台引擎只能装 {tier} 芯片，芯片与档位绑定。",
+  "chip slot picker hint": "这台引擎可装 {tier} 及更高档位的芯片——芯片向下兼容低档位。",
   "booster slot picker hint": "这台引擎只能装 {tier} 加速器，它们与档位绑定。",
   "no eligible chips": "该插槽暂无可用芯片。请在背包中制作或升级。",
   "mint in inventory": "在背包中制作芯片",

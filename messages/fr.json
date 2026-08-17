@@ -88,7 +88,7 @@
   "pick capacity chip": "Choisis une puce de capacité",
   "pick speed booster": "Choisis un booster de temps",
   "pick capacity booster": "Choisis un booster de capacité",
-  "chip slot picker hint": "Seules les puces {tier} entrent dans ce moteur — les puces sont liées au palier.",
+  "chip slot picker hint": "Les puces {tier} et au-dessus entrent dans ce moteur — les puces descendent l’échelle des paliers.",
   "booster slot picker hint": "Seuls les boosters {tier} entrent dans ce moteur — ils sont liés au palier.",
   "no eligible chips": "Aucune puce prête pour cet emplacement. Fabrique-en une ou monte-la de niveau dans l'inventaire.",
   "mint in inventory": "Fabriquer une puce dans l'inventaire",

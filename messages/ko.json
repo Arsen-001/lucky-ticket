@@ -88,7 +88,7 @@
   "pick capacity chip": "용량 칩 선택",
   "pick speed booster": "시간 부스터 선택",
   "pick capacity booster": "용량 부스터 선택",
-  "chip slot picker hint": "이 엔진에는 {tier} 칩만 장착됩니다. 칩은 티어에 고정되어 있습니다.",
+  "chip slot picker hint": "이 엔진에는 {tier} 이상 티어의 칩이 장착됩니다. 칩은 티어 사다리를 아래로 적용됩니다.",
   "booster slot picker hint": "이 엔진에는 {tier} 부스터만 장착됩니다. 티어에 고정되어 있습니다.",
   "no eligible chips": "이 슬롯에 쓸 칩이 없습니다. 인벤토리에서 제작하거나 레벨을 올리세요.",
   "mint in inventory": "인벤토리에서 칩 제작",

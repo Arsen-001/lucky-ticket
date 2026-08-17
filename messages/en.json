@@ -88,7 +88,7 @@
   "pick capacity chip": "Pick a Capacity Chip",
   "pick speed booster": "Pick a Time Booster",
   "pick capacity booster": "Pick a Capacity Booster",
-  "chip slot picker hint": "Only {tier} chips fit this engine — chips are tier-locked.",
+  "chip slot picker hint": "{tier} chips and higher fit this engine — chips work down the tier ladder.",
   "booster slot picker hint": "Only {tier} boosters fit this engine — boosters are tier-locked.",
   "no eligible chips": "No chips ready for this slot. Mint or level up in inventory.",
   "mint in inventory": "Mint a chip in inventory",

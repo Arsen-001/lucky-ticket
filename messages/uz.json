@@ -88,7 +88,7 @@
   "pick capacity chip": "Sigʻim chipini tanla",
   "pick speed booster": "Vaqt busterini tanla",
   "pick capacity booster": "Sigʻim busterini tanla",
-  "chip slot picker hint": "Bu dvigatelga faqat {tier} chiplar tushadi — chiplar darajaga bogʻlangan.",
+  "chip slot picker hint": "Bu dvigatelga {tier} va undan yuqori chiplar tushadi — chiplar bosqich boʻyicha pastga ishlaydi.",
   "booster slot picker hint": "Bu dvigatelga faqat {tier} busterlar tushadi — ular darajaga bogʻlangan.",
   "no eligible chips": "Bu uyacha uchun tayyor chip yoʻq. Inventarda yasa yoki darajasini koʻtar.",
   "mint in inventory": "Inventarda chip yasash",

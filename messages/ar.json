@@ -88,7 +88,7 @@
   "pick capacity chip": "اختر شريحة سعة",
   "pick speed booster": "اختر معزّز وقت",
   "pick capacity booster": "اختر معزّز سعة",
-  "chip slot picker hint": "لا تناسب هذا المحرك إلا شرائح {tier} — الشرائح مرتبطة بالفئة.",
+  "chip slot picker hint": "تناسب هذا المحرك شرائح {tier} وما فوقها — الشرائح تعمل نزولًا في سلّم الفئات.",
   "booster slot picker hint": "لا تناسب هذا المحرك إلا معزّزات {tier} — وهي مرتبطة بالفئة.",
   "no eligible chips": "لا توجد شريحة جاهزة لهذه الفتحة. اصنع واحدة أو ارفع مستواها في المخزون.",
   "mint in inventory": "صناعة شريحة في المخزون",

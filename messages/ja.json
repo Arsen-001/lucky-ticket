@@ -88,7 +88,7 @@
   "pick capacity chip": "容量チップを選ぶ",
   "pick speed booster": "時間ブースターを選ぶ",
   "pick capacity booster": "容量ブースターを選ぶ",
-  "chip slot picker hint": "このエンジンには{tier}のチップだけが装着できます。チップはティアに固定されています。",
+  "chip slot picker hint": "このエンジンには{tier}以上のチップが装着できます。チップはティアの下方向に働きます。",
   "booster slot picker hint": "このエンジンには{tier}のブースターだけが装着できます。ティアに固定されています。",
   "no eligible chips": "このスロットに使えるチップがありません。インベントリで作成するかレベルを上げてください。",
   "mint in inventory": "インベントリでチップを作る",

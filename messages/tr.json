@@ -88,7 +88,7 @@
   "pick capacity chip": "Bir kapasite çipi seç",
   "pick speed booster": "Bir zaman güçlendiricisi seç",
   "pick capacity booster": "Bir kapasite güçlendiricisi seç",
-  "chip slot picker hint": "Bu motora sadece {tier} çipler girer — çipler seviyeye bağlıdır.",
+  "chip slot picker hint": "Bu motora {tier} ve üzeri çipler girer — çipler kademe merdiveninde aşağı doğru çalışır.",
   "booster slot picker hint": "Bu motora sadece {tier} güçlendiriciler girer — seviyeye bağlıdırlar.",
   "no eligible chips": "Bu yuva için hazır çip yok. Envanterde üret ya da seviyesini yükselt.",
   "mint in inventory": "Envanterde çip üret",

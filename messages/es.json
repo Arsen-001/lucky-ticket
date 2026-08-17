@@ -88,7 +88,7 @@
   "pick capacity chip": "Elige un chip de capacidad",
   "pick speed booster": "Elige un potenciador de tiempo",
   "pick capacity booster": "Elige un potenciador de capacidad",
-  "chip slot picker hint": "Solo encajan chips {tier} en este motor: los chips están ligados al nivel.",
+  "chip slot picker hint": "En este motor encajan chips {tier} y superiores: los chips bajan por la escalera de niveles.",
   "booster slot picker hint": "Solo encajan potenciadores {tier} en este motor: están ligados al nivel.",
   "no eligible chips": "No hay chips listos para esta ranura. Fabrica o sube de nivel en el inventario.",
   "mint in inventory": "Fabricar un chip en el inventario",
