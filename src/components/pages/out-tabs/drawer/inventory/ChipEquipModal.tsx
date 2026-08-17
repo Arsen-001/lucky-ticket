@@ -171,7 +171,7 @@ export function ChipEquipModal({
             one case that bills. */}
         <footer className="flex items-center justify-end gap-3">
           {cost > 0 && (
-            <div className="mr-auto flex items-center gap-1.5 text-[11px] font-bold tabular-nums">
+            <div className="me-auto flex items-center gap-1.5 text-[11px] font-bold tabular-nums">
               <TelegramStarIcon size={14} />
               <span className={canAfford ? 'text-white' : 'text-error-text'}>
                 {userStars} / {cost}

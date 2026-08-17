@@ -31,7 +31,12 @@ export function InventoryContainer() {
   const toast = useToast();
   const spend = useSpendFailure();
   const { data, isLoading, isError, refetch } = useGetInventoryQuery();
-  const { data: tickets } = useGetTicketsQuery();
+  // `isLoading` too: the bonus tiles count SLOTS, which come from the tickets
+  // query, not the inventory one. With only the inventory flag the skeleton
+  // lifted while engines were still in flight and the tiles printed a confident
+  // "+0% · 0 of 20 slots" — the same truthful-looking zero the skeleton exists
+  // to prevent, just half a second later.
+  const { data: tickets, isLoading: ticketsLoading } = useGetTicketsQuery();
   const { data: me } = useGetMeQuery();
   const [equipChipMutation, { isLoading: equipping }] = useEquipChipMutation();
   const [unequipChipMutation] = useUnequipChipMutation();
@@ -145,7 +150,7 @@ export function InventoryContainer() {
         shards={shards}
         boosters={boosters}
         slots={slots}
-        isLoading={isLoading}
+        isLoading={isLoading || ticketsLoading}
         levelingUpChipId={animatingChipId}
         unequippingChipId={unequipPendingId}
         onEquip={setEquipChip}

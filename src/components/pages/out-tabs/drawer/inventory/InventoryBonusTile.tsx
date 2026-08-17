@@ -48,7 +48,7 @@ export function InventoryBonusTile({
       onClick={() => onInfo?.(type)}
       aria-label={`${type === 'speed' ? t('time') : t('capacity')} · ${t('what are chips')}`}
       className={twMerge(
-        'shine-card flex flex-col items-stretch gap-2 overflow-hidden rounded-2xl p-3 text-left transition-transform active:scale-98',
+        'shine-card flex flex-col items-stretch gap-2 overflow-hidden rounded-2xl p-3 text-start transition-transform active:scale-98',
         className
       )}
       style={{ ['--shine-card-accent' as string]: accent }}
@@ -56,16 +56,19 @@ export function InventoryBonusTile({
       <span className="relative z-1 flex items-center gap-1.5 text-[9px] font-extrabold uppercase tracking-[0.14em] text-white/55">
         <Icon size={12} stroke={accent} strokeWidth={2.6} />
         {type === 'speed' ? t('time') : t('capacity')}
-        <Info size={13} strokeWidth={2.4} className="ml-auto text-white/40" />
+        <Info size={13} strokeWidth={2.4} className="ms-auto text-white/40" />
       </span>
 
       {loading ? (
         <Skeleton variant="line" className="relative z-1 h-5 w-20" />
       ) : (
         <span
-          // 20px, not 22: "+1020 tickets" is the widest this line can get on a
-          // full fleet, and it has to stay on one line in a half-width tile.
-          className="relative z-1 truncate text-[20px] font-extrabold leading-none tabular-nums"
+          // Wraps, never truncates. 20px was chosen so "+1020 tickets" fits one
+          // line at 390px — but Japanese puts the number INSIDE the phrase
+          // ("チケット+40枚"), so at 320px an ellipsis ate the number itself and
+          // the tile showed a unit with no value. Two lines beat a lost number;
+          // the grid stretches both tiles to the taller one.
+          className="relative z-1 text-[20px] font-extrabold leading-tight tabular-nums"
           style={{
             color: hasBonus ? accent : 'rgba(255,255,255,0.32)',
             textShadow: hasBonus

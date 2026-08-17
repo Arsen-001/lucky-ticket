@@ -67,7 +67,7 @@ export function ShardInfoSheet({ open, shard, chips, onClose }: ShardInfoSheetPr
   return (
     <Modal open={open} onClose={onClose} label={name}>
       <div className="card-outlined bg-purple-gradient flex flex-col gap-4 rounded-2xl p-5">
-        <header className="flex items-center gap-3 pr-8">
+        <header className="flex items-center gap-3 pe-8">
           <ChipShardIcon type={type} tier={quality} size={56} empty={count === 0} />
           <div className="flex min-w-0 flex-col gap-1">
             <h2 className="text-base font-extrabold leading-tight text-white">{name}</h2>
