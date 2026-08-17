@@ -4,6 +4,7 @@ import { useEffect, useRef, useState, type CSSProperties } from 'react';
 import { twMerge } from 'tailwind-merge';
 import { Clock } from 'lucide-react';
 import { TelegramStarIcon } from '@/components/shared/icons/TelegramStarIcon';
+import { ButtonSpinner } from '@/components/shared/loaders/ButtonSpinner';
 import { TicketOverlap } from '@/components/shared/icons/TicketOverlap';
 import { formatCycleTime } from '@/utils/global/ticket-engine.utils';
 import { tierNameId, tierTicketNameId } from '@/constants/tier-names';
@@ -215,7 +216,10 @@ export function EngineCardCycleRow({
           } as CSSProperties
         }
       >
-        <span className="relative z-1">{t('claim')}</span>
+        <span className="relative z-1 flex-center gap-1">
+          {busy && <ButtonSpinner size={compact ? 13 : 11} />}
+          {t('claim')}
+        </span>
       </button>
       <button
         onClick={() => onInstantClaim(engineId)}
@@ -227,11 +231,15 @@ export function EngineCardCycleRow({
           compact
             ? 'min-w-16 h-8 px-2 rounded-lg text-[12px]'
             : 'min-w-16 h-7.5 px-2.5 rounded-lg text-[10px]',
-          busy && 'opacity-60 cursor-progress',
+          busy && 'cursor-progress',
           pending && 'hidden'
         )}
       >
-        <TelegramStarIcon size={compact ? 13 : 11} />
+        {busy ? (
+          <ButtonSpinner size={compact ? 13 : 11} />
+        ) : (
+          <TelegramStarIcon size={compact ? 13 : 11} />
+        )}
         {/* The verb, never the adverb — on BOTH faces since 17.08.2026. At
             readable type "Забрать сейчас · 1" is 133px of the row's 260 and
             squeezes the ticket name off the strip; the cube face was fixed

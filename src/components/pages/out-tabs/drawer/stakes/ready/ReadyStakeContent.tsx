@@ -269,7 +269,8 @@ export function ReadyStakeContent({ stakeId }: ReadyStakeContentProps) {
           <Button
             type="button"
             onClick={handleClaim}
-            disabled={claiming}
+            loading={claiming}
+            iconSize={16}
             className="border-success/30 pointer-events-auto flex w-full items-center justify-center rounded-2xl border px-5 py-4 text-[13px] font-extrabold uppercase tracking-wider text-white shadow-[0_3px_9px_rgba(74,222,128,0.15),inset_0_1px_0_rgba(255,255,255,0.08)] disabled:opacity-60"
             style={{
               background:

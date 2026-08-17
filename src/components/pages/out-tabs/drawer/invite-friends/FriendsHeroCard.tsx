@@ -28,7 +28,9 @@ export function FriendsHeroCard() {
   const locale = useLocale() as LocaleType;
   const { data: me, isLoading: isMeLoading } = useGetMeQuery();
   const { data: stats, isLoading: isStatsLoading } = useGetReferralStatsQuery();
-  const [prepareShareMessage] = usePrepareShareMessageMutation();
+  // The Telegram share sheet opens only after the card is prepared on the
+  // server — a round trip through the proxy with nothing on screen until now.
+  const [prepareShareMessage, { isLoading: preparingCard }] = usePrepareShareMessageMutation();
   const [markShareSent] = useMarkShareSentMutation();
   const rewards = useInviteRewards();
 
@@ -133,7 +135,7 @@ export function FriendsHeroCard() {
       <div className="relative mt-2.5 flex gap-2">
         <Button
           variant="primary"
-          loading={isMeLoading || !linkReady}
+          loading={isMeLoading || !linkReady || preparingCard}
           icon={copied ? <Check /> : <Share2 />}
           iconSize={13}
           onClick={handleShare}

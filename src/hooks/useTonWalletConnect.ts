@@ -30,8 +30,12 @@ export function useTonWalletConnect() {
   const t = useAppTranslations();
   const toast = useToast();
   const [tonConnectUI] = useTonConnectUI();
-  const [fetchPayload] = useLazyGetTonProofPayloadQuery();
-  const [connectWallet, { isLoading: isConnecting }] = useConnectWalletMutation();
+  // The proof nonce is fetched BEFORE the TON Connect sheet opens — a silent
+  // round trip through the proxy that used to leave «Подключить кошелёк»
+  // looking dead for up to a second. Surfaced through `isConnecting` below.
+  const [fetchPayload, { isFetching: isPriming }] = useLazyGetTonProofPayloadQuery();
+  const [connectWallet, { isLoading: isVerifying }] = useConnectWalletMutation();
+  const isConnecting = isPriming || isVerifying;
   const [disconnectWallet, { isLoading: isDisconnecting }] = useDisconnectWalletMutation();
 
   // Address already sent to the backend — guards against a double-verify when

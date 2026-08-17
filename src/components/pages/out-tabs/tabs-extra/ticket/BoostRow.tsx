@@ -2,6 +2,7 @@
 
 import { twMerge } from 'tailwind-merge';
 import { TelegramStarIcon } from '@/components/shared/icons/TelegramStarIcon';
+import { ButtonSpinner } from '@/components/shared/loaders/ButtonSpinner';
 import { useAppTranslations } from '@/hooks/useAppTranslations';
 import type { ReactNode } from 'react';
 
@@ -15,11 +16,11 @@ export interface BoostRowProps {
   costStars: number;
   onUpgrade: () => void;
   /**
-   * An upgrade of this engine is in flight. The button ignores taps and dims
+   * An upgrade of this engine is in flight. The button ignores taps and spins
    * until the server answers — a second request racing the first loses the
    * backend's level CAS and comes back as «покупка не прошла» after an
-   * upgrade that had in fact gone through. Content stays put (no spinner): the
-   * round trip is well under a second, and the level already moved.
+   * upgrade that had in fact gone through. The spinner takes the star's place
+   * so the button keeps its width; the price stays beside it.
    */
   pending?: boolean;
   compact?: boolean;
@@ -114,7 +115,7 @@ export function BoostRow({
           maxed
             ? 'bg-white/3 border border-white/5 text-pink-secondary cursor-default'
             : 'cursor-pointer hover:brightness-110 active:scale-99',
-          !maxed && pending && 'opacity-60 cursor-progress'
+          !maxed && pending && 'cursor-progress'
         )}
         style={
           maxed
@@ -134,7 +135,11 @@ export function BoostRow({
                 the home cube's 3D context (`preserve-3d` + `backface-visibility`),
                 which is where iOS drops the icon. The star reads fine on both
                 accents at this size — the button fill is only 12% tint. */}
-            <TelegramStarIcon size={compact ? 14 : 12} />
+            {pending ? (
+              <ButtonSpinner size={compact ? 14 : 12} />
+            ) : (
+              <TelegramStarIcon size={compact ? 14 : 12} />
+            )}
             <span className="tabular-nums">{costStars}</span>
           </>
         )}

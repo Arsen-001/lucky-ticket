@@ -188,7 +188,11 @@ export function FriendClaimModal({
 
           <Button
             variant="primary"
-            loading={isClaiming && !snapshot}
+            // Spins until the claim lands: the sheet already celebrates from the
+            // snapshot, but «LC added to your balance» is only true once the
+            // server says so. (`&& !snapshot` made this unreachable — the
+            // snapshot is taken before the claim is fired.)
+            loading={isClaiming}
             onClick={onClose}
             className="h-11 w-full rounded-xl py-0 text-sm font-extrabold"
           >

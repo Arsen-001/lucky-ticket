@@ -1,5 +1,6 @@
 'use client';
 
+import { useState } from 'react';
 import {
   Award,
   Flag,
@@ -130,19 +131,28 @@ export function NotificationPreferencesSection() {
   const t = useAppTranslations();
   const { data, isLoading } = useGetNotificationPreferencesQuery();
   const [updatePreferences, { isLoading: isUpdating }] = useUpdateNotificationPreferencesMutation();
+  // Which switch is waiting on the server — that one spins; the others only
+  // hold (the mutation writes the whole channel, so a second toggle mid-flight
+  // would clobber the first).
+  const [pendingKey, setPendingKey] = useState<string | null>(null);
 
-  const handleToggle = (
+  const handleToggle = async (
     channel: NotificationChannel,
     key: NotificationPreferenceKey,
     checked: boolean
   ) => {
-    if (!data) return;
-    updatePreferences({
-      [channel]: {
-        ...data[channel],
-        [key]: checked,
-      },
-    });
+    if (!data || pendingKey !== null) return;
+    setPendingKey(`${channel}:${key}`);
+    try {
+      await updatePreferences({
+        [channel]: {
+          ...data[channel],
+          [key]: checked,
+        },
+      });
+    } finally {
+      setPendingKey(null);
+    }
   };
 
   const renderChannelList = (channel: NotificationChannel) => (
@@ -167,7 +177,7 @@ export function NotificationPreferencesSection() {
                   aria-label={t(category.labelKey)}
                   checked={checked}
                   onChange={next => handleToggle(channel, category.key, next)}
-                  loading={isLoading}
+                  loading={isLoading || pendingKey === `${channel}:${category.key}`}
                   disabled={isUpdating}
                 />
               }

@@ -15,6 +15,7 @@ import {
   computeNextTierThreshold,
   GlobalConstants,
 } from '@/constants/global.constants';
+import { ButtonSpinner } from '@/components/shared/loaders/ButtonSpinner';
 import { routes } from '@/constants/routes';
 import { useAppTranslations } from '@/hooks/useAppTranslations';
 import { useStakesDisplayConfig } from '@/hooks/useStakesDisplayConfig';
@@ -183,8 +184,11 @@ export function StakesContent() {
           type="button"
           onClick={handleClaimAll}
           disabled={claimingAll}
+          aria-busy={claimingAll || undefined}
           className="bg-success/15 hover:bg-success/20 border-success/40 text-success flex items-center justify-center gap-2 rounded-2xl border px-4 py-3 text-[13px] font-extrabold uppercase tracking-wider transition-colors disabled:opacity-60"
         >
+          {/* One request per stake, in sequence — seconds, not a round trip. */}
+          {claimingAll && <ButtonSpinner size={14} />}
           <span>{t('claim all ready')}</span>
           <span className="bg-success/30 rounded-full px-1.5 py-0.5 text-[10px] font-bold tabular-nums">
             {readyCount}

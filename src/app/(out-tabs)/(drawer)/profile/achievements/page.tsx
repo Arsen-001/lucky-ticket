@@ -37,6 +37,7 @@ export default function Page() {
   const { data, isLoading, isError, refetch } = useGetAchievementsQuery();
   const { data: profile } = useGetProfileQuery(undefined);
   const [pinAchievement] = usePinAchievementMutation();
+  const [pinningSlot, setPinningSlot] = useState<number | null>(null);
   const [filter, setFilter] = useState<Filter>('all');
   const [category, setCategory] = useState<AchievementCategory | 'all'>('all');
   const [rarity, setRarity] = useState<AchievementRarity | 'all'>('all');
@@ -70,12 +71,15 @@ export default function Page() {
   );
 
   const handlePin = async (slot: number) => {
-    if (!pinTarget) return;
+    if (!pinTarget || pinningSlot !== null) return;
+    setPinningSlot(slot);
     try {
       await pinAchievement({ achievementId: pinTarget.id, slot }).unwrap();
       setPinTarget(null);
     } catch {
       toast.error(t('action failed'));
+    } finally {
+      setPinningSlot(null);
     }
   };
 
@@ -178,6 +182,7 @@ export default function Page() {
         pinnedSlots={pinnedSlots}
         onClose={() => setPinTarget(null)}
         onPin={handlePin}
+        pinningSlot={pinningSlot}
       />
     </div>
   );

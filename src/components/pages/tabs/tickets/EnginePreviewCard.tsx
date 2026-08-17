@@ -6,6 +6,7 @@ import { twMerge } from 'tailwind-merge';
 import { useGetInventoryQuery } from '@/api/inventory.api';
 import { useGetMeQuery } from '@/api/me.api';
 import { ReactorDial } from '@/components/pages/out-tabs/tabs-extra/ticket/ReactorDial';
+import { ButtonSpinner } from '@/components/shared/loaders/ButtonSpinner';
 import { EngineLevelBadge } from '@/components/pages/out-tabs/tabs-extra/ticket/EngineLevelBadge';
 import { useAppTranslations } from '@/hooks/useAppTranslations';
 import { useEngineSpeedAvatarBoostPct } from '@/hooks/useEngineSpeedAvatarBoostPct';
@@ -33,6 +34,8 @@ export interface EnginePreviewCardProps {
   /** Undefined until the parent's first timer tick resolves the real value. */
   elapsedSeconds?: number;
   onClaim?: () => void;
+  /** The claim of this engine is in flight — the button spins and ignores taps. */
+  busy?: boolean;
   className?: string;
 }
 
@@ -42,6 +45,7 @@ export function EnginePreviewCard({
   index,
   elapsedSeconds,
   onClaim,
+  busy = false,
   className,
 }: EnginePreviewCardProps) {
   const t = useAppTranslations();
@@ -180,6 +184,8 @@ export function EnginePreviewCard({
       {pending ? (
         <button
           type="button"
+          disabled={busy}
+          aria-busy={busy || undefined}
           onClick={e => {
             e.preventDefault();
             e.stopPropagation();
@@ -198,6 +204,7 @@ export function EnginePreviewCard({
           >
             <span className="animate-task-shine absolute -top-1/2 -left-1/2 h-[200%] w-[55%] bg-gradient-to-r from-transparent via-white/40 to-transparent" />
           </span>
+          {busy && <ButtonSpinner size={13} className="relative text-white" />}
           <span className="relative text-[10px] font-extrabold tracking-wider text-white uppercase">
             {t('claim')}
           </span>

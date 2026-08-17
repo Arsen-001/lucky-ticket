@@ -1,8 +1,11 @@
 'use client';
 
-import { PlayCircle, RotateCcw } from 'lucide-react';
+import { Check, PlayCircle, RotateCcw } from 'lucide-react';
+import { useState } from 'react';
 import { useUpdateMeMutation } from '@/api/me.api';
 import { SettingsMenuItem } from '@/components/pages/out-tabs/drawer/settings/SettingsMenuItem';
+import { ButtonSpinner } from '@/components/shared/loaders/ButtonSpinner';
+import { useToast } from '@/hooks/useToast';
 import { useAppDispatch } from '@/lib/rtk/hooks';
 import { startTour } from '@/lib/rtk/features/onboarding-tour.slice';
 import { useAppTranslations } from '@/hooks/useAppTranslations';
@@ -15,7 +18,21 @@ import { useAppTranslations } from '@/hooks/useAppTranslations';
 export function SettingsTourRow() {
   const t = useAppTranslations();
   const dispatch = useAppDispatch();
-  const [updateMe] = useUpdateMeMutation();
+  const toast = useToast();
+  const [updateMe, { isLoading: resetting }] = useUpdateMeMutation();
+  // The reset changes nothing visible on this screen, so the row itself has to
+  // say the tap landed: a spinner for the round trip, a check once it did.
+  const [resetDone, setResetDone] = useState(false);
+
+  const handleReset = async () => {
+    if (resetting) return;
+    try {
+      await updateMe({ hasSeenTour: false }).unwrap();
+      setResetDone(true);
+    } catch {
+      toast.error(t('action failed'));
+    }
+  };
 
   return (
     <div className="flex flex-col gap-2">
@@ -28,12 +45,20 @@ export function SettingsTourRow() {
         rightElement={<div />}
       />
       <SettingsMenuItem
-        onClick={() => updateMe({ hasSeenTour: false })}
+        onClick={handleReset}
         icon={<RotateCcw size={18} className="text-gold" />}
         title={t('reset onboarding')}
         description={t('show the tour again for a new account')}
         accent="gold"
-        rightElement={<div />}
+        rightElement={
+          resetting ? (
+            <ButtonSpinner size={16} className="text-white/60" />
+          ) : resetDone ? (
+            <Check size={16} className="text-success" strokeWidth={2.6} />
+          ) : (
+            <div />
+          )
+        }
       />
     </div>
   );

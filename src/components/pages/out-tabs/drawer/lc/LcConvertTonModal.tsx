@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react';
 import { ArrowDown, CheckCircle2, Coins } from 'lucide-react';
 import { twMerge } from 'tailwind-merge';
+import { ButtonSpinner } from '@/components/shared/loaders/ButtonSpinner';
 import { Modal } from '@/components/shared/modals/Modal';
 import { useAppTranslations } from '@/hooks/useAppTranslations';
 import { useConverterAmount } from '@/hooks/useConverterAmount';
@@ -222,15 +223,20 @@ export function LcConvertTonModal({ open, onClose, balance }: LcConvertTonModalP
             <button
               type="button"
               disabled={!canSubmit || isLoading}
+              aria-busy={isLoading || undefined}
               onClick={handleConvert}
               className={twMerge(
                 'relative flex items-center justify-center gap-2 overflow-hidden rounded-xl px-4 py-3.5 text-sm font-extrabold uppercase tracking-wider transition-transform active:scale-99',
-                canSubmit && !isLoading
+                canSubmit
                   ? 'bg-pink-gradient cursor-pointer text-white'
-                  : 'cursor-not-allowed bg-white/8 text-white/40'
+                  : 'cursor-not-allowed bg-white/8 text-white/40',
+                isLoading && 'cursor-progress'
               )}
             >
-              {isLoading ? t('loading') : t('convert')}
+              {/* Keeps its face while waiting: a grey «Loading…» read as the
+                  button giving up, not as the request being on its way. */}
+              {isLoading && <ButtonSpinner size={16} />}
+              {t('convert')}
             </button>
 
             <p className="text-pink-secondary text-center text-[10px]">

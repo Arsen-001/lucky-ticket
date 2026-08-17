@@ -44,7 +44,7 @@ export function WalletContainer() {
     refetch: refetchTransactions,
   } = useGetWalletTransactionsQuery();
   const { data: lcState } = useGetLcStateQuery();
-  const { connect, disconnect, isDisconnecting, referralGate, dismissReferralGate } =
+  const { connect, disconnect, isConnecting, isDisconnecting, referralGate, dismissReferralGate } =
     useTonWalletConnect();
   const { withdrawalsEnabled } = useWalletLimits();
   const [modal, setModal] = useState<WalletModal>(null);
@@ -144,6 +144,7 @@ export function WalletContainer() {
         onConnect={() => void connect()}
         onDisconnect={() => setModal('removeWallet')}
         disconnecting={isDisconnecting}
+        connecting={isConnecting}
       />
 
       {/*

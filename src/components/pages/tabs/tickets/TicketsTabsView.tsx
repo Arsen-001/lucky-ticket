@@ -259,6 +259,8 @@ export function TicketsTabsView() {
         // matches what the server enforces; fall back to LP-only on an older API.
         onClaimAll={canBulkClaim ? () => handleClaimAllForTier(activeTab) : undefined}
         onClaimEngine={engineId => handleClaimEngine(activeTab, engineId)}
+        claimAllPending={claimLock.locked.has(activeTab)}
+        claimingEngineIds={claimLock.locked}
       />
     );
   };

@@ -3,6 +3,7 @@ import { Heart } from 'lucide-react';
 import { twMerge } from 'tailwind-merge';
 import { useLikeProfileMutation } from '@/api/profile.api';
 import { BoltIcon } from '@/components/shared/icons/BoltIcon';
+import { ButtonSpinner } from '@/components/shared/loaders/ButtonSpinner';
 import { useAppTranslations } from '@/hooks/useAppTranslations';
 import { GlobalConstants } from '@/constants/global.constants';
 import { formatNumber } from '@/utils/global/number.utils';
@@ -38,6 +39,7 @@ export function ProfileLikeButton({
       type="button"
       onClick={handleLike}
       disabled={blocked}
+      aria-busy={isLoading || undefined}
       aria-pressed={liked}
       aria-label={liked ? t('profile liked') : t('like profile')}
       className={twMerge(
@@ -49,7 +51,11 @@ export function ProfileLikeButton({
         className
       )}
     >
-      <Heart size={14} strokeWidth={2.6} fill={liked ? 'currentColor' : 'none'} />
+      {isLoading ? (
+        <ButtonSpinner size={14} />
+      ) : (
+        <Heart size={14} strokeWidth={2.6} fill={liked ? 'currentColor' : 'none'} />
+      )}
       <span className="tabular-nums">{formatNumber(likesReceived)}</span>
       {!liked && (
         <span className="text-teal flex items-center gap-0.5 border-l border-white/15 ps-1.5">

@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react';
 import { ArrowDown, CheckCircle2, Diamond } from 'lucide-react';
 import { twMerge } from 'tailwind-merge';
+import { ButtonSpinner } from '@/components/shared/loaders/ButtonSpinner';
 import { Modal } from '@/components/shared/modals/Modal';
 import { TelegramStarIcon } from '@/components/shared/icons/TelegramStarIcon';
 import { useAppTranslations } from '@/hooks/useAppTranslations';
@@ -68,7 +69,7 @@ export function ExchangeTonStarsModal({
   const stars = amount.to;
   const cost = starsToTon(stars, tonUsdRate, lsUsdRate); // exact TON that will be charged
   const insufficient = stars >= 1 && cost > tonBalance;
-  const canSubmit = isConnected && stars >= 1 && !insufficient && !isLoading;
+  const canSubmit = isConnected && stars >= 1 && !insufficient;
 
   const handleMax = () => amount.setFrom(String(tonBalance));
 
@@ -198,16 +199,19 @@ export function ExchangeTonStarsModal({
 
             <button
               type="button"
-              disabled={!canSubmit}
+              disabled={!canSubmit || isLoading}
+              aria-busy={isLoading || undefined}
               onClick={handleExchange}
               className={twMerge(
                 'relative flex items-center justify-center gap-2 overflow-hidden rounded-xl px-4 py-3.5 text-sm font-extrabold uppercase tracking-wider transition-transform active:scale-99',
                 canSubmit
                   ? 'bg-pink-gradient cursor-pointer text-white'
-                  : 'cursor-not-allowed bg-white/8 text-white/40'
+                  : 'cursor-not-allowed bg-white/8 text-white/40',
+                isLoading && 'cursor-progress'
               )}
             >
-              {isLoading ? t('loading') : t('exchange')}
+              {isLoading && <ButtonSpinner size={16} />}
+              {t('exchange')}
             </button>
           </>
         )}

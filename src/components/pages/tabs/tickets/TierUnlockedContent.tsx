@@ -2,6 +2,7 @@
 
 import { twMerge } from 'tailwind-merge';
 import { EnginePreviewCard } from '@/components/pages/tabs/tickets/EnginePreviewCard';
+import { ButtonSpinner } from '@/components/shared/loaders/ButtonSpinner';
 import { EmptyDataInfo } from '@/components/shared/EmptyDataInfo';
 import { useAppTranslations } from '@/hooks/useAppTranslations';
 import type { TicketEngine } from '@/types/interfaces/ticket.interfaces';
@@ -28,6 +29,10 @@ export interface TierUnlockedContentProps {
   elapsedByEngine: Record<string, number>;
   onClaimAll?: () => void;
   onClaimEngine?: (engineId: string) => void;
+  /** The bulk claim of this tier is in flight — the pill spins and ignores taps. */
+  claimAllPending?: boolean;
+  /** Engines whose single claim is in flight — their cards' buttons spin. */
+  claimingEngineIds?: ReadonlySet<string>;
   className?: string;
 }
 
@@ -38,6 +43,8 @@ export function TierUnlockedContent({
   elapsedByEngine,
   onClaimAll,
   onClaimEngine,
+  claimAllPending = false,
+  claimingEngineIds,
   className,
 }: TierUnlockedContentProps) {
   const t = useAppTranslations();
@@ -97,7 +104,12 @@ export function TierUnlockedContent({
             <button
               type="button"
               onClick={onClaimAll}
-              className="relative ms-auto rounded-full bg-success px-3 py-1 text-[11px] font-extrabold uppercase tracking-wider text-white cursor-pointer active:scale-95 transition-transform overflow-hidden"
+              disabled={claimAllPending}
+              aria-busy={claimAllPending || undefined}
+              className={twMerge(
+                'relative ms-auto rounded-full bg-success px-3 py-1 text-[11px] font-extrabold uppercase tracking-wider text-white cursor-pointer active:scale-95 transition-transform overflow-hidden flex-center gap-1',
+                claimAllPending && 'cursor-progress'
+              )}
             >
               <span
                 aria-hidden
@@ -105,6 +117,7 @@ export function TierUnlockedContent({
               >
                 <span className="absolute -top-1/2 -left-1/2 h-[200%] w-[55%] bg-gradient-to-r from-transparent via-white/40 to-transparent animate-task-shine" />
               </span>
+              {claimAllPending && <ButtonSpinner size={12} className="relative" />}
               <span className="relative">{t('claim all')}</span>
             </button>
           )}
@@ -131,6 +144,7 @@ export function TierUnlockedContent({
                 index={index}
                 elapsedSeconds={elapsedByEngine[engine.id]}
                 onClaim={onClaimEngine ? () => onClaimEngine(engine.id) : undefined}
+                busy={claimingEngineIds?.has(engine.id) ?? false}
               />
             </div>
           ))}

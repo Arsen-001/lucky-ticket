@@ -1,5 +1,6 @@
 'use client';
 import { Check, Plus } from 'lucide-react';
+import { ButtonSpinner } from '@/components/shared/loaders/ButtonSpinner';
 import { Modal } from '@/components/shared/modals/Modal';
 import { Achievement } from '@/components/shared/achievements/Achievement';
 import { useAppTranslations } from '@/hooks/useAppTranslations';
@@ -12,6 +13,8 @@ export interface AchievementPinModalProps {
   pinnedSlots: (AchievementType | null)[];
   onClose: () => void;
   onPin: (slot: number) => void;
+  /** The slot whose pin request is in flight — its button spins, the others hold. */
+  pinningSlot?: number | null;
 }
 
 export function AchievementPinModal({
@@ -19,6 +22,7 @@ export function AchievementPinModal({
   pinnedSlots,
   onClose,
   onPin,
+  pinningSlot = null,
 }: AchievementPinModalProps) {
   const t = useAppTranslations();
   const locale = useLocale();
@@ -73,8 +77,11 @@ export function AchievementPinModal({
                     <button
                       type="button"
                       onClick={() => onPin(slot)}
-                      className="w-full rounded-xl bg-white/8 py-2.5 text-xs font-bold uppercase tracking-wider text-white/80 transition-all active:scale-95 hover:bg-white/15"
+                      disabled={pinningSlot !== null}
+                      aria-busy={pinningSlot === slot || undefined}
+                      className="flex-center w-full gap-1.5 rounded-xl bg-white/8 py-2.5 text-xs font-bold uppercase tracking-wider text-white/80 transition-all active:scale-95 hover:bg-white/15 disabled:opacity-70"
                     >
+                      {pinningSlot === slot && <ButtonSpinner size={12} />}
                       {slotAch ? t('replace') : t('equip')}
                     </button>
                   )}

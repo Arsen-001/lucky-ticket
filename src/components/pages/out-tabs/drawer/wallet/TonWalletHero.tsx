@@ -3,6 +3,7 @@
 import { Check, Copy, Diamond, LogOut } from 'lucide-react';
 import { useState } from 'react';
 import { twMerge } from 'tailwind-merge';
+import { Button } from '@/components/shared/buttons/Button';
 import { Skeleton } from '@/components/shared/seleketons/Skeleton';
 import { SkeletonSuspense } from '@/components/shared/seleketons/SkeletonSuspense';
 import { useAppTranslations } from '@/hooks/useAppTranslations';
@@ -18,6 +19,8 @@ export interface TonWalletHeroProps {
   onConnect: () => void;
   onDisconnect: () => void;
   disconnecting?: boolean;
+  /** Priming the proof nonce / verifying the signature — the connect button spins. */
+  connecting?: boolean;
 }
 
 export function TonWalletHero({
@@ -26,6 +29,7 @@ export function TonWalletHero({
   onConnect,
   onDisconnect,
   disconnecting,
+  connecting = false,
 }: TonWalletHeroProps) {
   const isConnected = !!state?.isConnected;
 
@@ -62,7 +66,13 @@ export function TonWalletHero({
   }
 
   if (!isConnected) {
-    return <TonWalletDisconnected onConnect={onConnect} tonBalance={state?.tonBalance ?? 0} />;
+    return (
+      <TonWalletDisconnected
+        onConnect={onConnect}
+        connecting={connecting}
+        tonBalance={state?.tonBalance ?? 0}
+      />
+    );
   }
 
   return (
@@ -72,11 +82,12 @@ export function TonWalletHero({
 
 interface TonWalletDisconnectedProps {
   onConnect: () => void;
+  connecting: boolean;
   /** The account's TON — kept when a binding is removed, so it is shown here too. */
   tonBalance: number;
 }
 
-function TonWalletDisconnected({ onConnect, tonBalance }: TonWalletDisconnectedProps) {
+function TonWalletDisconnected({ onConnect, connecting, tonBalance }: TonWalletDisconnectedProps) {
   const t = useAppTranslations();
 
   return (
@@ -103,13 +114,14 @@ function TonWalletDisconnected({ onConnect, tonBalance }: TonWalletDisconnectedP
         <p className="text-pink-secondary max-w-[260px] text-[12px]">
           {t('deposit withdraw buy stars seamlessly')}
         </p>
-        <button
-          type="button"
+        <Button
+          variant="primary"
+          loading={connecting}
           onClick={onConnect}
-          className="bg-pink-gradient mt-1 w-full rounded-xl px-5 py-3 text-sm font-bold text-white transition-transform active:scale-[0.99]"
+          className="mt-1 w-full rounded-xl px-5 py-3 text-sm font-bold text-white"
         >
           {t('connect wallet')}
-        </button>
+        </Button>
         <WalletAccountTonNote balance={tonBalance} />
       </div>
     </div>

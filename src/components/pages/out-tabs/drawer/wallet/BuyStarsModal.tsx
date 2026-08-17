@@ -6,6 +6,7 @@ import { twMerge } from 'tailwind-merge';
 import { BottomSheet } from '@/components/shared/modals/BottomSheet';
 import { Button } from '@/components/shared/buttons/Button';
 import { TelegramStarIcon } from '@/components/shared/icons/TelegramStarIcon';
+import { ButtonSpinner } from '@/components/shared/loaders/ButtonSpinner';
 import { useAppTranslations } from '@/hooks/useAppTranslations';
 import { useToast } from '@/hooks/useToast';
 import { useBuyTelegramStars } from '@/hooks/useBuyTelegramStars';
@@ -41,7 +42,7 @@ export function BuyStarsModal({ open, onClose, initialStars }: BuyStarsModalProp
   }, [open, initialStars]);
 
   const amount = Number(input) || 0;
-  const canBuy = amount >= 1 && !pending;
+  const canBuy = amount >= 1;
 
   const handleBuy = async () => {
     const status = await buy(amount);
@@ -157,7 +158,8 @@ export function BuyStarsModal({ open, onClose, initialStars }: BuyStarsModalProp
 
             <button
               type="button"
-              disabled={!canBuy}
+              disabled={!canBuy || pending}
+              aria-busy={pending || undefined}
               onClick={handleBuy}
               className={twMerge(
                 'relative flex items-center justify-center gap-2 overflow-hidden rounded-xl px-4 py-3.5 text-sm font-extrabold uppercase tracking-wider transition-transform active:scale-99',
@@ -175,13 +177,15 @@ export function BuyStarsModal({ open, onClose, initialStars }: BuyStarsModalProp
                   : undefined
               }
             >
-              <TelegramStarIcon size={16} className="relative" />
+              {pending ? (
+                <ButtonSpinner size={16} className="relative" />
+              ) : (
+                <TelegramStarIcon size={16} className="relative" />
+              )}
               <span className="relative">
-                {pending
-                  ? t('loading')
-                  : amount >= 1
-                    ? t('buy stars amount', { stars: formatNumber(amount) })
-                    : t('buy stars')}
+                {amount >= 1
+                  ? t('buy stars amount', { stars: formatNumber(amount) })
+                  : t('buy stars')}
               </span>
             </button>
           </>

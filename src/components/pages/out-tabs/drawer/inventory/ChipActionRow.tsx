@@ -6,6 +6,7 @@ import { useGetMeQuery } from '@/api/me.api';
 import { Button } from '@/components/shared/buttons/Button';
 import { ChipEffectValue } from '@/components/shared/badges/ChipEffectValue';
 import { ChipIcon } from '@/components/shared/icons/ChipIcon';
+import { ButtonSpinner } from '@/components/shared/loaders/ButtonSpinner';
 import { useAppTranslations } from '@/hooks/useAppTranslations';
 import { QUALITY_ACCENT, chipUnequipStarsCost, isChipMaxed } from '@/utils/global/inventory.utils';
 import { staggerMs } from '@/utils/global/animation.utils';
@@ -156,6 +157,7 @@ export function ChipActionRow({
           <button
             type="button"
             disabled={isLevelingUp}
+            aria-busy={isLevelingUp || undefined}
             onClick={() => onLevelUp?.(chip)}
             aria-label={t('level up')}
             className="flex-center h-11 w-11 shrink-0 cursor-pointer flex-col gap-0 rounded-xl text-[9px] font-extrabold text-white shadow-[0_4px_14px_rgba(0,0,0,0.35),inset_0_1px_0_rgba(255,255,255,0.25)] transition-transform active:scale-95 disabled:opacity-70"
@@ -163,7 +165,11 @@ export function ChipActionRow({
               background: `linear-gradient(135deg, ${accent} 0%, color-mix(in srgb, ${accent} 65%, white) 100%)`,
             }}
           >
-            <ArrowUp size={14} strokeWidth={3} />
+            {isLevelingUp ? (
+              <ButtonSpinner size={14} className="text-white" />
+            ) : (
+              <ArrowUp size={14} strokeWidth={3} />
+            )}
             <span className="tabular-nums">{chip.shardsForNextLevel}</span>
           </button>
         )}
