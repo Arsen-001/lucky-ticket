@@ -43,7 +43,7 @@ export interface EngineSpeedBoostSource {
   temporary?: boolean;
   /**
    * Set on MULTIPLIER sources only, carrying the raw factor (`1.3` = ×1.3).
-   * Its presence is what marks a source as a super boost; `pct` stays the
+   * Its presence is what marks a source as a multiplier; `pct` stays the
    * additive equivalent on this engine so bars, arcs and totals keep summing.
    */
   multiplier?: number;
@@ -187,21 +187,21 @@ export const activeSpeedBoostSources = (sources: readonly EngineSpeedBoostSource
   sources.filter(source => source.pct > 0);
 
 /**
- * A super boost — one that MULTIPLIES the whole stack instead of adding to it
+ * A multiplier — one that MULTIPLIES the whole stack instead of adding to it
  * (speed chip, Lucky Player). The single predicate every screen asks, so none
  * of them has to know which keys those are.
  */
-export const isSuperBoost = (source: EngineSpeedBoostSource): boolean =>
+export const isMultiplierBoost = (source: EngineSpeedBoostSource): boolean =>
   source.multiplier !== undefined && source.multiplier > 1;
 
 /**
  * The additive half of the stack — everything that is summed, in row order.
- * Keyed off the ABSENCE of a factor, not off `isSuperBoost`: an unequipped chip
+ * Keyed off the ABSENCE of a factor, not off `isMultiplierBoost`: an unequipped chip
  * carries ×1 and belongs to neither half (`activeSpeedBoostSources` drops it).
  */
 export const additiveSpeedBoostSources = (sources: readonly EngineSpeedBoostSource[]) =>
   sources.filter(source => source.multiplier === undefined);
 
-/** The multiplier half — what the UI presents as "super boosts". */
-export const superSpeedBoostSources = (sources: readonly EngineSpeedBoostSource[]) =>
-  sources.filter(isSuperBoost);
+/** The multiplier half — what the UI presents as "multipliers". */
+export const multiplierSpeedBoostSources = (sources: readonly EngineSpeedBoostSource[]) =>
+  sources.filter(isMultiplierBoost);

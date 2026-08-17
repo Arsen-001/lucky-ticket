@@ -2,7 +2,7 @@
 
 import { Package, Zap } from 'lucide-react';
 import { useAppTranslations } from '@/hooks/useAppTranslations';
-import { SuperBoostBadge } from '@/components/shared/badges/SuperBoostBadge';
+import { MultiplierBadge } from '@/components/shared/badges/MultiplierBadge';
 import { ENGINE_BOOST_COLOR, ENGINE_BOOST_LABEL_KEY } from '@/constants/engine-boosts';
 import type { MessageIds } from '@/types/types/i18n.types';
 import {
@@ -11,7 +11,7 @@ import {
   type EngineSpeedBoostSource,
   activeCapacitySources,
   activeSpeedBoostSources,
-  isSuperBoost,
+  isMultiplierBoost,
   totalSpeedBoostPct,
 } from '@/utils/global/engine-boosts.utils';
 import { formatTicketRate } from '@/utils/global/number.utils';
@@ -192,13 +192,13 @@ export function EngineCubeReactorFace({
                   style={{ backgroundColor: ENGINE_BOOST_COLOR[source.key] }}
                 />
                 {t(ENGINE_BOOST_LABEL_KEY[source.key])}
-                {/* A super boost is quoted by its FACTOR, not by the percentage
+                {/* A multiplier is quoted by its FACTOR, not by the percentage
                     its arc is drawn from: the arc says what it is worth on this
                     engine, the ×N says what it will be worth on every other one.
                     It wears the same gold pill as everywhere else — at 9px a
                     bare `×` against a `+` is not a difference anyone sees. */}
-                {isSuperBoost(source) ? (
-                  <SuperBoostBadge multiplier={source.multiplier ?? 1} size="xs" />
+                {isMultiplierBoost(source) ? (
+                  <MultiplierBadge multiplier={source.multiplier ?? 1} size="xs" />
                 ) : (
                   <span className="tabular-nums text-white">+{Math.round(source.pct)}%</span>
                 )}

@@ -11,8 +11,8 @@ import {
 import {
   additiveSpeedBoostSources,
   engineSpeedBoostSources,
-  isSuperBoost,
-  superSpeedBoostSources,
+  isMultiplierBoost,
+  multiplierSpeedBoostSources,
 } from '@/utils/global/engine-boosts.utils';
 import {
   CHIP_MAX_LEVEL,
@@ -378,7 +378,7 @@ describe('engine levers — every upgrade must move the engine', () => {
       );
     });
 
-    it('the breakdown keeps the two apart: VIP a summand, Lucky Player a ×1.3 super boost', () => {
+    it('the breakdown keeps the two apart: VIP a summand, Lucky Player a ×1.3 multiplier', () => {
       // What the screens read to say "these are different accelerators". A
       // merged row (what shipped 17.08.2026) let a player believe the
       // subscription was another +X% — the one thing it is not.
@@ -392,23 +392,23 @@ describe('engine levers — every upgrade must move the engine', () => {
       const lp = sources.find(s => s.key === 'luckyPlayer');
 
       expect(vip).toEqual({ key: 'vip', pct: 150 });
-      expect(isSuperBoost(vip!)).toBe(false);
+      expect(isMultiplierBoost(vip!)).toBe(false);
       expect(lp?.multiplier).toBeCloseTo(1.3, 6);
-      expect(isSuperBoost(lp!)).toBe(true);
+      expect(isMultiplierBoost(lp!)).toBe(true);
       // The factor is the constant; the percentage beside it is not.
       expect(lp?.pct).toBeCloseTo(2.5 * 30, 6);
       expect(additiveSpeedBoostSources(sources).map(s => s.key)).not.toContain('luckyPlayer');
-      // No chip fitted, so the subscription is the only super boost on this
+      // No chip fitted, so the subscription is the only multiplier on this
       // engine — an inert ×1 chip belongs to neither half.
-      expect(superSpeedBoostSources(sources).map(s => s.key)).toEqual(['luckyPlayer']);
+      expect(multiplierSpeedBoostSources(sources).map(s => s.key)).toEqual(['luckyPlayer']);
       expect(additiveSpeedBoostSources(sources).map(s => s.key)).not.toContain('chip');
     });
 
-    it('a speed chip is the other super boost — same class, factor intact at every stage', () => {
+    it('a speed chip is the other multiplier — same class, factor intact at every stage', () => {
       for (const stage of STAGES) {
         const engine = engineOf('bronze', stage.engine);
         const sources = engineSpeedBoostSources(engine, { speedChip: chip('speed', 10) });
-        const chipSource = superSpeedBoostSources(sources).find(s => s.key === 'chip');
+        const chipSource = multiplierSpeedBoostSources(sources).find(s => s.key === 'chip');
         expect(chipSource?.multiplier, stage.name).toBeCloseTo(2, 6);
         // Its additive equivalent grows with the engine while the factor does
         // not — the whole reason the two are labelled differently.

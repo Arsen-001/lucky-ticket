@@ -1,6 +1,6 @@
 import { ArrowRight, Check } from 'lucide-react';
 import { twMerge } from 'tailwind-merge';
-import { SuperBoostBadge } from '@/components/shared/badges/SuperBoostBadge';
+import { MultiplierBadge } from '@/components/shared/badges/MultiplierBadge';
 import { Ticket } from '@/components/shared/icons/Ticket';
 import type { StatusPerkRow } from '@/utils/global/status-perks.utils';
 import { staggerMs } from '@/utils/global/animation.utils';
@@ -116,7 +116,7 @@ export function StatusPerkList({
                       </span>
                     )}
                     {row.multiplier ? (
-                      <SuperBoostBadge
+                      <MultiplierBadge
                         multiplier={row.multiplier}
                         size={isSmall ? 'xs' : 'sm'}
                         className="self-center"

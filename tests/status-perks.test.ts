@@ -137,7 +137,7 @@ describe('status perk rows', () => {
     expect(valueOf(rows, 'engineSpeedMultiplier')).toBe('×1.3');
     // And it says why it is not one of the rows around it.
     expect(rows.find(r => r.id === 'engineSpeedMultiplier')?.note).toBe(
-      'super boost multiplies stack'
+      'multiplier multiplies stack'
     );
 
     // A VIP listing is untouched: its engine speed IS a summand.

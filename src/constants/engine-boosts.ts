@@ -18,7 +18,7 @@ export const ENGINE_BOOST_LABEL_KEY: Record<EngineSpeedBoostKey, MessageIds> = {
 /**
  * One colour per contributor, so a stacked bar and its legend always agree.
  *
- * The two super boosts are deliberately NOT neighbours of the additive rows
+ * The two multipliers are deliberately NOT neighbours of the additive rows
  * they used to share a colour with: Lucky Player carries its own pink (the
  * accent of its own screen), which is why `avatar` moved to silver.
  */

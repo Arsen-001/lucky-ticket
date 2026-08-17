@@ -102,7 +102,7 @@ export const chipSpeedPct = (level: number | undefined): number =>
  * divides the finished cycle instead of joining the additive stack, so its worth
  * does not shrink as the engine grows — the property that separates it (and
  * Lucky Player) from every `+X%` on the engine screen. @see EngineStatsLedger,
- * which groups the two under "super boosts".
+ * which groups the two under «Множители» / "Multipliers".
  */
 export const chipEffectLabel = (
   chip: Pick<InventoryChip, 'type' | 'level'>,

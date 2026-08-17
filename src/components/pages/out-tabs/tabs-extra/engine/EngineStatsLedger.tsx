@@ -4,12 +4,12 @@ import { Sparkles } from 'lucide-react';
 import { twMerge } from 'tailwind-merge';
 import { useAppTranslations } from '@/hooks/useAppTranslations';
 import { EngineBoostRow } from '@/components/pages/out-tabs/tabs-extra/engine/EngineBoostRow';
-import { SuperBoostBadge } from '@/components/shared/badges/SuperBoostBadge';
+import { MultiplierBadge } from '@/components/shared/badges/MultiplierBadge';
 import {
   activeSpeedBoostSources,
   additiveSpeedBoostSources,
   type EngineSpeedBoostSource,
-  superSpeedBoostSources,
+  multiplierSpeedBoostSources,
   totalSpeedBoostPct,
 } from '@/utils/global/engine-boosts.utils';
 import { formatCompact, formatTicketRate } from '@/utils/global/number.utils';
@@ -53,10 +53,13 @@ export function EngineStatsLedger({
   const total = totalSpeedBoostPct(active);
   const strongest = active.reduce((max, source) => Math.max(max, source.pct), 0);
   const additive = additiveSpeedBoostSources(active);
-  const supers = superSpeedBoostSources(active);
-  // What the super boosts multiply the whole stack by, together — the headline
+  const multipliers = multiplierSpeedBoostSources(active);
+  // What the multipliers multiply the whole stack by, together — the headline
   // of their block, and the one number a player can carry between engines.
-  const superFactor = supers.reduce((product, source) => product * (source.multiplier ?? 1), 1);
+  const multiplierFactor = multipliers.reduce(
+    (product, source) => product * (source.multiplier ?? 1),
+    1
+  );
 
   return (
     <section
@@ -85,7 +88,7 @@ export function EngineStatsLedger({
               tell this one apart from — and then it has to carry half the
               contrast, so it gets a rule of its own rather than sitting at 35%
               opacity where it read as a caption. */}
-          {supers.length > 0 && (
+          {multipliers.length > 0 && (
             <span className="flex items-center gap-2 text-[9px] font-extrabold uppercase tracking-[0.18em] text-white/55">
               {t('adds up')}
               <span className="h-px flex-1 bg-white/10" />
@@ -101,7 +104,7 @@ export function EngineStatsLedger({
 
       {/* Gold frame, gold pills, hatched bars: the block is meant to be
           recognisable before a word of it is read. */}
-      {supers.length > 0 && (
+      {multipliers.length > 0 && (
         <div
           className="border-gold/25 flex flex-col gap-2 rounded-xl border p-2.5"
           style={{
@@ -112,17 +115,17 @@ export function EngineStatsLedger({
           <div className="flex items-center justify-between gap-2">
             <span className="text-gold flex items-center gap-1.5 text-[9px] font-extrabold uppercase tracking-[0.18em]">
               <Sparkles size={11} stroke="var(--color-gold)" strokeWidth={2.6} />
-              {t('super boosts')}
+              {t('multipliers')}
             </span>
-            <SuperBoostBadge multiplier={superFactor} size="md" />
+            <MultiplierBadge multiplier={multiplierFactor} size="md" />
           </div>
           <ul className="flex flex-col gap-1.5">
-            {supers.map(source => (
+            {multipliers.map(source => (
               <EngineBoostRow key={source.key} source={source} strongest={strongest} />
             ))}
           </ul>
           <p className="text-[10px] font-semibold leading-snug text-white/40">
-            {t('super boosts explained')}
+            {t('multipliers explained')}
           </p>
         </div>
       )}

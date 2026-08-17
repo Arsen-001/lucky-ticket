@@ -2,21 +2,21 @@
 
 import { twMerge } from 'tailwind-merge';
 import {
-  SuperBoostBadge,
-  type SuperBoostBadgeSize,
-} from '@/components/shared/badges/SuperBoostBadge';
+  MultiplierBadge,
+  type MultiplierBadgeSize,
+} from '@/components/shared/badges/MultiplierBadge';
 import { useAppTranslations } from '@/hooks/useAppTranslations';
 import type { InventoryChip } from '@/types/interfaces/inventory.interfaces';
 import { chipCapacityTickets, chipSpeedFactor } from '@/utils/global/inventory.utils';
 
 export interface ChipEffectValueProps {
   chip: Pick<InventoryChip, 'type' | 'level'>;
-  size?: SuperBoostBadgeSize;
+  size?: MultiplierBadgeSize;
   className?: string;
 }
 
 /**
- * What a chip does, in the form its class deserves: a Time chip is a super boost
+ * What a chip does, in the form its class deserves: a Time chip is a multiplier
  * and wears the gold `×N` pill, a Capacity chip adds whole tickets and reads as
  * plain text. The rendered twin of `chipEffectLabel`, which stays the string
  * form for the places that need one inside a sentence (confirm copy).
@@ -26,7 +26,7 @@ export function ChipEffectValue({ chip, size = 'xs', className }: ChipEffectValu
 
   if (chip.type === 'speed')
     return (
-      <SuperBoostBadge multiplier={chipSpeedFactor(chip.level)} size={size} className={className} />
+      <MultiplierBadge multiplier={chipSpeedFactor(chip.level)} size={size} className={className} />
     );
 
   return (

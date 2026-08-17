@@ -1,7 +1,7 @@
 import { formatLocalDate } from '@/utils/global/date.utils';
 import { CalendarDays, Crown, Sparkles, TrendingUp, UserRound, Zap } from 'lucide-react';
 import { useAppTranslations } from '@/hooks/useAppTranslations';
-import { SuperBoostBadge } from '@/components/shared/badges/SuperBoostBadge';
+import { MultiplierBadge } from '@/components/shared/badges/MultiplierBadge';
 import { formatCompact, formatTicketRate } from '@/utils/global/number.utils';
 import '@/styles/components/engine-cube-faces.css';
 
@@ -45,7 +45,7 @@ export function EngineCubeStatsFace({
   // Lucky Player pink, VIP gold — the same two colours the speed breakdown
   // paints their rows with, so the passport and the ledger name one thing once.
   const statusColor = isVipStatus ? 'var(--color-gold)' : 'var(--color-pink)';
-  const hasSuperBoost = luckyPlayerSpeedMultiplier > 1 && luckyPlayerSpeedPct > 0;
+  const hasMultiplier = luckyPlayerSpeedMultiplier > 1 && luckyPlayerSpeedPct > 0;
 
   const createdLabel = createdAt ? formatLocalDate(createdAt) : null;
   // The LIVE rate — running boosters included, same as the cycle the countdown
@@ -160,11 +160,11 @@ export function EngineCubeStatsFace({
             merged number would hide both facts. VIP adds its percentage into the
             stack; Lucky Player multiplies the finished stack, and leads with the
             factor for the same reason the ledger does. */}
-        {(vipSpeedBoostPct > 0 || hasSuperBoost) && (
+        {(vipSpeedBoostPct > 0 || hasMultiplier) && (
           <div
             className="mt-1 flex flex-col gap-0.5 rounded-md px-1.5 py-1"
             style={{
-              backgroundColor: `color-mix(in srgb, ${hasSuperBoost && !isVipStatus ? 'var(--color-pink)' : statusColor} 14%, transparent)`,
+              backgroundColor: `color-mix(in srgb, ${hasMultiplier && !isVipStatus ? 'var(--color-pink)' : statusColor} 14%, transparent)`,
             }}
           >
             {vipSpeedBoostPct > 0 && (
@@ -181,14 +181,14 @@ export function EngineCubeStatsFace({
                 </span>
               </div>
             )}
-            {hasSuperBoost && (
+            {hasMultiplier && (
               <div className="flex items-center justify-between gap-2">
                 <span className="flex items-center gap-1" style={{ color: 'var(--color-pink)' }}>
                   <Sparkles size={10} stroke="var(--color-pink)" strokeWidth={2.6} />
                   {t('lucky player')}
                 </span>
                 <span className="flex items-center gap-1">
-                  <SuperBoostBadge multiplier={luckyPlayerSpeedMultiplier} size="xs" />
+                  <MultiplierBadge multiplier={luckyPlayerSpeedMultiplier} size="xs" />
                   <span className="text-[8px] font-bold tabular-nums text-white/40">
                     +{Math.round(luckyPlayerSpeedPct)}%
                   </span>

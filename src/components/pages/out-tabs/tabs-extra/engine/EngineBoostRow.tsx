@@ -7,8 +7,8 @@ import {
   ENGINE_BOOST_ICON,
   ENGINE_BOOST_LABEL_KEY,
 } from '@/constants/engine-boosts';
-import { SuperBoostBadge } from '@/components/shared/badges/SuperBoostBadge';
-import { type EngineSpeedBoostSource, isSuperBoost } from '@/utils/global/engine-boosts.utils';
+import { MultiplierBadge } from '@/components/shared/badges/MultiplierBadge';
+import { type EngineSpeedBoostSource, isMultiplierBoost } from '@/utils/global/engine-boosts.utils';
 
 export interface EngineBoostRowProps {
   source: EngineSpeedBoostSource;
@@ -21,7 +21,7 @@ export interface EngineBoostRowProps {
  * One contributor to the speed stack: icon, name, its share of the bar, its
  * worth.
  *
- * A super boost (speed chip, Lucky Player) leads with its FACTOR — `×1.3` — and
+ * A multiplier (speed chip, Lucky Player) leads with its FACTOR — `×1.3` — and
  * only then with the percentage that factor is worth on this engine. That order
  * is the whole point: the factor is the part that does not change as the engine
  * grows, while the percentage next to it is the part that does.
@@ -30,7 +30,7 @@ export function EngineBoostRow({ source, strongest, className }: EngineBoostRowP
   const t = useAppTranslations();
   const Icon = ENGINE_BOOST_ICON[source.key];
   const color = ENGINE_BOOST_COLOR[source.key];
-  const isSuper = isSuperBoost(source);
+  const isMultiplier = isMultiplierBoost(source);
 
   return (
     <li className={twMerge('flex items-center gap-2', className)}>
@@ -45,15 +45,15 @@ export function EngineBoostRow({ source, strongest, className }: EngineBoostRowP
             width: `${strongest > 0 ? (source.pct / strongest) * 100 : 0}%`,
             // Two fabrics, so the classes are told apart even with the text
             // ignored: a summand is a solid bar, a multiplier a hatched one.
-            background: isSuper
+            background: isMultiplier
               ? `repeating-linear-gradient(115deg, ${color} 0 4px, color-mix(in srgb, ${color} 35%, transparent) 4px 8px)`
               : color,
           }}
         />
       </span>
-      {isSuper ? (
+      {isMultiplier ? (
         <span className="flex w-16 shrink-0 flex-col items-end gap-0.5 leading-none">
-          <SuperBoostBadge multiplier={source.multiplier ?? 1} size="sm" />
+          <MultiplierBadge multiplier={source.multiplier ?? 1} size="sm" />
           {/* What the factor is worth HERE — the same number the arcs and the
               total are built from, kept quiet so it reads as the consequence of
               the factor rather than as a second boost. */}

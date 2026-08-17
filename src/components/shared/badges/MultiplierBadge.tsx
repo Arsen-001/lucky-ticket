@@ -1,23 +1,23 @@
 import { twMerge } from 'tailwind-merge';
 import { formatMultiplier } from '@/utils/global/number.utils';
 
-export type SuperBoostBadgeSize = 'xs' | 'sm' | 'md';
+export type MultiplierBadgeSize = 'xs' | 'sm' | 'md';
 
-export interface SuperBoostBadgeProps {
+export interface MultiplierBadgeProps {
   /** Raw factor — `1.3` renders as `×1.3`. */
   multiplier: number;
-  size?: SuperBoostBadgeSize;
+  size?: MultiplierBadgeSize;
   className?: string;
 }
 
-const sizeClasses: Record<SuperBoostBadgeSize, string> = {
+const sizeClasses: Record<MultiplierBadgeSize, string> = {
   xs: 'px-1 py-px text-[9px]',
   sm: 'px-1.5 py-0.5 text-[11px]',
   md: 'px-2 py-0.5 text-[13px]',
 };
 
 /**
- * The one mark a super boost wears, everywhere it appears: a gold `×N` pill.
+ * The one mark a multiplier wears, everywhere it appears: a gold `×N` pill.
  *
  * A multiplier and a summand are different things — the multiplier is worth the
  * same on a brand-new engine and on a maxed one, the summand is not — and the
@@ -28,7 +28,7 @@ const sizeClasses: Record<SuperBoostBadgeSize, string> = {
  * breakdown, the reactor legend, the passport, the chip rows and the status
  * screens, so recognising it once is enough.
  */
-export function SuperBoostBadge({ multiplier, size = 'sm', className }: SuperBoostBadgeProps) {
+export function MultiplierBadge({ multiplier, size = 'sm', className }: MultiplierBadgeProps) {
   return (
     <span
       className={twMerge(

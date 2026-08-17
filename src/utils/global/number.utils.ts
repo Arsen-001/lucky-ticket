@@ -71,7 +71,7 @@ export const formatTicketRate = (value: number) => {
 
 /**
  * A boost MULTIPLIER as the player reads it — `×1.3`, `×2`. The `×` is the one
- * mark that separates a super boost (speed chip, Lucky Player) from the additive
+ * mark that separates a multiplier (speed chip, Lucky Player) from the additive
  * percentages printed all around it, so every screen that shows one goes through
  * here rather than spelling it inline. Trailing zeros are dropped: a level-10
  * chip is `×2`, never `×2.00`.

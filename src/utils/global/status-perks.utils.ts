@@ -37,7 +37,7 @@ export interface StatusPerkRow {
   note?: string;
   /**
    * Set when the value IS a multiplier — the renderer then prints it as the
-   * gold `×N` super-boost pill instead of plain text, the same mark the engine
+   * gold `×N` multiplier pill instead of plain text, the same mark the engine
    * screens use. `value` still carries the written form, which is what diffs
    * two VIP levels.
    */
@@ -121,7 +121,7 @@ export const buildStatusPerkRows = (
       label: t('perk engine speed'),
       value: formatMultiplier(1 + (perks.engineSpeedMultiplierPct as number) / 100),
       multiplier: 1 + (perks.engineSpeedMultiplierPct as number) / 100,
-      note: t('super boost multiplies stack'),
+      note: t('multiplier multiplies stack'),
     });
 
   if (perks.stakeYieldBoostPct > 0)
