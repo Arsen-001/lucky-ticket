@@ -1,6 +1,8 @@
 'use client';
 
-import { Mail, UserPen } from 'lucide-react';
+// EMAIL OFF (2026-08-17) — `Mail` iconed the change-email row below; it goes
+// with it. Grep `EMAIL OFF`.
+import { UserPen } from 'lucide-react';
 import { useGetMeQuery } from '@/api/me.api';
 import { NotificationPreferencesSection } from '@/components/pages/out-tabs/drawer/settings/NotificationPreferencesSection';
 // AVATARS OFF (2026-08-09) — the avatar cosmetics feature is switched off for
@@ -40,6 +42,11 @@ export default function SettingsPage() {
           description: me?.username || t('manage your account details'),
           accent: 'purple',
         },
+        // EMAIL OFF (2026-08-17) — the only way into the change-email screen from
+        // Settings. The screen is parked (settings/_email) because nothing behind
+        // it works: `me/email/request-code` answers 404 on production, SMTP is not
+        // configured. Uncomment with the route — grep `EMAIL OFF`.
+        /*
         {
           href: routes.settings.email,
           icon: <Mail size={18} className="text-electric-purple" />,
@@ -47,6 +54,7 @@ export default function SettingsPage() {
           description: me?.email || t('confirm or change your email address'),
           accent: 'purple',
         },
+        */
       ],
     },
   ];

@@ -1,3 +1,5 @@
+// EMAIL OFF (2026-08-17) — header slot of a screen that no longer routes; it is
+// parked in a private folder (`_email`) alongside the page itself. Grep `EMAIL OFF`.
 import { PageHeader } from '@/components/layout-elements/PageHeader';
 import { getAppTranslations } from '@/i18n/getAppTranslations';
 import { routes } from '@/constants/routes';

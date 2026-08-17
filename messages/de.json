@@ -851,7 +851,7 @@
   "vip inactive description": "VIP ist ein permanenter, gestufter Status mit kumulierenden Vorteilen. Einmal freischalten — bleibt für immer.",
   "vip maxed description": "Du hast die höchste VIP-Stufe erreicht. Genieße die Top-Vorteile.",
   "notification preferences": "Benachrichtigungseinstellungen",
-  "notification preferences description": "Wähle, worüber dir der Telegram-Bot und die E-Mail schreiben dürfen. Im App-Posteingang bleibt jedes Ereignis erhalten.",
+  "notification preferences description": "Wähle, worüber dir der Telegram-Bot schreiben darf. Im App-Posteingang bleibt jedes Ereignis erhalten.",
   "telegram bot": "Telegram-Bot",
   "email channel": "E-Mail",
   "channel": "Kanal",

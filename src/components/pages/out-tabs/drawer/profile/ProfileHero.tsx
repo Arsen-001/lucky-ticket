@@ -70,6 +70,11 @@ export function ProfileHero({ profile, loading, isPreview, onTogglePreview }: Pr
     tooltipTimerRef.current = setTimeout(() => setTooltip(null), 2200);
   };
 
+  // EMAIL OFF (2026-08-17) — on an unverified own profile this pushed to the
+  // change-email screen, which is parked while the flow is off; the tap would be
+  // a dead one. The locked badge goes with it (see the render below), so nothing
+  // is left to click. Uncomment with the route — grep `EMAIL OFF`.
+  /*
   const handleVerifiedClick = () => {
     if (profile?.isVerified) {
       showTooltip('verified', t('email verified'));
@@ -77,6 +82,7 @@ export function ProfileHero({ profile, loading, isPreview, onTogglePreview }: Pr
       router.push(routes.settings.email);
     }
   };
+  */
 
   const handleLuckyPlayerClick = () => {
     router.push(routes.settings.luckyPlayer);
@@ -253,6 +259,12 @@ export function ProfileHero({ profile, loading, isPreview, onTogglePreview }: Pr
         */}
 
         <div className="flex flex-wrap items-center justify-center gap-3">
+          {/* EMAIL OFF (2026-08-17) — the own-profile badge was the locked/tappable
+              one: locked it promised a verification the app can no longer perform.
+              While the flow is off the badge only shows where it is earned, so the
+              condition below drops `!isOwn` and covers both profiles. Restore this
+              block and put `!profile?.isOwn &&` back when email returns — grep
+              `EMAIL OFF`.
           {profile?.isOwn && (
             <ProfileTooltipWrap
               active={tooltip?.key === 'verified'}
@@ -267,7 +279,8 @@ export function ProfileHero({ profile, loading, isPreview, onTogglePreview }: Pr
               />
             </ProfileTooltipWrap>
           )}
-          {!profile?.isOwn && profile?.isVerified && (
+          */}
+          {profile?.isVerified && (
             <ProfileStatusIconButton
               variant="verified"
               icon={<VerifiedSparkleIcon size={51} />}

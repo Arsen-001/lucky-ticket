@@ -852,7 +852,7 @@
   "vip inactive description": "VIP, avantajları biriken kalıcı ve seviyeli bir statü. Bir kez aç — sonsuza kadar senin.",
   "vip maxed description": "En yüksek VIP seviyesine ulaştın. Zirvedeki ayrıcalıkların tadını çıkar.",
   "notification preferences": "Bildirim tercihleri",
-  "notification preferences description": "Telegram botunun ve e-postanın sana ne hakkında yazabileceğini seç. Uygulama içindeki kutu her olayı zaten saklıyor.",
+  "notification preferences description": "Telegram botunun sana ne hakkında yazabileceğini seç. Uygulama içindeki kutu her olayı zaten saklıyor.",
   "telegram bot": "Telegram botu",
   "email channel": "E-posta",
   "channel": "Kanal",

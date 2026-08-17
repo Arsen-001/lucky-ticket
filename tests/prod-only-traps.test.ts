@@ -87,9 +87,19 @@ describe('production-only traps', () => {
     // `/engines/:id` — the engine list itself lives on the Tickets tab. In
     // production that tap landed on the blank 404 above; in dev it redirected
     // home, so it looked merely odd rather than broken.
+    //
+    // Switched-off cards are read out first: the file keeps retired tasks
+    // commented verbatim so they can be restored (`EMAIL TASK OFF`, `2FA OFF`,
+    // `AVATARS OFF`), and a card nobody is served cannot land anywhere. Leaving
+    // them in made the check fire the moment a parked screen was parked with its
+    // task — which is the one case where a dead deeplink is intended.
+    const stripComments = (source: string) =>
+      source.replace(/\/\*[\s\S]*?\*\//g, '').replace(/^[ \t]*\/\/.*$/gm, '');
     const deeplinks = [
       ...new Set(
-        [...read('src/mock/tasks.mock.ts').matchAll(/deeplink:\s*'([^']+)'/g)].map(m => m[1])
+        [...stripComments(read('src/mock/tasks.mock.ts')).matchAll(/deeplink:\s*'([^']+)'/g)].map(
+          m => m[1]
+        )
       ),
     ];
     expect(deeplinks.length).toBeGreaterThan(0);

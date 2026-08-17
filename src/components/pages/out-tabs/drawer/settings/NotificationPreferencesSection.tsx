@@ -5,7 +5,8 @@ import {
   Flag,
   Gift,
   Layers,
-  Mail,
+  // EMAIL OFF (2026-08-17) — `Mail` iconed the email channel tab.
+  // Mail,
   Megaphone,
   Swords,
   TrophyIcon,
@@ -18,14 +19,17 @@ import {
 } from '@/api/notification-preferences.api';
 import { SettingsMenuItem } from '@/components/pages/out-tabs/drawer/settings/SettingsMenuItem';
 import { Switch } from '@/components/shared/form-elements/Switch';
-import { Tabs } from '@/components/shared/Tabs';
-import { TelegramStarIcon } from '@/components/shared/icons/TelegramStarIcon';
+// EMAIL OFF (2026-08-17) — both belong to the channel tab bar, which is off while
+// Telegram is the only channel. Grep `EMAIL OFF`.
+// import { Tabs } from '@/components/shared/Tabs';
+// import { TelegramStarIcon } from '@/components/shared/icons/TelegramStarIcon';
 import { useAppTranslations } from '@/hooks/useAppTranslations';
 import type { MessageIds } from '@/types/types/i18n.types';
 import type {
   NotificationChannel,
   NotificationPreferenceKey,
-  NotificationPreferences,
+  // EMAIL OFF (2026-08-17) — only `enabledCount` needed the whole shape.
+  // NotificationPreferences,
 } from '@/types/interfaces/notifications.interfaces';
 import type { SettingsMenuAccent } from '@/components/pages/out-tabs/drawer/settings/SettingsMenuItem';
 import { staggerMs } from '@/utils/global/animation.utils';
@@ -113,11 +117,14 @@ const CATEGORIES: CategoryDef[] = [
   },
 ];
 
+// EMAIL OFF (2026-08-17) — the count is a tab-bar affordance and the bar is off.
 /** How many of this channel's categories are on — shown on the channel tab. */
+/*
 const enabledCount = (
   preferences: NotificationPreferences | undefined,
   channel: NotificationChannel
 ) => (preferences ? CATEGORIES.filter(category => preferences[channel][category.key]).length : 0);
+*/
 
 export function NotificationPreferencesSection() {
   const t = useAppTranslations();
@@ -171,6 +178,8 @@ export function NotificationPreferencesSection() {
     </div>
   );
 
+  // EMAIL OFF (2026-08-17) — renders one channel tab; the bar is off. Grep `EMAIL OFF`.
+  /*
   const channelTitle = (channel: NotificationChannel, icon: React.ReactNode, label: string) => (
     <span className="inline-flex items-center gap-1.5">
       {icon}
@@ -182,6 +191,7 @@ export function NotificationPreferencesSection() {
       )}
     </span>
   );
+  */
 
   return (
     <div className="flex flex-col gap-3">
@@ -194,8 +204,15 @@ export function NotificationPreferencesSection() {
         </p>
       </div>
 
-      {/* Telegram leads: it is the channel the game actually writes to — the
-          bot DM is what a player reads outside the app. */}
+      {/* EMAIL OFF (2026-08-17) — with the email channel gone Telegram is the only
+          one left, and a tab bar of one tab is a control that cannot be operated:
+          the list is rendered straight instead. The counter it carried
+          (`channelTitle`, `enabledCount`) goes with the bar. Everything below is
+          kept verbatim — restore the block, the two icon imports and the two
+          helpers together. Grep `EMAIL OFF`.
+
+          Telegram leads: it is the channel the game actually writes to — the
+          bot DM is what a player reads outside the app.
       <Tabs
         defaultActiveKey="telegram"
         items={[
@@ -213,6 +230,8 @@ export function NotificationPreferencesSection() {
           },
         ]}
       />
+      */}
+      {renderChannelList('telegram')}
     </div>
   );
 }

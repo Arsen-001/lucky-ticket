@@ -36,7 +36,10 @@ export const STATIC_ROUTES = [
   '/test-quest',
   '/settings',
   '/settings/username',
-  '/settings/email',
+  // EMAIL OFF (2026-08-17) — the screen no longer routes (private folder), so a
+  // sweep of it would only assert a redirect Home. Uncomment with the rest —
+  // grep `EMAIL OFF`.
+  // '/settings/email',
   '/settings/security',
   '/settings/lucky-player',
   '/settings/vip',

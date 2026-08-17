@@ -6,7 +6,8 @@ import {
   Heart,
   ListChecks,
   type LucideIcon,
-  MailCheck,
+  // EMAIL OFF (2026-08-17) — `MailCheck` iconed the verify-email source below.
+  // MailCheck,
   Send,
   Swords,
   TrendingUp,
@@ -93,6 +94,12 @@ export const AP_SOURCES: ApSource[] = [
     route: routes.tasks,
     query: 'frequency=once',
   },
+  // EMAIL OFF (2026-08-17) — an AP source has to be earnable, and this one is
+  // not: the screen it routes to is parked and the backend answers 404 on the
+  // confirmation call (no SMTP). `apRewards.verifyEmail` stays in
+  // global.constants — the rate is still what the backend pays once the flow
+  // ships, and DOCS parity reads it. Uncomment with the route — grep `EMAIL OFF`.
+  /*
   {
     id: 'verifyEmail',
     category: 'base',
@@ -102,6 +109,7 @@ export const AP_SOURCES: ApSource[] = [
     hintKey: 'one-time',
     route: routes.settings.email,
   },
+  */
   {
     id: 'watchVideo',
     category: 'base',

@@ -852,7 +852,7 @@
   "vip inactive description": "VIP — постоянный многоуровневый статус с накопительными бонусами. Откройте один раз — он останется навсегда.",
   "vip maxed description": "Вы достигли максимального уровня VIP. Наслаждайтесь привилегиями высшего уровня.",
   "notification preferences": "Настройки уведомлений",
-  "notification preferences description": "Выберите, о чём вам может писать Telegram-бот и почта. В ленте приложения событие остаётся в любом случае.",
+  "notification preferences description": "Выберите, о чём вам может писать Telegram-бот. В ленте приложения событие остаётся в любом случае.",
   "telegram bot": "Telegram-бот",
   "email channel": "Почта",
   "channel": "Канал",

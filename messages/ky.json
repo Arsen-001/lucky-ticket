@@ -852,7 +852,7 @@
   "vip inactive description": "VIP — артыкчылыктары топтолгон деңгээлдүү туруктуу статус. Бир жолу ач — түбөлүк сеники.",
   "vip maxed description": "Эң жогорку VIP деңгээлине жеттиң. Чокудагы артыкчылыктарды колдон.",
   "notification preferences": "Билдирүү жөндөөлөрү",
-  "notification preferences description": "Telegram боту менен почта сага эмне жөнүндө жаза аларын танда. Колдонмонун ичиндеги кутуча баары бир бардык окуяны сактайт.",
+  "notification preferences description": "Telegram боту сага эмне жөнүндө жаза аларын танда. Колдонмонун ичиндеги кутуча баары бир бардык окуяны сактайт.",
   "telegram bot": "Telegram боту",
   "email channel": "Почта",
   "channel": "Канал",

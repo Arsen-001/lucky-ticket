@@ -852,7 +852,7 @@
   "vip inactive description": "VIP მუდმივი, დონეებიანი სტატუსია დაგროვებადი შეღავათებით. გახსენი ერთხელ — სამუდამოდ შენია.",
   "vip maxed description": "მაქსიმალურ VIP დონეს მიაღწიე. ისიამოვნე უმაღლესი პრივილეგიებით.",
   "notification preferences": "შეტყობინებების პარამეტრები",
-  "notification preferences description": "აირჩიე, რაზე მოგწეროს Telegram-ბოტმა და ელფოსტამ. აპლიკაციის შიდა ყუთი ისედაც ინახავს ყველა მოვლენას.",
+  "notification preferences description": "აირჩიე, რაზე მოგწეროს Telegram-ბოტმა. აპლიკაციის შიდა ყუთი ისედაც ინახავს ყველა მოვლენას.",
   "telegram bot": "Telegram ბოტი",
   "email channel": "ელფოსტა",
   "channel": "არხი",

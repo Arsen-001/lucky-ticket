@@ -852,7 +852,7 @@
   "vip inactive description": "VIP — мақоми доимии сатҳдор бо имтиёзҳои ҷамъшаванда. Як бор кушо — то абад аз они туст.",
   "vip maxed description": "Ба сатҳи баландтарини VIP расидӣ. Аз имтиёзҳои қулла баҳра бар.",
   "notification preferences": "Танзимоти огоҳиномаҳо",
-  "notification preferences description": "Интихоб кун, ки боти Telegram ва почта дар бораи чӣ ба ту навишта метавонанд. Қуттии дохили барнома ба ҳар ҳол ҳамаи рӯйдодҳоро нигоҳ медорад.",
+  "notification preferences description": "Интихоб кун, ки боти Telegram дар бораи чӣ ба ту навишта метавонад. Қуттии дохили барнома ба ҳар ҳол ҳамаи рӯйдодҳоро нигоҳ медорад.",
   "telegram bot": "Боти Telegram",
   "email channel": "Почта",
   "channel": "Канал",

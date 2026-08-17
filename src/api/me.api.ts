@@ -52,6 +52,13 @@ export const meApi = api.injectEndpoints({
       // edited fields (username, email) must refetch the profile screen.
       invalidatesTags: [rtkTags.me, rtkTags.profile],
     }),
+    // EMAIL OFF (2026-08-17) — the three endpoints below are left wired on
+    // purpose: nothing routed calls them any more (the screen is parked at
+    // settings/_email and every entry point into it is commented out), so they
+    // cost nothing standing here, and keeping them means the revival is two
+    // folder renames plus uncommenting — no re-plumbing of tags, mocks and
+    // types. Grep `EMAIL OFF`.
+    //
     // The gift composition is admin-configured — the settings screen reads it
     // from the backend instead of a hardcoded constant.
     getEmailReward: builder.query<EmailRewardInfo, void>({

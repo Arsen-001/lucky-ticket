@@ -852,7 +852,7 @@
   "vip inactive description": "VIPは特典が積み上がるレベル制の永続ステータスです。一度解放すればずっとあなたのものです。",
   "vip maxed description": "VIPレベルは最大です。最上位の特典をお楽しみください。",
   "notification preferences": "通知設定",
-  "notification preferences description": "Telegram ボットとメールが何について知らせてよいかを選べます。アプリ内の受信箱はいずれの場合もすべての出来事を保存します。",
+  "notification preferences description": "Telegram ボットが何について知らせてよいかを選べます。アプリ内の受信箱はいずれの場合もすべての出来事を保存します。",
   "telegram bot": "Telegram ボット",
   "email channel": "メール",
   "channel": "チャンネル",

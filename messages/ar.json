@@ -852,7 +852,7 @@
   "vip inactive description": "‏VIP حالة دائمة بمستويات ومزايا تتراكم. افتحها مرة واحدة لتبقى لك للأبد.",
   "vip maxed description": "بلغت أعلى مستوى VIP. استمتع بمزايا القمة.",
   "notification preferences": "تفضيلات الإشعارات",
-  "notification preferences description": "اختر ما يمكن لبوت Telegram والبريد الإلكتروني مراسلتك بشأنه. صندوق التطبيق يحتفظ بكل الأحداث في كل الأحوال.",
+  "notification preferences description": "اختر ما يمكن لبوت Telegram مراسلتك بشأنه. صندوق التطبيق يحتفظ بكل الأحداث في كل الأحوال.",
   "telegram bot": "بوت Telegram",
   "email channel": "البريد الإلكتروني",
   "channel": "القناة",

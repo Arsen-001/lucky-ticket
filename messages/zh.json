@@ -852,7 +852,7 @@
   "vip inactive description": "VIP 是分级的永久身份，权益可叠加。解锁一次，永久属于你。",
   "vip maxed description": "你已达到最高 VIP 等级，尽情享受顶级特权。",
   "notification preferences": "通知设置",
-  "notification preferences description": "选择 Telegram 机器人和邮件可以就哪些事通知你。应用内收件箱无论如何都会保留所有事件。",
+  "notification preferences description": "选择 Telegram 机器人可以就哪些事通知你。应用内收件箱无论如何都会保留所有事件。",
   "telegram bot": "Telegram 机器人",
   "email channel": "邮件",
   "channel": "频道",

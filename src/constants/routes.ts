@@ -64,7 +64,18 @@ export const routes = {
   settings: {
     index: '/settings',
     username: '/settings/username',
-    email: '/settings/email',
+    // EMAIL OFF (2026-08-17) — the whole change-email flow is switched off in
+    // the Mini App, not removed: the task went first (EMAIL TASK OFF, 2026-08-12),
+    // now the screen, its Settings row, its AP source and the profile badge that
+    // led to it. Nothing behind it works — the backend answers 404 on
+    // request-code/confirm because SMTP is not configured on Railway.
+    //
+    // The path is deliberately not spelled as a string here: route-coverage.test
+    // reads this file as TEXT and would demand an e2e sweep for a screen that no
+    // longer resolves. The screen itself lives on as a private folder, next to
+    // where it used to route — settings/_email (and @header/(drawer)/settings/_email).
+    // Uncomment together with those two renames — grep `EMAIL OFF`.
+    // email: settings/email,
     security: '/settings/security',
     luckyPlayer: '/settings/lucky-player',
     vip: '/settings/vip',

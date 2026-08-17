@@ -852,7 +852,7 @@
   "vip inactive description": "‏VIP وضعیتی دائمی و سطح‌بندی‌شده با مزایای انباشتی است. یک بار بازش کن — برای همیشه مال توست.",
   "vip maxed description": "به بالاترین سطح VIP رسیدی. از مزایای قله لذت ببر.",
   "notification preferences": "تنظیمات اعلان",
-  "notification preferences description": "انتخاب کن ربات Telegram و ایمیل دربارهٔ چه چیزهایی به تو بنویسند. صندوق درون برنامه در هر حال همهٔ رویدادها را نگه می‌دارد.",
+  "notification preferences description": "انتخاب کن ربات Telegram دربارهٔ چه چیزهایی به تو بنویسد. صندوق درون برنامه در هر حال همهٔ رویدادها را نگه می‌دارد.",
   "telegram bot": "ربات Telegram",
   "email channel": "ایمیل",
   "channel": "کانال",
