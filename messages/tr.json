@@ -146,6 +146,7 @@
   "unequip": "Çıkar",
   "inventory empty": "Envanterin boş. Doldurmak için turnuvalarda çip parçası kazan.",
   "{n}d left": "{n} gün kaldı",
+  "chip life paused": "ömür duraklatıldı",
   "{n}h left": "{n} sa kaldı",
   "{n}m left": "{n} dk kaldı",
   "better luck next time": "Bir dahakine bol şans",

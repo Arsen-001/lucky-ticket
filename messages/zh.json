@@ -146,6 +146,7 @@
   "unequip": "卸下",
   "inventory empty": "背包是空的。在比赛中赢取芯片碎片来填满它。",
   "{n}d left": "剩余 {n} 天",
+  "chip life paused": "寿命已暂停",
   "{n}h left": "剩余 {n} 小时",
   "{n}m left": "剩余 {n} 分钟",
   "better luck next time": "下次好运",

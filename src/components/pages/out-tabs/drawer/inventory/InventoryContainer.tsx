@@ -9,6 +9,7 @@ import {
   useMintChipMutation,
   useUnequipChipMutation,
 } from '@/api/inventory.api';
+import { useGetMeQuery } from '@/api/me.api';
 import { useGetTicketsQuery } from '@/api/tickets.api';
 import { useAppTranslations } from '@/hooks/useAppTranslations';
 import { useToast } from '@/hooks/useToast';
@@ -31,6 +32,7 @@ export function InventoryContainer() {
   const spend = useSpendFailure();
   const { data, isLoading, isError, refetch } = useGetInventoryQuery();
   const { data: tickets } = useGetTicketsQuery();
+  const { data: me } = useGetMeQuery();
   const [equipChipMutation, { isLoading: equipping }] = useEquipChipMutation();
   const [unequipChipMutation] = useUnequipChipMutation();
   const [levelUpChipMutation] = useLevelUpChipMutation();
@@ -67,19 +69,42 @@ export function InventoryContainer() {
     }, 700);
   };
 
+  /**
+   * A price the balance cannot cover ends in the top-up sheet, never in a dead
+   * control. Both slot actions used to disable their button instead — the
+   * player saw a greyed "Unequip · 8 ★" with nothing to tap and no route to
+   * Stars, which reads as a broken screen rather than as a price. `show()`
+   * exists for exactly this: a shortfall the screen can see BEFORE it asks, so
+   * a local check and a server refusal open the same sheet.
+   */
+  const shortOnStars = (cost: number) => {
+    if (cost <= 0) return false;
+    if ((me?.telegramStars ?? 0) >= cost) return false;
+    spend.show('stars', { required: cost });
+    return true;
+  };
+
   const handleEquipConfirm = async (engineId: string) => {
     if (!equipChip) return;
+    const price = chipSlotStarsCost(equipChip, engineId);
+    if (shortOnStars(price)) {
+      // Close the picker first: the top-up sheet is the answer now, and two
+      // stacked panels leave the player tapping the wrong one.
+      setEquipChip(undefined);
+      return;
+    }
     try {
       await equipChipMutation({ chipId: equipChip.id, engineId }).unwrap();
       setEquipChip(undefined);
     } catch (error) {
       // Equipping is a paid action (DOCS §10.4) — a short balance has to reach
       // the top-up sheet, with the price the modal just quoted.
-      await spend.report(error, { required: chipSlotStarsCost(equipChip, engineId) });
+      await spend.report(error, { required: price });
     }
   };
 
   const handleUnequip = async (chip: InventoryChip) => {
+    if (shortOnStars(chipUnequipStarsCost(chip.level))) return;
     setUnequipPendingId(chip.id);
     try {
       await unequipChipMutation({ chipId: chip.id }).unwrap();

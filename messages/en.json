@@ -146,6 +146,7 @@
   "unequip": "Unequip",
   "inventory empty": "Your inventory is empty. Win chip shards in tournaments to fill it up.",
   "{n}d left": "{n}d left",
+  "chip life paused": "life paused",
   "{n}h left": "{n}h left",
   "{n}m left": "{n}m left",
   "better luck next time": "Better luck next time",

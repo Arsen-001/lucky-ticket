@@ -146,6 +146,7 @@
   "unequip": "Retirer",
   "inventory empty": "Ton inventaire est vide. Gagne des fragments de puce dans les tournois pour le remplir.",
   "{n}d left": "{n} j restants",
+  "chip life paused": "durée en pause",
   "{n}h left": "{n} h restantes",
   "{n}m left": "{n} min restantes",
   "better luck next time": "Plus de chance la prochaine fois",

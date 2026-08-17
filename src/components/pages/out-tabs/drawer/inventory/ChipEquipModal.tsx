@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useMemo, useState } from 'react';
-import { Cpu, MemoryStick } from 'lucide-react';
+import { Check, Cpu, MemoryStick } from 'lucide-react';
 import { twMerge } from 'tailwind-merge';
 import { useGetMeQuery } from '@/api/me.api';
 import { useGetTicketsQuery } from '@/api/tickets.api';
@@ -140,6 +140,12 @@ export function ChipEquipModal({
                       {t(engine.tier)}
                     </span>
                   </div>
+                  {/* Where the chip is right now — without it a move looks like
+                      a fresh equip, and the one row that costs nothing (putting
+                      it back where it already is) is indistinguishable. */}
+                  {chip?.equippedOnEngineId === engine.id && (
+                    <Check size={16} strokeWidth={3} style={{ color: tierAccent }} />
+                  )}
                 </button>
               );
             })
@@ -172,7 +178,10 @@ export function ChipEquipModal({
           )}
           <Button
             onClick={() => selectedEngineId && onConfirm(selectedEngineId)}
-            disabled={!selectedEngineId || !canAfford || loading}
+            // A short balance is not a reason to disable: the container turns
+            // the tap into the buy-Stars sheet with this exact price. Only a
+            // missing choice keeps the button down.
+            disabled={!selectedEngineId || loading}
             loading={loading}
             className="px-4 py-2 text-[12px]"
           >

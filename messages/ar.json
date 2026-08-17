@@ -146,6 +146,7 @@
   "unequip": "نزع",
   "inventory empty": "مخزونك فارغ. اربح شظايا الشرائح في البطولات لملئه.",
   "{n}d left": "بقي {n} يوم",
+  "chip life paused": "العمر متوقف",
   "{n}h left": "بقي {n} ساعة",
   "{n}m left": "بقي {n} دقيقة",
   "better luck next time": "حظًا أوفر في المرة القادمة",

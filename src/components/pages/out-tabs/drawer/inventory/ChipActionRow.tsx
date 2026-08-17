@@ -1,6 +1,6 @@
 'use client';
 
-import { ArrowUp, Cpu, Infinity as InfinityIcon, Timer } from 'lucide-react';
+import { ArrowLeftRight, ArrowUp, Cpu, Infinity as InfinityIcon, Pause, Timer } from 'lucide-react';
 import { twMerge } from 'tailwind-merge';
 import { useGetMeQuery } from '@/api/me.api';
 import { Button } from '@/components/shared/buttons/Button';
@@ -106,22 +106,55 @@ export function ChipActionRow({
           <span className="whitespace-nowrap">
             {t('lv {level}', { level: chip.level })} · {chipEffectLabel(chip, t)}
           </span>
+          {/* A time-limited chip burns its life ONLY while it sits on an engine
+              (DOCS §10.5): off the engine the counter is stopped, and the same
+              pink "6h left" that a running chip wears read as a countdown the
+              player was losing. Stopped time gets its own icon, its own words
+              and no accent colour. */}
           {remaining ? (
-            <span className="text-electric-pink flex items-center gap-0.5 whitespace-nowrap text-[9px] font-bold uppercase tracking-wider">
-              <Timer size={10} strokeWidth={2.6} />
-              {remaining}
-            </span>
+            isEquipped ? (
+              <span className="text-electric-pink flex items-center gap-0.5 whitespace-nowrap text-[9px] font-bold uppercase tracking-wider">
+                <Timer size={10} strokeWidth={2.6} />
+                {remaining}
+              </span>
+            ) : (
+              <span className="flex items-center gap-0.5 whitespace-nowrap text-[9px] font-bold uppercase tracking-wider text-white/45">
+                <Pause size={10} strokeWidth={2.6} />
+                {remaining} · {t('chip life paused')}
+              </span>
+            )
           ) : (
             <InfinityIcon size={11} strokeWidth={2.6} className="text-white/30" />
           )}
-          {engineNumber && (
-            <span
-              className="flex items-center gap-0.5 whitespace-nowrap text-[9px] font-bold uppercase tracking-wider"
-              style={{ color: accent }}
-            >
-              <Cpu size={10} strokeWidth={2.6} />#{engineNumber}
-            </span>
-          )}
+          {/* The engine badge is the MOVE control. Re-attaching costs the same
+              whether it goes through "unequip, then equip" or straight across
+              (DOCS §10.4: a move is a detach plus a free attach), but the
+              screen only offered the two-step route — and between the steps the
+              chip sits idle on nothing. Tapping the engine it is on opens the
+              same picker, which prices the move and marks where it is now. */}
+          {engineNumber &&
+            (onEquip ? (
+              <button
+                type="button"
+                onClick={() => onEquip(chip)}
+                aria-label={t('equip chip')}
+                className="tap-target relative flex items-center gap-0.5 whitespace-nowrap rounded-full border px-1.5 py-0.5 text-[9px] font-bold uppercase tracking-wider transition-colors active:scale-95"
+                style={{
+                  color: accent,
+                  borderColor: `color-mix(in srgb, ${accent} 45%, transparent)`,
+                }}
+              >
+                <Cpu size={10} strokeWidth={2.6} />#{engineNumber}
+                <ArrowLeftRight size={9} strokeWidth={3} className="opacity-70" />
+              </button>
+            ) : (
+              <span
+                className="flex items-center gap-0.5 whitespace-nowrap text-[9px] font-bold uppercase tracking-wider"
+                style={{ color: accent }}
+              >
+                <Cpu size={10} strokeWidth={2.6} />#{engineNumber}
+              </span>
+            ))}
         </div>
 
         <div className="flex items-center gap-2">
@@ -162,13 +195,25 @@ export function ChipActionRow({
         {isEquipped ? (
           <Button
             variant="secondary"
-            disabled={!canAffordUnequip || isUnequipping}
+            // NOT disabled when the balance is short: the container answers a
+            // shortfall with the top-up sheet (and the price), which is the
+            // whole point — a greyed button with no route to Stars reads as a
+            // broken screen. The price stays red so the reason is visible
+            // before the tap, not only after it.
+            disabled={isUnequipping}
             loading={isUnequipping}
             onClick={() => onUnequip?.(chip)}
             className="tap-target relative flex flex-col items-center gap-0 px-2.5 py-1.5 text-[10px]"
           >
             <span>{t('unequip')}</span>
-            <span className="text-[9px] font-bold tabular-nums opacity-85">{unequipCost} ★</span>
+            <span
+              className={twMerge(
+                'text-[9px] font-bold tabular-nums opacity-85',
+                !canAffordUnequip && 'text-error-text opacity-100'
+              )}
+            >
+              {unequipCost} ★
+            </span>
           </Button>
         ) : (
           <Button

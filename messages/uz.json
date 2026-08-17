@@ -146,6 +146,7 @@
   "unequip": "Yechish",
   "inventory empty": "Inventaring boʻsh. Uni toʻldirish uchun turnirlarda chip boʻlaklarini yut.",
   "{n}d left": "{n} kun qoldi",
+  "chip life paused": "muddat toʻxtatilgan",
   "{n}h left": "{n} soat qoldi",
   "{n}m left": "{n} daqiqa qoldi",
   "better luck next time": "Keyingi safar omading kelsin",

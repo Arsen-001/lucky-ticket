@@ -146,6 +146,7 @@
   "unequip": "Quitar",
   "inventory empty": "Tu inventario está vacío. Gana fragmentos de chip en los torneos para llenarlo.",
   "{n}d left": "{n} d restantes",
+  "chip life paused": "vida en pausa",
   "{n}h left": "{n} h restantes",
   "{n}m left": "{n} min restantes",
   "better luck next time": "Más suerte la próxima vez",
