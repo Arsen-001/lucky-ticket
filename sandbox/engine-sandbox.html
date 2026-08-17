@@ -444,11 +444,12 @@
   <h1>
     Раскачка движка
     <small
-      >Нулевая бронза: 1 билет за 2 часа. Куб растёт до 5-го уровня: на каждом уровне две шкалы по
-      10, обе на максимуме → повышение. Клик скорости +2%, клик вместимости +1 билет. За полную
-      прокачку уровня — бонус билетов <b>1 · 5 · 10 · 15 · 20</b> и бонус скорости
-      <b>+15 · +65 · +125 · +190 · +255%</b>, подобранный так, что каждый прокачанный уровень выдаёт
-      всю пачку примерно за сутки, а пятый — ровно за 24 часа. Статусы —
+      >Нулевой движок: 1 билет за один цикл тира (бронза 2 ч, серебро 4, золото 8, платина 16, алмаз
+      32). Куб растёт до 5-го уровня: на каждом уровне две шкалы по 10, обе на максимуме →
+      повышение. Клик скорости +2%, клик вместимости +1 билет. За полную прокачку уровня — бонус
+      билетов <b>1 · 5 · 10 · 15 · 20</b> и бонус скорости <b>+15 · +65 · +125 · +190 · +255%</b>,
+      подобранный так, что каждый прокачанный уровень выдаёт всю пачку примерно за сутки на бронзе
+      (на серебре — за двое, и так далее), а пятый — ровно за 24 часа. Статусы —
       <b>как на проде с 17.08</b>: VIP кладёт в тот же стек процентов 7.5% за уровень (VIP 20 =
       +150%), Lucky Player — отдельный <b>множитель ×1.3</b> поверх всего, как чип скорости; вместе
       складываются и действуют на каждый движок парка.</small
@@ -456,13 +457,16 @@
   </h1>
 
   <div>
+    <div class="fleet" id="tiers" style="margin-bottom: 8px"></div>
     <div class="fleet" id="fleet" style="margin-bottom: 10px"></div>
     <div class="card">
       <div class="card-head">
         <div class="cube" id="cube"></div>
         <div>
           <b id="c-title">Двигатель #1</b>
-          <div class="tier">Бронза · <span id="c-level">уровень 1</span></div>
+          <div class="tier">
+            <span id="c-tier">Бронза</span> · <span id="c-level">уровень 1</span>
+          </div>
         </div>
       </div>
 
@@ -545,8 +549,10 @@
 
     <p class="hint">
       Цена клика растёт со шкалой и с уровнем куба: скорость 1+L+(ур−1) ⭐, вместимость 2+L+(ур−1)
-      ⭐. Весь путь до 5-го уровня 10/10 — 800 ⭐. Каждый следующий движок дороже в 1.35 раза: 10 ·
-      14 · 18 · 25 · 33 · 45 ⭐… Над карточкой — переключатель между твоими движками.
+      ⭐, всё × множитель тира <span id="h-mult">1</span>. Весь путь до 5-го уровня 10/10 —
+      <span id="h-full">800</span> ⭐. Каждый следующий движок дороже в 1.35 раза:
+      <span id="h-engines">10 · 14 · 18 · 25 · 33 · 45</span> ⭐… Над карточкой — тир (смена тира
+      начинает парк заново) и переключатель между твоими движками.
     </p>
   </div>
 
@@ -569,7 +575,17 @@
 </div>
 
 <script>
-  const TIER_CYCLE = 7200; // бронза: один билет = 2 часа
+  // Тиры — как на проде: один билет = один цикл тира; клики и полный куб дорожают ×1/2/4/8/16;
+  // цена движка — маркетная в LC, переведённая в ⭐ по паритету 20 000 LC/⭐; ценность билета для
+  // окупаемости — бронзовые 0.2 ⭐, дальше по цене билета тира в маркете.
+  const TIERS = [
+    { key: 'bronze', name: 'Бронза', cycle: 7200, mult: 1, engineLc: 200000, ticketLc: 6000 },
+    { key: 'silver', name: 'Серебро', cycle: 14400, mult: 2, engineLc: 360000, ticketLc: 15000 },
+    { key: 'gold', name: 'Золото', cycle: 28800, mult: 4, engineLc: 675000, ticketLc: 37500 },
+    { key: 'platinum', name: 'Платина', cycle: 57600, mult: 8, engineLc: 1170000, ticketLc: 90000 },
+    { key: 'diamond', name: 'Алмаз', cycle: 115200, mult: 16, engineLc: 2250000, ticketLc: 225000 },
+  ];
+  const LC_PER_STAR = 20000;
   const MAX = 10; // подуровней на каждой шкале
   const MAX_LEVEL = 5;
   const SPEED_PER_CLICK = 2;
@@ -582,13 +598,17 @@
     BASE.push(BASE[l] + MAX + FULL_BONUS[l]); // → 1, 12, 27, 47, 72
     LEVEL_SPEED.push(LEVEL_SPEED[l] + MAX * SPEED_PER_CLICK + FULL_SPEED[l]); // → 0, 35, 120, 265, 475
   }
-  const ENGINE_BASE = 10;
   const ENGINE_GROWTH = 1.35;
-  const TICKET_STARS = 0.2;
+  const tier = () => TIERS[state.tier];
+  const TIER_CYCLE = () => tier().cycle;
+  const ENGINE_BASE = () => Math.round(tier().engineLc / LC_PER_STAR); // 10 · 18 · 34 · 59 · 113 ⭐
+  const TICKET_STARS = () => (0.2 * tier().ticketLc) / 6000;
+  const ZERO_RATE = () => 3600 / tier().cycle; // нулевой движок тира: 1 билет за цикл
   const VIP_STEP = 7.5; // прод с 17.08: VIP engineSpeedBoostPct = 7.5 × уровень — слагаемое в стек
   const LP_MUL_PCT = 30; // прод с 17.08: Lucky Player — множитель ×1.3 поверх стека, как чип скорости
 
   const state = {
+    tier: 0,
     engines: [{ level: 1, speed: 0, cap: 0 }],
     cur: 0,
     spent: 0,
@@ -606,13 +626,13 @@
     LEVEL_SPEED[e.level] + SPEED_PER_CLICK * e.speed + (isMaxed(e) ? FULL_SPEED[e.level] : 0);
   // Статусы складываются: VIP — в аддитивный стек, LP — множителем сверху (оба, если оба).
   const cycleSec = (e, bare = false) =>
-    (capacity(e) * TIER_CYCLE) /
+    (capacity(e) * TIER_CYCLE()) /
     (1 + (speedPct(e) + (bare ? 0 : vipPct())) / 100) /
     (bare ? 1 : lpFactor());
   const rate = (e, bare = false) => capacity(e) / (cycleSec(e, bare) / 3600);
-  const priceSpeed = e => 1 + e.speed + (e.level - 1);
-  const priceCap = e => 2 + e.cap + (e.level - 1);
-  const priceEngine = n => Math.round(ENGINE_BASE * Math.pow(ENGINE_GROWTH, n - 1));
+  const priceSpeed = e => (1 + e.speed + (e.level - 1)) * tier().mult;
+  const priceCap = e => (2 + e.cap + (e.level - 1)) * tier().mult;
+  const priceEngine = n => Math.round(ENGINE_BASE() * Math.pow(ENGINE_GROWTH, n - 1));
 
   const fmtCycle = sec => {
     const h = Math.floor(sec / 3600);
@@ -642,6 +662,35 @@
     const maxed = isMaxed(e);
     const topLevel = e.level >= MAX_LEVEL;
 
+    const T = tier();
+    const tiersEl = document.getElementById('tiers');
+    tiersEl.innerHTML = '';
+    TIERS.forEach((x, i) => {
+      const b = document.createElement('button');
+      b.type = 'button';
+      b.className = i === state.tier ? 'on' : '';
+      b.innerHTML = `<b>${x.name}</b> ${x.cycle / 3600}ч · ×${x.mult}`;
+      b.addEventListener('click', () => {
+        if (i === state.tier) return;
+        state.tier = i;
+        state.engines = [{ level: 1, speed: 0, cap: 0 }];
+        state.cur = 0;
+        state.spent = 0;
+        state.log = [];
+        pushLog(
+          `🔁 <b>${x.name}</b>: билет = ${x.cycle / 3600} ч, клики ×${x.mult}, движок от ${Math.round(x.engineLc / LC_PER_STAR)} ⭐ — парк начат заново`,
+          true
+        );
+        render();
+      });
+      tiersEl.appendChild(b);
+    });
+    document.getElementById('c-tier').textContent = T.name;
+    document.getElementById('h-mult').textContent = T.mult;
+    document.getElementById('h-full').textContent = 800 * T.mult;
+    document.getElementById('h-engines').textContent = [1, 2, 3, 4, 5, 6]
+      .map(n => priceEngine(n))
+      .join(' · ');
     document.getElementById('c-title').textContent = `Двигатель #${state.cur + 1}`;
     document.getElementById('c-level').textContent =
       `уровень ${e.level}${maxed && topLevel ? ' · максимум' : ''}`;
@@ -714,16 +763,16 @@
       state.hasVip || state.hasLp
         ? `движок сам +${pct}%${state.hasVip ? ` + VIP ${vipPct()}% = <b>+${pct + vipPct()}%</b>` : ''}${state.hasLp ? ` · затем <b>×${lpFactor().toFixed(2)}</b> Lucky Player` : ''}<br>` +
           `цикл ${fmtCycle(bareCyc)} → <b>${fmtCycle(cyc)}</b> · ${bareRate.toFixed(2)} → <b>${r.toFixed(2)}</b> в час (×${(r / bareRate).toFixed(2)})<br>` +
-          `весь парк (${state.engines.length}): ${(fleetBare * 24).toFixed(1)} → <b>${(fleetRate * 24).toFixed(1)}</b> билетов в сутки, +${((fleetRate - fleetBare) * 24).toFixed(1)} — как ещё <b>${((fleetRate - fleetBare) / 0.5).toFixed(1)}</b> нулевых движков`
+          `весь парк (${state.engines.length}): ${(fleetBare * 24).toFixed(1)} → <b>${(fleetRate * 24).toFixed(1)}</b> билетов в сутки, +${((fleetRate - fleetBare) * 24).toFixed(1)} — как ещё <b>${((fleetRate - fleetBare) / ZERO_RATE()).toFixed(1)}</b> нулевых движков`
         : 'статусов нет — движок работает на своих процентах';
 
     document.getElementById('k-spent').textContent = `${state.spent} ⭐`;
     document.getElementById('k-engines').textContent = state.engines.length;
     document.getElementById('k-day').textContent = (fleetRate * 24).toFixed(1);
-    document.getElementById('k-mult').textContent = `×${(fleetRate / 0.5).toFixed(2)}`;
-    const perDay = fleetRate * 24 * TICKET_STARS;
+    document.getElementById('k-mult').textContent = `×${(fleetRate / ZERO_RATE()).toFixed(2)}`;
+    const perDay = fleetRate * 24 * TICKET_STARS();
     document.getElementById('k-payback').textContent =
-      state.spent === 0 ? '—' : `${Math.round((state.spent + ENGINE_BASE) / perDay)} дней`;
+      state.spent === 0 ? '—' : `${Math.round((state.spent + ENGINE_BASE()) / perDay)} дней`;
     document.getElementById('k-collects').textContent = (86400 / cyc).toFixed(2);
 
     const log = document.getElementById('log');
