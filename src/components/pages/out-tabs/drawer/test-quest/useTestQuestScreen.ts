@@ -105,7 +105,7 @@ export function useTestQuestScreen() {
   const baselines: Partial<Record<TestQuestAction, number>> = {};
   for (const card of cards) {
     if (!card.taken) continue;
-    for (const step of resolveTestQuestSteps(card.level, serverSteps[card.level])) {
+    for (const step of resolveTestQuestSteps(serverSteps[card.level])) {
       if (step.action && step.target != null) {
         baselines[step.action] = Math.max(baselines[step.action] ?? 0, step.target);
       }

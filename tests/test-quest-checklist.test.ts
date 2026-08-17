@@ -1,14 +1,8 @@
 import { describe, expect, it } from 'vitest';
-import { existsSync, readFileSync } from 'node:fs';
-import { resolve } from 'node:path';
 
 import { GlobalConstants } from '@/constants/global.constants';
-import {
-  getTestQuestSteps,
-  resolveTestQuestSteps,
-  testQuestLadder,
-  type TestQuestStep,
-} from '@/constants/testQuest.constants';
+import { resolveTestQuestSteps, testQuestLadder } from '@/constants/testQuest.constants';
+import { backendSteps, hasBackend, type WireStep } from './helpers/quest-steps';
 import { CHIP_MINT_SHARD_COST } from '@/utils/global/inventory.utils';
 import { MAX_BOOST_LEVEL } from '@/utils/global/ticket-engine.utils';
 import en from '@messages/en.json';
@@ -50,15 +44,22 @@ const CATALOG_AP_CEILING = 2_200;
 const apCeilingByDay = (day: number) =>
   GlobalConstants.dailyBaselineApByTier.bronze * day + CATALOG_AP_CEILING;
 
-const targetOf = (steps: TestQuestStep[], labelKey: string) =>
+const targetOf = (steps: WireStep[], labelKey: string) =>
   steps.find(s => s.labelKey === labelKey)?.target;
 
-const levels = testQuestLadder.map(l => ({ ...l, steps: getTestQuestSteps(l.level) }));
+/**
+ * The SERVER's checklist — the only one now. The Mini App's local copy was
+ * deleted on 18.08.2026 after it spent a day masking a broken server response
+ * (see `helpers/quest-steps.ts`), so these product invariants are asserted
+ * against what actually ships.
+ */
+const steps: Record<number, WireStep[]> = hasBackend ? backendSteps() : {};
+const levels = testQuestLadder.map(l => ({ ...l, steps: steps[l.level] ?? [] }));
 
-describe('test-quest checklist', () => {
+describe.skipIf(!hasBackend)('test-quest checklist', () => {
   it('every level ends with the channel gate, exactly once', () => {
     for (const l of levels) {
-      const gates = l.steps.filter(s => s.gate === 'channel');
+      const gates = l.steps.filter((s: WireStep) => s.gate === 'channel');
       expect(gates, `level ${l.level}`).toHaveLength(1);
       expect(l.steps.at(-1)?.gate, `level ${l.level} last step`).toBe('channel');
     }
@@ -198,8 +199,8 @@ describe('test-quest checklist', () => {
     // without a purchase. Connecting a wallet is free and stays.
     const paid = levels.flatMap(l =>
       l.steps
-        .filter(s => /swap|buy stars|top up/i.test(s.labelKey))
-        .map(s => `L${l.level}:${s.labelKey}`)
+        .filter((s: WireStep) => /swap|buy stars|top up/i.test(s.labelKey))
+        .map((s: WireStep) => `L${l.level}:${s.labelKey}`)
     );
     expect(paid).toEqual([]);
   });
@@ -207,7 +208,9 @@ describe('test-quest checklist', () => {
   it('does not point at switched-off features', () => {
     // Avatars are commented out in both repos (`AVATARS OFF`).
     const dead = levels.flatMap(l =>
-      l.steps.filter(s => /avatar/i.test(s.labelKey)).map(s => `L${l.level}:${s.labelKey}`)
+      l.steps
+        .filter((s: WireStep) => /avatar/i.test(s.labelKey))
+        .map((s: WireStep) => `L${l.level}:${s.labelKey}`)
     );
     expect(dead).toEqual([]);
   });
@@ -241,7 +244,9 @@ describe('test-quest checklist', () => {
    */
   it('every step has a live source — no step is decoration', () => {
     const blind = levels.flatMap(l =>
-      l.steps.filter(s => !s.action && s.gate !== 'channel').map(s => `L${l.level}:${s.labelKey}`)
+      l.steps
+        .filter((s: WireStep) => !s.action && s.gate !== 'channel')
+        .map((s: WireStep) => `L${l.level}:${s.labelKey}`)
     );
     expect(blind).toEqual([]);
   });
@@ -260,7 +265,7 @@ describe('test-quest checklist', () => {
         level: l.level,
         step: l.steps.find(s => s.labelKey === 'quest step buy engine market'),
       }))
-      .filter((x): x is { level: number; step: TestQuestStep } => !!x.step);
+      .filter((x): x is { level: number; step: WireStep } => !!x.step);
 
     expect(series.length, 'the engine ladder must exist').toBeGreaterThanOrEqual(3);
     for (const { level, step } of series) {
@@ -277,34 +282,36 @@ describe('test-quest checklist', () => {
   it('every number on the checklist is backed by a live counter', () => {
     const stuck = levels.flatMap(l =>
       l.steps
-        .filter(s => s.target != null && !s.action)
-        .map(s => `L${l.level}:${s.labelKey} — ${s.target} без счётчика`)
+        .filter((s: WireStep) => s.target != null && !s.action)
+        .map((s: WireStep) => `L${l.level}:${s.labelKey} — ${s.target} без счётчика`)
     );
     expect(stuck).toEqual([]);
   });
 
   it('a counted label is counted on every level it appears on', () => {
     const counted = new Set(
-      levels.flatMap(l => l.steps.filter(s => s.target != null).map(s => s.labelKey))
+      levels.flatMap(l =>
+        l.steps.filter((s: WireStep) => s.target != null).map((s: WireStep) => s.labelKey)
+      )
     );
     const bare = levels.flatMap(l =>
       l.steps
-        .filter(s => s.target == null && counted.has(s.labelKey))
-        .map(s => `L${l.level}:${s.labelKey} — без числа, хотя на других уровнях с числом`)
+        .filter((s: WireStep) => s.target == null && counted.has(s.labelKey))
+        .map(
+          (s: WireStep) => `L${l.level}:${s.labelKey} — без числа, хотя на других уровнях с числом`
+        )
     );
     expect(bare).toEqual([]);
   });
 });
 
 describe('test-quest checklist — server-driven rendering', () => {
-  const known = getTestQuestSteps(30);
-
   it('prefers the server list over the bundled one', () => {
     const fromServer = [
       { labelKey: 'quest step watch ads', target: 7, action: 'adsWatched', kind: 'ads' },
       { labelKey: 'quest step channel gate', kind: 'channel', gate: 'channel' },
     ];
-    expect(resolveTestQuestSteps(30, fromServer)).toEqual([
+    expect(resolveTestQuestSteps(fromServer)).toEqual([
       { labelKey: 'quest step watch ads', target: 7, action: 'adsWatched', kind: 'ads' },
       { labelKey: 'quest step channel gate', kind: 'channel', gate: 'channel' },
     ]);
@@ -313,7 +320,7 @@ describe('test-quest checklist — server-driven rendering', () => {
   it('drops rows this build cannot render instead of showing a raw key', () => {
     // An admin typo or a key added on the server before the app ships it would
     // otherwise reach t() and print "quest step whatever" on someone's screen.
-    const resolved = resolveTestQuestSteps(30, [
+    const resolved = resolveTestQuestSteps([
       { labelKey: 'quest step spend tickets', target: 5, action: 'ticketsSpent', kind: 'tickets' },
       { labelKey: 'quest step from the future', target: 3, kind: 'ads' },
       { labelKey: 'quest step watch ads', kind: 'telepathy' },
@@ -323,48 +330,18 @@ describe('test-quest checklist — server-driven rendering', () => {
     ]);
   });
 
-  it('falls back to the bundled ladder when the server sends nothing usable', () => {
-    expect(resolveTestQuestSteps(30, undefined)).toEqual(known);
-    expect(resolveTestQuestSteps(30, [])).toEqual(known);
-    expect(resolveTestQuestSteps(30, [{ labelKey: 'nope', kind: 'nope' }])).toEqual(known);
+  it('shows NOTHING when the server sends nothing usable — never a borrowed list', () => {
+    // This used to fall back to a bundled ladder, and that fallback is what let
+    // a server response with no counters look perfectly fine for a whole day.
+    expect(resolveTestQuestSteps(undefined)).toEqual([]);
+    expect(resolveTestQuestSteps([])).toEqual([]);
+    expect(resolveTestQuestSteps([{ labelKey: 'nope', kind: 'nope' }])).toEqual([]);
   });
 
   it('ignores a nonsense target or action rather than trusting it', () => {
-    const [step] = resolveTestQuestSteps(30, [
+    const [step] = resolveTestQuestSteps([
       { labelKey: 'quest step watch ads', target: -4, action: 'mindReading', kind: 'ads' },
     ]);
     expect(step).toEqual({ labelKey: 'quest step watch ads', kind: 'ads' });
-  });
-});
-
-describe('test-quest checklist — backend parity', () => {
-  // The catalogue moved to the backend on 17.08.2026; this copy is the fallback
-  // for an older server. If the two drift, players on a current build see one
-  // list and the fallback path another. Skipped when the backend is not checked
-  // out next to this repo (CI that clones only the frontend).
-  const levelsPath = resolve(
-    process.cwd(),
-    '../lucky-ticket-backend/src/test-quest/test-quest.levels.ts'
-  );
-  const hasBackend = existsSync(levelsPath);
-
-  it.skipIf(!hasBackend)('the bundled ladder matches the backend defaults', () => {
-    const src = readFileSync(levelsPath, 'utf8');
-    const block = src.slice(
-      src.indexOf('export const TEST_QUEST_STEPS'),
-      src.indexOf('/** The catalog the app reads')
-    );
-    expect(block.length, 'TEST_QUEST_STEPS not found in the backend').toBeGreaterThan(0);
-
-    for (const l of testQuestLadder) {
-      const steps = getTestQuestSteps(l.level);
-      for (const s of steps) {
-        expect(block, `level ${l.level}: ${s.labelKey}`).toContain(`'${s.labelKey}'`);
-      }
-      // Same number of rows for the level, counted off its own block.
-      const start = block.indexOf(`\n  ${l.level}: [`);
-      const rows = block.slice(start, block.indexOf('\n  ],', start)).split('labelKey').length - 1;
-      expect(rows, `level ${l.level} row count`).toBe(steps.length);
-    }
   });
 });

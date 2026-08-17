@@ -1,6 +1,7 @@
 import { routes, type Route } from '@/constants/routes';
 import type { TestQuestAction, TestQuestStepDto } from '@/types/interfaces/testQuest.interfaces';
 import type { MessageIds } from '@/types/types/i18n.types';
+import en from '@messages/en.json';
 
 /**
  * Test-Quest ladder — the 31-day launch quest ("Тестировщик 31 → 1").
@@ -157,279 +158,35 @@ export interface TestQuestStep {
   gate?: 'channel';
 }
 
-// The channel-subscription gate — required on EVERY level to claim its reward.
-const CHANNEL_GATE: TestQuestStep = {
-  labelKey: 'quest step channel gate',
-  kind: 'channel',
-  gate: 'channel',
-};
-
-// Authoring helpers for the recurring core steps. The label is number-less; the
-// count rides in `target` and renders as a "done / target" badge, so the numbers
-// stay out of the translated string.
-const spend = (n: number): TestQuestStep => ({
-  labelKey: 'quest step spend tickets',
-  target: n,
-  action: 'ticketsSpent',
-  kind: 'tickets',
-});
-const ads = (n: number): TestQuestStep => ({
-  labelKey: 'quest step watch ads',
-  target: n,
-  action: 'adsWatched',
-  kind: 'ads',
-});
 /**
- * Always counted. It used to accept an optional `n`, and day 1 was authored
- * without one — so the only step on that screen with no `0/1` badge sat between
- * four steps that had one, and read as "nothing to do here". A counted ladder
- * has to show its first rung too; `tests/test-quest-checklist.test.ts` now
- * refuses any step whose label is counted elsewhere but bare here.
+ * Every label key this build can render — the white-list server steps are
+ * checked against, so a key we have no translation for never reaches `t()`.
+ *
+ * Read from the DICTIONARY, not from a local copy of the checklist. There used
+ * to be such a copy, and it is exactly what broke: it also served as a fallback
+ * list, so the app rendered its own steps whenever the server's looked wrong —
+ * which hid, for a whole day, the fact that the server was sending steps with no
+ * counters at all. One source now: whatever `GET /test-quest` says, minus rows
+ * this build has no words or no icon for.
  */
-const share = (n: number): TestQuestStep => ({
-  labelKey: 'quest step share',
-  target: n,
-  action: 'shares',
-  kind: 'share',
-});
-const invite = (n: number): TestQuestStep => ({
-  labelKey: 'quest step invite referrals',
-  target: n,
-  action: 'referrals',
-  kind: 'referral',
-});
-const upgrade = (n: number): TestQuestStep => ({
-  labelKey: 'quest step upgrade engine',
-  target: n,
-  action: 'engineUpgrades',
-  kind: 'engine',
-});
-const collect = (n: number): TestQuestStep => ({
-  labelKey: 'quest step collect tickets',
-  target: n,
-  action: 'ticketsCollected',
-  kind: 'engine',
-});
-const holdStakes = (n: number): TestQuestStep => ({
-  labelKey: 'quest step hold stakes',
-  target: n,
-  action: 'activeStakes',
-  kind: 'stake',
-});
-/**
- * Shards, counted and cumulative like the rest of the core. The ladder is sized
- * to land on a CHIP: `CHIP_MINT_SHARD_COST` is 20 shards of a tier, a Bronze
- * shard is 20 000 LC (or 1 ⭐) in the market, so the full run costs 400k of the
- * ladder's own 1M LC — affordable, and it gives the last days something to build
- * toward instead of one more "buy a shard" checkbox.
- */
-const shards = (n: number): TestQuestStep => ({
-  labelKey: 'quest step buy shards',
-  target: n,
-  action: 'shardsBought',
-  kind: 'market',
-});
+const KNOWN_STEP_KEYS: ReadonlySet<string> = new Set(Object.keys(en));
 
-// Authored, real-only checklist per level (31 → 1). Every level carries the same
-// base — engine ticket · tournament spend · ads · invite/share · channel gate —
-// with the quantities escalating toward level 1, plus that level's own special
-// task(s) (upgrade, stake, status wall, friends milestone, wallet…). CHANNEL_GATE
-// is always last: no reward without a channel subscription. Front-end prototype
-// until the backend owns per-step data.
-const TEST_QUEST_STEP_OVERRIDES: Record<number, TestQuestStep[]> = {
-  // 31 · entry
-  31: [collect(1), spend(1), ads(1), share(1), CHANNEL_GATE],
-  // 30 · day 1 — engine-upgrade special
-  30: [spend(10), ads(2), share(2), upgrade(1), CHANNEL_GATE],
-  // 29 · day 2 — cumulative over the whole test
-  29: [
-    spend(18),
-    ads(5),
-    share(3),
-    {
-      labelKey: 'quest step buy ticket market',
-      target: 1,
-      action: 'ticketsBought',
-      kind: 'market',
-    },
-    upgrade(2),
-    CHANNEL_GATE,
-  ],
-  // 28 · day 3 — engine-capacity upgrade + profile
-  28: [
-    spend(27),
-    ads(10),
-    share(5),
-    invite(1),
-    upgrade(3),
-    // Was "set up profile — avatar & nickname". Avatars are switched OFF in
-    // both repos (marker `AVATARS OFF`, back ~October) and `avatarUrl` is filled
-    // from `tg.photo_url` at first login anyway — so half the step promised a
-    // screen that does not exist and the other half completed itself.
-    { labelKey: 'quest step set nickname', target: 1, action: 'nicknameSet', kind: 'profile' },
-    CHANNEL_GATE,
-  ],
-  // 27 · day 5 on screen — channel boost. Telegram counts boosts per channel, so
-  // this is an act performed once that the room keeps; the row deep-links to the
-  // boost page, not to the channel. (`day: 4` in the ladder above counts from
-  // the first claimable day; the screen numbers the entry level as day 1.)
-  27: [
-    spend(35),
-    ads(15),
-    share(6),
-    upgrade(4),
-    { labelKey: 'quest step boost channel', target: 1, action: 'channelBoosted', kind: 'boost' },
-    CHANNEL_GATE,
-  ],
-  // 26 · day 5
-  26: [spend(43), ads(22), share(8), upgrade(5), CHANNEL_GATE],
-  // 25 · day 6
-  25: [spend(52), ads(29), share(9), invite(2), upgrade(6), CHANNEL_GATE],
-  // 24 · day 7 — wallet. Connecting is free; BUYING Lucky Stars is not — the
-  // smallest package is 1 TON (`starsPackages` in the backend economy config),
-  // so "swap TON for Lucky Stars" was a real-money step standing in a free
-  // 31-day checklist. Removed; the wallet connection stays.
-  24: [
-    spend(60),
-    ads(36),
-    share(11),
-    upgrade(7),
-    { labelKey: 'quest step connect wallet', target: 1, action: 'walletConnected', kind: 'wallet' },
-    CHANNEL_GATE,
-  ],
-  // 23 · day 8
-  23: [spend(68), ads(43), share(12), upgrade(8), shards(2), CHANNEL_GATE],
-  // 22 · day 9
-  22: [spend(77), ads(51), share(14), invite(3), upgrade(9), CHANNEL_GATE],
-  // 21 · day 10 — first stake
-  21: [
-    spend(85),
-    ads(58),
-    share(15),
-    upgrade(10),
-    { labelKey: 'quest step first stake', target: 1, action: 'stakesMade', kind: 'stake' },
-    CHANNEL_GATE,
-  ],
-  // 20 · day 11 — the counted core only.
-  20: [spend(93), ads(65), share(17), upgrade(11), CHANNEL_GATE],
-  // 19 · day 12
-  19: [spend(102), ads(72), share(18), invite(4), upgrade(12), CHANNEL_GATE],
-  // 18 · day 13
-  18: [spend(110), ads(79), share(20), upgrade(13), CHANNEL_GATE],
-  // 17 · day 14
-  17: [spend(118), ads(86), share(21), invite(5), upgrade(14), CHANNEL_GATE],
-  // 16 · day 15
-  16: [spend(127), ads(93), share(23), upgrade(15), shards(8), CHANNEL_GATE],
-  // 15 · day 16 — stake hold. No status line here (or anywhere else in the
-  // checklist any more): AP tiers are TWO gates at once (points AND referrals),
-  // they move on the platform's own clock rather than the test's, and the test
-  // window cannot honestly promise any of them — Gold needs 1 650 AP + 5
-  // referrals, Platinum 5 900 + 10, against a 35 AP/day ceiling.
-  15: [spend(135), ads(100), share(24), upgrade(16), holdStakes(1), CHANNEL_GATE],
-  // 14 · day 17
-  14: [spend(143), ads(108), share(26), invite(6), upgrade(17), CHANNEL_GATE],
-  // 13 · day 18
-  13: [spend(152), ads(115), share(27), upgrade(18), CHANNEL_GATE],
-  // 12 · day 19 — new engine
-  12: [
-    spend(160),
-    ads(122),
-    share(29),
-    upgrade(19),
-    {
-      labelKey: 'quest step buy engine market',
-      target: 1,
-      action: 'enginesBought',
-      kind: 'market',
-    },
-    CHANNEL_GATE,
-  ],
-  // 11 · day 20 — two stakes
-  11: [spend(168), ads(129), share(30), invite(7), upgrade(20), holdStakes(2), CHANNEL_GATE],
-  // 10 · day 21
-  10: [spend(177), ads(136), share(32), upgrade(21), CHANNEL_GATE],
-  // 9 · day 22 — the shard run continues. The Gold status step and the Gold
-  // shard that depended on it are gone: Gold is 1 650 AP + 5 referrals, which by
-  // day 22 needs roughly half the entire one-time catalogue on top of a perfect
-  // daily baseline, and the market tier-gates the Gold shard behind that status.
-  9: [spend(185), ads(143), share(33), upgrade(22), shards(14), CHANNEL_GATE],
-  // 8 · day 23
-  8: [
-    spend(193),
-    ads(150),
-    share(35),
-    invite(8),
-    upgrade(23),
-    {
-      labelKey: 'quest step buy engine market',
-      target: 2,
-      action: 'enginesBought',
-      kind: 'market',
-    },
-    CHANNEL_GATE,
-  ],
-  // 7 · day 24
-  7: [spend(202), ads(157), share(36), upgrade(24), CHANNEL_GATE],
-  // 6 · day 25 — the shard run completes: 20 shards is exactly one chip.
-  6: [
-    spend(210),
-    ads(164),
-    share(38),
-    upgrade(25),
-    shards(20),
-    {
-      labelKey: 'quest step buy engine market',
-      target: 3,
-      action: 'enginesBought',
-      kind: 'market',
-    },
-    CHANNEL_GATE,
-  ],
-  // 5 · day 26
-  5: [spend(218), ads(172), share(39), invite(9), upgrade(26), CHANNEL_GATE],
-  // 4 · day 27 — the counted core only. It used to carry "reach Platinum", which
-  // is UNREACHABLE inside the test by arithmetic rather than by effort (Platinum
-  // is 5 900 AP + 10 referrals, while 27 days of the full daily AP ceiling —
-  // 35/day ⇒ 945 — plus the ENTIRE one-time catalogue tops out around 2 538 AP);
-  // and a "crown qualification" line, which stated a state, not a task.
-  4: [
-    spend(227),
-    ads(179),
-    share(41),
-    upgrade(27),
-    { labelKey: 'quest step mint chip', target: 1, action: 'chipsOwned', kind: 'chip' },
-    { labelKey: 'quest step equip chip', target: 1, action: 'chipsEquipped', kind: 'chip' },
-    CHANNEL_GATE,
-  ],
-  // 3 → 1 · crown — the counted core only. No placement lines here ("top 50",
-  // "top 10", "become #1"): the crown is ASSIGNED from the Founders leaderboard
-  // when the test is frozen, and `claim()` refuses every level below
-  // `config.qualifyLevel` outright — so a placement could never be a to-do.
-  3: [spend(235), ads(186), share(42), upgrade(28), CHANNEL_GATE],
-  2: [spend(243), ads(193), share(44), invite(10), upgrade(29), CHANNEL_GATE],
-  // 1 · crown — no referral count either: level 2 already asks for 10, so
-  // repeating it made the top level no harder than the one below it.
-  1: [spend(250), ads(200), share(45), upgrade(30), CHANNEL_GATE],
-};
-
-/**
- * The LOCAL checklist for a level (31 → 1) — the prototype ladder this build
- * ships with. Since 17.08.2026 the live list comes from the server (it is the
- * same data, ported into `test-quest.levels.ts`), and this is the fallback for
- * an older backend or the pre-load state. Prefer {@link resolveTestQuestSteps}.
- */
-export const getTestQuestSteps = (level: number): TestQuestStep[] =>
-  TEST_QUEST_STEP_OVERRIDES[level] ?? [];
-
-/** Every label key this build can render — the white-list server steps are
- *  checked against, so a key we have no translation for never reaches `t()`. */
-const KNOWN_STEP_KEYS: ReadonlySet<string> = new Set(
-  Object.values(TEST_QUEST_STEP_OVERRIDES).flatMap(steps => steps.map(s => s.labelKey))
-);
-
-const KNOWN_KINDS: ReadonlySet<string> = new Set(
-  Object.values(TEST_QUEST_STEP_OVERRIDES).flatMap(steps => steps.map(s => s.kind))
-);
+const KNOWN_KINDS: ReadonlySet<string> = new Set<TestQuestStepKind>([
+  'tickets',
+  'ads',
+  'share',
+  'referral',
+  'engine',
+  'market',
+  'chip',
+  'wallet',
+  'stake',
+  'status',
+  'profile',
+  'rank',
+  'boost',
+  'channel',
+]);
 
 const KNOWN_ACTIONS: ReadonlySet<string> = new Set<TestQuestAction>([
   'ticketsSpent',
@@ -452,21 +209,23 @@ const KNOWN_ACTIONS: ReadonlySet<string> = new Set<TestQuestAction>([
 ]);
 
 /**
- * The checklist to render for a level, preferring the SERVER's list.
+ * The checklist to render for a level — **the server's list, and only that**.
  *
- * The server owns the list so its numbers can be retuned from the admin panel
- * without a frontend deploy. What it sends is untrusted wire data, so each row
- * is narrowed here first: an unknown `labelKey` has no translation in this
- * build and would render as a raw key on someone's screen, and an unknown
- * `kind` has no icon — both are dropped rather than shown broken. A level left
- * with nothing usable falls back to the local ladder, so the screen is never
- * blank because of one bad row.
+ * What the server sends is untrusted wire data, so each row is narrowed here
+ * first: an unknown `labelKey` has no translation in this build and would render
+ * as a raw key on someone's screen, and an unknown `kind` has no icon — both are
+ * dropped rather than shown broken.
+ *
+ * Nothing is substituted when the server sends nothing. This build used to carry
+ * its own copy of the whole ladder and fall back to it, and that is precisely
+ * what hid the worst defect of 18.08.2026: the server was sending steps with no
+ * counters, the app quietly drew its own correct-looking list instead, every
+ * screen and every test agreed — and production showed `0/20` no matter how many
+ * shards the player bought. An empty checklist is the honest picture of "the
+ * server has not answered yet"; a borrowed one is a lie the player cannot act on.
  */
-export const resolveTestQuestSteps = (
-  level: number,
-  serverSteps?: TestQuestStepDto[]
-): TestQuestStep[] => {
-  if (!serverSteps?.length) return getTestQuestSteps(level);
+export const resolveTestQuestSteps = (serverSteps?: TestQuestStepDto[]): TestQuestStep[] => {
+  if (!serverSteps?.length) return [];
 
   const usable = serverSteps
     .filter(s => KNOWN_STEP_KEYS.has(s.labelKey) && KNOWN_KINDS.has(s.kind))
@@ -478,5 +237,5 @@ export const resolveTestQuestSteps = (
       ...(s.gate === 'channel' ? { gate: 'channel' as const } : {}),
     }));
 
-  return usable.length ? usable : getTestQuestSteps(level);
+  return usable;
 };

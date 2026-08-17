@@ -66,7 +66,7 @@ export function TestQuestSteps({
   title,
 }: TestQuestStepsProps) {
   const t = useAppTranslations();
-  const steps = resolveTestQuestSteps(level, serverSteps);
+  const steps = resolveTestQuestSteps(serverSteps);
   if (!steps.length) return null;
 
   // Effective count for a countable step: the live counter when there is one,

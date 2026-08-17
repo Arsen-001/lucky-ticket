@@ -2,7 +2,8 @@ import { describe, expect, it } from 'vitest';
 import { readFileSync, readdirSync } from 'node:fs';
 import { join, resolve } from 'node:path';
 
-import { getTestQuestSteps, testQuestLadder } from '@/constants/testQuest.constants';
+import { testQuestLadder } from '@/constants/testQuest.constants';
+import { backendSteps, hasBackend } from './helpers/quest-steps';
 import type { TestQuestAction } from '@/types/interfaces/testQuest.interfaces';
 
 /**
@@ -63,16 +64,18 @@ const MOVED_BY: Partial<Record<TestQuestAction, string>> = {
 const OFF_DEVICE: TestQuestAction[] = ['referrals', 'channelBoosted'];
 
 const usedActions = (): TestQuestAction[] => {
+  if (!hasBackend) return [];
+  const steps = backendSteps();
   const seen = new Set<TestQuestAction>();
   for (const level of testQuestLadder) {
-    for (const step of getTestQuestSteps(level.level)) {
-      if (step.action) seen.add(step.action);
+    for (const step of steps[level.level] ?? []) {
+      if (step.action) seen.add(step.action as TestQuestAction);
     }
   }
   return [...seen];
 };
 
-describe('quest step freshness — every step refetches when it is done', () => {
+describe.skipIf(!hasBackend)('quest step freshness — every step refetches when it is done', () => {
   const actions = usedActions();
 
   it('the checklist actually uses counters (the guard is not scanning an empty set)', () => {
