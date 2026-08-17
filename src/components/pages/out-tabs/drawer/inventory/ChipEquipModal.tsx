@@ -1,6 +1,6 @@
 'use client';
 
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { Cpu, MemoryStick } from 'lucide-react';
 import { twMerge } from 'tailwind-merge';
 import { useGetMeQuery } from '@/api/me.api';
@@ -38,6 +38,15 @@ export function ChipEquipModal({
   const { data: tickets } = useGetTicketsQuery();
   const { data: me } = useGetMeQuery();
   const [selectedEngineId, setSelectedEngineId] = useState<string | undefined>();
+
+  // The modal is mounted for the whole screen's life, so the selection outlived
+  // the chip it was made for: pick an engine for a Bronze chip, close, open a
+  // Gold one — nothing is highlighted in the new list (that engine is not in
+  // it), and the confirm button is live anyway. Tapping it equipped the chip
+  // onto the engine the player last looked at, on a different screen.
+  useEffect(() => {
+    setSelectedEngineId(undefined);
+  }, [chip?.id, open]);
 
   // One numbering for the whole feature: the inventory screen labels an
   // equipped chip with the number this list picks from, so they have to come
@@ -148,20 +157,26 @@ export function ChipEquipModal({
           {t('chip equip note')}
         </div>
 
-        <footer className="flex items-center justify-between gap-3">
-          <div className="flex items-center gap-1.5 text-[11px] font-bold tabular-nums">
-            <TelegramStarIcon size={14} />
-            <span className={canAfford ? 'text-white' : 'text-error-text'}>
-              {userStars} / {cost}
-            </span>
-          </div>
+        {/* Attaching is free (DOCS §10.4), and a price row reading "10000 / 0"
+            under a button promising "· 0 ★" invented a cost where there is
+            none. The row appears only when this equip is a MOVE, which is the
+            one case that bills. */}
+        <footer className="flex items-center justify-end gap-3">
+          {cost > 0 && (
+            <div className="mr-auto flex items-center gap-1.5 text-[11px] font-bold tabular-nums">
+              <TelegramStarIcon size={14} />
+              <span className={canAfford ? 'text-white' : 'text-error-text'}>
+                {userStars} / {cost}
+              </span>
+            </div>
+          )}
           <Button
             onClick={() => selectedEngineId && onConfirm(selectedEngineId)}
             disabled={!selectedEngineId || !canAfford || loading}
             loading={loading}
             className="px-4 py-2 text-[12px]"
           >
-            {t('equip for {n} stars', { n: cost })}
+            {cost > 0 ? t('equip for {n} stars', { n: cost }) : t('equip')}
           </Button>
         </footer>
       </div>
