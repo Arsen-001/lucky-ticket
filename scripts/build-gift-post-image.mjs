@@ -16,9 +16,17 @@ import { chromium } from '@playwright/test';
 import { fileURLToPath } from 'node:url';
 import { dirname, resolve } from 'node:path';
 
+/**
+ * A new file rather than a rewrite of `gift-post.png`, on purpose. The old card
+ * says «Подарок за пятерых друзей» — wrong language for the channel and a
+ * number the rule outgrew (seven since 13.08.2026) — and it is still the
+ * picture on thirty published posts. Those are re-pointed with
+ * `editMessageMedia`, which fetches by URL, and Telegram caches by URL: reusing
+ * the name would have been a coin flip between the old and the new artwork.
+ */
 const OUT = resolve(
   dirname(fileURLToPath(import.meta.url)),
-  '../public/assets/images/gift-post.png'
+  '../public/assets/images/gift-post-seven.png'
 );
 
 /** 5:4 — the crop the mock settled on: mostly bear, little sky. */
@@ -92,7 +100,7 @@ const HTML = `<!doctype html>
     <canvas id="confetti"></canvas>
     <span class="bear">🧸</span>
     <div class="foot">
-      <span class="label">Подарок за пятерых друзей</span>
+      <span class="label">Gift for seven friends</span>
       <span class="wordmark"><span class="lucky">Lucky</span><span class="ticket">Ticket</span><span class="n365">365</span></span>
     </div>
   </div>
