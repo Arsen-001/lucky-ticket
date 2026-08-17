@@ -43,11 +43,11 @@ const FALLBACK_TON_USD_RATE = 1.5;
  * Fallback catalog for the mock layer — the real one comes from
  * `GET /wallet/stars-packages`, priced off the live TON feed. The TON cost is
  * the fixed attribute (hence the ids); the stars are derived here the same way
- * the backend derives them, so the mock can't drift into quoting a count no
- * rate produces. Ids used to be `pkg_171`… — the star counts at the retired
- * 3.42 anchor.
+ * the backend derives them — off the LS **sale** price, not the valuation
+ * anchor — so the mock can't drift into quoting a count no rate produces. Ids
+ * used to be `pkg_171`… — the star counts at the retired 3.42 anchor.
  */
-const STARS_USD_ANCHOR = 0.02;
+const STARS_SALE_USD_RATE = 0.0188;
 const starsPackages: StarsPackage[] = (
   [
     { id: 'pkg_ton_1', tonCost: 1 },
@@ -58,7 +58,8 @@ const starsPackages: StarsPackage[] = (
 ).map(pkg => ({
   ...pkg,
   stars: Math.round(
-    ((pkg.tonCost * FALLBACK_TON_USD_RATE) / STARS_USD_ANCHOR) * (1 + (pkg.bonusPercent ?? 0) / 100)
+    ((pkg.tonCost * FALLBACK_TON_USD_RATE) / STARS_SALE_USD_RATE) *
+      (1 + (pkg.bonusPercent ?? 0) / 100)
   ),
 }));
 
@@ -283,8 +284,22 @@ export const appConfig = {
     minWithdrawLc: 10_000,
     /** USD value of one LC — used to price the LC → TON conversion (DOCS §6.1): $1 = 1,000,000 LC. */
     lcUsdRate: 0.000001,
-    /** USD anchor of one Lucky Star (LS) — the Stars packages are priced off it. */
+    /**
+     * USD **valuation** anchor of one Lucky Star (LS): what an LS is worth when
+     * a price is expressed in it (`lcPriceToLsParity`). NOT the price one is
+     * sold at — see `lsTonExchangeUsdRate`.
+     */
     lsUsdRate: 0.02,
+    /**
+     * Fallback for the USD **sale** price of one LS bought with TON: 100 LS =
+     * $1.88. The live value comes from `GET /config` (see
+     * `useLsTonExchangeRate`) — the backend charges with its own copy, so a
+     * preview computed from this bundled one would quote a price it then
+     * doesn't honour. Kept apart from the anchor above on purpose: that one
+     * also prices the market catalog at LC parity, and an exchange rate has no
+     * business repricing engines.
+     */
+    lsTonExchangeUsdRate: 0.0188,
     /**
      * Fallback invite gate on binding a wallet: how many friends a player must
      * have invited before TON Connect is offered. `0` = no gate, which is where

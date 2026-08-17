@@ -8,6 +8,7 @@ import { TelegramStarIcon } from '@/components/shared/icons/TelegramStarIcon';
 import { useAppTranslations } from '@/hooks/useAppTranslations';
 import { useConverterAmount } from '@/hooks/useConverterAmount';
 import { useToast } from '@/hooks/useToast';
+import { useLsTonExchangeRate } from '@/hooks/useLsTonExchangeRate';
 import { useTonUsdRate } from '@/hooks/useTonUsdRate';
 import { useBuyStarsMutation } from '@/api/wallet.api';
 import { formatNumber } from '@/utils/global/number.utils';
@@ -40,6 +41,7 @@ export function ExchangeTonStarsModal({
   const t = useAppTranslations();
   const toast = useToast();
   const tonUsdRate = useTonUsdRate();
+  const lsUsdRate = useLsTonExchangeRate();
   const [exchange, { isLoading }] = useBuyStarsMutation();
   const [step, setStep] = useState<Step>('select');
   const [result, setResult] = useState({ ton: 0, stars: 0 });
@@ -47,8 +49,8 @@ export function ExchangeTonStarsModal({
   // has, and answering it by guessing TON amounts against an unseen rate was
   // the only way this screen offered.
   const amount = useConverterAmount({
-    toRight: ton => tonToStars(ton, tonUsdRate),
-    toLeft: stars => starsToTon(stars, tonUsdRate),
+    toRight: ton => tonToStars(ton, tonUsdRate, lsUsdRate),
+    toLeft: stars => starsToTon(stars, tonUsdRate, lsUsdRate),
     formatLeft: tonField,
     // Grouped, so a five-digit star count stays readable; the field strips the
     // separators back out the moment it is typed into.
@@ -64,7 +66,7 @@ export function ExchangeTonStarsModal({
   }, [open]);
 
   const stars = amount.to;
-  const cost = starsToTon(stars, tonUsdRate); // exact TON that will be charged
+  const cost = starsToTon(stars, tonUsdRate, lsUsdRate); // exact TON that will be charged
   const insufficient = stars >= 1 && cost > tonBalance;
   const canSubmit = isConnected && stars >= 1 && !insufficient && !isLoading;
 

@@ -11,8 +11,14 @@ export interface PublicConfig {
   lcUsdRate: number;
   /** USD value of one TON. */
   tonUsdRate: number;
-  /** USD value of one Lucky Star. */
+  /** USD value of one Lucky Star — the anchor item prices are set against. */
   lsUsdRate: number;
+  /**
+   * USD price of one Lucky Star bought with TON (100 LS = $1.88) — the sale
+   * price, deliberately under the anchor above. Optional: an older backend
+   * doesn't serve it and the client then falls back to the bundled value.
+   */
+  lsTonExchangeUsdRate?: number;
   /** Admin kill switch for rewarded ads — hides every ad surface when false. */
   adsEnabled: boolean;
   /** Advertiser (partners) cabinet master switch — false = coming-soon preview. */

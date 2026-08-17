@@ -7,21 +7,26 @@ import { appConfig } from '@/config/app.config';
 import type { Dictionary } from '@/types/types/i18n.types';
 import type { TonNetwork, WalletTransaction } from '@/types/interfaces/wallet.interfaces';
 
-/** USD value of one Lucky Star — mirrors the backend buy-stars pricing. */
-const STAR_USD_RATE = 0.02;
-
 /**
- * Both directions take the TON→USD rate explicitly so a screen can pass the
- * live one from `GET /config` (see `useTonUsdRate`). The bundled anchor is only
- * a fallback: the backend prices the charge with its own rate, and a preview
- * computed from a stale copy would quote a number it then doesn't honour.
+ * Both rates are taken explicitly so a screen can pass the live ones from
+ * `GET /config` (see `useTonUsdRate` / `useLsTonExchangeRate`). The bundled
+ * values are only a fallback: the backend prices the charge with its own
+ * copies, and a preview computed from a stale one would quote a number it then
+ * doesn't honour. `lsUsdRate` here is the **sale** price of a star (100 LS =
+ * $1.88), not the $0.02 anchor the market values one at.
  */
-export const starsToTon = (stars: number, tonUsdRate = appConfig.wallet.tonUsdRate): number =>
-  Math.ceil((stars * STAR_USD_RATE * 1000) / tonUsdRate) / 1000;
+export const starsToTon = (
+  stars: number,
+  tonUsdRate = appConfig.wallet.tonUsdRate,
+  lsUsdRate = appConfig.wallet.lsTonExchangeUsdRate
+): number => Math.ceil((stars * lsUsdRate * 1000) / tonUsdRate) / 1000;
 
 /** Lucky Stars you get for `ton` TON (floored — the exchange never over-credits). */
-export const tonToStars = (ton: number, tonUsdRate = appConfig.wallet.tonUsdRate): number =>
-  Math.floor((ton * tonUsdRate) / STAR_USD_RATE);
+export const tonToStars = (
+  ton: number,
+  tonUsdRate = appConfig.wallet.tonUsdRate,
+  lsUsdRate = appConfig.wallet.lsTonExchangeUsdRate
+): number => Math.floor((ton * tonUsdRate) / lsUsdRate);
 
 const TON_MIN_WITHDRAW = 5;
 const TON_FIRST_MIN_WITHDRAW = 1;
