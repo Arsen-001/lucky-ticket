@@ -11,6 +11,11 @@ import {
   computeStakeEffectiveAprPercent,
   computeStakeFee,
   findLevelForDeposit,
+  formatStakeRelative,
+  stakeApKept,
+  stakeCompletedAtMs,
+  stakeDurationMonths,
+  stakeIsMatured,
 } from '@/utils/global/stakes.utils';
 import { computeTierGap } from '@/utils/global/activity.utils';
 
@@ -108,6 +113,106 @@ describe('deposit bands (DOCS §18.2)', () => {
     expect(computeStakeReturnCoins(1_000_000, months, false, false, undefined, undefined, 1)).toBe(
       110_000
     );
+  });
+});
+
+/**
+ * Cancelling returns the principal and NOTHING else — the base AP credited at
+ * start is revoked with it (DOCS §18.3, `StakesService.cancel`). Nothing guarded
+ * this, and the drift it allowed shipped: the cancel sheet showed a row reading
+ * "Base AP kept · +N" in positive teal, directly under a paragraph in the same
+ * sheet saying the AP is revoked, while the mock backend quietly kept it.
+ */
+describe('cancelling a stake keeps no AP (DOCS §18.3)', () => {
+  const completed = { outcome: 'completed' as const, apAwarded: 1800 };
+  const cancelled = { outcome: 'cancelled' as const, apAwarded: 120 };
+
+  it('a completed stake keeps everything it was awarded', () => {
+    expect(stakeApKept(completed)).toBe(1800);
+  });
+
+  it('a cancelled stake keeps none of it, however much the row still carries', () => {
+    // The server never zeroes `apAwarded` on cancel, so the row arrives with the
+    // base still stamped on it. Rendering that number credits the player with
+    // points that were taken off their balance.
+    expect(stakeApKept(cancelled)).toBe(0);
+  });
+
+  it('lifetime AP counts completed stakes only', () => {
+    const history = [completed, cancelled, { outcome: 'completed' as const, apAwarded: 45 }];
+    expect(history.reduce((sum, h) => sum + stakeApKept(h), 0)).toBe(1845);
+  });
+});
+
+/**
+ * The duration is the server's number, not one re-derived from the dates. The
+ * 30-day approximation agrees with calendar months up to 12 and then stops:
+ * 36 calendar months is 1096 days, and `round(1096 / 30)` is 37.
+ */
+describe('stake duration comes from the server', () => {
+  it('prefers the stored durationMonths over the dates', () => {
+    expect(
+      stakeDurationMonths({
+        durationMonths: 6,
+        startDate: '2026-01-01T00:00:00.000Z',
+        endDate: '2026-01-01T02:00:00.000Z',
+      })
+    ).toBe(6);
+  });
+
+  it('falls back to the dates only when the field is absent', () => {
+    expect(
+      stakeDurationMonths({
+        startDate: '2026-01-01T00:00:00.000Z',
+        endDate: '2026-07-01T00:00:00.000Z',
+      })
+    ).toBe(6);
+  });
+
+  it('the date fallback is exactly what drifts on a long stake', () => {
+    // Kept as a statement of the known limit: 2026-01-01 → 2029-01-01.
+    expect(
+      stakeDurationMonths({
+        startDate: '2026-01-01T00:00:00.000Z',
+        endDate: '2029-01-01T00:00:00.000Z',
+      })
+    ).toBe(37);
+    // ...which is why the server's own value has to win.
+    expect(
+      stakeDurationMonths({
+        durationMonths: 36,
+        startDate: '2026-01-01T00:00:00.000Z',
+        endDate: '2029-01-01T00:00:00.000Z',
+      })
+    ).toBe(36);
+  });
+});
+
+describe('maturity is the server’s verdict, not the device clock', () => {
+  const future = new Date(Date.now() + 86_400_000).toISOString();
+  const past = new Date(Date.now() - 86_400_000).toISOString();
+
+  it('honours `matured` even when the local clock disagrees', () => {
+    expect(stakeIsMatured({ matured: false, endDate: past })).toBe(false);
+    expect(stakeIsMatured({ matured: true, endDate: future })).toBe(true);
+  });
+
+  it('falls back to the end date when the server did not say', () => {
+    expect(stakeIsMatured({ endDate: past })).toBe(true);
+    expect(stakeIsMatured({ endDate: future })).toBe(false);
+  });
+});
+
+describe('nullable history fields do not corrupt the list', () => {
+  const t = ((key: string) => key) as unknown as Parameters<typeof formatStakeRelative>[1];
+
+  it('a missing completedAt does not print "NaN d ago"', () => {
+    expect(formatStakeRelative(null, t)).toBe('just now');
+  });
+
+  it('a missing completedAt sorts to the bottom instead of poisoning the comparator', () => {
+    expect(stakeCompletedAtMs({ completedAt: null })).toBe(0);
+    expect(stakeCompletedAtMs({ completedAt: 'not a date' })).toBe(0);
   });
 });
 

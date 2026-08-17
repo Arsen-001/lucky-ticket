@@ -7,6 +7,7 @@ import { icons } from '@/constants/icons';
 import { useAppTranslations } from '@/hooks/useAppTranslations';
 import { useStakesDisplayConfig } from '@/hooks/useStakesDisplayConfig';
 import { GlobalConstants } from '@/constants/global.constants';
+import { formatNumber } from '@/utils/global/number.utils';
 import { twMerge } from 'tailwind-merge';
 
 export interface NewStakeStickyCtaProps {
@@ -68,8 +69,8 @@ export function NewStakeStickyCta({
   } else if (insufficient) {
     label = t('not enough {coin}', { coin: GlobalConstants.coinName });
     reason = t('not enough coins description', {
-      balance: `${balance.toLocaleString()} ${GlobalConstants.coinName}`,
-      required: `${amount.toLocaleString()} ${GlobalConstants.coinName}`,
+      balance: `${formatNumber(balance)} ${GlobalConstants.coinName}`,
+      required: `${formatNumber(amount)} ${GlobalConstants.coinName}`,
     });
   } else {
     // A level-0 stake is a stake, so the button confirms it by name rather than
@@ -86,7 +87,7 @@ export function NewStakeStickyCta({
       {valid && balanceAfter !== undefined && (
         <div className="text-white-secondary mb-1.5 text-center text-[10px] tabular-nums">
           {t('balance after {n} {coin}', {
-            n: balanceAfter.toLocaleString(),
+            n: formatNumber(balanceAfter),
             coin: GlobalConstants.coinName,
           })}
         </div>
@@ -128,17 +129,18 @@ export function NewStakeStickyCta({
         ) : valid ? (
           stakeFeeFree ? (
             <span className="relative z-10 inline-flex items-center gap-1.5 text-[12px] font-extrabold uppercase tracking-wider text-white">
-              <span className="leading-none">{t('free')}</span>
-              <span className="text-bronze inline-flex items-center rounded-full bg-bronze/20 px-1.5 py-0.5 text-[9px] font-bold leading-none tabular-nums">
+              {/* `fee free` ("Бесплатно"), not the shared `free` key — that one
+                  is an adjective agreeing with an avatar tier elsewhere in the
+                  app, and read as a mis-declined word on a price slot. */}
+              <span className="leading-none">{t('fee free')}</span>
+              <span className="inline-flex items-center rounded-full border border-bronze/50 bg-bronze/25 px-1.5 py-0.5 text-[9px] font-bold leading-none text-white tabular-nums">
                 {freeStartsRemaining}/{stakeCfg.freeStartCount}
               </span>
             </span>
           ) : (
             <span className="relative z-10 inline-flex items-center gap-1.5 text-base">
               <Image sizes="14px" src={icons.telegramStar} alt="" className="h-3.5 w-auto" />
-              <span className="font-bold leading-none tabular-nums">
-                {stakeFee.toLocaleString()}
-              </span>
+              <span className="font-bold leading-none tabular-nums">{formatNumber(stakeFee)}</span>
             </span>
           )
         ) : null}

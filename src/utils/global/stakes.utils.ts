@@ -1,4 +1,5 @@
 import { GlobalConstants } from '@/constants/global.constants';
+import { formatNumber } from '@/utils/global/number.utils';
 import type { StakeHistoryEntry, StakeLevelDefinition } from '@/types/interfaces/stakes.interfaces';
 import type { StatusPerks } from '@/types/interfaces/user.interfaces';
 import type { Dictionary } from '@/types/types/i18n.types';
@@ -74,8 +75,15 @@ export const computeStakeReturnCoins = (
 
 /**
  * Base AP credited the moment a stake starts: `deposit × months ÷ apDivisor`
- * (DOCS §5.3 / §18.3). Retained even if the stake is cancelled early. Floored to
- * match the backend (`stake-math.baseAp`) so the projection equals what's credited.
+ * (DOCS §5.3 / §18.3). Floored to match the backend (`stake-math.baseAp`) so the
+ * projection equals what's credited.
+ *
+ * **Revoked in full on early cancellation** — `StakesService.cancel` decrements
+ * `activityPoints` by `min(stake.apAwarded, balance)`. This docblock used to say
+ * the opposite ("retained on cancel"), and the cancel sheet was built on that
+ * sentence; with the AP retained, open→cancel was a near-free infinite AP loop,
+ * which was farmed in the wild and closed on 2026-07-07. Cancelling returns the
+ * principal and nothing else.
  */
 export const computeStakeBaseAp = (
   deposit: number,
@@ -180,12 +188,53 @@ export const computeStakeCancelFee = (deposit: number) => {
   );
 };
 
-/** Whole months a stake runs, derived from its start/end dates. */
+/**
+ * Whole months a stake runs, DERIVED from its start/end dates — the fallback
+ * only. Prefer `stakeDurationMonths()`.
+ *
+ * The server adds calendar months (`end.setMonth(+n)`) and charges and pays by
+ * the stored `durationMonths`; this rounds a 30-day approximation, which agrees
+ * with it up to 12 months and stops agreeing above ~30 (36 calendar months is
+ * 1096 days → `round(36.5) = 37`). Deriving a number the server already sent is
+ * how a screen ends up quoting a yield the claim will not pay.
+ */
 export const computeStakeMonths = (start: string, end: string) =>
   Math.max(
     1,
     Math.round((new Date(end).getTime() - new Date(start).getTime()) / (30 * 86_400_000))
   );
+
+/** The duration the server opened the stake for, falling back to the dates. */
+export const stakeDurationMonths = (stake: {
+  durationMonths?: number;
+  startDate: string;
+  endDate: string;
+}) =>
+  Number.isFinite(stake.durationMonths) && (stake.durationMonths as number) > 0
+    ? (stake.durationMonths as number)
+    : computeStakeMonths(stake.startDate, stake.endDate);
+
+/**
+ * Has the stake matured? The server's own verdict wins; the clock comparison is
+ * the fallback, and it is the device's clock — a phone set a day ahead would
+ * otherwise show "claim now" on a button the server answers with a 400.
+ *
+ * This replaced an exported `isStakeReady(endDate)`, which every caller reached
+ * for because it was the only thing on offer — including the header dot and the
+ * drawer badge, two screens away from the stake they were counting.
+ */
+export const stakeIsMatured = (stake: { matured?: boolean; endDate: string }, now = Date.now()) =>
+  typeof stake.matured === 'boolean' ? stake.matured : new Date(stake.endDate).getTime() <= now;
+
+/**
+ * A rate for display: one decimal at most, a whole number when it is whole, and
+ * the reader's own decimal separator.
+ *
+ * `toFixed(1)` was doing this, and it always emits a DOT — so the Russian UI
+ * printed "Ставка 6.3%" one line above "+13,8 тыс." from `formatCompact`, two
+ * separators for two numbers in the same card.
+ */
+export const formatStakeRatePercent = (value: number) => formatNumber(Math.round(value * 10) / 10);
 
 /** The band a stake was opened in — `null` for a level-0 (no band) stake. */
 export const findLevelDef = (levels: StakeLevelDefinition[], level: number) =>
@@ -224,10 +273,12 @@ export const computeStakeProgress = (start: string, end: string, now = Date.now(
   return Math.max(0, Math.min(100, Math.round((elapsed / total) * 100)));
 };
 
-export const isStakeReady = (end: string, now = Date.now()) => new Date(end).getTime() <= now;
-
-export const formatStakeRelative = (iso: string, t: Dictionary, now = Date.now()) => {
-  const ago = Math.max(0, (now - new Date(iso).getTime()) / 1000);
+export const formatStakeRelative = (iso: string | null, t: Dictionary, now = Date.now()) => {
+  // `completedAt` is nullable on the wire. Unguarded, `new Date(null|undefined)`
+  // makes every comparison below false and the row prints "NaN d ago".
+  const at = iso ? new Date(iso).getTime() : NaN;
+  if (!Number.isFinite(at)) return t('just now');
+  const ago = Math.max(0, (now - at) / 1000);
   if (ago < 60) return t('just now');
   if (ago < 3600) return t('{n}m ago', { n: Math.floor(ago / 60) });
   if (ago < 86400) return t('{n}h ago', { n: Math.floor(ago / 3600) });
@@ -246,7 +297,23 @@ export const sortStakesReadyFirst = <T extends { endDate: string }>(
     return new Date(a.endDate).getTime() - new Date(b.endDate).getTime();
   });
 
+/**
+ * Completion instant as a sortable number. A missing `completedAt` sorts to the
+ * bottom instead of turning the comparator into NaN, which makes the sort order
+ * depend on the input order.
+ */
+export const stakeCompletedAtMs = (entry: Pick<StakeHistoryEntry, 'completedAt'>) => {
+  const at = entry.completedAt ? new Date(entry.completedAt).getTime() : NaN;
+  return Number.isFinite(at) ? at : 0;
+};
+
 export const sortHistoryNewestFirst = (history: StakeHistoryEntry[]) =>
-  [...history].sort(
-    (a, b) => new Date(b.completedAt).getTime() - new Date(a.completedAt).getTime()
-  );
+  [...history].sort((a, b) => stakeCompletedAtMs(b) - stakeCompletedAtMs(a));
+
+/**
+ * AP the player actually keeps from a finished stake. A cancelled stake keeps
+ * its `apAwarded` row in the database — the server never zeroes it — but that
+ * AP was revoked off the balance, so history must not present it as earned.
+ */
+export const stakeApKept = (entry: Pick<StakeHistoryEntry, 'outcome' | 'apAwarded'>) =>
+  entry.outcome === 'completed' ? entry.apAwarded : 0;

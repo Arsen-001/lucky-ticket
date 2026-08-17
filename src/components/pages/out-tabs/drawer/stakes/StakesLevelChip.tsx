@@ -34,13 +34,21 @@ const iconSize: Record<StakesLevelChipSize, number> = {
   lg: 12,
 };
 
+/** Neutral accent for a stake with no band, or a band the server did not name. */
+export const STAKE_NEUTRAL_ACCENT = 'var(--color-electric-purple)';
+
 /**
  * The accent a stake card paints itself with — its band's tier colour, or a
  * neutral purple when the deposit cleared no band. Every stake surface reads
  * this so a bandless stake looks deliberate instead of borrowing bronze.
+ *
+ * The `tier` guard is not belt-and-braces: the server names a band by indexing
+ * its five shipped tiers while the band list comes from the admin config, so a
+ * sixth band arrives with `tier: null` and this would emit `var(--color-null)`
+ * — an invalid value that drops the card's whole gradient border.
  */
 export const stakeAccent = (levelDef: StakeLevelDefinition | null) =>
-  levelDef ? `var(--color-${levelDef.tier})` : 'var(--color-electric-purple)';
+  levelDef?.tier ? `var(--color-${levelDef.tier})` : STAKE_NEUTRAL_ACCENT;
 
 export function StakesLevelChip({ level, tier, size = 'md', className }: StakesLevelChipProps) {
   const t = useAppTranslations();

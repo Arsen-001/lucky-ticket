@@ -4,6 +4,7 @@ import { Star } from 'lucide-react';
 import { twMerge } from 'tailwind-merge';
 import { useAppTranslations } from '@/hooks/useAppTranslations';
 import { formatCompact } from '@/utils/global/number.utils';
+import { formatStakeRatePercent } from '@/utils/global/stakes.utils';
 import type { StakeLevelDefinition } from '@/types/interfaces/stakes.interfaces';
 import type { TicketType } from '@/types/types/ticket.types';
 
@@ -32,6 +33,10 @@ const tierIdle: Record<TicketType, string> = {
   diamond: 'border-diamond/25 bg-diamond/[0.06] text-diamond/80',
 };
 
+/** A band the server left unnamed — same neutral purple every stake surface uses. */
+const neutralActive = 'border-electric-purple/80 bg-electric-purple/20 text-electric-purple';
+const neutralIdle = 'border-electric-purple/25 bg-electric-purple/[0.06] text-electric-purple/80';
+
 /**
  * Jump the deposit to a band's floor.
  *
@@ -57,11 +62,16 @@ export function NewStakeLevelPicker({
       {levels.map(lv => {
         const affordable = balance >= lv.minDeposit;
         const isActive = activeLevel === lv.level;
+        // An admin-added band beyond the five shipped tiers arrives unnamed
+        // (`tier: null`); it paints neutral rather than indexing to undefined
+        // and rendering a borderless, colourless button.
+        const active = lv.tier ? tierActive[lv.tier] : neutralActive;
+        const idle = lv.tier ? tierIdle[lv.tier] : neutralIdle;
         const stateClass = !affordable
           ? 'cursor-not-allowed border-white/5 bg-white/[0.02] text-disabled'
           : isActive
-            ? `${tierActive[lv.tier]} -translate-y-0.5 shadow-[0_4px_14px_rgba(0,0,0,0.35)]`
-            : tierIdle[lv.tier];
+            ? `${active} -translate-y-0.5 shadow-[0_4px_14px_rgba(0,0,0,0.35)]`
+            : idle;
 
         return (
           <button
@@ -84,7 +94,7 @@ export function NewStakeLevelPicker({
               {formatCompact(lv.minDeposit)}
             </span>
             <span className="mt-0.5 text-[8px] font-bold tabular-nums opacity-80">
-              +{lv.yieldBoostPct}%
+              +{formatStakeRatePercent(lv.yieldBoostPct)}%
             </span>
           </button>
         );

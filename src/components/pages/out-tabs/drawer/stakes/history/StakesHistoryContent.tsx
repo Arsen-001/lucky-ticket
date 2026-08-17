@@ -18,21 +18,21 @@ import {
   STAKE_HISTORY_SORTS,
   type StakeHistorySortId,
 } from '@/components/pages/out-tabs/drawer/stakes/history/StakesHistorySortModal';
-import { formatCompact } from '@/utils/global/number.utils';
+import { formatCompact, formatNumber } from '@/utils/global/number.utils';
+import { stakeApKept, stakeCompletedAtMs } from '@/utils/global/stakes.utils';
 import type { StakeHistoryEntry } from '@/types/interfaces/stakes.interfaces';
 import { QueryErrorState } from '@/components/shared/error/QueryErrorState';
 
 const sortHistory = (history: StakeHistoryEntry[], sortBy: StakeHistorySortId) => {
   const copy = [...history];
   switch (sortBy) {
+    // `stakeCompletedAtMs` rather than `new Date(entry.completedAt)`: the field
+    // is nullable on the wire, and a NaN comparator leaves the order up to the
+    // input, silently.
     case 'newest':
-      return copy.sort(
-        (a, b) => new Date(b.completedAt).getTime() - new Date(a.completedAt).getTime()
-      );
+      return copy.sort((a, b) => stakeCompletedAtMs(b) - stakeCompletedAtMs(a));
     case 'oldest':
-      return copy.sort(
-        (a, b) => new Date(a.completedAt).getTime() - new Date(b.completedAt).getTime()
-      );
+      return copy.sort((a, b) => stakeCompletedAtMs(a) - stakeCompletedAtMs(b));
     case 'highest':
       return copy.sort((a, b) => b.yieldLC - a.yieldLC);
     case 'level':
@@ -76,11 +76,15 @@ export function StakesHistoryContent() {
     cancelled: allHistory.filter(e => e.outcome === 'cancelled').length,
   };
 
+  // AP is summed via `stakeApKept`: a cancelled stake keeps its stamped
+  // `apAwarded` in the database but that AP was revoked off the balance, so
+  // adding it here would make "lifetime totals" claim points the player never
+  // kept (DOCS §18.3).
   const totals = allHistory.reduce(
     (acc, h) => ({
       lc: acc.lc + h.yieldLC,
       stars: acc.stars + h.bonusLS,
-      ap: acc.ap + h.apAwarded,
+      ap: acc.ap + stakeApKept(h),
     }),
     { lc: 0, stars: 0, ap: 0 }
   );
@@ -112,7 +116,7 @@ export function StakesHistoryContent() {
               </div>
               <div className="flex flex-col gap-0.5">
                 <span className="text-gold inline-flex items-center gap-1 text-[15px] font-extrabold tabular-nums">
-                  +{totals.stars.toLocaleString()}
+                  +{formatNumber(totals.stars)}
                   <Image sizes="12px" src={icons.telegramStar} alt="" className="h-3 w-auto" />
                 </span>
                 <span className="text-pink-secondary text-[9px] font-semibold uppercase tracking-wider">
@@ -121,7 +125,7 @@ export function StakesHistoryContent() {
               </div>
               <div className="flex flex-col gap-0.5">
                 <span className="text-teal inline-flex items-center gap-1 text-[15px] font-extrabold tabular-nums">
-                  <BoltIcon size={13} />+{totals.ap.toLocaleString()}
+                  <BoltIcon size={13} />+{formatNumber(totals.ap)}
                 </span>
                 <span className="text-pink-secondary text-[9px] font-semibold uppercase tracking-wider">
                   AP

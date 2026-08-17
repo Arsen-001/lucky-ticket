@@ -4,10 +4,10 @@ import '@/styles/components/stakes.css';
 import { useEffect, useState } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
-import { ChevronRight, Info, Sparkles } from 'lucide-react';
+import { Info } from 'lucide-react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { icons } from '@/constants/icons';
-import { formatCompact } from '@/utils/global/number.utils';
+import { formatCompact, formatNumber } from '@/utils/global/number.utils';
 import { useGetMeQuery } from '@/api/me.api';
 import { useGetStakesQuery, useStartStakeMutation } from '@/api/stakes.api';
 import { routes } from '@/constants/routes';
@@ -27,7 +27,6 @@ import { StakeOpenedModal } from '@/components/pages/out-tabs/drawer/stakes/new/
 import { StakesRewardsPreviewCard } from '@/components/pages/out-tabs/drawer/stakes/StakesRewardsPreviewCard';
 import { StakesSectionLabel } from '@/components/pages/out-tabs/drawer/stakes/StakesSectionLabel';
 import { StakesWalletPill } from '@/components/pages/out-tabs/drawer/stakes/StakesWalletPill';
-import { NotEnoughCoinsModal } from '@/components/shared/modals/NotEnoughCoinsModal';
 import { useSpendFailure } from '@/hooks/useSpendFailure';
 import { spendFailure } from '@/utils/global/spend-failure.utils';
 import { Skeleton } from '@/components/shared/seleketons/Skeleton';
@@ -59,8 +58,13 @@ export function NewStakeContent() {
     setSeeded(true);
   }, [seeded, levels, balance, meLoading]);
 
-  // Pre-fill from query (?amount=, ?months=) for the "re-stake" flow from history.
+  // Pre-fill from query (?amount=, ?months=) for the "re-stake" flow from
+  // history. Applied ONCE: `searchParams` is a new object on every navigation
+  // in the App Router, so an unguarded effect re-imposed the URL's amount over
+  // whatever the player had since typed.
+  const [prefilled, setPrefilled] = useState(false);
   useEffect(() => {
+    if (prefilled) return;
     const amountParam = Number(searchParams.get('amount'));
     const monthsParam = Number(searchParams.get('months'));
     if (Number.isFinite(amountParam) && amountParam > 0) {
@@ -68,13 +72,16 @@ export function NewStakeContent() {
       setSeeded(true);
     }
     if (Number.isFinite(monthsParam) && monthsParam > 0) setDurationMonths(monthsParam);
-  }, [searchParams]);
+    setPrefilled(true);
+  }, [searchParams, prefilled]);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [compareOpen, setCompareOpen] = useState(false);
-  const [openedSnapshot, setOpenedSnapshot] = useState<{ amount: number; months: number } | null>(
-    null
-  );
-  const [blocked, setBlocked] = useState<'coins' | null>(null);
+  const [openedSnapshot, setOpenedSnapshot] = useState<{
+    amount: number;
+    months: number;
+    level: number;
+    endDate?: string;
+  } | null>(null);
 
   if (isError) return <QueryErrorState onRetry={() => refetch()} />;
 
@@ -132,8 +139,8 @@ export function NewStakeContent() {
     durationMonths < maxMonths && apDelta > 0
       ? t('extend to {n} months for {ap} more AP and {lc} more LC', {
           n: maxMonths,
-          ap: apDelta.toLocaleString(),
-          lc: lcDelta.toLocaleString(),
+          ap: formatNumber(apDelta),
+          lc: formatNumber(lcDelta),
         })
       : undefined;
 
@@ -143,7 +150,10 @@ export function NewStakeContent() {
   const handleConfirm = async () => {
     if (deposit <= 0 || deposit > balance) return;
     if (notEnoughStars) {
-      setErrorMessage(t('not enough stars for fee {n}', { n: stakeFee.fee - starsBalance }));
+      // The buy-Stars sheet, not a red line under the form. A shortfall the
+      // screen can see before it asks must look the same as one the server
+      // reports — and a refusal has to lead somewhere (see `useSpendFailure`).
+      spend.show('stars', { required: stakeFee.fee });
       return;
     }
     setErrorMessage(null);
@@ -155,7 +165,16 @@ export function NewStakeContent() {
       durationMonths,
     });
     if ('data' in result && result.data?.success) {
-      setOpenedSnapshot({ amount: deposit, months: durationMonths });
+      // The band and end date come back from the SERVER, which re-derived them
+      // from the amount; the form's own guess is only the fallback for an older
+      // backend. A config change mid-session must not leave this sheet naming a
+      // level the stake does not have.
+      setOpenedSnapshot({
+        amount: result.data.lockedAmount ?? deposit,
+        months: durationMonths,
+        level: result.data.level ?? activeLevel?.level ?? 0,
+        endDate: result.data.endDate,
+      });
     } else if ('error' in result) {
       // A shortfall the local check could not see (someone spent elsewhere, or
       // the server prices the fee differently) gets the top-up route; anything
@@ -174,12 +193,15 @@ export function NewStakeContent() {
   return (
     <div className="flex flex-col gap-1 pb-32">
       <div className="mb-3 flex items-center justify-between gap-2">
+        {/* "Compare the bands", not "pick a level & amount": there is no level
+            to pick any more — the amount alone decides the band (DOCS §18.2) —
+            and this button only opens the comparison sheet. */}
         <button
           type="button"
           onClick={() => setCompareOpen(true)}
-          className="text-pink-secondary hover:text-white tap-target relative inline-flex items-center gap-1 text-[10px] font-bold uppercase tracking-wider transition-colors"
+          className="text-pink-secondary hover:text-white tap-target relative inline-flex items-center gap-1 rounded-full border border-white/10 px-2.5 py-1.5 text-[10px] font-bold uppercase tracking-wider transition-colors"
         >
-          <span>{t('pick level amount')}</span>
+          <span>{t('compare stake levels')}</span>
           <Info size={11} strokeWidth={2.4} />
         </button>
         <div className="flex items-center gap-1.5">
@@ -207,18 +229,13 @@ export function NewStakeContent() {
         onDurationChange={setDurationMonths}
       />
 
-      {!me?.isLuckyPlayer && deposit >= 100_000 && (
-        <Link
-          href={routes.settings.luckyPlayer}
-          className="border-electric-pink/35 bg-electric-pink/10 hover:bg-electric-pink/15 mt-2 flex items-center gap-2 rounded-xl border px-3 py-2 transition-colors"
-        >
-          <Sparkles size={14} className="text-electric-pink shrink-0" strokeWidth={2.4} />
-          <span className="text-electric-pink flex-1 text-[11px] font-semibold leading-tight">
-            {t('lucky player doubles volume discount')}
-          </span>
-          <ChevronRight size={12} className="text-electric-pink shrink-0" strokeWidth={2.4} />
-        </Link>
-      )}
+      {/* The "Lucky Player doubles the volume discount" banner used to sit here.
+          It was removed rather than reworded: the stake-fee volume discount is
+          `0` for Lucky Player AND on all twenty VIP levels (DOCS §7.3), so the
+          banner sold a perk the server does not grant — and even when it was
+          live the word "doubles" only held at the bottom rung (+10 pp on a
+          10→20% ladder). The status configuration itself is untouched; this
+          screen simply stops advertising it. */}
 
       <StakesSectionLabel>
         {activeLevel
@@ -259,7 +276,7 @@ export function NewStakeContent() {
               balanceAfter={Math.max(0, balance - deposit)}
               loading={starting}
               onConfirm={handleConfirm}
-              onBlocked={setBlocked}
+              onBlocked={() => spend.show('coins', { required: deposit })}
             />
           </div>
         </div>
@@ -271,12 +288,10 @@ export function NewStakeContent() {
         levels={levels}
       />
 
-      <NotEnoughCoinsModal
-        open={blocked === 'coins'}
-        onClose={() => setBlocked(null)}
-        required={deposit}
-        current={balance}
-      />
+      {/* The local "not enough LC" modal was a second copy of the one
+          `useSpendFailure` already renders below; both are now the same sheet,
+          so a shortfall the screen predicts and one the server reports look
+          identical. */}
 
       {openedSnapshot && (
         <StakeOpenedModal
@@ -284,6 +299,8 @@ export function NewStakeContent() {
           onClose={handleOpenedClose}
           amount={openedSnapshot.amount}
           months={openedSnapshot.months}
+          level={openedSnapshot.level}
+          endDate={openedSnapshot.endDate}
         />
       )}
 

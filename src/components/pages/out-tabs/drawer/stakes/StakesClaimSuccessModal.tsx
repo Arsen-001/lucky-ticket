@@ -7,7 +7,7 @@ import { BoltIcon } from '@/components/shared/icons/BoltIcon';
 import { icons } from '@/constants/icons';
 import { Modal } from '@/components/shared/modals/Modal';
 import { useAppTranslations } from '@/hooks/useAppTranslations';
-import { formatCompact } from '@/utils/global/number.utils';
+import { formatCompact, formatNumber } from '@/utils/global/number.utils';
 
 export interface StakesClaimSuccessModalProps {
   open: boolean;
@@ -50,23 +50,36 @@ export function StakesClaimSuccessModal({
           <p className="text-white-secondary mt-1 text-[12px]">{t('all rewards added')}</p>
         </div>
 
+        {/* Labelled tiles. Three bare numbers under three icons left the player
+            to guess which was which — and the LC one in particular is the
+            DEPOSIT BACK PLUS the yield, a different number from the "you
+            earned" figure on the screen behind this sheet. */}
         <div className="grid w-full grid-cols-3 gap-2">
           <div className="flex flex-col items-center gap-1 rounded-xl border border-white/10 bg-black/25 px-2 py-2.5">
             <LcLabel size={20} />
             <span className="text-gold text-[13px] font-extrabold leading-none tabular-nums">
               +{formatCompact(amount)}
             </span>
+            <span className="text-pink-secondary text-[8px] font-bold uppercase leading-tight tracking-wider">
+              {t('deposit plus yield')}
+            </span>
           </div>
           <div className="flex flex-col items-center gap-1 rounded-xl border border-white/10 bg-black/25 px-2 py-2.5">
             <Image sizes="20px" src={icons.telegramStar} alt="" className="h-5 w-auto" />
             <span className="text-gold text-[13px] font-extrabold leading-none tabular-nums">
-              +{stars}
+              +{formatNumber(stars)}
+            </span>
+            <span className="text-pink-secondary text-[8px] font-bold uppercase leading-tight tracking-wider">
+              {t('stars')}
             </span>
           </div>
           <div className="flex flex-col items-center gap-1 rounded-xl border border-white/10 bg-black/25 px-2 py-2.5">
             <BoltIcon size={18} className="text-teal" />
             <span className="text-teal text-[13px] font-extrabold leading-none tabular-nums">
-              +{ap}
+              +{formatNumber(ap)}
+            </span>
+            <span className="text-pink-secondary text-[8px] font-bold uppercase leading-tight tracking-wider">
+              AP
             </span>
           </div>
         </div>

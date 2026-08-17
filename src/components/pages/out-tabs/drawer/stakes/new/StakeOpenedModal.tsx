@@ -1,20 +1,38 @@
 'use client';
 
 import { Check } from 'lucide-react';
+import { useGetStakesQuery } from '@/api/stakes.api';
 import { LcLabel } from '@/components/shared/icons/LcLabel';
 import { Modal } from '@/components/shared/modals/Modal';
+import { StakesLevelChip } from '@/components/pages/out-tabs/drawer/stakes/StakesLevelChip';
 import { useAppTranslations } from '@/hooks/useAppTranslations';
+import { formatDate } from '@/utils/global/date.utils';
 import { formatCompact } from '@/utils/global/number.utils';
+import { findLevelDef } from '@/utils/global/stakes.utils';
 
 export interface StakeOpenedModalProps {
   open: boolean;
   onClose: () => void;
   amount: number;
   months: number;
+  /** The band the SERVER settled on — `0` when the deposit cleared none. */
+  level: number;
+  /** Unlock date as the server computed it (calendar months, not months × 30d). */
+  endDate?: string;
 }
 
-export function StakeOpenedModal({ open, onClose, amount, months }: StakeOpenedModalProps) {
+export function StakeOpenedModal({
+  open,
+  onClose,
+  amount,
+  months,
+  level,
+  endDate,
+}: StakeOpenedModalProps) {
   const t = useAppTranslations();
+  // Cached by the screen that opened this sheet — no extra request.
+  const { data: stakes } = useGetStakesQuery();
+  const levelDef = stakes ? findLevelDef(stakes.levels, level) : null;
 
   return (
     <Modal open={open} onClose={onClose} hideCloseButton label={t('stake opened')}>
@@ -37,6 +55,17 @@ export function StakeOpenedModal({ open, onClose, amount, months }: StakeOpenedM
             <span className="text-gold tabular-nums">{formatCompact(amount)}</span>
             <LcLabel size={15} />
             <span>{t('locked for {n} months', { n: months })}</span>
+          </div>
+          {/* The band and the unlock date as the server recorded them — the
+              response used to be thrown away and this sheet quoted the form's
+              own guess back at the player. */}
+          <div className="mt-2.5 flex items-center justify-center gap-2">
+            <StakesLevelChip level={level} tier={levelDef?.tier ?? null} size="sm" />
+            {endDate && (
+              <span className="text-white-secondary text-[11px] font-semibold tabular-nums">
+                {t('ends on')} {formatDate(endDate, 'DD.MM.YY')}
+              </span>
+            )}
           </div>
         </div>
         <button

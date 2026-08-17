@@ -7,7 +7,7 @@ import { useGetMeQuery } from '@/api/me.api';
 import { GlobalConstants } from '@/constants/global.constants';
 import { useAppTranslations } from '@/hooks/useAppTranslations';
 import { useStakesDisplayConfig } from '@/hooks/useStakesDisplayConfig';
-import { formatCompact } from '@/utils/global/number.utils';
+import { formatCompact, formatNumber } from '@/utils/global/number.utils';
 import { LcLabel } from '@/components/shared/icons/LcLabel';
 import { NewStakeAmountField } from '@/components/pages/out-tabs/drawer/stakes/new/NewStakeAmountField';
 import { NewStakeDurationScale } from '@/components/pages/out-tabs/drawer/stakes/new/NewStakeDurationScale';
@@ -21,6 +21,7 @@ import {
   computeStakeEffectiveAprPercent,
   computeStakeReturnCoins,
   findNextLevelOver,
+  formatStakeRatePercent,
 } from '@/utils/global/stakes.utils';
 import type { StakeLevelDefinition } from '@/types/interfaces/stakes.interfaces';
 
@@ -76,7 +77,6 @@ export function NewStakeHero({
     me?.statusPerks,
     boostPct
   );
-  const fmtPct = (value: number) => value.toFixed(value % 1 === 0 ? 0 : 1);
 
   return (
     <div
@@ -102,7 +102,7 @@ export function NewStakeHero({
           </div>
           <div className="text-white-secondary mt-1 text-[11px]">
             {t('of {amount} {coin} available', {
-              amount: balance.toLocaleString(),
+              amount: formatNumber(balance),
               coin: GlobalConstants.coinName,
             })}
           </div>
@@ -113,10 +113,10 @@ export function NewStakeHero({
         {next && (
           <div className="border-electric-purple/30 bg-electric-purple/15 text-electric-purple mt-3 inline-flex items-center gap-1.5 rounded-full border px-3 py-1.5 text-[10px] font-bold tracking-wide">
             {t('+{amount} {coin} for level {level} and +{boost}% apr', {
-              amount: (next.minDeposit - deposit).toLocaleString(),
+              amount: formatNumber(Math.max(0, next.minDeposit - deposit)),
               coin: GlobalConstants.coinName,
               level: next.level,
-              boost: fmtPct(next.yieldBoostPct),
+              boost: formatStakeRatePercent(next.yieldBoostPct),
             })}
           </div>
         )}
@@ -198,8 +198,14 @@ export function NewStakeHero({
               <Star size={12} className="text-gold" fill="currentColor" strokeWidth={0} />
             </div>
             <div className="leading-tight">
+              {/* NOT "annual return". `computeStakeReturnCoins` pays
+                  `deposit × rate / 100` flat, with no per-year scaling — the
+                  rate is the yield for the WHOLE lock (`aprMinPercent` at the
+                  shortest duration, `aprMaxPercent` at the longest). Calling a
+                  1-month 3% stake "3% годовых" understates it by ~12×, in the
+                  one place on the screen where the player reads a price. */}
               <div className="text-pink-secondary text-[9px] font-bold uppercase tracking-wider">
-                {t('annual return')}
+                {t('yield for the whole term')}
               </div>
               {/* The band's contribution is spelled out rather than folded into
                   one number — a rate that silently includes a boost gives the
@@ -207,11 +213,11 @@ export function NewStakeHero({
               <div className="text-gold text-[10px] font-semibold">
                 {boostPct > 0
                   ? t('{base}% + {boost}% for level {level}', {
-                      base: fmtPct(baseAprPercent),
-                      boost: fmtPct(boostPct),
+                      base: formatStakeRatePercent(baseAprPercent),
+                      boost: formatStakeRatePercent(boostPct),
                       level: activeLevel?.level ?? 0,
                     })
-                  : t('apr range {min}–{max}%', {
+                  : t('rate range {min}–{max}% by term', {
                       min: stakeKnobs.aprMinPercent,
                       max: stakeKnobs.aprMaxPercent,
                     })}
@@ -220,11 +226,11 @@ export function NewStakeHero({
           </div>
           <div className="shrink-0 text-end leading-tight">
             <div className="text-gold text-[15px] font-extrabold tabular-nums">
-              {fmtPct(aprPercent)}%
+              {formatStakeRatePercent(aprPercent)}%
             </div>
             <div className="text-white-secondary whitespace-nowrap text-[10px] font-semibold tabular-nums">
               {t('+{amount} {coin} back', {
-                amount: aprReturn.toLocaleString(),
+                amount: formatNumber(aprReturn),
                 coin: GlobalConstants.coinName,
               })}
             </div>

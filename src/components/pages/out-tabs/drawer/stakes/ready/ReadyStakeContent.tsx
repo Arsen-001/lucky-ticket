@@ -20,11 +20,13 @@ import {
   computeStakeEffectiveAprPercent,
   computeStakeCompletionBonusAp,
   computeStakeCompletionStars,
-  computeStakeMonths,
   computeStakeReturnCoins,
+  formatStakeRatePercent,
   findLevelDef,
-  isStakeReady,
+  stakeDurationMonths,
+  stakeIsMatured,
 } from '@/utils/global/stakes.utils';
+import { ClientPortal } from '@/components/shared/ClientPortal';
 import { StakesClaimSuccessModal } from '@/components/pages/out-tabs/drawer/stakes/StakesClaimSuccessModal';
 import { Skeleton } from '@/components/shared/seleketons/Skeleton';
 import { Button } from '@/components/shared/buttons/Button';
@@ -71,7 +73,7 @@ export function ReadyStakeContent({ stakeId }: ReadyStakeContentProps) {
   // A bandless stake still matures and still pays its principal + APR, so the
   // claim screen must open for it; only a missing stake is "not found".
   const levelDef = stake && stakes ? findLevelDef(stakes.levels, stake.level) : null;
-  const ready = stake ? isStakeReady(stake.endDate) : false;
+  const ready = stake ? stakeIsMatured(stake) : false;
 
   const [claimedSnapshot, setClaimedSnapshot] = useState<{
     amount: number;
@@ -118,7 +120,7 @@ export function ReadyStakeContent({ stakeId }: ReadyStakeContentProps) {
     );
   }
 
-  const months = computeStakeMonths(stake.startDate, stake.endDate);
+  const months = stakeDurationMonths(stake);
   const yieldLC = computeStakeReturnCoins(
     stake.lockedAmount,
     months,
@@ -133,19 +135,22 @@ export function ReadyStakeContent({ stakeId }: ReadyStakeContentProps) {
     levelDef?.yieldBoostPct ?? 0,
     stakeKnobs
   );
-  const rateLabel = ratePercent.toFixed(ratePercent % 1 === 0 ? 0 : 1);
+  const rateLabel = formatStakeRatePercent(ratePercent);
   const bonusAp = computeStakeCompletionBonusAp(stake.lockedAmount, months, stakeKnobs);
   const completionStars = computeStakeCompletionStars(months, levelDef);
 
   const handleClaim = async () => {
     const result = await claimStake({ stakeId: stake.id });
     if ('data' in result && result.data?.success) {
-      // Show the amounts the backend actually credited, not the client projection.
+      // The amounts the backend actually credited, not the client projection —
+      // but each one falls back to this screen's own figure, because a server
+      // that answers with a bare `{ success }` would otherwise render the whole
+      // success sheet as `formatCompact(NaN)`, i.e. the words "не число".
       const r = result.data;
       setClaimedSnapshot({
-        amount: r.principalReturned + r.yieldLC,
-        stars: r.completionStars,
-        ap: r.apBonus,
+        amount: (r.principalReturned ?? stake.lockedAmount) + (r.yieldLC ?? yieldLC),
+        stars: r.completionStars ?? completionStars,
+        ap: r.apBonus ?? bonusAp,
       });
     } else {
       // e.g. "Stake has not matured yet" (400) — never fail silently.
@@ -207,7 +212,8 @@ export function ReadyStakeContent({ stakeId }: ReadyStakeContentProps) {
   ];
 
   return (
-    <div className="flex flex-col gap-5 pb-4">
+    // `pb-32` clears the portalled CTA below, the same way the new-stake screen does.
+    <div className="flex flex-col gap-5 pb-32">
       <div
         className="animate-fade-in relative overflow-hidden rounded-3xl border border-success/30 px-5 py-7 text-center"
         style={{
@@ -216,7 +222,10 @@ export function ReadyStakeContent({ stakeId }: ReadyStakeContentProps) {
             'linear-gradient(180deg, #1F2A28 0%, #151F35 100%)',
         }}
       >
-        <div className="pointer-events-none absolute -top-4 left-1/2 -translate-x-1/2">
+        {/* Inside the card, not straddling its top edge: the card clips its own
+            overflow, so a negative offset here rendered half a sparkle sitting
+            on the border like a cropping accident. */}
+        <div className="pointer-events-none absolute top-1 left-1/2 -translate-x-1/2">
           <Sparkles size={56} className="text-success/30" strokeWidth={1.5} />
         </div>
         <div className="relative">
@@ -248,21 +257,30 @@ export function ReadyStakeContent({ stakeId }: ReadyStakeContentProps) {
         </div>
       </div>
 
-      <div className="to-background sticky bottom-0 -mx-5 mt-2 bg-gradient-to-b from-transparent px-5 pb-2 pt-6">
-        <Button
-          type="button"
-          onClick={handleClaim}
-          disabled={claiming}
-          className="border-success/30 flex w-full items-center justify-center rounded-2xl border px-5 py-4 text-[13px] font-extrabold uppercase tracking-wider text-white shadow-[0_3px_9px_rgba(74,222,128,0.15),inset_0_1px_0_rgba(255,255,255,0.08)] disabled:opacity-60"
-          style={{
-            background:
-              'radial-gradient(circle at 50% 0%, rgba(74,222,128,0.25) 0%, transparent 55%),' +
-              'linear-gradient(180deg, #1F2A28 0%, #151F35 100%)',
-          }}
+      {/* Portalled and fixed, not `sticky bottom-0`. Sticky only pins once the
+          content overflows, and this screen's content does not: the primary
+          action floated in the middle of the viewport with 200px of empty space
+          under it. Same rail the new-stake CTA uses. */}
+      <ClientPortal>
+        <div
+          className="from-background via-background pointer-events-none fixed inset-x-0 bottom-0 z-20 mx-auto max-w-[var(--app-max-w)] bg-gradient-to-t via-70% to-transparent px-5 pt-8"
+          style={{ paddingBottom: 'calc(0.5rem + var(--tg-inset-bottom))' }}
         >
-          {t('claim')}
-        </Button>
-      </div>
+          <Button
+            type="button"
+            onClick={handleClaim}
+            disabled={claiming}
+            className="border-success/30 pointer-events-auto flex w-full items-center justify-center rounded-2xl border px-5 py-4 text-[13px] font-extrabold uppercase tracking-wider text-white shadow-[0_3px_9px_rgba(74,222,128,0.15),inset_0_1px_0_rgba(255,255,255,0.08)] disabled:opacity-60"
+            style={{
+              background:
+                'radial-gradient(circle at 50% 0%, rgba(74,222,128,0.25) 0%, transparent 55%),' +
+                'linear-gradient(180deg, #1F2A28 0%, #151F35 100%)',
+            }}
+          >
+            {t('claim')}
+          </Button>
+        </div>
+      </ClientPortal>
     </div>
   );
 }

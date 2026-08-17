@@ -12,13 +12,14 @@ import { routes } from '@/constants/routes';
 import { useAppTranslations } from '@/hooks/useAppTranslations';
 import { useStakesDisplayConfig } from '@/hooks/useStakesDisplayConfig';
 import { useCountDown } from '@/hooks/useCountDown';
-import { formatCompact } from '@/utils/global/number.utils';
+import { formatCompact, formatNumber } from '@/utils/global/number.utils';
 import {
+  computeStakeBaseAp,
   computeStakeCompletionBonusAp,
   computeStakeCompletionStars,
-  computeStakeMonths,
   computeStakeReturnCoins,
-  isStakeReady,
+  stakeDurationMonths,
+  stakeIsMatured,
 } from '@/utils/global/stakes.utils';
 import {
   StakesLevelChip,
@@ -38,8 +39,8 @@ export function StakesActiveStakeCard({ stake, levelDef }: StakesActiveStakeCard
   const { data: me } = useGetMeQuery();
   const stakeKnobs = useStakesDisplayConfig();
   const countdown = useCountDown(stake.endDate);
-  const ready = countdown.expired || isStakeReady(stake.endDate);
-  const months = computeStakeMonths(stake.startDate, stake.endDate);
+  const ready = stakeIsMatured(stake) || countdown.expired;
+  const months = stakeDurationMonths(stake);
   const yieldLC = computeStakeReturnCoins(
     stake.lockedAmount,
     months,
@@ -49,6 +50,10 @@ export function StakesActiveStakeCard({ stake, levelDef }: StakesActiveStakeCard
     me?.statusPerks,
     levelDef?.yieldBoostPct ?? 0
   );
+  // Both halves. Showing the completion bonus alone understated the stake by
+  // two thirds: a 150,000 LC / 1-month stake reads "+15" where it in fact pays
+  // 30 at start and 15 more at the end.
+  const stakeBaseAp = computeStakeBaseAp(stake.lockedAmount, months, stakeKnobs);
   const stakeBonusAp = computeStakeCompletionBonusAp(stake.lockedAmount, months, stakeKnobs);
   const completionStars = computeStakeCompletionStars(months, levelDef);
 
@@ -95,13 +100,19 @@ export function StakesActiveStakeCard({ stake, levelDef }: StakesActiveStakeCard
 
         <div className="mt-2.5">
           <div className="text-pink-secondary text-[9px] font-bold uppercase tracking-wider">
-            {t('ap completion bonus')}
+            {t('activity points')}
           </div>
           <div className="mt-0.5 flex items-center gap-1">
             <BoltIcon size={16} className="text-teal" />
             <span className="text-teal text-[15px] font-extrabold leading-none tabular-nums">
-              +{stakeBonusAp}
+              +{formatNumber(stakeBaseAp + stakeBonusAp)}
             </span>
+          </div>
+          <div className="text-pink-secondary mt-0.5 text-[9px] font-semibold tabular-nums">
+            {t('{base} at start · {bonus} at the end', {
+              base: formatNumber(stakeBaseAp),
+              bonus: formatNumber(stakeBonusAp),
+            })}
           </div>
         </div>
 

@@ -50,21 +50,29 @@ function Stat({ label, value, sub, variant = 'default' }: StatProps) {
   );
 }
 
+/**
+ * What still stands between the player and the next AP-tier. The gate has two
+ * halves (DOCS §5.1) and the caller picks the one that is furthest from done,
+ * so the caption and the bar can never describe different halves.
+ */
+export interface StakesTierNeed {
+  kind: 'ap' | 'friends';
+  amount: number;
+}
+
 export interface StakesSummaryCardProps {
   activeCount: number;
   lockedAmount: number;
   readyCount: number;
   lifetimeEarned: number;
-  /** Tier of the largest active stake — drives the corner-glow accent. */
-  topTier?: TicketType;
-  /** AP gap to the next AP-tier — undefined when already at max tier. */
-  nextTierAp?: number;
   /**
-   * Friends still missing for the next tier. The AP-tier gate has two halves
-   * (DOCS §5.1) — with the AP half already met, AP alone reads as "0 AP left"
-   * while the tier stays locked, so the friend half is what to show.
+   * Tier of the largest active stake — drives the corner-glow accent. `null`
+   * when that band is one the server did not name, in which case the card falls
+   * back to the same neutral accent every other stake surface uses.
    */
-  nextTierFriends?: number;
+  topTier?: TicketType | null;
+  /** The blocking half of the next-tier gate, or `null` at max tier. */
+  nextTierNeed?: StakesTierNeed | null;
   /** Percent progress towards the next tier (0..100). */
   tierProgressPercent?: number;
 }
@@ -75,8 +83,7 @@ export function StakesSummaryCard({
   readyCount,
   lifetimeEarned,
   topTier,
-  nextTierAp,
-  nextTierFriends = 0,
+  nextTierNeed = null,
   tierProgressPercent = 0,
 }: StakesSummaryCardProps) {
   const t = useAppTranslations();
@@ -103,8 +110,11 @@ export function StakesSummaryCard({
           sub={<LcLabel size={12} />}
           variant="gold"
         />
+        {/* `ready count`, not the `ready` badge key: that one is the word
+            stamped on a matured card ("ГОТОВ", masculine singular) and it does
+            not agree with a count sitting under it. */}
         <Stat
-          label={t('ready')}
+          label={t('ready count')}
           value={String(readyCount)}
           sub={t('to claim')}
           variant={readyCount > 0 ? 'highlight' : 'default'}
@@ -120,16 +130,18 @@ export function StakesSummaryCard({
             <LcLabel size={11} />
           </span>
         </div>
-        {nextTierAp !== undefined && (
+        {nextTierNeed && (
           <div>
             <div className="flex items-center justify-between text-[9px] font-bold tabular-nums">
               <span className="text-pink-secondary uppercase tracking-wider">
                 {t('next tier in')}
               </span>
-              <span className="text-electric-pink">
-                {nextTierAp > 0
-                  ? `${formatCompact(nextTierAp)} AP`
-                  : t('need {n} friends', { n: nextTierFriends })}
+              {/* White, not `text-electric-pink`: that pink measured 3.76:1 on
+                  this card at 9px, below the 4.5:1 floor for body text. */}
+              <span className="text-white">
+                {nextTierNeed.kind === 'ap'
+                  ? `${formatCompact(nextTierNeed.amount)} AP`
+                  : t('need {n} friends', { n: nextTierNeed.amount })}
               </span>
             </div>
             <div className="bg-background-overlay/60 mt-1 h-0.5 overflow-hidden rounded-full">

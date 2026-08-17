@@ -9,10 +9,10 @@ import {
   computeStakeCompletionBonusAp,
   computeStakeCompletionStars,
   computeStakeFee,
-  computeStakeMonths,
   computeStakeReturnCoins,
   findLevelDef,
   findLevelForDeposit,
+  stakeDurationMonths,
 } from '@/utils/global/stakes.utils';
 
 const nowIso = () => new Date().toISOString();
@@ -21,6 +21,10 @@ const nowIso = () => new Date().toISOString();
  * `stakes` query — composed live from config (levels) + shared backend state.
  * Returns fresh copies so RTK Query detects changes after a mutation mutates
  * `mockDb` in place (identical array refs would be skipped by structural sharing).
+ *
+ * `durationMonths` and `matured` are sent on every active stake because the real
+ * `StakesService.getData` sends them: without them here, dev only ever exercises
+ * the client-side fallbacks and a drift between the two goes unseen until prod.
  */
 const getStakes = (): StakesData => ({
   enabled: true,
@@ -33,7 +37,11 @@ const getStakes = (): StakesData => ({
     apCompletionBonusPercent: appConfig.stakes.apCompletionBonusPercent,
   },
   levels: appConfig.stakes.levels,
-  activeStakes: mockDb.stakes.activeStakes.map(s => ({ ...s })),
+  activeStakes: mockDb.stakes.activeStakes.map(s => ({
+    ...s,
+    durationMonths: stakeDurationMonths(s),
+    matured: new Date(s.endDate).getTime() <= Date.now(),
+  })),
   history: mockDb.stakes.history.map(h => ({ ...h })),
 });
 
@@ -65,23 +73,45 @@ const startStake = (args: FetchArgs) => {
     return { error: { status: 400, data: 'Insufficient Stars for stake fee' } };
   }
 
+  // Base AP credited the moment the stake starts (DOCS §5.3) — and clawed back
+  // in full if the stake is cancelled, so it is stamped on the row too.
+  const apAwarded = computeStakeBaseAp(amount, months);
+
   mockDb.user.coins -= amount;
   mockDb.user.telegramStars -= feeBreakdown.fee;
   mockDb.user.freeStakeStartsUsed = freeStartsUsed + 1;
-  // Base AP credited the moment the stake starts (DOCS §5.3) — retained even if cancelled.
-  mockDb.user.activityPoints += computeStakeBaseAp(amount, months);
+  mockDb.user.activityPoints += apAwarded;
   const start = Date.now();
+  // Calendar months, like `end.setMonth(end.getMonth() + n)` on the server —
+  // not `n × 30 days`, which drifts a full month past ~30 months.
+  const end = new Date(start);
+  end.setMonth(end.getMonth() + months);
+  const id = `stake-${start}`;
   mockDb.stakes.activeStakes.push({
-    id: `stake-${start}`,
+    id,
     level,
     lockedAmount: amount,
+    durationMonths: months,
     startDate: new Date(start).toISOString(),
-    endDate: new Date(start + months * 30 * 86_400_000).toISOString(),
+    endDate: end.toISOString(),
     status: StakeStatus.ACTIVE,
     claimed: false,
   });
 
-  return { data: { success: true } };
+  // The full server shape, not a bare `{ success }` — the "stake opened" screen
+  // shows the band and end date the SERVER settled on, so a config change
+  // mid-session cannot leave it quoting a level the stake does not have.
+  return {
+    data: {
+      success: true,
+      id,
+      level,
+      lockedAmount: amount,
+      endDate: end.toISOString(),
+      feeStars: feeBreakdown.fee,
+      apAwarded,
+    },
+  };
 };
 
 /** POST stakes/cancel — refund the locked LC, charge a Stars penalty, archive. */
@@ -92,12 +122,17 @@ const cancelStake = (args: FetchArgs) => {
 
   const [stake] = mockDb.stakes.activeStakes.splice(idx, 1);
   const penalty = computeStakeCancelFee(stake.lockedAmount);
-  const cancelMonths = computeStakeMonths(stake.startDate, stake.endDate);
-  // Cancel keeps the base AP that was credited on start (DOCS §5.3) — record it for history.
-  const baseApKept = computeStakeBaseAp(stake.lockedAmount, cancelMonths);
+  const cancelMonths = stakeDurationMonths(stake);
+  const baseAp = computeStakeBaseAp(stake.lockedAmount, cancelMonths);
+  // Cancel REVOKES the base AP credited at start (DOCS §18.3) — floored at the
+  // current balance so AP decay in between cannot push it below zero. The mock
+  // used to keep it, which is how the cancel sheet came to promise the player
+  // AP that production takes away.
+  const apRevoked = Math.min(baseAp, mockDb.user.activityPoints);
 
   mockDb.user.coins += stake.lockedAmount;
   mockDb.user.telegramStars = Math.max(0, mockDb.user.telegramStars - penalty);
+  mockDb.user.activityPoints -= apRevoked;
   mockDb.stakes.history.unshift({
     id: `h-${Date.now()}`,
     level: stake.level,
@@ -105,12 +140,22 @@ const cancelStake = (args: FetchArgs) => {
     durationMonths: cancelMonths,
     yieldLC: 0,
     bonusLS: 0,
-    apAwarded: baseApKept,
+    // The server leaves the stamped AP on the row rather than zeroing it, so
+    // the mock does too — `stakeApKept()` is what stops the UI calling it earned.
+    apAwarded: baseAp,
     outcome: 'cancelled',
     completedAt: nowIso(),
   });
 
-  return { data: { success: true } };
+  return {
+    data: {
+      success: true,
+      id: stake.id,
+      principalReturned: stake.lockedAmount,
+      cancelFeeStars: penalty,
+      apRevoked,
+    },
+  };
 };
 
 /** POST stakes/claim — pay out rewards for a completed stake, archive it. */
@@ -126,7 +171,7 @@ const claimStake = (args: FetchArgs) => {
 
   mockDb.stakes.activeStakes.splice(idx, 1);
   const levelDef = findLevelDef(appConfig.stakes.levels, stake.level);
-  const months = computeStakeMonths(stake.startDate, stake.endDate);
+  const months = stakeDurationMonths(stake);
   const yieldLC = computeStakeReturnCoins(
     stake.lockedAmount,
     months,
@@ -160,7 +205,20 @@ const claimStake = (args: FetchArgs) => {
     completedAt: nowIso(),
   });
 
-  return { data: { success: true } };
+  // The full `ClaimStakeResult`. It used to return a bare `{ success: true }`
+  // against the very type the endpoint declares, so the claim screen rendered
+  // `formatCompact(NaN)` — literally "не число" — for the amount credited, and
+  // no one could see this screen work in development.
+  return {
+    data: {
+      success: true,
+      id: stake.id,
+      principalReturned: stake.lockedAmount,
+      yieldLC,
+      completionStars: bonusLS,
+      apBonus: completionBonusAp,
+    },
+  };
 };
 
 export const stakesMock = {

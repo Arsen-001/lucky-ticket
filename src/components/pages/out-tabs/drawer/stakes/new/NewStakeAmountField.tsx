@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import { twMerge } from 'tailwind-merge';
 import { useAppTranslations } from '@/hooks/useAppTranslations';
+import { formatNumber } from '@/utils/global/number.utils';
 
 export interface NewStakeAmountFieldProps {
   /** Committed deposit in LC. */
@@ -14,6 +15,13 @@ export interface NewStakeAmountFieldProps {
 }
 
 const digitsOf = (raw: string) => raw.replace(/\D/g, '');
+
+/**
+ * Grouped the way every other number on the screen is — `formatNumber` follows
+ * the APP's language, while a bare `toLocaleString()` follows the BROWSER's, so
+ * a Russian UI in an English Chrome printed "150,000" here beside "1 800 AP"
+ * one card below.
+ */
 
 /**
  * The hero amount doubles as the input: tap the number and type any sum.
@@ -28,7 +36,7 @@ export function NewStakeAmountField({ value, max, onChange, className }: NewStak
   const t = useAppTranslations();
   const [draft, setDraft] = useState<string | null>(null);
 
-  const shown = draft ?? value.toLocaleString();
+  const shown = draft ?? formatNumber(value);
 
   const commit = () => {
     if (draft === null) return;
@@ -45,12 +53,12 @@ export function NewStakeAmountField({ value, max, onChange, className }: NewStak
       value={shown}
       aria-label={t('you will lock')}
       onFocus={event => {
-        setDraft(value.toLocaleString());
+        setDraft(formatNumber(value));
         event.target.select();
       }}
       onChange={event => {
         const digits = digitsOf(event.target.value);
-        setDraft(digits ? Number(digits).toLocaleString() : '');
+        setDraft(digits ? formatNumber(Number(digits)) : '');
       }}
       onBlur={commit}
       onKeyDown={event => {

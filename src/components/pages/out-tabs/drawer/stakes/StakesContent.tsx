@@ -31,9 +31,9 @@ import { StakesSummaryCard } from '@/components/pages/out-tabs/drawer/stakes/Sta
 import { StakesWalletPill } from '@/components/pages/out-tabs/drawer/stakes/StakesWalletPill';
 import {
   findLevelDef,
-  isStakeReady,
   sortHistoryNewestFirst,
   sortStakesReadyFirst,
+  stakeIsMatured,
 } from '@/utils/global/stakes.utils';
 import { QueryErrorState } from '@/components/shared/error/QueryErrorState';
 
@@ -41,7 +41,7 @@ export function StakesContent() {
   const t = useAppTranslations();
   const toast = useToast();
   const { data: stakes, isLoading, isError, refetch } = useGetStakesQuery();
-  const { data: me } = useGetMeQuery();
+  const { data: me, isLoading: meLoading } = useGetMeQuery();
   const stakeCfg = useStakesDisplayConfig();
   const [claimStake, { isLoading: claimingAll }] = useClaimStakeMutation();
 
@@ -53,13 +53,18 @@ export function StakesContent() {
   const historyPreview = history.slice(0, 3);
   const hasMoreHistory = history.length > historyPreview.length;
   const totalLocked = activeStakes.reduce((sum, s) => sum + s.lockedAmount, 0);
-  const readyCount = activeStakes.filter(s => isStakeReady(s.endDate)).length;
+  const readyCount = activeStakes.filter(stakeIsMatured).length;
   const lifetimeEarned = history
     .filter(h => h.outcome === 'completed')
     .reduce((sum, h) => sum + h.yieldLC, 0);
   const freeStartsRemaining = Math.max(0, stakeCfg.freeStartCount - (me?.freeStakeStartsUsed ?? 0));
+  // Both queries have to have LANDED before the waiver is advertised. With
+  // `me` still loading, `freeStakeStartsUsed ?? 0` invents a full allowance, so
+  // a player who has already spent theirs saw "1 free stake left" flash on
+  // every open and then vanish.
+  const dataReady = !!stakes && !!me && !isLoading && !meLoading;
 
-  const readyStakeIds = activeStakes.filter(s => isStakeReady(s.endDate)).map(s => s.id);
+  const readyStakeIds = activeStakes.filter(stakeIsMatured).map(s => s.id);
 
   // Largest active stake by lockedAmount drives the summary-card accent tier.
   const biggest = activeStakes.reduce(
@@ -92,24 +97,42 @@ export function StakesContent() {
       : 100;
   const refProgressPercent =
     nextTierRefRequired > 0 ? percent((currentRefs / nextTierRefRequired) * 100) : 100;
-  const tierProgressPercent = nextTierApGap ? apProgressPercent : refProgressPercent;
+  // The bar tracks whichever half is FURTHEST from done, and the label names
+  // that same half. Reading the AP half alone made the bar jump backwards the
+  // moment the AP was covered: it filled to 100%, then the caption switched to
+  // "need 3 friends" and the bar dropped to the friend ratio.
+  const tierProgressPercent = Math.min(apProgressPercent, refProgressPercent);
+  const apBlocking = (nextTierApGap ?? 0) > 0;
+  const refBlocking = nextTierRefGap > 0;
+  const tierNeed =
+    nextThreshold === null || (!apBlocking && !refBlocking)
+      ? null
+      : apBlocking && (!refBlocking || apProgressPercent <= refProgressPercent)
+        ? { kind: 'ap' as const, amount: nextTierApGap as number }
+        : { kind: 'friends' as const, amount: nextTierRefGap };
 
   const handleClaimAll = async () => {
-    let failed = false;
+    let failed = 0;
     let claimed = 0;
     let totalLc = 0;
     for (const id of readyStakeIds) {
       const result = await claimStake({ stakeId: id });
       if ('data' in result && result.data?.success) {
         claimed += 1;
-        totalLc += result.data.principalReturned + result.data.yieldLC;
+        // Guarded because the sum has to survive an older server that answers
+        // with a bare `{ success }`: one missing field turns the whole toast
+        // into "+NaN LC" for every stake in the batch.
+        totalLc += (result.data.principalReturned ?? 0) + (result.data.yieldLC ?? 0);
       } else {
-        failed = true;
+        failed += 1;
       }
     }
-    if (failed) toast.error(t('action failed'));
-    else if (claimed > 0)
+    // Partial success is the normal outcome of a loop of N requests, and it used
+    // to render as a flat "action failed" — the player was told nothing worked
+    // while their balance had already moved for the ones that did.
+    if (claimed > 0)
       toast.success(t('claimed {n} ready stakes', { n: claimed, lc: formatCompact(totalLc) }));
+    if (failed > 0) toast.error(t('{n} stakes could not be claimed', { n: failed }));
   };
 
   return (
@@ -149,8 +172,7 @@ export function StakesContent() {
             readyCount={readyCount}
             lifetimeEarned={lifetimeEarned}
             topTier={topTier}
-            nextTierAp={nextTierApGap}
-            nextTierFriends={nextTierRefGap}
+            nextTierNeed={tierNeed}
             tierProgressPercent={tierProgressPercent}
           />
         </div>
@@ -170,7 +192,7 @@ export function StakesContent() {
         </button>
       )}
 
-      {stakes?.enabled !== false && freeStartsRemaining > 0 && (
+      {dataReady && stakes.enabled !== false && freeStartsRemaining > 0 && (
         <Link
           href={routes.stakes.new}
           className="border-bronze/35 bg-bronze/10 hover:bg-bronze/15 flex items-center gap-2.5 rounded-2xl border px-3.5 py-2.5 transition-colors"
@@ -183,8 +205,15 @@ export function StakesContent() {
               <div className="text-[12px] font-extrabold text-white">
                 {t('{n} free stakes left', { n: freeStartsRemaining })}
               </div>
-              <span className="text-bronze rounded-full bg-bronze/15 px-1.5 py-0.5 text-[9px] font-bold tabular-nums">
-                {me?.freeStakeStartsUsed ?? 0}/{stakeCfg.freeStartCount}
+              {/* REMAINING out of total — the same reading as the badge on the
+                  confirm button. It used to be used-out-of-total here, so the
+                  identical-looking chip said "0/1" next to a sentence saying
+                  "1 left", and "1/1" one screen over for the same state. */}
+              {/* White digits, not `text-bronze`: bronze on the page background
+                  measured 3.68:1 at 9px, under the 4.5:1 floor. The bronze
+                  identity survives in the chip's fill and the card around it. */}
+              <span className="rounded-full border border-bronze/50 bg-bronze/25 px-1.5 py-0.5 text-[9px] font-bold text-white tabular-nums">
+                {freeStartsRemaining}/{stakeCfg.freeStartCount}
               </span>
             </div>
             <div className="text-white-secondary mt-0.5 text-[10px]">
@@ -266,7 +295,10 @@ export function StakesContent() {
         </SkeletonSuspense>
       </div>
 
-      {stakes?.enabled !== false && <StakesNewStakeFab />}
+      {/* `stakes.enabled === true`, not `!== false`: before the query lands
+          `stakes` is undefined and the loose check showed the button even with
+          the admin kill switch on, for as long as the request took. */}
+      {stakes?.enabled === true && <StakesNewStakeFab />}
     </div>
   );
 }

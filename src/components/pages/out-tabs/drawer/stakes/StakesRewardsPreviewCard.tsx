@@ -15,8 +15,10 @@ import {
   computeStakeCompletionStars,
   computeStakeEffectiveAprPercent,
   computeStakeReturnCoins,
+  formatStakeRatePercent,
 } from '@/utils/global/stakes.utils';
 import { stakeAccent } from '@/components/pages/out-tabs/drawer/stakes/StakesLevelChip';
+import { formatNumber } from '@/utils/global/number.utils';
 import type { StakeLevelDefinition } from '@/types/interfaces/stakes.interfaces';
 
 export interface StakesRewardsPreviewCardProps {
@@ -48,7 +50,7 @@ export function StakesRewardsPreviewCard({
   const stakeBaseAp = computeStakeBaseAp(deposit, durationMonths, stakeKnobs);
   const stakeBonusAp = computeStakeCompletionBonusAp(deposit, durationMonths, stakeKnobs);
   const completionStars = computeStakeCompletionStars(durationMonths, levelDef);
-  const rateLabel = ratePercent.toFixed(ratePercent % 1 === 0 ? 0 : 1);
+  const rateLabel = formatStakeRatePercent(ratePercent);
 
   return (
     <div
@@ -64,7 +66,7 @@ export function StakesRewardsPreviewCard({
             {t('principal returned')}
           </span>
           <span className="text-gold inline-flex items-center gap-1 text-[12px] font-extrabold tabular-nums">
-            {deposit.toLocaleString()}
+            {formatNumber(deposit)}
             <LcLabel size={12} />
           </span>
         </div>
@@ -80,24 +82,31 @@ export function StakesRewardsPreviewCard({
             </div>
           </div>
           <span className="text-success inline-flex items-center gap-1 text-[13px] font-extrabold tabular-nums">
-            +{yieldLC.toLocaleString()}
+            +{formatNumber(yieldLC)}
             <LcLabel size={12} />
           </span>
         </div>
 
+        {/* The TOTAL is the number in the value column, like every other row —
+            it used to carry the base while the subtitle named the bonus, so the
+            row's headline figure was the smaller half of a two-part reward and
+            the two halves were never added up anywhere. */}
         <div className="border-teal/25 bg-teal/8 flex items-center gap-2.5 rounded-xl border px-3 py-2.5">
-          <div className="flex-center border-teal/40 bg-teal/15 h-7 w-7 shrink-0 rounded-lg border">
+          <div className="flex-center border-teal/40 bg-teal/15 text-teal h-7 w-7 shrink-0 rounded-lg border">
             <BoltIcon size={14} />
           </div>
           <div className="flex-1 leading-tight">
             <div className="text-[11px] font-bold text-white">{t('activity points')}</div>
-            <div className="text-white-secondary text-[10px]">
-              {t('plus {n} ap on completion', { n: stakeBonusAp })}
+            <div className="text-white-secondary text-[10px] tabular-nums">
+              {t('{base} at start · {bonus} at the end', {
+                base: formatNumber(stakeBaseAp),
+                bonus: formatNumber(stakeBonusAp),
+              })}
             </div>
           </div>
-          <span className="text-teal inline-flex flex-col items-end gap-0 text-[11px] font-extrabold leading-tight tabular-nums">
-            <span>{t('plus {n} ap', { n: stakeBaseAp })}</span>
-            <span className="text-white-secondary text-[9px] font-semibold">{t('at start')}</span>
+          <span className="text-teal inline-flex items-center gap-1 text-[13px] font-extrabold tabular-nums">
+            +{formatNumber(stakeBaseAp + stakeBonusAp)}
+            <BoltIcon size={12} />
           </span>
         </div>
 
@@ -108,7 +117,14 @@ export function StakesRewardsPreviewCard({
             </div>
             <div className="flex-1 leading-tight">
               <div className="text-[11px] font-bold text-white">{t('stars on completion')}</div>
-              <div className="text-white-secondary text-[10px]">{t('on stake completion')}</div>
+              {/* Was "On stake completion" — the title restated, word for word.
+                  The subtitle now carries the arithmetic behind the number. */}
+              <div className="text-white-secondary text-[10px] tabular-nums">
+                {t('{n} months × {k} per month', {
+                  n: durationMonths,
+                  k: levelDef?.completionStarsPerMonth ?? 0,
+                })}
+              </div>
             </div>
             <span className="text-gold inline-flex items-center gap-1 text-[13px] font-extrabold tabular-nums">
               +{completionStars}

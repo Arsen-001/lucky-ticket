@@ -8,6 +8,7 @@ import { LcLabel } from '@/components/shared/icons/LcLabel';
 import { BoltIcon } from '@/components/shared/icons/BoltIcon';
 import { icons } from '@/constants/icons';
 import { GlobalConstants } from '@/constants/global.constants';
+import { formatNumber } from '@/utils/global/number.utils';
 import { useAppTranslations } from '@/hooks/useAppTranslations';
 import { useStakesDisplayConfig } from '@/hooks/useStakesDisplayConfig';
 import {
@@ -68,7 +69,7 @@ export function StakeCancelSection({
             <p className="flex-1 text-[12px] leading-relaxed text-white">
               <strong className="text-error-text">{t('cancel forfeits bonus')}</strong>{' '}
               {t('cancel forfeits description', {
-                amount: lockedAmount.toLocaleString(),
+                amount: formatNumber(lockedAmount),
                 coin: GlobalConstants.coinName,
               })}
             </p>
@@ -78,19 +79,24 @@ export function StakeCancelSection({
             <div className="text-white-secondary flex items-center justify-between text-[11px]">
               <span>{t('lc returned')}</span>
               <span className="text-success inline-flex items-center gap-1 font-extrabold tabular-nums">
-                <LcLabel size={22} />+{lockedAmount.toLocaleString()}
+                <LcLabel size={22} />+{formatNumber(lockedAmount)}
               </span>
             </div>
+            {/* The base AP is TAKEN BACK, not kept. This row used to say "Base
+                AP kept" in positive teal — directly contradicting the paragraph
+                above it in this same sheet, and contradicting the server, which
+                decrements `activityPoints` by the stamped amount on cancel
+                (DOCS §18.3; the loop it closes was farmed in the wild). */}
             <div className="text-white-secondary mt-1.5 flex items-center justify-between text-[11px]">
-              <span>{t('base ap kept')}</span>
-              <span className="text-teal inline-flex items-center gap-1 font-extrabold tabular-nums">
-                <BoltIcon size={14} />+{baseAp}
+              <span>{t('base ap revoked')}</span>
+              <span className="text-error-text/85 inline-flex items-center gap-1 font-extrabold tabular-nums">
+                <BoltIcon size={14} />−{formatNumber(baseAp)}
               </span>
             </div>
             <div className="text-white-secondary mt-1.5 flex items-center justify-between text-[11px]">
               <span>{t('bonus ap forfeited')}</span>
               <span className="text-error-text/85 inline-flex items-center gap-1 font-extrabold tabular-nums line-through">
-                <BoltIcon size={14} />+{bonusAp}
+                <BoltIcon size={14} />+{formatNumber(bonusAp)}
               </span>
             </div>
             <div className="text-white-secondary mt-1.5 flex items-center justify-between text-[11px]">

@@ -33,7 +33,7 @@ import { twMerge } from 'tailwind-merge';
 import { useGetMeQuery } from '@/api/me.api';
 import { useGetNotificationsSummaryQuery } from '@/api/notifications.api';
 import { useGetStakesQuery } from '@/api/stakes.api';
-import { isStakeReady } from '@/utils/global/stakes.utils';
+import { stakeIsMatured } from '@/utils/global/stakes.utils';
 import { Avatar } from '@/components/shared/user-elements/Avatar';
 import { ClientPortal } from '@/components/shared/ClientPortal';
 import { DrawerItem } from '@/components/layout-elements/DrawerItem';
@@ -86,8 +86,10 @@ export function Drawer() {
   // Whole-inbox count from the server — the feed is paginated, so counting
   // the loaded rows would under-report the badge the moment page 2 exists.
   const unreadCount = notificationsSummary?.unread ?? 0;
+  // Same rule as the header dot: maturity is the server's `matured` flag, not a
+  // comparison against the device clock (see `stakeIsMatured`).
   const claimableStakesCount =
-    stakesData?.activeStakes.filter(s => !s.claimed && isStakeReady(s.endDate)).length ?? 0;
+    stakesData?.activeStakes.filter(s => !s.claimed && stakeIsMatured(s)).length ?? 0;
 
   const handleDrawerClose = () => {
     dispatch(closeDrawer());

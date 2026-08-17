@@ -1,13 +1,15 @@
 'use client';
 
 import '@/styles/components/stakes.css';
+import Image from 'next/image';
 import Link from 'next/link';
 import { Repeat } from 'lucide-react';
 import { LcLabel } from '@/components/shared/icons/LcLabel';
 import { BoltIcon } from '@/components/shared/icons/BoltIcon';
+import { icons } from '@/constants/icons';
 import { routes } from '@/constants/routes';
 import { useAppTranslations } from '@/hooks/useAppTranslations';
-import { findLevelDef, formatStakeRelative } from '@/utils/global/stakes.utils';
+import { findLevelDef, formatStakeRelative, stakeApKept } from '@/utils/global/stakes.utils';
 import {
   StakesLevelChip,
   stakeAccent,
@@ -27,9 +29,16 @@ export function StakesHistoryRow({ entry, levels }: StakesHistoryRowProps) {
   // completed stake would silently disappear from the list that proves it ran.
   const levelDef = findLevelDef(levels, entry.level);
   const accent = stakeAccent(levelDef);
+  // AP survives only on a completed stake. A cancelled one keeps its stamped
+  // `apAwarded` in the database — the server never zeroes the row — but that AP
+  // was revoked off the balance (DOCS §18.3), so printing it here credits the
+  // player with points they do not have.
+  const apKept = stakeApKept(entry);
 
+  // No `level=`: the new-stake screen reads only `amount` and `months`, and the
+  // band is re-derived from the amount by both the form and the server anyway.
   const restakeHref =
-    `${routes.stakes.new}?level=${entry.level}&amount=${entry.amount}&months=${entry.durationMonths}` as const;
+    `${routes.stakes.new}?amount=${entry.amount}&months=${entry.durationMonths}` as const;
 
   return (
     <div
@@ -58,30 +67,38 @@ export function StakesHistoryRow({ entry, levels }: StakesHistoryRowProps) {
             <span className="font-bold text-error-text/90">{t('cancelled · LC returned')}</span>
           ) : (
             <>
-              <span className="text-gold inline-flex items-center gap-1 font-bold">
-                +{entry.yieldLC.toLocaleString()}
+              <span className="text-gold inline-flex items-center gap-1 font-bold tabular-nums">
+                +{formatNumber(entry.yieldLC)}
                 <LcLabel size={11} />
               </span>
               {entry.bonusLS > 0 && (
-                <span className="text-gold font-bold">
-                  +{entry.bonusLS} {t('stars')}
+                <span className="text-gold inline-flex items-center gap-1 font-bold tabular-nums">
+                  +{formatNumber(entry.bonusLS)}
+                  <Image sizes="11px" src={icons.telegramStar} alt="" className="h-2.5 w-auto" />
                 </span>
               )}
             </>
           )}
-          {entry.apAwarded > 0 && (
+          {apKept > 0 && (
             <span className="text-teal inline-flex items-center gap-0.5 font-bold tabular-nums">
-              <BoltIcon size={11} />+{formatNumber(entry.apAwarded)} AP
+              <BoltIcon size={11} />+{formatNumber(apKept)} AP
             </span>
           )}
         </div>
       </div>
 
       <div className="relative flex flex-col items-end gap-1">
-        <div className="flex items-center gap-1">
-          <LcLabel size={20} />
-          <span className="text-gold text-[11px] font-bold tabular-nums">
-            {entry.amount.toLocaleString()}
+        <div className="flex flex-col items-end leading-none">
+          {/* Labelled: an unlabelled gold number beside a row of gains reads as
+              another gain, and this one is the deposit that went in. */}
+          <span className="text-pink-secondary text-[8px] font-bold uppercase tracking-wider">
+            {t('staked')}
+          </span>
+          <span className="mt-0.5 inline-flex items-center gap-1">
+            <LcLabel size={20} />
+            <span className="text-gold text-[11px] font-bold tabular-nums">
+              {formatNumber(entry.amount)}
+            </span>
           </span>
         </div>
         <Link

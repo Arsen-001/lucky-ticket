@@ -16,10 +16,10 @@ import { formatDate } from '@/utils/global/date.utils';
 import { formatCompact } from '@/utils/global/number.utils';
 import {
   computeStakeCancelFee,
-  computeStakeMonths,
   computeStakeProgress,
   findLevelDef,
-  isStakeReady,
+  stakeDurationMonths,
+  stakeIsMatured,
 } from '@/utils/global/stakes.utils';
 import { stakeAccent } from '@/components/pages/out-tabs/drawer/stakes/StakesLevelChip';
 import { StakeCancelSection } from '@/components/pages/out-tabs/drawer/stakes/progress/StakeCancelSection';
@@ -48,7 +48,7 @@ export function ProgressStakeContent({ stakeId }: ProgressStakeContentProps) {
   const levelDef = stake && stakes ? findLevelDef(stakes.levels, stake.level) : null;
 
   const countdown = useCountDown(stake?.endDate);
-  const ready = stake ? countdown.expired || isStakeReady(stake.endDate) : false;
+  const ready = stake ? stakeIsMatured(stake) || countdown.expired : false;
 
   useEffect(() => {
     if (!isLoading && stake && ready) {
@@ -115,7 +115,6 @@ export function ProgressStakeContent({ stakeId }: ProgressStakeContentProps) {
             levelDef={levelDef}
             leftTime={countdown.leftTime}
             progress={progress}
-            ready={false}
           />
 
           <div className="mt-5 grid grid-cols-2 gap-2.5 text-start">
@@ -148,13 +147,13 @@ export function ProgressStakeContent({ stakeId }: ProgressStakeContentProps) {
       <StakesRewardsPreviewCard
         levelDef={levelDef}
         deposit={stake.lockedAmount}
-        durationMonths={computeStakeMonths(stake.startDate, stake.endDate)}
+        durationMonths={stakeDurationMonths(stake)}
       />
 
       <div className="mt-5">
         <StakeCancelSection
           lockedAmount={stake.lockedAmount}
-          durationMonths={computeStakeMonths(stake.startDate, stake.endDate)}
+          durationMonths={stakeDurationMonths(stake)}
           loading={cancelling}
           onCancel={handleCancel}
         />

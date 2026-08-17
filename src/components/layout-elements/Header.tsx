@@ -7,7 +7,7 @@ import { twMerge } from 'tailwind-merge';
 import { useGetMeQuery } from '@/api/me.api';
 import { useGetNotificationsSummaryQuery } from '@/api/notifications.api';
 import { useGetStakesQuery } from '@/api/stakes.api';
-import { isStakeReady } from '@/utils/global/stakes.utils';
+import { stakeIsMatured } from '@/utils/global/stakes.utils';
 import { formatCompact } from '@/utils/global/number.utils';
 import { Avatar } from '@/components/shared/user-elements/Avatar';
 import { Skeleton } from '@/components/shared/seleketons/Skeleton';
@@ -46,8 +46,12 @@ export function Header({ className }: ClassNameProps) {
   // Whole-inbox count from the server — the feed is paginated, so counting
   // the loaded rows would under-report the badge the moment page 2 exists.
   const unreadCount = notificationsSummary?.unread ?? 0;
+  // `stakeIsMatured`, not a date comparison: the server sends its own verdict
+  // now, and this badge has to agree with the stake cards it sends the player to
+  // — a device clock an hour fast would otherwise light the dot for a stake the
+  // claim button will not claim.
   const claimableStakesCount =
-    stakesData?.activeStakes.filter(s => !s.claimed && isStakeReady(s.endDate)).length ?? 0;
+    stakesData?.activeStakes.filter(s => !s.claimed && stakeIsMatured(s)).length ?? 0;
   const hasUpdates = unreadCount + claimableStakesCount > 0;
 
   const usernameClasses = twMerge(

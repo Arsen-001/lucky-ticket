@@ -107,7 +107,13 @@ export function NewStakeDurationScale({
       aria-valuenow={activeMonth}
       aria-valuetext={t('{n} months', { n: activeMonth })}
       onKeyDown={handleKeyDown}
-      className={twMerge('outline-none', className)}
+      // Arrow keys move the value, so the control has to SHOW that it has the
+      // focus. It carried a bare `outline-none`: keyboard users were scrubbing
+      // a slider with no indication of where they were.
+      className={twMerge(
+        'rounded-lg outline-none focus-visible:ring-2 focus-visible:ring-electric-pink/70',
+        className
+      )}
     >
       <div
         ref={trackRef}

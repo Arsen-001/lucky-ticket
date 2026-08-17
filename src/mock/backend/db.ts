@@ -168,10 +168,15 @@ export const mockDb = {
     activeStakes: (fresh
       ? []
       : [
+          // `durationMonths` is what the server stores and charges by; the
+          // dates here are squeezed into minutes so the demo has something
+          // ticking and something claimable. Deriving the duration from those
+          // dates would call both stakes "1 month" — the field has to be sent.
           {
             id: 'stake-mid',
             level: 2,
             lockedAmount: 50_000,
+            durationMonths: 3,
             startDate: minutesAgo(65),
             endDate: minutesFromNow(115),
             status: StakeStatus.ACTIVE,
@@ -181,6 +186,7 @@ export const mockDb = {
             id: 'stake-ready',
             level: 3,
             lockedAmount: 150_000,
+            durationMonths: 6,
             startDate: hoursAgo(4),
             endDate: minutesAgo(60),
             status: StakeStatus.COMPLETED,

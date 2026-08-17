@@ -20,8 +20,13 @@ export function StakesEmptyActiveCard() {
         <Lock size={20} className="text-electric-purple" />
       </div>
       <div className="text-sm font-extrabold text-white">{t('no active stakes')}</div>
+      {/* This used to read "Lock LC for 3 HOURS to earn guaranteed TICKETS" —
+          copy from a mechanic that no longer exists. A stake runs 1–12 months
+          and pays LC yield, Activity Points and Lucky Stars; no tickets, no
+          hours. It is also the first thing a brand-new player reads about
+          staking, since it only shows when there is nothing else on the screen. */}
       <p className="text-white-secondary mt-1 text-[11px] leading-relaxed">
-        {t('lock LC for hours description')}
+        {t('lock LC to earn description')}
       </p>
       <div className="mt-3 flex items-center gap-1">
         {TIERS.map(tier => (
