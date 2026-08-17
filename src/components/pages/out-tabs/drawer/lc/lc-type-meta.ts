@@ -1,5 +1,6 @@
 import {
   ArrowDownUp,
+  Ban,
   Clapperboard,
   Coins,
   Cpu,
@@ -109,6 +110,14 @@ export const LC_TYPE_META: Record<LcTransactionType, LcTypeMeta> = {
     Icon: SlidersHorizontal,
     iconClass: 'text-white/70',
     iconBg: 'bg-white/10',
+  },
+  // Error red, and the only row in this list painted with it: the balance did
+  // not move, it was taken — and the player has to be able to find that line
+  // without reading every description.
+  [LcTransactionType.BOT_BLOCK_RESET]: {
+    Icon: Ban,
+    iconClass: 'text-error',
+    iconBg: 'bg-error/15',
   },
 };
 

@@ -27,6 +27,12 @@ export enum LcTransactionType {
    */
   LP_DAILY_GIFT = 'lp_daily_gift',
   ADMIN_ADJUST = 'admin_adjust',
+  /**
+   * The account was wiped because its owner blocked the bot. Its own type and
+   * not `ADMIN_ADJUST`: nobody adjusted anything, and «почему списался баланс»
+   * has to be answerable from the player's own history.
+   */
+  BOT_BLOCK_RESET = 'bot_block_reset',
 }
 
 export enum LcTransactionDirection {

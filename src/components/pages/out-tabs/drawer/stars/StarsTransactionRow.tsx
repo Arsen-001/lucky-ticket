@@ -1,6 +1,7 @@
 'use client';
 
 import {
+  Ban,
   Clapperboard,
   Cpu,
   Gift,
@@ -108,6 +109,14 @@ const TYPE_META: Record<StarsTransactionType, TypeMeta> = {
     Icon: Cpu,
     iconClass: 'text-teal',
     iconBg: 'bg-teal/15',
+  },
+  // The one row in this list that is not a purchase, a reward or a fee: the
+  // balance was taken because the bot was blocked. Painted with the error
+  // colour for the same reason the LC list is. @see lc-type-meta.ts
+  [StarsTransactionType.BOT_BLOCK_RESET]: {
+    Icon: Ban,
+    iconClass: 'text-error',
+    iconBg: 'bg-error/15',
   },
 };
 

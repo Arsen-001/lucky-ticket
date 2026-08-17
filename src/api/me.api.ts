@@ -52,6 +52,28 @@ export const meApi = api.injectEndpoints({
       // edited fields (username, email) must refetch the profile screen.
       invalidatesTags: [rtkTags.me, rtkTags.profile],
     }),
+    /**
+     * The returning player has been told why their account is empty.
+     *
+     * Optimistic, and deliberately not gated on the response: the modal closes
+     * on the tap either way, and a failed ack simply shows it once more on the
+     * next launch — which is the harmless direction to fail in.
+     */
+    ackBlockWipeNotice: builder.mutation<{ blockWipeNotice: boolean }, void>({
+      query: () => ({ url: 'me/block-wipe-notice', method: 'POST' }),
+      async onQueryStarted(_arg, { dispatch, queryFulfilled }) {
+        const patch = dispatch(
+          meApi.util.updateQueryData('getMe', undefined, draft => {
+            draft.blockWipeNotice = false;
+          })
+        );
+        try {
+          await queryFulfilled;
+        } catch {
+          patch.undo();
+        }
+      },
+    }),
     // EMAIL OFF (2026-08-17) — the three endpoints below are left wired on
     // purpose: nothing routed calls them any more (the screen is parked at
     // settings/_email and every entry point into it is commented out), so they
@@ -86,6 +108,7 @@ export const meApi = api.injectEndpoints({
 export const {
   useGetMeQuery,
   useUpdateMeMutation,
+  useAckBlockWipeNoticeMutation,
   useGetEmailRewardQuery,
   useRequestEmailCodeMutation,
   useConfirmEmailMutation,

@@ -43,6 +43,15 @@ const meMock = {
     Object.assign(mockDb.user, body);
     return { ...mockDb.user };
   },
+  // The «аккаунт обнулён» notice was shown. Writes to the shared record so the
+  // modal does not come back on the next `getMe`, exactly as on the backend.
+  // Flip `blockWipeNotice` to `true` in `mockDb.user` to see the modal in dev —
+  // the wipe itself has no mock, because nothing in the Mini App triggers it
+  // (Telegram does).
+  'POST me/block-wipe-notice': () => {
+    mockDb.user.blockWipeNotice = false;
+    return { blockWipeNotice: false };
+  },
   // ── Change-email flow (mirrors the backend EmailVerificationService) ──
   'GET me/email/reward': () => ({
     enabled: true,

@@ -20,6 +20,11 @@ export enum StarsTransactionType {
    * a chip shuffled between engines ticked off «прокачай двигатель N раз».
    */
   CHIP_SLOT = 'chip_slot',
+  /**
+   * The account was wiped because its owner blocked the bot.
+   * @see LcTransactionType.BOT_BLOCK_RESET
+   */
+  BOT_BLOCK_RESET = 'bot_block_reset',
 }
 
 export enum StarsTransactionDirection {

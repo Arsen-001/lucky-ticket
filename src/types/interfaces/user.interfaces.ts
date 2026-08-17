@@ -69,6 +69,12 @@ export interface MeResponse {
   freeStakeStartsUsed?: number;
   /** Whether the user has completed or skipped the first-run onboarding tour. */
   hasSeenTour?: boolean;
+  /**
+   * The account was wiped for blocking the bot and the player has not been told
+   * yet. Carries no numbers on purpose — the notice explains an empty account,
+   * it does not itemise the loss. Cleared by `ackBlockWipeNotice`.
+   */
+  blockWipeNotice?: boolean;
 }
 
 /** Email-verification gift bundle (backend RewardRungData shape). */

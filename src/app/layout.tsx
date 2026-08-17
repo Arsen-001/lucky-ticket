@@ -7,6 +7,7 @@ import { TelegramProvider } from '@/providers/TelegramProvider';
 import { ContentProtectionProvider } from '@/providers/ContentProtectionProvider';
 import { Onboarding } from '@/components/onboarding/Onboarding';
 import { TournamentResultWatcher } from '@/components/pages/tabs/tournaments/TournamentResultWatcher';
+import { BlockWipeNoticeWatcher } from '@/components/shared/modals/BlockWipeNoticeWatcher';
 import { TicketFlightViewport } from '@/components/shared/ticket-flight/TicketFlightViewport';
 import { ToastViewport } from '@/components/shared/toast/ToastViewport';
 import { OverlayProbeBanner } from '@/components/shared/debug/OverlayProbeBanner';
@@ -198,6 +199,12 @@ export default async function RootLayout({ children }: ChildrenProps) {
                         <TelegramBackButton />
                         <Onboarding />
                         <TournamentResultWatcher />
+                        {/* Told once, to a player who blocked the bot and came
+                            back to an empty account. Here rather than on the
+                            friends screen: the wipe takes the whole account, so
+                            the screen they open first is rarely the one that
+                            explains it. @see BlockWipeNoticeWatcher */}
+                        <BlockWipeNoticeWatcher />
                       </TelegramProvider>
                       <FullscreenBrandBar />
                       <TicketFlightViewport />
