@@ -1383,7 +1383,7 @@
   "where to get shards": "碎片从哪来",
   "shards source explainer": "碎片来自比赛：每场一种，时间和容量轮流出。商城也有出售。",
   "shards spend explainer": "碎片在这里使用——做一块 1 级的新芯片，或给已有芯片升级。",
-  "chip tier rule": "芯片只能装在同档位的引擎上。",
+  "chip tier rule": "芯片可装在同档位或更低档位的引擎上。",
   "chip level explainer": "共十级。每一级让时间芯片 +10%，容量芯片 +5 张门票。升级用碎片支付，等级越高越贵。",
   "chip stars explainer": "装上免费，只有取下才花 ★，数量等于芯片等级。",
   "what this shard is for": "有什么用",

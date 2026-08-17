@@ -1383,7 +1383,7 @@
   "where to get shards": "D’où viennent les fragments",
   "shards source explainer": "Ce sont les tournois qui en donnent : un type par tournoi, temps et capacité en alternance. Le marché en vend aussi.",
   "shards spend explainer": "C’est ici qu’on dépense les fragments — fabriquer une puce au niveau 1 ou monter le niveau d’une puce que tu as déjà.",
-  "chip tier rule": "Une puce ne va que sur un moteur de son propre palier.",
+  "chip tier rule": "Une puce va sur un moteur de son propre palier ou de tout palier inférieur.",
   "chip level explainer": "Dix niveaux. Chacun ajoute +10% à une puce de temps ou +5 tickets à une puce de capacité. Les niveaux se paient en fragments, et le prix monte avec le niveau.",
   "chip stars explainer": "L’installation est gratuite — seul le retrait coûte des ★, autant que le niveau de la puce.",
   "what this shard is for": "À quoi il sert",

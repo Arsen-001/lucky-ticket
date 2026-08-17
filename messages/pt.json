@@ -1383,7 +1383,7 @@
   "where to get shards": "De onde vêm os fragmentos",
   "shards source explainer": "Os torneios soltam eles: um tipo por torneio, tempo e capacidade se revezando. O mercado também vende.",
   "shards spend explainer": "É aqui que os fragmentos são gastos — fabrique um chip novo no nível 1 ou suba o nível de um que já tem.",
-  "chip tier rule": "Um chip só entra num motor do mesmo nível.",
+  "chip tier rule": "Um chip entra num motor do mesmo nível ou de qualquer nível inferior.",
   "chip level explainer": "Dez níveis. Cada um dá +10% a um chip de tempo ou +5 tickets a um de capacidade. Os níveis são pagos com fragmentos e o preço sobe com o nível.",
   "chip stars explainer": "Instalar é grátis — só retirar custa ★, tantas quanto o nível do chip.",
   "what this shard is for": "Para que serve",

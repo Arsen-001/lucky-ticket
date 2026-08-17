@@ -275,8 +275,21 @@ export const isChipReadyToLevelUp = (
   (shards.find(s => s.type === chip.type && s.quality === chip.quality)?.count ?? 0) >=
     chip.shardsForNextLevel;
 
+/**
+ * A chip of quality X fits an engine of tier **X or lower** (DOCS §10.4) —
+ * chips work down the tier ladder, never up. A Diamond chip goes on anything;
+ * a Bronze chip only on Bronze. That is what makes a higher tier worth more:
+ * it covers every tier beneath it.
+ *
+ * This read `chipQuality === engineTier` until 17.08.2026, which is the rule
+ * for BOOSTERS (§10.6), not for chips — and it was strictly harsher than the
+ * server, which has enforced "or lower" since its first commit. The cost was
+ * paid by exactly the chips worth the most: a player holding a Diamond or
+ * Platinum chip and no engine of that tier was told "no engines available" and
+ * could not use it at all, while the backend would have taken it happily.
+ */
 export const canEquipChipOnTier = (chipQuality: TicketType, engineTier: TicketType): boolean =>
-  chipQuality === engineTier;
+  tierRank(engineTier) <= tierRank(chipQuality);
 
 /**
  * Attaching a chip is free; only taking one OFF costs Stars, its level's worth

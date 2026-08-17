@@ -1383,7 +1383,7 @@
   "where to get shards": "Parçalar nereden gelir",
   "shards source explainer": "Turnuvalar düşürür: turnuva başına tek tür, süre ve kapasite sırayla. Markette de satılır.",
   "shards spend explainer": "Parçalar burada harcanır — 1. seviye yeni bir çip üret ya da elindekinin seviyesini yükselt.",
-  "chip tier rule": "Bir çip yalnızca kendi kademesindeki motora takılır.",
+  "chip tier rule": "Bir çip kendi kademesindeki ya da daha düşük kademedeki motora takılır.",
   "chip level explainer": "On seviye. Her biri süre çipine +10%, kapasite çipine +5 bilet ekler. Seviyeler parçalarla ödenir ve fiyat seviyeyle birlikte artar.",
   "chip stars explainer": "Takmak ücretsiz — yalnızca çıkarmak ★ tutar, çipin seviyesi kadar.",
   "what this shard is for": "Ne işe yarar",

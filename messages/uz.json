@@ -1383,7 +1383,7 @@
   "where to get shards": "Boʻlaklar qayerdan olinadi",
   "shards source explainer": "Ularni turnirlar beradi: bir turnirga bitta tur, vaqt va sigʻim navbatma-navbat. Boʻlaklar bozorda ham sotiladi.",
   "shards spend explainer": "Shu yerda sarflanadi: 1-darajali yangi chip yasa yoki bor chipning darajasini koʻtar.",
-  "chip tier rule": "Chip faqat oʻz bosqichidagi dvigatelga tushadi.",
+  "chip tier rule": "Chip oʻz bosqichidagi yoki undan quyi bosqichdagi dvigatelga tushadi.",
   "chip level explainer": "Oʻn daraja. Har biri vaqt chipiga +10%, sigʻim chipiga +5 chipta qoʻshadi. Darajalar boʻlaklar bilan toʻlanadi, narx daraja bilan oshadi.",
   "chip stars explainer": "Oʻrnatish bepul — ★ faqat yechib olish uchun olinadi, chip darajasi qancha boʻlsa, shuncha.",
   "what this shard is for": "U nima uchun",
