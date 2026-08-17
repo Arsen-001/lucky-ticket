@@ -67,6 +67,22 @@ export interface TestQuestProgress {
    * «hold», not «make»: a matured stake stops counting, as the wording promises.
    */
   activeStakes?: number;
+  /** Stakes ever made — lifetime, so «make your first stake» stays done. */
+  stakesMade?: number;
+  /** Engines the player owns right now (bought, granted or starter). */
+  enginesOwned?: number;
+  /** Chips in the inventory, minted or won. */
+  chipsOwned?: number;
+  /** Engines carrying a chip in a slot — taking it off undoes the step. */
+  chipsEquipped?: number;
+  /** Tickets BOUGHT in the market, lifetime (`Profile.ticketsBought`). */
+  ticketsBought?: number;
+  /** 1 once a nickname is set. */
+  nicknameSet?: number;
+  /** 1 while a TON wallet is linked. */
+  walletConnected?: number;
+  /** 1 once Telegram reports a channel boost from this player. */
+  channelBoosted?: number;
 }
 
 /** The countable checklist actions that {@link TestQuestProgress} tracks. */

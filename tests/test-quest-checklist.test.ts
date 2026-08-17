@@ -228,6 +228,24 @@ describe('test-quest checklist', () => {
    * legitimately number-less everywhere, but a label that is counted on ANY
    * level must be counted on EVERY level.
    */
+  /**
+   * The strongest form of the rule, and the one the player actually asked for:
+   * **every** step must be measurable, not just the numbered ones.
+   *
+   * Before 18.08.2026 ten of them were plain booleans — buy a ticket, set a
+   * nickname, connect a wallet, boost the channel, make a stake, launch/buy an
+   * engine ×3, mint a chip, equip it. They ticked only when the whole LEVEL was
+   * claimed, so a player who had done the thing saw no acknowledgement, and one
+   * who had not saw the same. The channel gate is the single exception: it is
+   * not counted, it is a live subscription check with its own state.
+   */
+  it('every step has a live source — no step is decoration', () => {
+    const blind = levels.flatMap(l =>
+      l.steps.filter(s => !s.action && s.gate !== 'channel').map(s => `L${l.level}:${s.labelKey}`)
+    );
+    expect(blind).toEqual([]);
+  });
+
   it('every number on the checklist is backed by a live counter', () => {
     const stuck = levels.flatMap(l =>
       l.steps

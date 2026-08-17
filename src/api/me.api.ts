@@ -1,6 +1,7 @@
 import { api } from '@/api/index.api';
 import { balanceTags } from '@/api/balance-tags';
 import { profileApi } from '@/api/profile.api';
+import { refetchTestQuestProgress } from '@/api/testQuest.api';
 import { rtkTags } from '@/constants/rtk-tags';
 import type {
   ConfirmEmailResponse,
@@ -41,6 +42,11 @@ export const meApi = api.injectEndpoints({
           : null;
         try {
           await queryFulfilled;
+          // Setting a nickname is a task (`has_username`) AND a step of the
+          // 31-day checklist. Both counted the change server-side and neither
+          // was told about it, so the player renamed themselves and both
+          // screens went on showing the step undone.
+          refetchTestQuestProgress(dispatch);
         } catch {
           // The live backend DOES reject (e.g. username too short, email taken) —
           // roll back so the cache never keeps a value the server refused.
@@ -50,7 +56,7 @@ export const meApi = api.injectEndpoints({
       },
       // `profile` too: the optimistic patch above only syncs `avatar`; other
       // edited fields (username, email) must refetch the profile screen.
-      invalidatesTags: [rtkTags.me, rtkTags.profile],
+      invalidatesTags: [rtkTags.me, rtkTags.profile, rtkTags.tasks],
     }),
     /**
      * The returning player has been told why their account is empty.

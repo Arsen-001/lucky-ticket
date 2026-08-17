@@ -246,7 +246,12 @@ const TEST_QUEST_STEP_OVERRIDES: Record<number, TestQuestStep[]> = {
     spend(18),
     ads(5),
     share(3),
-    { labelKey: 'quest step buy ticket market', kind: 'market' },
+    {
+      labelKey: 'quest step buy ticket market',
+      target: 1,
+      action: 'ticketsBought',
+      kind: 'market',
+    },
     upgrade(2),
     CHANNEL_GATE,
   ],
@@ -261,7 +266,7 @@ const TEST_QUEST_STEP_OVERRIDES: Record<number, TestQuestStep[]> = {
     // both repos (marker `AVATARS OFF`, back ~October) and `avatarUrl` is filled
     // from `tg.photo_url` at first login anyway — so half the step promised a
     // screen that does not exist and the other half completed itself.
-    { labelKey: 'quest step set nickname', kind: 'profile' },
+    { labelKey: 'quest step set nickname', target: 1, action: 'nicknameSet', kind: 'profile' },
     CHANNEL_GATE,
   ],
   // 27 · day 5 on screen — channel boost. Telegram counts boosts per channel, so
@@ -273,7 +278,7 @@ const TEST_QUEST_STEP_OVERRIDES: Record<number, TestQuestStep[]> = {
     ads(15),
     share(6),
     upgrade(4),
-    { labelKey: 'quest step boost channel', kind: 'boost' },
+    { labelKey: 'quest step boost channel', target: 1, action: 'channelBoosted', kind: 'boost' },
     CHANNEL_GATE,
   ],
   // 26 · day 5
@@ -289,7 +294,7 @@ const TEST_QUEST_STEP_OVERRIDES: Record<number, TestQuestStep[]> = {
     ads(36),
     share(11),
     upgrade(7),
-    { labelKey: 'quest step connect wallet', kind: 'wallet' },
+    { labelKey: 'quest step connect wallet', target: 1, action: 'walletConnected', kind: 'wallet' },
     CHANNEL_GATE,
   ],
   // 23 · day 8
@@ -302,7 +307,7 @@ const TEST_QUEST_STEP_OVERRIDES: Record<number, TestQuestStep[]> = {
     ads(58),
     share(15),
     upgrade(10),
-    { labelKey: 'quest step first stake', kind: 'stake' },
+    { labelKey: 'quest step first stake', target: 1, action: 'stakesMade', kind: 'stake' },
     CHANNEL_GATE,
   ],
   // 20 · day 11 — the counted core only.
@@ -331,7 +336,7 @@ const TEST_QUEST_STEP_OVERRIDES: Record<number, TestQuestStep[]> = {
     ads(122),
     share(29),
     upgrade(19),
-    { labelKey: 'quest step launch new engine', kind: 'engine' },
+    { labelKey: 'quest step launch new engine', target: 2, action: 'enginesOwned', kind: 'engine' },
     CHANNEL_GATE,
   ],
   // 11 · day 20 — two stakes
@@ -350,7 +355,7 @@ const TEST_QUEST_STEP_OVERRIDES: Record<number, TestQuestStep[]> = {
     share(35),
     invite(8),
     upgrade(23),
-    { labelKey: 'quest step buy engine market', kind: 'market' },
+    { labelKey: 'quest step buy engine market', target: 3, action: 'enginesOwned', kind: 'market' },
     CHANNEL_GATE,
   ],
   // 7 · day 24
@@ -362,7 +367,12 @@ const TEST_QUEST_STEP_OVERRIDES: Record<number, TestQuestStep[]> = {
     share(38),
     upgrade(25),
     shards(20),
-    { labelKey: 'quest step launch another engine', kind: 'engine' },
+    {
+      labelKey: 'quest step launch another engine',
+      target: 4,
+      action: 'enginesOwned',
+      kind: 'engine',
+    },
     CHANNEL_GATE,
   ],
   // 5 · day 26
@@ -377,8 +387,8 @@ const TEST_QUEST_STEP_OVERRIDES: Record<number, TestQuestStep[]> = {
     ads(179),
     share(41),
     upgrade(27),
-    { labelKey: 'quest step mint chip', kind: 'chip' },
-    { labelKey: 'quest step equip chip', kind: 'chip' },
+    { labelKey: 'quest step mint chip', target: 1, action: 'chipsOwned', kind: 'chip' },
+    { labelKey: 'quest step equip chip', target: 1, action: 'chipsEquipped', kind: 'chip' },
     CHANNEL_GATE,
   ],
   // 3 → 1 · crown — the counted core only. No placement lines here ("top 50",
@@ -420,6 +430,14 @@ const KNOWN_ACTIONS: ReadonlySet<string> = new Set<TestQuestAction>([
   'shardsBought',
   'ticketsCollected',
   'activeStakes',
+  'stakesMade',
+  'enginesOwned',
+  'chipsOwned',
+  'chipsEquipped',
+  'ticketsBought',
+  'nicknameSet',
+  'walletConnected',
+  'channelBoosted',
 ]);
 
 /**

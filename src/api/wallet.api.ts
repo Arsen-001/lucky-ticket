@@ -1,6 +1,7 @@
 import { api } from '@/api/index.api';
 import { balanceTags } from '@/api/balance-tags';
 import { rtkTags } from '@/constants/rtk-tags';
+import { refetchTestQuestProgress } from '@/api/testQuest.api';
 import type {
   BuyStarsRequest,
   BuyStarsResponse,
@@ -44,11 +45,33 @@ export const walletApi = api.injectEndpoints({
     }),
     connectWallet: builder.mutation<ConnectWalletResponse, ConnectWalletRequest>({
       query: body => ({ url: 'wallet/connect', method: 'POST', body }),
-      invalidatesTags: [rtkTags.wallet],
+      // `tasks` too: «Connect a TON wallet» is a real task whose counter
+      // (`wallet_connected`) flips on this very call. Without the tag the task
+      // list kept showing it undone until something else happened to refetch —
+      // the player did the thing and the screen disagreed.
+      invalidatesTags: [rtkTags.wallet, rtkTags.tasks],
+      async onQueryStarted(_arg, { dispatch, queryFulfilled }) {
+        try {
+          await queryFulfilled;
+          // Same step lives in the 31-day checklist. @see refetchTestQuestProgress
+          refetchTestQuestProgress(dispatch);
+        } catch {
+          // A failed connect changes nothing to refresh.
+        }
+      },
     }),
     disconnectWallet: builder.mutation<{ success: boolean }, void>({
       query: () => ({ url: 'wallet/disconnect', method: 'POST' }),
-      invalidatesTags: [rtkTags.wallet],
+      // Unlinking flips the same counter back, so it refreshes the same places.
+      invalidatesTags: [rtkTags.wallet, rtkTags.tasks],
+      async onQueryStarted(_arg, { dispatch, queryFulfilled }) {
+        try {
+          await queryFulfilled;
+          refetchTestQuestProgress(dispatch);
+        } catch {
+          // Nothing changed.
+        }
+      },
     }),
     withdrawTon: builder.mutation<WithdrawTonResponse, WithdrawTonRequest>({
       query: body => ({ url: 'wallet/withdraw', method: 'POST', body }),

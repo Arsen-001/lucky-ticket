@@ -68,6 +68,16 @@ const view = () => {
       // Live, not cumulative — a stake that matured stops counting, so this one
       // deliberately does not scale with the climb.
       activeStakes: climbed > 10 ? 2 : climbed > 5 ? 1 : 0,
+      stakesMade: climbed > 5 ? 1 : 0,
+      // Starter engine + one per ~8 days climbed, so the 2 → 3 → 4 ladder is
+      // reachable in mock mode without hand-editing this file.
+      enginesOwned: 1 + Math.floor(climbed / 8),
+      chipsOwned: climbed > 25 ? 1 : 0,
+      chipsEquipped: climbed > 26 ? 1 : 0,
+      ticketsBought: climbed > 1 ? 1 : 0,
+      nicknameSet: climbed > 2 ? 1 : 0,
+      walletConnected: climbed > 6 ? 1 : 0,
+      channelBoosted: climbed > 3 ? 1 : 0,
     },
   };
 };
