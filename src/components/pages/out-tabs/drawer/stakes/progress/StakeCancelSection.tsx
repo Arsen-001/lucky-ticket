@@ -3,7 +3,7 @@
 import '@/styles/components/stakes.css';
 import Image from 'next/image';
 import { AlertTriangle } from 'lucide-react';
-import { useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { LcLabel } from '@/components/shared/icons/LcLabel';
 import { BoltIcon } from '@/components/shared/icons/BoltIcon';
 import { icons } from '@/constants/icons';
@@ -40,6 +40,19 @@ export function StakeCancelSection({
   const baseAp = computeStakeBaseAp(lockedAmount, durationMonths, stakeKnobs);
   const bonusAp = computeStakeCompletionBonusAp(lockedAmount, durationMonths, stakeKnobs);
 
+  // The sheet used to close on the tap itself, so `loading` had nothing left to
+  // render on: the request ran (400–1200ms against the mock, a real round-trip
+  // in production) with the player already back on the stake screen and no sign
+  // that anything was happening — and a second tap on the row could start it
+  // again. It now stays up with the button spinning and closes once the request
+  // has answered: on success the screen navigates away, on a Stars shortfall the
+  // top-up sheet takes over.
+  const wasLoading = useRef(false);
+  useEffect(() => {
+    if (wasLoading.current && !loading) setOpen(false);
+    wasLoading.current = loading;
+  }, [loading]);
+
   return (
     <>
       <button
@@ -57,7 +70,10 @@ export function StakeCancelSection({
 
       <Modal
         open={open}
-        onClose={() => setOpen(false)}
+        onClose={loading ? undefined : () => setOpen(false)}
+        // Dismissing an in-flight cancellation would not call it back, only
+        // hide it — the Stars are already on their way out.
+        closeOnOverlayClick={!loading}
         hideCloseButton
         label={t('cancel forfeits bonus')}
       >
@@ -78,8 +94,11 @@ export function StakeCancelSection({
           <div className="bg-background-overlay/50 rounded-xl border border-white/5 px-3 py-2.5">
             <div className="text-white-secondary flex items-center justify-between text-[11px]">
               <span>{t('lc returned')}</span>
+              {/* 14px, like the bolt and the star below it. At 22 the coin was
+                  half again the height of its own row and the value column
+                  stopped lining up with the three rows under it. */}
               <span className="text-success inline-flex items-center gap-1 font-extrabold tabular-nums">
-                <LcLabel size={22} />+{formatNumber(lockedAmount)}
+                <LcLabel size={14} />+{formatNumber(lockedAmount)}
               </span>
             </div>
             {/* The base AP is TAKEN BACK, not kept. This row used to say "Base
@@ -101,9 +120,12 @@ export function StakeCancelSection({
             </div>
             <div className="text-white-secondary mt-1.5 flex items-center justify-between text-[11px]">
               <span>{t('cancellation fee')}</span>
+              {/* The star icon and the italic line below already name the
+                  currency; spelling "Stars" a third time in the same card only
+                  pushed the number off the column the other rows align to. */}
               <span className="text-gold inline-flex items-center gap-1 font-extrabold tabular-nums">
                 <Image sizes="14px" src={icons.telegramStar} alt="" className="h-3.5 w-auto" />
-                {cancelFee} {t('stars')}
+                {cancelFee}
               </span>
             </div>
             <div
@@ -117,25 +139,30 @@ export function StakeCancelSection({
             <Button
               variant="transparent"
               onClick={() => setOpen(false)}
+              disabled={loading}
               className="text-white-secondary flex-1 border border-white/10 px-3 py-3 text-[12px] font-extrabold uppercase tracking-wider"
             >
               {t('keep staking')}
             </Button>
+            {/* Two deliberate lines — the action, then its price — instead of
+                one row of four inline pieces ("Pay ★ 10 · Cancel"). That row fit
+                nowhere: in Russian it broke after the number, leaving an orphan
+                "·" hanging at the right edge and the verb on the line below, so
+                the button read as two separate commands. */}
             <Button
               variant="primary"
-              onClick={() => {
-                setOpen(false);
-                onCancel();
-              }}
+              onClick={onCancel}
               loading={loading}
+              iconSize={16}
               className="flex-[1.3] px-3 py-3 text-[12px] font-extrabold uppercase tracking-wider"
               style={{ background: 'linear-gradient(135deg, #FF8C8C 0%, #C73030 100%)' }}
             >
-              <span className="inline-flex items-center justify-center gap-1.5">
-                <span>{t('pay')}</span>
-                <Image sizes="14px" src={icons.telegramStar} alt="" className="h-3.5 w-auto" />
-                <span className="tabular-nums">{cancelFee}</span>
-                <span>· {t('cancel')}</span>
+              <span className="flex flex-col items-center gap-0.5 leading-tight">
+                <span>{t('cancel stake')}</span>
+                <span className="inline-flex items-center gap-1 whitespace-nowrap text-[10px] font-bold opacity-90">
+                  <Image sizes="12px" src={icons.telegramStar} alt="" className="h-3 w-auto" />
+                  <span className="tabular-nums">{cancelFee}</span>
+                </span>
               </span>
             </Button>
           </div>
