@@ -325,15 +325,16 @@
       >Выбери движок, вставь чипы, качай их осколками. Три правила:
       <b>10 уровней · полный чип = 200 осколков = 200 ⭐ · на максимуме = половина движка</b>.
       Ёмкость: +5 билетов за уровень, десятый +6 — на максимуме +51. Скорость: множитель к циклу,
-      +10% за уровень, на 10-м ×2 (24 ч → 12 ч, 2 ч → 1 ч). Цена: собрать 20 осколков, дальше 12 ·
-      14 · 16 … 28. Осколок в маркете 1 ⭐ (или 20 000 LC — паритет). Надеть — бесплатно, снять — L
-      ⭐. Один билет = один цикл тира. Статусы — <b>как на проде с 17.08</b>: VIP — слагаемое в стек
-      движка, 7.5% за уровень (VIP 20 = +150%); Lucky Player — <b>множитель ×1.3</b> поверх всего
-      стека, как чип скорости; вместе они <b>складываются</b>. Слайдеры и переключатели «слагаемое /
-      множитель» оставлены, чтобы примерять другие цифры: слагаемое тонет в стеке прокачанного
-      движка, множитель — нет. Бустер скорости добавляется к процентам движка; бустер ёмкости +25%
-      ко всей пачке, округление вверх; чип скорости — отдельный множитель. Справа «статус на весь
-      парк» пересчитывает выигрыш в «движки в подарок» для парка нужного размера.</small
+      +10% за уровень, на 10-м ×2 (24 ч → 12 ч, 2 ч → 1 ч на бронзе). Цена: собрать 20 осколков,
+      дальше 12 · 14 · 16 … 28. Осколок в маркете 1 ⭐ (или 20 000 LC — паритет). Надеть —
+      бесплатно, снять — L ⭐. Один билет = один цикл тира. Статусы — <b>как на проде с 17.08</b>:
+      VIP — слагаемое в стек движка, 7.5% за уровень (VIP 20 = +150%); Lucky Player —
+      <b>множитель ×1.3</b> поверх всего стека, как чип скорости; вместе они <b>складываются</b>.
+      Слайдеры и переключатели «слагаемое / множитель» оставлены, чтобы примерять другие цифры:
+      слагаемое тонет в стеке прокачанного движка, множитель — нет. Бустер скорости добавляется к
+      процентам движка; бустер ёмкости +25% ко всей пачке, округление вверх; чип скорости —
+      отдельный множитель. Справа «статус на весь парк» пересчитывает выигрыш в «движки в подарок»
+      для парка нужного размера.</small
     >
   </h1>
 
@@ -342,8 +343,13 @@
       <div class="card-head">
         <div>
           <b>Движок</b>
-          <div class="sub">Бронза · <span id="e-desc">свежий</span></div>
+          <div class="sub"><span id="e-tier">Бронза</span> · <span id="e-desc">свежий</span></div>
         </div>
+      </div>
+      <div class="row"><span>тир — один билет = один цикл тира</span><span></span></div>
+      <div class="presets" id="tiers"></div>
+      <div class="row" style="font-size: 11px">
+        <span id="tier-note" style="font-family: var(--data)"></span>
       </div>
       <div class="presets" id="presets"></div>
       <div class="row" style="font-size: 11px">
@@ -407,7 +413,9 @@
         <span>движков в парке <b id="fleet-val">1</b> — статус даёт всем</span
         ><input id="fleet" type="range" min="1" max="15" value="1" style="width: 55%" />
       </div>
-      <div class="row"><span>бустеры (бронза, время ограничено)</span><span></span></div>
+      <div class="row">
+        <span id="boosters-label">бустеры (бронза, время ограничено)</span><span></span>
+      </div>
       <div class="presets">
         <button id="b-speed" type="button">⚡ бустер скорости +25% · 3ч</button>
         <button id="b-cap" type="button">📦 бустер ёмкости +25% · 3ч</button>
@@ -505,31 +513,78 @@
             <th>осколков</th>
             <th>LC</th>
             <th>цикл ÷</th>
-            <th>свежий 2:00 →</th>
-            <th>ур5 полный 24:00 →</th>
+            <th id="th-fresh">свежий 2:00 →</th>
+            <th id="th-full">ур5 полный 24:00 →</th>
           </tr>
         </thead>
         <tbody></tbody>
       </table>
       <p class="hint" style="margin-top: 8px">
         Множитель, а не слагаемое: чип одинаково ускоряет и свежий, и прокачанный движок. Полный чип
-        = 200 осколков = 200 ⭐ через маркет — четверть цены полного движка (800 ⭐) за половину его
-        силы.
+        = 200 осколков =
+        <span id="hint-chip-stars">200</span> ⭐ через маркет — четверть цены полного движка (<span
+          id="hint-engine-stars"
+          >800</span
+        >
+        ⭐) за половину его силы; у тира выше и то и другое дороже в те же разы.
       </p>
     </div>
 
     <div class="panel">
       <h2>Что происходило</h2>
-      <div class="log" id="log"><p class="empty">Пока ничего — собери чип.</p></div>
+      <div class="log" id="log">
+        <p class="empty">Пока ничего — собери чип.</p>
+      </div>
     </div>
   </div>
 </div>
 
 <script>
-  const TIER_CYCLE = 7200;
+  // Тиры — как на проде: один билет = один цикл тира; осколок, клики прокачки и полный движок
+  // дорожают в те же ×1/2/4/8/16; бустеры — из inventory.service бэкенда (эффект % и часы).
+  const TIERS = [
+    {
+      key: 'bronze',
+      name: 'Бронза',
+      cycle: 7200,
+      mult: 1,
+      booster: { pct: 25, hours: 3 },
+    },
+    {
+      key: 'silver',
+      name: 'Серебро',
+      cycle: 14400,
+      mult: 2,
+      booster: { pct: 35, hours: 12 },
+    },
+    {
+      key: 'gold',
+      name: 'Золото',
+      cycle: 28800,
+      mult: 4,
+      booster: { pct: 75, hours: 24 },
+    },
+    {
+      key: 'platinum',
+      name: 'Платина',
+      cycle: 57600,
+      mult: 8,
+      booster: { pct: 50, hours: 48 },
+    },
+    {
+      key: 'diamond',
+      name: 'Алмаз',
+      cycle: 115200,
+      mult: 16,
+      booster: { pct: 100, hours: 48 },
+    },
+  ];
+  const tier = () => TIERS[state.tier];
+  const TIER_CYCLE = () => tier().cycle;
   const MINT_SHARDS = 20;
-  const LC_PER_SHARD = 20000;
-  const STARS_PER_SHARD = 1;
+  const LC_PER_SHARD = () => 20000 * tier().mult;
+  const STARS_PER_SHARD = () => 1 * tier().mult;
+  const ENGINE_FULL_STARS = () => 800 * tier().mult; // весь путь куба до L5 10/10
   const TICKET_STARS = 0.2;
   const MAX_CHIP_LEVEL = 10;
   // +5 билетов за уровень, десятый даёт +6 → ровно +51 на максимуме (половина от 102)
@@ -548,6 +603,7 @@
   ];
 
   const state = {
+    tier: 0,
     preset: 0,
     cap: { level: 0, shards: 0, equipped: false },
     speed: { level: 0, shards: 0, equipped: false },
@@ -590,8 +646,8 @@
       (1 + (state.lpMode === 'mul' ? a.lp : 0) / 100)
     );
   };
-  const BOOSTER_SPEED = 25,
-    BOOSTER_CAP = 25; // бронзовые пресеты
+  const BOOSTER_SPEED = () => tier().booster.pct,
+    BOOSTER_CAP = () => tier().booster.pct; // по тиру, как в inventory.service
 
   const stepCost = level => (level === 0 ? MINT_SHARDS : 10 + 2 * level); // минт 20, затем 12,14,…,28 → всего 200
   const capTickets = c => (c.equipped ? capChipTickets(c.level) : 0);
@@ -601,11 +657,11 @@
     const p = PRESETS[state.preset];
     const core = p.batch + (withExtras ? capTickets(state.cap) : 0);
     const batch =
-      withExtras && state.boostCap ? core + Math.ceil((core * BOOSTER_CAP) / 100) : core;
-    const addPct = withExtras ? statusAddPct() + (state.boostSpeed ? BOOSTER_SPEED : 0) : 0;
+      withExtras && state.boostCap ? core + Math.ceil((core * BOOSTER_CAP()) / 100) : core;
+    const addPct = withExtras ? statusAddPct() + (state.boostSpeed ? BOOSTER_SPEED() : 0) : 0;
     const statusFactor = withExtras ? statusMulFactor() : 1;
     const factor = withExtras ? speedFactor(state.speed) : 1;
-    const cycle = (batch * TIER_CYCLE) / (1 + (p.speed + addPct) / 100) / factor / statusFactor;
+    const cycle = (batch * TIER_CYCLE()) / (1 + (p.speed + addPct) / 100) / factor / statusFactor;
     return {
       batch,
       pct: p.speed,
@@ -634,7 +690,35 @@
 
   const render = () => {
     const p = PRESETS[state.preset];
+    const T = tier();
+    const cycleH = T.cycle / 3600;
+    document.getElementById('e-tier').textContent = T.name;
     document.getElementById('e-desc').textContent = p.name;
+    const tb0 = document.getElementById('tiers');
+    tb0.innerHTML = '';
+    TIERS.forEach((x, i) => {
+      const b = document.createElement('button');
+      b.type = 'button';
+      b.className = i === state.tier ? 'on' : '';
+      b.textContent = `${x.name} · ${x.cycle / 3600}ч`;
+      b.addEventListener('click', () => {
+        state.tier = i;
+        render();
+      });
+      tb0.appendChild(b);
+    });
+    document.getElementById('tier-note').textContent =
+      `${T.name}: билет = ${cycleH} ч · L5 полный = 102 бил за ${fmt((102 * T.cycle) / 8.5)} · осколок ${LC_PER_SHARD().toLocaleString('ru-RU')} LC / ${STARS_PER_SHARD()} ⭐ · весь куб ${ENGINE_FULL_STARS()} ⭐`;
+    document.getElementById('boosters-label').textContent =
+      `бустеры (${T.name.toLowerCase()}, время ограничено)`;
+    document.getElementById('b-speed').textContent =
+      `⚡ бустер скорости +${T.booster.pct}% · ${T.booster.hours}ч`;
+    document.getElementById('b-cap').textContent =
+      `📦 бустер ёмкости +${T.booster.pct}% · ${T.booster.hours}ч`;
+    document.getElementById('th-fresh').textContent = `свежий ${fmt(T.cycle)} →`;
+    document.getElementById('th-full').textContent = `ур5 полный ${fmt((102 * T.cycle) / 8.5)} →`;
+    document.getElementById('hint-chip-stars').textContent = 200 * T.mult;
+    document.getElementById('hint-engine-stars').textContent = ENGINE_FULL_STARS();
     const pr = document.getElementById('presets');
     pr.innerHTML = '';
     PRESETS.forEach((x, i) => {
@@ -696,7 +780,7 @@
         ? `${(full.rate / bare.rate - 1) * 100 >= 0 ? '+' : ''}${((full.rate / bare.rate - 1) * 100).toFixed(1)}%`
         : '';
     document.getElementById('e-formula').textContent =
-      `${full.batch} бил × 2ч ÷ (1 + ${full.pct}%${full.addPct ? ` + ${full.addPct}%` : ''})${full.factor !== 1 ? ` ÷ ${full.factor.toFixed(2)} чип` : ''}${full.statusFactor !== 1 ? ` ÷ ${full.statusFactor.toFixed(2)} статус` : ''} = ${fmt(full.cycle)}`;
+      `${full.batch} бил × ${cycleH}ч ÷ (1 + ${full.pct}%${full.addPct ? ` + ${full.addPct}%` : ''})${full.factor !== 1 ? ` ÷ ${full.factor.toFixed(2)} чип` : ''}${full.statusFactor !== 1 ? ` ÷ ${full.statusFactor.toFixed(2)} статус` : ''} = ${fmt(full.cycle)}`;
 
     for (const [key, cls, fmtEff] of [
       ['cap', 'on-cap', c => (c.level ? `+${capChipTickets(c.level)} билетов за цикл` : '—')],
@@ -735,8 +819,8 @@
     const shards = state.cap.shards + state.speed.shards;
     document.getElementById('k-shards').textContent = shards;
     document.getElementById('k-lc').textContent =
-      `${(shards * LC_PER_SHARD).toLocaleString('ru-RU')} LC`;
-    document.getElementById('k-stars-sh').textContent = `${shards * STARS_PER_SHARD} ⭐`;
+      `${(shards * LC_PER_SHARD()).toLocaleString('ru-RU')} LC`;
+    document.getElementById('k-stars-sh').textContent = `${shards * STARS_PER_SHARD()} ⭐`;
     document.getElementById('k-stars-eq').textContent = `${state.equipStars} ⭐`;
     document.getElementById('k-day').textContent =
       `${(bare.rate * 24).toFixed(1)} → ${(full.rate * 24).toFixed(1)}`;
@@ -765,7 +849,7 @@
       for (let k = 1; k < L; k += 1) sh += stepCost(k);
       const add = capChipTickets(L);
       const tr = document.createElement('tr');
-      tr.innerHTML = `<td>${L}</td><td>${sh}</td><td>${((sh * LC_PER_SHARD) / 1000).toFixed(0)}k</td><td>${1 + add}</td><td>${12 + add}</td><td>${102 + add}</td>`;
+      tr.innerHTML = `<td>${L}</td><td>${sh}</td><td>${((sh * LC_PER_SHARD()) / 1000).toFixed(0)}k</td><td>${1 + add}</td><td>${12 + add}</td><td>${102 + add}</td>`;
       tb.appendChild(tr);
     }
 
@@ -776,7 +860,7 @@
       for (let k = 1; k < L; k += 1) sh += stepCost(k);
       const f = speedChipFactor(L);
       const tr = document.createElement('tr');
-      tr.innerHTML = `<td>${L}</td><td>${sh}</td><td>${((sh * LC_PER_SHARD) / 1000).toFixed(0)}k</td><td>×${f.toFixed(1)}</td><td>${fmt(TIER_CYCLE / f)}</td><td>${fmt((24 * 3600) / f)}</td>`;
+      tr.innerHTML = `<td>${L}</td><td>${sh}</td><td>${((sh * LC_PER_SHARD()) / 1000).toFixed(0)}k</td><td>×${f.toFixed(1)}</td><td>${fmt(TIER_CYCLE() / f)}</td><td>${fmt((102 * TIER_CYCLE()) / 8.5 / f)}</td>`;
       tb2.appendChild(tr);
     }
 
