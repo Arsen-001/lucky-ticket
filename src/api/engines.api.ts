@@ -55,6 +55,9 @@ const buildStarterEngine = (): TicketEngine => {
   const cycleSeconds = appConfig.engines.baseCycleSecondsByTier.bronze;
   return {
     id: STARTER_ENGINE_ID,
+    // Named rather than implied: every engine carries its tier since 17.08.2026,
+    // and `engineCapacity` reads it to decide the crown's bronze-only prize.
+    tier: 'bronze',
     cycleSeconds,
     cycleStartedAt: dayjs().subtract(cycleSeconds, 'second').toISOString(),
     pendingCount: 1,
