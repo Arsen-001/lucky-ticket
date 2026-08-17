@@ -58,12 +58,14 @@ export function BoostRow({
               value off its own line (6px of the 17px it needs). The value is
               what the row is read FOR — the label is guessable from the icon. */}
           {/* The label is the part allowed to give way. Measured on production
-              (RU, capacity 10/10): the line is 142px, «Вместимость» takes 81 and
-              the «10/10» badge 39, which left 10px for a value needing 19 — the
-              row printed «Вместимость 10/10 +.», eating the one number it exists
-              to show. English never hit it («Capacity» is 24px shorter), and no
+              (RU, capacity 10/10): the line is 142px, the label took 81 and the
+              «10/10» badge 39, which left 10px for a value needing 19 — the row
+              printed «Вместимость 10/10 +.», eating the one number it exists to
+              show. English never hit it («Capacity» is 24px shorter), and no
               mock engine reaches 10/10 with a two-digit bonus, so only the live
-              screen showed it. */}
+              screen showed it. The Russian word has since been shortened to
+              «Ёмкость» (52px) and now fits with room to spare — this stays as
+              the floor, so the next long label loses letters, never the number. */}
           <span
             className={twMerge(
               'min-w-0 truncate font-bold text-white tracking-wide',
