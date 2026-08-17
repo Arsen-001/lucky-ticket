@@ -63,24 +63,23 @@ export function MarketShardSection({ shards, onSelect, onBuy }: MarketShardSecti
           isNew: shard.isNew,
           discountPct: shard.discountPct,
           accent: shard.quality,
-          maxQuantity: GlobalConstants.marketMaxShardPurchaseQuantity,
+          maxQuantity: GlobalConstants.marketMaxUnitsPerOrder,
           ownedCount:
             inventory?.shards.find(s => s.type === shard.type && s.quality === shard.quality)
               ?.count ?? 0,
           ownedIconNode: <ChipShardIcon type={shard.type} tier={shard.quality} size={14} />,
-          // The shards/buy DTO rejects a count field — buy sequentially, one
-          // request per unit (the per-order cap keeps this loop short).
-          mutate: async (price, count) => {
-            for (let i = 0; i < count; i += 1) {
-              await buyShard({
-                shardId: shard.id,
-                shardType: shard.type,
-                quality: shard.quality,
-                count: shard.count,
-                price,
-              }).unwrap();
-            }
-          },
+          // One request for the whole order: the backend charges price × N
+          // under a balance guard, so «×10» is all-or-nothing rather than the
+          // ten sequential POSTs it used to be.
+          mutate: (price, quantity) =>
+            buyShard({
+              shardId: shard.id,
+              shardType: shard.type,
+              quality: shard.quality,
+              count: shard.count,
+              quantity,
+              price,
+            }).unwrap(),
         };
         return (
           <MarketUniversalCard

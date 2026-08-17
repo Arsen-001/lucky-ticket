@@ -207,13 +207,15 @@ export const GlobalConstants = {
   stakeCancelFeeMinStars: appConfig.stakes.cancelFeeMinStars,
   stakeCancelFeeMultiplier: appConfig.stakes.cancelFeeMultiplier,
   stakeFreeStartCount: appConfig.stakes.freeStartCount,
-  /** Max units of a countable Market item (tickets) purchasable in one order. */
-  marketMaxPurchaseQuantity: 999,
   /**
-   * Shards are bought one request per unit (the backend buy DTO has no count
-   * field), so the per-order cap keeps the client-side request loop short.
+   * Countable Market items (tickets, shards) are capped by the balance alone:
+   * the stepper's MAX is «how many the wallet covers». This is NOT a purchase
+   * policy but the int-overflow guard mirrored from the backend DTO
+   * (`MAX_UNITS_PER_ORDER`) — a zero-priced SKU would otherwise arm an
+   * unbounded stepper. Until 18.08.2026 shards stopped at 10 because the
+   * endpoint had no quantity field and the client looped one POST per unit.
    */
-  marketMaxShardPurchaseQuantity: 10,
+  marketMaxUnitsPerOrder: 1_000_000,
   telegramBotUrl: 'https://t.me/luckyticket365_bot',
   /**
    * The link that opens THIS app, not the bot chat.

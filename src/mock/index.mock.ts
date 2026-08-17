@@ -53,10 +53,13 @@ const marketCatalog = () => [
  * `chargeMockUser`.
  */
 const buyFromCatalog = (itemId?: string) => (args: FetchArgs) => {
-  const body = (args.body ?? {}) as { priceType?: MarketPriceType; count?: number } & Record<
-    string,
-    unknown
-  >;
+  const body = (args.body ?? {}) as {
+    priceType?: MarketPriceType;
+    /** Tickets: units in the order. */
+    count?: number;
+    /** Shards: bundles in the order. */
+    quantity?: number;
+  } & Record<string, unknown>;
   const id =
     itemId ??
     (body.engineId as string) ??
@@ -66,7 +69,7 @@ const buyFromCatalog = (itemId?: string) => (args: FetchArgs) => {
   const item = marketCatalog().find(entry => entry.id === id);
   const price = item?.prices.find(p => p.type === (body.priceType ?? MarketPriceType.LC));
   if (price) {
-    const total = price.amount * Math.max(1, Math.trunc(body.count ?? 1));
+    const total = price.amount * Math.max(1, Math.trunc(body.quantity ?? body.count ?? 1));
     chargeMockUser({
       lc: price.type === MarketPriceType.LC ? total : 0,
       stars: price.type === MarketPriceType.TELEGRAM_STARS ? total : 0,

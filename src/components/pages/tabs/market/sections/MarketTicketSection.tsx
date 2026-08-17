@@ -69,7 +69,7 @@ export function MarketTicketSection({ tickets, onSelect, onBuy }: MarketTicketSe
           isNew: ticket.isNew,
           discountPct: ticket.discountPct,
           accent: ticket.ticketType,
-          maxQuantity: GlobalConstants.marketMaxPurchaseQuantity,
+          maxQuantity: GlobalConstants.marketMaxUnitsPerOrder,
           ownedCount: myTickets?.find(t => t.ticketType === ticket.ticketType)?.count ?? 0,
           ownedIconNode: <Ticket type={ticket.ticketType} width={18} height={18} />,
           mutate: (price, count) =>

@@ -163,14 +163,17 @@ export const marketApi = api.injectEndpoints({
         shardId: string;
         shardType: InventoryChipType;
         quality: TicketType;
+        /** Bundle size of the SKU («+5 shards») — informational, the backend reads its own. */
         count: number;
+        /** How many bundles in THIS order — one request, one balance-guarded charge. */
+        quantity: number;
         price: MarketPrice;
       }
     >({
-      query: ({ shardId, price }) => ({
+      query: ({ shardId, quantity, price }) => ({
         url: 'market/shards/buy',
         method: 'POST',
-        body: { shardId, priceType: price.type },
+        body: { shardId, quantity, priceType: price.type },
       }),
       // A market purchase moves three quest/task counters (tickets bought,
       // shards bought, engines owned) and several task counters with them, so

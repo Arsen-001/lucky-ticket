@@ -156,24 +156,21 @@ export function useMarketFeaturedItems(): { items: MarketFeaturedItem[]; isLoadi
           <ChipShardIcon type={s.type} tier={s.quality} size={Math.round(size / 1.3)} />
         </div>
       ),
-      maxQuantity: GlobalConstants.marketMaxShardPurchaseQuantity,
+      maxQuantity: GlobalConstants.marketMaxUnitsPerOrder,
       ownedCount:
         inventory?.shards.find(own => own.type === s.type && own.quality === s.quality)?.count ?? 0,
       ownedIconNode: <ChipShardIcon type={s.type} tier={s.quality} size={14} />,
-      // Same loop as the grid: the shards/buy DTO rejects a count field (`count`
-      // there is the bundle size), so a quantity is N requests, not one bigger
-      // one. The per-order cap keeps the loop short.
-      mutate: async (price, count) => {
-        for (let i = 0; i < count; i += 1) {
-          await buyShard({
-            shardId: s.id,
-            shardType: s.type,
-            quality: s.quality,
-            count: s.count,
-            price,
-          }).unwrap();
-        }
-      },
+      // Same as the grid: one request for the whole order (`count` is the
+      // bundle size, `quantity` how many bundles), charged all-or-nothing.
+      mutate: (price, quantity) =>
+        buyShard({
+          shardId: s.id,
+          shardType: s.type,
+          quality: s.quality,
+          count: s.count,
+          quantity,
+          price,
+        }).unwrap(),
     });
 
     const push = (entry: MarketFeaturedItem) => {
