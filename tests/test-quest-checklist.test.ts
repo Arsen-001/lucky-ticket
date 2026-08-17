@@ -317,12 +317,12 @@ describe('test-quest checklist — server-driven rendering', () => {
     ]);
   });
 
-  it('drops rows this build cannot render instead of showing a raw key', () => {
-    // An admin typo or a key added on the server before the app ships it would
-    // otherwise reach t() and print "quest step whatever" on someone's screen.
+  it('drops a row whose KIND this build has no icon for', () => {
+    // The label is checked one layer up, in `TestQuestSteps`, where a dictionary
+    // exists (`t.has`) — doing it here meant importing messages/en.json into a
+    // client constant and shipping the whole English dictionary (+66 KB).
     const resolved = resolveTestQuestSteps([
       { labelKey: 'quest step spend tickets', target: 5, action: 'ticketsSpent', kind: 'tickets' },
-      { labelKey: 'quest step from the future', target: 3, kind: 'ads' },
       { labelKey: 'quest step watch ads', kind: 'telepathy' },
     ]);
     expect(resolved).toEqual([

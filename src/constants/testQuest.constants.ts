@@ -1,7 +1,6 @@
 import { routes, type Route } from '@/constants/routes';
 import type { TestQuestAction, TestQuestStepDto } from '@/types/interfaces/testQuest.interfaces';
 import type { MessageIds } from '@/types/types/i18n.types';
-import en from '@messages/en.json';
 
 /**
  * Test-Quest ladder — the 31-day launch quest ("Тестировщик 31 → 1").
@@ -158,19 +157,6 @@ export interface TestQuestStep {
   gate?: 'channel';
 }
 
-/**
- * Every label key this build can render — the white-list server steps are
- * checked against, so a key we have no translation for never reaches `t()`.
- *
- * Read from the DICTIONARY, not from a local copy of the checklist. There used
- * to be such a copy, and it is exactly what broke: it also served as a fallback
- * list, so the app rendered its own steps whenever the server's looked wrong —
- * which hid, for a whole day, the fact that the server was sending steps with no
- * counters at all. One source now: whatever `GET /test-quest` says, minus rows
- * this build has no words or no icon for.
- */
-const KNOWN_STEP_KEYS: ReadonlySet<string> = new Set(Object.keys(en));
-
 const KNOWN_KINDS: ReadonlySet<string> = new Set<TestQuestStepKind>([
   'tickets',
   'ads',
@@ -212,9 +198,13 @@ const KNOWN_ACTIONS: ReadonlySet<string> = new Set<TestQuestAction>([
  * The checklist to render for a level — **the server's list, and only that**.
  *
  * What the server sends is untrusted wire data, so each row is narrowed here
- * first: an unknown `labelKey` has no translation in this build and would render
- * as a raw key on someone's screen, and an unknown `kind` has no icon — both are
- * dropped rather than shown broken.
+ * first: an unknown `kind` has no icon and is dropped here.
+ *
+ * The LABEL is checked where the dictionary already lives — in the row that
+ * renders it (`TestQuestStepRow`), via next-intl's own `has()`. Checking it here
+ * meant importing `messages/en.json` into a client constant, which put the whole
+ * English dictionary into every bundle: measured at **+66 KB** on /test-quest.
+ * The keys were all that was needed and the values came along for the ride.
  *
  * Nothing is substituted when the server sends nothing. This build used to carry
  * its own copy of the whole ladder and fall back to it, and that is precisely
@@ -228,7 +218,7 @@ export const resolveTestQuestSteps = (serverSteps?: TestQuestStepDto[]): TestQue
   if (!serverSteps?.length) return [];
 
   const usable = serverSteps
-    .filter(s => KNOWN_STEP_KEYS.has(s.labelKey) && KNOWN_KINDS.has(s.kind))
+    .filter(s => KNOWN_KINDS.has(s.kind))
     .map<TestQuestStep>(s => ({
       labelKey: s.labelKey as MessageIds,
       kind: s.kind as TestQuestStepKind,

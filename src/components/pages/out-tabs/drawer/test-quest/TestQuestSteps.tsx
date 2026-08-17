@@ -66,7 +66,10 @@ export function TestQuestSteps({
   title,
 }: TestQuestStepsProps) {
   const t = useAppTranslations();
-  const steps = resolveTestQuestSteps(serverSteps);
+  // The label check lives here, not in `resolveTestQuestSteps`: this is where a
+  // dictionary exists. A key this build has no words for is dropped instead of
+  // printed raw — @see Dictionary.has
+  const steps = resolveTestQuestSteps(serverSteps).filter(s => t.has(s.labelKey));
   if (!steps.length) return null;
 
   // Effective count for a countable step: the live counter when there is one,
