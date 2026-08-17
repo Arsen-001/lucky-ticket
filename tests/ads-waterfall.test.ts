@@ -5,15 +5,17 @@ import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
  *
  * The money rules live here: exactly one ad per action, a user-initiated skip
  * must never fall through to another provider (otherwise "close the ad" turns
- * into a second chance at a reward), and the house ad must not stand in for a
- * network in dev — that would replace the instant mock grant with a promo.
+ * into a second chance at a reward), and an empty chain must surface the
+ * network's OWN reason — that reason is what the player's modal names and what
+ * the attempt is telemetered against. Nothing stands in for a missing video: the
+ * app's own promo used to close the chain and was removed on 17.08.2026,
+ * because it cost a second tap and attributed every no-fill to itself.
  *
  * `Env` snapshots process.env at import time, so every case sets the env first
  * and then imports the module fresh.
  */
 
 type AdsModule = typeof import('@/lib/ads');
-type HouseModule = typeof import('@/lib/ads/house.provider');
 
 const AD_ENV_KEYS = [
   'NEXT_PUBLIC_ADSGRAM_BLOCK_ID',
@@ -21,25 +23,34 @@ const AD_ENV_KEYS = [
   'NEXT_PUBLIC_AD_PROVIDERS',
 ] as const;
 
-async function loadAds(env: Partial<Record<(typeof AD_ENV_KEYS)[number], string>>) {
+async function loadAds(
+  env: Partial<Record<(typeof AD_ENV_KEYS)[number], string>>
+): Promise<AdsModule> {
   for (const key of AD_ENV_KEYS) delete process.env[key];
   Object.assign(process.env, env);
   vi.resetModules();
-  const ads: AdsModule = await import('@/lib/ads');
-  const house: HouseModule = await import('@/lib/ads/house.provider');
-  return { ads, house };
+  return import('@/lib/ads');
 }
 
 /**
- * Minimal fake of the Adsgram SDK. `reject` is what `show()` rejects with —
- * the shape decides whether the app reads it as a skip or a failure.
+ * Minimal fake of the Adsgram SDK. `reject` is what `show()` rejects with — the
+ * shape decides whether the app reads it as a skip or a failure. `event`, when
+ * given, is emitted first, exactly as the real SDK does: it prefers a
+ * registered listener over its own Telegram alert, and the listener is what
+ * narrows the reason.
  */
-function stubAdsgram(reject: unknown) {
+function stubAdsgram(reject: unknown, event?: 'onBannerNotFound' | 'onNonStopShow' | 'onError') {
+  const handlers: Record<string, () => void> = {};
   (globalThis as Record<string, unknown>).window = {
     Adsgram: {
       init: () => ({
-        show: () => Promise.reject(reject),
-        addEventListener: () => {},
+        show: () => {
+          if (event) handlers[event]?.();
+          return Promise.reject(reject);
+        },
+        addEventListener: (name: string, handler: () => void) => {
+          handlers[name] = handler;
+        },
       }),
     },
   };
@@ -58,6 +69,7 @@ function stubAdsgram(reject: unknown) {
  * the revenue docs moved out (13.08.2026).
  */
 const BLOCK_ID = '00000';
+const ZONE_ID = '123';
 
 beforeEach(() => {
   delete (globalThis as Record<string, unknown>).window;
@@ -69,78 +81,86 @@ afterEach(() => {
 });
 
 describe('rewarded-ad waterfall', () => {
-  it('reports `unavailable` when no network is configured, even with the house ad mounted', async () => {
-    const { ads, house } = await loadAds({});
-    house.registerHousePresenter(async () => 'retry');
+  it('reports `unavailable` when no network is configured', async () => {
+    const ads = await loadAds({});
 
-    // The dev/mock flow depends on this: a promo screen must not replace the
-    // instant grant just because the overlay happens to be mounted.
+    // The dev/mock flow depends on this: with nothing wired the action keeps
+    // working and the backend decides, instead of refusing on the client.
     expect(await ads.showRewardedAd()).toEqual({ outcome: 'unavailable', provider: null });
   });
 
-  it('falls through a failing network to the house ad', async () => {
-    const { ads, house } = await loadAds({ NEXT_PUBLIC_ADSGRAM_BLOCK_ID: BLOCK_ID });
-    house.registerHousePresenter(async () => 'retry');
+  it("surfaces the network's own reason when it has no fill", async () => {
+    // `onBannerNotFound` + a rejected show() is Adsgram's empty answer.
+    stubAdsgram(new Error('AdsgramError'), 'onBannerNotFound');
+    const ads = await loadAds({ NEXT_PUBLIC_ADSGRAM_BLOCK_ID: BLOCK_ID });
 
-    // No SDK on the page → the Adsgram provider fails, and the chain continues.
-    // The house ad answers, and answers `noAd`: it fills the screen, never the
-    // wallet.
-    expect(await ads.showRewardedAd()).toEqual({ outcome: 'noAd', provider: 'house' });
+    // Both halves matter: `noAd` picks the modal's copy, and `adsgram` is what
+    // the attempt is reported against. A stand-in provider closing the chain
+    // would replace both.
+    expect(await ads.showRewardedAd()).toEqual({ outcome: 'noAd', provider: 'adsgram' });
   });
 
-  it('stops on a user skip instead of offering the next provider', async () => {
+  it('stops on a user skip instead of asking the next network', async () => {
     // Adsgram rejects with error=false when the user closed the ad early.
     stubAdsgram({ done: false, error: false, state: 'destroy', description: 'closed' });
-    const { ads, house } = await loadAds({ NEXT_PUBLIC_ADSGRAM_BLOCK_ID: BLOCK_ID });
-
-    let housePlayed = false;
-    house.registerHousePresenter(async () => {
-      housePlayed = true;
-      return 'retry';
+    const ads = await loadAds({
+      NEXT_PUBLIC_ADSGRAM_BLOCK_ID: BLOCK_ID,
+      NEXT_PUBLIC_MONETAG_ZONE_ID: ZONE_ID,
     });
 
+    // Monetag is configured and next in line, so a fall-through would show up
+    // as its id here.
     expect(await ads.showRewardedAd()).toEqual({ outcome: 'skipped', provider: 'adsgram' });
-    expect(housePlayed, 'a skip must not fall through to another ad').toBe(false);
   });
 
   it('treats a playback failure as a fall-through, not a skip', async () => {
     stubAdsgram({ done: false, error: true, state: 'playing', description: 'failed' });
-    const { ads, house } = await loadAds({ NEXT_PUBLIC_ADSGRAM_BLOCK_ID: BLOCK_ID });
-    house.registerHousePresenter(async () => 'retry');
+    const ads = await loadAds({
+      NEXT_PUBLIC_ADSGRAM_BLOCK_ID: BLOCK_ID,
+      NEXT_PUBLIC_MONETAG_ZONE_ID: ZONE_ID,
+    });
 
-    expect(await ads.showRewardedAd()).toEqual({ outcome: 'noAd', provider: 'house' });
-  });
-
-  it('never grants for the house ad, whichever way the player leaves it', async () => {
-    // The money rule: an unpaid impression must not be able to pay out. Both
-    // exits are checked, so adding a third one to the overlay fails here first.
-    for (const exit of ['retry', 'skipped'] as const) {
-      const { ads, house } = await loadAds({ NEXT_PUBLIC_ADSGRAM_BLOCK_ID: BLOCK_ID });
-      house.registerHousePresenter(async () => exit);
-
-      const result = await ads.showRewardedAd();
-      expect(result.provider).toBe('house');
-      expect(result.outcome).not.toBe('completed');
-    }
+    // Monetag gets its turn and fails too (no SDK tag on the page), so the
+    // reason reported is the LAST network's.
+    expect(await ads.showRewardedAd()).toEqual({ outcome: 'error', provider: 'monetag' });
   });
 
   it('honours the order in NEXT_PUBLIC_AD_PROVIDERS and drops unknown ids', async () => {
-    const { ads, house } = await loadAds({
+    const ads = await loadAds({
       NEXT_PUBLIC_ADSGRAM_BLOCK_ID: BLOCK_ID,
-      NEXT_PUBLIC_MONETAG_ZONE_ID: '123',
+      NEXT_PUBLIC_MONETAG_ZONE_ID: ZONE_ID,
       NEXT_PUBLIC_AD_PROVIDERS: 'monetag, nonsense ,adsgram',
     });
-    house.registerHousePresenter(async () => 'retry');
 
-    // House is not in the list, so the chain ends on the last network failure.
+    // Monetag is asked first, so the chain ends on Adsgram — the reverse of the
+    // default order.
     const result = await ads.showRewardedAd();
     expect(result.provider).toBe('adsgram');
     expect(result.outcome).not.toBe('completed');
   });
 
-  it('ends on the last network failure when the house ad is not mounted', async () => {
-    const { ads } = await loadAds({ NEXT_PUBLIC_ADSGRAM_BLOCK_ID: BLOCK_ID });
+  it('ignores a leftover `house` entry in the env list', async () => {
+    // Production ran `adsgram,house` until 17.08.2026. That value must degrade
+    // to the network alone rather than resurrect a stand-in for a missing ad.
+    const withNetwork = await loadAds({
+      NEXT_PUBLIC_ADSGRAM_BLOCK_ID: BLOCK_ID,
+      NEXT_PUBLIC_AD_PROVIDERS: 'adsgram,house',
+    });
+    expect((await withNetwork.showRewardedAd()).provider).toBe('adsgram');
 
+    // `house` on its own leaves no usable id, which falls back to the default
+    // order — networks only.
+    const houseOnly = await loadAds({
+      NEXT_PUBLIC_ADSGRAM_BLOCK_ID: BLOCK_ID,
+      NEXT_PUBLIC_AD_PROVIDERS: 'house',
+    });
+    expect((await houseOnly.showRewardedAd()).provider).toBe('adsgram');
+  });
+
+  it('ends on the network failure when only one network is wired', async () => {
+    const ads = await loadAds({ NEXT_PUBLIC_ADSGRAM_BLOCK_ID: BLOCK_ID });
+
+    // Configured but no SDK on the page — `error`, and no free reward.
     expect(await ads.showRewardedAd()).toEqual({ outcome: 'error', provider: 'adsgram' });
   });
 });

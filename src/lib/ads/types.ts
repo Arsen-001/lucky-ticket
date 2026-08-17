@@ -11,7 +11,9 @@
  * - `completed`   — user watched the ad to the end → grant the reward.
  * - `skipped`     — user closed the ad early → no reward, and no fallback
  *                   (otherwise "close the ad to get another one" becomes a farm).
- * - `noAd`        — no fill: the network has nothing to serve right now.
+ * - `noAd`        — no fill: the network has nothing to serve right now. The
+ *                   player is told so in one modal; nothing stands in for the
+ *                   missing video (see `./index.ts`).
  * - `tooFast`     — a new ad was requested too soon after the previous one.
  * - `error`       — the network is configured but the ad failed to load/show.
  * - `unavailable` — no ad network configured at all (dev / plain browser / e2e)
@@ -28,13 +30,18 @@ export type RewardedAdOutcome =
 /** Outcomes that mean "this provider delivered nothing — try the next one". */
 export type RewardedAdFailure = Extract<RewardedAdOutcome, 'noAd' | 'tooFast' | 'error'>;
 
-/** Every wired provider. `house` is the app's own promo — it always fills. */
-export type AdProviderId = 'adsgram' | 'monetag' | 'house';
+/**
+ * Every wired provider — real ad networks only. There used to be a `house` id
+ * for the app's own promo, which always filled and therefore ended every
+ * waterfall; it is gone on purpose, so a no-fill reports the network that
+ * refused (17.08.2026).
+ */
+export type AdProviderId = 'adsgram' | 'monetag';
 
 /**
  * Outcome plus the provider that produced it. The backend needs the provider
- * to price the impression (a house ad is unpaid and may reward differently)
- * and to attribute revenue per network once several are live.
+ * to price the impression and to attribute revenue per network once several
+ * are live.
  */
 export interface RewardedAdResult {
   outcome: RewardedAdOutcome;

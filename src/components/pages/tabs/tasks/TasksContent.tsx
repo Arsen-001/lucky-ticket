@@ -49,7 +49,6 @@ import { TournamentMilestoneSlider } from './TournamentMilestoneSlider';
 import { AdsSection } from './AdsSection';
 import { AdUnavailableModal, type AdUnavailableReason } from './AdUnavailableModal';
 import { BuyExtraAdsModal } from './BuyExtraAdsModal';
-import { HouseAdOverlay } from './HouseAdOverlay';
 import { ClaimRewardModal, type RewardModalResult } from './ClaimRewardModal';
 import { classifyClaimError, type ClaimErrorKind } from '@/utils/pages/task-claim.utils';
 import { ArrivalShine } from '@/components/shared/ArrivalShine';
@@ -590,8 +589,6 @@ export function TasksContent() {
   const handleClaimSubStep = (task: Task, step: TaskSubStep) =>
     runClaim(task.id, [step.id], task.tier);
 
-  // Return type is annotated because the body calls itself (the house-ad
-  // retry) — TypeScript cannot infer a self-referencing initializer.
   const handleWatchAd = async (slot: AdSlot): Promise<void> => {
     // A Lucky Player skip (DOCS §7.3): the status pays this view outright, so
     // no network is asked for anything and the post-view pause — which exists
@@ -610,8 +607,9 @@ export function TasksContent() {
     triggerHaptic('medium');
 
     // Play the real rewarded ad first — the waterfall tries each configured
-    // network in turn and falls back to the house ad. Only a genuine
-    // completion (or the no-network dev/mock fallback) records the watch.
+    // network in turn. Only a genuine completion (or the no-network dev/mock
+    // fallback) records the watch; an empty chain ends in one modal naming the
+    // reason, and nothing stands in for the missing video.
     const { outcome, provider } = await showRewardedAd();
     // An attempt that pays nothing still happened, and to the network that
     // showed the ad it counts as an impression. Reported fire-and-forget: it
@@ -622,18 +620,10 @@ export function TasksContent() {
       reportAdAttempt({ provider, outcome });
     }
     if (outcome === 'skipped') {
-      // "Watch it to the end to earn the reward" is only true of a network's
-      // video. The house promo pays nothing either way, so saying that there
-      // would promise a reward that does not exist.
-      if (provider !== 'house') toast.info(t('ad not completed'));
+      // Every ad the player can close early is now a network's video, so the
+      // reason a reward did not land is always the same one.
+      toast.info(t('ad not completed'));
       return;
-    }
-    if (outcome === 'noAd' && provider === 'house') {
-      // The player pressed "try again" on the house promo. That promo already
-      // was the "no ads right now" screen, so stacking the modal on top of it
-      // would just repeat the news — go straight back to the waterfall. This
-      // cannot spin: every pass needs another deliberate tap.
-      return handleWatchAd(slot);
     }
     if (outcome === 'noAd' || outcome === 'tooFast' || outcome === 'error') {
       setAdIssue({ open: true, reason: outcome });
@@ -1125,10 +1115,6 @@ export function TasksContent() {
           <div className="h-12" />
         </div>
       )}
-
-      {/* Mounting this registers the `house` provider — the last step of the
-          rewarded-ad waterfall, so an empty network never dead-ends the task. */}
-      <HouseAdOverlay />
 
       <AdUnavailableModal
         open={adIssue.open}

@@ -1,7 +1,6 @@
 import { Env } from '@/services/environment.service';
 import { adsgramProvider } from './adsgram.provider';
 import { monetagProvider } from './monetag.provider';
-import { houseProvider } from './house.provider';
 import type { AdProvider, AdProviderId, RewardedAdResult } from './types';
 
 /**
@@ -9,22 +8,25 @@ import type { AdProvider, AdProviderId, RewardedAdResult } from './types';
  *
  * One user action plays exactly ONE ad. Networks are tried in order and the
  * next one is only asked after the previous returned nothing — never two ads
- * in a row. The house ad closes the chain so the action always works, even
- * when every network is empty.
+ * in a row. When every network comes up empty the chain ends there and the
+ * caller shows ONE screen naming the reason (product decision, 17.08.2026):
+ * an in-app promo used to stand in for the missing video, which cost the player
+ * a second tap to learn the same thing and hid the network's own reason from
+ * the telemetry — every attempt was attributed to the promo instead.
  *
  * Order comes from `NEXT_PUBLIC_AD_PROVIDERS` (comma-separated) so it can be
  * re-tuned from Vercel env once real per-network eCPM is known, with no code
- * change. Unknown or unconfigured ids are dropped.
+ * change. Unknown or unconfigured ids are dropped — `house` among them, so an
+ * env list left over from before that decision degrades to the networks in it.
  */
 
 const PROVIDERS: Record<AdProviderId, AdProvider> = {
   adsgram: adsgramProvider,
   monetag: monetagProvider,
-  house: houseProvider,
 };
 
 /** Applied when `NEXT_PUBLIC_AD_PROVIDERS` is unset. */
-const DEFAULT_ORDER: AdProviderId[] = ['adsgram', 'monetag', 'house'];
+const DEFAULT_ORDER: AdProviderId[] = ['adsgram', 'monetag'];
 
 function isProviderId(value: string): value is AdProviderId {
   return value in PROVIDERS;
@@ -63,12 +65,9 @@ export function preloadRewardedAd(): void {
 export async function showRewardedAd(): Promise<RewardedAdResult> {
   const chain = getChain();
 
-  // No real network wired (dev / plain browser / e2e) — keep the existing mock
-  // flow. The house ad alone must not stand in for a network here: it would
-  // replace the instant dev grant with a promo screen for no reason.
-  if (!chain.some(provider => provider.id !== 'house')) {
-    return { outcome: 'unavailable', provider: null };
-  }
+  // No network wired (dev / plain browser / e2e) — keep the existing mock flow
+  // rather than refusing the action.
+  if (chain.length === 0) return { outcome: 'unavailable', provider: null };
 
   let last: RewardedAdResult = { outcome: 'error', provider: chain[0].id };
   for (const provider of chain) {
@@ -81,7 +80,8 @@ export async function showRewardedAd(): Promise<RewardedAdResult> {
 
     // noAd / tooFast / error → the next provider gets a turn. The last one is
     // reported if everyone comes up empty, so the modal explains the real
-    // reason rather than a generic failure.
+    // reason rather than a generic failure — and the attempt is telemetered
+    // against the network that actually refused.
     last = { outcome, provider: provider.id };
   }
 

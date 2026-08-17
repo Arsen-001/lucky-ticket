@@ -48,9 +48,8 @@ import type { AdProviderId } from '@/lib/ads/types';
  *
  *   Ad delivery: the client plays a real rewarded ad through the provider
  *   waterfall and only POSTs here after a genuine completion (see
- *   `src/lib/ads/`). `provider` reports which network served it — including
- *   `house`, the app's own promo shown when every network was empty, which is
- *   unpaid and may carry a different reward.
+ *   `src/lib/ads/`). `provider` reports which network served it — always a real
+ *   network: an empty waterfall grants nothing at all.
  *   Until an account qualifies for a network's server-to-server reward
  *   callback the watch is client-attested. Once S2S is enabled, treat that
  *   callback (Adsgram: GET ?userid=<telegramId>; Monetag: postback with
@@ -72,8 +71,8 @@ export const tasksApi = api.injectEndpoints({
     }),
     watchAd: builder.mutation<
       { adId: string; rewards: TaskReward[] },
-      // `provider` tells the backend which network served the impression —
-      // it prices a house ad differently and attributes revenue per network.
+      // `provider` tells the backend which network served the impression, so
+      // revenue is attributed per network.
       // Optional so an older client (or the dev mock flow) still works.
       //
       // `skipped` claims the Lucky Player skip: no ad played, pay the view

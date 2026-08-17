@@ -37,10 +37,12 @@ const REASON_DESCRIPTION_KEY: Record<AdUnavailableReason, MessageIds> = {
 
 /**
  * Shown when a rewarded ad can't be played (no fill / requested too fast /
- * load error) — i.e. every provider in the waterfall came up empty, house ad
- * included. Also replaces the Adsgram SDK's native Telegram alert, which the
- * SDK suppresses once the app subscribes to its error events (see
- * `src/lib/ads/adsgram.provider.ts`).
+ * load error) — i.e. every network in the waterfall came up empty. This is the
+ * ONLY screen that case produces (product decision, 17.08.2026): an in-app
+ * promo used to stand in for the missing video and this modal was consequently
+ * unreachable in production. It also replaces the Adsgram SDK's native Telegram
+ * alert, which the SDK suppresses once the app subscribes to its error events
+ * (see `src/lib/ads/adsgram.provider.ts`).
  */
 export function AdUnavailableModal({ open, reason, onClose }: AdUnavailableModalProps) {
   const t = useAppTranslations();

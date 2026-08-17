@@ -8,7 +8,7 @@ export const Env = {
   /** Monetag Rewarded Interstitial zone id. Empty → Monetag is skipped. */
   monetagZoneId: process.env.NEXT_PUBLIC_MONETAG_ZONE_ID,
   /**
-   * Ordered, comma-separated rewarded-ad waterfall (`adsgram,monetag,house`).
+   * Ordered, comma-separated rewarded-ad waterfall (`adsgram,monetag`).
    * Empty → the default order in `src/lib/ads/index.ts`. Lets the priority be
    * re-tuned from Vercel env once real per-network eCPM is known.
    */
