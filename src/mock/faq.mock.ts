@@ -492,9 +492,9 @@ const articles: FaqArticle[] = [
     id: '50',
     sectionId: '11',
     title: tx('Do Lucky Player and VIP stack?'),
-    description: tx('Higher tier wins.'),
+    description: tx('Mostly the higher tier wins — with three exceptions.'),
     content: tx(
-      'No — when both are active, every percent-based perk uses the VIP value (they are never summed). Also, the matching discount is excluded when buying that status (no VIP discount on buying VIP). Avatar boosts do still stack on top of your status.'
+      'Mostly no — when both are active, the percent-based perks (stake yield, Market discount, ad views per day, ticket sends) use the VIP value and are never summed. Three things a Lucky Player keeps no matter the VIP level: the engine-speed multiplier (it multiplies on top of the VIP bonus), the daily ad views taken without watching a video, and one-tap "Claim all". Also, the matching discount is excluded when buying that status (no VIP discount on buying VIP). Avatar boosts do still stack on top of your status.'
     ),
   },
 

@@ -76,8 +76,11 @@ export const mockDb = {
     // invented before and every one of them was wrong — the market discount
     // read 2% where production charges 1.4%, so dev was validating prices the
     // server would never quote. The counted perks are BONUSES over the free
-    // numbers: `adsDailyBonus: 2` means 10 + 2 = 12 views. `bulkClaimEnabled`
-    // is false because "Claim all" unlocks at VIP 10 (DOCS §7.3).
+    // numbers: `adsDailyBonus: 2` means 10 + 2 = 12 views. Two fields are NOT
+    // the VIP row: the demo account also holds Lucky Player, and since
+    // 17.08.2026 the server resolves the ad skip and bulk claim outside the
+    // "VIP row wins" rule — a subscriber keeps both at any VIP level (DOCS
+    // §7.3), so `me` reports the subscription's 10 skips and «Claim all».
     statusPerks: fresh
       ? undefined
       : {
@@ -88,8 +91,8 @@ export const mockDb = {
           marketDiscountPct: 1.4,
           referralPct: 25,
           adsDailyBonus: 2,
-          // VIP level 2 — the ad skip is Lucky Player's perk and VIP has none.
-          adsSkipDaily: 0,
+          // Lucky Player's 10, kept as a VIP (the VIP 2 row itself says 0).
+          adsSkipDaily: 10,
           stakeFeeDiscountBonusPct: 0,
           ticketSendDailyBonus: {
             BRONZE: 3,
@@ -98,7 +101,8 @@ export const mockDb = {
             PLATINUM: 0,
             DIAMOND: 0,
           },
-          bulkClaimEnabled: false,
+          // Lucky Player's, kept as a VIP under 15 (the VIP 2 row says false).
+          bulkClaimEnabled: true,
         },
     isVerified: !fresh,
     avatar: images.avatar.src,
