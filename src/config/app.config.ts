@@ -354,20 +354,21 @@ export const appConfig = {
      */
     accrualPercent: 10,
     /**
-     * When the pot drops, this percent is split EQUALLY among ALL participants
-     * as a consolation. **0 by default** — the jackpot pays the top-3 ONLY, so a
-     * real player parked deep in the fake field (267/500) can't win it. Mirrors
-     * the backend `JACKPOT.participantsSharePercent`; raising it (admin-tunable)
-     * re-enables the consolation spread. Display-only anchor — the backend
-     * `GET /config` value is authoritative.
+     * When the pot drops, this percent is split EQUALLY among the finishers
+     * placed 4th and below — the podium is paid by place and takes nothing from
+     * here, so the two shares never overlap. **20 by default** since 2026-08-19
+     * (it was 0 — podium-only — on the reasoning that a real player parked deep
+     * in the fake field, 267/500, shouldn't collect a slice; that call was
+     * reversed). Mirrors the backend `JACKPOT.participantsSharePercent`.
+     * Display-only anchor — the backend `GET /config` value is authoritative.
      */
-    participantsSharePercent: 0,
+    participantsSharePercent: 20,
     /** The remaining percent of the dropped pot, paid to the top-3 podium. */
-    podiumSharePercent: 100,
+    podiumSharePercent: 80,
     /**
      * How the podium share splits across 1st / 2nd / 3rd (percent OF the podium
      * share). Whole-pot equivalents (via `getJackpotWholePotSplit`) at the
-     * default: 1st 50%, 2nd 30%, 3rd 20%.
+     * default: 1st 40%, 2nd 24%, 3rd 16% — the field takes the other 20%.
      */
     podiumSplitPercent: { first: 50, second: 30, third: 20 },
   },
