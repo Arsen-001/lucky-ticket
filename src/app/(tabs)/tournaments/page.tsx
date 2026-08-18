@@ -7,6 +7,7 @@ import {
   type TournamentFilterType,
 } from '@/components/pages/tabs/tournaments/TournamentFilters';
 import { TournamentList } from '@/components/pages/tabs/tournaments/TournamentList';
+import { TournamentTierTeasers } from '@/components/pages/tabs/tournaments/TournamentTierTeasers';
 import type { TournamentCardProps } from '@/components/pages/tabs/tournaments/TournamentCard';
 import {
   TournamentFilterSheet,
@@ -40,6 +41,13 @@ const matchesTab = (tournament: PersonalTournament, filter: TournamentFilterType
       return true;
   }
 };
+
+/**
+ * Tiers above Bronze, in the order they open. Only Bronze tournaments are
+ * spawned today (verified in the prod admin panel), so the rest of the ladder
+ * has nothing to show in the catalog — @see TournamentTierTeasers.
+ */
+const TEASER_TIER_ORDER: TournamentType[] = ['silver', 'gold', 'platinum', 'diamond'];
 
 export default function TournamentPage() {
   const t = useAppTranslations();
@@ -154,6 +162,22 @@ export default function TournamentPage() {
         ? t('no finished tournaments description')
         : undefined;
 
+  // Ladder preview. A tier earns a teaser only while the catalog holds nothing
+  // of it to join — the day real Silver tournaments spawn, the Silver teaser
+  // steps aside and Gold leads what is left. Search is a name query and the
+  // teasers have no name to match, so it hides them; the type filter narrows
+  // them the same way it narrows the list.
+  const openTiers = new Set(
+    tournamentsData?.filter(tour => tour.status === 'upcoming').map(tour => tour.type)
+  );
+  const teaserTiers =
+    isLoading || filter !== 'all' || searchValue
+      ? []
+      : TEASER_TIER_ORDER.filter(
+          tier =>
+            !openTiers.has(tier) && (selectedTypes.length === 0 || selectedTypes.includes(tier))
+        );
+
   if (isError) return <QueryErrorState onRetry={() => refetch()} />;
 
   return (
@@ -182,6 +206,7 @@ export default function TournamentPage() {
           emptyTitle={emptyTitle}
           emptyDescription={emptyDescription}
         />
+        <TournamentTierTeasers tiers={teaserTiers} />
       </div>
       <TournamentFilterSheet
         open={isFilterSheetOpen}

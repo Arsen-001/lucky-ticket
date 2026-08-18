@@ -1436,5 +1436,13 @@
   "{count} places short of the prize zone": "{count, plural, =1 {1 place short of the prize zone} other {# places short of the prize zone}}",
   "place prize": "Place prize",
   "chip shards": "Chip shards",
-  "full standings": "Full standings"
+  "full standings": "Full standings",
+  "bronze tournaments": "Bronze tournaments",
+  "silver tournaments": "Silver tournaments",
+  "gold tournaments": "Gold tournaments",
+  "platinum tournaments": "Platinum tournaments",
+  "diamond tournaments": "Diamond tournaments",
+  "next tiers title": "Coming next",
+  "next tiers description": "Higher tiers open in order — one tier at a time.",
+  "tier ready for launch": "Tier unlocked — you're ready"
 }

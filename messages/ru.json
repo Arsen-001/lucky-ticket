@@ -1436,5 +1436,13 @@
   "{count} places short of the prize zone": "{count, plural, one {До призовой зоны — # место} few {До призовой зоны — # места} many {До призовой зоны — # мест} other {До призовой зоны — # мест}}",
   "place prize": "Приз за место",
   "chip shards": "Осколки чипов",
-  "full standings": "Таблица турнира"
+  "full standings": "Таблица турнира",
+  "bronze tournaments": "Бронзовые турниры",
+  "silver tournaments": "Серебряные турниры",
+  "gold tournaments": "Золотые турниры",
+  "platinum tournaments": "Платиновые турниры",
+  "diamond tournaments": "Алмазные турниры",
+  "next tiers title": "Что дальше",
+  "next tiers description": "Тиры открываются по порядку — по одному за раз.",
+  "tier ready for launch": "Тир открыт — ты готов"
 }

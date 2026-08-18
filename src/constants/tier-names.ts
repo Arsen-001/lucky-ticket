@@ -49,3 +49,18 @@ export const tierTicketDescriptionId: Record<TicketType, MessageIds> = {
   platinum: 'platinum ticket description',
   diamond: 'diamond ticket description',
 };
+
+/**
+ * Message id for a tier's tournaments as a group ("Silver tournaments").
+ *
+ * Same reason as {@link tierTicketNameId}: `t('{tier} tournaments')` glues the
+ * tier's bare noun onto the plural and only works in English — Russian needs an
+ * agreeing adjective ("Серебряные турниры", not "Серебро турниры").
+ */
+export const tierTournamentsNameId: Record<TicketType, MessageIds> = {
+  bronze: 'bronze tournaments',
+  silver: 'silver tournaments',
+  gold: 'gold tournaments',
+  platinum: 'platinum tournaments',
+  diamond: 'diamond tournaments',
+};
