@@ -218,9 +218,9 @@ describe('nullable history fields do not corrupt the list', () => {
 
 describe('tier gap names the half that is actually missing', () => {
   it('reports friends, not "0 more AP", when AP is already met', () => {
-    // 18,500 AP is past every threshold up to Platinum's 5,900; 7 friends is
+    // 600,000 AP is past every threshold up to Platinum's 590,000; 7 friends is
     // three short of its 10. Naming AP alone printed "need 0 more AP".
-    expect(computeTierGap(18_500, 7, 'platinum')).toEqual({ apGap: 0, refGap: 3 });
+    expect(computeTierGap(600_000, 7, 'platinum')).toEqual({ apGap: 0, refGap: 3 });
   });
 
   it('reports both halves when both are short', () => {

@@ -256,36 +256,34 @@ describe('economy simulation (DOCS §14.2 guardrails)', () => {
     );
   });
 
-  it('AP pacing hits the product targets: Silver ~15d, then +1mo, +3.5mo, +7mo', () => {
+  it('Silver keeps its ~15-day pace; Gold and above are parked out of reach', () => {
     const t = GlobalConstants.apTierThresholds;
     const base = GlobalConstants.dailyBaselineApByTier;
-    const daysPerLeg = [
-      (t.silver - t.bronze) / base.bronze,
-      (t.gold - t.silver) / base.silver,
-      (t.platinum - t.gold) / base.gold,
-      (t.diamond - t.platinum) / base.platinum,
+
+    // The one leg still meant to be walked: a player collecting the full derived
+    // daily ceiling clears it in about a fortnight, the target it has always had.
+    const silverDays = (t.silver - t.bronze) / base.bronze;
+    expect(silverDays, 'days to Silver').toBeGreaterThanOrEqual(13);
+    expect(silverDays, 'days to Silver').toBeLessThanOrEqual(17);
+
+    // Gold, Platinum and Diamond were multiplied by 100 on 18.08.2026 to take
+    // them off the board while the economy is retuned; each gets a real number
+    // back one tier at a time. "Off the board" has to be measurable or it decays
+    // into "slow", so: every parked leg costs more than five years of perfect
+    // play at the baseline of the tier below it.
+    const yearsPerLeg = [
+      (t.gold - t.silver) / base.silver / 365,
+      (t.platinum - t.gold) / base.gold / 365,
+      (t.diamond - t.platinum) / base.platinum / 365,
     ];
-    // A perfect player who collects the full derived daily ceiling every day
-    // must land each leg within ±10% of the product pacing targets.
-    //
-    // The last two read 90 / 180 while the baseline priced every task at the
-    // PLAYER's tier rate: a Diamond player was credited 5 AP for the channel
-    // check-in and 5 for the Bronze tournament task, 35 AP/day of tasks where
-    // the catalog pays 19. On the real rates the legs are 3.5 and 7 months.
-    // The targets moved, not the thresholds — pulling Platinum and Diamond back
-    // to 3 and 6 months means LOWERING the AP gates on a live ladder, which
-    // demotes whoever sits between the old gate and the new one.
-    const targetDays = [15, 30, 105, 220];
-    daysPerLeg.forEach((leg, i) => {
-      expect(leg, `leg ${i} vs target ${targetDays[i]}d`).toBeGreaterThanOrEqual(
-        targetDays[i] * 0.9
-      );
-      expect(leg, `leg ${i} vs target ${targetDays[i]}d`).toBeLessThanOrEqual(targetDays[i] * 1.1);
+    yearsPerLeg.forEach((years, i) => {
+      expect(years, `parked leg ${i} in years`).toBeGreaterThan(5);
     });
-    // And pacing still decelerates: each tier takes longer than the previous.
-    for (let i = 1; i < daysPerLeg.length; i++) {
-      expect(daysPerLeg[i]).toBeGreaterThan(daysPerLeg[i - 1]);
-    }
+
+    // Still a ladder: every rung strictly above the one below it.
+    activityTierOrder.forEach((tier, i) => {
+      if (i > 0) expect(t[tier]).toBeGreaterThan(t[activityTierOrder[i - 1]]);
+    });
   });
 
   /**
@@ -294,18 +292,16 @@ describe('economy simulation (DOCS §14.2 guardrails)', () => {
    *
    * It divides each threshold gap by the daily baseline alone — the pace of a
    * player who logs in, collects, and never finishes a milestone. The one-time
-   * catalog holds enough Activity Points to clear Silver several times over and
-   * to very nearly reach Gold on its own, so "Silver in ~15 days" describes a
-   * player who is deliberately ignoring most of the game.
+   * catalog holds enough Activity Points to clear Silver several times over, so
+   * "Silver in ~15 days" describes a player who is deliberately ignoring most
+   * of the game.
    *
-   * Nothing here argues for moving the thresholds — that is a live ladder and
-   * lowering a gate demotes whoever sits between the old one and the new. What
-   * this pins is the SHAPE, so the gap stops being invisible: if the catalog is
-   * rebalanced until it no longer covers Silver, or grows until it covers
-   * Platinum, that is a pacing change and it should be a decision rather than a
-   * side effect.
+   * What this pins is the SHAPE, so the gap stops being invisible: if the
+   * catalog is rebalanced until it no longer covers Silver — the only rung a
+   * player is currently meant to reach — that is a pacing change and it should
+   * be a decision rather than a side effect.
    */
-  it('one-time tasks alone clear Silver and nearly reach Gold — the baseline pace is a floor', () => {
+  it('one-time tasks alone clear Silver — the baseline pace is a floor', () => {
     const catalogAp = oneTimeCatalogAp();
     if (catalogAp === null) return; // backend not checked out; same as enum-parity
 
@@ -320,9 +316,9 @@ describe('economy simulation (DOCS §14.2 guardrails)', () => {
     // Silver is not a time gate at all — the catalog covers it outright.
     expect(catalogAp, 'catalog vs Silver').toBeGreaterThan(t.silver);
 
-    // Gold is within reach of the catalog alone; Platinum is firmly not.
-    expect(catalogAp / t.gold, 'catalog vs Gold').toBeGreaterThan(0.8);
-    expect(catalogAp / t.platinum, 'catalog vs Platinum').toBeLessThan(0.5);
+    // Gold used to sit within reach of the catalog alone (4/5 of it). Parked at
+    // ×100 it is nowhere near, and that distance is the point.
+    expect(catalogAp / t.gold, 'catalog vs Gold').toBeLessThan(0.05);
 
     // And the two halves are the same order of magnitude over a year, so
     // neither can be left out of a pacing claim: the baseline pays ~35/day at
@@ -340,9 +336,9 @@ describe('economy simulation (DOCS §14.2 guardrails)', () => {
       expect(r[activityTierOrder[i]]).toBeGreaterThanOrEqual(r[activityTierOrder[i - 1]]);
     }
     // Both halves are required: a whale with no friends stays Bronze…
-    expect(computeActivityTier(1_000_000, 0)).toBe('bronze');
-    expect(computeActivityTier(1_000_000, 5)).toBe('gold');
-    expect(computeActivityTier(1_000_000, 20)).toBe('diamond');
+    expect(computeActivityTier(2_000_000, 0)).toBe('bronze');
+    expect(computeActivityTier(2_000_000, 5)).toBe('gold');
+    expect(computeActivityTier(2_000_000, 20)).toBe('diamond');
     // …and friends alone never unlock a tier without the AP.
     expect(computeActivityTier(0, 20)).toBe('bronze');
     expect(computeActivityTier(GlobalConstants.apTierThresholds.silver, 20)).toBe('silver');

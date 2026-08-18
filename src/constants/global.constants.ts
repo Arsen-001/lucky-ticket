@@ -255,19 +255,28 @@ export const GlobalConstants = {
   /** Days of inactivity before AP decay begins. */
   decayGraceDays: 7,
   /**
-   * Product pacing targets (days per leg at the DERIVED daily baselines
-   * ≈33/39/47/57): Silver in ~15 days, Gold +1 month, Platinum +3 months,
-   * Diamond +6 months → actual legs ≈15.2 / 29.5 / 90.4 / 177.2 days
-   * (~10.3 months to Diamond total). Asserted in `tests/economy-sim.test.ts`.
-   * Retuned when engine-claim AP was removed (baselines dropped) so the
-   * pacing targets held.
+   * Silver is the only rung still tuned for a player to walk: ~15 days at the
+   * Bronze daily baseline, the target it has always had.
+   *
+   * Gold, Platinum and Diamond were multiplied by 100 on 18.08.2026 and are
+   * deliberately OUT OF REACH — not slow, unreachable: the highest Activity
+   * Points balance on production is ~51k, three times below the new Gold. They
+   * are parked while the economy is retuned, and a real number comes back for
+   * each one at a time, tied to how the game actually develops. Until then no
+   * pacing claim is made about them and none should be written here —
+   * `tests/economy-sim.test.ts` asserts the parking, not a pace.
+   *
+   * Stated so it is never a surprise: a tier is computed live from AP and
+   * friends, so raising a gate demotes whoever sat above the old one. On the
+   * day of the change that was one live player (6,148 AP, 67 friends, Platinum
+   * → Silver) and five test accounts.
    */
   apTierThresholds: {
     bronze: 0,
     silver: 500,
-    gold: 1650,
-    platinum: 5900,
-    diamond: 16000,
+    gold: 165_000,
+    platinum: 590_000,
+    diamond: 1_600_000,
   },
   /**
    * Second half of the tier gate (DOCS §5.1): a tier unlocks only when the
