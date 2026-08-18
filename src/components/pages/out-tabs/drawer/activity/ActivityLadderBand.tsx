@@ -8,14 +8,8 @@ import { GlobalConstants, activityTierOrder } from '@/constants/global.constants
 
 export interface ActivityLadderBandProps {
   tierIdx: number;
-  /** 0–100 progress along the current leg. */
-  legPercent: number;
-  accent: string;
   className?: string;
 }
-
-/** Each tier sits in the centre of one of five equal columns: 10/30/50/70/90 %. */
-const columnCenter = (idx: number) => ((idx + 0.5) / activityTierOrder.length) * 100;
 
 /**
  * The five-medal ladder as a band of the card — the same strip construction the
@@ -24,28 +18,17 @@ const columnCenter = (idx: number) => ((idx + 0.5) / activityTierOrder.length) *
  * Half the height of the shipped ladder: the current medal grows to 34px rather
  * than 54, which is what forced the 40px gap between the bar and its labels.
  */
-export function ActivityLadderBand({
-  tierIdx,
-  legPercent,
-  accent,
-  className,
-}: ActivityLadderBandProps) {
+export function ActivityLadderBand({ tierIdx, className }: ActivityLadderBandProps) {
   const t = useAppTranslations();
-
-  const current = columnCenter(tierIdx);
-  const next = columnCenter(Math.min(tierIdx + 1, activityTierOrder.length - 1));
-  const fillPercent = current + (legPercent / 100) * (next - current);
 
   return (
     <div className={twMerge('border-t border-white/8 px-4 pb-3 pt-3', className)}>
-      <div className="relative h-1.5 rounded-full bg-white/8">
-        <div
-          className="absolute inset-y-0 start-0 rounded-full transition-[width] duration-700"
-          style={{ width: `${fillPercent}%`, background: accent }}
-        />
-      </div>
-
-      <div className="mt-2 flex">
+      {/* The strip that used to fill across the medals is gone with the AP
+          numbers it measured: a bar creeping towards the next medal against an
+          unpublished threshold is a promise nobody can check, and it read as
+          "almost there" on a tier that was shut on friends. @see
+          TierGateChecklist */}
+      <div className="flex">
         {activityTierOrder.map((stopTier, idx) => {
           const stopAccent = `var(--color-${stopTier})`;
           const reached = idx <= tierIdx;

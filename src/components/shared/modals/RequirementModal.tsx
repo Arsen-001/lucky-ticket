@@ -33,12 +33,6 @@ export interface RequirementProgress {
   label: string;
   current: number;
   required: number;
-  /**
-   * Print the player's own count alone, without «/ required» — the bar still
-   * fills against `required`. Set for the AP half of the tier gate, whose
-   * threshold is deliberately unpublished (@see ActivityGateBand).
-   */
-  hideRequired?: boolean;
 }
 
 export interface RequirementModalProps {
@@ -48,6 +42,12 @@ export interface RequirementModalProps {
   description?: ReactNode;
   /** How close the player already is — omitted when the gate has no progress. */
   progress?: RequirementProgress;
+  /**
+   * Requirements that a bar cannot state honestly — the tier gate's two halves,
+   * where one is met and the other has no published number. Rendered in the
+   * meter's place; the two are never shown together. @see TierGateChecklist
+   */
+  checklist?: ReactNode;
   /** Defaults to a lock; pass a coin/star icon when the requirement is a balance. */
   icon?: ReactNode;
   /** The way out of the dead end: closes the modal, then navigates. */
@@ -70,6 +70,7 @@ export function RequirementModal({
   title,
   description,
   progress,
+  checklist,
   icon,
   action,
   secondaryAction,
@@ -107,14 +108,14 @@ export function RequirementModal({
           </p>
         )}
 
-        {progress && (
+        {checklist && <div className="relative mt-1 w-full">{checklist}</div>}
+
+        {progress && !checklist && (
           <div className="relative mt-1 flex w-full flex-col gap-1.5">
             <div className="flex items-center justify-between text-[11px] font-bold uppercase tracking-wider">
               <span className="text-pink-secondary">{progress.label}</span>
               <span className="tabular-nums text-white">
-                {progress.hideRequired
-                  ? formatCount(progress.current)
-                  : `${formatCount(current)}/${formatCount(progress.required)}`}
+                {formatCount(current)}/{formatCount(progress.required)}
               </span>
             </div>
             {/* Lighter track than the default: at 0/3 the bar itself is

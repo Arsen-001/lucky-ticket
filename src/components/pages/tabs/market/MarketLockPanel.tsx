@@ -5,7 +5,7 @@ import type { ReactNode } from 'react';
 import { ArrowRight, Lock } from 'lucide-react';
 import { twMerge } from 'tailwind-merge';
 import { useGetMeQuery } from '@/api/me.api';
-import { Progress } from '@/components/shared/Progress';
+import { TierGateChecklist } from '@/components/shared/tier/TierGateChecklist';
 import { GlobalConstants } from '@/constants/global.constants';
 import { routes, type Route } from '@/constants/routes';
 import { useAppTranslations } from '@/hooks/useAppTranslations';
@@ -35,7 +35,6 @@ export function MarketLockPanel({ tier, note, action, className }: MarketLockPan
   const t = useAppTranslations();
   const { data: me } = useGetMeQuery();
 
-  const requiredAp = tier ? GlobalConstants.apTierThresholds[tier] : 0;
   const requiredReferrals = tier ? GlobalConstants.tierReferralRequirements[tier] : 0;
   const currentAp = me?.activityPoints ?? 0;
   const currentReferrals = me?.referralsCount ?? 0;
@@ -43,9 +42,6 @@ export function MarketLockPanel({ tier, note, action, className }: MarketLockPan
   // Two halves, two screens. Friends are the blocking one whenever they are
   // short — AP keeps accruing on its own, invites never do.
   const needsFriends = currentReferrals < requiredReferrals;
-  const current = needsFriends ? currentReferrals : currentAp;
-  const required = needsFriends ? requiredReferrals : requiredAp;
-  const percentage = required > 0 ? Math.min(100, (current / required) * 100) : 100;
 
   const link: { label: string; href: Route } | undefined =
     action ??
@@ -78,20 +74,11 @@ export function MarketLockPanel({ tier, note, action, className }: MarketLockPan
               </>
             )}
           </p>
-          <div className="flex items-center justify-between text-[11px] font-bold">
-            <span className="text-pink-secondary uppercase tracking-wider">
-              {needsFriends ? t('friends invited') : t('activity points')}
-            </span>
-            {/* Friends print as N/M; the AP half prints the player's own score
-                alone, because its threshold is not published (@see
-                ActivityGateBand). The bar below fills against it either way. */}
-            <span className="tabular-nums text-white">
-              {needsFriends
-                ? `${current.toLocaleString()}/${required.toLocaleString()}`
-                : current.toLocaleString()}
-            </span>
-          </div>
-          <Progress percentage={percentage} className="h-2 bg-white/10" />
+          <TierGateChecklist
+            tier={tier}
+            activityPoints={currentAp}
+            referralsCount={currentReferrals}
+          />
         </>
       ) : (
         note && <p className="text-white-secondary text-[12px] leading-snug">{note}</p>

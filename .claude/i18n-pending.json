@@ -17,6 +17,7 @@
     "grand prize capacity {n}",
     "grand prize for level 1",
     "grand prize soon",
+    "keep earning",
     "multiplier multiplies stack",
     "multipliers",
     "multipliers explained",
@@ -41,6 +42,7 @@
     "tier ready for launch",
     "time chip explainer",
     "{count} places short of the prize zone",
-    "{place} of {total}"
+    "{place} of {total}",
+    "{tier} tier is still locked"
   ]
 }

@@ -57,17 +57,12 @@ export function ActivityContent() {
           <ActivityCardBandsSkeleton />
         ) : (
           <>
-            <ActivityLadderBand
-              tierIdx={progress.tierIdx}
-              legPercent={progress.legPercent}
-              accent={accent}
-            />
+            <ActivityLadderBand tierIdx={progress.tierIdx} />
             {progress.nextTier && (
               <ActivityGateBand
                 nextTier={progress.nextTier}
                 activityPoints={me?.activityPoints ?? 0}
                 referralsCount={me?.referralsCount ?? 0}
-                accent={accent}
               />
             )}
           </>

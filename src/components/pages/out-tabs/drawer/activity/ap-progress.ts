@@ -1,5 +1,4 @@
 import {
-  GlobalConstants,
   activityTierOrder,
   computeActivityTier,
   computeDailyBaselineAp,
@@ -17,8 +16,6 @@ export interface ApProgress {
   apGap: number;
   /** Friends still missing for the next tier (0 = that half is met). */
   refGap: number;
-  /** 0–100 progress along the current leg, clamped at both ends. */
-  legPercent: number;
   /** Approximate AP/day at this tier without donation. */
   dailyBaseline: number;
   decay: ApDecayInfo;
@@ -45,19 +42,12 @@ export const computeApProgress = (
     ? computeTierGap(activityPoints, referralsCount, nextTier)
     : { apGap: 0, refGap: 0 };
 
-  const floor = GlobalConstants.apTierThresholds[tier];
-  const legPercent =
-    nextThreshold === null
-      ? 100
-      : Math.min(100, Math.max(0, ((activityPoints - floor) / (nextThreshold - floor)) * 100));
-
   return {
     tier,
     tierIdx,
     nextTier,
     apGap: gap.apGap,
     refGap: gap.refGap,
-    legPercent,
     dailyBaseline: computeDailyBaselineAp(activityPoints, referralsCount),
     decay: computeApDecay(lastActivityAt, activityPoints, referralsCount),
   };

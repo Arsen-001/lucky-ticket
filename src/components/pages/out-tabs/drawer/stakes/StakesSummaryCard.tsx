@@ -73,8 +73,6 @@ export interface StakesSummaryCardProps {
   topTier?: TicketType | null;
   /** The blocking half of the next-tier gate, or `null` at max tier. */
   nextTierNeed?: StakesTierNeed | null;
-  /** Percent progress towards the next tier (0..100). */
-  tierProgressPercent?: number;
 }
 
 export function StakesSummaryCard({
@@ -84,7 +82,6 @@ export function StakesSummaryCard({
   lifetimeEarned,
   topTier,
   nextTierNeed = null,
-  tierProgressPercent = 0,
 }: StakesSummaryCardProps) {
   const t = useAppTranslations();
   const accent = topTier ? tierColorVar[topTier] : 'rgba(222,0,155,1)';
@@ -143,12 +140,6 @@ export function StakesSummaryCard({
                   ? t('need more ap')
                   : t('need {n} friends', { n: nextTierNeed.amount })}
               </span>
-            </div>
-            <div className="bg-background-overlay/60 mt-1 h-0.5 overflow-hidden rounded-full">
-              <div
-                className="bg-pink-gradient h-full rounded-full transition-all duration-500"
-                style={{ width: `${tierProgressPercent}%` }}
-              />
             </div>
           </div>
         )}

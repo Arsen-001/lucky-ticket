@@ -98,11 +98,9 @@ export function StakesContent() {
       : 100;
   const refProgressPercent =
     nextTierRefRequired > 0 ? percent((currentRefs / nextTierRefRequired) * 100) : 100;
-  // The bar tracks whichever half is FURTHEST from done, and the label names
-  // that same half. Reading the AP half alone made the bar jump backwards the
-  // moment the AP was covered: it filled to 100%, then the caption switched to
-  // "need 3 friends" and the bar dropped to the friend ratio.
-  const tierProgressPercent = Math.min(apProgressPercent, refProgressPercent);
+  // The two percentages no longer draw anything — the bar they fed is gone with
+  // the unpublished AP threshold it measured. They still decide WHICH half the
+  // caption names: whichever is furthest from done.
   const apBlocking = (nextTierApGap ?? 0) > 0;
   const refBlocking = nextTierRefGap > 0;
   const tierNeed =
@@ -174,7 +172,6 @@ export function StakesContent() {
             lifetimeEarned={lifetimeEarned}
             topTier={topTier}
             nextTierNeed={tierNeed}
-            tierProgressPercent={tierProgressPercent}
           />
         </div>
       </SkeletonSuspense>

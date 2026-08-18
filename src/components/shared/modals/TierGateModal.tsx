@@ -2,6 +2,7 @@
 
 import { useGetMeQuery } from '@/api/me.api';
 import { RequirementModal } from '@/components/shared/modals/RequirementModal';
+import { TierGateChecklist } from '@/components/shared/tier/TierGateChecklist';
 import { GlobalConstants } from '@/constants/global.constants';
 import { routes } from '@/constants/routes';
 import { tierNameId } from '@/constants/tier-names';
@@ -30,7 +31,6 @@ export function TierGateModal({ open, onClose, tier, titleId }: TierGateModalPro
   const t = useAppTranslations();
   const { data: me } = useGetMeQuery();
 
-  const requiredAp = GlobalConstants.apTierThresholds[tier];
   const requiredReferrals = GlobalConstants.tierReferralRequirements[tier];
   const currentAp = me?.activityPoints ?? 0;
   const currentReferrals = me?.referralsCount ?? 0;
@@ -60,17 +60,12 @@ export function TierGateModal({ open, onClose, tier, titleId }: TierGateModalPro
           )}
         </>
       }
-      progress={
-        needsFriends
-          ? { label: t('friends invited'), current: currentReferrals, required: requiredReferrals }
-          : {
-              label: t('activity points'),
-              current: currentAp,
-              required: requiredAp,
-              // The bar fills against the threshold; the threshold itself is
-              // not named (@see ActivityGateBand).
-              hideRequired: true,
-            }
+      checklist={
+        <TierGateChecklist
+          tier={tier}
+          activityPoints={currentAp}
+          referralsCount={currentReferrals}
+        />
       }
       action={needsFriends ? { label: t('invite friends'), href: routes.inviteFriends } : apAction}
       secondaryAction={needsFriends ? apAction : undefined}
