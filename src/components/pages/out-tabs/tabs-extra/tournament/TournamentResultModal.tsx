@@ -7,7 +7,6 @@ import { useGetMeQuery } from '@/api/me.api';
 import { Modal } from '@/components/shared/modals/Modal';
 import { Button } from '@/components/shared/buttons/Button';
 import { Medal } from '@/components/shared/icons/Medal';
-import { PlaceCup } from '@/components/shared/icons/PlaceCup';
 import { LcLabel } from '@/components/shared/icons/LcLabel';
 import { ChipShardIcon } from '@/components/shared/icons/ChipShardIcon';
 import { useAppTranslations } from '@/hooks/useAppTranslations';
@@ -181,29 +180,12 @@ export function TournamentResultModal({
     <Modal open={open} onClose={onClose} hideCloseButton label={title}>
       <div className="relative bg-purple-gradient rounded-2xl overflow-hidden w-full max-w-[360px] mx-auto">
         <div className="relative flex flex-col items-center gap-3.5 px-5 pt-6 pb-5">
-          {/* HERO — the podium cup for a top-3 finish, the rank ring below it */}
-          {rank ? (
-            <div className="flex flex-col items-center">
-              <div
-                className="flex-center w-[150px] h-[150px] rounded-full"
-                style={{
-                  background: `radial-gradient(circle, ${accent}3D 0%, ${accent}14 45%, transparent 72%)`,
-                }}
-              >
-                <PlaceCup tier={tournamentType} place={rank} size={134} />
-              </div>
-              <span
-                className="-mt-3 rounded-full border px-3.5 py-1 text-[11px] font-extrabold uppercase tracking-[0.2em] tabular-nums backdrop-blur-sm"
-                style={{
-                  borderColor: `${accent}80`,
-                  color: accent,
-                  background: `linear-gradient(180deg, ${accent}2E 0%, rgba(0,0,0,0.5) 100%)`,
-                }}
-              >
-                {total ? t('{place} of {total}', { place, total }) : t('place')}
-              </span>
-            </div>
-          ) : view === 'placed' ? (
+          {/* HERO — the place, always as the number. A top-3 finish used to get the
+              podium cup instead, but that art carries the tournament's TIER in its
+              metal, so a bronze tournament's 1st place read as "third". One ring for
+              every finish: gold/silver/bronze on the podium, brand pink for a paying
+              place below it, flat white for one that paid nothing. */}
+          {view === 'placed' ? (
             <div className="relative flex-center" style={{ width: RING.size, height: RING.size }}>
               <svg
                 width={RING.size}
