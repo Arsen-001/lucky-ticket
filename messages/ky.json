@@ -1430,5 +1430,11 @@
   "deposit plus yield": "Негизги сумма + киреше",
   "{n} stakes could not be claimed": "{n, plural, =1 {1 стейкти алуу мүмкүн болбоду} other {# стейкти алуу мүмкүн болбоду}}",
   "ap over {n} months": "{n} айда AP",
-  "stars over {n} months": "{n} айда жылдыздар"
+  "stars over {n} months": "{n} айда жылдыздар",
+  "{place} of {total}": "{place} of {total}",
+  "better than {percent}% of players": "Better than {percent}% of players",
+  "{count} places short of the prize zone": "{count, plural, =1 {1 place short of the prize zone} other {# places short of the prize zone}}",
+  "place prize": "Place prize",
+  "chip shards": "Chip shards",
+  "full standings": "Full standings"
 }

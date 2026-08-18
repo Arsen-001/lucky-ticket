@@ -1,13 +1,15 @@
 {
   "keys": [
     "account was reset",
-    "account was reset because the bot was blocked",
     "adds up",
     "balance after",
+    "better than {percent}% of players",
     "chip level explainer",
+    "chip shards",
     "claim already collected",
     "duration",
     "early cancel costs {n} stars and revokes ap",
+    "full standings",
     "grand prize",
     "grand prize capacity {n}",
     "grand prize for level 1",
@@ -17,6 +19,7 @@
     "multipliers explained",
     "on every bronze engine forever",
     "open this stake?",
+    "place prize",
     "purchase error claim conflict",
     "purchase error upgrade conflict",
     "quest step boost channel",
@@ -27,6 +30,8 @@
     "session expired description",
     "stake fee",
     "stake lock warning",
-    "time chip explainer"
+    "time chip explainer",
+    "{count} places short of the prize zone",
+    "{place} of {total}"
   ]
 }

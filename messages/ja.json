@@ -1430,5 +1430,11 @@
   "deposit plus yield": "元本＋利回り",
   "{n} stakes could not be claimed": "{n, plural, other {#件のステーク}}を受け取れませんでした",
   "ap over {n} months": "{n}か月のAP",
-  "stars over {n} months": "{n}か月のスター"
+  "stars over {n} months": "{n}か月のスター",
+  "{place} of {total}": "{place} of {total}",
+  "better than {percent}% of players": "Better than {percent}% of players",
+  "{count} places short of the prize zone": "{count, plural, =1 {1 place short of the prize zone} other {# places short of the prize zone}}",
+  "place prize": "Place prize",
+  "chip shards": "Chip shards",
+  "full standings": "Full standings"
 }

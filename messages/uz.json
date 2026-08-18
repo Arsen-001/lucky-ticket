@@ -1430,5 +1430,11 @@
   "deposit plus yield": "Asosiy summa + daromad",
   "{n} stakes could not be claimed": "{n, plural, =1 {1 steykni olib boʻlmadi} other {# steykni olib boʻlmadi}}",
   "ap over {n} months": "{n} oyda AP",
-  "stars over {n} months": "{n} oyda yulduzlar"
+  "stars over {n} months": "{n} oyda yulduzlar",
+  "{place} of {total}": "{place} of {total}",
+  "better than {percent}% of players": "Better than {percent}% of players",
+  "{count} places short of the prize zone": "{count, plural, =1 {1 place short of the prize zone} other {# places short of the prize zone}}",
+  "place prize": "Place prize",
+  "chip shards": "Chip shards",
+  "full standings": "Full standings"
 }

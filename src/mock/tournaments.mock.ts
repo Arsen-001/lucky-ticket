@@ -287,6 +287,7 @@ export const tournaments: PersonalTournament[] = [
   {
     id: '123e4567-e89b-12d3-a456-426655440030',
     name: 'Morning Gold',
+    participantsCount: 128,
     startTime: getHoursAgo(2),
     teamSize: 64,
     prizePool: 1_600_000,
@@ -306,6 +307,7 @@ export const tournaments: PersonalTournament[] = [
   {
     id: '123e4567-e89b-12d3-a456-426655440031',
     name: 'Yesterday Silver',
+    participantsCount: 96,
     startTime: getHoursAgo(20),
     teamSize: 96,
     prizePool: 960_000,
@@ -327,6 +329,7 @@ export const tournaments: PersonalTournament[] = [
   {
     id: '123e4567-e89b-12d3-a456-426655440032',
     name: 'Yesterday Bronze',
+    participantsCount: 128,
     startTime: getHoursAgo(36),
     teamSize: 128,
     prizePool: 512_000,
@@ -341,8 +344,8 @@ export const tournaments: PersonalTournament[] = [
     places: getMockPlacements(),
     participated: true,
     participatedTicketsCount: 3,
-    // user didn't place — got nothing
-    userResult: { place: undefined, lc: 0 },
+    // user finished 112th of 128 — placed, but outside the paying zone
+    userResult: { place: 112, lc: 0 },
     resultSeen: false,
   },
 ];

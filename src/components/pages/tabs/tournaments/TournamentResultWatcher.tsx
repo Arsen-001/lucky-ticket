@@ -40,11 +40,13 @@ export function TournamentResultWatcher() {
     <TournamentResultModal
       open={canShow}
       onClose={handleClose}
+      tournamentId={pending?.id}
       tournamentName={pending?.name ?? ''}
       tournamentType={pending?.type ?? 'bronze'}
       shardType={pending?.shardType}
       result={pending?.userResult}
       total={pending?.participantsCount}
+      places={pending?.places}
     />
   );
 }

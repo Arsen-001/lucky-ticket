@@ -1430,5 +1430,11 @@
   "deposit plus yield": "Депозит + доход",
   "{n} stakes could not be claimed": "{n, plural, one {Не удалось забрать # стейк} few {Не удалось забрать # стейка} many {Не удалось забрать # стейков} other {Не удалось забрать # стейков}}",
   "ap over {n} months": "AP за {n} мес",
-  "stars over {n} months": "Stars за {n} мес"
+  "stars over {n} months": "Stars за {n} мес",
+  "{place} of {total}": "{place} из {total}",
+  "better than {percent}% of players": "Лучше {percent}% игроков",
+  "{count} places short of the prize zone": "{count, plural, one {До призовой зоны — # место} few {До призовой зоны — # места} many {До призовой зоны — # мест} other {До призовой зоны — # мест}}",
+  "place prize": "Приз за место",
+  "chip shards": "Осколки чипов",
+  "full standings": "Таблица турнира"
 }

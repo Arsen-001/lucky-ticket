@@ -1430,5 +1430,11 @@
   "deposit plus yield": "Kapital + Ertrag",
   "{n} stakes could not be claimed": "{n, plural, =1 {1 Stake konnte nicht eingelöst werden} other {# Stakes konnten nicht eingelöst werden}}",
   "ap over {n} months": "AP über {n} Mo",
-  "stars over {n} months": "Stars über {n} Mo"
+  "stars over {n} months": "Stars über {n} Mo",
+  "{place} of {total}": "{place} of {total}",
+  "better than {percent}% of players": "Better than {percent}% of players",
+  "{count} places short of the prize zone": "{count, plural, =1 {1 place short of the prize zone} other {# places short of the prize zone}}",
+  "place prize": "Place prize",
+  "chip shards": "Chip shards",
+  "full standings": "Full standings"
 }

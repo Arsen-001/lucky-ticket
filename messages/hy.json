@@ -1430,5 +1430,11 @@
   "deposit plus yield": "Հիմնական գումար + եկամուտ",
   "{n} stakes could not be claimed": "{n, plural, =1 {1 ստեյք չհաջողվեց ստանալ} other {# ստեյք չհաջողվեց ստանալ}}",
   "ap over {n} months": "AP {n} ամսում",
-  "stars over {n} months": "Աստղեր {n} ամսում"
+  "stars over {n} months": "Աստղեր {n} ամսում",
+  "{place} of {total}": "{place} of {total}",
+  "better than {percent}% of players": "Better than {percent}% of players",
+  "{count} places short of the prize zone": "{count, plural, =1 {1 place short of the prize zone} other {# places short of the prize zone}}",
+  "place prize": "Place prize",
+  "chip shards": "Chip shards",
+  "full standings": "Full standings"
 }

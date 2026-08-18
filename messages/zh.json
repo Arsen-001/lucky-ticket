@@ -1430,5 +1430,11 @@
   "deposit plus yield": "本金 + 收益",
   "{n} stakes could not be claimed": "{n, plural, other {# 笔质押}}未能领取",
   "ap over {n} months": "{n} 个月的 AP",
-  "stars over {n} months": "{n} 个月的星星"
+  "stars over {n} months": "{n} 个月的星星",
+  "{place} of {total}": "{place} of {total}",
+  "better than {percent}% of players": "Better than {percent}% of players",
+  "{count} places short of the prize zone": "{count, plural, =1 {1 place short of the prize zone} other {# places short of the prize zone}}",
+  "place prize": "Place prize",
+  "chip shards": "Chip shards",
+  "full standings": "Full standings"
 }

@@ -104,6 +104,7 @@ export function TournamentCard({
   prizePool,
   teamSize,
   participantsCount,
+  places,
   shardType,
   shardsFirst,
   shardsSecond,
@@ -531,11 +532,13 @@ export function TournamentCard({
       <TournamentResultModal
         open={isResultModalOpen}
         onClose={handleResultClose}
+        tournamentId={id}
         tournamentName={name ?? ''}
         tournamentType={type ?? 'bronze'}
         shardType={shardType}
         result={userResult}
         total={participantsCount}
+        places={places}
       />
 
       <TierGateModal

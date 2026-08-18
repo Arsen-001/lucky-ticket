@@ -1430,5 +1430,11 @@
   "deposit plus yield": "Тіло + дохідність",
   "{n} stakes could not be claimed": "{n, plural, one {Не вдалося отримати # стейк} few {Не вдалося отримати # стейки} many {Не вдалося отримати # стейків} other {Не вдалося отримати # стейків}}",
   "ap over {n} months": "AP за {n} міс",
-  "stars over {n} months": "Зірки за {n} міс"
+  "stars over {n} months": "Зірки за {n} міс",
+  "{place} of {total}": "{place} of {total}",
+  "better than {percent}% of players": "Better than {percent}% of players",
+  "{count} places short of the prize zone": "{count, plural, =1 {1 place short of the prize zone} other {# places short of the prize zone}}",
+  "place prize": "Place prize",
+  "chip shards": "Chip shards",
+  "full standings": "Full standings"
 }

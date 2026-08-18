@@ -1430,5 +1430,11 @@
   "deposit plus yield": "원금＋수익",
   "{n} stakes could not be claimed": "{n, plural, other {스테이크 #건}}을 받지 못했습니다",
   "ap over {n} months": "{n}개월 AP",
-  "stars over {n} months": "{n}개월 스타"
+  "stars over {n} months": "{n}개월 스타",
+  "{place} of {total}": "{place} of {total}",
+  "better than {percent}% of players": "Better than {percent}% of players",
+  "{count} places short of the prize zone": "{count, plural, =1 {1 place short of the prize zone} other {# places short of the prize zone}}",
+  "place prize": "Place prize",
+  "chip shards": "Chip shards",
+  "full standings": "Full standings"
 }

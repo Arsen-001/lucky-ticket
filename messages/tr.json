@@ -1430,5 +1430,11 @@
   "deposit plus yield": "Anapara + getiri",
   "{n} stakes could not be claimed": "{n, plural, =1 {1 stake alınamadı} other {# stake alınamadı}}",
   "ap over {n} months": "{n} ayda AP",
-  "stars over {n} months": "{n} ayda yıldız"
+  "stars over {n} months": "{n} ayda yıldız",
+  "{place} of {total}": "{place} of {total}",
+  "better than {percent}% of players": "Better than {percent}% of players",
+  "{count} places short of the prize zone": "{count, plural, =1 {1 place short of the prize zone} other {# places short of the prize zone}}",
+  "place prize": "Place prize",
+  "chip shards": "Chip shards",
+  "full standings": "Full standings"
 }

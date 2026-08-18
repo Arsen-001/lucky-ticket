@@ -1430,5 +1430,11 @@
   "deposit plus yield": "رأس المال + العائد",
   "{n} stakes could not be claimed": "{n, plural, one {تعذّر استلام رهن واحد} two {تعذّر استلام رهنين} few {تعذّر استلام # رهون} many {تعذّر استلام # رهنًا} other {تعذّر استلام # رهن}}",
   "ap over {n} months": "نقاط AP خلال {n} شهر",
-  "stars over {n} months": "النجوم خلال {n} شهر"
+  "stars over {n} months": "النجوم خلال {n} شهر",
+  "{place} of {total}": "{place} of {total}",
+  "better than {percent}% of players": "Better than {percent}% of players",
+  "{count} places short of the prize zone": "{count, plural, =1 {1 place short of the prize zone} other {# places short of the prize zone}}",
+  "place prize": "Place prize",
+  "chip shards": "Chip shards",
+  "full standings": "Full standings"
 }

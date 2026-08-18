@@ -1,16 +1,22 @@
 'use client';
 
 import { useEffect, useRef, useState } from 'react';
+import { useRouter } from 'next/navigation';
 import { Trophy } from 'lucide-react';
 import { useGetMeQuery } from '@/api/me.api';
 import { Modal } from '@/components/shared/modals/Modal';
 import { Button } from '@/components/shared/buttons/Button';
-import { Medal, type MedalType } from '@/components/shared/icons/Medal';
+import { Medal } from '@/components/shared/icons/Medal';
+import { PlaceCup } from '@/components/shared/icons/PlaceCup';
 import { LcLabel } from '@/components/shared/icons/LcLabel';
 import { ChipShardIcon } from '@/components/shared/icons/ChipShardIcon';
 import { useAppTranslations } from '@/hooks/useAppTranslations';
+import { routes } from '@/constants/routes';
 import type { InventoryChipType } from '@/types/interfaces/inventory.interfaces';
-import type { TournamentUserResult } from '@/types/interfaces/tournaments.interfaces';
+import type {
+  TournamentPlacesResponse,
+  TournamentUserResult,
+} from '@/types/interfaces/tournaments.interfaces';
 import type { TournamentType } from '@/types/types/tournaments.types';
 import { statusTournamentLcBoostPct } from '@/utils/global/tournament.utils';
 import { formatNumber } from '@/utils/global/number.utils';
@@ -20,27 +26,18 @@ import { triggerHaptic } from '@/utils/global/haptic.utils';
 interface TournamentResultModalProps {
   open: boolean;
   onClose: () => void;
+  tournamentId?: string;
   tournamentName: string;
   tournamentType: TournamentType;
   shardType?: InventoryChipType;
   result?: TournamentUserResult;
-  /** Displayed field size (real + cosmetic count) — shown as "place / total". */
+  /** Displayed field size (real + cosmetic count) — shown as "place of total". */
   total?: number;
+  /** Prize grid; the last paying place is read off it. */
+  places?: TournamentPlacesResponse;
 }
 
-type ResultView = 'top-three' | 'mid-place' | 'no-place' | 'not-played';
-
-const PLACE_LABEL: Record<number, '1st' | '2nd' | '3rd'> = {
-  1: '1st',
-  2: '2nd',
-  3: '3rd',
-};
-
-const MEDAL_BY_PLACE: Record<number, MedalType> = {
-  1: 'gold',
-  2: 'silver',
-  3: 'bronze',
-};
+type ResultView = 'placed' | 'unplaced' | 'not-played';
 
 const RANK_TEXT_CLASS: Record<1 | 2 | 3, string> = {
   1: 'tournament-rank-text tournament-rank-text--gold',
@@ -50,10 +47,22 @@ const RANK_TEXT_CLASS: Record<1 | 2 | 3, string> = {
 
 const MID_TEXT_CLASS = 'tournament-rank-text tournament-rank-text--mid';
 
-const RANK_HALO_RGB: Record<1 | 2 | 3, string> = {
-  1: '248, 189, 62',
-  2: '192, 190, 177',
-  3: '172, 97, 34',
+const RANK_HEX: Record<1 | 2 | 3, string> = {
+  1: '#F8BD3E',
+  2: '#C0BEB1',
+  3: '#AC6122',
+};
+
+const MID_HEX = '#DE009B';
+const FLAT_HEX = 'rgba(255,255,255,0.30)';
+
+const RING = { size: 148, stroke: 7 };
+
+/** Last place the grid still pays, so "N places short of the prize zone" can be said. */
+const lastPayingPlace = (places?: TournamentPlacesResponse): number | undefined => {
+  const paying = places?.places?.filter(p => p.percentage > 0) ?? [];
+  if (!paying.length) return undefined;
+  return Math.max(...paying.map(p => p.to ?? p.from));
 };
 
 const useCounter = (target: number, durationMs = 900) => {
@@ -88,21 +97,24 @@ const useCounter = (target: number, durationMs = 900) => {
 export function TournamentResultModal({
   open,
   onClose,
+  tournamentId,
   tournamentName,
   tournamentType,
   shardType,
   result,
   total,
+  places,
 }: TournamentResultModalProps) {
   const t = useAppTranslations();
+  const router = useRouter();
   const { data: me } = useGetMeQuery();
 
   const place = result?.place;
   const isLp = me?.isLuckyPlayer ?? false;
   const isVip = me?.isVIP ?? false;
   // `result.lc` is the actual credited amount — the backend already applied the
-  // VIP/LP reward boost at finish-time (DOCS §7.3). Show it as-is; split out the
-  // status bonus only to label the badge below.
+  // VIP/LP reward boost at finish-time (DOCS §7.3). Split the status bonus back
+  // out only to show it as its own receipt line.
   const lc = result?.lc ?? 0;
   const statusBoostPct = statusTournamentLcBoostPct(isLp, isVip, me?.statusPerks);
   const baseLc = statusBoostPct > 0 ? Math.round(lc / (1 + statusBoostPct / 100)) : lc;
@@ -113,193 +125,277 @@ export function TournamentResultModal({
   // tournament gets at least the consolation share, so it can arrive with any
   // placement, including one that pays no regular prize.
   const jackpotLc = result?.jackpotLc ?? 0;
+  const totalLc = lc + jackpotLc;
+  const paid = totalLc > 0 || shards > 0;
 
   const view: ResultView =
-    result === undefined
-      ? 'not-played'
-      : place !== undefined && place >= 1 && place <= 3
-        ? 'top-three'
-        : place !== undefined && place > 3 && lc > 0
-          ? 'mid-place'
-          : 'no-place';
+    result === undefined ? 'not-played' : place !== undefined ? 'placed' : 'unplaced';
+
+  const rank = place !== undefined && place <= 3 ? (place as 1 | 2 | 3) : null;
+  // Colour says rank, never tier: gold/silver/bronze for the podium, brand pink
+  // for a paying finish below it, flat white for one that paid nothing.
+  const accent = rank ? RANK_HEX[rank] : paid ? MID_HEX : FLAT_HEX;
+  // A finish that paid nothing keeps the plain white number: the pink gradient
+  // is reward language and reads as a win where there wasn't one.
+  const textClass = rank ? RANK_TEXT_CLASS[rank] : paid ? MID_TEXT_CLASS : 'text-white/70';
 
   // Count up only while the modal is on screen. A card renders its result modal
   // whether or not it is open, so this used to run a rAF loop per finished
   // tournament in the list — and the count-up was over long before the player
   // ever opened it.
-  const counter = useCounter(open && (view === 'top-three' || view === 'mid-place') ? lc : 0);
-  const jackpotCounter = useCounter(open ? jackpotLc : 0);
-  const placeLabel = view === 'top-three' && place ? t(PLACE_LABEL[place]) : undefined;
-  // Subtitle place prefix: podium → "1st ·"; a placed non-podium player → "N / total ·".
-  const placePrefix = placeLabel
-    ? `${placeLabel} · `
-    : place && place > 3
-      ? `${place}${total ? ` / ${total}` : ''} · `
-      : '';
+  const counter = useCounter(open ? totalLc : 0);
 
-  // Per-rank colors: 1st=gold, 2nd=silver, 3rd=bronze; mid-place uses pink/purple
-  const rank = view === 'top-three' && place ? (place as 1 | 2 | 3) : null;
-  const textClass = rank
-    ? RANK_TEXT_CLASS[rank]
-    : view === 'mid-place'
-      ? MID_TEXT_CLASS
-      : RANK_TEXT_CLASS[1];
+  // Share of the field the player finished ahead of — the arc, not the number,
+  // is what makes "47" legible at a glance.
+  const beaten = place && total && total > 1 ? (total - place) / (total - 1) : 0;
+  const topPct = place && total ? Math.max(1, Math.round((place / total) * 100)) : null;
+  const ringRadius = (RING.size - RING.stroke) / 2;
+  const circumference = 2 * Math.PI * ringRadius;
+
+  const prizeCutoff = lastPayingPlace(places);
+  const missedBy = place && prizeCutoff && place > prizeCutoff ? place - prizeCutoff : 0;
+
+  const receiptRows =
+    (lc > 0 ? 1 : 0) + (statusBonusLc > 0 ? 1 : 0) + (jackpotLc > 0 ? 1 : 0) + (shards > 0 ? 1 : 0);
 
   useEffect(() => {
-    if (open && (view === 'top-three' || view === 'mid-place' || jackpotLc > 0)) {
-      triggerHaptic('success');
-    }
-  }, [open, view, jackpotLc]);
+    if (open && paid) triggerHaptic('success');
+  }, [open, paid]);
 
-  const titleByView: Record<ResultView, string> = {
-    'top-three': `${t('you won')}!`,
-    'mid-place': t('your result'),
-    'no-place': t('better luck next time'),
-    'not-played': t('tournament ended'),
+  const title =
+    view === 'not-played'
+      ? t('tournament ended')
+      : rank
+        ? `${t('you won')}!`
+        : paid
+          ? t('your result')
+          : t('better luck next time');
+
+  const handleStandings = () => {
+    if (!tournamentId) return;
+    onClose();
+    router.push(routes.tournaments.getById(tournamentId));
   };
-  // A jackpot consolation with no placement prize is still a win — don't greet
-  // the player with "better luck next time" over a windfall.
-  const title = view === 'no-place' && jackpotLc > 0 ? `${t('jackpot')}!` : titleByView[view];
 
   return (
     <Modal open={open} onClose={onClose} hideCloseButton label={title}>
       <div className="relative bg-purple-gradient rounded-2xl overflow-hidden w-full max-w-[360px] mx-auto">
-        <div className="relative flex flex-col items-center gap-4 px-6 pt-7 pb-5">
-          {/* PRIZE AREA */}
-          <div className="flex-center w-full">
-            <div className="relative flex-center">
-              {view === 'top-three' && place ? (
-                <div
-                  className="flex-center w-32 h-32 rounded-full"
-                  style={{
-                    background: `radial-gradient(circle, rgba(${RANK_HALO_RGB[place as 1 | 2 | 3]}, 0.28) 0%, rgba(${RANK_HALO_RGB[place as 1 | 2 | 3]}, 0.10) 45%, transparent 75%)`,
-                  }}
-                >
-                  <Medal
-                    type={MEDAL_BY_PLACE[place]}
-                    height={120}
-                    className="drop-shadow-2xl drop-shadow-black/50"
+        <div className="relative flex flex-col items-center gap-3.5 px-5 pt-6 pb-5">
+          {/* HERO — the podium cup for a top-3 finish, the rank ring below it */}
+          {rank ? (
+            <div className="flex flex-col items-center">
+              <div
+                className="flex-center w-[150px] h-[150px] rounded-full"
+                style={{
+                  background: `radial-gradient(circle, ${accent}3D 0%, ${accent}14 45%, transparent 72%)`,
+                }}
+              >
+                <PlaceCup tier={tournamentType} place={rank} size={134} />
+              </div>
+              <span
+                className="-mt-3 rounded-full border px-3.5 py-1 text-[11px] font-extrabold uppercase tracking-[0.2em] tabular-nums backdrop-blur-sm"
+                style={{
+                  borderColor: `${accent}80`,
+                  color: accent,
+                  background: `linear-gradient(180deg, ${accent}2E 0%, rgba(0,0,0,0.5) 100%)`,
+                }}
+              >
+                {total ? t('{place} of {total}', { place, total }) : t('place')}
+              </span>
+            </div>
+          ) : view === 'placed' ? (
+            <div className="relative flex-center" style={{ width: RING.size, height: RING.size }}>
+              <svg
+                width={RING.size}
+                height={RING.size}
+                viewBox={`0 0 ${RING.size} ${RING.size}`}
+                className="absolute inset-0 -rotate-90"
+              >
+                <circle
+                  cx={RING.size / 2}
+                  cy={RING.size / 2}
+                  r={ringRadius}
+                  fill="none"
+                  stroke="rgba(255,255,255,0.10)"
+                  strokeWidth={RING.stroke}
+                />
+                {beaten > 0 && (
+                  <circle
+                    cx={RING.size / 2}
+                    cy={RING.size / 2}
+                    r={ringRadius}
+                    fill="none"
+                    stroke={accent}
+                    strokeWidth={RING.stroke}
+                    strokeLinecap="round"
+                    strokeDasharray={circumference}
+                    strokeDashoffset={circumference * (1 - beaten)}
                   />
-                </div>
-              ) : view === 'mid-place' ? (
-                <div
-                  className="flex-center w-32 h-32 rounded-full border-2"
-                  style={{
-                    background:
-                      'radial-gradient(circle, rgba(222, 0, 155, 0.28) 0%, rgba(116, 61, 245, 0.10) 45%, transparent 75%)',
-                    borderColor: 'rgba(222, 0, 155, 0.55)',
-                    boxShadow:
-                      '0 0 0 4px rgba(222, 0, 155, 0.10), 0 0 22px rgba(222, 0, 155, 0.30), inset 0 0 18px rgba(222, 0, 155, 0.18)',
-                  }}
-                >
-                  <div className="flex flex-col items-center justify-center leading-none gap-1">
-                    <span className={`${MID_TEXT_CLASS} text-5xl tabular-nums leading-none`}>
-                      {place}
-                    </span>
-                    <span
-                      className={`${MID_TEXT_CLASS} text-[13px] tabular-nums uppercase tracking-[0.2em] leading-none`}
-                    >
-                      {total ? `/ ${total}` : t('place')}
-                    </span>
-                  </div>
-                </div>
-              ) : view === 'no-place' ? (
-                <div className="flex-center w-28 h-28 rounded-full bg-white/5 border border-white/10">
-                  <Medal type={tournamentType} height={72} className="opacity-60" />
-                </div>
+                )}
+              </svg>
+              {/* The glow lives on its own round div: a `filter` on the SVG
+                  rasterises the whole element and paints a visible box. */}
+              <div
+                className="absolute inset-[3px] rounded-full"
+                style={{ boxShadow: paid ? `0 0 26px ${accent}55` : undefined }}
+              />
+              <div
+                className="absolute inset-[10px] rounded-full"
+                style={{
+                  background: paid
+                    ? `radial-gradient(circle, ${accent}38 0%, transparent 70%)`
+                    : undefined,
+                }}
+              />
+              <div className="relative flex flex-col items-center leading-none">
+                <span className={`${textClass} text-[56px] tabular-nums leading-none`}>
+                  {place}
+                </span>
+                <span className="mt-1 text-[11px] font-extrabold uppercase tracking-[0.22em] text-white/55 tabular-nums">
+                  {total ? t('of {total}', { total }) : t('place')}
+                </span>
+              </div>
+              {/* Tier chip — the medal art means TIER, never placement. */}
+              <div className="absolute -bottom-1 -right-1 flex-center w-11 h-11 rounded-full bg-background/85 border border-white/10">
+                <Medal type={tournamentType} height={30} />
+              </div>
+            </div>
+          ) : (
+            <div className="flex-center w-28 h-28 rounded-full bg-white/5 border border-white/10">
+              {view === 'unplaced' ? (
+                <Medal type={tournamentType} height={72} className="opacity-60" />
               ) : (
-                <div className="flex-center w-28 h-28 rounded-full bg-white/5 border border-white/10">
-                  <Trophy size={48} className="text-white/40" strokeWidth={2.2} />
-                </div>
+                <Trophy size={48} className="text-white/40" strokeWidth={2.2} />
               )}
             </div>
-          </div>
+          )}
 
-          {/* TITLE BLOCK */}
+          {/* TITLE */}
           <div className="flex flex-col items-center justify-center gap-1 w-full">
             <h2 className="text-2xl font-extrabold leading-tight text-center">{title}</h2>
             <p className="text-xs text-white-secondary text-center max-w-[280px] line-clamp-2">
-              {placePrefix}
               {tournamentName}
+              {topPct !== null && (
+                <span className="text-white/40">
+                  {' · '}
+                  {topPct <= 50
+                    ? t('top {n}', { n: `${topPct}%` })
+                    : t('better than {percent}% of players', { percent: 100 - topPct })}
+                </span>
+              )}
             </p>
-          </div>
-
-          {/* COUNTER + EXTRA REWARDS */}
-          <div className="flex flex-col items-center justify-center gap-2 w-full">
-            {(view === 'top-three' || view === 'mid-place') && (
-              <>
-                <div className="inline-flex items-baseline gap-2 leading-none">
-                  <LcLabel size={26} className="self-center" />
-                  <span className={`${textClass} text-4xl tabular-nums leading-none`}>
-                    {formatNumber(counter)}
-                  </span>
-                </div>
-                {statusBonusLc > 0 && (
-                  <span
-                    className={`inline-flex items-center gap-1 rounded-full border px-2 py-0.5 text-[10px] font-extrabold uppercase tracking-[0.16em] ${
-                      isVip
-                        ? 'border-gold/40 bg-gold/15 text-gold'
-                        : 'border-electric-pink/35 bg-electric-pink/12 text-electric-pink'
-                    }`}
-                  >
-                    {t(statusLabelKey)} +{statusBoostPct}%
-                  </span>
-                )}
-                {view === 'top-three' && shards > 0 && shardType && (
-                  <div className="inline-flex items-center gap-1.5 leading-none">
-                    <ChipShardIcon
-                      type={shardType}
-                      tier={tournamentType}
-                      size={22}
-                      className="shrink-0"
-                    />
-                    <span className={`${textClass} text-2xl tabular-nums leading-none`}>
-                      {shards}
-                    </span>
-                    <span
-                      className={`${textClass} text-base tabular-nums leading-none uppercase tracking-wider`}
-                    >
-                      {t('shards unit {count}', { count: shards })}
-                    </span>
-                  </div>
-                )}
-              </>
-            )}
-            {view === 'no-place' && jackpotLc === 0 && (
-              <p className="text-sm text-white/55 text-center max-w-[260px]">
-                {t('no prize description')}
+            {missedBy > 0 && !paid && (
+              <p className="text-[11px] text-white/40 text-center">
+                {t('{count} places short of the prize zone', { count: missedBy })}
               </p>
             )}
-            {jackpotLc > 0 && (
-              <div
-                className="w-full flex flex-col items-center gap-1.5 rounded-xl border border-gold/45 px-4 py-3"
-                style={{
-                  background:
-                    'radial-gradient(circle at 50% 0%, rgba(248, 189, 62, 0.22) 0%, rgba(248, 189, 62, 0.08) 55%, transparent 100%)',
-                  boxShadow:
-                    '0 0 0 4px rgba(248, 189, 62, 0.08), 0 0 22px rgba(248, 189, 62, 0.25), inset 0 0 18px rgba(248, 189, 62, 0.12)',
-                }}
-              >
-                <span className="text-[10px] font-extrabold uppercase tracking-[0.3em] text-gold">
-                  {t('jackpot')}
-                </span>
-                <div className="inline-flex items-baseline gap-2 leading-none">
-                  <LcLabel size={22} className="self-center" />
-                  <span className="tournament-rank-text tournament-rank-text--gold text-3xl tabular-nums leading-none">
-                    {formatNumber(jackpotCounter)}
-                  </span>
-                </div>
-              </div>
-            )}
           </div>
 
-          {/* BUTTON */}
-          <Button
-            onClick={onClose}
-            className="w-full rounded-xl py-3 text-sm font-extrabold uppercase tracking-[0.16em]"
-          >
-            {t('continue')}
-          </Button>
+          {/* REWARD — one source reads as a headline number, several as a receipt */}
+          {paid && receiptRows === 1 && (
+            <div className="inline-flex items-baseline gap-2 leading-none">
+              <LcLabel size={26} className="self-center" />
+              {shards > 0 && shardType ? (
+                <span className="inline-flex items-center gap-1.5 leading-none">
+                  <ChipShardIcon type={shardType} tier={tournamentType} size={22} />
+                  <span className={`${textClass} text-3xl tabular-nums leading-none`}>
+                    {shards}
+                  </span>
+                </span>
+              ) : (
+                <span className={`${textClass} text-4xl tabular-nums leading-none`}>
+                  {formatNumber(counter)}
+                </span>
+              )}
+            </div>
+          )}
+
+          {paid && receiptRows > 1 && (
+            <div className="w-full flex flex-col gap-1.5 rounded-xl border border-white/10 bg-black/20 px-3 py-3">
+              {lc > 0 && (
+                <div className="flex items-center justify-between">
+                  <span className="text-[11px] text-white/55">{t('place prize')}</span>
+                  <span className="inline-flex items-center gap-1.5 leading-none">
+                    <LcLabel size={16} className="self-center" />
+                    <span className="text-sm font-extrabold tabular-nums">
+                      {formatNumber(baseLc)}
+                    </span>
+                  </span>
+                </div>
+              )}
+              {statusBonusLc > 0 && (
+                <div className="flex items-center justify-between">
+                  <span
+                    className={`text-[11px] ${isVip ? 'text-gold' : 'text-electric-pink'}`}
+                  >{`${t(statusLabelKey)} +${statusBoostPct}%`}</span>
+                  <span className="inline-flex items-center gap-1.5 leading-none">
+                    <LcLabel size={16} className="self-center" />
+                    <span
+                      className={`text-sm font-extrabold tabular-nums ${isVip ? 'text-gold' : 'text-electric-pink'}`}
+                    >
+                      +{formatNumber(statusBonusLc)}
+                    </span>
+                  </span>
+                </div>
+              )}
+              {jackpotLc > 0 && (
+                <div className="flex items-center justify-between">
+                  <span className="text-[11px] text-gold">{t('jackpot')}</span>
+                  <span className="inline-flex items-center gap-1.5 leading-none">
+                    <LcLabel size={16} className="self-center" />
+                    <span className="text-sm font-extrabold tabular-nums text-gold">
+                      +{formatNumber(jackpotLc)}
+                    </span>
+                  </span>
+                </div>
+              )}
+              {shards > 0 && shardType && (
+                <div className="flex items-center justify-between">
+                  <span className="text-[11px] text-white/55">{t('chip shards')}</span>
+                  <span className="inline-flex items-center gap-1.5 leading-none">
+                    <ChipShardIcon type={shardType} tier={tournamentType} size={16} />
+                    <span className="text-sm font-extrabold tabular-nums">+{shards}</span>
+                  </span>
+                </div>
+              )}
+              <div className="mt-1 border-t border-white/10 pt-2 flex items-center justify-between">
+                <span className="text-[10px] font-extrabold uppercase tracking-[0.22em] text-white/50">
+                  {t('total')}
+                </span>
+                <span className="inline-flex items-baseline gap-1.5">
+                  <LcLabel size={20} className="self-center" />
+                  <span className={`${textClass} text-2xl tabular-nums leading-none`}>
+                    {formatNumber(counter)}
+                  </span>
+                </span>
+              </div>
+            </div>
+          )}
+
+          {!paid && view !== 'not-played' && (
+            <p className="text-sm text-white/55 text-center max-w-[260px]">
+              {t('no prize description')}
+            </p>
+          )}
+
+          {/* ACTIONS */}
+          <div className="w-full flex flex-col items-center gap-2">
+            <Button
+              onClick={onClose}
+              className="w-full rounded-xl py-3 text-sm font-extrabold uppercase tracking-[0.16em]"
+            >
+              {t('continue')}
+            </Button>
+            {tournamentId && (
+              <button
+                type="button"
+                onClick={handleStandings}
+                className="text-[11px] font-bold uppercase tracking-[0.18em] text-white/45"
+              >
+                {t('full standings')}
+              </button>
+            )}
+          </div>
         </div>
       </div>
     </Modal>

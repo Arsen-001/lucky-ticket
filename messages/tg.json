@@ -1430,5 +1430,11 @@
   "deposit plus yield": "Маблағи асосӣ + даромад",
   "{n} stakes could not be claimed": "{n, plural, =1 {1 стейкро гирифтан нашуд} other {# стейкро гирифтан нашуд}}",
   "ap over {n} months": "AP дар {n} моҳ",
-  "stars over {n} months": "Ситораҳо дар {n} моҳ"
+  "stars over {n} months": "Ситораҳо дар {n} моҳ",
+  "{place} of {total}": "{place} of {total}",
+  "better than {percent}% of players": "Better than {percent}% of players",
+  "{count} places short of the prize zone": "{count, plural, =1 {1 place short of the prize zone} other {# places short of the prize zone}}",
+  "place prize": "Place prize",
+  "chip shards": "Chip shards",
+  "full standings": "Full standings"
 }
