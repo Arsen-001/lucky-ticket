@@ -6,6 +6,7 @@ import {
   useGetDailyGiftQuery,
   useMarkDailyGiftPromoSeenMutation,
 } from '@/api/statusGift.api';
+import { useGetMeQuery } from '@/api/me.api';
 import { LuckyPlayerDailyGiftModal } from '@/components/pages/tabs/home/LuckyPlayerDailyGiftModal';
 import { useAutoSurfaceSlot } from '@/hooks/useAutoSurfaceSlot';
 import { useAppTranslations } from '@/hooks/useAppTranslations';
@@ -37,6 +38,7 @@ export function DailyGiftAutoSurface() {
   const t = useAppTranslations();
   const toast = useToast();
   const { data: gift } = useGetDailyGiftQuery();
+  const { data: me } = useGetMeQuery();
   const [claim, { isLoading: claiming }] = useClaimDailyGiftMutation();
   const [markPromoSeen] = useMarkDailyGiftPromoSeenMutation();
   const [dismissed, setDismissed] = useState(true);
@@ -48,7 +50,19 @@ export function DailyGiftAutoSurface() {
     setDismissed(localStorage.getItem(DISMISSED_KEY) === utcDay(new Date()));
   }, []);
 
-  const wants = Boolean(gift?.shouldSurface) && !dismissed;
+  // Never on the session a player first opens the app. They arrive into the
+  // language picker, the welcome gifts and the tour; a paid-status pitch landing
+  // on top of that is the first thing the game says to them, and the offer is
+  // one-time — spent before they have any idea what a Lucky Player is. Decided
+  // once from the value `me` carried when this mounted, not read live: the tour
+  // flips the flag the moment it ends, which is still the same first session.
+  const [firstSession, setFirstSession] = useState<boolean | null>(null);
+  useEffect(() => {
+    if (firstSession !== null || !me) return;
+    setFirstSession(!me.hasSeenTour);
+  }, [me, firstSession]);
+
+  const wants = Boolean(gift?.shouldSurface) && !dismissed && firstSession === false;
   const canShow = useAutoSurfaceSlot('daily-gift', wants);
 
   // Burn the one-time offer the moment it is actually on screen — not when it
