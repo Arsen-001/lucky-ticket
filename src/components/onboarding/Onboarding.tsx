@@ -31,7 +31,14 @@ export function Onboarding() {
   useEffect(() => {
     if (decidedRef.current || !me) return;
     decidedRef.current = true;
-    const isFirstRun = !me.hasSeenTour && me.activityPoints === 0;
+    // "Never saw the tour" is the whole test. It used to also require
+    // `activityPoints === 0` as a proxy for "brand-new account", and that proxy
+    // broke on launch day: every pre-launch account was reset to AP = invited
+    // friends × 10 + the welcome pack, so players who had never once seen the
+    // app past the countdown were counted as veterans and dropped straight into
+    // an untoured game. The pack itself is granted idempotently below, so a
+    // player who already owns it simply claims a screen they already have.
+    const isFirstRun = !me.hasSeenTour;
     setPhase(appConfig.onboardingTour.autoStart && isFirstRun ? 'language' : 'done');
   }, [me]);
 
