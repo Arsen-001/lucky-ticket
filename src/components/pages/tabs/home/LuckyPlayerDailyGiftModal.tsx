@@ -98,13 +98,6 @@ export function LuckyPlayerDailyGiftModal({
               {t('collect')}
             </Button>
           )}
-          <Button
-            variant="transparent"
-            className="w-full py-2 text-[13px] font-semibold text-white/45"
-            onClick={onClose}
-          >
-            {t('later')}
-          </Button>
         </div>
       </div>
     </Modal>
