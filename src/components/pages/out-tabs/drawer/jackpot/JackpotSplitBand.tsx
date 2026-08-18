@@ -24,7 +24,9 @@ export function JackpotSplitBand({ pot, className }: JackpotSplitBandProps) {
     { label: t('2nd'), percent: split.second, text: 'text-silver', bar: 'bg-silver' },
     { label: t('3rd'), percent: split.third, text: 'text-bronze', bar: 'bg-bronze' },
     {
-      label: t('all players'),
+      // Not "all players": the share is divided among the finishers OUTSIDE the
+      // top-3 — a podium place is paid its own slice and nothing from this one.
+      label: t('everyone else'),
       percent: split.participants,
       text: 'text-electric-purple',
       bar: 'bg-electric-purple',

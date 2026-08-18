@@ -4,7 +4,9 @@ import { appConfig } from '@/config/app.config';
  * The jackpot pot split expressed as percentages of the WHOLE pot (DOCS §20).
  * By default the podium takes the whole pot (participants share 0) →
  * participants 0%, 1st 50%, 2nd 30%, 3rd 20%. Raising the participants share
- * (admin-tunable) carves out an equal consolation slice for every player.
+ * (admin-tunable, 20 in production) carves out a slice split equally among the
+ * finishers BELOW the podium — the two groups are disjoint, so a winner is
+ * never paid from both, and these four numbers always close to 100%.
  */
 export const getJackpotWholePotSplit = () => {
   const { participantsSharePercent, podiumSharePercent, podiumSplitPercent } = appConfig.jackpot;

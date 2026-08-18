@@ -1005,7 +1005,7 @@
   "jackpot step drop title": "落ちる",
   "jackpot step drop text": "そのトーナメントが終わると、ポット全額がその参加者で分配されます。",
   "where the pot goes": "ポットの行き先",
-  "all players": "全参加者",
+  "everyone else": "その他全員",
   "recent jackpots": "最近のジャックポット",
   "dropped": "落選",
   "won by {name}": "{name}さんが獲得",

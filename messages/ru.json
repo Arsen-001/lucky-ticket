@@ -1005,7 +1005,7 @@
   "jackpot step drop title": "Срывается",
   "jackpot step drop text": "Когда турнир завершается, весь банк делится между его игроками.",
   "where the pot goes": "Куда уходит банк",
-  "all players": "Все игроки",
+  "everyone else": "Остальные",
   "recent jackpots": "Последние срывы",
   "dropped": "сорвано",
   "won by {name}": "Сорвал {name}",
