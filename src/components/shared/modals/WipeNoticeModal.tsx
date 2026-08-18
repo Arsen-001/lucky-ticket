@@ -5,7 +5,7 @@ import { Modal } from '@/components/shared/modals/Modal';
 import { Button } from '@/components/shared/buttons/Button';
 import { useAppTranslations } from '@/hooks/useAppTranslations';
 
-interface BlockWipeNoticeModalProps {
+interface WipeNoticeModalProps {
   open: boolean;
   onClose: () => void;
 }
@@ -21,12 +21,12 @@ interface BlockWipeNoticeModalProps {
  * fired automatically on any bot block, which is exactly the kind of thing this
  * modal must not have to explain away. @see AccountWipeService in the backend.
  *
- * "Once" is decided by the server (`blockWipeNotice` on `GET /me`), not by
+ * "Once" is decided by the server (`wipeNotice` on `GET /me`), not by
  * local storage: a device-local flag re-shows after a reinstall, on a second
  * device and after cleared storage — and this is precisely the notice nobody
  * should meet twice.
  */
-export function BlockWipeNoticeModal({ open, onClose }: BlockWipeNoticeModalProps) {
+export function WipeNoticeModal({ open, onClose }: WipeNoticeModalProps) {
   const t = useAppTranslations();
 
   return (

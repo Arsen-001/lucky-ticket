@@ -65,12 +65,12 @@ export const meApi = api.injectEndpoints({
      * on the tap either way, and a failed ack simply shows it once more on the
      * next launch — which is the harmless direction to fail in.
      */
-    ackBlockWipeNotice: builder.mutation<{ blockWipeNotice: boolean }, void>({
-      query: () => ({ url: 'me/block-wipe-notice', method: 'POST' }),
+    ackWipeNotice: builder.mutation<{ wipeNotice: boolean }, void>({
+      query: () => ({ url: 'me/wipe-notice', method: 'POST' }),
       async onQueryStarted(_arg, { dispatch, queryFulfilled }) {
         const patch = dispatch(
           meApi.util.updateQueryData('getMe', undefined, draft => {
-            draft.blockWipeNotice = false;
+            draft.wipeNotice = false;
           })
         );
         try {
@@ -114,7 +114,7 @@ export const meApi = api.injectEndpoints({
 export const {
   useGetMeQuery,
   useUpdateMeMutation,
-  useAckBlockWipeNoticeMutation,
+  useAckWipeNoticeMutation,
   useGetEmailRewardQuery,
   useRequestEmailCodeMutation,
   useConfirmEmailMutation,

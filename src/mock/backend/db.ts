@@ -128,8 +128,8 @@ export const mockDb = {
     hasSeenTour: false,
     // Blocking the bot wipes the account, and the returning player is told once
     // why it is empty. `false` here because the demo account never blocked
-    // anything — flip it to see the modal. @see BlockWipeNoticeWatcher
-    blockWipeNotice: false,
+    // anything — flip it to see the modal. @see WipeNoticeWatcher
+    wipeNotice: false,
   } as MeResponse,
 
   // Own-profile history & stats — single source so a level change shows up on

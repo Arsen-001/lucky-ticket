@@ -1,8 +1,8 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { useAckBlockWipeNoticeMutation, useGetMeQuery } from '@/api/me.api';
-import { BlockWipeNoticeModal } from '@/components/shared/modals/BlockWipeNoticeModal';
+import { useAckWipeNoticeMutation, useGetMeQuery } from '@/api/me.api';
+import { WipeNoticeModal } from '@/components/shared/modals/WipeNoticeModal';
 
 /**
  * Shows the «аккаунт обнулён» notice once, to a player whose account an operator
@@ -17,13 +17,13 @@ import { BlockWipeNoticeModal } from '@/components/shared/modals/BlockWipeNotice
  * modal on any refetch of `me` that lands while it is open (a claim, a balance
  * invalidation, a tab switch), and the ack is idempotent anyway.
  */
-export function BlockWipeNoticeWatcher() {
+export function WipeNoticeWatcher() {
   const { data: me } = useGetMeQuery();
-  const [ack] = useAckBlockWipeNoticeMutation();
+  const [ack] = useAckWipeNoticeMutation();
   const [open, setOpen] = useState(false);
 
   useEffect(() => {
-    if (!me?.blockWipeNotice) return;
+    if (!me?.wipeNotice) return;
 
     // Wait for whatever else is on screen. A returning player can land straight
     // into another dialog — the Lucky Player gift offer, a tournament result —
@@ -40,7 +40,7 @@ export function BlockWipeNoticeWatcher() {
     const timer = setInterval(show, 400);
     show();
     return () => clearInterval(timer);
-  }, [me?.blockWipeNotice]);
+  }, [me?.wipeNotice]);
 
-  return <BlockWipeNoticeModal open={open} onClose={() => setOpen(false)} />;
+  return <WipeNoticeModal open={open} onClose={() => setOpen(false)} />;
 }

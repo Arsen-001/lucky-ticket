@@ -72,9 +72,9 @@ export interface MeResponse {
   /**
    * The account was wiped for blocking the bot and the player has not been told
    * yet. Carries no numbers on purpose — the notice explains an empty account,
-   * it does not itemise the loss. Cleared by `ackBlockWipeNotice`.
+   * it does not itemise the loss. Cleared by `ackWipeNotice`.
    */
-  blockWipeNotice?: boolean;
+  wipeNotice?: boolean;
 }
 
 /** Email-verification gift bundle (backend RewardRungData shape). */
