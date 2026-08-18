@@ -5,7 +5,6 @@ import { twMerge } from 'tailwind-merge';
 import { Medal } from '@/components/shared/icons/Medal';
 import { useAppTranslations } from '@/hooks/useAppTranslations';
 import { GlobalConstants, activityTierOrder } from '@/constants/global.constants';
-import { formatCompact } from '@/utils/global/number.utils';
 
 export interface ActivityLadderBandProps {
   tierIdx: number;
@@ -52,7 +51,6 @@ export function ActivityLadderBand({
           const reached = idx <= tierIdx;
           const isCurrent = idx === tierIdx;
           const friendsNeeded = GlobalConstants.tierReferralRequirements[stopTier];
-          const threshold = GlobalConstants.apTierThresholds[stopTier];
 
           return (
             <div key={stopTier} className="flex flex-1 flex-col items-center gap-1">
@@ -79,21 +77,22 @@ export function ActivityLadderBand({
               >
                 {t(stopTier)}
               </span>
-              <span
-                className={twMerge(
-                  'flex items-center gap-1 text-[10.5px] leading-none tabular-nums',
-                  isCurrent && 'font-bold'
-                )}
-                style={{ color: isCurrent ? stopAccent : 'rgba(255,255,255,0.42)' }}
-              >
-                {threshold === 0 ? '0' : formatCompact(threshold)}
-                {friendsNeeded > 0 && (
-                  <span className="flex items-center gap-0.5">
-                    <UserPlus size={9} strokeWidth={2.5} />
-                    {friendsNeeded}
-                  </span>
-                )}
-              </span>
+              {/* The rung's AP threshold used to print here. It is no longer
+                  published (@see ActivityGateBand): the ladder says where the
+                  player stands, not the number they are marching at. The
+                  friends half stays — it is acted on, not accrued. */}
+              {friendsNeeded > 0 && (
+                <span
+                  className={twMerge(
+                    'flex items-center gap-0.5 text-[10.5px] leading-none tabular-nums',
+                    isCurrent && 'font-bold'
+                  )}
+                  style={{ color: isCurrent ? stopAccent : 'rgba(255,255,255,0.42)' }}
+                >
+                  <UserPlus size={9} strokeWidth={2.5} />
+                  {friendsNeeded}
+                </span>
+              )}
             </div>
           );
         })}

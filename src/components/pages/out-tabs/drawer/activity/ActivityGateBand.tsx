@@ -39,6 +39,11 @@ export function ActivityGateBand({
       label: t('ap'),
       value: activityPoints,
       required: GlobalConstants.apTierThresholds[nextTier],
+      // The threshold drives the bar but is never printed: the AP ladder is
+      // live and unpublished, so the player reads "how far along", not "how
+      // much is left". Friends stay a full N/M — that half is something they
+      // act on, and it does not move.
+      showRequired: false,
       format: formatCompact,
     },
     {
@@ -47,6 +52,7 @@ export function ActivityGateBand({
       label: t('friends'),
       value: referralsCount,
       required: GlobalConstants.tierReferralRequirements[nextTier],
+      showRequired: true,
       format: (n: number) => String(n),
     },
   ].filter(meter => meter.required > 0);
@@ -74,7 +80,9 @@ export function ActivityGateBand({
               </span>
               <span className="ms-auto text-[13px] font-extrabold tabular-nums text-white">
                 {meter.format(meter.value)}
-                <span className="text-white/35"> / {meter.format(meter.required)}</span>
+                {meter.showRequired && (
+                  <span className="text-white/35"> / {meter.format(meter.required)}</span>
+                )}
               </span>
               {met && <Check size={13} strokeWidth={3} className="text-success-text" aria-hidden />}
             </div>

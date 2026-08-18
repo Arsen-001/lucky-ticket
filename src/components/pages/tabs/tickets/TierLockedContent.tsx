@@ -70,10 +70,7 @@ export function TierLockedContent({ ticket, className }: TierLockedContentProps)
           {t('unlock requirement')}
         </span>
         <p className="text-white-secondary text-[12px] leading-snug">
-          {t('reach {tier} tier with {ap} ap', {
-            tier: t(tierNameId[ticket.ticketType]),
-            ap: threshold.toLocaleString(),
-          })}
+          {t('reach {tier} tier', { tier: t(tierNameId[ticket.ticketType]) })}
         </p>
         <div className="h-2 overflow-hidden rounded-full bg-white/8">
           <div
@@ -81,8 +78,10 @@ export function TierLockedContent({ ticket, className }: TierLockedContentProps)
             style={{ width: `${progressPct}%`, background: tierColor }}
           />
         </div>
+        {/* The player's own score, not «x / threshold»: the AP half of the
+            gate keeps its bar but not its number (@see ActivityGateBand). */}
         <span className="text-[11px] font-semibold tabular-nums text-white/55">
-          {currentAp.toLocaleString()} / {threshold.toLocaleString()} {t('ap')}
+          {currentAp.toLocaleString()} {t('ap')}
         </span>
 
         {referralsRequired > 0 && (

@@ -70,10 +70,7 @@ export function MarketLockPanel({ tier, note, action, className }: MarketLockPan
       {tier ? (
         <>
           <p className="text-white-secondary text-[12px] leading-snug">
-            {t('reach {tier} tier with {ap} ap', {
-              tier: t(tier as MessageIds),
-              ap: requiredAp.toLocaleString(),
-            })}
+            {t('reach {tier} tier', { tier: t(tier as MessageIds) })}
             {requiredReferrals > 0 && (
               <>
                 <br />
@@ -85,8 +82,13 @@ export function MarketLockPanel({ tier, note, action, className }: MarketLockPan
             <span className="text-pink-secondary uppercase tracking-wider">
               {needsFriends ? t('friends invited') : t('activity points')}
             </span>
+            {/* Friends print as N/M; the AP half prints the player's own score
+                alone, because its threshold is not published (@see
+                ActivityGateBand). The bar below fills against it either way. */}
             <span className="tabular-nums text-white">
-              {current.toLocaleString()}/{required.toLocaleString()}
+              {needsFriends
+                ? `${current.toLocaleString()}/${required.toLocaleString()}`
+                : current.toLocaleString()}
             </span>
           </div>
           <Progress percentage={percentage} className="h-2 bg-white/10" />

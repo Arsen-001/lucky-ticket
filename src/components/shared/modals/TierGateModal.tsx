@@ -49,10 +49,7 @@ export function TierGateModal({ open, onClose, tier, titleId }: TierGateModalPro
       title={t(titleId, { tier: tierName })}
       description={
         <>
-          {t('reach {tier} tier with {ap} ap', {
-            tier: tierName,
-            ap: requiredAp.toLocaleString(),
-          })}
+          {t('reach {tier} tier', { tier: tierName })}
           {/* Two requirements, two lines — inlined behind a separator they read
               as one sentence and the "…and" of the second key looks like a typo. */}
           {requiredReferrals > 0 && (
@@ -66,7 +63,14 @@ export function TierGateModal({ open, onClose, tier, titleId }: TierGateModalPro
       progress={
         needsFriends
           ? { label: t('friends invited'), current: currentReferrals, required: requiredReferrals }
-          : { label: t('activity points'), current: currentAp, required: requiredAp }
+          : {
+              label: t('activity points'),
+              current: currentAp,
+              required: requiredAp,
+              // The bar fills against the threshold; the threshold itself is
+              // not named (@see ActivityGateBand).
+              hideRequired: true,
+            }
       }
       action={needsFriends ? { label: t('invite friends'), href: routes.inviteFriends } : apAction}
       secondaryAction={needsFriends ? apAction : undefined}

@@ -27,7 +27,6 @@ export function ProfileActivityCard({
   const nextThreshold = computeNextTierThreshold(activityPoints, referralsCount);
   const nextTier =
     nextThreshold !== null ? activityTierOrder[activityTierOrder.indexOf(tier) + 1] : null;
-  const toNextTier = nextThreshold !== null ? Math.max(0, nextThreshold - activityPoints) : 0;
   const referralGap = computeNextTierReferralGap(activityPoints, referralsCount);
 
   return (
@@ -49,9 +48,7 @@ export function ProfileActivityCard({
           {activityPoints.toLocaleString()}
         </span>
         <span className="mt-0.5 text-[11px] font-semibold" style={{ color: accent }}>
-          {nextTier
-            ? t('{n} AP to {tier}', { n: toNextTier.toLocaleString(), tier: t(nextTier) })
-            : t('max tier reached')}
+          {nextTier ? t('to {tier}', { tier: t(nextTier) }) : t('max tier reached')}
         </span>
         {nextTier && referralGap > 0 && (
           <span className="text-white-secondary text-[10px] font-semibold">

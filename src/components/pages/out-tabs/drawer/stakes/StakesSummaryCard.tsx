@@ -140,7 +140,7 @@ export function StakesSummaryCard({
                   this card at 9px, below the 4.5:1 floor for body text. */}
               <span className="text-white">
                 {nextTierNeed.kind === 'ap'
-                  ? `${formatCompact(nextTierNeed.amount)} AP`
+                  ? t('need more ap')
                   : t('need {n} friends', { n: nextTierNeed.amount })}
               </span>
             </div>

@@ -43,14 +43,20 @@ export const computeTierGap = (
 });
 
 /**
- * The gap as one short line: "Need 3 friends · Need 400 AP". Friends lead —
+ * The gap as one short line: "Need 3 friends · More AP needed". Friends lead —
  * AP keeps accruing on its own, invites never do — and a met half is dropped
  * rather than printed as a zero.
+ *
+ * The AP half is stated WITHOUT its number, here and everywhere else the gate
+ * is drawn (@see ActivityGateBand): the friends requirement is a thing the
+ * player acts on and is named in full, while the AP threshold is not published
+ * — it is a live ladder, and a number on screen is a promise that retuning it
+ * breaks.
  */
 export const formatTierGap = (gap: TierGap, t: Dictionary): string =>
   [
     gap.refGap > 0 ? t('need {n} friends', { n: gap.refGap }) : null,
-    gap.apGap > 0 ? t('need {n} ap', { n: gap.apGap.toLocaleString() }) : null,
+    gap.apGap > 0 ? t('need more ap') : null,
   ]
     .filter(Boolean)
     .join(' · ');

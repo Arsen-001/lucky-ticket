@@ -33,6 +33,12 @@ export interface RequirementProgress {
   label: string;
   current: number;
   required: number;
+  /**
+   * Print the player's own count alone, without «/ required» — the bar still
+   * fills against `required`. Set for the AP half of the tier gate, whose
+   * threshold is deliberately unpublished (@see ActivityGateBand).
+   */
+  hideRequired?: boolean;
 }
 
 export interface RequirementModalProps {
@@ -106,7 +112,9 @@ export function RequirementModal({
             <div className="flex items-center justify-between text-[11px] font-bold uppercase tracking-wider">
               <span className="text-pink-secondary">{progress.label}</span>
               <span className="tabular-nums text-white">
-                {formatCount(current)}/{formatCount(progress.required)}
+                {progress.hideRequired
+                  ? formatCount(progress.current)
+                  : `${formatCount(current)}/${formatCount(progress.required)}`}
               </span>
             </div>
             {/* Lighter track than the default: at 0/3 the bar itself is
