@@ -22,8 +22,11 @@ export function ProfileLeaderboardCard({ profile, loading }: ProfileLeaderboardC
   const t = useAppTranslations();
   const router = useRouter();
   const [open, setOpen] = useState(false);
-  // Board still shut for the test period (§16.4): the player's own AP and rank
-  // stay visible, but the card leads nowhere until the leaderboard opens.
+  // Board still shut for the test period (§16.4): AP stays visible — it is the
+  // player's own number and it accrues either way — but the card leads nowhere
+  // and the standing itself is withheld. A rank is a claim about everyone else,
+  // and while the board is locked nobody can open it to see whether #4 out of a
+  // handful of testers means anything.
   const leaderboardEnabled = useLeaderboardEnabled();
 
   const showSkeleton = loading || !profile;
@@ -69,19 +72,23 @@ export function ProfileLeaderboardCard({ profile, loading }: ProfileLeaderboardC
                 </span>
               </SkeletonSuspense>
             </div>
-            <div className="flex flex-col items-end gap-0.5">
-              <span className="text-[9px] font-extrabold uppercase tracking-wider text-white/45">
-                {t('rank')}
-              </span>
-              <SkeletonSuspense
-                loading={showSkeleton}
-                skeleton={<Skeleton variant="line" textSize="xl" className="h-5 w-10" />}
-              >
-                <span className="text-xl font-black leading-none tabular-nums text-white">
-                  {allTimeRank > 0 ? `#${allTimeRank}` : '—'}
+            {leaderboardEnabled ? (
+              <div className="flex flex-col items-end gap-0.5">
+                <span className="text-[9px] font-extrabold uppercase tracking-wider text-white/45">
+                  {t('rank')}
                 </span>
-              </SkeletonSuspense>
-            </div>
+                <SkeletonSuspense
+                  loading={showSkeleton}
+                  skeleton={<Skeleton variant="line" textSize="xl" className="h-5 w-10" />}
+                >
+                  <span className="text-xl font-black leading-none tabular-nums text-white">
+                    {allTimeRank > 0 ? `#${allTimeRank}` : '—'}
+                  </span>
+                </SkeletonSuspense>
+              </div>
+            ) : (
+              <Lock size={16} className="shrink-0 text-white/25" />
+            )}
           </div>
         </button>
 
