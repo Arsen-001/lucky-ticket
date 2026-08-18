@@ -27,9 +27,10 @@ export interface TasksCategorySectionProps {
   highlightToken?: number | null;
   taskHighlight?: { id: string; nonce: number } | null;
   /**
-   * Card layout: `cards` = full cards (1-col), `grid` = compact tiles (2-col),
-   * `rows` = compact single-line rows (1-col), `achievement-*` = the badge
-   * shapes of the Achievements section (@see TaskLayout).
+   * Card layout: `cards` = full cards (1-col), `compact-cards` = the same card
+   * in its single-line form, `grid` = compact tiles (2-col), `rows` = compact
+   * single-line rows (1-col), `achievement-*` = the badge shapes of the
+   * Achievements section (@see TaskLayout).
    */
   layout?: TaskLayout;
   /** Optional slot rendered between the section header and the task grid (e.g. milestone slider). */
@@ -251,6 +252,7 @@ export function TasksCategorySection({
                 <TaskItemCard
                   key={task.id}
                   task={task}
+                  compact={taskLayout === 'compact-cards'}
                   onClaim={onClaim}
                   onClaimSubStep={onClaimSubStep}
                   expanded={openTaskId === task.id}

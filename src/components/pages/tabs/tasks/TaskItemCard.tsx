@@ -26,7 +26,7 @@ import { Medal, type MedalType } from '@/components/shared/icons/Medal';
 import { GoldenText } from '@/components/shared/typography/GoldenText';
 import { formatNumber } from '@/utils/global/number.utils';
 import { resolveTaskSocialBrand } from '@/utils/pages/task-social.utils';
-import { TaskCategory, TaskFrequency, TaskRewardType, TaskStatus } from '@/types/enums/tasks.enums';
+import { TaskCategory, TaskRewardType, TaskStatus } from '@/types/enums/tasks.enums';
 import type { Task, TaskSubStep } from '@/types/interfaces/tasks.interfaces';
 import { routes } from '@/constants/routes';
 import { useTaskNavigate } from '@/hooks/useTaskNavigate';
@@ -50,6 +50,13 @@ export interface TaskItemCardProps {
   pinned?: boolean;
   pinDisabled?: boolean;
   onTogglePin?: (taskId: string) => void;
+  /**
+   * Draw the single-line form instead of the full card. Passed in by the
+   * section, which owns the shape decision — the card used to work it out from
+   * its own category, so a section asking for a full card silently got a row.
+   * @see TaskLayout
+   */
+  compact?: boolean;
 }
 
 /**
@@ -194,6 +201,7 @@ export function TaskItemCard({
   pinned = false,
   pinDisabled = false,
   onTogglePin,
+  compact = false,
 }: TaskItemCardProps) {
   const t = useAppTranslations();
   const localized = useLocalized();
@@ -324,16 +332,13 @@ export function TaskItemCard({
     navigateToTask(task);
   };
 
-  // Compact layout flag — applies only to ONCE-frequency tasks in selected
-  // categories (Social, Achievements, Profile Status, Profile). Daily/weekly
-  // tasks always render in the standard full-size row, even for these
-  // categories, so they look consistent with other categories' weekly tasks.
-  const isCompactRow =
-    task.frequency === TaskFrequency.ONCE &&
-    (task.category === TaskCategory.SOCIAL ||
-      task.category === TaskCategory.ACHIEVEMENTS ||
-      task.category === TaskCategory.PROFILE_STATUS ||
-      task.category === TaskCategory.PROFILE);
+  // Which shape to draw is the section's call (`compact`), never this card's
+  // own reading of its category. It used to be the latter — a hard-coded list
+  // of ONCE categories — and that quietly outranked the section: a task
+  // promoted to `cards` because it carries sub-steps came back as a compact
+  // row, which has no accordion, so the steps vanished. Daily/weekly tasks are
+  // full cards everywhere, and that still holds: nothing asks for compact.
+  const isCompactRow = compact;
   const showSubtitleInCompact =
     task.category === TaskCategory.ACHIEVEMENTS ||
     task.category === TaskCategory.PROFILE_STATUS ||
@@ -520,8 +525,14 @@ export function TaskItemCard({
                 </GoldenText>
               )}
 
+              {/* Two lines, same reason as the headline above: at one line the
+                  subtitle is cut where the condition is, and the condition is
+                  the whole point of it. «Boost the channel» ends «…from
+                  Telegram Premium …» — the sentence that says why most players
+                  cannot do it. `leading-snug`, not `leading-none`: two clamped
+                  lines at zero leading overlap. */}
               {(task.subtitle || task.unlockHint) && (
-                <span className="line-clamp-1 text-[11px] leading-none text-white/45">
+                <span className="line-clamp-2 text-[11px] leading-snug text-white/45">
                   {localized(isLocked && task.unlockHint ? task.unlockHint : task.subtitle)}
                 </span>
               )}

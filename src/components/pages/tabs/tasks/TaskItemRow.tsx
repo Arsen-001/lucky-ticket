@@ -233,9 +233,21 @@ export function TaskItemRow({ task, onClaim, highlightToken, className, style }:
       </div>
 
       {/* Rewards, the reset countdown and the progress figure stack to the
-          right rather than competing with the title for the same line. */}
-      <div className="flex shrink-0 flex-col items-end gap-1">
-        <TaskRewardRow rewards={task.rewards} tier={task.tier} size="sm" className="gap-1" />
+          right rather than competing with the title for the same line.
+
+          Capped at half the strip, and the chips wrap inside it. Uncapped,
+          `shrink-0` let the column take whatever its chips wanted: a task
+          paying LC + ticket + star + AP swallowed the row and left the title
+          ~40px — «Boost the channel» rendered as «Boos th…». Wrapping to two
+          short lines costs a few pixels of height and keeps every chip
+          visible, which truncating them would not. */}
+      <div className="flex max-w-[50%] shrink-0 flex-col items-end gap-1">
+        <TaskRewardRow
+          rewards={task.rewards}
+          tier={task.tier}
+          size="sm"
+          className="justify-end gap-1"
+        />
         {((task.resetAt && !isLocked && !expired) || showProgress) && (
           <span className="flex items-center gap-2 text-[10px] leading-none font-medium text-white/40 tabular-nums">
             {task.resetAt && !isLocked && !expired && (

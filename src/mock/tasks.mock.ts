@@ -835,37 +835,24 @@ const LEADERBOARD = buildCategory({
 */
 
 // ───────────────── SOCIAL ─────────────────
-const SOCIAL_PLATFORMS = [
-  {
-    title: 'Follow our Telegram channel',
-    rewards: [lc(1), ap(50)],
-    url: 'https://t.me/luckyticket365',
-    completed: true,
-  },
-  {
-    title: 'Subscribe on Twitter / X',
-    rewards: [lc(1), ap(50)],
-    url: 'https://x.com/luckyticket365',
-  },
-  { title: 'Join Discord community', rewards: [ap(40)], url: 'https://discord.gg/luckyticket' },
-  {
-    title: 'Subscribe to YouTube channel',
-    rewards: [lc(2), ap(75)],
-    url: 'https://youtube.com/@luckyticket',
-  },
-];
-
+// One task, and it is the production catalog's one (`t-266`). The four
+// platform follows that used to live here — Telegram / X / Discord / YouTube —
+// were never in the backend catalog at all, so dev showed a four-row list where
+// a player sees a single row. See milestones.data.ts in the backend.
 const SOCIAL = buildCategory({
   category: TaskCategory.SOCIAL,
   // "Share your daily result" lived here and shared nothing: no mechanic, no
   // link, 1 AP for a tap. It is the daily engine claim now (see ENGINES).
-  once: SOCIAL_PLATFORMS.map(p => ({
-    title: p.title,
-    rewards: p.rewards,
-    progress: { current: p.completed ? 1 : 0, target: 1 },
-    status: p.completed ? TaskStatus.COMPLETED : undefined,
-    externalLink: p.url,
-  })),
+  once: [
+    {
+      title: 'Boost the channel',
+      subtitle: 'Give our channel a boost from Telegram Premium — then come back and check.',
+      rewards: [lc(10), tickets(1), stars(1), ap(5)],
+      progress: { current: 0, target: 1 },
+      rarity: TaskRarity.GOLD,
+      externalLink: 'https://t.me/LuckyTicket365?boost',
+    },
+  ],
 });
 
 // ───────────────── PROFILE ─────────────────

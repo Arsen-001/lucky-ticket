@@ -53,6 +53,7 @@ import { ClaimRewardModal, type RewardModalResult } from './ClaimRewardModal';
 import { classifyClaimError, type ClaimErrorKind } from '@/utils/pages/task-claim.utils';
 import { ArrivalShine } from '@/components/shared/ArrivalShine';
 import { triggerHaptic } from '@/utils/global/haptic.utils';
+import { layoutForCategory } from '@/utils/pages/task-layout.utils';
 import { AchievementsCollectedBar } from './AchievementsCollectedBar';
 
 function TasksSkeleton() {
@@ -911,30 +912,7 @@ export function TasksContent() {
                   highlightToken?.category === cat.category ? highlightToken.nonce : null
                 }
                 taskHighlight={taskHighlight}
-                layout={
-                  // Achievements carry art of their own — a rarity medal — and
-                  // the longest names on the tab, so they get a row built for
-                  // both. @see AchievementTaskRow
-                  isAchievementsOnce
-                    ? 'achievement-row'
-                    : // The single-line row is the shape for the LONG one-time
-                      // lists, and only for them. A daily or weekly task gets the
-                      // full card even in these categories, because only the card
-                      // opens the sub-step accordion — and the row's chevron
-                      // reveals a subtitle, which is not the same thing. Weekly
-                      // «Check in 7 days this week» ships 7 steps: as a row, five
-                      // collected days sat behind a chevron that showed one
-                      // sentence, with no way to claim them at all.
-                      activeFrequency === TaskFrequency.ONCE &&
-                        (cat.category === TaskCategory.SOCIAL ||
-                          cat.category === TaskCategory.PROFILE)
-                      ? 'rows'
-                      : activeFrequency === TaskFrequency.ONCE &&
-                          cat.category !== TaskCategory.ACHIEVEMENTS &&
-                          cat.category !== TaskCategory.PROFILE_STATUS
-                        ? 'grid'
-                        : 'cards'
-                }
+                layout={layoutForCategory(cat.category, activeFrequency, regularTasks.length)}
                 collapsible={
                   cat.category === TaskCategory.ACHIEVEMENTS &&
                   activeFrequency === TaskFrequency.ONCE
