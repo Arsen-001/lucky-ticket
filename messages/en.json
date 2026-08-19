@@ -1445,5 +1445,8 @@
   "diamond tournaments": "Diamond tournaments",
   "next tiers title": "Coming next",
   "next tiers description": "Higher tiers open in order — one tier at a time.",
-  "tier ready for launch": "Tier unlocked — you're ready"
+  "tier ready for launch": "Tier unlocked — you're ready",
+  "finish level tasks": "Finish the level's tasks",
+  "{n} tasks left to claim": "{n} more to go before the reward opens",
+  "finish tasks to claim hint": "Every task on the list has to be done — then the reward is yours"
 }

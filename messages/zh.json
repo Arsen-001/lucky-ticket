@@ -1445,5 +1445,8 @@
   "diamond tournaments": "钻石比赛",
   "next tiers title": "接下来",
   "next tiers description": "更高的档位按顺序开放，一次一个。",
-  "tier ready for launch": "档位已解锁——你准备好了"
+  "tier ready for launch": "档位已解锁——你准备好了",
+  "finish level tasks": "Finish the level's tasks",
+  "{n} tasks left to claim": "{n} more to go before the reward opens",
+  "finish tasks to claim hint": "Every task on the list has to be done — then the reward is yours"
 }

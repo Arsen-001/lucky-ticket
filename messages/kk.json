@@ -1445,5 +1445,8 @@
   "diamond tournaments": "Гауһар турнирлері",
   "next tiers title": "Келесі не",
   "next tiers description": "Жоғары сатылар кезекпен ашылады — бір-бірлеп.",
-  "tier ready for launch": "Саты ашылды — дайынсың"
+  "tier ready for launch": "Саты ашылды — дайынсың",
+  "finish level tasks": "Finish the level's tasks",
+  "{n} tasks left to claim": "{n} more to go before the reward opens",
+  "finish tasks to claim hint": "Every task on the list has to be done — then the reward is yours"
 }

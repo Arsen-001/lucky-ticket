@@ -97,6 +97,8 @@ export function TestQuestChain({ className }: TestQuestChainProps) {
             title={t('steps for day {day}', { day: s.activeCard.day })}
             claimed={s.activeCard.taken}
             ready={s.isToday && s.claimableToday}
+            stepsComplete={s.stepsComplete}
+            stepsRemaining={s.stepsRemaining}
             claiming={s.claiming}
             onClaim={s.handleClaim}
             channelSubscribed={s.channelSubscribed}

@@ -1445,5 +1445,8 @@
   "diamond tournaments": "Мусобиқаҳои алмос",
   "next tiers title": "Минбаъд чӣ",
   "next tiers description": "Зинаҳои болотар бо навбат кушода мешаванд — яктогӣ.",
-  "tier ready for launch": "Зина кушода шуд — омодаӣ"
+  "tier ready for launch": "Зина кушода шуд — омодаӣ",
+  "finish level tasks": "Finish the level's tasks",
+  "{n} tasks left to claim": "{n} more to go before the reward opens",
+  "finish tasks to claim hint": "Every task on the list has to be done — then the reward is yours"
 }

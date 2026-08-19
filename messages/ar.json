@@ -1445,5 +1445,8 @@
   "diamond tournaments": "البطولات الماسية",
   "next tiers title": "التالي",
   "next tiers description": "تُفتح الفئات الأعلى بالترتيب — فئة واحدة في كل مرة.",
-  "tier ready for launch": "الفئة مفتوحة — أنت جاهز"
+  "tier ready for launch": "الفئة مفتوحة — أنت جاهز",
+  "finish level tasks": "Finish the level's tasks",
+  "{n} tasks left to claim": "{n} more to go before the reward opens",
+  "finish tasks to claim hint": "Every task on the list has to be done — then the reward is yours"
 }

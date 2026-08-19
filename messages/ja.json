@@ -1445,5 +1445,8 @@
   "diamond tournaments": "ダイヤモンドのトーナメント",
   "next tiers title": "次はこれ",
   "next tiers description": "上位ティアは順番に、1つずつ開きます。",
-  "tier ready for launch": "ティア解放 — 準備完了です"
+  "tier ready for launch": "ティア解放 — 準備完了です",
+  "finish level tasks": "Finish the level's tasks",
+  "{n} tasks left to claim": "{n} more to go before the reward opens",
+  "finish tasks to claim hint": "Every task on the list has to be done — then the reward is yours"
 }

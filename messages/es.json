@@ -1445,5 +1445,8 @@
   "diamond tournaments": "Torneos de Diamante",
   "next tiers title": "Lo siguiente",
   "next tiers description": "Los rangos superiores se abren en orden, de uno en uno.",
-  "tier ready for launch": "Rango desbloqueado: ya puedes"
+  "tier ready for launch": "Rango desbloqueado: ya puedes",
+  "finish level tasks": "Finish the level's tasks",
+  "{n} tasks left to claim": "{n} more to go before the reward opens",
+  "finish tasks to claim hint": "Every task on the list has to be done — then the reward is yours"
 }

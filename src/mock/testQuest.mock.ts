@@ -303,10 +303,53 @@ const MOCK_STEPS: Record<number, TestQuestStepDto[]> = {
   ],
 };
 
+/**
+ * Countable steps of a level the fake progress below has NOT reached — the mock
+ * side of the server's `unmetSteps`. `channelBoosted` is excluded there too: it
+ * needs a Telegram Premium boost, so it is a bonus line and never a wall.
+ */
+const unmetMockSteps = (level: number, progress: Record<string, number>) =>
+  (MOCK_STEPS[level] ?? []).filter(
+    step =>
+      step.action &&
+      step.target != null &&
+      step.action !== 'channelBoosted' &&
+      (progress[step.action] ?? 0) < step.target
+  );
+
 const view = () => {
   const qualified = climbed >= QUALIFIED_CLIMBED;
   const level = Math.max(DAILY_TOP_LEVEL, TEST_QUEST_TOTAL_LEVELS - climbed); // 31 → 4
   const def = testQuestLadder.find(l => l.level === level);
+  // Cumulative-since-enrollment progress. Scaled off `climbed` so the current
+  // level's countable steps read as partially done (e.g. tickets 5/6) and past
+  // levels read fully done — enough to see the live badges move in mock mode.
+  const stepProgress = {
+    ticketsSpent: 5 * climbed,
+    adsWatched: 7 * climbed,
+    shares: 2 * climbed,
+    referrals: Math.floor(climbed / 3),
+    engineUpgrades: climbed,
+    shardsBought: Math.floor(climbed / 2),
+    ticketsCollected: 3 * climbed,
+    // Live, not cumulative — a stake that matured stops counting, so this one
+    // deliberately does not scale with the climb.
+    activeStakes: climbed > 10 ? 2 : climbed > 5 ? 1 : 0,
+    stakesMade: climbed > 5 ? 1 : 0,
+    // Starter engine + one per ~8 days climbed, so the 2 → 3 → 4 ladder is
+    // reachable in mock mode without hand-editing this file.
+    enginesOwned: 1 + Math.floor(climbed / 8),
+    // Purchases only — the mock's climb grants one engine on level 12, and the
+    // ladder must not tick off a gift.
+    enginesBought: Math.floor(climbed / 10),
+    chipsOwned: climbed > 25 ? 1 : 0,
+    chipsEquipped: climbed > 26 ? 1 : 0,
+    ticketsBought: climbed > 1 ? 1 : 0,
+    nicknameSet: climbed > 2 ? 1 : 0,
+    walletConnected: climbed > 6 ? 1 : 0,
+    channelBoosted: climbed > 3 ? 1 : 0,
+  };
+  const unmet = unmetMockSteps(level, stepProgress);
   return {
     level,
     totalLevels: TEST_QUEST_TOTAL_LEVELS,
@@ -337,34 +380,9 @@ const view = () => {
     chestsPaid: 0,
     chestsTotal: 6,
     finished: qualified,
-    // Cumulative-since-enrollment progress. Scaled off `climbed` so the current
-    // level's countable steps read as partially done (e.g. tickets 5/6) and past
-    // levels read fully done — enough to see the live badges move in mock mode.
-    stepProgress: {
-      ticketsSpent: 5 * climbed,
-      adsWatched: 7 * climbed,
-      shares: 2 * climbed,
-      referrals: Math.floor(climbed / 3),
-      engineUpgrades: climbed,
-      shardsBought: Math.floor(climbed / 2),
-      ticketsCollected: 3 * climbed,
-      // Live, not cumulative — a stake that matured stops counting, so this one
-      // deliberately does not scale with the climb.
-      activeStakes: climbed > 10 ? 2 : climbed > 5 ? 1 : 0,
-      stakesMade: climbed > 5 ? 1 : 0,
-      // Starter engine + one per ~8 days climbed, so the 2 → 3 → 4 ladder is
-      // reachable in mock mode without hand-editing this file.
-      enginesOwned: 1 + Math.floor(climbed / 8),
-      // Purchases only — the mock's climb grants one engine on level 12, and the
-      // ladder must not tick off a gift.
-      enginesBought: Math.floor(climbed / 10),
-      chipsOwned: climbed > 25 ? 1 : 0,
-      chipsEquipped: climbed > 26 ? 1 : 0,
-      ticketsBought: climbed > 1 ? 1 : 0,
-      nicknameSet: climbed > 2 ? 1 : 0,
-      walletConnected: climbed > 6 ? 1 : 0,
-      channelBoosted: climbed > 3 ? 1 : 0,
-    },
+    stepProgress,
+    stepsComplete: unmet.length === 0,
+    stepsRemaining: unmet.length,
   };
 };
 
@@ -372,8 +390,9 @@ export const testQuestMock = {
   'test-quest': () => view(),
   'POST test-quest/claim': () => {
     const before = view();
-    // Mirror the server gate: no advance without a channel subscription.
-    if (!before.finished && channelSubscribed) climbed += 1;
+    // Mirror the server gates: no advance without a channel subscription, and
+    // none while the level's checklist is short of its targets.
+    if (!before.finished && channelSubscribed && before.stepsComplete) climbed += 1;
     return {
       ...view(),
       granted: {},

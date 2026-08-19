@@ -1445,5 +1445,8 @@
   "diamond tournaments": "Ադամանդե մրցաշարեր",
   "next tiers title": "Ինչ է հաջորդը",
   "next tiers description": "Ավելի բարձր կարգերը բացվում են հերթով՝ մեկ առ մեկ։",
-  "tier ready for launch": "Կարգը բացված է — պատրաստ ես"
+  "tier ready for launch": "Կարգը բացված է — պատրաստ ես",
+  "finish level tasks": "Finish the level's tasks",
+  "{n} tasks left to claim": "{n} more to go before the reward opens",
+  "finish tasks to claim hint": "Every task on the list has to be done — then the reward is yours"
 }

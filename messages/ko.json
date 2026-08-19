@@ -1445,5 +1445,8 @@
   "diamond tournaments": "다이아몬드 토너먼트",
   "next tiers title": "다음 순서",
   "next tiers description": "상위 티어는 순서대로 하나씩 열립니다.",
-  "tier ready for launch": "티어 해금 — 준비 완료"
+  "tier ready for launch": "티어 해금 — 준비 완료",
+  "finish level tasks": "Finish the level's tasks",
+  "{n} tasks left to claim": "{n} more to go before the reward opens",
+  "finish tasks to claim hint": "Every task on the list has to be done — then the reward is yours"
 }

@@ -1445,5 +1445,8 @@
   "diamond tournaments": "Diamant-Turniere",
   "next tiers title": "Als Nächstes",
   "next tiers description": "Höhere Stufen öffnen der Reihe nach — eine nach der anderen.",
-  "tier ready for launch": "Stufe frei — du bist bereit"
+  "tier ready for launch": "Stufe frei — du bist bereit",
+  "finish level tasks": "Finish the level's tasks",
+  "{n} tasks left to claim": "{n} more to go before the reward opens",
+  "finish tasks to claim hint": "Every task on the list has to be done — then the reward is yours"
 }

@@ -1445,5 +1445,8 @@
   "diamond tournaments": "Tournois Diamant",
   "next tiers title": "La suite",
   "next tiers description": "Les paliers supérieurs s'ouvrent dans l'ordre, un par un.",
-  "tier ready for launch": "Palier débloqué — tu es prêt"
+  "tier ready for launch": "Palier débloqué — tu es prêt",
+  "finish level tasks": "Finish the level's tasks",
+  "{n} tasks left to claim": "{n} more to go before the reward opens",
+  "finish tasks to claim hint": "Every task on the list has to be done — then the reward is yours"
 }

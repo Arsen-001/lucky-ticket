@@ -112,6 +112,16 @@ export interface TestQuestState {
   /** Checklist of the level being climbed now (also present inside `ladder`). */
   steps?: TestQuestStepDto[];
   claimableToday: boolean;
+  /**
+   * Every blocking step of the current level is done, so the server will accept
+   * the claim. Separate from `claimableToday` on purpose: the screen has to tell
+   * "come back tomorrow" apart from "finish the checklist", and one flag cannot
+   * say both. Absent on a backend older than 19.08.2026 ⇒ treated as satisfied,
+   * because that server does not gate on the checklist either.
+   */
+  stepsComplete?: boolean;
+  /** How many blocking steps are still open — drives the "N tasks left" hint. */
+  stepsRemaining?: number;
   /** Subscribed to the official channel @luckyticket365. Required to claim ANY
    *  level's reward — read live (getChatMember) server-side. */
   channelSubscribed: boolean;

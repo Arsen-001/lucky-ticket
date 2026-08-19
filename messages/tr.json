@@ -1445,5 +1445,8 @@
   "diamond tournaments": "Elmas turnuvaları",
   "next tiers title": "Sırada ne var",
   "next tiers description": "Üst kademeler sırayla açılır — teker teker.",
-  "tier ready for launch": "Kademe açıldı — hazırsın"
+  "tier ready for launch": "Kademe açıldı — hazırsın",
+  "finish level tasks": "Finish the level's tasks",
+  "{n} tasks left to claim": "{n} more to go before the reward opens",
+  "finish tasks to claim hint": "Every task on the list has to be done — then the reward is yours"
 }

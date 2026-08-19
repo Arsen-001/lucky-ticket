@@ -19,7 +19,11 @@ export function HomeTestQuestCard() {
   const t = useAppTranslations();
   const { data } = useGetTestQuestQuery();
 
-  const claimable = data?.claimableToday ?? false;
+  // Both halves, or the gift badge promises a reward the screen will refuse:
+  // the daily gate AND the level's checklist have to be clear (@see
+  // TestQuestSteps). An older backend sends no `stepsComplete` and does not gate
+  // on it either, hence the permissive default.
+  const claimable = (data?.claimableToday ?? false) && (data?.stepsComplete ?? true);
   const level = data?.level;
 
   return (

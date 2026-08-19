@@ -67,6 +67,10 @@ export function useTestQuestScreen() {
   const claimableToday = data?.claimableToday ?? true;
   // Missing field (older backend) ⇒ don't gate — default to satisfied.
   const channelSubscribed = data?.channelSubscribed ?? true;
+  // Same default, same reason: a server that does not send this does not gate
+  // on the checklist either, so locking the button here would only lie.
+  const stepsComplete = data?.stepsComplete ?? true;
+  const stepsRemaining = data?.stepsRemaining ?? 0;
   const dailyTop = data?.dailyTopLevel ?? 4;
 
   // Prefer the live ladder from the server (admin-editable rewards); fall back to
@@ -113,7 +117,7 @@ export function useTestQuestScreen() {
   }
 
   const handleClaim = async () => {
-    if (!claimableToday || claiming || !channelSubscribed) return;
+    if (!claimableToday || claiming || !channelSubscribed || !stepsComplete) return;
     try {
       await claim().unwrap();
       setBurstId(id => id + 1);
@@ -145,6 +149,8 @@ export function useTestQuestScreen() {
     selectLevel: setSelectedLevel,
     backToToday: () => setSelectedLevel(null),
     claimableToday,
+    stepsComplete,
+    stepsRemaining,
     channelSubscribed,
     /** Server-sent checklist for a level; undefined ⇒ the caller falls back. */
     stepsFor: (level: number) => serverSteps[level],

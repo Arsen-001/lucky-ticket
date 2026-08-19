@@ -1445,5 +1445,8 @@
   "diamond tournaments": "ბრილიანტის ტურნირები",
   "next tiers title": "რა არის შემდეგ",
   "next tiers description": "მაღალი საფეხურები რიგრიგობით იხსნება — თითო-თითოდ.",
-  "tier ready for launch": "საფეხური გაიხსნა — მზად ხარ"
+  "tier ready for launch": "საფეხური გაიხსნა — მზად ხარ",
+  "finish level tasks": "Finish the level's tasks",
+  "{n} tasks left to claim": "{n} more to go before the reward opens",
+  "finish tasks to claim hint": "Every task on the list has to be done — then the reward is yours"
 }

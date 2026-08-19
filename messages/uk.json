@@ -1445,5 +1445,8 @@
   "diamond tournaments": "Діамантові турніри",
   "next tiers title": "Що далі",
   "next tiers description": "Щаблі відкриваються по черзі — по одному за раз.",
-  "tier ready for launch": "Щабель відкрито — ти готовий"
+  "tier ready for launch": "Щабель відкрито — ти готовий",
+  "finish level tasks": "Finish the level's tasks",
+  "{n} tasks left to claim": "{n} more to go before the reward opens",
+  "finish tasks to claim hint": "Every task on the list has to be done — then the reward is yours"
 }

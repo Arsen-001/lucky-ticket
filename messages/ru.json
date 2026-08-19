@@ -1445,5 +1445,8 @@
   "diamond tournaments": "Алмазные турниры",
   "next tiers title": "Что дальше",
   "next tiers description": "Тиры открываются по порядку — по одному за раз.",
-  "tier ready for launch": "Тир открыт — ты готов"
+  "tier ready for launch": "Тир открыт — ты готов",
+  "finish level tasks": "Выполните задания уровня",
+  "{n} tasks left to claim": "Осталось заданий: {n}",
+  "finish tasks to claim hint": "Награда откроется, когда выполнены все задания списка"
 }

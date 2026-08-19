@@ -1445,5 +1445,8 @@
   "diamond tournaments": "Torneios de Diamante",
   "next tiers title": "A seguir",
   "next tiers description": "Os patamares maiores abrem em ordem — um de cada vez.",
-  "tier ready for launch": "Patamar liberado — você está pronto"
+  "tier ready for launch": "Patamar liberado — você está pronto",
+  "finish level tasks": "Finish the level's tasks",
+  "{n} tasks left to claim": "{n} more to go before the reward opens",
+  "finish tasks to claim hint": "Every task on the list has to be done — then the reward is yours"
 }

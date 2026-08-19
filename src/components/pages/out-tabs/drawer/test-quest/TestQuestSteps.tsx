@@ -22,6 +22,11 @@ export interface TestQuestStepsProps {
   claimed?: boolean;
   /** Level is the current claimable one → show the claim CTA at the bottom. */
   ready?: boolean;
+  /** Server verdict: every blocking step is done, so the claim will be accepted.
+   *  The CTA is locked until it is — the checklist is a condition, not a hint. */
+  stepsComplete?: boolean;
+  /** Blocking steps still open — shown on the locked CTA's hint. */
+  stepsRemaining?: number;
   claiming?: boolean;
   onClaim?: () => void;
   /** Live channel-subscription status — drives the gate step's done-state and
@@ -30,7 +35,9 @@ export interface TestQuestStepsProps {
   /** Open the channel + re-check membership, unlocking the gate. */
   onVerifyChannel?: () => void;
   verifyingChannel?: boolean;
-  /** Live cumulative progress → fills the countable steps' badges (display-only). */
+  /** Live cumulative progress → fills the countable steps' badges. Since
+   *  19.08.2026 the server gates the claim on the same numbers, so a badge short
+   *  of its target is also the reason the CTA below is locked. */
   progress?: TestQuestProgress;
   /** Per-action total already banked by the claimed levels — used ONLY when
    *  `progress` carries no live counter for that action (older backend), never
@@ -55,6 +62,8 @@ export function TestQuestSteps({
   steps: serverSteps,
   claimed,
   ready,
+  stepsComplete = true,
+  stepsRemaining = 0,
   claiming,
   onClaim,
   channelSubscribed = true,
@@ -78,9 +87,10 @@ export function TestQuestSteps({
   // It used to be `Math.max(live, floor)` — and that froze the badge. The ladder
   // targets are cumulative LIFETIME totals, so the live counter already carries
   // over between levels on its own; the floor added nothing but an assumption
-  // that claiming a level means having done its tasks. Nothing enforces that —
-  // the checklist is display-only and the claim is gated on the channel alone —
-  // so a player who claimed day 11 (share 15) with 10 real shares saw the badge
+  // that claiming a level means having done its tasks. Nothing enforced that
+  // back then — the checklist was display-only and the claim was gated on the
+  // channel alone (it is a real condition since 19.08.2026), so a player who
+  // claimed day 11 (share 15) with 10 real shares saw the badge
   // pinned at 15/17 and unmoved by six more shares. Measured on @garmartikyan:
   // referralSharesCount=10, level 20, badge stuck at 15.
   //
@@ -91,6 +101,10 @@ export function TestQuestSteps({
 
   // The channel gate blocks the claim until the player is subscribed.
   const gateBlocked = steps.some(s => s.gate === 'channel') && !channelSubscribed;
+  // …and so does the rest of the checklist. The server refuses the claim while
+  // anything countable is short of its target (@see unmetSteps, backend), so a
+  // live CTA here would only earn the player a red toast.
+  const tasksBlocked = !gateBlocked && !stepsComplete;
 
   return (
     <div
@@ -123,7 +137,22 @@ export function TestQuestSteps({
       </div>
 
       {ready &&
-        (gateBlocked ? (
+        (tasksBlocked ? (
+          <div className="mt-0.5 flex flex-col gap-1">
+            <Button
+              disabled
+              className="flex-center w-full gap-1.5 rounded-xl bg-white/[0.06] bg-none py-2 text-[13px] font-bold text-white/45"
+            >
+              <Lock size={14} />
+              {t('finish level tasks')}
+            </Button>
+            <p className="flex-center gap-1 px-1 text-center text-[10px] leading-snug text-white/45">
+              {stepsRemaining > 0
+                ? t('{n} tasks left to claim', { n: stepsRemaining })
+                : t('finish tasks to claim hint')}
+            </p>
+          </div>
+        ) : gateBlocked ? (
           <div className="mt-0.5 flex flex-col gap-1">
             <Button
               className="flex-center w-full gap-1.5 rounded-xl py-2 text-[13px] font-bold"
