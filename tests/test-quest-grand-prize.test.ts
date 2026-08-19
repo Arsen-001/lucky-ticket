@@ -68,3 +68,21 @@ describe.skipIf(!existsSync(backendPath))('backend ↔ frontend grand-prize pari
     expect(fn.slice(0, fn.indexOf('\n}'))).toMatch(/climbedWholeLadder\(climbed\)/);
   });
 });
+
+const backendLevels = resolve(
+  process.cwd(),
+  '../lucky-ticket-backend/src/test-quest/test-quest.levels.ts'
+);
+
+describe.skipIf(!existsSync(backendLevels))('one prize, one condition', () => {
+  it('ships no second reward beside the grand prize', () => {
+    // Finishing the ladder earns the permanent capacity and nothing else: the
+    // monthly chest series and the freeze VIP grant were switched off on
+    // 19.08.2026 rather than re-priced, so there is a single prize with a single
+    // condition. Both are dormant (the panel can restore them), which is exactly
+    // why the shipped DEFAULTS are worth asserting — a deploy is what carries them.
+    const src = readFileSync(backendLevels, 'utf8');
+    expect(src).toMatch(/export const TEST_QUEST_CHEST_MONTHS = 0;/);
+    expect(src).toMatch(/export const TEST_QUEST_CROWN_VIP: TestQuestCrownVip\[\] = \[\];/);
+  });
+});

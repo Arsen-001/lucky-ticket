@@ -31,7 +31,7 @@ export interface TestQuestChainProps {
  * card on the one under the finger, for jumping far ahead.
  *
  * Once the test is frozen the climb is over — the screen collapses to the badge
- * and its monthly chests ({@link TestQuestFrozenSummary}).
+ * alone ({@link TestQuestFrozenSummary}).
  */
 export function TestQuestChain({ className }: TestQuestChainProps) {
   const t = useAppTranslations();

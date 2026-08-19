@@ -393,7 +393,10 @@ const view = () => {
     badgeLevel: null,
     frozen: false,
     chestsPaid: 0,
-    chestsTotal: 6,
+    // 0 like production: the monthly chest was switched off so that finishing the
+    // ladder earns the grand prize and nothing else. Dev must not show a series
+    // the server will never pay.
+    chestsTotal: 0,
     finished: qualified,
     stepProgress,
     stepsComplete: unmet.length === 0,

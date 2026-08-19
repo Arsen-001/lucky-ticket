@@ -16,7 +16,13 @@ export interface TestQuestFrozenSummaryProps {
 /**
  * What the screen becomes after the admin freezes the test: the climb is over,
  * so there is no ladder, no claim and nothing to look ahead to — only the badge
- * that was minted and the monthly chests it still pays out.
+ * that was minted.
+ *
+ * The monthly-chest row is drawn only when there are chests to draw. They were
+ * switched off on 19.08.2026 (`chestMonths` = 0) so that finishing the ladder
+ * earns one prize and not two, and a row reading "0/0" would advertise a series
+ * nobody will ever be paid. The mechanism is dormant, not gone — the row comes
+ * back on its own if the panel turns it back on.
  */
 export function TestQuestFrozenSummary({
   badgeLevel,
@@ -41,13 +47,15 @@ export function TestQuestFrozenSummary({
         {badgeLevel != null && <TestQuestBadge level={badgeLevel} className="shrink-0" />}
       </div>
 
-      <div className="flex items-center gap-1.5 rounded-2xl border border-white/10 bg-background-overlay p-2.5 text-[11px] text-white-secondary">
-        <Gift size={12} className="text-gold" />
-        {t('monthly chest')} ·{' '}
-        <span className="font-bold tabular-nums text-white">
-          {chestsPaid}/{chestsTotal}
-        </span>
-      </div>
+      {chestsTotal > 0 && (
+        <div className="flex items-center gap-1.5 rounded-2xl border border-white/10 bg-background-overlay p-2.5 text-[11px] text-white-secondary">
+          <Gift size={12} className="text-gold" />
+          {t('monthly chest')} ·{' '}
+          <span className="font-bold tabular-nums text-white">
+            {chestsPaid}/{chestsTotal}
+          </span>
+        </div>
+      )}
     </section>
   );
 }
