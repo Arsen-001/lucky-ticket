@@ -12,6 +12,17 @@ export interface TelegramWebAppUser {
   username?: string;
   language_code?: string;
   is_premium?: boolean;
+  /**
+   * Bot API 6.9+ — "True, if this user allowed the bot to message them"
+   * (Telegram's own wording). Absent means NOT allowed, or a client older than
+   * 6.9 that never reports it.
+   *
+   * This is the whole ballgame for notifications: a bot may not write first, so
+   * without this permission every DM the game sends that player answers
+   * `Bad Request: chat not found`. Measured on production 19.08.2026 — of ~1000
+   * engine-ready reminders, zero were delivered. @see useBotWriteAccess
+   */
+  allows_write_to_pm?: boolean;
   photo_url?: string;
 }
 
@@ -84,6 +95,16 @@ export interface TelegramWebApp {
     url: string,
     callback?: (status: 'paid' | 'cancelled' | 'failed' | 'pending') => void
   ) => void;
+  /**
+   * Bot API 6.9+ — "shows a native popup requesting permission for the bot to
+   * send messages to the user" (Telegram's own wording); the callback receives
+   * whether it was granted.
+   *
+   * Telegram only honours it in response to a real user interaction, so it must
+   * be called from inside a tap handler — never from an effect on mount.
+   * @see useBotWriteAccess
+   */
+  requestWriteAccess?: (callback?: (granted: boolean) => void) => void;
   /** Bot API 6.1+ — optional so older clients (where it is simply absent) type-check. */
   BackButton?: TelegramBackButton;
   setHeaderColor?: (color: string) => void;

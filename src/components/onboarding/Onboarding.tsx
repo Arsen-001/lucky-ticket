@@ -5,6 +5,7 @@ import { useGetMeQuery } from '@/api/me.api';
 import { useGrantWelcomePackMutation } from '@/api/engines.api';
 import { appConfig } from '@/config/app.config';
 import { useAppDispatch } from '@/lib/rtk/hooks';
+import { useBotWriteAccess } from '@/hooks/useBotWriteAccess';
 import { startTour } from '@/lib/rtk/features/onboarding-tour.slice';
 import { OnboardingLanguageStep } from '@/components/onboarding/OnboardingLanguageStep';
 import { OnboardingGiftsStep } from '@/components/onboarding/OnboardingGiftsStep';
@@ -24,6 +25,7 @@ export function Onboarding() {
   const dispatch = useAppDispatch();
   const { data: me } = useGetMeQuery();
   const [grantWelcomePack] = useGrantWelcomePackMutation();
+  const botWriteAccess = useBotWriteAccess();
   const [phase, setPhase] = useState<OnboardingPhase>('idle');
   const decidedRef = useRef(false);
 
@@ -47,6 +49,21 @@ export function Onboarding() {
   };
 
   const handleClaimGifts = () => {
+    // Ask Telegram for permission to message this player, here and nowhere
+    // earlier: this is a real tap (the client ignores the request outside a user
+    // interaction), and it lands the moment they have been handed an engine —
+    // so "let me tell you when it is full" is a promise about something they
+    // now own rather than an abstract permission prompt on a cold start.
+    //
+    // Without it the bot cannot write first, and every notification the game
+    // offers is undeliverable: production measured ZERO of ~1000 engine-ready
+    // reminders arriving on 19.08.2026. @see useBotWriteAccess
+    //
+    // Deliberately not awaited. The popup is the client's, the answer changes
+    // nothing about the gifts, and a player who dismisses it must still land in
+    // the tour rather than on a frozen screen.
+    if (botWriteAccess.canAsk) void botWriteAccess.ask();
+
     setPhase('done');
     // Grant the welcome pack (engine + tickets + AP), then start the tour (whose
     // engine step now has something to highlight). The grant patches the cache
