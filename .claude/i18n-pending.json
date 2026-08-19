@@ -1,3 +1,8 @@
 {
-  "keys": ["finish level tasks", "finish tasks to claim hint", "{n} tasks left to claim"]
+  "keys": [
+    "finish level tasks",
+    "finish tasks to claim hint",
+    "grand prize every finisher",
+    "{n} tasks left to claim"
+  ]
 }

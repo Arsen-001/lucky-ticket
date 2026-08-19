@@ -24,7 +24,9 @@ export const testBadgeSpeedBoostPct = (badgeLevel: number | null | undefined): n
 
 /**
  * The grand prize of the test quest: whole tickets of permanent CAPACITY on
- * every engine, for the single player whose badge froze at level 1.
+ * every engine, for EVERY player who finished the daily ladder. It used to be
+ * the single level-1 crown; since 19.08.2026 the climb is the price and the
+ * leaderboard only decides rank.
  *
  * EXACT mirror of the backend `testBadgeCapacityTickets` — the server mints the
  * batch this size, so a frontend that forgot it would print a smaller collect
@@ -36,7 +38,25 @@ export const testBadgeSpeedBoostPct = (badgeLevel: number | null | undefined): n
  */
 export const TEST_BADGE_CAPACITY_TICKETS = 3;
 
-export const testBadgeCapacityTickets = (badgeLevel: number | null | undefined): number => {
+/** Daily ladder floor — levels at or below it are the crown, not claimed daily. */
+export const TEST_QUEST_QUALIFY_LEVEL = 4;
+
+/** Claimed the whole daily ladder (31 → floor) — mirror of the backend predicate. */
+export const climbedWholeLadder = (climbed: number | null | undefined): boolean =>
+  (climbed ?? 0) >= TEST_QUEST_TOTAL_LEVELS - TEST_QUEST_QUALIFY_LEVEL + 1;
+
+/**
+ * Reads `climbed`, not the badge level, and the backend does the same: at freeze
+ * a player standing ON the floor with 27 claims is stamped level 4 — the same
+ * number as one who CLEARED it with 28. A `badgeLevel <= 4` test would show the
+ * prize to someone one level short of the finish, and the server would then mint
+ * a smaller batch than the screen promised.
+ */
+export const testBadgeCapacityTickets = (
+  badgeLevel: number | null | undefined,
+  climbed: number | null | undefined
+): number => {
+  // Null badge = the test is still running: the prize starts paying at freeze.
   if (badgeLevel == null) return 0;
-  return badgeLevel <= 1 ? TEST_BADGE_CAPACITY_TICKETS : 0;
+  return climbedWholeLadder(climbed) ? TEST_BADGE_CAPACITY_TICKETS : 0;
 };

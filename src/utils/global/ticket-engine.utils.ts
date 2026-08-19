@@ -313,7 +313,8 @@ export const engineCapacity = (
     capacityBooster?: InventoryBooster;
     /**
      * Permanent capacity tickets from the frozen Test-Quest badge — the quest's
-     * grand prize, held by exactly one player (@see useTestBadgeCapacityTickets).
+     * grand prize, held by everyone who finished the daily ladder
+     * (@see useTestBadgeCapacityTickets).
      * Unlike the chip and the booster it belongs to the PLAYER, not to the
      * engine, so it applies to every engine they own and has to be passed in
      * from a hook rather than read off the engine row.

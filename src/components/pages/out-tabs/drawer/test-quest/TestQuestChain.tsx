@@ -60,7 +60,7 @@ export function TestQuestChain({ className }: TestQuestChainProps) {
       <TestQuestGrandPrize
         day={s.totalDays}
         title={t('grand prize capacity {n}', { n: TEST_BADGE_CAPACITY_TICKETS })}
-        note={t('on every bronze engine forever')}
+        note={t('grand prize every finisher')}
       />
 
       <div className="flex items-baseline justify-between">

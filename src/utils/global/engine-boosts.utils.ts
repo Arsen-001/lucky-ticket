@@ -157,7 +157,7 @@ export interface EngineCapacityOptions {
   /** Must already be filtered for liveness (`findActiveBooster` does it). */
   capacityBooster?: InventoryBooster;
   /**
-   * The Test-Quest crown's permanent tickets (@see useTestBadgeCapacityTickets).
+   * A Test-Quest finisher's permanent tickets (@see useTestBadgeCapacityTickets).
    * Itemised here for the same reason it is summed in `engineCapacity`: the
    * breakdown has to add up to the batch, and a source left out of the list
    * makes the reactor face contradict the number printed beside it.

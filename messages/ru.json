@@ -1448,5 +1448,6 @@
   "tier ready for launch": "Тир открыт — ты готов",
   "finish level tasks": "Выполните задания уровня",
   "{n} tasks left to claim": "Осталось заданий: {n}",
-  "finish tasks to claim hint": "Награда откроется, когда выполнены все задания списка"
+  "finish tasks to claim hint": "Награда откроется, когда выполнены все задания списка",
+  "grand prize every finisher": "Всем, кто пройдёт все 31 день — на бронзовые двигатели, навсегда"
 }

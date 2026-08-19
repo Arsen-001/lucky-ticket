@@ -15,8 +15,8 @@ export interface TestQuestGrandPrizeProps {
 }
 
 /**
- * The one prize that is not a daily drop: it belongs to whoever reaches level 1,
- * and there is exactly one of it.
+ * The one prize that is not a daily drop: it belongs to everyone who finishes the
+ * whole daily ladder, however the leaderboard then ranks them.
  *
  * The card holds its place from day 1 — an empty gold slot still says "there is
  * something at the top", which is why it sits above today's card instead of at

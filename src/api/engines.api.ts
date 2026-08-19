@@ -233,15 +233,12 @@ export const enginesApi = api.injectEndpoints({
           getState() as Parameters<ReturnType<typeof inventoryApi.endpoints.getInventory.select>>[0]
         ).data;
         const tables = levelTablesFromState(getState());
-        // The Test-Quest crown's permanent capacity tickets are part of that
+        // The Test-Quest finisher's permanent capacity tickets are part of that
         // batch on the server, so they are part of it here too.
-        const badgeCapacity = testBadgeCapacityTickets(
-          testQuestApi.endpoints.getTestQuest.select()(
-            getState() as Parameters<
-              ReturnType<typeof testQuestApi.endpoints.getTestQuest.select>
-            >[0]
-          ).data?.badgeLevel
-        );
+        const quest = testQuestApi.endpoints.getTestQuest.select()(
+          getState() as Parameters<ReturnType<typeof testQuestApi.endpoints.getTestQuest.select>>[0]
+        ).data;
+        const badgeCapacity = testBadgeCapacityTickets(quest?.badgeLevel, quest?.climbed);
         // The boldest prediction of the three claim paths: with nothing pending
         // it invents a whole batch from `engineCapacity` — client-side math over
         // chips, boosters, the badge prize and admin-tunable tables — instead of
@@ -432,10 +429,10 @@ export const enginesApi = api.injectEndpoints({
           getState() as Parameters<ReturnType<typeof testQuestApi.endpoints.getTestQuest.select>>[0]
         ).data;
         const badgeSpeedPct = testBadgeSpeedBoostPct(testQuest?.badgeLevel);
-        // Its capacity half travels with it: the crown's permanent tickets grow
+        // Its capacity half travels with it: a finisher's permanent tickets grow
         // the batch the server mints, and — one ticket costing one tier cycle —
         // the cycle this loop is deciding against.
-        const badgeCapacity = testBadgeCapacityTickets(testQuest?.badgeLevel);
+        const badgeCapacity = testBadgeCapacityTickets(testQuest?.badgeLevel, testQuest?.climbed);
         const tables = levelTablesFromState(getState());
         const patch = dispatch(
           ticketsApi.util.updateQueryData('getTickets', undefined, draft => {

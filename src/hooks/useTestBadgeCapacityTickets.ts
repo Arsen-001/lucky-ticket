@@ -3,8 +3,8 @@ import { testBadgeCapacityTickets } from '@/utils/global/testQuest.utils';
 
 /**
  * Permanent capacity tickets from the frozen "Тестировщик" badge — the test
- * quest's grand prize, and 0 for everyone but the one player whose badge froze
- * at level 1.
+ * quest's grand prize, paid to every player who finished the daily ladder and 0
+ * for everyone who stopped short.
  *
  * Pass the result as `badgeCapacityTickets` to `engineCapacity` /
  * `effectiveCycleSeconds` wherever a batch or a cycle is computed, next to
@@ -14,11 +14,15 @@ import { testBadgeCapacityTickets } from '@/utils/global/testQuest.utils';
  * the server is counting).
  */
 export const useTestBadgeCapacityTickets = (): number => {
-  // Scoped to badgeLevel alone, like `useTestBadgeSpeedBoostPct`: the rest of
-  // the test-quest payload changes far more often and would re-render every
-  // engine cube for nothing.
-  const { badgeLevel } = useGetTestQuestQuery(undefined, {
-    selectFromResult: ({ data }) => ({ badgeLevel: data?.badgeLevel ?? null }),
+  // Scoped to the two fields the prize depends on, like
+  // `useTestBadgeSpeedBoostPct`: the rest of the test-quest payload changes far
+  // more often and would re-render every engine cube for nothing. Both are
+  // frozen once the badge is minted, so this selector settles for good.
+  const { badgeLevel, climbed } = useGetTestQuestQuery(undefined, {
+    selectFromResult: ({ data }) => ({
+      badgeLevel: data?.badgeLevel ?? null,
+      climbed: data?.climbed ?? 0,
+    }),
   });
-  return testBadgeCapacityTickets(badgeLevel);
+  return testBadgeCapacityTickets(badgeLevel, climbed);
 };
