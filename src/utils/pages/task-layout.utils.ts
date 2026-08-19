@@ -48,26 +48,44 @@ const SHORT_LIST_MAX = 2;
 const ROW_ONCE_CATEGORIES = new Set<TaskCategory>([TaskCategory.SOCIAL, TaskCategory.PROFILE]);
 
 /**
+ * Reward chips a row can carry before the title starts paying for them.
+ *
+ * The row lays icon · title · rewards · CTA on one line, so every chip is width
+ * taken from the headline. Two is what fits; at four the title collapsed to
+ * ~40px and «Boost the channel» rendered as «Boos th…» (`f34f5aa`). Measured
+ * per section rather than assumed per category, because the catalog is edited
+ * from the admin panel: Profile hit exactly this with «Connect a TON wallet»,
+ * whose four chips (LC · tickets · star · AP) make it the heaviest one-off on
+ * the tab after the channel boost.
+ */
+const ROW_MAX_REWARDS = 2;
+
+/**
  * The shape a whole section is drawn in.
  *
  * Daily and weekly are always full cards — only the card opens the sub-step
  * accordion, and the weekly «Check in 7 days this week» ships seven steps. The
- * one-time tab is where the shapes differ, and `taskCount` is part of that
- * call rather than a category-by-category assumption: the row was picked for
+ * one-time tab is where the shapes differ, and the section's own tasks are part
+ * of that call rather than a category-by-category assumption: the row was picked for
  * Social because that list used to be long, and the production catalog holds
  * exactly one Social task — «Boost the channel», the priciest one-off on the
  * tab. In a row its four reward chips took the whole width and left the title
  * ~40px, so it rendered as «Boos th…», with the subtitle naming its Telegram
  * Premium requirement behind a tap that navigates instead of expanding.
  *
- * The catalog is edited from the admin panel, so the count is read at render
- * rather than baked in: add a few Social follows back and the list earns the
- * row shape again on its own.
+ * The catalog is edited from the admin panel, so the section is measured at
+ * render rather than baked in: add a few light Social follows back and the list
+ * earns the row shape again on its own.
+ *
+ * Two things are measured, not one — length AND the heaviest reward strip in
+ * the section. Length alone said «three Profile tasks, long enough for rows»
+ * and handed the row the same four-chip task that had just broken it in
+ * Social.
  */
 export const layoutForCategory = (
   category: TaskCategory,
   frequency: TaskFrequency,
-  taskCount: number
+  tasks: readonly Pick<Task, 'rewards'>[]
 ): TaskLayout => {
   if (frequency !== TaskFrequency.ONCE) return 'cards';
   // Achievements carry art of their own — a rarity medal — and the longest
@@ -76,6 +94,7 @@ export const layoutForCategory = (
   // The VIP ladder: 11 near-identical steps that differ by a number, so the
   // single-line card is the right density here.
   if (category === TaskCategory.PROFILE_STATUS) return 'compact-cards';
-  if (ROW_ONCE_CATEGORIES.has(category)) return taskCount > SHORT_LIST_MAX ? 'rows' : 'cards';
-  return 'grid';
+  if (!ROW_ONCE_CATEGORIES.has(category)) return 'grid';
+  const heaviest = tasks.reduce((max, task) => Math.max(max, task.rewards?.length ?? 0), 0);
+  return tasks.length > SHORT_LIST_MAX && heaviest <= ROW_MAX_REWARDS ? 'rows' : 'cards';
 };

@@ -912,7 +912,7 @@ export function TasksContent() {
                   highlightToken?.category === cat.category ? highlightToken.nonce : null
                 }
                 taskHighlight={taskHighlight}
-                layout={layoutForCategory(cat.category, activeFrequency, regularTasks.length)}
+                layout={layoutForCategory(cat.category, activeFrequency, regularTasks)}
                 collapsible={
                   cat.category === TaskCategory.ACHIEVEMENTS &&
                   activeFrequency === TaskFrequency.ONCE
