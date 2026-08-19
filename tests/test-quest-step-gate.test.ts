@@ -60,4 +60,16 @@ describe('test-quest — the screen respects the checklist gate', () => {
     // in the only environment anyone actually clicks through.
     expect(src).toMatch(/channelSubscribed && before\.stepsComplete/);
   });
+
+  it('the mock drops a Premium-only step the same way the server does', () => {
+    // Level 27 asks for a channel boost — a paid Telegram perk. The server sends
+    // that row only to Premium players; a mock that shows it to everyone would
+    // make dev disagree with production about what the level even asks for.
+    const src = read(MOCK);
+    expect(src).toMatch(/requires: 'telegramPremium'/);
+    expect(src).toMatch(/step\.requires !== 'telegramPremium' \|\| MOCK_TELEGRAM_PREMIUM/);
+    // The ladder must serve the filtered list, not the raw catalog.
+    expect(src).toMatch(/steps: mockStepsForPlayer\(l\.level\)/);
+    expect(src).not.toMatch(/steps: MOCK_STEPS\[l\.level\]/);
+  });
 });

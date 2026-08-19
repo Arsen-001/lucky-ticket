@@ -22,6 +22,13 @@ export interface TestQuestStepDto {
   action?: string;
   kind: string;
   gate?: string;
+  /**
+   * Precondition on WHO the step belongs to — currently only `'telegramPremium'`
+   * (the level-27 channel boost). The server already drops steps the player does
+   * not qualify for, so the app never has to act on this; it travels with the
+   * wire shape so the mock can mirror the same filter.
+   */
+  requires?: string;
 }
 
 /** One ladder card (31 → 1), server-provided so admin reward edits render live. */

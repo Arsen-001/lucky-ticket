@@ -79,7 +79,15 @@ const MOCK_STEPS: Record<number, TestQuestStepDto[]> = {
     { labelKey: 'quest step watch ads', target: 15, action: 'adsWatched', kind: 'ads' },
     { labelKey: 'quest step share', target: 6, action: 'shares', kind: 'share' },
     { labelKey: 'quest step upgrade engine', target: 4, action: 'engineUpgrades', kind: 'engine' },
-    { labelKey: 'quest step boost channel', target: 1, action: 'channelBoosted', kind: 'boost' },
+    // Premium-only, exactly like the server's catalog: a channel boost is a paid
+    // Telegram perk, so the row exists for Premium players and for nobody else.
+    {
+      labelKey: 'quest step boost channel',
+      target: 1,
+      action: 'channelBoosted',
+      kind: 'boost',
+      requires: 'telegramPremium',
+    },
     { labelKey: 'quest step channel gate', kind: 'channel', gate: 'channel' },
   ],
   26: [
@@ -304,17 +312,24 @@ const MOCK_STEPS: Record<number, TestQuestStepDto[]> = {
 };
 
 /**
- * Countable steps of a level the fake progress below has NOT reached — the mock
- * side of the server's `unmetSteps`. `channelBoosted` is excluded there too: it
- * needs a Telegram Premium boost, so it is a bonus line and never a wall.
+ * The mock player is not on Telegram Premium — the common case, and the one that
+ * has to be right: a Premium-only step must be absent from their checklist, not
+ * merely unenforced. Flip to `true` to see the level-27 boost row in dev.
  */
-const unmetMockSteps = (level: number, progress: Record<string, number>) =>
+const MOCK_TELEGRAM_PREMIUM = false;
+
+/** Mock side of the server's `stepsForPlayer` — drops steps that are not this
+ *  player's to do, so dev sees the same list production would send. */
+const mockStepsForPlayer = (level: number) =>
   (MOCK_STEPS[level] ?? []).filter(
-    step =>
-      step.action &&
-      step.target != null &&
-      step.action !== 'channelBoosted' &&
-      (progress[step.action] ?? 0) < step.target
+    step => step.requires !== 'telegramPremium' || MOCK_TELEGRAM_PREMIUM
+  );
+
+/** Countable steps of a level the fake progress below has NOT reached — the mock
+ *  side of the server's `unmetSteps`. */
+const unmetMockSteps = (level: number, progress: Record<string, number>) =>
+  mockStepsForPlayer(level).filter(
+    step => step.action && step.target != null && (progress[step.action] ?? 0) < step.target
   );
 
 const view = () => {
@@ -369,7 +384,7 @@ const view = () => {
         level: l.level,
         task: '',
         rewardLabel: l.drop,
-        steps: MOCK_STEPS[l.level] ?? [],
+        steps: mockStepsForPlayer(l.level),
       })),
     claimableToday: !qualified,
     channelSubscribed,
