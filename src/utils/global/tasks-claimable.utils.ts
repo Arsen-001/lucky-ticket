@@ -14,10 +14,20 @@ import { type Route, routes } from '@/constants/routes';
  */
 
 /**
- * Profile and Partners are intentionally absent from the one-time tab — Profile
- * setup lives in Settings, Partners in the advertiser cabinet.
+ * Partners is intentionally absent from the one-time tab — those live in the
+ * advertiser cabinet.
+ *
+ * Profile used to sit here too, on the reasoning that profile setup belongs in
+ * Settings. The effect was that «Pick a nickname», «Connect a TON wallet» and
+ * «Make your first deposit» were rendered by nothing at all: the predicate
+ * hides the chip AND the section, and no other screen lists one-time tasks. Not
+ * one of the three had ever been claimed — 0 rows on production 19.08.2026 —
+ * not because nobody qualified (21 wallets are connected) but because there was
+ * no button. They pay 1 700 LC + 11 tickets + 1 star + 10 AP for exactly the
+ * three actions worth paying for, and their deeplinks (`/wallet`,
+ * `/settings/username`) both resolve.
  */
-const HIDDEN_ONCE_CATEGORIES = new Set<TaskCategory>([TaskCategory.PROFILE, TaskCategory.PARTNERS]);
+const HIDDEN_ONCE_CATEGORIES = new Set<TaskCategory>([TaskCategory.PARTNERS]);
 
 /**
  * Does this category render at all in this tab. `adsEnabled` is the admin kill
