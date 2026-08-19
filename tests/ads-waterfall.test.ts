@@ -20,7 +20,10 @@ type AdsModule = typeof import('@/lib/ads');
 const AD_ENV_KEYS = [
   'NEXT_PUBLIC_ADSGRAM_BLOCK_ID',
   'NEXT_PUBLIC_MONETAG_ZONE_ID',
+  'NEXT_PUBLIC_RICHADS_PUB_ID',
+  'NEXT_PUBLIC_RICHADS_APP_ID',
   'NEXT_PUBLIC_AD_PROVIDERS',
+  'NEXT_PUBLIC_AD_ROTATE_EVERY',
 ] as const;
 
 async function loadAds(
@@ -162,5 +165,153 @@ describe('rewarded-ad waterfall', () => {
 
     // Configured but no SDK on the page — `error`, and no free reward.
     expect(await ads.showRewardedAd()).toEqual({ outcome: 'error', provider: 'adsgram' });
+  });
+
+  it('gives up on an SDK that never answers, and does not open a second ad', async () => {
+    // Neither resolve nor reject — the case no network documents and the one
+    // that used to freeze the watch button for the rest of the session.
+    stubAdsgram(new Error('unused'));
+    (globalThis as Record<string, unknown>).window = {
+      Adsgram: {
+        init: () => ({ show: () => new Promise(() => {}), addEventListener: () => {} }),
+      },
+    };
+    const ads = await loadAds({
+      NEXT_PUBLIC_ADSGRAM_BLOCK_ID: BLOCK_ID,
+      NEXT_PUBLIC_MONETAG_ZONE_ID: ZONE_ID,
+    });
+
+    vi.useFakeTimers();
+    try {
+      const pending = ads.showRewardedAd();
+      await vi.advanceTimersByTimeAsync(90_000);
+
+      // `adsgram`, not `monetag`: the silent ad may still be on screen, so the
+      // chain stops rather than stacking a second video on top of it.
+      expect(await pending).toEqual({ outcome: 'error', provider: 'adsgram' });
+    } finally {
+      vi.useRealTimers();
+    }
+  });
+
+  it('moves a network that had no fill to the back of the chain', async () => {
+    stubAdsgram(new Error('AdsgramError'), 'onBannerNotFound');
+    const ads = await loadAds({
+      NEXT_PUBLIC_ADSGRAM_BLOCK_ID: BLOCK_ID,
+      NEXT_PUBLIC_MONETAG_ZONE_ID: ZONE_ID,
+    });
+
+    // The result names the LAST network asked, so it reads the order back.
+    // First watch: adsgram (empty) → monetag, which has no SDK tag and errors.
+    expect((await ads.showRewardedAd()).provider).toBe('monetag');
+
+    // Second watch: adsgram answered `noAd` a moment ago, so it is asked last
+    // and the player no longer pays its round-trip before reaching a network
+    // that might fill. Monetag keeps its place — an `error` says nothing about
+    // that network's inventory, so only `noAd` demotes.
+    expect((await ads.showRewardedAd()).provider).toBe('adsgram');
+  });
+
+  it('demotes an empty network but never drops it out of the chain', async () => {
+    stubAdsgram(new Error('AdsgramError'), 'onBannerNotFound');
+    const ads = await loadAds({ NEXT_PUBLIC_ADSGRAM_BLOCK_ID: BLOCK_ID });
+
+    expect(await ads.showRewardedAd()).toEqual({ outcome: 'noAd', provider: 'adsgram' });
+
+    // The money rule: an emptied chain would report `unavailable`, which is the
+    // dev/mock path that grants the reward outright. A no-fill must never be
+    // able to reach it.
+    expect(await ads.showRewardedAd()).toEqual({ outcome: 'noAd', provider: 'adsgram' });
+  });
+
+  it('gives each network its turn instead of one taking nearly everything', async () => {
+    // Adsgram fills 97% on production, so a strict waterfall asks Monetag about
+    // twice per hundred views — too little to earn from and far too little to
+    // ever compare against. Rotation is what puts a measurable share in front
+    // of the second network, and what keeps a viewer's later views away from a
+    // pool that has already been frequency-capped.
+    const ads = await loadAds({
+      NEXT_PUBLIC_ADSGRAM_BLOCK_ID: BLOCK_ID,
+      NEXT_PUBLIC_MONETAG_ZONE_ID: ZONE_ID,
+      NEXT_PUBLIC_AD_PROVIDERS: 'adsgram,monetag',
+      NEXT_PUBLIC_AD_ROTATE_EVERY: '2',
+    });
+
+    // Nothing is stubbed, so every network errors and the result names the LAST
+    // one asked — which reads the order back. Two views each, then it swaps.
+    const asked = [];
+    for (let view = 0; view < 6; view++) asked.push((await ads.showRewardedAd(view)).provider);
+
+    expect(asked).toEqual([
+      'monetag',
+      'monetag', // views 0–1: adsgram first
+      'adsgram',
+      'adsgram', // views 2–3: monetag first
+      'monetag',
+      'monetag', // views 4–5: back to adsgram
+    ]);
+  });
+
+  it('alternates on every view by default', async () => {
+    // The default is 1, not 2: spreading a player's views across as many
+    // uncapped demand pools as possible is the whole point, and two in a row
+    // already spends the second on demand the first one dented.
+    const ads = await loadAds({
+      NEXT_PUBLIC_ADSGRAM_BLOCK_ID: BLOCK_ID,
+      NEXT_PUBLIC_MONETAG_ZONE_ID: ZONE_ID,
+      NEXT_PUBLIC_AD_PROVIDERS: 'adsgram,monetag',
+    });
+
+    const asked = [];
+    for (let view = 0; view < 4; view++) asked.push((await ads.showRewardedAd(view)).provider);
+
+    // Nothing stubbed → every network errors and the result names the last one
+    // asked, so this reads the turn order back.
+    expect(asked).toEqual(['monetag', 'adsgram', 'monetag', 'adsgram']);
+  });
+
+  it('rotates on the view number, not on state of its own', async () => {
+    // The player reloads the Mini App mid-day. A counter kept in this module
+    // would restart at the top and quietly hand the first network more than its
+    // share — the exact bias the rotation exists to remove.
+    const env = {
+      NEXT_PUBLIC_ADSGRAM_BLOCK_ID: BLOCK_ID,
+      NEXT_PUBLIC_MONETAG_ZONE_ID: ZONE_ID,
+      NEXT_PUBLIC_AD_ROTATE_EVERY: '2',
+    };
+    const before = await loadAds(env);
+    const atViewFour = (await before.showRewardedAd(4)).provider;
+
+    // A fresh import is a fresh page load, with every module-level map empty.
+    const after = await loadAds(env);
+    expect((await after.showRewardedAd(4)).provider).toBe(atViewFour);
+  });
+
+  it('keeps the strict waterfall when rotation is switched off', async () => {
+    const ads = await loadAds({
+      NEXT_PUBLIC_ADSGRAM_BLOCK_ID: BLOCK_ID,
+      NEXT_PUBLIC_MONETAG_ZONE_ID: ZONE_ID,
+      NEXT_PUBLIC_AD_PROVIDERS: 'adsgram,monetag',
+      NEXT_PUBLIC_AD_ROTATE_EVERY: '0',
+    });
+
+    // Every view starts at adsgram, so every chain ends on monetag.
+    for (let view = 0; view < 4; view++) {
+      expect((await ads.showRewardedAd(view)).provider).toBe('monetag');
+    }
+  });
+
+  it('skips RichAds until BOTH of its ids are set', async () => {
+    // Its controller needs pubId and appId together; a half-filled config must
+    // behave as "not wired" rather than initialise and fail on every watch.
+    const halfWired = await loadAds({ NEXT_PUBLIC_RICHADS_PUB_ID: '792361' });
+    expect(await halfWired.showRewardedAd()).toEqual({ outcome: 'unavailable', provider: null });
+
+    const wired = await loadAds({
+      NEXT_PUBLIC_RICHADS_PUB_ID: '792361',
+      NEXT_PUBLIC_RICHADS_APP_ID: '1396',
+    });
+    // No SDK on the page — `error`, and no free reward.
+    expect(await wired.showRewardedAd()).toEqual({ outcome: 'error', provider: 'richads' });
   });
 });

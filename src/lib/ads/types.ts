@@ -35,8 +35,13 @@ export type RewardedAdFailure = Extract<RewardedAdOutcome, 'noAd' | 'tooFast' | 
  * for the app's own promo, which always filled and therefore ended every
  * waterfall; it is gone on purpose, so a no-fill reports the network that
  * refused (17.08.2026).
+ *
+ * Adding one here is not enough: the id is validated server-side by
+ * `@IsIn(AD_PROVIDERS)` on `POST /tasks/ads/watch` and `…/attempt`, so a
+ * network missing from `src/admin/ad-networks.constants.ts` in the backend
+ * makes every watch 400 — the reward is lost, not merely unreported.
  */
-export type AdProviderId = 'adsgram' | 'monetag';
+export type AdProviderId = 'adsgram' | 'monetag' | 'richads';
 
 /**
  * Outcome plus the provider that produced it. The backend needs the provider

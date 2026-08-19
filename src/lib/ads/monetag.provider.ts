@@ -1,4 +1,5 @@
 import { Env } from '@/services/environment.service';
+import { classifyFastReject } from './fast-reject';
 import type { AdProvider, RewardedAdOutcome } from './types';
 
 /**
@@ -21,14 +22,6 @@ type MonetagShowOptions = {
 };
 
 type MonetagShow = (options?: MonetagShowOptions) => Promise<void>;
-
-/**
- * A rejection faster than this almost certainly means "nothing to show" rather
- * than "the user watched some of it and closed it" — the SDK gives no reason
- * code, so the elapsed time is the only signal that separates the two. The
- * distinction matters: a skip must NOT fall through to the next provider.
- */
-const NO_FILL_REJECT_MS = 2000;
 
 function getZoneId(): string | undefined {
   return Env.monetagZoneId || undefined;
@@ -71,8 +64,8 @@ async function show(): Promise<Exclude<RewardedAdOutcome, 'unavailable'>> {
     await showAd({ ymid: nextYmid() });
     return 'completed';
   } catch {
-    // The SDK rejects without a reason code; see NO_FILL_REJECT_MS.
-    return performance.now() - startedAt < NO_FILL_REJECT_MS ? 'noAd' : 'skipped';
+    // The SDK rejects without a reason code; see `classifyFastReject`.
+    return classifyFastReject(startedAt);
   }
 }
 

@@ -21,6 +21,23 @@ export const mergeRewards = (rewards: TaskReward[]): TaskReward[] => {
 };
 
 /**
+ * Did this payout amount to nothing at all?
+ *
+ * The claim modal is a "you won" screen: it puts the prize at headline size and
+ * the rest in a chip row. Handed a payout of zero it still draws all of that —
+ * an empty prize over an empty row — which is what a player sees as "the ad
+ * gave me nothing" and reports as a broken modal.
+ *
+ * A rewarded view really can pay zero (the day's cap is spent), so the answer
+ * is not to hide the zero but to stop calling it a win. Kept here as a check on
+ * the DATA rather than a rule about caps: whatever reason a payout comes back
+ * empty for — a cap, a ladder rung nobody configured, a backend that got its
+ * arithmetic wrong at the boundary — the modal must not celebrate it.
+ */
+export const isEmptyPayout = (rewards: TaskReward[] | null | undefined): boolean =>
+  !rewards?.some(reward => reward.amount > 0);
+
+/**
  * What kind of "no" a claim got back — the Tasks screen offers Retry for
  * exactly one of them.
  *

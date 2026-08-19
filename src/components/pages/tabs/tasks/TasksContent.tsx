@@ -50,7 +50,11 @@ import { AdsSection } from './AdsSection';
 import { AdUnavailableModal, type AdUnavailableReason } from './AdUnavailableModal';
 import { BuyExtraAdsModal } from './BuyExtraAdsModal';
 import { ClaimRewardModal, type RewardModalResult } from './ClaimRewardModal';
-import { classifyClaimError, type ClaimErrorKind } from '@/utils/pages/task-claim.utils';
+import {
+  classifyClaimError,
+  type ClaimErrorKind,
+  isEmptyPayout,
+} from '@/utils/pages/task-claim.utils';
 import { ArrivalShine } from '@/components/shared/ArrivalShine';
 import { triggerHaptic } from '@/utils/global/haptic.utils';
 import { layoutForCategory } from '@/utils/pages/task-layout.utils';
@@ -611,7 +615,7 @@ export function TasksContent() {
     // network in turn. Only a genuine completion (or the no-network dev/mock
     // fallback) records the watch; an empty chain ends in one modal naming the
     // reason, and nothing stands in for the missing video.
-    const { outcome, provider } = await showRewardedAd();
+    const { outcome, provider } = await showRewardedAd(slot.index);
     // An attempt that pays nothing still happened, and to the network that
     // showed the ad it counts as an impression. Reported fire-and-forget: it
     // grants nothing, so a failed report must not bother a player who already
@@ -636,7 +640,7 @@ export function TasksContent() {
     // `onNonStopShow` and the player reads that as a broken button. Timed from
     // here — the end of the ad — not from when the grant call comes back.
     setAdReadyAt(adPauseDeadline());
-    preloadAd();
+    preloadAd(slot.index + 1);
 
     await grantAdReward(slot, provider ?? undefined);
   };
@@ -662,6 +666,20 @@ export function TasksContent() {
         provider: skipped ? undefined : provider,
         skipped: skipped || undefined,
       }).unwrap();
+      // A view that paid nothing must not open a "you won" screen with an
+      // empty prize inside it — that is exactly what a player reports as "the
+      // ad gave me nothing". The honest answer is the same one a refused claim
+      // gets, and it carries no Retry: the video is spent either way.
+      if (isEmptyPayout(res.rewards)) {
+        setPendingClaim({
+          id: slot.id,
+          open: true,
+          status: 'failed',
+          failure: 'rejected',
+          result: null,
+        });
+        return;
+      }
       setPendingClaim({
         id: slot.id,
         open: true,
