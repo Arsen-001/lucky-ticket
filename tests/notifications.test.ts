@@ -132,3 +132,57 @@ describe('notification filter parity', () => {
     );
   });
 });
+
+describe('notification preference parity', () => {
+  const backendRoot = resolve(process.cwd(), '../lucky-ticket-backend');
+  const hasBackend = existsSync(backendRoot);
+
+  const settingsSource = readFileSync(
+    resolve(
+      process.cwd(),
+      'src/components/pages/out-tabs/drawer/settings/NotificationPreferencesSection.tsx'
+    ),
+    'utf8'
+  );
+  /** The `key:` of every row in the screen's CATEGORIES list, in order. */
+  const rows = [
+    ...(
+      settingsSource.match(/const CATEGORIES: CategoryDef\[\] = \[([\s\S]*?)\n\];/)?.[1] ?? ''
+    ).matchAll(/key: '([^']+)'/g),
+  ].map(m => m[1]);
+
+  /**
+   * The settings screen and the backend's `DEFAULT_PREFS` are one list written
+   * twice, and both halves fail silently when they drift: a row with no key
+   * behind it is a switch that saves nothing, and a key with no row is a
+   * message the player has no way to turn off. Nothing else notices — the
+   * PATCH takes any key, and an absent one just keeps its default `true`.
+   */
+  it.runIf(hasBackend)('renders one switch per backend preference key', () => {
+    const service = readFileSync(
+      resolve(backendRoot, 'src/notifications/notifications.service.ts'),
+      'utf8'
+    );
+    const telegram = service.match(/telegram: \{([^}]*)\}/)?.[1] ?? '';
+    const keys = [...telegram.matchAll(/(\w+):\s*(?:true|false)/g)].map(m => m[1]);
+
+    expect(keys).not.toHaveLength(0);
+    expect([...rows].sort()).toEqual([...keys].sort());
+  });
+
+  /** Same list a third time, as the union the component's `key` is typed by. */
+  it('types every rendered switch as a preference key', () => {
+    const union = readFileSync(
+      resolve(process.cwd(), 'src/types/interfaces/notifications.interfaces.ts'),
+      'utf8'
+    );
+    const declared = [
+      ...(union.match(/export type NotificationPreferenceKey =([\s\S]*?);/)?.[1] ?? '').matchAll(
+        /'([^']+)'/g
+      ),
+    ].map(m => m[1]);
+
+    expect(declared).not.toHaveLength(0);
+    expect([...rows].sort()).toEqual([...declared].sort());
+  });
+});

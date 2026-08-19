@@ -53,6 +53,7 @@ export type NotificationPreferenceKey =
   | 'tournamentEnd'
   | 'invites'
   | 'stake'
+  | 'engines'
   | 'gifts'
   | 'friends'
   | 'achievements'

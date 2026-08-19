@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import {
   Award,
+  Cog,
   Flag,
   Gift,
   Layers,
@@ -83,6 +84,14 @@ const CATEGORIES: CategoryDef[] = [
     accent: 'purple',
     labelKey: 'staking ready',
     descriptionKey: 'staking ready description',
+  },
+  {
+    key: 'engines',
+    icon: Cog,
+    fg: 'text-electric-purple',
+    accent: 'purple',
+    labelKey: 'engine ready',
+    descriptionKey: 'engine ready description',
   },
   {
     key: 'gifts',
