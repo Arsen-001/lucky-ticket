@@ -8,17 +8,20 @@ import { TEST_QUEST_TOTAL_LEVELS } from '@/constants/testQuest.constants';
 import type { TicketEngine } from '@/types/interfaces/ticket.interfaces';
 
 /**
- * Reproduction + guardrail for the "«Ускорить» не тратит звёзды" bug (@mikaevn).
+ * Guardrail for the "«Ускорить» не тратит звёзды" bug (@mikaevn), kept alive
+ * after the boost that caused it was removed.
  *
- * The backend applies the frozen Test-Quest badge speed boost to engine
- * readiness (`computeEngineState`). The frontend re-derives the cycle from base
- * values, so when it OMITS the badge boost it still thinks the engine is
- * mid-cycle — and keeps offering a paid "Ускорить" — after the server already
- * considers it ready. Tapping it hits `skipCycle`'s free no-op (`state.ready`),
- * so the optimistic star charge reverts and the stars are "never spent", forever.
+ * The backend applies any frozen Test-Quest badge speed boost to engine
+ * readiness (`computeEngineState`), and the app re-derives the cycle from base
+ * values. When the two disagreed, the app kept offering a paid "Ускорить" on an
+ * engine the server already considered ready; the tap hit `skipCycle`'s free
+ * no-op and the optimistic star charge reverted — stars "never spent", forever.
  *
- * These tests drive the REAL frontend cycle math to pin that the badge boost is
- * now applied (readiness matches the server → the phantom paid skip is gone).
+ * Since 19.08.2026 the badge grants ONE thing, permanent bronze capacity, so the
+ * boost is 0 on both sides and the divergence has nothing to open on. That is
+ * what these tests now pin: not "the boost is applied", but "both sides agree" —
+ * which is the property that actually prevented the bug, and the one that must
+ * survive the boost being switched back on.
  */
 
 const buildEngine = (elapsedSeconds: number): TicketEngine => ({
@@ -32,37 +35,44 @@ const buildEngine = (elapsedSeconds: number): TicketEngine => ({
 });
 
 describe('engine badge-boost readiness (skip-cost bug repro)', () => {
-  // A level-1 badge is +15% → the server's cycle is 7200 / 1.15 ≈ 6261s. Elapsed
-  // is picked INSIDE the divergence window: past the boosted cycle (server ready)
-  // but before the un-boosted one (old frontend still counting down).
-  const BADGE_PCT = testBadgeSpeedBoostPct(1);
   const engine = buildEngine(6600);
   const elapsed = engineElapsedSeconds(engine);
 
-  it('level-1 badge is a +15% boost', () => {
-    expect(BADGE_PCT).toBe(15);
+  it('the badge grants no speed at any level', () => {
+    // The whole reward of finishing is permanent bronze capacity. A non-zero
+    // here would be a second prize sneaking back in through the engine math.
+    for (let level = 1; level <= TEST_QUEST_TOTAL_LEVELS; level += 1) {
+      expect(testBadgeSpeedBoostPct(level)).toBe(0);
+    }
+    expect(testBadgeSpeedBoostPct(null)).toBe(0);
   });
 
-  it('WITHOUT the badge boost the frontend wrongly keeps the engine running → paid skip (the bug)', () => {
-    const cycle = effectiveCycleSeconds(engine, {}); // old behaviour: no badge input
-    expect(cycle).toBe(7200);
-    expect(elapsed).toBeLessThan(cycle); // "not ready" → a paid "Ускорить" is shown
-    const skipCost = Math.max(1, Math.ceil((cycle - elapsed) / 3600));
-    expect(skipCost).toBeGreaterThanOrEqual(1); // UI charges ≥1⭐ that the server won't take
+  it('readiness matches the server, so no phantom paid skip can open', () => {
+    // Both sides run the base cycle: passing the badge boost changes nothing,
+    // which is exactly the agreement the bug needed broken.
+    const withBadge = effectiveCycleSeconds(engine, {
+      badgeBoostPct: testBadgeSpeedBoostPct(1),
+    });
+    const without = effectiveCycleSeconds(engine, {});
+    expect(withBadge).toBe(without);
+    expect(withBadge).toBe(7200);
+    expect(elapsed).toBeLessThan(withBadge); // mid-cycle on BOTH sides — a paid skip here is real
   });
 
-  it('WITH the badge boost the frontend agrees the engine is ready → no phantom skip (the fix)', () => {
-    const cycle = effectiveCycleSeconds(engine, { badgeBoostPct: BADGE_PCT });
-    expect(cycle).toBeCloseTo(7200 / 1.15, 0); // ≈ 6261s, matching the server
-    expect(elapsed).toBeGreaterThanOrEqual(cycle); // "ready" → button is Claim, skip not offered
+  it('still diverges if a boost is ever applied on one side only', () => {
+    // The guard has to keep meaning something after the boost returns: feed a
+    // hypothetical +15% and the two answers must part company. If this ever
+    // stops being true, the test above has become a tautology.
+    const boosted = effectiveCycleSeconds(engine, { badgeBoostPct: 15 });
+    expect(boosted).toBeCloseTo(7200 / 1.15, 0);
+    expect(elapsed).toBeGreaterThanOrEqual(boosted); // server would say "ready"
   });
 });
 
 /**
- * Cross-repo parity: the frontend badge-boost bands must equal the backend's, or
- * the readiness fix above silently drifts again. Text-parsed from the backend
- * (skipped when it isn't checked out next to this repo), mirroring
- * engine-table-parity.test.ts.
+ * Cross-repo parity: the two badge-boost implementations must agree, or the
+ * readiness divergence above reopens. Text-parsed from the backend (skipped when
+ * it isn't checked out next to this repo), mirroring engine-table-parity.test.ts.
  */
 const levelsPath = resolve(
   process.cwd(),
@@ -79,13 +89,17 @@ describe.skipIf(!hasBackend)('badge speed-boost bands ↔ backend parity', () =>
     return Number(m[1]);
   };
 
-  it('crown bands (levels 1-4) match the backend literals', () => {
-    expect(testBadgeSpeedBoostPct(1)).toBe(
-      grab(/badgeLevel <= 1\)\s*return\s*(\d+)/, 'level <= 1')
-    );
-    expect(testBadgeSpeedBoostPct(2)).toBe(grab(/badgeLevel === 2\)\s*return\s*(\d+)/, 'level 2'));
-    expect(testBadgeSpeedBoostPct(3)).toBe(grab(/badgeLevel === 3\)\s*return\s*(\d+)/, 'level 3'));
-    expect(testBadgeSpeedBoostPct(4)).toBe(grab(/badgeLevel === 4\)\s*return\s*(\d+)/, 'level 4'));
+  it('the backend grants no badge speed either', () => {
+    // Both sides return 0 for every level. Asserted against the backend SOURCE,
+    // because the failure that matters is one repo turning the boost back on
+    // alone — which is precisely how the phantom skip happened the first time.
+    const fn = source.slice(source.indexOf('export function testBadgeSpeedBoostPct'));
+    const body = fn.slice(0, fn.indexOf('\n}'));
+    expect(body).toMatch(/return 0;/);
+    expect(body).not.toMatch(/return\s+(?!0;)\d+/);
+    for (let level = 1; level <= TEST_QUEST_TOTAL_LEVELS; level += 1) {
+      expect(testBadgeSpeedBoostPct(level)).toBe(0);
+    }
   });
 
   it('TEST_QUEST_TOTAL_LEVELS (the ladder formula anchor) matches the backend', () => {

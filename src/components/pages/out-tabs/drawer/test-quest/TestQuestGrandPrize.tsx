@@ -9,7 +9,7 @@ export interface TestQuestGrandPrizeProps {
   title?: string;
   /** One line under the title — what it gives, or how it is handed over. */
   note?: string;
-  /** Day the prize lands on — the top of the climb (31). */
+  /** Progress number the prize lands on — the top of the climb (level 31 of 31). */
   day: number;
   className?: string;
 }
@@ -69,10 +69,10 @@ export function TestQuestGrandPrize({ title, note, day, className }: TestQuestGr
         </span>
       </div>
 
-      {/* `capitalize` for the same reason the reward panel carries it: the `day`
-          key is lowercase, and every other day caption on this screen is not. */}
+      {/* The badge counts levels, like the rest of the screen: the prize lands on
+          the 31st and last one, whenever the player gets there. */}
       <span className="flex-center shrink-0 rounded-full bg-gold/15 px-2 py-1 text-[10.5px] font-extrabold capitalize tabular-nums text-gold ring-1 ring-inset ring-gold/35">
-        {t('day')} {day}
+        {t('level')} {day}
       </span>
     </div>
   );

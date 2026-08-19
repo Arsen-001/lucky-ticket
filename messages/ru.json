@@ -1451,5 +1451,8 @@
   "finish level tasks": "Выполните задания уровня",
   "{n} tasks left to claim": "Осталось заданий: {n}",
   "finish tasks to claim hint": "Награда откроется, когда выполнены все задания списка",
-  "grand prize every finisher": "Всем, кто пройдёт все 31 день — на бронзовые двигатели, навсегда"
+  "grand prize every finisher": "Всем, кто пройдёт все 31 уровень — на бронзовые двигатели, навсегда",
+  "level {n} of {total}": "Уровень {n} из {total}",
+  "{n} levels left": "Осталось {n} ур.",
+  "steps for quest level {n}": "Что сделать · Уровень {n}"
 }

@@ -92,7 +92,7 @@ export function TestQuestAheadRow({
           <TestQuestSteps
             level={card.level}
             steps={steps}
-            title={t('steps for day {day}', { day: card.day })}
+            title={t('steps for quest level {n}', { n: card.day })}
             progress={progress}
             baselines={baselines}
             className="border-white/[0.07] bg-black/25 p-2"

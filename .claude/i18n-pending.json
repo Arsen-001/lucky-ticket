@@ -5,6 +5,9 @@
     "finish level tasks",
     "finish tasks to claim hint",
     "grand prize every finisher",
+    "level {n} of {total}",
+    "steps for quest level {n}",
+    "{n} levels left",
     "{n} tasks left to claim"
   ]
 }

@@ -65,10 +65,10 @@ export function TestQuestChain({ className }: TestQuestChainProps) {
 
       <div className="flex items-baseline justify-between">
         <h3 className="text-[15px] font-extrabold tabular-nums">
-          {t('day {day} of {total}', { day: s.currentDay, total: s.totalDays })}
+          {t('level {n} of {total}', { n: s.currentDay, total: s.totalDays })}
         </h3>
         <span className="text-[12px] font-semibold tabular-nums text-white/60">
-          {t('{n} days left', { n: s.totalDays - s.currentDay })}
+          {t('{n} levels left', { n: s.totalDays - s.currentDay })}
         </span>
       </div>
 
@@ -92,9 +92,10 @@ export function TestQuestChain({ className }: TestQuestChainProps) {
           <TestQuestSteps
             level={s.activeCard.level}
             steps={s.stepsFor(s.activeCard.level)}
-            // The screen speaks days everywhere else — keep the checklist heading
-            // in the same language instead of switching to level numbers.
-            title={t('steps for day {day}', { day: s.activeCard.day })}
+            // The screen counts LEVELS, not days: a level opens a day at a time,
+            // per player, but what the quest is 31 of is levels. The checklist
+            // heading uses the same progress number as the header above it.
+            title={t('steps for quest level {n}', { n: s.activeCard.day })}
             claimed={s.activeCard.taken}
             ready={s.isToday && s.claimableToday}
             stepsComplete={s.stepsComplete}
