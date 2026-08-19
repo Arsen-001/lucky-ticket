@@ -71,7 +71,6 @@ export function useTestQuestScreen() {
   // on the checklist either, so locking the button here would only lie.
   const stepsComplete = data?.stepsComplete ?? true;
   const stepsRemaining = data?.stepsRemaining ?? 0;
-  const dailyTop = data?.dailyTopLevel ?? 4;
 
   // Prefer the live ladder from the server (admin-editable rewards); fall back to
   // the bundled prototype text until the response arrives.
@@ -84,7 +83,11 @@ export function useTestQuestScreen() {
     return {
       level: l.level,
       drop: l.drop,
-      crown: data?.ladder?.length ? l.level < dailyTop : zone === 'crown',
+      // Purely the gold finale treatment now. It used to mean "assigned by the
+      // leaderboard, not claimable", which is why it was read off the server's
+      // `dailyTopLevel`; with the crown removed no level is assigned, so the
+      // design-fixed zone is the only thing left to ask.
+      crown: zone === 'crown',
       wall: zone === 'wall',
       zone,
       day: testQuestDay(l.level),

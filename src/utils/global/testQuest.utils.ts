@@ -38,8 +38,12 @@ export const testBadgeSpeedBoostPct = (badgeLevel: number | null | undefined): n
  */
 export const TEST_BADGE_CAPACITY_TICKETS = 3;
 
-/** Daily ladder floor — levels at or below it are the crown, not claimed daily. */
-export const TEST_QUEST_QUALIFY_LEVEL = 4;
+/**
+ * Daily ladder floor — mirror of the backend constant. 1 since 19.08.2026: the
+ * crown is gone, so every level down to 1 is claimed by doing its tasks and
+ * "finished the ladder" means all 31.
+ */
+export const TEST_QUEST_QUALIFY_LEVEL = 1;
 
 /** Claimed the whole daily ladder (31 → floor) — mirror of the backend predicate. */
 export const climbedWholeLadder = (climbed: number | null | undefined): boolean =>

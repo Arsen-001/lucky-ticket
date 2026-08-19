@@ -17,8 +17,10 @@ import type { MessageIds } from '@/types/types/i18n.types';
  * derived from language-neutral tokens (see {@link parseRewardChips}).
  *
  * Countdown mechanic (see the launch design): every player enters at level 31
- * and climbs toward level 1 (1 = the top). Levels 31→4 are the daily ladder;
- * levels 3→1 are the competitive crown (leaderboard-assigned at test end).
+ * and climbs toward level 1 (1 = the top). Since 19.08.2026 ALL 31 levels are
+ * the daily ladder — levels 3→1 used to be a competitive crown assigned by the
+ * Founders leaderboard, and are now claimed by doing their tasks like the rest.
+ * The `crown` zone survives as what it always looked like: the gold finale.
  */
 
 export type TestQuestZone = 'entry' | 'ladder' | 'wall' | 'crown';
@@ -79,9 +81,11 @@ export const testQuestLadder: TestQuestLevel[] = [
   { level: 6, day: 25, drop: '25k LC · 1 TIX', zone: 'ladder' },
   { level: 5, day: 26, drop: '55k LC · 2 TIX · 5 LS', zone: 'wall' },
   { level: 4, day: 27, drop: '55k LC · 2 TIX · 5 LS · LP 6d', zone: 'wall' },
-  { level: 3, day: null, drop: '105k LC · 3 TIX · 15 LS', zone: 'crown' },
-  { level: 2, day: null, drop: '105k LC · 3 TIX · 17 LS · VIP 1', zone: 'crown' },
-  { level: 1, day: null, drop: '110k LC · 3 TIX · 19 LS · VIP 3', zone: 'crown' },
+  // Days, not nulls: these are climbed now. VIP is off the drop line because it
+  // is no longer a rank prize — finishing the ladder is what grants it, at freeze.
+  { level: 3, day: 28, drop: '105k LC · 3 TIX · 15 LS', zone: 'crown' },
+  { level: 2, day: 29, drop: '105k LC · 3 TIX · 17 LS', zone: 'crown' },
+  { level: 1, day: 30, drop: '110k LC · 3 TIX · 19 LS', zone: 'crown' },
 ];
 
 // Level → zone lookup. Walls and the crown are structural (fixed by the ladder
