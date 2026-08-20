@@ -3,6 +3,7 @@
 import { Fragment } from 'react';
 import { Check, Gift, Megaphone, UserPlus } from 'lucide-react';
 import { twMerge } from 'tailwind-merge';
+import { giftPrizeState } from '@/utils/pages/gift-prize-state';
 import { comingSoonConfig } from '@/config/coming-soon.config';
 import { Skeleton } from '@/components/shared/seleketons/Skeleton';
 import { SkeletonSuspense } from '@/components/shared/seleketons/SkeletonSuspense';
@@ -110,23 +111,16 @@ export function GiftLadder({
   const paused = !complete && (gift.status === 'PENDING' || gift.status === 'FAILED');
 
   /**
-   * The gift's own state. `canClaim` is the server's answer to "would pressing
-   * this work right now" — it already accounts for the places, the channel rule
-   * and an existing claim, so the screen never lights up a button that would be
-   * refused. An older backend that says nothing degrades to «locked», which
-   * promises nothing.
+   * The gift's own state — правило вынесено в чистую функцию и закреплено
+   * тестами: в нём была ошибка, которую нашёл живой игрок.
+   * @see giftPrizeState
    */
-  const prizeState = (() => {
-    if (sent) return 'sent' as const;
-    // Before the plain `claimed`: a filed claim that is no longer covered by a
-    // full ladder must not keep showing a green tick, or the screen promises a
-    // gift the panel is now refusing to send. @see paused
-    if (paused) return 'paused' as const;
-    if (gift.status) return 'claimed' as const;
-    if (gift.canClaim) return 'ready' as const;
-    if (gift.eligible) return 'closed' as const;
-    return 'locked' as const;
-  })();
+  const prizeState = giftPrizeState({
+    status: gift.status,
+    canClaim: gift.canClaim,
+    eligible: gift.eligible,
+    complete,
+  });
 
   /**
    * Today's board: the standing rule («каждый день 5 подарков») and how much of
@@ -238,6 +232,19 @@ export function GiftLadder({
           icon={<Gift className="h-1/2 w-1/2" strokeWidth={2.2} />}
         />
       </div>
+
+      {/* Счёт цифрами, а не только бусинами. На десяти шагах пересчитывать
+          галочки глазами — работа, а «пригласи ещё 3» говорит, сколько
+          осталось, но не говорит, сколько уже есть. Дробь отвечает на оба
+          вопроса сразу и не требует перевода: цифры со слэшем читаются на всех
+          двадцати языках одинаково, а что именно считается — сказано строкой
+          правила ниже. Просил игрок, увидевший «пригласи ещё 3» и не понявший,
+          семь у него или восемь. */}
+      <span className="flex items-baseline gap-1 tabular-nums leading-none">
+        <span className="text-electric-pink text-lg font-extrabold">{reached}</span>
+        <span className="text-[13px] font-bold text-white/35">/</span>
+        <span className="text-[15px] font-extrabold text-white/70">{total}</span>
+      </span>
 
       <SkeletonSuspense
         loading={loading}
