@@ -1196,6 +1196,7 @@
   "first withdrawal is smaller {first} {next}": "Seu primeiro saque começa em {first} TON — depois dele o mínimo é {next} TON.",
   "withdrawals closed for now note": "O saque de TON e a troca LC→TON estão fechados por enquanto — vamos anunciar a data de abertura depois. Depósitos, estrelas e LC seguem funcionando normalmente.",
   "wallet connect temporarily closed": "A conexão de carteira está fechada temporariamente",
+  "wallet wrong network": "This wallet is on a different TON network. Switch it and connect again",
   "wallet connect closed note": "Vincular uma carteira TON está pausado por enquanto. Estrelas e LC seguem funcionando normalmente.",
   "maximum withdrawal": "Saque máximo",
   "daily withdrawal limit": "Limite diário",

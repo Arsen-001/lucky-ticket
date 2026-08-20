@@ -1196,6 +1196,7 @@
   "first withdrawal is smaller {first} {next}": "İlk çekimin {first} TON'dan başlıyor — sonrasında alt sınır {next} TON.",
   "withdrawals closed for now note": "TON çekimi ve LC→TON takası şimdilik kapalı — açılış tarihini sonra duyuracağız. Yatırmalar, yıldızlar ve LC her zamanki gibi çalışıyor.",
   "wallet connect temporarily closed": "Cüzdan bağlama geçici olarak kapalı",
+  "wallet wrong network": "This wallet is on a different TON network. Switch it and connect again",
   "wallet connect closed note": "TON cüzdanı bağlama şimdilik duraklatıldı. Yıldızlar ve LC her zamanki gibi çalışıyor.",
   "maximum withdrawal": "En fazla çekim",
   "daily withdrawal limit": "Günlük sınır",

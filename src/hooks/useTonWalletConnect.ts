@@ -5,6 +5,7 @@ import { useTonConnectUI } from '@tonconnect/ui-react';
 import {
   useConnectWalletMutation,
   useDisconnectWalletMutation,
+  useGetWalletStateQuery,
   useLazyGetTonProofPayloadQuery,
 } from '@/api/wallet.api';
 import { useAppTranslations } from '@/hooks/useAppTranslations';
@@ -12,6 +13,7 @@ import { useToast } from '@/hooks/useToast';
 import {
   chainToNetwork,
   isWalletConnectDisabledError,
+  isWrongNetworkError,
   readReferralGateError,
   resolveWalletProvider,
 } from '@/utils/pages/wallet.utils';
@@ -37,6 +39,12 @@ export function useTonWalletConnect() {
   const [connectWallet, { isLoading: isVerifying }] = useConnectWalletMutation();
   const isConnecting = isPriming || isVerifying;
   const [disconnectWallet, { isLoading: isDisconnecting }] = useDisconnectWalletMutation();
+  // The chain the treasury actually talks to. Already in cache — the wallet
+  // screen that mounts this hook queries the same endpoint — so reading it here
+  // costs no extra request. Missing state falls back to mainnet, which is what
+  // production runs on.
+  const { data: walletState } = useGetWalletStateQuery();
+  const expectedNetwork = walletState?.network ?? 'mainnet';
 
   // Address already sent to the backend — guards against a double-verify when
   // onStatusChange fires more than once for the same connection.
@@ -71,6 +79,16 @@ export function useTonWalletConnect() {
       // so there is nothing new to verify then.
       const proofItem = wallet.connectItems?.tonProof;
       if (!proofItem || !('proof' in proofItem)) return;
+      // A wallet left on the other TON chain signs a valid proof, so nothing
+      // downstream would call this a failure — it would bind a `0Q…` address,
+      // and the refusal would surface only at withdrawal, after the invite gate
+      // had been cleared for nothing. Say it here, where the fix is one toggle
+      // away in the wallet app.
+      if (chainToNetwork(wallet.account.chain) !== expectedNetwork) {
+        toast.error(t('wallet wrong network'));
+        void tonConnectUI.disconnect();
+        return;
+      }
       if (syncedAddress.current === wallet.account.address) return;
       syncedAddress.current = wallet.account.address;
 
@@ -103,13 +121,16 @@ export function useTonWalletConnect() {
         // be wrong here — it offers a way forward this refusal does not have.
         else if (isWalletConnectDisabledError(error))
           toast.error(t('wallet connect temporarily closed'));
+        // Backstop for the chain check above, which compares against a wallet
+        // state that can be stale.
+        else if (isWrongNetworkError(error)) toast.error(t('wallet wrong network'));
         else toast.error(t('wallet connect failed'));
         void tonConnectUI.disconnect();
       }
     });
 
     return () => unsubscribe();
-  }, [tonConnectUI]);
+  }, [tonConnectUI, expectedNetwork]);
 
   const connect = async () => {
     await primeProof();

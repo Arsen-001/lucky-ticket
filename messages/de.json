@@ -1196,6 +1196,7 @@
   "first withdrawal is smaller {first} {next}": "Die erste Auszahlung beginnt bei {first} TON — danach liegt das Minimum bei {next} TON.",
   "withdrawals closed for now note": "TON-Auszahlungen und der LC→TON-Tausch sind vorerst geschlossen — den Eröffnungstermin geben wir später bekannt. Einzahlungen, Sterne und LC funktionieren wie gewohnt.",
   "wallet connect temporarily closed": "Wallet-Verbindung ist vorübergehend geschlossen",
+  "wallet wrong network": "This wallet is on a different TON network. Switch it and connect again",
   "wallet connect closed note": "Das Verbinden einer TON-Wallet ist vorerst pausiert. Sterne und LC funktionieren wie gewohnt.",
   "maximum withdrawal": "Maximale Abhebung",
   "daily withdrawal limit": "Tageslimit",

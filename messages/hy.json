@@ -1196,6 +1196,7 @@
   "first withdrawal is smaller {first} {next}": "Առաջին դուրսբերումդ սկսվում է {first} TON-ից — դրանից հետո նվազագույնը {next} TON է։",
   "withdrawals closed for now note": "TON-ի դուրսբերումը և LC→TON փոխանակումն այս պահին փակ են — բացման ամսաթիվը կհայտարարենք ավելի ուշ։ Համալրումները, աստղերը և LC-ն աշխատում են սովորականի պես։",
   "wallet connect temporarily closed": "Դրամապանակի միացումն այս պահին փակ է",
+  "wallet wrong network": "This wallet is on a different TON network. Switch it and connect again",
   "wallet connect closed note": "TON դրամապանակի կապումն այս պահին դադարեցված է։ Աստղերը և LC-ն աշխատում են սովորականի պես։",
   "maximum withdrawal": "Առավելագույն դուրսբերում",
   "daily withdrawal limit": "Օրական սահմանաչափ",

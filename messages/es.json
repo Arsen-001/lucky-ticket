@@ -1196,6 +1196,7 @@
   "first withdrawal is smaller {first} {next}": "Tu primera retirada empieza en {first} TON; después el mínimo es {next} TON.",
   "withdrawals closed for now note": "La retirada de TON y el cambio LC→TON están cerrados por ahora; anunciaremos la fecha de apertura más adelante. Los depósitos, las estrellas y los LC funcionan con normalidad.",
   "wallet connect temporarily closed": "La conexión de billetera está cerrada temporalmente",
+  "wallet wrong network": "This wallet is on a different TON network. Switch it and connect again",
   "wallet connect closed note": "Vincular una billetera TON está pausado por ahora. Las estrellas y los LC funcionan con normalidad.",
   "maximum withdrawal": "Retirada máxima",
   "daily withdrawal limit": "Límite diario",

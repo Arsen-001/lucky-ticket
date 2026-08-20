@@ -1196,6 +1196,7 @@
   "first withdrawal is smaller {first} {next}": "Первый вывод — от {first} TON, дальше минимум {next} TON.",
   "withdrawals closed for now note": "Вывод TON и обмен LC→TON пока закрыты — дату открытия объявим позже. Пополнение, звёзды и LC работают как обычно.",
   "wallet connect temporarily closed": "Подключение кошелька временно закрыто",
+  "wallet wrong network": "Кошелёк подключён к другой сети TON. Переключите сеть и подключите заново",
   "wallet connect closed note": "Привязка TON-кошелька временно приостановлена. Звёзды и LC работают как обычно.",
   "maximum withdrawal": "Максимум для вывода",
   "daily withdrawal limit": "Лимит в сутки",

@@ -1196,6 +1196,7 @@
   "first withdrawal is smaller {first} {next}": "你的首次提现从 {first} TON 起，之后最低为 {next} TON。",
   "withdrawals closed for now note": "TON 提现和 LC→TON 兑换目前已关闭，开放时间稍后公布。充值、星星和 LC 一切照常。",
   "wallet connect temporarily closed": "钱包连接暂时关闭",
+  "wallet wrong network": "This wallet is on a different TON network. Switch it and connect again",
   "wallet connect closed note": "绑定 TON 钱包目前已暂停。星星和 LC 一切照常。",
   "maximum withdrawal": "最高提现额",
   "daily withdrawal limit": "每日上限",

@@ -1196,6 +1196,7 @@
   "first withdrawal is smaller {first} {next}": "첫 출금은 {first} TON부터이며, 이후 최소 금액은 {next} TON입니다.",
   "withdrawals closed for now note": "TON 출금과 LC→TON 교환은 현재 중단되었습니다. 재개 일정은 추후 공지합니다. 입금・스타・LC는 평소대로 이용할 수 있습니다.",
   "wallet connect temporarily closed": "지갑 연결이 일시적으로 중단되었습니다",
+  "wallet wrong network": "This wallet is on a different TON network. Switch it and connect again",
   "wallet connect closed note": "TON 지갑 연동은 현재 중단되었습니다. 스타와 LC는 평소대로 이용할 수 있습니다.",
   "maximum withdrawal": "최대 출금액",
   "daily withdrawal limit": "일일 한도",

@@ -208,6 +208,19 @@ export const isWithdrawalsDisabledError = (error: unknown): boolean => {
   return (data as { error?: string }).error === 'withdrawals-disabled';
 };
 
+/**
+ * Whether a failed `POST /wallet/connect` was refused because the wallet sits on
+ * the other TON chain (400 `{ error: 'wrong-network' }`). The proof itself is
+ * valid, so this is not a "connect failed" — the player has to switch networks
+ * in the wallet app. Kept as a backstop for the check the hook already does on
+ * `wallet.account.chain`: the wallet state it compares against can be stale.
+ */
+export const isWrongNetworkError = (error: unknown): boolean => {
+  const data = (error as { status?: number; data?: unknown } | undefined)?.data;
+  if (!data || typeof data !== 'object') return false;
+  return (data as { error?: string }).error === 'wrong-network';
+};
+
 export const providerLabel = (provider?: WalletProvider): string => {
   switch (provider) {
     case WalletProvider.TONKEEPER:

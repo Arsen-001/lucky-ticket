@@ -1196,6 +1196,7 @@
   "first withdrawal is smaller {first} {next}": "Аввалин барориши ту аз {first} TON оғоз мешавад — пас аз он ҳадди ақал {next} TON.",
   "withdrawals closed for now note": "Барориши TON ва мубодилаи LC→TON ҳоло баста ҳастанд — санаи кушоданро дертар эълон мекунем. Пуркуниҳо, ситораҳо ва LC чун ҳарвақта кор мекунанд.",
   "wallet connect temporarily closed": "Пайвасти ҳамён муваққатан баста аст",
+  "wallet wrong network": "This wallet is on a different TON network. Switch it and connect again",
   "wallet connect closed note": "Пайвасткунии ҳамёни TON ҳоло қатъ шудааст. Ситораҳо ва LC чун ҳарвақта кор мекунанд.",
   "maximum withdrawal": "Барориши ҳадди аксар",
   "daily withdrawal limit": "Маҳдудияти ҳаррӯза",

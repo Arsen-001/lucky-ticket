@@ -1196,6 +1196,7 @@
   "first withdrawal is smaller {first} {next}": "يبدأ أول سحب لك من {first} TON — وبعده يصبح الحد الأدنى {next} TON.",
   "withdrawals closed for now note": "سحب TON وتبديل LC←TON مغلقان حاليًا — سنعلن موعد الفتح لاحقًا. الإيداعات والنجوم و LC تعمل كالمعتاد.",
   "wallet connect temporarily closed": "ربط المحفظة مغلق مؤقتًا",
+  "wallet wrong network": "This wallet is on a different TON network. Switch it and connect again",
   "wallet connect closed note": "ربط محفظة TON متوقف حاليًا. النجوم و LC تعمل كالمعتاد.",
   "maximum withdrawal": "الحد الأقصى للسحب",
   "daily withdrawal limit": "الحد اليومي",

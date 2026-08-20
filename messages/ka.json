@@ -1196,6 +1196,7 @@
   "first withdrawal is smaller {first} {next}": "პირველი გატანა {first} TON-იდან იწყება — შემდეგ მინიმუმი {next} TON-ია.",
   "withdrawals closed for now note": "TON-ის გატანა და LC→TON გაცვლა ჯერჯერობით დახურულია — გახსნის თარიღს მოგვიანებით გამოვაცხადებთ. შევსება, ვარსკვლავები და LC ჩვეულებრივ მუშაობს.",
   "wallet connect temporarily closed": "საფულის მიბმა დროებით დახურულია",
+  "wallet wrong network": "This wallet is on a different TON network. Switch it and connect again",
   "wallet connect closed note": "TON საფულის მიბმა ჯერჯერობით შეჩერებულია. ვარსკვლავები და LC ჩვეულებრივ მუშაობს.",
   "maximum withdrawal": "მაქსიმალური გატანა",
   "daily withdrawal limit": "დღიური ლიმიტი",

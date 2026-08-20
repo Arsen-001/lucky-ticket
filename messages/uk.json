@@ -1196,6 +1196,7 @@
   "first withdrawal is smaller {first} {next}": "Твоє перше виведення починається з {first} TON — далі мінімум {next} TON.",
   "withdrawals closed for now note": "Виведення TON і обмін LC→TON поки закриті — дату відкриття оголосимо пізніше. Поповнення, зірки та LC працюють як завжди.",
   "wallet connect temporarily closed": "Підключення гаманця тимчасово закрито",
+  "wallet wrong network": "This wallet is on a different TON network. Switch it and connect again",
   "wallet connect closed note": "Прив'язку гаманця TON поки призупинено. Зірки та LC працюють як завжди.",
   "maximum withdrawal": "Максимальне виведення",
   "daily withdrawal limit": "Денний ліміт",

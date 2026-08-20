@@ -1196,6 +1196,7 @@
   "first withdrawal is smaller {first} {next}": "Birinchi yechishing {first} TON dan boshlanadi — keyin minimal {next} TON.",
   "withdrawals closed for now note": "TON yechish va LC→TON almashuv hozircha yopiq — ochilish sanasini keyinroq e'lon qilamiz. Toʻldirishlar, yulduzlar va LC odatdagidek ishlaydi.",
   "wallet connect temporarily closed": "Hamyon ulash vaqtincha yopiq",
+  "wallet wrong network": "This wallet is on a different TON network. Switch it and connect again",
   "wallet connect closed note": "TON hamyonni bogʻlash hozircha toʻxtatilgan. Yulduzlar va LC odatdagidek ishlaydi.",
   "maximum withdrawal": "Maksimal yechish",
   "daily withdrawal limit": "Kunlik limit",
