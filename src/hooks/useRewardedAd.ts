@@ -20,14 +20,20 @@ export function useRewardedAd() {
     preloadRewardedAd();
   }, []);
 
-  const show = useCallback(async (viewIndex?: number): Promise<RewardedAdResult> => {
-    setShowing(true);
-    try {
-      return await showRewardedAd(viewIndex);
-    } finally {
-      setShowing(false);
-    }
-  }, []);
+  const show = useCallback(
+    async (
+      viewIndex?: number,
+      onFailure?: Parameters<typeof showRewardedAd>[1]
+    ): Promise<RewardedAdResult> => {
+      setShowing(true);
+      try {
+        return await showRewardedAd(viewIndex, onFailure);
+      } finally {
+        setShowing(false);
+      }
+    },
+    []
+  );
 
   // Exposed so the caller can warm the chain again between views — the pause
   // after a watch is the only moment when warming up costs the player nothing.

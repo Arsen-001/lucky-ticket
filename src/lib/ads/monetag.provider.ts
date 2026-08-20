@@ -15,8 +15,6 @@ import type { AdProvider, RewardedAdOutcome } from './types';
  */
 
 type MonetagShowOptions = {
-  /** `preload` warms the ad up; omitted entirely for a normal show. */
-  type?: 'preload';
   /** Echoed in the postback — our user id. */
   ymid?: string;
 };
@@ -69,16 +67,28 @@ async function show(): Promise<Exclude<RewardedAdOutcome, 'unavailable'>> {
   }
 }
 
-function preload(): void {
-  const showAd = getShowFn();
-  // Fire-and-forget: a failed warm-up must not surface anywhere. No ymid — a
-  // warm-up is not a view, and minting an id here would burn one.
-  void showAd?.({ type: 'preload' }).catch(() => {});
-}
-
+/**
+ * Deliberately NO `preload`.
+ *
+ * Monetag does document one — `show_<zone>({type: 'preload'})` — but only as
+ * half of a pair: it "loads ad materials in background without showing", and
+ * the ad is displayed by a LATER call with `type: 'end'`. This provider never
+ * calls `end`; `show()` above passes no type at all, which starts a fresh
+ * interstitial. So warming up left a charged ad sitting in the SDK that nothing
+ * here ever spends, alongside the one the player actually asked for.
+ *
+ * That went unnoticed for as long as Monetag was out of the waterfall
+ * (2026-08-02 … 2026-08-20) and surfaced the same day it went back in, as ads
+ * arriving in more than the one the player tapped for.
+ *
+ * Implementing the pair properly would mean tracking whether a preload is
+ * outstanding and branching `show()` on it — state that has to survive a
+ * reload, and gets an undefined answer when `end` is called with nothing
+ * charged. The whole prize is the latency of one request. Not worth it: the
+ * warm-up is simply gone, and `preload` being absent is a no-op in the chain.
+ */
 export const monetagProvider: AdProvider = {
   id: 'monetag',
   isConfigured: () => !!getZoneId(),
   show,
-  preload,
 };

@@ -1,7 +1,13 @@
 import { Env } from '@/services/environment.service';
 import { adsgramProvider } from './adsgram.provider';
 import { monetagProvider } from './monetag.provider';
-import type { AdProvider, AdProviderId, RewardedAdOutcome, RewardedAdResult } from './types';
+import type {
+  AdProvider,
+  AdProviderId,
+  RewardedAdFailure,
+  RewardedAdOutcome,
+  RewardedAdResult,
+} from './types';
 
 /**
  * Rewarded-ad waterfall.
@@ -183,8 +189,15 @@ async function showWithTimeout(
  * `viewIndex` is which view of the day this is (the ad slot's own index), which
  * decides whose turn it is when rotation is on. Omitted — an older caller — the
  * chain stays in its configured order.
+ *
+ * `onFailure` fires once per network that came up empty, in the order they were
+ * asked. The returned result names only ONE provider, so without this every
+ * network the chain passed over left no trace at all.
  */
-export async function showRewardedAd(viewIndex?: number): Promise<RewardedAdResult> {
+export async function showRewardedAd(
+  viewIndex?: number,
+  onFailure?: (attempt: { provider: AdProviderId; outcome: RewardedAdFailure }) => void
+): Promise<RewardedAdResult> {
   const chain = getChain(viewIndex);
 
   // No network wired (dev / plain browser / e2e) — keep the existing mock flow
@@ -198,7 +211,10 @@ export async function showRewardedAd(viewIndex?: number): Promise<RewardedAdResu
     // The SDK went silent past the watchdog. Stop the chain rather than open a
     // second ad: the first one may still be on screen, or arrive on top of the
     // next network's video a moment later.
-    if (outcome === null) return { outcome: 'error', provider: provider.id };
+    if (outcome === null) {
+      onFailure?.({ provider: provider.id, outcome: 'error' });
+      return { outcome: 'error', provider: provider.id };
+    }
 
     // Watched to the end → done. Closed by the user → also done: falling
     // through would turn "close the ad" into "get another chance at a
@@ -214,6 +230,14 @@ export async function showRewardedAd(viewIndex?: number): Promise<RewardedAdResu
     // `error` are deliberately NOT remembered: the first is our own pacing and
     // the second says nothing about inventory.
     if (outcome === 'noAd') emptyUntil.set(provider.id, Date.now() + NO_FILL_DEMOTION_MS);
+
+    // Report THIS network's refusal, not just the chain's last one. The result
+    // carries a single provider, so for years everything a passed-over network
+    // did was invisible: on 20.08.2026 Monetag sat at 0.2% of impressions with
+    // zero recorded no-fills, because a Monetag miss followed by an Adsgram
+    // miss was stored as one Adsgram row. The panel could not answer the only
+    // question worth asking about a second network.
+    onFailure?.({ provider: provider.id, outcome });
 
     // noAd / tooFast / error → the next provider gets a turn. The last one is
     // reported if everyone comes up empty, so the modal explains the real

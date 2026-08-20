@@ -615,13 +615,20 @@ export function TasksContent() {
     // network in turn. Only a genuine completion (or the no-network dev/mock
     // fallback) records the watch; an empty chain ends in one modal naming the
     // reason, and nothing stands in for the missing video.
-    const { outcome, provider } = await showRewardedAd(slot.index);
     // An attempt that pays nothing still happened, and to the network that
     // showed the ad it counts as an impression. Reported fire-and-forget: it
     // grants nothing, so a failed report must not bother a player who already
     // got no reward — but without it the network's count and ours diverge with
     // no stored reason (see DOCS/ADS_SETUP.md).
-    if (outcome !== 'completed' && outcome !== 'unavailable' && provider) {
+    //
+    // Reported per NETWORK, as the chain walks: the result names one provider,
+    // so a network the chain passed over used to leave no trace whatsoever.
+    const { outcome, provider } = await showRewardedAd(slot.index, attempt =>
+      reportAdAttempt(attempt)
+    );
+    // A skip is not a chain failure — it ends the chain — so it is reported
+    // here rather than by the callback above.
+    if (outcome === 'skipped' && provider) {
       reportAdAttempt({ provider, outcome });
     }
     if (outcome === 'skipped') {

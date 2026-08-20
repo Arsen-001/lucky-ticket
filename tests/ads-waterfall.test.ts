@@ -250,6 +250,49 @@ describe('rewarded-ad waterfall', () => {
     ]);
   });
 
+  it('reports every network that came up empty, not just the last', async () => {
+    // The result names ONE provider, so a network the chain passed over left no
+    // trace at all: on 20.08.2026 Monetag showed 0.2% of impressions with zero
+    // recorded no-fills, because a Monetag miss followed by an Adsgram miss was
+    // stored as a single Adsgram row. The panel could not answer the one
+    // question a second network exists to answer.
+    stubAdsgram(new Error('AdsgramError'), 'onBannerNotFound');
+    const ads = await loadAds({
+      NEXT_PUBLIC_ADSGRAM_BLOCK_ID: BLOCK_ID,
+      NEXT_PUBLIC_MONETAG_ZONE_ID: ZONE_ID,
+      NEXT_PUBLIC_AD_PROVIDERS: 'adsgram,monetag',
+      NEXT_PUBLIC_AD_ROTATE_EVERY: '0',
+    });
+
+    const reported: { provider: string; outcome: string }[] = [];
+    await ads.showRewardedAd(0, attempt => reported.push(attempt));
+
+    // Adsgram's empty answer AND Monetag's failure — both, in the order asked.
+    expect(reported).toEqual([
+      { provider: 'adsgram', outcome: 'noAd' },
+      { provider: 'monetag', outcome: 'error' },
+    ]);
+  });
+
+  it('does not warm Monetag up, because its warm-up needs a second call', async () => {
+    // `{type:'preload'}` loads an ad but leaves it charged for a later
+    // `{type:'end'}` — which this provider never sends, since `show()` passes no
+    // type at all and starts a fresh one. Warming therefore left an ad in the
+    // SDK that nothing here spends. Absent `preload` is a no-op in the chain.
+    const ads = await loadAds({ NEXT_PUBLIC_MONETAG_ZONE_ID: ZONE_ID });
+    const calls: unknown[] = [];
+    (globalThis as Record<string, unknown>).window = {
+      [`show_${ZONE_ID}`]: (opts: unknown) => {
+        calls.push(opts);
+        return Promise.reject(new Error('no fill'));
+      },
+    };
+
+    ads.preloadRewardedAd(0);
+
+    expect(calls).toEqual([]);
+  });
+
   it('alternates on every view by default', async () => {
     // The default is 1, not 2: spreading a player's views across as many
     // uncapped demand pools as possible is the whole point, and two in a row
