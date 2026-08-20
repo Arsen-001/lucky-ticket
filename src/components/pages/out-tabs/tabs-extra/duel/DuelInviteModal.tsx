@@ -58,7 +58,10 @@ export function DuelInviteModal({ open, duelId, onClose }: DuelInviteModalProps)
 
   return (
     <Modal open={open} onClose={onClose} label={t('duel invite players')}>
-      <div className="flex w-full flex-col gap-3">
+      {/* Панель модалки не красит себя сама — фон задаёт содержимое, как во
+          всех остальных модалках приложения. Без него сквозь список друзей
+          просвечивал экран под ним. */}
+      <div className="bg-background flex w-full flex-col gap-3 rounded-2xl border border-white/10 p-5 shadow-[0_24px_60px_rgba(0,0,0,0.55)]">
         <div className="flex flex-col gap-1">
           <span className="text-[17px] font-extrabold">{t('duel invite players')}</span>
           <span className="text-pink-secondary text-[12px] leading-snug">

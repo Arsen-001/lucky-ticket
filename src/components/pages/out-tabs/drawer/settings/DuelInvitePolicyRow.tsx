@@ -25,7 +25,7 @@ export function DuelInvitePolicyRow() {
   const { data: prefs } = useGetNotificationPreferencesQuery();
   const [update, { isLoading }] = useUpdateNotificationPreferencesMutation();
 
-  const policy = prefs?.duelInvitesFrom ?? 'friends';
+  const policy = prefs?.duelInvitesFrom ?? 'everyone';
   const enabled = policy !== 'nobody';
 
   const save = async (next: DuelInvitePolicy) => {
@@ -57,10 +57,9 @@ export function DuelInvitePolicyRow() {
           aria-label={t('duel policy title')}
           checked={enabled}
           disabled={isLoading}
-          // Выключение помнит только «никто»: возвращаясь, игрок получает
-          // дружеский вариант, а не тот, что был до выключения, — это самый
-          // безопасный из двух.
-          onChange={next => save(next ? 'friends' : 'nobody')}
+          // Возвращая тумблер, отдаём открытое состояние — то же, с которого
+          // всё начиналось. Кому нужно уже, тот выберет «друзья» рядом.
+          onChange={next => save(next ? 'everyone' : 'nobody')}
         />
       </div>
 

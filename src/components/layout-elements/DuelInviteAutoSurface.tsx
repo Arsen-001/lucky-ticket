@@ -81,7 +81,7 @@ export function DuelInviteAutoSurface() {
       label={invite ? t('duel invite title', { name: invite.fromName }) : t('duel')}
     >
       {invite && (
-        <div className="flex w-full flex-col items-center gap-3 text-center">
+        <div className="bg-background flex w-full flex-col items-center gap-3 rounded-2xl border border-white/10 p-5 text-center shadow-[0_24px_60px_rgba(0,0,0,0.55)]">
           <DuelToken move="TICKET" size={92} />
 
           <div className="flex flex-col items-center gap-1.5">

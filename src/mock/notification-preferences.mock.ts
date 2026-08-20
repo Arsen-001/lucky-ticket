@@ -25,8 +25,8 @@ const preferences: NotificationPreferences = {
     achievements: true,
     system: true,
   },
-  // Значение по умолчанию: звать может тот, с кем игрок уже знаком.
-  duelInvitesFrom: 'friends',
+  // Значение по умолчанию: вызовы открыты всем, сузить можно в настройках.
+  duelInvitesFrom: 'everyone',
 };
 
 export const notificationPreferencesMock = {
