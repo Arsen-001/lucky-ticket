@@ -154,6 +154,19 @@ export function DuelArena({ duelId, onLeave }: DuelArenaProps) {
             <span className="text-xs text-disabled">{t('duel both must confirm')}</span>
           </>
         )}
+        {/* Ход длится считаные секунды, и не успеть — значит получить случайную
+            фигуру. Пока свой ход не сделан, отсчёт идёт крупно: без него игрок
+            не знает, что времени в обрез, и узнаёт об этом поражением. */}
+        {playing && !revealed && !data.me.move && (
+          <span
+            className={twMerge(
+              'text-2xl font-extrabold tabular-nums',
+              secondsLeft(data.round?.deadline ?? null) <= 2 ? 'text-error-text' : 'text-gold'
+            )}
+          >
+            {secondsLeft(data.round?.deadline ?? null)}
+          </span>
+        )}
         {playing && (
           <span className="text-xs text-gray-secondary">
             {revealed

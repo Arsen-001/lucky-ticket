@@ -3,6 +3,8 @@
 import { useState } from 'react';
 import { twMerge } from 'tailwind-merge';
 import { Button } from '@/components/shared/buttons/Button';
+import { DuelStage } from '@/components/pages/out-tabs/tabs-extra/duel/DuelStage';
+import { DuelStakeBadge } from '@/components/pages/out-tabs/tabs-extra/duel/DuelStakeBadge';
 import { useAppTranslations } from '@/hooks/useAppTranslations';
 import { useToast } from '@/hooks/useToast';
 import {
@@ -38,6 +40,7 @@ export function DuelLobbies({ onEnter }: DuelLobbiesProps) {
   const [cancel] = useCancelDuelMutation();
 
   const tickets = data?.tickets ?? 0;
+  const min = data?.stakeMin ?? 1;
   const max = data?.stakeMax ?? 5;
 
   const handleCreate = async () => {
@@ -110,8 +113,18 @@ export function DuelLobbies({ onEnter }: DuelLobbiesProps) {
 
   return (
     <div className="flex-col-stretch flex-available gap-3">
+      <DuelStage
+        winsNeeded={data?.winsNeeded ?? 2}
+        stakeMin={min}
+        stakeMax={max}
+        moveSeconds={data?.moveSeconds ?? 5}
+      />
+
       <div className="flex items-baseline justify-between text-[11px] tracking-wider text-disabled uppercase">
-        <span>{t('duel open lobbies')}</span>
+        <span>
+          {t('duel open lobbies')}
+          {data?.lobbies.length ? ' · ' + data.lobbies.length : ''}
+        </span>
         <span>
           {tickets} {t('duel tickets left')}
         </span>
@@ -125,10 +138,9 @@ export function DuelLobbies({ onEnter }: DuelLobbiesProps) {
         >
           <span className="flex-1">
             <span className="block text-sm font-bold">{t('duel your lobby')}</span>
-            <span className="block text-xs text-disabled">
-              {t('duel stake short')} {data.own.stake}
-            </span>
+            <span className="block text-xs text-disabled">{t('duel waiting for opponent')}</span>
           </span>
+          <DuelStakeBadge stake={data.own.stake} />
         </button>
       )}
 
@@ -147,14 +159,19 @@ export function DuelLobbies({ onEnter }: DuelLobbiesProps) {
           <span className="min-w-0 flex-1">
             <span className="block truncate text-sm font-bold">{lobby.host.name}</span>
             <span className="block text-xs text-disabled">
-              {t('duel stake short')} {lobby.stake}
+              {t('duel waiting seconds', { count: lobby.waitingSeconds })}
             </span>
           </span>
+          <DuelStakeBadge stake={lobby.stake} />
           <Button className="h-9 px-4 text-xs" loading={busy} onClick={() => handleJoin(lobby.id)}>
             {t('duel join')}
           </Button>
         </div>
       ))}
+
+      {!data?.own && (
+        <p className="text-pink-secondary px-1 text-[11px] leading-snug">{t('duel lobby hint')}</p>
+      )}
 
       <div className="mt-auto flex flex-col gap-2 pt-2">
         {data?.own ? (

@@ -27,7 +27,7 @@ export function DuelScreen() {
   }
 
   return (
-    <div className="flex-col-stretch flex-available px-4 pt-2 pb-6">
+    <div className="flex min-h-full flex-col items-stretch pb-2">
       {duelId ? (
         <DuelArena duelId={duelId} onLeave={() => setDuelId(null)} />
       ) : (

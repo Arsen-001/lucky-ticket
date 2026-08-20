@@ -202,6 +202,9 @@ function fresh(id: string, stake: number, role: 'host' | 'guest'): MockDuel {
 const list = (): DuelLobbyList => ({
   stakeMin: 1,
   stakeMax: 5,
+  winsNeeded: 2,
+  moveSeconds: 5,
+  readySeconds: 10,
   tickets,
   own:
     current && current.status === 'WAITING'

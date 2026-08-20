@@ -52,6 +52,29 @@ export const mockBaseQuery =
       // 2. Try exact path match (e.g., "tournaments/top")
       if (mockMap[cleanPath] !== undefined) return mockMap[cleanPath];
 
+      // 2.5 Keys with a path parameter — "POST games/duel/:id/ready".
+      //
+      // Without this a mock route that carries an id is DEAD: the key is
+      // matched literally, so the only URL that could ever reach it is the one
+      // spelled ":id". The duel shipped exactly that way — creating a lobby
+      // worked, and every screen after it (readiness, moves, the match itself)
+      // resolved to nothing on localhost while working fine against the real
+      // backend. Exact keys are still tried first, so "games/duel/lobbies"
+      // cannot be swallowed by "games/duel/:id".
+      const parameterised = Object.keys(mockMap).find(key => {
+        if (!key.includes(':')) return false;
+        const spaced = key.indexOf(' ');
+        const keyMethod = spaced === -1 ? 'GET' : key.slice(0, spaced);
+        const keyPath = spaced === -1 ? key : key.slice(spaced + 1);
+        if (keyMethod.toUpperCase() !== method.toUpperCase()) return false;
+        const keySegments = keyPath.split('/').filter(Boolean);
+        if (keySegments.length !== segments.length) return false;
+        return keySegments.every(
+          (segment, index) => segment.startsWith(':') || segment === segments[index]
+        );
+      });
+      if (parameterised) return mockMap[parameterised];
+
       // 3. Fallback to segment-by-segment traversal (supports finding by id/uuid in arrays)
       let current: unknown = mockMap;
       for (const segment of segments) {

@@ -27,6 +27,14 @@ export interface DuelLobby {
 export interface DuelLobbyList {
   readonly stakeMin: number;
   readonly stakeMax: number;
+  /**
+   * Правила матча — сервер называет их вместе со списком, потому что их правит
+   * панель. Экран показывает их игроку до входа и обязан говорить то, что
+   * стоит на сервере сейчас, а не то, что было вшито при сборке.
+   */
+  readonly winsNeeded: number;
+  readonly moveSeconds: number;
+  readonly readySeconds: number;
   readonly tickets: number;
   readonly own: DuelLobby | null;
   readonly lobbies: DuelLobby[];

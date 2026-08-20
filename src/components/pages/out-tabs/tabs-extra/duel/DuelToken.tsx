@@ -14,7 +14,11 @@ export interface DuelTokenProps {
 
 const SRC: Record<DuelMove, string> = {
   ROCK: '/assets/icons/duel/rock.webp',
-  TICKET: '/assets/icons/duel/ticket.webp',
+  // Настоящий бронзовый билет, а не отдельно нарисованный жетон: ставка идёт
+  // билетами, и фигура обязана быть тем же предметом, что лежит на балансе.
+  // Две разные картинки под одним словом «билет» путали бы там, где на кону
+  // реальные билеты.
+  TICKET: '/assets/icons/tickets/bronze-ticket.webp',
   SCISSORS: '/assets/icons/duel/scissors.webp',
 };
 
@@ -56,7 +60,12 @@ export function DuelToken({ move, size = 128, state = 'idle', className }: DuelT
         alt=""
         width={size}
         height={size}
-        className="h-full w-full object-contain drop-shadow-[0_14px_22px_rgba(0,0,0,0.6)]"
+        // Билет вдвое шире, чем выше: вписанный в квадрат по ширине он выходит
+        // заметно мельче камня и ножниц, поэтому ему дают вырасти за рамку.
+        className={twMerge(
+          'h-full w-full object-contain drop-shadow-[0_14px_22px_rgba(0,0,0,0.6)]',
+          move === 'TICKET' && 'scale-[1.16]'
+        )}
         priority
       />
     </div>
