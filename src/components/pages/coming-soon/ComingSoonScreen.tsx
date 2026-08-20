@@ -94,7 +94,15 @@ export function ComingSoonScreen({ launchAt, session }: ComingSoonScreenProps) {
           {t('coming soon earn now')}
         </p>
 
-        {invite.available && (
+        {/* Два разных «available», и путать их дорого. `invite.available` — это
+            «мы авторизовались и вообще можем спрашивать». `gift.available` —
+            ответ сервера про ЭТОГО игрока: промо закрыто или подарок у него уже
+            есть. Здесь стояло только первое, и получивший подарок увидел бы
+            лестницу снова — на экране друзей правило ровно обратное
+            (@see FriendsGiftEventCard), а правило должно быть одно на оба
+            экрана. Экран «скоро» сейчас выключен для всех, так что это заслон
+            на случай, когда гейт поднимут обратно. */}
+        {invite.available && invite.gift.available !== false && (
           <GiftLadder
             // The COUNTED friends, not everyone invited: the backend files a
             // claim on subscribed friends only, and a ladder counting the rest
