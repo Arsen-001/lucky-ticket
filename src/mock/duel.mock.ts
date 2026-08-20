@@ -241,6 +241,19 @@ export const duelMock = {
   },
 
   /** Кого можно позвать: половина списка «достижима» — как в жизни. */
+  /** Входящий вызов: в моке он есть всегда, чтобы модалку было видно. */
+  'games/duel/invites': () => [
+    {
+      id: 'invite-1',
+      duelId: lobbies[0]?.id ?? 'duel-mock',
+      stake: 2,
+      fromName: 'Aram',
+      fromAvatarUrl: '',
+    },
+  ],
+
+  'POST games/duel/invites/:id/decline': () => ({ ok: true }),
+
   'games/duel/invite-candidates': () => [
     { id: 'friend-1', name: 'Aram', avatarUrl: '', reachable: true },
     { id: 'friend-2', name: 'Nare', avatarUrl: '', reachable: true },

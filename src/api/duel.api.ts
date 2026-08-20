@@ -2,6 +2,7 @@ import { api } from '@/api/index.api';
 import { refetchTestQuestProgress } from '@/api/testQuest.api';
 import { rtkTags } from '@/constants/rtk-tags';
 import type {
+  DuelInvite,
   DuelInviteCandidate,
   DuelLobbyList,
   DuelMove,
@@ -72,6 +73,24 @@ export const duelApi = api.injectEndpoints({
     }),
 
     /**
+     * Вызовы, ждущие ответа прямо сейчас.
+     *
+     * Опрашивается редко и вне игры: это фон, а не игровой цикл. Тому, кто уже
+     * в приложении, вызов показывается модалкой — DM доходит до единиц
+     * процентов, и надеяться только на него нельзя.
+     */
+    getDuelInvites: builder.query<DuelInvite[], void>({
+      query: () => ({ url: 'games/duel/invites' }),
+      providesTags: [rtkTags.duelInvites],
+    }),
+
+    /** Отказ — чтобы вызов не всплывал снова. */
+    declineDuelInvite: builder.mutation<{ ok: boolean }, string>({
+      query: id => ({ url: `games/duel/invites/${id}/decline`, method: 'POST' }),
+      invalidatesTags: [rtkTags.duelInvites],
+    }),
+
+    /**
      * Позвать выбранных в своё лобби.
      *
      * Ответ говорит правду о доставке: `sent` — сколько сообщений реально
@@ -100,5 +119,7 @@ export const {
   useReadyDuelMutation,
   useMoveDuelMutation,
   useGetDuelInviteCandidatesQuery,
+  useGetDuelInvitesQuery,
+  useDeclineDuelInviteMutation,
   useInviteToDuelMutation,
 } = duelApi;

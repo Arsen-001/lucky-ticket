@@ -6,6 +6,7 @@ import type { ChildrenProps } from '@/types/interfaces/component.interfcaes';
 import { Drawer } from '@/components/layout-elements/Drawer';
 import { NotificationAutoSurface } from '@/components/layout-elements/NotificationAutoSurface';
 import { DailyGiftAutoSurface } from '@/components/layout-elements/DailyGiftAutoSurface';
+import { DuelInviteAutoSurface } from '@/components/layout-elements/DuelInviteAutoSurface';
 import { usePathname } from 'next/navigation';
 
 export default function TabsLayout({ children }: ChildrenProps) {
@@ -38,6 +39,7 @@ export default function TabsLayout({ children }: ChildrenProps) {
       <Drawer />
       <NotificationAutoSurface />
       <DailyGiftAutoSurface />
+      <DuelInviteAutoSurface />
     </>
   );
 }

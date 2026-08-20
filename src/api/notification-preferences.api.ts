@@ -25,6 +25,7 @@ export const notificationPreferencesApi = api.injectEndpoints({
             draft => {
               if (body.email) Object.assign(draft.email, body.email);
               if (body.telegram) Object.assign(draft.telegram, body.telegram);
+              if (body.duelInvitesFrom) draft.duelInvitesFrom = body.duelInvitesFrom;
             }
           )
         );

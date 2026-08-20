@@ -22,6 +22,7 @@ import { TelegramStarIcon } from '@/components/shared/icons/TelegramStarIcon';
 import { routes } from '@/constants/routes';
 import { useAppDispatch } from '@/lib/rtk/hooks';
 import { useAppTranslations } from '@/hooks/useAppTranslations';
+import { useClaimableFriends } from '@/hooks/useClaimableFriends';
 import { useMounted } from '@/hooks/useMounted';
 import { openDrawer } from '@/lib/rtk/features/layout.slice';
 import type { ClassNameProps } from '@/types/interfaces/component.interfcaes';
@@ -49,7 +50,13 @@ export function Header({ className }: ClassNameProps) {
   // claim button will not claim.
   const claimableStakesCount =
     stakesData?.activeStakes.filter(s => !s.claimed && stakeIsMatured(s)).length ?? 0;
-  const hasUpdates = unreadCount + claimableStakesCount > 0;
+  // The referral reward is claimed two taps away — burger, «Друзья» — and until
+  // 21.08.2026 nothing on the way there said it was waiting. It is the same
+  // «есть что забрать» this dot already carries for a matured stake, so it
+  // belongs in the same count rather than in a mark of its own.
+  // @see useClaimableFriends
+  const { count: claimableFriendsCount } = useClaimableFriends();
+  const hasUpdates = unreadCount + claimableStakesCount + claimableFriendsCount > 0;
 
   const usernameClasses = twMerge(
     'ach-status-username truncate text-[18px] leading-tight',

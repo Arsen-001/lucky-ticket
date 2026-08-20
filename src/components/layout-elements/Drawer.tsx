@@ -46,6 +46,7 @@ import { type Route, routes } from '@/constants/routes';
 import { localeDirection } from '@/i18n/config';
 import { useAppTranslations } from '@/hooks/useAppTranslations';
 import { useBackDismiss } from '@/hooks/useBackDismiss';
+import { useClaimableFriends } from '@/hooks/useClaimableFriends';
 import { useContentPagesEnabled } from '@/hooks/useContentPagesEnabled';
 import { useFeature } from '@/hooks/useFeature';
 import { useLeaderboardEnabled } from '@/hooks/useLeaderboardEnabled';
@@ -94,6 +95,11 @@ export function Drawer() {
   // comparison against the device clock (see `stakeIsMatured`).
   const claimableStakesCount =
     stakesData?.activeStakes.filter(s => !s.claimed && stakeIsMatured(s)).length ?? 0;
+  // Where the burger dot leads. The header lights up for a waiting referral
+  // reward, and a menu with no mark on it ends the trail — the player is left
+  // opening rows to find which one owes them. Same request as the header's:
+  // RTK serves both from one cache entry. @see useClaimableFriends
+  const { count: claimableFriendsCount } = useClaimableFriends();
 
   const handleDrawerClose = () => {
     dispatch(closeDrawer());
@@ -295,6 +301,7 @@ export function Drawer() {
       route: routes.inviteFriends,
       title: t('friends'),
       icon: <UserRoundPlus size={18} />,
+      badge: claimableFriendsCount,
     },
     {
       route: routes.notifications,

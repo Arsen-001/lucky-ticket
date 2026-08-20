@@ -59,7 +59,18 @@ export type NotificationPreferenceKey =
   | 'achievements'
   | 'system';
 
+/**
+ * Кто может звать игрока на дуэль.
+ *
+ * «Все» включает друзей по определению — отдельного «и то и это» не бывает.
+ * По умолчанию `friends`: вызов это модалка поверх экрана, и незнакомец,
+ * способный её вызвать, превращает игру в место, откуда хочется уйти.
+ */
+export type DuelInvitePolicy = 'nobody' | 'friends' | 'everyone';
+
 export type NotificationPreferences = Record<
   NotificationChannel,
   Record<NotificationPreferenceKey, boolean>
->;
+> & {
+  duelInvitesFrom: DuelInvitePolicy;
+};

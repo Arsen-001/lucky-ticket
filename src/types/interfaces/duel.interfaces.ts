@@ -96,3 +96,12 @@ export interface DuelInviteCandidate {
   readonly avatarUrl: string;
   readonly reachable: boolean;
 }
+
+/** Вызов на дуэль, ждущий ответа: его показывает модалка внутри игры. */
+export interface DuelInvite {
+  readonly id: string;
+  readonly duelId: string;
+  readonly stake: number;
+  readonly fromName: string;
+  readonly fromAvatarUrl: string;
+}

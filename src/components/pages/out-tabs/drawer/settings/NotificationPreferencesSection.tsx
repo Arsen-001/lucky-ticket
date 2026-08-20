@@ -20,6 +20,7 @@ import {
   useUpdateNotificationPreferencesMutation,
 } from '@/api/notification-preferences.api';
 import { BotWriteAccessCard } from '@/components/pages/out-tabs/drawer/settings/BotWriteAccessCard';
+import { DuelInvitePolicyRow } from '@/components/pages/out-tabs/drawer/settings/DuelInvitePolicyRow';
 import { SettingsMenuItem } from '@/components/pages/out-tabs/drawer/settings/SettingsMenuItem';
 import { Switch } from '@/components/shared/form-elements/Switch';
 // EMAIL OFF (2026-08-17) — both belong to the channel tab bar, which is off while
@@ -255,6 +256,11 @@ export function NotificationPreferencesSection() {
           permission the bot cannot write first and none of them can deliver.
           Renders nothing once granted. */}
       <BotWriteAccessCard />
+
+      {/* Не тумблер уведомления, а право позвать: вызов приходит модалкой
+          поверх экрана, и решает здесь тот, кого зовут. Поэтому строка стоит
+          над списком каналов, а не среди них. */}
+      <DuelInvitePolicyRow />
 
       {renderChannelList('telegram')}
     </div>
