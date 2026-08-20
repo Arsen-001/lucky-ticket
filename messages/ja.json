@@ -1232,6 +1232,8 @@
   "coming soon gift daily rule": "毎日{total}個のギフト。早い者勝ちです",
   "coming soon gift issued today": "本日 {total} 個中 {issued} 個を配布済み",
   "coming soon gift channel rule": "友だちはチャンネルをフォローして初めてカウントされます",
+  "gift referral rule": "友だちはチャンネルをフォローし、ボットをブロックしていない間だけカウントされます",
+  "gift not blocked rule": "ボットをブロックした友だちはカウントされなくなります",
   "coming soon more friends better": "友だちを多く連れてくるほど強くスタートできます。公開後は彼らがあなたのステータスを押し上げ、チケットの分け前も入ります。{count}人分のギフトはいずれにせよあなたのものです。",
   "coming soon gift claim": "ギフトを受け取る",
   "coming soon gift locked": "解放するにはチャンネルに友だちを{count}人連れてきてください",

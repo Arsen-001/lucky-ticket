@@ -1232,6 +1232,8 @@
   "coming soon gift daily rule": "هر روز {total} هدیه. زودتر از بقیه یکی بردار",
   "coming soon gift issued today": "امروز {issued} از {total} داده شد",
   "coming soon gift channel rule": "دوست فقط پس از دنبال کردن کانال حساب می‌شود",
+  "gift referral rule": "دوست تا زمانی حساب می‌شود که کانال را دنبال کند و ربات را مسدود نکرده باشد",
+  "gift not blocked rule": "اگر دوست ربات را مسدود کند، دیگر حساب نمی‌شود",
   "coming soon more friends better": "هرچه دوست بیشتری بیاوری قوی‌تر شروع می‌کنی: پس از راه‌اندازی وضعیتت را بالا می‌برند و از بلیت‌هایشان سهم می‌دهند — و هدیهٔ {count} در هر حال مال توست.",
   "coming soon gift claim": "گرفتن هدیه‌ات",
   "coming soon gift locked": "برای باز شدن {count} دوست به کانال بیاور",

@@ -153,16 +153,32 @@ export function GiftLadder({
   })();
 
   /**
-   * The condition on every one of those steps: a friend counts only while
-   * subscribed to the channel. The friends list already flags the ones that do
-   * not count, but only after the fact — said here, it is something the player
-   * can act on *before* sending the link.
+   * The condition on every one of those steps: a friend counts only while they
+   * are a REFERRAL. The friends list already flags the ones that do not count,
+   * but only after the fact — said here, it is something the player can act on
+   * *before* sending the link.
+   *
+   * Условий два, и фраза собирается по тем, что реально включены: до
+   * 20.08.2026 подарок смотрел только на канал, писал ровно это — и обещал
+   * зачёт тому, кто в канале сидит, но бота заблокировал. Молчаливого «или»
+   * тут быть не должно, поэтому вариантов три, а не один с оговоркой.
    *
    * Dropped once their own claim is filed (the rule has done its work) and when
-   * an admin switches the rule off — but it comes back on a paused claim, where
-   * it is the one thing standing between them and the gift again.
+   * an admin switches the rules off — but it comes back on a paused claim,
+   * where it is the one thing standing between them and the gift again.
    */
-  const channelRule = (!gift.status || paused) && gift.requireChannelSubscription !== false;
+  const showRule = !gift.status || paused;
+  const channel = gift.requireChannelSubscription !== false;
+  // Undefined = бэкенд старый и про блокировку не знает; он её и не применял.
+  const notBlocked = gift.requireBotNotBlocked === true;
+  const ruleKey = channel
+    ? notBlocked
+      ? ('gift referral rule' as const)
+      : ('coming soon gift channel rule' as const)
+    : notBlocked
+      ? ('gift not blocked rule' as const)
+      : null;
+  const channelRule = showRule && ruleKey !== null;
 
   const caption = (() => {
     // Ahead of the plain «пригласите ещё N»: that sentence offers a gift for
@@ -249,7 +265,7 @@ export function GiftLadder({
           {channelRule && (
             <p className="flex items-center justify-center gap-1.5 text-balance max-w-[21rem] text-[11.5px] font-semibold leading-snug text-white/60">
               <Megaphone size={13} className="text-electric-pink flex-shrink-0" strokeWidth={2.4} />
-              {t('coming soon gift channel rule')}
+              {t(ruleKey!)}
             </p>
           )}
           {board && (

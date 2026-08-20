@@ -312,6 +312,9 @@ export const preLaunchGiftMock: PreLaunchGiftState = {
   notCountedFriendIds,
   // On, as it is in production — the ladder states it as a condition.
   requireChannelSubscription: true,
+  // Оба условия включены, как на проде: иначе в dev не видно фразы,
+  // которая называет правило целиком.
+  requireBotNotBlocked: true,
   // Today's board, mid-day: enough left to still be a race.
   dailyLimit: 5,
   dailyRemaining,

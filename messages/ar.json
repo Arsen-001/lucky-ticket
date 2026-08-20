@@ -1232,6 +1232,8 @@
   "coming soon gift daily rule": "{total} هدية كل يوم. كن أول من يحصل على واحدة",
   "coming soon gift issued today": "وُزّع {issued} من {total} اليوم",
   "coming soon gift channel rule": "لا يُحتسب الصديق إلا بعد اشتراكه في القناة",
+  "gift referral rule": "يُحتسب الصديق ما دام مشتركًا في القناة ولم يحظر البوت",
+  "gift not blocked rule": "لا يُحتسب الصديق إذا حظر البوت",
   "coming soon more friends better": "كلما أحضرت أصدقاء أكثر بدأت أقوى: بعد الإطلاق يرفعون حالتك ويدفعون لك حصة من تذاكرهم — وهدية {count} لك في كل الأحوال.",
   "coming soon gift claim": "استلام هديتك",
   "coming soon gift locked": "أحضر {count} أصدقاء إلى القناة للفتح",

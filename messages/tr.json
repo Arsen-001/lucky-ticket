@@ -1232,6 +1232,8 @@
   "coming soon gift daily rule": "Her gün {total} hediye. İlk kapan sen ol",
   "coming soon gift issued today": "Bugün {total} hediyeden {issued} tanesi verildi",
   "coming soon gift channel rule": "Bir arkadaş ancak kanalı takip edince sayılır",
+  "gift referral rule": "Bir arkadaş kanalı takip ettiği ve botu engellemediği sürece sayılır",
+  "gift not blocked rule": "Botu engelleyen arkadaş artık sayılmaz",
   "coming soon more friends better": "Ne kadar çok arkadaş getirirsen o kadar güçlü başlarsın: lansmandan sonra statünü yükseltiyorlar ve biletlerinden sana pay ödüyorlar — {count} için hediye de her hâlükârda senin.",
   "coming soon gift claim": "Hediyeni al",
   "coming soon gift locked": "Açmak için kanala {count} arkadaş getir",

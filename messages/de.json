@@ -1232,6 +1232,8 @@
   "coming soon gift daily rule": "Jeden Tag {total} Geschenke. Sei der Erste",
   "coming soon gift issued today": "Heute {issued} von {total} vergeben",
   "coming soon gift channel rule": "Ein Freund zählt erst, wenn er dem Kanal folgt",
+  "gift referral rule": "Ein Freund zählt, solange er dem Kanal folgt und den Bot nicht blockiert hat",
+  "gift not blocked rule": "Ein Freund zählt nicht mehr, wenn er den Bot blockiert",
   "coming soon more friends better": "Je mehr Freunde du mitbringst, desto stärker startest du: nach dem Launch heben sie deinen Status und zahlen dir einen Anteil ihrer Tickets — und das Geschenk für {count} bleibt dir ohnehin.",
   "coming soon gift claim": "Geschenk abholen",
   "coming soon gift locked": "Bring {count} Freunde in den Kanal, um es freizuschalten",

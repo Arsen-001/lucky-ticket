@@ -1232,6 +1232,8 @@
   "coming soon gift daily rule": "Օրական {total} նվեր։ Հասցրու առաջինը վերցնել",
   "coming soon gift issued today": "Այսօր տրված է {total}-ից {issued}-ը",
   "coming soon gift channel rule": "Ընկերը հաշվվում է միայն ալիքին բաժանորդագրվելուց հետո",
+  "gift referral rule": "Ընկերը հաշվվում է, քանի դեռ բաժանորդագրված է ալիքին և չի արգելափակել բոտը",
+  "gift not blocked rule": "Ընկերը դադարում է հաշվվել, եթե արգելափակի բոտը",
   "coming soon more friends better": "Որքան շատ ընկեր բերես, այնքան ուժեղ կսկսես․ գործարկումից հետո նրանք բարձրացնում են կարգավիճակդ և վճարում քեզ իրենց տոմսերի բաժինը — իսկ {count}-ի նվերը քոնն է ամեն դեպքում։",
   "coming soon gift claim": "Ստանալ նվերդ",
   "coming soon gift locked": "Բեր {count} ընկերոջ ալիք՝ բացելու համար",

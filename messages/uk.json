@@ -1232,6 +1232,8 @@
   "coming soon gift daily rule": "{total} подарунків щодня. Устигни забрати першим",
   "coming soon gift issued today": "Сьогодні видано {issued} з {total}",
   "coming soon gift channel rule": "Друг зараховується лише після підписки на канал",
+  "gift referral rule": "Друг зараховується, доки підписаний на канал і не заблокував бота",
+  "gift not blocked rule": "Друг перестає зараховуватися, якщо заблокує бота",
   "coming soon more friends better": "Що більше друзів приведеш, то сильніше стартуєш: після запуску вони піднімають твій статус і платять тобі частку зі своїх квитків — а подарунок за {count} твій у будь-якому разі.",
   "coming soon gift claim": "Забрати подарунок",
   "coming soon gift locked": "Приведи {count} друзів на канал, щоб відкрити",

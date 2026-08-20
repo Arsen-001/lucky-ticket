@@ -1232,6 +1232,8 @@
   "coming soon gift daily rule": "Har kuni {total} sovgʻa. Birinchi boʻlib olishga ulgur",
   "coming soon gift issued today": "Bugun {total} tadan {issued} tasi berildi",
   "coming soon gift channel rule": "Doʻst faqat kanalga obuna boʻlgach hisoblanadi",
+  "gift referral rule": "Doʻst kanalga obuna boʻlgan va botni bloklamagan boʻlsa hisoblanadi",
+  "gift not blocked rule": "Botni bloklagan doʻst hisoblanmay qoladi",
   "coming soon more friends better": "Qancha koʻp doʻst olib kelsang, shuncha kuchli boshlaysan: ishga tushgach ular statusingni koʻtaradi va chiptalaridan senga ulush toʻlaydi — {count} uchun sovgʻa esa har holda seniki.",
   "coming soon gift claim": "Sovgʻangni olish",
   "coming soon gift locked": "Ochish uchun kanalga {count} ta doʻst olib kel",

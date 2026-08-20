@@ -179,11 +179,15 @@ export interface PreLaunchGiftState {
   /** Ids of invited friends that do not count yet — the list marks them. */
   notCountedFriendIds?: string[];
   /**
-   * Is the channel rule on? The ladder prints it as a condition, so an admin
-   * switching it off must take the sentence down with it. Undefined = a backend
-   * too old to say, and the rule has been on the whole time it existed.
+   * Действующие условия зачёта — ровно те, по которым посчитан `counted`.
+   *
+   * Их два, потому что реферал — это два условия, и лестница печатает их
+   * словами: админ, выключивший одно, должен унести с экрана ровно половину
+   * фразы. Undefined = бэкенд слишком старый, чтобы сказать, — а он всё время
+   * своего существования применял только канальное.
    */
   requireChannelSubscription?: boolean;
+  requireBotNotBlocked?: boolean;
   /** Places on today's board; `0` means the promo is closed today. */
   dailyLimit?: number | null;
   /** Places still free today. */

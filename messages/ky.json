@@ -1232,6 +1232,8 @@
   "coming soon gift daily rule": "Күн сайын {total} белек. Биринчи болуп алганга үлгүр",
   "coming soon gift issued today": "Бүгүн {total} ичинен {issued} берилди",
   "coming soon gift channel rule": "Дос бир гана каналга жазылганда эсептелет",
+  "gift referral rule": "Дос каналга жазылып турса жана ботту бөгөттөбөсө эсептелет",
+  "gift not blocked rule": "Ботту бөгөттөгөн дос эсептелбей калат",
   "coming soon more friends better": "Канчалык көп дос алып келсең, ошончолук күчтүү баштайсың: иштегенден кийин алар статусуңду көтөрөт жана билеттеринен сага үлүш төлөйт — ал эми {count} үчүн белек кандай болсо да сеники.",
   "coming soon gift claim": "Белегиңди алуу",
   "coming soon gift locked": "Ачуу үчүн каналга {count} дос алып кел",
