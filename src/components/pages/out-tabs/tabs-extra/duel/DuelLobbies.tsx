@@ -8,6 +8,7 @@ import { DuelGameHeader } from '@/components/pages/out-tabs/tabs-extra/duel/Duel
 import { DuelLobbyRow } from '@/components/pages/out-tabs/tabs-extra/duel/DuelLobbyRow';
 import { duelClock } from '@/utils/global/duel.utils';
 import { useAppTranslations } from '@/hooks/useAppTranslations';
+import { useInFlightLock } from '@/hooks/useInFlightLock';
 import { useToast } from '@/hooks/useToast';
 import {
   useCancelDuelMutation,
@@ -33,7 +34,10 @@ export function DuelLobbies({ onEnter }: DuelLobbiesProps) {
   const toast = useToast();
   const [picking, setPicking] = useState(false);
   const [stake, setStake] = useState(1);
-  const [busy, setBusy] = useState(false);
+  // Замок вместо `isLoading`: RTK батчит `pending`, и перерисовка, гасящая
+  // кнопку, может опоздать на кадр — два быстрых тапа успевают уйти оба.
+  // Игрок и ДОЛЖЕН жать быстро, просить его «не спешить» нельзя.
+  const lock = useInFlightLock();
 
   const { data, isLoading, isError, refetch } = useGetDuelLobbiesQuery(undefined, {
     pollingInterval: 3000,
@@ -47,7 +51,7 @@ export function DuelLobbies({ onEnter }: DuelLobbiesProps) {
   const max = data?.stakeMax ?? 5;
 
   const handleCreate = async (invite = false) => {
-    setBusy(true);
+    if (!lock.acquire('create')) return;
     try {
       const duel = await create({ stake }).unwrap();
       setPicking(false);
@@ -55,19 +59,21 @@ export function DuelLobbies({ onEnter }: DuelLobbiesProps) {
     } catch {
       toast.error(t('duel action failed'));
     } finally {
-      setBusy(false);
+      lock.release('create');
     }
   };
 
   const handleJoin = async (id: string) => {
-    setBusy(true);
+    // Ключ — id лобби: два тапа по РАЗНЫМ лобби это два разных действия, а два
+    // тапа по одному — одно.
+    if (!lock.acquire(id)) return;
     try {
       const duel = await join(id).unwrap();
       onEnter(duel.id);
     } catch {
       toast.error(t('duel action failed'));
     } finally {
-      setBusy(false);
+      lock.release(id);
     }
   };
 
@@ -118,7 +124,11 @@ export function DuelLobbies({ onEnter }: DuelLobbiesProps) {
         <p className="text-disabled text-xs leading-relaxed">{t('duel stake note')}</p>
 
         <div className="mt-auto flex flex-col gap-2">
-          <Button className="h-14" loading={busy} onClick={() => handleCreate()}>
+          <Button
+            className="h-14"
+            loading={lock.locked.has('create')}
+            onClick={() => handleCreate()}
+          >
             {t('duel open lobby')}
           </Button>
           {/* Тот же самый ход, но с ответом на «а с кем играть»: лобби
@@ -128,7 +138,7 @@ export function DuelLobbies({ onEnter }: DuelLobbiesProps) {
           <Button
             variant="secondary"
             className="h-13"
-            loading={busy}
+            loading={lock.locked.has('create')}
             onClick={() => handleCreate(true)}
           >
             {t('duel play with friend')}
@@ -175,7 +185,12 @@ export function DuelLobbies({ onEnter }: DuelLobbiesProps) {
 
       <div className="scrollbar-hidden flex flex-1 flex-col gap-2.5 overflow-y-auto">
         {data?.lobbies.map(lobby => (
-          <DuelLobbyRow key={lobby.id} lobby={lobby} busy={busy} onJoin={handleJoin} />
+          <DuelLobbyRow
+            key={lobby.id}
+            lobby={lobby}
+            busy={lock.locked.has(lobby.id)}
+            onJoin={handleJoin}
+          />
         ))}
       </div>
 
@@ -186,13 +201,27 @@ export function DuelLobbies({ onEnter }: DuelLobbiesProps) {
           </p>
         )}
         {data?.own ? (
-          <Button variant="transparent" className="h-12" onClick={() => cancel(data.own!.id)}>
+          <Button
+            variant="transparent"
+            className="h-12"
+            loading={lock.locked.has('cancel')}
+            onClick={async () => {
+              if (!lock.acquire('cancel')) return;
+              try {
+                await cancel(data.own!.id).unwrap();
+              } catch {
+                toast.error(t('duel action failed'));
+              } finally {
+                lock.release('cancel');
+              }
+            }}
+          >
             {t('duel cancel lobby')}
           </Button>
         ) : (
           <Button
             className="h-14"
-            disabled={tickets < min}
+            disabled={tickets < min || lock.locked.has('create')}
             onClick={() => {
               setStake(min);
               setPicking(true);

@@ -11,6 +11,7 @@ import { DuelToken } from '@/components/pages/out-tabs/tabs-extra/duel/DuelToken
 import { DuelWaiting } from '@/components/pages/out-tabs/tabs-extra/duel/DuelWaiting';
 import { DUEL_MOVE_LABEL } from '@/components/pages/out-tabs/tabs-extra/duel/duel.tokens';
 import { useAppTranslations } from '@/hooks/useAppTranslations';
+import { useInFlightLock } from '@/hooks/useInFlightLock';
 import { useToast } from '@/hooks/useToast';
 import { useGetDuelStateQuery, useMoveDuelMutation, useReadyDuelMutation } from '@/api/duel.api';
 import { duelBeats } from '@/utils/global/duel.utils';
@@ -19,6 +20,13 @@ import '@/styles/components/duel.css';
 
 /** В бою состояние опрашивается часто: раунд длится считаные секунды. */
 const POLL_FAST = 600;
+/**
+ * Когда ход уже сделан и ждём вскрытия — чаще.
+ *
+ * Это единственный момент, где задержка видна: оба сходили, результат уже
+ * решён сервером, и лишние полсекунды читаются как зависший экран.
+ */
+const POLL_REVEAL = 300;
 
 export interface DuelArenaProps {
   duelId: string;
@@ -39,10 +47,18 @@ export interface DuelArenaProps {
 export function DuelArena({ duelId, tickets, openInvite, onLeave }: DuelArenaProps) {
   const t = useAppTranslations();
   const toast = useToast();
-  const [sending, setSending] = useState(false);
+  // Замок, а не `isLoading`: перерисовка, гасящая кнопку, может опоздать на
+  // кадр, и два быстрых тапа уходят оба. В матче на пять секунд быстрые тапы —
+  // норма, а не злоупотребление.
+  const lock = useInFlightLock();
   const [now, setNow] = useState(() => Date.now());
 
-  const { data } = useGetDuelStateQuery(duelId, { pollingInterval: POLL_FAST });
+  // Интервал зависит от фазы: пока ждём вскрытия — чаще, в остальное время
+  // достаточно шестисот миллисекунд.
+  const [awaitingReveal, setAwaitingReveal] = useState(false);
+  const { data } = useGetDuelStateQuery(duelId, {
+    pollingInterval: awaitingReveal ? POLL_REVEAL : POLL_FAST,
+  });
   const [ready] = useReadyDuelMutation();
   const [move] = useMoveDuelMutation();
 
@@ -52,6 +68,12 @@ export function DuelArena({ duelId, tickets, openInvite, onLeave }: DuelArenaPro
     const id = setInterval(() => setNow(Date.now()), playing ? 200 : 500);
     return () => clearInterval(id);
   }, [playing]);
+
+  // «Оба сходили, ждём картинку» — единственная фаза, где задержка заметна.
+  useEffect(() => {
+    const both = Boolean(data?.me.move) && Boolean(data?.foe.moved);
+    setAwaitingReveal(both && !data?.round?.revealed);
+  }, [data?.me.move, data?.foe.moved, data?.round?.revealed]);
 
   useEffect(() => {
     if (data?.status === 'CANCELLED') {
@@ -67,24 +89,27 @@ export function DuelArena({ duelId, tickets, openInvite, onLeave }: DuelArenaPro
     iso ? Math.max(0, Math.ceil((new Date(iso).getTime() - now) / 1000)) : 0;
 
   const handleReady = async () => {
-    setSending(true);
+    if (!lock.acquire('ready')) return;
     try {
       await ready(duelId).unwrap();
     } catch {
       toast.error(t('duel action failed'));
     } finally {
-      setSending(false);
+      lock.release('ready');
     }
   };
 
   const handleMove = async (picked: DuelMove) => {
-    setSending(true);
+    // Ключ с номером раунда: ход в следующем раунде — новое действие, а второй
+    // тап в этом же — тот самый повтор, который сервер и так не примет.
+    const key = `move-${data?.round?.index ?? 0}`;
+    if (!lock.acquire(key)) return;
     try {
       await move({ id: duelId, move: picked }).unwrap();
     } catch {
       toast.error(t('duel move failed'));
     } finally {
-      setSending(false);
+      lock.release(key);
     }
   };
 
@@ -276,7 +301,7 @@ export function DuelArena({ duelId, tickets, openInvite, onLeave }: DuelArenaPro
             </span>
             <Button
               className="h-14 bg-success"
-              loading={sending}
+              loading={lock.locked.has('ready')}
               disabled={data.me.ready}
               onClick={handleReady}
             >
@@ -285,7 +310,9 @@ export function DuelArena({ duelId, tickets, openInvite, onLeave }: DuelArenaPro
           </>
         )}
 
-        {playing && <DuelPicks chosen={data.me.move} disabled={sending} onPick={handleMove} />}
+        {playing && (
+          <DuelPicks chosen={data.me.move} disabled={lock.locked.size > 0} onPick={handleMove} />
+        )}
 
         {finished && (
           <Button className="h-14" onClick={onLeave}>
