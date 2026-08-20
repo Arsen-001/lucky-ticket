@@ -2,6 +2,7 @@
 
 > **See also:** [`.claude/PROJECT_RULES.md`](.claude/PROJECT_RULES.md) for supplementary Claude-Code-specific rules (R1–R31), and [`.claude/skills/`](.claude/skills/git pull) for invokable scaffolding skills:
 >
+> - `/new-pvp-game` — build a PvP mini-game on the settled duel skeleton (lobby, stake, readiness, blind moves, crowd, invites)
 > - `/new-rtk-endpoint` — wire an API file + tag + mock through all three required places
 > - `/new-component` — scaffold a component matching project conventions
 > - `/new-modal` — scaffold a modal with proper portal/inert/animation handling
