@@ -118,7 +118,7 @@ export const GlobalConstants = {
    * live value rides on `GET /config` (`referral.tournamentLcPct`) so an admin
    * retune reaches the screen without a deploy. @see useReferralReward
    */
-  referralTournamentLcPercentage: 4,
+  referralTournamentLcPercentage: 3.5,
   /**
    * The SECOND level: this % of a friend-of-a-friend's tournament prize goes to
    * whoever invited the middle link.
@@ -126,8 +126,12 @@ export const GlobalConstants = {
    * Carved out of the number above rather than added to it — the pair is the
    * flat 5% that used to be one level. Display fallback only; the live value
    * rides on `GET /config` (`referral.tournamentLcL2Pct`).
+   *
+   * Обе половины подтянуты к тому, что реально стоит на проде (сверено с
+   * `/config` 20.08.2026): здесь лежали 4 и 1, и до приезда конфига экран
+   * секунду показывал не ту ставку. Сумма та же — делят её в панели.
    */
-  referralTournamentLcL2Percentage: 1,
+  referralTournamentLcL2Percentage: 1.5,
   /**
    * Engine-speed MULTIPLIER of a Lucky Player, as a % (30 = ×1.3) — worth the
    * same on a fresh and on a maxed engine, like the speed chip, and applied
