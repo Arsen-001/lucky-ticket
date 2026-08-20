@@ -11,7 +11,7 @@ import '@/styles/components/coming-soon-gift.css';
  * earned it comes apart — a friend leaves the channel after the press. It is
  * deliberately NOT `locked`: the claim row is unique per account and permanent,
  * so there is nothing to press again, and a padlock would invite a tap that can
- * only answer «Подарок уже запрошен». @see ComingSoonGiftSteps
+ * only answer «Подарок уже запрошен». @see GiftLadder
  */
 export type GiftPrizeState = 'locked' | 'ready' | 'closed' | 'claimed' | 'paused' | 'sent';
 
@@ -26,6 +26,12 @@ export interface GiftPrizeProps {
    */
   image?: string | null;
   state: GiftPrizeState;
+  /**
+   * Friends the gift costs, as the SERVER currently reports it — the locked
+   * caption names it. Optional only so an older caller keeps compiling; the
+   * bundled constant behind it has been wrong twice (5 → 7 → 10).
+   */
+  required?: number;
   /** Files the claim. Only ever called in the `ready` state. */
   onClaim?: () => void;
   /** The claim request is in flight. */
@@ -45,7 +51,15 @@ export interface GiftPrizeProps {
  * A `button` only while it can actually be pressed — a disabled-looking control
  * that still takes taps is how a player concludes the screen is broken.
  */
-export function GiftPrize({ emoji, image, state, onClaim, claiming, className }: GiftPrizeProps) {
+export function GiftPrize({
+  emoji,
+  image,
+  state,
+  required,
+  onClaim,
+  claiming,
+  className,
+}: GiftPrizeProps) {
   const t = useAppTranslations();
 
   const ready = state === 'ready';
@@ -57,10 +71,11 @@ export function GiftPrize({ emoji, image, state, onClaim, claiming, className }:
     if (state === 'claimed') return t('coming soon gift requested');
     if (state === 'paused') return t('coming soon gift paused');
     if (state === 'sent') return t('coming soon gift in chat');
-    // Число берётся из конфига, а не из текста: планка уже менялась (5 → 7),
-    // и подпись, которая живёт своей жизнью, обещает не ту лестницу.
+    // Число приходит с сервера, а не из текста и не из бандла: планка уже
+    // менялась дважды (5 → 7 → 10) и теперь правится в панели, а подпись,
+    // которая живёт своей жизнью, обещает не ту лестницу.
     return t('coming soon gift locked', {
-      count: comingSoonConfig.giftFriendsRequired,
+      count: required || comingSoonConfig.giftFriendsRequired,
     });
   })();
 

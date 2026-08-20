@@ -30,7 +30,7 @@ const GIFT_POOL = ['💝'];
 /** Where the ladder lands when the server is still silent. @see GiftPrize */
 const PRIZE_EMOJI = GIFT_POOL[0];
 
-export interface ComingSoonGiftStepsProps {
+export interface GiftLadderProps {
   /** Friends who have already come through this player's link. */
   invitedCount: number;
   /** Where the claim stands once the ladder is full. @see PreLaunchGiftState */
@@ -42,13 +42,26 @@ export interface ComingSoonGiftStepsProps {
   claiming?: boolean;
   /** Why the last press was refused, in the backend's own words. */
   error?: string | null;
+  /**
+   * Draw the «подарок разовый, а друзья остаются» line under the caption.
+   *
+   * On for the countdown screen, where it is the only reason given to keep
+   * inviting after the gift. Off on the friends screen: the referral cut has
+   * its own section three blocks down, and saying it twice on one screen reads
+   * as a second, different promise.
+   */
+  showProfitNote?: boolean;
   className?: string;
   /** Carries the screen's entry-animation delay. */
   style?: CSSProperties;
 }
 
 /**
- * The ladder under the headline: five friends, then a gift from the bot.
+ * The ladder: N friends, then a gift from the bot.
+ *
+ * Lives in `shared/` because two screens draw it — the pre-launch countdown it
+ * was written for, and the friends-screen event that replaced it once the gate
+ * came down. @see FriendsGiftEventCard
  *
  * This is the whole answer to "earn before the game opens" — the countdown says
  * wait, this says what to do meanwhile. It counts the same referrals the invite
@@ -58,20 +71,25 @@ export interface ComingSoonGiftStepsProps {
  * Deliberately silent about *when* the gift lands: the bot sends it, and this
  * screen has no way to observe that it did.
  */
-export function ComingSoonGiftSteps({
+export function GiftLadder({
   invitedCount,
   gift,
   loading,
   onClaim,
   claiming,
   error,
+  showProfitNote = true,
   className,
   style,
-}: ComingSoonGiftStepsProps) {
+}: GiftLadderProps) {
   const t = useAppTranslations();
 
-  const total = comingSoonConfig.giftFriendsRequired;
-  // Clamped: a prolific inviter is at 5/5, not at 11/5.
+  // The server's number first: the threshold is a panel setting since
+  // 20.08.2026, and a ladder drawn from the bundled constant would keep
+  // promising the old bar for as long as the tab stayed open. The constant is
+  // only what to draw before the answer arrives.
+  const total = gift.required || comingSoonConfig.giftFriendsRequired;
+  // Clamped: a prolific inviter is at 10/10, not at 21/10.
   const reached = Math.min(Math.max(invitedCount, 0), total);
   const remaining = total - reached;
   const complete = remaining === 0;
@@ -182,11 +200,14 @@ export function ComingSoonGiftSteps({
                 state={done ? 'done' : active ? 'active' : 'idle'}
                 // Every step is one invited friend, and says so: a bare number
                 // reads as a level, not as a person to bring.
+                // Sized in CSS, not in pixels: the bead is fluid, so the icon
+                // has to be a fraction of it. A `size` prop here is what made
+                // a ten-step ladder unreadable at 360px.
                 icon={
                   done ? (
-                    <Check size={15} strokeWidth={3} />
+                    <Check className="h-1/2 w-1/2" strokeWidth={3} />
                   ) : (
-                    <UserPlus size={15} strokeWidth={2.4} />
+                    <UserPlus className="h-1/2 w-1/2" strokeWidth={2.4} />
                   )
                 }
               />
@@ -198,7 +219,7 @@ export function ComingSoonGiftSteps({
         <GiftStepNode
           emphasized
           state={complete ? 'done' : 'idle'}
-          icon={<Gift size={17} strokeWidth={2.2} />}
+          icon={<Gift className="h-1/2 w-1/2" strokeWidth={2.2} />}
         />
       </div>
 
@@ -220,9 +241,11 @@ export function ComingSoonGiftSteps({
               `GET /config`, which this screen never fetches (no store behind the
               gate), so a hardcoded number here would be a promise nobody keeps
               after an admin retune. @see GlobalConstants.referralTournamentLcPercentage */}
-          <p className="max-w-[22rem] text-balance text-[13px] font-extrabold leading-snug text-white">
-            {t('coming soon gift friends profit')}
-          </p>
+          {showProfitNote && (
+            <p className="max-w-[22rem] text-balance text-[13px] font-extrabold leading-snug text-white">
+              {t('coming soon gift friends profit')}
+            </p>
+          )}
           {channelRule && (
             <p className="flex items-center justify-center gap-1.5 text-balance max-w-[21rem] text-[11.5px] font-semibold leading-snug text-white/60">
               <Megaphone size={13} className="text-electric-pink flex-shrink-0" strokeWidth={2.4} />
@@ -267,6 +290,7 @@ export function ComingSoonGiftSteps({
       <GiftPrize
         emoji={gift.emoji || gift.giftEmoji || PRIZE_EMOJI}
         image={gift.giftImage}
+        required={total}
         state={prizeState}
         onClaim={onClaim}
         claiming={claiming}

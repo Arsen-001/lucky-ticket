@@ -8,7 +8,7 @@ import { useTelegramChrome } from '@/hooks/useTelegramChrome';
 import { usePreLaunchInvite } from '@/hooks/usePreLaunchInvite';
 import { LaunchCountdown } from './LaunchCountdown';
 import { ComingSoonChannelLink } from './ComingSoonChannelLink';
-import { ComingSoonGiftSteps } from './ComingSoonGiftSteps';
+import { GiftLadder } from '@/components/shared/gift-ladder/GiftLadder';
 import { ComingSoonInviteSection } from './ComingSoonInviteSection';
 import { ComingSoonLanguageSwitch } from './ComingSoonLanguageSwitch';
 import type { PreLaunchSession } from '@/hooks/usePreLaunchGate';
@@ -95,7 +95,7 @@ export function ComingSoonScreen({ launchAt, session }: ComingSoonScreenProps) {
         </p>
 
         {invite.available && (
-          <ComingSoonGiftSteps
+          <GiftLadder
             // The COUNTED friends, not everyone invited: the backend files a
             // claim on subscribed friends only, and a ladder counting the rest
             // would promise a gift nobody is going to file.

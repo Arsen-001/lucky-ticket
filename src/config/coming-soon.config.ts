@@ -49,17 +49,22 @@ const fallbackLaunchAt = (() => {
  * pre-launch screen actually pays out, and the reason it shows a ladder rather
  * than a bare countdown.
  *
- * Seven since 2026-08-04 (was five), and every one of them has to be in the
+ * Ten since 2026-08-20 (5 → 7 → 10), and every one of them has to be in the
  * channel: at five the queue filled with claims whose friends had never joined
  * it. Must equal the backend's `PRE_LAUNCH_GIFT_FRIENDS` — the guardrail suite
  * reads both files and fails when they drift.
  *
- * Lives here rather than in `global.constants` because it is a launch-window
- * promo, not a rule of the running economy: it stops meaning anything the day
- * the gate comes down. The delivery itself is the bot's job — the screen only
- * counts. @see ComingSoonGiftSteps
+ * 🔴 This is the FALLBACK, not the rule. The live threshold arrives with the
+ * promo state (`PreLaunchGiftState.required`) because it is a panel setting
+ * now; anything that can reach the server must prefer that number, and this one
+ * is what to draw in the second before the answer lands.
+ *
+ * The promo outlived the gate it was named for: the same ladder is the friends
+ * screen's event since 20.08.2026, so it is no longer a launch-window promo —
+ * only its constants still live here. The delivery itself is the bot's job —
+ * the screen only counts. @see GiftLadder
  */
-const GIFT_FRIENDS_REQUIRED = 7;
+const GIFT_FRIENDS_REQUIRED = 10;
 
 export const comingSoonConfig = {
   /** @see coming-soon.config — this closes the gate; it can never open it. */

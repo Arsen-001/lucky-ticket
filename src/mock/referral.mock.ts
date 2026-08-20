@@ -294,6 +294,10 @@ const eligible = countedFriends >= comingSoonConfig.giftFriendsRequired;
 const dailyRemaining = 2;
 
 export const preLaunchGiftMock: PreLaunchGiftState = {
+  // The event is open and this player has no gift yet — the state that renders
+  // the card. `false` is what the server sends once they have one, and the
+  // whole block disappears.
+  available: true,
   required: comingSoonConfig.giftFriendsRequired,
   status: null,
   emoji: null,
@@ -320,6 +324,14 @@ export const referralMock = {
   'referral/network': referralNetworkMock,
   'referral/stats': referralStatsMock,
   'referral/prelaunch-gift': preLaunchGiftMock,
+  // Pressing it locally files nothing on a server — the fixture answers with
+  // the state a real claim would produce, so the card can be walked end to end
+  // on mocks. @see FriendsGiftEventCard
+  'POST referral/prelaunch-gift/claim': (): PreLaunchGiftState => ({
+    ...preLaunchGiftMock,
+    status: 'PENDING',
+    canClaim: false,
+  }),
   'POST referral/prepare-share': preparedShareMessageMock,
   // A friend's reward is claimed per id — `referral/claim/:friendId` — and the
   // resolver has no wildcards, so the keys come from the roster. `baseFriends`,

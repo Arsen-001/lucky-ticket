@@ -1457,5 +1457,8 @@
   "grand prize every finisher": "Everyone who clears all 31 levels — on your Bronze engines, forever",
   "level {n} of {total}": "Level {n} of {total}",
   "{n} levels left": "{n} levels left",
-  "steps for quest level {n}": "What to do · Level {n}"
+  "steps for quest level {n}": "What to do · Level {n}",
+  "friends gift title": "Gift for friends",
+  "friends gift subtitle": "{count} friends in the channel — and the bot sends a gift",
+  "friends gift claim failed": "Could not request the gift. Try again"
 }

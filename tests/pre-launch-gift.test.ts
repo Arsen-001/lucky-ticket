@@ -29,7 +29,7 @@ const source = hasBackend ? readFileSync(backendPath, 'utf8') : '';
 /** The pool the screen shows, as written in the component. */
 const componentPool = (() => {
   const file = readFileSync(
-    resolve(process.cwd(), 'src/components/pages/coming-soon/ComingSoonGiftSteps.tsx'),
+    resolve(process.cwd(), 'src/components/shared/gift-ladder/GiftLadder.tsx'),
     'utf8'
   );
   const block = file.match(/GIFT_POOL\s*=\s*\[([^\]]*)\]/)?.[1] ?? '';

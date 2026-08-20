@@ -1,3 +1,4 @@
+import { FriendsGiftEventCard } from '@/components/pages/out-tabs/drawer/invite-friends/FriendsGiftEventCard';
 import { FriendsHeroCard } from '@/components/pages/out-tabs/drawer/invite-friends/FriendsHeroCard';
 import { FriendsRouletteCard } from '@/components/pages/out-tabs/drawer/invite-friends/roulette/FriendsRouletteCard';
 import { FriendsTierLadderCard } from '@/components/pages/out-tabs/drawer/invite-friends/FriendsTierLadderCard';
@@ -10,9 +11,11 @@ export default function InviteFriendsPage() {
       <div data-tour="referrals">
         <FriendsHeroCard />
       </div>
-      {/* Сразу под «пригласи друзей»: это единственное на экране, что даёт за
-          приглашения что-то прямо сейчас. Сам блок исчезает, когда игра
-          выключена или игрок уже забрал подарок на «скоро». */}
+      {/* Сразу под «пригласи друзей»: это то, что даёт за приглашения что-то
+          прямо сейчас. Оба блока умеют не отрисоваться — подарок исчезает,
+          когда промо выключено или игрок его уже получил, рулетка — когда
+          выключена игра. */}
+      <FriendsGiftEventCard />
       <FriendsRouletteCard />
       <FriendsTierLadderCard />
       <ReferralInfoSection />

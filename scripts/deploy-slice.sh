@@ -27,9 +27,16 @@
 #
 # Usage:
 #   npm run deploy:slice                    # deploy HEAD to production
+#   npm run deploy:slice -- --preview       # same slice, but to a preview URL
 #   npm run deploy:slice -- --dry           # build the slice, show what would go, stop
 #   npm run deploy:slice -- <ref>           # deploy a specific commit instead of HEAD
 #   npm run deploy:slice -- --no-ci-check   # ship anyway, CI verdict ignored
+#
+# `--preview` exists because this app is live: a change that players should not
+# see yet still has to be looked at on the real backend, and the frontend is the
+# only gate there is for a feature whose server half is already deployed. It
+# takes the identical slice — same worktree at the same commit — so what you
+# approve on the preview URL is byte-for-byte what production later gets.
 #
 # Anything uncommitted in your own tree is NOT deployed. That is the point: if
 # your change is not committed, it is not ready to be on production.
@@ -39,10 +46,12 @@ set -euo pipefail
 REF="HEAD"
 DRY=0
 CI_CHECK=1
+PREVIEW=0
 for arg in "$@"; do
   case "$arg" in
     --dry | --dry-run) DRY=1 ;;
     --no-ci-check) CI_CHECK=0 ;;
+    --preview) PREVIEW=1 ;;
     *) REF="$arg" ;;
   esac
 done
@@ -120,4 +129,9 @@ if [ "$DRY" = "1" ]; then
 fi
 
 cd "$WORKTREE"
-npx vercel --prod --yes
+if [ "$PREVIEW" = "1" ]; then
+  echo "цель:    PREVIEW (продакшен не трогаем)"
+  npx vercel --yes
+else
+  npx vercel --prod --yes
+fi

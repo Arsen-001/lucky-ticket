@@ -1457,5 +1457,8 @@
   "grand prize every finisher": "Всем, кто пройдёт все 31 уровень — на бронзовые двигатели, навсегда",
   "level {n} of {total}": "Уровень {n} из {total}",
   "{n} levels left": "Осталось {n} ур.",
-  "steps for quest level {n}": "Что сделать · Уровень {n}"
+  "steps for quest level {n}": "Что сделать · Уровень {n}",
+  "friends gift title": "Подарок за друзей",
+  "friends gift subtitle": "{count} друзей в канале — и бот пришлёт подарок",
+  "friends gift claim failed": "Не получилось запросить подарок. Попробуй ещё раз"
 }

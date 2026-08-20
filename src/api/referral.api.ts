@@ -5,6 +5,7 @@ import { rtkTags } from '@/constants/rtk-tags';
 import type {
   BranchMember,
   InvitedFriend,
+  PreLaunchGiftState,
   PreparedShareMessage,
   ReferralStats,
 } from '@/types/interfaces/referral.interfaces';
@@ -32,6 +33,31 @@ export const referralApi = api.injectEndpoints({
     getReferralNetwork: builder.query<BranchMember[], void>({
       query: () => ({ url: 'referral/network' }),
       providesTags: [rtkTags.referral],
+    }),
+    /**
+     * The «приведи друзей — подарок от бота» event on the friends screen.
+     *
+     * Every rule it draws lives on the server — the threshold, today's places,
+     * whether this player may see the block at all — because all three are
+     * panel settings and a screen that decides any of them locally starts
+     * promising a promo that is already closed. @see FriendsGiftEventCard
+     */
+    getPreLaunchGift: builder.query<PreLaunchGiftState, void>({
+      query: () => ({ url: 'referral/prelaunch-gift' }),
+      providesTags: [rtkTags.referral],
+    }),
+    /**
+     * Ask for the gift — the player pressed it. Nothing files a claim on its
+     * own, deliberately: the press is what separates «попросил» from «набрал,
+     * но не попросил» for whoever approves the payouts.
+     *
+     * Invalidates the referral group so the ladder redraws in its new state
+     * («заявка ждёт подтверждения») off the server's answer rather than a
+     * local guess about what the press did.
+     */
+    claimPreLaunchGift: builder.mutation<PreLaunchGiftState, void>({
+      query: () => ({ url: 'referral/prelaunch-gift/claim', method: 'POST' }),
+      invalidatesTags: [rtkTags.referral],
     }),
     // No cache tags: the prepared message is single-use and cache-irrelevant —
     // a fresh one is created on every share tap.
@@ -95,6 +121,8 @@ export const referralApi = api.injectEndpoints({
 
 export const {
   useGetInvitedFriendsQuery,
+  useGetPreLaunchGiftQuery,
+  useClaimPreLaunchGiftMutation,
   useGetFriendBranchQuery,
   useGetReferralNetworkQuery,
   useGetReferralStatsQuery,

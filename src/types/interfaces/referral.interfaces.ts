@@ -122,8 +122,8 @@ export interface PreparedShareMessage {
 }
 
 /**
- * Where the player stands on the pre-launch gift promised for bringing five
- * friends (`GET referral/prelaunch-gift`).
+ * Where the player stands on the gift promised for bringing friends
+ * (`GET referral/prelaunch-gift`).
  *
  * `null` status means no claim exists — either they are still short of the
  * threshold, or the promo did not apply when they crossed it. Nothing is owed
@@ -133,10 +133,21 @@ export type PreLaunchGiftStatus = 'PENDING' | 'APPROVED' | 'SENT' | 'REJECTED' |
 
 export interface PreLaunchGiftState {
   /**
-   * The backend's own threshold. The ladder is drawn from
-   * `comingSoonConfig.giftFriendsRequired` instead — a server value would make
-   * the step count change under the player mid-load — so this is here as the
-   * contract, kept equal by the guardrail suite rather than read at runtime.
+   * Is there a promo here for this player at all? `false` = draw NOTHING: it is
+   * switched off, or they already have their gift. One answer instead of three
+   * booleans, the same shape the invite-screen roulette uses.
+   *
+   * Undefined = a backend too old to say. Treated as "show it": that backend
+   * predates the friends-screen event, and the only screen asking it then was
+   * the countdown, which always drew the ladder.
+   */
+  available?: boolean;
+  /**
+   * The threshold the backend is CURRENTLY filing claims at — a panel setting
+   * since 20.08.2026, so the ladder reads it here and falls back to
+   * `comingSoonConfig.giftFriendsRequired` only until the answer arrives. The
+   * two are kept equal by the guardrail suite so that fallback is never a
+   * different promise.
    */
   required: number;
   status: PreLaunchGiftStatus | null;
@@ -147,7 +158,7 @@ export interface PreLaunchGiftState {
    * is the history. An admin setting since 13.08.2026, when Telegram retired
    * the gift the screen had hardcoded and the bot could not send it to anyone.
    * Undefined = a backend too old to say; the screen falls back to its own
-   * default. @see ComingSoonGiftSteps
+   * default. @see GiftLadder
    */
   giftEmoji?: string | null;
   /**
