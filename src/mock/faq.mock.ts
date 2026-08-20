@@ -80,7 +80,10 @@ const articles: FaqArticle[] = [
     title: tx('How do I earn Activity Points?'),
     description: tx('All the AP sources.'),
     content: tx(
-      'Almost every meaningful action grants AP: daily login streak (3), daily/weekly tasks (scaling 1–5 / 2–6 by tier), verifying email (20, one-time), watching ads (2 each), sending tickets to friends (1), liking profiles (1), inviting friends (10, or 20 for a Telegram Premium friend), joining tournaments (1–5 by tier), and spending — 1 AP per 10 Lucky Stars or per 25,000 LC spent (uncapped). Completing a stake credits LC×months÷50,000.'
+      // EMAIL OFF (2026-08-17) — «verifying email (20, one-time)» dropped from
+      // the list: the flow is off in the Mini App, so that AP cannot be earned.
+      // It goes back between the task line and the ads line — grep `EMAIL OFF`.
+      'Almost every meaningful action grants AP: daily login streak (3), daily/weekly tasks (scaling 1–5 / 2–6 by tier), watching ads (2 each), sending tickets to friends (1), liking profiles (1), inviting friends (10, or 20 for a Telegram Premium friend), joining tournaments (1–5 by tier), and spending — 1 AP per 10 Lucky Stars or per 25,000 LC spent (uncapped). Completing a stake credits LC×months÷50,000.'
     ),
   },
   {
@@ -89,7 +92,8 @@ const articles: FaqArticle[] = [
     title: tx('What is the daily baseline?'),
     description: tx('How much AP an active player earns per day.'),
     content: tx(
-      'The daily baseline is the approximate AP a fully-active player earns each day without spending money. It rises with tier because tasks scale: ~33 at Bronze, ~39 Silver, ~47 Gold, ~57 Platinum, ~70 Diamond. One-off sources (verify email, invites, tournaments, stakes, purchases) are earned on top of this baseline.'
+      // EMAIL OFF (2026-08-17) — `verify email` dropped from the one-off list.
+      'The daily baseline is the approximate AP a fully-active player earns each day without spending money. It rises with tier because tasks scale: ~33 at Bronze, ~39 Silver, ~47 Gold, ~57 Platinum, ~70 Diamond. One-off sources (invites, tournaments, stakes, purchases) are earned on top of this baseline.'
     ),
   },
   {
@@ -107,7 +111,10 @@ const articles: FaqArticle[] = [
     title: tx('What is the AP tier gate?'),
     description: tx('How tiers unlock content.'),
     content: tx(
-      'A feature of tier T requires your AP-tier ≥ T, and you can always use your own tier and every lower tier. Tier-gated: producer engines, tournaments, stakes and tier-bound market items. Not gated: avatars, statuses/VIP and the referral system.'
+      // AVATARS OFF (2026-08-09) — the cosmetics feature is switched off, so it
+      // cannot be named among the things a tier does not gate. Put `avatars, `
+      // back at the head of that list when it returns — grep `AVATARS OFF`.
+      'A feature of tier T requires your AP-tier ≥ T, and you can always use your own tier and every lower tier. Tier-gated: producer engines, tournaments, stakes and tier-bound market items. Not gated: statuses/VIP and the referral system.'
     ),
   },
 
@@ -409,7 +416,11 @@ const articles: FaqArticle[] = [
     title: tx('What can I buy in the Market?'),
     description: tx('The Mega Market categories.'),
     content: tx(
-      'The Market is the single storefront — there is no separate Shop. Paid in LC or Lucky Stars (no fiat). Surfaced categories: Status (Lucky Player/VIP), Tickets, Shards, Engines and Cosmetics (avatars, badges, themes). Engine Capacity Upgrades are not sold here — they are bought with Lucky Stars on the engine itself.'
+      // AVATARS OFF (2026-08-09) — the Cosmetics chip is filtered out of
+      // `MARKET_CATEGORY_ORDER` while avatars are off, so the article listed a
+      // category the storefront does not show. Gifts are named instead, with
+      // the condition that actually governs the chip (the shop being open).
+      'The Market is the single storefront — there is no separate Shop. Paid in LC or Lucky Stars (no fiat). Surfaced categories: Status (Lucky Player/VIP), Tickets, Shards and Engines — plus Telegram Gifts while the gift shop is open. Engine Capacity Upgrades are not sold here — they are bought with Lucky Stars on the engine itself.'
     ),
   },
   {
@@ -467,7 +478,13 @@ const articles: FaqArticle[] = [
     title: tx('What statuses exist?'),
     description: tx('Verified, Lucky Player, VIP.'),
     content: tx(
-      'There are three statuses: Verified (free, confirm identity via email or phone — permanent), Lucky Player (a paid monthly subscription with benefits — time-limited) and VIP (a permanent, leveled high-tier status). Statuses are bought with LC or Lucky Stars and are NOT gated by Activity Points.'
+      // EMAIL OFF (2026-08-17) — Verified said "confirm identity via email or
+      // phone". Email confirmation is switched off in the Mini App and phone
+      // confirmation was never built at all, so the sentence named two ways to
+      // earn a badge and neither existed. It now says what is true: the badge is
+      // permanent and free, and there is currently no way to earn it. Restore
+      // the email half when the flow returns — grep `EMAIL OFF`.
+      'There are three statuses: Verified (a free, permanent badge — earning it is temporarily closed), Lucky Player (a paid monthly subscription with benefits — time-limited) and VIP (a permanent, leveled high-tier status). Statuses are bought with LC or Lucky Stars and are NOT gated by Activity Points.'
     ),
   },
   {
@@ -494,7 +511,11 @@ const articles: FaqArticle[] = [
     title: tx('Do Lucky Player and VIP stack?'),
     description: tx('Mostly the higher tier wins — with three exceptions.'),
     content: tx(
-      'Mostly no — when both are active, the percent-based perks (stake yield, Market discount, ad views per day, ticket sends) use the VIP value and are never summed. Three things a Lucky Player keeps no matter the VIP level: the engine-speed multiplier (it multiplies on top of the VIP bonus), the daily ad views taken without watching a video, and one-tap "Claim all". Also, the matching discount is excluded when buying that status (no VIP discount on buying VIP). Avatar boosts do still stack on top of your status.'
+      'Mostly no — when both are active, the percent-based perks (stake yield, Market discount, ad views per day, ticket sends) use the VIP value and are never summed. Three things a Lucky Player keeps no matter the VIP level: the engine-speed multiplier (it multiplies on top of the VIP bonus), the daily ad views taken without watching a video, and one-tap "Claim all". Also, the matching discount is excluded when buying that status (no VIP discount on buying VIP).'
+      // AVATARS OFF (2026-08-09) — the sentence that closed this answer,
+      // «Avatar boosts do still stack on top of your status.», describes a boost
+      // nobody can own while the feature is off. Restore it verbatim with the
+      // feature — grep `AVATARS OFF`.
     ),
   },
 
@@ -585,9 +606,19 @@ const articles: FaqArticle[] = [
     title: tx('What is on my profile?'),
     description: tx('Your public identity and stats.'),
     content: tx(
-      'Your profile shows your avatar with a status ring, username, status badges, Activity Points, activity streak, a pinned badge showcase, recent achievements, and detailed stats per system (tickets, tournaments, stakes, tasks). Others can view a public version where your balances and transaction history are hidden, and can Send Ticket, Invite to Tournament, Share or Like you.'
+      // The badge showcase and the achievements collage are commented out in
+      // `ProfilePage`/`ProfileHero` — achievements are not being issued yet — so
+      // the answer must not promise two blocks the screen does not draw.
+      'Your profile shows your avatar with a status ring, username, status badges, Activity Points, activity streak, and detailed stats per system (tickets, tournaments, stakes, tasks). Others can view a public version where your balances and transaction history are hidden, and can Send Ticket, Invite to Tournament, Share or Like you.'
     ),
   },
+  // AVATARS OFF (2026-08-09) — the whole article is parked, not reworded: it
+  // answers a question about a ladder the player cannot reach at all. The
+  // picker row is out of Settings, the Cosmetics chip is out of the Market and
+  // the profile pencil is gone, so every route into it is closed. A knowledge
+  // base that describes a feature nobody can find reads as breakage, not as
+  // documentation. Uncomment it together with the feature — grep `AVATARS OFF`.
+  /*
   {
     id: '60',
     sectionId: '16',
@@ -597,6 +628,7 @@ const articles: FaqArticle[] = [
       'Avatars have a 10-level ladder. Levels 1–2 are free (cosmetic only); levels 3–10 are paid in the Market and carry a bound boost (engine speed, market discount, claim multiplier, AP earn or tournament reward), growing from ~3–5% up to ~25% at the animated level-10 apex. Ownership is permanent, but only one avatar is active at a time — its boost stacks with your status and engine boosts.'
     ),
   },
+  */
   {
     id: '61',
     sectionId: '16',
@@ -645,7 +677,18 @@ const articles: FaqArticle[] = [
     title: tx('What can I change in Settings?'),
     description: tx('Account and personalization.'),
     content: tx(
-      'Settings let you enable Two-Factor Authentication (2FA), confirm or change your email, change your username, change your avatar (from owned avatars), set notification preferences, switch language, and sign out. Verifying your email is also a one-time +20 AP reward.'
+      // The answer listed six things Settings does not have. Rewritten from the
+      // screen itself, row by row:
+      //  - EMAIL OFF (2026-08-17) — the email row and its "+20 AP" are gone;
+      //  - 2FA has no row at all: nothing links to /settings/security, and the
+      //    toggle behind that URL writes `twoFactorEnabled` with no secret, no
+      //    verification and no second factor — see `2FA OFF` in tasks.mock;
+      //  - AVATARS OFF (2026-08-09) — the avatar picker row is commented out;
+      //  - language is switched from the side menu, and there is no sign-out in
+      //    the app at all (the session is the Telegram one).
+      // What IS there: username, notification toggles, the paid-upgrade
+      // confirmation switch and the tour. Grep `EMAIL OFF` / `AVATARS OFF`.
+      'Settings hold your username, your notification preferences (a toggle per event for the Telegram bot), a switch that asks before every paid engine upgrade, and a replay of the app walkthrough. Language is changed from the side menu.'
     ),
   },
   {
@@ -654,7 +697,11 @@ const articles: FaqArticle[] = [
     title: tx('How do notification preferences work?'),
     description: tx('Per-channel toggles.'),
     content: tx(
-      'Notifications run on two independent channels — Email and the Telegram bot — each with its own toggles for high-signal events: Tournament start (~10 min before a joined tournament), Tournament end, Staking ready (when a stake matures), and System alerts (security, status, account). Toggles save instantly, no submit button.'
+      // EMAIL OFF (2026-08-17) — the email channel is off, so there is one
+      // channel left and no channel tabs on the screen. The event list is also
+      // brought up to what Settings actually shows (it named four of the eight).
+      // Restore the two-channel wording with the flow — grep `EMAIL OFF`.
+      'Notifications come from the Telegram bot, with a toggle per event: Tournament start (~10 min before a joined tournament), Tournament end, Tournament invites, Staking ready (when a stake matures), Gifts, Friends joined, Achievements, and News & announcements. Toggles save instantly, no submit button — and the in-app inbox keeps every event either way.'
     ),
   },
 ];
@@ -675,10 +722,15 @@ const SECTION_TITLES: Record<string, LocalizedText> = {
   '13': tx('Leaderboard'),
   '14': tx('Invite Friends & Referrals'),
   '15': tx('Jackpot'),
-  '16': tx('Profile & Avatars'),
+  // AVATARS OFF (2026-08-09) — was 'Profile & Avatars'; the section no longer
+  // holds an avatar article. Restore the title with the feature.
+  '16': tx('Profile'),
   '17': tx('Badges & Achievements'),
   '18': tx('Promo Codes'),
-  '19': tx('Account, Settings & Security'),
+  // Was 'Account, Settings & Security'. With 2FA out of the Settings answer the
+  // section holds nothing about security, and a heading that promises one is the
+  // same kind of false signpost the answers themselves were.
+  '19': tx('Account & Settings'),
 };
 
 const sections: FaqSection[] = Object.entries(SECTION_TITLES).map(([id, title]) => ({
