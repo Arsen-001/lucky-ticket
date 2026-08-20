@@ -1,7 +1,6 @@
 import { Env } from '@/services/environment.service';
 import { adsgramProvider } from './adsgram.provider';
 import { monetagProvider } from './monetag.provider';
-import { richadsProvider } from './richads.provider';
 import type { AdProvider, AdProviderId, RewardedAdOutcome, RewardedAdResult } from './types';
 
 /**
@@ -24,11 +23,10 @@ import type { AdProvider, AdProviderId, RewardedAdOutcome, RewardedAdResult } fr
 const PROVIDERS: Record<AdProviderId, AdProvider> = {
   adsgram: adsgramProvider,
   monetag: monetagProvider,
-  richads: richadsProvider,
 };
 
 /** Applied when `NEXT_PUBLIC_AD_PROVIDERS` is unset. */
-const DEFAULT_ORDER: AdProviderId[] = ['adsgram', 'monetag', 'richads'];
+const DEFAULT_ORDER: AdProviderId[] = ['adsgram', 'monetag'];
 
 /**
  * How many views in a row go to the same network before the chain rotates.

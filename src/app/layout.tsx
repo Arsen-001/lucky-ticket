@@ -144,17 +144,6 @@ export default async function RootLayout({ children }: ChildrenProps) {
               strategy="afterInteractive"
             />
           )}
-          {/* RichAds needs BOTH ids — its controller refuses to initialise with
-              one, so loading the script on a half-filled config would only add
-              a request. */}
-          {process.env.NEXT_PUBLIC_RICHADS_PUB_ID &&
-            process.env.NEXT_PUBLIC_RICHADS_APP_ID &&
-            isProviderEnabled('richads') && (
-              <Script
-                src="https://richinfo.co/richpartners/telegram/js/tg-ob.js"
-                strategy="afterInteractive"
-              />
-            )}
         </head>
         {/* The Telegram client / iOS Safari inject `ontouchstart=""` onto <body>
             before hydration (to enable :active on touch), which won't match

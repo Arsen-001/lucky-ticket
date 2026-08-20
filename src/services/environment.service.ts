@@ -7,12 +7,6 @@ export const Env = {
   adsgramDebug: process.env.NEXT_PUBLIC_ADSGRAM_DEBUG === 'true',
   /** Monetag Rewarded Interstitial zone id. Empty → Monetag is skipped. */
   monetagZoneId: process.env.NEXT_PUBLIC_MONETAG_ZONE_ID,
-  /** RichAds publisher id. Needs the app id too — either missing skips RichAds. */
-  richadsPubId: process.env.NEXT_PUBLIC_RICHADS_PUB_ID,
-  /** RichAds application id, issued per Mini App alongside the publisher id. */
-  richadsAppId: process.env.NEXT_PUBLIC_RICHADS_APP_ID,
-  /** RichAds debug mode — serves test creatives instead of real demand. */
-  richadsDebug: process.env.NEXT_PUBLIC_RICHADS_DEBUG === 'true',
   /**
    * Ordered, comma-separated rewarded-ad waterfall (`adsgram,monetag`).
    * Empty → the default order in `src/lib/ads/index.ts`. Lets the priority be

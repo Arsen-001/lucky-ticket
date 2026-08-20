@@ -20,8 +20,6 @@ type AdsModule = typeof import('@/lib/ads');
 const AD_ENV_KEYS = [
   'NEXT_PUBLIC_ADSGRAM_BLOCK_ID',
   'NEXT_PUBLIC_MONETAG_ZONE_ID',
-  'NEXT_PUBLIC_RICHADS_PUB_ID',
-  'NEXT_PUBLIC_RICHADS_APP_ID',
   'NEXT_PUBLIC_AD_PROVIDERS',
   'NEXT_PUBLIC_AD_ROTATE_EVERY',
 ] as const;
@@ -299,19 +297,5 @@ describe('rewarded-ad waterfall', () => {
     for (let view = 0; view < 4; view++) {
       expect((await ads.showRewardedAd(view)).provider).toBe('monetag');
     }
-  });
-
-  it('skips RichAds until BOTH of its ids are set', async () => {
-    // Its controller needs pubId and appId together; a half-filled config must
-    // behave as "not wired" rather than initialise and fail on every watch.
-    const halfWired = await loadAds({ NEXT_PUBLIC_RICHADS_PUB_ID: '792361' });
-    expect(await halfWired.showRewardedAd()).toEqual({ outcome: 'unavailable', provider: null });
-
-    const wired = await loadAds({
-      NEXT_PUBLIC_RICHADS_PUB_ID: '792361',
-      NEXT_PUBLIC_RICHADS_APP_ID: '1396',
-    });
-    // No SDK on the page — `error`, and no free reward.
-    expect(await wired.showRewardedAd()).toEqual({ outcome: 'error', provider: 'richads' });
   });
 });

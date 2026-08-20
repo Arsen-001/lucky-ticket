@@ -40,8 +40,14 @@ export type RewardedAdFailure = Extract<RewardedAdOutcome, 'noAd' | 'tooFast' | 
  * `@IsIn(AD_PROVIDERS)` on `POST /tasks/ads/watch` and `…/attempt`, so a
  * network missing from `src/admin/ad-networks.constants.ts` in the backend
  * makes every watch 400 — the reward is lost, not merely unreported.
+ *
+ * RichAds was wired on 19.08.2026 and removed on 20.08.2026 without ever being
+ * switched on: with Adsgram filling 97% a third network had ~nothing to add,
+ * and RichAds publishes no server-to-server postback at all, so its views would
+ * have been credited on the client's word. If a third source is ever wanted it
+ * should be one whose grant can be verified — see DOCS/ADS_SETUP.md.
  */
-export type AdProviderId = 'adsgram' | 'monetag' | 'richads';
+export type AdProviderId = 'adsgram' | 'monetag';
 
 /**
  * Outcome plus the provider that produced it. The backend needs the provider
