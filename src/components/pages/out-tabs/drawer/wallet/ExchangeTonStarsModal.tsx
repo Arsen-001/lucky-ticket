@@ -112,18 +112,39 @@ export function ExchangeTonStarsModal({
             <div className="relative flex flex-col items-center gap-1 text-center">
               <h2 className="text-xl font-extrabold text-white">{t('exchange')}</h2>
               <p className="text-pink-secondary text-[11px]">{t('exchange ton to stars')}</p>
-              {saving.percent > 0 && (
-                <p className="text-gold text-[11px] font-extrabold">
-                  {t('cheaper than telegram by {percent}', { percent: saving.percent })}
-                  <span className="text-pink-secondary ms-1 font-semibold tabular-nums">
-                    ${saving.exchangeUsdPer100.toFixed(2)} / 100 LS · {t('in telegram')} $
-                    {saving.telegramUsdPer100.toFixed(2)}
-                  </span>
-                </p>
-              )}
               <StarsPromoNote />
             </div>
 
+            {saving.percent > 0 && (
+              // The same 100 Lucky Stars, priced both ways — the argument for
+              // this door stated as a receipt rather than as an adjective. Both
+              // numbers come from the published rates, so the block cannot
+              // outlive a price change.
+              <div className="border-gold/25 bg-gold/8 relative flex flex-col gap-1.5 rounded-2xl border px-3 py-2.5">
+                <div className="flex items-center justify-between gap-2">
+                  <span className="text-gold text-[11px] font-extrabold uppercase tracking-wider">
+                    {t('cheaper than telegram by {percent}', { percent: saving.percent })}
+                  </span>
+                  <span className="bg-gold/20 text-gold rounded-full px-1.5 py-0.5 text-[10px] font-extrabold tabular-nums">
+                    −{saving.percent}%
+                  </span>
+                </div>
+
+                <div className="flex items-center justify-between gap-2 text-[11px]">
+                  <span className="font-bold text-white">{t('exchange')} · 100 LS</span>
+                  <span className="text-gold font-extrabold tabular-nums">
+                    ${saving.exchangeUsdPer100.toFixed(2)}
+                  </span>
+                </div>
+
+                <div className="text-pink-secondary flex items-center justify-between gap-2 text-[11px]">
+                  <span className="font-semibold">Telegram · 100 LS</span>
+                  <span className="font-semibold tabular-nums line-through">
+                    ${saving.telegramUsdPer100.toFixed(2)}
+                  </span>
+                </div>
+              </div>
+            )}
             <div className="relative flex flex-col gap-2">
               {/* From — TON */}
               <div
