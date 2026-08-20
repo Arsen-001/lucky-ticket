@@ -164,6 +164,12 @@ export interface PublicConfig {
      * `appConfig.wallet.xtrPackages` stands in (see `useStarPackages`).
      */
     xtrPackages?: StarPackage[];
+    /**
+     * When the bonus ladder stops paying (ISO), or null for no deadline. One
+     * date for the whole ladder — the screen counts down to it and the server
+     * stops granting the bonus at the same instant (`starsPromoActive`).
+     */
+    xtrPackagesPromoEndsAt?: string | null;
   };
   /** Stake builder display knobs (admin-editable, DOCS §18). */
   stakes?: {

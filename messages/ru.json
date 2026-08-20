@@ -1493,6 +1493,11 @@
   "duel round yours": "Ваш раунд",
   "duel round theirs": "Раунд соперника",
   "duel invite players": "Позвать игроков",
+  "duel invite title": "{name} зовёт на дуэль",
+  "duel invite body": "Камень, билет, ножницы · ставка {count} билетов. Билеты спишутся в момент старта",
+  "duel invite accept": "Принять вызов",
+  "duel invite refuse": "Не сейчас",
+  "duel invite gone": "Лобби уже занято",
   "duel waiting blurb": "Лобби видно всем в бронзовой лиге. Ставка {count} бил.",
   "duel league bronze": "бронза",
   "games": "Игры",
@@ -1546,5 +1551,7 @@
   "last 24h": "За 24 ч",
   "last 7 days": "7 дней",
   "top up": "Пополнить",
-  "bonus from {stars}": "Бонус — от {stars} ⭐"
+  "bonus from {stars}": "Бонус — от {stars} ⭐",
+  "offer ends in {time}": "До конца акции {time}",
+  "star packages": "Пакеты Lucky Stars"
 }

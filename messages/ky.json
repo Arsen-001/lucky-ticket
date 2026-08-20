@@ -1493,6 +1493,11 @@
   "duel round yours": "Your round",
   "duel round theirs": "Opponent takes it",
   "duel invite players": "Invite players",
+  "duel invite title": "{name} challenges you",
+  "duel invite body": "Rock, ticket, scissors · stake {count} tickets. Tickets are taken when the match starts",
+  "duel invite accept": "Accept the challenge",
+  "duel invite refuse": "Not now",
+  "duel invite gone": "The lobby is already taken",
   "duel waiting blurb": "Your lobby is visible to everyone in the bronze league. Stake {count} tick.",
   "duel league bronze": "RPS · bronze",
   "games": "Games",
@@ -1546,5 +1551,7 @@
   "last 24h": "Last 24h",
   "last 7 days": "Last 7 days",
   "top up": "Top up",
-  "bonus from {stars}": "Bonus from {stars} stars"
+  "bonus from {stars}": "Bonus from {stars} stars",
+  "offer ends in {time}": "Offer ends in {time}",
+  "star packages": "Lucky Stars packages"
 }

@@ -65,4 +65,40 @@ describe.skipIf(!hasBackend)('backend ↔ frontend package parity', () => {
       );
     }
   });
+
+  /**
+   * The promo deadline is the one field where a rename on one side is silent
+   * and expensive: the app would draw no countdown and keep advertising a bonus
+   * the server had already stopped paying. Both spellings are checked by name.
+   */
+  it('both sides spell the promo deadline the same way', () => {
+    const backend = readFileSync(backendPath, 'utf8');
+    expect(backend).toContain('xtrPackagesPromoEndsAt');
+
+    const appTypes = readFileSync(
+      resolve(process.cwd(), 'src/types/interfaces/config.interfaces.ts'),
+      'utf8'
+    );
+    expect(appTypes).toContain('xtrPackagesPromoEndsAt');
+
+    // …and the server publishes it, or the field exists on both sides and
+    // reaches neither screen.
+    const publicConfig = readFileSync(
+      resolve(process.cwd(), '../lucky-ticket-backend/src/config/public-config.controller.ts'),
+      'utf8'
+    );
+    expect(publicConfig).toContain('xtrPackagesPromoEndsAt');
+  });
+
+  it('the bonus rule on the server takes the deadline, not just the ladder', () => {
+    const util = readFileSync(
+      resolve(process.cwd(), '../lucky-ticket-backend/src/common/economy.util.ts'),
+      'utf8'
+    );
+    // A deadline the credit path does not read is a countdown that lies: the
+    // screen stops promising the bonus while the webhook keeps paying it, or
+    // the other way round.
+    expect(util).toContain('starsPromoActive');
+    expect(util.slice(util.indexOf('export function starsPurchaseBonus'))).toContain('promoEndsAt');
+  });
 });

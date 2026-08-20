@@ -8,7 +8,7 @@ import { formatNumber } from '@/utils/global/number.utils';
 export interface StarPackageCardProps {
   /** Telegram Stars charged. */
   stars: number;
-  /** Lucky Stars handed over on top of the payment. */
+  /** Lucky Stars handed over on top of the payment — 0 once the promo ended. */
   bonus: number;
   /** The recommended package — highlighted, one per sheet. */
   popular?: boolean;
@@ -64,8 +64,12 @@ export function StarPackageCard({
           {t('you receive {stars}', { stars: formatNumber(stars + bonus) })}
         </span>
         {bonus > 0 && (
+          // A percent, not the absolute bonus: the receipt line beside it
+          // already carries the number («you get 250»), so the pill's job is
+          // to make packages COMPARABLE — +25% against +20% says which one is
+          // worth taking, «+50» against «+20» only says which is bigger.
           <span className="bg-gold/20 text-gold rounded-full px-1 py-0.5 text-[9px] font-extrabold tabular-nums">
-            +{formatNumber(bonus)}
+            +{Math.round((bonus / stars) * 100)}%
           </span>
         )}
       </span>

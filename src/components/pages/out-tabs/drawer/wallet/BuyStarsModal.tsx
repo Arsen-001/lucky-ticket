@@ -12,6 +12,7 @@ import { useToast } from '@/hooks/useToast';
 import { useBuyTelegramStars } from '@/hooks/useBuyTelegramStars';
 import { StarPackageCard } from '@/components/pages/out-tabs/drawer/wallet/StarPackageCard';
 import { useStarPackages } from '@/hooks/useStarPackages';
+import { StarsPromoNote } from '@/components/shared/stars/StarsPromoNote';
 import { formatNumber } from '@/utils/global/number.utils';
 
 interface BuyStarsModalProps {
@@ -26,7 +27,7 @@ export function BuyStarsModal({ open, onClose, initialStars }: BuyStarsModalProp
   const t = useAppTranslations();
   const toast = useToast();
   const { buy, pending } = useBuyTelegramStars();
-  const { packages, bonusFor } = useStarPackages();
+  const { packages, bonusFor, promoActive } = useStarPackages();
   const [step, setStep] = useState<Step>('select');
   const [input, setInput] = useState('');
   const [purchased, setPurchased] = useState(0);
@@ -106,6 +107,10 @@ export function BuyStarsModal({ open, onClose, initialStars }: BuyStarsModalProp
                 {t('buy stars')}
               </h2>
               <p className="text-pink-secondary text-[11px]">{t('buy stars subtitle')}</p>
+              {/* The deadline belongs on the sheet too: this is the last screen
+                  before Telegram's own payment window, and a bonus with an end
+                  date has to be stated where the decision is made. */}
+              <StarsPromoNote />
             </div>
 
             <div className="relative flex flex-col gap-3">
@@ -115,7 +120,7 @@ export function BuyStarsModal({ open, onClose, initialStars }: BuyStarsModalProp
                   <StarPackageCard
                     key={pkg.stars}
                     stars={pkg.stars}
-                    bonus={pkg.bonus}
+                    bonus={promoActive ? pkg.bonus : 0}
                     popular={pkg.popular}
                     active={amount === pkg.stars}
                     onSelect={() => setInput(String(pkg.stars))}

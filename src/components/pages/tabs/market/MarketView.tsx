@@ -30,6 +30,7 @@ import { MarketGiftSection } from '@/components/pages/tabs/market/sections/Marke
 import { MarketPriceType } from '@/types/enums/market.enums';
 import type { MarketAccent, MarketPrice } from '@/types/interfaces/market.interfaces';
 import { limitedMarketData } from '@/utils/global/market.utils';
+import { useStarPackages } from '@/hooks/useStarPackages';
 import '@/styles/components/market.css';
 
 const ALL_KEY: MarketCategoryKey = 'all';
@@ -114,7 +115,11 @@ export function MarketView() {
   // tab at all, by the same rule as the gift chip above: a chip that opens an
   // empty screen reads as breakage, not as an absent offer. It appears by
   // itself the moment an admin puts a deadline or a stock number on anything.
-  const limitedCount = limitedMarketData(data).total;
+  // Star packages with a live promo deadline count as limited offers too: they
+  // are the one thing in that tab that has no MarketItem behind it.
+  const { packages: starPackages, promoActive, promoEndsAt } = useStarPackages();
+  const limitedCount =
+    limitedMarketData(data).total + (promoEndsAt && promoActive ? starPackages.length : 0);
   // AVATARS OFF (2026-08-09) — same rule for the cosmetics chip: the section
   // behind it draws nothing while avatars are off, and a chip that opens an
   // empty screen reads as breakage. Dropping it here also makes a stale

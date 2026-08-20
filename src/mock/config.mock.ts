@@ -26,6 +26,10 @@ const getPublicConfig = (): PublicConfig => ({
     minDepositTon: walletConstants.TON_MIN_DEPOSIT,
     minWithdrawLc: appConfig.wallet.minWithdrawLc,
     xtrPackages: appConfig.wallet.xtrPackages,
+    // A live promo in dev: the countdown, the percent chips and the Limited
+    // tab all draw nothing when there is no deadline, and a screen that draws
+    // nothing cannot be reviewed.
+    xtrPackagesPromoEndsAt: new Date(Date.now() + 62 * 3600_000).toISOString(),
   },
   adsEnabled: true,
   partnersEnabled: appConfig.partners.enabled,
