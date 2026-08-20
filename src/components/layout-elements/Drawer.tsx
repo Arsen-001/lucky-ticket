@@ -272,7 +272,7 @@ export function Drawer() {
     ...(gamesOpen
       ? [
           {
-            route: routes.games,
+            route: routes.games.index,
             title: t('games'),
             icon: <Gamepad2 size={18} />,
           },

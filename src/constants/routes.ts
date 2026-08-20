@@ -43,7 +43,12 @@ export const routes = {
   tickets: {
     index: '/tickets',
   },
-  games: '/games',
+  // Раздел — витрина игр; каждая игра живёт своим адресом, чтобы «назад»
+  // возвращало к выбору, а ссылка из приглашения вела прямо в игру.
+  games: {
+    index: '/games',
+    duel: '/games/duel',
+  },
   engines: {
     index: '/engines',
     getById: function (engineId: string) {

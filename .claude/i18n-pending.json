@@ -15,13 +15,9 @@
     "duel choose stake",
     "duel create lobby",
     "duel draw",
-    "duel fact match",
-    "duel fact move",
-    "duel fact seconds",
-    "duel fact stake",
-    "duel fact wins",
     "duel i am ready",
     "duel join",
+    "duel league bronze",
     "duel lobby hint",
     "duel move accepted",
     "duel move failed",
@@ -35,7 +31,6 @@
     "duel open lobby",
     "duel pick a token",
     "duel ready",
-    "duel rule line",
     "duel stake note",
     "duel stake short",
     "duel their round",
@@ -52,6 +47,9 @@
     "duel your lobby",
     "duel your round",
     "games",
+    "games duel blurb",
+    "games next blurb",
+    "games next title",
     "wallet wrong network"
   ]
 }

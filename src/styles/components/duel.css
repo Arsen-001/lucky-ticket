@@ -1,0 +1,100 @@
+/**
+ * Дуэль камень-билет-ножницы.
+ *
+ * Здесь то, чего Tailwind не выражает: дышащая рука соперника, пульсирующее
+ * кольцо ожидания и падение жетона на стол. Всё остальное живёт классами в
+ * компонентах.
+ */
+
+/* Кольцо ожидания: два расходящихся круга, второй с задержкой. */
+@keyframes duel-ping {
+  0% {
+    transform: scale(0.62);
+    opacity: 0.9;
+  }
+  100% {
+    transform: scale(1.25);
+    opacity: 0;
+  }
+}
+
+.duel-pulse::before,
+.duel-pulse::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  border: 1px solid rgba(116, 61, 245, 0.7);
+  animation: duel-ping 2.4s cubic-bezier(0.2, 0.7, 0.4, 1) infinite;
+}
+
+.duel-pulse::after {
+  animation-delay: 1.2s;
+}
+
+/**
+ * Рука соперника дышит ЦЕЛИКОМ.
+ *
+ * Поочерёдная подсветка карточек читалась как подсказка хода — глазу казалось,
+ * что подсвеченная и есть выбранная фигура. Поэтому пульсируют все три разом.
+ */
+@keyframes duel-breath {
+  0%,
+  100% {
+    border-color: rgba(158, 140, 214, 0.09);
+    background: rgba(34, 29, 56, 0.55);
+  }
+  50% {
+    border-color: rgba(158, 140, 214, 0.32);
+    background: rgba(34, 29, 56, 0.8);
+  }
+}
+
+.duel-hand-thinking > * {
+  animation: duel-breath 2s ease-in-out infinite;
+}
+
+/* Жетон падает на стол в момент вскрытия. */
+@keyframes duel-drop {
+  0% {
+    transform: scale(0.55);
+    opacity: 0;
+  }
+  70% {
+    transform: scale(1.06);
+  }
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+.duel-drop {
+  animation: duel-drop 0.36s cubic-bezier(0.2, 0.9, 0.25, 1.35);
+}
+
+/* Панель выбора поднимается снизу, когда начинается раунд. */
+@keyframes duel-rise {
+  from {
+    opacity: 0;
+    transform: translateY(14px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+.duel-rise {
+  animation: duel-rise 0.32s ease-out;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .duel-pulse::before,
+  .duel-pulse::after,
+  .duel-hand-thinking > *,
+  .duel-drop,
+  .duel-rise {
+    animation: none;
+  }
+}

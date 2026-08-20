@@ -69,6 +69,8 @@ export interface DuelState {
   };
   readonly round: DuelRoundState | null;
   readonly readyDeadline: string | null;
+  /** Сколько лобби уже ждёт соперника. Считает сервер. */
+  readonly waitingSeconds: number;
   readonly winner: DuelSide | null;
   readonly winsNeeded: number;
 }

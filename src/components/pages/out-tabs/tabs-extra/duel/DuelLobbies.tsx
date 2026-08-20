@@ -4,8 +4,9 @@ import { useState } from 'react';
 import { twMerge } from 'tailwind-merge';
 import { Button } from '@/components/shared/buttons/Button';
 import { QueryErrorState } from '@/components/shared/error/QueryErrorState';
-import { DuelStage } from '@/components/pages/out-tabs/tabs-extra/duel/DuelStage';
+import { DuelLobbyRow } from '@/components/pages/out-tabs/tabs-extra/duel/DuelLobbyRow';
 import { DuelStakeBadge } from '@/components/pages/out-tabs/tabs-extra/duel/DuelStakeBadge';
+import { Ticket } from '@/components/shared/icons/Ticket';
 import { useAppTranslations } from '@/hooks/useAppTranslations';
 import { useToast } from '@/hooks/useToast';
 import {
@@ -69,24 +70,34 @@ export function DuelLobbies({ onEnter }: DuelLobbiesProps) {
     }
   };
 
-  // Пока этого не было, отказ сервера выглядел как «у вас нет билетов»:
-  // без данных `tickets` равен нулю, и кнопка «Создать лобби» просто гасла.
-  // Ровно так и выглядел живой отказ 20.08 — список падал 500, а экран
-  // молчал и показывал заблокированную кнопку.
+  // Пока этого не было, отказ сервера выглядел как «у вас нет билетов»: без
+  // данных `tickets` равен нулю, и кнопка «Создать лобби» просто гасла.
   if (isError) return <QueryErrorState onRetry={() => refetch()} />;
+
+  /** Шапка игры: лига слева, свой запас билетов справа. */
+  const header = (
+    <div className="flex items-center justify-between px-0.5">
+      <span className="text-pink-secondary text-[11px] font-black tracking-[0.14em] uppercase">
+        {t('duel league bronze')}
+      </span>
+      <span className="text-gold flex items-center gap-1.5 text-sm font-extrabold tabular-nums">
+        <Ticket type="bronze" width={26} height={13} className="h-auto w-[26px]" />
+        {tickets}
+      </span>
+    </div>
+  );
 
   if (picking) {
     return (
-      <div className="flex-col-stretch flex-available gap-3">
-        <div className="flex items-baseline justify-between text-[11px] tracking-wider text-disabled uppercase">
-          <span>{t('duel choose stake')}</span>
-          <span>
-            {tickets} {t('duel tickets left')}
-          </span>
-        </div>
+      <div className="flex min-h-full flex-col gap-3">
+        {header}
+
+        <span className="text-pink-secondary text-[10px] font-black tracking-[0.16em] uppercase">
+          {t('duel choose stake')}
+        </span>
 
         <div className="grid grid-cols-5 gap-2">
-          {Array.from({ length: max }, (_, i) => i + 1).map(value => (
+          {Array.from({ length: max - min + 1 }, (_, i) => i + min).map(value => (
             <button
               key={value}
               type="button"
@@ -94,17 +105,27 @@ export function DuelLobbies({ onEnter }: DuelLobbiesProps) {
               disabled={value > tickets}
               onClick={() => setStake(value)}
               className={twMerge(
-                'flex-col-stretch h-16 items-center justify-center rounded-2xl border',
-                'border-white/10 bg-background-overlay transition disabled:opacity-30',
-                stake === value && 'border-gold bg-gold/10 text-gold'
+                'flex h-16 flex-col items-center justify-center gap-0.5 rounded-2xl border transition',
+                'bg-background-overlay border-white/10 disabled:opacity-30',
+                stake === value && 'border-gold bg-gold/12'
               )}
             >
-              <span className="text-lg font-bold">{value}</span>
+              <span
+                className={twMerge(
+                  'text-lg font-extrabold tabular-nums',
+                  stake === value && 'text-gold'
+                )}
+              >
+                {value}
+              </span>
+              <span className="text-pink-secondary text-[9px] tracking-wider uppercase">
+                {t('duel tickets left')}
+              </span>
             </button>
           ))}
         </div>
 
-        <p className="text-xs leading-relaxed text-disabled">{t('duel stake note')}</p>
+        <p className="text-disabled text-xs leading-relaxed">{t('duel stake note')}</p>
 
         <div className="mt-auto flex flex-col gap-2">
           <Button className="h-14" loading={busy} onClick={handleCreate}>
@@ -119,68 +140,46 @@ export function DuelLobbies({ onEnter }: DuelLobbiesProps) {
   }
 
   return (
-    <div className="flex-col-stretch flex-available gap-3">
-      <DuelStage
-        winsNeeded={data?.winsNeeded ?? 2}
-        stakeMin={min}
-        stakeMax={max}
-        moveSeconds={data?.moveSeconds ?? 5}
-      />
+    <div className="flex min-h-full flex-col gap-3">
+      {header}
 
-      <div className="flex items-baseline justify-between text-[11px] tracking-wider text-disabled uppercase">
-        <span>
-          {t('duel open lobbies')}
-          {data?.lobbies.length ? ' · ' + data.lobbies.length : ''}
-        </span>
-        <span>
-          {tickets} {t('duel tickets left')}
-        </span>
+      <div className="text-pink-secondary flex items-baseline justify-between text-[10px] font-black tracking-[0.16em] uppercase">
+        <span>{t('duel open lobbies')}</span>
+        <span className="tabular-nums">{data?.lobbies.length ?? 0}</span>
       </div>
 
       {data?.own && (
         <button
           type="button"
           onClick={() => onEnter(data.own!.id)}
-          className="flex items-center gap-3 rounded-2xl border border-gold/40 bg-gold/5 p-3 text-left"
+          className="border-gold/45 from-gold/10 flex items-center gap-3 rounded-2xl border bg-gradient-to-b to-transparent p-3 text-left"
         >
-          <span className="flex-1">
+          <span className="min-w-0 flex-1">
             <span className="block text-sm font-bold">{t('duel your lobby')}</span>
-            <span className="block text-xs text-disabled">{t('duel waiting for opponent')}</span>
+            <span className="text-disabled block text-[11px]">
+              {t('duel waiting seconds', { count: data.own.waitingSeconds })}
+            </span>
           </span>
           <DuelStakeBadge stake={data.own.stake} />
         </button>
       )}
 
       {!isLoading && !data?.lobbies.length && !data?.own && (
-        <p className="py-8 text-center text-sm text-disabled">{t('duel no lobbies')}</p>
+        <p className="text-disabled px-6 py-7 text-center text-[13px] leading-relaxed">
+          {t('duel no lobbies')}
+        </p>
       )}
 
       {data?.lobbies.map(lobby => (
-        <div
-          key={lobby.id}
-          className="flex items-center gap-3 rounded-2xl border border-white/8 bg-background-overlay p-3"
-        >
-          <span className="flex-center size-9 rounded-full bg-surface-hover text-sm font-bold text-gray-secondary">
-            {lobby.host.name.slice(0, 1).toUpperCase()}
-          </span>
-          <span className="min-w-0 flex-1">
-            <span className="block truncate text-sm font-bold">{lobby.host.name}</span>
-            <span className="block text-xs text-disabled">
-              {t('duel waiting seconds', { count: lobby.waitingSeconds })}
-            </span>
-          </span>
-          <DuelStakeBadge stake={lobby.stake} />
-          <Button className="h-9 px-4 text-xs" loading={busy} onClick={() => handleJoin(lobby.id)}>
-            {t('duel join')}
-          </Button>
-        </div>
+        <DuelLobbyRow key={lobby.id} lobby={lobby} busy={busy} onJoin={handleJoin} />
       ))}
 
-      {!data?.own && (
-        <p className="text-pink-secondary px-1 text-[11px] leading-snug">{t('duel lobby hint')}</p>
-      )}
-
       <div className="mt-auto flex flex-col gap-2 pt-2">
+        {!data?.own && (
+          <p className="text-pink-secondary px-1 text-[11px] leading-snug">
+            {t('duel lobby hint')}
+          </p>
+        )}
         {data?.own ? (
           <Button variant="transparent" className="h-12" onClick={() => cancel(data.own!.id)}>
             {t('duel cancel lobby')}
@@ -188,9 +187,9 @@ export function DuelLobbies({ onEnter }: DuelLobbiesProps) {
         ) : (
           <Button
             className="h-14"
-            disabled={tickets < 1}
+            disabled={tickets < min}
             onClick={() => {
-              setStake(1);
+              setStake(min);
               setPicking(true);
             }}
           >

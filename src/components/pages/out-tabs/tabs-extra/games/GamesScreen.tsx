@@ -1,15 +1,41 @@
 'use client';
 
-import { DuelScreen } from '@/components/pages/out-tabs/tabs-extra/duel/DuelScreen';
+import { useAppTranslations } from '@/hooks/useAppTranslations';
+import { useFeature } from '@/hooks/useFeature';
+import { GameCard } from '@/components/pages/out-tabs/tabs-extra/games/GameCard';
+import { routes } from '@/constants/routes';
 
 /**
- * Раздел «Игры».
+ * Раздел «Игры» — витрина, и только она.
  *
- * Игра сейчас одна — дуэль, поэтому раздел открывается прямо ею: выбор из
- * одного пункта был бы лишним экраном на пути к матчу. Когда игр станет
- * больше, выбор вернётся сюда — сам гейт и пункт меню уже написаны так, что
- * им всё равно, сколько игр внутри.
+ * Здесь не играют: карточка ведёт в игру, а игра живёт своим адресом. Так
+ * «назад» возвращает к выбору, а не выбрасывает из раздела, и ссылка на дуэль
+ * из приглашения открывает сразу её.
+ *
+ * Вторая карточка — заглушка следующей игры. Она стоит намеренно: пустая
+ * витрина из одного пункта выглядит недоделанной, а «скоро» здесь честное —
+ * сетку мы действительно строим следующей.
  */
 export function GamesScreen() {
-  return <DuelScreen />;
+  const t = useAppTranslations();
+  const duelOpen = useFeature('duel');
+
+  return (
+    <div className="flex min-h-full flex-col gap-3 pt-1 pb-4">
+      {duelOpen && (
+        <GameCard
+          href={routes.games.duel}
+          title={t('duel')}
+          subtitle={t('games duel blurb')}
+          tokens={[
+            '/assets/icons/duel/rock.webp',
+            '/assets/icons/tickets/bronze-ticket.webp',
+            '/assets/icons/duel/scissors.webp',
+          ]}
+        />
+      )}
+
+      <GameCard soon title={t('games next title')} subtitle={t('games next blurb')} />
+    </div>
+  );
 }
