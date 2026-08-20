@@ -111,6 +111,9 @@ const ticketPrices = (tier: TicketsEnum): MarketPrice[] => [
   },
 ];
 
+/** ISO instant `n` hours out — mock deadlines are relative so they never lapse. */
+const inHours = (n: number): string => new Date(Date.now() + n * 3600_000).toISOString();
+
 export const marketMock: MarketData = {
   engines: [
     {
@@ -176,6 +179,10 @@ export const marketMock: MarketData = {
       name: 'Silver Ticket',
       ticketType: TicketsEnum.SILVER,
       isAvailable: true,
+      // A deadline, so the «Limited» tab, its countdown pill and the sheet's
+      // "time left" line all have something to count in dev. Relative, never a
+      // literal date — a frozen one expires and the state under test flips.
+      expiresAt: inHours(38),
       prices: ticketPrices(TicketsEnum.SILVER),
     },
     {
@@ -221,6 +228,8 @@ export const marketMock: MarketData = {
       type: 'capacity',
       quality: TicketsEnum.BRONZE,
       count: 1,
+      // Empty shelf: the card must say "sold out" and stop offering a price.
+      remainingSupply: 0,
       prices: [
         { type: MarketPriceType.LC, amount: 20_000 },
         { type: MarketPriceType.TELEGRAM_STARS, amount: 1 },

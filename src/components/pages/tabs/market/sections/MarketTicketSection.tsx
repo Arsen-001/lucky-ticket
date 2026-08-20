@@ -8,6 +8,7 @@ import { useGetTicketsQuery } from '@/api/tickets.api';
 import { MarketSectionGrid } from '@/components/pages/tabs/market/MarketSectionGrid';
 import { MarketUniversalCard } from '@/components/pages/tabs/market/MarketUniversalCard';
 import { MarketItemImage } from '@/components/pages/tabs/market/MarketItemImage';
+import { MarketLimitedBadge } from '@/components/pages/tabs/market/MarketLimitedBadge';
 import { MarketLockPanel } from '@/components/pages/tabs/market/MarketLockPanel';
 import type { MarketSelectedItem } from '@/components/pages/tabs/market/MarketView';
 import { Ticket } from '@/components/shared/icons/Ticket';
@@ -17,7 +18,12 @@ import { marketTicketName } from '@/utils/pages/market-name.utils';
 import { useUnlockedTiers } from '@/hooks/useUnlockedTiers';
 import type { MarketPrice, MarketTicket } from '@/types/interfaces/market.interfaces';
 import { tierTicketDescriptionId } from '@/constants/tier-names';
-import { applyStatusMarketDiscount, effectiveMarketDiscountPct } from '@/utils/global/market.utils';
+import {
+  applyStatusMarketDiscount,
+  effectiveMarketDiscountPct,
+  marketOfferClosedMessageId,
+  marketOfferClosedReason,
+} from '@/utils/global/market.utils';
 
 export interface MarketTicketSectionProps {
   tickets: MarketTicket[];
@@ -40,7 +46,10 @@ export function MarketTicketSection({ tickets, onSelect, onBuy }: MarketTicketSe
     <MarketSectionGrid title={t('tickets')} icon={TicketLucide} accent="var(--color-electric-pink)">
       {tickets.map(ticket => {
         const isTierLocked = !isTierUnlocked(ticket.ticketType);
-        const isLocked = isTierLocked || ticket.isAvailable === false;
+        // An empty shelf or a passed deadline closes the sale exactly like the
+        // "not on sale" flag does — the server refuses all three.
+        const closed = marketOfferClosedReason(ticket);
+        const isLocked = isTierLocked || ticket.isAvailable === false || !!closed;
         const cardIcon: ReactNode = <Ticket type={ticket.ticketType} width={104} height={104} />;
         // One picture, any size the surface asks for — see `MarketSelectedItem`.
         const renderIcon = (size: number): ReactNode =>
@@ -60,11 +69,14 @@ export function MarketTicketSection({ tickets, onSelect, onBuy }: MarketTicketSe
             isTierLocked ? (
               <MarketLockPanel tier={ticket.ticketType} />
             ) : (
-              <MarketLockPanel note={t('ticket not on sale')} />
+              <MarketLockPanel
+                note={closed ? t(marketOfferClosedMessageId[closed]) : t('ticket not on sale')}
+              />
             )
           ) : undefined,
           renderIcon,
           prices: discountedPrices,
+          expiresAt: ticket.expiresAt,
           remainingSupply: ticket.remainingSupply,
           isNew: ticket.isNew,
           discountPct: ticket.discountPct,
@@ -83,6 +95,15 @@ export function MarketTicketSection({ tickets, onSelect, onBuy }: MarketTicketSe
             isNew={ticket.isNew}
             discountPct={ticket.discountPct}
             disabled={isLocked}
+            disabledLabel={
+              closed && !isTierLocked ? t(marketOfferClosedMessageId[closed]) : undefined
+            }
+            badge={
+              <MarketLimitedBadge
+                expiresAt={ticket.expiresAt}
+                remainingSupply={ticket.remainingSupply}
+              />
+            }
             iconStage={cardIcon}
             imageUrl={ticket.imageUrl}
             iconStageClassName="h-28"

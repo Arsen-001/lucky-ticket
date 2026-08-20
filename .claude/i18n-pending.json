@@ -12,7 +12,11 @@
     "friends gift title",
     "grand prize every finisher",
     "level {n} of {total}",
+    "limited",
+    "limited note",
+    "offer ended",
     "send ticket recipient closed",
+    "sold out",
     "steps for quest level {n}",
     "{n} levels left",
     "{n} tasks left to claim"

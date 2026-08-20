@@ -1461,5 +1461,9 @@
   "friends gift title": "Gift for friends",
   "friends gift subtitle": "{count} friends in the channel — and the bot sends a gift",
   "friends gift claim failed": "Could not request the gift. Try again",
-  "send ticket recipient closed": "This player is not accepting tickets right now"
+  "send ticket recipient closed": "This player is not accepting tickets right now",
+  "limited": "Limited",
+  "limited note": "These are on sale for a while — until the timer or the stock runs out.",
+  "sold out": "Sold out",
+  "offer ended": "Sale ended"
 }

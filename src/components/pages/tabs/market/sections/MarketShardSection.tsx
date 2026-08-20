@@ -8,6 +8,7 @@ import { useGetMeQuery } from '@/api/me.api';
 import { MarketSectionGrid } from '@/components/pages/tabs/market/MarketSectionGrid';
 import { MarketUniversalCard } from '@/components/pages/tabs/market/MarketUniversalCard';
 import { MarketItemImage } from '@/components/pages/tabs/market/MarketItemImage';
+import { MarketLimitedBadge } from '@/components/pages/tabs/market/MarketLimitedBadge';
 import { MarketLockPanel } from '@/components/pages/tabs/market/MarketLockPanel';
 import type { MarketSelectedItem } from '@/components/pages/tabs/market/MarketView';
 import { ChipShardIcon } from '@/components/shared/icons/ChipShardIcon';
@@ -16,7 +17,12 @@ import { useAppTranslations } from '@/hooks/useAppTranslations';
 import { marketShardName, marketShardsReceived } from '@/utils/pages/market-name.utils';
 import { useUnlockedTiers } from '@/hooks/useUnlockedTiers';
 import type { MarketPrice, MarketShard } from '@/types/interfaces/market.interfaces';
-import { applyStatusMarketDiscount, effectiveMarketDiscountPct } from '@/utils/global/market.utils';
+import {
+  applyStatusMarketDiscount,
+  effectiveMarketDiscountPct,
+  marketOfferClosedMessageId,
+  marketOfferClosedReason,
+} from '@/utils/global/market.utils';
 
 export interface MarketShardSectionProps {
   shards: MarketShard[];
@@ -38,7 +44,11 @@ export function MarketShardSection({ shards, onSelect, onBuy }: MarketShardSecti
   return (
     <MarketSectionGrid title={t('shards title')} icon={Gem} accent="var(--color-electric-purple)">
       {shards.map(shard => {
-        const isLocked = !isTierUnlocked(shard.quality);
+        const isTierLocked = !isTierUnlocked(shard.quality);
+        // Same rule as the tier gate: an empty shelf or a passed deadline is a
+        // refusal the server will make anyway — say it before the tap.
+        const closed = marketOfferClosedReason(shard);
+        const isLocked = isTierLocked || !!closed;
         const cardIcon: ReactNode = (
           <ChipShardIcon type={shard.type} tier={shard.quality} size={101} />
         );
@@ -59,9 +69,16 @@ export function MarketShardSection({ shards, onSelect, onBuy }: MarketShardSecti
           describeOrder: quantity => marketShardsReceived(shard.count * quantity, t),
           about: t('market shard purpose'),
           locked: isLocked,
-          lockNote: isLocked ? <MarketLockPanel tier={shard.quality} /> : undefined,
+          lockNote: isLocked ? (
+            isTierLocked ? (
+              <MarketLockPanel tier={shard.quality} />
+            ) : (
+              <MarketLockPanel note={t(marketOfferClosedMessageId[closed!])} />
+            )
+          ) : undefined,
           renderIcon,
           prices: discountedPrices,
+          expiresAt: shard.expiresAt,
           remainingSupply: shard.remainingSupply,
           isNew: shard.isNew,
           discountPct: shard.discountPct,
@@ -92,6 +109,15 @@ export function MarketShardSection({ shards, onSelect, onBuy }: MarketShardSecti
             isNew={shard.isNew}
             discountPct={shard.discountPct}
             disabled={isLocked}
+            disabledLabel={
+              closed && !isTierLocked ? t(marketOfferClosedMessageId[closed]) : undefined
+            }
+            badge={
+              <MarketLimitedBadge
+                expiresAt={shard.expiresAt}
+                remainingSupply={shard.remainingSupply}
+              />
+            }
             iconStage={cardIcon}
             imageUrl={shard.imageUrl}
             iconStageClassName="h-28"

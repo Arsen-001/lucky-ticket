@@ -18,6 +18,7 @@ import { MarketInfoModal } from '@/components/pages/tabs/market/MarketInfoModal'
 import { MarketPurchaseModal } from '@/components/pages/tabs/market/MarketPurchaseModal';
 import { MarketPurchaseSuccessModal } from '@/components/pages/tabs/market/MarketPurchaseSuccessModal';
 import { MarketEngineSection } from '@/components/pages/tabs/market/sections/MarketEngineSection';
+import { MarketLimitedSections } from '@/components/pages/tabs/market/sections/MarketLimitedSections';
 import { MarketTicketSection } from '@/components/pages/tabs/market/sections/MarketTicketSection';
 import { MarketShardSection } from '@/components/pages/tabs/market/sections/MarketShardSection';
 // AVATARS OFF (2026-08-09) — the avatar cosmetics feature is switched off for
@@ -28,6 +29,7 @@ import { MarketStatusSection } from '@/components/pages/tabs/market/sections/Mar
 import { MarketGiftSection } from '@/components/pages/tabs/market/sections/MarketGiftSection';
 import { MarketPriceType } from '@/types/enums/market.enums';
 import type { MarketAccent, MarketPrice } from '@/types/interfaces/market.interfaces';
+import { limitedMarketData } from '@/utils/global/market.utils';
 import '@/styles/components/market.css';
 
 const ALL_KEY: MarketCategoryKey = 'all';
@@ -108,12 +110,17 @@ export function MarketView() {
   // an empty screen, which reads as breakage rather than as "not on sale".
   const { data: giftShop } = useGetGiftShopQuery();
   const giftsOpen = !!giftShop && giftShop.closedReason !== 'disabled';
+  // Nothing on a clock or on a shelf right now — then there is no «Limited»
+  // tab at all, by the same rule as the gift chip above: a chip that opens an
+  // empty screen reads as breakage, not as an absent offer. It appears by
+  // itself the moment an admin puts a deadline or a stock number on anything.
+  const limitedCount = limitedMarketData(data).total;
   // AVATARS OFF (2026-08-09) — same rule for the cosmetics chip: the section
   // behind it draws nothing while avatars are off, and a chip that opens an
   // empty screen reads as breakage. Dropping it here also makes a stale
   // `?tab=cosmetics` link fall back to "all" (see `resolvedActive` below).
   const categoryOrder = MARKET_CATEGORY_ORDER.filter(
-    k => (k !== 'gifts' || giftsOpen) && k !== 'cosmetics'
+    k => (k !== 'gifts' || giftsOpen) && k !== 'cosmetics' && (k !== 'limited' || limitedCount > 0)
   );
   const [infoItem, setInfoItem] = useState<MarketSelectedItem | null>(null);
   const [purchase, setPurchase] = useState<MarketActivePurchase | null>(null);
@@ -224,6 +231,10 @@ export function MarketView() {
   const sections = useMemo(() => {
     if (!data) return null;
     return {
+      // Cross-category: the same section components, handed only what is
+      // temporary. Sits in its own tab and is skipped in "all" — everything in
+      // it is already drawn there under its own category.
+      limited: <MarketLimitedSections data={data} onSelect={handleSelect} onBuy={handleBuy} />,
       engines: (
         <MarketEngineSection engines={data.engines} onSelect={handleSelect} onBuy={handleBuy} />
       ),
@@ -275,7 +286,7 @@ export function MarketView() {
       >
         {showAll ? (
           categoryOrder
-            .filter(k => k !== ALL_KEY)
+            .filter(k => k !== ALL_KEY && k !== 'limited')
             .map(key => <div key={key}>{sections?.[key as Exclude<MarketCategoryKey, 'all'>]}</div>)
         ) : (
           <div className={highlight ? 'market-section-highlight' : undefined}>

@@ -10,6 +10,7 @@ import { MarketSavingsRow } from '@/components/pages/tabs/market/sections/Market
 import { MarketSectionGrid } from '@/components/pages/tabs/market/MarketSectionGrid';
 import { MarketUniversalCard } from '@/components/pages/tabs/market/MarketUniversalCard';
 import { MarketItemImage } from '@/components/pages/tabs/market/MarketItemImage';
+import { MarketLimitedBadge } from '@/components/pages/tabs/market/MarketLimitedBadge';
 import { MarketLockPanel } from '@/components/pages/tabs/market/MarketLockPanel';
 import { StatusPerkList } from '@/components/pages/tabs/market/status/StatusPerkList';
 import type { MarketSelectedItem } from '@/components/pages/tabs/market/MarketView';
@@ -24,7 +25,12 @@ import {
   MarketStatusType,
 } from '@/types/enums/market.enums';
 import type { MarketPrice, MarketStatus } from '@/types/interfaces/market.interfaces';
-import { applyStatusMarketDiscount, effectiveMarketDiscountPct } from '@/utils/global/market.utils';
+import {
+  applyStatusMarketDiscount,
+  effectiveMarketDiscountPct,
+  marketOfferClosedMessageId,
+  marketOfferClosedReason,
+} from '@/utils/global/market.utils';
 import {
   buildStatusPerkRows,
   buildVipUpgradeRows,
@@ -32,11 +38,20 @@ import {
 } from '@/utils/global/status-perks.utils';
 
 export interface MarketStatusSectionProps {
+  /**
+   * Draw these instead of the whole catalog — the «Limited» tab passes its own
+   * filtered subset. Omitted = every status the storefront sells.
+   */
+  statuses?: MarketStatus[];
   onSelect: (item: MarketSelectedItem) => void;
   onBuy: (item: MarketSelectedItem, price: MarketPrice) => void;
 }
 
-export function MarketStatusSection({ onSelect, onBuy }: MarketStatusSectionProps) {
+export function MarketStatusSection({
+  statuses: statusesProp,
+  onSelect,
+  onBuy,
+}: MarketStatusSectionProps) {
   const t = useAppTranslations();
   const format = useFormatter();
   const router = useRouter();
@@ -45,7 +60,7 @@ export function MarketStatusSection({ onSelect, onBuy }: MarketStatusSectionProp
   const [buyStatus] = useBuyStatusMutation();
 
   const isLoading = isMarketLoading || isMeLoading;
-  const statuses = data?.statuses ?? [];
+  const statuses = statusesProp ?? data?.statuses ?? [];
   const userVipLevel = me?.vipLevel ?? 0;
 
   const isLp = me?.isLuckyPlayer ?? false;
@@ -105,7 +120,9 @@ export function MarketStatusSection({ onSelect, onBuy }: MarketStatusSectionProp
     return buildStatusPerkRows(perks, status.perkBase, t, status.dailyGift);
   };
 
-  if (!isLoading && !statuses.length) return null;
+  // A caller-supplied list is already the answer — an empty one means "none of
+  // these here", not "still loading".
+  if ((statusesProp !== undefined || !isLoading) && !statuses.length) return null;
 
   return (
     // `count` is pinned to the statuses: the savings receipt is a child of the
@@ -139,7 +156,10 @@ export function MarketStatusSection({ onSelect, onBuy }: MarketStatusSectionProp
           : undefined;
         const meetsRequirements =
           !activityRequirement || (me?.activityPoints || 0) >= activityRequirement.count;
-        const isDisabled = isOwned || (!isVIP && !meetsRequirements);
+        // The shelf and the clock close a sale as firmly as a gate does — the
+        // server refuses both, so the card must stop offering the price.
+        const closed = marketOfferClosedReason(status);
+        const isDisabled = isOwned || !!closed || (!isVIP && !meetsRequirements);
 
         const lpExpiry = lpActive ? me?.luckyPlayerExpiresAt : undefined;
         const durationLabel = isVIP
@@ -203,7 +223,9 @@ export function MarketStatusSection({ onSelect, onBuy }: MarketStatusSectionProp
               : undefined,
           locked: isDisabled,
           lockNote: isDisabled ? (
-            lpActive ? (
+            closed && !isOwned ? (
+              <MarketLockPanel note={t(marketOfferClosedMessageId[closed])} />
+            ) : lpActive ? (
               <MarketLockPanel note={t('lucky player active')} />
             ) : vipAtMax ? (
               <MarketLockPanel note={t('vip maxed description')} />
@@ -224,6 +246,7 @@ export function MarketStatusSection({ onSelect, onBuy }: MarketStatusSectionProp
               renderIcon(size)
             ),
           prices: activePrices,
+          expiresAt: status.expiresAt,
           remainingSupply: status.remainingSupply,
           isNew: status.isNew,
           accent,
@@ -266,8 +289,24 @@ export function MarketStatusSection({ onSelect, onBuy }: MarketStatusSectionProp
             owned={isOwned}
             // An owned status is not gated — it is already the player's. The
             // padlock and the word "Locked" contradicted the ACTIVE badge above it.
-            disabledLabel={isOwned ? (vipAtMax ? t('max') : t('active')) : undefined}
-            badge={ownershipBadge}
+            disabledLabel={
+              isOwned
+                ? vipAtMax
+                  ? t('max')
+                  : t('active')
+                : closed
+                  ? t(marketOfferClosedMessageId[closed])
+                  : undefined
+            }
+            badge={
+              <>
+                {ownershipBadge}
+                <MarketLimitedBadge
+                  expiresAt={status.expiresAt}
+                  remainingSupply={status.remainingSupply}
+                />
+              </>
+            }
             iconStage={renderIcon(75)}
             imageUrl={status.imageUrl}
             iconStageClassName="h-24"

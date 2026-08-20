@@ -7,6 +7,7 @@ import { useGetMeQuery } from '@/api/me.api';
 import { MarketSectionGrid } from '@/components/pages/tabs/market/MarketSectionGrid';
 import { MarketUniversalCard } from '@/components/pages/tabs/market/MarketUniversalCard';
 import { MarketItemImage } from '@/components/pages/tabs/market/MarketItemImage';
+import { MarketLimitedBadge } from '@/components/pages/tabs/market/MarketLimitedBadge';
 import { MarketLockPanel } from '@/components/pages/tabs/market/MarketLockPanel';
 import type { MarketSelectedItem } from '@/components/pages/tabs/market/MarketView';
 import { EngineIcon } from '@/components/shared/icons/EngineIcon';
@@ -15,7 +16,12 @@ import { marketEngineName } from '@/utils/pages/market-name.utils';
 import { useUnlockedTiers } from '@/hooks/useUnlockedTiers';
 import type { MarketEngine, MarketPrice } from '@/types/interfaces/market.interfaces';
 import type { MessageIds } from '@/types/types/i18n.types';
-import { applyStatusMarketDiscount, effectiveMarketDiscountPct } from '@/utils/global/market.utils';
+import {
+  applyStatusMarketDiscount,
+  effectiveMarketDiscountPct,
+  marketOfferClosedMessageId,
+  marketOfferClosedReason,
+} from '@/utils/global/market.utils';
 
 export interface MarketEngineSectionProps {
   engines: MarketEngine[];
@@ -36,7 +42,12 @@ export function MarketEngineSection({ engines, onSelect, onBuy }: MarketEngineSe
   return (
     <MarketSectionGrid title={t('engines title')} icon={Cog} accent="var(--color-gold)">
       {engines.map(engine => {
-        const isLocked = !isTierUnlocked(engine.ticketType);
+        const isTierLocked = !isTierUnlocked(engine.ticketType);
+        // A shelf that ran out and a deadline that passed close the sale as
+        // firmly as the tier gate — the server refuses both, so the card stops
+        // offering the price instead of arming a doomed tap.
+        const closed = marketOfferClosedReason(engine);
+        const isLocked = isTierLocked || !!closed;
         const cardIcon: ReactNode = <EngineIcon tier={engine.ticketType} size={144} />;
         const renderIcon = (size: number): ReactNode =>
           engine.imageUrl ? (
@@ -55,9 +66,16 @@ export function MarketEngineSection({ engines, onSelect, onBuy }: MarketEngineSe
           description,
           about: t('market engine purpose', { tier: t(engine.ticketType as MessageIds) }),
           locked: isLocked,
-          lockNote: isLocked ? <MarketLockPanel tier={engine.ticketType} /> : undefined,
+          lockNote: isLocked ? (
+            isTierLocked ? (
+              <MarketLockPanel tier={engine.ticketType} />
+            ) : (
+              <MarketLockPanel note={t(marketOfferClosedMessageId[closed!])} />
+            )
+          ) : undefined,
           renderIcon,
           prices: discountedPrices,
+          expiresAt: engine.expiresAt,
           remainingSupply: engine.remainingSupply,
           isNew: engine.isNew,
           discountPct: engine.discountPct,
@@ -78,6 +96,15 @@ export function MarketEngineSection({ engines, onSelect, onBuy }: MarketEngineSe
             isNew={engine.isNew}
             discountPct={engine.discountPct}
             disabled={isLocked}
+            disabledLabel={
+              closed && !isTierLocked ? t(marketOfferClosedMessageId[closed]) : undefined
+            }
+            badge={
+              <MarketLimitedBadge
+                expiresAt={engine.expiresAt}
+                remainingSupply={engine.remainingSupply}
+              />
+            }
             iconStage={cardIcon}
             imageUrl={engine.imageUrl}
             iconStageClassName="h-40"

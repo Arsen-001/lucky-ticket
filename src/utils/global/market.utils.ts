@@ -3,6 +3,7 @@ import { MarketPriceType, MarketStatusType } from '@/types/enums/market.enums';
 import { TicketsEnum } from '@/types/enums/ticket.enums';
 import type { InventoryChipType } from '@/types/interfaces/inventory.interfaces';
 import type { MarketData, MarketPrice } from '@/types/interfaces/market.interfaces';
+import type { MessageIds } from '@/types/types/i18n.types';
 import type { TicketType } from '@/types/types/ticket.types';
 
 /**
@@ -116,3 +117,67 @@ export const sortMarketData = (data: MarketData): MarketData => ({
     (a, b) => statusRank(a.statusType) - statusRank(b.statusType) || a.id.localeCompare(b.id)
   ),
 });
+
+/** The two fields that make a listing temporary — a deadline, a finite shelf. */
+export interface MarketLimitedFields {
+  /** ISO instant the offer stops being sold; absent = no deadline. */
+  expiresAt?: string;
+  /** Units left; absent = unlimited. */
+  remainingSupply?: number;
+}
+
+/**
+ * Is this listing on sale only for a while?
+ *
+ * One definition behind three surfaces — the Market's «Limited» tab, the
+ * countdown/stock pill on the card, and the sold-out gate — so a card can never
+ * advertise a limit the tab disagrees with. Both admin-set fields count: a
+ * deadline ends the sale by time, a stock number ends it by supply, and the
+ * player has the same reason to hurry either way.
+ */
+export const isLimitedOffer = (item: MarketLimitedFields): boolean =>
+  !!item.expiresAt || item.remainingSupply !== undefined;
+
+export type MarketOfferClosedReason = 'sold-out' | 'expired';
+
+/**
+ * Why this listing can no longer be bought — `null` while it still can.
+ *
+ * The server is the authority (it refuses an empty shelf and a passed
+ * deadline); this is the screen agreeing with it in advance, so a limit that
+ * has run out reads as run out instead of as «not enough LC» after a doomed
+ * tap.
+ */
+export const marketOfferClosedReason = (
+  item: MarketLimitedFields
+): MarketOfferClosedReason | null => {
+  if (item.remainingSupply !== undefined && item.remainingSupply <= 0) return 'sold-out';
+  if (item.expiresAt && new Date(item.expiresAt).getTime() <= Date.now()) return 'expired';
+  return null;
+};
+
+export const marketOfferClosedMessageId: Record<MarketOfferClosedReason, MessageIds> = {
+  'sold-out': 'sold out',
+  expired: 'offer ended',
+};
+
+/**
+ * Every temporary listing in the catalog, grouped the way the sections take it.
+ *
+ * Cosmetics are left out on purpose: avatars are switched off (see `AVATARS
+ * OFF` in `MarketView`), so counting them would light the «Limited» chip for
+ * items no section draws — a chip that opens an empty screen reads as breakage.
+ */
+export const limitedMarketData = (data?: MarketData) => {
+  const engines = (data?.engines ?? []).filter(isLimitedOffer);
+  const tickets = (data?.tickets ?? []).filter(isLimitedOffer);
+  const shards = (data?.shards ?? []).filter(isLimitedOffer);
+  const statuses = (data?.statuses ?? []).filter(isLimitedOffer);
+  return {
+    engines,
+    tickets,
+    shards,
+    statuses,
+    total: engines.length + tickets.length + shards.length + statuses.length,
+  };
+};

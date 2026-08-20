@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useLayoutEffect, useRef, useState } from 'react';
-import { CircleStar, Cog, Gem, Gift, Palette, Sparkles, Ticket } from 'lucide-react';
+import { CircleStar, Cog, Gem, Gift, Hourglass, Palette, Sparkles, Ticket } from 'lucide-react';
 import type { LucideIcon } from 'lucide-react';
 import { twMerge } from 'tailwind-merge';
 import { useAppTranslations } from '@/hooks/useAppTranslations';
@@ -9,6 +9,8 @@ import type { MessageIds } from '@/types/types/i18n.types';
 
 export type MarketCategoryKey =
   | 'all'
+  /** Cross-category: everything with a deadline or a finite shelf. */
+  | 'limited'
   | 'engines'
   | 'tickets'
   | 'shards'
@@ -18,6 +20,9 @@ export type MarketCategoryKey =
 
 export const MARKET_CATEGORY_ORDER: MarketCategoryKey[] = [
   'all',
+  // Second on purpose, and dropped entirely when nothing is on a clock: what
+  // leaves the shelf soonest is the one thing a player cannot come back for.
+  'limited',
   'status',
   'tickets',
   'shards',
@@ -31,6 +36,7 @@ export const MARKET_CATEGORY_ORDER: MarketCategoryKey[] = [
 
 const CATEGORY_ICON: Record<MarketCategoryKey, LucideIcon> = {
   all: Sparkles,
+  limited: Hourglass,
   engines: Cog,
   tickets: Ticket,
   shards: Gem,
@@ -41,6 +47,7 @@ const CATEGORY_ICON: Record<MarketCategoryKey, LucideIcon> = {
 
 const CATEGORY_LABEL: Record<MarketCategoryKey, MessageIds> = {
   all: 'all',
+  limited: 'limited',
   engines: 'engines',
   tickets: 'tickets',
   shards: 'shards title',

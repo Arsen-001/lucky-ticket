@@ -1461,5 +1461,9 @@
   "friends gift title": "Подарок за друзей",
   "friends gift subtitle": "{count} друзей в канале — и бот пришлёт подарок",
   "friends gift claim failed": "Не получилось запросить подарок. Попробуй ещё раз",
-  "send ticket recipient closed": "Этот игрок сейчас не принимает билеты"
+  "send ticket recipient closed": "Этот игрок сейчас не принимает билеты",
+  "limited": "Временное",
+  "limited note": "Это продаётся не всегда — пока идёт таймер или не кончился остаток.",
+  "sold out": "Раскуплено",
+  "offer ended": "Продажа закончилась"
 }
