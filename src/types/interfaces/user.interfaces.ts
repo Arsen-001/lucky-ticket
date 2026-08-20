@@ -67,6 +67,16 @@ export interface MeResponse {
   walletId?: string | null;
   /** Lifetime count of stakes opened — metered against `stakes.freeStartCount`. */
   freeStakeStartsUsed?: number;
+  /**
+   * Стадии выката, уже посчитанные сервером под этого игрока:
+   * `{ friendsGift: true, giftShop: false }`.
+   *
+   * Экран спрашивает «мне это показывать?» и получает готовое да/нет — списка
+   * тестеров и самой стадии в клиенте нет и быть не должно. Ключа может не
+   * быть вовсе (бэкенд старше фичи), и это читается как «нет».
+   * @see useFeature
+   */
+  features?: Partial<Record<string, boolean>>;
   /** Whether the user has completed or skipped the first-run onboarding tour. */
   hasSeenTour?: boolean;
   /**
