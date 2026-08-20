@@ -36,7 +36,11 @@ export function DuelScreen() {
    * получилось (лобби заняли или закрыли, пока он шёл) — так и говорим, и
    * оставляем его в списке, где можно выбрать другое.
    */
-  const invitedLobbyId = useSearchParams().get('lobby');
+  const params = useSearchParams();
+  const invitedLobbyId = params.get('lobby');
+  // Пришли из карточки игрока: экран открывается сразу выбором ставки, а
+  // «Старт» создаёт лобби и тут же зовёт именно его.
+  const inviteUserId = params.get('invite');
   const joinedRef = useRef<string | null>(null);
   useEffect(() => {
     if (!enabled || !invitedLobbyId || joinedRef.current === invitedLobbyId) return;
@@ -85,6 +89,7 @@ export function DuelScreen() {
         />
       ) : (
         <DuelLobbies
+          inviteUserId={inviteUserId}
           onEnter={(id, options) => {
             setInviteOnEnter(Boolean(options?.invite));
             setDuelId(id);

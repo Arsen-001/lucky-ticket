@@ -1,7 +1,7 @@
 'use client';
 import { useEffect, useState, type ReactNode } from 'react';
 import { useRouter } from 'next/navigation';
-import { Heart, Medal, Send, UserRound } from 'lucide-react';
+import { Heart, Medal, Send, Swords, UserRound } from 'lucide-react';
 import { twMerge } from 'tailwind-merge';
 import { Modal } from '@/components/shared/modals/Modal';
 import { Button } from '@/components/shared/buttons/Button';
@@ -13,6 +13,7 @@ import { UserAvatar, type AvatarStatusColor } from '@/components/shared/user-ele
 import { ProfileSendTicketModal } from '@/components/pages/out-tabs/drawer/profile/ProfileSendTicketModal';
 import { useLikeProfileMutation } from '@/api/profile.api';
 import { useAppTranslations } from '@/hooks/useAppTranslations';
+import { useFeature } from '@/hooks/useFeature';
 import { routes } from '@/constants/routes';
 import { formatNumber } from '@/utils/global/number.utils';
 
@@ -71,6 +72,7 @@ export function PlayerQuickCard({
   isVIP,
 }: PlayerQuickCardProps) {
   const t = useAppTranslations();
+  const duelOpen = useFeature('duel');
   const router = useRouter();
   const [likeProfile, { isLoading }] = useLikeProfileMutation();
   const [sendOpen, setSendOpen] = useState(false);
@@ -166,6 +168,19 @@ export function PlayerQuickCard({
             className="animate-slide-in-bottom flex flex-col gap-2 px-5 pb-5"
             style={{ animationDelay: '240ms' }}
           >
+            {/* Вызов на дуэль — первым действием: это единственная кнопка
+                карточки, которая начинает игру, а не жест вежливости. Ведёт на
+                выбор ставки, потому что позвать без ставки нельзя. */}
+            {duelOpen && (
+              <Button
+                className="flex w-full items-center justify-center gap-1.5"
+                onClick={() => router.push(routes.games.getDuelInvite(userId))}
+              >
+                <Swords size={15} strokeWidth={2.6} />
+                {t('duel call to duel')}
+              </Button>
+            )}
+
             <div className="flex gap-2">
               <button
                 type="button"

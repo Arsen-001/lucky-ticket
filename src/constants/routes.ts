@@ -52,6 +52,10 @@ export const routes = {
     getDuelLobby: function (lobbyId: string) {
       return (this.duel + `?lobby=${lobbyId}`) as `/games/duel?lobby=${string}`;
     },
+    /** Позвать конкретного игрока: экран открывается сразу выбором ставки. */
+    getDuelInvite: function (userId: string) {
+      return (this.duel + `?invite=${userId}`) as `/games/duel?invite=${string}`;
+    },
   },
   engines: {
     index: '/engines',

@@ -14,12 +14,20 @@ import {
   useCancelDuelMutation,
   useCreateDuelMutation,
   useGetDuelLobbiesQuery,
+  useInviteToDuelMutation,
   useJoinDuelMutation,
 } from '@/api/duel.api';
 
 export interface DuelLobbiesProps {
   /** `invite` — открыть лобби и сразу показать список друзей. */
   onEnter: (duelId: string, options?: { invite?: boolean }) => void;
+  /**
+   * Кого зовём: пришли из карточки игрока.
+   *
+   * Экран сразу открывается выбором ставки — позвать без ставки нельзя, она
+   * часть вызова, а не настройка после него.
+   */
+  inviteUserId?: string | null;
 }
 
 /**
@@ -29,10 +37,10 @@ export interface DuelLobbiesProps {
  * перехода — поэтому «Создать лобби» лежит внизу, в зоне большого пальца, а не
  * прячется за плюсом в шапке.
  */
-export function DuelLobbies({ onEnter }: DuelLobbiesProps) {
+export function DuelLobbies({ onEnter, inviteUserId }: DuelLobbiesProps) {
   const t = useAppTranslations();
   const toast = useToast();
-  const [picking, setPicking] = useState(false);
+  const [picking, setPicking] = useState(Boolean(inviteUserId));
   const [stake, setStake] = useState(1);
   // Замок вместо `isLoading`: RTK батчит `pending`, и перерисовка, гасящая
   // кнопку, может опоздать на кадр — два быстрых тапа успевают уйти оба.
@@ -45,6 +53,7 @@ export function DuelLobbies({ onEnter }: DuelLobbiesProps) {
   const [create] = useCreateDuelMutation();
   const [join] = useJoinDuelMutation();
   const [cancel] = useCancelDuelMutation();
+  const [inviteToDuel] = useInviteToDuelMutation();
 
   const tickets = data?.tickets ?? 0;
   const min = data?.stakeMin ?? 1;
@@ -54,6 +63,20 @@ export function DuelLobbies({ onEnter }: DuelLobbiesProps) {
     if (!lock.acquire('create')) return;
     try {
       const duel = await create({ stake }).unwrap();
+      // Зовём того, ради кого пришли: лобби уже есть, ставка выбрана — вызов
+      // уходит тем же движением, без второго экрана.
+      if (inviteUserId) {
+        try {
+          const result = await inviteToDuel({
+            id: duel.id,
+            userIds: [inviteUserId],
+          }).unwrap();
+          if (result.invited > 0) toast.success(t('duel invite sent', { count: result.invited }));
+          else toast.error(t('duel invite refused'));
+        } catch {
+          toast.error(t('duel invite refused'));
+        }
+      }
       setPicking(false);
       onEnter(duel.id, { invite });
     } catch {
@@ -129,20 +152,22 @@ export function DuelLobbies({ onEnter }: DuelLobbiesProps) {
             loading={lock.locked.has('create')}
             onClick={() => handleCreate()}
           >
-            {t('duel open lobby')}
+            {inviteUserId ? t('duel invite start') : t('duel open lobby')}
           </Button>
           {/* Тот же самый ход, но с ответом на «а с кем играть»: лобби
               открывается и сразу показывает, кого позвать. Ждать случайного
               соперника после этого никто не мешает — приглашение ожидания не
               отменяет. */}
-          <Button
-            variant="secondary"
-            className="h-13"
-            loading={lock.locked.has('create')}
-            onClick={() => handleCreate(true)}
-          >
-            {t('duel play with friend')}
-          </Button>
+          {!inviteUserId && (
+            <Button
+              variant="secondary"
+              className="h-13"
+              loading={lock.locked.has('create')}
+              onClick={() => handleCreate(true)}
+            >
+              {t('duel play with friend')}
+            </Button>
+          )}
           <Button variant="transparent" className="h-12" onClick={() => setPicking(false)}>
             {t('duel back')}
           </Button>

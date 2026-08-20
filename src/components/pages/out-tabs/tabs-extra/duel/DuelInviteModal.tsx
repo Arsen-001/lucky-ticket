@@ -44,8 +44,8 @@ export function DuelInviteModal({ open, duelId, onClose }: DuelInviteModalProps)
   const send = async () => {
     try {
       const result = await invite({ id: duelId, userIds: picked }).unwrap();
-      // Говорим ровно то, что случилось: «отправлено» и «дошло» — разные вещи.
-      if (result.sent > 0) toast.success(t('duel invite sent', { count: result.sent }));
+      // Вызов в игре доходит всегда, письмо — не всем: считаем по первому.
+      if (result.invited > 0) toast.success(t('duel invite sent', { count: result.invited }));
       else toast.error(t('duel invite none'));
       setPicked([]);
       onClose();
