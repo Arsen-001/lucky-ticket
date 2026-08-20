@@ -11,6 +11,7 @@ import { useGetProfileQuery } from '@/api/profile.api';
 import { ProfileHero } from '@/components/pages/out-tabs/drawer/profile/ProfileHero';
 import { ProfileLeaderboardCard } from '@/components/pages/out-tabs/drawer/profile/ProfileLeaderboardCard';
 import { ProfileActivityCard } from '@/components/pages/out-tabs/drawer/profile/ProfileActivityCard';
+import { ProfileGamesCard } from '@/components/pages/out-tabs/drawer/profile/ProfileGamesCard';
 import { ProfileQuickStats } from '@/components/pages/out-tabs/drawer/profile/ProfileQuickStats';
 import { ProfileStatsLink } from '@/components/pages/out-tabs/drawer/profile/ProfileStatsLink';
 import { ProfileFooter } from '@/components/pages/out-tabs/drawer/profile/ProfileFooter';
@@ -82,6 +83,8 @@ export function ProfilePage({ userId }: ProfilePageProps) {
             }}
           />
           */}
+
+          <ProfileGamesCard stats={effectiveProfile.publicStats} loading={isLoading} />
 
           <ProfileQuickStats profile={effectiveProfile} loading={isLoading} />
 

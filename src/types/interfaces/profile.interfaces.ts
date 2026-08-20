@@ -7,6 +7,9 @@ export interface ProfileStreak {
 }
 
 export interface ProfilePublicStats {
+  /** Сыгранные до конца дуэли — по обеим сторонам стола. */
+  duelMatches: number;
+  duelWins: number;
   tournamentsPlayed: number;
   tournamentsWon: number;
   stakesCompleted: number;

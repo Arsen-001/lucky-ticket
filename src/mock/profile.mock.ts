@@ -70,6 +70,8 @@ export const ownProfile: ProfileResponse = {
   collageAchievements: getCollageAchievements(),
   friendsPreview: friendsPreview.slice(0, mockDb.accountStats.friendsCount),
   publicStats: {
+    duelMatches: 14,
+    duelWins: 8,
     tournamentsPlayed: mockDb.accountStats.tournamentsPlayed,
     tournamentsWon: mockDb.accountStats.tournamentsWon,
     stakesCompleted: mockDb.accountStats.stakesCompleted,
@@ -155,6 +157,8 @@ export const otherProfile: ProfileResponse = {
     'gem-br': { left: 79, top: 48 },
   },
   publicStats: {
+    duelMatches: 14,
+    duelWins: 8,
     tournamentsPlayed: 64,
     tournamentsWon: 17,
     stakesCompleted: 42,
