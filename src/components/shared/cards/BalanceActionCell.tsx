@@ -4,15 +4,21 @@ import { Lock } from 'lucide-react';
 import { twMerge } from 'tailwind-merge';
 import type { LucideIcon } from 'lucide-react';
 
-export interface LcActionCellProps {
+export interface BalanceActionCellProps {
   Icon: LucideIcon;
   label: string;
   /** Marks the action closed without disabling it — the screen behind explains why. */
   locked?: boolean;
 }
 
-/** Inner contents of one cell of the card's action footer. */
-export function LcActionCell({ Icon, label, locked }: LcActionCellProps) {
+/**
+ * Inner contents of one cell of a balance card's action footer.
+ *
+ * Shared by the LC and Lucky Stars screens: both cards end in the same strip of
+ * actions, and a cell that looked 1px different on one of them would read as
+ * two unrelated screens rather than the same screen for two currencies.
+ */
+export function BalanceActionCell({ Icon, label, locked }: BalanceActionCellProps) {
   return (
     <>
       <Icon

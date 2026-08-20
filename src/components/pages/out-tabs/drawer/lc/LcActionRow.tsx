@@ -8,7 +8,7 @@ import { useWalletLimits } from '@/hooks/useWalletLimits';
 import { useClaimableTasks } from '@/hooks/useClaimableTasks';
 import { routes } from '@/constants/routes';
 import { ClaimableDot } from '@/components/shared/badges/ClaimableDot';
-import { LcActionCell } from './LcActionCell';
+import { BalanceActionCell } from '@/components/shared/cards/BalanceActionCell';
 import type { LucideIcon } from 'lucide-react';
 import type { Route } from '@/constants/routes';
 
@@ -47,12 +47,16 @@ export function LcActionRow({ onConvertTon, className }: LcActionRowProps) {
       )}
     >
       <button type="button" onClick={onConvertTon} className={CELL}>
-        <LcActionCell Icon={ArrowLeftRight} label={t('convert')} locked={!withdrawalsEnabled} />
+        <BalanceActionCell
+          Icon={ArrowLeftRight}
+          label={t('convert')}
+          locked={!withdrawalsEnabled}
+        />
       </button>
 
       {links.map(link => (
         <Link key={link.href} href={link.href} className={CELL}>
-          <LcActionCell Icon={link.Icon} label={link.label} />
+          <BalanceActionCell Icon={link.Icon} label={link.label} />
           {link.claimable && <ClaimableDot label={t('something to claim')} size="sm" />}
         </Link>
       ))}

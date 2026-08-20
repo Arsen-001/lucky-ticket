@@ -6,19 +6,24 @@ import { TelegramStarIcon } from '@/components/shared/icons/TelegramStarIcon';
 import { GlobalConstants } from '@/constants/global.constants';
 import { formatNumber } from '@/utils/global/number.utils';
 import { useAppTranslations } from '@/hooks/useAppTranslations';
+import { StarsActionRow } from './StarsActionRow';
 import type { StarsState } from '@/types/interfaces/stars.interfaces';
 
 export interface StarsHeroProps {
   state?: StarsState;
   loading?: boolean;
+  onBuy: () => void;
+  onExchange: () => void;
+  /** No TON wallet bound — the exchange cell wears a padlock. */
+  exchangeLocked?: boolean;
 }
 
-export function StarsHero({ state, loading }: StarsHeroProps) {
+export function StarsHero({ state, loading, onBuy, onExchange, exchangeLocked }: StarsHeroProps) {
   const t = useAppTranslations();
   const balance = state?.balance ?? 0;
 
   return (
-    <div className="card-outlined bg-purple-gradient relative overflow-hidden rounded-2xl p-5">
+    <div className="card-outlined bg-purple-gradient relative overflow-hidden rounded-2xl">
       <span
         aria-hidden
         className="pointer-events-none absolute -top-24 left-1/2 h-56 w-56 -translate-x-1/2 rounded-full"
@@ -36,7 +41,7 @@ export function StarsHero({ state, loading }: StarsHeroProps) {
         }}
       />
 
-      <div className="relative flex flex-col items-center gap-3">
+      <div className="relative flex flex-col items-center gap-3 p-5">
         <div className="relative flex h-40 w-40 items-center justify-center">
           <span
             aria-hidden
@@ -87,6 +92,13 @@ export function StarsHero({ state, loading }: StarsHeroProps) {
           </span>
         </div>
       </div>
+
+      <StarsActionRow
+        onBuy={onBuy}
+        onExchange={onExchange}
+        exchangeLocked={exchangeLocked}
+        className="relative"
+      />
     </div>
   );
 }
