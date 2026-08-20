@@ -19,7 +19,11 @@ import { FriendsClaimSummaryCard } from '@/components/pages/out-tabs/drawer/invi
 import { FriendsQualificationNote } from '@/components/pages/out-tabs/drawer/invite-friends/FriendsQualificationNote';
 import { useAppTranslations } from '@/hooks/useAppTranslations';
 import { useReferralCounts } from '@/hooks/useReferralCounts';
-import { countsAsReferral, totalClaimableLcOf } from '@/utils/pages/referral.utils';
+import {
+  countsAsReferral,
+  hasClaimableReward,
+  totalClaimableLcOf,
+} from '@/utils/pages/referral.utils';
 import type { BranchMember, InvitedFriend } from '@/types/interfaces/referral.interfaces';
 import type { TicketType } from '@/types/types/ticket.types';
 import { useToast } from '@/hooks/useToast';
@@ -33,17 +37,6 @@ const EMPTY_TICKETS: Record<TicketType, number> = {
   platinum: 0,
   diamond: 0,
 };
-
-const sumTickets = (friend: InvitedFriend) =>
-  friend.claimableTickets.reduce((sum, ticket) => sum + ticket.amount, 0);
-
-/**
- * Claimable right now: the LC reward needs the friend to still count as a
- * referral, the leftover tickets do not. Mirrors the backend gate exactly —
- * a button the API is about to 403 is worse than no button.
- */
-const hasSomethingToClaim = (friend: InvitedFriend) =>
-  (totalClaimableLcOf(friend) > 0 && countsAsReferral(friend)) || sumTickets(friend) > 0;
 
 export const InvitedFriendsList = () => {
   const t = useAppTranslations();
@@ -70,7 +63,7 @@ export const InvitedFriendsList = () => {
       friends: friends.length,
       referrals,
       notCounted: friends.length - referrals,
-      withRewards: friends.filter(hasSomethingToClaim).length,
+      withRewards: friends.filter(hasClaimableReward).length,
     };
   }, [friends]);
 
@@ -93,8 +86,8 @@ export const InvitedFriendsList = () => {
   const visibleFriends = useMemo(() => {
     const filtered = tab === 'referrals' ? friends.filter(countsAsReferral) : friends;
     return [...filtered].sort((a, b) => {
-      const aReady = hasSomethingToClaim(a) ? 1 : 0;
-      const bReady = hasSomethingToClaim(b) ? 1 : 0;
+      const aReady = hasClaimableReward(a) ? 1 : 0;
+      const bReady = hasClaimableReward(b) ? 1 : 0;
       if (aReady !== bReady) return bReady - aReady;
       return totalClaimableLcOf(b) - totalClaimableLcOf(a) || b.points - a.points;
     });
@@ -122,7 +115,7 @@ export const InvitedFriendsList = () => {
   };
 
   const handleClaimAll = async () => {
-    const targets = friends.filter(hasSomethingToClaim);
+    const targets = friends.filter(hasClaimableReward);
     if (!targets.length) return;
 
     const totalLc = targets

@@ -4,6 +4,7 @@ import { Sparkles, Swords, UserPlus } from 'lucide-react';
 import { twMerge } from 'tailwind-merge';
 import { Link } from '@/components/shared/links/Link';
 import { useAppTranslations } from '@/hooks/useAppTranslations';
+import { useClaimableFriends } from '@/hooks/useClaimableFriends';
 import { useClaimableTasks } from '@/hooks/useClaimableTasks';
 import { ClaimableDot } from '@/components/shared/badges/ClaimableDot';
 import { routes } from '@/constants/routes';
@@ -27,13 +28,21 @@ const CELL =
 export function ActivityActionRow({ accent, className }: ActivityActionRowProps) {
   const t = useAppTranslations();
   const { hasAny: hasClaimableTasks, route: claimRoute } = useClaimableTasks();
+  // Friends pay out here too, and the row is the shortcut to that screen — so
+  // it carries the same mark when a reward is sitting on it.
+  const { hasAny: hasClaimableFriends } = useClaimableFriends();
 
   // `claimable` rather than re-comparing the href: it now carries the frequency
   // the reward is on, so it is no longer equal to `routes.tasks`.
   const links: { href: Route; Icon: LucideIcon; label: string; claimable?: boolean }[] = [
     { href: claimRoute, Icon: Sparkles, label: t('tasks'), claimable: hasClaimableTasks },
     { href: routes.tournaments.index, Icon: Swords, label: t('tournaments') },
-    { href: routes.inviteFriends, Icon: UserPlus, label: t('friends') },
+    {
+      href: routes.inviteFriends,
+      Icon: UserPlus,
+      label: t('friends'),
+      claimable: hasClaimableFriends,
+    },
   ];
 
   return (
