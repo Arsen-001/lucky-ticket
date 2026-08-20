@@ -1,12 +1,15 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { ArrowDown, CheckCircle2, Diamond } from 'lucide-react';
+import Link from 'next/link';
+import { ArrowDown, CheckCircle2, Diamond, Wallet } from 'lucide-react';
 import { twMerge } from 'tailwind-merge';
 import { ButtonSpinner } from '@/components/shared/loaders/ButtonSpinner';
 import { Modal } from '@/components/shared/modals/Modal';
 import { TelegramStarIcon } from '@/components/shared/icons/TelegramStarIcon';
 import { useAppTranslations } from '@/hooks/useAppTranslations';
+import { routes } from '@/constants/routes';
+import type { Route } from '@/constants/routes';
 import { useConverterAmount } from '@/hooks/useConverterAmount';
 import { useToast } from '@/hooks/useToast';
 import { useLsTonExchangeRate } from '@/hooks/useLsTonExchangeRate';
@@ -22,6 +25,9 @@ import {
   starsToTon,
   tonToStars,
 } from '@/utils/pages/wallet.utils';
+
+/** The wallet, with its deposit button asking to be noticed. */
+const WALLET_TOP_UP_ROUTE = `${routes.wallet}?highlight=deposit` as Route;
 
 export interface ExchangeTonStarsModalProps {
   open: boolean;
@@ -247,9 +253,24 @@ export function ExchangeTonStarsModal({
               </p>
             )}
             {insufficient && (
-              <p className="text-error-text text-[11px] font-semibold">
-                {t('insufficient balance')}
-              </p>
+              // Not just the refusal — the way out of it. The wallet is where
+              // TON is topped up, and the deposit button there pulses on
+              // arrival so nobody lands on a screen of equal buttons.
+              <div className="border-error/40 bg-error/15 flex items-center justify-between gap-2 rounded-xl border px-3 py-2">
+                {/* `not enough {coin}`, not the stake screen's «insufficient
+                    balance — top up to create»: that copy ends with the wrong
+                    verb here, and it was the only refusal this sheet had. */}
+                <span className="text-error-text text-[11px] font-semibold">
+                  {t('not enough {coin}', { coin: 'TON' })}
+                </span>
+                <Link
+                  href={WALLET_TOP_UP_ROUTE}
+                  className="bg-teal/20 border-teal/40 text-teal hover:bg-teal/30 tap-target relative inline-flex flex-shrink-0 items-center gap-1 rounded-full border px-2.5 py-1 text-[10px] font-extrabold uppercase tracking-wider transition-colors"
+                >
+                  <Wallet size={11} strokeWidth={3} />
+                  {t('deposit')}
+                </Link>
+              </div>
             )}
 
             <button

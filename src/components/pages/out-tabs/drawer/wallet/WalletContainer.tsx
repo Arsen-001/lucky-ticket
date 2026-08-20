@@ -49,6 +49,9 @@ export function WalletContainer() {
   const { withdrawalsEnabled } = useWalletLimits();
   const [modal, setModal] = useState<WalletModal>(null);
   const [pendingTopUp, setPendingTopUp] = useState<number | undefined>(undefined);
+  // Sent here from the exchange sheet with too little TON: point at the button
+  // that fixes it, then stop — a ring that never stops becomes wallpaper.
+  const [highlightDeposit, setHighlightDeposit] = useState(false);
   const [depositWatch, setDepositWatch] = useState<{ polls: number; fromBalance: number } | null>(
     null
   );
@@ -67,6 +70,14 @@ export function WalletContainer() {
   // The second, heavier gate: money on the way OUT. Connecting a wallet only
   // opens deposits, so this one is checked separately at withdrawal time.
   const isWithdrawGated = state?.canWithdraw === false;
+
+  useEffect(() => {
+    if (searchParams.get('highlight') !== 'deposit') return;
+    setHighlightDeposit(true);
+    router.replace(routes.wallet, { scroll: false });
+    const timer = setTimeout(() => setHighlightDeposit(false), 6_000);
+    return () => clearTimeout(timer);
+  }, [searchParams, router]);
 
   useEffect(() => {
     const topUpRaw = searchParams.get('topUp');
@@ -159,6 +170,7 @@ export function WalletContainer() {
       {!isConnectClosed && (
         <WalletActionButtons
           disabled={isLoading}
+          highlightDeposit={highlightDeposit}
           withdrawLocked={!withdrawalsEnabled}
           onDeposit={() => requireConnected('deposit')}
           onWithdraw={() => requireConnected('withdraw')}

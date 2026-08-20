@@ -16,6 +16,12 @@ export interface WalletActionButtonsProps {
   onDeposit: () => void;
   onWithdraw: () => void;
   onExchange: () => void;
+  /**
+   * Someone was sent here to top up (the exchange sheet ran out of TON) — the
+   * button pulses until they see it. A screen full of equal buttons is where a
+   * redirected player loses the thread.
+   */
+  highlightDeposit?: boolean;
 }
 
 export function WalletActionButtons({
@@ -24,6 +30,7 @@ export function WalletActionButtons({
   onDeposit,
   onWithdraw,
   onExchange,
+  highlightDeposit,
 }: WalletActionButtonsProps) {
   const t = useAppTranslations();
 
@@ -34,6 +41,7 @@ export function WalletActionButtons({
         label={t('deposit')}
         onClick={onDeposit}
         disabled={disabled}
+        highlight={highlightDeposit}
         bgClass="bg-gradient-to-br from-teal/40 to-diamond/40 border-teal/30"
         iconClass="text-teal"
       />
@@ -65,6 +73,8 @@ interface ActionButtonProps {
   disabled?: boolean;
   /** Marks the action closed without disabling it — the modal behind explains why. */
   locked?: boolean;
+  /** Pulsing ring: "this is the button you were sent for". */
+  highlight?: boolean;
   bgClass: string;
   iconClass: string;
 }
@@ -75,6 +85,7 @@ function ActionButton({
   onClick,
   disabled,
   locked,
+  highlight,
   bgClass,
   iconClass,
 }: ActionButtonProps) {
@@ -89,9 +100,19 @@ function ActionButton({
         bgClass,
         // Drained rather than dimmed as a whole: at 50% the label stops being
         // readable, and the point of the state is that it can still be read.
-        locked && 'border-white/10 from-white/6 to-white/3'
+        locked && 'border-white/10 from-white/6 to-white/3',
+        highlight && 'border-teal ring-1 ring-teal/60'
       )}
     >
+      {/* A ring that pulses AROUND the button rather than blinking the button
+          itself: the label has to stay readable while it asks for attention. */}
+      {highlight && (
+        <span
+          aria-hidden
+          className="border-teal pointer-events-none absolute -inset-0.5 animate-ping rounded-xl border-2 opacity-70"
+          style={{ animationDuration: '1.6s' }}
+        />
+      )}
       <Icon size={18} className={twMerge(iconClass, locked && 'text-white/40')} strokeWidth={2.4} />
       <span
         className={twMerge(
