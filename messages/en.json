@@ -1460,5 +1460,6 @@
   "steps for quest level {n}": "What to do · Level {n}",
   "friends gift title": "Gift for friends",
   "friends gift subtitle": "{count} friends in the channel — and the bot sends a gift",
-  "friends gift claim failed": "Could not request the gift. Try again"
+  "friends gift claim failed": "Could not request the gift. Try again",
+  "send ticket recipient closed": "This player is not accepting tickets right now"
 }

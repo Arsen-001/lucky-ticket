@@ -65,6 +65,10 @@ const MESSAGE_KEYS: Record<string, MessageIds> = {
   // server's state before the player taps again. Nothing was charged.
   'upgrade already in progress': 'purchase error upgrade conflict',
   'claim already in progress': 'purchase error claim conflict',
+  // profile.service: the recipient cannot take tickets. Phrased as a rule of
+  // the game rather than a failure, because nothing broke and nothing was
+  // charged — the sender's tickets are exactly where they were.
+  'recipient is not accepting tickets': 'send ticket recipient closed',
 };
 
 /**
