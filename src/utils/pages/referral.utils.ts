@@ -58,3 +58,32 @@ export const getRefererLink = (refererId?: string) => {
   if (!refererId) return '';
   return `${GlobalConstants.telegramBotUrl}?startapp=${refererId}`;
 };
+
+/**
+ * Everything this friend's row pays out in tickets — the legacy commission,
+ * summed. Nothing accrues here any more; it only drains.
+ */
+export const claimableTicketsOf = (friend?: Pick<InvitedFriend, 'claimableTickets'>): number =>
+  (friend?.claimableTickets ?? []).reduce((sum, ticket) => sum + ticket.amount, 0);
+
+/**
+ * Is there anything to take from this friend RIGHT NOW?
+ *
+ * The LC half needs the friend to still count as a referral, the leftover
+ * tickets do not — they were earned under a rule that made no such demand.
+ * Mirrors the backend gate exactly: a mark that promises what `claimFriend`
+ * is about to 403 is worse than no mark at all.
+ *
+ * Lives here rather than in the list because four other surfaces ask the same
+ * question — the dot on the burger, the badge in the drawer, and the «Друзья»
+ * shortcut on the LC / activity / jackpot cards. Two copies of the rule mean a
+ * dot that points at a screen with nothing on it.
+ */
+export const hasClaimableReward = (
+  friend: Pick<InvitedFriend, 'claimableLc' | 'branchLc' | 'countsAsReferral' | 'claimableTickets'>
+): boolean =>
+  (totalClaimableLcOf(friend) > 0 && countsAsReferral(friend)) || claimableTicketsOf(friend) > 0;
+
+/** How many friends have something waiting. A count, for badges. */
+export const claimableFriendsCount = (friends: readonly InvitedFriend[] = []): number =>
+  friends.filter(hasClaimableReward).length;
