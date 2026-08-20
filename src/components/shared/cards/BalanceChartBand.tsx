@@ -1,11 +1,12 @@
 'use client';
 
 import { twMerge } from 'tailwind-merge';
-import { useAppTranslations } from '@/hooks/useAppTranslations';
-import { LcSparkline } from './LcSparkline';
+import { BalanceSparkline } from './BalanceSparkline';
 
-export interface LcChartBandProps {
+export interface BalanceChartBandProps {
   values: number[];
+  /** What the band covers, already translated — «Last 7 days». */
+  caption: string;
   className?: string;
 }
 
@@ -19,18 +20,16 @@ export interface LcChartBandProps {
  * instead of in the opposite corner. Laid out in flow, so a card can stack it
  * under its content without hand-tuned padding.
  */
-export function LcChartBand({ values, className }: LcChartBandProps) {
-  const t = useAppTranslations();
-
+export function BalanceChartBand({ values, caption, className }: BalanceChartBandProps) {
   if (values.length < 2) return null;
 
   return (
     <div className={twMerge('relative h-16 w-full border-t border-white/8', className)}>
-      <LcSparkline values={values} className="absolute inset-0" />
+      <BalanceSparkline values={values} className="absolute inset-0" />
       {/* Chip, not bare text: the curve is free to pass through any corner of
           its own band, and it struck the label through on the first render. */}
       <span className="absolute start-4 top-1.5 rounded bg-black/35 px-1.5 py-0.5 text-[9px] font-bold uppercase tracking-widest text-white/55">
-        {t('lc last 7 days')}
+        {caption}
       </span>
     </div>
   );

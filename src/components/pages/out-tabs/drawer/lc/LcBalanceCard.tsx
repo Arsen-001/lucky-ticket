@@ -9,7 +9,7 @@ import { GlobalConstants } from '@/constants/global.constants';
 import { formatCompact, formatNumber } from '@/utils/global/number.utils';
 import { useAppTranslations } from '@/hooks/useAppTranslations';
 import { lcDailyBalanceSeries } from '@/utils/pages/lc.utils';
-import { LcChartBand } from './LcChartBand';
+import { BalanceChartBand } from '@/components/shared/cards/BalanceChartBand';
 import { LcActionRow } from './LcActionRow';
 import type { LcState, LcTransaction } from '@/types/interfaces/lc.interfaces';
 
@@ -110,7 +110,7 @@ export function LcBalanceCard({
         </SkeletonSuspense>
       </div>
 
-      <LcChartBand values={series} />
+      <BalanceChartBand values={series} caption={t('lc last 7 days')} />
 
       <LcActionRow onConvertTon={onConvertTon} />
     </div>

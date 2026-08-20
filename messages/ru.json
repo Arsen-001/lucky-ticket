@@ -1511,6 +1511,7 @@
   "duel choose stake": "Ставка за матч",
   "duel stake note": "Соперник видит ставку до входа. Билеты спишутся в момент старта матча, а не сейчас",
   "duel open lobby": "Открыть лобби",
+  "duel play with friend": "Играть с другом",
   "duel back": "Назад",
   "duel waiting title": "Ждём соперника",
   "duel cancel waiting": "Отменить ожидание",
@@ -1540,5 +1541,10 @@
   "duel cancel host_not_ready": "Вы не подтвердили за 10 секунд. Лобби закрыто — создайте новое",
   "duel cancel guest_not_ready": "Соперник не подтвердил. Ваше лобби осталось открытым",
   "duel cancel not_enough_tickets": "У кого-то не хватило билетов — матч не состоялся",
-  "duel cancel expired": "Лобби протухло"
+  "duel cancel expired": "Лобби протухло",
+  "stars balance": "Баланс LS",
+  "last 24h": "За 24 ч",
+  "last 7 days": "7 дней",
+  "top up": "Пополнить",
+  "bonus from {stars}": "Бонус — от {stars} ⭐"
 }

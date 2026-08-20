@@ -18,7 +18,7 @@ import { Skeleton } from '@/components/shared/seleketons/Skeleton';
 import { TelegramStarIcon } from '@/components/shared/icons/TelegramStarIcon';
 import { useAppTranslations } from '@/hooks/useAppTranslations';
 import { StarsTransactionDirection, StarsTransactionType } from '@/types/enums/stars.enums';
-import { formatRelativeTime } from '@/utils/pages/wallet.utils';
+import { ledgerRowTime } from '@/utils/global/ledger.utils';
 import { formatNumber } from '@/utils/global/number.utils';
 import type { CSSProperties } from 'react';
 import type { LucideIcon } from 'lucide-react';
@@ -174,25 +174,22 @@ export function StarsTransactionRow({
       <div className="flex min-w-0 flex-1 flex-col">
         <span className="truncate text-[13px] font-bold text-white">{transaction.description}</span>
         <span className="text-pink-secondary text-[11px]">
-          {formatRelativeTime(transaction.createdAt, t)}
+          {ledgerRowTime(transaction.createdAt, t)}
         </span>
       </div>
 
-      <div className="flex flex-shrink-0 flex-col items-end gap-0.5">
-        <span
-          className={twMerge(
-            'inline-flex items-center gap-1 text-sm font-extrabold tabular-nums',
-            amountClass
-          )}
-        >
-          {sign}
-          {formatNumber(transaction.amount)}
-          <TelegramStarIcon size={12} />
-        </span>
-        <span className="text-pink-secondary text-[10px] font-semibold tabular-nums">
-          {t('balance')}: {formatNumber(transaction.balanceAfter)}
-        </span>
-      </div>
+      {/* The amount alone: the running balance moved to the day header, where
+          it is stated once instead of on every row. */}
+      <span
+        className={twMerge(
+          'inline-flex flex-shrink-0 items-center gap-1 text-sm font-extrabold tabular-nums',
+          amountClass
+        )}
+      >
+        {sign}
+        {formatNumber(transaction.amount)}
+        <TelegramStarIcon size={12} />
+      </span>
     </div>
   );
 }

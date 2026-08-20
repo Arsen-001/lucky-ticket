@@ -1511,6 +1511,7 @@
   "duel choose stake": "Stake per match",
   "duel stake note": "Your opponent sees the stake before joining. Tickets are taken when the match starts, not now",
   "duel open lobby": "Open lobby",
+  "duel play with friend": "Play with a friend",
   "duel back": "Back",
   "duel waiting title": "Waiting for an opponent",
   "duel cancel waiting": "Cancel waiting",
@@ -1540,5 +1541,10 @@
   "duel cancel host_not_ready": "You did not confirm in 10 seconds. The lobby is closed — create a new one",
   "duel cancel guest_not_ready": "The opponent did not confirm. Your lobby stays open",
   "duel cancel not_enough_tickets": "Someone ran out of tickets — the match did not start",
-  "duel cancel expired": "The lobby expired"
+  "duel cancel expired": "The lobby expired",
+  "stars balance": "LS Balance",
+  "last 24h": "Last 24h",
+  "last 7 days": "Last 7 days",
+  "top up": "Top up",
+  "bonus from {stars}": "Bonus from {stars} stars"
 }

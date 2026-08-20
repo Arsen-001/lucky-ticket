@@ -7,6 +7,7 @@ import { QueryErrorState } from '@/components/shared/error/QueryErrorState';
 import { BuyStarsModal } from '@/components/pages/out-tabs/drawer/wallet/BuyStarsModal';
 import { ExchangeTonStarsModal } from '@/components/pages/out-tabs/drawer/wallet/ExchangeTonStarsModal';
 import { StarsHero } from './StarsHero';
+import { StarsTopUpBlock } from './StarsTopUpBlock';
 import { StarsTransactionHistory } from './StarsTransactionHistory';
 
 type StarsModal = 'buy' | 'exchange' | null;
@@ -26,11 +27,18 @@ export function StarsContainer() {
     <div className="flex flex-col gap-4 px-4 pb-8 pt-2">
       <StarsHero
         state={state}
+        transactions={transactions}
         loading={isLoading}
         onBuy={() => setModal('buy')}
         onExchange={() => setModal('exchange')}
         exchangeLocked={!wallet?.isConnected}
+        className="animate-slide-in-bottom"
       />
+
+      {/* Between the balance and the ledger on purpose: «how much I have» →
+          «how to add» → «where it came from». */}
+      <StarsTopUpBlock onCustomAmount={() => setModal('buy')} />
+
       <StarsTransactionHistory transactions={transactions} loading={isTxLoading} />
 
       {/* Both sheets are the wallet's own — same component, same mutations, so

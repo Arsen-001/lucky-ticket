@@ -3,7 +3,7 @@
 import { useId } from 'react';
 import { twMerge } from 'tailwind-merge';
 
-export interface LcSparklineProps {
+export interface BalanceSparklineProps {
   /** Balance points oldest → newest. Fewer than two draws nothing. */
   values: number[];
   className?: string;
@@ -21,7 +21,7 @@ const PLOT_H = VIEW_H - TOP_PAD * 2;
  * and the endpoint marker has to be an HTML dot rather than an SVG circle,
  * which the same stretch would turn into an ellipse.
  */
-export function LcSparkline({ values, className }: LcSparklineProps) {
+export function BalanceSparkline({ values, className }: BalanceSparklineProps) {
   const gradientId = useId();
 
   if (values.length < 2) return null;

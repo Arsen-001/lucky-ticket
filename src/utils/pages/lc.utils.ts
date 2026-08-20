@@ -1,13 +1,26 @@
-import dayjs from 'dayjs';
+import {
+  dailyBalanceSeries,
+  groupLedgerByDay,
+  ledgerDayLabel,
+  ledgerRowTime,
+} from '@/utils/global/ledger.utils';
 import {
   LcTransactionDirection,
   LcTransactionFilter,
   LcTransactionType,
 } from '@/types/enums/lc.enums';
-import { formatLocalDate } from '@/utils/global/date.utils';
-import { formatRelativeTime } from '@/utils/pages/wallet.utils';
+import type { LedgerEntry } from '@/utils/global/ledger.utils';
 import type { Dictionary } from '@/types/types/i18n.types';
 import type { LcTransaction } from '@/types/interfaces/lc.interfaces';
+
+/** LC rows in the shape the shared ledger helpers read. */
+const asLedger = (transactions: LcTransaction[]): LedgerEntry[] =>
+  transactions.map(tx => ({
+    createdAt: tx.createdAt,
+    amount: tx.amount,
+    balanceAfter: tx.balanceAfter,
+    credit: tx.direction === LcTransactionDirection.CREDIT,
+  }));
 
 /**
  * The three ledger rows that move LC between currencies rather than earning or
@@ -51,105 +64,28 @@ export interface LcTransactionDay {
 }
 
 /**
- * Splits the ledger into calendar days, preserving its newest-first order.
- * Relies on that order: rows for one day are contiguous, so a single pass with
- * a running key is enough and no sorting is needed.
+ * Splits the ledger into calendar days, newest first.
+ *
+ * The walk itself lives in `groupLedgerByDay` — the Lucky Stars screen groups
+ * its own ledger exactly the same way, and two copies of "are these rows the
+ * same day" is how the two screens start disagreeing about what "yesterday"
+ * means.
  */
-export const groupLcTransactionsByDay = (transactions: LcTransaction[]): LcTransactionDay[] => {
-  const days: LcTransactionDay[] = [];
+export const groupLcTransactionsByDay = (transactions: LcTransaction[]): LcTransactionDay[] =>
+  groupLedgerByDay(transactions).map(day => ({ key: day.key, transactions: day.rows }));
 
-  transactions.forEach(transaction => {
-    const key = dayjs(transaction.createdAt).format('YYYY-MM-DD');
-    const current = days.at(-1);
+/** @see ledgerRowTime */
+export const lcRowTime = (iso: string, t: Dictionary): string => ledgerRowTime(iso, t);
 
-    if (current?.key === key) current.transactions.push(transaction);
-    else days.push({ key, transactions: [transaction] });
-  });
-
-  return days;
-};
-
-/**
- * Row timestamp inside a day-grouped list. "2 d ago" under a header that
- * already says the date is noise; the clock time is the part the header cannot
- * carry. Today keeps the relative form, where "18 min ago" is the useful read.
- */
-export const lcRowTime = (iso: string, t: Dictionary): string => {
-  const date = dayjs(iso);
-  return date.isSame(dayjs(), 'day') ? formatRelativeTime(iso, t) : date.format('HH:mm');
-};
-
-export const lcDayLabel = (key: string, t: Dictionary): string => {
-  const day = dayjs(key);
-  const today = dayjs().startOf('day');
-
-  if (day.isSame(today, 'day')) return t('today');
-  if (day.isSame(today.subtract(1, 'day'), 'day')) return t('yesterday');
-  return formatLocalDate(day.toDate());
-};
-
-/** Closing balance per calendar day — the newest row of a day carries it. */
-const closingBalanceByDay = (transactions: LcTransaction[]): Map<string, number> => {
-  const closing = new Map<string, number>();
-
-  transactions.forEach(transaction => {
-    const key = dayjs(transaction.createdAt).format('YYYY-MM-DD');
-    if (!closing.has(key)) closing.set(key, transaction.balanceAfter);
-  });
-
-  return closing;
-};
+/** @see ledgerDayLabel */
+export const lcDayLabel = (key: string, t: Dictionary): string => ledgerDayLabel(key, t);
 
 /**
  * Balance at the end of each of the last `days` days, oldest → newest, with the
- * live balance as the final point.
- *
- * Deliberately per-day rather than per-transaction: a curve plotted straight
- * off the ledger puts equal spacing between rows minutes apart and rows a week
- * apart, so its shape says nothing about time. A day that had no transactions
- * carries the previous day's close forward — that is what the balance did.
- *
- * Returns [] for an empty ledger; the caller renders nothing rather than a flat
- * line implying a week of history that isn't there.
+ * live balance as the final point. @see dailyBalanceSeries
  */
 export const lcDailyBalanceSeries = (
   transactions: LcTransaction[],
   currentBalance: number,
   days = 7
-): number[] => {
-  const oldest = transactions.at(-1);
-  if (!oldest) return [];
-
-  const closing = closingBalanceByDay(transactions);
-  const windowStart = dayjs()
-    .startOf('day')
-    .subtract(days - 1, 'day');
-
-  // The balance before the ledger's oldest row — derivable from that row alone,
-  // and the only honest starting value for days older than any transaction.
-  let carried =
-    oldest.direction === LcTransactionDirection.CREDIT
-      ? oldest.balanceAfter - oldest.amount
-      : oldest.balanceAfter + oldest.amount;
-
-  // Days that fall before the window still move the balance, so the first point
-  // is what the player held that morning — not the opening of the whole log.
-  [...closing.entries()]
-    .filter(([key]) => dayjs(key).isBefore(windowStart, 'day'))
-    .sort(([a], [b]) => a.localeCompare(b))
-    .forEach(([, close]) => {
-      carried = close;
-    });
-
-  const series = Array.from({ length: days }, (_, index) => {
-    const close = closing.get(windowStart.add(index, 'day').format('YYYY-MM-DD'));
-    if (close !== undefined) carried = close;
-    return carried;
-  });
-
-  // Today's close is the live balance, not the last row of the ledger: a claim
-  // or a purchase that happened after the transactions query still shows.
-  series[series.length - 1] = currentBalance;
-
-  return series;
-};
+): number[] => dailyBalanceSeries(asLedger(transactions), currentBalance, days);
