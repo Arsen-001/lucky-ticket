@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import { twMerge } from 'tailwind-merge';
 import { Button } from '@/components/shared/buttons/Button';
+import { QueryErrorState } from '@/components/shared/error/QueryErrorState';
 import { DuelStage } from '@/components/pages/out-tabs/tabs-extra/duel/DuelStage';
 import { DuelStakeBadge } from '@/components/pages/out-tabs/tabs-extra/duel/DuelStakeBadge';
 import { useAppTranslations } from '@/hooks/useAppTranslations';
@@ -32,7 +33,7 @@ export function DuelLobbies({ onEnter }: DuelLobbiesProps) {
   const [stake, setStake] = useState(1);
   const [busy, setBusy] = useState(false);
 
-  const { data, isLoading } = useGetDuelLobbiesQuery(undefined, {
+  const { data, isLoading, isError, refetch } = useGetDuelLobbiesQuery(undefined, {
     pollingInterval: 3000,
   });
   const [create] = useCreateDuelMutation();
@@ -67,6 +68,12 @@ export function DuelLobbies({ onEnter }: DuelLobbiesProps) {
       setBusy(false);
     }
   };
+
+  // Пока этого не было, отказ сервера выглядел как «у вас нет билетов»:
+  // без данных `tickets` равен нулю, и кнопка «Создать лобби» просто гасла.
+  // Ровно так и выглядел живой отказ 20.08 — список падал 500, а экран
+  // молчал и показывал заблокированную кнопку.
+  if (isError) return <QueryErrorState onRetry={() => refetch()} />;
 
   if (picking) {
     return (
