@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useGetDuelLobbiesQuery } from '@/api/duel.api';
 import { useAppTranslations } from '@/hooks/useAppTranslations';
 import { useFeature } from '@/hooks/useFeature';
@@ -21,6 +21,13 @@ export function DuelScreen() {
   // Остаток билетов держит шапку игры на всех фазах. Запрос тот же, что у
   // списка лобби, поэтому лишнего похода на сервер нет — RTK отдаёт кеш.
   const { data: lobbies } = useGetDuelLobbiesQuery();
+
+  // Матч, который игрок не закрыл, важнее списка: сервер всё равно не даст
+  // создать второй, а сам матч продолжает идти по часам.
+  const active = lobbies?.active;
+  useEffect(() => {
+    if (active && active.status !== 'WAITING') setDuelId(active.id);
+  }, [active?.id, active?.status]);
 
   if (!enabled) {
     return (

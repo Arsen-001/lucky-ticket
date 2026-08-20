@@ -25,6 +25,14 @@ export interface DuelLobby {
 }
 
 export interface DuelLobbyList {
+  /**
+   * Незакрытый матч игрока: экран открывает его сразу.
+   *
+   * Без этого поля игрок, вышедший из приложения посреди матча, возвращался в
+   * список, из которого ничего не создать — сервер справедливо отвечал «у вас
+   * уже есть дуэль», а куда именно возвращаться, экран не знал.
+   */
+  readonly active: { readonly id: string; readonly status: DuelStatus } | null;
   readonly stakeMin: number;
   readonly stakeMax: number;
   /**

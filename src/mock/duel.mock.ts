@@ -201,6 +201,10 @@ function fresh(id: string, stake: number, role: 'host' | 'guest'): MockDuel {
 }
 
 const list = (): DuelLobbyList => ({
+  active:
+    current && current.status !== 'FINISHED' && current.status !== 'CANCELLED'
+      ? { id: current.id, status: current.status }
+      : null,
   stakeMin: 1,
   stakeMax: 5,
   winsNeeded: 2,
