@@ -28,8 +28,13 @@ export interface StarPackages {
  */
 export function useStarPackages(): StarPackages {
   const { data } = useGetPublicConfigQuery();
-  const packages = data?.wallet?.xtrPackages?.length
-    ? [...data.wallet.xtrPackages].sort((a, b) => a.stars - b.stars)
+  // An EMPTY list is an answer — the admin turned packages off, and the sheet
+  // then offers the plain 1:1 top-up. Only an ABSENT one (query in flight, or a
+  // backend that predates the field) falls back to the bundled table; treating
+  // the two the same would resurrect four packages nobody is paying a bonus on.
+  const served = data?.wallet?.xtrPackages;
+  const packages = served
+    ? [...served].sort((a, b) => a.stars - b.stars)
     : appConfig.wallet.xtrPackages;
 
   return {
