@@ -4,6 +4,7 @@ import { ArrowLeftRight, Plus, Store } from 'lucide-react';
 import Link from 'next/link';
 import { twMerge } from 'tailwind-merge';
 import { useAppTranslations } from '@/hooks/useAppTranslations';
+import { useStarsExchangeSaving } from '@/hooks/useStarsExchangeSaving';
 import { routes } from '@/constants/routes';
 import { BalanceActionCell } from '@/components/shared/cards/BalanceActionCell';
 
@@ -33,6 +34,10 @@ export function StarsActionRow({
   className,
 }: StarsActionRowProps) {
   const t = useAppTranslations();
+  // The exchange's own standing argument: it sells a Lucky Star cheaper than
+  // Telegram sells the star that buys one. Derived from the two published
+  // rates, so it cannot outlive a price change.
+  const { percent } = useStarsExchangeSaving();
 
   return (
     <div
@@ -46,7 +51,18 @@ export function StarsActionRow({
       </button>
 
       <button type="button" onClick={onExchange} className={CELL}>
-        <BalanceActionCell Icon={ArrowLeftRight} label={t('exchange')} locked={exchangeLocked} />
+        <BalanceActionCell
+          Icon={ArrowLeftRight}
+          label={t('exchange')}
+          locked={exchangeLocked}
+          badge={
+            percent > 0 && !exchangeLocked ? (
+              <span className="bg-gold/20 text-gold rounded-full px-1.5 py-0.5 text-[9px] font-extrabold tabular-nums">
+                −{percent}%
+              </span>
+            ) : undefined
+          }
+        />
       </button>
 
       {/* Where the balance is spent. No tab: Lucky Stars buy across the whole

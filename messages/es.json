@@ -1567,5 +1567,7 @@
   "top up": "Top up",
   "bonus from {stars}": "Bonus from {stars} stars",
   "offer ends in {time}": "Offer ends in {time}",
-  "star packages": "Lucky Stars packages"
+  "star packages": "Lucky Stars packages",
+  "cheaper than telegram by {percent}": "{percent}% cheaper than Telegram",
+  "in telegram": "in Telegram"
 }

@@ -10,6 +10,9 @@ import { useAppTranslations } from '@/hooks/useAppTranslations';
 import { useConverterAmount } from '@/hooks/useConverterAmount';
 import { useToast } from '@/hooks/useToast';
 import { useLsTonExchangeRate } from '@/hooks/useLsTonExchangeRate';
+import { useStarsExchangeSaving } from '@/hooks/useStarsExchangeSaving';
+import { useStarPackages } from '@/hooks/useStarPackages';
+import { StarsPromoNote } from '@/components/shared/stars/StarsPromoNote';
 import { useTonUsdRate } from '@/hooks/useTonUsdRate';
 import { useBuyStarsMutation } from '@/api/wallet.api';
 import { formatNumber } from '@/utils/global/number.utils';
@@ -43,6 +46,12 @@ export function ExchangeTonStarsModal({
   const toast = useToast();
   const tonUsdRate = useTonUsdRate();
   const lsUsdRate = useLsTonExchangeRate();
+  // Two arguments this door has and the Telegram one does not: it sells an LS
+  // cheaper, and — since 21.08.2026 — it earns the same package bonus. Both are
+  // read from the config the server charges and credits by, never typed into
+  // copy that would outlive the next price change.
+  const saving = useStarsExchangeSaving();
+  const { bonusFor } = useStarPackages();
   const [exchange, { isLoading }] = useBuyStarsMutation();
   const [step, setStep] = useState<Step>('select');
   const [result, setResult] = useState({ ton: 0, stars: 0 });
@@ -68,6 +77,9 @@ export function ExchangeTonStarsModal({
 
   const stars = amount.to;
   const cost = starsToTon(stars, tonUsdRate, lsUsdRate); // exact TON that will be charged
+  // What the server will actually credit for this exchange — the ladder is
+  // applied to the LS bought, exactly as it is to Stars paid in Telegram.
+  const bonus = bonusFor(stars);
   const insufficient = stars >= 1 && cost > tonBalance;
   const canSubmit = isConnected && stars >= 1 && !insufficient;
 
@@ -100,6 +112,16 @@ export function ExchangeTonStarsModal({
             <div className="relative flex flex-col items-center gap-1 text-center">
               <h2 className="text-xl font-extrabold text-white">{t('exchange')}</h2>
               <p className="text-pink-secondary text-[11px]">{t('exchange ton to stars')}</p>
+              {saving.percent > 0 && (
+                <p className="text-gold text-[11px] font-extrabold">
+                  {t('cheaper than telegram by {percent}', { percent: saving.percent })}
+                  <span className="text-pink-secondary ms-1 font-semibold tabular-nums">
+                    ${saving.exchangeUsdPer100.toFixed(2)} / 100 LS · {t('in telegram')} $
+                    {saving.telegramUsdPer100.toFixed(2)}
+                  </span>
+                </p>
+              )}
+              <StarsPromoNote />
             </div>
 
             <div className="relative flex flex-col gap-2">
@@ -183,6 +205,18 @@ export function ExchangeTonStarsModal({
                     LS
                   </span>
                 </div>
+                {/* The promo applies here too, so the sheet has to say what
+                    lands on the balance — not what was typed into the box. */}
+                {bonus > 0 && (
+                  <div className="flex items-center gap-1.5 pt-0.5 text-[11px] font-bold">
+                    <span className="bg-gold/20 text-gold rounded-full px-1.5 py-0.5 tabular-nums">
+                      {t('plus {n} bonus', { n: formatNumber(bonus) })}
+                    </span>
+                    <span className="text-white/70 tabular-nums">
+                      {t('you receive {stars}', { stars: formatNumber(stars + bonus) })}
+                    </span>
+                  </div>
+                )}
               </div>
             </div>
 

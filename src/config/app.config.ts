@@ -313,7 +313,10 @@ export const appConfig = {
      * also prices the market catalog at LC parity, and an exchange rate has no
      * business repricing engines.
      */
-    lsTonExchangeUsdRate: 0.0188,
+    // $0.0179 = $1.79 per 100 LS, against Telegram's own $2.00 for the same
+    // 100 — the gap the exchange screen advertises. Editable in the panel;
+    // this copy is the fallback while `GET /config` is in flight.
+    lsTonExchangeUsdRate: 0.0179,
     /**
      * Fallback invite gate on binding a wallet: how many friends a player must
      * have invited before TON Connect is offered. `0` = no gate, which is where

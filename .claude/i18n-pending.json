@@ -1,6 +1,7 @@
 {
   "keys": [
     "bonus from {stars}",
+    "cheaper than telegram by {percent}",
     "duel",
     "duel action failed",
     "duel back",
@@ -89,6 +90,7 @@
     "games duel blurb",
     "games next blurb",
     "games next title",
+    "in telegram",
     "last 24h",
     "last 7 days",
     "offer ends in {time}",

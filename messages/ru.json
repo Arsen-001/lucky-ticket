@@ -1567,5 +1567,7 @@
   "top up": "Пополнить",
   "bonus from {stars}": "Бонус — от {stars} ⭐",
   "offer ends in {time}": "До конца акции {time}",
-  "star packages": "Пакеты Lucky Stars"
+  "star packages": "Пакеты Lucky Stars",
+  "cheaper than telegram by {percent}": "На {percent}% дешевле, чем в Telegram",
+  "in telegram": "в Telegram"
 }
