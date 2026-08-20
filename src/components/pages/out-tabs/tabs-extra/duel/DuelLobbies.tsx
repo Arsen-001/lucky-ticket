@@ -6,7 +6,7 @@ import { Button } from '@/components/shared/buttons/Button';
 import { QueryErrorState } from '@/components/shared/error/QueryErrorState';
 import { DuelGameHeader } from '@/components/pages/out-tabs/tabs-extra/duel/DuelGameHeader';
 import { DuelLobbyRow } from '@/components/pages/out-tabs/tabs-extra/duel/DuelLobbyRow';
-import { duelClock, duelJoinFailure } from '@/utils/global/duel.utils';
+import { duelClock, duelJoinFailure, duelMatchInProgress } from '@/utils/global/duel.utils';
 import { useAppTranslations } from '@/hooks/useAppTranslations';
 import { useInFlightLock } from '@/hooks/useInFlightLock';
 import { useToast } from '@/hooks/useToast';
@@ -82,8 +82,15 @@ export function DuelLobbies({ onEnter, inviteUserId }: DuelLobbiesProps) {
       }
       setPicking(false);
       onEnter(duel.id, { invite });
-    } catch {
-      toast.error(t('duel action failed'));
+    } catch (error) {
+      // Идёт матч — не ошибка, а место, куда нужно вернуться: список лобби
+      // прислал его в `active`, и экран откроет его следующим тиком.
+      if (duelMatchInProgress(error)) {
+        toast.info(t('duel match in progress'));
+        if (data?.active) onEnter(data.active.id);
+      } else {
+        toast.error(t('duel action failed'));
+      }
     } finally {
       lock.release('create');
     }

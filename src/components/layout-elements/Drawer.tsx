@@ -32,6 +32,7 @@ import { useLocale } from 'next-intl';
 import { twMerge } from 'tailwind-merge';
 
 import { useGetMeQuery } from '@/api/me.api';
+import { useGetDuelInvitesQuery } from '@/api/duel.api';
 import { useGetNotificationsSummaryQuery } from '@/api/notifications.api';
 import { useGetStakesQuery } from '@/api/stakes.api';
 import { stakeIsMatured } from '@/utils/global/stakes.utils';
@@ -73,8 +74,11 @@ export function Drawer() {
   const partnersEnabled = usePartnersEnabled();
   const leaderboardEnabled = useLeaderboardEnabled();
   const contentPages = useContentPagesEnabled();
-  // Раздел открывает стадия выката дуэли — единственной игры внутри.
-  const gamesOpen = useFeature('duel');
+  // Раздел открывает стадия выката дуэли — единственной игры внутри. Плюс тот,
+  // кого позвали: вызов сам даёт право войти, и меню обязано его пустить.
+  const duelOpen = useFeature('duel');
+  const { data: duelInvites = [] } = useGetDuelInvitesQuery();
+  const gamesOpen = duelOpen || duelInvites.length > 0;
   const open = useAppSelector(selectDrawerOpen);
   const dispatch = useAppDispatch();
   const { data: me, isLoading } = useGetMeQuery();
@@ -281,6 +285,9 @@ export function Drawer() {
             route: routes.games.index,
             title: t('games'),
             icon: <Gamepad2 size={18} />,
+            // Вызовов ждут минутами, а не часами: цифра здесь — единственный
+            // след, если модалку закрыли или пропустили.
+            badge: duelInvites.length,
           },
         ]
       : []),

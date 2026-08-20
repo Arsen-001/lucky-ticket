@@ -9,6 +9,7 @@ import { Onboarding } from '@/components/onboarding/Onboarding';
 import { TournamentResultWatcher } from '@/components/pages/tabs/tournaments/TournamentResultWatcher';
 import { WipeNoticeWatcher } from '@/components/shared/modals/WipeNoticeWatcher';
 import { TicketFlightViewport } from '@/components/shared/ticket-flight/TicketFlightViewport';
+import { DuelInviteAutoSurface } from '@/components/layout-elements/DuelInviteAutoSurface';
 import { ToastViewport } from '@/components/shared/toast/ToastViewport';
 import { OverlayProbeBanner } from '@/components/shared/debug/OverlayProbeBanner';
 import { AppStatusOverlay } from '@/components/shared/status/AppStatusOverlay';
@@ -199,6 +200,12 @@ export default async function RootLayout({ children }: ChildrenProps) {
                         <TelegramBackButton />
                         <Onboarding />
                         <TournamentResultWatcher />
+                        {/* Вызов на дуэль всплывает на ЛЮБОМ экране: он срочный
+                            и живёт три минуты. Раньше жил только во вкладках —
+                            и человек, читавший в этот момент задания или свой
+                            профиль, узнавал о вызове уже после того, как тот
+                            протух. @see DuelInviteAutoSurface */}
+                        <DuelInviteAutoSurface />
                         {/* Told once, to a player who blocked the bot and came
                             back to an empty account. Here rather than on the
                             friends screen: the wipe takes the whole account, so

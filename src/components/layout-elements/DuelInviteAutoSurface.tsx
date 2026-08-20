@@ -13,12 +13,16 @@ import {
 } from '@/api/duel.api';
 import { routes } from '@/constants/routes';
 import { useAppTranslations } from '@/hooks/useAppTranslations';
-import { useFeature } from '@/hooks/useFeature';
 import { useInFlightLock } from '@/hooks/useInFlightLock';
 import { useToast } from '@/hooks/useToast';
 
-/** Вызов — вещь срочная, но не игровой цикл: опрос редкий, фоновый. */
-const POLL_MS = 10_000;
+/**
+ * Вызов живёт три минуты, поэтому опрос частый — но фоновый, не игровой цикл.
+ *
+ * Пять секунд: на десяти человек успевал открыть игру, посмотреть на пустой
+ * список и уйти, так и не увидев, что его звали.
+ */
+const POLL_MS = 5_000;
 
 /**
  * Вызов на дуэль всплывает прямо в приложении.
@@ -35,13 +39,15 @@ export function DuelInviteAutoSurface() {
   const toast = useToast();
   const router = useRouter();
   const lock = useInFlightLock();
-  const duelOpen = useFeature('duel');
   const [dismissed, setDismissed] = useState<string[]>([]);
 
+  // Гейт не ставим: вызов сам даёт право войти, и приглашённый, которому игра
+  // ещё не открыта, обязан его увидеть — иначе звать его бессмысленно.
   const { data: invites = [] } = useGetDuelInvitesQuery(undefined, {
     pollingInterval: POLL_MS,
     skipPollingIfUnfocused: true,
-    skip: !duelOpen,
+    refetchOnFocus: true,
+    refetchOnMountOrArgChange: true,
   });
   const [join] = useJoinDuelMutation();
   const [decline] = useDeclineDuelInviteMutation();

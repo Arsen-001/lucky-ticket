@@ -42,6 +42,12 @@ export function duelBeats(
  * Пришедший по приглашению чаще встречает второе, и говорить ему «уже занято»
  * — значит отправлять искать несуществующее место.
  */
+/** Сервер отказал, потому что у игрока уже идёт матч. */
+export function duelMatchInProgress(error: unknown): boolean {
+  const message = (error as { data?: { message?: string } })?.data?.message ?? '';
+  return message.includes('Match in progress');
+}
+
 export function duelJoinFailure(error: unknown): 'closed' | 'taken' | 'reserved' | 'other' {
   const message = (error as { data?: { message?: string } })?.data?.message ?? '';
   if (message.includes('closed')) return 'closed';
