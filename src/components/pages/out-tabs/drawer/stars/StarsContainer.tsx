@@ -1,11 +1,9 @@
 'use client';
 
-import { useEffect, useState } from 'react';
-import { useRouter, useSearchParams } from 'next/navigation';
+import { useState } from 'react';
 import { useGetStarsStateQuery, useGetStarsTransactionsQuery } from '@/api/stars.api';
 import { useGetWalletStateQuery } from '@/api/wallet.api';
 import { QueryErrorState } from '@/components/shared/error/QueryErrorState';
-import { routes } from '@/constants/routes';
 import { BuyStarsModal } from '@/components/pages/out-tabs/drawer/wallet/BuyStarsModal';
 import { ExchangeTonStarsModal } from '@/components/pages/out-tabs/drawer/wallet/ExchangeTonStarsModal';
 import { StarsHero } from './StarsHero';
@@ -22,17 +20,6 @@ export function StarsContainer() {
   // screens can never disagree about it.
   const { data: wallet } = useGetWalletStateQuery();
   const [modal, setModal] = useState<StarsModal>(null);
-  const router = useRouter();
-  const searchParams = useSearchParams();
-
-  // `?action=exchange` — the discount badge in the header lands here with the
-  // sheet already open. The parameter is consumed immediately, so a back-and-
-  // forth to this screen does not keep re-opening it.
-  useEffect(() => {
-    if (searchParams.get('action') !== 'exchange') return;
-    setModal('exchange');
-    router.replace(routes.stars, { scroll: false });
-  }, [searchParams, router]);
 
   if (isError) return <QueryErrorState onRetry={() => refetch()} />;
 
