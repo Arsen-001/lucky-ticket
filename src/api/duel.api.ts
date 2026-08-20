@@ -1,7 +1,12 @@
 import { api } from '@/api/index.api';
 import { refetchTestQuestProgress } from '@/api/testQuest.api';
 import { rtkTags } from '@/constants/rtk-tags';
-import type { DuelLobbyList, DuelMove, DuelState } from '@/types/interfaces/duel.interfaces';
+import type {
+  DuelInviteCandidate,
+  DuelLobbyList,
+  DuelMove,
+  DuelState,
+} from '@/types/interfaces/duel.interfaces';
 
 /**
  * Дуэль камень-билет-ножницы.
@@ -60,6 +65,29 @@ export const duelApi = api.injectEndpoints({
         if (data.status === 'FINISHED') refetchTestQuestProgress(dispatch);
       },
     }),
+
+    /** Кого можно позвать — с пометкой, дойдёт ли до человека сообщение. */
+    getDuelInviteCandidates: builder.query<DuelInviteCandidate[], void>({
+      query: () => ({ url: 'games/duel/invite-candidates' }),
+    }),
+
+    /**
+     * Позвать выбранных в своё лобби.
+     *
+     * Ответ говорит правду о доставке: `sent` — сколько сообщений реально
+     * ушло, `skipped` — сколько отвалилось. Телеграм-бот не может написать
+     * первым, поэтому «отправлено» и «доставлено» здесь разные вещи.
+     */
+    inviteToDuel: builder.mutation<
+      { sent: number; skipped: number },
+      { id: string; userIds: string[] }
+    >({
+      query: ({ id, userIds }) => ({
+        url: `games/duel/${id}/invite`,
+        method: 'POST',
+        body: { userIds },
+      }),
+    }),
   }),
 });
 
@@ -71,4 +99,6 @@ export const {
   useJoinDuelMutation,
   useReadyDuelMutation,
   useMoveDuelMutation,
+  useGetDuelInviteCandidatesQuery,
+  useInviteToDuelMutation,
 } = duelApi;

@@ -1,11 +1,15 @@
 'use client';
 
+import { useState } from 'react';
 import { twMerge } from 'tailwind-merge';
 import { Button } from '@/components/shared/buttons/Button';
+import { DuelInviteModal } from '@/components/pages/out-tabs/tabs-extra/duel/DuelInviteModal';
 import { useAppTranslations } from '@/hooks/useAppTranslations';
 import { duelClock } from '@/utils/global/duel.utils';
 
 export interface DuelWaitingProps {
+  /** Лобби, в которое зовут. */
+  duelId: string;
   stake: number;
   seconds: number;
   onCancel: () => void;
@@ -22,8 +26,9 @@ export interface DuelWaitingProps {
  * Билеты в этот момент НЕ списаны, и об этом сказано прямо: отменить ожидание
  * должно быть не страшно.
  */
-export function DuelWaiting({ stake, seconds, onCancel, className }: DuelWaitingProps) {
+export function DuelWaiting({ duelId, stake, seconds, onCancel, className }: DuelWaitingProps) {
   const t = useAppTranslations();
+  const [inviting, setInviting] = useState(false);
 
   return (
     <div className={twMerge('flex h-full flex-col text-center', className)}>
@@ -47,9 +52,19 @@ export function DuelWaiting({ stake, seconds, onCancel, className }: DuelWaiting
         </div>
       </div>
 
-      <Button variant="transparent" className="h-12 w-full" onClick={onCancel}>
-        {t('duel cancel waiting')}
-      </Button>
+      {/* Позвать конкретного человека — единственный способ вернуть в игру
+          того, кто сейчас не в ней. Ждать случайного соперника можно и дальше:
+          приглашение не отменяет ожидания. */}
+      <div className="flex flex-col gap-2">
+        <Button className="h-13 w-full" onClick={() => setInviting(true)}>
+          {t('duel invite players')}
+        </Button>
+        <Button variant="transparent" className="h-12 w-full" onClick={onCancel}>
+          {t('duel cancel waiting')}
+        </Button>
+      </div>
+
+      <DuelInviteModal open={inviting} duelId={duelId} onClose={() => setInviting(false)} />
     </div>
   );
 }

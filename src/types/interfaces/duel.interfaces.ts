@@ -82,3 +82,17 @@ export interface DuelState {
   readonly winner: DuelSide | null;
   readonly winsNeeded: number;
 }
+
+/**
+ * Кандидат в соперники: друг, которого можно позвать в лобби.
+ *
+ * `reachable` — не про онлайн, а про доставку: телеграм-бот не может написать
+ * первым, и пока человек не разрешил переписку, приглашение до него не дойдёт
+ * вообще. Такие строки видны, но не выбираются.
+ */
+export interface DuelInviteCandidate {
+  readonly id: string;
+  readonly name: string;
+  readonly avatarUrl: string;
+  readonly reachable: boolean;
+}

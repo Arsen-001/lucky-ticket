@@ -240,6 +240,21 @@ export const duelMock = {
     return view(current);
   },
 
+  /** Кого можно позвать: половина списка «достижима» — как в жизни. */
+  'games/duel/invite-candidates': () => [
+    { id: 'friend-1', name: 'Aram', avatarUrl: '', reachable: true },
+    { id: 'friend-2', name: 'Nare', avatarUrl: '', reachable: true },
+    { id: 'friend-3', name: 'Davit', avatarUrl: '', reachable: false },
+    { id: 'friend-4', name: 'Lilit', avatarUrl: '', reachable: false },
+  ],
+
+  /** Отправка: доходит только до достижимых — «отправлено» ≠ «доставлено». */
+  'POST games/duel/:id/invite': (args: FetchArgs) => {
+    const ids = ((args.body as { userIds?: string[] })?.userIds ?? []).length;
+    const sent = Math.min(ids, 2);
+    return { sent, skipped: ids - sent };
+  },
+
   'POST games/duel/:id/ready': () => {
     if (!current) throw new Error('no duel');
     current.meReady = true;

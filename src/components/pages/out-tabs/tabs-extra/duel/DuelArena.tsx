@@ -92,6 +92,7 @@ export function DuelArena({ duelId, tickets, onLeave }: DuelArenaProps) {
       <div className="flex h-full flex-col">
         <DuelGameHeader tickets={tickets} />
         <DuelWaiting
+          duelId={duelId}
           stake={data.stake}
           seconds={data.waitingSeconds}
           onCancel={onLeave}
