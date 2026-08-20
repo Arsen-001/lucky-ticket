@@ -43,6 +43,11 @@
     "duel you won",
     "duel your lobby",
     "duel your round",
+    "games",
+    "games duel blurb",
+    "games none open",
+    "games play",
+    "games roulette blurb",
     "wallet wrong network"
   ]
 }

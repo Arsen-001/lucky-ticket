@@ -36,7 +36,7 @@ export const STATIC_ROUTES = [
   '/test-quest',
   // Гейт выката держит его закрытым для всех, кроме тестировщиков — обход всё
   // равно нужен: экран обязан отрисовать отказ, а не упасть.
-  '/games/duel',
+  '/games',
   '/settings',
   '/settings/username',
   // EMAIL OFF (2026-08-17) — the screen no longer routes (private folder), so a

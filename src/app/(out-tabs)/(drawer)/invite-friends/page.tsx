@@ -1,6 +1,6 @@
 import { FriendsGiftEventCard } from '@/components/pages/out-tabs/drawer/invite-friends/FriendsGiftEventCard';
 import { FriendsHeroCard } from '@/components/pages/out-tabs/drawer/invite-friends/FriendsHeroCard';
-import { FriendsRouletteCard } from '@/components/pages/out-tabs/drawer/invite-friends/roulette/FriendsRouletteCard';
+import { FriendsRoulettePointerRow } from '@/components/pages/out-tabs/drawer/invite-friends/roulette/FriendsRoulettePointerRow';
 import { FriendsTierLadderCard } from '@/components/pages/out-tabs/drawer/invite-friends/FriendsTierLadderCard';
 import { ReferralInfoSection } from '@/components/pages/out-tabs/drawer/invite-friends/ReferralInfoSection';
 import { InvitedFriendsList } from '@/components/pages/out-tabs/drawer/invite-friends/InvitedFriendsList';
@@ -14,9 +14,12 @@ export default function InviteFriendsPage() {
       {/* Сразу под «пригласи друзей»: это то, что даёт за приглашения что-то
           прямо сейчас. Оба блока умеют не отрисоваться — подарок исчезает,
           когда промо выключено или игрок его уже получил, рулетка — когда
-          выключена игра. */}
+          выключена игра.
+
+          Рулетка тут строкой: сам барабан переехал в раздел «Игры» и живёт там
+          в одном экземпляре, а спин по-прежнему зарабатывается здесь. */}
       <FriendsGiftEventCard />
-      <FriendsRouletteCard />
+      <FriendsRoulettePointerRow />
       <FriendsTierLadderCard />
       <ReferralInfoSection />
       <InvitedFriendsList />

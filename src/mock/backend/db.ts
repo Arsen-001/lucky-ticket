@@ -130,6 +130,10 @@ export const mockDb = {
     // board the way a named tester sees it while the master switch is off
     // (`appConfig.leaderboard.enabled` is false, like production).
     leaderboardAllowed: true,
+    // Стадии выката решает сервер, у мока сервера нет — а невидимая фича на
+    // localhost означает, что её нельзя ни доработать, ни посмотреть. Здесь
+    // фича открыта, в проде её открывает панель.
+    features: { duel: true },
     // Blocking the bot wipes the account, and the returning player is told once
     // why it is empty. `false` here because the demo account never blocked
     // anything — flip it to see the modal. @see WipeNoticeWatcher

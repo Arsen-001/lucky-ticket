@@ -13,6 +13,7 @@ import {
   ChartNoAxesColumnIncreasing,
   ChevronRight,
   CircleQuestionMark,
+  Gamepad2,
   Gift,
   Globe,
   Handshake,
@@ -32,6 +33,7 @@ import { twMerge } from 'tailwind-merge';
 
 import { useGetMeQuery } from '@/api/me.api';
 import { useGetNotificationsSummaryQuery } from '@/api/notifications.api';
+import { useGetRouletteQuery } from '@/api/roulette.api';
 import { useGetStakesQuery } from '@/api/stakes.api';
 import { stakeIsMatured } from '@/utils/global/stakes.utils';
 import { Avatar } from '@/components/shared/user-elements/Avatar';
@@ -46,6 +48,7 @@ import { localeDirection } from '@/i18n/config';
 import { useAppTranslations } from '@/hooks/useAppTranslations';
 import { useBackDismiss } from '@/hooks/useBackDismiss';
 import { useContentPagesEnabled } from '@/hooks/useContentPagesEnabled';
+import { useFeature } from '@/hooks/useFeature';
 import { useLeaderboardEnabled } from '@/hooks/useLeaderboardEnabled';
 import { usePartnersEnabled } from '@/hooks/usePartnersEnabled';
 import { useLocation } from '@/hooks/useLocation';
@@ -70,6 +73,11 @@ export function Drawer() {
   const partnersEnabled = usePartnersEnabled();
   const leaderboardEnabled = useLeaderboardEnabled();
   const contentPages = useContentPagesEnabled();
+  // Рулетка отвечает одним словом на три причины «нельзя»; дуэль — стадией
+  // выката. Пункт меню появляется, если открыта хоть одна из двух.
+  const duelEnabled = useFeature('duel');
+  const { data: roulette } = useGetRouletteQuery();
+  const gamesOpen = duelEnabled || roulette?.available === true;
   const open = useAppSelector(selectDrawerOpen);
   const dispatch = useAppDispatch();
   const { data: me, isLoading } = useGetMeQuery();
@@ -262,6 +270,18 @@ export function Drawer() {
       title: t('jackpot'),
       icon: <Sparkles size={18} />,
     },
+    // Раздел появляется, когда открыта хотя бы одна игра — и исчезает, когда
+    // не открыта ни одна. Без замка: замком помечено то, что обещано на потом,
+    // а стадия выката ничего не обещает.
+    ...(gamesOpen
+      ? [
+          {
+            route: routes.games,
+            title: t('games'),
+            icon: <Gamepad2 size={18} />,
+          },
+        ]
+      : []),
     {
       route: routes.partners.index,
       title: t('partners'),

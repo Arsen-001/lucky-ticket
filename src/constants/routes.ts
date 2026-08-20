@@ -43,9 +43,7 @@ export const routes = {
   tickets: {
     index: '/tickets',
   },
-  games: {
-    duel: '/games/duel',
-  },
+  games: '/games',
   engines: {
     index: '/engines',
     getById: function (engineId: string) {
