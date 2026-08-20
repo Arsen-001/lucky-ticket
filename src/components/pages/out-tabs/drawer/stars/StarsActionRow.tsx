@@ -50,19 +50,22 @@ export function StarsActionRow({
         <BalanceActionCell Icon={Plus} label={t('buy')} />
       </button>
 
-      <button type="button" onClick={onExchange} className={CELL}>
-        <BalanceActionCell
-          Icon={ArrowLeftRight}
-          label={t('exchange')}
-          locked={exchangeLocked}
-          badge={
-            percent > 0 && !exchangeLocked ? (
-              <span className="bg-gold/20 text-gold rounded-full px-1.5 py-0.5 text-[9px] font-extrabold tabular-nums">
-                −{percent}%
-              </span>
-            ) : undefined
-          }
-        />
+      <button type="button" onClick={onExchange} className={twMerge(CELL, 'relative')}>
+        {/* A tab hanging off the cell's top edge instead of a pill beside the
+            word: the three labels stay on one line (so the strip reads as one
+            strip), and the cell keeps its width — «Exchange» and «Market» are
+            the first things to hit the edges in German and Armenian. Centred
+            with physical left/translate on purpose: centring is symmetric, so
+            it lands right in RTL too. */}
+        {percent > 0 && !exchangeLocked && (
+          <span
+            className="text-background absolute left-1/2 top-0 -translate-x-1/2 rounded-b-md px-1.5 py-px text-[8px] font-extrabold tabular-nums"
+            style={{ background: 'linear-gradient(120deg,#ffe08a,#f8bd3e 55%,#b47b0a)' }}
+          >
+            −{percent}%
+          </span>
+        )}
+        <BalanceActionCell Icon={ArrowLeftRight} label={t('exchange')} locked={exchangeLocked} />
       </button>
 
       {/* Where the balance is spent. No tab: Lucky Stars buy across the whole
