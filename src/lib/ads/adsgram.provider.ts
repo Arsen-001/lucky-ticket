@@ -1,5 +1,5 @@
 import { Env } from '@/services/environment.service';
-import type { AdProvider, RewardedAdFailure, RewardedAdOutcome } from './types';
+import type { AdProvider, AdShowResult, RewardedAdFailure } from './types';
 
 /**
  * Adsgram rewarded-ad provider.
@@ -60,6 +60,15 @@ let controller: AdController | null = null;
 // catch below reads the value of the attempt that just failed.
 let lastFailure: RewardedAdFailure | null = null;
 
+/**
+ * Whether the current attempt put anything on screen. The SDK says so in the
+ * `state` it fails with — `load` is still fetching, everything after it has a
+ * creative up — and that is what decides whether the waterfall may ask another
+ * network. Asking one after a video the player already watched is how a single
+ * tap produced two ads.
+ */
+let reachedScreen = false;
+
 function getController(): AdController | null {
   if (controller) return controller;
   const blockId = getBlockId();
@@ -67,33 +76,52 @@ function getController(): AdController | null {
   controller = window.Adsgram.init({ blockId, debug: Env.adsgramDebug });
   controller.addEventListener('onBannerNotFound', () => (lastFailure = 'noAd'));
   controller.addEventListener('onNonStopShow', () => (lastFailure = 'tooFast'));
-  controller.addEventListener('onTooLongSession', () => (lastFailure = 'error'));
+  // The session ran long — which can only happen to an ad that was PLAYING.
+  controller.addEventListener('onTooLongSession', () => {
+    lastFailure = 'error';
+    reachedScreen = true;
+  });
   controller.addEventListener('onError', () => (lastFailure = 'error'));
   return controller;
 }
 
-async function show(): Promise<Exclude<RewardedAdOutcome, 'unavailable'>> {
+/** Every state but `load` means a creative was already on screen. */
+function stateReachedScreen(state: ShowPromiseResult['state'] | undefined): boolean {
+  return state !== undefined && state !== 'load';
+}
+
+async function show(): Promise<AdShowResult> {
   const ctrl = getController();
   // Configured but the SDK script hasn't loaded — do NOT credit a free reward.
-  if (!ctrl) return 'error';
+  // Nothing was shown, so the next network may still try.
+  if (!ctrl) return { outcome: 'error' };
 
   lastFailure = null;
+  reachedScreen = false;
   try {
     const result = await ctrl.show();
-    return result.done && !result.error ? 'completed' : (lastFailure ?? 'skipped');
+    if (result.done && !result.error) return { outcome: 'completed', displayed: true };
+    return {
+      outcome: lastFailure ?? 'skipped',
+      displayed: reachedScreen || stateReachedScreen(result.state),
+    };
   } catch (reason) {
-    // A captured SDK event narrows the reason first.
-    if (lastFailure) return lastFailure;
     // Adsgram rejects with a ShowPromiseResult-shaped object when the ad was
     // shown but not completed: error=true is a playback failure, error=false
     // means the user closed it early. Config-class failures (inactive block,
     // unknown blockId, wrong referer, …) reject with an AdsgramError instance
     // instead — treat those as 'error' so the waterfall moves on rather than
     // reporting the misleading "user skipped it".
-    if (reason && typeof reason === 'object' && 'done' in reason) {
-      return (reason as ShowPromiseResult).error ? 'error' : 'skipped';
-    }
-    return 'error';
+    const shaped =
+      reason && typeof reason === 'object' && 'done' in reason
+        ? (reason as ShowPromiseResult)
+        : null;
+    const displayed = reachedScreen || stateReachedScreen(shaped?.state);
+
+    // A captured SDK event narrows the reason first.
+    if (lastFailure) return { outcome: lastFailure, displayed };
+    if (shaped) return { outcome: shaped.error ? 'error' : 'skipped', displayed };
+    return { outcome: 'error', displayed };
   }
 }
 

@@ -4,8 +4,8 @@ import { monetagProvider } from './monetag.provider';
 import type {
   AdProvider,
   AdProviderId,
+  AdShowResult,
   RewardedAdFailure,
-  RewardedAdOutcome,
   RewardedAdResult,
 } from './types';
 
@@ -167,9 +167,7 @@ export function preloadRewardedAd(viewIndex?: number): void {
 }
 
 /** A `show()` that never hangs; `null` means the SDK stopped answering. */
-async function showWithTimeout(
-  provider: AdProvider
-): Promise<Exclude<RewardedAdOutcome, 'unavailable'> | null> {
+async function showWithTimeout(provider: AdProvider): Promise<AdShowResult | null> {
   let timer: ReturnType<typeof setTimeout> | undefined;
   const watchdog = new Promise<null>(resolve => {
     timer = setTimeout(() => resolve(null), SHOW_TIMEOUT_MS);
@@ -206,15 +204,17 @@ export async function showRewardedAd(
 
   let last: RewardedAdResult = { outcome: 'error', provider: chain[0].id };
   for (const provider of chain) {
-    const outcome = await showWithTimeout(provider);
+    const result = await showWithTimeout(provider);
 
     // The SDK went silent past the watchdog. Stop the chain rather than open a
     // second ad: the first one may still be on screen, or arrive on top of the
     // next network's video a moment later.
-    if (outcome === null) {
+    if (result === null) {
       onFailure?.({ provider: provider.id, outcome: 'error' });
       return { outcome: 'error', provider: provider.id };
     }
+
+    const { outcome, displayed } = result;
 
     // Watched to the end → done. Closed by the user → also done: falling
     // through would turn "close the ad" into "get another chance at a
@@ -222,6 +222,16 @@ export async function showRewardedAd(
     if (outcome === 'completed' || outcome === 'skipped') {
       // It served something, so whatever we believed about its fill is stale.
       emptyUntil.delete(provider.id);
+      return { outcome, provider: provider.id };
+    }
+
+    // It FAILED, but a creative had already reached the screen. Stop here:
+    // asking the next network now plays a second video at a player who just
+    // sat through one, for a single tap and a single reward. Reported from
+    // production 20.08.2026 — "three ads in a row on one tap", of which this
+    // was the outer two.
+    if (displayed) {
+      onFailure?.({ provider: provider.id, outcome });
       return { outcome, provider: provider.id };
     }
 

@@ -60,12 +60,32 @@ export interface RewardedAdResult {
   provider: AdProviderId | null;
 }
 
+/**
+ * One provider's answer: what happened, and — critically — whether anything
+ * reached the player's screen.
+ *
+ * The waterfall may only move to the next network when the previous one showed
+ * NOTHING. Without this flag it moved on any failure, including a video that
+ * played and then broke, so one tap could open a second ad on top of a first
+ * the player had already sat through. Reported from production 20.08.2026 as
+ * three ads for one tap, with Adsgram logging 39 errors that day.
+ */
+export interface AdShowResult {
+  outcome: Exclude<RewardedAdOutcome, 'unavailable'>;
+  /**
+   * True when a creative reached the screen, even briefly. Default `false`
+   * means "nothing was shown" — so a provider that cannot tell must say so
+   * explicitly rather than let the chain guess.
+   */
+  displayed?: boolean;
+}
+
 export interface AdProvider {
   readonly id: AdProviderId;
   /** True when the provider has everything it needs to attempt a show. */
   isConfigured: () => boolean;
-  /** Play one rewarded ad. Must never throw — always resolves to an outcome. */
-  show: () => Promise<Exclude<RewardedAdOutcome, 'unavailable'>>;
+  /** Play one rewarded ad. Must never throw — always resolves to a result. */
+  show: () => Promise<AdShowResult>;
   /** Optional warm-up so the first show doesn't wait on a cold request. */
   preload?: () => void;
 }

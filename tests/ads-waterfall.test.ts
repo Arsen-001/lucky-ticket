@@ -114,11 +114,29 @@ describe('rewarded-ad waterfall', () => {
     expect(await ads.showRewardedAd()).toEqual({ outcome: 'skipped', provider: 'adsgram' });
   });
 
-  it('treats a playback failure as a fall-through, not a skip', async () => {
+  it('stops when a video broke AFTER it was already on screen', async () => {
+    // `state: 'playing'` — the player has watched some of this. Asking the next
+    // network now opens a second video for a single tap and a single reward,
+    // which is what production reported on 20.08.2026 as three ads in a row.
     stubAdsgram({ done: false, error: true, state: 'playing', description: 'failed' });
     const ads = await loadAds({
       NEXT_PUBLIC_ADSGRAM_BLOCK_ID: BLOCK_ID,
       NEXT_PUBLIC_MONETAG_ZONE_ID: ZONE_ID,
+      NEXT_PUBLIC_AD_ROTATE_EVERY: '0',
+    });
+
+    expect(await ads.showRewardedAd()).toEqual({ outcome: 'error', provider: 'adsgram' });
+  });
+
+  it('still falls through when the failure happened before anything was shown', async () => {
+    // `state: 'load'` — nothing reached the screen, so the next network is the
+    // whole point of having a waterfall. Stopping here would trade a real
+    // no-fill for a dead task.
+    stubAdsgram({ done: false, error: true, state: 'load', description: 'failed' });
+    const ads = await loadAds({
+      NEXT_PUBLIC_ADSGRAM_BLOCK_ID: BLOCK_ID,
+      NEXT_PUBLIC_MONETAG_ZONE_ID: ZONE_ID,
+      NEXT_PUBLIC_AD_ROTATE_EVERY: '0',
     });
 
     // Monetag gets its turn and fails too (no SDK tag on the page), so the

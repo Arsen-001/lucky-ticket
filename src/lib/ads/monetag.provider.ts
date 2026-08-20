@@ -1,6 +1,6 @@
 import { Env } from '@/services/environment.service';
 import { classifyFastReject } from './fast-reject';
-import type { AdProvider, RewardedAdOutcome } from './types';
+import type { AdProvider, AdShowResult } from './types';
 
 /**
  * Monetag rewarded-ad provider (Rewarded Interstitial).
@@ -52,18 +52,22 @@ function nextYmid(): string | undefined {
   return `${id}.${Date.now().toString(36)}${seq.toString(36)}`;
 }
 
-async function show(): Promise<Exclude<RewardedAdOutcome, 'unavailable'>> {
+async function show(): Promise<AdShowResult> {
   const showAd = getShowFn();
   // Configured but the SDK tag hasn't loaded — do NOT credit a free reward.
-  if (!showAd) return 'error';
+  // Nothing was shown, so the next network may still try.
+  if (!showAd) return { outcome: 'error' };
 
   const startedAt = performance.now();
   try {
     await showAd({ ymid: nextYmid() });
-    return 'completed';
+    return { outcome: 'completed', displayed: true };
   } catch {
-    // The SDK rejects without a reason code; see `classifyFastReject`.
-    return classifyFastReject(startedAt);
+    // The SDK rejects without a reason code; see `classifyFastReject`. The same
+    // elapsed time answers both questions: too fast to have been watched is
+    // also too fast to have been rendered.
+    const outcome = classifyFastReject(startedAt);
+    return { outcome, displayed: outcome === 'skipped' };
   }
 }
 
