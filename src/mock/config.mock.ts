@@ -25,6 +25,7 @@ const getPublicConfig = (): PublicConfig => ({
     withdrawDailyCapTon: walletConstants.TON_WITHDRAW_DAILY_CAP,
     minDepositTon: walletConstants.TON_MIN_DEPOSIT,
     minWithdrawLc: appConfig.wallet.minWithdrawLc,
+    xtrPackages: appConfig.wallet.xtrPackages,
   },
   adsEnabled: true,
   partnersEnabled: appConfig.partners.enabled,

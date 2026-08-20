@@ -1,3 +1,4 @@
+import type { StarPackage } from '@/types/interfaces/config.interfaces';
 import type { StakeLevelDefinition } from '@/types/interfaces/stakes.interfaces';
 import type { StarsPackage, SupportedWallet } from '@/types/interfaces/wallet.interfaces';
 import { WalletProvider } from '@/types/enums/wallet.enums';
@@ -282,6 +283,19 @@ export const appConfig = {
      * below it, so the form must validate against the same number.
      */
     minWithdrawLc: 10_000,
+    /**
+     * Fallback Telegram-Stars top-up packages: pay N ⭐, get N + bonus LS.
+     * Buying all four (850⭐) hands over 180 LS on top. The live table comes
+     * from `GET /config` (see `useStarPackages`) — the webhook pays the bonus
+     * from its own copy, so quoting this bundled one to a player is a fallback,
+     * not the source of truth.
+     */
+    xtrPackages: [
+      { stars: 50, bonus: 10 },
+      { stars: 100, bonus: 20 },
+      { stars: 200, bonus: 50, popular: true },
+      { stars: 500, bonus: 100 },
+    ] as StarPackage[],
     /** USD value of one LC — used to price the LC → TON conversion (DOCS §6.1): $1 = 1,000,000 LC. */
     lcUsdRate: 0.000001,
     /**

@@ -10,6 +10,8 @@ import { ButtonSpinner } from '@/components/shared/loaders/ButtonSpinner';
 import { useAppTranslations } from '@/hooks/useAppTranslations';
 import { useToast } from '@/hooks/useToast';
 import { useBuyTelegramStars } from '@/hooks/useBuyTelegramStars';
+import { StarPackageCard } from '@/components/pages/out-tabs/drawer/wallet/StarPackageCard';
+import { useStarPackages } from '@/hooks/useStarPackages';
 import { formatNumber } from '@/utils/global/number.utils';
 
 interface BuyStarsModalProps {
@@ -20,13 +22,11 @@ interface BuyStarsModalProps {
 
 type Step = 'select' | 'success';
 
-// `1` is a minimal-cost option for testing real payments; the rest are top-ups.
-const PRESETS = [1, 100, 500, 1000, 5000];
-
 export function BuyStarsModal({ open, onClose, initialStars }: BuyStarsModalProps) {
   const t = useAppTranslations();
   const toast = useToast();
   const { buy, pending } = useBuyTelegramStars();
+  const { packages, bonusFor } = useStarPackages();
   const [step, setStep] = useState<Step>('select');
   const [input, setInput] = useState('');
   const [purchased, setPurchased] = useState(0);
@@ -43,11 +43,15 @@ export function BuyStarsModal({ open, onClose, initialStars }: BuyStarsModalProp
 
   const amount = Number(input) || 0;
   const canBuy = amount >= 1;
+  // What the payment actually credits — the server adds the same bonus off the
+  // amount it was paid, so the sheet can promise it before the tap.
+  const bonus = bonusFor(amount);
+  const total = amount + bonus;
 
   const handleBuy = async () => {
     const status = await buy(amount);
     if (status === 'paid') {
-      setPurchased(amount);
+      setPurchased(total);
       setStep('success');
     } else if (status === 'unavailable') {
       toast.info(t('open in telegram to buy stars'));
@@ -105,27 +109,18 @@ export function BuyStarsModal({ open, onClose, initialStars }: BuyStarsModalProp
             </div>
 
             <div className="relative flex flex-col gap-3">
-              {/* preset amounts */}
-              <div className="grid grid-cols-5 gap-1.5">
-                {PRESETS.map(preset => {
-                  const active = amount === preset;
-                  return (
-                    <button
-                      key={preset}
-                      type="button"
-                      onClick={() => setInput(String(preset))}
-                      className={twMerge(
-                        'flex-center gap-0.5 rounded-xl border px-0.5 py-1.5 text-[11px] font-extrabold tabular-nums transition-colors',
-                        active
-                          ? 'border-gold/60 bg-gold/20 text-gold'
-                          : 'border-white/10 bg-white/5 text-white/70 hover:bg-white/10'
-                      )}
-                    >
-                      <TelegramStarIcon size={10} />
-                      {formatNumber(preset)}
-                    </button>
-                  );
-                })}
+              {/* packages — pay N stars, receive N + bonus */}
+              <div className="grid grid-cols-2 gap-2">
+                {packages.map(pkg => (
+                  <StarPackageCard
+                    key={pkg.stars}
+                    stars={pkg.stars}
+                    bonus={pkg.bonus}
+                    popular={pkg.popular}
+                    active={amount === pkg.stars}
+                    onSelect={() => setInput(String(pkg.stars))}
+                  />
+                ))}
               </div>
 
               {/* custom amount */}
@@ -153,6 +148,21 @@ export function BuyStarsModal({ open, onClose, initialStars }: BuyStarsModalProp
                     LS
                   </span>
                 </div>
+                {/* The typed amount earns the same bonus a package button does —
+                    the server decides it by what was PAID, not by which button
+                    was tapped, so 210⭐ is not worth less than 200⭐. */}
+                {amount >= 1 && (
+                  <div className="flex items-center gap-1.5 pt-0.5 text-[11px] font-bold">
+                    {bonus > 0 && (
+                      <span className="bg-gold/20 text-gold rounded-full px-1.5 py-0.5 tabular-nums">
+                        {t('plus {n} bonus', { n: formatNumber(bonus) })}
+                      </span>
+                    )}
+                    <span className="text-white/70 tabular-nums">
+                      {t('you receive {stars}', { stars: formatNumber(total) })}
+                    </span>
+                  </div>
+                )}
               </div>
             </div>
 

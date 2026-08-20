@@ -6,6 +6,14 @@
  * UI copy — optional because an older backend may not serve them yet; every
  * consumer falls back to the bundled constants.
  */
+/** One Telegram-Stars top-up package — `stars` paid, `bonus` free on top. */
+export interface StarPackage {
+  stars: number;
+  bonus: number;
+  /** Highlighted in the buy sheet as the recommended one. */
+  popular?: boolean;
+}
+
 export interface PublicConfig {
   /** USD value of one LC. */
   lcUsdRate: number;
@@ -145,6 +153,12 @@ export interface PublicConfig {
     minDepositTon?: number;
     /** Minimum LC per LC→TON conversion. */
     minWithdrawLc: number;
+    /**
+     * Telegram-Stars top-up packages: pay `stars` ⭐, receive `stars + bonus`
+     * Lucky Stars. Absent on a backend older than 20.08.2026 — the bundled
+     * `appConfig.wallet.xtrPackages` stands in (see `useStarPackages`).
+     */
+    xtrPackages?: StarPackage[];
   };
   /** Stake builder display knobs (admin-editable, DOCS §18). */
   stakes?: {

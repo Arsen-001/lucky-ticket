@@ -1465,5 +1465,8 @@
   "limited": "Limited",
   "limited note": "These are on sale for a while — until the timer or the stock runs out.",
   "sold out": "Sold out",
-  "offer ended": "Sale ended"
+  "offer ended": "Sale ended",
+  "plus {n} bonus": "+{n} bonus",
+  "you receive {stars}": "You get {stars}",
+  "best value": "Best value"
 }
