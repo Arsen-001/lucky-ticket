@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { twMerge } from 'tailwind-merge';
 import { Button } from '@/components/shared/buttons/Button';
 import { DuelGameHeader } from '@/components/pages/out-tabs/tabs-extra/duel/DuelGameHeader';
@@ -13,7 +13,12 @@ import { DUEL_MOVE_LABEL } from '@/components/pages/out-tabs/tabs-extra/duel/due
 import { useAppTranslations } from '@/hooks/useAppTranslations';
 import { useInFlightLock } from '@/hooks/useInFlightLock';
 import { useToast } from '@/hooks/useToast';
-import { useGetDuelStateQuery, useMoveDuelMutation, useReadyDuelMutation } from '@/api/duel.api';
+import {
+  useCancelDuelMutation,
+  useGetDuelStateQuery,
+  useMoveDuelMutation,
+  useReadyDuelMutation,
+} from '@/api/duel.api';
 import { duelBeats } from '@/utils/global/duel.utils';
 import type { DuelMove } from '@/types/interfaces/duel.interfaces';
 import '@/styles/components/duel.css';
@@ -61,6 +66,7 @@ export function DuelArena({ duelId, tickets, openInvite, onLeave }: DuelArenaPro
   });
   const [ready] = useReadyDuelMutation();
   const [move] = useMoveDuelMutation();
+  const [cancel] = useCancelDuelMutation();
 
   const playing = data?.status === 'PLAYING';
 
@@ -74,6 +80,26 @@ export function DuelArena({ duelId, tickets, openInvite, onLeave }: DuelArenaPro
     const both = Boolean(data?.me.move) && Boolean(data?.foe.moved);
     setAwaitingReveal(both && !data?.round?.revealed);
   }, [data?.me.move, data?.foe.moved, data?.round?.revealed]);
+
+  /**
+   * Лобби живёт, пока игрок на экране дуэли.
+   *
+   * Ушёл назад — лобби закрывается: висящее в списке лобби без хозяина обманывает
+   * всех остальных. Кто-то тапнет «Войти», потратит десять секунд готовности и
+   * получит несостоявшийся матч.
+   *
+   * Только для фазы ожидания. Уже начатый матч уходом не отменяется — иначе
+   * «назад» стало бы способом не проигрывать, а ставки к тому моменту списаны
+   * у обоих. Матч доигрывается без ушедшего (@see resolve на сервере).
+   */
+  const statusRef = useRef<string | undefined>(undefined);
+  statusRef.current = data?.status;
+  useEffect(
+    () => () => {
+      if (statusRef.current === 'WAITING') cancel(duelId);
+    },
+    [duelId]
+  );
 
   useEffect(() => {
     if (data?.status === 'CANCELLED') {
@@ -123,7 +149,16 @@ export function DuelArena({ duelId, tickets, openInvite, onLeave }: DuelArenaPro
           openInvite={openInvite}
           stake={data.stake}
           seconds={data.waitingSeconds}
-          onCancel={onLeave}
+          onCancel={async () => {
+            // Кнопка делает ровно то, что обещает: закрывает лобби, а не
+            // просто уводит с экрана, оставив его висеть в списке.
+            try {
+              await cancel(duelId).unwrap();
+            } catch {
+              toast.error(t('duel action failed'));
+            }
+            onLeave();
+          }}
           className="flex-1"
         />
       </div>
