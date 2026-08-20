@@ -52,7 +52,10 @@ export function StarPackagesGrid({ className }: StarPackagesGridProps) {
             // Zero once the promo has ended: the package stays on sale and pays
             // 1:1, exactly as the server credits it.
             bonus={promoActive ? pkg.bonus : 0}
-            popular={pkg.popular}
+            // «Best value» goes with the bonus: once every package pays 1:1
+            // there is no better value, and the label would be pointing at
+            // nothing.
+            popular={promoActive && pkg.popular}
             onSelect={() => handleBuy(pkg.stars)}
             className={twMerge('w-full', pending && 'pointer-events-none opacity-60')}
           />

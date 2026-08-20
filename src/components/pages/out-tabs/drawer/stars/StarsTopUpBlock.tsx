@@ -23,7 +23,7 @@ export interface StarsTopUpBlockProps {
  */
 export function StarsTopUpBlock({ onCustomAmount, className }: StarsTopUpBlockProps) {
   const t = useAppTranslations();
-  const { packages } = useStarPackages();
+  const { packages, promoActive } = useStarPackages();
 
   if (packages.length === 0) return null;
 
@@ -54,10 +54,14 @@ export function StarsTopUpBlock({ onCustomAmount, className }: StarsTopUpBlockPr
         <span className="flex min-w-0 flex-1 flex-col">
           <span className="text-[12px] font-extrabold text-white">{t('custom amount')}</span>
           {/* Says the rule the server applies, so a typed 210 is not read as a
-              worse deal than the 200 tile: the bonus goes by what was PAID. */}
-          <span className="text-pink-secondary text-[10px] font-semibold tabular-nums">
-            {t('bonus from {stars}', { stars: formatNumber(packages[0].stars) })}
-          </span>
+              worse deal than the 200 tile: the bonus goes by what was PAID.
+              Gone with the promo — a line promising a bonus that the server has
+              stopped granting is the one thing this screen must never print. */}
+          {promoActive && (
+            <span className="text-pink-secondary text-[10px] font-semibold tabular-nums">
+              {t('bonus from {stars}', { stars: formatNumber(packages[0].stars) })}
+            </span>
+          )}
         </span>
         <ChevronRight size={16} className="text-pink-secondary flex-shrink-0" strokeWidth={2.4} />
       </button>

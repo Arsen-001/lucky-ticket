@@ -170,6 +170,13 @@ export interface PublicConfig {
      * stops granting the bonus at the same instant (`starsPromoActive`).
      */
     xtrPackagesPromoEndsAt?: string | null;
+    /**
+     * The server's own verdict on that date, by ITS clock. The countdown runs
+     * on the device clock, so a phone running slow would otherwise advertise a
+     * bonus the server has already stopped paying — the app treats either
+     * "over" as over.
+     */
+    xtrPackagesPromoActive?: boolean;
   };
   /** Stake builder display knobs (admin-editable, DOCS §18). */
   stakes?: {

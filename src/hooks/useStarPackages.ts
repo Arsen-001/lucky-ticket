@@ -57,7 +57,12 @@ export function useStarPackages(): StarPackages {
   // direct read, and it is right to: a value that changes with the wall clock
   // makes a render non-repeatable).
   const { expired } = useCountDown(hasDeadline ? endsAtRaw! : undefined);
-  const promoActive = !hasDeadline || !expired;
+  // Either verdict ends it: the server's (computed on its own clock, absent on
+  // an older backend) or the local countdown reaching zero. A wrong device
+  // clock can then only hide the offer early — never promise a bonus that will
+  // not be credited.
+  const servedActive = data?.wallet?.xtrPackagesPromoActive;
+  const promoActive = servedActive !== false && (!hasDeadline || !expired);
 
   return {
     packages,

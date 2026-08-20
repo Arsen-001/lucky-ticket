@@ -29,7 +29,8 @@ const getPublicConfig = (): PublicConfig => ({
     // A live promo in dev: the countdown, the percent chips and the Limited
     // tab all draw nothing when there is no deadline, and a screen that draws
     // nothing cannot be reviewed.
-    xtrPackagesPromoEndsAt: new Date(Date.now() + 62 * 3600_000).toISOString(),
+    xtrPackagesPromoEndsAt: promoEndsAt,
+    xtrPackagesPromoActive: new Date(promoEndsAt).getTime() > Date.now(),
   },
   adsEnabled: true,
   partnersEnabled: appConfig.partners.enabled,
@@ -79,6 +80,13 @@ const getPublicConfig = (): PublicConfig => ({
     freeStartCount: GlobalConstants.stakeFreeStartCount,
   },
 });
+
+/**
+ * Dev promo deadline. Flip it into the past to review the "offer is over"
+ * state: the percent leaves the tiles, the countdown and the Market's Stars
+ * section disappear, and a typed amount stops earning a bonus.
+ */
+const promoEndsAt = new Date(Date.now() + 62 * 3600_000).toISOString();
 
 export const configMock = {
   config: getPublicConfig,
