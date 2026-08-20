@@ -54,24 +54,30 @@ export function StarPackageCard({
         </span>
       )}
 
+      {bonus > 0 && (
+        // The bonus as a percent, set at the price's own size in the opposite
+        // corner — the shape a discount takes in any shop. It used to be a 9px
+        // pill trailing «you get 250», which reads as a footnote to that number
+        // instead of as the reason to pick this tile. Sits a row lower when the
+        // «best value» ribbon is out, so the two never overlap.
+        <span
+          className={twMerge(
+            'text-gold absolute end-3 text-[15px] font-extrabold leading-none tabular-nums',
+            popular ? 'top-5' : 'top-2.5'
+          )}
+          style={{ textShadow: '0 0 12px rgba(248,189,62,0.45)' }}
+        >
+          +{Math.round((bonus / stars) * 100)}%
+        </span>
+      )}
+
       <span className="flex items-center gap-1 text-[15px] font-extrabold tabular-nums text-white">
         <TelegramStarIcon size={13} />
         {formatNumber(stars)}
       </span>
 
-      <span className="flex flex-wrap items-center gap-1.5">
-        <span className="text-gold text-[13px] font-extrabold tabular-nums">
-          {t('you receive {stars}', { stars: formatNumber(stars + bonus) })}
-        </span>
-        {bonus > 0 && (
-          // A percent, not the absolute bonus: the receipt line beside it
-          // already carries the number («you get 250»), so the pill's job is
-          // to make packages COMPARABLE — +25% against +20% says which one is
-          // worth taking, «+50» against «+20» only says which is bigger.
-          <span className="bg-gold/20 text-gold rounded-full px-1 py-0.5 text-[9px] font-extrabold tabular-nums">
-            +{Math.round((bonus / stars) * 100)}%
-          </span>
-        )}
+      <span className="text-gold text-[13px] font-extrabold tabular-nums">
+        {t('you receive {stars}', { stars: formatNumber(stars + bonus) })}
       </span>
     </button>
   );
