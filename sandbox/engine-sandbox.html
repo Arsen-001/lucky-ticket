@@ -688,7 +688,8 @@
     document.getElementById('c-tier').textContent = T.name;
     document.getElementById('h-mult').textContent = T.mult;
     document.getElementById('h-full').textContent = 800 * T.mult;
-    document.getElementById('h-engines').textContent = `${priceEngine()} ⭐ за любой (цена не растёт)`;
+    document.getElementById('h-engines').textContent =
+      `${priceEngine()} ⭐ за любой (цена не растёт)`;
     document.getElementById('c-title').textContent = `Двигатель #${state.cur + 1}`;
     document.getElementById('c-level').textContent =
       `уровень ${e.level}${maxed && topLevel ? ' · максимум' : ''}`;
@@ -839,10 +840,7 @@
     state.spent += price;
     state.engines.push({ level: 1, speed: 0, cap: 0 });
     state.cur = state.engines.length - 1;
-    pushLog(
-      `🟫 <b>куплен движок #${n}</b> за ${price} ⭐ · следующий столько же`,
-      true
-    );
+    pushLog(`🟫 <b>куплен движок #${n}</b> за ${price} ⭐ · следующий столько же`, true);
     pulse();
     render();
   };

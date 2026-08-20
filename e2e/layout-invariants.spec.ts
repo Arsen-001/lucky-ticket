@@ -258,7 +258,11 @@ test('nothing in the cube claim strip takes a second line', async ({ page }) => 
   test.setTimeout(CUBE_TEST_TIMEOUT);
   await page.setViewportSize({ width: 320, height: 900 });
   await page.context().addCookies([
-    { name: 'locale', value: 'uk', url: page.url().startsWith('http') ? page.url() : 'http://localhost:3000' },
+    {
+      name: 'locale',
+      value: 'uk',
+      url: page.url().startsWith('http') ? page.url() : 'http://localhost:3000',
+    },
   ]);
   await openHome(page);
   await page.waitForTimeout(SETTLE_MS);
@@ -267,7 +271,9 @@ test('nothing in the cube claim strip takes a second line', async ({ page }) => 
     // Both states of the strip stay mounted and toggle `hidden`, so the
     // producing one is readable without touching the DOM: the mock's second
     // engine is mid-cycle while the first has tickets waiting.
-    const strips = [...document.querySelectorAll('[data-engine-slide] .engine-card-cube-face--front div')]
+    const strips = [
+      ...document.querySelectorAll('[data-engine-slide] .engine-card-cube-face--front div'),
+    ]
       .filter(d => d.querySelector('svg.lucide-clock, svg.lucide-clock-icon'))
       .filter(d => d.getBoundingClientRect().height > 0);
     const strip = strips[0];
@@ -278,12 +284,18 @@ test('nothing in the cube claim strip takes a second line', async ({ page }) => 
     return {
       count: spans.length,
       wrapped: spans
-        .map(s => ({ text: (s.textContent ?? '').trim().slice(0, 24), boxes: s.getClientRects().length }))
+        .map(s => ({
+          text: (s.textContent ?? '').trim().slice(0, 24),
+          boxes: s.getClientRects().length,
+        }))
         .filter(s => s.boxes > 1),
     };
   });
 
-  expect(m, 'no producing claim strip on screen — the mock account owns mid-cycle engines').not.toBeNull();
+  expect(
+    m,
+    'no producing claim strip on screen — the mock account owns mid-cycle engines'
+  ).not.toBeNull();
   if (!m) return;
   expect(m.count, 'claim strip has no text to measure').toBeGreaterThan(0);
   expect(
