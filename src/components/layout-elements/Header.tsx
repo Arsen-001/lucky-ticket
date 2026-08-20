@@ -1,7 +1,6 @@
 'use client';
 
 import { useRouter } from 'next/navigation';
-import { useState } from 'react';
 import { Menu } from 'lucide-react';
 import { twMerge } from 'tailwind-merge';
 import { useGetMeQuery } from '@/api/me.api';
@@ -20,7 +19,6 @@ import { LuckyPlayerIcon } from '@/components/shared/icons/LuckyPlayerIcon';
 import { BoltIcon } from '@/components/shared/icons/BoltIcon';
 import { CoinIcon } from '@/components/shared/icons/CoinIcon';
 import { TelegramStarIcon } from '@/components/shared/icons/TelegramStarIcon';
-import { StarsTopUpFlow } from '@/components/pages/tabs/home/StarsTopUpFlow';
 import { routes } from '@/constants/routes';
 import { useAppDispatch } from '@/lib/rtk/hooks';
 import { useAppTranslations } from '@/hooks/useAppTranslations';
@@ -37,7 +35,6 @@ export function Header({ className }: ClassNameProps) {
   const { data: me, isLoading } = useGetMeQuery();
   const { data: notificationsSummary } = useGetNotificationsSummaryQuery();
   const { data: stakesData } = useGetStakesQuery();
-  const [starsModalOpen, setStarsModalOpen] = useState(false);
   // `me` is client-fetched (absent during SSR), so keep showing skeletons until
   // mount — otherwise the server skeleton vs the hydrated content mismatch.
   const mounted = useMounted();
@@ -177,12 +174,18 @@ export function Header({ className }: ClassNameProps) {
             loading={meLoading}
             skeleton={<Skeleton variant="rounded-rectangle" className="h-7 w-14" />}
           >
+            {/* A balance pill opens that balance's own screen — the same tap
+                the wallet's stars card makes. This one used to throw the Buy
+                sheet over whatever screen the player stood on: the only pill of
+                the three that answered "want to pay?" to a tap asking "how many
+                do I have?", and it left `/stars` (totals, history) reachable
+                from the drawer alone. */}
             <HeaderStatPill
               accent="purple"
               icon={<TelegramStarIcon size={18} />}
               value={formatCompact(me?.telegramStars ?? 0)}
-              onClick={() => setStarsModalOpen(true)}
-              ariaLabel={t('add stars')}
+              onClick={() => router.push(routes.stars)}
+              ariaLabel={t('stars wallet')}
             />
           </SkeletonSuspense>
         </div>
@@ -213,12 +216,6 @@ export function Header({ className }: ClassNameProps) {
           </>
         )}
       </Button>
-
-      <StarsTopUpFlow
-        open={starsModalOpen}
-        onClose={() => setStarsModalOpen(false)}
-        currentStars={me?.telegramStars ?? 0}
-      />
     </div>
   );
 }

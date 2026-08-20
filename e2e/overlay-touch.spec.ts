@@ -19,8 +19,8 @@ import { appDialogs } from './helpers';
  */
 test.use({ hasTouch: true, isMobile: true });
 
-/** Matches "Add Stars" / "Пополнить Stars" / "Stars aufladen". */
-const STARS_PILL = /stars/i;
+/** Matches the wallet card's "Buy more" / "Купить ещё". */
+const BUY_MORE = /buy more|купить ещё/i;
 /** Matches "Buy Stars" / "Купить Звёзды" / "Stars kaufen". */
 const SHEET_HEADING = /stars|звёзды/i;
 
@@ -42,7 +42,27 @@ async function clearAutoPopups(page: Page) {
       quietRounds += 1;
     } else {
       quietRounds = 0;
-      await page.keyboard.press('Escape');
+      // First-run steps (language → welcome gifts → tour) ignore Escape by
+      // design: they are a flow, not a dismissable popup, and a fresh browser
+      // profile always starts inside one. Without this the loop pressed Escape
+      // at the language picker until it gave up, and every test in this file
+      // failed before it began (measured 20.08.2026 — it was failing on the old
+      // header-pill opener too, so this is not new breakage).
+      const step = portal.getByRole('button', {
+        name: /^(continue|claim gifts|skip tour)$/i,
+      });
+      // Escape when the click misses: a tournament result sits ON TOP of the
+      // first-run flow and carries a "Continue" of its own, so the step button
+      // can be matched and covered at the same time. Falling back keeps the
+      // loop moving instead of clicking at an intercepted button forty times.
+      const clicked =
+        (await step.count()) > 0 &&
+        (await step
+          .last()
+          .click({ timeout: 2_000 })
+          .then(() => true)
+          .catch(() => false));
+      if (!clicked) await page.keyboard.press('Escape');
     }
     // Past the close animation, after which the overlay leaves the DOM.
     await page.waitForTimeout(400);
@@ -50,16 +70,22 @@ async function clearAutoPopups(page: Page) {
   expect(await portal.count(), 'auto-surfaced popups never stopped coming').toBe(0);
 }
 
-/** Opens the Stars sheet from the header pill with a real tap. */
-async function tapStarsPill(page: Page) {
-  await page.goto('/');
-  await expect(page.getByRole('button', { name: STARS_PILL })).toBeVisible();
+/**
+ * Opens the Stars sheet with a real tap — from the wallet's stars card, which
+ * is where a tap still opens it. The header's ⭐ pill stopped doing so on
+ * 20.08.2026: it opens the Stars screen now, the way the AP and LC pills open
+ * theirs. The sheet under test is the same component either way.
+ */
+async function openStarsSheet(page: Page) {
+  await page.goto('/wallet');
+  const buyMore = page.getByRole('button', { name: BUY_MORE });
+  await expect(buyMore, 'the wallet never rendered its stars card').toBeEnabled();
   await clearAutoPopups(page);
-  await page.getByRole('button', { name: STARS_PILL }).tap();
+  await buyMore.tap();
 }
 
 test('the Stars sheet survives the tap that opened it', async ({ page }) => {
-  await tapStarsPill(page);
+  await openStarsSheet(page);
 
   const sheet = page.getByRole('heading', { name: SHEET_HEADING });
   await expect(sheet, 'the sheet never opened').toHaveCount(1);
@@ -72,7 +98,7 @@ test('the Stars sheet survives the tap that opened it', async ({ page }) => {
 });
 
 test('the amount field keeps focus while the sheet is open', async ({ page }) => {
-  await tapStarsPill(page);
+  await openStarsSheet(page);
   const amount = page.locator('#portal-root input');
   await amount.tap();
   await expect(amount, 'tapping the field did not focus it').toBeFocused();
@@ -88,7 +114,7 @@ test('the amount field keeps focus while the sheet is open', async ({ page }) =>
 });
 
 test('tapping the backdrop still closes the Stars sheet', async ({ page }) => {
-  await tapStarsPill(page);
+  await openStarsSheet(page);
   const sheet = page.getByRole('heading', { name: SHEET_HEADING });
   await expect(sheet, 'the sheet never opened').toHaveCount(1);
 

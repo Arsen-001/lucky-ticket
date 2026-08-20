@@ -47,6 +47,17 @@ export function StarsTransactionHistory({
   const filtered = useMemo(() => filterTransactions(transactions, filter), [transactions, filter]);
   const visible = filtered.slice(0, page * PAGE_SIZE);
   const hasMore = visible.length < filtered.length;
+  // How many rows sit behind each chip, so a tap on «Spent» is an informed one
+  // — an empty list after the tap reads as a broken filter, not as "nothing
+  // spent yet".
+  const counts = useMemo(
+    () =>
+      FILTERS.reduce<Record<string, number>>(
+        (acc, f) => ({ ...acc, [f]: filterTransactions(transactions, f).length }),
+        {}
+      ),
+    [transactions]
+  );
 
   return (
     <section className="flex flex-col gap-3">
@@ -72,7 +83,19 @@ export function StarsTransactionHistory({
                 : 'bg-background-overlay/60 text-pink-secondary hover:text-white border border-white/5'
             )}
           >
-            {t(`stars filter ${f}`)}
+            <span className="inline-flex items-center gap-1.5">
+              {t(`stars filter ${f}`)}
+              {!loading && (
+                <span
+                  className={twMerge(
+                    'rounded-full px-1.5 py-0.5 text-[10px] font-extrabold tabular-nums',
+                    filter === f ? 'bg-white/25 text-white' : 'bg-white/10 text-white/70'
+                  )}
+                >
+                  {counts[f] ?? 0}
+                </span>
+              )}
+            </span>
           </button>
         ))}
       </div>

@@ -160,13 +160,32 @@ async function openHome(page: Page) {
  * mount on top of the exit dialog and swallow its click. So: walk it if it is
  * there, ignore it if it is not.
  */
-async function completeFirstRun(page: Page) {
-  for (const name of [/^continue$/i, /^claim gifts$/i, /^skip tour$/i]) {
-    const button = page.getByRole('button', { name });
-    if (await button.isVisible().catch(() => false)) {
-      await button.click().catch(() => {});
-      await page.waitForTimeout(600);
-    }
+async function completeFirstRun(page: Page, { escape = true } = {}) {
+  // The flow is language → welcome gifts → tour, and every step ignores Escape
+  // by design. Two things this has to survive, both of which silently skipped
+  // the whole flow before (measured 20.08.2026, with two tests here red on
+  // `main` because of it): the step buttons live inside dialogs, and an
+  // auto-surfaced tournament result stacks ON TOP carrying a "Continue" of its
+  // own — so a step button can be matched and covered at the same time. Look
+  // the buttons up inside the dialogs, click the topmost, and fall back to
+  // Escape (which the results DO honour) when the click misses.
+  for (let i = 0; i < 12 && (await appDialogs(page).count()); i++) {
+    const step = appDialogs(page).getByRole('button', {
+      name: /^(continue|claim gifts|skip tour)$/i,
+    });
+    const clicked =
+      (await step.count()) > 0 &&
+      (await step
+        .last()
+        .click({ timeout: 2_000 })
+        .then(() => true)
+        .catch(() => false));
+    // `escape: false` on drawer routes (`/wallet`, `/stars`…): Escape there
+    // closes the DRAWER and navigates the test back to home, which reads as
+    // "the popup would not go away".
+    if (!clicked && escape) await page.keyboard.press('Escape');
+    if (!clicked && !escape) break;
+    await page.waitForTimeout(450);
   }
 }
 
@@ -206,8 +225,9 @@ async function pressBackUntil(page: Page, expected: RegExp) {
 async function tapPastPopups(page: Page, target: Locator) {
   for (let attempt = 0; attempt < 6; attempt++) {
     if (await appDialogs(page).count()) {
-      await page.keyboard.press('Escape');
-      await page.waitForTimeout(400);
+      // Same walker as the first run: a page load can land back inside the
+      // welcome flow, and Escape alone never leaves it.
+      await completeFirstRun(page);
       continue;
     }
     try {
@@ -282,15 +302,26 @@ test('an open sheet swallows the press instead of navigating', async ({ page }) 
   await installTelegram(page);
   await openHome(page);
 
-  await tapPastPopups(page, page.getByRole('button', { name: /stars/i }));
-  const sheet = page.getByRole('heading', { name: /stars/i });
+  // The wallet, not the header: since 20.08.2026 the ⭐ pill opens the Stars
+  // SCREEN, so the sheet is opened where a tap still opens one. `openHome` has
+  // already walked the first run and the popups — and the walker must not run
+  // here, because Escape on a drawer route closes the drawer and sends the test
+  // back to home.
+  await page.goto('/wallet');
+  const buyMore = page.getByRole('button', { name: /buy more|купить ещё/i });
+  await expect(buyMore).toBeEnabled();
+  // A reload re-opens the welcome flow (mock `me` never records the choice),
+  // and it stacks over the wallet — walk it, but without Escape.
+  await completeFirstRun(page, { escape: false });
+  await buyMore.click();
+  const sheet = page.getByRole('heading', { name: /stars|звёзды/i });
   await expect(sheet).toBeVisible();
 
   await pressBack(page);
   // The sheet closes and the page stays put: navigating out from under an open
   // dialog is what leaves a portal stranded on the next screen.
   await expect(sheet).toHaveCount(0);
-  await expect(page).toHaveURL(/\/$/);
+  await expect(page).toHaveURL(/\/wallet$/);
 });
 
 test('at the end of the road the app asks instead of vanishing', async ({ page }) => {
