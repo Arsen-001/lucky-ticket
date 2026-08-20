@@ -10,6 +10,8 @@ import { duelClock } from '@/utils/global/duel.utils';
 export interface DuelWaitingProps {
   /** Лобби, в которое зовут. */
   duelId: string;
+  /** Открыть список друзей сразу — лобби создавали именно ради них. */
+  openInvite?: boolean;
   stake: number;
   seconds: number;
   onCancel: () => void;
@@ -26,9 +28,16 @@ export interface DuelWaitingProps {
  * Билеты в этот момент НЕ списаны, и об этом сказано прямо: отменить ожидание
  * должно быть не страшно.
  */
-export function DuelWaiting({ duelId, stake, seconds, onCancel, className }: DuelWaitingProps) {
+export function DuelWaiting({
+  duelId,
+  openInvite,
+  stake,
+  seconds,
+  onCancel,
+  className,
+}: DuelWaitingProps) {
   const t = useAppTranslations();
-  const [inviting, setInviting] = useState(false);
+  const [inviting, setInviting] = useState(Boolean(openInvite));
 
   return (
     <div className={twMerge('flex h-full flex-col text-center', className)}>

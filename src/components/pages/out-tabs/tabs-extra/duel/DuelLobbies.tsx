@@ -17,7 +17,8 @@ import {
 } from '@/api/duel.api';
 
 export interface DuelLobbiesProps {
-  onEnter: (duelId: string) => void;
+  /** `invite` — открыть лобби и сразу показать список друзей. */
+  onEnter: (duelId: string, options?: { invite?: boolean }) => void;
 }
 
 /**
@@ -45,12 +46,12 @@ export function DuelLobbies({ onEnter }: DuelLobbiesProps) {
   const min = data?.stakeMin ?? 1;
   const max = data?.stakeMax ?? 5;
 
-  const handleCreate = async () => {
+  const handleCreate = async (invite = false) => {
     setBusy(true);
     try {
       const duel = await create({ stake }).unwrap();
       setPicking(false);
-      onEnter(duel.id);
+      onEnter(duel.id, { invite });
     } catch {
       toast.error(t('duel action failed'));
     } finally {
@@ -117,8 +118,20 @@ export function DuelLobbies({ onEnter }: DuelLobbiesProps) {
         <p className="text-disabled text-xs leading-relaxed">{t('duel stake note')}</p>
 
         <div className="mt-auto flex flex-col gap-2">
-          <Button className="h-14" loading={busy} onClick={handleCreate}>
+          <Button className="h-14" loading={busy} onClick={() => handleCreate()}>
             {t('duel open lobby')}
+          </Button>
+          {/* Тот же самый ход, но с ответом на «а с кем играть»: лобби
+              открывается и сразу показывает, кого позвать. Ждать случайного
+              соперника после этого никто не мешает — приглашение ожидания не
+              отменяет. */}
+          <Button
+            variant="secondary"
+            className="h-13"
+            loading={busy}
+            onClick={() => handleCreate(true)}
+          >
+            {t('duel play with friend')}
           </Button>
           <Button variant="transparent" className="h-12" onClick={() => setPicking(false)}>
             {t('duel back')}

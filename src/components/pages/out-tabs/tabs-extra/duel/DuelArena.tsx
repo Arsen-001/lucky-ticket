@@ -23,6 +23,8 @@ const POLL_FAST = 600;
 export interface DuelArenaProps {
   duelId: string;
   tickets: number;
+  /** Лобби открыли ради конкретных людей — список друзей показываем сразу. */
+  openInvite?: boolean;
   onLeave: () => void;
 }
 
@@ -34,7 +36,7 @@ export interface DuelArenaProps {
  * одна кнопка «Я готов». Шаг не читается как лишний, потому что ничего не
  * переключается: меняется только то, что лежит под руками.
  */
-export function DuelArena({ duelId, tickets, onLeave }: DuelArenaProps) {
+export function DuelArena({ duelId, tickets, openInvite, onLeave }: DuelArenaProps) {
   const t = useAppTranslations();
   const toast = useToast();
   const [sending, setSending] = useState(false);
@@ -93,6 +95,7 @@ export function DuelArena({ duelId, tickets, onLeave }: DuelArenaProps) {
         <DuelGameHeader tickets={tickets} />
         <DuelWaiting
           duelId={duelId}
+          openInvite={openInvite}
           stake={data.stake}
           seconds={data.waitingSeconds}
           onCancel={onLeave}

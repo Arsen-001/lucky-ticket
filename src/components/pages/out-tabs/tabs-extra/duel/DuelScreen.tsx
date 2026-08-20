@@ -18,6 +18,8 @@ export function DuelScreen() {
   const t = useAppTranslations();
   const enabled = useFeature('duel');
   const [duelId, setDuelId] = useState<string | null>(null);
+  // Лобби открыли кнопкой «играть с другом» — список друзей показываем сразу.
+  const [inviteOnEnter, setInviteOnEnter] = useState(false);
   // Остаток билетов держит шапку игры на всех фазах. Запрос тот же, что у
   // списка лобби, поэтому лишнего похода на сервер нет — RTK отдаёт кеш.
   const { data: lobbies } = useGetDuelLobbiesQuery();
@@ -26,7 +28,10 @@ export function DuelScreen() {
   // создать второй, а сам матч продолжает идти по часам.
   const active = lobbies?.active;
   useEffect(() => {
-    if (active && active.status !== 'WAITING') setDuelId(active.id);
+    if (active && active.status !== 'WAITING') {
+      setInviteOnEnter(false);
+      setDuelId(active.id);
+    }
   }, [active?.id, active?.status]);
 
   if (!enabled) {
@@ -45,10 +50,19 @@ export function DuelScreen() {
         <DuelArena
           duelId={duelId}
           tickets={lobbies?.tickets ?? 0}
-          onLeave={() => setDuelId(null)}
+          openInvite={inviteOnEnter}
+          onLeave={() => {
+            setDuelId(null);
+            setInviteOnEnter(false);
+          }}
         />
       ) : (
-        <DuelLobbies onEnter={setDuelId} />
+        <DuelLobbies
+          onEnter={(id, options) => {
+            setInviteOnEnter(Boolean(options?.invite));
+            setDuelId(id);
+          }}
+        />
       )}
     </div>
   );
