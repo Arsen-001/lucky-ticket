@@ -1,6 +1,6 @@
 'use client';
 
-import { Check, Copy, Share2, Star, UserPlus } from 'lucide-react';
+import { Check, Copy, Crown, Share2, Star, UserPlus } from 'lucide-react';
 import { BoltIcon } from '@/components/shared/icons/BoltIcon';
 import type { ReactNode } from 'react';
 import { twMerge } from 'tailwind-merge';
@@ -113,22 +113,46 @@ export function FriendsHeroCard() {
             </span>
           </div>
         ) : (
-          // One line, no Regular/Premium split. The two rows it replaced said
-          // the same thing twice and made the Premium invite look like the
-          // real offer next to a lesser one — the screen states what an invite
-          // pays, and that is one number.
-          <div className="flex items-center gap-2 rounded-lg px-2 py-2">
-            <div className="bg-electric-pink/15 flex-center h-6 w-6 flex-shrink-0 rounded-md">
-              <UserPlus size={12} className="text-electric-pink" strokeWidth={2.4} />
+          <>
+            {/* Обычный друг — всегда первой строкой и полным контрастом. Он
+                правило, а не «улов поменьше»: именно так эта карточка стала
+                однострочной 06.08.2026, когда удвоение за Premium сняли. */}
+            <div className="flex items-center gap-2 rounded-lg px-2 py-2">
+              <div className="bg-electric-pink/15 flex-center h-6 w-6 flex-shrink-0 rounded-md">
+                <UserPlus size={12} className="text-electric-pink" strokeWidth={2.4} />
+              </div>
+              <span className="flex-1 truncate text-[11px] font-semibold text-white/85">
+                {t('per invite')}
+              </span>
+              <div className="flex flex-shrink-0 items-center gap-1.5">
+                <RewardChip icon={<BoltIcon size={16} />} value={`+${rewards.ap}`} />
+                <RewardChip icon={<TelegramStarIcon size={11} />} value={`+${rewards.stars}`} />
+              </div>
             </div>
-            <span className="flex-1 truncate text-[11px] font-semibold text-white/85">
-              {t('per invite')}
-            </span>
-            <div className="flex flex-shrink-0 items-center gap-1.5">
-              <RewardChip icon={<BoltIcon size={16} />} value={`+${rewards.ap}`} />
-              <RewardChip icon={<TelegramStarIcon size={11} />} value={`+${rewards.stars}`} />
-            </div>
-          </div>
+
+            {/* Вторая строка появляется, ТОЛЬКО пока пара Premium реально
+                больше обычной. Удвоение вернули 20.08.2026, и выключается оно
+                двумя числами в панели — экран должен замолчать сам, иначе он
+                снова начнёт обещать бонус, которого не платят.
+                @see useInviteRewards */}
+            {rewards.hasPremiumBonus && (
+              <div className="flex items-center gap-2 rounded-lg px-2 pb-2">
+                <div className="bg-gold/15 flex-center h-6 w-6 flex-shrink-0 rounded-md">
+                  <Crown size={12} className="text-gold" strokeWidth={2.4} />
+                </div>
+                <span className="flex-1 truncate text-[11px] font-semibold text-white/60">
+                  {t('friend with premium')}
+                </span>
+                <div className="flex flex-shrink-0 items-center gap-1.5">
+                  <RewardChip icon={<BoltIcon size={16} />} value={`+${rewards.premiumAp}`} />
+                  <RewardChip
+                    icon={<TelegramStarIcon size={11} />}
+                    value={`+${rewards.premiumStars}`}
+                  />
+                </div>
+              </div>
+            )}
+          </>
         )}
       </div>
 

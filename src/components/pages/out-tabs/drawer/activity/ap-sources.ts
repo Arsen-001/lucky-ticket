@@ -39,7 +39,7 @@ export interface ApSource {
   query?: string;
 }
 
-const { apRewards, inviteActivityPoints } = GlobalConstants;
+const { apRewards, inviteActivityPoints, invitePremiumActivityPoints } = GlobalConstants;
 
 /** Renders a tiered rate as a "+min–max" range across Bronze→Diamond. */
 const tierRange = (byTier: Record<ActivityTier, number>): string => {
@@ -145,7 +145,13 @@ export const AP_SOURCES: ApSource[] = [
     category: 'social',
     Icon: UserPlus,
     labelKey: 'ap source invite',
-    ap: `+${inviteActivityPoints}`,
+    // Диапазоном, как у тиров выше: нижняя граница — обычный друг, верхняя —
+    // друг с Telegram Premium, который платит вдвое. Одно число здесь
+    // занижало половину случаев.
+    ap:
+      invitePremiumActivityPoints > inviteActivityPoints
+        ? `+${inviteActivityPoints}–${invitePremiumActivityPoints}`
+        : `+${inviteActivityPoints}`,
     hintKey: 'per friend invited',
     route: routes.inviteFriends,
   },

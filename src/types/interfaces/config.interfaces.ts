@@ -55,9 +55,14 @@ export interface PublicConfig {
     signup: {
       ap: number;
       stars: number;
-      /** @deprecated Equal to `ap`; the reward no longer doubles for Premium. */
+      /**
+       * Paid INSTEAD of `ap` when the invited friend has Telegram Premium —
+       * it replaces the flat value, it does not add to it. Equal to `ap`
+       * means the bonus is switched off, and the screen then says nothing
+       * about Premium at all. @see useInviteRewards
+       */
       premiumAp: number;
-      /** @deprecated Equal to `stars`. */
+      /** Paid instead of `stars` for the same friend. */
       premiumStars: number;
     };
     /** True when the per-invite reward ladder replaces the flat signup reward. */

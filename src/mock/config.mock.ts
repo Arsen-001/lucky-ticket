@@ -35,10 +35,10 @@ const getPublicConfig = (): PublicConfig => ({
     signup: {
       ap: GlobalConstants.inviteActivityPoints,
       stars: GlobalConstants.inviteStars,
-      // Equal to the flat pair on purpose — the doubling is gone, and a mock
-      // that still showed 20/2 would be the only place it survived.
-      premiumAp: GlobalConstants.inviteActivityPoints,
-      premiumStars: GlobalConstants.inviteStars,
+      // Больше плоской пары — иначе вторая строка карточки друзей в dev не
+      // рисуется вообще, и её не на чем проверить.
+      premiumAp: GlobalConstants.invitePremiumActivityPoints,
+      premiumStars: GlobalConstants.invitePremiumStars,
     },
     hasRewardLadder: false,
     tournamentLcPct: GlobalConstants.referralTournamentLcPercentage,

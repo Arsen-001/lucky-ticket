@@ -184,13 +184,17 @@ export const GlobalConstants = {
    */
   maxFlyingTickets: 10,
   /**
-   * What one invited friend pays the inviter, once, at registration. FLAT —
-   * a Telegram Premium invitee used to pay double, which priced a friend by
-   * something the inviter cannot influence. Display fallback only; the live
-   * value rides on `GET /config`. @see useInviteRewards
+   * What one invited friend pays the inviter, once, at registration.
+   *
+   * A Telegram Premium invitee pays the `premium*` pair instead — dropped on
+   * 06.08.2026, restored on 20.08.2026. Display fallback only; the live values
+   * ride on `GET /config` and the screen states the Premium pair ONLY while it
+   * is actually bigger. @see useInviteRewards
    */
   inviteActivityPoints: 10,
   inviteStars: 1,
+  invitePremiumActivityPoints: 20,
+  invitePremiumStars: 2,
   // Stake values are sourced from the single config (`appConfig.stakes`) —
   // change them there, not here.
   stakeDurationMinMonths: appConfig.stakes.durationMinMonths,
