@@ -1,9 +1,9 @@
 'use client';
 
-import { DuelPlayerAvatar } from '@/components/pages/out-tabs/tabs-extra/duel/DuelPlayerAvatar';
 import { Button } from '@/components/shared/buttons/Button';
-import { DuelStakeBadge } from '@/components/pages/out-tabs/tabs-extra/duel/DuelStakeBadge';
+import { DuelPlayerAvatar } from '@/components/pages/out-tabs/tabs-extra/duel/DuelPlayerAvatar';
 import { useAppTranslations } from '@/hooks/useAppTranslations';
+import { duelClock } from '@/utils/global/duel.utils';
 import type { DuelLobby } from '@/types/interfaces/duel.interfaces';
 
 export interface DuelLobbyRowProps {
@@ -15,8 +15,8 @@ export interface DuelLobbyRowProps {
 /**
  * Одна строка списка: кто ждёт, сколько уже ждёт и во что обойдётся вход.
  *
- * Ставка стоит рядом с кнопкой намеренно — цена читается в том же взгляде,
- * которым выбирают «войти», а не после нажатия.
+ * Ожидание и ставка идут одной строкой под именем — так их читают за один
+ * взгляд, вместе с решением «войти или нет».
  */
 export function DuelLobbyRow({ lobby, busy, onJoin }: DuelLobbyRowProps) {
   const t = useAppTranslations();
@@ -26,15 +26,15 @@ export function DuelLobbyRow({ lobby, busy, onJoin }: DuelLobbyRowProps) {
       <DuelPlayerAvatar name={lobby.host.name} avatarUrl={lobby.host.avatarUrl || undefined} />
 
       <span className="min-w-0 flex-1">
-        <span className="block truncate text-sm font-bold">{lobby.host.name}</span>
-        <span className="text-disabled block text-[11px] tabular-nums">
-          {t('duel waiting seconds', { count: lobby.waitingSeconds })}
+        <span className="block truncate text-[15px] font-bold">{lobby.host.name}</span>
+        <span className="text-disabled block text-[12px]">
+          {t('duel waiting for', { time: duelClock(lobby.waitingSeconds) })} ·{' '}
+          <span className="text-gold font-bold tabular-nums">{lobby.stake}</span>{' '}
+          {t('duel stake tickets', { count: lobby.stake }).replace(/^\d+\s*/, '')}
         </span>
       </span>
 
-      <DuelStakeBadge stake={lobby.stake} />
-
-      <Button className="h-9 px-4 text-xs" loading={busy} onClick={() => onJoin(lobby.id)}>
+      <Button className="h-10 px-5 text-[13px]" loading={busy} onClick={() => onJoin(lobby.id)}>
         {t('duel join')}
       </Button>
     </div>

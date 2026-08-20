@@ -4,9 +4,9 @@ import { useState } from 'react';
 import { twMerge } from 'tailwind-merge';
 import { Button } from '@/components/shared/buttons/Button';
 import { QueryErrorState } from '@/components/shared/error/QueryErrorState';
+import { DuelGameHeader } from '@/components/pages/out-tabs/tabs-extra/duel/DuelGameHeader';
 import { DuelLobbyRow } from '@/components/pages/out-tabs/tabs-extra/duel/DuelLobbyRow';
-import { DuelStakeBadge } from '@/components/pages/out-tabs/tabs-extra/duel/DuelStakeBadge';
-import { Ticket } from '@/components/shared/icons/Ticket';
+import { duelClock } from '@/utils/global/duel.utils';
 import { useAppTranslations } from '@/hooks/useAppTranslations';
 import { useToast } from '@/hooks/useToast';
 import {
@@ -74,22 +74,11 @@ export function DuelLobbies({ onEnter }: DuelLobbiesProps) {
   // данных `tickets` равен нулю, и кнопка «Создать лобби» просто гасла.
   if (isError) return <QueryErrorState onRetry={() => refetch()} />;
 
-  /** Шапка игры: лига слева, свой запас билетов справа. */
-  const header = (
-    <div className="flex items-center justify-between px-0.5">
-      <span className="text-pink-secondary text-[11px] font-black tracking-[0.14em] uppercase">
-        {t('duel league bronze')}
-      </span>
-      <span className="text-gold flex items-center gap-1.5 text-sm font-extrabold tabular-nums">
-        <Ticket type="bronze" width={26} height={13} className="h-auto w-[26px]" />
-        {tickets}
-      </span>
-    </div>
-  );
+  const header = <DuelGameHeader tickets={tickets} />;
 
   if (picking) {
     return (
-      <div className="flex min-h-full flex-col gap-3">
+      <div className="flex h-full flex-col gap-3">
         {header}
 
         <span className="text-pink-secondary text-[10px] font-black tracking-[0.16em] uppercase">
@@ -140,12 +129,12 @@ export function DuelLobbies({ onEnter }: DuelLobbiesProps) {
   }
 
   return (
-    <div className="flex min-h-full flex-col gap-3">
+    <div className="flex h-full flex-col gap-3">
       {header}
 
-      <div className="text-pink-secondary flex items-baseline justify-between text-[10px] font-black tracking-[0.16em] uppercase">
+      <div className="text-disabled flex items-baseline justify-between text-[10.5px] font-black tracking-[0.16em] uppercase">
         <span>{t('duel open lobbies')}</span>
-        <span className="tabular-nums">{data?.lobbies.length ?? 0}</span>
+        <span>{t('duel stake column')}</span>
       </div>
 
       {data?.own && (
@@ -155,12 +144,13 @@ export function DuelLobbies({ onEnter }: DuelLobbiesProps) {
           className="border-gold/45 from-gold/10 flex items-center gap-3 rounded-2xl border bg-gradient-to-b to-transparent p-3 text-left"
         >
           <span className="min-w-0 flex-1">
-            <span className="block text-sm font-bold">{t('duel your lobby')}</span>
-            <span className="text-disabled block text-[11px]">
-              {t('duel waiting seconds', { count: data.own.waitingSeconds })}
+            <span className="block text-[15px] font-bold">{t('duel your lobby')}</span>
+            <span className="text-disabled block text-[12px]">
+              {t('duel waiting for', { time: duelClock(data.own.waitingSeconds) })} ·{' '}
+              <span className="text-gold font-bold tabular-nums">{data.own.stake}</span>{' '}
+              {t('duel stake tickets', { count: data.own.stake }).replace(/^\d+\s*/, '')}
             </span>
           </span>
-          <DuelStakeBadge stake={data.own.stake} />
         </button>
       )}
 
@@ -170,11 +160,13 @@ export function DuelLobbies({ onEnter }: DuelLobbiesProps) {
         </p>
       )}
 
-      {data?.lobbies.map(lobby => (
-        <DuelLobbyRow key={lobby.id} lobby={lobby} busy={busy} onJoin={handleJoin} />
-      ))}
+      <div className="scrollbar-hidden flex flex-1 flex-col gap-2.5 overflow-y-auto">
+        {data?.lobbies.map(lobby => (
+          <DuelLobbyRow key={lobby.id} lobby={lobby} busy={busy} onJoin={handleJoin} />
+        ))}
+      </div>
 
-      <div className="mt-auto flex flex-col gap-2 pt-2">
+      <div className="flex flex-col gap-2 pt-1">
         {!data?.own && (
           <p className="text-pink-secondary px-1 text-[11px] leading-snug">
             {t('duel lobby hint')}

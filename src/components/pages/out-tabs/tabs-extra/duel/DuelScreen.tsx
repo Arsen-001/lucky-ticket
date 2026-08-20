@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import { useGetDuelLobbiesQuery } from '@/api/duel.api';
 import { useAppTranslations } from '@/hooks/useAppTranslations';
 import { useFeature } from '@/hooks/useFeature';
 import { DuelLobbies } from './DuelLobbies';
@@ -17,6 +18,9 @@ export function DuelScreen() {
   const t = useAppTranslations();
   const enabled = useFeature('duel');
   const [duelId, setDuelId] = useState<string | null>(null);
+  // Остаток билетов держит шапку игры на всех фазах. Запрос тот же, что у
+  // списка лобби, поэтому лишнего похода на сервер нет — RTK отдаёт кеш.
+  const { data: lobbies } = useGetDuelLobbiesQuery();
 
   if (!enabled) {
     return (
@@ -27,9 +31,15 @@ export function DuelScreen() {
   }
 
   return (
-    <div className="flex min-h-full flex-col items-stretch pb-2">
+    // Ровно высота прокручиваемой области, а не «не меньше»: иначе нижняя
+    // кнопка встаёт по концу контента и под ней остаётся пустое поле.
+    <div className="flex h-full flex-col items-stretch pb-2">
       {duelId ? (
-        <DuelArena duelId={duelId} onLeave={() => setDuelId(null)} />
+        <DuelArena
+          duelId={duelId}
+          tickets={lobbies?.tickets ?? 0}
+          onLeave={() => setDuelId(null)}
+        />
       ) : (
         <DuelLobbies onEnter={setDuelId} />
       )}

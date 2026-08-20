@@ -1,13 +1,15 @@
 'use client';
 
+import { twMerge } from 'tailwind-merge';
 import { Button } from '@/components/shared/buttons/Button';
-import { DuelStakeBadge } from '@/components/pages/out-tabs/tabs-extra/duel/DuelStakeBadge';
 import { useAppTranslations } from '@/hooks/useAppTranslations';
+import { duelClock } from '@/utils/global/duel.utils';
 
 export interface DuelWaitingProps {
   stake: number;
   seconds: number;
   onCancel: () => void;
+  className?: string;
 }
 
 /**
@@ -20,11 +22,11 @@ export interface DuelWaitingProps {
  * Билеты в этот момент НЕ списаны, и об этом сказано прямо: отменить ожидание
  * должно быть не страшно.
  */
-export function DuelWaiting({ stake, seconds, onCancel }: DuelWaitingProps) {
+export function DuelWaiting({ stake, seconds, onCancel, className }: DuelWaitingProps) {
   const t = useAppTranslations();
 
   return (
-    <div className="flex min-h-full flex-col text-center">
+    <div className={twMerge('flex h-full flex-col text-center', className)}>
       {/* Поиск — по центру экрана, отмена — под большим пальцем: одно
           «justify-center» на весь блок держало кнопку посередине. */}
       <div className="flex flex-1 flex-col items-center justify-center gap-4">
@@ -36,15 +38,13 @@ export function DuelWaiting({ stake, seconds, onCancel }: DuelWaitingProps) {
 
         <div className="flex flex-col items-center gap-1.5">
           <span className="text-[17px] font-extrabold">{t('duel waiting title')}</span>
-          <p className="text-pink-secondary max-w-[26ch] text-[13px] leading-snug">
-            {t('duel waiting note')}
+          <p className="text-pink-secondary max-w-[28ch] text-[13px] leading-snug">
+            {t('duel waiting blurb', { count: stake })}
           </p>
           <span className="text-gold text-[15px] font-extrabold tabular-nums">
-            {t('duel waiting seconds', { count: seconds })}
+            {duelClock(seconds)}
           </span>
         </div>
-
-        <DuelStakeBadge stake={stake} />
       </div>
 
       <Button variant="transparent" className="h-12 w-full" onClick={onCancel}>
