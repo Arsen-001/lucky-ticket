@@ -1,27 +1,3 @@
 {
-  "keys": [
-    "allow bot to message",
-    "best value",
-    "bot cannot message you",
-    "bot cannot message you description",
-    "engine ready",
-    "engine ready description",
-    "finish level tasks",
-    "finish tasks to claim hint",
-    "friends gift claim failed",
-    "friends gift subtitle",
-    "friends gift title",
-    "grand prize every finisher",
-    "level {n} of {total}",
-    "limited",
-    "limited note",
-    "offer ended",
-    "plus {n} bonus",
-    "send ticket recipient closed",
-    "sold out",
-    "steps for quest level {n}",
-    "you receive {stars}",
-    "{n} levels left",
-    "{n} tasks left to claim"
-  ]
+  "keys": []
 }
