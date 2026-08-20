@@ -126,6 +126,10 @@ export const mockDb = {
     // First-run onboarding tour: auto-shows only for a level-zero account
     // (activityPoints === 0) that hasn't seen it.
     hasSeenTour: false,
+    // The demo account is on the leaderboard's allow-list, so dev shows the
+    // board the way a named tester sees it while the master switch is off
+    // (`appConfig.leaderboard.enabled` is false, like production).
+    leaderboardAllowed: true,
     // Blocking the bot wipes the account, and the returning player is told once
     // why it is empty. `false` here because the demo account never blocked
     // anything — flip it to see the modal. @see WipeNoticeWatcher

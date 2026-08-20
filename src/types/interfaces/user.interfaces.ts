@@ -70,6 +70,14 @@ export interface MeResponse {
   /** Whether the user has completed or skipped the first-run onboarding tour. */
   hasSeenTour?: boolean;
   /**
+   * May THIS player open the leaderboard. `GET /config`'s `leaderboardEnabled`
+   * is anonymous and so can only say whether the board is open to everyone;
+   * while it is off the board is still open to the ids an admin listed, and
+   * only a signed-in response can say whether the viewer is one of them. Read
+   * it through `useLeaderboardEnabled`, never on its own.
+   */
+  leaderboardAllowed?: boolean;
+  /**
    * The account was wiped for blocking the bot and the player has not been told
    * yet. Carries no numbers on purpose — the notice explains an empty account,
    * it does not itemise the loss. Cleared by `ackWipeNotice`.
