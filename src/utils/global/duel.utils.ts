@@ -33,3 +33,19 @@ export function duelBeats(
   if (!a || !b || a === b) return null;
   return BEATS[a] === b ? { winner: a, loser: b } : { winner: b, loser: a };
 }
+
+/**
+ * Что именно ответил сервер на попытку войти в лобби.
+ *
+ * Два исхода, и путать их нельзя: «заняли» значит опоздал на секунды и стоит
+ * вернуться в список, «закрыто» значит звавший ушёл — ждать больше нечего.
+ * Пришедший по приглашению чаще встречает второе, и говорить ему «уже занято»
+ * — значит отправлять искать несуществующее место.
+ */
+export function duelJoinFailure(error: unknown): 'closed' | 'taken' | 'reserved' | 'other' {
+  const message = (error as { data?: { message?: string } })?.data?.message ?? '';
+  if (message.includes('closed')) return 'closed';
+  if (message.includes('reserved')) return 'reserved';
+  if (message.includes('taken')) return 'taken';
+  return 'other';
+}

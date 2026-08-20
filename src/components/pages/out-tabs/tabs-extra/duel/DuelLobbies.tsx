@@ -6,7 +6,7 @@ import { Button } from '@/components/shared/buttons/Button';
 import { QueryErrorState } from '@/components/shared/error/QueryErrorState';
 import { DuelGameHeader } from '@/components/pages/out-tabs/tabs-extra/duel/DuelGameHeader';
 import { DuelLobbyRow } from '@/components/pages/out-tabs/tabs-extra/duel/DuelLobbyRow';
-import { duelClock } from '@/utils/global/duel.utils';
+import { duelClock, duelJoinFailure } from '@/utils/global/duel.utils';
 import { useAppTranslations } from '@/hooks/useAppTranslations';
 import { useInFlightLock } from '@/hooks/useInFlightLock';
 import { useToast } from '@/hooks/useToast';
@@ -96,8 +96,17 @@ export function DuelLobbies({ onEnter, inviteUserId }: DuelLobbiesProps) {
     try {
       const duel = await join(id).unwrap();
       onEnter(duel.id);
-    } catch {
-      toast.error(t('duel action failed'));
+    } catch (error) {
+      const reason = duelJoinFailure(error);
+      toast.error(
+        reason === 'closed'
+          ? t('duel lobby closed')
+          : reason === 'reserved'
+            ? t('duel lobby reserved')
+            : reason === 'taken'
+              ? t('duel invite gone')
+              : t('duel action failed')
+      );
     } finally {
       lock.release(id);
     }

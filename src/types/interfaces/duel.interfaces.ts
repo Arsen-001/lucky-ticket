@@ -79,6 +79,15 @@ export interface DuelState {
   readonly readyDeadline: string | null;
   /** Сколько лобби уже ждёт соперника. Считает сервер. */
   readonly waitingSeconds: number;
+  /**
+   * Лобби ждёт ответа на вызов.
+   *
+   * Пока это так, его нельзя закрывать по уходу с экрана: приглашённый как раз
+   * идёт по ссылке, и закрытое лобби встретит его словами «уже занято».
+   */
+  readonly awaitingInvite: boolean;
+  /** Кого именно ждёт приватное лобби. `null` — открытое для всех. */
+  readonly invitedName: string | null;
   readonly winner: DuelSide | null;
   readonly winsNeeded: number;
 }

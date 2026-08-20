@@ -11,6 +11,8 @@ import { duelClock } from '@/utils/global/duel.utils';
 export interface DuelWaitingProps {
   /** Лобби, в которое зовут. */
   duelId: string;
+  /** Кого ждём поимённо: пока вызов жив, лобби закрыто для остальных. */
+  invitedName?: string | null;
   /** Открыть список друзей сразу — лобби создавали именно ради них. */
   openInvite?: boolean;
   stake: number;
@@ -31,6 +33,7 @@ export interface DuelWaitingProps {
  */
 export function DuelWaiting({
   duelId,
+  invitedName,
   openInvite,
   stake,
   seconds,
@@ -52,9 +55,15 @@ export function DuelWaiting({
         </div>
 
         <div className="flex flex-col items-center gap-1.5">
-          <span className="text-[17px] font-extrabold">{t('duel waiting title')}</span>
+          <span className="text-[17px] font-extrabold">
+            {invitedName
+              ? t('duel waiting for player', { name: invitedName })
+              : t('duel waiting title')}
+          </span>
           <p className="text-pink-secondary max-w-[28ch] text-[13px] leading-snug">
-            {t('duel waiting blurb', { count: stake })}
+            {invitedName
+              ? t('duel waiting private', { count: stake })
+              : t('duel waiting blurb', { count: stake })}
           </p>
           <span className="text-gold text-[15px] font-extrabold tabular-nums">
             {duelClock(seconds)}

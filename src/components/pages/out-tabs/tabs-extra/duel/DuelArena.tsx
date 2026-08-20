@@ -93,10 +93,17 @@ export function DuelArena({ duelId, tickets, openInvite, onLeave }: DuelArenaPro
    * у обоих. Матч доигрывается без ушедшего (@see resolve на сервере).
    */
   const statusRef = useRef<string | undefined>(undefined);
+  const awaitingInviteRef = useRef(false);
   statusRef.current = data?.status;
+  awaitingInviteRef.current = Boolean(data?.awaitingInvite);
   useEffect(
     () => () => {
-      if (statusRef.current === 'WAITING') cancel(duelId);
+      // Кроме одного случая: если позвали живого и ответ ещё не пришёл, лобби
+      // держится. Иначе выходило так, что зовущий свернул экран на минуту, а
+      // пришедший по ссылке получил «лобби уже занято».
+      if (statusRef.current === 'WAITING' && !awaitingInviteRef.current) {
+        cancel(duelId);
+      }
     },
     [duelId]
   );
@@ -146,6 +153,7 @@ export function DuelArena({ duelId, tickets, openInvite, onLeave }: DuelArenaPro
         <DuelGameHeader tickets={tickets} />
         <DuelWaiting
           duelId={duelId}
+          invitedName={data.invitedName}
           openInvite={openInvite}
           stake={data.stake}
           seconds={data.waitingSeconds}

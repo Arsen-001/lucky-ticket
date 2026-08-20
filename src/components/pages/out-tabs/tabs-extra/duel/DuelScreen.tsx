@@ -5,6 +5,7 @@ import { useRouter, useSearchParams } from 'next/navigation';
 import { useGetDuelLobbiesQuery, useJoinDuelMutation } from '@/api/duel.api';
 import { useToast } from '@/hooks/useToast';
 import { routes } from '@/constants/routes';
+import { duelJoinFailure } from '@/utils/global/duel.utils';
 import { useAppTranslations } from '@/hooks/useAppTranslations';
 import { useFeature } from '@/hooks/useFeature';
 import { DuelLobbies } from './DuelLobbies';
@@ -51,8 +52,9 @@ export function DuelScreen() {
       try {
         const duel = await join(invitedLobbyId).unwrap();
         setDuelId(duel.id);
-      } catch {
-        toast.error(t('duel invite gone'));
+      } catch (error) {
+        const reason = duelJoinFailure(error);
+        toast.error(reason === 'closed' ? t('duel lobby closed') : t('duel invite gone'));
       }
     })();
   }, [enabled, invitedLobbyId]);

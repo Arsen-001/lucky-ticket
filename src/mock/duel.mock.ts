@@ -170,6 +170,8 @@ function view(duel: MockDuel): DuelState {
     },
     readyDeadline: duel.readyAt ? new Date(duel.readyAt).toISOString() : null,
     waitingSeconds: Math.floor((Date.now() - duel.createdAt) / 1000),
+    awaitingInvite: false,
+    invitedName: null,
     winner: duel.winner,
     winsNeeded: WINS_NEEDED,
   };
