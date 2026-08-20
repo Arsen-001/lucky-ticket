@@ -4,6 +4,7 @@ import { useState } from 'react';
 import { twMerge } from 'tailwind-merge';
 import { Button } from '@/components/shared/buttons/Button';
 import { DuelInviteModal } from '@/components/pages/out-tabs/tabs-extra/duel/DuelInviteModal';
+import { DuelWriteAccessRow } from '@/components/pages/out-tabs/tabs-extra/duel/DuelWriteAccessRow';
 import { useAppTranslations } from '@/hooks/useAppTranslations';
 import { duelClock } from '@/utils/global/duel.utils';
 
@@ -65,6 +66,11 @@ export function DuelWaiting({
           того, кто сейчас не в ней. Ждать случайного соперника можно и дальше:
           приглашение не отменяет ожидания. */}
       <div className="flex flex-col gap-2">
+        {/* Просьба стоит здесь, а не в настройках: игрок как раз ждёт
+            соперника, и разрешение — это то, что позволит позвать его в
+            следующий раз. */}
+        <DuelWriteAccessRow />
+
         <Button className="h-13 w-full" onClick={() => setInviting(true)}>
           {t('duel invite players')}
         </Button>

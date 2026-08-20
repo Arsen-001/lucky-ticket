@@ -1494,6 +1494,8 @@
   "duel round theirs": "Opponent takes it",
   "duel invite players": "Invite players",
   "duel policy title": "Duel challenges",
+  "duel write access note": "Let the bot message you — without it friends cannot call you into a duel",
+  "duel write access allow": "Allow",
   "duel stat matches": "Matches",
   "duel stat wins": "Wins",
   "duel stat rate": "Win rate",

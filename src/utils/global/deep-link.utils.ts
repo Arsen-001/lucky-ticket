@@ -14,6 +14,9 @@ import { routes, type Route } from '@/constants/routes';
  */
 const DEEP_LINK_ROUTES: Record<string, (id: string) => Route> = {
   faq: id => routes.faq.getById(id),
+  // Приглашение на дуэль ведёт в КОНКРЕТНОЕ лобби, а не в список: человек
+  // нажал «принять вызов», значит он идёт играть с тем, кто позвал.
+  duel: id => routes.games.getDuelLobby(id),
   // Add more as needed, e.g.:
   // tournament: id => routes.tournaments.getById(id),
   // stake: id => routes.stakes.getById(id),

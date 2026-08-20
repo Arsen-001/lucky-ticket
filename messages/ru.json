@@ -1494,6 +1494,8 @@
   "duel round theirs": "Раунд соперника",
   "duel invite players": "Позвать игроков",
   "duel policy title": "Вызовы на дуэль",
+  "duel write access note": "Разрешите боту писать — иначе друзья не смогут позвать вас на дуэль",
+  "duel write access allow": "Разрешить",
   "duel stat matches": "Матчей",
   "duel stat wins": "Побед",
   "duel stat rate": "Процент побед",

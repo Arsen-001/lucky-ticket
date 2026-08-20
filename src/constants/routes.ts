@@ -48,6 +48,10 @@ export const routes = {
   games: {
     index: '/games',
     duel: '/games/duel',
+    /** Ссылка из приглашения: открывает игру и сразу входит в это лобби. */
+    getDuelLobby: function (lobbyId: string) {
+      return (this.duel + `?lobby=${lobbyId}`) as `/games/duel?lobby=${string}`;
+    },
   },
   engines: {
     index: '/engines',
