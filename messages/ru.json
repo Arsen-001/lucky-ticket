@@ -1498,6 +1498,7 @@
   "duel invite target": "Зовём {name}",
   "duel invite start": "Начать и позвать",
   "duel invite refused": "Этот игрок не принимает вызовы",
+  "duel invite unavailable": "Этому игроку игра пока не открыта",
   "duel write access note": "Разрешите боту писать — иначе друзья не смогут позвать вас на дуэль",
   "duel write access allow": "Разрешить",
   "duel stat matches": "Матчей",

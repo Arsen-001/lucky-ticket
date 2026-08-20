@@ -1,9 +1,10 @@
 'use client';
 
 import { useEffect, useRef, useState } from 'react';
-import { useSearchParams } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { useGetDuelLobbiesQuery, useJoinDuelMutation } from '@/api/duel.api';
 import { useToast } from '@/hooks/useToast';
+import { routes } from '@/constants/routes';
 import { useAppTranslations } from '@/hooks/useAppTranslations';
 import { useFeature } from '@/hooks/useFeature';
 import { DuelLobbies } from './DuelLobbies';
@@ -36,6 +37,7 @@ export function DuelScreen() {
    * получилось (лобби заняли или закрыли, пока он шёл) — так и говорим, и
    * оставляем его в списке, где можно выбрать другое.
    */
+  const router = useRouter();
   const params = useSearchParams();
   const invitedLobbyId = params.get('lobby');
   // Пришли из карточки игрока: экран открывается сразу выбором ставки, а
@@ -93,6 +95,9 @@ export function DuelScreen() {
           onEnter={(id, options) => {
             setInviteOnEnter(Boolean(options?.invite));
             setDuelId(id);
+            // Адрес отработал — убираем параметры, иначе возврат к списку
+            // снова открыл бы выбор ставки, а вход по ссылке — повторный join.
+            if (inviteUserId || invitedLobbyId) router.replace(routes.games.duel);
           }}
         />
       )}

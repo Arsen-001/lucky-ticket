@@ -45,7 +45,9 @@ export function DuelInviteModal({ open, duelId, onClose }: DuelInviteModalProps)
     try {
       const result = await invite({ id: duelId, userIds: picked }).unwrap();
       // Вызов в игре доходит всегда, письмо — не всем: считаем по первому.
+      // Не дошёл никому — говорим, по какой именно причине.
       if (result.invited > 0) toast.success(t('duel invite sent', { count: result.invited }));
+      else if (result.unavailable > 0) toast.error(t('duel invite unavailable'));
       else toast.error(t('duel invite none'));
       setPicked([]);
       onClose();

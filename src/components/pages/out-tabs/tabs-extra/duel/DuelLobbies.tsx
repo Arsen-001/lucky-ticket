@@ -71,7 +71,10 @@ export function DuelLobbies({ onEnter, inviteUserId }: DuelLobbiesProps) {
             id: duel.id,
             userIds: [inviteUserId],
           }).unwrap();
+          // Три разных исхода — три разных слова. «Не получилось» одинаковым
+          // текстом на всё сразу не даёт понять, что делать дальше.
           if (result.invited > 0) toast.success(t('duel invite sent', { count: result.invited }));
+          else if (result.unavailable > 0) toast.error(t('duel invite unavailable'));
           else toast.error(t('duel invite refused'));
         } catch {
           toast.error(t('duel invite refused'));

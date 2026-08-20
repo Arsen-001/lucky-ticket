@@ -174,7 +174,13 @@ export function PlayerQuickCard({
             {duelOpen && (
               <Button
                 className="flex w-full items-center justify-center gap-1.5"
-                onClick={() => router.push(routes.games.getDuelInvite(userId))}
+                onClick={() => {
+                  // Карточка — модалка в портале: без закрытия она осталась бы
+                  // поверх экрана дуэли, и «позвать» выглядело бы как «ничего
+                  // не произошло».
+                  onClose();
+                  router.push(routes.games.getDuelInvite(userId));
+                }}
               >
                 <Swords size={15} strokeWidth={2.6} />
                 {t('duel call to duel')}

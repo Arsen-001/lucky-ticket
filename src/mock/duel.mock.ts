@@ -265,7 +265,7 @@ export const duelMock = {
   'POST games/duel/:id/invite': (args: FetchArgs) => {
     const ids = ((args.body as { userIds?: string[] })?.userIds ?? []).length;
     const sent = Math.min(ids, 2);
-    return { invited: ids, sent, skipped: 0 };
+    return { invited: ids, sent, refused: 0, unavailable: 0 };
   },
 
   'POST games/duel/:id/ready': () => {

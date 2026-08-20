@@ -38,6 +38,7 @@
     "duel invite start",
     "duel invite target",
     "duel invite title",
+    "duel invite unavailable",
     "duel join",
     "duel league",
     "duel league bronze",
