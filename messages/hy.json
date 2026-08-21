@@ -49,6 +49,7 @@
   "ad watched hint": "Պարգևն արդեն հաշվեգրված է",
   "ad bought": "Գնված",
   "ad skip hint {left}": "Այս դիտումը՝ առանց տեսանյութի, այսօր մնացել է {left}։",
+  "ad skips spent": "Today's skips are used up — this view plays a video",
   "ads progress": "Այսօր դիտված է {watched}-ը {total}-ից",
   "ad skips left {n}": "{n} առանց տեսանյութի",
   "next ad in seconds": "Հաջորդ գովազդը {sec} վրկ-ից",

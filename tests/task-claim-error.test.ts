@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { classifyClaimError } from '../src/utils/pages/task-claim.utils';
+import { classifyClaimError, isSkipRefusal } from '../src/utils/pages/task-claim.utils';
 
 /**
  * Reported 08.08.2026: claim the daily check-in, tap the row again, and the
@@ -48,5 +48,37 @@ describe('classifyClaimError', () => {
     expect(classifyClaimError(null)).toBe('network');
     expect(classifyClaimError('boom')).toBe('network');
     expect(classifyClaimError({ status: 400, data: 'plain string body' })).toBe('rejected');
+  });
+});
+
+/**
+ * Reported from production 21.08.2026: a Lucky Player took the day's ten
+ * «Забрать без просмотра» views and the next tap opened a modal with no prize
+ * in it — «Награда недоступна».
+ *
+ * Nothing was broken on the paying side: the admin panel showed 12 of 12 views
+ * that day, every one of them worth 1 AP, and rung #10 of the live ladder pays
+ * 1 AP · 500 LC · 1⭐ · 3 tickets. What the player hit was the server refusing
+ * the SKIP (`403 ad-skip-exhausted`) — and `classifyClaimError` sorts every
+ * 4xx into `rejected`, which is the rewardless card.
+ *
+ * A refused skip costs the player nothing: no view was granted, no daily slot
+ * was spent. The Tasks screen therefore replays the tap as an ordinary view
+ * instead of reporting a loss, and this pair of rules is what keeps the two
+ * kinds of "no" apart.
+ */
+describe('isSkipRefusal', () => {
+  it('recognises both refusals the skip endpoint can answer with', () => {
+    expect(isSkipRefusal({ status: 403, data: { message: 'ad-skip-exhausted' } })).toBe(true);
+    expect(isSkipRefusal({ status: 403, data: { message: 'ad-skip-not-granted' } })).toBe(true);
+  });
+
+  it('leaves every other refusal to the reward modal', () => {
+    // Same status, a different verdict: ads switched off is not "watch it instead".
+    expect(isSkipRefusal({ status: 403, data: { message: 'Ads are disabled' } })).toBe(false);
+    expect(isSkipRefusal({ status: 400, data: { message: 'ad-skip-exhausted' } })).toBe(false);
+    expect(isSkipRefusal({ status: 500 })).toBe(false);
+    expect(isSkipRefusal(new Error('offline'))).toBe(false);
+    expect(isSkipRefusal(null)).toBe(false);
   });
 });

@@ -49,6 +49,7 @@
   "ad watched hint": "Ödül zaten yatırıldı",
   "ad bought": "Satın alındı",
   "ad skip hint {left}": "Bu gösterim videosuz — bugün {left} kaldı",
+  "ad skips spent": "Today's skips are used up — this view plays a video",
   "ads progress": "Bugün {total} izlemeden {watched} tanesi yapıldı",
   "ad skips left {n}": "{n} videosuz",
   "next ad in seconds": "Sonraki reklam {sec} sn içinde",

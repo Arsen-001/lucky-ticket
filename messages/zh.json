@@ -49,6 +49,7 @@
   "ad watched hint": "奖励已发放",
   "ad bought": "已购买",
   "ad skip hint {left}": "这一次免看视频 — 今天还剩 {left} 次",
+  "ad skips spent": "Today's skips are used up — this view plays a video",
   "ads progress": "今日已看 {watched}/{total}",
   "ad skips left {n}": "{n} 次免视频",
   "next ad in seconds": "下一条广告 {sec} 秒后",

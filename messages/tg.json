@@ -49,6 +49,7 @@
   "ad watched hint": "Мукофот аллакай ҳисоб шудааст",
   "ad bought": "Харида шуд",
   "ad skip hint {left}": "Ин намоиш — бе ролик, имрӯз {left} мондааст",
+  "ad skips spent": "Today's skips are used up — this view plays a video",
   "ads progress": "Имрӯз аз {total} тамошои {watched} анҷом дода шуд",
   "ad skips left {n}": "{n} бе ролик",
   "next ad in seconds": "Рекламаи навбатӣ пас аз {sec} сония",

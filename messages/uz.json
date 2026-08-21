@@ -49,6 +49,7 @@
   "ad watched hint": "Mukofot allaqachon hisoblangan",
   "ad bought": "Sotib olingan",
   "ad skip hint {left}": "Bu koʻrsatish — roliksiz, bugun {left} qoldi",
+  "ad skips spent": "Today's skips are used up — this view plays a video",
   "ads progress": "Bugun {total} tadan {watched} tasi koʻrildi",
   "ad skips left {n}": "{n} roliksiz",
   "next ad in seconds": "Keyingi reklama {sec} soniyadan keyin",

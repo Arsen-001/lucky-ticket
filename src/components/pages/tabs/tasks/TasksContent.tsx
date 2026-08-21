@@ -54,6 +54,7 @@ import {
   classifyClaimError,
   type ClaimErrorKind,
   isEmptyPayout,
+  isSkipRefusal,
 } from '@/utils/pages/task-claim.utils';
 import { ArrivalShine } from '@/components/shared/ArrivalShine';
 import { triggerHaptic } from '@/utils/global/haptic.utils';
@@ -595,6 +596,7 @@ export function TasksContent() {
     runClaim(task.id, [step.id], task.tier);
 
   const handleWatchAd = async (slot: AdSlot): Promise<void> => {
+    let skipRefused = false;
     // A Lucky Player skip (DOCS §7.3): the status pays this view outright, so
     // no network is asked for anything and the post-view pause — which exists
     // only because a network refuses rapid repeats — is not started either.
@@ -602,14 +604,23 @@ export function TasksContent() {
     // so this flag opens no door the perk hasn't already opened.
     if (slot.skippable && (data?.ads?.skip?.remaining ?? 0) > 0) {
       triggerHaptic('medium');
-      await grantAdReward(slot, undefined, true);
-      return;
+      const outcome = await grantAdReward(slot, undefined, true);
+      // The server refused the skip — the allowance ran out (or the status
+      // lapsed) under a screen that was still offering the button, which is
+      // what the tap right after the tenth skip hits. Nothing was granted and
+      // no slot was spent, so the view is still there: play it as an ordinary
+      // one instead of closing the tap with «Награда недоступна», the empty
+      // card this case produced in production.
+      if (outcome !== 'skip-refused') return;
+      toast.info(t('ad skips spent'));
+      skipRefused = true;
     }
 
     // The button is already disabled while the pause runs; this is the backstop
     // for anything that reaches the handler another way.
     if (!isAdPauseOver(adReadyAt)) return;
-    triggerHaptic('medium');
+    // A tap that fell through from a refused skip already buzzed once.
+    if (!skipRefused) triggerHaptic('medium');
 
     // Play the real rewarded ad first — the waterfall tries each configured
     // network in turn. Only a genuine completion (or the no-network dev/mock
@@ -662,7 +673,7 @@ export function TasksContent() {
     slot: AdSlot,
     provider?: AdProviderId,
     skipped?: boolean
-  ): Promise<void> => {
+  ): Promise<'granted' | 'skip-refused' | 'failed'> => {
     retryRef.current = () => grantAdReward(slot, provider, skipped);
     try {
       // Show what the server actually granted (not the slot's advertised reward,
@@ -685,7 +696,7 @@ export function TasksContent() {
           failure: 'rejected',
           result: null,
         });
-        return;
+        return 'failed';
       }
       setPendingClaim({
         id: slot.id,
@@ -697,7 +708,15 @@ export function TasksContent() {
         // of the day.
         ad: { watchedToday: slot.index + 1, total: data?.ads?.total ?? slot.index + 1 },
       });
+      return 'granted';
     } catch (error) {
+      // A refused skip is the one 4xx that costs the player nothing: the view
+      // is untouched and the caller replays it as an ordinary one. Refetch so
+      // the card stops offering a button the allowance no longer backs.
+      if (skipped && isSkipRefusal(error)) {
+        refetch();
+        return 'skip-refused';
+      }
       // Same rule as a task claim: a slot the server says is already credited
       // must not offer a Retry that can only be refused again.
       setPendingClaim({
@@ -707,6 +726,7 @@ export function TasksContent() {
         failure: classifyClaimError(error),
         result: null,
       });
+      return 'failed';
     }
   };
 

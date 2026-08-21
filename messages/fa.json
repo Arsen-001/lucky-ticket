@@ -49,6 +49,7 @@
   "ad watched hint": "پاداش از قبل واریز شده",
   "ad bought": "خریداری‌شده",
   "ad skip hint {left}": "این نمایش بدون ویدیو است — امروز {left} باقی مانده",
+  "ad skips spent": "Today's skips are used up — this view plays a video",
   "ads progress": "امروز {watched} از {total} دیده شد",
   "ad skips left {n}": "{n} بدون ویدیو",
   "next ad in seconds": "تبلیغ بعدی تا {sec} ثانیه",

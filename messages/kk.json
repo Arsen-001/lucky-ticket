@@ -49,6 +49,7 @@
   "ad watched hint": "Сыйлық әлдеқашан есептелген",
   "ad bought": "Сатып алынды",
   "ad skip hint {left}": "Бұл көрсетілім — роликсіз, бүгін {left} қалды",
+  "ad skips spent": "Today's skips are used up — this view plays a video",
   "ads progress": "Бүгін {total} ішінен {watched} қаралды",
   "ad skips left {n}": "{n} роликсіз",
   "next ad in seconds": "Келесі жарнама {sec} сек кейін",

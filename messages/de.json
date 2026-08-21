@@ -49,6 +49,7 @@
   "ad watched hint": "Belohnung bereits gutgeschrieben",
   "ad bought": "Gekauft",
   "ad skip hint {left}": "Dieser Aufruf läuft ohne Video — heute noch {left}",
+  "ad skips spent": "Today's skips are used up — this view plays a video",
   "ads progress": "{watched} von {total} heute angesehen",
   "ad skips left {n}": "{n} ohne Video",
   "next ad in seconds": "Nächste Anzeige in {sec}s",

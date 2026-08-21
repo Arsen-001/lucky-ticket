@@ -49,6 +49,7 @@
   "ad watched hint": "Recompensa já creditada",
   "ad bought": "Comprado",
   "ad skip hint {left}": "Desta vez sem vídeo — hoje ainda restam {left}",
+  "ad skips spent": "Today's skips are used up — this view plays a video",
   "ads progress": "{watched} de {total} vistos hoje",
   "ad skips left {n}": "{n} sem vídeo",
   "next ad in seconds": "Próximo anúncio em {sec}s",

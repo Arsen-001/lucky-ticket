@@ -49,6 +49,7 @@
   "ad watched hint": "報酬は付与済みです",
   "ad bought": "購入済み",
   "ad skip hint {left}": "この回は動画なし — 本日あと{left}回",
+  "ad skips spent": "Today's skips are used up — this view plays a video",
   "ads progress": "本日 {total} 件中 {watched} 件視聴",
   "ad skips left {n}": "動画なし{n}回",
   "next ad in seconds": "次の広告まで{sec}秒",

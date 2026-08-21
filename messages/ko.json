@@ -49,6 +49,7 @@
   "ad watched hint": "보상이 이미 지급되었습니다",
   "ad bought": "구매함",
   "ad skip hint {left}": "이번엔 영상 없이 — 오늘 {left}회 남음",
+  "ad skips spent": "Today's skips are used up — this view plays a video",
   "ads progress": "오늘 {total}개 중 {watched}개 시청",
   "ad skips left {n}": "영상 없이 {n}회",
   "next ad in seconds": "다음 광고까지 {sec}초",

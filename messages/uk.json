@@ -49,6 +49,7 @@
   "ad watched hint": "Нагороду вже зараховано",
   "ad bought": "Куплено",
   "ad skip hint {left}": "Цей показ — без ролика, сьогодні лишилося {left}",
+  "ad skips spent": "Today's skips are used up — this view plays a video",
   "ads progress": "Сьогодні переглянуто {watched} з {total}",
   "ad skips left {n}": "{n} без ролика",
   "next ad in seconds": "Наступна реклама через {sec} с",

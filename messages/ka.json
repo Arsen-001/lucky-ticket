@@ -49,6 +49,7 @@
   "ad watched hint": "ჯილდო უკვე ჩარიცხულია",
   "ad bought": "ნაყიდი",
   "ad skip hint {left}": "ეს ვიდეოს გარეშეა — დღეს {left} დარჩა",
+  "ad skips spent": "Today's skips are used up — this view plays a video",
   "ads progress": "დღეს ნანახია {watched} {total}-დან",
   "ad skips left {n}": "{n} ვიდეოს გარეშე",
   "next ad in seconds": "შემდეგი რეკლამა {sec} წამში",

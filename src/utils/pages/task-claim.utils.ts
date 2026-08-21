@@ -66,3 +66,22 @@ export const classifyClaimError = (error: unknown): ClaimErrorKind => {
   const message = (error as { data?: { message?: unknown } } | null)?.data?.message;
   return typeof message === 'string' && /already claimed/i.test(message) ? 'claimed' : 'rejected';
 };
+
+/**
+ * A refused Lucky Player skip (`POST /tasks/ads/watch` with `skipped: true`):
+ * today's allowance is spent, or the status that grants it lapsed while the
+ * screen still offered the button. The server answers 403 with the reason as
+ * its message.
+ *
+ * This is NOT a reward the player lost. The view itself is untouched — nothing
+ * was granted, no daily slot was spent — and it can still be taken by watching
+ * the video. Sent through `classifyClaimError` like every other 4xx it became
+ * `rejected`, i.e. the «Награда недоступна» card with no prize in it, which is
+ * exactly what the eleventh tap after ten skips looked like from production.
+ */
+export const isSkipRefusal = (error: unknown): boolean => {
+  const status = (error as { status?: unknown } | null)?.status;
+  if (status !== 403) return false;
+  const message = (error as { data?: { message?: unknown } } | null)?.data?.message;
+  return typeof message === 'string' && /^ad-skip-(exhausted|not-granted)$/.test(message);
+};

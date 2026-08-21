@@ -49,6 +49,7 @@
   "ad watched hint": "المكافأة مُضافة بالفعل",
   "ad bought": "مُشترى",
   "ad skip hint {left}": "هذه المرة بلا فيديو — بقي لك اليوم {left}",
+  "ad skips spent": "Today's skips are used up — this view plays a video",
   "ads progress": "شوهد {watched} من {total} اليوم",
   "ad skips left {n}": "{n} بلا فيديو",
   "next ad in seconds": "الإعلان التالي بعد {sec} ثانية",
