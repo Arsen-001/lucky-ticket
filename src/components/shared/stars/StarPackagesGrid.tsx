@@ -56,6 +56,7 @@ export function StarPackagesGrid({ className }: StarPackagesGridProps) {
             // there is no better value, and the label would be pointing at
             // nothing.
             popular={promoActive && pkg.popular}
+            top={pkg.top}
             onSelect={() => handleBuy(pkg.stars)}
             className={twMerge('w-full', pending && 'pointer-events-none opacity-60')}
           />

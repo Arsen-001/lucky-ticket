@@ -10,8 +10,13 @@
 export interface StarPackage {
   stars: number;
   bonus: number;
-  /** Highlighted in the buy sheet as the recommended one. */
+  /** Highlighted as the recommended one — «best value». */
   popular?: boolean;
+  /**
+   * Second, independent label: «top» — the one most people take, as opposed to
+   * the one that gives most per star. Both can sit on one package.
+   */
+  top?: boolean;
 }
 
 export interface PublicConfig {

@@ -12,6 +12,8 @@ export interface StarPackageCardProps {
   bonus: number;
   /** The recommended package — highlighted, one per sheet. */
   popular?: boolean;
+  /** The one most people take — a second, independent label. */
+  top?: boolean;
   active?: boolean;
   onSelect: () => void;
   className?: string;
@@ -29,11 +31,16 @@ export function StarPackageCard({
   stars,
   bonus,
   popular,
+  top,
   active,
   onSelect,
   className,
 }: StarPackageCardProps) {
   const t = useAppTranslations();
+  // Both labels ride in one strip on the top edge, so a package carrying both
+  // does not stack them over each other — and the percent below knows to step
+  // down for either.
+  const labelled = popular || top;
 
   return (
     <button
@@ -48,9 +55,22 @@ export function StarPackageCard({
         className
       )}
     >
-      {popular && (
-        <span className="bg-pink-gradient absolute -top-2 end-2 rounded-full px-1.5 py-0.5 text-[8px] font-extrabold uppercase tracking-wider text-white">
-          {t('best value')}
+      {labelled && (
+        <span className="absolute -top-2 end-2 flex items-center gap-1">
+          {top && (
+            // Solid electric purple, not `bg-gradient-purple`: that gradient is
+            // the app's dark card ground (rgb(51,34,71)) and a pill painted with
+            // it disappears into the tile it sits on — the label read as loose
+            // text with no chip at all.
+            <span className="bg-electric-purple rounded-full px-1.5 py-0.5 text-[8px] font-extrabold uppercase tracking-wider text-white">
+              {t('top')}
+            </span>
+          )}
+          {popular && (
+            <span className="bg-pink-gradient rounded-full px-1.5 py-0.5 text-[8px] font-extrabold uppercase tracking-wider text-white">
+              {t('best value')}
+            </span>
+          )}
         </span>
       )}
 
@@ -63,7 +83,7 @@ export function StarPackageCard({
         <span
           className={twMerge(
             'text-gold absolute end-3 text-[15px] font-extrabold leading-none tabular-nums',
-            popular ? 'top-5' : 'top-2.5'
+            labelled ? 'top-5' : 'top-2.5'
           )}
           style={{ textShadow: '0 0 12px rgba(248,189,62,0.45)' }}
         >

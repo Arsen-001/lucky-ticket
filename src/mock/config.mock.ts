@@ -25,7 +25,11 @@ const getPublicConfig = (): PublicConfig => ({
     withdrawDailyCapTon: walletConstants.TON_WITHDRAW_DAILY_CAP,
     minDepositTon: walletConstants.TON_MIN_DEPOSIT,
     minWithdrawLc: appConfig.wallet.minWithdrawLc,
-    xtrPackages: appConfig.wallet.xtrPackages,
+    // Dev fixture: one package wears «top» so the label strip (and a tile
+    // carrying both labels at once) can be reviewed without the panel.
+    xtrPackages: appConfig.wallet.xtrPackages.map(pkg =>
+      pkg.stars === 100 ? { ...pkg, top: true } : pkg
+    ),
     // A live promo in dev: the countdown, the percent chips and the Limited
     // tab all draw nothing when there is no deadline, and a screen that draws
     // nothing cannot be reviewed.

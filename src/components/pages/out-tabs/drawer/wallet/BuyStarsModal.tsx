@@ -122,6 +122,7 @@ export function BuyStarsModal({ open, onClose, initialStars }: BuyStarsModalProp
                     stars={pkg.stars}
                     bonus={promoActive ? pkg.bonus : 0}
                     popular={promoActive && pkg.popular}
+                    top={pkg.top}
                     active={amount === pkg.stars}
                     onSelect={() => setInput(String(pkg.stars))}
                   />
