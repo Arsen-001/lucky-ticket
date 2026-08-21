@@ -15,27 +15,39 @@ Working prototypes, playable:
 
 ## Settled — do not re-ask
 
-| Question                              | Answer                                                                                                                                                                     |
-| ------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| What is staked                        | **Tickets**, tier of the ticket picks the league. Not LC — LC is withdrawable, staking it makes the game gambling inside Telegram                                          |
-| Who sets the stake                    | The **lobby creator**, 1–5 tickets. Cap is 5 because a bronze engine yields 12/day                                                                                         |
-| When tickets leave the balance        | **At match start**, never at lobby creation. Cancelled waiting costs nothing                                                                                               |
-| Platform commission                   | **None.** Winner takes both stakes whole. Duels are ticket-neutral; the sink stays tournament entry                                                                        |
-| Readiness                             | Both press "Ready", **10 seconds**. Not a separate screen — it is a state of the arena, with the button where the tokens will appear                                       |
-| Nobody confirmed                      | Tickets untouched. If the **creator** was silent, the lobby **closes** — "create a new one". If the guest was silent, the lobby survives and the creator keeps waiting     |
-| After every match                     | Readiness is asked again. A rematch never auto-starts                                                                                                                      |
-| Empty lobby                           | A **SeedPlayer** joins between **20 and 30 seconds** — a window, not a fixed second. Live players always take priority                                                     |
-| Bot fairness                          | Move is **committed before the player's move** and drawn as an honest third. No patterns, no adjustment to what the player picked                                          |
-| Bot payout                            | **Identical to a live match.** No reduced coefficient, no house edge                                                                                                       |
-| Move secrecy                          | The server never reveals a move until **both** have arrived. The other side sees only a "moved" badge                                                                      |
-| Timeout on a move                     | **Random figure**, never a loss. A stalled screen must not hand the round to the opponent                                                                                  |
-| Round clock                           | Counted from **server time**, not from when the client rendered                                                                                                            |
-| Opponent quits mid-match              | Their moves go random, the match finishes. Stakes are already spent — otherwise quitting becomes a way not to lose                                                         |
-| Transport                             | **Short polling**, 600 ms in a match, 3 s in a lobby, one request returns the whole state, read from **Redis** not Postgres. WebSocket only when match volume justifies it |
-| Spinners                              | Only for the **network hop** (200–300 ms). Waiting for the opponent is a game state, not a loader — a spinner there reads as a frozen app                                  |
-| Invites                               | DM through the bot, only to players who enabled it. Unreachable players **cannot be selected at all**                                                                      |
-| Invite link                           | Opens **straight into the arena** of that lobby. No list, no onboarding, no modal on the way                                                                               |
-| Creator left before the guest arrived | "Opponent didn't wait" modal, tickets untouched, back to the lobby list                                                                                                    |
+| Question                              | Answer                                                                                                                                                                       |
+| ------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| What is staked                        | **Tickets**, tier of the ticket picks the league. Not LC — LC is withdrawable, staking it makes the game gambling inside Telegram                                            |
+| Who sets the stake                    | The **lobby creator**, 1–5 tickets. Cap is 5 because a bronze engine yields 12/day                                                                                           |
+| When tickets leave the balance        | **At match start**, never at lobby creation. Cancelled waiting costs nothing                                                                                                 |
+| Platform commission                   | **None.** Winner takes both stakes whole. Duels are ticket-neutral; the sink stays tournament entry                                                                          |
+| Readiness                             | Both press "Ready", **10 seconds**. Not a separate screen — it is a state of the arena, with the button where the tokens will appear                                         |
+| Nobody confirmed                      | Tickets untouched. If the **creator** was silent, the lobby **closes** — "create a new one". If the guest was silent, the lobby survives and the creator keeps waiting       |
+| After every match                     | Readiness is asked again. A rematch never auto-starts                                                                                                                        |
+| Empty lobby                           | A **SeedPlayer** joins between **20 and 30 seconds** — a window, not a fixed second. Live players always take priority                                                       |
+| Bot fairness                          | Move is **committed before the player's move** and drawn as an honest third. No patterns, no adjustment to what the player picked                                            |
+| Bot payout                            | **Identical to a live match.** No reduced coefficient, no house edge                                                                                                         |
+| Move secrecy                          | The server never reveals a move until **both** have arrived. The other side sees only a "moved" badge                                                                        |
+| Timeout on a move                     | **Random figure**, never a loss. A stalled screen must not hand the round to the opponent                                                                                    |
+| Round clock                           | Counted from **server time**, not from when the client rendered                                                                                                              |
+| Opponent quits mid-match              | Their moves go random, the match finishes. Stakes are already spent — otherwise quitting becomes a way not to lose                                                           |
+| Transport                             | **Short polling**, 600 ms in a match, 3 s in a lobby, one request returns the whole state, read from **Redis** not Postgres. WebSocket only when match volume justifies it   |
+| Spinners                              | Only for the **network hop** (200–300 ms). Waiting for the opponent is a game state, not a loader — a spinner there reads as a frozen app                                    |
+| Invites                               | DM through the bot, only to players who enabled it. Unreachable players **cannot be selected at all**                                                                        |
+| Invite link                           | Opens **straight into the arena** of that lobby. No list, no onboarding, no modal on the way                                                                                 |
+| Creator left before the guest arrived | "Opponent didn't wait" modal, tickets untouched, back to the lobby list                                                                                                      |
+| Two invite channels                   | A **modal inside the app** (always arrives) **and** a bot DM (reaches 3–4 % of the roster). Never rely on the DM alone — and never make the in-app one wait on it            |
+| An invite is a pass                   | Being invited **grants access to the game** for as long as the invite lives, even while the rollout stage is «testers». Otherwise a tester can invite nobody                 |
+| Invited lobby is private              | While the invite is unanswered: the crowd stays out, other players **cannot join**, and the lobby is **hidden from their list** — a row that will refuse them is a lie       |
+| Who may call whom                     | The **recipient's** setting: nobody / friends / everyone, default **everyone**. Friends means both directions of referral. The server enforces it, never the screen          |
+| Invite result                         | Four separate numbers — reached in-app, DM sent, refused by their setting, game unavailable. One "failed" for all four tells the player nothing                              |
+| Creating a lobby twice                | The new one **replaces** your own idle lobby. "You already have a duel" turns every second tap into a dead end — the player pressed create, that is the decision             |
+| Leaving the screen                    | Closes a plain waiting lobby (tickets untouched). **Not** a lobby awaiting an invited player, and **never** a running match                                                  |
+| Both players abandon a match          | The match is **finished lazily** from the lobby list — missed moves go random, the winner is paid. Otherwise stakes burn with nobody to receive them                         |
+| Reveal pause                          | The revealed round holds for **`revealSeconds`** (3) before the next opens. Opening it in the same transaction makes the result invisible — figures blink and vanish         |
+| Two sides polling                     | Both apply lazy time, so both race. Reveal takes a **guard** (`where revealedAt: null`), round creation **swallows P2002**. Without it: doubled score and a 500 mid-match    |
+| Fast taps                             | Every action goes through **`useInFlightLock`** — the mutation's `isLoading` lands a frame late, and asking a player not to tap fast in a five-second match is not an option |
+| Numbers live in the panel             | Stakes, wins needed, all the timers, the crowd window — `PlatformConfig.gamesConfig.<game>`. The normaliser fixes impossible values silently instead of refusing the save    |
 
 ## Ask the user, per game
 
@@ -117,3 +129,44 @@ Admin panel:
 - [ ] Deep link lands in the arena with nothing in between
 - [ ] No spinner while waiting for the opponent
 - [ ] Buttons at least 96 px tall, bottom inset ≥ 24 px, nothing tappable in the top 190 px
+
+## Mistakes that already cost time here
+
+Each of these shipped, reached production and was found the hard way. They are
+not hypothetical.
+
+- **`User.avatarUrl` does not exist** — a player's avatar lives in `Profile`
+  (`SeedPlayer.avatarUrl` does exist, which is what misled). Prisma validates
+  `select` at query time, so neither `tsc` nor unit tests see it: the lobby list
+  answered **500** on every request while the screen showed a greyed-out button
+  and said nothing. Guard: an e2e case against a real database, not a unit test.
+- **A failed query must surface.** Without `QueryErrorState` the screen read
+  "you have no tickets" — because with no data the balance is zero and the
+  create button dims. The server's refusal has to be visible, or the bug is
+  hunted in the wrong place.
+- **The mock matcher took keys literally**, so `games/duel/:id` matched no real
+  URL: on localhost creating a lobby worked and everything after it — readiness,
+  moves, the match — hit an empty screen, while production was fine. Teach the
+  matcher `:param` before writing a mock with ids in the path.
+- **Never stage a directory.** `git commit --only src/components/layout-elements/`
+  swept up another session's unfinished files; their imports were left
+  uncommitted and `main` stopped building — two production deploys failed.
+  Stage explicit file paths, and after committing run `git show --stat HEAD`: a
+  foreign file in the list almost always has an uncommitted dependency nearby.
+- **Build from the mockup, not from its description.** The first pass was built
+  from a written summary of the approved prototype and came out with a different
+  composition entirely. Open the artifact, screenshot its states, compare.
+
+## Diagnosing "the game doesn't work"
+
+In order, because each step rules out the ones below it:
+
+1. **Prod logs first** (`railway logs`) — a Prisma validation error names the
+   exact field, and no amount of reading the client will find it.
+2. **Is anyone able to play?** The rollout stage gates the whole game; an invite
+   is the only exception. `crowdPool` in the panel: zero active `SeedPlayer`
+   means an empty lobby has nobody to fill it and the player waits forever.
+3. **Is the lobby still there?** A stuck `READY`/`PLAYING` from a previous
+   session blocks creation until it is resolved lazily.
+4. **Does the screen say what the server said?** Most "it doesn't work" reports
+   are a refusal the UI swallowed — a dimmed button, a generic toast, silence.
