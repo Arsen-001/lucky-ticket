@@ -1575,5 +1575,6 @@
   "offer ends in {time}": "Offer ends in {time}",
   "star packages": "Lucky Stars packages",
   "cheaper than telegram by {percent}": "{percent}% cheaper than Telegram",
-  "in telegram": "in Telegram"
+  "in telegram": "in Telegram",
+  "+{days} days": "+{days, plural, other {# روز}}"
 }

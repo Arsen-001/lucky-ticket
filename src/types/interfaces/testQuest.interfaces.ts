@@ -5,6 +5,8 @@ export interface TestQuestReward {
   ap?: number;
   ls?: number;
   lpDays?: number;
+  /** Free Bronze engines granted (level 12 pays one). */
+  engine?: number;
 }
 
 /**

@@ -3,7 +3,7 @@ import {
   TEST_QUEST_TOTAL_LEVELS,
   testQuestLadder,
 } from '@/constants/testQuest.constants';
-import type { TestQuestStepDto } from '@/types/interfaces/testQuest.interfaces';
+import type { TestQuestReward, TestQuestStepDto } from '@/types/interfaces/testQuest.interfaces';
 
 /**
  * Dev-mock for the Test-Quest card (used only in mock mode, i.e. when
@@ -16,6 +16,32 @@ let climbed = TEST_QUEST_TOTAL_LEVELS - TEST_QUEST_START_LEVEL;
 // demo. Tapping "subscribe" hits POST test-quest/check-channel, which flips it
 // (mock stand-in for a live getChatMember). A page reload resets it.
 let channelSubscribed = false;
+
+/**
+ * The structured drop the real server sends alongside a claim, derived here from
+ * the ladder's own token label ("25k LC · 1 TIX · 5 LS · LP 2d").
+ *
+ * Parsed rather than hand-tabulated so the mock can never quote a payout the
+ * ladder above does not list — and so the claim modal is exercised in dev with
+ * the same shape production sends (`granted`), not with an empty object that
+ * silently drops it to the label fallback.
+ */
+const parseDrop = (label: string): TestQuestReward => {
+  const reward: TestQuestReward = {};
+  for (const token of label.split('·').map(t => t.trim())) {
+    const digits = /(\d+)\s*([km])?/i.exec(token);
+    if (!digits) continue;
+    const amount =
+      Number(digits[1]) * (digits[2]?.toLowerCase() === 'm' ? 1e6 : digits[2] ? 1e3 : 1);
+    if (/\bTIX\b/i.test(token)) reward.tickets = amount;
+    else if (/\bLS\b/i.test(token)) reward.ls = amount;
+    else if (/\bAP\b/i.test(token)) reward.ap = amount;
+    else if (/\bLP\b/i.test(token)) reward.lpDays = amount;
+    else if (/\bENG\b/i.test(token)) reward.engine = amount;
+    else if (/\bLC\b/i.test(token)) reward.lc = amount;
+  }
+  return reward;
+};
 
 const DAILY_TOP_LEVEL = 4;
 const QUALIFIED_CLIMBED = TEST_QUEST_TOTAL_LEVELS - DAILY_TOP_LEVEL + 1; // 28
@@ -374,7 +400,7 @@ const view = () => {
     // `task` (the one-line daily label) is no longer rendered — the checklist is
     // keyed per level and localized — so the mock leaves it empty.
     task: '',
-    reward: {},
+    reward: parseDrop(def?.drop ?? ''),
     rewardLabel: def?.drop ?? '',
     // Checklists ride along exactly as the real backend sends them, so mock mode
     // exercises the server-driven path instead of the local fallback.
@@ -411,11 +437,18 @@ export const testQuestMock = {
     // Mirror the server gates: no advance without a channel subscription, and
     // none while the level's checklist is short of its targets.
     if (!before.finished && channelSubscribed && before.stepsComplete) climbed += 1;
+    const granted = parseDrop(before.rewardLabel);
     return {
       ...view(),
-      granted: {},
+      granted,
       grantedLabel: before.rewardLabel,
-      newBalance: { lc: 0, tickets: 0, activityPoints: 0 },
+      // Not zeroes: the claim modal prints this as "new balance", and three
+      // zeroes after a payout read as "the reward went nowhere".
+      newBalance: {
+        lc: 120_000 + (granted.lc ?? 0),
+        tickets: 12 + (granted.tickets ?? 0),
+        activityPoints: 340 + (granted.ap ?? 0),
+      },
     };
   },
   'POST test-quest/check-channel': () => {

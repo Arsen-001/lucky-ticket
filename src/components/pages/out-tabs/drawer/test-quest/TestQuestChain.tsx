@@ -4,6 +4,7 @@ import { twMerge } from 'tailwind-merge';
 import { useAppTranslations } from '@/hooks/useAppTranslations';
 import { TEST_BADGE_CAPACITY_TICKETS } from '@/utils/global/testQuest.utils';
 import { TestQuestClaimBurst } from './TestQuestClaimBurst';
+import { TestQuestClaimModal } from './TestQuestClaimModal';
 import { TestQuestFrozenSummary } from './TestQuestFrozenSummary';
 import { TestQuestSteps } from './TestQuestSteps';
 import { TestQuestRewardPanel } from './TestQuestRewardPanel';
@@ -121,6 +122,15 @@ export function TestQuestChain({ className }: TestQuestChainProps) {
         progress={s.data.stepProgress}
         baselines={s.baselines}
         stepsFor={s.stepsFor}
+      />
+
+      {/* What the claim just paid, named item by item — the burst above only
+          celebrates it. */}
+      <TestQuestClaimModal
+        result={s.claimed?.result ?? null}
+        day={s.claimed?.day ?? s.currentDay}
+        totalDays={s.totalDays}
+        onClose={s.dismissClaimed}
       />
     </section>
   );

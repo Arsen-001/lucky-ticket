@@ -18,8 +18,19 @@ import {
   testQuestLadder,
   type TestQuestZone,
 } from '@/constants/testQuest.constants';
-import type { TestQuestAction, TestQuestStepDto } from '@/types/interfaces/testQuest.interfaces';
+import type {
+  ClaimTestQuestResponse,
+  TestQuestAction,
+  TestQuestStepDto,
+} from '@/types/interfaces/testQuest.interfaces';
 import { triggerHaptic } from '@/utils/global/haptic.utils';
+
+/** A claim that just landed: what the server paid, and which day it paid for. */
+export interface ClaimedLevel {
+  result: ClaimTestQuestResponse;
+  /** 1 … 31 — the day that was taken, captured before the state advanced. */
+  day: number;
+}
 
 /** One rung of the 31 → 1 climb, enriched with what a design needs to draw it. */
 export interface TestQuestScreenCard {
@@ -58,8 +69,13 @@ export function useTestQuestScreen() {
   const [claim, { isLoading: claiming }] = useClaimTestQuestLevelMutation();
   const [recheckChannel, { isLoading: verifyingChannel }] = useRecheckChannelSubscriptionMutation();
 
-  // Bumped on each successful claim to replay the coin burst.
+  // Bumped when the claim modal is dismissed, to replay the coin burst over the
+  // card the player lands back on. Not on the claim itself: the modal covers the
+  // card, so the burst played to nobody.
   const [burstId, setBurstId] = useState(0);
+  // What the last claim paid, with the day it paid for — drives the reward
+  // modal; null = nothing to show.
+  const [claimed, setClaimed] = useState<ClaimedLevel | null>(null);
   // Level tapped on the map; null = follow today.
   const [selectedLevel, setSelectedLevel] = useState<number | null>(null);
 
@@ -121,15 +137,24 @@ export function useTestQuestScreen() {
 
   const handleClaim = async () => {
     if (!claimableToday || claiming || !channelSubscribed || !stepsComplete) return;
+    // The level being claimed — read BEFORE the response advances the state, so
+    // the modal names the day that was just taken and not the next one.
+    const claimedDay = testQuestDay(currentLevel);
     try {
-      await claim().unwrap();
-      setBurstId(id => id + 1);
+      const result = await claim().unwrap();
       setSelectedLevel(null); // follow the new current level after advancing
       triggerHaptic();
-      toast.success(t('level taken'));
+      // No success toast: the modal below IS the confirmation, and it says what
+      // landed instead of only that something did.
+      setClaimed({ result, day: claimedDay });
     } catch {
       toast.error(t('claim failed'));
     }
+  };
+
+  const dismissClaimed = () => {
+    setClaimed(null);
+    setBurstId(id => id + 1);
   };
 
   // Open the channel, then re-check membership so the lock lifts without a reload.
@@ -163,5 +188,8 @@ export function useTestQuestScreen() {
     handleClaim,
     handleVerifyChannel,
     burstId,
+    /** Last claim's payout, for the reward modal; null when there is none. */
+    claimed,
+    dismissClaimed,
   };
 }

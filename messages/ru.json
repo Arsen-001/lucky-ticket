@@ -1575,5 +1575,6 @@
   "offer ends in {time}": "До конца акции {time}",
   "star packages": "Пакеты Lucky Stars",
   "cheaper than telegram by {percent}": "На {percent}% дешевле, чем в Telegram",
-  "in telegram": "в Telegram"
+  "in telegram": "в Telegram",
+  "+{days} days": "+{days, plural, one {# день} few {# дня} many {# дней} other {# дней}}"
 }
