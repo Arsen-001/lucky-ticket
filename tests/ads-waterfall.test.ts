@@ -311,22 +311,32 @@ describe('rewarded-ad waterfall', () => {
     expect(calls).toEqual([]);
   });
 
-  it('alternates on every view by default', async () => {
-    // The default is 1, not 2: spreading a player's views across as many
-    // uncapped demand pools as possible is the whole point, and two in a row
-    // already spends the second on demand the first one dented.
+  it('asks the second network only after the first came up empty, by default', async () => {
+    // Rotation is off by default since 21.08.2026: the only per-network money
+    // measured here puts Monetag at about a third of Adsgram's CPM, so a
+    // rotated view is a view sold cheap. The second network is a no-fill
+    // fallback, not every other block.
     const ads = await loadAds({
       NEXT_PUBLIC_ADSGRAM_BLOCK_ID: BLOCK_ID,
       NEXT_PUBLIC_MONETAG_ZONE_ID: ZONE_ID,
       NEXT_PUBLIC_AD_PROVIDERS: 'adsgram,monetag',
     });
 
-    const asked = [];
-    for (let view = 0; view < 4; view++) asked.push((await ads.showRewardedAd(view)).provider);
+    // Nothing is stubbed, so every network fails before anything reached the
+    // screen and the chain is walked in full — which reads the order back.
+    const asked: string[][] = [];
+    for (let view = 0; view < 4; view++) {
+      const reported: string[] = [];
+      await ads.showRewardedAd(view, attempt => reported.push(attempt.provider));
+      asked.push(reported);
+    }
 
-    // Nothing stubbed → every network errors and the result names the last one
-    // asked, so this reads the turn order back.
-    expect(asked).toEqual(['monetag', 'adsgram', 'monetag', 'adsgram']);
+    expect(asked).toEqual([
+      ['adsgram', 'monetag'],
+      ['adsgram', 'monetag'],
+      ['adsgram', 'monetag'],
+      ['adsgram', 'monetag'],
+    ]);
   });
 
   it('rotates on the view number, not on state of its own', async () => {

@@ -15,8 +15,9 @@ export const Env = {
   adProviders: process.env.NEXT_PUBLIC_AD_PROVIDERS,
   /**
    * How many views in a row go to one network before the waterfall rotates to
-   * the next. Empty → the default in `src/lib/ads/index.ts`; `0` restores the
-   * strict waterfall, where the first network serves nearly everything.
+   * the next. Empty → the default in `src/lib/ads/index.ts`, which is **0**
+   * since 21.08.2026: a strict waterfall, where the second network is asked
+   * only on a no-fill. `1` alternates on every view.
    */
   adRotateEvery: process.env.NEXT_PUBLIC_AD_ROTATE_EVERY,
 } as const;

@@ -37,30 +37,26 @@ const DEFAULT_ORDER: AdProviderId[] = ['adsgram', 'monetag'];
 /**
  * How many views in a row go to the same network before the chain rotates.
  *
- * A pure waterfall gives the network at the top ~everything: with fill at 97%
- * the second one is asked about twice in a hundred views, which is too little
- * to earn from and far too little to ever compare against (the panel refuses a
- * verdict under 1000 views per network — decades away from second place).
+ * **0 — no rotation, strict waterfall — since 21.08.2026** (product decision):
+ * the second network is asked ONLY when the first one has nothing to serve.
+ * Adsgram fills 97% of requests, so Monetag is reached on roughly two views per
+ * hundred — deliberately. The only per-network money ever measured here puts
+ * Monetag at about a third of Adsgram's CPM ($1.43 against ~$4.20), so a
+ * rotated view is a view sold at the lower price.
  *
- * Rotating is not only about measuring, though. Advertisers frequency-cap their
- * campaigns, so a viewer's expensive demand is spent after the first few views
- * and the rest of their session is filled with cheap or unpaid inventory — it
- * is in this project's own numbers (25 views at $1.58 one day, 3 at $0.00 the
- * next). Players here watch ~6 ads per session, deep into that decay. Handing
- * every other block to another network puts each of those views in front of a
- * pool that has not been capped yet.
+ * What this gives up, written down so it is not rediscovered as a bug: the
+ * week-long comparison started on 20.08.2026 never reaches its threshold of
+ * 1000 views per network at 2% of the traffic, and a player's later views stay
+ * with the network that has already frequency-capped them (advertisers cap per
+ * viewer, so the 6th video of a session is filled with cheap or unpaid
+ * inventory) instead of going to a pool nobody has capped yet.
  *
- * **1** — alternate on every view — is the default for that reason: it puts each
- * of a player's views in front of the freshest pool available. Two in a row
- * already spends the second on demand the first one dented. That is a judgement
- * call, not a measurement: the panel reports revenue per network, never per
- * view POSITION, so 1 and 2 look identical in it (both split the day 50/50).
- * It is one variable to change if the weekly comparison ever says otherwise.
- *
- * `0` disables rotation and restores the strict waterfall. With one usable
+ * `1` alternates on every view and restores that experiment; any `n` gives each
+ * network n views in a row. It reads `NEXT_PUBLIC_AD_ROTATE_EVERY`, so going
+ * back is a Vercel edit plus a redeploy and no code change. With one usable
  * network it does nothing either way.
  */
-const DEFAULT_ROTATE_EVERY = 1;
+const DEFAULT_ROTATE_EVERY = 0;
 
 /**
  * Deadlock guard around a single `show()`.
