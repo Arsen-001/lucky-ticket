@@ -11,6 +11,7 @@ import type {
   TasksResponse,
 } from '@/types/interfaces/tasks.interfaces';
 import type { AdProviderId } from '@/lib/ads/types';
+import { markAdViewSpent } from '@/utils/pages/ad-slots.utils';
 
 /**
  * Tasks API — endpoints consumed by the Tasks page.
@@ -87,12 +88,21 @@ export const tasksApi = api.injectEndpoints({
       // included) — `me` + `lc` alone left the ad reward missing from both
       // histories and from the ticket balance.
       invalidatesTags: [rtkTags.tasks, rtkTags.tickets, ...balanceTags.lc, ...balanceTags.stars],
-      async onQueryStarted(_arg, { dispatch, queryFulfilled }) {
+      async onQueryStarted(arg, { dispatch, queryFulfilled }) {
         // A paid view moves `lifetimeWatched`, which is what the test-quest's
         // «посмотри N реклам» step counts. Only after the server confirms — a
         // refused claim moves nothing.
         try {
           await queryFulfilled;
+          // Spend the view in the cache too. The invalidation below refetches
+          // `tasks`, but that is a round trip, and until it lands the card
+          // still offers the skip this call just used — see `markAdViewSpent`
+          // for what that cost in production.
+          dispatch(
+            tasksApi.util.updateQueryData('getTasks', undefined, draft => {
+              markAdViewSpent(draft.ads, { adId: arg.adId, skipped: arg.skipped });
+            })
+          );
           refetchTestQuestProgress(dispatch);
         } catch {
           /* the caller surfaces the failure; nothing was counted */

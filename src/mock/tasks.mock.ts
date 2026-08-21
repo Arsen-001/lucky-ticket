@@ -253,9 +253,12 @@ const rawLc = (amount: number): TaskReward => ({ type: TaskRewardType.LC, amount
 const DAILY_ADS_TARGET = 10;
 
 const ADS_CONFIG: AdsConfig = {
-  // Default status cap. Lucky Player gets 20, VIP 40 — the ladder just keeps
-  // cycling through them.
-  total: 10,
+  // The demo account's cap, and deliberately LARGER than its ten skips: on the
+  // live economy a Lucky Player who is also VIP 2 gets twelve views a day and
+  // ten skips, so the allowance runs out two views before the day does. With
+  // both set to ten, dev never reached that boundary — and the boundary is
+  // exactly where the 21.08.2026 production bug lived.
+  total: 12,
   watchedToday: 3,
   // Copy of the live ladder (admin → Реклама → Награды, read 06.08.2026), so
   // dev shows what a player actually sees instead of an invented ramp. A
@@ -292,7 +295,12 @@ const getAdRewards = (index: number): TaskReward[] =>
  */
 const ADS_SKIP = {
   total: fresh ? 0 : 10,
-  usedToday: 0,
+  // The demo day is three views in (`ADS_CONFIG.watchedToday`), and those three
+  // were taken with the perk — so the allowance is three down as well. Left at
+  // zero it claimed ten untouched skips against nine remaining views, i.e. a
+  // day the perk covers end to end, and the boundary where it runs out first
+  // never appeared on the dev screen.
+  usedToday: fresh ? 0 : 3,
 };
 
 /** Extra slots bought in this dev session — mirrors `AdWatchProgress`. */
@@ -1907,7 +1915,14 @@ export const tasksMock = {
     // The server refuses a skip it did not grant, so the mock does too — a mock
     // that always says yes is how a refusal branch ships untested.
     if (args.body?.skipped) {
-      if ((ads.skip?.remaining ?? 0) <= 0) throw new Error('ad-skip-exhausted');
+      // Shaped exactly like the server's answer — `403` with the reason as
+      // `data.message` — because that shape is what the client branches on
+      // (`isSkipRefusal`): it replays the tap as an ordinary view instead of
+      // reporting a lost reward. Thrown as a plain Error it arrived as a mock
+      // 500 with a string body, i.e. as "the network died", and the one branch
+      // this refusal exists to drive never ran in dev.
+      if ((ads.skip?.remaining ?? 0) <= 0)
+        return { error: { status: 403, data: { message: 'ad-skip-exhausted' } } };
       ADS_SKIP.usedToday += 1;
     }
     if (adId) mockState.watchedAdIds.add(adId);
