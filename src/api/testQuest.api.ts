@@ -31,11 +31,25 @@ export const testQuestApi = api.injectEndpoints({
       query: () => ({ url: 'test-quest/claim', method: 'POST' }),
       // A level pays LC, Lucky Stars and tickets together, each with its own
       // ledger row — both currency groups plus the ticket balance.
-      invalidatesTags: [
+      //
+      // Six of the levels also pay Lucky-Player DAYS, and that is not a balance:
+      // it changes the player's status, and with it the market discount, the
+      // engine-speed multiplier, the daily LP gift and the badge on the profile
+      // hero — none of which are drawn from `me`. A market LP purchase already
+      // refreshes exactly those (@see market.api `buyStatus`); a level that
+      // grants the same status has to refresh them too, or the perks the player
+      // just earned only appear after they happen to reopen a screen. The same
+      // for the one level that grants an engine — the market draws "engines
+      // owned" from its own payload.
+      invalidatesTags: result => [
         rtkTags.testQuest,
         rtkTags.tickets,
         ...balanceTags.lc,
         ...balanceTags.stars,
+        ...(result?.granted?.lpDays
+          ? [rtkTags.profile, rtkTags.market, rtkTags.marketSavings, rtkTags.statusDailyGift]
+          : []),
+        ...(result?.granted?.engine ? [rtkTags.market] : []),
       ],
     }),
     // Re-reads the caller's live channel membership (getChatMember) — called

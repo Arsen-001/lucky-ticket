@@ -23,6 +23,8 @@ export interface TestQuestClaimRewardRowProps {
   amount: number;
   /** Position in the list, for the entry stagger. */
   index?: number;
+  /** Second line under the name — the term an LP grant now runs to. */
+  note?: string;
   className?: string;
 }
 
@@ -48,6 +50,7 @@ export function TestQuestClaimRewardRow({
   kind,
   amount,
   index = 0,
+  note,
   className,
 }: TestQuestClaimRewardRowProps) {
   const t = useAppTranslations();
@@ -88,8 +91,11 @@ export function TestQuestClaimRewardRow({
       <span className={twMerge('flex-center h-9 w-9 shrink-0 rounded-lg', TINT[kind])}>
         {icon[kind]}
       </span>
-      <span className="min-w-0 flex-1 truncate text-[13px] font-semibold text-white">
-        {name[kind]}
+      <span className="flex min-w-0 flex-1 flex-col">
+        <span className="truncate text-[13px] font-semibold text-white">{name[kind]}</span>
+        {/* Lucky-Player days are the one reward with an end: the number alone
+            says how many were added, not what the player now holds. */}
+        {note && <span className="truncate text-[10.5px] text-white/50">{note}</span>}
       </span>
       <span className="shrink-0 text-[15px] font-extrabold tabular-nums text-white">{value}</span>
     </div>

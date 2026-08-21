@@ -2,10 +2,12 @@
 
 import { useEffect } from 'react';
 import { Gift, Ticket } from 'lucide-react';
+import { useFormatter } from 'next-intl';
 import { Button } from '@/components/shared/buttons/Button';
 import { Modal } from '@/components/shared/modals/Modal';
 import { BoltIcon } from '@/components/shared/icons/BoltIcon';
 import { LcLabel } from '@/components/shared/icons/LcLabel';
+import { useGetMeQuery } from '@/api/me.api';
 import { useAppTranslations } from '@/hooks/useAppTranslations';
 import type { ClaimTestQuestResponse } from '@/types/interfaces/testQuest.interfaces';
 import { formatNumber } from '@/utils/global/number.utils';
@@ -36,22 +38,38 @@ export interface TestQuestClaimModalProps {
  */
 export function TestQuestClaimModal({ result, day, totalDays, onClose }: TestQuestClaimModalProps) {
   const t = useAppTranslations();
+  const format = useFormatter();
+  // The claim invalidates `me`, so this is the expiry the grant just produced —
+  // the point of showing it is that Lucky Player is a TERM, and "+2 days" alone
+  // never says when it runs out.
+  const { data: me } = useGetMeQuery();
   const open = !!result;
 
   useEffect(() => {
     if (open) triggerHaptic('success');
   }, [open]);
 
+  const lpUntil =
+    me?.isLuckyPlayer && me.luckyPlayerExpiresAt
+      ? t('active until {date}', {
+          date: format.dateTime(new Date(me.luckyPlayerExpiresAt), {
+            year: 'numeric',
+            month: 'short',
+            day: 'numeric',
+          }),
+        })
+      : undefined;
+
   // Fixed order, so the same reward always sits in the same place: money, then
   // tickets, then the rarer drops.
-  const rows: { kind: TestQuestGrantKind; amount: number }[] = [];
+  const rows: { kind: TestQuestGrantKind; amount: number; note?: string }[] = [];
   const granted = result?.granted;
   if (granted) {
     if (granted.lc) rows.push({ kind: 'lc', amount: granted.lc });
     if (granted.tickets) rows.push({ kind: 'ticket', amount: granted.tickets });
     if (granted.ls) rows.push({ kind: 'star', amount: granted.ls });
     if (granted.ap) rows.push({ kind: 'ap', amount: granted.ap });
-    if (granted.lpDays) rows.push({ kind: 'lp', amount: granted.lpDays });
+    if (granted.lpDays) rows.push({ kind: 'lp', amount: granted.lpDays, note: lpUntil });
     if (granted.engine) rows.push({ kind: 'engine', amount: granted.engine });
   }
 
@@ -90,6 +108,7 @@ export function TestQuestClaimModal({ result, day, totalDays, onClose }: TestQue
                     key={row.kind}
                     kind={row.kind}
                     amount={row.amount}
+                    note={row.note}
                     index={i}
                   />
                 ))

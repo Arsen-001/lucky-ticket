@@ -3,6 +3,7 @@ import {
   TEST_QUEST_TOTAL_LEVELS,
   testQuestLadder,
 } from '@/constants/testQuest.constants';
+import { mockDb } from '@/mock/backend/db';
 import type { TestQuestReward, TestQuestStepDto } from '@/types/interfaces/testQuest.interfaces';
 
 /**
@@ -438,6 +439,19 @@ export const testQuestMock = {
     // none while the level's checklist is short of its targets.
     if (!before.finished && channelSubscribed && before.stepsComplete) climbed += 1;
     const granted = parseDrop(before.rewardLabel);
+    // Lucky-Player days are the one drop with a TERM, and the modal prints the
+    // date it now runs to — off `me`, exactly as in production. So the mock has
+    // to extend the same field the server does (from the later of now and the
+    // current expiry), or dev shows a date the claim did not move.
+    if (granted.lpDays) {
+      const current = mockDb.user.luckyPlayerExpiresAt
+        ? new Date(mockDb.user.luckyPlayerExpiresAt).getTime()
+        : 0;
+      mockDb.user.isLuckyPlayer = true;
+      mockDb.user.luckyPlayerExpiresAt = new Date(
+        Math.max(Date.now(), current) + granted.lpDays * 24 * 3_600_000
+      ).toISOString();
+    }
     return {
       ...view(),
       granted,
