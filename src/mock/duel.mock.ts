@@ -275,6 +275,7 @@ export const duelMock = {
       stake: 2,
       fromName: 'Aram',
       fromAvatarUrl: '',
+      rematch: false,
     },
   ],
 

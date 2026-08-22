@@ -1,6 +1,6 @@
 'use client';
 
-import { useRouter } from 'next/navigation';
+import { usePathname, useRouter } from 'next/navigation';
 import { useState } from 'react';
 import { Button } from '@/components/shared/buttons/Button';
 import { Modal } from '@/components/shared/modals/Modal';
@@ -40,6 +40,7 @@ export function DuelInviteAutoSurface() {
   const t = useAppTranslations();
   const toast = useToast();
   const router = useRouter();
+  const pathname = usePathname();
   const lock = useInFlightLock();
   const spend = useSpendFailure();
   const [dismissed, setDismissed] = useState<string[]>([]);
@@ -55,8 +56,12 @@ export function DuelInviteAutoSurface() {
   const [join] = useJoinDuelMutation();
   const [decline] = useDeclineDuelInviteMutation();
 
-  // Свежий вызов, на который ещё не ответили в этой сессии.
-  const invite = invites.find(i => !dismissed.includes(i.id));
+  // Свежий вызов, на который ещё не ответили в этой сессии. Реванш на самом
+  // экране дуэли модалкой НЕ дублируем: там его показывает экран результата
+  // (строка «соперник предлагает реванш» + кнопка). Везде ещё — модалка,
+  // словами реванша.
+  const onDuelScreen = pathname === routes.games.duel;
+  const invite = invites.find(i => !dismissed.includes(i.id) && !(i.rematch && onDuelScreen));
 
   const accept = async () => {
     if (!invite || !lock.acquire(invite.id)) return;
@@ -112,7 +117,13 @@ export function DuelInviteAutoSurface() {
         onClose={refuse}
         // Ключ несёт имя зовущего — без него next-intl бросает FORMATTING_ERROR
         // прямо в консоль, а ассистивная техника читает «диалог» и ничего больше.
-        label={invite ? t('duel invite title', { name: invite.fromName }) : t('duel')}
+        label={
+          invite
+            ? invite.rematch
+              ? t('duel invite rematch title', { name: invite.fromName })
+              : t('duel invite title', { name: invite.fromName })
+            : t('duel')
+        }
       >
         {invite && (
           <div className="bg-background flex w-full flex-col items-center gap-3 rounded-2xl border border-white/10 p-5 text-center shadow-[0_24px_60px_rgba(0,0,0,0.55)]">
@@ -125,7 +136,9 @@ export function DuelInviteAutoSurface() {
                 size={44}
               />
               <span className="text-[17px] font-extrabold">
-                {t('duel invite title', { name: invite.fromName })}
+                {invite.rematch
+                  ? t('duel invite rematch title', { name: invite.fromName })
+                  : t('duel invite title', { name: invite.fromName })}
               </span>
               <span className="text-pink-secondary text-[12px] leading-snug">
                 {t('duel invite body', { count: invite.stake })}
@@ -134,7 +147,7 @@ export function DuelInviteAutoSurface() {
 
             <div className="mt-1 flex w-full flex-col gap-2">
               <Button className="h-13" loading={lock.locked.has(invite.id)} onClick={accept}>
-                {t('duel invite accept')}
+                {invite.rematch ? t('duel accept rematch') : t('duel invite accept')}
               </Button>
               <Button variant="transparent" className="h-11" onClick={refuse}>
                 {t('duel invite refuse')}
