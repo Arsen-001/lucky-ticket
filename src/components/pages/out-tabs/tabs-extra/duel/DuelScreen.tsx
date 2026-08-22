@@ -4,6 +4,7 @@ import { useEffect, useRef, useState } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useGetDuelLobbiesQuery, useJoinDuelMutation } from '@/api/duel.api';
 import { useToast } from '@/hooks/useToast';
+import { useSpendFailure } from '@/hooks/useSpendFailure';
 import { routes } from '@/constants/routes';
 import { duelJoinFailure } from '@/utils/global/duel.utils';
 import { useAppTranslations } from '@/hooks/useAppTranslations';
@@ -29,6 +30,7 @@ export function DuelScreen() {
   const { data: lobbies } = useGetDuelLobbiesQuery();
   const [join] = useJoinDuelMutation();
   const toast = useToast();
+  const spend = useSpendFailure();
 
   /**
    * Заход по приглашению: `?lobby=<id>` из ссылки бота.
@@ -57,6 +59,10 @@ export function DuelScreen() {
         router.replace(routes.games.duel);
       } catch (error) {
         const reason = duelJoinFailure(error);
+        if (reason === 'tickets') {
+          await spend.report(error);
+          return;
+        }
         toast.error(reason === 'closed' ? t('duel lobby closed') : t('duel invite gone'));
       }
     })();
@@ -84,6 +90,7 @@ export function DuelScreen() {
     // Ровно высота прокручиваемой области, а не «не меньше»: иначе нижняя
     // кнопка встаёт по концу контента и под ней остаётся пустое поле.
     <div className="flex h-full flex-col items-stretch pb-2">
+      {spend.modals}
       {duelId ? (
         <DuelArena
           duelId={duelId}

@@ -10,6 +10,7 @@ import { DuelLobbyRow } from '@/components/pages/out-tabs/tabs-extra/duel/DuelLo
 import { duelClock, duelJoinFailure, duelMatchInProgress } from '@/utils/global/duel.utils';
 import { useAppTranslations } from '@/hooks/useAppTranslations';
 import { useInFlightLock } from '@/hooks/useInFlightLock';
+import { useSpendFailure } from '@/hooks/useSpendFailure';
 import { useToast } from '@/hooks/useToast';
 import {
   useCancelDuelMutation,
@@ -57,6 +58,9 @@ export function DuelLobbies({ onEnter, inviteUserId }: DuelLobbiesProps) {
   // кнопку, может опоздать на кадр — два быстрых тапа успевают уйти оба.
   // Игрок и ДОЛЖЕН жать быстро, просить его «не спешить» нельзя.
   const lock = useInFlightLock();
+  // Нехватка билетов — модалка с дорогой к билетам, не тост (правило для
+  // всех экранов, где что-то стоит денег).
+  const spend = useSpendFailure();
 
   const { data, isLoading, isError, refetch } = useGetDuelLobbiesQuery(undefined, {
     pollingInterval: 3000,
@@ -86,6 +90,7 @@ export function DuelLobbies({ onEnter, inviteUserId }: DuelLobbiesProps) {
           // Три разных исхода — три разных слова. «Не получилось» одинаковым
           // текстом на всё сразу не даёт понять, что делать дальше.
           if (result.invited > 0) toast.success(t('duel invite sent', { count: result.invited }));
+          else if (result.unaffordable > 0) toast.error(t('duel invite unaffordable'));
           else if (result.unavailable > 0) toast.error(t('duel invite unavailable'));
           else toast.error(t('duel invite refused'));
         } catch {
@@ -110,6 +115,13 @@ export function DuelLobbies({ onEnter, inviteUserId }: DuelLobbiesProps) {
   };
 
   const handleJoin = async (id: string) => {
+    // Ставка выше моих билетов — сервер откажет; говорим это сразу и тем же
+    // окном, каким сказал бы по его отказу.
+    const target = data?.lobbies.find(l => l.id === id);
+    if (target && target.stake > tickets) {
+      spend.show('tickets', { required: target.stake });
+      return;
+    }
     // Ключ — id лобби: два тапа по РАЗНЫМ лобби это два разных действия, а два
     // тапа по одному — одно.
     if (!lock.acquire(id)) return;
@@ -124,6 +136,10 @@ export function DuelLobbies({ onEnter, inviteUserId }: DuelLobbiesProps) {
         return;
       }
       const reason = duelJoinFailure(error);
+      if (reason === 'tickets') {
+        await spend.report(error, { required: target?.stake });
+        return;
+      }
       toast.error(
         reason === 'closed'
           ? t('duel lobby closed')
@@ -213,8 +229,10 @@ export function DuelLobbies({ onEnter, inviteUserId }: DuelLobbiesProps) {
           </Button>
         </div>
 
+        {spend.modals}
         <DuelInviteModal
           open={pickingFriends}
+          stake={stake}
           onSend={async userIds => {
             if (!lock.acquire('create')) throw new Error('busy');
             setCreating('friend');
@@ -280,10 +298,12 @@ export function DuelLobbies({ onEnter, inviteUserId }: DuelLobbiesProps) {
             key={lobby.id}
             lobby={lobby}
             busy={lock.locked.has(lobby.id)}
+            affordable={lobby.stake <= tickets}
             onJoin={handleJoin}
           />
         ))}
       </div>
+      {spend.modals}
 
       <div className="flex flex-col gap-2 pt-1">
         {!data?.own && (

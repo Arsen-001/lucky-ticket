@@ -15,12 +15,15 @@ export type DuelInviteResult = {
   sent: number;
   refused: number;
   unavailable: number;
+  unaffordable: number;
 };
 
 export interface DuelInviteModalProps {
   open: boolean;
   /** Лобби, в которое зовём. Пусто — лобби ещё нет, его создаст `onSend`. */
   duelId?: string;
+  /** Ставка матча: кому она не по карману, того позвать нельзя — он не войдёт. */
+  stake?: number;
   /**
    * Своя отправка: для «играть с другом» лобби создаётся ТОЛЬКО здесь, вместе
    * с вызовом, — иначе оно висело публичным в списке всё время, пока игрок
@@ -43,7 +46,7 @@ export interface DuelInviteModalProps {
  * отвечает «chat not found» — на проде рассылка на 283 адресата доставила ноль.
  * Обещать отправку, которая не дойдёт, хуже, чем честно показать, что не дойдёт.
  */
-export function DuelInviteModal({ open, duelId, onSend, onClose }: DuelInviteModalProps) {
+export function DuelInviteModal({ open, duelId, stake, onSend, onClose }: DuelInviteModalProps) {
   const t = useAppTranslations();
   const toast = useToast();
   const [picked, setPicked] = useState<string[]>([]);
@@ -66,6 +69,7 @@ export function DuelInviteModal({ open, duelId, onSend, onClose }: DuelInviteMod
       // Вызов в игре доходит всегда, письмо — не всем: считаем по первому.
       // Не дошёл никому — говорим, по какой именно причине.
       if (result.invited > 0) toast.success(t('duel invite sent', { count: result.invited }));
+      else if (result.unaffordable > 0) toast.error(t('duel invite unaffordable'));
       else if (result.unavailable > 0) toast.error(t('duel invite unavailable'));
       else toast.error(t('duel invite none'));
       setPicked([]);
@@ -102,11 +106,15 @@ export function DuelInviteModal({ open, duelId, onSend, onClose }: DuelInviteMod
           <div className="scrollbar-hidden flex max-h-[46vh] flex-col gap-2 overflow-y-auto">
             {candidates.map(candidate => {
               const chosen = picked.includes(candidate.id);
+              // Ставка выше его билетов — не выбирается, как и недостижимый:
+              // вызов, который кончится «не хватает билетов», хуже честной
+              // серой строки.
+              const poor = stake !== undefined && candidate.tickets < stake;
               return (
                 <button
                   key={candidate.id}
                   type="button"
-                  disabled={!candidate.reachable}
+                  disabled={!candidate.reachable || poor}
                   aria-pressed={chosen}
                   onClick={() => toggle(candidate.id)}
                   className={twMerge(
@@ -114,7 +122,7 @@ export function DuelInviteModal({ open, duelId, onSend, onClose }: DuelInviteMod
                     chosen
                       ? 'border-electric-pink bg-electric-pink/10'
                       : 'bg-background-overlay border-white/8',
-                    !candidate.reachable && 'opacity-55'
+                    (!candidate.reachable || poor) && 'opacity-55'
                   )}
                 >
                   <DuelPlayerAvatar
@@ -127,10 +135,14 @@ export function DuelInviteModal({ open, duelId, onSend, onClose }: DuelInviteMod
                     <span
                       className={twMerge(
                         'block text-[10.5px]',
-                        candidate.reachable ? 'text-success-text' : 'text-disabled'
+                        candidate.reachable && !poor ? 'text-success-text' : 'text-disabled'
                       )}
                     >
-                      {candidate.reachable ? t('duel invite reachable') : t('duel invite blocked')}
+                      {poor
+                        ? t('duel invite poor')
+                        : candidate.reachable
+                          ? t('duel invite reachable')
+                          : t('duel invite blocked')}
                     </span>
                   </span>
                   <span

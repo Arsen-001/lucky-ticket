@@ -106,6 +106,8 @@ export interface DuelInviteCandidate {
   readonly name: string;
   readonly avatarUrl: string;
   readonly reachable: boolean;
+  /** Бронзовых билетов на руках: ставка выше — звать бессмысленно. */
+  readonly tickets: number;
 }
 
 /** Вызов на дуэль, ждущий ответа: его показывает модалка внутри игры. */

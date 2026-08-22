@@ -12,7 +12,8 @@ import {
   useJoinDuelMutation,
 } from '@/api/duel.api';
 import { routes } from '@/constants/routes';
-import { duelMatchInProgress } from '@/utils/global/duel.utils';
+import { duelJoinFailure, duelMatchInProgress } from '@/utils/global/duel.utils';
+import { useSpendFailure } from '@/hooks/useSpendFailure';
 import { useAppTranslations } from '@/hooks/useAppTranslations';
 import { useInFlightLock } from '@/hooks/useInFlightLock';
 import { useToast } from '@/hooks/useToast';
@@ -40,6 +41,7 @@ export function DuelInviteAutoSurface() {
   const toast = useToast();
   const router = useRouter();
   const lock = useInFlightLock();
+  const spend = useSpendFailure();
   const [dismissed, setDismissed] = useState<string[]>([]);
 
   // Гейт не ставим: вызов сам даёт право войти, и приглашённый, которому игра
@@ -72,6 +74,11 @@ export function DuelInviteAutoSurface() {
         router.push(routes.games.duel);
         return;
       }
+      // Не хватает билетов на ставку — окно нехватки с дорогой к билетам.
+      if (duelJoinFailure(error) === 'tickets') {
+        await spend.report(error, { required: invite.stake });
+        return;
+      }
       // Место могли занять, пока модалка висела, — это нормальный исход.
       toast.error(t('duel invite gone'));
     } finally {
@@ -98,41 +105,44 @@ export function DuelInviteAutoSurface() {
   };
 
   return (
-    <Modal
-      open={Boolean(invite)}
-      onClose={refuse}
-      // Ключ несёт имя зовущего — без него next-intl бросает FORMATTING_ERROR
-      // прямо в консоль, а ассистивная техника читает «диалог» и ничего больше.
-      label={invite ? t('duel invite title', { name: invite.fromName }) : t('duel')}
-    >
-      {invite && (
-        <div className="bg-background flex w-full flex-col items-center gap-3 rounded-2xl border border-white/10 p-5 text-center shadow-[0_24px_60px_rgba(0,0,0,0.55)]">
-          <DuelToken move="TICKET" size={92} />
+    <>
+      {spend.modals}
+      <Modal
+        open={Boolean(invite)}
+        onClose={refuse}
+        // Ключ несёт имя зовущего — без него next-intl бросает FORMATTING_ERROR
+        // прямо в консоль, а ассистивная техника читает «диалог» и ничего больше.
+        label={invite ? t('duel invite title', { name: invite.fromName }) : t('duel')}
+      >
+        {invite && (
+          <div className="bg-background flex w-full flex-col items-center gap-3 rounded-2xl border border-white/10 p-5 text-center shadow-[0_24px_60px_rgba(0,0,0,0.55)]">
+            <DuelToken move="TICKET" size={92} />
 
-          <div className="flex flex-col items-center gap-1.5">
-            <DuelPlayerAvatar
-              name={invite.fromName}
-              avatarUrl={invite.fromAvatarUrl || undefined}
-              size={44}
-            />
-            <span className="text-[17px] font-extrabold">
-              {t('duel invite title', { name: invite.fromName })}
-            </span>
-            <span className="text-pink-secondary text-[12px] leading-snug">
-              {t('duel invite body', { count: invite.stake })}
-            </span>
-          </div>
+            <div className="flex flex-col items-center gap-1.5">
+              <DuelPlayerAvatar
+                name={invite.fromName}
+                avatarUrl={invite.fromAvatarUrl || undefined}
+                size={44}
+              />
+              <span className="text-[17px] font-extrabold">
+                {t('duel invite title', { name: invite.fromName })}
+              </span>
+              <span className="text-pink-secondary text-[12px] leading-snug">
+                {t('duel invite body', { count: invite.stake })}
+              </span>
+            </div>
 
-          <div className="mt-1 flex w-full flex-col gap-2">
-            <Button className="h-13" loading={lock.locked.has(invite.id)} onClick={accept}>
-              {t('duel invite accept')}
-            </Button>
-            <Button variant="transparent" className="h-11" onClick={refuse}>
-              {t('duel invite refuse')}
-            </Button>
+            <div className="mt-1 flex w-full flex-col gap-2">
+              <Button className="h-13" loading={lock.locked.has(invite.id)} onClick={accept}>
+                {t('duel invite accept')}
+              </Button>
+              <Button variant="transparent" className="h-11" onClick={refuse}>
+                {t('duel invite refuse')}
+              </Button>
+            </div>
           </div>
-        </div>
-      )}
-    </Modal>
+        )}
+      </Modal>
+    </>
   );
 }

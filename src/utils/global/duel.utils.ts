@@ -48,8 +48,13 @@ export function duelMatchInProgress(error: unknown): boolean {
   return message.includes('Match in progress');
 }
 
-export function duelJoinFailure(error: unknown): 'closed' | 'taken' | 'reserved' | 'other' {
+export function duelJoinFailure(
+  error: unknown
+): 'closed' | 'taken' | 'reserved' | 'tickets' | 'other' {
   const message = (error as { data?: { message?: string } })?.data?.message ?? '';
+  // Нехватка билетов — не «не получилось», а цена: её показывает модалка
+  // нехватки с дорогой к билетам (@see useSpendFailure).
+  if (message.includes('Not enough tickets')) return 'tickets';
   if (message.includes('closed')) return 'closed';
   if (message.includes('reserved')) return 'reserved';
   if (message.includes('taken')) return 'taken';

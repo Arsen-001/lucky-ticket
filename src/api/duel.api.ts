@@ -118,7 +118,14 @@ export const duelApi = api.injectEndpoints({
      * `unavailable` — кому игра пока не открыта стадией выката.
      */
     inviteToDuel: builder.mutation<
-      { invited: number; sent: number; refused: number; unavailable: number },
+      {
+        invited: number;
+        sent: number;
+        refused: number;
+        unavailable: number;
+        /** У кого билетов меньше ставки — вызов им не уходит. */
+        unaffordable: number;
+      },
       { id: string; userIds: string[] }
     >({
       query: ({ id, userIds }) => ({

@@ -96,7 +96,12 @@ export function DuelWaiting({
         </Button>
       </div>
 
-      <DuelInviteModal open={inviting} duelId={duelId} onClose={() => setInviting(false)} />
+      <DuelInviteModal
+        open={inviting}
+        duelId={duelId}
+        stake={stake}
+        onClose={() => setInviting(false)}
+      />
     </div>
   );
 }

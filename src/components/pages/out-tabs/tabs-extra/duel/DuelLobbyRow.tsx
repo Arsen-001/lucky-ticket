@@ -1,5 +1,6 @@
 'use client';
 
+import { twMerge } from 'tailwind-merge';
 import { Button } from '@/components/shared/buttons/Button';
 import { DuelPlayerAvatar } from '@/components/pages/out-tabs/tabs-extra/duel/DuelPlayerAvatar';
 import { useAppTranslations } from '@/hooks/useAppTranslations';
@@ -9,6 +10,8 @@ import type { DuelLobby } from '@/types/interfaces/duel.interfaces';
 export interface DuelLobbyRowProps {
   lobby: DuelLobby;
   busy: boolean;
+  /** Хватает ли моих билетов на эту ставку. Нет — кнопка тусклая, но тап остаётся: он откроет окно нехватки. */
+  affordable?: boolean;
   onJoin: (id: string) => void;
 }
 
@@ -18,7 +21,7 @@ export interface DuelLobbyRowProps {
  * Ожидание и ставка идут одной строкой под именем — так их читают за один
  * взгляд, вместе с решением «войти или нет».
  */
-export function DuelLobbyRow({ lobby, busy, onJoin }: DuelLobbyRowProps) {
+export function DuelLobbyRow({ lobby, busy, affordable = true, onJoin }: DuelLobbyRowProps) {
   const t = useAppTranslations();
 
   return (
@@ -34,7 +37,11 @@ export function DuelLobbyRow({ lobby, busy, onJoin }: DuelLobbyRowProps) {
         </span>
       </span>
 
-      <Button className="h-10 px-5 text-[13px]" loading={busy} onClick={() => onJoin(lobby.id)}>
+      <Button
+        className={twMerge('h-10 px-5 text-[13px]', !affordable && 'opacity-45')}
+        loading={busy}
+        onClick={() => onJoin(lobby.id)}
+      >
         {t('duel join')}
       </Button>
     </div>

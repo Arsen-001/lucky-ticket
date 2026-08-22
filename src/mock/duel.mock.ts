@@ -267,17 +267,19 @@ export const duelMock = {
   }),
 
   'games/duel/invite-candidates': () => [
-    { id: 'friend-1', name: 'Aram', avatarUrl: '', reachable: true },
-    { id: 'friend-2', name: 'Nare', avatarUrl: '', reachable: true },
-    { id: 'friend-3', name: 'Davit', avatarUrl: '', reachable: false },
-    { id: 'friend-4', name: 'Lilit', avatarUrl: '', reachable: false },
+    { id: 'friend-1', name: 'Aram', avatarUrl: '', reachable: true, tickets: 9 },
+    { id: 'friend-2', name: 'Nare', avatarUrl: '', reachable: true, tickets: 4 },
+    { id: 'friend-3', name: 'Davit', avatarUrl: '', reachable: false, tickets: 12 },
+    { id: 'friend-4', name: 'Lilit', avatarUrl: '', reachable: false, tickets: 0 },
+    // Достижим, но без билетов: ставка любая — серый, «не хватает билетов».
+    { id: 'friend-5', name: 'Karen', avatarUrl: '', reachable: true, tickets: 0 },
   ],
 
   /** Отправка: доходит только до достижимых — «отправлено» ≠ «доставлено». */
   'POST games/duel/:id/invite': (args: FetchArgs) => {
     const ids = ((args.body as { userIds?: string[] })?.userIds ?? []).length;
     const sent = Math.min(ids, 2);
-    return { invited: ids, sent, refused: 0, unavailable: 0 };
+    return { invited: ids, sent, refused: 0, unavailable: 0, unaffordable: 0 };
   },
 
   'POST games/duel/:id/ready': () => {
