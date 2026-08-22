@@ -1518,6 +1518,7 @@
   "duel invite gone": "Lobbi allaqachon band",
   "duel invite accepted elsewhere": "Chaqiriq boshqa qurilmada allaqachon qabul qilingan — oʻyinni ochyapmiz",
   "duel lobby closed": "Oʻyinchi kutmadi — lobbi yopildi",
+  "duel lobby left": "Bu lobbidan chiqding — boshqasini tanla",
   "duel match in progress": "Oʻyining davom etyapti — ochyapmiz",
   "duel waiting for player": "{name}ni kutyapmiz",
   "duel waiting private": "Faqat sen chaqirgan oʻyinchi kira oladi. Tikish {count} chip.",

@@ -1518,6 +1518,7 @@
   "duel invite gone": "La sala ya está ocupada",
   "duel invite accepted elsewhere": "Ya aceptado en otro dispositivo: abrimos el duelo",
   "duel lobby closed": "El jugador no esperó: la sala se cerró",
+  "duel lobby left": "Saliste de esta sala: elige otra",
   "duel match in progress": "Tu duelo sigue en marcha: lo abrimos",
   "duel waiting for player": "Esperando a {name}",
   "duel waiting private": "Solo puede entrar el jugador al que retaste. Apuesta: {count} tick.",

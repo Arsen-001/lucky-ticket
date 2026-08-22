@@ -1518,6 +1518,7 @@
   "duel invite gone": "Лобі вже зайняте",
   "duel invite accepted elsewhere": "Виклик уже прийнято на іншому пристрої — відкриваємо матч",
   "duel lobby closed": "Гравець не дочекався — лобі закрито",
+  "duel lobby left": "Ти вийшов із цього лобі — обери інше",
   "duel match in progress": "У тебе триває матч — відкриваємо його",
   "duel waiting for player": "Чекаємо {name}",
   "duel waiting private": "Увійти може лише той, кого ти покликав. Ставка {count} кв.",

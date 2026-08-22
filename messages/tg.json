@@ -1518,6 +1518,7 @@
   "duel invite gone": "Лобби аллакай банд аст",
   "duel invite accepted elsewhere": "Даъват аллакай дар дастгоҳи дигар қабул шудааст — бозиро мекушоем",
   "duel lobby closed": "Бозигар интизор нашуд — лобби баста шуд",
+  "duel lobby left": "Ту аз ин лобби баромадӣ — дигареро интихоб кун",
   "duel match in progress": "Бозии ту давом дорад — мекушоем",
   "duel waiting for player": "{name}-ро интизорем",
   "duel waiting private": "Танҳо бозигаре, ки ту даъват кардӣ, даромада метавонад. Гарав {count} чип.",

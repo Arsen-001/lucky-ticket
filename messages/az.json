@@ -1518,6 +1518,7 @@
   "duel invite gone": "Lobbi artıq tutulub",
   "duel invite accepted elsewhere": "Başqa cihazda artıq qəbul edilib — matçı açırıq",
   "duel lobby closed": "Oyunçu gözləmədi — lobbi bağlandı",
+  "duel lobby left": "Bu lobbidən çıxdın — başqasını seç",
   "duel match in progress": "Matçın hələ davam edir — açırıq",
   "duel waiting for player": "{name} gözlənilir",
   "duel waiting private": "Yalnız çağırdığın oyunçu qoşula bilər. Mərc {count} bil.",

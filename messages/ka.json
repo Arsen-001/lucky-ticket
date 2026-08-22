@@ -1518,6 +1518,7 @@
   "duel invite gone": "ლობი უკვე დაკავებულია",
   "duel invite accepted elsewhere": "სხვა მოწყობილობაზე უკვე მიღებულია — ვხსნით მატჩს",
   "duel lobby closed": "მოთამაშემ არ დაიცადა — ლობი დაიხურა",
+  "duel lobby left": "ამ ლობიდან გახვედი — აირჩიე სხვა",
   "duel match in progress": "შენი მატჩი ჯერ მიმდინარეობს — ვხსნით",
   "duel waiting for player": "ველოდებით {name}-ს",
   "duel waiting private": "შესვლა მხოლოდ შენს მიერ გამოწვეულ მოთამაშეს შეუძლია. ფსონი {count} ბილ.",

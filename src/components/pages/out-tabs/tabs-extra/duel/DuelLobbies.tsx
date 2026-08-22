@@ -147,7 +147,9 @@ export function DuelLobbies({ onEnter, inviteUserId }: DuelLobbiesProps) {
             ? t('duel lobby reserved')
             : reason === 'taken'
               ? t('duel invite gone')
-              : t('duel action failed')
+              : reason === 'left'
+                ? t('duel lobby left')
+                : t('duel action failed')
       );
     } finally {
       lock.release(id);

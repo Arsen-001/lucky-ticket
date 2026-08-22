@@ -1518,6 +1518,7 @@
   "duel invite gone": "Լոբբին արդեն զբաղված է",
   "duel invite accepted elsewhere": "Արդեն ընդունվել է այլ սարքից — բացում ենք խաղը",
   "duel lobby closed": "Խաղացողը չսպասեց — լոբբին փակվել է",
+  "duel lobby left": "Դու դուրս եկար այս լոբբիից — ընտրիր մեկ ուրիշը",
   "duel match in progress": "Քո խաղը դեռ ընթանում է — բացում ենք",
   "duel waiting for player": "Սպասում ենք {name}-ին",
   "duel waiting private": "Կարող է մտնել միայն նա, ում դու կանչել ես։ Խաղադրույք՝ {count} տոմս",

@@ -1518,6 +1518,7 @@
   "duel invite gone": "Лобби ээленип калды",
   "duel invite accepted elsewhere": "Чакыруу башка түзмөктө кабыл алынган — матчты ачып жатабыз",
   "duel lobby closed": "Оюнчу күткөн жок — лобби жабылды",
+  "duel lobby left": "Бул лоббиден чыктың — башкасын танда",
   "duel match in progress": "Матчың жүрүп жатат — ачып жатабыз",
   "duel waiting for player": "{name} күтөбүз",
   "duel waiting private": "Сен чакырган оюнчу гана кире алат. Ставка {count} бил.",

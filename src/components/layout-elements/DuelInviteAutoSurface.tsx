@@ -80,7 +80,7 @@ export function DuelInviteAutoSurface() {
         return;
       }
       // Место могли занять, пока модалка висела, — это нормальный исход.
-      toast.error(t('duel invite gone'));
+      toast.error(duelJoinFailure(error) === 'left' ? t('duel lobby left') : t('duel invite gone'));
     } finally {
       lock.release(invite.id);
     }

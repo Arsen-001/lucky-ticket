@@ -1518,6 +1518,7 @@
   "duel invite gone": "ロビーはすでに埋まっています",
   "duel invite accepted elsewhere": "別の端末ですでに承諾済みです。対戦を開きます",
   "duel lobby closed": "プレイヤーが待たなかったため、ロビーは閉じられました",
+  "duel lobby left": "このロビーから退出しました。別のロビーを選んでください",
   "duel match in progress": "対戦がまだ続いています。開きます",
   "duel waiting for player": "{name}を待っています",
   "duel waiting private": "参加できるのはあなたが誘ったプレイヤーだけです。ベット {count}枚",

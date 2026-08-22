@@ -1518,6 +1518,7 @@
   "duel invite gone": "The lobby is already taken",
   "duel invite accepted elsewhere": "Already accepted on another device — opening the match",
   "duel lobby closed": "The player did not wait — the lobby is closed",
+  "duel lobby left": "You left this lobby — pick another one",
   "duel match in progress": "Your match is still on — opening it",
   "duel waiting for player": "Waiting for {name}",
   "duel waiting private": "Only the player you called can join. Stake {count} tick.",

@@ -63,7 +63,13 @@ export function DuelScreen() {
           await spend.report(error);
           return;
         }
-        toast.error(reason === 'closed' ? t('duel lobby closed') : t('duel invite gone'));
+        toast.error(
+          reason === 'closed'
+            ? t('duel lobby closed')
+            : reason === 'left'
+              ? t('duel lobby left')
+              : t('duel invite gone')
+        );
       }
     })();
   }, [enabled, invitedLobbyId]);

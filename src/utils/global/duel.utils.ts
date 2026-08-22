@@ -50,11 +50,13 @@ export function duelMatchInProgress(error: unknown): boolean {
 
 export function duelJoinFailure(
   error: unknown
-): 'closed' | 'taken' | 'reserved' | 'tickets' | 'other' {
+): 'closed' | 'taken' | 'reserved' | 'tickets' | 'left' | 'other' {
   const message = (error as { data?: { message?: string } })?.data?.message ?? '';
   // Нехватка билетов — не «не получилось», а цена: её показывает модалка
   // нехватки с дорогой к билетам (@see useSpendFailure).
   if (message.includes('Not enough tickets')) return 'tickets';
+  // Ушёл с этого стола на готовности — обратно нельзя, выбирай другой.
+  if (message.includes('You left this lobby')) return 'left';
   if (message.includes('closed')) return 'closed';
   if (message.includes('reserved')) return 'reserved';
   if (message.includes('taken')) return 'taken';

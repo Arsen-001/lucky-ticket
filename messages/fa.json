@@ -1518,6 +1518,7 @@
   "duel invite gone": "اتاق قبلاً پر شده",
   "duel invite accepted elsewhere": "قبلاً در دستگاه دیگری پذیرفته شده — مسابقه را باز می‌کنیم",
   "duel lobby closed": "بازیکن منتظر نماند — اتاق بسته شد",
+  "duel lobby left": "از این اتاق خارج شدی — یکی دیگر را انتخاب کن",
   "duel match in progress": "مسابقه‌ات هنوز ادامه دارد — بازش می‌کنیم",
   "duel waiting for player": "منتظر {name}",
   "duel waiting private": "فقط بازیکنی که دعوتش کردی می‌تواند بپیوندد. شرط {count} بلیت",
