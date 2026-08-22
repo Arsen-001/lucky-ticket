@@ -1,4 +1,9 @@
+import type { TicketType } from '@/types/types/ticket.types';
+
 export type DuelMove = 'ROCK' | 'TICKET' | 'SCISSORS';
+
+/** Лига дуэли = тир билета, которым играют. */
+export type DuelTier = TicketType;
 
 export type DuelStatus = 'WAITING' | 'READY' | 'PLAYING' | 'FINISHED' | 'CANCELLED';
 
@@ -20,6 +25,8 @@ export interface DuelOpponent {
 }
 
 export interface DuelLobby {
+  /** Лига стола: каким билетом играют. */
+  readonly tier: DuelTier;
   readonly id: string;
   readonly stake: number;
   readonly waitingSeconds: number;
@@ -46,6 +53,8 @@ export interface DuelLobbyList {
   readonly moveSeconds: number;
   readonly readySeconds: number;
   readonly tickets: number;
+  /** Билеты по всем лигам: экран ставки рисует их под тирами. */
+  readonly balances: Readonly<Record<DuelTier, number>>;
   readonly own: DuelLobby | null;
   readonly lobbies: DuelLobby[];
 }
@@ -67,6 +76,8 @@ export interface DuelState {
   readonly id: string;
   readonly status: DuelStatus;
   readonly stake: number;
+  /** Лига матча. */
+  readonly tier: DuelTier;
   readonly role: 'host' | 'guest';
   readonly cancelReason: DuelCancelReason | null;
   readonly opponent: DuelOpponent | null;

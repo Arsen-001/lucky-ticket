@@ -4,6 +4,7 @@ import { rtkTags } from '@/constants/rtk-tags';
 import type { AppDispatch } from '@/lib/rtk/store';
 import type {
   DuelInvite,
+  DuelTier,
   DuelInviteCandidate,
   DuelLobbyList,
   DuelMove,
@@ -29,7 +30,7 @@ export const duelApi = api.injectEndpoints({
       providesTags: (_r, _e, id) => [{ type: rtkTags.duelState, id }],
     }),
 
-    createDuel: builder.mutation<DuelState, { stake: number }>({
+    createDuel: builder.mutation<DuelState, { stake: number; tier: DuelTier }>({
       query: body => ({ url: 'games/duel/lobbies', method: 'POST', body }),
       invalidatesTags: [rtkTags.duelLobbies],
       async onQueryStarted(_arg, { dispatch, queryFulfilled }) {
@@ -90,8 +91,10 @@ export const duelApi = api.injectEndpoints({
     }),
 
     /** Кого можно позвать — с пометкой, дойдёт ли до человека сообщение. */
-    getDuelInviteCandidates: builder.query<DuelInviteCandidate[], void>({
-      query: () => ({ url: 'games/duel/invite-candidates' }),
+    getDuelInviteCandidates: builder.query<DuelInviteCandidate[], DuelTier | void>({
+      // Билеты кандидатов считаются в той лиге, в которую зовут: у друга может
+      // быть полный кошелёк бронзы и ноль золота.
+      query: tier => ({ url: `games/duel/invite-candidates${tier ? `?tier=${tier}` : ''}` }),
     }),
 
     /**

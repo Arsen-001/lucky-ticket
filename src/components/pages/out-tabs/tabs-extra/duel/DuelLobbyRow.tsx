@@ -3,6 +3,7 @@
 import { twMerge } from 'tailwind-merge';
 import { Button } from '@/components/shared/buttons/Button';
 import { DuelPlayerAvatar } from '@/components/pages/out-tabs/tabs-extra/duel/DuelPlayerAvatar';
+import { Ticket } from '@/components/shared/icons/Ticket';
 import { useAppTranslations } from '@/hooks/useAppTranslations';
 import { duelClock } from '@/utils/global/duel.utils';
 import type { DuelLobby } from '@/types/interfaces/duel.interfaces';
@@ -33,7 +34,13 @@ export function DuelLobbyRow({ lobby, busy, affordable = true, onJoin }: DuelLob
         <span className="text-disabled block text-[12px]">
           {t('duel waiting for', { time: duelClock(lobby.waitingSeconds) })} ·{' '}
           <span className="text-gold font-bold tabular-nums">{lobby.stake}</span>{' '}
-          {t('duel stake tickets', { count: lobby.stake }).replace(/^\d+\s*/, '')}
+          {/* Билет лиги вместо слова: во что играют, видно раньше, чем прочитано */}
+          <Ticket
+            type={lobby.tier}
+            width={22}
+            height={22}
+            className="inline-block h-[14px] w-[22px] object-contain align-[-2px]"
+          />
         </span>
       </span>
 

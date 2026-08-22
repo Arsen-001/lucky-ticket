@@ -1540,6 +1540,7 @@
   "duel your lobby": "내 로비",
   "duel join": "참가",
   "duel choose stake": "경기당 베팅",
+  "duel choose tier": "리그 — 어떤 티켓으로 플레이할지",
   "duel stake note": "상대는 참가 전에 베팅을 봅니다. 티켓은 지금이 아니라 경기가 시작될 때 차감됩니다",
   "duel open lobby": "로비 열기",
   "duel play with friend": "친구와 플레이",

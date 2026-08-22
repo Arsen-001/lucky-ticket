@@ -27,6 +27,7 @@ const CROWD_MS = 8_000;
 interface MockDuel {
   id: string;
   stake: number;
+  tier: DuelState['tier'];
   role: 'host' | 'guest';
   status: DuelState['status'];
   opponent: { name: string; avatarUrl: string } | null;
@@ -51,6 +52,7 @@ interface MockDuel {
 
 const NAMES = ['Ani', 'Grig', 'Milena', 'Davit', 'Sona', 'Tigran', 'Vahe'];
 
+const balances = { bronze: 17, silver: 6, gold: 4, platinum: 0, diamond: 1 };
 let tickets = 5;
 let current: MockDuel | null = null;
 /** Счёт серии реваншей в моке: считается при каждом «играть ещё». */
@@ -60,18 +62,21 @@ const lobbies: DuelLobby[] = [
   {
     id: 'lobby-grig',
     stake: 1,
+    tier: 'bronze',
     waitingSeconds: 42,
     host: { id: 'u1', name: 'Grig', avatarUrl: '' },
   },
   {
     id: 'lobby-milena',
     stake: 3,
+    tier: 'gold',
     waitingSeconds: 78,
     host: { id: 'u2', name: 'Milena', avatarUrl: '' },
   },
   {
     id: 'lobby-tigran',
     stake: 2,
+    tier: 'silver',
     waitingSeconds: 125,
     host: { id: 'u3', name: 'Tigran', avatarUrl: '' },
   },
@@ -162,6 +167,7 @@ function view(duel: MockDuel): DuelState {
     id: duel.id,
     status: duel.status,
     stake: duel.stake,
+    tier: duel.tier,
     role: duel.role,
     cancelReason: duel.cancelReason,
     opponent: duel.opponent,
@@ -201,10 +207,16 @@ function view(duel: MockDuel): DuelState {
   };
 }
 
-function fresh(id: string, stake: number, role: 'host' | 'guest'): MockDuel {
+function fresh(
+  id: string,
+  stake: number,
+  role: 'host' | 'guest',
+  tier: DuelState['tier'] = 'bronze'
+): MockDuel {
   return {
     id,
     stake,
+    tier,
     role,
     status: role === 'host' ? 'WAITING' : 'READY',
     opponent: role === 'guest' ? { name: rnd(NAMES), avatarUrl: '' } : null,
@@ -237,12 +249,14 @@ const list = (): DuelLobbyList => ({
   moveSeconds: 5,
   readySeconds: 10,
   tickets,
+  balances: { ...balances, bronze: tickets },
   own:
     current && current.status === 'WAITING'
       ? {
           id: current.id,
           stake: current.stake,
           waitingSeconds: Math.floor((Date.now() - current.createdAt) / 1000),
+          tier: current.tier,
           host: { id: 'me', name: 'Вы', avatarUrl: '' },
         }
       : null,
@@ -253,15 +267,16 @@ export const duelMock = {
   'games/duel/lobbies': () => list(),
 
   'POST games/duel/lobbies': (args: FetchArgs) => {
-    const stake = Number((args.body as { stake?: number })?.stake ?? 1);
-    current = fresh(`duel-${Date.now()}`, stake, 'host');
+    const body = args.body as { stake?: number; tier?: DuelState['tier'] };
+    const stake = Number(body?.stake ?? 1);
+    current = fresh(`duel-${Date.now()}`, stake, 'host', body?.tier ?? 'bronze');
     return view(current);
   },
 
   'POST games/duel/:id/join': (args: FetchArgs) => {
     const id = String(args.url).split('/')[2];
     const lobby = lobbies.find(l => l.id === id);
-    current = fresh(id, lobby?.stake ?? 1, 'guest');
+    current = fresh(id, lobby?.stake ?? 1, 'guest', lobby?.tier ?? 'bronze');
     if (lobby) current.opponent = { name: lobby.host.name, avatarUrl: '' };
     return view(current);
   },
@@ -324,7 +339,8 @@ export const duelMock = {
       series.matches += 1;
     }
     const stake = current.stake;
-    current = fresh(`duel-${Date.now()}`, stake, 'host');
+    const tier = current.tier;
+    current = fresh(`duel-${Date.now()}`, stake, 'host', tier);
     current.status = 'READY';
     current.opponent = { name: rnd(NAMES), avatarUrl: '' };
     current.foeReady = true;

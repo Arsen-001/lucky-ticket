@@ -7,11 +7,13 @@ import { QueryErrorState } from '@/components/shared/error/QueryErrorState';
 import { DuelGameHeader } from '@/components/pages/out-tabs/tabs-extra/duel/DuelGameHeader';
 import { DuelInviteModal } from '@/components/pages/out-tabs/tabs-extra/duel/DuelInviteModal';
 import { DuelLobbyRow } from '@/components/pages/out-tabs/tabs-extra/duel/DuelLobbyRow';
+import { DuelTierPicker } from '@/components/pages/out-tabs/tabs-extra/duel/DuelTierPicker';
 import { duelClock, duelJoinFailure, duelMatchInProgress } from '@/utils/global/duel.utils';
 import { useAppTranslations } from '@/hooks/useAppTranslations';
 import { useInFlightLock } from '@/hooks/useInFlightLock';
 import { useSpendFailure } from '@/hooks/useSpendFailure';
 import { useToast } from '@/hooks/useToast';
+import type { DuelTier } from '@/types/interfaces/duel.interfaces';
 import {
   useCancelDuelMutation,
   useCreateDuelMutation,
@@ -44,6 +46,9 @@ export function DuelLobbies({ onEnter, inviteUserId }: DuelLobbiesProps) {
   const toast = useToast();
   const [picking, setPicking] = useState(Boolean(inviteUserId));
   const [stake, setStake] = useState(1);
+  // Лига — то есть каким билетом играем. Бронза по умолчанию: она расходная,
+  // её на руках у всех больше всего.
+  const [tier, setTier] = useState<DuelTier>('bronze');
   // Какая из двух кнопок создания нажата — лоадер крутит она одна, вторая
   // просто гаснет. Обе под одним замком `create`, чтобы второй тап не ушёл.
   const [creating, setCreating] = useState<'open' | 'friend' | null>(null);
@@ -70,7 +75,9 @@ export function DuelLobbies({ onEnter, inviteUserId }: DuelLobbiesProps) {
   const [cancel] = useCancelDuelMutation();
   const [inviteToDuel] = useInviteToDuelMutation();
 
-  const tickets = data?.tickets ?? 0;
+  const balances = data?.balances;
+  // Кошелёк выбранной лиги: и потолок ставки, и число в шапке — из него.
+  const tickets = balances ? (balances[tier] ?? 0) : (data?.tickets ?? 0);
   const min = data?.stakeMin ?? 1;
   const max = data?.stakeMax ?? 5;
 
@@ -78,7 +85,7 @@ export function DuelLobbies({ onEnter, inviteUserId }: DuelLobbiesProps) {
     if (!lock.acquire('create')) return;
     setCreating('open');
     try {
-      const duel = await create({ stake }).unwrap();
+      const duel = await create({ stake, tier }).unwrap();
       // Зовём того, ради кого пришли: лобби уже есть, ставка выбрана — вызов
       // уходит тем же движением, без второго экрана.
       if (inviteUserId) {
@@ -118,7 +125,10 @@ export function DuelLobbies({ onEnter, inviteUserId }: DuelLobbiesProps) {
     // Ставка выше моих билетов — сервер откажет; говорим это сразу и тем же
     // окном, каким сказал бы по его отказу.
     const target = data?.lobbies.find(l => l.id === id);
-    if (target && target.stake > tickets) {
+    // Своё лобби этой лиги: чужой стол может быть золотым, когда у меня выбрана
+    // бронза — считаем по лиге СТОЛА, а не по той, что открыта на экране.
+    const affordFor = target ? (balances?.[target.tier] ?? tickets) : tickets;
+    if (target && target.stake > affordFor) {
       spend.show('tickets', { required: target.stake });
       return;
     }
@@ -160,12 +170,27 @@ export function DuelLobbies({ onEnter, inviteUserId }: DuelLobbiesProps) {
   // данных `tickets` равен нулю, и кнопка «Создать лобби» просто гасла.
   if (isError) return <QueryErrorState onRetry={() => refetch()} />;
 
-  const header = <DuelGameHeader tickets={tickets} />;
+  const header = <DuelGameHeader tickets={tickets} tier={tier} />;
 
   if (picking) {
     return (
       <div className="flex h-full flex-col gap-3">
         {header}
+
+        <span className="text-pink-secondary text-[10px] font-black tracking-[0.16em] uppercase">
+          {t('duel choose tier')}
+        </span>
+
+        <DuelTierPicker
+          value={tier}
+          balances={balances ?? { bronze: tickets, silver: 0, gold: 0, platinum: 0, diamond: 0 }}
+          onChange={next => {
+            setTier(next);
+            // Ставка не должна пережить смену лиги: пять золотых и пять
+            // бронзовых — разные деньги, и потолок у них свой.
+            setStake(Math.min(stake, Math.max(min, balances?.[next] ?? min)));
+          }}
+        />
 
         <span className="text-pink-secondary text-[10px] font-black tracking-[0.16em] uppercase">
           {t('duel choose stake')}
@@ -235,11 +260,12 @@ export function DuelLobbies({ onEnter, inviteUserId }: DuelLobbiesProps) {
         <DuelInviteModal
           open={pickingFriends}
           stake={stake}
+          tier={tier}
           onSend={async userIds => {
             if (!lock.acquire('create')) throw new Error('busy');
             setCreating('friend');
             try {
-              const duel = await create({ stake }).unwrap();
+              const duel = await create({ stake, tier }).unwrap();
               createdForFriends.current = duel.id;
               return await inviteToDuel({ id: duel.id, userIds }).unwrap();
             } finally {
@@ -300,7 +326,7 @@ export function DuelLobbies({ onEnter, inviteUserId }: DuelLobbiesProps) {
             key={lobby.id}
             lobby={lobby}
             busy={lock.locked.has(lobby.id)}
-            affordable={lobby.stake <= tickets}
+            affordable={lobby.stake <= (balances?.[lobby.tier] ?? tickets)}
             onJoin={handleJoin}
           />
         ))}

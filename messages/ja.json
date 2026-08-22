@@ -1540,6 +1540,7 @@
   "duel your lobby": "あなたのロビー",
   "duel join": "参加",
   "duel choose stake": "1戦あたりのベット",
+  "duel choose tier": "リーグ — どのチケットで戦うか",
   "duel stake note": "相手は参加前にベットを確認できます。チケットは今ではなく、対戦開始時に引かれます",
   "duel open lobby": "ロビーを開く",
   "duel play with friend": "友だちと対戦",

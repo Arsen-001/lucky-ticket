@@ -9,6 +9,7 @@ import { DuelPlayerAvatar } from '@/components/pages/out-tabs/tabs-extra/duel/Du
 import { useGetDuelInviteCandidatesQuery, useInviteToDuelMutation } from '@/api/duel.api';
 import { useAppTranslations } from '@/hooks/useAppTranslations';
 import { useToast } from '@/hooks/useToast';
+import type { DuelTier } from '@/types/interfaces/duel.interfaces';
 
 export type DuelInviteResult = {
   invited: number;
@@ -24,6 +25,8 @@ export interface DuelInviteModalProps {
   duelId?: string;
   /** Ставка матча: кому она не по карману, того позвать нельзя — он не войдёт. */
   stake?: number;
+  /** Лига матча: билеты кандидатов считаются в ней. */
+  tier?: DuelTier;
   /**
    * Своя отправка: для «играть с другом» лобби создаётся ТОЛЬКО здесь, вместе
    * с вызовом, — иначе оно висело публичным в списке всё время, пока игрок
@@ -46,12 +49,19 @@ export interface DuelInviteModalProps {
  * отвечает «chat not found» — на проде рассылка на 283 адресата доставила ноль.
  * Обещать отправку, которая не дойдёт, хуже, чем честно показать, что не дойдёт.
  */
-export function DuelInviteModal({ open, duelId, stake, onSend, onClose }: DuelInviteModalProps) {
+export function DuelInviteModal({
+  open,
+  duelId,
+  stake,
+  tier = 'bronze',
+  onSend,
+  onClose,
+}: DuelInviteModalProps) {
   const t = useAppTranslations();
   const toast = useToast();
   const [picked, setPicked] = useState<string[]>([]);
 
-  const { data: candidates = [], isLoading } = useGetDuelInviteCandidatesQuery(undefined, {
+  const { data: candidates = [], isLoading } = useGetDuelInviteCandidatesQuery(tier, {
     skip: !open,
   });
   const [invite, { isLoading: sending }] = useInviteToDuelMutation();
