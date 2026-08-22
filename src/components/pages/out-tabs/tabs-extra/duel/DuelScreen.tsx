@@ -106,6 +106,10 @@ export function DuelScreen() {
             setDuelId(null);
             setInviteOnEnter(false);
           }}
+          onRematch={id => {
+            setInviteOnEnter(false);
+            setDuelId(id);
+          }}
         />
       ) : (
         <DuelLobbies

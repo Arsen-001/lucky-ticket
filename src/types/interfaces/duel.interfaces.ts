@@ -92,6 +92,14 @@ export interface DuelState {
   readonly invitedName: string | null;
   readonly winner: DuelSide | null;
   readonly winsNeeded: number;
+  /** Счёт серии реваншей глазами игрока («вы : соперник»); есть после финала и внутри серии. */
+  readonly series: {
+    readonly mine: number;
+    readonly theirs: number;
+    readonly matches: number;
+  } | null;
+  /** Открытый реванш этой серии: `mine` — открыл я и жду, иначе — зовёт соперник. */
+  readonly rematch: { readonly duelId: string; readonly mine: boolean } | null;
 }
 
 /**

@@ -45,12 +45,16 @@ interface MockDuel {
   roundWinner: 'HOST' | 'GUEST' | 'DRAW' | null;
   winner: 'HOST' | 'GUEST' | null;
   cancelReason: DuelState['cancelReason'];
+  /** Итог уже учтён в серии (после «играть ещё»). */
+  counted?: boolean;
 }
 
 const NAMES = ['Ani', 'Grig', 'Milena', 'Davit', 'Sona', 'Tigran', 'Vahe'];
 
 let tickets = 5;
 let current: MockDuel | null = null;
+/** Счёт серии реваншей в моке: считается при каждом «играть ещё». */
+const series = { mine: 0, theirs: 0, matches: 0 };
 
 const lobbies: DuelLobby[] = [
   {
@@ -180,6 +184,14 @@ function view(duel: MockDuel): DuelState {
     invitedName: null,
     winner: duel.winner,
     winsNeeded: WINS_NEEDED,
+    series:
+      duel.status === 'FINISHED' || series.matches > 0
+        ? {
+            ...series,
+            matches: series.matches + (duel.status === 'FINISHED' && !duel.counted ? 1 : 0),
+          }
+        : null,
+    rematch: null,
   };
 }
 
@@ -293,6 +305,24 @@ export const duelMock = {
     const move = (args.body as { move?: DuelMove })?.move ?? 'ROCK';
     if (!current.myMove) current.myMove = move;
     return view(advance(current));
+  },
+
+  /** «Играть ещё»: итог прошлого матча — в серию, соперник садится сразу. */
+  'POST games/duel/:id/rematch': () => {
+    if (!current) throw new Error('no duel');
+    if (current.status === 'FINISHED' && !current.counted) {
+      current.counted = true;
+      if (current.winner === 'HOST') series.mine += 1;
+      else series.theirs += 1;
+      series.matches += 1;
+    }
+    const stake = current.stake;
+    current = fresh(`duel-${Date.now()}`, stake, 'host');
+    current.status = 'READY';
+    current.opponent = { name: rnd(NAMES), avatarUrl: '' };
+    current.foeReady = true;
+    current.readyAt = Date.now() + READY_MS;
+    return view(current);
   },
 
   'DELETE games/duel/:id': () => {

@@ -52,6 +52,19 @@ export const duelApi = api.injectEndpoints({
       },
     }),
 
+    /**
+     * «Играть ещё» после финала: открывает реванш в серии или входит в уже
+     * открытый соперником — оба нажатия сходятся в один стол.
+     */
+    rematchDuel: builder.mutation<DuelState, string>({
+      query: id => ({ url: `games/duel/${id}/rematch`, method: 'POST' }),
+      invalidatesTags: [rtkTags.duelLobbies],
+      async onQueryStarted(_arg, { dispatch, queryFulfilled }) {
+        const { data } = await queryFulfilled;
+        seedDuelState(dispatch, data);
+      },
+    }),
+
     readyDuel: builder.mutation<DuelState, string>({
       query: id => ({ url: `games/duel/${id}/ready`, method: 'POST' }),
       invalidatesTags: (_r, _e, id) => [{ type: rtkTags.duelState, id }],
@@ -154,6 +167,7 @@ export const {
   useCancelDuelMutation,
   useJoinDuelMutation,
   useReadyDuelMutation,
+  useRematchDuelMutation,
   useMoveDuelMutation,
   useGetDuelInviteCandidatesQuery,
   useGetDuelInvitesQuery,

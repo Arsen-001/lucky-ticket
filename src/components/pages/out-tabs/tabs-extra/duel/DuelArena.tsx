@@ -22,8 +22,15 @@ import {
   useGetDuelStateQuery,
   useMoveDuelMutation,
   useReadyDuelMutation,
+  useRematchDuelMutation,
 } from '@/api/duel.api';
-import { duelBeats, duelRoundWon } from '@/utils/global/duel.utils';
+import {
+  duelBeats,
+  duelJoinFailure,
+  duelMatchInProgress,
+  duelRoundWon,
+} from '@/utils/global/duel.utils';
+import { useSpendFailure } from '@/hooks/useSpendFailure';
 import type { DuelMove } from '@/types/interfaces/duel.interfaces';
 import '@/styles/components/duel.css';
 
@@ -43,6 +50,8 @@ export interface DuelArenaProps {
   /** Лобби открыли ради конкретных людей — список друзей показываем сразу. */
   openInvite?: boolean;
   onLeave: () => void;
+  /** Реванш открыт или принят — арена переключается на новый матч. */
+  onRematch: (duelId: string) => void;
 }
 
 /**
@@ -53,7 +62,7 @@ export interface DuelArenaProps {
  * одна кнопка «Я готов». Шаг не читается как лишний, потому что ничего не
  * переключается: меняется только то, что лежит под руками.
  */
-export function DuelArena({ duelId, tickets, openInvite, onLeave }: DuelArenaProps) {
+export function DuelArena({ duelId, tickets, openInvite, onLeave, onRematch }: DuelArenaProps) {
   const t = useAppTranslations();
   const toast = useToast();
   // Замок, а не `isLoading`: перерисовка, гасящая кнопку, может опоздать на
@@ -61,6 +70,7 @@ export function DuelArena({ duelId, tickets, openInvite, onLeave }: DuelArenaPro
   // норма, а не злоупотребление.
   const lock = useInFlightLock();
   const dispatch = useAppDispatch();
+  const spend = useSpendFailure();
   const [now, setNow] = useState(() => Date.now());
   /**
    * Ход, который уже нажат, но сервером ещё не подтверждён.
@@ -81,6 +91,7 @@ export function DuelArena({ duelId, tickets, openInvite, onLeave }: DuelArenaPro
   const [ready] = useReadyDuelMutation();
   const [move] = useMoveDuelMutation();
   const [cancel] = useCancelDuelMutation();
+  const [rematch] = useRematchDuelMutation();
 
   const playing = data?.status === 'PLAYING';
 
@@ -211,6 +222,21 @@ export function DuelArena({ duelId, tickets, openInvite, onLeave }: DuelArenaPro
     }
   };
 
+  const handleRematch = async () => {
+    if (!lock.acquire('rematch')) return;
+    try {
+      const next = await rematch(duelId).unwrap();
+      onRematch(next.id);
+    } catch (error) {
+      if (duelMatchInProgress(error)) toast.info(t('duel match in progress'));
+      else if (duelJoinFailure(error) === 'tickets')
+        await spend.report(error, { required: data?.stake });
+      else toast.error(t('duel action failed'));
+    } finally {
+      lock.release('rematch');
+    }
+  };
+
   // Своё лобби до прихода соперника — отдельная картина, а не пустая арена.
   if (data.status === 'WAITING') {
     return (
@@ -263,7 +289,14 @@ export function DuelArena({ duelId, tickets, openInvite, onLeave }: DuelArenaPro
 
   return (
     <div className="flex h-full flex-col">
+      {spend.modals}
       <DuelGameHeader tickets={tickets} />
+      {/* Счёт серии — «вы : соперник», по людям, не по сторонам стола. */}
+      {data.series && data.series.matches > 0 && (
+        <div className="text-pink-secondary -mt-0.5 pb-1 text-center text-[11px] font-bold tracking-[0.12em] uppercase">
+          {t('duel series', { mine: data.series.mine, theirs: data.series.theirs })}
+        </div>
+      )}
 
       {/* ── сторона соперника ── */}
       <div className="flex flex-1 flex-col items-center gap-2.5">
@@ -432,9 +465,22 @@ export function DuelArena({ duelId, tickets, openInvite, onLeave }: DuelArenaPro
         )}
 
         {finished && (
-          <Button className="h-14" onClick={onLeave}>
-            {t('duel back to lobbies')}
-          </Button>
+          <>
+            {/* Реванш никогда не стартует сам: один открывает, второй принимает.
+                Оба нажатия «играть ещё» сходятся в один стол — сервер так решает. */}
+            {data.rematch?.mine ? (
+              <Button className="h-14" disabled>
+                {t('duel rematch waiting')}
+              </Button>
+            ) : (
+              <Button className="h-14" loading={lock.locked.has('rematch')} onClick={handleRematch}>
+                {data.rematch ? t('duel accept rematch') : t('duel play again')}
+              </Button>
+            )}
+            <Button variant="transparent" className="h-12" onClick={onLeave}>
+              {t('duel back to lobbies')}
+            </Button>
+          </>
         )}
       </div>
     </div>
