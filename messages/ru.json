@@ -1514,6 +1514,7 @@
   "duel invite accept": "Принять вызов",
   "duel invite refuse": "Не сейчас",
   "duel invite gone": "Лобби уже занято",
+  "duel invite accepted elsewhere": "Вызов уже принят на другом устройстве — открываем матч",
   "duel lobby closed": "Игрок не дождался — лобби закрыто",
   "duel match in progress": "У вас идёт матч — открываем его",
   "duel waiting for player": "Ждём {name}",

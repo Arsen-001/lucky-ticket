@@ -1514,6 +1514,7 @@
   "duel invite accept": "Aceitar o desafio",
   "duel invite refuse": "Agora não",
   "duel invite gone": "A sala já está ocupada",
+  "duel invite accepted elsewhere": "Já aceito em outro dispositivo — abrindo a partida",
   "duel lobby closed": "O jogador não esperou — a sala foi fechada",
   "duel match in progress": "Sua partida ainda está rolando — abrindo",
   "duel waiting for player": "Esperando {name}",

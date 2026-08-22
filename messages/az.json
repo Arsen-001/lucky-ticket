@@ -1514,6 +1514,7 @@
   "duel invite accept": "Çağırışı qəbul et",
   "duel invite refuse": "İndi yox",
   "duel invite gone": "Lobbi artıq tutulub",
+  "duel invite accepted elsewhere": "Başqa cihazda artıq qəbul edilib — matçı açırıq",
   "duel lobby closed": "Oyunçu gözləmədi — lobbi bağlandı",
   "duel match in progress": "Matçın hələ davam edir — açırıq",
   "duel waiting for player": "{name} gözlənilir",

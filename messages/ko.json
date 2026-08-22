@@ -1514,6 +1514,7 @@
   "duel invite accept": "도전 수락",
   "duel invite refuse": "나중에",
   "duel invite gone": "로비가 이미 찼습니다",
+  "duel invite accepted elsewhere": "다른 기기에서 이미 수락했습니다. 경기를 엽니다",
   "duel lobby closed": "플레이어가 기다리지 않아 로비가 닫혔습니다",
   "duel match in progress": "경기가 아직 진행 중입니다. 엽니다",
   "duel waiting for player": "{name} 기다리는 중",

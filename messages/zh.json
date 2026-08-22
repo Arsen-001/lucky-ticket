@@ -1514,6 +1514,7 @@
   "duel invite accept": "接受挑战",
   "duel invite refuse": "暂不",
   "duel invite gone": "房间已被占用",
+  "duel invite accepted elsewhere": "已在另一台设备上接受，正在打开比赛",
   "duel lobby closed": "玩家没有等待，房间已关闭",
   "duel match in progress": "你的比赛还在进行，正在打开",
   "duel waiting for player": "等待 {name}",

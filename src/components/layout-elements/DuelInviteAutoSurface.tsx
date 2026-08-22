@@ -82,7 +82,19 @@ export function DuelInviteAutoSurface() {
   const refuse = async () => {
     if (!invite) return;
     setDismissed(prev => [...prev, invite.id]);
-    decline(invite.id);
+    try {
+      const result = await decline(invite.id).unwrap();
+      // Тот же аккаунт на другом устройстве уже нажал «принять»: отказ
+      // опоздал, матч идёт — ведём в него, иначе здесь человек «отказался», а
+      // хозяин видит, что он за столом.
+      if (result.acceptedElsewhere) {
+        toast.info(t('duel invite accepted elsewhere'));
+        router.push(routes.games.duel);
+      }
+    } catch {
+      // Отказ — не то действие, ради которого стоит показывать ошибку:
+      // модалка уже закрыта, вызов протухнет сам.
+    }
   };
 
   return (

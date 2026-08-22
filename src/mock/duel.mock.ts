@@ -260,7 +260,11 @@ export const duelMock = {
     },
   ],
 
-  'POST games/duel/invites/:id/decline': () => ({ ok: true }),
+  'POST games/duel/invites/:id/decline': () => ({
+    ok: true,
+    acceptedElsewhere: false,
+    duelId: null,
+  }),
 
   'games/duel/invite-candidates': () => [
     { id: 'friend-1', name: 'Aram', avatarUrl: '', reachable: true },

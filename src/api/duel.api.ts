@@ -93,8 +93,17 @@ export const duelApi = api.injectEndpoints({
       providesTags: [rtkTags.duelInvites],
     }),
 
-    /** Отказ — чтобы вызов не всплывал снова. */
-    declineDuelInvite: builder.mutation<{ ok: boolean }, string>({
+    /**
+     * Отказ — чтобы вызов не всплывал снова.
+     *
+     * `acceptedElsewhere` — на вызов уже ответили «принять» с другого
+     * устройства этого же аккаунта: отказ опоздал, матч идёт, и экран должен
+     * открыть его, а не сделать вид, что отказ прошёл.
+     */
+    declineDuelInvite: builder.mutation<
+      { ok: boolean; acceptedElsewhere?: boolean; duelId?: string | null },
+      string
+    >({
       query: id => ({ url: `games/duel/invites/${id}/decline`, method: 'POST' }),
       invalidatesTags: [rtkTags.duelInvites],
     }),

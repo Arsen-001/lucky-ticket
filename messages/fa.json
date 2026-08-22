@@ -1514,6 +1514,7 @@
   "duel invite accept": "پذیرفتن مبارزه",
   "duel invite refuse": "الان نه",
   "duel invite gone": "اتاق قبلاً پر شده",
+  "duel invite accepted elsewhere": "قبلاً در دستگاه دیگری پذیرفته شده — مسابقه را باز می‌کنیم",
   "duel lobby closed": "بازیکن منتظر نماند — اتاق بسته شد",
   "duel match in progress": "مسابقه‌ات هنوز ادامه دارد — بازش می‌کنیم",
   "duel waiting for player": "منتظر {name}",
