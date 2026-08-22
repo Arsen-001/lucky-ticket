@@ -1,10 +1,11 @@
 'use client';
 
-import { useState } from 'react';
+import { useRef, useState } from 'react';
 import { twMerge } from 'tailwind-merge';
 import { Button } from '@/components/shared/buttons/Button';
 import { QueryErrorState } from '@/components/shared/error/QueryErrorState';
 import { DuelGameHeader } from '@/components/pages/out-tabs/tabs-extra/duel/DuelGameHeader';
+import { DuelInviteModal } from '@/components/pages/out-tabs/tabs-extra/duel/DuelInviteModal';
 import { DuelLobbyRow } from '@/components/pages/out-tabs/tabs-extra/duel/DuelLobbyRow';
 import { duelClock, duelJoinFailure, duelMatchInProgress } from '@/utils/global/duel.utils';
 import { useAppTranslations } from '@/hooks/useAppTranslations';
@@ -45,6 +46,13 @@ export function DuelLobbies({ onEnter, inviteUserId }: DuelLobbiesProps) {
   // Какая из двух кнопок создания нажата — лоадер крутит она одна, вторая
   // просто гаснет. Обе под одним замком `create`, чтобы второй тап не ушёл.
   const [creating, setCreating] = useState<'open' | 'friend' | null>(null);
+  // «Играть с другом»: сначала выбор, кого позвать, — лобби создаётся вместе с
+  // вызовом. Созданное здесь лобби запоминается, чтобы войти в него, когда
+  // модалка закроется (она закрывается сама после отправки).
+  const [pickingFriends, setPickingFriends] = useState(false);
+  // Ref, а не state: модалка зовёт `onClose` из того же вызова, в котором
+  // лобби только что создалось, — state в этом замыкании ещё пустой.
+  const createdForFriends = useRef<string | null>(null);
   // Замок вместо `isLoading`: RTK батчит `pending`, и перерисовка, гасящая
   // кнопку, может опоздать на кадр — два быстрых тапа успевают уйти оба.
   // Игрок и ДОЛЖЕН жать быстро, просить его «не спешить» нельзя.
@@ -62,9 +70,9 @@ export function DuelLobbies({ onEnter, inviteUserId }: DuelLobbiesProps) {
   const min = data?.stakeMin ?? 1;
   const max = data?.stakeMax ?? 5;
 
-  const handleCreate = async (invite = false) => {
+  const handleCreate = async () => {
     if (!lock.acquire('create')) return;
-    setCreating(invite ? 'friend' : 'open');
+    setCreating('open');
     try {
       const duel = await create({ stake }).unwrap();
       // Зовём того, ради кого пришли: лобби уже есть, ставка выбрана — вызов
@@ -85,7 +93,7 @@ export function DuelLobbies({ onEnter, inviteUserId }: DuelLobbiesProps) {
         }
       }
       setPicking(false);
-      onEnter(duel.id, { invite });
+      onEnter(duel.id);
     } catch (error) {
       // Идёт матч — не ошибка, а место, куда нужно вернуться: список лобби
       // прислал его в `active`, и экран откроет его следующим тиком.
@@ -185,17 +193,17 @@ export function DuelLobbies({ onEnter, inviteUserId }: DuelLobbiesProps) {
           >
             {inviteUserId ? t('duel invite start') : t('duel open lobby')}
           </Button>
-          {/* Тот же самый ход, но с ответом на «а с кем играть»: лобби
-              открывается и сразу показывает, кого позвать. Ждать случайного
-              соперника после этого никто не мешает — приглашение ожидания не
-              отменяет. */}
+          {/* Тот же самый ход, но с ответом на «а с кем играть»: сперва
+              выбираешь, кого позвать, и лобби открывается вместе с вызовом —
+              уже приватным. Ждать случайного соперника после этого никто не
+              мешает — приглашение ожидания не отменяет. */}
           {!inviteUserId && (
             <Button
               variant="secondary"
               className="h-13"
               loading={creating === 'friend'}
               disabled={creating !== null}
-              onClick={() => handleCreate(true)}
+              onClick={() => setPickingFriends(true)}
             >
               {t('duel play with friend')}
             </Button>
@@ -204,6 +212,32 @@ export function DuelLobbies({ onEnter, inviteUserId }: DuelLobbiesProps) {
             {t('duel back')}
           </Button>
         </div>
+
+        <DuelInviteModal
+          open={pickingFriends}
+          onSend={async userIds => {
+            if (!lock.acquire('create')) throw new Error('busy');
+            setCreating('friend');
+            try {
+              const duel = await create({ stake }).unwrap();
+              createdForFriends.current = duel.id;
+              return await inviteToDuel({ id: duel.id, userIds }).unwrap();
+            } finally {
+              setCreating(null);
+              lock.release('create');
+            }
+          }}
+          onClose={() => {
+            setPickingFriends(false);
+            // Лобби есть — значит вызов ушёл: идём ждать именно этого человека.
+            const id = createdForFriends.current;
+            if (id) {
+              createdForFriends.current = null;
+              setPicking(false);
+              onEnter(id);
+            }
+          }}
+        />
       </div>
     );
   }

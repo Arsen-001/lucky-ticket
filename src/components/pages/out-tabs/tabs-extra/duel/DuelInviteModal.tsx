@@ -10,9 +10,24 @@ import { useGetDuelInviteCandidatesQuery, useInviteToDuelMutation } from '@/api/
 import { useAppTranslations } from '@/hooks/useAppTranslations';
 import { useToast } from '@/hooks/useToast';
 
+export type DuelInviteResult = {
+  invited: number;
+  sent: number;
+  refused: number;
+  unavailable: number;
+};
+
 export interface DuelInviteModalProps {
   open: boolean;
-  duelId: string;
+  /** Лобби, в которое зовём. Пусто — лобби ещё нет, его создаст `onSend`. */
+  duelId?: string;
+  /**
+   * Своя отправка: для «играть с другом» лобби создаётся ТОЛЬКО здесь, вместе
+   * с вызовом, — иначе оно висело публичным в списке всё время, пока игрок
+   * выбирает, кого позвать, и его успевал занять кто угодно (на проде —
+   * за одну секунду), а через полминуты садилась массовка.
+   */
+  onSend?: (userIds: string[]) => Promise<DuelInviteResult>;
   onClose: () => void;
 }
 
@@ -28,7 +43,7 @@ export interface DuelInviteModalProps {
  * отвечает «chat not found» — на проде рассылка на 283 адресата доставила ноль.
  * Обещать отправку, которая не дойдёт, хуже, чем честно показать, что не дойдёт.
  */
-export function DuelInviteModal({ open, duelId, onClose }: DuelInviteModalProps) {
+export function DuelInviteModal({ open, duelId, onSend, onClose }: DuelInviteModalProps) {
   const t = useAppTranslations();
   const toast = useToast();
   const [picked, setPicked] = useState<string[]>([]);
@@ -37,13 +52,17 @@ export function DuelInviteModal({ open, duelId, onClose }: DuelInviteModalProps)
     skip: !open,
   });
   const [invite, { isLoading: sending }] = useInviteToDuelMutation();
+  const [sendingOwn, setSendingOwn] = useState(false);
 
   const toggle = (id: string) =>
     setPicked(prev => (prev.includes(id) ? prev.filter(x => x !== id) : [...prev, id]));
 
   const send = async () => {
+    setSendingOwn(true);
     try {
-      const result = await invite({ id: duelId, userIds: picked }).unwrap();
+      const result = onSend
+        ? await onSend(picked)
+        : await invite({ id: duelId ?? '', userIds: picked }).unwrap();
       // Вызов в игре доходит всегда, письмо — не всем: считаем по первому.
       // Не дошёл никому — говорим, по какой именно причине.
       if (result.invited > 0) toast.success(t('duel invite sent', { count: result.invited }));
@@ -53,6 +72,8 @@ export function DuelInviteModal({ open, duelId, onClose }: DuelInviteModalProps)
       onClose();
     } catch {
       toast.error(t('duel action failed'));
+    } finally {
+      setSendingOwn(false);
     }
   };
 
@@ -128,7 +149,12 @@ export function DuelInviteModal({ open, duelId, onClose }: DuelInviteModalProps)
           </div>
         )}
 
-        <Button className="h-13" loading={sending} disabled={!picked.length} onClick={send}>
+        <Button
+          className="h-13"
+          loading={sending || sendingOwn}
+          disabled={!picked.length}
+          onClick={send}
+        >
           {picked.length ? t('duel invite send', { count: picked.length }) : t('duel invite pick')}
         </Button>
 
