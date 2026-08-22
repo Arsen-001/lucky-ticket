@@ -100,6 +100,14 @@ export interface DuelState {
   } | null;
   /** Открытый реванш этой серии: `mine` — открыл я и жду, иначе — зовёт соперник. */
   readonly rematch: { readonly duelId: string; readonly mine: boolean } | null;
+  /** Только в ответе на «реванш»: дошёл ли вызов сопернику и почему нет. */
+  readonly rematchInvite?: {
+    readonly invited: number;
+    readonly sent: number;
+    readonly refused: number;
+    readonly unavailable: number;
+    readonly unaffordable: number;
+  } | null;
 }
 
 /**
@@ -125,4 +133,6 @@ export interface DuelInvite {
   readonly stake: number;
   readonly fromName: string;
   readonly fromAvatarUrl: string;
+  /** Вызов — это реванш в серии: зовём словами «предлагает реванш». */
+  readonly rematch?: boolean;
 }

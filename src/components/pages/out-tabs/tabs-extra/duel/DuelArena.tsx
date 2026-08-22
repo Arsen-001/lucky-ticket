@@ -226,6 +226,13 @@ export function DuelArena({ duelId, tickets, openInvite, onLeave, onRematch }: D
     if (!lock.acquire('rematch')) return;
     try {
       const next = await rematch(duelId).unwrap();
+      // Сопернику вызов не дошёл — предложивший узнаёт почему, а не ждёт впустую.
+      const inv = next.rematchInvite;
+      if (inv && inv.invited === 0) {
+        if (inv.unaffordable > 0) toast.error(t('duel invite unaffordable'));
+        else if (inv.refused > 0) toast.error(t('duel invite refused'));
+        else if (inv.unavailable > 0) toast.error(t('duel invite unavailable'));
+      }
       onRematch(next.id);
     } catch (error) {
       if (duelMatchInProgress(error)) toast.info(t('duel match in progress'));
@@ -467,7 +474,13 @@ export function DuelArena({ duelId, tickets, openInvite, onLeave, onRematch }: D
         {finished && (
           <>
             {/* Реванш никогда не стартует сам: один открывает, второй принимает.
-                Оба нажатия «играть ещё» сходятся в один стол — сервер так решает. */}
+                Оба нажатия сходятся в один стол — сервер так решает. Соперник
+                предложил — говорим это словами, а не только подписью кнопки. */}
+            {data.rematch && !data.rematch.mine && (
+              <span className="text-gold animation-blink text-center text-[13px] font-bold">
+                {t('duel rematch offered')}
+              </span>
+            )}
             {data.rematch?.mine ? (
               <Button className="h-14" disabled>
                 {t('duel rematch waiting')}
