@@ -184,12 +184,18 @@ function view(duel: MockDuel): DuelState {
     invitedName: null,
     winner: duel.winner,
     winsNeeded: WINS_NEEDED,
+    // Итог ТЕКУЩЕГО финала входит в счёт сразу, как на сервере, — иначе после
+    // первого матча экран показывал «серия 0 : 0».
     series:
       duel.status === 'FINISHED' || series.matches > 0
-        ? {
-            ...series,
-            matches: series.matches + (duel.status === 'FINISHED' && !duel.counted ? 1 : 0),
-          }
+        ? (() => {
+            const pending = duel.status === 'FINISHED' && !duel.counted;
+            return {
+              mine: series.mine + (pending && duel.winner === 'HOST' ? 1 : 0),
+              theirs: series.theirs + (pending && duel.winner !== 'HOST' ? 1 : 0),
+              matches: series.matches + (pending ? 1 : 0),
+            };
+          })()
         : null,
     rematch: null,
   };
