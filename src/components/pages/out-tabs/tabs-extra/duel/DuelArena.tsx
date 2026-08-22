@@ -23,7 +23,7 @@ import {
   useMoveDuelMutation,
   useReadyDuelMutation,
 } from '@/api/duel.api';
-import { duelBeats } from '@/utils/global/duel.utils';
+import { duelBeats, duelRoundWon } from '@/utils/global/duel.utils';
 import type { DuelMove } from '@/types/interfaces/duel.interfaces';
 import '@/styles/components/duel.css';
 
@@ -227,10 +227,7 @@ export function DuelArena({ duelId, tickets, openInvite, onLeave }: DuelArenaPro
 
   // Ничья приходит как `winner: 'DRAW'` — это не «решено не в мою пользу»,
   // а «не решено»: без этой оговорки треть раундов показывалась проигрышем.
-  const decided = revealed && data.round?.winner && data.round.winner !== 'DRAW';
-  const roundWon = decided
-    ? data.round!.winner === (data.role === 'host' ? 'HOST' : 'GUEST')
-    : null;
+  const roundWon = revealed ? duelRoundWon(data.round?.winner, data.role) : null;
   const myState = roundWon === null ? 'idle' : roundWon ? 'win' : 'lose';
   const foeState = roundWon === null ? 'idle' : roundWon ? 'lose' : 'win';
   const beats = revealed ? duelBeats(data.me.move, data.foe.move) : null;

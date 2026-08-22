@@ -1,4 +1,4 @@
-import type { DuelMove } from '@/types/interfaces/duel.interfaces';
+import type { DuelMove, DuelSide } from '@/types/interfaces/duel.interfaces';
 
 /**
  * Время в формате `м:сс`.
@@ -54,4 +54,20 @@ export function duelJoinFailure(error: unknown): 'closed' | 'taken' | 'reserved'
   if (message.includes('reserved')) return 'reserved';
   if (message.includes('taken')) return 'taken';
   return 'other';
+}
+
+/**
+ * Исход вскрытого раунда для этой стороны: `true` — мой, `false` — соперника,
+ * `null` — не решён (ничья или ещё не вскрыт).
+ *
+ * Сервер присылает ничью как `winner: 'DRAW'`, и это НЕ «решено не в мою
+ * пользу»: арена, считавшая решённым любое не-null значение, показывала треть
+ * раундов проигрышем — «Opponent takes it», мой жетон серый, чужой горит.
+ */
+export function duelRoundWon(
+  winner: DuelSide | null | undefined,
+  role: 'host' | 'guest'
+): boolean | null {
+  if (!winner || winner === 'DRAW') return null;
+  return winner === (role === 'host' ? 'HOST' : 'GUEST');
 }
