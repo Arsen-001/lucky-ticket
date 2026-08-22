@@ -42,6 +42,9 @@ export function DuelLobbies({ onEnter, inviteUserId }: DuelLobbiesProps) {
   const toast = useToast();
   const [picking, setPicking] = useState(Boolean(inviteUserId));
   const [stake, setStake] = useState(1);
+  // Какая из двух кнопок создания нажата — лоадер крутит она одна, вторая
+  // просто гаснет. Обе под одним замком `create`, чтобы второй тап не ушёл.
+  const [creating, setCreating] = useState<'open' | 'friend' | null>(null);
   // Замок вместо `isLoading`: RTK батчит `pending`, и перерисовка, гасящая
   // кнопку, может опоздать на кадр — два быстрых тапа успевают уйти оба.
   // Игрок и ДОЛЖЕН жать быстро, просить его «не спешить» нельзя.
@@ -61,6 +64,7 @@ export function DuelLobbies({ onEnter, inviteUserId }: DuelLobbiesProps) {
 
   const handleCreate = async (invite = false) => {
     if (!lock.acquire('create')) return;
+    setCreating(invite ? 'friend' : 'open');
     try {
       const duel = await create({ stake }).unwrap();
       // Зовём того, ради кого пришли: лобби уже есть, ставка выбрана — вызов
@@ -92,6 +96,7 @@ export function DuelLobbies({ onEnter, inviteUserId }: DuelLobbiesProps) {
         toast.error(t('duel action failed'));
       }
     } finally {
+      setCreating(null);
       lock.release('create');
     }
   };
@@ -168,7 +173,8 @@ export function DuelLobbies({ onEnter, inviteUserId }: DuelLobbiesProps) {
         <div className="mt-auto flex flex-col gap-2">
           <Button
             className="h-14"
-            loading={lock.locked.has('create')}
+            loading={creating === 'open'}
+            disabled={creating !== null}
             onClick={() => handleCreate()}
           >
             {inviteUserId ? t('duel invite start') : t('duel open lobby')}
@@ -181,7 +187,8 @@ export function DuelLobbies({ onEnter, inviteUserId }: DuelLobbiesProps) {
             <Button
               variant="secondary"
               className="h-13"
-              loading={lock.locked.has('create')}
+              loading={creating === 'friend'}
+              disabled={creating !== null}
               onClick={() => handleCreate(true)}
             >
               {t('duel play with friend')}

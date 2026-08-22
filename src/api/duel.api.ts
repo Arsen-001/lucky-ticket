@@ -1,6 +1,7 @@
 import { api } from '@/api/index.api';
 import { refetchTestQuestProgress } from '@/api/testQuest.api';
 import { rtkTags } from '@/constants/rtk-tags';
+import type { AppDispatch } from '@/lib/rtk/store';
 import type {
   DuelInvite,
   DuelInviteCandidate,
@@ -31,6 +32,10 @@ export const duelApi = api.injectEndpoints({
     createDuel: builder.mutation<DuelState, { stake: number }>({
       query: body => ({ url: 'games/duel/lobbies', method: 'POST', body }),
       invalidatesTags: [rtkTags.duelLobbies],
+      async onQueryStarted(_arg, { dispatch, queryFulfilled }) {
+        const { data } = await queryFulfilled;
+        seedDuelState(dispatch, data);
+      },
     }),
 
     cancelDuel: builder.mutation<{ ok: boolean }, string>({
@@ -41,6 +46,10 @@ export const duelApi = api.injectEndpoints({
     joinDuel: builder.mutation<DuelState, string>({
       query: id => ({ url: `games/duel/${id}/join`, method: 'POST' }),
       invalidatesTags: [rtkTags.duelLobbies],
+      async onQueryStarted(_arg, { dispatch, queryFulfilled }) {
+        const { data } = await queryFulfilled;
+        seedDuelState(dispatch, data);
+      },
     }),
 
     readyDuel: builder.mutation<DuelState, string>({
@@ -111,6 +120,16 @@ export const duelApi = api.injectEndpoints({
     }),
   }),
 });
+
+/**
+ * Ответ «создать» и «войти» — это уже готовое состояние матча. Кладём его в
+ * кеш `getDuelState` сразу: иначе арена, открывшись, секунду стоит пустой,
+ * пока не придёт первый опрос — и это ровно тот момент, когда игрок только
+ * что нажал кнопку и смотрит, сработала ли она.
+ */
+function seedDuelState(dispatch: AppDispatch, state: DuelState) {
+  dispatch(duelApi.util.upsertQueryData('getDuelState', state.id, state));
+}
 
 export const {
   useGetDuelLobbiesQuery,

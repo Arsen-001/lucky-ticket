@@ -18,6 +18,8 @@ export interface DuelWaitingProps {
   stake: number;
   seconds: number;
   onCancel: () => void;
+  /** Отмена ушла на сервер — кнопка крутит лоадер, пока ответ не пришёл. */
+  cancelling?: boolean;
   className?: string;
 }
 
@@ -38,6 +40,7 @@ export function DuelWaiting({
   stake,
   seconds,
   onCancel,
+  cancelling = false,
   className,
 }: DuelWaitingProps) {
   const t = useAppTranslations();
@@ -83,7 +86,12 @@ export function DuelWaiting({
         <Button className="h-13 w-full" onClick={() => setInviting(true)}>
           {t('duel invite players')}
         </Button>
-        <Button variant="transparent" className="h-12 w-full" onClick={onCancel}>
+        <Button
+          variant="transparent"
+          className="h-12 w-full"
+          loading={cancelling}
+          onClick={onCancel}
+        >
           {t('duel cancel waiting')}
         </Button>
       </div>

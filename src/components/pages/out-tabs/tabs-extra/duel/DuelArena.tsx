@@ -13,7 +13,11 @@ import { DUEL_MOVE_LABEL } from '@/components/pages/out-tabs/tabs-extra/duel/due
 import { useAppTranslations } from '@/hooks/useAppTranslations';
 import { useInFlightLock } from '@/hooks/useInFlightLock';
 import { useToast } from '@/hooks/useToast';
+import { useAppDispatch } from '@/lib/rtk/hooks';
+import { rtkTags } from '@/constants/rtk-tags';
+import { refetchTestQuestProgress } from '@/api/testQuest.api';
 import {
+  duelApi,
   useCancelDuelMutation,
   useGetDuelStateQuery,
   useMoveDuelMutation,
@@ -56,7 +60,17 @@ export function DuelArena({ duelId, tickets, openInvite, onLeave }: DuelArenaPro
   // кадр, и два быстрых тапа уходят оба. В матче на пять секунд быстрые тапы —
   // норма, а не злоупотребление.
   const lock = useInFlightLock();
+  const dispatch = useAppDispatch();
   const [now, setNow] = useState(() => Date.now());
+  /**
+   * Ход, который уже нажат, но сервером ещё не подтверждён.
+   *
+   * Раунд длится пять секунд, а круг до сервера плюс следующий опрос — до
+   * секунды. Жетон, не загоревшийся сразу, читается как «не нажалось», и
+   * игрок жмёт ещё раз. Поэтому выбранная фигура показывается в момент тапа,
+   * а не в момент ответа; отказ сервера снимает её обратно.
+   */
+  const [pending, setPending] = useState<{ round: number; move: DuelMove } | null>(null);
 
   // Интервал зависит от фазы: пока ждём вскрытия — чаще, в остальное время
   // достаточно шестисот миллисекунд.
@@ -74,6 +88,29 @@ export function DuelArena({ duelId, tickets, openInvite, onLeave }: DuelArenaPro
     const id = setInterval(() => setNow(Date.now()), playing ? 200 : 500);
     return () => clearInterval(id);
   }, [playing]);
+
+  /**
+   * Билеты двигаются не от моих тапов, а от хода матча: списываются, когда
+   * ОБА подтвердили готовность, и возвращаются удвоенными на финале. Узнаёт
+   * об этом арена из опроса, поэтому и список лобби с остатком билетов в
+   * шапке обновляется отсюда, по смене статуса, — иначе после победы «4 tick.»
+   * стояло над шапкой с прежним числом, а список ещё три секунды показывал
+   * «Ваше лобби · 0:00» и «Закрыть лобби» от матча, который уже сыгран.
+   */
+  const seenStatusRef = useRef<string | undefined>(undefined);
+  useEffect(() => {
+    const status = data?.status;
+    if (!status || seenStatusRef.current === status) return;
+    const first = seenStatusRef.current === undefined;
+    seenStatusRef.current = status;
+    if (first) return;
+    if (status === 'PLAYING' || status === 'FINISHED' || status === 'CANCELLED') {
+      dispatch(duelApi.util.invalidateTags([rtkTags.duelLobbies, rtkTags.tickets]));
+    }
+    // Проигравший узнаёт о списании из опроса, а не из своего хода — чек-лист
+    // тест-квеста считает билеты и должен увидеть это у обеих сторон.
+    if (status === 'FINISHED') refetchTestQuestProgress(dispatch);
+  }, [data?.status]);
 
   // «Оба сходили, ждём картинку» — единственная фаза, где задержка заметна.
   useEffect(() => {
@@ -135,11 +172,14 @@ export function DuelArena({ duelId, tickets, openInvite, onLeave }: DuelArenaPro
   const handleMove = async (picked: DuelMove) => {
     // Ключ с номером раунда: ход в следующем раунде — новое действие, а второй
     // тап в этом же — тот самый повтор, который сервер и так не примет.
-    const key = `move-${data?.round?.index ?? 0}`;
+    const roundIndex = data?.round?.index ?? 0;
+    const key = `move-${roundIndex}`;
     if (!lock.acquire(key)) return;
+    setPending({ round: roundIndex, move: picked });
     try {
       await move({ id: duelId, move: picked }).unwrap();
     } catch {
+      setPending(null);
       toast.error(t('duel move failed'));
     } finally {
       lock.release(key);
@@ -157,13 +197,19 @@ export function DuelArena({ duelId, tickets, openInvite, onLeave }: DuelArenaPro
           openInvite={openInvite}
           stake={data.stake}
           seconds={data.waitingSeconds}
+          cancelling={lock.locked.has('cancel')}
           onCancel={async () => {
             // Кнопка делает ровно то, что обещает: закрывает лобби, а не
-            // просто уводит с экрана, оставив его висеть в списке.
+            // просто уводит с экрана, оставив его висеть в списке. И крутит
+            // лоадер, пока сервер отвечает: без него экран секунду не менялся,
+            // и тап выглядел непринятым.
+            if (!lock.acquire('cancel')) return;
             try {
               await cancel(duelId).unwrap();
             } catch {
               toast.error(t('duel action failed'));
+            } finally {
+              lock.release('cancel');
             }
             onLeave();
           }}
@@ -179,13 +225,19 @@ export function DuelArena({ duelId, tickets, openInvite, onLeave }: DuelArenaPro
   const iWon = data.winner === (data.role === 'host' ? 'HOST' : 'GUEST');
   const readiness = data.status === 'READY';
 
-  const roundWon =
-    revealed && data.round?.winner
-      ? data.round.winner === (data.role === 'host' ? 'HOST' : 'GUEST')
-      : null;
+  // Ничья приходит как `winner: 'DRAW'` — это не «решено не в мою пользу»,
+  // а «не решено»: без этой оговорки треть раундов показывалась проигрышем.
+  const decided = revealed && data.round?.winner && data.round.winner !== 'DRAW';
+  const roundWon = decided
+    ? data.round!.winner === (data.role === 'host' ? 'HOST' : 'GUEST')
+    : null;
   const myState = roundWon === null ? 'idle' : roundWon ? 'win' : 'lose';
   const foeState = roundWon === null ? 'idle' : roundWon ? 'lose' : 'win';
   const beats = revealed ? duelBeats(data.me.move, data.foe.move) : null;
+  // Нажатый, но ещё не подтверждённый ход показывается как сделанный — только
+  // в своём раунде: сервер мог уже открыть следующий.
+  const myMove =
+    data.me.move ?? (pending && pending.round === data.round?.index ? pending.move : null);
 
   return (
     <div className="flex h-full flex-col">
@@ -275,7 +327,7 @@ export function DuelArena({ duelId, tickets, openInvite, onLeave }: DuelArenaPro
           </>
         ) : (
           <>
-            {!data.me.move && (
+            {!myMove && (
               <span
                 className={twMerge(
                   'text-2xl font-extrabold tabular-nums',
@@ -286,7 +338,7 @@ export function DuelArena({ duelId, tickets, openInvite, onLeave }: DuelArenaPro
               </span>
             )}
             <span className="text-gray-secondary text-[13px]">
-              {data.me.move ? t('duel move accepted') : t('duel pick a token')}
+              {myMove ? t('duel move accepted') : t('duel pick a token')}
             </span>
           </>
         )}
@@ -295,7 +347,7 @@ export function DuelArena({ duelId, tickets, openInvite, onLeave }: DuelArenaPro
       {/* ── моя сторона ── */}
       <div className="flex flex-1 flex-col items-center justify-end gap-2.5">
         <DuelToken
-          move={data.me.move}
+          move={myMove}
           size={124}
           state={myState}
           className={revealed ? 'duel-drop' : ''}
@@ -354,7 +406,7 @@ export function DuelArena({ duelId, tickets, openInvite, onLeave }: DuelArenaPro
         )}
 
         {playing && (
-          <DuelPicks chosen={data.me.move} disabled={lock.locked.size > 0} onPick={handleMove} />
+          <DuelPicks chosen={myMove} disabled={lock.locked.size > 0} onPick={handleMove} />
         )}
 
         {finished && (

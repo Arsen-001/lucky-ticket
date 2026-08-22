@@ -29,9 +29,13 @@ const SRC: Record<DuelMove, string> = {
  * загорается золотом, проигравший ужимается и сереет.
  */
 export function DuelToken({ move, size = 128, state = 'idle', className }: DuelTokenProps) {
+  // Рубашка и фигура — разные узлы (ключи), а не один div с другим классом:
+  // иначе React переиспользует узел, и `transition-all` на 300 мс дорисовывает
+  // тающую рамку рубашки вокруг уже открытой фигуры.
   if (!move) {
     return (
       <div
+        key="back"
         className={twMerge(
           'flex-center rounded-full border border-electric-purple/50 bg-background-overlay',
           'font-bold text-pink-secondary/60 transition-transform duration-300',
@@ -52,6 +56,7 @@ export function DuelToken({ move, size = 128, state = 'idle', className }: DuelT
 
   return (
     <div
+      key="face"
       className={twMerge('flex-center transition-all duration-300', stateClasses[state], className)}
       style={{ width: size, height: size }}
     >
