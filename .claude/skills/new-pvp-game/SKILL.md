@@ -99,7 +99,8 @@ Each line below is a bug that reached production on 22.08.2026 and the pattern t
 7. **Deep link hygiene.** `?lobby=<id>` auto-joins once and then `router.replace(routes.games.<name>)`; `?invite=<userId>` opens the stake picker and creates+invites in one go.
 8. **The invite auto-surface lives in the root layout**, polls 5 s with `refetchOnFocus`, keeps a `dismissed` list, and on «accept» / «not now» handles `Match in progress` and `acceptedElsewhere` by navigating to the game screen, where `active` opens the match.
 9. **«Play with a friend» = `DuelInviteModal` with `onSend`** that creates the lobby and invites in one motion; the created id sits in a **ref** (the modal calls `onClose` from the same invocation — state in that closure is still empty).
-10. **The screen reopens a running match from `lobbies.active`**, and a `CANCELLED` state turns into a toast + leave. A failed query shows `QueryErrorState`, never «you have no tickets».
+10. **Player names go through `shownName(user) ?? username`** — never `displayName || username`. `usernameCustom` means the player set an in-app nickname and it must win over the Telegram name; SeedPlayer names are authored and used as-is. Select `usernameCustom` wherever a user's name is shown.
+11. **The screen reopens a running match from `lobbies.active`**, and a `CANCELLED` state turns into a toast + leave. A failed query shows `QueryErrorState`, never «you have no tickets».
 
 ## Telegram reality
 
@@ -210,6 +211,7 @@ Each of these shipped, reached production and was found the hard way.
 - **Join during my own match** → two matches, two stakes (22.08).
 - **Modal over a running match; two devices disagreeing** → user decisions, both closed (22.08).
 - **Numbers in strings** — «10 seconds» in 20 languages one panel edit away from lying (22.08).
+- **Showing the Telegram name instead of the in-app nickname** — the duel used `displayName || username` everywhere; the whole app picks the visible name with `shownName(user) ?? username` (`usernameCustom` → the in-app nickname wins). A player who renamed themselves saw their Telegram name in the lobby (23.08). Any player name a new game shows must go through `shownName`.
 - **Inviting someone without tickets** → they accepted and got «lobby already taken»; fixed at every door (22.08).
 - **Testing one account on two clients without meaning to** — the headless copy accepted, the phone declined, it looked like a bug (22.08).
 
