@@ -12,6 +12,7 @@ import {
   useJoinDuelMutation,
 } from '@/api/duel.api';
 import { routes } from '@/constants/routes';
+import { duelMatchInProgress } from '@/utils/global/duel.utils';
 import { useAppTranslations } from '@/hooks/useAppTranslations';
 import { useInFlightLock } from '@/hooks/useInFlightLock';
 import { useToast } from '@/hooks/useToast';
@@ -63,10 +64,16 @@ export function DuelInviteAutoSurface() {
       // Дальше экран дуэли сам откроет матч: список лобби сообщает ему, в каком
       // матче игрок уже состоит.
       router.push(routes.games.duel);
-    } catch {
+    } catch (error) {
+      setDismissed(prev => [...prev, invite.id]);
+      // Свой матч ещё идёт — экран дуэли сам вернёт в него.
+      if (duelMatchInProgress(error)) {
+        toast.info(t('duel match in progress'));
+        router.push(routes.games.duel);
+        return;
+      }
       // Место могли занять, пока модалка висела, — это нормальный исход.
       toast.error(t('duel invite gone'));
-      setDismissed(prev => [...prev, invite.id]);
     } finally {
       lock.release(invite.id);
     }

@@ -111,8 +111,14 @@ function advance(duel: MockDuel): MockDuel {
       duel.readyAt = null;
       openRound(duel);
     } else if (duel.readyAt && now >= duel.readyAt) {
+      // Хозяин подтвердил, гость нет — лобби ждёт дальше. Не подтвердил сам
+      // игрок: хозяин — лобби закрыто, гость — его место освободили.
       duel.status = duel.meReady ? 'WAITING' : 'CANCELLED';
-      duel.cancelReason = duel.meReady ? 'guest_not_ready' : 'host_not_ready';
+      duel.cancelReason = duel.meReady
+        ? 'guest_not_ready'
+        : duel.role === 'guest'
+          ? 'guest_dropped'
+          : 'host_not_ready';
       duel.meReady = false;
       duel.foeReady = false;
       duel.opponent = null;

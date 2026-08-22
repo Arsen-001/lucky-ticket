@@ -1568,6 +1568,8 @@
   "duel cancel guest_not_ready": "Соперник не подтвердил. Ваше лобби осталось открытым",
   "duel cancel not_enough_tickets": "У кого-то не хватило билетов — матч не состоялся",
   "duel cancel expired": "Лобби протухло",
+  "duel cancel guest_dropped": "Вы не подтвердили вовремя — лобби вернулось в список",
+  "duel cancel host_not_ready guest": "Соперник не подтвердил за 10 секунд — лобби закрыто",
   "stars balance": "Баланс LS",
   "last 24h": "За 24 ч",
   "last 7 days": "7 дней",

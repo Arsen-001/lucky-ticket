@@ -52,6 +52,9 @@ export function DuelScreen() {
       try {
         const duel = await join(invitedLobbyId).unwrap();
         setDuelId(duel.id);
+        // Адрес отработал: иначе перезагрузка или возврат к списку снова
+        // пытались бы войти в лобби, которого уже нет.
+        router.replace(routes.games.duel);
       } catch (error) {
         const reason = duelJoinFailure(error);
         toast.error(reason === 'closed' ? t('duel lobby closed') : t('duel invite gone'));

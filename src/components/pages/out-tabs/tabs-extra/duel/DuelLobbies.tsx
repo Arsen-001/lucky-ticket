@@ -109,6 +109,12 @@ export function DuelLobbies({ onEnter, inviteUserId }: DuelLobbiesProps) {
       const duel = await join(id).unwrap();
       onEnter(duel.id);
     } catch (error) {
+      // Свой матч ещё идёт — не ошибка, а место, куда нужно вернуться.
+      if (duelMatchInProgress(error)) {
+        toast.info(t('duel match in progress'));
+        if (data?.active) onEnter(data.active.id);
+        return;
+      }
       const reason = duelJoinFailure(error);
       toast.error(
         reason === 'closed'

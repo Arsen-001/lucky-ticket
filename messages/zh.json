@@ -1568,6 +1568,8 @@
   "duel cancel guest_not_ready": "The opponent did not confirm. Your lobby stays open",
   "duel cancel not_enough_tickets": "Someone ran out of tickets — the match did not start",
   "duel cancel expired": "The lobby expired",
+  "duel cancel guest_dropped": "You did not confirm in time — the lobby went back to the list",
+  "duel cancel host_not_ready guest": "The host did not confirm in 10 seconds — the lobby is closed",
   "stars balance": "LS 余额",
   "last 24h": "最近 24 小时",
   "last 7 days": "最近 7 天",

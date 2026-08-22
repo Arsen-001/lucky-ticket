@@ -148,7 +148,13 @@ export function DuelArena({ duelId, tickets, openInvite, onLeave }: DuelArenaPro
   useEffect(() => {
     if (data?.status === 'CANCELLED') {
       const reason = data.cancelReason ?? 'expired';
-      toast.error(t(`duel cancel ${reason}`));
+      // Причина одна, а слова — по роли: «вы не подтвердили» хозяину и
+      // «соперник не подтвердил» гостю, который как раз подтвердил.
+      const key =
+        reason === 'host_not_ready' && data.role === 'guest'
+          ? ('duel cancel host_not_ready guest' as const)
+          : (`duel cancel ${reason}` as const);
+      toast.error(t(key));
       onLeave();
     }
   }, [data?.status, data?.cancelReason]);

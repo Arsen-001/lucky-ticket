@@ -9,6 +9,8 @@ export type DuelCancelReason =
   | 'host_cancelled'
   | 'host_not_ready'
   | 'guest_not_ready'
+  /** Гость не подтвердил готовность: его место освободили, лобби вернулось в список. */
+  | 'guest_dropped'
   | 'not_enough_tickets'
   | 'expired';
 
