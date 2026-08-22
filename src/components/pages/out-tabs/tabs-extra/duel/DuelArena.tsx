@@ -138,12 +138,31 @@ export function DuelArena({ duelId, tickets, openInvite, onLeave }: DuelArenaPro
       // Кроме одного случая: если позвали живого и ответ ещё не пришёл, лобби
       // держится. Иначе выходило так, что зовущий свернул экран на минуту, а
       // пришедший по ссылке получил «лобби уже занято».
-      if (statusRef.current === 'WAITING' && !awaitingInviteRef.current) {
+      //
+      // Уход на фазе готовности — тоже уход: хозяин закрывает лобби (гость
+      // сразу видит «лобби закрыто», а не отсиживает весь отсчёт), гость
+      // освобождает место (лобби хозяина возвращается в ожидание). Сервер
+      // различает роли сам. Идущий матч этим не трогается — он не WAITING и не
+      // READY.
+      const status = statusRef.current;
+      if (status === 'READY' || (status === 'WAITING' && !awaitingInviteRef.current)) {
         cancel(duelId);
       }
     },
     [duelId]
   );
+
+  // Гость ушёл (или не подтвердил) — хозяин возвращается в ожидание молча.
+  // Говорим об этом словами: иначе экран готовности просто сменился ожиданием,
+  // и непонятно, что случилось.
+  const prevStatusRef = useRef<string | undefined>(undefined);
+  useEffect(() => {
+    const prev = prevStatusRef.current;
+    prevStatusRef.current = data?.status;
+    if (prev === 'READY' && data?.status === 'WAITING' && data.role === 'host') {
+      toast.info(t('duel cancel guest_not_ready'));
+    }
+  }, [data?.status]);
 
   useEffect(() => {
     if (data?.status === 'CANCELLED') {
