@@ -1,11 +1,13 @@
 ---
 name: new-pvp-game
-description: Build a player-versus-player mini-game (lobby, stake, readiness, blind simultaneous moves, crowd fallback, DM invites) using the decisions already settled for the rock-paper-scissors duel. Use when adding ANY new game where two players face each other, or when extending the duel itself. Carries the answers to questions that were argued through once — do not re-open them.
+description: Build a player-versus-player mini-game (lobby, stake, readiness, blind simultaneous moves, crowd fallback, in-app + DM invites, two-device safety) using the decisions, server invariants, client rules and test recipes already settled — and verified live on production — for the rock-paper-scissors duel. Use when adding ANY new game where two players face each other, or when extending the duel itself. Carries the answers to questions that were argued through once and the bugs that were paid for once — do not re-open them, do not re-discover them.
 ---
 
 # new-pvp-game
 
-Every PvP game in this project inherits the same skeleton: a lobby, a stake in tickets, a readiness handshake, blind simultaneous moves judged by the server, and a crowd bot when nobody live shows up. That skeleton was argued through in full for the rock-paper-scissors duel. **Reuse the answers below instead of asking again.**
+Every PvP game in this project inherits the same skeleton: a lobby, a stake in tickets, a readiness handshake, blind simultaneous moves judged by the server, a crowd bot when nobody live shows up, and invites that reach a player both inside the app and through the bot. That skeleton was argued through in full for the rock-paper-scissors duel, then **tested on production with live people on 22.08.2026** — two humans, a third invited player, one account on two phones, a headless copy of the real Mini App. **Reuse the answers below instead of asking again, and reuse the rules below instead of finding the bugs again.**
+
+The duel is the reference implementation. When in doubt, open its files (listed at the end) and copy the shape.
 
 Working prototypes, playable:
 
@@ -15,39 +17,44 @@ Working prototypes, playable:
 
 ## Settled — do not re-ask
 
-| Question                              | Answer                                                                                                                                                                       |
-| ------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| What is staked                        | **Tickets**, tier of the ticket picks the league. Not LC — LC is withdrawable, staking it makes the game gambling inside Telegram                                            |
-| Who sets the stake                    | The **lobby creator**, 1–5 tickets. Cap is 5 because a bronze engine yields 12/day                                                                                           |
-| When tickets leave the balance        | **At match start**, never at lobby creation. Cancelled waiting costs nothing                                                                                                 |
-| Platform commission                   | **None.** Winner takes both stakes whole. Duels are ticket-neutral; the sink stays tournament entry                                                                          |
-| Readiness                             | Both press "Ready", **10 seconds**. Not a separate screen — it is a state of the arena, with the button where the tokens will appear                                         |
-| Nobody confirmed                      | Tickets untouched. If the **creator** was silent, the lobby **closes** — "create a new one". If the guest was silent, the lobby survives and the creator keeps waiting       |
-| After every match                     | Readiness is asked again. A rematch never auto-starts                                                                                                                        |
-| Empty lobby                           | A **SeedPlayer** joins between **20 and 30 seconds** — a window, not a fixed second. Live players always take priority                                                       |
-| Bot fairness                          | Move is **committed before the player's move** and drawn as an honest third. No patterns, no adjustment to what the player picked                                            |
-| Bot payout                            | **Identical to a live match.** No reduced coefficient, no house edge                                                                                                         |
-| Move secrecy                          | The server never reveals a move until **both** have arrived. The other side sees only a "moved" badge                                                                        |
-| Timeout on a move                     | **Random figure**, never a loss. A stalled screen must not hand the round to the opponent                                                                                    |
-| Round clock                           | Counted from **server time**, not from when the client rendered                                                                                                              |
-| Opponent quits mid-match              | Their moves go random, the match finishes. Stakes are already spent — otherwise quitting becomes a way not to lose                                                           |
-| Transport                             | **Short polling**, 600 ms in a match, 3 s in a lobby, one request returns the whole state, read from **Redis** not Postgres. WebSocket only when match volume justifies it   |
-| Spinners                              | Only for the **network hop** (200–300 ms). Waiting for the opponent is a game state, not a loader — a spinner there reads as a frozen app                                    |
-| Invites                               | DM through the bot, only to players who enabled it. Unreachable players **cannot be selected at all**                                                                        |
-| Invite link                           | Opens **straight into the arena** of that lobby. No list, no onboarding, no modal on the way                                                                                 |
-| Creator left before the guest arrived | "Opponent didn't wait" modal, tickets untouched, back to the lobby list                                                                                                      |
-| Two invite channels                   | A **modal inside the app** (always arrives) **and** a bot DM (reaches 3–4 % of the roster). Never rely on the DM alone — and never make the in-app one wait on it            |
-| An invite is a pass                   | Being invited **grants access to the game** for as long as the invite lives, even while the rollout stage is «testers». Otherwise a tester can invite nobody                 |
-| Invited lobby is private              | While the invite is unanswered: the crowd stays out, other players **cannot join**, and the lobby is **hidden from their list** — a row that will refuse them is a lie       |
-| Who may call whom                     | The **recipient's** setting: nobody / friends / everyone, default **everyone**. Friends means both directions of referral. The server enforces it, never the screen          |
-| Invite result                         | Four separate numbers — reached in-app, DM sent, refused by their setting, game unavailable. One "failed" for all four tells the player nothing                              |
-| Creating a lobby twice                | The new one **replaces** your own idle lobby. "You already have a duel" turns every second tap into a dead end — the player pressed create, that is the decision             |
-| Leaving the screen                    | Closes a plain waiting lobby (tickets untouched). **Not** a lobby awaiting an invited player, and **never** a running match                                                  |
-| Both players abandon a match          | The match is **finished lazily** from the lobby list — missed moves go random, the winner is paid. Otherwise stakes burn with nobody to receive them                         |
-| Reveal pause                          | The revealed round holds for **`revealSeconds`** (3) before the next opens. Opening it in the same transaction makes the result invisible — figures blink and vanish         |
-| Two sides polling                     | Both apply lazy time, so both race. Reveal takes a **guard** (`where revealedAt: null`), round creation **swallows P2002**. Without it: doubled score and a 500 mid-match    |
-| Fast taps                             | Every action goes through **`useInFlightLock`** — the mutation's `isLoading` lands a frame late, and asking a player not to tap fast in a five-second match is not an option |
-| Numbers live in the panel             | Stakes, wins needed, all the timers, the crowd window — `PlatformConfig.gamesConfig.<game>`. The normaliser fixes impossible values silently instead of refusing the save    |
+| Question                              | Answer                                                                                                                                                                                                                                                |
+| ------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| What is staked                        | **Tickets**, tier of the ticket picks the league. Not LC — LC is withdrawable, staking it makes the game gambling inside Telegram                                                                                                                     |
+| Who sets the stake                    | The **lobby creator**, 1–5 tickets. Cap is 5 because a bronze engine yields 12/day                                                                                                                                                                    |
+| When tickets leave the balance        | **At match start**, never at lobby creation. Cancelled waiting costs nothing                                                                                                                                                                          |
+| Platform commission                   | **None.** Winner takes both stakes whole. Duels are ticket-neutral; the sink stays tournament entry                                                                                                                                                   |
+| Readiness                             | Both press "Ready". **`readySeconds` lives in the panel — 15 since 22.08.2026** (10 was missed three times out of five by real people). Not a separate screen — a state of the arena, with the button where the tokens will appear                    |
+| Nobody confirmed                      | Tickets untouched. If the **creator** was silent, the lobby **closes** — "create a new one". If the guest was silent, the lobby survives and the creator keeps waiting; the guest is told **he** was dropped (see `guest_dropped`)                    |
+| After every match                     | Readiness is asked again. A rematch never auto-starts                                                                                                                                                                                                 |
+| Empty lobby                           | A **SeedPlayer** joins between **20 and 30 seconds** — a window, not a fixed second. Live players always take priority                                                                                                                                |
+| Bot fairness                          | Move is **committed before the player's move** and drawn as an honest third. No patterns, no adjustment to what the player picked                                                                                                                     |
+| Bot payout                            | **Identical to a live match.** No reduced coefficient, no house edge                                                                                                                                                                                  |
+| Move secrecy                          | The server never reveals a move until **both** have arrived. The other side sees only a "moved" badge. **A non-participant sees no moves at all** (see droppedView)                                                                                   |
+| Timeout on a move                     | **Random figure**, never a loss. A stalled screen must not hand the round to the opponent. A tap that arrives after the round closed is **not an error** — return the state                                                                           |
+| Draw                                  | A round with `winner: 'DRAW'` is **undecided**, replayed, and shown as a draw — never as the opponent's win. Draws are ~1/3 of rounds; humans who both tap the same token produce runs of them                                                        |
+| Round clock                           | Counted from **server time**, not from when the client rendered                                                                                                                                                                                       |
+| Opponent quits mid-match              | Their moves go random, the match finishes. Stakes are already spent — otherwise quitting becomes a way not to lose                                                                                                                                    |
+| Transport                             | **Short polling**, 600 ms in a match (300 ms while awaiting a reveal), 3 s in a lobby, 5 s for invites; one request returns the whole state. WebSocket only when match volume justifies it                                                            |
+| Spinners                              | Only for the **network hop**. Waiting for the opponent is a game state, not a loader. But **every tap that waits on the server shows its own spinner and holds a lock** — «cancel waiting» without one looked dead for a whole round-trip             |
+| Invites                               | DM through the bot **and** a modal inside the app. Unreachable players are shown grey and **cannot be selected**                                                                                                                                      |
+| Invite link                           | Opens **straight into the arena** of that lobby (`startapp=<game>-<id>` → `?lobby=<id>` → auto-join). Verified live: the invited person tapped the DM button and landed in the match                                                                  |
+| Creator left before the guest arrived | "Opponent didn't wait" modal, tickets untouched, back to the lobby list                                                                                                                                                                               |
+| Two invite channels                   | A **modal inside the app** (always arrives, ≤5 s) **and** a bot DM (reaches 3–4 % of the roster). Never rely on the DM alone — and never make the in-app one wait on it                                                                               |
+| An invite is a pass                   | Being invited **grants access to the whole game** (list included) for as long as the invite lives, even while the rollout stage is «testers». Otherwise a tester can invite nobody                                                                    |
+| Invited lobby is private              | While the invite is unanswered: the crowd stays out, other players **cannot join** («reserved»), and the lobby is **hidden from their list** — a row that will refuse them is a lie                                                                   |
+| «Play with a friend»                  | **Pick the friends first, then create the lobby together with the invite** — one motion. Creating first and picking later left a public lobby in the list for seconds; on production a stranger took it in **1 s**, before the invite was sent        |
+| Who may call whom                     | The **recipient's** setting: nobody / friends / everyone, default **everyone**. Friends means both directions of referral. The server enforces it, never the screen                                                                                   |
+| Invite result                         | Four separate numbers — reached in-app, DM sent, refused by their setting, game unavailable. One "failed" for all four tells the player nothing                                                                                                       |
+| Invite while in a match               | A player in readiness or in a match **sees no challenges** (`pendingInvites` returns `[]`); they surface after the match if still alive. A modal over a running round is a ruined move — user decision 22.08.2026                                     |
+| One account, two devices              | The accept **wins**: a second «accept» gets the same match back, a later «not now» gets `acceptedElsewhere` → toast «already accepted on another device — opening the match» and the arena. A decline that raced in first is overridden by the join   |
+| Creating a lobby twice                | The new one **replaces** your own idle lobby. "You already have a duel" turns every second tap into a dead end                                                                                                                                        |
+| Joining while your match runs         | Refused with **«Match in progress»**; the screen returns the player **into** that match. Joining while your own lobby is idle **closes** that lobby. One live match per account                                                                       |
+| Leaving the screen                    | Closes a plain waiting lobby (tickets untouched). **Not** a lobby awaiting an invited player, and **never** a running match. Coming back reopens the running match from `active`                                                                      |
+| Both players abandon a match          | Finished **lazily from the lobby list**, one step per list call, five oldest stalled matches per call — missed moves go random, the winner is paid. Otherwise stakes burn with nobody to receive them                                                 |
+| Reveal pause                          | The revealed round holds for **`revealSeconds`** (3) before the next opens, and the **last** round is the one with the highest index — **never** `rounds[rounds.length-1]` (see ordering)                                                             |
+| Two sides polling                     | Both apply lazy time, so both race. Every transition is a **guard update** (see invariants). Without it: doubled score, doubled stakes, a 500 mid-match                                                                                               |
+| Fast taps                             | Every action goes through **`useInFlightLock`** — the mutation's `isLoading` lands a frame late, and asking a player not to tap fast in a five-second match is not an option                                                                          |
+| Numbers live in the panel             | Stakes, wins needed, all timers, the crowd window — `PlatformConfig.gamesConfig.<game>`, **read on every action** so an edit applies to the match in progress. The normaliser fixes impossible values silently. **Never bake a number into a string** |
 
 ## Ask the user, per game
 
@@ -58,115 +65,150 @@ Only these. Everything else is answered above.
 3. **Seconds per move** — 5 s is the duel's number; a heavier game may need more.
 4. **Whether skill exists** — against a fair bot there is none by construction. If the game should reward skill, it has to come from the live opponent or from the rules, not from bot patterns.
 
-## Screen states
+## Server invariants — copy these, do not rediscover them
 
-One screen, states swap in place. Never a wizard.
+Each line below is a bug that reached production on 22.08.2026 and the pattern that closed it. `duel.service.ts` is the reference for every one.
 
-```
-list → stake → waiting → ready → playing → result → (ready again)
-                  ↑                  ↓
-                  └── invite      modal (nobody confirmed / opponent left)
-```
+1. **Claim, then mutate, inside one transaction.** The state transition is an `updateMany` with the _old_ state in `where` (`status: READY, stakesPaid: false`); `if (count === 0) return` — someone else did it. Debit **after** the claim, in the same `$transaction`, so a failed debit rolls the claim back. Checking a flag on the row you loaded is not a guard: both pollers read `false` and **stakes were debited twice with one payout**.
+2. **The same guard everywhere a race can land:** reveal (`where revealedAt: null`), join (`where status: WAITING, guestId: null`), crowd join (same), a move (`where hostMove: null` for the host, `guestMove: null` for the guest — the second tap must not overwrite the first), round creation (`@@unique([duelId, index])`, swallow `P2002`).
+3. **`include: { rounds: true }` has no order.** Postgres returns physical order, and updated rows move; after seven rounds production got `2,3,4,5,6,7,0,1`. Always `rounds: { orderBy: { index: 'asc' } }`, and pick the last round by **max index**, never by array position. Symptom when violated: the reveal pause vanishes from round 3 on and the screen shows a _previous_ round's result.
+4. **Role-aware view; strangers get nothing.** `stateView` computes `me/foe` from `hostId/guestId`. Anyone who is **neither** (a dropped guest, or a stranger with the id) gets `droppedView`: `CANCELLED / guest_dropped`, no moves, no opponent. Before this the stranger was treated as «guest» and received the **real guest's unrevealed move** — a second account could read the opponent's hand.
+5. **One live match per account.** `resolveMine(userId)` (host OR guest, WAITING/READY/PLAYING, time applied) runs before `create` **and** before `join`: a live READY/PLAYING → `Match in progress`; an idle WAITING lobby of mine → closed (`host_cancelled`) and the action proceeds.
+6. **Join is idempotent for the seated guest** (`guestId === userId && READY/PLAYING` → return the state) — the second device of the same account.
+7. **Join answers the invite.** On a successful join: `duelInvite.updateMany where { duelId, toUserId, OR: [respondedAt null, accepted false] } → accepted: true` — also **over** a decline that raced in a fraction of a second earlier. `decline` after that returns `{ ok: false, acceptedElsewhere: true, duelId }`.
+8. **`pendingInvites` is `[]` while the player has a live READY/PLAYING match** (via `resolveMine`, so a stale readiness does not hide invites longer than it lives).
+9. **Lazy time needs a reader.** `resolve()` runs on every read; `listLobbies` additionally runs `expireStaleLobbies` (WAITING with `updatedAt` older than TTL), `settleAbandoned` (READY/PLAYING silent for ≥60 s, five oldest, one step each) and `resolveMine`. The host's own `getState` on a WAITING lobby **touches `updatedAt` once a minute** — reads write nothing, and a watched lobby used to expire under its owner when the crowd was off.
+10. **Readiness failure is asymmetric and explicit.** Host silent → `CANCELLED / host_not_ready`. Guest silent → lobby back to `WAITING`, `guestId: null`, `createdAt` reset (else the crowd sits down instantly), reason `guest_not_ready` on the host's row; the guest learns via `droppedView`.
+11. **The crowd's move is written when the round is created**, `randomMove()` honest third; the crowd never joins while an unanswered invite is younger than its TTL (3 min).
+12. **Config is read per action** (`await this.config()` at the top of every public method). The panel edit applies to the running match.
+13. **Timestamps you compare are UTC wall-clock in `timestamp` columns.** In tests rewind them **relative** (`col - interval`) or absolute via `(now() AT TIME ZONE 'UTC')`; and never pass a JS `Date` as a pg parameter against such a column — node-pg serialises it with the local offset and it compares as local time (a monitor script polled for an hour and saw nothing).
 
-- `list` — open lobbies with name, stake, waiting time; "Create lobby" at the bottom
-- `stake` — 1–5 chips, note that tickets leave only at start
-- `waiting` — pulse, elapsed clock, "Invite players", "Cancel"
-- `ready` — the arena already, both face-down tokens, badges, 10 s bar, one green button
-- `playing` — opponent's hand at the top (not tappable), yours at the bottom in thumb reach
-- `result` — outcome stays on screen, "Ready for rematch" and "Back to lobby"
+## Client rules — the other half
 
-## Server rules — the non-negotiable half
-
-The client draws; the server decides. Concretely:
-
-- The bot's move is written into the round **at creation**, not computed when the player's move arrives. Anyone who opens the network tab will check this first.
-- A move is **one per round, idempotent**. A second tap changes nothing.
-- Reveal timing is the server's; both clients receive the same event. Faster connection must not mean earlier knowledge.
-- Ticket movement happens in the same transaction as the result, with a ledger row per side.
-- Guard every debit with `updateMany where count gte` + `if count === 0 throw` — the pattern already used in wallet/lc/engines/market. Reading a balance before the transaction is a race, and this project has been bitten by it.
+1. **`DRAW` is not a loss.** `duelRoundWon(winner, role)` returns `null` for `DRAW`/unrevealed; only `HOST`/`GUEST` decide. `tests/duel-round-outcome.test.ts` holds the line.
+2. **Optimistic pick.** The tapped token is shown chosen and «move accepted» **at the tap** (`pending` state keyed by round index), cleared on server refusal or round change. Without it a five-second round has a whole second of «did it register?».
+3. **Seed the state cache from mutations.** `create`/`join` return the full state — `upsertQueryData('getDuelState', id, data)` in `onQueryStarted`, or the arena stands empty until its first poll.
+4. **Money moves by status, not by my taps.** The arena invalidates `duelLobbies` + `tickets` on `PLAYING` / `FINISHED` / `CANCELLED` transitions (stakes leave when the _other_ side confirms; payout arrives on the final reveal) and refetches test-quest progress for **both** sides. Otherwise the list shows a stale «your lobby · 0:00» and the header an old balance for three seconds.
+5. **Every waiting tap: lock + spinner** (`useInFlightLock` keys: `create`, lobby id, `ready`, `cancel`, `move-<round>`), and only the **pressed** button spins.
+6. **Texts by role, numbers from the server.** `host_not_ready` reads «you did not confirm» to the host and «the host did not confirm» to the guest; `guest_dropped` exists for the dropped guest. No «10 seconds» in a string — `readySeconds` changed to 15 in the panel and every string would have lied.
+7. **Deep link hygiene.** `?lobby=<id>` auto-joins once and then `router.replace(routes.games.<name>)`; `?invite=<userId>` opens the stake picker and creates+invites in one go.
+8. **The invite auto-surface lives in the root layout**, polls 5 s with `refetchOnFocus`, keeps a `dismissed` list, and on «accept» / «not now» handles `Match in progress` and `acceptedElsewhere` by navigating to the game screen, where `active` opens the match.
+9. **«Play with a friend» = `DuelInviteModal` with `onSend`** that creates the lobby and invites in one motion; the created id sits in a **ref** (the modal calls `onClose` from the same invocation — state in that closure is still empty).
+10. **The screen reopens a running match from `lobbies.active`**, and a `CANCELLED` state turns into a toast + leave. A failed query shows `QueryErrorState`, never «you have no tickets».
 
 ## Telegram reality
 
-- **The bot cannot write first.** Measured on production: a broadcast to 283 recipients delivered **0**; reachability across the roster is **3–4 %**. Anything that depends on a DM must show who will actually receive it.
-- Ask for permission with `WebApp.requestWriteAccess` on a **real tap** — from `useEffect` Telegram silently ignores it. Good moment: the first time a player creates a lobby.
-- Trust `user.allows_write_to_pm` from signed initData, and store it as nullable (`true` / `false` / `null` for clients older than 6.9).
-- `botWriteAllowed: { not: false }` **does not match NULL**. Write `OR: [{ ...: null }, { ...: true }]`.
+- **The bot cannot write first.** Measured on production: a broadcast to 283 recipients delivered **0**; reachability across the roster is **3–4 %**. Anything that depends on a DM must show who will actually receive it. The DM carries a one-off button `startapp=<game>-<lobbyId>` (the catalog cannot hold an id).
+- Ask for permission with `WebApp.requestWriteAccess` on a **real tap** — from `useEffect` Telegram silently ignores it.
+- Trust `user.allows_write_to_pm` from signed initData, store it nullable; `botWriteAllowed: { not: false }` **does not match NULL** — write `OR: [{ null }, { true }]`. Reachable = `botWriteAllowed === true && !botBlockedAt && telegramId`.
+- The in-app modal is what actually reaches people: measured ≤5 s on production, on a phone and on a headless copy of the Mini App.
 
 ## Economy accounting
 
-- Live match = transfer. Tickets move between players, the total is unchanged.
-- Match against the crowd = **mint or burn**. No commission means the expectation is around zero, but the variance is real.
-- Keep a **separate ledger line for crowd matches** — in and out. Not to tune the odds, but to notice when reality drifts from the expectation, which would mean a bug rather than bad luck.
+- Live match = transfer. Tickets move between players, the total is unchanged — **verify it after every live session** (query below).
+- Match against the crowd = **mint or burn** (`crowdTicketsNetToday` in the panel). No commission means the expectation is around zero, but the variance is real.
+- Ticket income is **not ledgered** in the DB (`TicketClaimEvent` covers engine claims only) — when a balance drifts from the duel sum, ask the player what else they did before suspecting the game.
 
-## Where the code goes
+## Testing — the four layers, with recipes
+
+1. **Unit (`duel.spec.ts`)** — rules, fairness over 30 000 throws, crowd window, config normaliser.
+2. **E2e against a real database** (`test/app.e2e-spec.ts`, `describe('duel: state machine…')`, run with `DATABASE_URL=…luckyticket365_e2e PORT=4010 npx jest --config ./test/jest-e2e.json -t "duel"`). Black-box over HTTP + direct `pg`. Time is moved by rewinding timestamps (`rewind(table,id,col,seconds)`, `expire(...)`), never by sleeping. `beforeAll` **cancels stale WAITING/READY/PLAYING rows of previous runs** — `settleAbandoned` drains five oldest per call and a fresh match waits behind the backlog. Cover: whole match with a draw and ticket conservation; simultaneous ready ×5; simultaneous reveal; dropped guest + stranger view; host-not-ready; not-enough-tickets rollback; move rules; crowd print/burn; invites + policy + reservation + gate exception + crowd hold-off; decline; one match per account; expiry + heartbeat; abandoned settle; reveal pause after physical reorder; no invites in a match; two devices.
+3. **Playwright on the mock** (`scripts/duel-live/duel-run*.mjs`): the mock is a state machine in the browser — a full reload resets it, so one flow = one page; navigate with `window.next.router.push`. The onboarding gauntlet in order: «Choose your language» → Continue; «Claim gifts» → click, then the **«Skip tour» button — never Escape, Escape closes the topmost modal, which is the challenge**; tournament results → Continue until none; the mock always serves one challenge → «Not now» once. Match dialogs with `:light([role="dialog"])` + `filter({ hasText })`.
+4. **Live on production.** The real Mini App runs headless: `https://lucky-ticket-nu.vercel.app/#tgWebAppData=<initData signed with the bot token from backend .env>&tgWebAppVersion=8.0&tgWebAppPlatform=android&tgWebAppThemeParams=%7B%7D` — logs in as that account, passes the device gate, polls like a phone. For API-level opponents sign the same initData and call `/auth/telegram` (the access token lives ~30 min; re-login, do not cache). Scripts in `scripts/duel-live/`: `duel-live-player.mjs` (guest: waits for the host's lobby **by host id** or an invite), `duel-live-host.mjs` (creates, invites, plays), `duel-inapp-invitee.mjs` (headless Mini App that accepts the modal and plays by tapping). **Rule for the live session: one account = one client at a time**, unless the two-device path is what you are testing — otherwise an accept from the headless copy looks like «the phone declined but the host saw accepted».
+
+Verification queries after any live session (prod DB via `railway variables --service Postgres --kv` → `DATABASE_PUBLIC_URL`, `psql` with `PGCONNECT_TIMEOUT=20`, the proxy drops every other connection — retry):
+
+```sql
+-- conservation for one player since a point in time
+SELECT (SELECT count FROM "TicketBalance" WHERE "userId"=$1 AND tier='BRONZE') balance,
+       sum(CASE WHEN d."hostId"=$1 THEN (CASE WHEN d.winner='HOST' THEN d.stake ELSE -d.stake END)
+                ELSE (CASE WHEN d.winner='GUEST' THEN d.stake ELSE -d.stake END) END) net
+FROM "Duel" d WHERE d.status='FINISHED' AND (d."hostId"=$1 OR d."guestId"=$1) AND d."createdAt" > $2;
+-- reveal pause per round (must be ≈ revealSeconds) and wins consistency
+SELECT r."duelId", r.index, r.winner,
+       round(EXTRACT(EPOCH FROM (r."createdAt" - lag(r."revealedAt") OVER (PARTITION BY r."duelId" ORDER BY r.index)))::numeric,2) pause_before
+FROM "DuelRound" r ORDER BY r."duelId", r.index;
+SELECT count(*) FROM "Duel" d WHERE status='FINISHED' AND (d."hostWins" <> (SELECT count(*) FROM "DuelRound" r WHERE r."duelId"=d.id AND r.winner='HOST')
+                                                     OR d."guestWins" <> (SELECT count(*) FROM "DuelRound" r WHERE r."duelId"=d.id AND r.winner='GUEST'));
+```
+
+`railway logs --service lucky-ticket-backend --environment production` shows Prisma validation errors and DM failures (`DM "duel_invite_dm" … failed`); 4xx are not logged.
+
+## Live-ops — what the operator sees and turns
+
+- Panel «Игры → Дуэль»: rollout stage (off / testers / all — testers are one shared list under «Настройки → Выкат», matched by `@username` or Telegram id), **Настройка** (stake bounds, wins, `readySeconds`, `moveSeconds`, `revealSeconds`, lobby TTL, list size, crowd toggle + window) — edits apply to the running match, stored as overrides only (`gamesConfig.<game>`), **Журнал матчей** (who vs whom, stake, score, outcome) and four metrics (`matchesToday`, crowd share, tickets staked, `crowdTicketsNetToday`).
+- `crowdPool` = active `SeedPlayer` rows. **Zero means an empty lobby is never filled** — first thing to check on «nobody comes».
+- An invite lives 3 minutes; a lobby 5 minutes of silence; a stalled match is settled from the list after 60 s of silence.
+
+## Where the code goes — the duel as the template
 
 Backend (`../lucky-ticket-backend`):
 
-- `src/games/<name>/` — service, controller, scheduler; state of a live round in Redis
-- Prisma models for match/round/participant; ticket movement through the existing `TicketBalance` guard pattern
-- Config knobs in `PlatformConfig` so the admin can retune without a deploy
+- `prisma/schema.prisma` — `Duel`, `DuelRound` (`@@unique([duelId, index])`), `DuelInvite` (`@@unique([duelId, toUserId])`), enums `DuelStatus/DuelMove/DuelSide` (`DRAW` is a side) + migration in the same commit
+- `src/common/duel.constants.ts` — defaults, `compareMoves`, `randomMove`, `crowdDelaySeconds(id)` deterministic from the lobby id
+- `src/games/duel/duel.service.ts` — the whole state machine (`listLobbies`, `createLobby`, `cancelLobby`, `join`, `inviteCandidates`, `invite`, `allowedByPolicy`, `pendingInvites`, `respondInvite`, `ready`, `move`, `getState`, `resolve`, `crowdJoins`, `readyFailed`, `startMatch`, `openRound`, `reveal`, `payout`, `debit`, `lobbyView`, `stateView`, `droppedView`, `resolveMine`, `settleAbandoned`, `expireStaleLobbies`)
+- `src/games/duel/duel.controller.ts` — `games/<name>` routes; static routes (`lobbies`, `invites`, `invite-candidates`) declared **before** `:id`
+- `src/games/duel/duel.spec.ts`, `test/app.e2e-spec.ts` (duel describes)
+- `src/common/rollout.constants.ts` — the feature key; `rollout.spec.ts` lists every feature
+- admin: `src/admin/…/admin-duel.controller.ts` (`stats`, `journal`), `DuelConfigDto` in `update-config.dto.ts`, `mergeGamesConfig` in `platform-config.service.ts`
+- bot catalog key `duel_invite_dm`; `notifications.sendDm(userId, 'invites', key, params, { buttons })`
 
 Mini App:
 
-- `src/api/<name>.api.ts` + tag in `src/constants/rtk-tags.ts` + mock spread into `src/mock/index.mock.ts` — all three, or it 404s at runtime
-- Screens under `(out-tabs)/(tabs-extra)/games/<name>/`
-- `en` + `ru` only while wording can still change, then `npm run i18n:draft`
-
-Admin panel:
-
-- Toggle, schedule, stake bounds, prize pool — the mode must be switchable without a deploy, like the roulette
+- `src/types/interfaces/duel.interfaces.ts`, `src/api/duel.api.ts` (tags `duelLobbies`, `duelState`, `duelInvites`; `seedDuelState`), `src/mock/duel.mock.ts` (a state machine; the matcher understands `:param`), `src/utils/global/duel.utils.ts` (`duelClock`, `duelBeats`, `duelRoundWon`, `duelJoinFailure`, `duelMatchInProgress`)
+- `src/components/pages/out-tabs/tabs-extra/duel/` — `DuelScreen`, `DuelLobbies`, `DuelArena`, `DuelWaiting`, `DuelInviteModal`, `DuelWriteAccessRow`, `DuelPicks`, `DuelHand`, `DuelToken`, `DuelSide`, `DuelPlayerAvatar`, `DuelGameHeader`, `DuelLobbyRow`, `duel.tokens.ts`; `src/styles/components/duel.css`
+- `src/components/layout-elements/DuelInviteAutoSurface.tsx` (root layout), drawer item «Games» with the invite badge, `ProfileGamesCard`, `DuelInvitePolicyRow` in settings
+- `src/app/(out-tabs)/(tabs-extra)/games/duel/page.tsx` + `@header` slot, `routes.games.duel / getDuelLobby / getDuelInvite`, `deep-link.utils.ts` entry `duel`, `e2e/routes.ts`
+- i18n: `en` + `ru` by hand while wording moves, `npm run i18n:draft` for the rest, translate everything when the feature opens (the duel's 94 keys went to 20 languages on 22.08 with `patch.mjs`); terms follow each dictionary's neighbours (ticket/lobby/stake/duel), **stake in a game ≠ the LC «Stake» feature**
+- guardrail tests: `tests/duel-round-outcome.test.ts`, i18n parity, RTK 3-place wiring
 
 ## Checklist before calling it done
 
 - [ ] Bot move committed before the player's, verified in the network tab
-- [ ] Opponent's move invisible until both arrived
-- [ ] Timeout gives a random figure, not a loss
-- [ ] Stakes debited at start, refunded never, guarded against races
-- [ ] Creator-silent closes the lobby, guest-silent does not
-- [ ] Crowd joins in a 20–30 s window and always confirms
-- [ ] Payout identical for bot and live matches
-- [ ] Invite list marks unreachable players and blocks selecting them
-- [ ] Deep link lands in the arena with nothing in between
-- [ ] No spinner while waiting for the opponent
+- [ ] Opponent's move invisible until both arrived; **a stranger's `GET state` shows no moves**
+- [ ] Timeout gives a random figure, not a loss; a late tap is not an error
+- [ ] A draw is shown as a draw, tokens idle, score unchanged
+- [ ] Stakes debited **once** at start under a claim guard; simultaneous ready ×5 in e2e
+- [ ] Creator-silent closes the lobby, guest-silent does not — and the guest is told
+- [ ] Crowd joins in a 20–30 s window, never over a pending invite, and always confirms
+- [ ] Payout identical for bot and live matches; conservation query is zero after a live session
+- [ ] Rounds ordered by index; reveal pause holds on round 8 as on round 1
+- [ ] One live match per account; join while in a match returns into it
+- [ ] «Play with a friend» never shows a public lobby before the invite exists
+- [ ] Invite list marks unreachable players and blocks selecting them; in-app modal ≤5 s; none while in a match
+- [ ] Deep link lands in the arena with nothing in between, then the URL is clean
+- [ ] Two devices: second accept = same match; late decline = toast + match
+- [ ] Every waiting tap spins and is locked; only the pressed button spins
+- [ ] Header balance and lobby list refresh on start/finish; no stale «your lobby»
+- [ ] No number baked into a string that the panel can change
 - [ ] Buttons at least 96 px tall, bottom inset ≥ 24 px, nothing tappable in the top 190 px
+- [ ] Live: one human match, one invited third person, one two-device run — verified in the DB, not on the screen
 
 ## Mistakes that already cost time here
 
-Each of these shipped, reached production and was found the hard way. They are
-not hypothetical.
+Each of these shipped, reached production and was found the hard way.
 
-- **`User.avatarUrl` does not exist** — a player's avatar lives in `Profile`
-  (`SeedPlayer.avatarUrl` does exist, which is what misled). Prisma validates
-  `select` at query time, so neither `tsc` nor unit tests see it: the lobby list
-  answered **500** on every request while the screen showed a greyed-out button
-  and said nothing. Guard: an e2e case against a real database, not a unit test.
-- **A failed query must surface.** Without `QueryErrorState` the screen read
-  "you have no tickets" — because with no data the balance is zero and the
-  create button dims. The server's refusal has to be visible, or the bug is
-  hunted in the wrong place.
-- **The mock matcher took keys literally**, so `games/duel/:id` matched no real
-  URL: on localhost creating a lobby worked and everything after it — readiness,
-  moves, the match — hit an empty screen, while production was fine. Teach the
-  matcher `:param` before writing a mock with ids in the path.
-- **Never stage a directory.** `git commit --only src/components/layout-elements/`
-  swept up another session's unfinished files; their imports were left
-  uncommitted and `main` stopped building — two production deploys failed.
-  Stage explicit file paths, and after committing run `git show --stat HEAD`: a
-  foreign file in the list almost always has an uncommitted dependency nearby.
-- **Build from the mockup, not from its description.** The first pass was built
-  from a written summary of the approved prototype and came out with a different
-  composition entirely. Open the artifact, screenshot its states, compare.
+- **`User.avatarUrl` does not exist** — a player's avatar lives in `Profile`. Prisma validates `select` at query time: the lobby list answered **500** while the screen showed a greyed-out button. Guard: an e2e case against a real database.
+- **A failed query must surface.** Without `QueryErrorState` the screen read "you have no tickets".
+- **The mock matcher took keys literally**, so `games/duel/:id` matched nothing on localhost.
+- **Never stage a directory.** `git commit --only src/components/layout-elements/` swept up another session's files; `main` stopped building, two deploys failed. Stage explicit paths, then `git show --stat HEAD`.
+- **Build from the mockup, not from its description.**
+- **`DRAW` treated as a decided round** → every third round displayed as a loss (22.08).
+- **`startMatch` checked `stakesPaid` on the loaded copy** → double debit under simultaneous ready (22.08).
+- **Stranger/dropped guest got the guest's view** → unrevealed move leak, and a dropped guest sat on a stranger's waiting screen (22.08).
+- **`rounds` without `orderBy`** → after round 3 the pause vanished and an old result was shown; «непонятные ошибки» on a real phone (22.08).
+- **«Play with a friend» created a public lobby first** → taken by a stranger in 1 s (22.08).
+- **Join during my own match** → two matches, two stakes (22.08).
+- **Modal over a running match; two devices disagreeing** → user decisions, both closed (22.08).
+- **Numbers in strings** — «10 seconds» in 20 languages one panel edit away from lying (22.08).
+- **Testing one account on two clients without meaning to** — the headless copy accepted, the phone declined, it looked like a bug (22.08).
 
 ## Diagnosing "the game doesn't work"
 
 In order, because each step rules out the ones below it:
 
-1. **Prod logs first** (`railway logs`) — a Prisma validation error names the
-   exact field, and no amount of reading the client will find it.
-2. **Is anyone able to play?** The rollout stage gates the whole game; an invite
-   is the only exception. `crowdPool` in the panel: zero active `SeedPlayer`
-   means an empty lobby has nobody to fill it and the player waits forever.
-3. **Is the lobby still there?** A stuck `READY`/`PLAYING` from a previous
-   session blocks creation until it is resolved lazily.
-4. **Does the screen say what the server said?** Most "it doesn't work" reports
-   are a refusal the UI swallowed — a dimmed button, a generic toast, silence.
+1. **Prod logs first** (`railway logs`) — a Prisma validation error names the exact field.
+2. **Is anyone able to play?** Rollout stage + tester list; an invite is the only exception. `crowdPool` zero = nobody fills an empty lobby.
+3. **Is the account already in a match?** `resolveMine` — a stuck `READY`/`PLAYING` is resolved lazily on the list; the screen reopens it from `active`.
+4. **Read the rounds table.** `index`, both moves, `winner`, `createdAt` vs previous `revealedAt` — a pause under `revealSeconds` or a wrong «last» round is an ordering bug; a `DRAW` row with a changed score is a reveal raced twice.
+5. **Does the screen say what the server said?** Most "it doesn't work" reports are a refusal the UI swallowed.
