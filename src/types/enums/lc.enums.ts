@@ -1,6 +1,16 @@
 export enum LcTransactionType {
   TOURNAMENT_PRIZE = 'tournament_prize',
   STAKE_REWARD = 'stake_reward',
+  /**
+   * Тело стейка: списание при блокировке и возврат при завершении или отмене.
+   *
+   * Отдельно от `STAKE_REWARD`, потому что это не доход, а перекладывание
+   * собственных денег: в отчёте по экономике тело не должно попадать ни в
+   * эмиссию, ни в сток. До 23.08.2026 этих строк не было вовсе — тело двигало
+   * баланс молча, и /lc не мог объяснить, куда делись деньги у игрока,
+   * открывшего стейк.
+   */
+  STAKE_PRINCIPAL = 'stake_principal',
   TASK_REWARD = 'task_reward',
   REFERRAL = 'referral',
   MARKET_PURCHASE = 'market_purchase',

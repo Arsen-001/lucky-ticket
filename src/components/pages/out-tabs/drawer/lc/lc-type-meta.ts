@@ -6,6 +6,7 @@ import {
   Cpu,
   Crown,
   Gift,
+  Lock,
   ShoppingCart,
   SlidersHorizontal,
   Sparkles,
@@ -33,6 +34,13 @@ export const LC_TYPE_META: Record<LcTransactionType, LcTypeMeta> = {
     Icon: Gift,
     iconClass: 'text-electric-pink',
     iconBg: 'bg-electric-pink/15',
+  },
+  // Тело стейка — замок, а не подарок: это движение своих денег в блокировку и
+  // обратно, а не награда. Нейтральный цвет, чтобы не спорить с доходом рядом.
+  [LcTransactionType.STAKE_PRINCIPAL]: {
+    Icon: Lock,
+    iconClass: 'text-pink-secondary',
+    iconBg: 'bg-white/10',
   },
   [LcTransactionType.TASK_REWARD]: {
     Icon: Sparkles,
