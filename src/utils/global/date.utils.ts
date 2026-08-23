@@ -100,3 +100,24 @@ export const formatLocalDate = (date?: string | Date | number) => {
   if (!date) return '';
   return dayjs(date).format('ll');
 };
+
+/** Сегодняшний день по UTC как `YYYY-MM-DD` — метка для локальных счётчиков. */
+export const utcDay = (date: Date = new Date()) => date.toISOString().slice(0, 10);
+
+/**
+ * Сколько календарных UTC-дней прошло с метки `YYYY-MM-DD`.
+ *
+ * Календарные дни, а не «сколько часов назад»: у игрока, заходящего каждое
+ * утро, счёт от часа к часу сдвигал бы повторный показ на всё более позднее
+ * время. `null` — метки нет или она не разбирается (переставленные часы, чужая
+ * запись); читатель обязан трактовать это как «ограничение не действует»:
+ * промолчать из-за испорченного значения хуже, чем показать лишний раз.
+ */
+export const utcDaysSince = (stamp: string | null | undefined): number | null => {
+  if (!stamp) return null;
+  const then = Date.parse(`${stamp}T00:00:00Z`);
+  if (Number.isNaN(then)) return null;
+  const days = Math.floor((Date.parse(`${utcDay()}T00:00:00Z`) - then) / 86_400_000);
+  // Метка из будущего — тоже испорченная: часы игрока могли уйти вперёд.
+  return days < 0 ? null : days;
+};

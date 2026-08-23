@@ -7,14 +7,23 @@ import { useGetPreLaunchGiftQuery } from '@/api/referral.api';
 import { InviteFriendsPromoModal } from '@/components/pages/out-tabs/drawer/invite-friends/promo/InviteFriendsPromoModal';
 import { routes } from '@/constants/routes';
 import { useAutoSurfaceSlot } from '@/hooks/useAutoSurfaceSlot';
+import { utcDay, utcDaysSince } from '@/utils/global/date.utils';
 
-/** В какие UTC-сутки промо уже показывали. */
+/** UTC-день последнего показа, `YYYY-MM-DD`. */
 const SHOWN_KEY = 'lt-friends-promo-shown';
 
-const utcDay = (d: Date) => d.toISOString().slice(0, 10);
+/** Сколько дней промо молчит после показа. Решение пользователя 23.08.2026. */
+const QUIET_DAYS = 7;
+
+/** Показывали недавно — значит на этой неделе промо молчит. */
+const shownWithinWeek = (stamp: string | null): boolean => {
+  const days = utcDaysSince(stamp);
+  // `null` — метки нет или она испорчена: ограничение не действует.
+  return days !== null && days < QUIET_DAYS;
+};
 
 /**
- * «Пока идёт тест — зови друзей»: раз в сутки, после всего остального.
+ * «Пока идёт тест — зови друзей»: раз в неделю, после всего остального.
  *
  * Стоит последним в очереди авто-попапов (@see AUTO_SURFACE_PRIORITY): это
  * единственный из них, который ничего не выдаёт и ничего не теряет от того, что
@@ -24,7 +33,7 @@ const utcDay = (d: Date) => d.toISOString().slice(0, 10);
  *
  * Три вещи, за которые тут отвечает именно клиент:
  *
- *  1. **Раз в сутки.** Промо не выдаёт награду, поэтому сервер о нём ничего не
+ *  1. **Раз в неделю.** Промо не выдаёт награду, поэтому сервер о нём ничего не
  *     знает и знать не должен; счётчик локальный, и переустановка приложения
  *     даёт лишний показ — это дешевле, чем колонка в базе ради рекламы.
  *  2. **Не в первую сессию.** Новичок приходит в выбор языка, подарки и тур;
@@ -39,16 +48,16 @@ export function FriendsPromoAutoSurface() {
 
   // null — ещё не читали: localStorage недоступен на сервере, а старт с «уже
   // показано» не даёт модалке мигнуть на гидрации.
-  const [shownToday, setShownToday] = useState<boolean | null>(null);
+  const [shownRecently, setShownRecently] = useState<boolean | null>(null);
   const [closed, setClosed] = useState(false);
 
   useEffect(() => {
-    setShownToday(localStorage.getItem(SHOWN_KEY) === utcDay(new Date()));
+    setShownRecently(shownWithinWeek(localStorage.getItem(SHOWN_KEY)));
   }, []);
 
-  // Показывали сегодня — не спрашиваем сервер вовсе: лишний запрос на каждый
-  // заход ради попапа, который в этот день уже не выйдет.
-  const skip = shownToday !== false || !me?.hasSeenTour;
+  // Показывали на этой неделе — не спрашиваем сервер вовсе: лишний запрос на
+  // каждый заход ради попапа, который до конца недели уже не выйдет.
+  const skip = shownRecently !== false || !me?.hasSeenTour;
   const { data: gift } = useGetPreLaunchGiftQuery(undefined, { skip });
 
   // `available === false` — «выключено или у него уже есть»; undefined — бэкенд
@@ -58,12 +67,12 @@ export function FriendsPromoAutoSurface() {
   const wants = !skip && !closed && Boolean(giftLive);
   const canShow = useAutoSurfaceSlot('friends-promo', wants);
 
-  // Сутки жжём в момент, когда промо РЕАЛЬНО на экране, а не когда его закрыли:
+  // Неделю жжём в момент, когда промо РЕАЛЬНО на экране, а не когда его закрыли:
   // приложение, убитое с открытой модалкой, показ уже потратило, а ждать тапа
   // значит показать её второй раз тому, кто просто ушёл в другой чат.
   useEffect(() => {
     if (!canShow) return;
-    localStorage.setItem(SHOWN_KEY, utcDay(new Date()));
+    localStorage.setItem(SHOWN_KEY, utcDay());
   }, [canShow]);
 
   const invite = () => {

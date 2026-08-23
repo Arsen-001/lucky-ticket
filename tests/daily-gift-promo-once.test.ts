@@ -54,6 +54,9 @@ describe('the Lucky Player offer is spent, not repeated', () => {
     const source = read('src/components/layout-elements/DailyGiftAutoSurface.tsx');
 
     expect(source).toContain('lt-daily-gift-dismissed');
-    expect(source).toMatch(/utcDay\(new Date\(\)\)/);
+    // Метка — сегодняшний UTC-день; сама арифметика с 23.08.2026 общая с промо
+    // приглашений и живёт в `date.utils`. @see utcDay
+    expect(source).toMatch(/utcDay\(\)/);
+    expect(source).toMatch(/from '@\/utils\/global\/date\.utils'/);
   });
 });

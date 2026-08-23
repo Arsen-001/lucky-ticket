@@ -83,16 +83,29 @@ describe('общий слот всплывающих окон', () => {
 describe('промо «позови друзей»', () => {
   const source = read('src/components/layout-elements/FriendsPromoAutoSurface.tsx');
 
-  it('раз в UTC-сутки, и сутки жгутся при показе, а не при закрытии', () => {
+  it('раз в неделю, и неделя жжётся при показе, а не при закрытии', () => {
     // Убитое с открытой модалкой приложение показ уже потратило; ждать тапа
     // значит показать её второй раз тому, кто просто ушёл в другой чат.
     expect(source).toContain('lt-friends-promo-shown');
+    expect(source).toMatch(/const QUIET_DAYS = 7/);
     expect(source).toMatch(/if \(!canShow\) return;\s*\n\s*localStorage\.setItem/);
   });
 
-  it('показанное сегодня не дёргает сервер', () => {
-    expect(source).toMatch(/const skip = shownToday !== false \|\| !me\?\.hasSeenTour/);
+  it('показанное на этой неделе не дёргает сервер', () => {
+    expect(source).toMatch(/const skip = shownRecently !== false \|\| !me\?\.hasSeenTour/);
     expect(source).toMatch(/useGetPreLaunchGiftQuery\(undefined, \{ skip \}\)/);
+  });
+
+  it('день показа считается общей утилитой, а не своей копией', () => {
+    // Два авто-попапа держат по локальной метке дня; разошедшиеся копии одной
+    // и той же арифметики — это два разных ответа на вопрос «какой сегодня
+    // день» в одном приложении.
+    const dailyGift = read('src/components/layout-elements/DailyGiftAutoSurface.tsx');
+
+    for (const file of [source, dailyGift]) {
+      expect(file).toMatch(/from '@\/utils\/global\/date\.utils'/);
+      expect(file).not.toMatch(/const utcDay = /);
+    }
   });
 
   it('нечего показать — модалки нет', () => {

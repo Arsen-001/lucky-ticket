@@ -11,11 +11,10 @@ import { LuckyPlayerDailyGiftModal } from '@/components/pages/tabs/home/LuckyPla
 import { useAutoSurfaceSlot } from '@/hooks/useAutoSurfaceSlot';
 import { useAppTranslations } from '@/hooks/useAppTranslations';
 import { useToast } from '@/hooks/useToast';
+import { utcDay } from '@/utils/global/date.utils';
 
 /** Which UTC day the player last dismissed the popup on. */
 const DISMISSED_KEY = 'lt-daily-gift-dismissed';
-
-const utcDay = (d: Date) => d.toISOString().slice(0, 10);
 
 /**
  * Opens the Lucky Player daily gift (DOCS §7.2a) on the first app entry of the
@@ -47,7 +46,7 @@ export function DailyGiftAutoSurface() {
   // rendered on the server, and starting "dismissed" keeps the modal from
   // flashing open on hydration before we know.
   useEffect(() => {
-    setDismissed(localStorage.getItem(DISMISSED_KEY) === utcDay(new Date()));
+    setDismissed(localStorage.getItem(DISMISSED_KEY) === utcDay());
   }, []);
 
   // Never on the session a player first opens the app. They arrive into the
@@ -81,7 +80,7 @@ export function DailyGiftAutoSurface() {
   }, [canShow, gift?.surfaceReason, markPromoSeen]);
 
   const close = () => {
-    localStorage.setItem(DISMISSED_KEY, utcDay(new Date()));
+    localStorage.setItem(DISMISSED_KEY, utcDay());
     setDismissed(true);
   };
 
