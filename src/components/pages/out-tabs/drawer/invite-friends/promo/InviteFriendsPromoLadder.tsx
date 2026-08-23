@@ -65,7 +65,10 @@ export function InviteFriendsPromoLadder({
             ? t('coming soon gift steps hint', { count: remaining })
             : t('coming soon gift steps done')}
         </p>
-        <span className="flex-shrink-0 text-[11px] font-extrabold tabular-nums text-white">
+        {/* `whitespace-nowrap` обязателен: «7 / 10» — это три текстовых узла с
+            пробелами, и на узком экране перенос рвёт счётчик пополам, оставляя
+            «10 /» на одной строке и «10» на другой. */}
+        <span className="flex-shrink-0 whitespace-nowrap text-[11px] font-extrabold tabular-nums text-white">
           {reached} / {total}
         </span>
       </div>
