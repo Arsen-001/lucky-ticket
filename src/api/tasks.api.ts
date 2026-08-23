@@ -33,11 +33,12 @@ import { markAdViewSpent } from '@/utils/pages/ad-slots.utils';
  *     • ads.slots[i].watched flags + watchedToday counter
  *     • streak / dailyProgress aggregates
  *
- * POST /tasks/claim  body: { id, subStepIds? }
- *   Claims a task or sub-step, optionally bundling completed-but-unclaimed
- *   sub-step rewards into the same response. Server should:
+ * POST /tasks/claim  body: { id }
+ *   Claims a task — the whole task, once. Sub-steps are a progress checklist
+ *   and pay nothing of their own (the server sends every one of them
+ *   `claimable: false`), so there is nothing to bundle. Server should:
  *     • Validate user owns the task and it's claimable
- *     • Mark the task / sub-steps as claimed
+ *     • Mark the task as claimed
  *     • Apply rewards to user balance
  *     • Return ClaimTaskResponse with the rewards granted + new balance
  *   The frontend invalidates `rtkTags.tasks` here, so the UI auto-refetches

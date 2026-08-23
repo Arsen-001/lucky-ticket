@@ -25,13 +25,18 @@ export interface TaskSubStep {
    */
   label: LocalizedText | string;
   completed: boolean;
+  /**
+   * Всё, что сервер шлёт про сбор шага, и всё это уже не значит ничего.
+   *
+   * Подшаги — это чек-лист прогресса, а не лестница наград: задание платит то,
+   * что написано на его карточке, один раз и целиком. Маппер бэкенда ставит
+   * `claimable: false` каждому шагу в обеих ветках и не кладёт `reward`, а
+   * `subStepIds` в запросе на сбор принимает и игнорирует. Поля оставлены,
+   * потому что они реально приезжают по проводу; ЧИТАТЬ их не надо — экран
+   * рисует только «сделано / не сделано».
+   */
   claimed?: boolean;
   reward?: TaskReward;
-  /**
-   * `false` marks a read-only checklist row — the all-set bonus lists the
-   * other tasks of the period, and those are claimed on their own cards.
-   * Absent means claimable, the shape every other task sends.
-   */
   claimable?: boolean;
 }
 
@@ -239,7 +244,6 @@ export interface TasksResponse {
 
 export interface ClaimTaskRequest {
   id: string;
-  subStepIds?: string[];
 }
 
 export interface ClaimTaskResponse {

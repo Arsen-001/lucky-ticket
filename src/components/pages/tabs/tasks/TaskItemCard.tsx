@@ -34,14 +34,12 @@ import { taskHasDestination } from '@/utils/pages/task-destination.utils';
 import { TaskCategoryIcon } from './TaskCategoryIcon';
 import { TaskRewardRow } from './TaskRewardRow';
 import { openExternalUrl } from '@/lib/telegram/telegram';
-import { TaskRewardBadge } from './TaskRewardBadge';
 import { SectionShine } from './SectionShine';
 import { ClaimableDot } from '@/components/shared/badges/ClaimableDot';
 
 export interface TaskItemCardProps {
   task: Task;
-  onClaim: (task: Task, bundleSubStepIds?: string[]) => void;
-  onClaimSubStep?: (task: Task, step: TaskSubStep) => void;
+  onClaim: (task: Task) => void;
   expanded?: boolean;
   onToggleExpanded?: () => void;
   highlightToken?: number | null;
@@ -73,33 +71,24 @@ const TIER_RGB: Record<string, string> = {
   all: '222 0 155',
 };
 
-function SubStepRow({
-  step,
-  claimed,
-  tier,
-  onClaim,
-  onNavigate,
-}: {
-  step: TaskSubStep;
-  claimed: boolean;
-  /** Owning task's tier — which ticket a ticket-paying step draws. */
-  tier?: string;
-  onClaim: () => void;
-  onNavigate?: () => void;
-}) {
+/**
+ * One row of a task's checklist: done, or not done yet.
+ *
+ * Sub-steps pay nothing and are not claimed — the task pays what its card says,
+ * once, when it is finished. The server states that itself: every step arrives
+ * `claimable: false`, from both branches of the mapper, with no reward and no
+ * admin setting that could change it. This row used to carry the other half —
+ * a pink «Забрать» pill, a claimed state, a reward badge — and none of it could
+ * ever render.
+ */
+function SubStepRow({ step, onNavigate }: { step: TaskSubStep; onNavigate?: () => void }) {
   const t = useAppTranslations();
   const localized = useLocalized();
-  // A read-only row (the all-set bonus lists the period's other tasks) carries
-  // no reward of its own — those hang on the member tasks' own cards — so it
-  // shows as done or pending and never as claimable.
-  const isReadOnly = step.claimable === false;
-  const isClaimable = step.completed && !claimed && !isReadOnly;
-  const isFullyClaimed = step.completed && claimed && !isReadOnly;
-  const isDone = step.completed && isReadOnly;
+  const isDone = step.completed;
   const isPending = !step.completed;
   const label = localized(step.label);
   const canNavigate = isPending && !!onNavigate;
-  const rowAction = isClaimable ? onClaim : canNavigate ? onNavigate : undefined;
+  const rowAction = canNavigate ? onNavigate : undefined;
   const isInteractive = !!rowAction;
 
   return (
@@ -127,20 +116,14 @@ function SubStepRow({
       }
       className={twMerge(
         'flex items-center gap-2.5 rounded-lg px-2.5 py-1.5 transition-all',
-        isClaimable &&
-          'bg-pink/10 border border-pink/20 cursor-pointer active:scale-[0.99] hover:bg-pink/15',
-        (isFullyClaimed || isDone) && 'bg-success/10',
+        isDone && 'bg-success/10',
         isPending && 'bg-white/5',
         canNavigate && 'cursor-pointer active:scale-[0.99] hover:bg-white/10'
       )}
     >
-      {isFullyClaimed || isDone ? (
+      {isDone ? (
         <div className="flex-center w-5 h-5 rounded-full bg-success/30 shrink-0">
           <Check size={11} className="text-success" />
-        </div>
-      ) : isClaimable ? (
-        <div className="flex-center w-5 h-5 rounded-full bg-pink/30 shrink-0 animate-task-pulse">
-          <Gift size={11} className="text-electric-pink" />
         </div>
       ) : (
         <Circle size={18} className="text-white/30 shrink-0" />
@@ -149,18 +132,13 @@ function SubStepRow({
         <span
           className={twMerge(
             'text-xs font-semibold flex-1 truncate',
-            isFullyClaimed && 'text-white/50',
-            (isClaimable || isDone) && 'text-white',
-            !step.completed && 'text-white/60'
+            isDone ? 'text-white' : 'text-white/60'
           )}
         >
           {label}
         </span>
       ) : (
         <div className="flex-1" />
-      )}
-      {step.reward && !isFullyClaimed && !isReadOnly && (
-        <TaskRewardBadge reward={step.reward} tier={tier} size="sm" />
       )}
       {isPending && onNavigate && (
         <button
@@ -175,16 +153,6 @@ function SubStepRow({
           <ChevronRight size={12} className="text-electric-pink" strokeWidth={2.5} />
         </button>
       )}
-      {isClaimable && (
-        <span className="rounded-full bg-pink-gradient px-2.5 py-1 text-[10px] font-bold text-white shrink-0 pointer-events-none">
-          {t('claim')}
-        </span>
-      )}
-      {isFullyClaimed && (
-        <span className="text-[10px] font-semibold text-success uppercase tracking-wider shrink-0">
-          {t('claimed')}
-        </span>
-      )}
     </div>
   );
 }
@@ -192,7 +160,6 @@ function SubStepRow({
 export function TaskItemCard({
   task,
   onClaim,
-  onClaimSubStep,
   expanded: expandedProp,
   onToggleExpanded,
   highlightToken,
@@ -236,72 +203,21 @@ export function TaskItemCard({
       setInternalExpanded(next);
     }
   };
-  const [locallyClaimed, setLocallyClaimed] = useState<Record<string, boolean>>({});
-  const [isSimulating, setIsSimulating] = useState(false);
-
-  const isStepClaimed = (step: TaskSubStep) => locallyClaimed[step.id] ?? !!step.claimed;
   /**
-   * A step is collectable only if the server says it can be — sub-steps stopped
-   * paying AP of their own (a task pays what its card says, once), so every
-   * step now arrives `claimable: false` and this whole branch stays dark. Kept
-   * as a condition rather than deleted: an admin-authored task could bring
-   * paying steps back, and the card would then work without another deploy.
+   * Собирается ЗАДАНИЕ, а не его шаги.
+   *
+   * Здесь была вторая половина: подшаги забирались поштучно и пачкой, карточка
+   * держала локальный список забранных и проигрывала анимацию «собираю по
+   * одному». Ничего из этого не могло случиться — сервер помечает каждый
+   * подшаг `claimable: false` (обе ветки маппера, награды у шага нет), фронт
+   * читал это поле, и все три кнопки были невидимы. А запросы, которые они бы
+   * послали, бэкенд отбивает: `subStepIds` он принимает и игнорирует, и на
+   * незавершённом задании отвечает «Milestone not reached yet».
    */
-  const canClaimStep = (s: TaskSubStep) =>
-    s.claimable !== false && s.completed && !isStepClaimed(s);
-  const hasClaimableSubStep = task.subSteps?.some(canClaimStep) ?? false;
-
-  const handleClaimSubStep = (step: TaskSubStep) => {
-    setLocallyClaimed(prev => ({ ...prev, [step.id]: true }));
-    onClaimSubStep?.(task, step);
-  };
-
-  const handleClaimMain = async () => {
-    if (isSimulating) return;
-    const unclaimed = (task.subSteps ?? []).filter(canClaimStep);
-
-    if (unclaimed.length > 1) {
-      // Run a brief simulation: keep dropdown open, mark each substep claimed
-      // in sequence so the user sees rewards being collected one by one.
-      setIsSimulating(true);
-      setExpanded(true);
-      for (const step of unclaimed) {
-        await new Promise(res => setTimeout(res, 280));
-        setLocallyClaimed(prev => ({ ...prev, [step.id]: true }));
-      }
-      await new Promise(res => setTimeout(res, 360));
-      setIsSimulating(false);
-      setExpanded(false);
-      onClaim(
-        task,
-        unclaimed.map(s => s.id)
-      );
-      return;
-    }
-
-    if (unclaimed.length === 1) {
-      setLocallyClaimed(prev => ({ ...prev, [unclaimed[0].id]: true }));
-    }
+  const handleClaimMain = () => {
     setExpanded(false);
-    onClaim(task, unclaimed.length ? unclaimed.map(s => s.id) : undefined);
+    onClaim(task);
   };
-
-  const handleClaimAllSubSteps = async () => {
-    if (isSimulating) return;
-    const unclaimed = (task.subSteps ?? []).filter(canClaimStep);
-    if (unclaimed.length < 2) return;
-    // Local-only batch claim — fires per-substep callback; no main task claim.
-    setIsSimulating(true);
-    for (const step of unclaimed) {
-      await new Promise(res => setTimeout(res, 220));
-      setLocallyClaimed(prev => ({ ...prev, [step.id]: true }));
-      onClaimSubStep?.(task, step);
-    }
-    await new Promise(res => setTimeout(res, 200));
-    setIsSimulating(false);
-  };
-
-  const claimableCount = (task.subSteps ?? []).filter(canClaimStep).length;
 
   const isLockedTournament = isLocked && task.category === TaskCategory.TOURNAMENTS;
 
@@ -362,7 +278,7 @@ export function TaskItemCard({
    * A ready sub-step counts: its reward is as collectable as the task's own,
    * and the card is collapsed by default, so nothing else on the row says so.
    */
-  const hasSomethingToClaim = !isLocked && !isCompleted && (isClaimAction || hasClaimableSubStep);
+  const hasSomethingToClaim = !isLocked && !isCompleted && isClaimAction;
 
   /**
    * One headline figure and «the rest». LC is the headline when a task pays it:
@@ -609,7 +525,7 @@ export function TaskItemCard({
             {showAction && (
               <button
                 type="button"
-                disabled={(isLocked && !isLockedTournament) || isSimulating}
+                disabled={isLocked && !isLockedTournament}
                 onClick={e => {
                   e.stopPropagation();
                   // Claim goes straight to the claim handler. Routing it through
@@ -624,7 +540,6 @@ export function TaskItemCard({
                 }}
                 className={twMerge(
                   'tap-target flex-center relative flex-1 gap-1.5 rounded-xl py-2.5 text-[12px] leading-none font-extrabold tracking-[0.14em] uppercase',
-                  isSimulating && 'cursor-wait opacity-70',
                   isClaimAction && 'bg-pink-gradient animate-task-pulse text-white',
                   isCompleted && 'bg-success/15 text-success',
                   isLockedTournament && 'bg-pink-gradient text-white',
@@ -640,7 +555,7 @@ export function TaskItemCard({
                 {isClaimAction ? (
                   <>
                     <Gift size={13} strokeWidth={2.6} />
-                    {isSimulating ? t('claiming') : t('claim')}
+                    {t('claim')}
                   </>
                 ) : isCompleted ? (
                   <>
@@ -676,14 +591,6 @@ export function TaskItemCard({
                     <ChevronRight size={13} strokeWidth={2.6} />
                     {t('open')}
                   </>
-                )}
-
-                {/* «Внутри есть что забрать» — the same dot the icon carries,
-                    repeated on the control that opens the accordion, so the mark
-                    also says where to tap. Unlabelled: the card's own dot already
-                    announces it once, and twice is noise in a screen reader. */}
-                {hasClaimableSubStep && !isClaimAction && (
-                  <ClaimableDot className="absolute top-1.5 end-1.5" />
                 )}
               </button>
             )}
@@ -791,14 +698,13 @@ export function TaskItemCard({
             {(isReady || allStepsDone) && !isCompleted ? (
               <Button
                 className="animate-task-pulse flex-center flex-col gap-0.5 rounded-full px-3 py-1.5 text-xs font-bold disabled:opacity-70"
-                disabled={isSimulating}
                 onClick={e => {
                   e.stopPropagation();
                   handleClaimMain();
                 }}
               >
                 <Gift size={14} />
-                {isSimulating ? t('claiming') : t('claim')}
+                {t('claim')}
               </Button>
             ) : isLocked ? (
               <div className="flex-center size-8 rounded-full bg-white/5">
@@ -864,31 +770,9 @@ export function TaskItemCard({
             <SubStepRow
               key={step.id}
               step={step}
-              claimed={isStepClaimed(step)}
-              tier={task.tier}
-              onClaim={() => handleClaimSubStep(step)}
               onNavigate={hasDestination ? handleStepNavigate : undefined}
             />
           ))}
-
-          {/* Batch claim collected substeps — visible only when 2+ are claimable AND not all done */}
-          {!isCompleted && !allStepsDone && claimableCount >= 2 && (
-            <button
-              type="button"
-              disabled={isSimulating}
-              onClick={e => {
-                e.stopPropagation();
-                handleClaimAllSubSteps();
-              }}
-              className={twMerge(
-                'mt-1 w-full rounded-xl py-2 text-xs font-bold flex-center gap-1.5 transition-all bg-pink-gradient text-white active:scale-95 shadow-md shadow-electric-pink/25',
-                isSimulating && 'opacity-70 cursor-wait'
-              )}
-            >
-              <Gift size={12} />
-              {isSimulating ? t('claiming') : `${t('claim all')} (${claimableCount})`}
-            </button>
-          )}
 
           {/* Main bonus claim button — always present, gated by allStepsDone */}
           <div className="mt-2 pt-2 border-t border-white/5 flex flex-col gap-2">
@@ -906,27 +790,24 @@ export function TaskItemCard({
             ) : (
               <button
                 type="button"
-                disabled={!allStepsDone || isSimulating}
+                disabled={!allStepsDone}
                 onClick={e => {
                   e.stopPropagation();
-                  if (allStepsDone && !isSimulating) handleClaimMain();
+                  if (allStepsDone) handleClaimMain();
                 }}
                 className={twMerge(
                   'w-full rounded-xl py-2.5 text-sm font-bold flex-center gap-1.5 transition-all',
                   allStepsDone
                     ? 'bg-pink-gradient text-white animate-task-pulse active:scale-95 shadow-lg shadow-electric-pink/30'
-                    : 'bg-white/5 text-white/40 cursor-not-allowed',
-                  isSimulating && 'opacity-70 cursor-wait'
+                    : 'bg-white/5 text-white/40 cursor-not-allowed'
                 )}
               >
                 <Gift size={14} />
-                {isSimulating
-                  ? t('claiming')
-                  : allStepsDone
-                    ? t('claim main bonus')
-                    : t('claim locked steps remaining', {
-                        remaining: totalSteps - completedSteps,
-                      })}
+                {allStepsDone
+                  ? t('claim main bonus')
+                  : t('claim locked steps remaining', {
+                      remaining: totalSteps - completedSteps,
+                    })}
               </button>
             )}
           </div>

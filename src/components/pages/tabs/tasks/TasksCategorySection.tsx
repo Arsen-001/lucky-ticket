@@ -3,7 +3,7 @@
 import { type ReactNode, useEffect, useMemo, useRef, useState } from 'react';
 import { twMerge } from 'tailwind-merge';
 import { TaskCategory, TaskStatus } from '@/types/enums/tasks.enums';
-import type { Task, TaskSubStep } from '@/types/interfaces/tasks.interfaces';
+import type { Task } from '@/types/interfaces/tasks.interfaces';
 import { useAppTranslations } from '@/hooks/useAppTranslations';
 import type { MessageIds } from '@/types/types/i18n.types';
 import { TaskCategoryIcon } from './TaskCategoryIcon';
@@ -19,8 +19,7 @@ import { AchievementTaskRow } from './AchievementTaskRow';
 export interface TasksCategorySectionProps {
   category: TaskCategory;
   tasks: Task[];
-  onClaim: (task: Task, bundleSubStepIds?: string[]) => void;
-  onClaimSubStep?: (task: Task, step: TaskSubStep) => void;
+  onClaim: (task: Task) => void;
   registerSection?: (category: TaskCategory, el: HTMLElement | null) => void;
   className?: string;
   emptyHint?: ReactNode;
@@ -112,7 +111,6 @@ export function TasksCategorySection({
   category,
   tasks,
   onClaim,
-  onClaimSubStep,
   registerSection,
   className,
   emptyHint,
@@ -254,7 +252,6 @@ export function TasksCategorySection({
                   task={task}
                   compact={taskLayout === 'compact-cards'}
                   onClaim={onClaim}
-                  onClaimSubStep={onClaimSubStep}
                   expanded={openTaskId === task.id}
                   onToggleExpanded={() =>
                     setOpenTaskId(prev => (prev === task.id ? null : task.id))

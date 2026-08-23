@@ -25,7 +25,7 @@ import {
 } from '@/api/tasks.api';
 import { useAppDispatch } from '@/lib/rtk/hooks';
 import { TaskCategory, TaskFrequency, TaskStatus } from '@/types/enums/tasks.enums';
-import type { AdSlot, Task, TasksResponse, TaskSubStep } from '@/types/interfaces/tasks.interfaces';
+import type { AdSlot, Task, TasksResponse } from '@/types/interfaces/tasks.interfaces';
 import {
   countClaimableAdSlots,
   countClaimableTasks,
@@ -521,7 +521,7 @@ export function TasksContent() {
    * cache closes that window: the row is COMPLETED the moment the claim
    * returns, and the refetch merely confirms it.
    */
-  const markTaskClaimed = (id: string, subStepIds?: string[]) => {
+  const markTaskClaimed = (id: string) => {
     dispatch(
       tasksApi.util.updateQueryData('getTasks', undefined, draft => {
         // The all-set bonuses live outside `categories` — patch them too, or
@@ -533,17 +533,9 @@ export function TasksContent() {
           for (const list of [cat.daily, cat.weekly, cat.once]) {
             const task = list.find(item => item.id === id);
             if (!task) continue;
-            // A sub-step claim also claims the main task when the main task was
-            // itself claimable — the backend does both in one call — so this
-            // reads the row's own status rather than the shape of the request.
             if (task.status === TaskStatus.READY_TO_CLAIM) {
               task.status = TaskStatus.COMPLETED;
               task.progress = { ...task.progress, current: task.progress.target };
-            }
-            if (subStepIds?.length && task.subSteps) {
-              task.subSteps = task.subSteps.map(step =>
-                subStepIds.includes(step.id) ? { ...step, claimed: true } : step
-              );
             }
           }
         }
@@ -552,25 +544,22 @@ export function TasksContent() {
   };
 
   /**
-   * Claims in flight, keyed by task + sub-steps. Two taps landing inside the
-   * same frame both passed the status check and both POSTed; the second one
-   * could only ever come back "already claimed".
+   * Claims in flight, keyed by task. Two taps landing inside the same frame
+   * both passed the status check and both POSTed; the second one could only
+   * ever come back "already claimed".
    */
   const claimsInFlight = useRef<Set<string>>(new Set());
 
-  const runClaim = async (id: string, subStepIds?: string[], tier?: string) => {
-    const key = `${id}::${[...(subStepIds ?? [])].sort().join(',')}`;
-    if (claimsInFlight.current.has(key)) return;
-    claimsInFlight.current.add(key);
+  const runClaim = async (id: string, tier?: string) => {
+    if (claimsInFlight.current.has(id)) return;
+    claimsInFlight.current.add(id);
 
     triggerHaptic('medium');
-    // Retry has to redo *this* claim, sub-steps included — retrying a failed
-    // sub-step claim as a whole-task claim asks for something else entirely.
-    retryRef.current = () => runClaim(id, subStepIds, tier);
+    retryRef.current = () => runClaim(id, tier);
     setPendingClaim({ id, open: true, status: 'pending', result: null, tier });
     try {
-      const res = await claimTask({ id, subStepIds }).unwrap();
-      markTaskClaimed(id, subStepIds);
+      const res = await claimTask({ id }).unwrap();
+      markTaskClaimed(id);
       setPendingClaim({ id, open: true, status: 'done', result: res, tier });
       // Backend updates state on its side; RTK invalidates `tasks` tag
       // (see tasks.api.ts) which triggers automatic refetch + UI sync.
@@ -579,21 +568,15 @@ export function TasksContent() {
       // The server refused because our view of the task is stale — so fix the
       // view, not just the copy. By the time the player taps Close the row
       // already shows the truth.
-      if (failure === 'claimed') markTaskClaimed(id, subStepIds);
+      if (failure === 'claimed') markTaskClaimed(id);
       if (failure !== 'network') refetch();
       setPendingClaim({ id, open: true, status: 'failed', failure, result: null, tier });
     } finally {
-      claimsInFlight.current.delete(key);
+      claimsInFlight.current.delete(id);
     }
   };
 
-  const handleClaimTask = (task: Task, bundleSubStepIds?: string[]) =>
-    runClaim(task.id, bundleSubStepIds, task.tier);
-  // Per-substep claim uses the documented contract — POST /tasks/claim
-  // { id: <taskId>, subStepIds: [<stepId>] }. Sending the substep id as the
-  // task id only ever worked against the mock; the live backend 404s on it.
-  const handleClaimSubStep = (task: Task, step: TaskSubStep) =>
-    runClaim(task.id, [step.id], task.tier);
+  const handleClaimTask = (task: Task) => runClaim(task.id, task.tier);
 
   const handleWatchAd = async (slot: AdSlot): Promise<void> => {
     let skipRefused = false;
@@ -947,7 +930,6 @@ export function TasksContent() {
                 category={cat.category}
                 tasks={regularTasks}
                 onClaim={handleClaimTask}
-                onClaimSubStep={handleClaimSubStep}
                 registerSection={sectionRegistrarFor(cat.category)}
                 emptyHint={t('no tasks here yet')}
                 // Every task of the category, not just the rows below the
@@ -1125,7 +1107,6 @@ export function TasksContent() {
               category={allSetBonus.category}
               tasks={[allSetBonus]}
               onClaim={handleClaimTask}
-              onClaimSubStep={handleClaimSubStep}
               registerSection={registerSection}
               hasClaimable={hasClaimableTask([allSetBonus])}
               highlightToken={

@@ -1729,7 +1729,6 @@ const PROCESSED_CATEGORIES = CATEGORIES.map(applyTierLockToCategory).map(normali
 // ============================================================
 const mockState = {
   claimedTaskIds: new Set<string>(),
-  claimedSubStepIds: new Set<string>(),
   watchedAdIds: new Set<string>(),
   balance: fresh
     ? { lc: 0, tickets: 0, activityPoints: 0 }
@@ -1737,23 +1736,12 @@ const mockState = {
 };
 
 const applyMockState = (task: Task): Task => {
-  const taskClaimed = mockState.claimedTaskIds.has(task.id);
-  const hasClaimedSub = task.subSteps?.some(s => mockState.claimedSubStepIds.has(s.id));
-  if (!taskClaimed && !hasClaimedSub) return task;
-
-  if (taskClaimed) {
-    return {
-      ...task,
-      status: TaskStatus.COMPLETED,
-      progress: { current: task.progress.target, target: task.progress.target },
-      subSteps: task.subSteps?.map(s => ({ ...s, completed: true, claimed: true })),
-    };
-  }
+  if (!mockState.claimedTaskIds.has(task.id)) return task;
   return {
     ...task,
-    subSteps: task.subSteps?.map(s =>
-      mockState.claimedSubStepIds.has(s.id) ? { ...s, claimed: true } : s
-    ),
+    status: TaskStatus.COMPLETED,
+    progress: { current: task.progress.target, target: task.progress.target },
+    subSteps: task.subSteps?.map(s => ({ ...s, completed: true })),
   };
 };
 
@@ -1859,9 +1847,8 @@ const grantRewards = (id: string, granted: TaskReward[]): ClaimTaskResponse => {
   return { id, rewards, newBalance: { ...mockState.balance } };
 };
 
-const claimTaskHandler = (args: { body?: { id?: string; subStepIds?: string[] } }) => {
+const claimTaskHandler = (args: { body?: { id?: string } }) => {
   const id = args.body?.id ?? '';
-  const subStepIds = args.body?.subStepIds ?? [];
   // The all-set bonuses live outside the categories and are built per response,
   // so they are resolved from a live build — otherwise claiming one 404s in dev
   // while working in production.
@@ -1881,9 +1868,6 @@ const claimTaskHandler = (args: { body?: { id?: string; subStepIds?: string[] } 
     mockState.claimedTaskIds.add(id);
     return grantRewards(id, found.rewards ?? []);
   }
-  let rewards: TaskReward[] = [];
-  const allSubSteps = allTasks.flatMap(t => t.subSteps ?? []);
-
   // Mirrors the live backend's `BadRequestException('Task already claimed')`.
   // The fixture used to pay out again on every repeat call, so a UI that let
   // the player tap a claimed row twice looked perfectly healthy in dev and only
@@ -1892,44 +1876,14 @@ const claimTaskHandler = (args: { body?: { id?: string; subStepIds?: string[] } 
     error: { status: 400, data: { message: 'Task already claimed' } },
   };
 
-  if (!found) {
-    // Legacy form: a substep id passed as the task id.
-    const sub = allSubSteps.find(s => s.id === id);
-    if (mockState.claimedSubStepIds.has(id)) return alreadyClaimed;
-    if (sub?.reward) {
-      rewards = [sub.reward];
-      mockState.claimedSubStepIds.add(id);
-    }
-  } else if (subStepIds.length) {
-    // Bundle form ({ id: taskId, subStepIds }) — mirrors the live backend:
-    // the named substeps are claimed, but the MAIN task completes only when
-    // it is genuinely done (all its substeps completed), so collecting one
-    // substep never swallows the whole task.
-    const fresh = subStepIds.filter(sid => !mockState.claimedSubStepIds.has(sid));
-    const ownSubs = found.subSteps ?? [];
-    const mainReady =
-      found.status === TaskStatus.READY_TO_CLAIM ||
-      (ownSubs.length > 0 && ownSubs.every(s => s.completed));
-    const mainClaim = mainReady && !mockState.claimedTaskIds.has(id);
-    // Nothing new in the bundle and the main task is already banked — the live
-    // backend answers 400 here rather than handing out the rewards a second time.
-    if (!fresh.length && !mainClaim) return alreadyClaimed;
-    const bundled = fresh
-      .map(sid => allSubSteps.find(s => s.id === sid))
-      .filter(s => s?.reward)
-      .map(s => s!.reward!);
-    rewards = bundled;
-    fresh.forEach(sid => mockState.claimedSubStepIds.add(sid));
-    if (mainClaim) {
-      mockState.claimedTaskIds.add(id);
-      rewards = [...(found.rewards ?? []), ...rewards];
-    }
-  } else {
-    if (mockState.claimedTaskIds.has(id)) return alreadyClaimed;
-    mockState.claimedTaskIds.add(id);
-    rewards = found.rewards ?? [];
-  }
-  return grantRewards(id, rewards);
+  // Собирается задание целиком и только оно. Подшаги здесь когда-то платили
+  // по-своему — поштучно и пачкой, — и это была выдумка мока: живой бэкенд
+  // помечает каждый шаг `claimable: false`, наград им не даёт и `subStepIds`
+  // в запросе игнорирует. Так что «в деве работало» означало ровно ничего.
+  if (!found) return { error: { status: 404, data: { message: 'Task not found' } } };
+  if (mockState.claimedTaskIds.has(id)) return alreadyClaimed;
+  mockState.claimedTaskIds.add(id);
+  return grantRewards(id, found.rewards ?? []);
 };
 
 export const tasksMock = {
