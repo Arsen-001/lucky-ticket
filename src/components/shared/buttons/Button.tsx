@@ -67,7 +67,13 @@ export function Button({
       disabled={disabled || loading}
       className={twMerge(
         variantClasses[variant],
-        ` text-white font-semibold py-3.5 px-6 rounded-lg
+        /*
+         * `flex-center` в основе, а не только под иконку: кнопка с заданной
+         * высотой (h-10 и ниже) — блок с `py-3.5`, и текст в ней прижимался
+         * ВНИЗ на 3.5 px, потому что 14+19.5+14 не влезает в 40. Выравнивание
+         * по центру чинит это для любой высоты, а не в каждой кнопке руками.
+         */
+        ` text-white font-semibold py-3.5 px-6 rounded-lg flex-center
           transition-all duration-100 transform
           
           active:scale-99

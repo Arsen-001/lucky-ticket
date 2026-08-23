@@ -87,7 +87,9 @@
   inset: -12px -20px -44px;
   pointer-events: none;
   z-index: 0;
-  opacity: 0.05;
+  /* 8%, а не 5%: на пяти процентах знак угадывался, но фигурой не читался —
+     выбрано в студии на живом экране. */
+  opacity: 0.08;
   background-repeat: no-repeat;
   background-image: url('/assets/icons/duel/rock.webp'), url('/assets/icons/duel/scissors.webp');
   background-size: 210px, 230px;
@@ -116,20 +118,20 @@
   margin: -78px 0 0 -150px;
   pointer-events: none;
   z-index: 0;
-  opacity: 0.05;
+  opacity: 0.08;
   background: url('/assets/icons/tickets/bronze-ticket.webp') center / contain no-repeat;
   transform: rotate(45deg);
 }
 
 .duel-marks-quiet::before {
-  opacity: 0.022;
+  opacity: 0.035;
   background-position:
     -92px 76%,
     calc(100% + 96px) 12%;
 }
 
 .duel-marks-quiet::after {
-  opacity: 0.022;
+  opacity: 0.035;
 }
 
 /**
