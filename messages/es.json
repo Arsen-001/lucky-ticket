@@ -1615,8 +1615,8 @@
   "cheaper than telegram by {percent}": "{percent}% más barato que Telegram",
   "+{days} days": "+{days, plural, one {# día} other {# días}}",
   "next result": "Siguiente",
-  "invite promo title": "Invita a amigos mientras dura la prueba",
-  "invite promo subtitle": "Invita a amigos y el bot te enviará un regalo real de Telegram.",
+  "invite promo title": "Invita a tus amigos mientras dura la prueba",
+  "invite promo subtitle": "Invita a tus amigos y el bot te enviará un regalo real de Telegram.",
   "you get for watching": "Recibes por visualización",
-  "extra ads reward on watch": "Cada recompensa llega cuando ves esa visualización"
+  "extra ads reward on watch": "Cada recompensa llega al completar esa visualización."
 }
