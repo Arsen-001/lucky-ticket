@@ -73,7 +73,8 @@ export function ComingSoonScreen({ launchAt, session }: ComingSoonScreenProps) {
             sizes="270px"
             src={logo}
             alt={GlobalConstants.projectName}
-            priority
+            loading="eager"
+            fetchPriority="high"
             className="drop-shadow-3xl h-auto w-full"
           />
         </h1>

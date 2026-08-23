@@ -29,6 +29,7 @@ export function GamesScreen() {
     <div className="flex min-h-full flex-col gap-3 pt-1 pb-4">
       {duelOpen && (
         <GameCard
+          eager
           href={routes.games.duel}
           title={t('duel')}
           subtitle={t('games duel blurb')}

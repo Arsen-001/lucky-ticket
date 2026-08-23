@@ -22,6 +22,19 @@ export interface GameCardProps {
    */
   badge?: string;
   soon?: boolean;
+  /**
+   * Первая карточка витрины: её жетоны рисуются сразу и оказываются самым
+   * крупным, что видит игрок при открытии раздела — то есть LCP. Next грузит
+   * картинки лениво, поэтому именно они запрашивались последними
+   * (предупреждение в консоли про `loading="eager"`).
+   *
+   * Именно `loading`/`fetchPriority`, а НЕ `priority`: в Next 16 тот проп
+   * объявлен устаревшим и молча ничего не делает (@see
+   * node_modules/next/dist/docs — Image, `preload`).
+   *
+   * Только для первой: поднять приоритет всем — значит не поднять никому.
+   */
+  eager?: boolean;
   className?: string;
 }
 
@@ -31,7 +44,16 @@ export interface GameCardProps {
  * Игру показывает её собственными предметами, а не иконкой из набора: жетоны
  * узнаются раньше, чем прочитано название.
  */
-export function GameCard({ title, subtitle, href, tokens, badge, soon, className }: GameCardProps) {
+export function GameCard({
+  title,
+  subtitle,
+  href,
+  tokens,
+  badge,
+  soon,
+  eager = false,
+  className,
+}: GameCardProps) {
   const t = useAppTranslations();
 
   const body = (
@@ -62,6 +84,8 @@ export function GameCard({ title, subtitle, href, tokens, badge, soon, className
               alt=""
               width={52}
               height={52}
+              loading={eager ? 'eager' : undefined}
+              fetchPriority={eager ? 'high' : undefined}
               style={{ marginInlineStart: index === 0 ? 0 : -8 }}
               // Билет вдвое шире, чем выше: плашмя он читался полосой, а не
               // предметом. Под −45° он встаёт в один рост с камнем и ножницами.

@@ -26,9 +26,16 @@ export function OnboardingGiftsStep({ onClaim }: OnboardingGiftsStepProps) {
   const { bronzeTickets, activityPoints } = appConfig.onboardingTour.welcomePack;
 
   const gifts: { icon: ReactNode; label: string; amount: number }[] = [
-    { icon: <EngineIcon tier="bronze" size={46} />, label: t('bronze engine'), amount: 1 },
+    // Первый экран приложения: движок и билеты рисуются сразу и оказываются
+    // самым крупным, что видит игрок — то есть LCP. Без `priority` Next грузит
+    // их лениво, и картинка приезжает последней.
     {
-      icon: <TicketOverlap type="bronze" width={48} height={36} />,
+      icon: <EngineIcon tier="bronze" size={46} eager />,
+      label: t('bronze engine'),
+      amount: 1,
+    },
+    {
+      icon: <TicketOverlap type="bronze" width={48} height={36} fetchPriority="high" />,
       label: t('bronze tickets'),
       amount: bronzeTickets,
     },

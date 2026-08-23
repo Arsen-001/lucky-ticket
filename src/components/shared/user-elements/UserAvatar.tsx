@@ -89,7 +89,8 @@ export function UserAvatar({
       <Image
         src={src}
         alt={alt}
-        priority
+        loading="eager"
+        fetchPriority="high"
         height={size}
         width={size}
         className="h-full w-full rounded-full object-cover"

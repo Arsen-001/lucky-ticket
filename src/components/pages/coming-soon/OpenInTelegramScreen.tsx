@@ -57,7 +57,8 @@ export function OpenInTelegramScreen({ deviceKind }: OpenInTelegramScreenProps) 
           sizes="230px"
           src={logo}
           alt={GlobalConstants.projectName}
-          priority
+          loading="eager"
+          fetchPriority="high"
           className="drop-shadow-3xl h-auto w-full"
         />
       </h1>

@@ -80,7 +80,8 @@ export function DuelToken({ move, size = 128, state = 'idle', className }: DuelT
           'h-full w-full object-contain drop-shadow-[0_18px_12px_rgba(0,0,0,0.7)]',
           move === 'TICKET' && 'scale-[1.16]'
         )}
-        priority
+        loading="eager"
+        fetchPriority="high"
       />
     </div>
   );

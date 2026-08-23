@@ -46,7 +46,8 @@ export function Avatar({ className, size = 54, shadow = false, ...rest }: Avatar
       className={containerClassNames}
       src={src}
       alt="avatar"
-      priority
+      loading="eager"
+      fetchPriority="high"
       {...rest}
       height={size}
       width={size}
