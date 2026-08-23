@@ -322,6 +322,14 @@ export function DuelLobbies({ onEnter, inviteUserId }: DuelLobbiesProps) {
         onInfo={data ? () => setRulesOpen(true) : undefined}
       />
 
+      {/* Свой счёт стоит под кошельком, а не в хвосте списка: это строка про
+          ИГРОКА, и читается она вместе с его билетами, а не после чужих столов.
+          Правила стола уехали под кнопку «i» — их читают один раз. */}
+      <DuelTablePanel
+        matches={profile?.publicStats.duelMatches ?? 0}
+        wins={profile?.publicStats.duelWins ?? 0}
+      />
+
       {/* Лига выбирается сверху, а не разбивает список на группы: цифра на
           самой кнопке говорит, где есть с кем играть, и лишнее убирается одним
           тапом. Пустая лига видна и гаснет. */}
@@ -375,16 +383,6 @@ export function DuelLobbies({ onEnter, inviteUserId }: DuelLobbiesProps) {
             onJoin={handleJoin}
           />
         ))}
-
-        {/* Табличка едет сразу за столами, а не прижимается ко дну: сверху
-            получается один блок «что на столе и чем это кончалось», внизу —
-            только то, что нажимают. Правила стола уехали под кнопку «i»:
-            их читают один раз. */}
-        <DuelTablePanel
-          className="mt-0.5"
-          matches={profile?.publicStats.duelMatches ?? 0}
-          wins={profile?.publicStats.duelWins ?? 0}
-        />
       </div>
       {spend.modals}
       {rules}
