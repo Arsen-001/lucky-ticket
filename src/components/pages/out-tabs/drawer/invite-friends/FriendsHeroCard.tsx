@@ -67,19 +67,30 @@ export function FriendsHeroCard() {
         className="bg-electric-pink/12 pointer-events-none absolute -right-8 -top-8 h-24 w-24 rounded-full blur-2xl"
       />
 
-      <div className="relative flex items-center gap-3">
+      {/* Шапка переносится, а не сжимается.
+          Числа справа не сжимаются никогда (`flex-shrink-0`), поэтому раньше всё
+          отдавала колонка заголовка — и на 320px ей оставалось 14–38px в любом
+          языке, кроме английского: текст не помещался в свой бокс и рисовался
+          ПОВЕРХ чисел. Замерено 23.08.2026 на прод-сборке: hy не влезал на 76px,
+          ka на 64, ru на 51, английский помещался ровно — поэтому дефекта и не
+          было видно. Минимум в 7rem у колонки превращает нехватку места в
+          перенос: числа уезжают на свою строку под заголовок, и обе половины
+          читаются целиком. */}
+      <div className="relative flex flex-wrap items-center gap-3">
         <div className="bg-electric-pink/15 ring-electric-pink/30 flex-center h-10 w-10 flex-shrink-0 rounded-xl ring-1">
           <UserPlus size={20} className="text-electric-pink" strokeWidth={2.2} />
         </div>
-        <div className="flex min-w-0 flex-1 flex-col">
+        <div className="flex min-w-[7rem] flex-1 flex-col">
           <ArrivalShine id="invite" variant="title">
-            <h2 className="text-sm font-extrabold leading-tight text-white">
+            <h2 className="text-sm font-extrabold leading-tight break-words text-white">
               {t('invite friends')}
             </h2>
           </ArrivalShine>
           <p className="text-pink-secondary truncate text-[11px]">{t('invite hero subtitle')}</p>
         </div>
-        <div className="flex flex-shrink-0 items-start gap-3">
+        {/* `ms-auto`, а не `ml-auto`: на арабском и фарси строка идёт справа
+            налево, и физический отступ прижал бы числа не к тому краю. */}
+        <div className="ms-auto flex flex-shrink-0 items-start gap-3">
           <HeroInlineStat
             label={t('invite hero stat invited')}
             value={stats?.totalInvited ?? 0}
