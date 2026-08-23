@@ -9,6 +9,7 @@ import { routes } from '@/constants/routes';
 import { duelJoinFailure } from '@/utils/global/duel.utils';
 import { useAppTranslations } from '@/hooks/useAppTranslations';
 import { useFeature } from '@/hooks/useFeature';
+import { useTelegramSurfaceColor } from '@/hooks/useTelegramSurfaceColor';
 import { DuelLobbies } from './DuelLobbies';
 import { DuelArena } from './DuelArena';
 import '@/styles/components/duel.css';
@@ -23,6 +24,10 @@ import '@/styles/components/duel.css';
 export function DuelScreen() {
   const t = useAppTranslations();
   const enabled = useFeature('duel');
+  // Верхняя полоса телеграма красится в цвет стола, а не основного фона: над
+  // почти чёрной игрой висела светлая полоса приложения, и шов был виден
+  // раньше самой игры. Уходим с экрана — цвет возвращается.
+  useTelegramSurfaceColor('#0b0914');
   const [duelId, setDuelId] = useState<string | null>(null);
   // Лобби открыли кнопкой «играть с другом» — список друзей показываем сразу.
   const [inviteOnEnter, setInviteOnEnter] = useState(false);
