@@ -4,7 +4,6 @@ import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useGetMeQuery } from '@/api/me.api';
 import { useGetPreLaunchGiftQuery } from '@/api/referral.api';
-import { useGetRouletteQuery } from '@/api/roulette.api';
 import { InviteFriendsPromoModal } from '@/components/pages/out-tabs/drawer/invite-friends/promo/InviteFriendsPromoModal';
 import { routes } from '@/constants/routes';
 import { useAutoSurfaceSlot } from '@/hooks/useAutoSurfaceSlot';
@@ -31,8 +30,8 @@ const utcDay = (d: Date) => d.toISOString().slice(0, 10);
  *  2. **Не в первую сессию.** Новичок приходит в выбор языка, подарки и тур;
  *     четвёртым диалогом подряд промо не читают, его закрывают.
  *  3. **Нечего показать — не показываем.** `available: false` у подарка значит
- *     «выключено или уже получено», у рулетки — то же самое. Когда обоих нет,
- *     модалки не существует, а запросы вообще не уходят.
+ *     «выключено или уже получено»; тогда модалки не существует, а запрос
+ *     вообще не уходит.
  */
 export function FriendsPromoAutoSurface() {
   const router = useRouter();
@@ -47,18 +46,16 @@ export function FriendsPromoAutoSurface() {
     setShownToday(localStorage.getItem(SHOWN_KEY) === utcDay(new Date()));
   }, []);
 
-  // Показывали сегодня — не спрашиваем сервер вовсе: два запроса на каждый
+  // Показывали сегодня — не спрашиваем сервер вовсе: лишний запрос на каждый
   // заход ради попапа, который в этот день уже не выйдет.
   const skip = shownToday !== false || !me?.hasSeenTour;
   const { data: gift } = useGetPreLaunchGiftQuery(undefined, { skip });
-  const { data: roulette } = useGetRouletteQuery(undefined, { skip });
 
   // `available === false` — «выключено или у него уже есть»; undefined — бэкенд
   // слишком старый, чтобы сказать, и тогда блок рисуется, как рисовался всегда.
   const giftLive = gift && gift.available !== false ? gift : undefined;
-  const rouletteLive = roulette?.available ? roulette : undefined;
 
-  const wants = !skip && !closed && Boolean(giftLive || rouletteLive);
+  const wants = !skip && !closed && Boolean(giftLive);
   const canShow = useAutoSurfaceSlot('friends-promo', wants);
 
   // Сутки жжём в момент, когда промо РЕАЛЬНО на экране, а не когда его закрыли:
@@ -80,7 +77,6 @@ export function FriendsPromoAutoSurface() {
       onClose={() => setClosed(true)}
       onInvite={invite}
       gift={giftLive}
-      roulette={rouletteLive}
     />
   );
 }

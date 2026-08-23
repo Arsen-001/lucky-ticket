@@ -93,15 +93,27 @@ describe('промо «позови друзей»', () => {
   it('показанное сегодня не дёргает сервер', () => {
     expect(source).toMatch(/const skip = shownToday !== false \|\| !me\?\.hasSeenTour/);
     expect(source).toMatch(/useGetPreLaunchGiftQuery\(undefined, \{ skip \}\)/);
-    expect(source).toMatch(/useGetRouletteQuery\(undefined, \{ skip \}\)/);
   });
 
   it('нечего показать — модалки нет', () => {
     // `available: false` значит «выключено или уже получено» — рисовать пустую
     // лестницу нельзя, её некому оплатить.
     expect(source).toMatch(/gift && gift\.available !== false \? gift : undefined/);
-    expect(source).toMatch(/roulette\?\.available \? roulette : undefined/);
-    expect(source).toMatch(/Boolean\(giftLive \|\| rouletteLive\)/);
+    expect(source).toMatch(/Boolean\(giftLive\)/);
+  });
+
+  it('обещание одно — рулетки в промо нет', () => {
+    // Убрана 23.08.2026 (решение пользователя): барабан живёт на экране друзей,
+    // а промо с двумя механиками сразу заставляет выбирать там, где надо просто
+    // позвать друга.
+    const modal = read(
+      'src/components/pages/out-tabs/drawer/invite-friends/promo/InviteFriendsPromoModal.tsx'
+    );
+
+    // Проверяются связи кода, а не слово: в комментарии модалки рулетка названа
+    // — там записано, почему её здесь нет.
+    expect(source).not.toMatch(/useGetRouletteQuery|roulette\.api/);
+    expect(modal).not.toMatch(/roulette\.api|RouletteState|InviteFriendsPromoPrizes/);
   });
 
   it('забрать награду отсюда нельзя — только уйти на экран друзей', () => {
@@ -111,7 +123,7 @@ describe('промо «позови друзей»', () => {
       'src/components/pages/out-tabs/drawer/invite-friends/promo/InviteFriendsPromoModal.tsx'
     );
 
-    expect(modal).not.toMatch(/useClaimPreLaunchGiftMutation|useSpinRouletteMutation/);
+    expect(modal).not.toMatch(/useClaimPreLaunchGiftMutation/);
     expect(source).toMatch(/router\.push\(routes\.inviteFriends\)/);
   });
 });

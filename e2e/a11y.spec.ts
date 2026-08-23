@@ -74,8 +74,14 @@ async function dismissAutoDialogs(page: Page) {
   // асинхронная, и следующая модалка встаёт уже после того, как предыдущая
   // ушла. Код выходил по первому же пустому взгляду и оставлял хвост очереди
   // на экране — тест мерил его как «зоны проглочены».
+  // Модалка подарков закрывается единственной кнопкой «Забрать», а та уводит
+  // на главную; онбординг в моке не запоминается, и возврат поднимает очередь
+  // заново. Поэтому возврат разрешён дважды, и на весь разбор — бюджет: без
+  // него цикл честно крутился до 90-секундного таймаута теста.
+  const DEADLINE = Date.now() + 12_000;
+  let returns = 0;
   let empty = 0;
-  for (let i = 0; i < 16; i++) {
+  for (let i = 0; i < 16 && Date.now() < DEADLINE; i++) {
     const dialog = await nextDialog();
     if (!dialog) {
       if (++empty >= 2) break;
@@ -106,10 +112,39 @@ async function dismissAutoDialogs(page: Page) {
     // Let the dismissal animation finish before looking for the next one.
     await page.waitForTimeout(250);
     if (page.url() !== measuring) {
+      if (++returns > 2) break;
       await page.goto(measuring, { waitUntil: 'domcontentloaded' });
       await page.waitForTimeout(400);
     }
   }
+}
+
+/**
+ * Что делать с модалками, которые не закрываются.
+ *
+ * Очередь в моке бесконечна по устройству: единственная кнопка окна подарков —
+ * «Забрать», и она уводит на главную; онбординг мок не запоминает, поэтому
+ * возврат на измеряемый экран поднимает всю очередь заново. Разбор честно
+ * пробуется первым — он и проверяет, что кнопки закрытия работают, — но если
+ * после бюджета что-то осталось, оставшееся ПРЯЧЕТСЯ.
+ *
+ * Это не заметание под ковёр: здесь меряются тап-зоны САМОГО ЭКРАНА, а
+ * поведение оверлеев проверяют overlay-touch и modal-close-collision. Без
+ * этого шага четыре вкладки из пяти отчитывались «все зоны проглочены» —
+ * то есть тест мерил не экран, а подложку чужого окна.
+ */
+async function hideStuckDialogs(page: Page) {
+  return page.evaluate(() => {
+    const stuck: string[] = [];
+    for (const dialog of document.querySelectorAll('[role="dialog"]')) {
+      const shell = dialog.parentElement;
+      if (!shell || getComputedStyle(dialog).display === 'none') continue;
+      stuck.push((dialog.textContent ?? '').trim().slice(0, 40));
+      shell.style.visibility = 'hidden';
+      shell.style.pointerEvents = 'none';
+    }
+    return stuck;
+  });
 }
 
 async function openScreen(page: Page, route: string) {
@@ -117,6 +152,7 @@ async function openScreen(page: Page, route: string) {
   await expect(page.getByTestId('app-shell')).toBeAttached({ timeout: 20_000 });
   await page.waitForTimeout(1500);
   await dismissAutoDialogs(page);
+  await hideStuckDialogs(page);
 }
 
 for (const route of STATIC_ROUTES) {
@@ -149,12 +185,10 @@ for (const route of STATIC_ROUTES) {
 
   test(`tap-target controls on ${route} own their 44px zone`, async ({ page }) => {
     await openScreen(page, route);
-    // Очередь модалок асинхронная: вызов на дуэль в моке приезжает секундами
-    // позже остальных и встаёт уже после того, как экран разобран. Второй
-    // проход перед самым замером стоит пару секунд тишины и снимает гонку —
-    // без него треть прогонов мерила экран под модалкой и объявляла
-    // проглоченными ВСЕ зоны разом.
-    await dismissAutoDialogs(page);
+    // Вызов на дуэль в моке приезжает опросом — секундами позже прочих, уже
+    // после разбора очереди. Ещё один взгляд прямо перед замером снимает эту
+    // гонку.
+    await hideStuckDialogs(page);
 
     const short = await page.evaluate(async () => {
       // 44/2 minus a pixel, so every sample sits inside the required square.

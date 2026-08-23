@@ -3,15 +3,9 @@
 import { Button } from '@/components/shared/buttons/Button';
 import { Modal } from '@/components/shared/modals/Modal';
 import { useAppTranslations } from '@/hooks/useAppTranslations';
-import { pickGrandPrize, rouletteShowcase } from '@/utils/global/roulette.utils';
 import type { PreLaunchGiftState } from '@/types/interfaces/referral.interfaces';
-import type { RouletteState } from '@/types/interfaces/roulette.interfaces';
 import { InviteFriendsPromoGrandPrize } from './InviteFriendsPromoGrandPrize';
 import { InviteFriendsPromoLadder } from './InviteFriendsPromoLadder';
-import { InviteFriendsPromoPrizes } from './InviteFriendsPromoPrizes';
-
-/** Сколько призов помещается в ленту, прежде чем она перестаёт читаться. */
-const SHOWCASE_LIMIT = 8;
 
 /** Чем рисуем подарок, пока сервер не сказал свой. @see GiftLadder */
 const FALLBACK_GIFT_EMOJI = '💝';
@@ -19,17 +13,14 @@ const FALLBACK_GIFT_EMOJI = '💝';
 export interface InviteFriendsPromoModalProps {
   open: boolean;
   onClose: () => void;
-  /** Увести на экран друзей — там и лестница, и барабан целиком. */
+  /** Увести на экран друзей — там лестница целиком и кнопка заявки. */
   onInvite: () => void;
-  /** Живое состояние подарка за друзей; undefined — событие не показываем. */
+  /** Живое состояние подарка за друзей; undefined — промо не показываем. */
   gift?: PreLaunchGiftState;
-  /** Живое состояние рулетки; undefined — барабан не показываем. */
-  roulette?: RouletteState;
 }
 
 /**
- * «Пока идёт тест — зови друзей»: что игрок получит за приглашения, одним
- * экраном.
+ * «Пока идёт тест — зови друзей»: что игрок получит за приглашения.
  *
  * Всплывает сама, после очереди результатов турниров: человек, который только
  * что забрал награду, — единственный, кто в этот момент точно знает, чего стоит
@@ -37,42 +28,40 @@ export interface InviteFriendsPromoModalProps {
  *
  * Три правила:
  *
- *  1. **Ничего не обещаем от себя.** Порог, число друзей, таблица призов и цена
- *     спина — всё это настройки панели, и модалка рисует ровно то, что пришло с
- *     сервера. Блок, которого сервер не дал, не рисуется вовсе.
- *  2. **Забрать отсюда нельзя.** Ни заявки, ни спина: обе кнопки ведут на экран
- *     друзей, где у каждой механики свой полный вид с отказами сервера словами.
- *     Промо, которое само подаёт заявку, обязано и объяснять отказ — а места на
- *     это здесь нет.
- *  3. **Главный приз — картинкой.** @see InviteFriendsPromoGrandPrize
+ *  1. **Одно обещание на модалку.** Подарок бота за собранную лестницу — и всё.
+ *     Рулетка отсюда убрана 23.08.2026 (решение пользователя): барабан живёт на
+ *     экране друзей, а промо с двумя механиками сразу заставляет выбирать там,
+ *     где надо просто позвать друга. @see FriendsRouletteCard
+ *  2. **Ничего не обещаем от себя.** Порог и число засчитанных друзей — с
+ *     сервера, оба правятся в панели. Подарка нет — модалки не существует.
+ *  3. **Забрать отсюда нельзя.** Кнопка ведёт на экран друзей, где у заявки
+ *     свой полный вид с отказами сервера словами. Промо, которое само подаёт
+ *     заявку, обязано и объяснять отказ — а места на это здесь нет.
  */
 export function InviteFriendsPromoModal({
   open,
   onClose,
   onInvite,
   gift,
-  roulette,
 }: InviteFriendsPromoModalProps) {
   const t = useAppTranslations();
 
-  const slots = roulette?.slots ?? [];
-  const grand = pickGrandPrize(slots);
-  const showcase = rouletteShowcase(slots, SHOWCASE_LIMIT);
   const giftEmoji = gift?.giftEmoji || FALLBACK_GIFT_EMOJI;
-
-  // Рулетки нет — главным призом становится сам подарок бота: без него шапка
-  // осталась бы пустой рамкой, а подарок Telegram и есть то, ради чего зовут.
-  const hero = grand
-    ? { emoji: grand.emoji, title: grand.title }
-    : gift
-      ? { emoji: giftEmoji, title: t('friends gift title') }
-      : null;
 
   return (
     <Modal open={open} onClose={onClose} hideCloseButton label={t('invite promo title')}>
       <div className="bg-purple-gradient relative mx-auto w-full max-w-[360px] overflow-hidden rounded-2xl">
         <div className="relative flex flex-col items-center gap-3 px-5 pb-5 pt-6">
-          {hero && <InviteFriendsPromoGrandPrize emoji={hero.emoji} title={hero.title} />}
+          {gift && (
+            <InviteFriendsPromoGrandPrize
+              emoji={giftEmoji}
+              // Стикер подарка, когда он пришёл: `sticker.emoji` подарок НЕ
+              // опознаёт (мишка Telegram сообщает про себя '🎂'), поэтому
+              // картинка всегда честнее эмодзи. @see PreLaunchGiftState
+              imageSrc={gift.giftImage ?? undefined}
+              title={t('friends gift title')}
+            />
+          )}
 
           <div className="flex flex-col items-center gap-1">
             <h2 className="text-center text-xl font-extrabold leading-tight">
@@ -88,14 +77,6 @@ export function InviteFriendsPromoModal({
               counted={gift.counted ?? 0}
               required={gift.required}
               giftEmoji={giftEmoji}
-            />
-          )}
-
-          {roulette && (
-            <InviteFriendsPromoPrizes
-              slots={showcase}
-              friendsPerSpin={roulette.friendsPerSpin}
-              totalCount={slots.length}
             />
           )}
 
