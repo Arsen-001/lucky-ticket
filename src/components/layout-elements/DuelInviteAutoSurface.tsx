@@ -4,8 +4,7 @@ import { usePathname, useRouter } from 'next/navigation';
 import { useState } from 'react';
 import { Button } from '@/components/shared/buttons/Button';
 import { Modal } from '@/components/shared/modals/Modal';
-import { DuelPlayerAvatar } from '@/components/pages/out-tabs/tabs-extra/duel/DuelPlayerAvatar';
-import { DuelToken } from '@/components/pages/out-tabs/tabs-extra/duel/DuelToken';
+import { DuelCallCard } from '@/components/pages/out-tabs/tabs-extra/duel/DuelCallCard';
 import {
   useDeclineDuelInviteMutation,
   useGetDuelInvitesQuery,
@@ -17,6 +16,7 @@ import { useSpendFailure } from '@/hooks/useSpendFailure';
 import { useAppTranslations } from '@/hooks/useAppTranslations';
 import { useInFlightLock } from '@/hooks/useInFlightLock';
 import { useToast } from '@/hooks/useToast';
+import '@/styles/components/duel.css';
 
 /**
  * Вызов живёт три минуты, поэтому опрос частый — но фоновый, не игровой цикл.
@@ -126,24 +126,8 @@ export function DuelInviteAutoSurface() {
         }
       >
         {invite && (
-          <div className="bg-background flex w-full flex-col items-center gap-3 rounded-2xl border border-white/10 p-5 text-center shadow-[0_24px_60px_rgba(0,0,0,0.55)]">
-            <DuelToken move="TICKET" size={92} />
-
-            <div className="flex flex-col items-center gap-1.5">
-              <DuelPlayerAvatar
-                name={invite.fromName}
-                avatarUrl={invite.fromAvatarUrl || undefined}
-                size={44}
-              />
-              <span className="text-[17px] font-extrabold">
-                {invite.rematch
-                  ? t('duel invite rematch title', { name: invite.fromName })
-                  : t('duel invite title', { name: invite.fromName })}
-              </span>
-              <span className="text-pink-secondary text-[12px] leading-snug">
-                {t('duel invite body', { count: invite.stake })}
-              </span>
-            </div>
+          <div className="duel-rim bg-background flex w-full flex-col items-center gap-3 rounded-[20px] p-5 text-center shadow-[0_30px_70px_rgba(0,0,0,0.62)]">
+            <DuelCallCard invite={invite} />
 
             <div className="mt-1 flex w-full flex-col gap-2">
               <Button className="h-13" loading={lock.locked.has(invite.id)} onClick={accept}>

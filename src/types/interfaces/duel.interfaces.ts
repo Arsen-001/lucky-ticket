@@ -142,6 +142,13 @@ export interface DuelInvite {
   readonly id: string;
   readonly duelId: string;
   readonly stake: number;
+  /**
+   * Лига стола, в который зовут.
+   *
+   * Без неё окно вызова рисовало бы бронзовый билет над золотой ставкой:
+   * «2» за золотым столом и «2» за бронзовым — разные деньги.
+   */
+  readonly tier: DuelTier;
   readonly fromName: string;
   readonly fromAvatarUrl: string;
   /** Вызов — это реванш в серии: зовём словами «предлагает реванш». */

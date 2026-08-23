@@ -288,6 +288,7 @@ export const duelMock = {
       id: 'invite-1',
       duelId: lobbies[0]?.id ?? 'duel-mock',
       stake: 2,
+      tier: 'bronze' as const,
       fromName: 'Aram',
       fromAvatarUrl: '',
       rematch: false,
