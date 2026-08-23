@@ -29,6 +29,10 @@ export function AdBuyMoreCard({ extra, onOpen, className }: AdBuyMoreCardProps) 
   // buyable there, so the null case is spelled out rather than coerced.
   const soldOut = extra.remaining !== null && extra.remaining <= 0;
   // Absent on an older backend — the card then reads exactly as it used to.
+  //
+  // The LC branch, because LC is the currency the modal opens on; a Stars
+  // purchase is paid from its own ladder and the modal shows that as soon as
+  // the player switches.
   const nextReward = extra.nextRewards?.[0];
 
   return (
