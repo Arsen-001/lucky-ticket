@@ -28,7 +28,7 @@ export function DuelTierPicker({ value, balances, onChange, className }: DuelTie
   const t = useAppTranslations();
 
   return (
-    <div className={twMerge('grid grid-cols-5 gap-2', className)}>
+    <div className={twMerge('grid grid-cols-[repeat(5,minmax(0,1fr))] gap-2', className)}>
       {DUEL_TIERS.map(tier => {
         const count = balances[tier] ?? 0;
         const empty = count < 1;
@@ -56,7 +56,7 @@ export function DuelTierPicker({ value, balances, onChange, className }: DuelTie
             >
               {count}
             </span>
-            <span className="text-pink-secondary text-[8px] tracking-[0.08em] uppercase">
+            <span className="text-pink-secondary max-w-full truncate text-[8px] tracking-[0.08em] uppercase">
               {t(tier)}
             </span>
           </button>

@@ -8,6 +8,13 @@ export interface DuelReadyMarkProps {
   /** Подпись под знаком: «подтвердил» / «ждём вас». */
   caption: string;
   size?: number;
+  /**
+   * Сторона соперника: подпись встаёт НАД знаком.
+   *
+   * Стол зеркален — сверху «имя · подпись · знак», снизу «знак · подпись ·
+   * имя», и знаки обоих оказываются одинаково близко к табличке между ними.
+   */
+  captionFirst?: boolean;
   className?: string;
 }
 
@@ -20,11 +27,23 @@ export interface DuelReadyMarkProps {
  * пустой пунктирный, дышащий кольцами. Промахнуться мимо своего состояния
  * невозможно.
  */
-export function DuelReadyMark({ ready, caption, size = 132, className }: DuelReadyMarkProps) {
+export function DuelReadyMark({
+  ready,
+  caption,
+  size = 132,
+  captionFirst = false,
+  className,
+}: DuelReadyMarkProps) {
   return (
     // Подпись стоит в потоке, а не absolute: прижатая к кругу отрицательным
     // отступом, она налезала на имя игрока под собой.
-    <span className={twMerge('flex flex-col items-center gap-2.5', className)}>
+    <span
+      className={twMerge(
+        'flex flex-col items-center gap-2.5',
+        captionFirst && 'flex-col-reverse',
+        className
+      )}
+    >
       <span
         style={{ width: size, height: size }}
         className={twMerge(

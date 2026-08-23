@@ -10,6 +10,7 @@ import { duelJoinFailure } from '@/utils/global/duel.utils';
 import { useAppTranslations } from '@/hooks/useAppTranslations';
 import { useFeature } from '@/hooks/useFeature';
 import { useTelegramSurfaceColor } from '@/hooks/useTelegramSurfaceColor';
+import { useDuelFit } from '@/hooks/useDuelFit';
 import { DuelLobbies } from './DuelLobbies';
 import { DuelArena } from './DuelArena';
 import '@/styles/components/duel.css';
@@ -28,6 +29,8 @@ export function DuelScreen() {
   // почти чёрной игрой висела светлая полоса приложения, и шов был виден
   // раньше самой игры. Уходим с экрана — цвет возвращается.
   useTelegramSurfaceColor('#0b0914');
+  // Весь экран — макет 390×782, который масштабируется под телефон целиком.
+  const fitRef = useDuelFit<HTMLDivElement>();
   const [duelId, setDuelId] = useState<string | null>(null);
   // Лобби открыли кнопкой «играть с другом» — список друзей показываем сразу.
   const [inviteOnEnter, setInviteOnEnter] = useState(false);
@@ -101,36 +104,51 @@ export function DuelScreen() {
   return (
     // Ровно высота прокручиваемой области, а не «не меньше»: иначе нижняя
     // кнопка встаёт по концу контента и под ней остаётся пустое поле.
-    <div className="duel-lamp flex h-full flex-col items-stretch pb-2">
+    // Раздел вне вкладок кладёт содержимое в поля (`pt-3 px-5` и нижний отступ
+    // под инсет). Макету дуэли нужна ВСЯ площадь: множитель считается от неё, и
+    // сорок пикселей полей по бокам стоили высоты — на 390/430 под шапкой
+    // оставался пустой карман. Поля возвращаются внутрь макета.
+    <div
+      className="duel-lamp -mx-5 -mt-3 flex flex-col items-stretch"
+      style={{
+        marginBottom: 'calc(-2.5rem - var(--tg-inset-bottom))',
+        height: 'calc(100% + 0.75rem + 2.5rem + var(--tg-inset-bottom))',
+      }}
+    >
       {spend.modals}
-      {duelId ? (
-        <DuelArena
-          duelId={duelId}
-          tickets={lobbies?.tickets ?? 0}
-          readySeconds={lobbies?.readySeconds}
-          balances={lobbies?.balances}
-          openInvite={inviteOnEnter}
-          onLeave={() => {
-            setDuelId(null);
-            setInviteOnEnter(false);
-          }}
-          onRematch={id => {
-            setInviteOnEnter(false);
-            setDuelId(id);
-          }}
-        />
-      ) : (
-        <DuelLobbies
-          inviteUserId={inviteUserId}
-          onEnter={(id, options) => {
-            setInviteOnEnter(Boolean(options?.invite));
-            setDuelId(id);
-            // Адрес отработал — убираем параметры, иначе возврат к списку
-            // снова открыл бы выбор ставки, а вход по ссылке — повторный join.
-            if (inviteUserId || invitedLobbyId) router.replace(routes.games.duel);
-          }}
-        />
-      )}
+      {/* Место под макет: сам макет лежит в нём по центру и масштабируется. */}
+      <div ref={fitRef} className="duel-fit-area">
+        <div className="duel-fit">
+          {duelId ? (
+            <DuelArena
+              duelId={duelId}
+              tickets={lobbies?.tickets ?? 0}
+              readySeconds={lobbies?.readySeconds}
+              balances={lobbies?.balances}
+              openInvite={inviteOnEnter}
+              onLeave={() => {
+                setDuelId(null);
+                setInviteOnEnter(false);
+              }}
+              onRematch={id => {
+                setInviteOnEnter(false);
+                setDuelId(id);
+              }}
+            />
+          ) : (
+            <DuelLobbies
+              inviteUserId={inviteUserId}
+              onEnter={(id, options) => {
+                setInviteOnEnter(Boolean(options?.invite));
+                setDuelId(id);
+                // Адрес отработал — убираем параметры, иначе возврат к списку
+                // снова открыл бы выбор ставки, а вход по ссылке — повторный join.
+                if (inviteUserId || invitedLobbyId) router.replace(routes.games.duel);
+              }}
+            />
+          )}
+        </div>
+      </div>
     </div>
   );
 }

@@ -33,7 +33,10 @@ export function DuelHand({ thinking, revealed, className }: DuelHandProps) {
           <span
             key={move}
             className={twMerge(
-              'flex-center h-[52px] rounded-xl border transition-all duration-300',
+              // Высота совпадает с кнопкой хода на моей стороне: стороны стола
+              // обязаны быть зеркальны, иначе табличка между ними стоит не
+              // посередине (замер: 55 px сверху против 30 снизу).
+              'flex-center h-[76px] rounded-xl border transition-all duration-300',
               chosen
                 ? 'border-gold/65 bg-gold/12'
                 : 'border-electric-purple/32 bg-[rgba(8,6,20,0.5)]'

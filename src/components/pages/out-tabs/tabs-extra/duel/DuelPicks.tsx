@@ -15,6 +15,7 @@ export interface DuelPicksProps {
   chosen: DuelMove | null;
   disabled?: boolean;
   onPick: (move: DuelMove) => void;
+  className?: string;
 }
 
 /**
@@ -23,11 +24,11 @@ export interface DuelPicksProps {
  * Панель поднимается снизу в начале раунда: движение говорит «твой ход»
  * раньше, чем прочитана подпись.
  */
-export function DuelPicks({ chosen, disabled, onPick }: DuelPicksProps) {
+export function DuelPicks({ chosen, disabled, onPick, className }: DuelPicksProps) {
   const t = useAppTranslations();
 
   return (
-    <div className="duel-rise grid grid-cols-3 gap-2.5">
+    <div className={twMerge('duel-rise grid grid-cols-3 gap-2.5', className)}>
       {DUEL_MOVES.map(move => (
         <button
           key={move}
@@ -35,7 +36,8 @@ export function DuelPicks({ chosen, disabled, onPick }: DuelPicksProps) {
           disabled={disabled || Boolean(chosen)}
           onClick={() => onPick(move)}
           className={twMerge(
-            'duel-rim flex h-24 flex-col items-center justify-center gap-1 rounded-[14px] p-1.5',
+            // 76 px — столько же, сколько у слота руки соперника: зеркало.
+            'duel-rim flex h-[76px] flex-col items-center justify-center gap-1 rounded-[14px] p-1.5',
             'transition active:scale-95 disabled:opacity-35',
             chosen === move && 'duel-rim-on opacity-100'
           )}
@@ -43,9 +45,9 @@ export function DuelPicks({ chosen, disabled, onPick }: DuelPicksProps) {
           <Image
             src={duelTokenSrc(move)}
             alt=""
-            width={56}
-            height={56}
-            className="h-14 w-14 object-contain drop-shadow-[0_6px_10px_rgba(0,0,0,0.6)]"
+            width={44}
+            height={44}
+            className="h-11 w-11 object-contain drop-shadow-[0_6px_10px_rgba(0,0,0,0.6)]"
           />
           <span
             className={twMerge(

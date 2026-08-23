@@ -341,10 +341,14 @@ export function DuelArena({
       )}
 
       {/* Сукно лежит под всеми тремя блоками разом: руки соперника и мои — по
-          две стороны одного стола, а не два отдельных списка. */}
-      <div className="duel-felt flex flex-1 flex-col">
+          две стороны одного стола, а не два отдельных списка.
+
+          `duel-stage` — сетка «половина · табличка · половина»: половины равны
+          по определению, поэтому табличка стоит ровно посередине, а стороны
+          зеркальны по составу и центрированы каждая в своей половине. */}
+      <div className="duel-felt duel-stage">
         {/* ── сторона соперника ── */}
-        <div className="flex flex-1 flex-col items-center gap-2.5 pt-2">
+        <div className="flex flex-col items-center justify-center gap-2.5">
           <DuelSide
             name={foeName}
             avatarUrl={data.opponent?.avatarUrl || undefined}
@@ -374,7 +378,7 @@ export function DuelArena({
             <DuelReadyMark
               ready={data.foe.ready}
               caption={data.foe.ready ? t('duel ready confirmed') : t('duel foe waiting')}
-              className="my-3"
+              captionFirst
             />
           ) : (
             <DuelToken
@@ -467,24 +471,34 @@ export function DuelArena({
         </div>
 
         {/* ── моя сторона ── */}
-        {/* По центру своей половины, а не прижата ко дну: у соперника сверху
-            лежит ещё и рука, у меня её роль играют кнопки хода — прижатая вниз
-            сторона оставляла между табличкой и жетоном провал в треть экрана. */}
-        <div className="flex flex-1 flex-col items-center justify-center gap-2.5">
+        {/* Зеркало верхней стороны: жетон у таблички, следом рука (у меня это
+            кнопки хода), имя с краю. Раз состав половин одинаковый, обе просто
+            центрируются — и расстояния до таблички и до краёв равны сами. */}
+        <div className="flex flex-col items-center justify-center gap-2.5">
           {readiness ? (
             <DuelReadyMark
               ready={data.me.ready}
               caption={data.me.ready ? t('duel ready confirmed') : t('duel ready waiting you')}
-              className="my-3"
             />
           ) : (
             <DuelToken
               move={myMove}
-              size={124}
+              size={118}
               state={myState}
               className={revealed ? 'duel-drop' : ''}
             />
           )}
+          {/* Рука игрока стоит ЗДЕСЬ, а не в нижнем блоке: она зеркалит руку
+              соперника сверху, и стол читается как стол. */}
+          {playing && (
+            <DuelPicks
+              chosen={myMove}
+              disabled={lock.locked.size > 0}
+              onPick={handleMove}
+              className="w-full"
+            />
+          )}
+
           <DuelSide
             name={t('duel you')}
             wins={readiness ? null : data.me.wins}
@@ -535,10 +549,6 @@ export function DuelArena({
               {data.me.ready ? t('duel waiting for opponent') : t('duel i am ready')}
             </Button>
           </>
-        )}
-
-        {playing && (
-          <DuelPicks chosen={myMove} disabled={lock.locked.size > 0} onPick={handleMove} />
         )}
 
         {finished && (

@@ -35,7 +35,7 @@ export function DuelStakePicker({
   className,
 }: DuelStakePickerProps) {
   return (
-    <div className={twMerge('grid grid-cols-5 gap-2', className)}>
+    <div className={twMerge('grid grid-cols-[repeat(5,minmax(0,1fr))] gap-2', className)}>
       {Array.from({ length: max - min + 1 }, (_, i) => i + min).map(stake => (
         <button
           key={stake}

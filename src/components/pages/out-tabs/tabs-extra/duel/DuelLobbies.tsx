@@ -220,39 +220,43 @@ export function DuelLobbies({ onEnter, inviteUserId }: DuelLobbiesProps) {
           onInfo={data ? () => setRulesOpen(true) : undefined}
         />
 
-        <span className="text-pink-secondary text-[10px] font-black tracking-[0.16em] uppercase">
-          {t('duel choose tier')}
-        </span>
+        {/* Тело прокручивается, кнопки приколоты: на низком экране (320×568)
+            «Открыть лобби» уезжало за край на 111 px. */}
+        <div className="scrollbar-hidden flex min-h-0 flex-1 flex-col gap-3 overflow-y-auto">
+          <span className="text-pink-secondary text-[10px] font-black tracking-[0.16em] uppercase">
+            {t('duel choose tier')}
+          </span>
 
-        <DuelTierPicker
-          value={tier}
-          balances={balances ?? { bronze: tickets, silver: 0, gold: 0, platinum: 0, diamond: 0 }}
-          onChange={next => {
-            setTier(next);
-            // Ставка не должна пережить смену лиги: пять золотых и пять
-            // бронзовых — разные деньги, и потолок у них свой.
-            setStake(Math.min(stake, Math.max(min, balances?.[next] ?? min)));
-          }}
-        />
+          <DuelTierPicker
+            value={tier}
+            balances={balances ?? { bronze: tickets, silver: 0, gold: 0, platinum: 0, diamond: 0 }}
+            onChange={next => {
+              setTier(next);
+              // Ставка не должна пережить смену лиги: пять золотых и пять
+              // бронзовых — разные деньги, и потолок у них свой.
+              setStake(Math.min(stake, Math.max(min, balances?.[next] ?? min)));
+            }}
+          />
 
-        <span className="text-pink-secondary text-[10px] font-black tracking-[0.16em] uppercase">
-          {t('duel choose stake')}
-        </span>
+          <span className="text-pink-secondary text-[10px] font-black tracking-[0.16em] uppercase">
+            {t('duel choose stake')}
+          </span>
 
-        <DuelStakePicker
-          value={stake}
-          min={min}
-          max={max}
-          tickets={tickets}
-          tier={tier}
-          onChange={setStake}
-        />
+          <DuelStakePicker
+            value={stake}
+            min={min}
+            max={max}
+            tickets={tickets}
+            tier={tier}
+            onChange={setStake}
+          />
 
-        <p className="text-disabled text-xs leading-relaxed">{t('duel stake note')}</p>
+          <p className="text-disabled text-xs leading-relaxed">{t('duel stake note')}</p>
 
-        <DuelPotPreview stake={stake} tier={tier} className="flex-1" />
+          <DuelPotPreview stake={stake} tier={tier} className="flex-1" />
+        </div>
 
-        <div className="flex flex-col gap-2">
+        <div className="flex flex-none flex-col gap-2">
           <Button
             className="h-14"
             loading={creating === 'open'}
@@ -377,7 +381,7 @@ export function DuelLobbies({ onEnter, inviteUserId }: DuelLobbiesProps) {
         </p>
       )}
 
-      <div className="scrollbar-hidden flex flex-1 flex-col gap-2.5 overflow-y-auto">
+      <div className="scrollbar-hidden flex min-h-0 flex-1 flex-col gap-2.5 overflow-y-auto">
         {shown.map(lobby => (
           <DuelLobbyRow
             key={lobby.id}
@@ -391,7 +395,7 @@ export function DuelLobbies({ onEnter, inviteUserId }: DuelLobbiesProps) {
       {spend.modals}
       {rules}
 
-      <div className="flex flex-col gap-2 pt-1">
+      <div className="flex flex-none flex-col gap-2 pt-1">
         {!data?.own && (
           <p className="text-pink-secondary px-1 text-[11px] leading-snug">
             {t('duel lobby hint')}
