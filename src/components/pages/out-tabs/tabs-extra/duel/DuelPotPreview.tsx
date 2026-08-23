@@ -22,6 +22,9 @@ const STANDING_FROM = 4;
  * подписи, а стопка, которая растёт под рукой. До трёх они лежат веером, с
  * четырёх — встают в ряд: лёжа четвёртый и пятый уже не помещаются в колонку,
  * а мельчить билет нельзя, по нему узнают лигу.
+ *
+ * Стопка стоит на той же подставке, что камень и ножницы в матче: билет — это
+ * такая же фигура на столе, а не картинка рядом с текстом.
  */
 export function DuelPotPreview({ stake, tier, className }: DuelPotPreviewProps) {
   const t = useAppTranslations();
@@ -33,7 +36,11 @@ export function DuelPotPreview({ stake, tier, className }: DuelPotPreviewProps) 
 
   return (
     <div className={twMerge('flex flex-col items-center justify-center gap-3', className)}>
-      <span aria-hidden className="flex items-center justify-center">
+      {/* Та же подставка, на которой в матче стоят камень, билет и ножницы
+          (`duel-pedestal`): пятно света под предметом и низкая тень. Одно на
+          всю стопку, а не под каждым билетом — иначе пять пятен читаются как
+          пять луж, а лампа над столом одна. */}
+      <span aria-hidden className="duel-pedestal-stack flex items-center justify-center pb-1.5">
         {Array.from({ length: count }, (_, index) => {
           const tilt = (index - middle) * (standing ? 6 : 9);
 
