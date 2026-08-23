@@ -89,22 +89,47 @@
   z-index: 0;
   opacity: 0.05;
   background-repeat: no-repeat;
-  background-image:
-    url('/assets/icons/duel/rock.webp'), url('/assets/icons/duel/scissors.webp'),
-    url('/assets/icons/tickets/bronze-ticket.webp');
-  background-size: 210px, 230px, 250px;
+  background-image: url('/assets/icons/duel/rock.webp'), url('/assets/icons/duel/scissors.webp');
+  background-size: 210px, 230px;
   background-position:
     -62px 68%,
-    calc(100% + 66px) 20%,
-    50% 112%;
+    calc(100% + 66px) 20%;
+}
+
+/**
+ * Третий знак — билет, и он лежит на столе по диагонали МЕЖДУ камнем и
+ * ножницами.
+ *
+ * Своим слоем, а не третьим фоном: фоновую картинку нельзя повернуть, а знак
+ * стоит под 45° — по той же диагонали, на концах которой лежат две другие
+ * фигуры. Раньше билет стоял в общем фоне на `50% 112%`, то есть целиком за
+ * нижним краем экрана: камень и ножницы читались, а третьей фигуры игры не
+ * было видно вовсе.
+ */
+.duel-marks::after {
+  content: '';
+  position: absolute;
+  left: 52%;
+  top: 52%;
+  width: 300px;
+  height: 156px;
+  margin: -78px 0 0 -150px;
+  pointer-events: none;
+  z-index: 0;
+  opacity: 0.05;
+  background: url('/assets/icons/tickets/bronze-ticket.webp') center / contain no-repeat;
+  transform: rotate(45deg);
 }
 
 .duel-marks-quiet::before {
   opacity: 0.022;
   background-position:
     -92px 76%,
-    calc(100% + 96px) 12%,
-    50% 126%;
+    calc(100% + 96px) 12%;
+}
+
+.duel-marks-quiet::after {
+  opacity: 0.022;
 }
 
 /**
