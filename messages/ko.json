@@ -1355,6 +1355,7 @@
   "purchase error upgrade conflict": "업그레이드가 진행되는 사이 엔진이 바뀌었습니다. 레벨을 새로 고쳤고 청구된 것은 없습니다. 다시 시도해 주세요.",
   "purchase error claim conflict": "이 엔진의 사이클을 방금 다른 요청이 받아갔습니다. 청구된 것은 없으며 화면을 새로 고쳤습니다.",
   "claim already collected": "이미 받았습니다",
+  "claim not ready": "Engine is still running",
   "session expired": "세션이 만료되었습니다",
   "session expired description": "앱이 계정과의 연결을 잃었습니다. 청구된 것은 없습니다 — 다시 시작해 로그인해 주세요.",
   "restart app": "다시 시작",

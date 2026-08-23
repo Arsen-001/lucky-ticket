@@ -105,8 +105,11 @@ describe('claim wiring', () => {
     expect(api.match(/resolveClaimedCount\(data, predicted\) - predicted/g)?.length).toBe(3);
     expect(api).toMatch(/distributeClaimShortfall\(drained, -delta\)/);
     // Each must read the resolved value — `await queryFulfilled` alone (the
-    // pre-fix shape, still correct for the void mutations) discards it.
-    expect(api.match(/const \{ data \} = await queryFulfilled;/g)?.length).toBe(3);
+    // pre-fix shape, still correct for the void mutations) discards it. Four
+    // since 23.08.2026: `complete-cycle` reads the answer too, because the
+    // server now says whether it AGREED the cycle was over (@see
+    // engineElapsedAligned) instead of nodding at every announcement.
+    expect(api.match(/const \{ data \} = await queryFulfilled;/g)?.length).toBe(4);
   });
 
   it('the mock does not invent a claimed count it cannot know', () => {
@@ -116,8 +119,11 @@ describe('claim wiring', () => {
 
   it('the response types keep `claimed` optional so the fallback stays reachable', () => {
     const api = read('src/api/engines.api.ts');
-    expect(api).toMatch(/claimEngine:\s*builder\.mutation<\{\s*claimed\?:\s*number\s*\}/);
-    expect(api).toMatch(/claimEnginesForTier:\s*builder\.mutation<\{\s*claimed\?:\s*number\s*\}/);
+    // The claim answers carry the server's own engine state alongside the
+    // count now, so the match stops at `claimed?: number` rather than at the
+    // closing brace. @see EngineSync
+    expect(api).toMatch(/claimEngine:\s*builder\.mutation<\s*\{\s*claimed\?:\s*number/);
+    expect(api).toMatch(/claimEnginesForTier:\s*builder\.mutation<\s*\{\s*claimed\?:\s*number/);
     // instant-claim's mock answers a bare `{}` — a required `claimed` there was
     // a type the fixtures already contradicted.
     expect(api).toMatch(/instantClaimEngine:\s*builder\.mutation<\s*\{\s*claimed\?:\s*number/);

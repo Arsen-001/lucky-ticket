@@ -1355,6 +1355,7 @@
   "purchase error upgrade conflict": "Ҳангоми беҳтаркунӣ муҳаррик тағйир ёфт. Сатҳҳояш нав шуданд — чизе гирифта нашуд, бори дигар кӯшиш кун.",
   "purchase error claim conflict": "Давраи ин муҳаррикро ҳозир дархости дигар гирифт. Чизе гирифта нашуд — экран нав шуд.",
   "claim already collected": "Аллакай гирифта шудааст",
+  "claim not ready": "Engine is still running",
   "session expired": "Ҷаласа ба охир расид",
   "session expired description": "Барнома алоқаро бо ҳисобат гум кард. Чизе гирифта нашуд — онро аз нав оғоз кун, то дубора ворид шавӣ.",
   "restart app": "Аз нав оғоз кардан",

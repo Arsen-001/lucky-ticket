@@ -37,7 +37,7 @@ import { useAppTranslations } from '@/hooks/useAppTranslations';
 import { useToast } from '@/hooks/useToast';
 import { useInFlightLock } from '@/hooks/useInFlightLock';
 import { useSpendFailure } from '@/hooks/useSpendFailure';
-import { isConflictError } from '@/utils/global/spend-failure.utils';
+import { isConflictError, isNotReadyError } from '@/utils/global/spend-failure.utils';
 import { useEngineSpeedAvatarBoostPct } from '@/hooks/useEngineSpeedAvatarBoostPct';
 import { useTestBadgeCapacityTickets } from '@/hooks/useTestBadgeCapacityTickets';
 import { useTestBadgeSpeedBoostPct } from '@/hooks/useTestBadgeSpeedBoostPct';
@@ -52,7 +52,7 @@ import '@/styles/components/home-engines-slider.css';
 import {
   effectiveCycleSeconds,
   engineCapacity,
-  engineElapsedSeconds,
+  engineElapsedAligned,
   maxBoostLevel,
   promoteEngineIfMaxed,
 } from '@/utils/global/ticket-engine.utils';
@@ -277,7 +277,10 @@ export function HomeEnginesSlider({ className }: ClassNameProps) {
           elapsedNext[engine.id] = cycle;
           continue;
         }
-        const elapsed = engineElapsedSeconds(engine);
+        // Never past what the server still says is left: the button used to
+        // appear on this screen's own arithmetic alone, and the tap behind it
+        // came back «Не удалось забрать награду». @see engineElapsedAligned
+        const elapsed = engineElapsedAligned(engine, cycle);
         elapsedNext[engine.id] = elapsed;
         if (elapsed >= cycle) {
           readyCapacity[engine.id] = engineCapacity(engine, {
@@ -412,6 +415,11 @@ export function HomeEnginesSlider({ className }: ClassNameProps) {
         // collected the cycle, and `engines.api` has already asked for the
         // server's state.
         if (isConflictError(error)) toast.info(t('claim already collected'));
+        // Neither is a cycle that simply has seconds left: this screen offered
+        // the collect early, and `engines.api` has already taken the server's
+        // countdown from the refusal — so the cube goes back to counting down
+        // instead of accusing the server of losing a reward.
+        else if (isNotReadyError(error)) toast.info(t('claim not ready'));
         else toast.error(t('claim failed'));
       })
       .finally(() => claimLock.release(engineId));
@@ -438,7 +446,7 @@ export function HomeEnginesSlider({ className }: ClassNameProps) {
       badgeCapacityTickets: badgeCapacity,
       tables,
     });
-    const elapsed = elapsedByEngine[engine.id] ?? engineElapsedSeconds(engine);
+    const elapsed = elapsedByEngine[engine.id] ?? engineElapsedAligned(engine, cycle);
     const remaining = Math.max(0, cycle - elapsed);
     const cost = Math.max(1, Math.ceil(remaining / 3600));
     setInstantClaimConfirm({ engineId, cost });

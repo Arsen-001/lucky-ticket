@@ -1355,6 +1355,7 @@
   "purchase error upgrade conflict": "The engine changed while the upgrade was in flight. Its levels are refreshed — nothing was charged, try again.",
   "purchase error claim conflict": "This engine's cycle was just collected by another request. Nothing was charged — the screen is refreshed.",
   "claim already collected": "Already collected",
+  "claim not ready": "Engine is still running",
   "session expired": "Session expired",
   "session expired description": "The app lost its connection to your account. Nothing was charged — restart it to sign in again.",
   "restart app": "Restart",

@@ -1355,6 +1355,7 @@
   "purchase error upgrade conflict": "Жақсарту жүріп жатқанда қозғалтқыш өзгерді. Деңгейлері жаңартылды — ештеңе алынған жоқ, қайта көр.",
   "purchase error claim conflict": "Бұл қозғалтқыштың циклін жаңа ғана басқа сұрау алды. Ештеңе алынған жоқ — экран жаңартылды.",
   "claim already collected": "Әлдеқашан алынған",
+  "claim not ready": "Engine is still running",
   "session expired": "Сессия аяқталды",
   "session expired description": "Қосымша есептік жазбамен байланысын жоғалтты. Ештеңе алынған жоқ — қайта қосып, қайтадан кір.",
   "restart app": "Қайта қосу",

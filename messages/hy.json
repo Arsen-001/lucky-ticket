@@ -1355,6 +1355,7 @@
   "purchase error upgrade conflict": "Շարժիչը փոխվեց, մինչ բարելավումն ընթանում էր։ Մակարդակները թարմացվել են — ոչինչ չի պահվել, փորձիր նորից։",
   "purchase error claim conflict": "Այս շարժիչի ցիկլը հենց նոր վերցրեց մեկ այլ հարցում։ Ոչինչ չի պահվել — էկրանը թարմացվել է։",
   "claim already collected": "Արդեն ստացված է",
+  "claim not ready": "Engine is still running",
   "session expired": "Սեսիան ավարտվել է",
   "session expired description": "Հավելվածը կորցրել է կապը հաշվիդ հետ։ Ոչինչ չի պահվել — վերագործարկիր այն՝ նորից մտնելու համար։",
   "restart app": "Վերագործարկել",

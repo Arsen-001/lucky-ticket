@@ -1355,6 +1355,7 @@
   "purchase error upgrade conflict": "アップグレード処理中にエンジンが変わりました。レベルを更新しました — 請求は発生していません。もう一度お試しください。",
   "purchase error claim conflict": "このエンジンのサイクルは別のリクエストが受け取りました。請求は発生していません — 画面を更新しました。",
   "claim already collected": "すでに受け取り済みです",
+  "claim not ready": "Engine is still running",
   "session expired": "セッションが切れました",
   "session expired description": "アプリがアカウントとの接続を失いました。請求は発生していません — 再起動してログインし直してください。",
   "restart app": "再起動",

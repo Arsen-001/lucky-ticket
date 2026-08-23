@@ -23,7 +23,7 @@ import { PartnersComingSoon } from '@/components/pages/tabs/home/PartnersComingS
 import { useUnlockedTiers } from '@/hooks/useUnlockedTiers';
 import { useInFlightLock } from '@/hooks/useInFlightLock';
 import { useToast } from '@/hooks/useToast';
-import { isConflictError } from '@/utils/global/spend-failure.utils';
+import { isConflictError, isNotReadyError } from '@/utils/global/spend-failure.utils';
 import { useAppTranslations } from '@/hooks/useAppTranslations';
 import { useEngineSpeedAvatarBoostPct } from '@/hooks/useEngineSpeedAvatarBoostPct';
 import { useTestBadgeCapacityTickets } from '@/hooks/useTestBadgeCapacityTickets';
@@ -33,7 +33,7 @@ import { TicketsEnum } from '@/types/enums/ticket.enums';
 import { findActiveBooster, findEquippedChip } from '@/utils/global/inventory.utils';
 import {
   effectiveCycleSeconds,
-  engineElapsedSeconds,
+  engineElapsedAligned,
   resolveClaimedCount,
 } from '@/utils/global/ticket-engine.utils';
 import type { Ticket, TicketType } from '@/types/types/ticket.types';
@@ -118,7 +118,10 @@ export function TicketsTabsView() {
           badgeCapacityTickets: badgeCapacity,
           tables,
         });
-        next[engine.id] = engine.pendingCount > 0 ? cycle : engineElapsedSeconds(engine);
+        // Held to the server's own countdown, not just this device's clock —
+        // the two disagreeing is what put «Забрать» on a running engine.
+        // @see engineElapsedAligned
+        next[engine.id] = engineElapsedAligned(engine, cycle);
         if (engine.pendingCount === 0 && next[engine.id] >= cycle) due.push(engine.id);
       }
 
@@ -199,6 +202,10 @@ export function TicketsTabsView() {
       // collected the cycle, and `engines.api` has already asked for the
       // server's state.
       if (isConflictError(error)) toast.info(t('claim already collected'));
+      // The tier had nothing ready by the server's clock — this screen was
+      // early. `engines.api` has already taken the server's state from the
+      // refusal, so the buttons correct themselves. @see isNotReadyError
+      else if (isNotReadyError(error)) toast.info(t('claim not ready'));
       else toast.error(t('claim failed'));
     } finally {
       claimLock.release(tier);
@@ -217,6 +224,7 @@ export function TicketsTabsView() {
       if (claimed > 0) setClaimedModal({ open: true, tier, count: claimed });
     } catch (error) {
       if (isConflictError(error)) toast.info(t('claim already collected'));
+      else if (isNotReadyError(error)) toast.info(t('claim not ready'));
       else toast.error(t('claim failed'));
     } finally {
       claimLock.release(engineId);

@@ -1355,6 +1355,7 @@
   "purchase error upgrade conflict": "موتور در حین ارتقا تغییر کرد. سطح‌هایش به‌روز شد — چیزی کسر نشد، دوباره تلاش کن.",
   "purchase error claim conflict": "چرخهٔ این موتور را همین حالا درخواستی دیگر گرفت. چیزی کسر نشد — صفحه به‌روز شد.",
   "claim already collected": "قبلاً دریافت شده",
+  "claim not ready": "Engine is still running",
   "session expired": "نشست منقضی شد",
   "session expired description": "برنامه ارتباطش با حسابت را از دست داد. چیزی کسر نشد — دوباره اجرایش کن تا وارد شوی.",
   "restart app": "راه‌اندازی دوباره",

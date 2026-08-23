@@ -1355,6 +1355,7 @@
   "purchase error upgrade conflict": "Yükseltme sürerken motor değişti. Seviyeleri yenilendi — hiçbir ücret alınmadı, tekrar dene.",
   "purchase error claim conflict": "Bu motorun döngüsünü az önce başka bir istek aldı. Hiçbir ücret alınmadı — ekran yenilendi.",
   "claim already collected": "Zaten alındı",
+  "claim not ready": "Engine is still running",
   "session expired": "Oturum doldu",
   "session expired description": "Uygulama hesabınla bağlantısını kaybetti. Hiçbir ücret alınmadı — yeniden başlatıp tekrar giriş yap.",
   "restart app": "Yeniden başlat",

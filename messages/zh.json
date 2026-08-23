@@ -1355,6 +1355,7 @@
   "purchase error upgrade conflict": "升级进行时引擎发生了变化。等级已刷新，没有扣款，请重试。",
   "purchase error claim conflict": "这台引擎的这一轮刚被另一个请求领走了。没有扣款，页面已刷新。",
   "claim already collected": "已经领过了",
+  "claim not ready": "Engine is still running",
   "session expired": "会话已过期",
   "session expired description": "应用与你的账号失去了连接。没有扣款——重新启动后再登录一次。",
   "restart app": "重新启动",

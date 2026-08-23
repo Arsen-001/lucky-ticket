@@ -1355,6 +1355,7 @@
   "purchase error upgrade conflict": "Yaxshilash davom etayotganda dvigatel oʻzgardi. Darajalari yangilandi — hech narsa yechilmadi, qayta urin.",
   "purchase error claim conflict": "Bu dvigatelning siklini hozirgina boshqa soʻrov oldi. Hech narsa yechilmadi — ekran yangilandi.",
   "claim already collected": "Allaqachon olingan",
+  "claim not ready": "Engine is still running",
   "session expired": "Sessiya tugadi",
   "session expired description": "Ilova hisobing bilan aloqani yoʻqotdi. Hech narsa yechilmadi — qayta ishga tushirib, yana kir.",
   "restart app": "Qayta ishga tushirish",

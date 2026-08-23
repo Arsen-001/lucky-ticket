@@ -1355,6 +1355,7 @@
   "purchase error upgrade conflict": "تغيّر المحرك أثناء تنفيذ الترقية. تم تحديث مستوياته — لم يُخصم شيء، حاول مرة أخرى.",
   "purchase error claim conflict": "استلم طلب آخر دورة هذا المحرك للتو. لم يُخصم شيء — تم تحديث الشاشة.",
   "claim already collected": "تم الاستلام بالفعل",
+  "claim not ready": "Engine is still running",
   "session expired": "انتهت الجلسة",
   "session expired description": "فقد التطبيق الاتصال بحسابك. لم يُخصم شيء — أعد تشغيله لتسجيل الدخول من جديد.",
   "restart app": "إعادة التشغيل",

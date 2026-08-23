@@ -1355,6 +1355,7 @@
   "purchase error upgrade conflict": "Le moteur a changé pendant l'amélioration. Ses niveaux sont actualisés — rien n'a été débité, réessaie.",
   "purchase error claim conflict": "Le cycle de ce moteur vient d'être récupéré par une autre requête. Rien n'a été débité — l'écran est actualisé.",
   "claim already collected": "Déjà récupéré",
+  "claim not ready": "Engine is still running",
   "session expired": "Session expirée",
   "session expired description": "L'app a perdu la connexion à ton compte. Rien n'a été débité — redémarre-la pour te reconnecter.",
   "restart app": "Redémarrer",

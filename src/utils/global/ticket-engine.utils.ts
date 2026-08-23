@@ -355,6 +355,58 @@ export const engineElapsedSeconds = (engine: TicketEngine) => {
   return Math.max(0, now.diff(started, 'second'));
 };
 
+/**
+ * Turn the server's «this cycle has N seconds left» into an instant on THIS
+ * device's clock. Stored on the engine as `readyAt`, and what every readiness
+ * check counts down to (@see isEngineReady).
+ */
+export const serverReadyAt = (secondsRemaining: number, nowMs: number = Date.now()) =>
+  new Date(nowMs + Math.max(0, secondsRemaining) * 1000).toISOString();
+
+/**
+ * Seconds of THIS cycle the player has actually earned — counted down to the
+ * remainder the SERVER last stated (`readyAt`), not to this bundle's own
+ * arithmetic.
+ *
+ * The screens tick a countdown of their own (they must: nothing else runs
+ * between requests), computed from the device clock and this bundle's copy of
+ * the boost math. When that ran ahead of the server nobody noticed until the
+ * tap: the bar filled, «Забрать» appeared, `POST engines/claim` answered
+ * «Engine still producing», and the player read «Не удалось забрать награду»
+ * (production, 23.08.2026: 9 of 165 claims and 4 of 9 bulk claims, each one
+ * seconds after a `complete-cycle` the server had quietly ignored).
+ *
+ * It corrects both directions. Running fast is what produced the reports;
+ * running slow is the quieter half — the button withheld from an engine the
+ * server would have paid out on the spot.
+ *
+ * `pendingCount > 0` short-circuits it: the batch is banked on the server
+ * already, so there is nothing left to be early about.
+ */
+export const engineElapsedAligned = (
+  engine: TicketEngine,
+  cycleSeconds: number,
+  nowMs: number = Date.now()
+) => {
+  if (engine.pendingCount > 0) return cycleSeconds;
+  // Nothing from the server yet (mock mode, an older payload): the local
+  // countdown is all there is.
+  if (!engine.readyAt) return engineElapsedSeconds(engine);
+  // Otherwise the remainder is the server's to state and this function's only
+  // job is to tick between requests. Both directions matter: running fast put
+  // «Забрать» on an engine the server then refused, and running slow held the
+  // button back on one it would have paid out.
+  const serverRemaining = (new Date(engine.readyAt).getTime() - nowMs) / 1000;
+  return Math.max(0, cycleSeconds - Math.max(0, serverRemaining));
+};
+
+/** Collectable right now, by the countdown the server last agreed to. */
+export const isEngineReady = (
+  engine: TicketEngine,
+  cycleSeconds: number,
+  nowMs: number = Date.now()
+) => engineElapsedAligned(engine, cycleSeconds, nowMs) >= cycleSeconds;
+
 export const isEngineMaxed = (engine: TicketEngine, tables?: EngineLevelTables) =>
   (engine.speedLevel || 0) >= maxBoostLevel(tables) &&
   (engine.capacityLevel || 0) >= maxBoostLevel(tables);

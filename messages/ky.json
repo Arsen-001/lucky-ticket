@@ -1355,6 +1355,7 @@
   "purchase error upgrade conflict": "Жакшыртуу жүрүп жатканда кыймылдаткыч өзгөрдү. Деңгээлдери жаңыртылды — эч нерсе алынган жок, кайра аракет кыл.",
   "purchase error claim conflict": "Бул кыймылдаткычтын циклин азыр эле башка сурам алды. Эч нерсе алынган жок — экран жаңыртылды.",
   "claim already collected": "Мурун эле алынган",
+  "claim not ready": "Engine is still running",
   "session expired": "Сессия аяктады",
   "session expired description": "Колдонмо аккаунт менен байланышын жоготту. Эч нерсе алынган жок — кайра иштетип, кайрадан кир.",
   "restart app": "Кайра иштетүү",

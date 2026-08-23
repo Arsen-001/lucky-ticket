@@ -22,7 +22,7 @@ import { ConfirmModal } from '@/components/shared/modals/ConfirmModal';
 import { EngineSlotPickerModal } from '@/components/pages/tabs/home/EngineSlotPickerModal';
 import { useAppTranslations } from '@/hooks/useAppTranslations';
 import { useInFlightLock } from '@/hooks/useInFlightLock';
-import { isConflictError } from '@/utils/global/spend-failure.utils';
+import { isConflictError, isNotReadyError } from '@/utils/global/spend-failure.utils';
 import { useToast } from '@/hooks/useToast';
 import { useSpendFailure } from '@/hooks/useSpendFailure';
 import { useEngineSpeedAvatarBoostPct } from '@/hooks/useEngineSpeedAvatarBoostPct';
@@ -40,7 +40,7 @@ import {
   baselineCycleSeconds,
   effectiveCycleSeconds,
   engineCapacity,
-  engineElapsedSeconds,
+  engineElapsedAligned,
   findEngineLocation,
 } from '@/utils/global/ticket-engine.utils';
 import { speedUpgradeLsCost, capacityUpgradeLsCost } from '@/utils/global/economy.utils';
@@ -135,8 +135,11 @@ export function EngineDetails({ id }: EngineDetailsProps) {
         badgeCapacityTickets: badgeCapacity,
         tables,
       });
-      const elapsed =
-        engine.pendingCount > 0 ? cycle : Math.min(cycle, engineElapsedSeconds(engine));
+      // Never ahead of the server's own countdown (@see engineElapsedAligned):
+      // this screen's arithmetic finishing first is what drew «Забрать» over an
+      // engine still running, and turned the tap into «Не удалось забрать
+      // награду».
+      const elapsed = Math.min(cycle, engineElapsedAligned(engine, cycle));
       setElapsedSeconds(elapsed);
       if (engine.pendingCount === 0 && elapsed >= cycle) {
         const now = Date.now();
@@ -259,6 +262,8 @@ export function EngineDetails({ id }: EngineDetailsProps) {
       // second device, a tap that slipped past the lock) collected the cycle,
       // and `engines.api` has already asked for the server's state.
       if (isConflictError(error)) toast.info(t('claim already collected'));
+      // Still producing by the server's clock — not a failure. @see isNotReadyError
+      else if (isNotReadyError(error)) toast.info(t('claim not ready'));
       else toast.error(t('action failed'));
     } finally {
       claimLock.release(engine.id);

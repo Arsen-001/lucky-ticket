@@ -1355,6 +1355,7 @@
   "purchase error upgrade conflict": "Yüksəltmə gedərkən mühərrik dəyişdi. Səviyyələri yeniləndi — heç nə tutulmadı, yenidən cəhd et.",
   "purchase error claim conflict": "Bu mühərrikin dövrünü indicə başqa sorğu aldı. Heç nə tutulmadı — ekran yeniləndi.",
   "claim already collected": "Artıq alınıb",
+  "claim not ready": "Engine is still running",
   "session expired": "Sessiya bitdi",
   "session expired description": "Tətbiq hesabınla əlaqəni itirdi. Heç nə tutulmadı — yenidən başladıb təkrar daxil ol.",
   "restart app": "Yenidən başlat",

@@ -1355,6 +1355,7 @@
   "purchase error upgrade conflict": "Die Engine hat sich während des Upgrades geändert. Ihre Level sind aktualisiert — es wurde nichts abgebucht, versuch es erneut.",
   "purchase error claim conflict": "Der Zyklus dieser Engine wurde gerade von einer anderen Anfrage eingesammelt. Es wurde nichts abgebucht — der Bildschirm ist aktualisiert.",
   "claim already collected": "Bereits eingesammelt",
+  "claim not ready": "Engine is still running",
   "session expired": "Sitzung abgelaufen",
   "session expired description": "Die App hat die Verbindung zu deinem Konto verloren. Es wurde nichts abgebucht — starte sie neu, um dich wieder anzumelden.",
   "restart app": "Neu starten",

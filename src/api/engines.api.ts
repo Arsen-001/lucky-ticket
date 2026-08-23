@@ -12,9 +12,11 @@ import {
   distributeClaimShortfall,
   effectiveCycleSeconds,
   engineCapacity,
+  engineElapsedAligned,
   maxBoostLevel,
   promoteEngineIfMaxed,
   resolveClaimedCount,
+  serverReadyAt,
   type DrainedEngine,
   type EngineLevelTables,
 } from '@/utils/global/ticket-engine.utils';
@@ -25,8 +27,8 @@ import { testBadgeCapacityTickets, testBadgeSpeedBoostPct } from '@/utils/global
 import { inventoryApi } from '@/api/inventory.api';
 // AVATARS OFF — import { avatarsApi } from '@/api/avatars.api';
 import { testQuestApi } from '@/api/testQuest.api';
-import type { TicketEngine } from '@/types/interfaces/ticket.interfaces';
-import type { TicketType } from '@/types/types/ticket.types';
+import type { EngineSync, TicketEngine } from '@/types/interfaces/ticket.interfaces';
+import type { Ticket, TicketType } from '@/types/types/ticket.types';
 
 const STARTER_ENGINE_ID = 'engine-bronze-starter';
 
@@ -61,6 +63,56 @@ const IS_REAL_BACKEND = !!process.env.NEXT_PUBLIC_API_URL;
 const isLostRace = (reason: unknown): boolean =>
   (reason as { error?: { status?: unknown } } | null | undefined)?.error?.status === 409;
 
+/** The body a claim path answers with — `{ error: { status, data } }` on refusal. */
+type ClaimRefusal = {
+  error?: {
+    status?: unknown;
+    data?: { reason?: string; engine?: EngineSync; engines?: EngineSync[] };
+  };
+};
+
+/**
+ * The server's «that cycle is still running» (400 + `reason: 'not-ready'`).
+ *
+ * NOT a failure: nothing was charged, nothing was lost, the engine simply has
+ * seconds left that this client had already counted off. It reached players as
+ * «Не удалось забрать награду» until 23.08.2026, on a screen that had drawn the
+ * button itself. The refusal carries the server's own state — apply it and the
+ * button goes away instead of the error. @see applyEngineSync
+ */
+export const isNotReadyRefusal = (reason: unknown): boolean =>
+  (reason as ClaimRefusal | null | undefined)?.error?.status === 400 &&
+  (reason as ClaimRefusal).error?.data?.reason === 'not-ready';
+
+const refusalSyncs = (reason: unknown): EngineSync[] => {
+  const data = (reason as ClaimRefusal | null | undefined)?.error?.data;
+  if (data?.engines?.length) return data.engines;
+  return data?.engine ? [data.engine] : [];
+};
+
+/**
+ * Write the server's own view of an engine into the tickets cache.
+ *
+ * Everything the screens compute — the countdown, whether «Забрать» shows at
+ * all — hangs off `cycleStartedAt` + the local boost math. This is the one
+ * place the server gets to correct it: `readyAt` pins its verdict to this
+ * device's clock, so a client running ahead (a skewed clock, a perk it thinks
+ * is live, an inventory cache one refetch behind) stops offering a collect the
+ * server would refuse. @see isEngineReady
+ */
+const applyEngineSync = (draft: Ticket[], syncs: readonly EngineSync[], nowMs = Date.now()) => {
+  for (const sync of syncs) {
+    for (const ticket of draft) {
+      const engine = ticket.engines?.find(item => item.id === sync.id);
+      if (!engine) continue;
+      engine.pendingCount = sync.pendingCount;
+      engine.cycleStartedAt = sync.cycleStartedAt;
+      engine.secondsRemaining = sync.secondsRemaining;
+      engine.readyAt = serverReadyAt(sync.secondsRemaining, nowMs);
+    }
+  }
+};
+
 // The free Bronze starter engine, granted once after the onboarding language
 // step. Comes with one ready ticket so the tour's claim finale has something to
 // collect (DOCS §9 / §17.5).
@@ -86,7 +138,7 @@ export const enginesApi = api.injectEndpoints({
     // the player, and the mock cannot know it (it holds no engine state), so the
     // type must force every caller through the local-total fallback in
     // `resolveClaimedCount` rather than trusting a field that may be absent.
-    claimEngine: builder.mutation<{ claimed?: number }, { engineId: string }>({
+    claimEngine: builder.mutation<{ claimed?: number; engine?: EngineSync }, { engineId: string }>({
       query: body => ({ url: 'engines/claim', method: 'POST', body }),
       // No `tickets` invalidation: the onQueryStarted patch below already writes
       // the claim result (pendingCount→0, balance, cycle restart, lifetime) into
@@ -104,13 +156,21 @@ export const enginesApi = api.injectEndpoints({
           ticketsApi.util.updateQueryData('getTickets', undefined, draft => {
             for (const ticket of draft) {
               const engine = ticket.engines?.find(item => item.id === engineId);
-              if (engine && engine.pendingCount > 0) {
+              if (!engine) continue;
+              if (engine.pendingCount > 0) {
                 predicted = engine.pendingCount;
                 ticket.count = (ticket.count ?? 0) + engine.pendingCount;
                 engine.lifetimeProduced = (engine.lifetimeProduced ?? 0) + engine.pendingCount;
                 engine.pendingCount = 0;
-                engine.cycleStartedAt = dayjs().toISOString();
               }
+              // Restarted whatever the cache thought was banked. A ready cycle
+              // that the server has not been told about yet carries
+              // `pendingCount: 0` (the server fills it on `complete-cycle`), and
+              // the old `pendingCount > 0` guard skipped exactly that case: the
+              // claim went through, the cache kept the finished cycle, and the
+              // screen offered the same engine again — for a 400.
+              engine.cycleStartedAt = dayjs().toISOString();
+              engine.readyAt = undefined;
             }
           })
         );
@@ -126,27 +186,48 @@ export const enginesApi = api.injectEndpoints({
           // an over-predicted inventory number would otherwise just stay on
           // screen. A matching response dispatches nothing.
           const delta = resolveClaimedCount(data, predicted) - predicted;
-          if (delta !== 0) {
+          if (delta !== 0 || data?.engine) {
             dispatch(
               ticketsApi.util.updateQueryData('getTickets', undefined, draft => {
-                for (const ticket of draft) {
-                  const engine = ticket.engines?.find(item => item.id === engineId);
-                  if (!engine) continue;
-                  ticket.count = Math.max(0, (ticket.count ?? 0) + delta);
-                  engine.lifetimeProduced = Math.max(0, (engine.lifetimeProduced ?? 0) + delta);
+                if (delta !== 0) {
+                  for (const ticket of draft) {
+                    const engine = ticket.engines?.find(item => item.id === engineId);
+                    if (!engine) continue;
+                    ticket.count = Math.max(0, (ticket.count ?? 0) + delta);
+                    engine.lifetimeProduced = Math.max(0, (engine.lifetimeProduced ?? 0) + delta);
+                  }
                 }
+                // The cycle the server actually started, in the server's own
+                // words — the prediction above only guessed at it.
+                if (data?.engine) applyEngineSync(draft, [data.engine]);
               })
             );
           }
         } catch (reason) {
           patch.undo();
           if (isLostRace(reason)) dispatch(api.util.invalidateTags([rtkTags.tickets]));
+          // «Still producing»: the undo just put the finished-looking cycle back
+          // on screen, which is what kept the button there for the next tap and
+          // the next 400. The refusal carries the server's own countdown — take
+          // it, and the button goes with it.
+          else if (isNotReadyRefusal(reason)) {
+            const syncs = refusalSyncs(reason);
+            if (syncs.length)
+              dispatch(
+                ticketsApi.util.updateQueryData('getTickets', undefined, draft =>
+                  applyEngineSync(draft, syncs)
+                )
+              );
+          }
         }
       },
     }),
 
     // See claimEngine — `claimed` optional for the same reason.
-    claimEnginesForTier: builder.mutation<{ claimed?: number }, { tier: TicketType }>({
+    claimEnginesForTier: builder.mutation<
+      { claimed?: number; engines?: EngineSync[] },
+      { tier: TicketType }
+    >({
       query: body => ({ url: 'engines/claim-all', method: 'POST', body }),
       // No `tickets` invalidation (see claimEngine): the patch below fully updates
       // the getTickets cache, so the refetch is redundant and would refresh every
@@ -170,6 +251,7 @@ export const enginesApi = api.injectEndpoints({
                 engine.lifetimeProduced = (engine.lifetimeProduced ?? 0) + engine.pendingCount;
                 engine.pendingCount = 0;
                 engine.cycleStartedAt = dayjs().toISOString();
+                engine.readyAt = undefined;
               }
             }
             ticket.count = (ticket.count ?? 0) + total;
@@ -186,11 +268,20 @@ export const enginesApi = api.injectEndpoints({
           // See claimEngine: without this the tier's inventory keeps whatever the
           // prediction guessed, forever.
           const delta = resolveClaimedCount(data, predicted) - predicted;
-          if (delta !== 0) {
+          if (delta !== 0 || data?.engines?.length) {
             dispatch(
               ticketsApi.util.updateQueryData('getTickets', undefined, draft => {
+                // Every engine of the tier as the server left it: the ones it
+                // drained (a fresh cycle) AND the ones it did not (the seconds
+                // they really have left). The optimistic pass above could only
+                // see the engines whose batch the cache already knew about —
+                // the server also collects cycles that finished without a
+                // `complete-cycle` ever landing, which is how the bulk button
+                // stayed lit over an emptied tier.
+                if (data?.engines?.length) applyEngineSync(draft, data.engines);
                 const ticket = draft.find(item => item.ticketType === tier);
                 if (!ticket) return;
+                if (delta === 0) return;
                 ticket.count = Math.max(0, (ticket.count ?? 0) + delta);
                 // Only a shortfall is attributable: a surplus (the cache sat a
                 // cycle behind the server) has no engine to credit, so that
@@ -208,6 +299,17 @@ export const enginesApi = api.injectEndpoints({
         } catch (reason) {
           patch.undo();
           if (isLostRace(reason)) dispatch(api.util.invalidateTags([rtkTags.tickets]));
+          // See claimEngine: «nothing to claim» is the server correcting a
+          // client that counted the cycle off early, not a failure.
+          else if (isNotReadyRefusal(reason)) {
+            const syncs = refusalSyncs(reason);
+            if (syncs.length)
+              dispatch(
+                ticketsApi.util.updateQueryData('getTickets', undefined, draft =>
+                  applyEngineSync(draft, syncs)
+                )
+              );
+          }
         }
       },
     }),
@@ -386,7 +488,10 @@ export const enginesApi = api.injectEndpoints({
       },
     }),
 
-    completeEngineCycle: builder.mutation<void, { engineId: string }>({
+    completeEngineCycle: builder.mutation<
+      { ok?: boolean; engine?: EngineSync } | void,
+      { engineId: string }
+    >({
       query: body => ({ url: 'engines/complete-cycle', method: 'POST', body }),
       // No `tickets` invalidation: the onQueryStarted patch below fills
       // pendingCount in the cache with the same math the server runs, so the
@@ -456,8 +561,10 @@ export const enginesApi = api.injectEndpoints({
                 badgeCapacityTickets: badgeCapacity,
                 tables,
               });
-              const elapsed = dayjs().diff(dayjs(engine.cycleStartedAt), 'second');
-              if (elapsed >= cycle) {
+              // Same floor the screens use: predicting a finished batch the
+              // server has not agreed to is what left «Забрать» standing over a
+              // running engine. @see engineElapsedAligned
+              if (engineElapsedAligned(engine, cycle) >= cycle) {
                 engine.pendingCount = engineCapacity(engine, {
                   capacityChip,
                   capacityBooster,
@@ -469,7 +576,22 @@ export const enginesApi = api.injectEndpoints({
           })
         );
         try {
-          await queryFulfilled;
+          const { data } = await queryFulfilled;
+          // The server's verdict on the very cycle this call announced. `ok:
+          // false` means it disagrees — it is still running — and until
+          // 23.08.2026 it said so by saying nothing at all: the optimistic
+          // `pendingCount` above stayed, «Забрать» appeared, and the tap behind
+          // it came back «Не удалось забрать награду». Undo the guess and take
+          // the server's countdown instead.
+          if (data && data.ok === false) patch.undo();
+          if (data?.engine) {
+            const sync = data.engine;
+            dispatch(
+              ticketsApi.util.updateQueryData('getTickets', undefined, draft =>
+                applyEngineSync(draft, [sync])
+              )
+            );
+          }
         } catch {
           patch.undo();
         }

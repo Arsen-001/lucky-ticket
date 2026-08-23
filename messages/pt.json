@@ -1355,6 +1355,7 @@
   "purchase error upgrade conflict": "O motor mudou enquanto a melhoria estava em andamento. Os níveis estão atualizados — nada foi cobrado, tente de novo.",
   "purchase error claim conflict": "O ciclo deste motor acabou de ser coletado por outra requisição. Nada foi cobrado — a tela está atualizada.",
   "claim already collected": "Já foi coletado",
+  "claim not ready": "Engine is still running",
   "session expired": "Sessão expirada",
   "session expired description": "O app perdeu a conexão com sua conta. Nada foi cobrado — reinicie para entrar de novo.",
   "restart app": "Reiniciar",

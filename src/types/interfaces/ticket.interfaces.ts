@@ -21,6 +21,21 @@ export interface BlockedTicketProps extends BaseTicketProps {
   requirements?: TicketRequirement[];
 }
 
+/**
+ * The engine as the SERVER saw it at the instant it answered — carried by every
+ * claim path (`engines/claim`, `claim-all`, `complete-cycle`) and by the 400
+ * that refuses a cycle still running. @see applyEngineSync
+ */
+export interface EngineSync {
+  id: string;
+  pendingCount: number;
+  cycleStartedAt: string;
+  /** Seconds left by the SERVER's clock and the SERVER's boost math. */
+  secondsRemaining: number;
+  ready: boolean;
+  serverNow: string;
+}
+
 export interface TicketEngine {
   id: string;
   /**
@@ -47,6 +62,24 @@ export interface TicketEngine {
   engineLevel?: number;
   speedLevel?: number;
   capacityLevel?: number;
+  /**
+   * Seconds the SERVER says this cycle still has to run (`GET /tickets`, and
+   * every claim answer). Optional: mock fixtures and older payloads omit it.
+   */
+  secondsRemaining?: number;
+  /**
+   * The same verdict pinned to THIS device's clock — `Date.now() +
+   * secondsRemaining` at the moment the payload arrived (@see serverReadyAt).
+   *
+   * The countdown has to be recomputed locally between requests, and until
+   * 23.08.2026 that local answer was the only one: the client decided the cycle
+   * was over, told the server (`complete-cycle`), was quietly ignored, drew
+   * «Забрать» anyway, and the tap came back 400 — «Не удалось забрать награду»
+   * on an engine that was simply still running. Whatever the two disagree about
+   * — a device clock, a perk the client thinks is live, an inventory cache a
+   * refetch behind — this is what the screens count down to instead.
+   */
+  readyAt?: string;
 }
 
 export interface AvailableTicketItemProps extends BaseTicketProps {

@@ -1355,6 +1355,7 @@
   "purchase error upgrade conflict": "ძრავი შეიცვალა, სანამ გაუმჯობესება მიმდინარეობდა. დონეები განახლდა — ჩამოჭრა არ მომხდარა, სცადე თავიდან.",
   "purchase error claim conflict": "ამ ძრავის ციკლი ახლახან სხვა მოთხოვნამ აიღო. ჩამოჭრა არ მომხდარა — ეკრანი განახლდა.",
   "claim already collected": "უკვე აღებულია",
+  "claim not ready": "Engine is still running",
   "session expired": "სესია ამოიწურა",
   "session expired description": "აპლიკაციამ ანგარიშთან კავშირი დაკარგა. ჩამოჭრა არ მომხდარა — გადატვირთე და თავიდან შედი.",
   "restart app": "გადატვირთვა",

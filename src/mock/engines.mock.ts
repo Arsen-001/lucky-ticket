@@ -36,6 +36,11 @@ export const enginesMock = {
   // variant ever comes back.
   'POST engines/upgrade-speed': chargeStars,
   'POST engines/upgrade-capacity': chargeStars,
+  // Against the real backend this answers `{ ok, engine }` — whether the server
+  // AGREED the cycle was over, and its own countdown (@see engineElapsedAligned).
+  // The mock cannot: engine state lives in the RTK cache here, so there is no
+  // second opinion to give. `{}` leaves the client's own math in charge, which
+  // in mock mode IS the truth.
   'POST engines/complete-cycle': successResponse,
   'POST engines/grant-welcome': successResponse,
 };

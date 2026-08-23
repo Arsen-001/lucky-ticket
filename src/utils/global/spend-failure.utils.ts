@@ -96,6 +96,20 @@ const SHORTFALL_RULES: { test: RegExp; kind: SpendShortfallKind }[] = [
 export const isConflictError = (error: unknown): boolean =>
   (error as { status?: unknown } | null | undefined)?.status === 409;
 
+/**
+ * The server's «that cycle is still running» — a 400 carrying
+ * `reason: 'not-ready'` from the claim paths (`engines/claim`, `claim-all`).
+ *
+ * Nothing failed and nothing was charged: the screen counted the cycle off
+ * before the server did and offered a collect it would not honour. Shown as an
+ * error until 23.08.2026 — «Не удалось забрать награду» over an engine that was
+ * simply still working — while `engines.api` quietly took the server's own
+ * countdown from the same response and put the button away.
+ */
+export const isNotReadyError = (error: unknown): boolean =>
+  (error as { status?: unknown } | null | undefined)?.status === 400 &&
+  (error as { data?: { reason?: unknown } } | null | undefined)?.data?.reason === 'not-ready';
+
 const readServerMessage = (error: unknown): string => {
   const data = (error as { data?: unknown } | null | undefined)?.data;
   if (typeof data === 'string') return data;

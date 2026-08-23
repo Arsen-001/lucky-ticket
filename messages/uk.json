@@ -1355,6 +1355,7 @@
   "purchase error upgrade conflict": "Двигун змінився, поки тривало покращення. Рівні оновлено — списання не було, спробуй ще раз.",
   "purchase error claim conflict": "Цикл цього двигуна щойно забрав інший запит. Списання не було — екран оновлено.",
   "claim already collected": "Уже забрано",
+  "claim not ready": "Engine is still running",
   "session expired": "Сесія завершилась",
   "session expired description": "Застосунок втратив зв'язок з акаунтом. Списання не було — перезапусти його, щоб увійти знову.",
   "restart app": "Перезапустити",
