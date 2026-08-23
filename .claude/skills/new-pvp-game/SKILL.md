@@ -114,6 +114,7 @@ Each line below is a bug that reached production on 22.08.2026 and the pattern t
 
 - Live match = transfer. Tickets move between players, the total is unchanged — **verify it after every live session** (query below).
 - Match against the crowd = **mint or burn** (`crowdTicketsNetToday` in the panel). No commission means the expectation is around zero, but the variance is real.
+- **Keep that number per league, never blended.** Once the crowd plays every tier, one integer adds a burned diamond to a burned bronze and hides the only thing the metric is read for. The stats endpoint serves `byTier` (matches, staked, crowd net) and the panel renders a «По лигам» row under the headline cards.
 - Ticket income is **not ledgered** in the DB (`TicketClaimEvent` covers engine claims only) — when a balance drifts from the duel sum, ask the player what else they did before suspecting the game.
 
 ## Testing — the four layers, with recipes
@@ -139,11 +140,14 @@ SELECT count(*) FROM "Duel" d WHERE status='FINISHED' AND (d."hostWins" <> (SELE
                                                      OR d."guestWins" <> (SELECT count(*) FROM "DuelRound" r WHERE r."duelId"=d.id AND r.winner='GUEST'));
 ```
 
+⚠️ The e2e suite creates a user per player through `/auth/telegram`, which is throttled to **10 logins per minute per IP** with Redis-backed storage shared across runs — back-to-back runs start answering **429** and the failures look like broken code. Wait out the minute and re-run before debugging anything.
+
 `railway logs --service lucky-ticket-backend --environment production` shows Prisma validation errors and DM failures (`DM "duel_invite_dm" … failed`); 4xx are not logged.
 
 ## Live-ops — what the operator sees and turns
 
 - Panel «Игры → Дуэль»: rollout stage (off / testers / all — testers are one shared list under «Настройки → Выкат», matched by `@username` or Telegram id), **Настройка** (stake bounds, wins, `readySeconds`, `moveSeconds`, `revealSeconds`, lobby TTL, list size, crowd toggle + window) — edits apply to the running match, stored as overrides only (`gamesConfig.<game>`), **Журнал матчей** (who vs whom, stake, score, outcome) and four metrics (`matchesToday`, crowd share, tickets staked, `crowdTicketsNetToday`).
+- `crowdTiers` is the emission lever: which leagues the crowd will sit in. Default is all five; narrowing it is a panel edit, no deploy. Watch it against the «По лигам» card.
 - `crowdPool` = active `SeedPlayer` rows. **Zero means an empty lobby is never filled** — first thing to check on «nobody comes».
 - An invite lives 3 minutes; a lobby 5 minutes of silence; a stalled match is settled from the list after 60 s of silence.
 
@@ -215,6 +219,7 @@ Each of these shipped, reached production and was found the hard way.
 - **Modal over a running match; two devices disagreeing** → user decisions, both closed (22.08).
 - **Numbers in strings** — «10 seconds» in 20 languages one panel edit away from lying (22.08).
 - **Showing the Telegram name instead of the in-app nickname** — the duel used `displayName || username` everywhere; the whole app picks the visible name with `shownName(user) ?? username` (`usernameCustom` → the in-app nickname wins). A player who renamed themselves saw their Telegram name in the lobby (23.08). Any player name a new game shows must go through `shownName`.
+- **A new config knob the panel cannot save** — `PATCH /admin/config` runs `forbidNonWhitelisted`, so a field missing from `UpdateConfigDto` is refused with a bare 400 and the panel silently keeps the old value. Add the field to the DTO in the same commit as the config default (23.08).
 - **Inviting someone without tickets** → they accepted and got «lobby already taken»; fixed at every door (22.08).
 - **Testing one account on two clients without meaning to** — the headless copy accepted, the phone declined, it looked like a bug (22.08).
 
