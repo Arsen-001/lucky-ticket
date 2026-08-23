@@ -7,17 +7,31 @@ import { createSlice, type PayloadAction } from '@reduxjs/toolkit';
  * away and an admin notification is waiting, and both watchers fire on the
  * first render of the first screen.
  */
-export type AutoSurfaceId = 'tournament-result' | 'notification' | 'daily-gift';
+export type AutoSurfaceId =
+  | 'duel-invite'
+  | 'tournament-result'
+  | 'notification'
+  | 'daily-gift'
+  | 'friends-promo';
 
 /**
  * Higher wins the screen first. A won tournament outranks an announcement, and
- * the daily gift goes last: it is the only one of the three that survives being
- * postponed — it stays collectable until midnight UTC either way.
+ * the daily gift goes last of the three that hand something out: it is the one
+ * that survives being postponed — it stays collectable until midnight UTC
+ * either way.
+ *
+ * Ниже всех — приглашение позвать друзей: оно ничего не выдаёт и ничего не
+ * теряет от отсрочки, поэтому пропускает вперёд любой попап с наградой. Именно
+ * это и делает порядок «сначала все результаты турниров, потом промо».
  */
 const AUTO_SURFACE_PRIORITY: Record<AutoSurfaceId, number> = {
-  'tournament-result': 2,
-  notification: 1,
-  'daily-gift': 0,
+  // Вызов на дуэль живёт три минуты и после этого не значит ничего — он один
+  // здесь протухает. Результат турнира и все остальные ждут сколько угодно.
+  'duel-invite': 4,
+  'tournament-result': 3,
+  notification: 2,
+  'daily-gift': 1,
+  'friends-promo': 0,
 };
 
 export interface LayoutSliceState {

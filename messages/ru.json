@@ -1615,5 +1615,8 @@
   "cheaper than telegram by {percent}": "На {percent}% дешевле, чем в Telegram",
   "+{days} days": "+{days, plural, one {# день} few {# дня} many {# дней} other {# дней}}",
   "you get for watching": "Получишь за просмотр",
-  "extra ads reward on watch": "Награда приходит за просмотр каждого показа"
+  "extra ads reward on watch": "Награда приходит за просмотр каждого показа",
+  "next result": "Далее",
+  "invite promo title": "Пока идёт тест — зови друзей",
+  "invite promo subtitle": "Подарок от бота за собранную лестницу — и спин барабана за каждую партию друзей."
 }

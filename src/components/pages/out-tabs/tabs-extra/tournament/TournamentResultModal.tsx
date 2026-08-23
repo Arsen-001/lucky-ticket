@@ -34,6 +34,13 @@ interface TournamentResultModalProps {
   total?: number;
   /** Prize grid; the last paying place is read off it. */
   places?: TournamentPlacesResponse;
+  /**
+   * Какой по счёту результат показывается и сколько их в очереди. Игрок,
+   * участвовавший в трёх турнирах, закрывает три КАРТОЧКИ подряд, и без этой
+   * подписи третья неотличима от первой. @see TournamentResultWatcher
+   */
+  queuePosition?: number;
+  queueTotal?: number;
 }
 
 type ResultView = 'placed' | 'unplaced' | 'not-played';
@@ -103,6 +110,8 @@ export function TournamentResultModal({
   result,
   total,
   places,
+  queuePosition,
+  queueTotal,
 }: TournamentResultModalProps) {
   const t = useAppTranslations();
   const router = useRouter();
@@ -160,6 +169,11 @@ export function TournamentResultModal({
   useEffect(() => {
     if (open && paid) triggerHaptic('success');
   }, [open, paid]);
+
+  // Очередь рисуем только когда она есть: одному результату индикатор из одной
+  // точки ничего не сообщает, а место под кнопкой занимает.
+  const hasQueue = !!queueTotal && queueTotal > 1 && !!queuePosition;
+  const hasNext = hasQueue && (queuePosition as number) < (queueTotal as number);
 
   const title =
     view === 'not-played'
@@ -362,11 +376,31 @@ export function TournamentResultModal({
 
           {/* ACTIONS */}
           <div className="w-full flex flex-col items-center gap-2">
+            {/* Сколько ещё карточек за этой. Точки, а не «2 / 3»: число тут
+                соперничает бы взглядом с местом и суммой, а вопрос у него
+                маленький — «это всё или будет ещё». */}
+            {hasQueue && (
+              <div
+                className="flex items-center justify-center gap-1.5 pb-0.5"
+                role="status"
+                aria-label={`${queuePosition} / ${queueTotal}`}
+              >
+                {Array.from({ length: queueTotal }, (_, index) => (
+                  <span
+                    key={index}
+                    aria-hidden
+                    className={`h-1.5 rounded-full transition-all ${
+                      index === queuePosition - 1 ? 'w-4 bg-white/80' : 'w-1.5 bg-white/25'
+                    }`}
+                  />
+                ))}
+              </div>
+            )}
             <Button
               onClick={onClose}
               className="w-full rounded-xl py-3 text-sm font-extrabold uppercase tracking-[0.16em]"
             >
-              {t('continue')}
+              {hasNext ? t('next result') : t('continue')}
             </Button>
             {tournamentId && (
               <button

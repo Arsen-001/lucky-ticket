@@ -1615,5 +1615,8 @@
   "cheaper than telegram by {percent}": "{percent}% cheaper than Telegram",
   "+{days} days": "+{days, plural, =1 {# day} other {# days}}",
   "you get for watching": "You get for watching",
-  "extra ads reward on watch": "Each reward lands when you watch that view"
+  "extra ads reward on watch": "Each reward lands when you watch that view",
+  "next result": "Next",
+  "invite promo title": "Bring friends while the test is on",
+  "invite promo subtitle": "A gift from the bot for the full ladder — and a spin of the drum for every batch of friends."
 }

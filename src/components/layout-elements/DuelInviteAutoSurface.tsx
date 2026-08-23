@@ -14,6 +14,7 @@ import { routes } from '@/constants/routes';
 import { duelJoinFailure, duelMatchInProgress } from '@/utils/global/duel.utils';
 import { useSpendFailure } from '@/hooks/useSpendFailure';
 import { useAppTranslations } from '@/hooks/useAppTranslations';
+import { useAutoSurfaceSlot } from '@/hooks/useAutoSurfaceSlot';
 import { useInFlightLock } from '@/hooks/useInFlightLock';
 import { useToast } from '@/hooks/useToast';
 import '@/styles/components/duel.css';
@@ -62,6 +63,14 @@ export function DuelInviteAutoSurface() {
   // словами реванша.
   const onDuelScreen = pathname === routes.games.duel;
   const invite = invites.find(i => !dismissed.includes(i.id) && !(i.rematch && onDuelScreen));
+
+  // Встаём в общую очередь всплывающих окон, а не поверх того, что уже открыто.
+  // Замерено 23.08.2026 на моке: игрок, вернувшийся после трёх турниров,
+  // получал вызов на дуэль ПОВЕРХ карточки награды — два диалога в DOM, оба
+  // читаются наполовину, кнопка «Не сейчас» стоит ровно на «Таблице турнира».
+  // Слот вызов не отменяет: он откроется, как только закроется предыдущее окно,
+  // и стоит в очереди первым — три минуты жизни есть только у него.
+  const canShow = useAutoSurfaceSlot('duel-invite', Boolean(invite));
 
   const accept = async () => {
     if (!invite || !lock.acquire(invite.id)) return;
@@ -113,7 +122,7 @@ export function DuelInviteAutoSurface() {
     <>
       {spend.modals}
       <Modal
-        open={Boolean(invite)}
+        open={canShow}
         onClose={refuse}
         // Ключ несёт имя зовущего — без него next-intl бросает FORMATTING_ERROR
         // прямо в консоль, а ассистивная техника читает «диалог» и ничего больше.
