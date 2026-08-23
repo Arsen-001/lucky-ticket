@@ -166,6 +166,32 @@ it deserved: «ты уже собираешь стол, а я не сказал 
 - The in-app modal is what actually reaches people: measured ≤5 s on production, on a phone and on a headless copy of the Mini App.
 - **A rematch sends NO DM** — the opponent just played here and is in the app; only the fresh cold invite (someone you called who is not currently playing) is worth a bot message. `invite(..., { dm: false })` for rematches; `dm` defaults on for normal invites.
 
+### A screen with its own world owns three surfaces, not one
+
+The duel is dark; the app is `#1b1930`. That difference cost three separate
+bug reports in one evening, and each had a **different** owner:
+
+1. **The strip above the header on a phone is OURS.** In fullscreen Telegram
+   draws no bar of its own — it hands over the space under the status bar as
+   `--tg-inset-top`, and the layout reserves it with a padding nobody paints.
+   The screen's own ground has to reach up into it: pull the header up by the
+   inset (`margin-top: calc(-1 * var(--tg-inset-top))`) and give the padding
+   back inside, so the background runs to the top edge while the title stays
+   under Telegram's floating buttons.
+2. **The bar on a client WITHOUT fullscreen is Telegram's.** It is painted the
+   colour last given to `setHeaderColor`, and the app names its own background
+   on boot. A screen with another world must repaint it on mount and restore
+   the app colour on unmount.
+3. **The room around the column is ours again.** The app column is
+   `--app-max-w: 430px`; in a desktop window everything beside it is `html`,
+   i.e. the app background. A dark game sat as an island in a light room, and
+   the border read before the game did. Paint `document.documentElement` too —
+   and do it whether or not the Telegram SDK is present, because a browser and
+   the desktop client show that room identically.
+
+One hook does all three (`useTelegramSurfaceColor`) and undoes them on the way
+out: the screen leaves, its world leaves with it.
+
 ## Economy accounting
 
 - Live match = transfer. Tickets move between players, the total is unchanged — **verify it after every live session** (query below).
@@ -298,6 +324,30 @@ Each of these shipped, reached production and was found the hard way.
 - **`background` shorthand killed the ticket picture** in the league tiles — the same trap the brand wordmark documents. Write `background-position/size/repeat` separately whenever another rule supplies `background-image` (23.08).
 - **Deleting a dictionary key without checking runtime-built ones.** Keys assembled as `` `duel cancel ${reason}` `` are invisible to grep; check the template sites before removing anything (23.08).
 - **The local e2e suite cannot be judged from one red run.** It walks ~40 routes; against `next dev` the on-demand compile blew the 20 s shell wait and the 90 s test timeout, and a hung browser run pinned the machine at load 114 — which then flaked a timing-sensitive **unit** test inside pre-commit. Build once into a detached worktree and serve it (`cp -al node_modules` — a symlinked one breaks Turbopack), then point the suite at that port (23.08).
+- **A number hard-wired in an expression, not in a string.** The readiness bar
+  divided by a literal `10` while the panel had long said `readySeconds: 15` —
+  the bar stood full for five seconds and only started moving at ten. The rule
+  «no numbers in strings» has a twin: no server-owned number in code either.
+  The local mock hid it by also saying 10; make the mock mirror production.
+- **A class whose pseudo-elements need a positioned host must say so itself.**
+  `.duel-pulse` drew its rings with `position: absolute` but never declared
+  `position: relative` on itself; in one caller the class happened to sit next
+  to a `relative` and looked right, in the next the rings anchored to some
+  ancestor and left the mark entirely. Declare it in the class, not in the
+  caller.
+- **A blanket `.parent > * { position: relative }` breaks absolutely positioned
+  children.** It overrode a centred title's `absolute`, the title fell into the
+  flow and `left-1/2` threw it against the right edge. Send decoration behind
+  with `z-index: -1` instead of lifting everything else.
+- **You cannot stub `window.Telegram` before load to watch the SDK** — the page
+  pulls the real `telegram-web-app.js` and overwrites the stub, so the probe
+  records nothing while the app works fine. Wrap the ALREADY loaded object and
+  navigate inside the app (no reload), or the wrapper dies with the next
+  document.
+- **Prove a Mini App change on the player surface**: open the production URL
+  with `#tgWebAppData=<initData signed with the bot token>` and read the DOM.
+  Grepping the served HTML proves nothing — the document is a splash until the
+  client boots.
 - **Testing one account on two clients without meaning to** — the headless copy accepted, the phone declined, it looked like a bug (22.08).
 
 ## Known, deliberately open
