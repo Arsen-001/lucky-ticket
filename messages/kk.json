@@ -211,7 +211,7 @@
   "claim": "Алу",
   "claim all": "Бәрін алу",
   "claim failed": "Сыйлықты алу мүмкін болмады",
-  "some rewards were not claimed": "Some rewards weren't claimed",
+  "some rewards were not claimed": "Кейбір сыйлықтарды алу мүмкін болмады",
   "claim failed description": "Серверге қосылу мүмкін болмады. «Қайталау» батырмасын бас.",
   "claim already done": "Әлдеқашан алынған",
   "claim already done description": "Бұл сыйлықты әлдеқашан алдың. Тапсырмаларың қазір өзекті.",
@@ -1356,7 +1356,7 @@
   "purchase error upgrade conflict": "Жақсарту жүріп жатқанда қозғалтқыш өзгерді. Деңгейлері жаңартылды — ештеңе алынған жоқ, қайта көр.",
   "purchase error claim conflict": "Бұл қозғалтқыштың циклін жаңа ғана басқа сұрау алды. Ештеңе алынған жоқ — экран жаңартылды.",
   "claim already collected": "Әлдеқашан алынған",
-  "claim not ready": "Engine is still running",
+  "claim not ready": "Қозғалтқыш әлі жұмыс істеп тұр",
   "session expired": "Сессия аяқталды",
   "session expired description": "Қосымша есептік жазбамен байланысын жоғалтты. Ештеңе алынған жоқ — қайта қосып, қайтадан кір.",
   "restart app": "Қайта қосу",
@@ -1614,9 +1614,9 @@
   "star packages": "Lucky Stars пакеттері",
   "cheaper than telegram by {percent}": "Telegram-ға қарағанда {percent}% арзан",
   "+{days} days": "+{days, plural, other {# күн}}",
-  "you get for watching": "You get for watching",
-  "extra ads reward on watch": "Each reward lands when you watch that view",
-  "next result": "Next",
-  "invite promo title": "Bring friends while the test is on",
-  "invite promo subtitle": "Bring friends — and the bot sends you a real Telegram gift."
+  "next result": "Келесі",
+  "invite promo title": "Тест жүріп жатқанда достарыңды шақыр",
+  "invite promo subtitle": "Достарыңды шақыр — бот саған Telegram-да нағыз сыйлық жібереді.",
+  "you get for watching": "Әр қарау үшін аласың",
+  "extra ads reward on watch": "Әр сыйлық сол қарауды көргенде келеді"
 }

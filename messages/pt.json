@@ -211,7 +211,7 @@
   "claim": "Resgatar",
   "claim all": "Resgatar tudo",
   "claim failed": "Não deu para resgatar a recompensa",
-  "some rewards were not claimed": "Some rewards weren't claimed",
+  "some rewards were not claimed": "Algumas recompensas não foram resgatadas",
   "claim failed description": "Não conseguimos falar com o servidor. Toque em tentar de novo.",
   "claim already done": "Já resgatado",
   "claim already done description": "Você já pegou esta recompensa. Suas tarefas estão em dia.",
@@ -1356,7 +1356,7 @@
   "purchase error upgrade conflict": "O motor mudou enquanto a melhoria estava em andamento. Os níveis estão atualizados — nada foi cobrado, tente de novo.",
   "purchase error claim conflict": "O ciclo deste motor acabou de ser coletado por outra requisição. Nada foi cobrado — a tela está atualizada.",
   "claim already collected": "Já foi coletado",
-  "claim not ready": "Engine is still running",
+  "claim not ready": "O motor ainda está rodando",
   "session expired": "Sessão expirada",
   "session expired description": "O app perdeu a conexão com sua conta. Nada foi cobrado — reinicie para entrar de novo.",
   "restart app": "Reiniciar",
@@ -1614,9 +1614,9 @@
   "star packages": "Pacotes Lucky Stars",
   "cheaper than telegram by {percent}": "{percent}% mais barato que no Telegram",
   "+{days} days": "+{days, plural, one {# dia} other {# dias}}",
-  "you get for watching": "You get for watching",
-  "extra ads reward on watch": "Each reward lands when you watch that view",
-  "next result": "Next",
-  "invite promo title": "Bring friends while the test is on",
-  "invite promo subtitle": "Bring friends — and the bot sends you a real Telegram gift."
+  "next result": "Próximo",
+  "invite promo title": "Convide amigos enquanto o teste está no ar",
+  "invite promo subtitle": "Convide amigos — e o bot envia um presente de verdade no Telegram.",
+  "you get for watching": "Você ganha por exibição",
+  "extra ads reward on watch": "Cada recompensa chega quando você assiste àquela exibição"
 }

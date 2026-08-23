@@ -211,7 +211,7 @@
   "claim": "دریافت",
   "claim all": "دریافت همه",
   "claim failed": "پاداش دریافت نشد",
-  "some rewards were not claimed": "Some rewards weren't claimed",
+  "some rewards were not claimed": "برخی پاداش‌ها دریافت نشد",
   "claim failed description": "اتصال به سرور ممکن نشد. «تلاش دوباره» را بزن.",
   "claim already done": "قبلاً دریافت شده",
   "claim already done description": "این پاداش را قبلاً گرفته‌ای. مأموریت‌هایت اکنون به‌روزند.",
@@ -1356,7 +1356,7 @@
   "purchase error upgrade conflict": "موتور در حین ارتقا تغییر کرد. سطح‌هایش به‌روز شد — چیزی کسر نشد، دوباره تلاش کن.",
   "purchase error claim conflict": "چرخهٔ این موتور را همین حالا درخواستی دیگر گرفت. چیزی کسر نشد — صفحه به‌روز شد.",
   "claim already collected": "قبلاً دریافت شده",
-  "claim not ready": "Engine is still running",
+  "claim not ready": "موتور هنوز کار می‌کند",
   "session expired": "نشست منقضی شد",
   "session expired description": "برنامه ارتباطش با حسابت را از دست داد. چیزی کسر نشد — دوباره اجرایش کن تا وارد شوی.",
   "restart app": "راه‌اندازی دوباره",
@@ -1614,9 +1614,9 @@
   "star packages": "بسته‌های Lucky Stars",
   "cheaper than telegram by {percent}": "{percent}% ارزان‌تر از Telegram",
   "+{days} days": "+{days, plural, other {# روز}}",
-  "you get for watching": "You get for watching",
-  "extra ads reward on watch": "Each reward lands when you watch that view",
-  "next result": "Next",
-  "invite promo title": "Bring friends while the test is on",
-  "invite promo subtitle": "Bring friends — and the bot sends you a real Telegram gift."
+  "next result": "بعدی",
+  "invite promo title": "تا وقتی آزمایش ادامه دارد، دوستانت را دعوت کن",
+  "invite promo subtitle": "دوستانت را دعوت کن — ربات یک هدیه واقعی در Telegram برایت می‌فرستد.",
+  "you get for watching": "برای هر تماشا می‌گیری",
+  "extra ads reward on watch": "هر پاداش با تماشای همان نمایش می‌رسد"
 }

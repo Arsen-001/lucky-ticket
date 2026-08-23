@@ -211,7 +211,7 @@
   "claim": "受け取る",
   "claim all": "すべて受け取る",
   "claim failed": "報酬を受け取れませんでした",
-  "some rewards were not claimed": "Some rewards weren't claimed",
+  "some rewards were not claimed": "一部の報酬を受け取れませんでした",
   "claim failed description": "サーバーに接続できませんでした。再試行をタップしてください。",
   "claim already done": "受け取り済み",
   "claim already done description": "この報酬はすでに受け取っています。タスクは最新の状態です。",
@@ -1356,7 +1356,7 @@
   "purchase error upgrade conflict": "アップグレード処理中にエンジンが変わりました。レベルを更新しました — 請求は発生していません。もう一度お試しください。",
   "purchase error claim conflict": "このエンジンのサイクルは別のリクエストが受け取りました。請求は発生していません — 画面を更新しました。",
   "claim already collected": "すでに受け取り済みです",
-  "claim not ready": "Engine is still running",
+  "claim not ready": "エンジンはまだ稼働中です",
   "session expired": "セッションが切れました",
   "session expired description": "アプリがアカウントとの接続を失いました。請求は発生していません — 再起動してログインし直してください。",
   "restart app": "再起動",
@@ -1614,9 +1614,9 @@
   "star packages": "Lucky Stars パッケージ",
   "cheaper than telegram by {percent}": "Telegram より {percent}% お得",
   "+{days} days": "+{days, plural, other {#日}}",
-  "you get for watching": "You get for watching",
-  "extra ads reward on watch": "Each reward lands when you watch that view",
-  "next result": "Next",
-  "invite promo title": "Bring friends while the test is on",
-  "invite promo subtitle": "Bring friends — and the bot sends you a real Telegram gift."
+  "next result": "次へ",
+  "invite promo title": "テスト期間中に友だちを招待しよう",
+  "invite promo subtitle": "友だちを招待すると、ボットが本物の Telegram ギフトを送ります。",
+  "you get for watching": "1回あたりの獲得数",
+  "extra ads reward on watch": "報酬は各視聴を見たときに届きます"
 }

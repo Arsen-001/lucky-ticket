@@ -211,7 +211,7 @@
   "claim": "استلام",
   "claim all": "استلام الكل",
   "claim failed": "تعذّر استلام المكافأة",
-  "some rewards were not claimed": "Some rewards weren't claimed",
+  "some rewards were not claimed": "تعذّر استلام بعض المكافآت",
   "claim failed description": "تعذّر الاتصال بالخادم. اضغط إعادة المحاولة.",
   "claim already done": "مُستلمة بالفعل",
   "claim already done description": "استلمت هذه المكافأة من قبل. مهامك محدّثة الآن.",
@@ -1356,7 +1356,7 @@
   "purchase error upgrade conflict": "تغيّر المحرك أثناء تنفيذ الترقية. تم تحديث مستوياته — لم يُخصم شيء، حاول مرة أخرى.",
   "purchase error claim conflict": "استلم طلب آخر دورة هذا المحرك للتو. لم يُخصم شيء — تم تحديث الشاشة.",
   "claim already collected": "تم الاستلام بالفعل",
-  "claim not ready": "Engine is still running",
+  "claim not ready": "المحرك لا يزال يعمل",
   "session expired": "انتهت الجلسة",
   "session expired description": "فقد التطبيق الاتصال بحسابك. لم يُخصم شيء — أعد تشغيله لتسجيل الدخول من جديد.",
   "restart app": "إعادة التشغيل",
@@ -1614,9 +1614,9 @@
   "star packages": "باقات Lucky Stars",
   "cheaper than telegram by {percent}": "أرخص بنسبة {percent}% من Telegram",
   "+{days} days": "+{days, plural, zero {# يوم} one {# يوم} two {# يومان} few {# أيام} many {# يومًا} other {# يوم}}",
-  "you get for watching": "You get for watching",
-  "extra ads reward on watch": "Each reward lands when you watch that view",
-  "next result": "Next",
-  "invite promo title": "Bring friends while the test is on",
-  "invite promo subtitle": "Bring friends — and the bot sends you a real Telegram gift."
+  "next result": "التالي",
+  "invite promo title": "ادعُ أصدقاءك ما دامت التجربة مستمرة",
+  "invite promo subtitle": "ادعُ أصدقاءك — وسيرسل لك البوت هدية حقيقية على Telegram.",
+  "you get for watching": "تحصل عليه لكل مشاهدة",
+  "extra ads reward on watch": "تصل كل مكافأة عند مشاهدة ذلك الإعلان"
 }

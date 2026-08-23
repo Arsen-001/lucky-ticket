@@ -211,7 +211,7 @@
   "claim": "Al",
   "claim all": "Hamısını al",
   "claim failed": "Mükafat alınmadı",
-  "some rewards were not claimed": "Some rewards weren't claimed",
+  "some rewards were not claimed": "Bəzi mükafatlar alınmadı",
   "claim failed description": "Serverə çıxmaq olmadı. Yenidən cəhd et.",
   "claim already done": "Artıq alınıb",
   "claim already done description": "Bu mükafatı artıq almısan. Tapşırıqların indi yenilənib.",
@@ -1356,7 +1356,7 @@
   "purchase error upgrade conflict": "Yüksəltmə gedərkən mühərrik dəyişdi. Səviyyələri yeniləndi — heç nə tutulmadı, yenidən cəhd et.",
   "purchase error claim conflict": "Bu mühərrikin dövrünü indicə başqa sorğu aldı. Heç nə tutulmadı — ekran yeniləndi.",
   "claim already collected": "Artıq alınıb",
-  "claim not ready": "Engine is still running",
+  "claim not ready": "Mühərrik hələ işləyir",
   "session expired": "Sessiya bitdi",
   "session expired description": "Tətbiq hesabınla əlaqəni itirdi. Heç nə tutulmadı — yenidən başladıb təkrar daxil ol.",
   "restart app": "Yenidən başlat",
@@ -1614,9 +1614,9 @@
   "star packages": "Lucky Stars paketləri",
   "cheaper than telegram by {percent}": "Telegram-dan {percent}% ucuz",
   "+{days} days": "+{days, plural, other {# gün}}",
-  "you get for watching": "You get for watching",
-  "extra ads reward on watch": "Each reward lands when you watch that view",
-  "next result": "Next",
-  "invite promo title": "Bring friends while the test is on",
-  "invite promo subtitle": "Bring friends — and the bot sends you a real Telegram gift."
+  "next result": "Növbəti",
+  "invite promo title": "Test davam edərkən dostlarını dəvət et",
+  "invite promo subtitle": "Dostlarını dəvət et — bot sənə Telegram-da əsl hədiyyə göndərəcək.",
+  "you get for watching": "Hər baxışa qazanırsan",
+  "extra ads reward on watch": "Hər mükafat həmin baxışı tamamlayanda gəlir"
 }

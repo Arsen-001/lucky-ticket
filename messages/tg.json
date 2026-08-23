@@ -211,7 +211,7 @@
   "claim": "Гирифтан",
   "claim all": "Ҳамаро гирифтан",
   "claim failed": "Мукофотро гирифтан имконнопазир буд",
-  "some rewards were not claimed": "Some rewards weren't claimed",
+  "some rewards were not claimed": "Баъзе мукофотҳоро гирифтан имконнопазир буд",
   "claim failed description": "Ба сервер пайваст шудан имконнопазир буд. «Такрор»-ро пахш кун.",
   "claim already done": "Аллакай гирифта шуд",
   "claim already done description": "Ин мукофотро аллакай гирифтӣ. Вазифаҳоят ҳозир дар ҳолати навтарин.",
@@ -1356,7 +1356,7 @@
   "purchase error upgrade conflict": "Ҳангоми беҳтаркунӣ муҳаррик тағйир ёфт. Сатҳҳояш нав шуданд — чизе гирифта нашуд, бори дигар кӯшиш кун.",
   "purchase error claim conflict": "Давраи ин муҳаррикро ҳозир дархости дигар гирифт. Чизе гирифта нашуд — экран нав шуд.",
   "claim already collected": "Аллакай гирифта шудааст",
-  "claim not ready": "Engine is still running",
+  "claim not ready": "Муҳаррик ҳанӯз кор мекунад",
   "session expired": "Ҷаласа ба охир расид",
   "session expired description": "Барнома алоқаро бо ҳисобат гум кард. Чизе гирифта нашуд — онро аз нав оғоз кун, то дубора ворид шавӣ.",
   "restart app": "Аз нав оғоз кардан",
@@ -1614,9 +1614,9 @@
   "star packages": "Бастаҳои Lucky Stars",
   "cheaper than telegram by {percent}": "Нисбат ба Telegram {percent}% арзонтар",
   "+{days} days": "+{days, plural, other {# рӯз}}",
-  "you get for watching": "You get for watching",
-  "extra ads reward on watch": "Each reward lands when you watch that view",
-  "next result": "Next",
-  "invite promo title": "Bring friends while the test is on",
-  "invite promo subtitle": "Bring friends — and the bot sends you a real Telegram gift."
+  "next result": "Баъдӣ",
+  "invite promo title": "То даме ки озмоиш идома дорад, дӯстонатро даъват кун",
+  "invite promo subtitle": "Дӯстонатро даъват кун — бот ба ту дар Telegram тӯҳфаи ҳақиқӣ мефиристад.",
+  "you get for watching": "Барои ҳар тамошо мегирӣ",
+  "extra ads reward on watch": "Ҳар мукофот ҳангоми тамошои ҳамон намоиш меояд"
 }

@@ -211,7 +211,7 @@
   "claim": "Отримати",
   "claim all": "Отримати все",
   "claim failed": "Не вдалося отримати нагороду",
-  "some rewards were not claimed": "Some rewards weren't claimed",
+  "some rewards were not claimed": "Частину нагород отримати не вдалося",
   "claim failed description": "Не вдалося зв'язатися із сервером. Натисни «Повторити».",
   "claim already done": "Уже отримано",
   "claim already done description": "Ти вже забрав цю нагороду. Твої завдання зараз актуальні.",
@@ -1356,7 +1356,7 @@
   "purchase error upgrade conflict": "Двигун змінився, поки тривало покращення. Рівні оновлено — списання не було, спробуй ще раз.",
   "purchase error claim conflict": "Цикл цього двигуна щойно забрав інший запит. Списання не було — екран оновлено.",
   "claim already collected": "Уже забрано",
-  "claim not ready": "Engine is still running",
+  "claim not ready": "Двигун ще працює",
   "session expired": "Сесія завершилась",
   "session expired description": "Застосунок втратив зв'язок з акаунтом. Списання не було — перезапусти його, щоб увійти знову.",
   "restart app": "Перезапустити",
@@ -1614,9 +1614,9 @@
   "star packages": "Пакети Lucky Stars",
   "cheaper than telegram by {percent}": "На {percent}% дешевше, ніж у Telegram",
   "+{days} days": "+{days, plural, one {# день} few {# дні} many {# днів} other {# днів}}",
-  "you get for watching": "You get for watching",
-  "extra ads reward on watch": "Each reward lands when you watch that view",
-  "next result": "Next",
-  "invite promo title": "Bring friends while the test is on",
-  "invite promo subtitle": "Bring friends — and the bot sends you a real Telegram gift."
+  "next result": "Далі",
+  "invite promo title": "Поки триває тест — клич друзів",
+  "invite promo subtitle": "Клич друзів — і бот надішле справжній подарунок у Telegram.",
+  "you get for watching": "Отримаєш за перегляд",
+  "extra ads reward on watch": "Кожна нагорода приходить за перегляд"
 }

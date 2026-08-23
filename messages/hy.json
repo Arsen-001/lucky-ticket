@@ -211,7 +211,7 @@
   "claim": "Ստանալ",
   "claim all": "Ստանալ բոլորը",
   "claim failed": "Չհաջողվեց ստանալ պարգևը",
-  "some rewards were not claimed": "Some rewards weren't claimed",
+  "some rewards were not claimed": "Որոշ պարգևներ չհաջողվեց ստանալ",
   "claim failed description": "Չհաջողվեց կապվել սերվերի հետ։ Սեղմիր «Կրկնել»՝ նորից փորձելու համար։",
   "claim already done": "Արդեն ստացված է",
   "claim already done description": "Այս պարգևն արդեն վերցրել ես։ Առաջադրանքներդ այժմ թարմացված են։",
@@ -1356,7 +1356,7 @@
   "purchase error upgrade conflict": "Շարժիչը փոխվեց, մինչ բարելավումն ընթանում էր։ Մակարդակները թարմացվել են — ոչինչ չի պահվել, փորձիր նորից։",
   "purchase error claim conflict": "Այս շարժիչի ցիկլը հենց նոր վերցրեց մեկ այլ հարցում։ Ոչինչ չի պահվել — էկրանը թարմացվել է։",
   "claim already collected": "Արդեն ստացված է",
-  "claim not ready": "Engine is still running",
+  "claim not ready": "Շարժիչը դեռ աշխատում է",
   "session expired": "Սեսիան ավարտվել է",
   "session expired description": "Հավելվածը կորցրել է կապը հաշվիդ հետ։ Ոչինչ չի պահվել — վերագործարկիր այն՝ նորից մտնելու համար։",
   "restart app": "Վերագործարկել",
@@ -1614,9 +1614,9 @@
   "star packages": "Lucky Stars փաթեթներ",
   "cheaper than telegram by {percent}": "{percent}%-ով էժան, քան Telegram-ում",
   "+{days} days": "+{days, plural, other {# օր}}",
-  "you get for watching": "You get for watching",
-  "extra ads reward on watch": "Each reward lands when you watch that view",
-  "next result": "Next",
-  "invite promo title": "Bring friends while the test is on",
-  "invite promo subtitle": "Bring friends — and the bot sends you a real Telegram gift."
+  "next result": "Հաջորդը",
+  "invite promo title": "Հրավիրիր ընկերներիդ, քանի դեռ թեստը շարունակվում է",
+  "invite promo subtitle": "Հրավիրիր ընկերներիդ — և բոտը կուղարկի իսկական նվեր Telegram-ում։",
+  "you get for watching": "Կստանաս մեկ դիտման դիմաց",
+  "extra ads reward on watch": "Յուրաքանչյուր պարգև գալիս է դիտման դիմաց"
 }

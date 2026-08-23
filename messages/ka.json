@@ -211,7 +211,7 @@
   "claim": "აღება",
   "claim all": "ყველას აღება",
   "claim failed": "ჯილდო ვერ აიღეს",
-  "some rewards were not claimed": "Some rewards weren't claimed",
+  "some rewards were not claimed": "ზოგიერთი ჯილდო ვერ აიღეს",
   "claim failed description": "სერვერს ვერ დავუკავშირდით. სცადე ხელახლა.",
   "claim already done": "უკვე აღებულია",
   "claim already done description": "ეს ჯილდო უკვე აიღე. შენი დავალებები განახლებულია.",
@@ -1356,7 +1356,7 @@
   "purchase error upgrade conflict": "ძრავი შეიცვალა, სანამ გაუმჯობესება მიმდინარეობდა. დონეები განახლდა — ჩამოჭრა არ მომხდარა, სცადე თავიდან.",
   "purchase error claim conflict": "ამ ძრავის ციკლი ახლახან სხვა მოთხოვნამ აიღო. ჩამოჭრა არ მომხდარა — ეკრანი განახლდა.",
   "claim already collected": "უკვე აღებულია",
-  "claim not ready": "Engine is still running",
+  "claim not ready": "ძრავი ჯერ კიდევ მუშაობს",
   "session expired": "სესია ამოიწურა",
   "session expired description": "აპლიკაციამ ანგარიშთან კავშირი დაკარგა. ჩამოჭრა არ მომხდარა — გადატვირთე და თავიდან შედი.",
   "restart app": "გადატვირთვა",
@@ -1614,9 +1614,9 @@
   "star packages": "Lucky Stars პაკეტები",
   "cheaper than telegram by {percent}": "{percent}%-ით იაფი, ვიდრე Telegram-ში",
   "+{days} days": "+{days, plural, other {# დღე}}",
-  "you get for watching": "You get for watching",
-  "extra ads reward on watch": "Each reward lands when you watch that view",
-  "next result": "Next",
-  "invite promo title": "Bring friends while the test is on",
-  "invite promo subtitle": "Bring friends — and the bot sends you a real Telegram gift."
+  "next result": "შემდეგი",
+  "invite promo title": "მოიწვიე მეგობრები, სანამ ტესტი მიმდინარეობს",
+  "invite promo subtitle": "მოიწვიე მეგობრები — და ბოტი გამოგიგზავნის ნამდვილ საჩუქარს Telegram-ში.",
+  "you get for watching": "მიიღებ ერთ ჩვენებაზე",
+  "extra ads reward on watch": "თითოეული ჯილდო ჩვენების ნახვისას მოდის"
 }

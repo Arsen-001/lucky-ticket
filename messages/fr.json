@@ -211,7 +211,7 @@
   "claim": "Réclamer",
   "claim all": "Tout réclamer",
   "claim failed": "Impossible de réclamer la récompense",
-  "some rewards were not claimed": "Some rewards weren't claimed",
+  "some rewards were not claimed": "Certaines récompenses n'ont pas été réclamées",
   "claim failed description": "Impossible de joindre le serveur. Appuie sur réessayer.",
   "claim already done": "Déjà réclamé",
   "claim already done description": "Tu as déjà pris cette récompense. Tes tâches sont à jour.",
@@ -1356,7 +1356,7 @@
   "purchase error upgrade conflict": "Le moteur a changé pendant l'amélioration. Ses niveaux sont actualisés — rien n'a été débité, réessaie.",
   "purchase error claim conflict": "Le cycle de ce moteur vient d'être récupéré par une autre requête. Rien n'a été débité — l'écran est actualisé.",
   "claim already collected": "Déjà récupéré",
-  "claim not ready": "Engine is still running",
+  "claim not ready": "Le moteur tourne encore",
   "session expired": "Session expirée",
   "session expired description": "L'app a perdu la connexion à ton compte. Rien n'a été débité — redémarre-la pour te reconnecter.",
   "restart app": "Redémarrer",
@@ -1614,9 +1614,9 @@
   "star packages": "Packs Lucky Stars",
   "cheaper than telegram by {percent}": "{percent} % moins cher que Telegram",
   "+{days} days": "+{days, plural, one {# jour} other {# jours}}",
-  "you get for watching": "You get for watching",
-  "extra ads reward on watch": "Each reward lands when you watch that view",
-  "next result": "Next",
-  "invite promo title": "Bring friends while the test is on",
-  "invite promo subtitle": "Bring friends — and the bot sends you a real Telegram gift."
+  "next result": "Suivant",
+  "invite promo title": "Invite tes amis pendant le test",
+  "invite promo subtitle": "Invite tes amis — et le bot t'envoie un vrai cadeau Telegram.",
+  "you get for watching": "Tu reçois par visionnage",
+  "extra ads reward on watch": "Chaque récompense arrive au moment du visionnage"
 }
