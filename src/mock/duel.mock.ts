@@ -308,6 +308,10 @@ export const duelMock = {
     { id: 'friend-4', name: 'Lilit', avatarUrl: '', reachable: false, tickets: 0 },
     // Достижим, но без билетов: ставка любая — серый, «не хватает билетов».
     { id: 'friend-5', name: 'Karen', avatarUrl: '', reachable: true, tickets: 0 },
+    // Игроки с доски: их зовут так же, как друзей, и отличить их в списке
+    // нельзя — ни полем, ни подписью. Вызов до них доходит всегда.
+    { id: 'seed-1', name: 'Narek', avatarUrl: '', reachable: true, tickets: 20 },
+    { id: 'seed-2', name: 'Ayse', avatarUrl: '', reachable: true, tickets: 20 },
   ],
 
   /** Отправка: доходит только до достижимых — «отправлено» ≠ «доставлено». */
