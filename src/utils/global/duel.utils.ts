@@ -21,6 +21,16 @@ const BEATS: Record<DuelMove, DuelMove> = {
 };
 
 /**
+ * Круг правил целиком: три пары «бьёт».
+ *
+ * Берётся из той же таблицы, что судит раунды. Второй список тех же правил —
+ * для экрана правил — разошёлся бы с первым на первой же правке.
+ */
+export function duelCycle(): { winner: DuelMove; loser: DuelMove }[] {
+  return (Object.keys(BEATS) as DuelMove[]).map(winner => ({ winner, loser: BEATS[winner] }));
+}
+
+/**
  * Победившая и проигравшая фигуры раунда, или `null` при ничьей.
  *
  * Нужно, чтобы объяснить исход словами («билет бьёт камень»): без объяснения

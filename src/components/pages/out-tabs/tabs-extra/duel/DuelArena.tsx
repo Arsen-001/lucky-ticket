@@ -6,6 +6,8 @@ import { Button } from '@/components/shared/buttons/Button';
 import { DuelGameHeader } from '@/components/pages/out-tabs/tabs-extra/duel/DuelGameHeader';
 import { DuelHand } from '@/components/pages/out-tabs/tabs-extra/duel/DuelHand';
 import { DuelPicks } from '@/components/pages/out-tabs/tabs-extra/duel/DuelPicks';
+import { DuelReadyMark } from '@/components/pages/out-tabs/tabs-extra/duel/DuelReadyMark';
+import { DuelSeriesChip } from '@/components/pages/out-tabs/tabs-extra/duel/DuelSeriesChip';
 import { DuelSide } from '@/components/pages/out-tabs/tabs-extra/duel/DuelSide';
 import { DuelToken } from '@/components/pages/out-tabs/tabs-extra/duel/DuelToken';
 import { DuelWaiting } from '@/components/pages/out-tabs/tabs-extra/duel/DuelWaiting';
@@ -31,7 +33,7 @@ import {
   duelRoundWon,
 } from '@/utils/global/duel.utils';
 import { useSpendFailure } from '@/hooks/useSpendFailure';
-import type { DuelMove } from '@/types/interfaces/duel.interfaces';
+import type { DuelMove, DuelTier } from '@/types/interfaces/duel.interfaces';
 import '@/styles/components/duel.css';
 
 /** В бою состояние опрашивается часто: раунд длится считаные секунды. */
@@ -47,6 +49,13 @@ const POLL_REVEAL = 300;
 export interface DuelArenaProps {
   duelId: string;
   tickets: number;
+  /**
+   * Билеты по лигам.
+   *
+   * В шапке стоит кошелёк ЭТОЙ лиги: за золотым столом «17» бронзовых билетов
+   * — не тот остаток, которым игрок рискует.
+   */
+  balances?: Readonly<Record<DuelTier, number>>;
   /** Лобби открыли ради конкретных людей — список друзей показываем сразу. */
   openInvite?: boolean;
   onLeave: () => void;
@@ -62,7 +71,14 @@ export interface DuelArenaProps {
  * одна кнопка «Я готов». Шаг не читается как лишний, потому что ничего не
  * переключается: меняется только то, что лежит под руками.
  */
-export function DuelArena({ duelId, tickets, openInvite, onLeave, onRematch }: DuelArenaProps) {
+export function DuelArena({
+  duelId,
+  tickets,
+  balances,
+  openInvite,
+  onLeave,
+  onRematch,
+}: DuelArenaProps) {
   const t = useAppTranslations();
   const toast = useToast();
   // Замок, а не `isLoading`: перерисовка, гасящая кнопку, может опоздать на
@@ -248,12 +264,13 @@ export function DuelArena({ duelId, tickets, openInvite, onLeave, onRematch }: D
   if (data.status === 'WAITING') {
     return (
       <div className="flex h-full flex-col">
-        <DuelGameHeader tickets={tickets} />
+        <DuelGameHeader tickets={balances?.[data.tier] ?? tickets} tier={data.tier} />
         <DuelWaiting
           duelId={duelId}
           invitedName={data.invitedName}
           openInvite={openInvite}
           stake={data.stake}
+          tier={data.tier}
           seconds={data.waitingSeconds}
           cancelling={lock.locked.has('cancel')}
           onCancel={async () => {
@@ -297,137 +314,170 @@ export function DuelArena({ duelId, tickets, openInvite, onLeave, onRematch }: D
   return (
     <div className="flex h-full flex-col">
       {spend.modals}
-      <DuelGameHeader tickets={tickets} />
+      <DuelGameHeader
+        tickets={balances?.[data.tier] ?? tickets}
+        tier={data.tier}
+        round={playing ? (data.round?.index ?? 0) + 1 : null}
+      />
+
       {/* Счёт серии — «вы : соперник», по людям, не по сторонам стола. */}
       {data.series && data.series.matches > 0 && (
-        <div className="text-pink-secondary -mt-0.5 pb-1 text-center text-[11px] font-bold tracking-[0.12em] uppercase">
-          {t('duel series', { mine: data.series.mine, theirs: data.series.theirs })}
-        </div>
+        <DuelSeriesChip mine={data.series.mine} theirs={data.series.theirs} className="mt-2" />
       )}
 
-      {/* ── сторона соперника ── */}
-      <div className="flex flex-1 flex-col items-center gap-2.5">
-        <DuelSide
-          name={foeName}
-          avatarUrl={data.opponent?.avatarUrl || undefined}
-          wins={data.foe.wins}
-          winsNeeded={data.winsNeeded}
-          ringed={readiness ? data.foe.ready : true}
-          badge={
-            readiness
-              ? {
-                  text: data.foe.ready ? t('duel ready') : t('duel foe waiting'),
-                  tone: data.foe.ready ? 'ready' : 'idle',
-                }
-              : playing && data.foe.moved && !revealed
+      {/* Сукно лежит под всеми тремя блоками разом: руки соперника и мои — по
+          две стороны одного стола, а не два отдельных списка. */}
+      <div className="duel-felt flex flex-1 flex-col">
+        {/* ── сторона соперника ── */}
+        <div className="flex flex-1 flex-col items-center gap-2.5 pt-2">
+          <DuelSide
+            name={foeName}
+            avatarUrl={data.opponent?.avatarUrl || undefined}
+            // На готовности счёта нет: матч ещё не начался, и ноль там не
+            // значит ничего — длину матча называет табличка словами.
+            wins={readiness ? null : data.foe.wins}
+            winsNeeded={data.winsNeeded}
+            leading={data.foe.wins > data.me.wins}
+            ringed={readiness ? data.foe.ready : true}
+            badge={
+              !readiness && playing && data.foe.moved && !revealed
                 ? { text: t('duel moved'), tone: 'moved' }
                 : null
-          }
-        />
-
-        {/* Его рука — сразу под именем: это его сторона стола. */}
-        {!readiness && (
-          <DuelHand
-            className="w-full"
-            thinking={playing && !data.foe.moved && !revealed}
-            revealed={revealed ? data.foe.move : null}
+            }
           />
-        )}
 
-        <DuelToken
-          move={revealed ? data.foe.move : null}
-          size={118}
-          state={foeState}
-          className={revealed ? 'duel-drop' : ''}
-        />
-      </div>
+          {/* Его рука — сразу под именем: это его сторона стола. */}
+          {!readiness && (
+            <DuelHand
+              className="w-full"
+              thinking={playing && !data.foe.moved && !revealed}
+              revealed={revealed ? data.foe.move : null}
+            />
+          )}
 
-      {/* ── середина: что сейчас происходит ── */}
-      <div className="flex min-h-[70px] flex-col items-center justify-center gap-0.5 border-y border-white/6 px-2 py-2 text-center">
-        {finished ? (
-          <>
-            <span
-              className={twMerge(
-                'text-[21px] font-extrabold',
-                iWon ? 'text-gold' : 'text-error-text'
-              )}
-            >
-              {iWon ? t('duel you won') : t('duel you lost')}
-            </span>
-            <span className="text-pink-secondary text-[11px]">
-              {t('duel stake tickets', { count: data.stake * 2 })}
-            </span>
-          </>
-        ) : readiness ? (
-          <span className="text-gray-secondary text-[13px]">{t('duel both must confirm')}</span>
-        ) : revealed ? (
-          <>
-            <span
-              className={twMerge(
-                'text-[19px] font-extrabold',
-                roundWon === null
-                  ? 'text-gray-secondary'
-                  : roundWon
-                    ? 'text-gold'
-                    : 'text-error-text'
-              )}
-            >
-              {roundWon === null
-                ? t('duel draw')
-                : roundWon
-                  ? t('duel round yours')
-                  : t('duel round theirs')}
-            </span>
-            {beats && (
-              <span className="text-pink-secondary text-[11px]">
-                {t('duel round beats', {
-                  winner: t(DUEL_MOVE_LABEL[beats.winner]),
-                  loser: t(DUEL_MOVE_LABEL[beats.loser]),
-                })}
-              </span>
-            )}
-          </>
-        ) : (
-          <>
-            {!myMove && (
+          {readiness ? (
+            <DuelReadyMark
+              ready={data.foe.ready}
+              caption={data.foe.ready ? t('duel ready confirmed') : t('duel foe waiting')}
+              className="my-3"
+            />
+          ) : (
+            <DuelToken
+              move={revealed ? data.foe.move : null}
+              size={118}
+              state={foeState}
+              className={revealed ? 'duel-drop' : ''}
+            />
+          )}
+        </div>
+
+        {/* ── середина: что сейчас происходит ── */}
+        <div className="duel-plate flex min-h-[70px] flex-col items-center justify-center gap-0.5 rounded-[14px] px-2 py-2 text-center">
+          {finished ? (
+            <>
               <span
                 className={twMerge(
-                  'text-2xl font-extrabold tabular-nums',
-                  secondsLeft(data.round?.deadline ?? null) <= 2 ? 'text-error-text' : 'text-gold'
+                  'text-[21px] font-extrabold',
+                  iWon ? 'text-gold' : 'text-error-text'
                 )}
               >
-                {secondsLeft(data.round?.deadline ?? null)}
+                {iWon ? t('duel you won') : t('duel you lost')}
               </span>
-            )}
-            <span className="text-gray-secondary text-[13px]">
-              {myMove ? t('duel move accepted') : t('duel pick a token')}
-            </span>
-          </>
-        )}
-      </div>
+              {/* Раньше здесь стояло «4 бил.» независимо от исхода — проигравший
+                  читал под словом «Поражение» размер чужого выигрыша. */}
+              <span
+                className={twMerge(
+                  'text-[12.5px] font-extrabold tabular-nums',
+                  iWon ? 'text-gold' : 'text-pink-secondary'
+                )}
+              >
+                {iWon
+                  ? t('duel took tickets', { count: data.stake * 2 })
+                  : t('duel lost tickets', { count: data.stake })}
+              </span>
+            </>
+          ) : readiness ? (
+            <>
+              {/* Длину матча называет табличка словами — счёт 0:0 на этой фазе
+                  убран: матча ещё нет, и ноль там не значит ничего. */}
+              <span className="text-[16px] font-extrabold">
+                {t('duel match to wins', { count: data.winsNeeded })}
+              </span>
+              <span className="text-gray-secondary text-[13px]">{t('duel both must confirm')}</span>
+            </>
+          ) : revealed ? (
+            <>
+              <span
+                className={twMerge(
+                  'text-[19px] font-extrabold',
+                  roundWon === null
+                    ? 'text-gray-secondary'
+                    : roundWon
+                      ? 'text-gold'
+                      : 'text-error-text'
+                )}
+              >
+                {roundWon === null
+                  ? t('duel draw')
+                  : roundWon
+                    ? t('duel round yours')
+                    : t('duel round theirs')}
+              </span>
+              {beats && (
+                <span className="text-pink-secondary text-[11px]">
+                  {t('duel round beats', {
+                    winner: t(DUEL_MOVE_LABEL[beats.winner]),
+                    loser: t(DUEL_MOVE_LABEL[beats.loser]),
+                  })}
+                </span>
+              )}
+            </>
+          ) : (
+            <>
+              {!myMove && (
+                <span
+                  className={twMerge(
+                    'text-2xl font-extrabold tabular-nums',
+                    secondsLeft(data.round?.deadline ?? null) <= 2 ? 'text-error-text' : 'text-gold'
+                  )}
+                >
+                  {secondsLeft(data.round?.deadline ?? null)}
+                </span>
+              )}
+              <span className="text-gray-secondary text-[13px]">
+                {myMove ? t('duel move accepted') : t('duel pick a token')}
+              </span>
+            </>
+          )}
+        </div>
 
-      {/* ── моя сторона ── */}
-      <div className="flex flex-1 flex-col items-center justify-end gap-2.5">
-        <DuelToken
-          move={myMove}
-          size={124}
-          state={myState}
-          className={revealed ? 'duel-drop' : ''}
-        />
-        <DuelSide
-          name={t('duel you')}
-          wins={data.me.wins}
-          winsNeeded={data.winsNeeded}
-          ringed={readiness ? data.me.ready : true}
-          badge={
-            readiness
-              ? {
-                  text: data.me.ready ? t('duel ready') : t('duel not ready'),
-                  tone: data.me.ready ? 'ready' : 'idle',
-                }
-              : null
-          }
-        />
+        {/* ── моя сторона ── */}
+        {/* По центру своей половины, а не прижата ко дну: у соперника сверху
+            лежит ещё и рука, у меня её роль играют кнопки хода — прижатая вниз
+            сторона оставляла между табличкой и жетоном провал в треть экрана. */}
+        <div className="flex flex-1 flex-col items-center justify-center gap-2.5">
+          {readiness ? (
+            <DuelReadyMark
+              ready={data.me.ready}
+              caption={data.me.ready ? t('duel ready confirmed') : t('duel ready waiting you')}
+              className="my-3"
+            />
+          ) : (
+            <DuelToken
+              move={myMove}
+              size={124}
+              state={myState}
+              className={revealed ? 'duel-drop' : ''}
+            />
+          )}
+          <DuelSide
+            name={t('duel you')}
+            wins={readiness ? null : data.me.wins}
+            winsNeeded={data.winsNeeded}
+            leading={data.me.wins > data.foe.wins}
+            ringed={readiness ? data.me.ready : true}
+          />
+        </div>
       </div>
 
       {/* ── низ: готовность или жетоны ── */}
@@ -444,13 +494,18 @@ export function DuelArena({ duelId, tickets, openInvite, onLeave, onRematch }: D
                   ? ` · ${t('duel lobby of', { name: data.opponent.name })}`
                   : ''}
               </span>
-              <span className="text-gold text-[15px] font-extrabold tabular-nums">
+              <span
+                className={twMerge(
+                  'text-[15px] font-extrabold tabular-nums',
+                  secondsLeft(data.readyDeadline) <= 3 ? 'text-error-text' : 'text-gold'
+                )}
+              >
                 {secondsLeft(data.readyDeadline)}
               </span>
             </div>
-            <span className="h-1 w-full overflow-hidden rounded-full bg-white/10">
+            <span className="h-1 w-full overflow-hidden rounded-full bg-black/40">
               <span
-                className="bg-pink-gradient block h-full origin-left transition-transform duration-500"
+                className="bg-gold block h-full origin-left transition-transform duration-500"
                 style={{
                   transform: `scaleX(${Math.max(0, Math.min(1, secondsLeft(data.readyDeadline) / 10))})`,
                 }}

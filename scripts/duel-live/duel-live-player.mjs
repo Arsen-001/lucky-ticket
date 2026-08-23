@@ -25,7 +25,7 @@ log('lobbies:', list.status, list.body?.message ?? '', 'tickets=', list.body?.ti
 if (list.status !== 200) process.exit(2);
 
 // ── 1. ждём лобби хозяина (или свой незакрытый матч) ─────────────────
-let duelId = list.body.active?.id ?? null; // eslint-disable-line prefer-const
+let duelId = list.body.active?.id ?? null;
 const t0 = Date.now();
 while (!duelId && Date.now() - t0 < WAIT_MIN * 60_000) {
   list = await api('GET', '/games/duel/lobbies');

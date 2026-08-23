@@ -37,7 +37,7 @@ export function DuelToken({ move, size = 128, state = 'idle', className }: DuelT
       <div
         key="back"
         className={twMerge(
-          'flex-center rounded-full border border-electric-purple/50 bg-background-overlay',
+          'flex-center duel-pedestal rounded-full border border-electric-purple/55 bg-[rgba(8,6,20,0.6)]',
           'font-bold text-pink-secondary/60 transition-transform duration-300',
           className
         )}
@@ -50,14 +50,21 @@ export function DuelToken({ move, size = 128, state = 'idle', className }: DuelT
 
   const stateClasses: Record<DuelTokenState, string> = {
     idle: '',
-    win: 'scale-110 drop-shadow-[0_0_26px_rgba(248,189,62,0.75)]',
+    win: '-translate-y-1 scale-110 drop-shadow-[0_0_26px_rgba(248,189,62,0.75)]',
     lose: 'scale-90 grayscale brightness-[0.62]',
   };
 
   return (
     <div
       key="face"
-      className={twMerge('flex-center transition-all duration-300', stateClasses[state], className)}
+      className={twMerge(
+        'flex-center duel-pedestal transition-all duration-300',
+        // Под проигравшим тень не светится: подсветка под ним читалась ровно
+        // наоборот тому, что случилось.
+        state === 'lose' && 'duel-pedestal-dark',
+        stateClasses[state],
+        className
+      )}
       style={{ width: size, height: size }}
     >
       <Image
@@ -68,7 +75,9 @@ export function DuelToken({ move, size = 128, state = 'idle', className }: DuelT
         // Билет вдвое шире, чем выше: вписанный в квадрат по ширине он выходит
         // заметно мельче камня и ножниц, поэтому ему дают вырасти за рамку.
         className={twMerge(
-          'h-full w-full object-contain drop-shadow-[0_14px_22px_rgba(0,0,0,0.6)]',
+          // Тень длинная и низкая: предмет лежит на столе под лампой, а не
+          // висит в пустоте.
+          'h-full w-full object-contain drop-shadow-[0_18px_12px_rgba(0,0,0,0.7)]',
           move === 'TICKET' && 'scale-[1.16]'
         )}
         priority

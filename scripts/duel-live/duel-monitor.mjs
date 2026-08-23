@@ -10,7 +10,6 @@ const S = new URL('.', import.meta.url).pathname;
 const DBURL = fs.readFileSync(S + '/.dburl', 'utf8').trim();
 const API = 'https://lucky-ticket-backend-production.up.railway.app';
 const AK001 = '16eb243f-0025-4fb7-ad22-5e7b7fb42e2d';
-const DAVIT = '0686e171-20a1-4f80-83ae-f02462e7feb5';
 const ts = () => new Date().toISOString().slice(11, 23);
 const log = (...a) => console.log(ts(), ...a);
 const sleep = (ms) => new Promise(r => setTimeout(r, ms));

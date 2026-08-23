@@ -26,13 +26,14 @@ export function DuelLobbyRow({ lobby, busy, affordable = true, onJoin }: DuelLob
   const t = useAppTranslations();
 
   return (
-    <div className="bg-background-overlay flex items-center gap-3 rounded-2xl border border-white/8 p-3">
+    <div className="duel-rim flex items-center gap-3 rounded-[14px] p-3">
       <DuelPlayerAvatar name={lobby.host.name} avatarUrl={lobby.host.avatarUrl || undefined} />
 
       <span className="min-w-0 flex-1">
         <span className="block truncate text-[15px] font-bold">{lobby.host.name}</span>
         <span className="text-disabled block text-[12px]">
           {t('duel waiting for', { time: duelClock(lobby.waitingSeconds) })} ·{' '}
+          {t('duel stake short')}{' '}
           <span className="text-gold font-bold tabular-nums">{lobby.stake}</span>{' '}
           {/* Билет лиги вместо слова: во что играют, видно раньше, чем прочитано */}
           <Ticket
@@ -45,7 +46,10 @@ export function DuelLobbyRow({ lobby, busy, affordable = true, onJoin }: DuelLob
       </span>
 
       <Button
-        className={twMerge('h-10 px-5 text-[13px]', !affordable && 'opacity-45')}
+        className={twMerge(
+          'h-10 shrink-0 rounded-xl px-5 text-[13px]',
+          !affordable && 'opacity-45'
+        )}
         loading={busy}
         onClick={() => onJoin(lobby.id)}
       >

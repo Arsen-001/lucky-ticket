@@ -14,6 +14,13 @@ export interface GameCardProps {
   href?: Route;
   /** Жетоны игры: показываются веером справа. */
   tokens?: string[];
+  /**
+   * Живая строка про игру: сколько столов открыто прямо сейчас.
+   *
+   * Витрина обязана отвечать на «во что играть сейчас», а не только «во что
+   * можно вообще»: число открытых столов — единственное, что здесь меняется.
+   */
+  badge?: string;
   soon?: boolean;
   className?: string;
 }
@@ -24,12 +31,17 @@ export interface GameCardProps {
  * Игру показывает её собственными предметами, а не иконкой из набора: жетоны
  * узнаются раньше, чем прочитано название.
  */
-export function GameCard({ title, subtitle, href, tokens, soon, className }: GameCardProps) {
+export function GameCard({ title, subtitle, href, tokens, badge, soon, className }: GameCardProps) {
   const t = useAppTranslations();
 
   const body = (
     <>
       <span className="relative z-2 flex min-w-0 flex-1 flex-col gap-1">
+        {badge && (
+          <span className="text-success-text w-fit rounded-full border border-success-text/45 bg-success/15 px-2 py-0.5 text-[9.5px] font-black tracking-[0.12em] uppercase tabular-nums">
+            {badge}
+          </span>
+        )}
         <span className="flex items-center gap-2">
           <span className="text-[17px] font-extrabold leading-tight">{title}</span>
           {soon && (
@@ -51,7 +63,12 @@ export function GameCard({ title, subtitle, href, tokens, soon, className }: Gam
               width={52}
               height={52}
               style={{ marginInlineStart: index === 0 ? 0 : -8 }}
-              className="h-[52px] w-[52px] object-contain drop-shadow-[0_8px_14px_rgba(0,0,0,0.6)]"
+              // Билет вдвое шире, чем выше: плашмя он читался полосой, а не
+              // предметом. Под −45° он встаёт в один рост с камнем и ножницами.
+              className={twMerge(
+                'h-[52px] w-[52px] object-contain drop-shadow-[0_8px_14px_rgba(0,0,0,0.6)]',
+                src.includes('ticket') && '-rotate-45'
+              )}
             />
           ))}
         </span>

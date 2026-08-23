@@ -1,10 +1,208 @@
 /**
  * Дуэль камень-билет-ножницы.
  *
- * Здесь то, чего Tailwind не выражает: дышащая рука соперника, пульсирующее
- * кольцо ожидания и падение жетона на стол. Всё остальное живёт классами в
- * компонентах.
+ * Здесь два слоя, которых Tailwind не выражает.
+ *
+ * **Мир стола** — вход в игру должен быть входом в помещение, а не сменой
+ * цвета фона: лампа сверху, ворс сукна, пятно света посреди стола, тёмные углы
+ * комнаты и водяные знаки самими фигурами игры.
+ *
+ * **Неоновая оправа** — кромки блоков светятся акцентом приложения, а заливка
+ * уходит в черноту. Выбрано пользователем 23.08.2026 из пяти вариантов
+ * (латунь / сталь / стекло / неон / уголь) поверх трёх миров сцены.
+ *
+ * Что НЕ является украшением и не меняется вместе с оправой: зелёный — это
+ * «готов», золото — это «выбрано», бронза фигур — это сами фигуры.
  */
+
+/* ═════════════════════════ мир стола ═════════════════════════ */
+
+/**
+ * Свой грунт и свет лампы над ним.
+ *
+ * Общий атмосферный фон приложения — лучи и звёзды — над столом читался как
+ * небо: предметы висели в нём, а не лежали. Подложка вылезает за поля колонки
+ * (`px-5`, `pt-3`, нижний отступ прокрутки), чтобы стол доходил до краёв
+ * экрана, а не был карточкой в рамке.
+ */
+.duel-lamp {
+  position: relative;
+}
+
+.duel-lamp::before,
+.duel-lamp::after {
+  content: '';
+  position: absolute;
+  inset: -12px -20px -44px;
+  pointer-events: none;
+  z-index: 0;
+}
+
+.duel-lamp::before {
+  background:
+    radial-gradient(
+      118% 60% at 50% -8%,
+      rgba(255, 226, 168, 0.15) 0%,
+      rgba(255, 226, 168, 0.045) 34%,
+      transparent 64%
+    ),
+    radial-gradient(92% 58% at 50% 50%, rgba(96, 66, 152, 0.3), transparent 72%),
+    linear-gradient(
+      180deg,
+      rgba(25, 21, 50, 0.93) 0%,
+      rgba(15, 12, 28, 0.96) 58%,
+      rgba(11, 9, 20, 0.98) 100%
+    );
+}
+
+/**
+ * Ворс сукна и виньетка.
+ *
+ * Две встречные штриховки на грани видимости: заметить их нельзя, а отличить
+ * ткань от заливки — можно. Виньетка говорит, что стол освещён посередине, а
+ * по углам комната тёмная.
+ */
+.duel-lamp::after {
+  background:
+    repeating-linear-gradient(45deg, rgba(255, 226, 168, 0.018) 0 2px, transparent 2px 5px),
+    repeating-linear-gradient(-45deg, rgba(0, 0, 0, 0.07) 0 2px, transparent 2px 5px);
+  box-shadow: inset 0 0 110px 28px rgba(0, 0, 0, 0.62);
+}
+
+.duel-lamp > * {
+  position: relative;
+  z-index: 1;
+}
+
+/**
+ * Водяные знаки — фигуры самой игры за содержимым.
+ *
+ * Они закрывают пустоту там, где её иначе нечем занять (список, ставка). На
+ * экранах, где идёт партия, знаки почти гаснут: на столе уже лежат настоящие
+ * фигуры, и вторая пара тех же самых за ними спорит с первой.
+ */
+.duel-marks::before {
+  content: '';
+  position: absolute;
+  inset: -12px -20px -44px;
+  pointer-events: none;
+  z-index: 0;
+  opacity: 0.05;
+  background-repeat: no-repeat;
+  background-image:
+    url('/assets/icons/duel/rock.webp'), url('/assets/icons/duel/scissors.webp'),
+    url('/assets/icons/tickets/bronze-ticket.webp');
+  background-size: 210px, 230px, 250px;
+  background-position:
+    -62px 68%,
+    calc(100% + 66px) 20%,
+    50% 112%;
+}
+
+.duel-marks-quiet::before {
+  opacity: 0.022;
+  background-position:
+    -92px 76%,
+    calc(100% + 96px) 12%,
+    50% 126%;
+}
+
+/**
+ * Пятно света на сукне между руками.
+ *
+ * Не обведённая дуга: жёсткая кромка на высоком экране прочерчивала через него
+ * случайную линию и читалась чем угодно, только не столом.
+ */
+.duel-felt {
+  position: relative;
+}
+
+.duel-felt::before {
+  content: '';
+  position: absolute;
+  inset: 14% -18% 10%;
+  border-radius: 50% / 30%;
+  pointer-events: none;
+  background: radial-gradient(
+    closest-side,
+    rgba(112, 78, 170, 0.4),
+    rgba(64, 42, 108, 0.16) 62%,
+    transparent 82%
+  );
+}
+
+.duel-felt > * {
+  position: relative;
+}
+
+/* ═════════════════════ неоновая оправа ═════════════════════ */
+
+/**
+ * Блок игры: кромка светится, заливка уходит в черноту.
+ *
+ * Ею обведено всё, что лежит на столе, — строки столов, жетоны выбора, фишки
+ * ставки, плитки лиг, табло счёта.
+ */
+.duel-rim {
+  border: 1px solid rgba(116, 61, 245, 0.55);
+  background: linear-gradient(180deg, rgba(116, 61, 245, 0.16), rgba(8, 6, 20, 0.55));
+  box-shadow:
+    0 0 16px rgba(116, 61, 245, 0.22),
+    inset 0 1px 0 rgba(190, 160, 255, 0.24);
+}
+
+/* Выбранное — золотом. Это значение, а не материал, и от оправы не зависит. */
+.duel-rim-on {
+  border-color: rgba(248, 189, 62, 0.7);
+  background: linear-gradient(180deg, rgba(248, 189, 62, 0.18), rgba(8, 6, 20, 0.5));
+  box-shadow:
+    0 0 18px rgba(248, 189, 62, 0.24),
+    inset 0 1px 0 rgba(255, 226, 168, 0.32);
+}
+
+/* Табличка посреди стола: на ней написано, что происходит прямо сейчас. */
+.duel-plate {
+  border: 1px solid rgba(222, 0, 155, 0.5);
+  background: linear-gradient(180deg, rgba(222, 0, 155, 0.16), rgba(8, 6, 20, 0.5));
+  box-shadow:
+    0 0 20px rgba(222, 0, 155, 0.2),
+    inset 0 1px 0 rgba(255, 160, 220, 0.24);
+}
+
+/* Счёт серии — жетон поперёк стола. */
+.duel-chip {
+  border: 1px solid rgba(222, 0, 155, 0.6);
+  background: linear-gradient(180deg, rgba(222, 0, 155, 0.2), rgba(8, 6, 20, 0.5));
+  box-shadow: inset 0 1px 0 rgba(255, 160, 220, 0.28);
+}
+
+/**
+ * Тень под жетоном: предмет лежит на столе, а не висит в воздухе.
+ *
+ * Кроме проигравшего: подсвеченная тень под ним читалась подсветкой, то есть
+ * ровно наоборот случившемуся.
+ */
+.duel-pedestal {
+  position: relative;
+}
+
+.duel-pedestal::after {
+  content: '';
+  position: absolute;
+  left: 15%;
+  right: 15%;
+  bottom: 1px;
+  height: 12px;
+  border-radius: 50%;
+  pointer-events: none;
+  background: radial-gradient(closest-side, rgba(116, 61, 245, 0.45), transparent);
+}
+
+.duel-pedestal-dark::after {
+  background: radial-gradient(closest-side, rgba(0, 0, 0, 0.55), transparent);
+}
+
+/* ═════════════════════════ движение ═════════════════════════ */
 
 /* Кольцо ожидания: два расходящихся круга, второй с задержкой. */
 @keyframes duel-ping {
@@ -24,7 +222,7 @@
   position: absolute;
   inset: 0;
   border-radius: 50%;
-  border: 1px solid rgba(116, 61, 245, 0.7);
+  border: 1px solid rgba(116, 61, 245, 0.6);
   animation: duel-ping 2.4s cubic-bezier(0.2, 0.7, 0.4, 1) infinite;
 }
 
@@ -41,12 +239,12 @@
 @keyframes duel-breath {
   0%,
   100% {
-    border-color: rgba(158, 140, 214, 0.09);
-    background: rgba(34, 29, 56, 0.55);
+    border-color: rgba(116, 61, 245, 0.32);
+    background: rgba(8, 6, 20, 0.5);
   }
   50% {
-    border-color: rgba(158, 140, 214, 0.32);
-    background: rgba(34, 29, 56, 0.8);
+    border-color: rgba(150, 110, 255, 0.62);
+    background: rgba(24, 14, 54, 0.62);
   }
 }
 

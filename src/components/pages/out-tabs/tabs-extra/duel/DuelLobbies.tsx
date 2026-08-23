@@ -1,13 +1,20 @@
 'use client';
 
 import { useRef, useState } from 'react';
-import { twMerge } from 'tailwind-merge';
 import { Button } from '@/components/shared/buttons/Button';
 import { QueryErrorState } from '@/components/shared/error/QueryErrorState';
 import { DuelGameHeader } from '@/components/pages/out-tabs/tabs-extra/duel/DuelGameHeader';
 import { DuelInviteModal } from '@/components/pages/out-tabs/tabs-extra/duel/DuelInviteModal';
 import { DuelLobbyRow } from '@/components/pages/out-tabs/tabs-extra/duel/DuelLobbyRow';
-import { DuelTierPicker } from '@/components/pages/out-tabs/tabs-extra/duel/DuelTierPicker';
+import { DuelPotPreview } from '@/components/pages/out-tabs/tabs-extra/duel/DuelPotPreview';
+import { DuelRulesModal } from '@/components/pages/out-tabs/tabs-extra/duel/DuelRulesModal';
+import { DuelTierFilter } from '@/components/pages/out-tabs/tabs-extra/duel/DuelTierFilter';
+import { DuelStakePicker } from '@/components/pages/out-tabs/tabs-extra/duel/DuelStakePicker';
+import { DuelTablePanel } from '@/components/pages/out-tabs/tabs-extra/duel/DuelTablePanel';
+import {
+  DUEL_TIERS,
+  DuelTierPicker,
+} from '@/components/pages/out-tabs/tabs-extra/duel/DuelTierPicker';
 import { duelClock, duelJoinFailure, duelMatchInProgress } from '@/utils/global/duel.utils';
 import { useAppTranslations } from '@/hooks/useAppTranslations';
 import { useInFlightLock } from '@/hooks/useInFlightLock';
@@ -21,6 +28,8 @@ import {
   useInviteToDuelMutation,
   useJoinDuelMutation,
 } from '@/api/duel.api';
+import { useGetProfileQuery } from '@/api/profile.api';
+import '@/styles/components/duel.css';
 
 export interface DuelLobbiesProps {
   /** `invite` — открыть лобби и сразу показать список друзей. */
@@ -56,6 +65,11 @@ export function DuelLobbies({ onEnter, inviteUserId }: DuelLobbiesProps) {
   // вызовом. Созданное здесь лобби запоминается, чтобы войти в него, когда
   // модалка закроется (она закрывается сама после отправки).
   const [pickingFriends, setPickingFriends] = useState(false);
+  // Правила стола: читают один раз, поэтому живут под кнопкой «i».
+  const [rulesOpen, setRulesOpen] = useState(false);
+  // Какую лигу показывать в списке. `null` — все: столы разных лиг лежат
+  // вперемешку, и по умолчанию видно всё, что вообще открыто.
+  const [filterTier, setFilterTier] = useState<DuelTier | null>(null);
   // Ref, а не state: модалка зовёт `onClose` из того же вызова, в котором
   // лобби только что создалось, — state в этом замыкании ещё пустой.
   const createdForFriends = useRef<string | null>(null);
@@ -70,6 +84,9 @@ export function DuelLobbies({ onEnter, inviteUserId }: DuelLobbiesProps) {
   const { data, isLoading, isError, refetch } = useGetDuelLobbiesQuery(undefined, {
     pollingInterval: 3000,
   });
+  // Свой счёт сыгранного — из профиля: он там уже посчитан и обычно лежит в
+  // кеше. Отдельной ручки под это заводить не нужно.
+  const { data: profile } = useGetProfileQuery(undefined);
   const [create] = useCreateDuelMutation();
   const [join] = useJoinDuelMutation();
   const [cancel] = useCancelDuelMutation();
@@ -80,6 +97,14 @@ export function DuelLobbies({ onEnter, inviteUserId }: DuelLobbiesProps) {
   const tickets = balances ? (balances[tier] ?? 0) : (data?.tickets ?? 0);
   const min = data?.stakeMin ?? 1;
   const max = data?.stakeMax ?? 5;
+  // Сколько столов ждёт соперника, считая своё.
+  const open = (data?.lobbies.length ?? 0) + (data?.own ? 1 : 0);
+  // Сколько столов в каждой лиге — цифра стоит на самой кнопке фильтра.
+  const counts = DUEL_TIERS.reduce(
+    (acc, next) => ({ ...acc, [next]: (data?.lobbies ?? []).filter(l => l.tier === next).length }),
+    {} as Record<DuelTier, number>
+  );
+  const shown = (data?.lobbies ?? []).filter(l => !filterTier || l.tier === filterTier);
 
   const handleCreate = async () => {
     if (!lock.acquire('create')) return;
@@ -170,12 +195,29 @@ export function DuelLobbies({ onEnter, inviteUserId }: DuelLobbiesProps) {
   // данных `tickets` равен нулю, и кнопка «Создать лобби» просто гасла.
   if (isError) return <QueryErrorState onRetry={() => refetch()} />;
 
-  const header = <DuelGameHeader tickets={tickets} tier={tier} />;
+  // Лигу выбирают строкой ниже, поэтому в шапке её не называют ни там, ни там.
+  // Справа в списке — весь кошелёк: столы лежат вперемешку, и одно число
+  // отвечало бы только про одну лигу.
+  const rules = data && (
+    <DuelRulesModal
+      open={rulesOpen}
+      winsNeeded={data.winsNeeded}
+      moveSeconds={data.moveSeconds}
+      readySeconds={data.readySeconds}
+      onClose={() => setRulesOpen(false)}
+    />
+  );
 
   if (picking) {
     return (
-      <div className="flex h-full flex-col gap-3">
-        {header}
+      <div className="duel-marks flex h-full flex-col gap-3">
+        <DuelGameHeader
+          tickets={tickets}
+          tier={tier}
+          showLeague={false}
+          wallet={false}
+          onInfo={data ? () => setRulesOpen(true) : undefined}
+        />
 
         <span className="text-pink-secondary text-[10px] font-black tracking-[0.16em] uppercase">
           {t('duel choose tier')}
@@ -196,38 +238,20 @@ export function DuelLobbies({ onEnter, inviteUserId }: DuelLobbiesProps) {
           {t('duel choose stake')}
         </span>
 
-        <div className="grid grid-cols-5 gap-2">
-          {Array.from({ length: max - min + 1 }, (_, i) => i + min).map(value => (
-            <button
-              key={value}
-              type="button"
-              aria-pressed={stake === value}
-              disabled={value > tickets}
-              onClick={() => setStake(value)}
-              className={twMerge(
-                'flex h-16 flex-col items-center justify-center gap-0.5 rounded-2xl border transition',
-                'bg-background-overlay border-white/10 disabled:opacity-30',
-                stake === value && 'border-gold bg-gold/12'
-              )}
-            >
-              <span
-                className={twMerge(
-                  'text-lg font-extrabold tabular-nums',
-                  stake === value && 'text-gold'
-                )}
-              >
-                {value}
-              </span>
-              <span className="text-pink-secondary text-[9px] tracking-wider uppercase">
-                {t('duel tickets left')}
-              </span>
-            </button>
-          ))}
-        </div>
+        <DuelStakePicker
+          value={stake}
+          min={min}
+          max={max}
+          tickets={tickets}
+          tier={tier}
+          onChange={setStake}
+        />
 
         <p className="text-disabled text-xs leading-relaxed">{t('duel stake note')}</p>
 
-        <div className="mt-auto flex flex-col gap-2">
+        <DuelPotPreview stake={stake} tier={tier} className="flex-1" />
+
+        <div className="flex flex-col gap-2">
           <Button
             className="h-14"
             loading={creating === 'open'}
@@ -257,6 +281,7 @@ export function DuelLobbies({ onEnter, inviteUserId }: DuelLobbiesProps) {
         </div>
 
         {spend.modals}
+        {rules}
         <DuelInviteModal
           open={pickingFriends}
           stake={stake}
@@ -289,19 +314,39 @@ export function DuelLobbies({ onEnter, inviteUserId }: DuelLobbiesProps) {
   }
 
   return (
-    <div className="flex h-full flex-col gap-3">
-      {header}
+    <div className="duel-marks flex h-full flex-col gap-3">
+      <DuelGameHeader
+        tickets={tickets}
+        showLeague={false}
+        balances={balances}
+        onInfo={data ? () => setRulesOpen(true) : undefined}
+      />
 
+      {/* Лига выбирается сверху, а не разбивает список на группы: цифра на
+          самой кнопке говорит, где есть с кем играть, и лишнее убирается одним
+          тапом. Пустая лига видна и гаснет. */}
+      {data && (
+        <DuelTierFilter
+          value={filterTier}
+          counts={counts}
+          total={data.lobbies.length}
+          onChange={setFilterTier}
+        />
+      )}
+
+      {/* Справа было слово «Ставка» — подпись колонки, которой нет: ставка
+          стоит строкой под именем, а справа лежит кнопка входа. Теперь там
+          число открытых столов: единственное, что здесь меняется. */}
       <div className="text-disabled flex items-baseline justify-between text-[10.5px] font-black tracking-[0.16em] uppercase">
         <span>{t('duel open lobbies')}</span>
-        <span>{t('duel stake column')}</span>
+        {open > 0 && <span className="text-gold tabular-nums">{open}</span>}
       </div>
 
       {data?.own && (
         <button
           type="button"
           onClick={() => onEnter(data.own!.id)}
-          className="border-gold/45 from-gold/10 flex items-center gap-3 rounded-2xl border bg-gradient-to-b to-transparent p-3 text-left"
+          className="duel-rim duel-rim-on flex items-center gap-3 rounded-[14px] p-3 text-left"
         >
           <span className="min-w-0 flex-1">
             <span className="block text-[15px] font-bold">{t('duel your lobby')}</span>
@@ -314,14 +359,14 @@ export function DuelLobbies({ onEnter, inviteUserId }: DuelLobbiesProps) {
         </button>
       )}
 
-      {!isLoading && !data?.lobbies.length && !data?.own && (
+      {!isLoading && !shown.length && !data?.own && (
         <p className="text-disabled px-6 py-7 text-center text-[13px] leading-relaxed">
           {t('duel no lobbies')}
         </p>
       )}
 
       <div className="scrollbar-hidden flex flex-1 flex-col gap-2.5 overflow-y-auto">
-        {data?.lobbies.map(lobby => (
+        {shown.map(lobby => (
           <DuelLobbyRow
             key={lobby.id}
             lobby={lobby}
@@ -330,8 +375,19 @@ export function DuelLobbies({ onEnter, inviteUserId }: DuelLobbiesProps) {
             onJoin={handleJoin}
           />
         ))}
+
+        {/* Табличка едет сразу за столами, а не прижимается ко дну: сверху
+            получается один блок «что на столе и чем это кончалось», внизу —
+            только то, что нажимают. Правила стола уехали под кнопку «i»:
+            их читают один раз. */}
+        <DuelTablePanel
+          className="mt-0.5"
+          matches={profile?.publicStats.duelMatches ?? 0}
+          wins={profile?.publicStats.duelWins ?? 0}
+        />
       </div>
       {spend.modals}
+      {rules}
 
       <div className="flex flex-col gap-2 pt-1">
         {!data?.own && (

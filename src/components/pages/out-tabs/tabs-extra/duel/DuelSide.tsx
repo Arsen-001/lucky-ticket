@@ -6,26 +6,36 @@ import { DuelPlayerAvatar } from '@/components/pages/out-tabs/tabs-extra/duel/Du
 export interface DuelSideProps {
   name: string;
   avatarUrl?: string;
-  /** Побед в матче у этой стороны и сколько нужно всего. */
-  wins: number;
+  /**
+   * Счёт партии: сколько побед у этой стороны и сколько берёт матч.
+   *
+   * `null` — счёта нет: на фазе готовности матч ещё не начался, и ноль там не
+   * значит ничего.
+   */
+  wins: number | null;
   winsNeeded: number;
-  /** Бейдж состояния: «готов», «ждём», «сходил». Пусто — бейджа нет. */
+  /** Ведёт — табло горит. */
+  leading?: boolean;
+  /** Бейдж состояния: «сходил». Пусто — бейджа нет. */
   badge?: { text: string; tone: 'ready' | 'moved' | 'idle' } | null;
   ringed?: boolean;
   className?: string;
 }
 
 /**
- * Подпись стороны: аватар, имя, счёт точками и бейдж состояния.
+ * Подпись стороны: аватар, имя и счёт партии.
  *
- * Счёт точками, а не цифрами: в матче до двух побед две зажжённые точки
- * читаются мгновенно, а «2:1» требует вспомнить, чей счёт первый.
+ * Счёт цифрой, а не точками: две точки по восемь пикселей не отвечали ни «чей
+ * это счёт», ни «сколько нужно всего» — зажжённая читалась и как «одна
+ * победа», и как «одна попытка». «1/2» рядом со своим именем говорит и то и
+ * другое, и размером с цифру на табло, а не подписью.
  */
 export function DuelSide({
   name,
   avatarUrl,
   wins,
   winsNeeded,
+  leading,
   badge,
   ringed,
   className,
@@ -37,23 +47,30 @@ export function DuelSide({
   };
 
   return (
-    <div className={twMerge('flex items-center justify-center gap-2', className)}>
+    <div className={twMerge('flex items-center justify-center gap-2.5', className)}>
       <DuelPlayerAvatar name={name} avatarUrl={avatarUrl} size={30} ready={ringed} />
-      <span className="text-gray-secondary max-w-[9rem] truncate text-[13px] font-semibold">
+      <span className="text-gray-secondary max-w-[8rem] truncate text-[13px] font-semibold">
         {name}
       </span>
 
-      <span className="flex gap-1.5">
-        {Array.from({ length: winsNeeded }).map((_, i) => (
-          <span
-            key={i}
+      {wins !== null && (
+        <span
+          className={twMerge(
+            'duel-rim flex items-baseline gap-px rounded-[10px] px-2.5 pt-0.5 pb-1',
+            leading && 'duel-rim-on'
+          )}
+        >
+          <b
             className={twMerge(
-              'size-2 rounded-full',
-              i < wins ? 'bg-gold shadow-[0_0_10px_rgba(248,189,62,0.85)]' : 'bg-pink-secondary/25'
+              'text-[26px] leading-none font-extrabold tabular-nums',
+              wins > 0 ? 'text-gold' : 'text-pink-secondary/75'
             )}
-          />
-        ))}
-      </span>
+          >
+            {wins}
+          </b>
+          <i className="text-disabled text-[13px] font-extrabold not-italic">/{winsNeeded}</i>
+        </span>
+      )}
 
       {badge && (
         <span

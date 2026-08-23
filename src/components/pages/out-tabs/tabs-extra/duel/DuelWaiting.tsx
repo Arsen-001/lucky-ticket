@@ -5,8 +5,10 @@ import { twMerge } from 'tailwind-merge';
 import { Button } from '@/components/shared/buttons/Button';
 import { DuelInviteModal } from '@/components/pages/out-tabs/tabs-extra/duel/DuelInviteModal';
 import { DuelWriteAccessRow } from '@/components/pages/out-tabs/tabs-extra/duel/DuelWriteAccessRow';
+import { Ticket } from '@/components/shared/icons/Ticket';
 import { useAppTranslations } from '@/hooks/useAppTranslations';
 import { duelClock } from '@/utils/global/duel.utils';
+import type { DuelTier } from '@/types/interfaces/duel.interfaces';
 
 export interface DuelWaitingProps {
   /** Лобби, в которое зовут. */
@@ -16,6 +18,8 @@ export interface DuelWaitingProps {
   /** Открыть список друзей сразу — лобби создавали именно ради них. */
   openInvite?: boolean;
   stake: number;
+  /** Лига стола: её имя стоит в тексте — стол видит она, а не «бронза» всегда. */
+  tier?: DuelTier;
   seconds: number;
   onCancel: () => void;
   /** Отмена ушла на сервер — кнопка крутит лоадер, пока ответ не пришёл. */
@@ -38,6 +42,7 @@ export function DuelWaiting({
   invitedName,
   openInvite,
   stake,
+  tier = 'bronze',
   seconds,
   onCancel,
   cancelling = false,
@@ -52,23 +57,38 @@ export function DuelWaiting({
           «justify-center» на весь блок держало кнопку посередине. */}
       <div className="flex flex-1 flex-col items-center justify-center gap-4">
         <div className="duel-pulse flex-center relative h-[118px] w-[118px] rounded-full">
-          <span className="flex-center bg-background-overlay h-[76px] w-[76px] rounded-full border border-white/10 text-[28px]">
+          <span className="flex-center duel-rim h-[76px] w-[76px] rounded-full text-[28px]">
             ⚔️
           </span>
         </div>
 
-        <div className="flex flex-col items-center gap-1.5">
+        <div className="flex flex-col items-center gap-2">
           <span className="text-[17px] font-extrabold">
             {invitedName
               ? t('duel waiting for player', { name: invitedName })
               : t('duel waiting title')}
           </span>
+          {/* Лига стола названа жетоном: ждать бронзу и ждать золото — разное
+              ожидание, и очередь у них своя. Существительным, а не
+              прилагательным: «бронзовый стол» требует согласования в каждом из
+              двадцати языков, а «Бронза · ставка 2» — нет. */}
+          <span className="duel-chip flex items-center gap-1.5 rounded-lg px-3 py-1 text-[10px] font-black tracking-[0.14em] text-white/90 uppercase">
+            <Ticket
+              type={tier}
+              width={20}
+              height={20}
+              className="h-[13px] w-[20px] object-contain"
+            />
+            {t(tier)} · {t('duel stake short')}{' '}
+            <b className="text-gold text-[12px] tabular-nums">{stake}</b>
+          </span>
+
           <p className="text-pink-secondary max-w-[28ch] text-[13px] leading-snug">
             {invitedName
               ? t('duel waiting private', { count: stake })
               : t('duel waiting blurb', { count: stake })}
           </p>
-          <span className="text-gold text-[15px] font-extrabold tabular-nums">
+          <span className="text-gold text-[22px] font-extrabold tabular-nums">
             {duelClock(seconds)}
           </span>
         </div>
@@ -100,6 +120,7 @@ export function DuelWaiting({
         open={inviting}
         duelId={duelId}
         stake={stake}
+        tier={tier}
         onClose={() => setInviting(false)}
       />
     </div>

@@ -3,6 +3,7 @@
 import { useAppTranslations } from '@/hooks/useAppTranslations';
 import { useFeature } from '@/hooks/useFeature';
 import { GameCard } from '@/components/pages/out-tabs/tabs-extra/games/GameCard';
+import { useGetDuelLobbiesQuery } from '@/api/duel.api';
 import { routes } from '@/constants/routes';
 
 /**
@@ -19,6 +20,10 @@ import { routes } from '@/constants/routes';
 export function GamesScreen() {
   const t = useAppTranslations();
   const duelOpen = useFeature('duel');
+  // Сколько столов ждёт соперника прямо сейчас. Тот же запрос, что у самой
+  // игры, — переход в дуэль отдаётся из кеша, лишнего похода нет.
+  const { data: duel } = useGetDuelLobbiesQuery(undefined, { skip: !duelOpen });
+  const tables = (duel?.lobbies.length ?? 0) + (duel?.own ? 1 : 0);
 
   return (
     <div className="flex min-h-full flex-col gap-3 pt-1 pb-4">
@@ -27,6 +32,7 @@ export function GamesScreen() {
           href={routes.games.duel}
           title={t('duel')}
           subtitle={t('games duel blurb')}
+          badge={tables > 0 ? t('duel tables open', { count: tables }) : undefined}
           tokens={[
             '/assets/icons/duel/rock.webp',
             '/assets/icons/tickets/bronze-ticket.webp',

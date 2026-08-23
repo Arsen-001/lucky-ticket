@@ -11,6 +11,7 @@ import { useAppTranslations } from '@/hooks/useAppTranslations';
 import { useFeature } from '@/hooks/useFeature';
 import { DuelLobbies } from './DuelLobbies';
 import { DuelArena } from './DuelArena';
+import '@/styles/components/duel.css';
 
 /**
  * Экран дуэли целиком.
@@ -95,12 +96,13 @@ export function DuelScreen() {
   return (
     // Ровно высота прокручиваемой области, а не «не меньше»: иначе нижняя
     // кнопка встаёт по концу контента и под ней остаётся пустое поле.
-    <div className="flex h-full flex-col items-stretch pb-2">
+    <div className="duel-lamp flex h-full flex-col items-stretch pb-2">
       {spend.modals}
       {duelId ? (
         <DuelArena
           duelId={duelId}
           tickets={lobbies?.tickets ?? 0}
+          balances={lobbies?.balances}
           openInvite={inviteOnEnter}
           onLeave={() => {
             setDuelId(null);

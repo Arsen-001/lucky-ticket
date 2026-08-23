@@ -35,10 +35,9 @@ export function DuelPicks({ chosen, disabled, onPick }: DuelPicksProps) {
           disabled={disabled || Boolean(chosen)}
           onClick={() => onPick(move)}
           className={twMerge(
-            'flex h-24 flex-col items-center justify-center gap-1 rounded-2xl border p-1.5',
-            'border-white/10 bg-gradient-to-b from-white/6 to-transparent transition',
-            'active:scale-95 disabled:opacity-35',
-            chosen === move && 'border-gold/60 bg-gold/10 opacity-100'
+            'duel-rim flex h-24 flex-col items-center justify-center gap-1 rounded-[14px] p-1.5',
+            'transition active:scale-95 disabled:opacity-35',
+            chosen === move && 'duel-rim-on opacity-100'
           )}
         >
           <Image
@@ -48,7 +47,12 @@ export function DuelPicks({ chosen, disabled, onPick }: DuelPicksProps) {
             height={56}
             className="h-14 w-14 object-contain drop-shadow-[0_6px_10px_rgba(0,0,0,0.6)]"
           />
-          <span className="text-pink-secondary text-[9px] font-black tracking-[0.1em] uppercase">
+          <span
+            className={twMerge(
+              'text-[9px] font-black tracking-[0.12em] uppercase',
+              chosen === move ? 'text-gold' : 'text-pink-secondary'
+            )}
+          >
             {t(DUEL_MOVE_LABEL[move])}
           </span>
         </button>

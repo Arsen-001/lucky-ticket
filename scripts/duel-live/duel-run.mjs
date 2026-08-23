@@ -90,10 +90,6 @@ async function ensureDuelRoute() {
   }
 }
 
-const state = async () => {
-  const txt = await bodyText();
-  return txt;
-};
 
 const waitText = async (re, timeout = 20_000, label = String(re)) => {
   const t0 = Date.now();
@@ -186,7 +182,14 @@ log('массовка подсела через', msToReady, 'ms');
 await page.waitForTimeout(3000);
 await shot('ready-phase-countdown');
 await page.getByRole('button', { name: /i'm ready|я готов/i }).click();
-await page.waitForTimeout(600);
+// Ждём появления жетонов, а не фиксированные 600 мс: мок отвечает с задержкой
+// 400–1200 мс, а состояние приезжает следующим опросом (600 мс) — на этой
+// сумме прогон «терял» нажатие примерно в трети запусков и объявлял мёртвой
+// кнопку, которая работает.
+await page
+  .getByRole('button', { name: /^(rock|камень)$/i })
+  .waitFor({ state: 'visible', timeout: 12_000 })
+  .catch(() => {});
 await shot('playing-round-start');
 
 // ── 4. Играем раунды до конца ───────────────────────────────────────
@@ -237,7 +240,7 @@ await shot('back-to-lobbies');
 txt = await bodyText();
 log('after match lobbies:', txt.slice(0, 200));
 if (/your lobby|ваше лобби/i.test(txt)) note('после матча список показывает протухшее «Your lobby»');
-const ticketsAfter = txt.match(/(\d+)\s*TICKETS/i)?.[1];
+const ticketsAfter = txt.match(/RPS[^\d]*(\d+)/i)?.[1];
 log('tickets in header after match:', ticketsAfter, won ? '(ожидаю 7)' : '(ожидаю 3)');
 if (won && ticketsAfter !== '7') note(`после победы в шапке ${ticketsAfter} билетов, а не 7 (протухший кадр)`);
 if (lost && ticketsAfter !== '3') note(`после поражения в шапке ${ticketsAfter} билетов, а не 3`);

@@ -34,7 +34,9 @@ export function DuelHand({ thinking, revealed, className }: DuelHandProps) {
             key={move}
             className={twMerge(
               'flex-center h-[52px] rounded-xl border transition-all duration-300',
-              chosen ? 'border-gold/60 bg-gold/10' : 'border-white/8 bg-background-overlay/55'
+              chosen
+                ? 'border-gold/65 bg-gold/12'
+                : 'border-electric-purple/32 bg-[rgba(8,6,20,0.5)]'
             )}
           >
             <Image

@@ -40,10 +40,9 @@ export function DuelTierPicker({ value, balances, onChange, className }: DuelTie
             disabled={empty}
             onClick={() => onChange(tier)}
             className={twMerge(
-              'flex flex-col items-center justify-center gap-1 rounded-2xl border p-1.5 transition',
-              'bg-background-overlay border-white/10',
+              'duel-rim flex flex-col items-center justify-center gap-1 rounded-xl p-1.5 transition',
               empty && 'opacity-35',
-              value === tier && 'border-gold bg-gold/12'
+              value === tier && 'duel-rim-on'
             )}
           >
             <Ticket
