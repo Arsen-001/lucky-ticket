@@ -30,12 +30,9 @@ export function DuelPurse({ balances, className }: DuelPurseProps) {
               count < 1 && 'opacity-30'
             )}
           >
-            <Ticket
-              type={tier}
-              width={20}
-              height={20}
-              className="h-[13px] w-[20px] object-contain"
-            />
+            {/* Коробка билета равна самому билету (256×133): квадрат 20×20
+                держал шесть пустых пикселей, и число отъезжало от картинки. */}
+            <Ticket type={tier} width={21} height={11} className="object-contain" />
             {count}
           </span>
         );

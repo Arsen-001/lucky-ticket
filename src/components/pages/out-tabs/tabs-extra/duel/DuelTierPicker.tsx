@@ -45,12 +45,9 @@ export function DuelTierPicker({ value, balances, onChange, className }: DuelTie
               value === tier && 'duel-rim-on'
             )}
           >
-            <Ticket
-              type={tier}
-              width={34}
-              height={34}
-              className="h-[26px] w-[34px] object-contain"
-            />
+            {/* По пропорциям билета, а не квадратом: иначе остаток висел на
+                восемь пустых пикселей ниже картинки, к которой он относится. */}
+            <Ticket type={tier} width={36} height={19} className="object-contain" />
             <span
               className={twMerge(
                 'text-[11px] font-extrabold tabular-nums',

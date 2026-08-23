@@ -9,6 +9,7 @@ import { DuelPicks } from '@/components/pages/out-tabs/tabs-extra/duel/DuelPicks
 import { DuelReadyMark } from '@/components/pages/out-tabs/tabs-extra/duel/DuelReadyMark';
 import { DuelSeriesChip } from '@/components/pages/out-tabs/tabs-extra/duel/DuelSeriesChip';
 import { DuelSide } from '@/components/pages/out-tabs/tabs-extra/duel/DuelSide';
+import { DuelStakeAmount } from '@/components/pages/out-tabs/tabs-extra/duel/DuelStakeAmount';
 import { DuelToken } from '@/components/pages/out-tabs/tabs-extra/duel/DuelToken';
 import { DuelWaiting } from '@/components/pages/out-tabs/tabs-extra/duel/DuelWaiting';
 import { DUEL_MOVE_LABEL } from '@/components/pages/out-tabs/tabs-extra/duel/duel.tokens';
@@ -499,11 +500,11 @@ export function DuelArena({
         {readiness && (
           <>
             <div className="text-disabled flex items-center justify-between text-[11px]">
-              <span>
+              <span className="flex items-center gap-1">
                 {t('duel stake short')}{' '}
-                <span className="text-gold font-bold">
-                  {t('duel stake tickets', { count: data.stake })}
-                </span>
+                {/* Число с билетом, а не «2 бил.»: та же запись, что в списке и
+                    на экране ставки, — сумма читается одинаково везде. */}
+                <DuelStakeAmount stake={data.stake} tier={data.tier} size="sm" />
                 {data.role === 'guest' && data.opponent
                   ? ` · ${t('duel lobby of', { name: data.opponent.name })}`
                   : ''}

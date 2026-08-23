@@ -94,7 +94,7 @@ export function DuelGameHeader({
         <DuelPurse balances={balances} />
       ) : (
         <span className="text-pink-secondary flex items-center gap-1 text-[11px] font-bold">
-          <Ticket type={tier} width={22} height={22} className="h-[14px] w-[22px] object-contain" />
+          <Ticket type={tier} width={23} height={12} className="object-contain" />
           <span className="text-gold text-[15px] font-extrabold tabular-nums">{tickets}</span>
         </span>
       )}

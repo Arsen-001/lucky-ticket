@@ -9,6 +9,7 @@ import { DuelLobbyRow } from '@/components/pages/out-tabs/tabs-extra/duel/DuelLo
 import { DuelPotPreview } from '@/components/pages/out-tabs/tabs-extra/duel/DuelPotPreview';
 import { DuelRulesModal } from '@/components/pages/out-tabs/tabs-extra/duel/DuelRulesModal';
 import { DuelTierFilter } from '@/components/pages/out-tabs/tabs-extra/duel/DuelTierFilter';
+import { DuelStakeAmount } from '@/components/pages/out-tabs/tabs-extra/duel/DuelStakeAmount';
 import { DuelStakePicker } from '@/components/pages/out-tabs/tabs-extra/duel/DuelStakePicker';
 import { DuelTablePanel } from '@/components/pages/out-tabs/tabs-extra/duel/DuelTablePanel';
 import {
@@ -358,10 +359,13 @@ export function DuelLobbies({ onEnter, inviteUserId }: DuelLobbiesProps) {
         >
           <span className="min-w-0 flex-1">
             <span className="block text-[15px] font-bold">{t('duel your lobby')}</span>
-            <span className="text-disabled block text-[12px]">
-              {t('duel waiting for', { time: duelClock(data.own.waitingSeconds) })} ·{' '}
-              <span className="text-gold font-bold tabular-nums">{data.own.stake}</span>{' '}
-              {t('duel stake tickets', { count: data.own.stake }).replace(/^\d+\s*/, '')}
+            {/* Своя строка читается так же, как чужие: сперва цена числом с
+                билетом, следом приглушённое ожидание. */}
+            <span className="mt-0.5 flex items-center gap-1.5">
+              <DuelStakeAmount stake={data.own.stake} tier={data.own.tier} />
+              <span className="text-disabled truncate text-[12px]">
+                · {t('duel waiting for', { time: duelClock(data.own.waitingSeconds) })}
+              </span>
             </span>
           </span>
         </button>

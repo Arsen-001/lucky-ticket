@@ -3,7 +3,7 @@
 import { twMerge } from 'tailwind-merge';
 import { Button } from '@/components/shared/buttons/Button';
 import { DuelPlayerAvatar } from '@/components/pages/out-tabs/tabs-extra/duel/DuelPlayerAvatar';
-import { Ticket } from '@/components/shared/icons/Ticket';
+import { DuelStakeAmount } from '@/components/pages/out-tabs/tabs-extra/duel/DuelStakeAmount';
 import { useAppTranslations } from '@/hooks/useAppTranslations';
 import { duelClock } from '@/utils/global/duel.utils';
 import type { DuelLobby } from '@/types/interfaces/duel.interfaces';
@@ -17,10 +17,13 @@ export interface DuelLobbyRowProps {
 }
 
 /**
- * Одна строка списка: кто ждёт, сколько уже ждёт и во что обойдётся вход.
+ * Одна строка списка: кто ждёт, во что обойдётся вход и кнопка входа.
  *
- * Ожидание и ставка идут одной строкой под именем — так их читают за один
- * взгляд, вместе с решением «войти или нет».
+ * Слева — цена, справа — действие, как в любом списке, где во что-то входят за
+ * деньги. Цена стоит первой строкой под именем и написана как деньги: число и
+ * сразу за ним билет ([[DuelStakeAmount]]), без слова «ставка» — билет говорит
+ * это картинкой на всех двадцати языках. Ожидание ушло следом приглушённым: это
+ * справка, а не то, что решают.
  */
 export function DuelLobbyRow({ lobby, busy, affordable = true, onJoin }: DuelLobbyRowProps) {
   const t = useAppTranslations();
@@ -31,17 +34,11 @@ export function DuelLobbyRow({ lobby, busy, affordable = true, onJoin }: DuelLob
 
       <span className="min-w-0 flex-1">
         <span className="block truncate text-[15px] font-bold">{lobby.host.name}</span>
-        <span className="text-disabled block text-[12px]">
-          {t('duel waiting for', { time: duelClock(lobby.waitingSeconds) })} ·{' '}
-          {t('duel stake short')}{' '}
-          <span className="text-gold font-bold tabular-nums">{lobby.stake}</span>{' '}
-          {/* Билет лиги вместо слова: во что играют, видно раньше, чем прочитано */}
-          <Ticket
-            type={lobby.tier}
-            width={22}
-            height={22}
-            className="inline-block h-[14px] w-[22px] object-contain align-[-2px]"
-          />
+        <span className="mt-0.5 flex items-center gap-1.5">
+          <DuelStakeAmount stake={lobby.stake} tier={lobby.tier} />
+          <span className="text-disabled truncate text-[12px]">
+            · {t('duel waiting for', { time: duelClock(lobby.waitingSeconds) })}
+          </span>
         </span>
       </span>
 
