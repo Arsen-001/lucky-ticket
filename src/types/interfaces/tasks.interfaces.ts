@@ -145,6 +145,13 @@ export interface AdsExtraOffer {
    * an older backend; the card then states the price alone, as it used to.
    */
   nextRewards?: TaskReward[][];
+  /**
+   * The same for views bought with Stars — they are paid from their own ladder.
+   * A star-bought view that paid a star back handed the price straight back to
+   * the buyer, so the two purchases stopped being the same trade. Absent = the
+   * backend has no star ladder and both read the LC one.
+   */
+  nextRewardsLs?: TaskReward[][];
 }
 
 /**
@@ -156,6 +163,8 @@ export interface AdsExtraOffer {
  */
 export interface AdsExtraQuote {
   count: number;
+  /** The currency this quote was priced AND paid for; the two ladders differ. */
+  currency?: 'lc' | 'ls';
   price: { lc: number; ls: number };
   /** The whole purchase, summed per reward type. */
   rewards: TaskReward[];

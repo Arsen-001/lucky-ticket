@@ -300,9 +300,45 @@ const ADS_PAID_LADDER: TaskReward[][] = Array.from({ length: 20 }, (_, i) => [
   { ...tickets(i < 6 ? 1 : i < 14 ? 2 : 3), label: 'bronze' },
 ]);
 
-/** `paidIndex` is 0-based from the day's first bought view. */
-const getPaidAdRewards = (paidIndex: number): TaskReward[] =>
-  ADS_PAID_LADDER[paidIndex % ADS_PAID_LADDER.length] ?? flatAdReward;
+/**
+ * The ladder for views bought with STARS — the one the star price actually
+ * buys. No star on any rung: a view bought for 1 ⭐ that pays 1 ⭐ back hands
+ * the price straight back to the player, so the reward is tickets instead,
+ * climbing 3 → 4 → 5 across the twenty rungs.
+ */
+const ADS_PAID_STARS_LADDER: TaskReward[][] = Array.from({ length: 20 }, (_, i) => [
+  ap(1),
+  { ...tickets(i < 6 ? 3 : i < 14 ? 4 : 5), label: 'bronze' },
+]);
+
+/** `paidIndex` is 0-based from the day's first bought view of that currency. */
+const getPaidAdRewards = (paidIndex: number, currency: 'lc' | 'ls' = 'lc'): TaskReward[] => {
+  const ladder = currency === 'ls' ? ADS_PAID_STARS_LADDER : ADS_PAID_LADDER;
+  return ladder[paidIndex % ladder.length] ?? flatAdReward;
+};
+
+/**
+ * Which currency bought each of this dev session's extra slots, in purchase
+ * order — the mock's stand-in for `AdWatchProgress.extraPurchasesToday`. The
+ * server picks the ladder from it, so without it dev never sees the star
+ * branch at all.
+ */
+const ADS_EXTRA_QUEUE: { c: 'lc' | 'ls'; n: number }[] = [];
+
+const boughtWithCurrency = (c: 'lc' | 'ls') =>
+  ADS_EXTRA_QUEUE.reduce((sum, p) => (p.c === c ? sum + p.n : sum), 0);
+
+/** Currency and per-currency position of the bought slot at `paidIndex`. */
+const paidSlotOrigin = (paidIndex: number): { c: 'lc' | 'ls'; index: number } => {
+  let seen = 0;
+  const before = { lc: 0, ls: 0 };
+  for (const p of ADS_EXTRA_QUEUE) {
+    if (paidIndex < seen + p.n) return { c: p.c, index: before[p.c] + (paidIndex - seen) };
+    seen += p.n;
+    before[p.c] += p.n;
+  }
+  return { c: 'lc', index: before.lc + (paidIndex - seen) };
+};
 
 /** How many upcoming bought views the offer previews — mirrors the server. */
 const ADS_EXTRA_PREVIEW = 3;
@@ -352,7 +388,10 @@ const buildAds = (): AdsBlock => {
     return {
       id,
       index: i,
-      rewards: i >= free ? getPaidAdRewards(i - free) : getAdRewards(i),
+      rewards:
+        i >= free
+          ? (o => getPaidAdRewards(o.index, o.c))(paidSlotOrigin(i - free))
+          : getAdRewards(i),
       watched: i < ADS_CONFIG.watchedToday || mockState.watchedAdIds.has(id),
       paid: i >= free,
     };
@@ -389,7 +428,11 @@ const buildAds = (): AdsBlock => {
       grantsAp: true,
       // What the next bought views pay, so the card can say it before the tap.
       nextRewards: Array.from({ length: ADS_EXTRA_PREVIEW }, (_, k) =>
-        getPaidAdRewards(ADS_EXTRA.purchasedToday + k)
+        getPaidAdRewards(boughtWithCurrency('lc') + k, 'lc')
+      ),
+      // Per currency: the two are no longer the same purchase.
+      nextRewardsLs: Array.from({ length: ADS_EXTRA_PREVIEW }, (_, k) =>
+        getPaidAdRewards(boughtWithCurrency('ls') + k, 'ls')
       ),
     },
   };
@@ -1936,10 +1979,14 @@ export const tasksMock = {
    * the server sums it — a flat `reward × count` would quote a total the buy
    * endpoint never pays, and dev would never see the difference.
    */
-  'GET tasks/ads/extra/quote': (args: { params?: { count?: number | string } }) => {
+  'GET tasks/ads/extra/quote': (args: {
+    params?: { count?: number | string; currency?: string };
+  }) => {
     const count = Math.min(100, Math.max(1, Math.trunc(Number(args.params?.count ?? 1)) || 1));
+    const currency = args.params?.currency === 'ls' ? 'ls' : 'lc';
+    const already = boughtWithCurrency(currency);
     const perView = Array.from({ length: count }, (_, k) =>
-      getPaidAdRewards(ADS_EXTRA.purchasedToday + k)
+      getPaidAdRewards(already + k, currency)
     );
     const sum = (type: TaskRewardType) =>
       perView.flat().reduce((s, r) => (r.type === type ? s + r.amount : s), 0);
@@ -1952,6 +1999,7 @@ export const tasksMock = {
       rewards.push({ ...tickets(sum(TaskRewardType.TICKETS)), label: 'bronze' });
     return {
       count,
+      currency,
       price: { lc: ADS_EXTRA.priceLc * count, ls: ADS_EXTRA.priceLs * count },
       rewards,
       perView: perView.slice(0, ADS_EXTRA_PREVIEW),
@@ -1980,6 +2028,11 @@ export const tasksMock = {
       type: LcTransactionType.AD_EXTRA_VIEWS,
     });
     ADS_EXTRA.purchasedToday += count;
+    // Same queue rule as the server: a repeat of the same currency extends the
+    // last run instead of adding a row.
+    const last = ADS_EXTRA_QUEUE[ADS_EXTRA_QUEUE.length - 1];
+    if (last && last.c === currency) last.n += count;
+    else ADS_EXTRA_QUEUE.push({ c: currency, n: count });
 
     const ads = buildAds();
     return {

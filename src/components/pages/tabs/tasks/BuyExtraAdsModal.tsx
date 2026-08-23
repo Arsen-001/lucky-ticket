@@ -71,16 +71,19 @@ export function BuyExtraAdsModal({
 
   // Skipped while the modal is closed: it is one request per count the player
   // stops on, and a closed modal stops on nothing.
-  const { data: quote, isFetching: quoting } = useQuoteExtraAdViewsQuery(count, {
-    skip: !open,
-  });
-  // The count the quote answers for — a stale one from the previous step must
-  // not be read as this step's payout while the new one is in flight.
-  const quoteRewards = quote?.count === count ? quote.rewards : undefined;
+  const { data: quote, isFetching: quoting } = useQuoteExtraAdViewsQuery(
+    { count, currency },
+    { skip: !open }
+  );
+  // The count AND currency the quote answers for — a stale one from the previous
+  // step must not be read as this step's payout while the new one is in flight,
+  // and the two currencies pay differently.
+  const quoteRewards =
+    quote?.count === count && (quote.currency ?? 'lc') === currency ? quote.rewards : undefined;
   // Fallback while the first quote lands (and on a backend that has no quote
-  // route at all): what ONE bought view pays, labelled as such rather than
-  // multiplied.
-  const perView = extra.nextRewards?.[0];
+  // route at all): what ONE bought view of THIS currency pays, labelled as such
+  // rather than multiplied.
+  const perView = (currency === 'ls' ? extra.nextRewardsLs : extra.nextRewards)?.[0];
 
   return (
     <ConfirmModal

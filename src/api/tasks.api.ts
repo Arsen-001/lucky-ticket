@@ -147,11 +147,18 @@ export const tasksApi = api.injectEndpoints({
      *   the only correct source of that total: the paid ladder climbs, so the
      *   app must never quote `one view × N` on its own.
      *
+     *   The currency is part of the question, not just of the price: views
+     *   bought with Stars are paid from their own ladder, so quoting without it
+     *   would show the LC payout beside a Stars price.
+     *
      *   Tagged `tasks` so a purchase re-quotes — the next view bought after
      *   this one starts a rung further up the ladder.
      */
-    quoteExtraAdViews: builder.query<AdsExtraQuote, number>({
-      query: count => ({ url: 'tasks/ads/extra/quote', params: { count } }),
+    quoteExtraAdViews: builder.query<AdsExtraQuote, { count: number; currency: 'lc' | 'ls' }>({
+      query: ({ count, currency }) => ({
+        url: 'tasks/ads/extra/quote',
+        params: { count, currency },
+      }),
       providesTags: [rtkTags.tasks],
     }),
   }),
