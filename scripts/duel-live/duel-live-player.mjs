@@ -25,7 +25,7 @@ log('lobbies:', list.status, list.body?.message ?? '', 'tickets=', list.body?.ti
 if (list.status !== 200) process.exit(2);
 
 // ── 1. ждём лобби хозяина (или свой незакрытый матч) ─────────────────
-let duelId = list.body.active?.id ?? null;
+let duelId = list.body.active?.id ?? null; // eslint-disable-line prefer-const
 const t0 = Date.now();
 while (!duelId && Date.now() - t0 < WAIT_MIN * 60_000) {
   list = await api('GET', '/games/duel/lobbies');
@@ -54,7 +54,7 @@ if (!duelId) { log('лобби хозяина не появилось за', WAI
 // ── 2. матч: готовность, ходы, вскрытия ──────────────────────────────
 let readyPressed = false, moveIdx = 0, lastRound = -1, lastStatus = '', lastRevealIdx = -1, revealSeenAt = 0, maxIdxSeen = -1;
 const tStart = Date.now();
-while (Date.now() - tStart < 10 * 60_000) {
+while (Date.now() - tStart < 20 * 60_000) {
   const s = await api('GET', `/games/duel/${duelId}`);
   if (s.status !== 200) { log('state', s.status, s.body?.message); await sleep(700); continue; }
   const d = s.body;
@@ -80,7 +80,21 @@ while (Date.now() - tStart < 10 * 60_000) {
       log(`round ${d.round.index} REVEAL: me ${d.me.move} vs foe ${d.foe.move} → ${d.round.winner} | score me ${d.me.wins} : foe ${d.foe.wins}`);
     }
   }
-  if (d.status === 'FINISHED') { log('FINISHED winner=', d.winner, 'my role=', d.role, d.winner === (d.role === 'host' ? 'HOST' : 'GUEST') ? 'Я ВЫИГРАЛ' : 'я проиграл', 'score', d.me.wins, ':', d.foe.wins); break; }
+  if (d.status === 'FINISHED') {
+    log('FINISHED winner=', d.winner, 'my role=', d.role, d.winner === (d.role === 'host' ? 'HOST' : 'GUEST') ? 'Я ВЫИГРАЛ' : 'я проиграл', 'score', d.me.wins, ':', d.foe.wins, '| серия', JSON.stringify(d.series), '| rematch', JSON.stringify(d.rematch));
+    // Реванш: ждём предложение соперника до 90 с (или предлагаем сами, если REMATCH_FIRST) и играем дальше.
+    const tF = Date.now(); let next = null;
+    if (process.env.REMATCH_FIRST) { const r = await api('POST', `/games/duel/${duelId}/rematch`); log('предложил реванш →', r.status, r.body?.status ?? r.body?.message); if (r.status === 200) next = r.body.id; }
+    while (!next && Date.now() - tF < 90_000) {
+      const s2 = await api('GET', `/games/duel/${duelId}`);
+      if (s2.body?.rematch && !s2.body.rematch.mine) { log('соперник предложил реванш → принимаю'); const r = await api('POST', `/games/duel/${duelId}/rematch`); log('rematch →', r.status, r.body?.status ?? r.body?.message, '| серия', JSON.stringify(r.body?.series)); if (r.status === 200) next = r.body.id; break; }
+      await sleep(1000);
+    }
+    if (!next) { log('реванша не было — выхожу'); break; }
+    // новый матч: сбрасываем состояние цикла
+    duelId = next; readyPressed = false; lastRound = -1; lastStatus = ''; lastRevealIdx = -1; revealSeenAt = 0; maxIdxSeen = -1;
+    continue;
+  }
   if (d.status === 'CANCELLED') { log('CANCELLED reason=', d.cancelReason); break; }
   await sleep(450);
 }
