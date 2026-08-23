@@ -41,10 +41,17 @@ export function DuelStakeAmount({
   className,
   classNames,
 }: DuelStakeAmountProps) {
+  // Размер и интерлиньяж ОДНИМ классом (`text-[20px]/none`), а не двумя.
+  // Отдельный `leading-none` рядом с `text-[…]` съедает `twMerge`: у него
+  // размер шрифта конфликтует с интерлиньяжем, потому что в Tailwind размер
+  // умеет задавать оба (`text-lg/none`). Разница видна на фишке ставки: строка
+  // числа становилась 30 px вместо 20, лишние 5 px падали ПОД цифру, и билет
+  // оказывался в 7 px от числа и в 4 px от нижней кромки — то есть ближе к
+  // кромке, чем к тому, к чему относится.
   const valueClasses: Record<DuelStakeAmountSize, string> = {
-    sm: 'text-[13px]',
-    md: 'text-[15px]',
-    lg: 'text-[20px]',
+    sm: 'text-[13px]/none',
+    md: 'text-[15px]/none',
+    lg: 'text-[20px]/none',
   };
   // Вплотную: 3 px в строке и 2 px столбиком. Дальше уже не пара, а две вещи.
   const gapClasses: Record<DuelStakeAmountSize, string> = {
@@ -73,9 +80,7 @@ export function DuelStakeAmount({
     >
       <span
         className={twMerge(
-          // `leading-none`: коробка строки хватает цифру по росту, иначе между
-          // ней и билетом стоит невидимый интерлиньяж — то самое «далеко».
-          'text-gold font-extrabold tabular-nums leading-none',
+          'text-gold font-extrabold tabular-nums',
           valueClasses[size],
           classNames?.value
         )}
