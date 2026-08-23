@@ -125,7 +125,7 @@ export const mockDb = {
     freeStakeStartsUsed: 0,
     // First-run onboarding tour: auto-shows only for a level-zero account
     // (activityPoints === 0) that hasn't seen it.
-    hasSeenTour: false,
+    hasSeenTour: true,
     // The demo account is on the leaderboard's allow-list, so dev shows the
     // board the way a named tester sees it while the master switch is off
     // (`appConfig.leaderboard.enabled` is false, like production).
@@ -205,6 +205,22 @@ export const mockDb = {
             durationMonths: 6,
             startDate: hoursAgo(4),
             endDate: minutesAgo(60),
+            status: StakeStatus.COMPLETED,
+            claimed: false,
+          },
+          // A SECOND matured stake, and the reason is the button above it:
+          // «Забрать все готовые» renders only from two ready stakes up, so with
+          // one in the fixture the whole batch path — N requests, the partial
+          // toast, the summed payout — could not be reached on localhost at all.
+          // That blind spot is how it kept running its claims one after another
+          // in a loop long after anyone would have noticed watching it.
+          {
+            id: 'stake-ready-2',
+            level: 1,
+            lockedAmount: 20_000,
+            durationMonths: 1,
+            startDate: hoursAgo(3),
+            endDate: minutesAgo(20),
             status: StakeStatus.COMPLETED,
             claimed: false,
           },

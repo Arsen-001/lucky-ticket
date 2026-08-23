@@ -193,6 +193,12 @@ const claimStake = (args: FetchArgs) => {
   mockDb.user.telegramStars += bonusLS;
   // Completion bonus AP on top of the base granted at start (DOCS §5.3 / §18.3).
   mockDb.user.activityPoints += completionBonusAp;
+  // Printed like the referral claim: «Забрать все готовые» is N of these at
+  // once, and the timestamps are the only place on localhost where you can see
+  // whether they went out together or one after another.
+  console.log(
+    `[mock] stakes/claim ${stake.id} — returned ${stake.lockedAmount} + ${yieldLC} LC, ${bonusLS} ⭐`
+  );
   mockDb.stakes.history.unshift({
     id: `h-${Date.now()}`,
     level: stake.level,

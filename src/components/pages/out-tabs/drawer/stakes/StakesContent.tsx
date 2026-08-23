@@ -1,12 +1,17 @@
 'use client';
 
 import '@/styles/components/stakes.css';
+import { useState } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { ChevronRight, Gift } from 'lucide-react';
 import { icons } from '@/constants/icons';
 import { formatCompact } from '@/utils/global/number.utils';
-import { useClaimStakeMutation, useGetStakesQuery } from '@/api/stakes.api';
+import {
+  refreshAfterStakeClaims,
+  useClaimStakeMutation,
+  useGetStakesQuery,
+} from '@/api/stakes.api';
 import { useGetMeQuery } from '@/api/me.api';
 import {
   activityTierOrder,
@@ -17,6 +22,7 @@ import {
 } from '@/constants/global.constants';
 import { ButtonSpinner } from '@/components/shared/loaders/ButtonSpinner';
 import { routes } from '@/constants/routes';
+import { useAppDispatch } from '@/lib/rtk/hooks';
 import { useAppTranslations } from '@/hooks/useAppTranslations';
 import { useStakesDisplayConfig } from '@/hooks/useStakesDisplayConfig';
 import { useToast } from '@/hooks/useToast';
@@ -37,6 +43,16 @@ import {
   stakeIsMatured,
 } from '@/utils/global/stakes.utils';
 import { QueryErrorState } from '@/components/shared/error/QueryErrorState';
+import { mapWithConcurrency } from '@/utils/global/async.utils';
+
+/**
+ * How many stake claims «Забрать все готовые» keeps in flight.
+ *
+ * There is no bulk endpoint — the button is N × `POST stakes/claim`. Four at a
+ * time turns ten ready stakes from ten sequential round-trips into three,
+ * without opening a connection per stake for someone holding twenty.
+ */
+const CLAIM_ALL_CONCURRENCY = 4;
 
 export function StakesContent() {
   const t = useAppTranslations();
@@ -44,7 +60,12 @@ export function StakesContent() {
   const { data: stakes, isLoading, isError, refetch } = useGetStakesQuery();
   const { data: me, isLoading: meLoading } = useGetMeQuery();
   const stakeCfg = useStakesDisplayConfig();
-  const [claimStake, { isLoading: claimingAll }] = useClaimStakeMutation();
+  const [claimStake] = useClaimStakeMutation();
+  const dispatch = useAppDispatch();
+  // The batch owns its own flag rather than reading the mutation's `isLoading`:
+  // that one goes false between claims, so the button used to un-disable
+  // mid-batch and a second tap re-ran the whole loop over stakes already paid.
+  const [claimingAll, setClaimingAll] = useState(false);
 
   if (isError) return <QueryErrorState onRetry={() => refetch()} />;
 
@@ -111,22 +132,42 @@ export function StakesContent() {
         : { kind: 'friends' as const, amount: nextTierRefGap };
 
   const handleClaimAll = async () => {
-    let failed = 0;
+    // Re-entrancy guard: the batch finishes BEFORE the refetch it triggers comes
+    // back, and in that window the list still shows stakes the server has
+    // already paid.
+    if (claimingAll || !readyStakeIds.length) return;
+
+    setClaimingAll(true);
     let claimed = 0;
+    let failed = 0;
     let totalLc = 0;
-    for (const id of readyStakeIds) {
-      const result = await claimStake({ stakeId: id });
-      if ('data' in result && result.data?.success) {
-        claimed += 1;
-        // Guarded because the sum has to survive an older server that answers
-        // with a bare `{ success }`: one missing field turns the whole toast
-        // into "+NaN LC" for every stake in the batch.
-        totalLc += (result.data.principalReturned ?? 0) + (result.data.yieldLC ?? 0);
-      } else {
-        failed += 1;
+    try {
+      // `silent: true` — one refresh for the batch instead of one per stake;
+      // @see claimStake. The pool is what makes this a single wait rather than
+      // N: the claims used to run in an `await` loop, so ten ready stakes meant
+      // ten sequential round-trips with the button spinning through all of them.
+      const outcomes = await mapWithConcurrency(readyStakeIds, CLAIM_ALL_CONCURRENCY, id =>
+        claimStake({ stakeId: id, silent: true })
+      );
+      for (const result of outcomes) {
+        if ('data' in result && result.data?.success) {
+          claimed += 1;
+          // Guarded because the sum has to survive an older server that answers
+          // with a bare `{ success }`: one missing field turns the whole toast
+          // into "+NaN LC" for every stake in the batch.
+          totalLc += (result.data.principalReturned ?? 0) + (result.data.yieldLC ?? 0);
+        } else {
+          failed += 1;
+        }
       }
+    } finally {
+      // Whatever went through has already paid out on the server, including when
+      // the pool itself threw — so this runs on every path.
+      refreshAfterStakeClaims(dispatch);
+      setClaimingAll(false);
     }
-    // Partial success is the normal outcome of a loop of N requests, and it used
+
+    // Partial success is the normal outcome of a batch of N requests, and it used
     // to render as a flat "action failed" — the player was told nothing worked
     // while their balance had already moved for the ones that did.
     if (claimed > 0)
@@ -184,7 +225,6 @@ export function StakesContent() {
           aria-busy={claimingAll || undefined}
           className="bg-success/15 hover:bg-success/20 border-success/40 text-success flex items-center justify-center gap-2 rounded-2xl border px-4 py-3 text-[13px] font-extrabold uppercase tracking-wider transition-colors disabled:opacity-60"
         >
-          {/* One request per stake, in sequence — seconds, not a round trip. */}
           {claimingAll && <ButtonSpinner size={14} />}
           <span>{t('claim all ready')}</span>
           <span className="bg-success/30 rounded-full px-1.5 py-0.5 text-[10px] font-bold tabular-nums">
