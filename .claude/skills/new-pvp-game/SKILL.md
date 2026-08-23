@@ -102,6 +102,62 @@ Each line below is a bug that reached production on 22.08.2026 and the pattern t
 10. **Player names go through `shownName(user) ?? username`** — never `displayName || username`. `usernameCustom` means the player set an in-app nickname and it must win over the Telegram name; SeedPlayer names are authored and used as-is. Select `usernameCustom` wherever a user's name is shown.
 11. **The screen reopens a running match from `lobbies.active`**, and a `CANCELLED` state turns into a toast + leave. A failed query shows `QueryErrorState`, never «you have no tickets».
 
+## The look — decide it in a studio, then build
+
+The mechanics chapter above is settled. The **appearance is not**, and it is the
+user's call, not yours. Building first and showing after got exactly the answer
+it deserved: «ты уже собираешь стол, а я не сказал что мне нравится».
+
+- **Publish a studio artifact and iterate there.** One page, the whole game:
+  every screen inside a 390×844 frame, real strings, the game's own assets
+  (tokens, tier tickets — data-URI them), a switcher per axis, and a one-line
+  «замысел» under each screen. The intent line is what actually gets judged.
+- **Split the choice into two independent axes**, or every note becomes a
+  rebuild. The **world** of the scene (ground, texture, light: table / ring /
+  terminal) and the **frame** of the blocks (border, fill, shadow: brass /
+  steel / glass / neon / coal). When they are one control, «не нравятся цвета
+  бордеров» means «переделай весь мир». The duel settled on **Table + Neon**.
+- **Fourteen screens** is what a PvP game turned out to need: showcase card,
+  lobby list, the same list filtered by league, rules, stake, waiting, «who to
+  call», readiness, move, reveal, **two** results (win and loss — the red half
+  has to be chosen with the eyes too), and **two** incoming-challenge modals
+  (fresh and rematch).
+
+### What the screens must say
+
+1. **Score is a number with its denominator, beside the owner's name** —
+   `1/2`. Two 8px dots answered neither «whose» nor «how many are needed», and
+   a lit dot read equally as «one win» and «one attempt». The leader's plate
+   glows; a zero stays grey.
+2. **No score at all on the readiness phase** — the match has not started, and
+   `0/2` there is noise. The match length goes in words on the plate instead.
+3. **Readiness is the biggest thing on its screen.** It replaces the face-down
+   tokens, which mean nothing before the first move: a green disc with a tick
+   for the one who confirmed, a breathing dashed one for the one being waited
+   on. That phase is where lobbies die; a small pill under a name is not
+   enough.
+4. **The result names YOUR number.** Winner «забрали 4», loser «потеряли 2».
+   Showing the doubled pot to both put the size of someone else's win under the
+   word «поражение».
+5. **Never claim a league the screen does not own.** The list holds tables of
+   every tier, so its header names none of them; the tier lives in the row, as
+   the ticket picture. In a match the header carries the round number instead,
+   and the wallet is the balance **of that match's league**.
+6. **A ticket picture beside every ticket count**, and it replaces the «бил.»
+   abbreviation on the stake chips: a picture needs no translation into twenty
+   languages. This forces data: the invite payload has to carry `tier`, or the
+   modal draws bronze over a golden stake.
+7. **The game gets its own ground**, not the app's shared backdrop — light,
+   texture, vignette, and watermarks made of the game's own pieces. Dim the
+   watermarks on the screens where the real pieces are on the table.
+8. **Rules live under an «i» in the header**, not as a row in the list: they
+   are read once and the list space is needed always. They are the only place
+   that says who beats whom — build that cycle **from the same table that
+   judges rounds**, never a second list of the same rules.
+9. **Do not invent data for the design.** A countdown on the challenge modal
+   was cut because the invite payload has no expiry — a timer with nothing to
+   tick is a lie. Add the field first, then draw it.
+
 ## Telegram reality
 
 - **The bot cannot write first.** Measured on production: a broadcast to 283 recipients delivered **0**; reachability across the roster is **3–4 %**. Anything that depends on a DM must show who will actually receive it. The DM carries a one-off button `startapp=<game>-<lobbyId>` (the catalog cannot hold an id).
@@ -143,6 +199,23 @@ SELECT count(*) FROM "Duel" d WHERE status='FINISHED' AND (d."hostWins" <> (SELE
 ⚠️ The e2e suite creates a user per player through `/auth/telegram`, which is throttled to **10 logins per minute per IP** with Redis-backed storage shared across runs — back-to-back runs start answering **429** and the failures look like broken code. Wait out the minute and re-run before debugging anything.
 
 `railway logs --service lucky-ticket-backend --environment production` shows Prisma validation errors and DM failures (`DM "duel_invite_dm" … failed`); 4xx are not logged.
+
+### Whose failure is it
+
+Before saying «не моё», prove it. Build the **previous commit** in a detached
+worktree (`git worktree add --detach … <sha>`, then `cp -al node_modules` — a
+symlink out of the project root makes Turbopack refuse), serve it on another
+port and run the failing test against it with `E2E_BASE_URL`. Two rounds of
+this session's «12 упало» dissolved that way: eight failures were identical on
+the pre-change build, four were the suite's own 420 s budget under three
+workers, one was flaky. Nothing was mine — but only the A/B could say so.
+
+And when a mock keeps re-opening auto-modals (onboarding that never persists,
+a gifts dialog whose only button navigates away), a screen-level test has to
+**bound its dismissal and hide what is left**, then measure. Dismissing by
+clicking the first dialog, or the last button of it, spins forever: the first
+dialog in the DOM is often the one painted underneath, and the last button is
+sometimes «Полная таблица».
 
 ## Live-ops — what the operator sees and turns
 
@@ -208,7 +281,7 @@ Each of these shipped, reached production and was found the hard way.
 - **`User.avatarUrl` does not exist** — a player's avatar lives in `Profile`. Prisma validates `select` at query time: the lobby list answered **500** while the screen showed a greyed-out button. Guard: an e2e case against a real database.
 - **A failed query must surface.** Without `QueryErrorState` the screen read "you have no tickets".
 - **The mock matcher took keys literally**, so `games/duel/:id` matched nothing on localhost.
-- **Never stage a directory.** `git commit --only src/components/layout-elements/` swept up another session's files; `main` stopped building, two deploys failed. Stage explicit paths, then `git show --stat HEAD`.
+- **Never stage a directory, and never trust `git add` alone.** `git commit --only src/components/layout-elements/` swept up another session's files once; `main` stopped building, two deploys failed. The subtler repeat (23.08): `git add <my paths>` followed by a plain `git commit` — **commit takes the WHOLE index**, and the parallel session had already staged its work there, so 27 foreign files shipped under an unrelated message. Use `git commit -F msg -- <explicit paths>`, then `git show --stat HEAD` and read it.
 - **Build from the mockup, not from its description.**
 - **`DRAW` treated as a decided round** → every third round displayed as a loss (22.08).
 - **`startMatch` checked `stakesPaid` on the loaded copy** → double debit under simultaneous ready (22.08).
@@ -221,6 +294,10 @@ Each of these shipped, reached production and was found the hard way.
 - **Showing the Telegram name instead of the in-app nickname** — the duel used `displayName || username` everywhere; the whole app picks the visible name with `shownName(user) ?? username` (`usernameCustom` → the in-app nickname wins). A player who renamed themselves saw their Telegram name in the lobby (23.08). Any player name a new game shows must go through `shownName`.
 - **A new config knob the panel cannot save** — `PATCH /admin/config` runs `forbidNonWhitelisted`, so a field missing from `UpdateConfigDto` is refused with a bare 400 and the panel silently keeps the old value. Add the field to the DTO in the same commit as the config default (23.08).
 - **Inviting someone without tickets** → they accepted and got «lobby already taken»; fixed at every door (22.08).
+- **A skin rule silently ate the outcome.** `[data-dir='table'] .token .tok { filter: drop-shadow(…) }` sat below `.token.win` / `.token.lose` at equal specificity, and `filter` is one property, not a list — so on the reveal screen the winner did not glow and the loser did not grey, both figures looked identical, and the screen stopped saying anything. Any skin that touches `filter`/`background` must exclude the state classes (`:not(.win):not(.lose)`) and restate them (23.08).
+- **`background` shorthand killed the ticket picture** in the league tiles — the same trap the brand wordmark documents. Write `background-position/size/repeat` separately whenever another rule supplies `background-image` (23.08).
+- **Deleting a dictionary key without checking runtime-built ones.** Keys assembled as `` `duel cancel ${reason}` `` are invisible to grep; check the template sites before removing anything (23.08).
+- **The local e2e suite cannot be judged from one red run.** It walks ~40 routes; against `next dev` the on-demand compile blew the 20 s shell wait and the 90 s test timeout, and a hung browser run pinned the machine at load 114 — which then flaked a timing-sensitive **unit** test inside pre-commit. Build once into a detached worktree and serve it (`cp -al node_modules` — a symlinked one breaks Turbopack), then point the suite at that port (23.08).
 - **Testing one account on two clients without meaning to** — the headless copy accepted, the phone declined, it looked like a bug (22.08).
 
 ## Known, deliberately open
