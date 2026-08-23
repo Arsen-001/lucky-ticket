@@ -28,7 +28,7 @@ export function DuelReadyMark({ ready, caption, size = 132, className }: DuelRea
       <span
         style={{ width: size, height: size }}
         className={twMerge(
-          'flex-center rounded-full',
+          'flex-center relative rounded-full',
           ready
             ? 'border-success-text/85 bg-success/25 text-success-text border-2 shadow-[0_0_44px_rgba(52,211,153,0.32)]'
             : 'duel-pulse border-electric-purple/50 border-2 border-dashed text-white/45'

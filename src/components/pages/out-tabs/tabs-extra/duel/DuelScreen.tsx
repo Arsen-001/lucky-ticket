@@ -102,6 +102,7 @@ export function DuelScreen() {
         <DuelArena
           duelId={duelId}
           tickets={lobbies?.tickets ?? 0}
+          readySeconds={lobbies?.readySeconds}
           balances={lobbies?.balances}
           openInvite={inviteOnEnter}
           onLeave={() => {

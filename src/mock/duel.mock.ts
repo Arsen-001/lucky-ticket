@@ -247,7 +247,10 @@ const list = (): DuelLobbyList => ({
   stakeMax: 5,
   winsNeeded: 2,
   moveSeconds: 5,
-  readySeconds: 10,
+  // Пятнадцать, как в панели на проде. Пока здесь стояла десятка, вшитая в
+  // полосу готовности десятка выглядела правильной, и ошибку было видно
+  // только живым игрокам.
+  readySeconds: 15,
   tickets,
   balances: { ...balances, bronze: tickets },
   own:

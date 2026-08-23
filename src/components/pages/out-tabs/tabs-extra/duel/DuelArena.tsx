@@ -49,6 +49,8 @@ const POLL_REVEAL = 300;
 export interface DuelArenaProps {
   duelId: string;
   tickets: number;
+  /** Сколько всего даётся на подтверждение — число правит панель. */
+  readySeconds?: number;
   /**
    * Билеты по лигам.
    *
@@ -74,6 +76,7 @@ export interface DuelArenaProps {
 export function DuelArena({
   duelId,
   tickets,
+  readySeconds,
   balances,
   openInvite,
   onLeave,
@@ -294,6 +297,17 @@ export function DuelArena({
     );
   }
 
+  /**
+   * Чем меряется полоса готовности.
+   *
+   * Здесь была вшита десятка, а `readySeconds` в панели давно пятнадцать:
+   * первые пять секунд полоса стояла полной и трогалась только с десятой.
+   * Число приходит с сервера тем же ответом, что и список лобби; текущий
+   * остаток взят полом на случай, если ответ ещё не доехал, — тогда полоса
+   * начнёт с полной и поедет честно, а не соврёт.
+   */
+  const readyTotal = Math.max(1, readySeconds ?? 0, secondsLeft(data.readyDeadline));
+
   const foeName = data.opponent?.name ?? t('duel waiting for opponent');
   const revealed = Boolean(data.round?.revealed);
   const finished = data.status === 'FINISHED';
@@ -507,7 +521,7 @@ export function DuelArena({
               <span
                 className="bg-gold block h-full origin-left transition-transform duration-500"
                 style={{
-                  transform: `scaleX(${Math.max(0, Math.min(1, secondsLeft(data.readyDeadline) / 10))})`,
+                  transform: `scaleX(${Math.max(0, Math.min(1, secondsLeft(data.readyDeadline) / readyTotal))})`,
                 }}
               />
             </span>
