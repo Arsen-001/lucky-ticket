@@ -43,30 +43,72 @@ async function dismissAutoDialogs(page: Page) {
   const SETTLE_MS = 900;
   const STEP_MS = 100;
 
+  /**
+   * Верхний диалог, а не первый.
+   *
+   * На главной их встаёт трое разом — подарки, итог турнира и вызов на дуэль,
+   * — и вызов лежит в DOM ПЕРВЫМ, а рисуется под остальными. Цикл честно брал
+   * `.first()`, восемь раз подряд пытался нажать его «Не сейчас», ловил таймаут
+   * о перекрывающую модалку и уходил ни с чем: экран оставался закрытым, и все
+   * тап-зоны на нём отчитывались проглоченными. Последний портал в DOM — верхний
+   * на экране, и именно он нажимается.
+   */
   const nextDialog = async () => {
     for (let waited = 0; waited < SETTLE_MS; waited += STEP_MS) {
-      const dialog = appDialogs(page).first();
+      const dialog = appDialogs(page).last();
       if (await dialog.isVisible().catch(() => false)) return dialog;
       await page.waitForTimeout(STEP_MS);
     }
     return null;
   };
 
-  for (let i = 0; i < 8; i++) {
+  // Куда мы пришли мерить. Последняя кнопка модалки — не всегда «закрыть»: у
+  // итога турнира это «Все результаты», и она уводит со страницы. Дальше цикл
+  // честно разбирал очередь, но уже на ЧУЖОМ экране, а тест потом мерил его же.
+  const measuring = page.url();
+
+  // Очередь глубже, чем кажется: язык → подарки → четыре шага тура → два итога
+  // турнира → вызов на дуэль. Восьми проходов на неё не хватало, и тест мерил
+  // экран, на котором ещё висели модалки.
+  // Условие выхода — ДВА пустых взгляда подряд, как и написано выше: очередь
+  // асинхронная, и следующая модалка встаёт уже после того, как предыдущая
+  // ушла. Код выходил по первому же пустому взгляду и оставлял хвост очереди
+  // на экране — тест мерил его как «зоны проглочены».
+  let empty = 0;
+  for (let i = 0; i < 16; i++) {
     const dialog = await nextDialog();
-    if (!dialog) return;
+    if (!dialog) {
+      if (++empty >= 2) break;
+      continue;
+    }
+    empty = 0;
     const buttons = dialog.locator('button');
     const count = await buttons.count();
     if (count === 0) {
       await page.keyboard.press('Escape');
     } else {
-      await buttons
-        .nth(count - 1)
-        .click({ timeout: 5000 })
-        .catch(() => {});
+      /**
+       * Кнопку выбираем по смыслу, а не по месту в ряду.
+       *
+       * Ни «первая», ни «последняя» не работают на всех: у выбора языка
+       * закрывает ПОСЛЕДНЯЯ («Продолжить»), а первые двадцать — сами языки;
+       * у итога турнира закрывает ПЕРВАЯ («Продолжить»), а последняя уводит
+       * на полную таблицу. И вернуться назад нельзя: онбординг в моке не
+       * запоминается, любая навигация поднимает всю очередь заново, и цикл
+       * не сходится никогда.
+       */
+      const closer = dialog.getByRole('button', {
+        name: /^(continue|claim|not now|close|ok|got it|done|продолжить|забрать|не сейчас|закрыть|понятно)/i,
+      });
+      const target = (await closer.count()) > 0 ? closer.first() : buttons.nth(count - 1);
+      await target.click({ timeout: 5000 }).catch(() => {});
     }
     // Let the dismissal animation finish before looking for the next one.
     await page.waitForTimeout(250);
+    if (page.url() !== measuring) {
+      await page.goto(measuring, { waitUntil: 'domcontentloaded' });
+      await page.waitForTimeout(400);
+    }
   }
 }
 
@@ -107,6 +149,12 @@ for (const route of STATIC_ROUTES) {
 
   test(`tap-target controls on ${route} own their 44px zone`, async ({ page }) => {
     await openScreen(page, route);
+    // Очередь модалок асинхронная: вызов на дуэль в моке приезжает секундами
+    // позже остальных и встаёт уже после того, как экран разобран. Второй
+    // проход перед самым замером стоит пару секунд тишины и снимает гонку —
+    // без него треть прогонов мерила экран под модалкой и объявляла
+    // проглоченными ВСЕ зоны разом.
+    await dismissAutoDialogs(page);
 
     const short = await page.evaluate(async () => {
       // 44/2 minus a pixel, so every sample sits inside the required square.
