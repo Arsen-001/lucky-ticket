@@ -10,7 +10,9 @@ import { LcLabel } from '@/components/shared/icons/LcLabel';
 import { formatCompact, formatNumber } from '@/utils/global/number.utils';
 import { useAppTranslations } from '@/hooks/useAppTranslations';
 import { useGetMeQuery } from '@/api/me.api';
+import { useQuoteExtraAdViewsQuery } from '@/api/tasks.api';
 import type { AdsExtraOffer } from '@/types/interfaces/tasks.interfaces';
+import { AdRewardRow } from './AdRewardRow';
 
 type Currency = 'lc' | 'ls';
 
@@ -32,9 +34,15 @@ export interface BuyExtraAdsModalProps {
 /**
  * Buy extra ad views for the rest of the day.
  *
- * Two things are stated before the player pays, because both are surprises
- * otherwise: the slots die at the daily reset, and the two currencies are not
- * priced at parity (Stars can't go below 1, so LC is the cheaper path).
+ * Three things are stated before the player pays, because all three are
+ * surprises otherwise: what the purchase actually pays out, that the slots die
+ * at the daily reset, and that the two currencies are not priced at parity
+ * (Stars can't go below 1, so LC is the cheaper path).
+ *
+ * The payout is quoted BY THE SERVER for this exact count. The paid ladder
+ * climbs, so a total worked out here as "one view × count" would promise
+ * rewards the grant path never pays — the same reason the slot list is server
+ * built.
  */
 export function BuyExtraAdsModal({
   open,
@@ -60,6 +68,19 @@ export function BuyExtraAdsModal({
   const total = unit * count;
   const balance = currency === 'ls' ? (me?.telegramStars ?? 0) : (me?.coins ?? 0);
   const short = balance < total;
+
+  // Skipped while the modal is closed: it is one request per count the player
+  // stops on, and a closed modal stops on nothing.
+  const { data: quote, isFetching: quoting } = useQuoteExtraAdViewsQuery(count, {
+    skip: !open,
+  });
+  // The count the quote answers for — a stale one from the previous step must
+  // not be read as this step's payout while the new one is in flight.
+  const quoteRewards = quote?.count === count ? quote.rewards : undefined;
+  // Fallback while the first quote lands (and on a backend that has no quote
+  // route at all): what ONE bought view pays, labelled as such rather than
+  // multiplied.
+  const perView = extra.nextRewards?.[0];
 
   return (
     <ConfirmModal
@@ -114,6 +135,26 @@ export function BuyExtraAdsModal({
           </div>
 
           <QuantityStepper value={count} onChange={setCount} max={max} />
+
+          {/* What the money buys. Above the price on purpose: the reward is the
+              reason to read the price, not the other way round. */}
+          {Boolean(quoteRewards?.length || perView?.length) && (
+            <div className="border-electric-pink/25 from-electric-pink/[0.12] flex flex-col gap-2 rounded-xl border bg-gradient-to-b to-transparent px-3.5 py-3">
+              <span className="text-[11px] font-bold tracking-wider text-white/50 uppercase">
+                {quoteRewards ? t('you get for watching') : t('per view')}
+              </span>
+              <AdRewardRow
+                rewards={quoteRewards ?? perView ?? []}
+                muted={quoting && !quoteRewards}
+              />
+              {/* The purchase is a slot, not a payout — the reward lands when
+                  the view is watched, and saying so here is cheaper than a
+                  support message tomorrow. */}
+              <span className="text-[11px] leading-snug text-white/45">
+                {t('extra ads reward on watch')}
+              </span>
+            </div>
+          )}
 
           <div className="flex items-center justify-between rounded-xl bg-white/5 px-4 py-3">
             <span className="text-pink-secondary text-sm font-bold uppercase tracking-wider">

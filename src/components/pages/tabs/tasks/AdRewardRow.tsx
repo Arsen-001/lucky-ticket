@@ -80,6 +80,16 @@ export interface AdRewardRowProps {
   variant?: AdRewardRowVariant;
   /** Dims the row for a slot that is spent or not reachable yet. */
   muted?: boolean;
+  /**
+   * The row is rendered INSIDE a `<button>` (the buy-more card).
+   *
+   * Two things follow, and both are HTML rather than taste: the wrapper becomes
+   * a `span`, because a `div` inside a button is invalid and browsers repair it
+   * by closing the button early; and the ticket art drops its own button, which
+   * a nested `<button>` would otherwise be — React logs it as a hydration
+   * error and the inner tap target steals the card's tap.
+   */
+  insideButton?: boolean;
   className?: string;
 }
 
@@ -93,17 +103,19 @@ export function AdRewardRow({
   rewards,
   variant = 'row',
   muted = false,
+  insideButton = false,
   className,
 }: AdRewardRowProps) {
   if (!rewards.length) return null;
 
+  const Wrapper = insideButton ? 'span' : 'div';
   const inline = variant === 'inline';
   const dense = rewards.length >= 4;
   const iconSize = inline ? 20 : dense ? 15 : 17;
   const textClass = inline ? 'text-[15px]' : dense ? 'text-[12px]' : 'text-[13px]';
 
   return (
-    <div
+    <Wrapper
       className={twMerge(
         'relative flex items-stretch gap-1.5',
         inline && 'shrink-0',
@@ -138,6 +150,7 @@ export function AdRewardRow({
                 tier={ticketTier}
                 amount={reward.amount}
                 size={dense ? iconSize - 3 : iconSize}
+                interactive={!insideButton}
               />
             ) : Icon ? (
               <Icon size={iconSize} strokeWidth={2.2} className={twMerge('shrink-0', iconClass)} />
@@ -151,6 +164,6 @@ export function AdRewardRow({
           </span>
         );
       })}
-    </div>
+    </Wrapper>
   );
 }

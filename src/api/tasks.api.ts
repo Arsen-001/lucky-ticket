@@ -3,6 +3,7 @@ import { balanceTags } from '@/api/balance-tags';
 import { refetchTestQuestProgress } from '@/api/testQuest.api';
 import { rtkTags } from '@/constants/rtk-tags';
 import type {
+  AdsExtraQuote,
   BuyExtraAdViewsRequest,
   BuyExtraAdViewsResponse,
   ClaimTaskRequest,
@@ -139,6 +140,19 @@ export const tasksApi = api.injectEndpoints({
       // matching ledger row, so both groups refresh alongside the ads block.
       invalidatesTags: [rtkTags.tasks, ...balanceTags.lc, ...balanceTags.stars],
     }),
+    /**
+     * GET /tasks/ads/extra/quote?count=N
+     *   What buying N more views right now would cost and pay. Read-only, and
+     *   the only correct source of that total: the paid ladder climbs, so the
+     *   app must never quote `one view × N` on its own.
+     *
+     *   Tagged `tasks` so a purchase re-quotes — the next view bought after
+     *   this one starts a rung further up the ladder.
+     */
+    quoteExtraAdViews: builder.query<AdsExtraQuote, number>({
+      query: count => ({ url: 'tasks/ads/extra/quote', params: { count } }),
+      providesTags: [rtkTags.tasks],
+    }),
   }),
 });
 
@@ -148,4 +162,5 @@ export const {
   useWatchAdMutation,
   useReportAdAttemptMutation,
   useBuyExtraAdViewsMutation,
+  useQuoteExtraAdViewsQuery,
 } = tasksApi;

@@ -283,6 +283,31 @@ const getAdRewards = (index: number): TaskReward[] =>
   ADS_CONFIG.rewardLadder[index % ADS_CONFIG.rewardLadder.length] ?? flatAdReward;
 
 /**
+ * The ladder BOUGHT views are paid from, copied from production (read straight
+ * off `PlatformConfig.adRewardsPaidConfig`, 23.08.2026): twenty rungs, no LC on
+ * any of them — the 5 000 LC is the price, not a reward — a star every time,
+ * and the ticket count climbing 1 → 2 → 3.
+ *
+ * Kept separate from the free ladder because the server keeps them separate:
+ * a bought view is numbered from the day's FIRST bought view, so the tenth free
+ * view and the first bought one pay completely different things. With the free
+ * ladder standing in for both, the buy card on localhost promised LC that
+ * production never pays.
+ */
+const ADS_PAID_LADDER: TaskReward[][] = Array.from({ length: 20 }, (_, i) => [
+  ap(1),
+  stars(1),
+  { ...tickets(i < 6 ? 1 : i < 14 ? 2 : 3), label: 'bronze' },
+]);
+
+/** `paidIndex` is 0-based from the day's first bought view. */
+const getPaidAdRewards = (paidIndex: number): TaskReward[] =>
+  ADS_PAID_LADDER[paidIndex % ADS_PAID_LADDER.length] ?? flatAdReward;
+
+/** How many upcoming bought views the offer previews — mirrors the server. */
+const ADS_EXTRA_PREVIEW = 3;
+
+/**
  * The Lucky Player skip allowance for this dev session (DOCS §7.3) — the perk
  * that pays a view without playing anything. `total: 0` is the statusless view
  * of the same screen, which is what a `fresh` account gets: the card must then
@@ -327,7 +352,7 @@ const buildAds = (): AdsBlock => {
     return {
       id,
       index: i,
-      rewards: getAdRewards(i),
+      rewards: i >= free ? getPaidAdRewards(i - free) : getAdRewards(i),
       watched: i < ADS_CONFIG.watchedToday || mockState.watchedAdIds.has(id),
       paid: i >= free,
     };
@@ -362,6 +387,10 @@ const buildAds = (): AdsBlock => {
       // offer the panel can now switch on — the mock has no admin to ask.
       unlimited: false,
       grantsAp: true,
+      // What the next bought views pay, so the card can say it before the tap.
+      nextRewards: Array.from({ length: ADS_EXTRA_PREVIEW }, (_, k) =>
+        getPaidAdRewards(ADS_EXTRA.purchasedToday + k)
+      ),
     },
   };
 };
@@ -1948,6 +1977,33 @@ export const tasksMock = {
   // Telemetry for an attempt that paid nothing. Grants nothing and touches no
   // mock state on purpose — that is exactly what the real endpoint does.
   'POST tasks/ads/attempt': () => ({ status: 'recorded' }),
+  /**
+   * Price and payout for a purchase not made yet. Summed rung by rung the way
+   * the server sums it — a flat `reward × count` would quote a total the buy
+   * endpoint never pays, and dev would never see the difference.
+   */
+  'GET tasks/ads/extra/quote': (args: { params?: { count?: number | string } }) => {
+    const count = Math.min(100, Math.max(1, Math.trunc(Number(args.params?.count ?? 1)) || 1));
+    const perView = Array.from({ length: count }, (_, k) =>
+      getPaidAdRewards(ADS_EXTRA.purchasedToday + k)
+    );
+    const sum = (type: TaskRewardType) =>
+      perView.flat().reduce((s, r) => (r.type === type ? s + r.amount : s), 0);
+    const rewards: TaskReward[] = [];
+    if (sum(TaskRewardType.ACTIVITY_POINTS) > 0)
+      rewards.push(ap(sum(TaskRewardType.ACTIVITY_POINTS)));
+    if (sum(TaskRewardType.LC) > 0) rewards.push(rawLc(sum(TaskRewardType.LC)));
+    if (sum(TaskRewardType.STARS) > 0) rewards.push(stars(sum(TaskRewardType.STARS)));
+    if (sum(TaskRewardType.TICKETS) > 0)
+      rewards.push({ ...tickets(sum(TaskRewardType.TICKETS)), label: 'bronze' });
+    return {
+      count,
+      price: { lc: ADS_EXTRA.priceLc * count, ls: ADS_EXTRA.priceLs * count },
+      rewards,
+      perView: perView.slice(0, ADS_EXTRA_PREVIEW),
+      grantsAp: true,
+    };
+  },
   'POST tasks/ads/extra': (args: { body?: { count?: number; currency?: 'lc' | 'ls' } }) => {
     const count = Math.max(1, Math.trunc(args.body?.count ?? 1));
     const currency = args.body?.currency === 'ls' ? 'ls' : 'lc';

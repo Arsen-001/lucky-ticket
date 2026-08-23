@@ -1613,5 +1613,7 @@
   "offer ends in {time}": "Науқан аяқталуына {time}",
   "star packages": "Lucky Stars пакеттері",
   "cheaper than telegram by {percent}": "Telegram-ға қарағанда {percent}% арзан",
-  "+{days} days": "+{days, plural, other {# күн}}"
+  "+{days} days": "+{days, plural, other {# күн}}",
+  "you get for watching": "You get for watching",
+  "extra ads reward on watch": "Each reward lands when you watch that view"
 }

@@ -133,6 +133,30 @@ export interface AdsExtraOffer {
   unlimited?: boolean;
   /** A bought view pays AP too. Off = everything except AP. */
   grantsAp: boolean;
+  /**
+   * What the next bought views pay, in the order they will be watched — the
+   * server reads its PAID ladder from the day's first bought view, so this is
+   * the only place the app learns what the offer is actually selling. Absent on
+   * an older backend; the card then states the price alone, as it used to.
+   */
+  nextRewards?: TaskReward[][];
+}
+
+/**
+ * Price and payout of a purchase the player has NOT made yet
+ * (`GET /tasks/ads/extra/quote?count=N`).
+ *
+ * Server-summed on purpose: the paid ladder climbs, so multiplying one view's
+ * reward by `count` quotes a total the grant path never pays.
+ */
+export interface AdsExtraQuote {
+  count: number;
+  price: { lc: number; ls: number };
+  /** The whole purchase, summed per reward type. */
+  rewards: TaskReward[];
+  /** The first few views of it, one entry each, for a per-view breakdown. */
+  perView: TaskReward[][];
+  grantsAp: boolean;
 }
 
 export interface AdsBlock {

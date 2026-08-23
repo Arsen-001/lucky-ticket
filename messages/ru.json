@@ -1613,5 +1613,7 @@
   "offer ends in {time}": "До конца акции {time}",
   "star packages": "Пакеты Lucky Stars",
   "cheaper than telegram by {percent}": "На {percent}% дешевле, чем в Telegram",
-  "+{days} days": "+{days, plural, one {# день} few {# дня} many {# дней} other {# дней}}"
+  "+{days} days": "+{days, plural, one {# день} few {# дня} many {# дней} other {# дней}}",
+  "you get for watching": "Получишь за просмотр",
+  "extra ads reward on watch": "Награда приходит за просмотр каждого показа"
 }
