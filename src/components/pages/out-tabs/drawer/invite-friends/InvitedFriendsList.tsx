@@ -1,7 +1,11 @@
 'use client';
 
 import { useMemo, useState } from 'react';
-import { useClaimFriendMutation, useGetInvitedFriendsQuery } from '@/api/referral.api';
+import {
+  refreshAfterFriendClaims,
+  useClaimFriendMutation,
+  useGetInvitedFriendsQuery,
+} from '@/api/referral.api';
 import { ArrivalShine } from '@/components/shared/ArrivalShine';
 import { EmptyDataInfo } from '@/components/shared/EmptyDataInfo';
 import { QueryErrorState } from '@/components/shared/error/QueryErrorState';
@@ -17,6 +21,7 @@ import { FriendBranchList } from '@/components/pages/out-tabs/drawer/invite-frie
 import { NetworkList } from '@/components/pages/out-tabs/drawer/invite-friends/NetworkList';
 import { FriendsClaimSummaryCard } from '@/components/pages/out-tabs/drawer/invite-friends/FriendsClaimSummaryCard';
 import { FriendsQualificationNote } from '@/components/pages/out-tabs/drawer/invite-friends/FriendsQualificationNote';
+import { useAppDispatch } from '@/lib/rtk/hooks';
 import { useAppTranslations } from '@/hooks/useAppTranslations';
 import { useReferralCounts } from '@/hooks/useReferralCounts';
 import {
@@ -29,6 +34,16 @@ import type { TicketType } from '@/types/types/ticket.types';
 import { useToast } from '@/hooks/useToast';
 import { displayNameOf } from '@/utils/global/user.utils';
 import { staggerMs } from '@/utils/global/animation.utils';
+import { mapWithConcurrency } from '@/utils/global/async.utils';
+
+/**
+ * How many friend claims «Забрать всё» keeps in flight.
+ *
+ * There is no bulk endpoint — the button is N × `POST referral/claim/:id`. Four
+ * at a time turns a ten-friend collect from ten sequential round-trips into
+ * three, without opening a connection per friend for the player who has fifty.
+ */
+const CLAIM_ALL_CONCURRENCY = 4;
 
 const EMPTY_TICKETS: Record<TicketType, number> = {
   bronze: 0,
@@ -41,6 +56,7 @@ const EMPTY_TICKETS: Record<TicketType, number> = {
 export const InvitedFriendsList = () => {
   const t = useAppTranslations();
   const toast = useToast();
+  const dispatch = useAppDispatch();
   const { data: friends = [], isLoading, isError, refetch } = useGetInvitedFriendsQuery();
   const [claimFriend, { isLoading: isClaiming }] = useClaimFriendMutation();
   // The tab badge, off the same per-friend counts the rows draw — so the number
@@ -115,35 +131,59 @@ export const InvitedFriendsList = () => {
   };
 
   const handleClaimAll = async () => {
+    // Re-entrancy guard, not belt-and-braces: the summary card's button is
+    // disabled while `isClaimingAll`, but the batch finishes BEFORE the refetch
+    // it triggers comes back, and in that window `friends` still lists rewards
+    // the server has already paid. A second press there would fire a whole
+    // round of claims the backend can only refuse.
+    if (isClaimingAll) return;
+
     const targets = friends.filter(hasClaimableReward);
     if (!targets.length) return;
 
-    const totalLc = targets
-      .filter(countsAsReferral)
-      .reduce((sum, friend) => sum + totalClaimableLcOf(friend), 0);
-
     setIsClaimingAll(true);
-    let claimed = 0;
-    let failed = 0;
+    let outcomes: { friend: InvitedFriend; ok: boolean }[] = [];
     try {
-      for (const friend of targets) {
-        const result = await claimFriend({ friendId: friend.id });
-        if ('error' in result) failed += 1;
-        else claimed += 1;
-      }
+      // `silent: true` — one refresh for the batch instead of one per friend;
+      // @see claimFriend. The pool is what makes this a single wait rather than
+      // N: the claims used to run in an `await` loop, so ten friends meant ten
+      // sequential round-trips with the button spinning through all of them.
+      outcomes = await mapWithConcurrency(targets, CLAIM_ALL_CONCURRENCY, async friend => {
+        // Without `.unwrap()` the mutation RESOLVES with `{ error }` instead of
+        // throwing, so a bare `await` could not tell success from failure.
+        const result = await claimFriend({ friendId: friend.id, silent: true });
+        return { friend, ok: !('error' in result) };
+      });
     } finally {
+      // Whatever went through has already moved money on the server, including
+      // when the pool itself threw — so this runs on every path.
+      refreshAfterFriendClaims(dispatch);
       setIsClaimingAll(false);
     }
 
-    if (failed) toast.error(t('claim failed'));
-    // The celebration is raised AFTER the requests, and only when something was
-    // actually granted. It used to be opened from a local snapshot before the
-    // first call went out, so a refusal — which the backend returns for a
-    // duplicate claim instead of quietly granting twice — still announced
-    // "+N" the player never received.
-    if (!claimed) return;
+    const claimed = outcomes.filter(outcome => outcome.ok).map(outcome => outcome.friend);
+    const failed = outcomes.length - claimed.length;
 
-    setClaimAllSnapshot({ friends: targets, totalLc });
+    // A partial batch is its own message: «не удалось забрать награду» over a
+    // collect that paid eight friends out of ten reads as though nothing
+    // arrived, while the celebration behind it says +N.
+    if (failed) {
+      toast.error(claimed.length ? t('some rewards were not claimed') : t('claim failed'));
+    }
+
+    // The celebration is raised AFTER the requests, and only over what the
+    // server actually granted. It used to be opened from a snapshot of every
+    // target before the first call went out, so a refusal — which the backend
+    // returns for a duplicate claim instead of quietly granting twice — still
+    // announced "+N" the player never received.
+    if (!claimed.length) return;
+
+    setClaimAllSnapshot({
+      friends: claimed,
+      totalLc: claimed
+        .filter(countsAsReferral)
+        .reduce((sum, friend) => sum + totalClaimableLcOf(friend), 0),
+    });
   };
 
   if (isError && !friends.length) {

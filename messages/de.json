@@ -210,6 +210,7 @@
   "claim": "Einlösen",
   "claim all": "Alle einlösen",
   "claim failed": "Belohnung konnte nicht eingelöst werden",
+  "some rewards were not claimed": "Some rewards weren't claimed",
   "claim failed description": "Server nicht erreichbar. Tippe „Erneut versuchen“, um es noch einmal zu probieren.",
   "claim already done": "Bereits eingelöst",
   "claim already done description": "Du hast diese Belohnung schon erhalten. Deine Aufgaben sind jetzt aktuell.",

@@ -211,6 +211,7 @@
   "claim": "استلام",
   "claim all": "استلام الكل",
   "claim failed": "تعذّر استلام المكافأة",
+  "some rewards were not claimed": "Some rewards weren't claimed",
   "claim failed description": "تعذّر الاتصال بالخادم. اضغط إعادة المحاولة.",
   "claim already done": "مُستلمة بالفعل",
   "claim already done description": "استلمت هذه المكافأة من قبل. مهامك محدّثة الآن.",

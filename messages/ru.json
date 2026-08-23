@@ -211,6 +211,7 @@
   "claim": "Забрать",
   "claim all": "Забрать все",
   "claim failed": "Не удалось забрать награду",
+  "some rewards were not claimed": "Часть наград забрать не удалось",
   "claim failed description": "Сервер недоступен. Нажми «Повторить», чтобы попробовать снова.",
   "claim already done": "Награда уже забрана",
   "claim already done description": "Эта награда уже получена. Список заданий обновлён.",

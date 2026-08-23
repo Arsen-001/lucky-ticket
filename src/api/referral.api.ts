@@ -2,6 +2,7 @@ import { api } from '@/api/index.api';
 import { balanceTags } from '@/api/balance-tags';
 import { refetchTestQuestProgress } from '@/api/testQuest.api';
 import { rtkTags } from '@/constants/rtk-tags';
+import type { AppDispatch } from '@/lib/rtk/store';
 import type {
   BranchMember,
   InvitedFriend,
@@ -10,6 +11,14 @@ import type {
   ReferralStats,
 } from '@/types/interfaces/referral.interfaces';
 import type { LocaleType } from '@/types/types/locale.types';
+
+/**
+ * Everything one friend claim moves: the friends list and its stats
+ * (`referral`), the legacy ticket commission it pays out (`tickets`) and the
+ * whole LC group — a claim writes a REFERRAL ledger row per level, so the
+ * header pill alone is not enough. @see balanceTags
+ */
+export const friendClaimTags = [rtkTags.referral, rtkTags.tickets, ...balanceTags.lc];
 
 export const referralApi = api.injectEndpoints({
   endpoints: builder => ({
@@ -92,14 +101,26 @@ export const referralApi = api.injectEndpoints({
         }
       },
     }),
-    claimFriend: builder.mutation<void, { friendId: string }>({
+    /**
+     * Collect one friend's accrued reward.
+     *
+     * `silent` suppresses this claim's cache invalidation, and exists for
+     * «Забрать всё»: that button fires one of these PER FRIEND — there is no
+     * bulk endpoint on the backend — and every one of them would otherwise
+     * refetch the friends list, the referral stats, the header pill and the
+     * whole LC ledger. Ten friends meant ten POSTs and ~30 GETs, each answer
+     * thrown away by the next claim's invalidation. The batch invalidates the
+     * same tags exactly once, when the last claim has settled.
+     * @see refreshAfterFriendClaims
+     */
+    claimFriend: builder.mutation<void, { friendId: string; silent?: boolean }>({
       query: ({ friendId }) => ({
         url: `referral/claim/${friendId}`,
         method: 'POST',
       }),
       // Collecting a friend pays accrued LC (one REFERRAL ledger row per level)
       // and tickets — the LC group, not just the header pill.
-      invalidatesTags: [rtkTags.referral, rtkTags.tickets, ...balanceTags.lc],
+      invalidatesTags: (_result, _error, { silent }) => (silent ? [] : friendClaimTags),
       async onQueryStarted({ friendId }, { dispatch, queryFulfilled }) {
         const patchResult = dispatch(
           referralApi.util.updateQueryData('getInvitedFriends', undefined, draft => {
@@ -118,6 +139,18 @@ export const referralApi = api.injectEndpoints({
     }),
   }),
 });
+
+/**
+ * Refresh everything a BATCH of friend claims moved — once, after the last one
+ * has settled. The companion to `claimFriend({ silent: true })`.
+ *
+ * Runs from a `finally`, deliberately: a batch that threw half-way has still
+ * moved money on the server for the claims that did go through, and leaving
+ * those unrefreshed is the exact disagreement `balanceTags` exists to prevent.
+ */
+export const refreshAfterFriendClaims = (dispatch: AppDispatch) => {
+  dispatch(api.util.invalidateTags(friendClaimTags));
+};
 
 export const {
   useGetInvitedFriendsQuery,

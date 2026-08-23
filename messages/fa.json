@@ -211,6 +211,7 @@
   "claim": "دریافت",
   "claim all": "دریافت همه",
   "claim failed": "پاداش دریافت نشد",
+  "some rewards were not claimed": "Some rewards weren't claimed",
   "claim failed description": "اتصال به سرور ممکن نشد. «تلاش دوباره» را بزن.",
   "claim already done": "قبلاً دریافت شده",
   "claim already done description": "این پاداش را قبلاً گرفته‌ای. مأموریت‌هایت اکنون به‌روزند.",

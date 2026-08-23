@@ -211,6 +211,7 @@
   "claim": "Al",
   "claim all": "Hamısını al",
   "claim failed": "Mükafat alınmadı",
+  "some rewards were not claimed": "Some rewards weren't claimed",
   "claim failed description": "Serverə çıxmaq olmadı. Yenidən cəhd et.",
   "claim already done": "Artıq alınıb",
   "claim already done description": "Bu mükafatı artıq almısan. Tapşırıqların indi yenilənib.",

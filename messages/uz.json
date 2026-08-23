@@ -211,6 +211,7 @@
   "claim": "Olish",
   "claim all": "Hammasini olish",
   "claim failed": "Mukofotni olib boʻlmadi",
+  "some rewards were not claimed": "Some rewards weren't claimed",
   "claim failed description": "Serverga ulanib boʻlmadi. «Qayta urinish»ni bos.",
   "claim already done": "Allaqachon olingan",
   "claim already done description": "Bu mukofotni allaqachon olding. Vazifalaring hozir dolzarb.",

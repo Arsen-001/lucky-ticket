@@ -211,6 +211,7 @@
   "claim": "Claim",
   "claim all": "Claim all",
   "claim failed": "Couldn't claim reward",
+  "some rewards were not claimed": "Some rewards weren't claimed",
   "claim failed description": "Couldn't reach the server. Tap retry to try again.",
   "claim already done": "Already claimed",
   "claim already done description": "You've already taken this reward. Your tasks are up to date now.",

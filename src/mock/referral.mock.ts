@@ -8,6 +8,8 @@ import {
 } from '@/types/interfaces/referral.interfaces';
 import { appConfig } from '@/config/app.config';
 import { comingSoonConfig } from '@/config/coming-soon.config';
+import { creditMockUser } from '@/mock/backend/charge';
+import { LcTransactionType } from '@/types/enums/lc.enums';
 
 const LOCAL_AVATARS = [
   images.avatar1.src,
@@ -322,8 +324,67 @@ export const preLaunchGiftMock: PreLaunchGiftState = {
   canClaim: eligible && dailyRemaining > 0,
 };
 
+/**
+ * Who has already been collected in this dev session.
+ *
+ * Session state lives OUTSIDE the fixture on purpose: RTK Query deep-freezes
+ * whatever the mock hands back, so a handler that wrote into the served roster
+ * would throw on the second press rather than pay.
+ * @see tests/mock-served-fixture-frozen.test.ts
+ */
+const claimedFriendIds = new Set<string>();
+
+/** The roster as it stands right now — fresh objects, collected rows emptied. */
+const serveInvitedFriends = (): InvitedFriend[] =>
+  invitedFriendsMock.map(friend =>
+    claimedFriendIds.has(friend.id)
+      ? { ...friend, claimableLc: 0, branchLc: 0, claimableTickets: [] }
+      : { ...friend }
+  );
+
+/**
+ * Collect one friend, the way the backend actually does it: the money moves on
+ * the shared mock player, the row empties, and a SECOND claim is REFUSED.
+ *
+ * The refusal is the part that matters. The handler used to answer `{}` to
+ * everything forever, so on localhost «Забрать всё» could be pressed all day,
+ * the balance never moved, and neither the partial-failure toast nor the
+ * duplicate-claim path the backend really returns (403 `not-a-referral`) could
+ * be reached at all. @see market-mock-never-refuses — the same blind spot.
+ *
+ * Tickets are marked collected but not credited: the mock player has no ticket
+ * balance to add them to. The LC half is what every balance surface reads.
+ */
+const claimFriendMock = (friend: (typeof baseFriends)[number]) => () => {
+  const lc = MOCK_NOT_COUNTED.has(friend.id)
+    ? 0
+    : (friend.claimableLc ?? 0) + (friend.branchLc ?? 0);
+  const tickets = friend.claimableTickets.reduce((sum, ticket) => sum + ticket.amount, 0);
+
+  if (claimedFriendIds.has(friend.id) || (lc === 0 && tickets === 0)) {
+    return { error: { status: 403, data: { error: 'not-a-referral', friendId: friend.id } } };
+  }
+
+  claimedFriendIds.add(friend.id);
+  // Printed like `referral/shared` below: «Забрать всё» is N of these at once,
+  // and the timestamps are the only place on localhost where you can see
+  // whether they went out together or one after another.
+  console.log(`[mock] referral/claim/${friend.id} — paid ${lc} LC, ${tickets} ticket(s)`);
+  if (lc > 0) {
+    creditMockUser({
+      lc,
+      type: LcTransactionType.REFERRAL,
+      description: 'Referral reward: friend tournament winnings',
+      sourceId: friend.id,
+    });
+  }
+  return {};
+};
+
 export const referralMock = {
-  'referral/friends': invitedFriendsMock,
+  // A thunk, not the array: the roster changes as friends are collected, and a
+  // shared reference would be frozen by the first response anyway.
+  'referral/friends': serveInvitedFriends,
   'referral/network': referralNetworkMock,
   'referral/stats': referralStatsMock,
   'referral/prelaunch-gift': preLaunchGiftMock,
@@ -341,7 +402,7 @@ export const referralMock = {
   // not `invitedFriendsMock`: the latter is empty for a fresh account, and the
   // handler should exist either way.
   ...Object.fromEntries(
-    baseFriends.map(friend => [`POST referral/claim/${friend.id}`, () => ({})])
+    baseFriends.map(friend => [`POST referral/claim/${friend.id}`, claimFriendMock(friend)])
   ),
   // Same reason as the claim keys above: a branch is read per friend id and the
   // resolver has no wildcards, so every friend gets a key — including the ones

@@ -211,6 +211,7 @@
   "claim": "Réclamer",
   "claim all": "Tout réclamer",
   "claim failed": "Impossible de réclamer la récompense",
+  "some rewards were not claimed": "Some rewards weren't claimed",
   "claim failed description": "Impossible de joindre le serveur. Appuie sur réessayer.",
   "claim already done": "Déjà réclamé",
   "claim already done description": "Tu as déjà pris cette récompense. Tes tâches sont à jour.",

@@ -211,6 +211,7 @@
   "claim": "Ստանալ",
   "claim all": "Ստանալ բոլորը",
   "claim failed": "Չհաջողվեց ստանալ պարգևը",
+  "some rewards were not claimed": "Some rewards weren't claimed",
   "claim failed description": "Չհաջողվեց կապվել սերվերի հետ։ Սեղմիր «Կրկնել»՝ նորից փորձելու համար։",
   "claim already done": "Արդեն ստացված է",
   "claim already done description": "Այս պարգևն արդեն վերցրել ես։ Առաջադրանքներդ այժմ թարմացված են։",

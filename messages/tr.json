@@ -211,6 +211,7 @@
   "claim": "Al",
   "claim all": "Hepsini al",
   "claim failed": "Ödül alınamadı",
+  "some rewards were not claimed": "Some rewards weren't claimed",
   "claim failed description": "Sunucuya ulaşılamadı. Tekrar dene'ye bas.",
   "claim already done": "Zaten alındı",
   "claim already done description": "Bu ödülü zaten aldın. Görevlerin şu an güncel.",

@@ -211,6 +211,7 @@
   "claim": "受け取る",
   "claim all": "すべて受け取る",
   "claim failed": "報酬を受け取れませんでした",
+  "some rewards were not claimed": "Some rewards weren't claimed",
   "claim failed description": "サーバーに接続できませんでした。再試行をタップしてください。",
   "claim already done": "受け取り済み",
   "claim already done description": "この報酬はすでに受け取っています。タスクは最新の状態です。",

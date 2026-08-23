@@ -211,6 +211,7 @@
   "claim": "აღება",
   "claim all": "ყველას აღება",
   "claim failed": "ჯილდო ვერ აიღეს",
+  "some rewards were not claimed": "Some rewards weren't claimed",
   "claim failed description": "სერვერს ვერ დავუკავშირდით. სცადე ხელახლა.",
   "claim already done": "უკვე აღებულია",
   "claim already done description": "ეს ჯილდო უკვე აიღე. შენი დავალებები განახლებულია.",

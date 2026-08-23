@@ -211,6 +211,7 @@
   "claim": "Алуу",
   "claim all": "Баарын алуу",
   "claim failed": "Сыйлыкты алуу мүмкүн болбоду",
+  "some rewards were not claimed": "Some rewards weren't claimed",
   "claim failed description": "Серверге туташуу мүмкүн болбоду. «Кайталоо» баскычын бас.",
   "claim already done": "Мурунтан алынган",
   "claim already done description": "Бул сыйлыкты мурунтан алдың. Тапшырмаларың азыр актуалдуу.",

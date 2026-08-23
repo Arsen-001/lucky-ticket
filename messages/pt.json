@@ -211,6 +211,7 @@
   "claim": "Resgatar",
   "claim all": "Resgatar tudo",
   "claim failed": "Não deu para resgatar a recompensa",
+  "some rewards were not claimed": "Some rewards weren't claimed",
   "claim failed description": "Não conseguimos falar com o servidor. Toque em tentar de novo.",
   "claim already done": "Já resgatado",
   "claim already done description": "Você já pegou esta recompensa. Suas tarefas estão em dia.",

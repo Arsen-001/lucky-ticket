@@ -211,6 +211,7 @@
   "claim": "받기",
   "claim all": "모두 받기",
   "claim failed": "보상을 받지 못했습니다",
+  "some rewards were not claimed": "Some rewards weren't claimed",
   "claim failed description": "서버에 연결하지 못했습니다. 다시 시도를 눌러주세요.",
   "claim already done": "이미 받음",
   "claim already done description": "이 보상은 이미 받았습니다. 미션은 최신 상태입니다.",

@@ -31,7 +31,11 @@ export function FriendsClaimSummaryCard({
     .filter(([, amount]) => amount > 0)
     .map(([type, amount]) => ({ type, amount }));
 
-  if (claimableLc === 0 && stacks.length === 0) return null;
+  // `loading` keeps the card mounted with nothing left to claim, and that is the
+  // point: it owns the only spinner «Забрать всё» has. The batch clears each
+  // friend's row as its claim goes through, so an unguarded card could vanish
+  // mid-collect and leave the press with no feedback at all.
+  if (!loading && claimableLc === 0 && stacks.length === 0) return null;
 
   return (
     <div

@@ -211,6 +211,7 @@
   "claim": "领取",
   "claim all": "全部领取",
   "claim failed": "领取奖励失败",
+  "some rewards were not claimed": "Some rewards weren't claimed",
   "claim failed description": "无法连接服务器。请点击重试。",
   "claim already done": "已领取",
   "claim already done description": "这份奖励你已经领过了。任务现在是最新状态。",
