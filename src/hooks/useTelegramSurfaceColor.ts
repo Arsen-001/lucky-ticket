@@ -17,16 +17,23 @@ const APP_BG = '#1b1930';
  * полноэкранном режиме, но он даётся не всем клиентам, и там, где полоса
  * есть, шов между ней и столом виден первым.
  *
+ * Тем же цветом красится и сам документ. На широком окне (мини-апп в Telegram
+ * Desktop) колонка приложения — 430px, а по бокам от неё видно `html`, то есть
+ * основной фон: тёмный стол оказывался островом в светлой комнате.
+ *
  * Возвращаем цвет приложения на выходе: экран уходит — его мир уходит с ним.
  */
 export function useTelegramSurfaceColor(color: string): void {
   useEffect(() => {
+    // Документ красим всегда, хром телеграма — если он есть: в браузере и на
+    // десктопе комната вокруг колонки видна ровно так же.
     const tg = getTelegramWebApp();
-    if (!tg) return;
+    const root = document.documentElement;
     const paint = (next: string) => {
+      root.style.backgroundColor = next;
       try {
-        tg.setHeaderColor?.(next);
-        tg.setBackgroundColor?.(next);
+        tg?.setHeaderColor?.(next);
+        tg?.setBackgroundColor?.(next);
       } catch {
         /* хром телеграма — по возможности, а не обязательство */
       }
