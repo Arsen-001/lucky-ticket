@@ -364,6 +364,13 @@ const ADS_SKIP = {
   usedToday: fresh ? 0 : 3,
 };
 
+/**
+ * Of the day's spent slots, how many an ad actually played for. A skip spends
+ * the slot and pays the ladder, so it stays in `watchedToday`; every "watch N
+ * ads" promise subtracts it (backend `TasksService.watchedOnly`).
+ */
+const watchedAdsOnly = (spentToday: number) => Math.max(0, spentToday - ADS_SKIP.usedToday);
+
 /** Extra slots bought in this dev session — mirrors `AdWatchProgress`. */
 const ADS_EXTRA = {
   priceLc: 5_000,
@@ -479,7 +486,11 @@ const ADS = buildCategory({
       // `syncAdsTaskProgress`; watching an ad has to move this card too.
       // The target is the whole free daily cap, same as the catalog.
       progress: {
-        current: Math.min(ADS_CONFIG.watchedToday, DAILY_ADS_TARGET),
+        // Slots spent MINUS the ones taken with the Lucky Player perk: the card
+        // says "watch", and the server stopped counting skips towards it. The
+        // demo day's three views were all skips, so this card correctly starts
+        // at 0 while the ads block correctly shows 3 of 12 spent.
+        current: Math.min(watchedAdsOnly(ADS_CONFIG.watchedToday), DAILY_ADS_TARGET),
         target: DAILY_ADS_TARGET,
       },
       deeplink: '/tasks?frequency=daily&category=ads',
@@ -1792,10 +1803,14 @@ const applyMockState = (task: Task): Task => {
  * The daily "watch N ads" card reads the same counter the ads block does, so a
  * view watched in this session has to move both. Without it the fixture's card
  * sat frozen at its build-time value and dev could never see the task complete.
+ *
+ * Slots taken with the skip perk are subtracted, exactly as the server does —
+ * a mock that moved this card on a skip would show dev the one behaviour
+ * production no longer has.
  */
 const syncAdsTaskProgress = (task: Task, ads: AdsBlock): Task => {
   if (task.id !== 'task-daily-ads' || task.status === TaskStatus.COMPLETED) return task;
-  const current = Math.min(ads.watchedToday, task.progress.target);
+  const current = Math.min(watchedAdsOnly(ads.watchedToday), task.progress.target);
   return {
     ...task,
     progress: { ...task.progress, current },

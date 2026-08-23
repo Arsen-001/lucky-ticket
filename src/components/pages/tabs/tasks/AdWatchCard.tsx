@@ -82,7 +82,11 @@ export function AdWatchCard({
       : cooling
         ? t('ad cooldown hint')
         : skipping
-          ? t('ad skip hint {left}', { left: skipsLeft })
+          ? // Says out loud that the perk pays the reward but not the "watch N
+            // ads" cards: the slot is spent either way, so a player who skipped
+            // their way through the block would otherwise watch the task sit at
+            // 0/10 with no slots left and no reason given.
+            `${t('ad skip hint {left}', { left: skipsLeft })} · ${t('ad skip not counted')}`
           : paidWithoutAp
             ? t('paid ad no ap')
             : t('ad ready hint');

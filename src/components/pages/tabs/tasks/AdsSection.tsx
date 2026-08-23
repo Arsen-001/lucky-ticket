@@ -95,7 +95,10 @@ export function AdsSection({
             <h2 className="text-base leading-tight font-extrabold">{t('category ads')}</h2>
           </ArrivalShine>
           <p className="text-pink-secondary text-[11px]">
-            {t('ads progress', { watched, total })}
+            {/* «за сегодня», а не «просмотрено»: слот, забранный без ролика,
+                потрачен, но никто ничего не смотрел — а так строка называла
+                просмотрами ровно то, что перк показами не считает. */}
+            {t('ads slots today', { watched, total })}
             {/* The allowance is a countdown a subscriber plans around, so it
                 belongs beside the day's count rather than only on the card. */}
             {skipsLeft > 0 && ` · ${t('ad skips left {n}', { n: skipsLeft })}`}

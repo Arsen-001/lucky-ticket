@@ -68,10 +68,16 @@ const articles: FaqArticle[] = [
   {
     id: '6',
     sectionId: '2',
-    title: tx('What are the tiers and their AP thresholds?'),
+    title: tx('What are the tiers and how do I move up?'),
     description: tx('Bronze → Diamond progression.'),
     content: tx(
-      'Your tier is derived from accumulated AP: Bronze 0 AP (start), Silver 500 AP (~2 weeks), Gold 1,650 AP (~1.5 months), Platinum 5,900 AP (~4.5 months), Diamond 16,000 AP (~10 months). Pacing assumes a player who collects the full daily baseline every day — tournaments make it faster, missed days slower.'
+      // Numbers deliberately absent. This answer used to publish 1 650 AP for
+      // Gold and 5 900 for Platinum — a hundredth of the live thresholds — and
+      // it was corrected in the backend catalog only, so the two texts drifted
+      // and any `sync-faq` run would have shipped the wrong ladder back to
+      // players. Kept identical to `faq.catalog.ts` on purpose: this file is
+      // the source, the catalog is the copy.
+      'There are five tiers — Bronze, Silver, Gold, Platinum and Diamond. Each one opens on two conditions at once: enough accumulated Activity Points, and enough invited friends — 2 for Silver, 5 for Gold, 10 for Platinum, 20 for Diamond. The AP totals themselves are not published: the ladder is retuned as the game grows, and the Activity screen always shows how far along the current step you already are. Tournaments and one-off tasks move it fastest; missed days move it back through AP decay.'
     ),
   },
   {
@@ -511,7 +517,7 @@ const articles: FaqArticle[] = [
     title: tx('Do Lucky Player and VIP stack?'),
     description: tx('Mostly the higher tier wins — with three exceptions.'),
     content: tx(
-      'Mostly no — when both are active, the percent-based perks (stake yield, Market discount, ad views per day, ticket sends) use the VIP value and are never summed. Three things a Lucky Player keeps no matter the VIP level: the engine-speed multiplier (it multiplies on top of the VIP bonus), the daily ad views taken without watching a video, and one-tap "Claim all". Also, the matching discount is excluded when buying that status (no VIP discount on buying VIP).'
+      'Mostly no — when both are active, the percent-based perks (stake yield, Market discount, ad views per day, ticket sends) use the VIP value and are never summed. Three things a Lucky Player keeps no matter the VIP level: the engine-speed multiplier (it multiplies on top of the VIP bonus), the daily ad views taken without watching a video, and one-tap "Claim all". Taking a view without watching pays the same reward and uses up that view for the day, but it does not count as a watched ad — the "watch N ads" tasks only move when an ad actually plays. Also, the matching discount is excluded when buying that status (no VIP discount on buying VIP).'
       // AVATARS OFF (2026-08-09) — the sentence that closed this answer,
       // «Avatar boosts do still stack on top of your status.», describes a boost
       // nobody can own while the feature is off. Restore it verbatim with the
