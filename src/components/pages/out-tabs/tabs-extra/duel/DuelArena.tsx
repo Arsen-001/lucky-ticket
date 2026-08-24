@@ -6,6 +6,7 @@ import { Button } from '@/components/shared/buttons/Button';
 import { DuelGameHeader } from '@/components/pages/out-tabs/tabs-extra/duel/DuelGameHeader';
 import { DuelHand } from '@/components/pages/out-tabs/tabs-extra/duel/DuelHand';
 import { DuelPicks } from '@/components/pages/out-tabs/tabs-extra/duel/DuelPicks';
+import { DuelPlayerAvatar } from '@/components/pages/out-tabs/tabs-extra/duel/DuelPlayerAvatar';
 import { DuelReadyMark } from '@/components/pages/out-tabs/tabs-extra/duel/DuelReadyMark';
 import { DuelSeriesChip } from '@/components/pages/out-tabs/tabs-extra/duel/DuelSeriesChip';
 import { DuelSide } from '@/components/pages/out-tabs/tabs-extra/duel/DuelSide';
@@ -14,6 +15,8 @@ import { DuelToken } from '@/components/pages/out-tabs/tabs-extra/duel/DuelToken
 import { DuelWaiting } from '@/components/pages/out-tabs/tabs-extra/duel/DuelWaiting';
 import { DUEL_MOVE_LABEL } from '@/components/pages/out-tabs/tabs-extra/duel/duel.tokens';
 import { useAppTranslations } from '@/hooks/useAppTranslations';
+import { useGetProfileQuery } from '@/api/profile.api';
+import { displayNameOf } from '@/utils/global/user.utils';
 import { useInFlightLock } from '@/hooks/useInFlightLock';
 import { useToast } from '@/hooks/useToast';
 import { useAppDispatch } from '@/lib/rtk/hooks';
@@ -105,6 +108,9 @@ export function DuelArena({
   // Интервал зависит от фазы: пока ждём вскрытия — чаще, в остальное время
   // достаточно шестисот миллисекунд.
   const [awaitingReveal, setAwaitingReveal] = useState(false);
+  // Своё лицо и своё имя для кружка на моей стороне: профиль уже лежит в кеше
+  // (его тянет список лобби), так что лишнего похода на сервер нет.
+  const { data: profile } = useGetProfileQuery(undefined);
   const { data } = useGetDuelStateQuery(duelId, {
     pollingInterval: awaitingReveal ? POLL_REVEAL : POLL_FAST,
   });
@@ -314,6 +320,9 @@ export function DuelArena({
   const finished = data.status === 'FINISHED';
   const iWon = data.winner === (data.role === 'host' ? 'HOST' : 'GUEST');
   const readiness = data.status === 'READY';
+  // Счёт серии показываем, только когда он о чём-то говорит: первый матч серии
+  // ещё не сыгран — «0 : 0» рядом с исходом читалось бы как часть результата.
+  const series = data.series && data.series.matches > 0 ? data.series : null;
 
   // Ничья приходит как `winner: 'DRAW'` — это не «решено не в мою пользу»,
   // а «не решено»: без этой оговорки треть раундов показывалась проигрышем.
@@ -335,8 +344,10 @@ export function DuelArena({
         round={playing ? (data.round?.index ?? 0) + 1 : null}
       />
 
-      {/* Счёт серии — «вы : соперник», по людям, не по сторонам стола. */}
-      {data.series && data.series.matches > 0 && (
+      {/* Счёт серии — «вы : соперник», по людям, не по сторонам стола. На
+          финале он уезжает в табличку исхода: там же, где читают результат, и
+          строка над столом освобождает место кнопкам реванша. */}
+      {data.series && data.series.matches > 0 && !finished && (
         <DuelSeriesChip mine={data.series.mine} theirs={data.series.theirs} className="mt-2" />
       )}
 
@@ -369,6 +380,7 @@ export function DuelArena({
           {!readiness && (
             <DuelHand
               className="w-full"
+              compact={finished}
               thinking={playing && !data.foe.moved && !revealed}
               revealed={revealed ? data.foe.move : null}
             />
@@ -383,7 +395,7 @@ export function DuelArena({
           ) : (
             <DuelToken
               move={revealed ? data.foe.move : null}
-              size={118}
+              size={finished ? 104 : 118}
               state={foeState}
               className={revealed ? 'duel-drop' : ''}
             />
@@ -393,28 +405,57 @@ export function DuelArena({
         {/* ── середина: что сейчас происходит ── */}
         <div className="duel-plate flex min-h-[70px] flex-col items-center justify-center gap-0.5 rounded-[14px] px-2 py-2 text-center">
           {finished ? (
-            <>
-              <span
-                className={twMerge(
-                  'text-[21px] font-extrabold',
-                  iWon ? 'text-gold' : 'text-error-text'
-                )}
-              >
-                {iWon ? t('duel you won') : t('duel you lost')}
+            /* Счёт серии живёт ЗДЕСЬ, по краям исхода: слева я со своим
+               числом, справа соперник со своим. «Серия 1 : 0» отдельной
+               строкой не отвечала на «кто из нас 1» — лицо отвечает без слов,
+               а без аватарки кружок рисует первую букву имени. */
+            <div className="flex w-full items-center justify-between gap-2">
+              {series && (
+                <span className="flex shrink-0 items-center gap-1.5">
+                  <DuelPlayerAvatar
+                    name={displayNameOf(profile) || t('duel you')}
+                    avatarUrl={profile?.avatar || undefined}
+                    size={26}
+                    className="ring-gold/60 ring-1"
+                  />
+                  <b className="text-gold text-[15px] tabular-nums">{series.mine}</b>
+                </span>
+              )}
+
+              <span className="flex min-w-0 flex-col items-center gap-0.5">
+                <span
+                  className={twMerge(
+                    'text-[21px] font-extrabold',
+                    iWon ? 'text-gold' : 'text-error-text'
+                  )}
+                >
+                  {iWon ? t('duel you won') : t('duel you lost')}
+                </span>
+                {/* Раньше здесь стояло «4 бил.» независимо от исхода — проигравший
+                    читал под словом «Поражение» размер чужого выигрыша. */}
+                <span
+                  className={twMerge(
+                    'text-[12.5px] font-extrabold tabular-nums',
+                    iWon ? 'text-gold' : 'text-pink-secondary'
+                  )}
+                >
+                  {iWon
+                    ? t('duel took tickets', { count: data.stake * 2 })
+                    : t('duel lost tickets', { count: data.stake })}
+                </span>
               </span>
-              {/* Раньше здесь стояло «4 бил.» независимо от исхода — проигравший
-                  читал под словом «Поражение» размер чужого выигрыша. */}
-              <span
-                className={twMerge(
-                  'text-[12.5px] font-extrabold tabular-nums',
-                  iWon ? 'text-gold' : 'text-pink-secondary'
-                )}
-              >
-                {iWon
-                  ? t('duel took tickets', { count: data.stake * 2 })
-                  : t('duel lost tickets', { count: data.stake })}
-              </span>
-            </>
+
+              {series && (
+                <span className="flex shrink-0 items-center gap-1.5">
+                  <b className="text-pink-secondary text-[15px] tabular-nums">{series.theirs}</b>
+                  <DuelPlayerAvatar
+                    name={data.opponent?.name ?? ''}
+                    avatarUrl={data.opponent?.avatarUrl || undefined}
+                    size={26}
+                  />
+                </span>
+              )}
+            </div>
           ) : readiness ? (
             <>
               {/* Длину матча называет табличка словами — счёт 0:0 на этой фазе
@@ -483,7 +524,7 @@ export function DuelArena({
           ) : (
             <DuelToken
               move={myMove}
-              size={118}
+              size={finished ? 104 : 118}
               state={myState}
               className={revealed ? 'duel-drop' : ''}
             />
@@ -497,6 +538,7 @@ export function DuelArena({
           {(playing || finished) && (
             <DuelPicks
               chosen={myMove}
+              compact={finished}
               disabled={finished || lock.locked.size > 0}
               onPick={handleMove}
               className="w-full"
@@ -505,6 +547,10 @@ export function DuelArena({
 
           <DuelSide
             name={t('duel you')}
+            // Подпись — «Вы», а кружок берёт МОИ фото и имя: без этого он рисовал
+            // букву «В» от слова «Вы» и никогда не показывал мою аватарку.
+            avatarName={displayNameOf(profile) || undefined}
+            avatarUrl={profile?.avatar || undefined}
             wins={readiness ? null : data.me.wins}
             winsNeeded={data.winsNeeded}
             leading={data.me.wins > data.foe.wins}

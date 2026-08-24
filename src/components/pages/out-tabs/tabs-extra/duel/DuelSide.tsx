@@ -5,6 +5,14 @@ import { DuelPlayerAvatar } from '@/components/pages/out-tabs/tabs-extra/duel/Du
 
 export interface DuelSideProps {
   name: string;
+  /**
+   * Имя для КРУЖКА, когда подпись — не имя.
+   *
+   * Своя сторона подписана словом «Вы», и без этого поля кружок рисовал букву
+   * «В» — первую букву слова, а не игрока. Аватарки может не быть (её нет у
+   * большинства), поэтому буква — это то, что видит человек чаще картинки.
+   */
+  avatarName?: string;
   avatarUrl?: string;
   /**
    * Счёт партии: сколько побед у этой стороны и сколько берёт матч.
@@ -32,6 +40,7 @@ export interface DuelSideProps {
  */
 export function DuelSide({
   name,
+  avatarName,
   avatarUrl,
   wins,
   winsNeeded,
@@ -48,7 +57,7 @@ export function DuelSide({
 
   return (
     <div className={twMerge('flex items-center justify-center gap-2.5', className)}>
-      <DuelPlayerAvatar name={name} avatarUrl={avatarUrl} size={30} ready={ringed} />
+      <DuelPlayerAvatar name={avatarName ?? name} avatarUrl={avatarUrl} size={30} ready={ringed} />
       <span className="text-gray-secondary max-w-[8rem] truncate text-[13px] font-semibold">
         {name}
       </span>

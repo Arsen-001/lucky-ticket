@@ -15,6 +15,14 @@ export interface DuelPicksProps {
   chosen: DuelMove | null;
   disabled?: boolean;
   onPick: (move: DuelMove) => void;
+  /**
+   * Матч окончен — рука уже не цель для пальца, а память о ходе.
+   *
+   * Ужимается, потому что на финале снизу появляются кнопки реванша, и в
+   * полный рост половины стола перестают помещаться: их содержимое лезет
+   * вверх, на счёт серии (замер: 240 против строки 226).
+   */
+  compact?: boolean;
   className?: string;
 }
 
@@ -24,7 +32,7 @@ export interface DuelPicksProps {
  * Панель поднимается снизу в начале раунда: движение говорит «твой ход»
  * раньше, чем прочитана подпись.
  */
-export function DuelPicks({ chosen, disabled, onPick, className }: DuelPicksProps) {
+export function DuelPicks({ chosen, disabled, onPick, compact, className }: DuelPicksProps) {
   const t = useAppTranslations();
 
   return (
@@ -37,7 +45,8 @@ export function DuelPicks({ chosen, disabled, onPick, className }: DuelPicksProp
           onClick={() => onPick(move)}
           className={twMerge(
             // 76 px — столько же, сколько у слота руки соперника: зеркало.
-            'duel-rim flex h-[76px] flex-col items-center justify-center gap-1 rounded-[14px] p-1.5',
+            'duel-rim flex flex-col items-center justify-center gap-1 rounded-[14px] p-1.5',
+            compact ? 'h-[62px]' : 'h-[76px]',
             'transition active:scale-95 disabled:opacity-35',
             chosen === move && 'duel-rim-on opacity-100'
           )}
@@ -47,7 +56,10 @@ export function DuelPicks({ chosen, disabled, onPick, className }: DuelPicksProp
             alt=""
             width={44}
             height={44}
-            className="h-11 w-11 object-contain drop-shadow-[0_6px_10px_rgba(0,0,0,0.6)]"
+            className={twMerge(
+              'object-contain drop-shadow-[0_6px_10px_rgba(0,0,0,0.6)]',
+              compact ? 'h-8 w-8' : 'h-11 w-11'
+            )}
           />
           <span
             className={twMerge(

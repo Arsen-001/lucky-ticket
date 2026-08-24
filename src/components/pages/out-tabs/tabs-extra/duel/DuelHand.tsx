@@ -10,6 +10,8 @@ export interface DuelHandProps {
   thinking?: boolean;
   /** Вскрытая фигура: подсвечиваем её и гасим две другие. */
   revealed?: DuelMove | null;
+  /** Финал: ужимается вместе с моей рукой, чтобы стороны остались зеркальны. */
+  compact?: boolean;
   className?: string;
 }
 
@@ -20,7 +22,7 @@ export interface DuelHandProps {
  * читалась как подсказка хода — казалось, что подсвеченная фигура и есть
  * выбранная.
  */
-export function DuelHand({ thinking, revealed, className }: DuelHandProps) {
+export function DuelHand({ thinking, revealed, compact, className }: DuelHandProps) {
   return (
     <div
       aria-hidden
@@ -36,7 +38,8 @@ export function DuelHand({ thinking, revealed, className }: DuelHandProps) {
               // Высота совпадает с кнопкой хода на моей стороне: стороны стола
               // обязаны быть зеркальны, иначе табличка между ними стоит не
               // посередине (замер: 55 px сверху против 30 снизу).
-              'flex-center h-[76px] rounded-xl border transition-all duration-300',
+              'flex-center rounded-xl border transition-all duration-300',
+              compact ? 'h-[62px]' : 'h-[76px]',
               chosen
                 ? 'border-gold/65 bg-gold/12'
                 : 'border-electric-purple/32 bg-[rgba(8,6,20,0.5)]'
