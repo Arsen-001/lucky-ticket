@@ -22,6 +22,14 @@ const nextConfig: NextConfig = {
   images: {
     //TODO: Add remote image patterns (aws and so on.)
     remotePatterns: [
+      // Аватарки, загруженные из админки (массовка на доске лидеров), лежат в
+      // Vercel Blob. Без этой строки `/_next/image` отвечает 400 и картинка не
+      // появляется вообще — сам файл при этом отдаётся, что и сбивает с толку:
+      // в панели он виден, в приложении нет. Замерено 24.08.2026.
+      //
+      // Хост с подстановкой, а не точный: имя хранилища — случайный префикс,
+      // пересоздание стора молча ломало бы аватарки заново.
+      { protocol: 'https', hostname: '*.public.blob.vercel-storage.com' },
       { protocol: 'https', hostname: 'i.pravatar.cc' },
       { protocol: 'https', hostname: 'api.dicebear.com' },
       { protocol: 'https', hostname: 'randomuser.me' },
