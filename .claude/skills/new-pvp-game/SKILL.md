@@ -158,6 +158,79 @@ it deserved: «ты уже собираешь стол, а я не сказал 
    was cut because the invite payload has no expiry — a timer with nothing to
    tick is a lie. Add the field first, then draw it.
 
+### One layout for every phone — draw it once at 390×844 and scale
+
+Settled 24.08.2026, in the user's words: «берём всё как выглядит в 390×844, и на
+остальных размерах должно выглядеть так же». That is **not** reflow per width.
+One multiplier for the whole screen, and the composition is identical everywhere.
+
+- **Design box** = what is visible under the section header at the reference:
+  **390×782**. `useDuelFit` measures the area and sets
+  `--duel-fit = min(width/390, height/782)`; the box is absolutely centred and
+  `transform: translate(-50%,-50%) scale(var(--duel-fit))`. Live numbers:
+  **0.673** on 320×568, **1.0** on the reference, **1.103** on 430×932.
+- **The area must be full-bleed.** `(out-tabs)/layout.tsx` pads its children
+  `pt-3 px-5` plus a bottom inset. Those 40px of side padding make the
+  multiplier width-bound and leave a **70-95px empty pocket under the header**
+  on 390/430 — the user's «пустое место от хедера много». Strip it with negative
+  margins (`-mx-5 -mt-3`, `marginBottom: calc(-2.5rem - var(--tg-inset-bottom))`,
+  `height: calc(100% + 0.75rem + 2.5rem + var(--tg-inset-bottom))`) and give the
+  padding back **inside** the scaled box.
+- **The ref must be a callback ref, not `useRef` + `useEffect([])`.** A PvP
+  screen sits behind a rollout gate, so the first render is «game unavailable»
+  and the node does not exist yet: the effect fires once against `null` and never
+  again. Symptom — `--duel-fit` is empty, the box renders at 1.0 and overflows a
+  small phone by 200px.
+- **CSS cannot do this alone.** Length divided by length is not a number in CSS,
+  and the `@media` ladder used by the home cube (`--engine-cube-scale`) only
+  knows the width — a full-height game screen is decided by the height too.
+- **State the price out loud.** Everything scales, tap targets included. At 320
+  the move token is ~51px and the primary button ~38px, against 56 at the
+  reference. If that is unacceptable, the two exits are a floor on the
+  multiplier (~0.8, scroll beyond it) or keeping the controls outside the scaled
+  box — but then a small screen is no longer an exact copy, which was the point.
+
+### The table has to be a mirror, and mirrors are measured
+
+- **`1fr auto 1fr`, never two `flex-1`.** With `flex-1` the halves take their
+  content's height: measured 270.5 vs 262.5, and the middle plate sat **32px
+  above** the screen centre. With the grid the halves are equal by construction.
+- **Both halves need the same structure and the same element heights** —
+  «name · hand · token» above, «token · hand · name» below. The opponent's hand
+  slot must equal the player's move button (**76px** both), and both tokens must
+  be the same size (**118**). With 52 vs 96 and 118 vs 124 the plate stood 55px
+  from the top token and 30px from the bottom one, and the user saw it instantly.
+- **Then centre each half** (`justify-content: center`). Because the halves are
+  identical, centring gives equal gaps _both_ to the plate and to the outer
+  edges. Pinning them to the middle (`flex-end` / `flex-start`) is the trap: all
+  the air collects at the outer edges and an empty pocket appears under the round
+  row — that is what earned «ты испортил дизайн матча».
+- **`flex: none` on every circle** (tokens, ready marks, hand slots). A half that
+  does not fit squeezes its children, and the round token silently becomes an
+  ellipse (117×99 measured).
+- The readiness screen mirrors too: the opponent's caption goes **above** their
+  mark (`captionFirst`), so both marks sit equally close to the plate.
+
+### Verify by measuring, on every screen times every phone
+
+Looking at one screenshot proves nothing; the defects here were all sub-10px.
+The audit that found them (studio first, then the same one against the app):
+
+| what                       | how                                                     |
+| -------------------------- | ------------------------------------------------------- |
+| anything outside the phone | element rect vs viewport rect, per element              |
+| halves and edges           | children of the stage: heights and top/bottom gaps      |
+| circles                    | `width` vs `height` (within 1px)                        |
+| text in a button           | `Range.getBoundingClientRect()` centre vs button centre |
+| number beside its icon     | max gap between the two rects, in design units          |
+| overlaps                   | pairwise rect intersection of siblings                  |
+
+Run it at **320x568, 360x640, 390x844, 430x932** — six screens times four sizes.
+Zero is the only passing result; every number above came out of this script.
+It is checked in: `scripts/duel-live/duel-layout-audit.mjs`
+(`BASE=http://localhost:3020 node scripts/duel-live/duel-layout-audit.mjs`) —
+point it at a new game's screens instead of rewriting it.
+
 ## Telegram reality
 
 - **The bot cannot write first.** Measured on production: a broadcast to 283 recipients delivered **0**; reachability across the roster is **3–4 %**. Anything that depends on a DM must show who will actually receive it. The DM carries a one-off button `startapp=<game>-<lobbyId>` (the catalog cannot hold an id).
@@ -304,6 +377,12 @@ Mini App:
 
 Each of these shipped, reached production and was found the hard way.
 
+- **`twMerge` eats `leading-none` next to `text-[20px]`** — in Tailwind a font-size can carry a line-height (`text-lg/none`), so the two are conflicting classes and the last one wins. The number's line box came out 30px instead of 20, the extra 5px fell under the digit, and the ticket beside it looked glued to the tile's bottom edge (4px from the border against 7px from the number). Write it as one class: `text-[20px]/none` (24.08).
+- **`Ticket` / `Medal` set an inline `style={{width,height}}`** — `h-`/`w-` classes on them never apply. `width={28} height={28}` puts a 256x133 picture in a square box with 6.7px of dead space above and below, and the number reads as «far from the ticket». Pass the real proportions: 31x16, 25x13, 21x11 (24.08).
+- **The base `Button` was `display: block` with `py-3.5`** — at any fixed height under 48px the label sat **3.5px below centre** («почему текст не в центре кнопки»). `flex-center` belongs in the base, not in the caller; the same bug was live on the friends screen (24.08).
+- **A glow under a stack must be painted on top of it but below its bottom edge.** Behind the stack (`::before`, `z-index: -1`) the tickets' own `drop-shadow` eats it, and `z-index: -1` additionally drops it behind the `.duel-lamp` ground — three attempts before it was visible at all (24.08).
+- **Watermarks in px scale wrong.** 210/230/300px read twice as large on a 320 phone as on the reference. Use fractions of the width: 54% / 59% / 77% (24.08).
+- **A background layer cannot be rotated.** The third game figure (the ticket) lived in the shared `background-image` at `50% 112%` — entirely below the screen edge, so only two of the three read. It needs its own element to sit at 45 degrees between the other two (24.08).
 - **`User.avatarUrl` does not exist** — a player's avatar lives in `Profile`. Prisma validates `select` at query time: the lobby list answered **500** while the screen showed a greyed-out button. Guard: an e2e case against a real database.
 - **A failed query must surface.** Without `QueryErrorState` the screen read "you have no tickets".
 - **The mock matcher took keys literally**, so `games/duel/:id` matched nothing on localhost.

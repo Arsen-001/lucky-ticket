@@ -91,3 +91,7 @@ tmp/
 # This repo is public; those files carried revenue, CPM and ad-unit numbers.
 # Clone it into DOCS/ to keep every local path and skill working unchanged.
 DOCS/
+
+# Снимки прогонов дуэли — рабочий мусор, не в репозиторий.
+scripts/duel-live/shots/
+scripts/duel-live/duel-shots/
