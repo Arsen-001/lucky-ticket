@@ -19,6 +19,7 @@ import { AtmosphericBackground } from '@/components/shared/AtmosphericBackground
 import { PreLaunchGate } from '@/components/pages/coming-soon/PreLaunchGate';
 import { TelegramLocaleSeed } from '@/components/telegram/TelegramLocaleSeed';
 import { TelegramBackButton } from '@/components/telegram/TelegramBackButton';
+import { BotWriteAccessWatcher } from '@/components/telegram/BotWriteAccessWatcher';
 import { DayjsLocaleProvider } from '@/providers/DayjsLocaleProvider';
 import { NextIntlClientProvider } from 'next-intl';
 import {
@@ -199,6 +200,12 @@ export default async function RootLayout({ children }: ChildrenProps) {
                             @see TelegramBackButton */}
                         <TelegramBackButton />
                         <Onboarding />
+                        {/* Разрешение боту писать спрашивается на первом тапе,
+                            на любом экране: до сих пор его просили только те
+                            три места, до которых игрок, зашедший по ссылке и
+                            сразу ушедший играть, не доходит никогда — и бот для
+                            него молчал навсегда. @see BotWriteAccessWatcher */}
+                        <BotWriteAccessWatcher />
                         <TournamentResultWatcher />
                         {/* Вызов на дуэль всплывает на ЛЮБОМ экране: он срочный
                             и живёт три минуты. Раньше жил только во вкладках —

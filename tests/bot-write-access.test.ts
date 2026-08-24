@@ -2,6 +2,10 @@ import { describe, expect, it } from 'vitest';
 import { existsSync, readdirSync, readFileSync } from 'node:fs';
 import { resolve } from 'node:path';
 import { canAskWriteAccess } from '@/hooks/useBotWriteAccess';
+import {
+  WRITE_ACCESS_AUTO_ASK_COOLDOWN_MS,
+  shouldAutoAskWriteAccess,
+} from '@/utils/global/write-access-prompt.utils';
 
 const tg = (over: Record<string, unknown> = {}) =>
   ({
@@ -47,6 +51,48 @@ describe('bot write-access prompt gating', () => {
   });
 });
 
+/**
+ * Кнопки просят разрешение только у тех, кто до них дошёл, а приходят в игру
+ * по ссылке — мимо бота, мимо онбординга, сразу играть. Поэтому мини-апп
+ * спрашивает и сам: первый раз у всех, дальше раз в неделю.
+ * @see BotWriteAccessWatcher
+ */
+describe('bot write-access auto-ask cadence', () => {
+  const now = 1_756_000_000_000;
+
+  it('asks everyone the first time, whoever they are', () => {
+    expect(shouldAutoAskWriteAccess({ asks: 0, lastAskAt: 0 }, now)).toBe(true);
+  });
+
+  /** Вопрос не должен превращать каждый заход в игру в допрос. */
+  it('stays quiet for a week after asking', () => {
+    const asked = { asks: 1, lastAskAt: now };
+    expect(shouldAutoAskWriteAccess(asked, now + 60_000)).toBe(false);
+    expect(shouldAutoAskWriteAccess(asked, now + WRITE_ACCESS_AUTO_ASK_COOLDOWN_MS - 1)).toBe(
+      false
+    );
+  });
+
+  it('comes back a week later', () => {
+    expect(
+      shouldAutoAskWriteAccess({ asks: 1, lastAskAt: now }, now + WRITE_ACCESS_AUTO_ASK_COOLDOWN_MS)
+    ).toBe(true);
+  });
+
+  /**
+   * Верхнего предела нет намеренно: разрешение можно дать в любой момент, и
+   * отказавший на второй день через месяц игры отвечает уже иначе.
+   */
+  it('keeps asking weekly however many times it was refused', () => {
+    expect(
+      shouldAutoAskWriteAccess(
+        { asks: 40, lastAskAt: now },
+        now + WRITE_ACCESS_AUTO_ASK_COOLDOWN_MS
+      )
+    ).toBe(true);
+  });
+});
+
 describe('bot write-access wiring', () => {
   const backendRoot = resolve(process.cwd(), '../lucky-ticket-backend');
   const hasBackend = existsSync(backendRoot);
@@ -68,6 +114,25 @@ describe('bot write-access wiring', () => {
     // excess-property checking, so `tsc` had nothing to say).
     expect(auth.match(/allows_write_to_pm/g)?.length ?? 0).toBeGreaterThanOrEqual(2);
     expect(users).toContain('botWriteAllowed');
+  });
+
+  /**
+   * Ответ игрока записывается СРАЗУ, отдельным вызовом: подписанная initData
+   * повторит его лишь на следующем запуске мини-аппа, а до тех пор разрешивший
+   * минуту назад числится недостижимым — мимо него проходят ровно те
+   * уведомления, ради которых его и спрашивали.
+   */
+  it.runIf(hasBackend)('records the answer without waiting for the next launch', () => {
+    const controller = readFileSync(resolve(backendRoot, 'src/me/me.controller.ts'), 'utf8');
+    const service = readFileSync(resolve(backendRoot, 'src/me/me.service.ts'), 'utf8');
+
+    expect(controller).toContain("@Post('write-access')");
+    expect(service).toContain('setBotWriteAccess');
+
+    const api = readFileSync(resolve(process.cwd(), 'src/api/me.api.ts'), 'utf8');
+    const hook = readFileSync(resolve(process.cwd(), 'src/hooks/useBotWriteAccess.ts'), 'utf8');
+    expect(api).toContain("url: 'me/write-access'");
+    expect(hook).toContain('setBotWriteAccess(');
   });
 
   /** A column the schema declares but no migration creates is a 500 on deploy. */

@@ -80,6 +80,21 @@ export const meApi = api.injectEndpoints({
         }
       },
     }),
+    /**
+     * Ответ игрока на нативный попап «разрешить боту писать» — сразу на сервер.
+     *
+     * `allows_write_to_pm` приезжает в ПОДПИСАННОЙ initData, а она обновляется
+     * только при следующем запуске мини-аппа. То есть без этого вызова человек,
+     * разрешивший переписку минуту назад, до конца сессии числится
+     * недостижимым — и именно сейчас, пока он в игре, мимо него проходят вызов
+     * на дуэль и напоминание о двигателе.
+     *
+     * Кэш `me` не инвалидируем: поля `botWriteAllowed` в ответе `me` нет, а
+     * лишний рефетч на ровном месте моргает скелетами.
+     */
+    setBotWriteAccess: builder.mutation<{ botWriteAllowed: boolean }, { allowed: boolean }>({
+      query: body => ({ url: 'me/write-access', method: 'POST', body }),
+    }),
     // EMAIL OFF (2026-08-17) — the three endpoints below are left wired on
     // purpose: nothing routed calls them any more (the screen is parked at
     // settings/_email and every entry point into it is commented out), so they
@@ -115,6 +130,7 @@ export const {
   useGetMeQuery,
   useUpdateMeMutation,
   useAckWipeNoticeMutation,
+  useSetBotWriteAccessMutation,
   useGetEmailRewardQuery,
   useRequestEmailCodeMutation,
   useConfirmEmailMutation,

@@ -1,7 +1,9 @@
 'use client';
 
 import { useCallback, useEffect, useState } from 'react';
+import { useSetBotWriteAccessMutation } from '@/api/me.api';
 import { getTelegramWebApp, isTelegramVersionAtLeast } from '@/lib/telegram/telegram';
+import { recordWriteAccessAsk } from '@/utils/global/write-access-prompt.utils';
 import type { TelegramWebApp } from '@/types/interfaces/telegram.interfaces';
 
 /** Bot API version that introduced `requestWriteAccess` / `allows_write_to_pm`. */
@@ -45,6 +47,7 @@ export function canAskWriteAccess(
  * is what carries the news until the next launch.
  */
 export function useBotWriteAccess() {
+  const [setBotWriteAccess] = useSetBotWriteAccessMutation();
   const [granted, setGranted] = useState(false);
   const [supported, setSupported] = useState(false);
   const [asking, setAsking] = useState(false);
@@ -63,24 +66,34 @@ export function useBotWriteAccess() {
     const tg = getTelegramWebApp();
     if (!tg?.requestWriteAccess || asking) return Promise.resolve(false);
     setAsking(true);
+    // Считается ЛЮБОЙ показ, не только сторожевой: иначе игрок, отказавший
+    // кнопке в настройках, получил бы тот же попап через минуту от
+    // BotWriteAccessWatcher. @see shouldAutoAskWriteAccess
+    recordWriteAccessAsk(Date.now());
     return new Promise<boolean>(resolve => {
       // Guarded against a client that never calls back (the popup was dismissed
       // by the OS, an old WebView): without this the button would spin forever.
       let settled = false;
-      const settle = (ok: boolean) => {
+      const settle = (ok: boolean, heard: boolean) => {
         if (settled) return;
         settled = true;
         setAsking(false);
         if (ok) setGranted(true);
+        // Ответ — серверу, и «нет» тоже: initData повторит его лишь на
+        // следующем запуске, а до тех пор сервер либо молчит тому, кто уже
+        // разрешил, либо стучится к тому, кто отказал. Молча, без `unwrap` —
+        // упавший запрос не должен ронять тап, следующий вход всё перепишет.
+        // Молчание клиента (таймаут) — не ответ, его не отправляем.
+        if (heard) void setBotWriteAccess({ allowed: ok });
         resolve(ok);
       };
-      const timeout = setTimeout(() => settle(false), 60_000);
+      const timeout = setTimeout(() => settle(false, false), 60_000);
       tg.requestWriteAccess?.(ok => {
         clearTimeout(timeout);
-        settle(!!ok);
+        settle(!!ok, true);
       });
     });
-  }, [asking]);
+  }, [asking, setBotWriteAccess]);
 
   return {
     /** The bot may already write to this player — nothing to ask. */

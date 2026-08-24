@@ -52,6 +52,12 @@ const meMock = {
     mockDb.user.wipeNotice = false;
     return { wipeNotice: false };
   },
+  // Ответ на нативный попап «разрешить боту писать». В моке хранить негде и
+  // незачем — в браузере попапа всё равно нет, а ветка нужна, чтобы вызов из
+  // useBotWriteAccess не падал 404 в dev.
+  'POST me/write-access': (args: FetchArgs) => ({
+    botWriteAllowed: !!(args.body as { allowed?: boolean })?.allowed,
+  }),
   // ── Change-email flow (mirrors the backend EmailVerificationService) ──
   'GET me/email/reward': () => ({
     enabled: true,
