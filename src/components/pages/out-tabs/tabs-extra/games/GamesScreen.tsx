@@ -5,6 +5,7 @@ import { useFeature } from '@/hooks/useFeature';
 import { GameCard } from '@/components/pages/out-tabs/tabs-extra/games/GameCard';
 import { useGetDuelLobbiesQuery } from '@/api/duel.api';
 import { routes } from '@/constants/routes';
+import { openDuelTables } from '@/utils/global/duel.utils';
 
 /**
  * Раздел «Игры» — витрина, и только она.
@@ -23,7 +24,7 @@ export function GamesScreen() {
   // Сколько столов ждёт соперника прямо сейчас. Тот же запрос, что у самой
   // игры, — переход в дуэль отдаётся из кеша, лишнего похода нет.
   const { data: duel } = useGetDuelLobbiesQuery(undefined, { skip: !duelOpen });
-  const tables = (duel?.lobbies.length ?? 0) + (duel?.own ? 1 : 0);
+  const tables = openDuelTables(duel);
 
   return (
     <div className="flex min-h-full flex-col gap-3 pt-1 pb-4">

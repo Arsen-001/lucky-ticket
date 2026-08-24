@@ -2,13 +2,19 @@ import { HomeEnginesSlider } from '@/components/pages/tabs/home/HomeEnginesSlide
 import { HomeUpcomingTournaments } from '@/components/pages/tabs/home/HomeUpcomingTournaments';
 import { HomeJackpotBanner } from '@/components/pages/tabs/home/HomeJackpotBanner';
 import { HomeTestQuestCard } from '@/components/pages/tabs/home/HomeTestQuestCard';
+import { HomeGamesChip } from '@/components/pages/tabs/home/HomeGamesChip';
 
 export default function HomePage() {
   return (
     <div className="flex flex-col gap-5 pt-3 pb-6">
-      <section className="flex items-stretch gap-3 px-4">
+      {/* Поля и зазор тут уже, чем на остальной странице (10 px по бокам,
+          6 px между плашками): третья плашка помещается в строку только так.
+          Замер на 390: до поджатия заголовок тест-квеста терял 19 px и уходил
+          в многоточие, после — читается целиком. */}
+      <section className="flex items-stretch gap-1.5 px-2.5">
         <HomeJackpotBanner />
         <HomeTestQuestCard />
+        <HomeGamesChip />
       </section>
 
       {/* Pulled tight against its neighbours: the strip is 88px of card and the

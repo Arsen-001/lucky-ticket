@@ -1,4 +1,4 @@
-import type { DuelMove, DuelSide } from '@/types/interfaces/duel.interfaces';
+import type { DuelLobbyList, DuelMove, DuelSide } from '@/types/interfaces/duel.interfaces';
 
 /**
  * Время в формате `м:сс`.
@@ -87,4 +87,14 @@ export function duelRoundWon(
 ): boolean | null {
   if (!winner || winner === 'DRAW') return null;
   return winner === (role === 'host' ? 'HOST' : 'GUEST');
+}
+
+/**
+ * Сколько столов ждёт соперника прямо сейчас — включая свой открытый.
+ *
+ * Живое число входа в игру: витрина и плашка на главной обязаны называть одно
+ * и то же, поэтому считает его одна функция, а не каждый экран по-своему.
+ */
+export function openDuelTables(list?: Pick<DuelLobbyList, 'lobbies' | 'own'>): number {
+  return (list?.lobbies.length ?? 0) + (list?.own ? 1 : 0);
 }
