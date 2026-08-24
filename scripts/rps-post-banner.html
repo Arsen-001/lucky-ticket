@@ -1,0 +1,100 @@
+<style>
+  @font-face { font-family: 'Gilroy'; src: url('{{gilroy-black}}') format('woff2'); font-weight: 900; font-display: block; }
+  @font-face { font-family: 'Gilroy'; src: url('{{gilroy-extrabold}}') format('woff2'); font-weight: 800; font-display: block; }
+  @font-face { font-family: 'Gilroy'; src: url('{{gilroy-semibold}}') format('woff2'); font-weight: 600; font-display: block; }
+  @font-face { font-family: 'Gilroy'; src: url('{{gilroy-medium}}') format('woff2'); font-weight: 500; font-display: block; }
+
+  * { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; background: #0b0914; }
+
+  .board {
+    width: 1280px; height: 720px; position: relative; overflow: hidden;
+    font-family: 'Gilroy', 'Helvetica Neue', Arial, sans-serif; color: #f3eff8;
+    background:
+      radial-gradient(120% 62% at 50% -6%, rgba(255, 226, 168, 0.16) 0%, rgba(255, 226, 168, 0.05) 34%, transparent 64%),
+      radial-gradient(92% 60% at 50% 52%, rgba(96, 66, 152, 0.34), transparent 72%),
+      linear-gradient(180deg, #191532 0%, #0f0c1c 58%, #0b0914 100%);
+  }
+  /* Ворс сукна и виньетка — те же, что на столе дуэли в приложении. */
+  .board::after {
+    content: ''; position: absolute; inset: 0; pointer-events: none;
+    background:
+      repeating-linear-gradient(45deg, rgba(255, 226, 168, 0.02) 0 2px, transparent 2px 5px),
+      repeating-linear-gradient(-45deg, rgba(0, 0, 0, 0.08) 0 2px, transparent 2px 5px);
+    box-shadow: inset 0 0 190px 46px rgba(0, 0, 0, 0.6);
+  }
+
+  .inner { position: relative; z-index: 2; height: 100%; display: flex; flex-direction: column; justify-content: space-between; padding: 54px 64px 48px; }
+
+  .top { display: flex; align-items: center; justify-content: space-between; }
+  .brand { font-weight: 800; font-size: 27px; letter-spacing: 0.02em; }
+  .brand .lucky { color: #fff; }
+  .brand .ticket { background: linear-gradient(100deg, #de009b 0%, #a32183 45%, #743df5 100%); -webkit-background-clip: text; background-clip: text; color: transparent; }
+  .brand .n365 { background-image: linear-gradient(100deg, #f8bd3e 0%, #ffe6a3 50%, #f8bd3e 100%); -webkit-background-clip: text; background-clip: text; color: transparent; }
+
+  .tag {
+    font-weight: 900; font-size: 15px; letter-spacing: 0.24em; text-transform: uppercase; color: #ffd98a;
+    border: 1px solid rgba(248, 189, 62, 0.55); border-radius: 999px; padding: 9px 20px;
+    background: rgba(248, 189, 62, 0.09);
+  }
+
+  .mid { display: flex; align-items: center; justify-content: space-between; gap: 40px; }
+
+  h1 { margin: 0; font-weight: 900; font-size: 76px; line-height: 0.98; letter-spacing: -0.015em; }
+  h1 .accent { background-image: linear-gradient(100deg, #f8bd3e 0%, #ffe6a3 50%, #f8bd3e 100%); -webkit-background-clip: text; background-clip: text; color: transparent; }
+  .sub { margin: 22px 0 0; font-weight: 500; font-size: 25px; line-height: 1.35; color: #cfc4e0; max-width: 15ch; }
+
+  /* Три фигуры на столе: камень, БИЛЕТ вместо бумаги, ножницы. */
+  .figures { display: flex; align-items: center; gap: 26px; flex: none; }
+  .fig { position: relative; width: 196px; height: 196px; display: flex; align-items: center; justify-content: center;
+    border-radius: 34px; border: 1px solid rgba(116, 61, 245, 0.5);
+    background: linear-gradient(180deg, rgba(116, 61, 245, 0.16), rgba(8, 6, 20, 0.6));
+    box-shadow: 0 0 34px rgba(116, 61, 245, 0.22), inset 0 1px 0 rgba(190, 160, 255, 0.22); }
+  .fig.hero { border-color: rgba(248, 189, 62, 0.7); background: linear-gradient(180deg, rgba(248, 189, 62, 0.18), rgba(8, 6, 20, 0.55)); box-shadow: 0 0 44px rgba(248, 189, 62, 0.26), inset 0 1px 0 rgba(255, 226, 168, 0.3); }
+  .fig img { max-width: 74%; max-height: 74%; object-fit: contain; filter: drop-shadow(0 18px 16px rgba(0, 0, 0, 0.65)); }
+  .fig .cap { position: absolute; bottom: 14px; font-weight: 900; font-size: 13px; letter-spacing: 0.18em; text-transform: uppercase; color: rgba(163, 137, 164, 0.9); }
+  .fig.hero .cap { color: #ffd98a; }
+  /* Пятно света под фигурой — та же подставка, что в игре. */
+  .fig::after { content: ''; position: absolute; left: 18%; right: 18%; bottom: -13px; height: 26px; border-radius: 50%;
+    background: radial-gradient(closest-side, rgba(116, 61, 245, 0.5), transparent); }
+
+  .bottom { display: flex; align-items: flex-end; justify-content: space-between; gap: 30px; }
+  .facts { display: flex; gap: 12px; }
+  .fact { border: 1px solid rgba(116, 61, 245, 0.42); border-radius: 14px; padding: 13px 20px; background: rgba(12, 10, 24, 0.55); }
+  .fact b { display: block; font-weight: 900; font-size: 23px; color: #f8bd3e; font-variant-numeric: tabular-nums; }
+  .fact span { font-weight: 600; font-size: 14px; letter-spacing: 0.06em; text-transform: uppercase; color: #a99fc0; }
+
+  .cta { display: flex; align-items: center; gap: 14px; font-weight: 800; font-size: 25px; color: #fff;
+    border-radius: 18px; padding: 20px 34px; background: linear-gradient(to right, #661753, #a32183); box-shadow: 0 16px 40px rgba(163, 33, 131, 0.35); }
+</style>
+
+<div class="board">
+  <div class="inner">
+    <div class="top">
+      <div class="brand"><span class="lucky">Lucky</span><span class="ticket">Ticket</span><span class="n365">365</span></div>
+      <div class="tag">New game</div>
+    </div>
+
+    <div class="mid">
+      <div class="words">
+        <h1>Rock<br>Ticket<br><span class="accent">Scissors</span></h1>
+        <p class="sub">Duel another player. Winner takes both stakes.</p>
+      </div>
+
+      <div class="figures">
+        <div class="fig"><img src="{{rock}}" alt=""><span class="cap">Rock</span></div>
+        <div class="fig hero"><img src="{{ticket}}" alt=""><span class="cap">Ticket</span></div>
+        <div class="fig"><img src="{{scissors}}" alt=""><span class="cap">Scissors</span></div>
+      </div>
+    </div>
+
+    <div class="bottom">
+      <div class="facts">
+        <div class="fact"><b>1–5</b><span>tickets a match</span></div>
+        <div class="fact"><b>×2</b><span>winner takes</span></div>
+        <div class="fact"><b>5</b><span>leagues</span></div>
+      </div>
+      <div class="cta">Play in the bot</div>
+    </div>
+  </div>
+</div>
