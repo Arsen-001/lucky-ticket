@@ -489,11 +489,15 @@ export function DuelArena({
             />
           )}
           {/* Рука игрока стоит ЗДЕСЬ, а не в нижнем блоке: она зеркалит руку
-              соперника сверху, и стол читается как стол. */}
-          {playing && (
+              соперника сверху, и стол читается как стол.
+
+              На финале она тоже остаётся — только не нажимается: у соперника
+              сверху рука никуда не делась, и без моей половины расходятся по
+              высоте. Строка счёта серии тогда налезала на имя соперника. */}
+          {(playing || finished) && (
             <DuelPicks
               chosen={myMove}
-              disabled={lock.locked.size > 0}
+              disabled={finished || lock.locked.size > 0}
               onPick={handleMove}
               className="w-full"
             />
@@ -566,7 +570,16 @@ export function DuelArena({
                 {t('duel rematch waiting')}
               </Button>
             ) : (
-              <Button className="h-14" loading={lock.locked.has('rematch')} onClick={handleRematch}>
+              <Button
+                // Зелёная, когда ход мой: соперник уже предложил и ждёт. Тем же
+                // зелёным подтверждают готовность к матчу — цвет значит «ждут
+                // твоего слова», а не «важная кнопка». Розовой оставалась бы
+                // неотличимой от «предложить реванш», и по экрану нельзя было
+                // понять, чей сейчас ход.
+                className={twMerge('h-14', data.rematch && !data.rematch.mine && 'bg-success')}
+                loading={lock.locked.has('rematch')}
+                onClick={handleRematch}
+              >
                 {data.rematch ? t('duel accept rematch') : t('duel play again')}
               </Button>
             )}

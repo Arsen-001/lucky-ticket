@@ -48,6 +48,8 @@ interface MockDuel {
   cancelReason: DuelState['cancelReason'];
   /** Итог уже учтён в серии (после «играть ещё»). */
   counted?: boolean;
+  /** Когда соперник в моке предложит реванш. */
+  foeRematchAt: number;
 }
 
 const NAMES = ['Ani', 'Grig', 'Milena', 'Davit', 'Sona', 'Tigran', 'Vahe'];
@@ -149,6 +151,8 @@ function advance(duel: MockDuel): MockDuel {
 
       if (duel.myWins >= WINS_NEEDED || duel.foeWins >= WINS_NEEDED) {
         duel.status = 'FINISHED';
+        // Через 2.5 с соперник предлагает реванш — состояние «мне предложили».
+        duel.foeRematchAt = now + 2500;
         duel.winner = duel.myWins >= WINS_NEEDED ? 'HOST' : 'GUEST';
         if (duel.winner === 'HOST') tickets += duel.stake * 2;
       } else {
@@ -203,7 +207,13 @@ function view(duel: MockDuel): DuelState {
             };
           })()
         : null,
-    rematch: null,
+    // Соперник предлагает реванш через пару секунд после финала: без этого
+    // состояние «мне предложили» на localhost не воспроизвести вовсе, а именно
+    // в нём кнопка принятия зелёная.
+    rematch:
+      duel.status === 'FINISHED' && !duel.counted && Date.now() - duel.foeRematchAt >= 0
+        ? { duelId: duel.id, mine: false }
+        : null,
   };
 }
 
@@ -235,6 +245,8 @@ function fresh(
     roundWinner: null,
     winner: null,
     cancelReason: null,
+    // Ставится в момент финала: до него значение не нужно.
+    foeRematchAt: Number.POSITIVE_INFINITY,
   };
 }
 
