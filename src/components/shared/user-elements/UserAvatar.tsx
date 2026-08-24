@@ -1,9 +1,9 @@
 'use client';
-import Image from 'next/image';
 import { twMerge } from 'tailwind-merge';
 import { Skeleton } from '@/components/shared/seleketons/Skeleton';
 import '@/styles/components/avatar.css';
 import '@/styles/components/achievement.css';
+import { PlayerPhoto } from '@/components/shared/user-elements/PlayerPhoto';
 
 export type AvatarStatusColor = 'verified' | 'lucky-player' | 'vip' | 'plain';
 
@@ -86,15 +86,7 @@ export function UserAvatar({
 
   return (
     <div style={style} className={containerClassNames}>
-      <Image
-        src={src}
-        alt={alt}
-        loading="eager"
-        fetchPriority="high"
-        height={size}
-        width={size}
-        className="h-full w-full rounded-full object-cover"
-      />
+      <PlayerPhoto src={src} alt={alt} size={size} eager className="h-full w-full rounded-full" />
     </div>
   );
 }

@@ -1,6 +1,5 @@
 'use client';
 
-import Image from 'next/image';
 import { ChevronDown, ChevronRight, Lock, Star, Users } from 'lucide-react';
 import { twMerge } from 'tailwind-merge';
 import { Skeleton } from '@/components/shared/seleketons/Skeleton';
@@ -17,6 +16,7 @@ import { broughtCountOf, countsAsReferral, totalClaimableLcOf } from '@/utils/pa
 import type { InvitedFriend } from '@/types/interfaces/referral.interfaces';
 import { displayNameOf } from '@/utils/global/user.utils';
 import type { CSSProperties } from 'react';
+import { PlayerPhoto } from '@/components/shared/user-elements/PlayerPhoto';
 
 export interface InvitedFriendRowProps {
   friend?: InvitedFriend;
@@ -117,12 +117,11 @@ export function InvitedFriendRow({
             >
               {friend &&
                 (friend.avatar ? (
-                  <Image
+                  <PlayerPhoto
                     src={friend.avatar}
                     alt={displayNameOf(friend)}
-                    width={44}
-                    height={44}
-                    className="h-11 w-11 rounded-full object-cover"
+                    size={44}
+                    className="h-11 w-11 rounded-full"
                   />
                 ) : (
                   <div className="h-11 w-11 rounded-full bg-white/5" />

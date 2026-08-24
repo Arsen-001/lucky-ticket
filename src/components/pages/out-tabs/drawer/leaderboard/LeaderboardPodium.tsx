@@ -1,4 +1,3 @@
-import Image from 'next/image';
 import { useRouter } from 'next/navigation';
 import { Crown, Sparkles, Star, User } from 'lucide-react';
 import { twMerge } from 'tailwind-merge';
@@ -13,6 +12,7 @@ import { routes } from '@/constants/routes';
 import type { QuickCardPlayer } from '@/components/shared/user-elements/PlayerQuickCard';
 import type { CSSProperties, ReactNode } from 'react';
 import '@/styles/components/leaderboard-podium.css';
+import { PlayerPhoto } from '@/components/shared/user-elements/PlayerPhoto';
 
 export type PodiumRank = 1 | 2 | 3 | 4 | 5;
 
@@ -349,13 +349,12 @@ function PodiumSlot({ rank, player, loading, className, onOpenCard, meId }: Podi
           >
             <div className="bg-background-overlay flex-center relative h-full w-full overflow-hidden rounded-full">
               {player?.avatarUrl ? (
-                <Image
+                <PlayerPhoto
                   src={player.avatarUrl}
                   alt={player.username}
-                  width={size}
-                  height={size}
-                  loading="eager"
-                  className="h-full w-full rounded-full object-cover"
+                  size={size}
+                  eager
+                  className="h-full w-full rounded-full"
                 />
               ) : player?.fallbackInitial ? (
                 <span

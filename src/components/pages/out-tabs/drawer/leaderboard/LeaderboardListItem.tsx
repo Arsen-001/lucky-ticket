@@ -1,6 +1,5 @@
 'use client';
 
-import Image from 'next/image';
 import Link from 'next/link';
 import { twMerge } from 'tailwind-merge';
 import { BoltIcon } from '@/components/shared/icons/BoltIcon';
@@ -16,6 +15,7 @@ import { routes } from '@/constants/routes';
 import type { LeaderboardEntry } from '@/types/interfaces/leaderboard.interfaces';
 import { displayNameOf } from '@/utils/global/user.utils';
 import type { CSSProperties } from 'react';
+import { PlayerPhoto } from '@/components/shared/user-elements/PlayerPhoto';
 
 export interface LeaderboardListItemProps {
   entry?: LeaderboardEntry;
@@ -64,13 +64,11 @@ export function LeaderboardListItem({
       skeleton={<Skeleton variant="round" className="h-full w-full" />}
     >
       {entry?.avatar ? (
-        <Image
+        <PlayerPhoto
           src={entry.avatar}
           alt={displayNameOf(entry)}
-          width={40}
-          height={40}
-          loading="lazy"
-          className="h-10 w-10 rounded-full object-cover"
+          size={40}
+          className="h-10 w-10 rounded-full"
         />
       ) : (
         <div className="flex-center bg-electric-purple/20 text-electric-purple h-10 w-10 rounded-full text-sm font-extrabold">

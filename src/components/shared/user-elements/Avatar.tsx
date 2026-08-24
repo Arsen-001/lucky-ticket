@@ -1,17 +1,18 @@
 'use client';
-import Image, { type ImageProps } from 'next/image';
+import { PlayerPhoto } from '@/components/shared/user-elements/PlayerPhoto';
 import { twMerge } from 'tailwind-merge';
 import { useGetMeQuery } from '@/api/me.api';
 import { useMounted } from '@/hooks/useMounted';
 import { Skeleton } from '@/components/shared/seleketons/Skeleton';
 import '@/styles/components/avatar.css';
 
-export interface AvatarProps extends Omit<ImageProps, 'src' | 'alt'> {
+export interface AvatarProps {
+  className?: string;
   shadow?: boolean;
   size?: number;
 }
 
-export function Avatar({ className, size = 54, shadow = false, ...rest }: AvatarProps) {
+export function Avatar({ className, size = 54, shadow = false }: AvatarProps) {
   const { data: me, isLoading } = useGetMeQuery();
   // `me` resolves only on the client, so its avatar differs between the server
   // render (no data → skeleton) and the first client render — a hydration
@@ -41,16 +42,5 @@ export function Avatar({ className, size = 54, shadow = false, ...rest }: Avatar
 
   if (!src) return null;
 
-  return (
-    <Image
-      className={containerClassNames}
-      src={src}
-      alt="avatar"
-      loading="eager"
-      fetchPriority="high"
-      {...rest}
-      height={size}
-      width={size}
-    />
-  );
+  return <PlayerPhoto className={containerClassNames} src={src} alt="avatar" size={size} eager />;
 }

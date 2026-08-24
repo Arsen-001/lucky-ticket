@@ -1,6 +1,5 @@
 'use client';
 
-import Image from 'next/image';
 import { Sparkles, Star } from 'lucide-react';
 import { VerifiedSparkleIcon } from '@/components/shared/icons/VerifiedSparkleIcon';
 import { useEffect, useRef, useState } from 'react';
@@ -15,6 +14,7 @@ import { branchLcOf, claimableLcOf, totalClaimableLcOf } from '@/utils/pages/ref
 import type { ClaimableTicket, InvitedFriend } from '@/types/interfaces/referral.interfaces';
 import { displayNameOf } from '@/utils/global/user.utils';
 import { staggerMs } from '@/utils/global/animation.utils';
+import { PlayerPhoto } from '@/components/shared/user-elements/PlayerPhoto';
 
 interface FriendClaimModalProps {
   open: boolean;
@@ -100,12 +100,11 @@ export function FriendClaimModal({
             <span aria-hidden className="absolute inset-0 animate-ping rounded-full bg-white/30" />
             <span className="relative h-20 w-20 overflow-hidden rounded-full border-[3px] border-white/80 shadow-[0_0_24px_rgba(255,255,255,0.45)]">
               {friend.avatar ? (
-                <Image
+                <PlayerPhoto
                   src={friend.avatar}
                   alt={displayNameOf(friend)}
-                  width={80}
-                  height={80}
-                  className="h-20 w-20 object-cover"
+                  size={80}
+                  className="h-20 w-20"
                 />
               ) : (
                 <div className="h-20 w-20 bg-white/10" />

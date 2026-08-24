@@ -1,6 +1,5 @@
 'use client';
 
-import Image from 'next/image';
 import { Sparkles, Star } from 'lucide-react';
 import { Modal } from '@/components/shared/modals/Modal';
 import { Button } from '@/components/shared/buttons/Button';
@@ -8,6 +7,7 @@ import { GlobalConstants } from '@/constants/global.constants';
 import { useAppTranslations } from '@/hooks/useAppTranslations';
 import type { InvitedFriend } from '@/types/interfaces/referral.interfaces';
 import { displayNameOf } from '@/utils/global/user.utils';
+import { PlayerPhoto } from '@/components/shared/user-elements/PlayerPhoto';
 
 export interface FriendsClaimAllModalProps {
   open: boolean;
@@ -78,12 +78,11 @@ export function FriendsClaimAllModal({
                   }}
                 >
                   {friend.avatar ? (
-                    <Image
+                    <PlayerPhoto
                       src={friend.avatar}
                       alt={displayNameOf(friend)}
-                      width={56}
-                      height={56}
-                      className="h-14 w-14 object-cover"
+                      size={56}
+                      className="h-14 w-14"
                     />
                   ) : (
                     <div className="h-14 w-14 bg-white/10" />

@@ -1,6 +1,5 @@
 'use client';
 
-import Image from 'next/image';
 import { Star, Users } from 'lucide-react';
 import { twMerge } from 'tailwind-merge';
 import { useGetFriendBranchQuery } from '@/api/referral.api';
@@ -14,6 +13,7 @@ import { formatCompact } from '@/utils/global/number.utils';
 import { staggerMs } from '@/utils/global/animation.utils';
 import type { BranchMember } from '@/types/interfaces/referral.interfaces';
 import { displayNameOf } from '@/utils/global/user.utils';
+import { PlayerPhoto } from '@/components/shared/user-elements/PlayerPhoto';
 
 export interface FriendBranchListProps {
   friendId: string;
@@ -92,12 +92,11 @@ function FriendBranchRow({ member, onOpen, style }: FriendBranchRowProps) {
     >
       <div className="h-7 w-7 flex-shrink-0 overflow-hidden rounded-full">
         {member.avatar ? (
-          <Image
+          <PlayerPhoto
             src={member.avatar}
             alt={displayNameOf(member)}
-            width={28}
-            height={28}
-            className="h-7 w-7 rounded-full object-cover"
+            size={28}
+            className="h-7 w-7 rounded-full"
           />
         ) : (
           <div className="h-7 w-7 rounded-full bg-white/5" />

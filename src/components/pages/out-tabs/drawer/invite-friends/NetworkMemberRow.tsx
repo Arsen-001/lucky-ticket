@@ -1,6 +1,5 @@
 'use client';
 
-import Image from 'next/image';
 import { Star, Users } from 'lucide-react';
 import type { CSSProperties } from 'react';
 import { twMerge } from 'tailwind-merge';
@@ -13,6 +12,7 @@ import { useAppTranslations } from '@/hooks/useAppTranslations';
 import { formatCompact } from '@/utils/global/number.utils';
 import type { BranchMember } from '@/types/interfaces/referral.interfaces';
 import { displayNameOf } from '@/utils/global/user.utils';
+import { PlayerPhoto } from '@/components/shared/user-elements/PlayerPhoto';
 
 export interface NetworkMemberRowProps {
   member?: BranchMember;
@@ -58,12 +58,11 @@ export function NetworkMemberRow({
         >
           {member &&
             (member.avatar ? (
-              <Image
+              <PlayerPhoto
                 src={member.avatar}
                 alt={displayNameOf(member)}
-                width={40}
-                height={40}
-                className="h-10 w-10 rounded-full object-cover"
+                size={40}
+                className="h-10 w-10 rounded-full"
               />
             ) : (
               <div className="h-10 w-10 rounded-full bg-white/5" />
