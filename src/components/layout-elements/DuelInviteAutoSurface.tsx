@@ -140,7 +140,10 @@ export function DuelInviteAutoSurface() {
 
             <div className="mt-1 flex w-full flex-col gap-2">
               <Button className="h-13" loading={lock.locked.has(invite.id)} onClick={accept}>
-                {invite.rematch ? t('duel accept rematch') : t('duel invite accept')}
+                {/* Реванш зовут того, кто только что играл; слова «принять
+                    реванш» победителю врали так же, как на итоге. Нейтральное
+                    «сыграть ещё» верно обоим. */}
+                {invite.rematch ? t('duel play more') : t('duel invite accept')}
               </Button>
               <Button variant="transparent" className="h-11" onClick={refuse}>
                 {t('duel invite refuse')}

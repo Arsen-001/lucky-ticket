@@ -562,7 +562,9 @@ export function DuelArena({
                 предложил — говорим это словами, а не только подписью кнопки. */}
             {data.rematch && !data.rematch.mine && (
               <span className="text-gold animation-blink text-center text-[13px] font-bold">
-                {t('duel rematch offered')}
+                {/* Победителю соперник хочет ОТЫГРАТЬСЯ, проигравшему — просто
+                    сыграть ещё. Одно слово на оба случая врало одному из двух. */}
+                {iWon ? t('duel foe wants revenge') : t('duel foe wants more')}
               </span>
             )}
             {data.rematch?.mine ? (
@@ -580,7 +582,11 @@ export function DuelArena({
                 loading={lock.locked.has('rematch')}
                 onClick={handleRematch}
               >
-                {data.rematch ? t('duel accept rematch') : t('duel play again')}
+                {/* «Реванш» — это отыграться за поражение, и победителю оно
+                    врёт: ему нечего отыгрывать. Слово выбирает МОЙ исход, а не
+                    то, кто предложил: выиграл — «Играть ещё», проиграл —
+                    «Отыграться». Чей сейчас ход, говорит цвет и строка выше. */}
+                {iWon ? t('duel play more') : t('duel play revenge')}
               </Button>
             )}
             <Button variant="transparent" className="h-12" onClick={onLeave}>
