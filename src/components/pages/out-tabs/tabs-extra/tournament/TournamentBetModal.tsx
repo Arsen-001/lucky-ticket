@@ -32,11 +32,13 @@ interface TournamentBetModalProps {
   participated?: boolean;
   participatedTicketsCount?: number;
   /**
-   * Tickets already entered by everyone (server aggregate). The draw weights by
-   * tickets, so the chance shown below is exactly `mine / total`. Absent (an
-   * older payload) → the line falls back to the wording without a number.
+   * Tickets already entered by everyone (server aggregate) — what the draw
+   * weighs by. Absent (an older payload) → the line falls back to the wording
+   * without a number.
    */
   ticketsTotal?: number;
+  /** Real entrants, without the display ramp `participantsCount` carries. */
+  entrantsCount?: number;
 }
 
 const TIER_HALO_RGB: Record<TournamentType, string> = {
@@ -67,6 +69,7 @@ export function TournamentBetModal({
   participated,
   participatedTicketsCount,
   ticketsTotal,
+  entrantsCount,
 }: TournamentBetModalProps) {
   const t = useAppTranslations();
   const router = useRouter();
@@ -92,15 +95,43 @@ export function TournamentBetModal({
   );
   const hasTickets = availableTickets > 0;
 
-  // Chance at first place. The server draws with `random()^(1/tickets)` and
-  // takes the highest key, which is exactly weighted sampling: P(1st) = my
-  // tickets / all tickets. `ticketsTotal` already counts what the player has
-  // entered before, so only the tickets about to be added go on both sides.
+  /**
+   * Chance of finishing in the top 3 — the placements that pay shards.
+   *
+   * The server ranks by `random()^(1/tickets)` descending, which is weighted
+   * sampling without replacement: the field is drawn one place at a time, each
+   * pick proportional to the tickets still in the hat. Under that draw the
+   * number of rivals who finish above me has a closed form —
+   *
+   *   P(exactly i above me) = a · Π(m−r) / Π(a+m−r),  a = my tickets / a
+   *   typical rival's, m = rivals
+   *
+   * — whose first term is the familiar `my tickets / all tickets` (first
+   * place). Top-3 is the first three terms, so no loop over the field and no
+   * simulation. Checked against 200k draws of the real algorithm.
+   *
+   * Needs the REAL entrant count: `participantsCount` on the card carries a
+   * display ramp, and dividing the pot of tickets by that would invent rivals
+   * who hold a third of a ticket each.
+   */
   const chanceOf = (bet: number) => {
-    if (ticketsTotal === undefined) return null;
+    if (ticketsTotal === undefined || !entrantsCount) return null;
     const mine = (participatedTicketsCount ?? 0) + bet;
     const total = ticketsTotal + bet;
-    return total > 0 ? mine / total : null;
+    if (mine <= 0 || total <= 0) return null;
+    // Already in? Then the roster counts me. Not yet? This join adds me to it.
+    const entrants = entrantsCount + (participatedTicketsCount ? 0 : 1);
+    const rivals = entrants - 1;
+    if (rivals <= 0) return 1;
+    const rivalAvg = Math.max(1, (total - mine) / rivals);
+    const a = mine / rivalAvg;
+    let term = a / (a + rivals);
+    let sum = term;
+    for (let i = 1; i < 3 && i <= rivals; i++) {
+      term = (term * (rivals - i + 1)) / (a + rivals - i);
+      sum += term;
+    }
+    return Math.min(1, sum);
   };
   const chance = chanceOf(betCount);
   const chanceNext = chanceOf(betCount + 1);
@@ -339,7 +370,7 @@ export function TournamentBetModal({
                 <div className="border-pink/30 bg-pink/10 flex w-full flex-col gap-1.5 rounded-2xl border px-3 py-2.5">
                   <div className="flex items-baseline justify-between gap-2">
                     <span className="text-[11px] font-semibold text-white/70">
-                      {t('chance to win')}
+                      {t('chance top three')}
                     </span>
                     <span className="text-lg leading-none font-extrabold text-white tabular-nums">
                       {formatChance(chance)}

@@ -516,6 +516,9 @@ const serveTournaments = (): PersonalTournament[] =>
     return {
       ...tournament,
       ticketsTotal,
+      // Мок накрутку не изображает, поэтому реальных участников столько же,
+      // сколько показано на карточке.
+      entrantsCount: tournament.entrantsCount ?? tournament.participantsCount ?? 60,
       ...(seen ? { resultSeen: true } : {}),
       ...(approved ? { status: 'upcoming' as const } : {}),
     };

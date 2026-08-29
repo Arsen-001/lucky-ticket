@@ -441,7 +441,7 @@
   "maximum withdrawal {n} ton": "最大出金額は {n} TON です",
   "minimum conversion {n} lc": "最小交換額は {n} LC です",
   "more tickets higher chance": "チケットが多いほど当選確率が上がります",
-  "chance to win": "Chance to win",
+  "chance top three": "Chance to finish top 3",
   "one more ticket": "one more ticket",
   "needs {count} activity points": "アクティビティポイントが{count}必要です（現在{current}）",
   "network fee": "出金手数料",

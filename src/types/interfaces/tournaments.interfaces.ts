@@ -51,11 +51,16 @@ export interface Tournament {
   /** Players joined (real + cosmetic ramp); shown as "joined / capacity". */
   participantsCount?: number;
   /**
-   * Tickets entered by real players — the denominator of the win chance shown
-   * in the bet modal. The draw weights by tickets, so a player's chance at
-   * first place is exactly `my tickets / ticketsTotal`.
+   * Tickets entered by real players — what the draw weighs by. A player's
+   * chance at first place is exactly `my tickets / ticketsTotal`.
    */
   ticketsTotal?: number;
+  /**
+   * Real entrants, without the cosmetic ramp `participantsCount` carries. The
+   * top-3 chance shown in the bet modal needs the size of the field the draw
+   * runs over, not the one on the card.
+   */
+  entrantsCount?: number;
   prizePool: number;
   type: TournamentType;
   shardType: InventoryChipType;
