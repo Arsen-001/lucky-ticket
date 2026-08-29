@@ -31,6 +31,12 @@ interface TournamentBetModalProps {
   availableTickets: number;
   participated?: boolean;
   participatedTicketsCount?: number;
+  /**
+   * Tickets already entered by everyone (server aggregate). The draw weights by
+   * tickets, so the chance shown below is exactly `mine / total`. Absent (an
+   * older payload) → the line falls back to the wording without a number.
+   */
+  ticketsTotal?: number;
 }
 
 const TIER_HALO_RGB: Record<TournamentType, string> = {
@@ -60,6 +66,7 @@ export function TournamentBetModal({
   availableTickets,
   participated,
   participatedTicketsCount,
+  ticketsTotal,
 }: TournamentBetModalProps) {
   const t = useAppTranslations();
   const router = useRouter();
@@ -84,6 +91,24 @@ export function TournamentBetModal({
     me?.statusPerks
   );
   const hasTickets = availableTickets > 0;
+
+  // Chance at first place. The server draws with `random()^(1/tickets)` and
+  // takes the highest key, which is exactly weighted sampling: P(1st) = my
+  // tickets / all tickets. `ticketsTotal` already counts what the player has
+  // entered before, so only the tickets about to be added go on both sides.
+  const chanceOf = (bet: number) => {
+    if (ticketsTotal === undefined) return null;
+    const mine = (participatedTicketsCount ?? 0) + bet;
+    const total = ticketsTotal + bet;
+    return total > 0 ? mine / total : null;
+  };
+  const chance = chanceOf(betCount);
+  const chanceNext = chanceOf(betCount + 1);
+  // Two decimals under 10%: on a live field one ticket is a fraction of a
+  // percent, and "0%" next to a stepper that just moved reads as broken. Below
+  // what two decimals can show, say so rather than rounding to a flat zero.
+  const formatChance = (value: number) =>
+    value > 0 && value < 0.0001 ? '<0.01%' : `${(value * 100).toFixed(value < 0.1 ? 2 : 1)}%`;
 
   const isMinReached = betCount <= 1;
   const isMaxReached = betCount >= availableTickets;
@@ -305,10 +330,31 @@ export function TournamentBetModal({
                 )}
               </div>
 
-              {/* Nudge */}
-              <p className="text-[11px] text-center text-white/55 leading-snug">
-                {t('more tickets higher chance')}
-              </p>
+              {/* Chance at first place — the number the draw actually uses */}
+              {chance === null ? (
+                <p className="text-[11px] text-center text-white/55 leading-snug">
+                  {t('more tickets higher chance')}
+                </p>
+              ) : (
+                <div className="border-pink/30 bg-pink/10 flex w-full flex-col gap-1.5 rounded-2xl border px-3 py-2.5">
+                  <div className="flex items-baseline justify-between gap-2">
+                    <span className="text-[11px] font-semibold text-white/70">
+                      {t('chance to win')}
+                    </span>
+                    <span className="text-lg leading-none font-extrabold text-white tabular-nums">
+                      {formatChance(chance)}
+                    </span>
+                  </div>
+                  {chanceNext !== null && !isMaxReached && (
+                    <div className="flex items-baseline justify-between gap-2">
+                      <span className="text-[10px] text-white/45">{t('one more ticket')}</span>
+                      <span className="text-success-text text-[11px] font-extrabold tabular-nums">
+                        {`\u2192 ${formatChance(chanceNext)}`}
+                      </span>
+                    </div>
+                  )}
+                </div>
+              )}
 
               {/* AP reward for joining */}
               <div className="border-teal/30 bg-teal/12 inline-flex items-center gap-1.5 rounded-full border px-3 py-1">

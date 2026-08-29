@@ -441,6 +441,8 @@
   "maximum withdrawal {n} ton": "Максимальне виведення — {n} TON",
   "minimum conversion {n} lc": "Мінімальна конвертація — {n} LC",
   "more tickets higher chance": "Більше квитків = вищий шанс виграти",
+  "chance to win": "Chance to win",
+  "one more ticket": "one more ticket",
   "needs {count} activity points": "Потрібно {count} балів активності (у тебе {current})",
   "network fee": "Комісія за виведення",
   "new": "Нове",

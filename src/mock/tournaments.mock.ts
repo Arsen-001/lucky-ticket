@@ -506,9 +506,16 @@ const serveTournaments = (): PersonalTournament[] =>
   [...createdTournaments, ...servedTournaments].map(tournament => {
     const seen = resultSeenIds.has(tournament.id);
     const approved = approvedIds.has(tournament.id);
-    if (!seen && !approved) return tournament;
+    // Denominator of the win chance in the bet modal. The real backend sums the
+    // entered tickets; here it is derived from the field so every fixture has
+    // one — a tournament without it falls back to the wording with no number,
+    // which is the one state dev would never notice was wrong.
+    const ticketsTotal =
+      tournament.ticketsTotal ??
+      Math.max(1, Math.round((tournament.participantsCount ?? tournament.teamSize ?? 60) * 4));
     return {
       ...tournament,
+      ticketsTotal,
       ...(seen ? { resultSeen: true } : {}),
       ...(approved ? { status: 'upcoming' as const } : {}),
     };

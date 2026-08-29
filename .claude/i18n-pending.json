@@ -1,10 +1,12 @@
 {
   "keys": [
+    "chance to win",
     "duel foe wants more",
     "duel foe wants revenge",
     "duel invite rematch title",
     "duel play more",
     "duel play revenge",
-    "duel rematch waiting"
+    "duel rematch waiting",
+    "one more ticket"
   ]
 }

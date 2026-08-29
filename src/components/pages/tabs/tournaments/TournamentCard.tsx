@@ -104,6 +104,7 @@ export function TournamentCard({
   prizePool,
   teamSize,
   participantsCount,
+  ticketsTotal,
   places,
   shardType,
   shardsFirst,
@@ -527,6 +528,7 @@ export function TournamentCard({
         availableTickets={availableTickets}
         participated={participated}
         participatedTicketsCount={participatedTicketsCount}
+        ticketsTotal={ticketsTotal}
       />
 
       <TournamentResultModal

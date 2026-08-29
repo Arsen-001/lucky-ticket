@@ -441,6 +441,8 @@
   "maximum withdrawal {n} ton": "O saque máximo é {n} TON",
   "minimum conversion {n} lc": "A conversão mínima é {n} LC",
   "more tickets higher chance": "Mais tickets = mais chance de vencer",
+  "chance to win": "Chance to win",
+  "one more ticket": "one more ticket",
   "needs {count} activity points": "Precisa de {count} pontos de atividade (você tem {current})",
   "network fee": "Taxa de saque",
   "new": "Novo",

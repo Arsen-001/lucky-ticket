@@ -441,6 +441,8 @@
   "maximum withdrawal {n} ton": "최대 출금액은 {n} TON입니다",
   "minimum conversion {n} lc": "최소 변환액은 {n} LC입니다",
   "more tickets higher chance": "티켓이 많을수록 당첨 확률이 올라갑니다",
+  "chance to win": "Chance to win",
+  "one more ticket": "one more ticket",
   "needs {count} activity points": "활동 포인트가 {count} 필요합니다 (현재 {current})",
   "network fee": "출금 수수료",
   "new": "신규",
