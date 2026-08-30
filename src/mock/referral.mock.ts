@@ -3,7 +3,6 @@ import {
   BranchMember,
   InvitedFriend,
   PreLaunchGiftState,
-  PreparedShareMessage,
   ReferralStats,
 } from '@/types/interfaces/referral.interfaces';
 import { appConfig } from '@/config/app.config';
@@ -264,10 +263,6 @@ export const referralStatsMock: ReferralStats = {
   requireBotNotBlocked: true,
 };
 
-export const preparedShareMessageMock: PreparedShareMessage = {
-  id: 'mock-prepared-message-id',
-};
-
 /**
  * Friends who arrived but do not count toward the promo — the same three the
  * friends list marks, read off the one map above rather than re-derived here.
@@ -396,7 +391,6 @@ export const referralMock = {
     status: 'PENDING',
     canClaim: false,
   }),
-  'POST referral/prepare-share': preparedShareMessageMock,
   // A friend's reward is claimed per id — `referral/claim/:friendId` — and the
   // resolver has no wildcards, so the keys come from the roster. `baseFriends`,
   // not `invitedFriendsMock`: the latter is empty for a fresh account, and the

@@ -6,24 +6,12 @@ import { getTelegramWebApp, isTelegramEnv } from '@/lib/telegram/telegram';
 export interface UseInviteShareOptions {
   /** `t.me/<bot>?startapp=<id>`. Empty while the inviter's id is unknown. */
   link: string;
-  /**
-   * Optional caption for the plain-link fallbacks (Telegram's share sheet, the
-   * OS one). Omit it to hand over the bare link — exactly what the copy button
-   * puts on the clipboard, and what the invite screen sends.
-   */
-  text?: string;
   /** Title for the OS share sheet, used only outside Telegram. */
   title?: string;
   /**
-   * Prepares the rich invite card server-side and resolves its id. Rejecting is
-   * an expected outcome, not an error to report: the share quietly falls back
-   * to the plain link, which carries the same referral.
-   */
-  prepareCard?: () => Promise<string>;
-  /**
-   * Called once a share actually went out. `confirmed` is true only when
-   * Telegram reported delivery (or the OS sheet resolved); the fallback paths
-   * give no signal and report optimistically.
+   * Called once a share actually went out. `confirmed` is true only when the OS
+   * sheet resolved; inside Telegram there is no delivery callback on this path,
+   * so the share is reported optimistically.
    */
   onShared?: (confirmed: boolean) => void;
 }
@@ -40,28 +28,31 @@ export interface InviteShareControls {
 /**
  * The one place that knows how to hand a referral link to another person.
  *
- * Three paths, best first, each falling through to the next so a tap never
- * dead-ends:
+ * What goes out is the bare link and nothing else — byte for byte what the
+ * copy button puts on the clipboard, so a shared invite is indistinguishable
+ * from one a person pasted by hand. Telegram expands it into the bot's own
+ * preview at the far end.
  *
- *  1. **Rich card** (Bot API 8.0+) — image + caption + "Play" button, prepared
- *     by the backend and forwarded through Telegram's native chat picker.
- *     Only for callers that pass `prepareCard`; the invite screen deliberately
- *     does not, so its share is the same message a person would paste by hand.
- *  2. **Plain Telegram share** — `t.me/share/url`, which minimises the Mini App
- *     and opens the same picker with a bare link. No delivery callback exists
+ * Two paths, each falling through to the next so a tap never dead-ends:
+ *
+ *  1. **Telegram share** — `t.me/share/url`, which minimises the Mini App and
+ *     opens the native chat picker with the link. No delivery callback exists
  *     here, so a share is recorded optimistically.
- *  3. **Outside Telegram** — the OS share sheet, then the clipboard.
+ *  2. **Outside Telegram** — the OS share sheet, then the clipboard.
+ *
+ * There used to be a third, first: a server-prepared rich card (image, caption,
+ * "Play" button) forwarded with `WebApp.shareMessage`. Both screens dropped it
+ * on 31.08.2026 — the plain link is what the user asked for on each. The
+ * backend route and its admin editor are still there, so bringing it back is a
+ * revert, not a rebuild.
  *
  * Shared between the in-app invite screen and the pre-launch countdown, which
  * fetch their link through completely different plumbing (RTK Query vs. a bare
- * token). What they hand over differs on purpose: the countdown still sends the
- * prepared card, the invite screen sends the plain link.
+ * token) but must behave identically once tapped.
  */
 export function useInviteShare({
   link,
-  text,
   title,
-  prepareCard,
   onShared,
 }: UseInviteShareOptions): InviteShareControls {
   const [copied, setCopied] = useState(false);
@@ -82,27 +73,11 @@ export function useInviteShare({
     const webApp = getTelegramWebApp();
 
     if (isTelegramEnv() && webApp) {
-      if (webApp.shareMessage && prepareCard) {
-        try {
-          const id = await prepareCard();
-          // The callback fires with sent=true only if the user actually
-          // forwarded the card — the reliable "did they share" signal.
-          webApp.shareMessage(id, sent => {
-            if (sent) onShared?.(true);
-          });
-          return;
-        } catch {
-          /* fall through to the plain t.me/share/url flow */
-        }
-      }
-
       if (webApp.openTelegramLink) {
-        // No `text` means no caption at all — Telegram then sends the link on
-        // its own and renders the bot's own preview, which is the whole point
-        // of this path for the invite screen. An empty `text=` is NOT the same
-        // thing: it still counts as a caption slot.
-        const caption = text ? `&text=${encodeURIComponent(text)}` : '';
-        webApp.openTelegramLink(`https://t.me/share/url?url=${encodeURIComponent(link)}${caption}`);
+        // No `text=` on purpose, and NOT an empty one: an empty caption still
+        // occupies the caption slot, while leaving the parameter off sends the
+        // link on its own and lets Telegram render the bot's preview.
+        webApp.openTelegramLink(`https://t.me/share/url?url=${encodeURIComponent(link)}`);
         onShared?.(false);
         return;
       }
@@ -110,7 +85,7 @@ export function useInviteShare({
 
     if (typeof navigator !== 'undefined' && navigator.share) {
       try {
-        await navigator.share({ url: link, title, text });
+        await navigator.share({ url: link, title });
         onShared?.(true);
         return;
       } catch {

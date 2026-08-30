@@ -115,12 +115,6 @@ export interface ReferralStats {
   requireBotNotBlocked?: boolean;
 }
 
-/** Server-prepared rich invite message (image + caption + button), created via
- *  Bot API `savePreparedInlineMessage` and sent with `WebApp.shareMessage(id)`. */
-export interface PreparedShareMessage {
-  id: string;
-}
-
 /**
  * Where the player stands on the gift promised for bringing friends
  * (`GET referral/prelaunch-gift`).

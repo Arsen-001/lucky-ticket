@@ -1,6 +1,5 @@
 'use client';
 
-import { useLocale } from 'next-intl';
 import { twMerge } from 'tailwind-merge';
 import { ComingSoonFriendsList } from '@/components/pages/coming-soon/ComingSoonFriendsList';
 import { ComingSoonInviteCard } from '@/components/pages/coming-soon/ComingSoonInviteCard';
@@ -9,7 +8,6 @@ import { useAppTranslations } from '@/hooks/useAppTranslations';
 import { useInviteShare } from '@/hooks/useInviteShare';
 import type { CSSProperties } from 'react';
 import type { PreLaunchInviteState } from '@/hooks/usePreLaunchInvite';
-import type { LocaleType } from '@/types/types/locale.types';
 
 export interface ComingSoonInviteSectionProps {
   /**
@@ -25,11 +23,11 @@ export interface ComingSoonInviteSectionProps {
 /**
  * Invite block on the countdown screen: share the link, and see who came.
  *
- * Sharing goes through the same `useInviteShare` as the in-app invite screen,
- * but this one still passes `prepareCard`: before launch the rich card is the
- * whole pitch, while the invite screen sends the bare link. The plumbing also
- * differs — no store exists here, so the data comes from `usePreLaunchInvite`
- * rather than RTK Query.
+ * Sharing behaves exactly as it does inside the app — the bare invite link,
+ * the same thing the copy button puts on the clipboard — because both screens
+ * go through `useInviteShare`. Only the plumbing under it differs: no store
+ * exists here, so the data comes from `usePreLaunchInvite` rather than RTK
+ * Query.
  */
 export function ComingSoonInviteSection({
   invite,
@@ -37,12 +35,9 @@ export function ComingSoonInviteSection({
   style,
 }: ComingSoonInviteSectionProps) {
   const t = useAppTranslations();
-  const locale = useLocale() as LocaleType;
   const { copied, copy, share, ready } = useInviteShare({
     link: invite.link,
-    text: t('invite share message'),
     title: t('invite friends'),
-    prepareCard: () => invite.prepareCard(locale),
     onShared: invite.markShared,
   });
 

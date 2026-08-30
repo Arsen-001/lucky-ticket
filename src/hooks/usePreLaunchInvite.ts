@@ -6,7 +6,6 @@ import { comingSoonConfig } from '@/config/coming-soon.config';
 import { getRefererLink } from '@/utils/pages/referral.utils';
 import type { PreLaunchSession } from '@/hooks/usePreLaunchGate';
 import type { InvitedFriend, PreLaunchGiftState } from '@/types/interfaces/referral.interfaces';
-import type { LocaleType } from '@/types/types/locale.types';
 
 /** Placeholder inviter id for the mock layer, where nobody is signed in. */
 const MOCK_USER_ID = 'mock-user-id';
@@ -27,10 +26,9 @@ const NO_GIFT: PreLaunchGiftState = {
  * The invite block's data, fetched by hand rather than through RTK Query.
  *
  * The pre-launch gate renders its screen *outside* the provider tree — no
- * store, therefore no `useGetInvitedFriendsQuery`. These are the same three
- * endpoints the in-app invite screen uses (`me`, `referral/friends`,
- * `referral/prepare-share`), asked with the token the gate's own sign-in
- * returned. @see PreLaunchSession
+ * store, therefore no `useGetInvitedFriendsQuery`. These are the same endpoints
+ * the in-app invite screen uses (`me`, `referral/friends`), asked with the
+ * token the gate's own sign-in returned. @see PreLaunchSession
  *
  * Referrals are already real before launch: a friend opening the invite link
  * gets an account created by that same sign-in, and the backend binds the
@@ -57,8 +55,6 @@ export interface PreLaunchInviteState {
   /** That request is in flight. */
   claiming: boolean;
   retry: () => void;
-  /** Prepares the rich share card server-side; rejects when it can't be had. */
-  prepareCard: (lang: LocaleType) => Promise<string>;
   /** Records that a share actually went out. Fire-and-forget. */
   markShared: (confirmed: boolean) => void;
 }
@@ -151,18 +147,6 @@ export function usePreLaunchInvite(session: PreLaunchSession | null): PreLaunchI
     };
   }, [token, available, attempt]);
 
-  const prepareCard = async (lang: LocaleType): Promise<string> => {
-    if (!apiBase || !token) throw new Error('no session');
-    const response = await authedFetch('referral/prepare-share', token, {
-      method: 'POST',
-      body: JSON.stringify({ lang }),
-    });
-    if (!response.ok) throw new Error(`prepare-share ${response.status}`);
-    const { id } = (await response.json()) as { id?: string };
-    if (!id) throw new Error('prepare-share returned no id');
-    return id;
-  };
-
   /**
    * Press the gift. On the mock layer there is no backend to ask, so it just
    * flips the local state — the screen is still worth looking at locally.
@@ -215,7 +199,6 @@ export function usePreLaunchInvite(session: PreLaunchSession | null): PreLaunchI
     claim,
     claiming,
     retry: () => setAttempt(value => value + 1),
-    prepareCard,
     markShared,
   };
 }

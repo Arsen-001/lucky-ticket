@@ -7,10 +7,8 @@ import type {
   BranchMember,
   InvitedFriend,
   PreLaunchGiftState,
-  PreparedShareMessage,
   ReferralStats,
 } from '@/types/interfaces/referral.interfaces';
-import type { LocaleType } from '@/types/types/locale.types';
 
 /**
  * Everything one friend claim moves: the friends list and its stats
@@ -67,15 +65,6 @@ export const referralApi = api.injectEndpoints({
     claimPreLaunchGift: builder.mutation<PreLaunchGiftState, void>({
       query: () => ({ url: 'referral/prelaunch-gift/claim', method: 'POST' }),
       invalidatesTags: [rtkTags.referral],
-    }),
-    // No cache tags: the prepared message is single-use and cache-irrelevant —
-    // a fresh one is created on every share tap.
-    prepareShareMessage: builder.mutation<PreparedShareMessage, { lang: LocaleType }>({
-      query: ({ lang }) => ({
-        url: 'referral/prepare-share',
-        method: 'POST',
-        body: { lang },
-      }),
     }),
     // Records that the user actually SENT a referral share (not just opened the
     // picker). `confirmed` = Telegram `shareMessage` reported sent=true (or the
@@ -160,6 +149,5 @@ export const {
   useGetReferralNetworkQuery,
   useGetReferralStatsQuery,
   useClaimFriendMutation,
-  usePrepareShareMessageMutation,
   useMarkShareSentMutation,
 } = referralApi;
