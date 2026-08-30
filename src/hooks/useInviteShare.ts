@@ -6,8 +6,12 @@ import { getTelegramWebApp, isTelegramEnv } from '@/lib/telegram/telegram';
 export interface UseInviteShareOptions {
   /** `t.me/<bot>?startapp=<id>`. Empty while the inviter's id is unknown. */
   link: string;
-  /** Caption for the plain-link fallbacks (Telegram's share sheet, the OS one). */
-  text: string;
+  /**
+   * Optional caption for the plain-link fallbacks (Telegram's share sheet, the
+   * OS one). Omit it to hand over the bare link — exactly what the copy button
+   * puts on the clipboard, and what the invite screen sends.
+   */
+  text?: string;
   /** Title for the OS share sheet, used only outside Telegram. */
   title?: string;
   /**
@@ -41,14 +45,17 @@ export interface InviteShareControls {
  *
  *  1. **Rich card** (Bot API 8.0+) — image + caption + "Play" button, prepared
  *     by the backend and forwarded through Telegram's native chat picker.
+ *     Only for callers that pass `prepareCard`; the invite screen deliberately
+ *     does not, so its share is the same message a person would paste by hand.
  *  2. **Plain Telegram share** — `t.me/share/url`, which minimises the Mini App
  *     and opens the same picker with a bare link. No delivery callback exists
  *     here, so a share is recorded optimistically.
  *  3. **Outside Telegram** — the OS share sheet, then the clipboard.
  *
  * Shared between the in-app invite screen and the pre-launch countdown, which
- * fetch their link and prepare their card through completely different plumbing
- * (RTK Query vs. a bare token) but must behave identically once tapped.
+ * fetch their link through completely different plumbing (RTK Query vs. a bare
+ * token). What they hand over differs on purpose: the countdown still sends the
+ * prepared card, the invite screen sends the plain link.
  */
 export function useInviteShare({
   link,
@@ -90,9 +97,12 @@ export function useInviteShare({
       }
 
       if (webApp.openTelegramLink) {
-        webApp.openTelegramLink(
-          `https://t.me/share/url?url=${encodeURIComponent(link)}&text=${encodeURIComponent(text)}`
-        );
+        // No `text` means no caption at all — Telegram then sends the link on
+        // its own and renders the bot's own preview, which is the whole point
+        // of this path for the invite screen. An empty `text=` is NOT the same
+        // thing: it still counts as a caption slot.
+        const caption = text ? `&text=${encodeURIComponent(text)}` : '';
+        webApp.openTelegramLink(`https://t.me/share/url?url=${encodeURIComponent(link)}${caption}`);
         onShared?.(false);
         return;
       }

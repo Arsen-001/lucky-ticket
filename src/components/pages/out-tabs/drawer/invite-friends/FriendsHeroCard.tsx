@@ -4,13 +4,8 @@ import { Check, Copy, Crown, Share2, Star, UserPlus } from 'lucide-react';
 import { BoltIcon } from '@/components/shared/icons/BoltIcon';
 import type { ReactNode } from 'react';
 import { twMerge } from 'tailwind-merge';
-import { useLocale } from 'next-intl';
 import { useGetMeQuery } from '@/api/me.api';
-import {
-  useGetReferralStatsQuery,
-  useMarkShareSentMutation,
-  usePrepareShareMessageMutation,
-} from '@/api/referral.api';
+import { useGetReferralStatsQuery, useMarkShareSentMutation } from '@/api/referral.api';
 import { Button } from '@/components/shared/buttons/Button';
 import { Skeleton } from '@/components/shared/seleketons/Skeleton';
 import { SkeletonSuspense } from '@/components/shared/seleketons/SkeletonSuspense';
@@ -21,16 +16,11 @@ import { useInviteRewards } from '@/hooks/useInviteRewards';
 import { useInviteShare } from '@/hooks/useInviteShare';
 import { useReferralCounts } from '@/hooks/useReferralCounts';
 import { getRefererLink } from '@/utils/pages/referral.utils';
-import type { LocaleType } from '@/types/types/locale.types';
 
 export function FriendsHeroCard() {
   const t = useAppTranslations();
-  const locale = useLocale() as LocaleType;
   const { data: me, isLoading: isMeLoading } = useGetMeQuery();
   const { data: stats, isLoading: isStatsLoading } = useGetReferralStatsQuery();
-  // The Telegram share sheet opens only after the card is prepared on the
-  // server — a round trip through the proxy with nothing on screen until now.
-  const [prepareShareMessage, { isLoading: preparingCard }] = usePrepareShareMessageMutation();
   const [markShareSent] = useMarkShareSentMutation();
   const rewards = useInviteRewards();
 
@@ -42,18 +32,17 @@ export function FriendsHeroCard() {
   const referrals = useReferralCounts();
   const countedReferrals = referrals.notCounted > 0 ? referrals.counted : null;
 
-  // Every branch of "hand this link to someone" lives in the hook — the
-  // pre-launch countdown shares the exact same behaviour off a different data
-  // layer. @see useInviteShare
+  // «Поделиться» отправляет РОВНО то же, что кладёт в буфер соседняя кнопка:
+  // голую ссылку, которую Telegram сам раскрывает превью бота. Ни `prepareCard`,
+  // ни `text` здесь нет намеренно — подготовленная карточка (картинка + подпись
+  // + кнопка) осталась только на экране обратного отсчёта. @see useInviteShare
   const {
     copied,
     copy: handleCopy,
     share: handleShare,
   } = useInviteShare({
     link,
-    text: t('invite share message'),
     title: t('invite friends'),
-    prepareCard: async () => (await prepareShareMessage({ lang: locale }).unwrap()).id,
     onShared: confirmed => markShareSent({ confirmed }),
   });
 
@@ -170,7 +159,7 @@ export function FriendsHeroCard() {
       <div className="relative mt-2.5 flex gap-2">
         <Button
           variant="primary"
-          loading={isMeLoading || !linkReady || preparingCard}
+          loading={isMeLoading || !linkReady}
           icon={copied ? <Check /> : <Share2 />}
           iconSize={13}
           onClick={handleShare}

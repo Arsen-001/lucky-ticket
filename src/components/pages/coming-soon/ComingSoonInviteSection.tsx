@@ -25,10 +25,11 @@ export interface ComingSoonInviteSectionProps {
 /**
  * Invite block on the countdown screen: share the link, and see who came.
  *
- * Sharing behaves exactly as it does inside the app (same rich card, same
- * fallbacks) because both go through `useInviteShare`; only the plumbing under
- * it differs — no store exists here, so the data comes from
- * `usePreLaunchInvite` rather than RTK Query.
+ * Sharing goes through the same `useInviteShare` as the in-app invite screen,
+ * but this one still passes `prepareCard`: before launch the rich card is the
+ * whole pitch, while the invite screen sends the bare link. The plumbing also
+ * differs — no store exists here, so the data comes from `usePreLaunchInvite`
+ * rather than RTK Query.
  */
 export function ComingSoonInviteSection({
   invite,
