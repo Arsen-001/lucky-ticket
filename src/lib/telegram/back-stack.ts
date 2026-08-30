@@ -31,12 +31,40 @@ interface BackEntry {
 const entries: BackEntry[] = [];
 
 /**
+ * Told whenever the stack gains or loses a handler.
+ *
+ * `TelegramBackButton` needs it because the arrow is no longer always up: it is
+ * hidden at the root, and an overlay opening there has to bring it back for as
+ * long as it is open — otherwise the press falls through to Telegram and folds
+ * the whole game away instead of closing the dialog on screen.
+ */
+const listeners = new Set<() => void>();
+
+function notify() {
+  for (const listener of listeners) listener();
+}
+
+/** Subscribe to stack changes. Returns the unsubscribe function. */
+export function subscribeBackStack(listener: () => void): () => void {
+  listeners.add(listener);
+  return () => {
+    listeners.delete(listener);
+  };
+}
+
+/** Is any overlay currently claiming Back? */
+export function hasBackHandler(): boolean {
+  return entries.length > 0;
+}
+
+/**
  * Registers a dismiss handler as the current meaning of Back.
  * Returns the release function — call it when the overlay closes or unmounts.
  */
 export function pushBackHandler(run: BackHandler): () => void {
   const entry: BackEntry = { run };
   entries.push(entry);
+  notify();
 
   let released = false;
   return () => {
@@ -44,6 +72,7 @@ export function pushBackHandler(run: BackHandler): () => void {
     released = true;
     const index = entries.indexOf(entry);
     if (index !== -1) entries.splice(index, 1);
+    notify();
   };
 }
 

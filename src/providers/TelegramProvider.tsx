@@ -128,12 +128,12 @@ export function TelegramProvider({ children }: { children: ReactNode }) {
       tg.setHeaderColor?.(THEME_BG);
       tg.setBackgroundColor?.(THEME_BG);
       tg.disableVerticalSwipes?.();
-      // The last press has to be deliberate. `BackButton` takes the Android back
-      // gesture over on every screen but the root — at the root it is a genuine
-      // "close the game", and one stray press there ends the session, engine
-      // timers and all. This makes the client ask first, on every way out it
-      // owns (back at the root, the ✕, the swipe). @see TelegramBackButton
-      tg.enableClosingConfirmation?.();
+      // Deliberately NOT `enableClosingConfirmation()`. It was added so a stray
+      // back press could not end the session, but it charges every intentional
+      // exit — the ✕, the swipe, back at the root — an extra tap, and leaving
+      // is the far more common press. The app no longer stands in its way.
+      // @see TelegramBackButton, which hides the arrow at the root for the same
+      // reason.
       // Immersive fullscreen (Bot API 8.0+) — phones only. No-ops / emits
       // `fullscreenFailed` on clients that don't support it — harmless, we
       // ignore the failure.

@@ -164,8 +164,6 @@
   "purchase failed": "購入できませんでした。もう一度お試しください。",
   "stars added": "{stars} Lucky Stars を残高に追加しました",
   "cancel": "キャンセル",
-  "leave the game?": "ゲームを終了しますか？",
-  "leave": "退出",
   "cancel forfeits bonus": "キャンセルすると、付与されたAP・+50%ボーナス・利回りが失われます。",
   "cancel forfeits description": "{amount} {coin} は返却されます。付与されたAPは取り消され、利回り・+50%APボーナス・完了スターは失われます。",
   "base": "基本",

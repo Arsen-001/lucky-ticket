@@ -2,10 +2,8 @@
 
 import { useEffect, useRef, useState } from 'react';
 import { usePathname, useRouter } from 'next/navigation';
-import { ConfirmModal } from '@/components/shared/modals/ConfirmModal';
 import { routes } from '@/constants/routes';
-import { useAppTranslations } from '@/hooks/useAppTranslations';
-import { runTopBackHandler } from '@/lib/telegram/back-stack';
+import { hasBackHandler, runTopBackHandler, subscribeBackStack } from '@/lib/telegram/back-stack';
 import { getTelegramWebApp, isTelegramVersionAtLeast } from '@/lib/telegram/telegram';
 import { useNavigationHistory } from '@/providers/NavigationHistoryProvider';
 
@@ -22,39 +20,40 @@ function getBackButton() {
 }
 
 /**
- * Makes Back mean "back inside the app" instead of "put the game away".
+ * Makes Back mean "back inside the app" — and nothing else.
  *
  * The client hands the Android back gesture to a Mini App **only while its
- * header arrow is visible**. With the arrow hidden the press belongs to
- * Telegram, and what Telegram does with it is not one behaviour: older builds
- * close the Mini App, current ones fold it into the collapsed bar, and
- * `enableClosingConfirmation` guards neither (measured on a device 15.08.2026 —
- * the window folded away without a word). Consuming the press is the only lever
- * the app has over any of that, so the arrow now stays up on **every** screen,
- * the root included.
+ * header arrow is visible**; with the arrow hidden the press belongs to
+ * Telegram, which closes or folds the game. So the arrow is up exactly on the
+ * screens where the app has somewhere to go, and down where it does not:
  *
- * A press resolves in the order the player perceives the layers:
+ *  - **an overlay is open** — the press must close the dialog, never navigate
+ *    the page out from under it (@see back-stack). True even at the root, which
+ *    is why this listens to the stack rather than only to the route;
+ *  - **anywhere but Home** — step back through the in-app history, or to Home
+ *    when a deep link dropped the player straight onto a detail page. Same rule
+ *    as {@link useSafeBack};
+ *  - **Home, nothing open** — the arrow is hidden and the press is Telegram's
+ *    again. Leaving the game is one press, with no dialog in the way.
  *
- *  1. the topmost open overlay closes (@see back-stack) — a dialog must never
- *     let the page navigate out from under it;
- *  2. otherwise the in-app history is stepped back;
- *  3. with no history left but somewhere still to go — a deep link opened
- *     straight onto a detail page — Home. Same rule as {@link useSafeBack};
- *  4. at the end of the road, an explicit "leave the game?" — because that is
- *     the press the player used to lose the session to.
+ * That last line is a deliberate reversal of 15.08.2026, when the arrow was
+ * pinned to every screen and the root press opened a "leave the game?"
+ * confirmation. It did stop the accidental exit, at the price of making every
+ * intentional one a two-step — and the exit is the far more common press.
  *
- * So the arrow is never a dead tap on Home: it is the way out, asked for out
- * loud. Leaving is still one press plus one tap; it just cannot happen by
- * accident any more.
- *
- * Renders only that dialog; the rest is the client's chrome.
+ * Renders nothing; the arrow is the client's own chrome.
  */
 export function TelegramBackButton() {
-  const t = useAppTranslations();
   const pathname = usePathname();
   const router = useRouter();
   const { canGoBack } = useNavigationHistory();
-  const [exitOpen, setExitOpen] = useState(false);
+  // Overlays register with the back-stack outside React, so their presence is
+  // mirrored into state — the arrow has to appear the moment a dialog opens.
+  const [overlayOpen, setOverlayOpen] = useState(false);
+
+  useEffect(() => subscribeBackStack(() => setOverlayOpen(hasBackHandler())), []);
+
+  const atRoot = pathname === routes.home && !overlayOpen;
 
   const handleBack = () => {
     if (runTopBackHandler()) return;
@@ -62,11 +61,9 @@ export function TelegramBackButton() {
       router.back();
       return;
     }
-    if (pathname !== routes.home) {
-      router.push(routes.home);
-      return;
-    }
-    setExitOpen(true);
+    if (pathname !== routes.home) router.push(routes.home);
+    // At the root with nothing open the arrow is hidden, so there is no press
+    // left to answer here — closing the game is Telegram's own gesture.
   };
 
   // The SDK keeps the handler it is given, so it must be one stable function
@@ -83,7 +80,6 @@ export function TelegramBackButton() {
 
     const onClick = () => latest.current();
     backButton.onClick(onClick);
-    backButton.show();
     return () => {
       backButton.offClick(onClick);
       // The Mini App outlives this component (the app is one webview session):
@@ -92,16 +88,12 @@ export function TelegramBackButton() {
     };
   }, []);
 
-  return (
-    <ConfirmModal
-      open={exitOpen}
-      onClose={() => setExitOpen(false)}
-      onConfirm={() => {
-        setExitOpen(false);
-        getTelegramWebApp()?.close();
-      }}
-      title={t('leave the game?')}
-      confirmText={t('leave')}
-    />
-  );
+  useEffect(() => {
+    const backButton = getBackButton();
+    if (!backButton) return;
+    if (atRoot) backButton.hide();
+    else backButton.show();
+  }, [atRoot]);
+
+  return null;
 }

@@ -164,8 +164,6 @@
   "purchase failed": "Не удалось выполнить покупку. Попробуй ещё раз.",
   "stars added": "{stars} Lucky Stars зачислено на баланс",
   "cancel": "Отмена",
-  "leave the game?": "Выйти из игры?",
-  "leave": "Выйти",
   "cancel forfeits bonus": "Отмена аннулирует начисленный AP, +50% бонус и доход.",
   "cancel forfeits description": "Твои {amount} {coin} возвращаются. Начисленный AP отзывается; доход, +50% AP-бонус и Stars за завершение сгорают.",
   "base": "База",

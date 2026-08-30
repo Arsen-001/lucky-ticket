@@ -164,8 +164,6 @@
   "purchase failed": "فشل الشراء. حاول مرة أخرى.",
   "stars added": "أُضيفت {stars} Lucky Stars إلى رصيدك",
   "cancel": "إلغاء",
-  "leave the game?": "هل تخرج من اللعبة؟",
-  "leave": "خروج",
   "cancel forfeits bonus": "الإلغاء يُفقدك نقاط AP الممنوحة ومكافأة الـ 50% والعائد.",
   "cancel forfeits description": "يُعاد إليك {amount} {coin}. تُسحب نقاط AP الممنوحة، ويضيع العائد ومكافأة الـ 50% ونجوم الإتمام.",
   "base": "الأساس",

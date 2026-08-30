@@ -1,7 +1,12 @@
 import { describe, expect, it } from 'vitest';
 import { readFileSync } from 'node:fs';
 import { resolve } from 'node:path';
-import { pushBackHandler, runTopBackHandler } from '@/lib/telegram/back-stack';
+import {
+  hasBackHandler,
+  pushBackHandler,
+  runTopBackHandler,
+  subscribeBackStack,
+} from '@/lib/telegram/back-stack';
 
 const root = process.cwd();
 const read = (path: string) => readFileSync(resolve(root, path), 'utf8');
@@ -46,6 +51,26 @@ describe('back stack decides what a Back press means', () => {
     other();
     expect(runTopBackHandler()).toBe(false);
   });
+
+  /**
+   * The arrow is hidden at the root now, so an overlay opening THERE has to
+   * bring it back — otherwise the press is Telegram's and folds the game away
+   * instead of closing the dialog on screen. That only works if the stack
+   * announces itself. @see TelegramBackButton
+   */
+  it('tells subscribers when an overlay claims or releases the press', () => {
+    const seen: boolean[] = [];
+    const unsubscribe = subscribeBackStack(() => seen.push(hasBackHandler()));
+
+    const release = pushBackHandler(() => {});
+    expect(seen).toEqual([true]);
+    release();
+    expect(seen).toEqual([true, false]);
+
+    unsubscribe();
+    pushBackHandler(() => {})();
+    expect(seen).toEqual([true, false]);
+  });
 });
 
 describe('the Telegram client is told to route Back to the app', () => {
@@ -53,24 +78,34 @@ describe('the Telegram client is told to route Back to the app', () => {
 
   /**
    * The client gives the back gesture to the app only while the header arrow is
-   * VISIBLE. Hidden, the press is Telegram's — and Telegram closes the Mini App
-   * on one build and folds it into the collapsed bar on the next. `show()` is
-   * therefore not decoration, it is the whole feature; and it is unconditional,
-   * because the root press is the one that used to take the game away.
+   * VISIBLE. Hidden, the press is Telegram's. So the arrow tracks whether the
+   * app has anywhere to go — up off the root and under any open overlay, down
+   * at the root with nothing open, where Back is simply "close the game".
    */
-  it('keeps the arrow up rather than showing it per screen', () => {
-    expect(source).toMatch(/backButton\.show\(\)/);
-    // `hide()` survives in the unmount cleanup only — an arrow with no handler
-    // behind it is a dead tap. Anything more means a screen gave the press back
-    // to the client.
-    expect(source.match(/backButton\.hide\(\)/g)).toHaveLength(1);
+  it('shows the arrow per screen instead of pinning it up everywhere', () => {
+    expect(source).toMatch(/const atRoot = pathname === routes\.home && !overlayOpen/);
+    expect(source).toMatch(/if \(atRoot\) backButton\.hide\(\);\s*else backButton\.show\(\)/);
   });
 
-  /** The root press has to end somewhere, and silence is what the player lost. */
-  it('asks before it lets the game go', () => {
-    expect(source).toContain("t('leave the game?')");
-    expect(source).toMatch(/setExitOpen\(true\)/);
-    expect(source).toMatch(/getTelegramWebApp\(\)\?\.close\(\)/);
+  /**
+   * An overlay open at the root still needs the press, so the arrow follows the
+   * back-stack and not only the route.
+   */
+  it('brings the arrow back for an overlay opened at the root', () => {
+    expect(source).toMatch(/subscribeBackStack\(\(\) => setOverlayOpen\(hasBackHandler\(\)\)\)/);
+  });
+
+  /**
+   * Leaving is one press. The 15.08.2026 confirmation dialog is gone from both
+   * ends — no "leave the game?" of ours, and (below) no native one either —
+   * because it taxed every intentional exit to prevent a rarer accidental one.
+   */
+  it('lets the game go without asking', () => {
+    // The code, not the prose: the doc comment above the component still tells
+    // the story of the dialog that used to be here.
+    expect(source).not.toContain("t('leave the game?')");
+    expect(source).not.toMatch(/ConfirmModal/);
+    expect(source).not.toMatch(/\.close\(\)/);
   });
 
   it('is mounted inside the booted app', () => {
@@ -78,11 +113,13 @@ describe('the Telegram client is told to route Back to the app', () => {
   });
 
   /**
-   * The ways out the client still owns on its own — the ✕ and the swipe. Set up
-   * in the boot chrome, so it must survive edits to that block.
+   * The ways out the client owns on its own — the ✕ and the swipe — are left
+   * alone: a confirmation there is the same tax on the same press.
    */
-  it('asks the client to confirm a close it does own', () => {
-    expect(read('src/providers/TelegramProvider.tsx')).toMatch(/enableClosingConfirmation\?\.\(\)/);
+  it('does not make the client confirm a close it owns', () => {
+    expect(read('src/providers/TelegramProvider.tsx')).not.toMatch(
+      /enableClosingConfirmation\?\.\(\)/
+    );
   });
 
   /**

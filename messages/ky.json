@@ -164,8 +164,6 @@
   "purchase failed": "Сатып алуу ишке ашкан жок. Кайра аракет кыл.",
   "stars added": "Балансыңа {stars} Lucky Stars кошулду",
   "cancel": "Жокко чыгаруу",
-  "leave the game?": "Оюндан чыгасыңбы?",
-  "leave": "Чыгуу",
   "cancel forfeits bonus": "Жокко чыгарсаң берилген AP, +50% бонус жана киреше жоголот.",
   "cancel forfeits description": "{amount} {coin} сага кайтат. Берилген AP кайра алынат; киреше, +50% AP бонусу жана бүтүрүү жылдыздары жоголот.",
   "base": "Негизги",

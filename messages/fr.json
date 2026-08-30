@@ -164,8 +164,6 @@
   "purchase failed": "L'achat a échoué. Réessaie.",
   "stars added": "{stars} Lucky Stars ajoutées à ton solde",
   "cancel": "Annuler",
-  "leave the game?": "Quitter le jeu ?",
-  "leave": "Quitter",
   "cancel forfeits bonus": "Annuler fait perdre les AP accordés, le bonus de +50 % et le rendement.",
   "cancel forfeits description": "Tes {amount} {coin} te sont rendus. Les AP accordés sont repris ; le rendement, le bonus de +50 % d'AP et les étoiles de fin sont perdus.",
   "base": "Base",

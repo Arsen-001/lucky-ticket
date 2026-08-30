@@ -164,8 +164,6 @@
   "purchase failed": "Purchase failed. Please try again.",
   "stars added": "{stars} Lucky Stars added to your balance",
   "cancel": "Cancel",
-  "leave the game?": "Leave the game?",
-  "leave": "Leave",
   "cancel forfeits bonus": "Cancel forfeits the awarded AP, the +50% bonus and the yield.",
   "cancel forfeits description": "Your {amount} {coin} is returned. The awarded AP is revoked; the yield, the +50% AP bonus and the completion Stars are forfeited.",
   "base": "Base",

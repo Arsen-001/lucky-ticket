@@ -164,8 +164,6 @@
   "purchase failed": "구매하지 못했습니다. 다시 시도해 주세요.",
   "stars added": "{stars} Lucky Stars가 잔액에 추가되었습니다",
   "cancel": "취소",
-  "leave the game?": "게임에서 나갈까요?",
-  "leave": "나가기",
   "cancel forfeits bonus": "취소하면 지급된 AP와 +50% 보너스, 수익이 사라집니다.",
   "cancel forfeits description": "{amount} {coin}은(는) 반환됩니다. 지급된 AP는 회수되고, 수익과 +50% AP 보너스, 완료 스타는 사라집니다.",
   "base": "기본",
