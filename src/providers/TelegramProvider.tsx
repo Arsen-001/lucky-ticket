@@ -5,6 +5,7 @@ import { usePathname, useRouter } from 'next/navigation';
 import { twMerge } from 'tailwind-merge';
 import { useTelegramLoginMutation } from '@/api/auth.api';
 import { getTelegramWebApp } from '@/lib/telegram/telegram';
+import { getDeviceKind } from '@/lib/telegram/platform';
 import { hasSessionCk } from '@/services/cookie.service';
 import { routes } from '@/constants/routes';
 import { resolveStartParamRoute } from '@/utils/global/deep-link.utils';
@@ -22,6 +23,14 @@ type Phase = 'pending' | 'authenticating' | 'ready' | 'error';
 const OVERLAY_MIN_MS = 400; // let the first route mount + suspend before checking
 const OVERLAY_MAX_MS = 2500; // hard cap so the overlay can never get stuck
 const OVERLAY_FADE_MS = 320; // must match the transition duration below
+
+/**
+ * How long after boot a fullscreen state restored by the client is still undone
+ * on a computer. Long enough to cover Telegram Desktop restoring it right after
+ * `ready()`, short enough that a player hitting Telegram's own fullscreen button
+ * a moment later keeps it. @see the desktop effect below.
+ */
+const DESKTOP_FULLSCREEN_UNDO_MS = 3000;
 
 /** App background — keeps the Telegram header/body chrome on-theme. */
 const THEME_BG = '#1b1930';
@@ -125,9 +134,15 @@ export function TelegramProvider({ children }: { children: ReactNode }) {
       // timers and all. This makes the client ask first, on every way out it
       // owns (back at the root, the ✕, the swipe). @see TelegramBackButton
       tg.enableClosingConfirmation?.();
-      // Immersive fullscreen (Bot API 8.0+). No-ops / emits `fullscreenFailed`
-      // on clients that don't support it — harmless, we ignore the failure.
-      tg.requestFullscreen?.();
+      // Immersive fullscreen (Bot API 8.0+) — phones only. No-ops / emits
+      // `fullscreenFailed` on clients that don't support it — harmless, we
+      // ignore the failure.
+      //
+      // On a computer "fullscreen" means the whole MONITOR, and asking for it
+      // unconditionally is what blew the Mini App up to the full screen on
+      // every desktop launch. The app is laid out for a phone-width column, so
+      // there it stays in Telegram's own normal window instead.
+      if (getDeviceKind() === 'telegram-mobile') tg.requestFullscreen?.();
     } catch {
       /* SDK chrome is best-effort — never block auth on it */
     }
@@ -220,6 +235,37 @@ export function TelegramProvider({ children }: { children: ReactNode }) {
     };
     tg.onEvent?.('viewportChanged', keepExpanded);
     return () => tg.offEvent?.('viewportChanged', keepExpanded);
+  }, []);
+
+  // On a computer the app opens in Telegram's normal window, never fullscreen.
+  //
+  // Two reasons it is not enough to simply stop asking. The client REMEMBERS
+  // the fullscreen state of a Mini App between launches, so every session that
+  // ran while `requestFullscreen()` was unconditional left that flag set and
+  // the app would keep coming back fullscreen on its own. And that restore
+  // lands *after* `ready()`, as a `fullscreenChanged` event — it is not
+  // readable synchronously at boot, so it has to be listened for.
+  //
+  // Boot only: after the window has settled the listener is dropped, so a
+  // player who deliberately presses Telegram's own fullscreen button keeps it.
+  // The rule is about how the app OPENS, not about forbidding a big window.
+  useEffect(() => {
+    const tg = getTelegramWebApp();
+    if (!tg || !tg.initData) return;
+    if (getDeviceKind() === 'telegram-mobile') return;
+
+    const leaveFullscreen = () => {
+      if (tg.isFullscreen) tg.exitFullscreen?.();
+    };
+    leaveFullscreen();
+    tg.onEvent?.('fullscreenChanged', leaveFullscreen);
+    const stopWatching = window.setTimeout(() => {
+      tg.offEvent?.('fullscreenChanged', leaveFullscreen);
+    }, DESKTOP_FULLSCREEN_UNDO_MS);
+    return () => {
+      clearTimeout(stopWatching);
+      tg.offEvent?.('fullscreenChanged', leaveFullscreen);
+    };
   }, []);
 
   // Deep link: a shared in-app link opens the app via `t.me/<bot>?startapp=<param>`,
