@@ -12,6 +12,7 @@ export const STATIC_ROUTES = [
   '/tasks',
   '/tickets',
   '/jackpot',
+  '/tikki',
   '/partners',
   '/partners/new',
   '/promo',

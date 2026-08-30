@@ -1620,5 +1620,19 @@
   "invite promo title": "Пока идёт тест — зови друзей",
   "invite promo subtitle": "Позови друзей — и бот пришлёт настоящий подарок в Telegram.",
   "you get for watching": "Получишь за просмотр",
-  "extra ads reward on watch": "Награда приходит за просмотр каждого показа"
+  "extra ads reward on watch": "Награда приходит за просмотр каждого показа",
+  "tikki": "Тикки",
+  "tap tikki": "Нажать на Тикки",
+  "per tap": "За тап",
+  "max level": "Максимум",
+  "collected here": "Собрано здесь",
+  "nothing to collect": "Собирать нечего",
+  "collect {amount}": "Забрать {amount}",
+  "upgrade for {amount}": "Апгрейд · {amount}",
+  "unlock for {amount}": "Открыть за {amount}",
+  "unlock to start earning {coin}": "Откройте, чтобы он начал приносить {coin}",
+  "tikki draft note": "Черновой стенд: настоящего баланса это не касается, прогресс лежит только на этом устройстве. Доход копится не больше {hours} ч.",
+  "empty for now": "Пока пусто",
+  "all tikki": "Все {count}",
+  "tap for {tap}, {perHour} per hour": "Тап — {tap} · {perHour} в час"
 }

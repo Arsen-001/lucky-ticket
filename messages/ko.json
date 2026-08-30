@@ -1620,5 +1620,19 @@
   "invite promo title": "테스트 기간에 친구를 초대하세요",
   "invite promo subtitle": "친구를 초대하면 봇이 진짜 Telegram 선물을 보내드립니다.",
   "you get for watching": "시청하면 받는 보상",
-  "extra ads reward on watch": "보상은 시청할 때마다 지급됩니다."
+  "extra ads reward on watch": "보상은 시청할 때마다 지급됩니다.",
+  "tikki": "Tikki",
+  "tap tikki": "Tap Tikki",
+  "per tap": "Per tap",
+  "max level": "Max level",
+  "collected here": "Collected here",
+  "nothing to collect": "Nothing to collect",
+  "collect {amount}": "Collect {amount}",
+  "upgrade for {amount}": "Upgrade · {amount}",
+  "unlock for {amount}": "Unlock for {amount}",
+  "unlock to start earning {coin}": "Unlock to start earning {coin}",
+  "tikki draft note": "Draft bench: nothing here touches your real balance, progress is kept on this device only. Idle income accrues for up to {hours} h.",
+  "empty for now": "Empty for now",
+  "all tikki": "All {count}",
+  "tap for {tap}, {perHour} per hour": "Tap for {tap} · {perHour} per hour"
 }

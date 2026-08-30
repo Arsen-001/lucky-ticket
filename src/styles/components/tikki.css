@@ -1,0 +1,62 @@
+/* Тикки-кликер: отдача на тап и цифра, вылетающая из-под пальца. */
+
+@keyframes tikki-squash {
+  0% {
+    transform: scale(1, 1) translateY(0);
+  }
+  35% {
+    transform: scale(1.06, 0.9) translateY(4px);
+  }
+  70% {
+    transform: scale(0.97, 1.04) translateY(-3px);
+  }
+  100% {
+    transform: scale(1, 1) translateY(0);
+  }
+}
+
+@utility animate-tikki-squash {
+  animation: tikki-squash 0.32s ease-out;
+}
+
+@keyframes tikki-pop {
+  0% {
+    opacity: 0;
+    transform: translate(-50%, 0) scale(0.85);
+  }
+  18% {
+    opacity: 1;
+    transform: translate(-50%, -10px) scale(1);
+  }
+  100% {
+    opacity: 0;
+    transform: translate(-50%, -58px) scale(1);
+  }
+}
+
+@utility animate-tikki-pop {
+  animation: tikki-pop 0.75s ease-out forwards;
+}
+
+/* Дыхание в покое: персонаж не должен стоять мёртвым, пока его не трогают. */
+@keyframes tikki-breathe {
+  0%,
+  100% {
+    transform: translateY(0) scale(1);
+  }
+  50% {
+    transform: translateY(-4px) scale(1.012);
+  }
+}
+
+@utility animate-tikki-breathe {
+  animation: tikki-breathe 3.4s ease-in-out infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .animate-tikki-breathe,
+  .animate-tikki-squash,
+  .animate-tikki-pop {
+    animation: none !important;
+  }
+}

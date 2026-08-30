@@ -3,6 +3,7 @@ import { HomeUpcomingTournaments } from '@/components/pages/tabs/home/HomeUpcomi
 import { HomeJackpotBanner } from '@/components/pages/tabs/home/HomeJackpotBanner';
 import { HomeTestQuestCard } from '@/components/pages/tabs/home/HomeTestQuestCard';
 import { HomeGamesChip } from '@/components/pages/tabs/home/HomeGamesChip';
+import { HomeTikkiSection } from '@/components/pages/tabs/home/HomeTikkiSection';
 
 export default function HomePage() {
   return (
@@ -16,6 +17,10 @@ export default function HomePage() {
         <HomeTestQuestCard />
         <HomeGamesChip />
       </section>
+
+      {/* Тикки на главной. Сам решает, показываться ли: стадия выката приходит
+          с сервера, и до неё блок не рисуется вовсе. */}
+      <HomeTikkiSection />
 
       {/* Pulled tight against its neighbours: the strip is 88px of card and the
           page's 20px rhythm around it read as two gaps rather than one block. */}

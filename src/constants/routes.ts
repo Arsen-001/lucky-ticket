@@ -32,6 +32,9 @@ export const routes = {
     achievements: '/profile/achievements',
     stats: '/profile/stats',
   },
+  // Черновая витрина персонажей: кликер и доход по уровням. Своим адресом,
+  // чтобы её можно было показать, не трогая остальные экраны.
+  tikki: '/tikki',
   notifications: '/notifications',
   leaderboard: '/leaderboard',
   jackpot: '/jackpot',

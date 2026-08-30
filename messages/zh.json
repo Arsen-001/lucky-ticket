@@ -1620,5 +1620,19 @@
   "invite promo title": "测试期间，快邀请好友",
   "invite promo subtitle": "邀请好友，机器人就会在 Telegram 送你真正的礼物。",
   "you get for watching": "观看后可获得",
-  "extra ads reward on watch": "每看完一次广告，对应的奖励就会到账。"
+  "extra ads reward on watch": "每看完一次广告，对应的奖励就会到账。",
+  "tikki": "Tikki",
+  "tap tikki": "Tap Tikki",
+  "per tap": "Per tap",
+  "max level": "Max level",
+  "collected here": "Collected here",
+  "nothing to collect": "Nothing to collect",
+  "collect {amount}": "Collect {amount}",
+  "upgrade for {amount}": "Upgrade · {amount}",
+  "unlock for {amount}": "Unlock for {amount}",
+  "unlock to start earning {coin}": "Unlock to start earning {coin}",
+  "tikki draft note": "Draft bench: nothing here touches your real balance, progress is kept on this device only. Idle income accrues for up to {hours} h.",
+  "empty for now": "Empty for now",
+  "all tikki": "All {count}",
+  "tap for {tap}, {perHour} per hour": "Tap for {tap} · {perHour} per hour"
 }

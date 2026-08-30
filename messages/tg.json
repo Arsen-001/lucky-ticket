@@ -1620,5 +1620,19 @@
   "invite promo title": "То даме ки озмоиш идома дорад, дӯстонатро даъват кун",
   "invite promo subtitle": "Дӯстонатро даъват кун — бот ба ту дар Telegram тӯҳфаи ҳақиқӣ мефиристад.",
   "you get for watching": "Ҳангоми тамошо мегирӣ",
-  "extra ads reward on watch": "Ҳар мукофот пас аз ҳамон тамошо дода мешавад."
+  "extra ads reward on watch": "Ҳар мукофот пас аз ҳамон тамошо дода мешавад.",
+  "tikki": "Tikki",
+  "tap tikki": "Tap Tikki",
+  "per tap": "Per tap",
+  "max level": "Max level",
+  "collected here": "Collected here",
+  "nothing to collect": "Nothing to collect",
+  "collect {amount}": "Collect {amount}",
+  "upgrade for {amount}": "Upgrade · {amount}",
+  "unlock for {amount}": "Unlock for {amount}",
+  "unlock to start earning {coin}": "Unlock to start earning {coin}",
+  "tikki draft note": "Draft bench: nothing here touches your real balance, progress is kept on this device only. Idle income accrues for up to {hours} h.",
+  "empty for now": "Empty for now",
+  "all tikki": "All {count}",
+  "tap for {tap}, {perHour} per hour": "Tap for {tap} · {perHour} per hour"
 }

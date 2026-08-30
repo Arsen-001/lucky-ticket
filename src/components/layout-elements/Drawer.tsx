@@ -24,6 +24,7 @@ import {
   Settings,
   ShieldCheck,
   Sparkles,
+  Ticket,
   User,
   UserRoundPlus,
   Wallet,
@@ -79,6 +80,7 @@ export function Drawer() {
   const duelOpen = useFeature('duel');
   const { data: duelInvites = [] } = useGetDuelInvitesQuery();
   const gamesOpen = duelOpen || duelInvites.length > 0;
+  const tikkiOpen = useFeature('tikkiClicker');
   const open = useAppSelector(selectDrawerOpen);
   const dispatch = useAppDispatch();
   const { data: me, isLoading } = useGetMeQuery();
@@ -276,6 +278,17 @@ export function Drawer() {
       title: t('jackpot'),
       icon: <Sparkles size={18} />,
     },
+    // Черновая страница персонажей: появляется только у тех, кому фича открыта,
+    // как и блок на главной. Уедет отсюда, когда решится, где ей место.
+    ...(tikkiOpen
+      ? [
+          {
+            route: routes.tikki,
+            title: t('tikki'),
+            icon: <Ticket size={18} />,
+          },
+        ]
+      : []),
     // Раздел появляется, когда игра открыта игроку, и исчезает, когда нет.
     // Без замка: замком помечено то, что обещано на потом, а стадия выката
     // ничего не обещает.

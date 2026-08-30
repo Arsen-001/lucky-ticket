@@ -133,7 +133,9 @@ export const mockDb = {
     // Стадии выката решает сервер, у мока сервера нет — а невидимая фича на
     // localhost означает, что её нельзя ни доработать, ни посмотреть. Здесь
     // фича открыта, в проде её открывает панель.
-    features: { duel: true },
+    // На моках фичи открыты, иначе локально их не посмотреть: на проде
+    // стадию решает панель, и по умолчанию новая фича выключена.
+    features: { duel: true, tikkiClicker: true },
     // Blocking the bot wipes the account, and the returning player is told once
     // why it is empty. `false` here because the demo account never blocked
     // anything — flip it to see the modal. @see WipeNoticeWatcher

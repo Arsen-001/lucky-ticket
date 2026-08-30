@@ -1620,5 +1620,19 @@
   "invite promo title": "მოიწვიე მეგობრები, სანამ ტესტი მიმდინარეობს",
   "invite promo subtitle": "მოიწვიე მეგობრები — და ბოტი გამოგიგზავნის ნამდვილ საჩუქარს Telegram-ში.",
   "you get for watching": "მიიღებ ყურებისას",
-  "extra ads reward on watch": "თითოეული ჯილდო ჩვენების ნახვისას მოდის"
+  "extra ads reward on watch": "თითოეული ჯილდო ჩვენების ნახვისას მოდის",
+  "tikki": "Tikki",
+  "tap tikki": "Tap Tikki",
+  "per tap": "Per tap",
+  "max level": "Max level",
+  "collected here": "Collected here",
+  "nothing to collect": "Nothing to collect",
+  "collect {amount}": "Collect {amount}",
+  "upgrade for {amount}": "Upgrade · {amount}",
+  "unlock for {amount}": "Unlock for {amount}",
+  "unlock to start earning {coin}": "Unlock to start earning {coin}",
+  "tikki draft note": "Draft bench: nothing here touches your real balance, progress is kept on this device only. Idle income accrues for up to {hours} h.",
+  "empty for now": "Empty for now",
+  "all tikki": "All {count}",
+  "tap for {tap}, {perHour} per hour": "Tap for {tap} · {perHour} per hour"
 }

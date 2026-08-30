@@ -1620,5 +1620,19 @@
   "invite promo title": "Invita a tus amigos mientras dura la prueba",
   "invite promo subtitle": "Invita a tus amigos y el bot te enviará un regalo real de Telegram.",
   "you get for watching": "Recibes al ver",
-  "extra ads reward on watch": "Cada recompensa llega al completar esa visualización."
+  "extra ads reward on watch": "Cada recompensa llega al completar esa visualización.",
+  "tikki": "Tikki",
+  "tap tikki": "Tap Tikki",
+  "per tap": "Per tap",
+  "max level": "Max level",
+  "collected here": "Collected here",
+  "nothing to collect": "Nothing to collect",
+  "collect {amount}": "Collect {amount}",
+  "upgrade for {amount}": "Upgrade · {amount}",
+  "unlock for {amount}": "Unlock for {amount}",
+  "unlock to start earning {coin}": "Unlock to start earning {coin}",
+  "tikki draft note": "Draft bench: nothing here touches your real balance, progress is kept on this device only. Idle income accrues for up to {hours} h.",
+  "empty for now": "Empty for now",
+  "all tikki": "All {count}",
+  "tap for {tap}, {perHour} per hour": "Tap for {tap} · {perHour} per hour"
 }

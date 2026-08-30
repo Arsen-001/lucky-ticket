@@ -1620,5 +1620,19 @@
   "invite promo title": "Test sürerken arkadaşlarını davet et",
   "invite promo subtitle": "Arkadaşlarını davet et — bot sana Telegram'da gerçek bir hediye gönderir.",
   "you get for watching": "İzleyince kazanırsın",
-  "extra ads reward on watch": "Her ödül, o izlemeyi tamamladığında gelir"
+  "extra ads reward on watch": "Her ödül, o izlemeyi tamamladığında gelir",
+  "tikki": "Tikki",
+  "tap tikki": "Tap Tikki",
+  "per tap": "Per tap",
+  "max level": "Max level",
+  "collected here": "Collected here",
+  "nothing to collect": "Nothing to collect",
+  "collect {amount}": "Collect {amount}",
+  "upgrade for {amount}": "Upgrade · {amount}",
+  "unlock for {amount}": "Unlock for {amount}",
+  "unlock to start earning {coin}": "Unlock to start earning {coin}",
+  "tikki draft note": "Draft bench: nothing here touches your real balance, progress is kept on this device only. Idle income accrues for up to {hours} h.",
+  "empty for now": "Empty for now",
+  "all tikki": "All {count}",
+  "tap for {tap}, {perHour} per hour": "Tap for {tap} · {perHour} per hour"
 }
