@@ -107,7 +107,7 @@ export const appConfig = {
     /** Bonus added to the stake AP base when it completes (forfeited on cancel). */
     apCompletionBonusPercent: 50,
     /** LC required to add 1 ⭐ to the base stake fee (`base = ceil(deposit / feeStep)`). */
-    feeStep: 10_000,
+    feeStep: 100_000,
     /** Discount % per stake month — applied to the base fee. */
     feeMonthDiscountPercent: 1,
     /**

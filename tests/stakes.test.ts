@@ -30,13 +30,15 @@ describe('stake math (DOCS §18)', () => {
   });
 
   it('fee base = ceil(deposit ÷ feeStep)', () => {
-    expect(computeStakeFeeBase(25_000)).toBe(3);
+    expect(computeStakeFeeBase(250_000)).toBe(3);
+    expect(computeStakeFeeBase(100_000)).toBe(1);
+    // Anything under one step is still one whole Star — `ceil` never rounds to 0.
     expect(computeStakeFeeBase(10_000)).toBe(1);
   });
 
   it('cancel fee = max(min, multiplier × base)', () => {
-    expect(computeStakeCancelFee(10_000)).toBe(2); // max(2, 2 × 1)
-    expect(computeStakeCancelFee(50_000)).toBe(10); // max(2, 2 × 5)
+    expect(computeStakeCancelFee(100_000)).toBe(2); // max(2, 2 × 1)
+    expect(computeStakeCancelFee(500_000)).toBe(10); // max(2, 2 × 5)
   });
 
   it('volume-discount brackets without a status', () => {
