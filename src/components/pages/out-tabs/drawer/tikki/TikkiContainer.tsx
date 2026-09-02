@@ -15,5 +15,7 @@ export function TikkiContainer() {
   const enabled = useFeature('tikkiClicker');
   if (!enabled) return null;
 
-  return <TikkiScreen stand />;
+  // Дровер-раскладка даёт свои 20 px по бокам, а у экрана Тикки поле 14 —
+  // гасим чужое, чтобы колонка была той же, что и на главной.
+  return <TikkiScreen stand className="-mx-5" />;
 }

@@ -23,6 +23,8 @@ export interface TikkiHeroProps {
   tapValue: number;
   /** Кликер пуст — нажимать можно, но брать нечего. */
   empty: boolean;
+  /** Кликер набит доверху: доход встал, и персонаж об этом просит. */
+  full?: boolean;
   onTap: () => void;
   className?: string;
   /** Картинка отдельно: на главной Тикки стоит в карточке, а не на сцене. */
@@ -40,7 +42,15 @@ const MAX_POPS = 6;
  * касанием и `click` проходит до 300 мс, и при быстрых тапах половина их
  * терялась бы — а тап тут повторяют десятками подряд.
  */
-export function TikkiHero({ tier, tapValue, empty, onTap, className, classNames }: TikkiHeroProps) {
+export function TikkiHero({
+  tier,
+  tapValue,
+  empty,
+  full = false,
+  onTap,
+  className,
+  classNames,
+}: TikkiHeroProps) {
   const t = useAppTranslations();
   const [pops, setPops] = useState<Pop[]>([]);
   const [squash, setSquash] = useState(false);
@@ -96,15 +106,17 @@ export function TikkiHero({ tier, tapValue, empty, onTap, className, classNames 
       <Image
         src={squash ? tikkiImages[tier].happy : tikkiImages[tier].idle}
         alt=""
-        width={232}
-        height={252}
+        width={348}
+        height={356}
         // Тикки — самая крупная картинка первого экрана: ждать ленивой загрузки
         // нечего. `priority` в Next 16 молча ничего не делает, поэтому словами.
         loading="eager"
         fetchPriority="high"
         className={twMerge(
-          'mx-auto h-auto w-[62vw] max-w-[248px] object-contain drop-shadow-[0_18px_34px_rgba(0,0,0,0.45)]',
-          squash ? 'animate-tikki-squash' : 'animate-tikki-breathe',
+          // 348×356 — размер из макета; на узком телефоне ужимается по ширине.
+          'mx-auto h-auto max-h-full w-[348px] max-w-full object-contain',
+          squash ? 'animate-tikki-squash' : full ? 'animate-tikki-ready' : 'animate-tikki-breathe',
+          empty && 'saturate-[0.75] brightness-[0.82]',
           classNames?.image
         )}
       />

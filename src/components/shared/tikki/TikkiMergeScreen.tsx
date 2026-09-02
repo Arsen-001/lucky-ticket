@@ -73,7 +73,7 @@ export function TikkiMergeScreen({
     'flex-available rounded-xl border border-white/10 bg-white/5 py-2 text-[11px] font-bold';
 
   return (
-    <div className={twMerge('flex flex-col gap-3', className)}>
+    <div className={twMerge('flex flex-col gap-3 px-[14px] pt-2.5', className)}>
       <header className="flex items-center gap-3">
         <button
           type="button"

@@ -5,11 +5,16 @@ import { twMerge } from 'tailwind-merge';
 import { RotateCcw } from 'lucide-react';
 import { Button } from '@/components/shared/buttons/Button';
 import { CoinIcon } from '@/components/shared/icons/CoinIcon';
-import { tierAccentColors } from '@/constants/tier-colors';
 import { useAppTranslations } from '@/hooks/useAppTranslations';
-import { formatNumber } from '@/utils/global/number.utils';
-import { tikkiMergeSize, type TikkiTier } from './tikki.constants';
-import { nextTikkiTier, tikkiPassiveRate, tikkiTapMaxed, tikkiTapValue } from './tikki.utils';
+import { formatCompact } from '@/utils/global/number.utils';
+import { tikkiMaxLevel, tikkiMergeSize, type TikkiTier } from './tikki.constants';
+import {
+  nextTikkiTier,
+  tikkiCapacity,
+  tikkiPassiveRate,
+  tikkiTapMaxed,
+  tikkiTapValue,
+} from './tikki.utils';
 import { upgradeCost, useTikkiProgress, type TikkiUpgrade } from './useTikkiProgress';
 import { TikkiBalanceRow } from './TikkiBalanceRow';
 import { TikkiBoostChip } from './TikkiBoostChip';
@@ -74,7 +79,6 @@ export function TikkiScreen({ footer, stand = false, onTierChange, className }: 
 
   if (!ready || !selected) return null;
 
-  const accent = tierAccentColors[selected.tier];
   const passivePerHour = progress.units.reduce((sum, unit) => sum + tikkiPassiveRate(unit), 0);
   const mergeReady = progress.units.some(
     unit =>
@@ -112,49 +116,57 @@ export function TikkiScreen({ footer, stand = false, onTierChange, className }: 
   }
 
   return (
-    <div className={twMerge('flex flex-available flex-col gap-3', className)}>
+    <div className={twMerge('flex flex-available flex-col px-[14px] pt-2.5', className)}>
       <TikkiBalanceRow balance={progress.balance} perHour={passivePerHour} />
 
-      <div className="flex-available flex flex-col gap-3">
+      {/* Персонаж занимает всё, что осталось между счётом и нижним рядом. Чипы
+          лежат ПОВЕРХ него по нижним углам — так в макете: он крупный ровно
+          потому, что уходит за них, а не жмётся между ними. Уводим их на 6 px
+          за колонку (в макете left/right 8 px при поле 14), и стрелка каждого
+          садится во внешний угол, к краю экрана. */}
+      <div className="relative flex flex-available items-end justify-center">
         <TikkiHero
           tier={selected.tier}
           tapValue={tikkiTapValue(selected)}
           empty={selected.fill < 1}
+          full={selected.fill >= tikkiCapacity(selected)}
           onTap={() => tap(selected.id)}
-          className="my-auto"
+          // Ногами персонаж заходит на 28 px ниже чипов — ровно как в макете.
+          // Оттуда и его размер: он крупный потому, что уходит ЗА них.
+          className="translate-y-7"
         />
 
-        <div className="flex items-end justify-between gap-2">
-          <TikkiBoostChip
-            label={t('passive')}
-            side="left"
-            poor={poor('passive')}
-            value={
-              <>
-                <CoinIcon size={15} />
-                {formatNumber(tikkiPassiveRate(selected))}
-              </>
-            }
-            onClick={() => openUpgrade('passive')}
-          />
-          <TikkiBoostChip
-            label={t('per tap')}
-            side="right"
-            poor={poor('tap')}
-            maxed={tikkiTapMaxed(selected)}
-            value={formatNumber(tikkiTapValue(selected))}
-            className="items-end text-right"
-            onClick={() => openUpgrade('tap')}
-          />
-        </div>
-
-        <TikkiMeterRow
-          unit={selected}
-          accent={accent}
-          onUpgradeClicker={() => openUpgrade('clicker')}
-          onUpgradeWindow={() => openUpgrade('window')}
+        <TikkiBoostChip
+          className="absolute bottom-0 -start-1.5"
+          label={t('passive')}
+          side="left"
+          maxed={selected.passiveLevel >= tikkiMaxLevel}
+          poor={poor('passive')}
+          value={
+            <>
+              <CoinIcon size={13} className="me-1" />
+              {formatCompact(tikkiPassiveRate(selected))}
+            </>
+          }
+          onClick={() => openUpgrade('passive')}
+        />
+        <TikkiBoostChip
+          className="absolute bottom-0 -end-1.5"
+          label={t('per tap')}
+          side="right"
+          poor={poor('tap')}
+          maxed={tikkiTapMaxed(selected)}
+          value={formatCompact(tikkiTapValue(selected))}
+          onClick={() => openUpgrade('tap')}
         />
       </div>
+
+      <TikkiMeterRow
+        unit={selected}
+        onUpgradeClicker={() => openUpgrade('clicker')}
+        onUpgradeWindow={() => openUpgrade('window')}
+        className="mb-2 mt-0.5"
+      />
 
       <TikkiCollection
         units={progress.units}
@@ -166,7 +178,7 @@ export function TikkiScreen({ footer, stand = false, onTierChange, className }: 
       />
 
       {stand && (
-        <footer className="flex items-center justify-between gap-2">
+        <footer className="mt-2 flex items-center justify-between gap-2">
           <p className="text-faint flex-available text-[10px] leading-snug">
             {t('tikki stand note')}
           </p>
@@ -182,7 +194,7 @@ export function TikkiScreen({ footer, stand = false, onTierChange, className }: 
         </footer>
       )}
 
-      {footer}
+      <div className="mt-1.5">{footer}</div>
 
       <TikkiUpgradeModal
         open={upgrading !== null}

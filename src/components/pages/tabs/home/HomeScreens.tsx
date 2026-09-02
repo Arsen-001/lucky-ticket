@@ -40,7 +40,6 @@ export function HomeScreens() {
   return (
     <TikkiScreen
       onTierChange={setTier}
-      className="px-4 pb-1"
       footer={
         <div className="flex items-center justify-between gap-2">
           <HomeScreenPill

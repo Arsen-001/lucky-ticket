@@ -11,19 +11,32 @@ export interface HomeScreenPillProps {
   /** Ссылка — для перехода в другой раздел; иначе переключаем экран на месте. */
   href?: Route;
   onClick?: () => void;
+  /** Слева иконка мельче, поэтому и поле слева больше — как в макете. */
+  side?: 'left' | 'right';
   className?: string;
 }
 
 /**
- * Пилюля перехода на главной: слева «Игры», справа «Движки».
+ * Пилюля перехода на главной: слева «Игры», справа «Движки». 34 px ростом —
+ * ровно как карточка коллекции над ней, чтобы низ экрана читался одной линией.
  *
- * Без обводки и без подложки-карточки — они стоят прямо на сцене, у самого
- * таб-бара, и любая рамка здесь читалась бы как ещё один ряд вкладок.
+ * Без обводки: она стоит прямо на сцене, у самого таб-бара, и любая рамка здесь
+ * читалась бы как ещё один ряд вкладок. Держит её только тень под низом.
  */
-export function HomeScreenPill({ label, icon, href, onClick, className }: HomeScreenPillProps) {
+export function HomeScreenPill({
+  label,
+  icon,
+  href,
+  onClick,
+  side = 'right',
+  className,
+}: HomeScreenPillProps) {
   const shape = twMerge(
-    'flex h-[34px] items-center gap-1.5 rounded-full bg-white/8 px-3 text-[12px] font-bold',
-    'backdrop-blur-sm focus-visible:outline-teal focus-visible:outline focus-visible:outline-2',
+    'flex h-[34px] items-center gap-1.5 rounded-full',
+    side === 'left' ? 'ps-2.5 pe-3' : 'ps-1.5 pe-3',
+    'bg-[linear-gradient(150deg,#3a2350,#1c1a30)] shadow-[0_10px_24px_-12px_rgba(0,0,0,0.9)]',
+    'text-[11.5px] font-extrabold whitespace-nowrap text-white',
+    'focus-visible:outline-teal focus-visible:outline focus-visible:outline-2',
     className
   );
 

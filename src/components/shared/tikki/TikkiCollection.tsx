@@ -2,16 +2,16 @@
 
 import { FlaskConical, Plus } from 'lucide-react';
 import { twMerge } from 'tailwind-merge';
+import { staggerStyle } from '@/utils/global/animation.utils';
+import { useAppTranslations } from '@/hooks/useAppTranslations';
 import type { TikkiUnit } from './tikki.constants';
 import { tikkiCapacity } from './tikki.utils';
-import { useAppTranslations } from '@/hooks/useAppTranslations';
-import { staggerStyle } from '@/utils/global/animation.utils';
 import { TikkiCollectionItem } from './TikkiCollectionItem';
 
 export interface TikkiCollectionProps {
   units: readonly TikkiUnit[];
   selectedId: string;
-  /** Где-то набралось четыре одинаковых — сплав открыт, чип светится. */
+  /** Где-то набралось четыре одинаковых — сплав открыт, чип светится розовым. */
   mergeReady: boolean;
   onSelect: (id: string) => void;
   onBuy: () => void;
@@ -19,9 +19,10 @@ export interface TikkiCollectionProps {
   className?: string;
 }
 
+/** Та же коробка 52×52, что и у Тикки: лента должна читаться одним рядом. */
 const action =
-  'flex w-[54px] flex-none flex-col items-center justify-center gap-1 rounded-2xl border ' +
-  'px-1 py-2 text-[9px] font-bold uppercase leading-none tracking-wide ' +
+  'flex size-[52px] flex-none flex-col items-center justify-center gap-px rounded-[13px] bg-white/4 ' +
+  'shadow-[inset_0_0_0_1px_rgba(255,255,255,0.06)] ' +
   'focus-visible:outline-teal focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2';
 
 /**
@@ -33,9 +34,6 @@ const action =
  *
  * Сплав и покупка НЕ едут вместе с лентой. Внутри неё они уезжали за правый
  * край на пятом Тикки — ровно на том, где сплав как раз и открывается.
- *
- * Поля лента не трогает: у главной и у `/tikki` они разные, а отрицательные
- * márgin'ы под одно из них ломали бы второе.
  */
 export function TikkiCollection({
   units,
@@ -49,8 +47,8 @@ export function TikkiCollection({
   const t = useAppTranslations();
 
   return (
-    <div className={twMerge('flex items-stretch gap-2', className)}>
-      <div className="scrollbar-hidden flex flex-available gap-2 overflow-x-auto py-1">
+    <div className={twMerge('flex items-start gap-[7px]', className)}>
+      <div className="scrollbar-hidden flex flex-available gap-[7px] overflow-x-auto pb-0.5 pt-2">
         {units.map((unit, index) => (
           <TikkiCollectionItem
             key={unit.id}
@@ -64,29 +62,38 @@ export function TikkiCollection({
         ))}
       </div>
 
-      <div className="flex flex-none items-stretch gap-2 py-1">
+      <div className="flex flex-none gap-[7px] pb-0.5 pt-2">
         <button
           type="button"
           onClick={onMerge}
           disabled={!mergeReady}
-          className={twMerge(
-            action,
+          className={twMerge(action, !mergeReady && 'opacity-55')}
+          style={
             mergeReady
-              ? 'border-electric-purple/60 bg-electric-purple/15 text-white'
-              : 'text-muted border-white/10 bg-white/4 opacity-55'
-          )}
+              ? { boxShadow: 'inset 0 0 0 1.5px rgba(222,0,155,0.6), 0 0 18px -6px #de009b' }
+              : undefined
+          }
         >
-          <FlaskConical size={17} aria-hidden />
-          {t('merge')}
+          <FlaskConical
+            size={16}
+            aria-hidden
+            className={mergeReady ? 'text-electric-pink' : 'text-[#d4c9c9]'}
+          />
+          <span
+            className={twMerge(
+              'text-[8px] font-extrabold uppercase leading-none',
+              mergeReady ? 'text-electric-pink' : 'text-[#7d7391]'
+            )}
+          >
+            {t('merge')}
+          </span>
         </button>
 
-        <button
-          type="button"
-          onClick={onBuy}
-          className={twMerge(action, 'text-muted border-white/10 bg-white/4')}
-        >
-          <Plus size={17} aria-hidden />
-          {t('buy')}
+        <button type="button" onClick={onBuy} className={action}>
+          <Plus size={16} aria-hidden className="text-[#d4c9c9]" />
+          <span className="text-[8px] font-extrabold uppercase leading-none text-[#7d7391]">
+            {t('buy')}
+          </span>
         </button>
       </div>
     </div>

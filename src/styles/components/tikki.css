@@ -60,3 +60,102 @@
     animation: none !important;
   }
 }
+
+/* ─── Сцена Тикки: числа взяты из макета, а не подобраны на глаз ─────────────
+   Колонка 14 px по бокам, персонаж 348×356, полоса кликера 16 px, карточка
+   коллекции 52×52. Всё, что ниже, — то, что Tailwind не выражает: плазма в
+   полосе, золотой градиент текста и золотая волосяная линия под счётом.      */
+
+/* Полоса кликера — не заливка цветом тира, а плазма: она идёт всё время, и
+   полный кликер видно боковым зрением, не читая цифр. */
+@keyframes tikki-plasma-flow {
+  to {
+    background-position: 320% 0;
+  }
+}
+
+@keyframes tikki-plasma-blob {
+  from {
+    transform: translateX(-14%) scale(1, 1);
+    opacity: 0.7;
+  }
+  to {
+    transform: translateX(14%) scale(1.18, 1);
+    opacity: 1;
+  }
+}
+
+@utility tikki-plasma {
+  position: relative;
+  height: 100%;
+  border-radius: 999px;
+  overflow: hidden;
+  background-image: linear-gradient(
+    90deg,
+    #4a1140,
+    #a32183,
+    #de009b,
+    #ff5ac8,
+    #f8bd3e,
+    #de009b,
+    #a32183,
+    #4a1140
+  );
+  background-size: 320% 100%;
+  animation: tikki-plasma-flow 5.5s linear infinite;
+  box-shadow:
+    0 0 14px rgba(222, 0, 155, 0.5),
+    inset 0 0 12px rgba(255, 255, 255, 0.22);
+}
+
+@utility tikki-plasma-glow {
+  content: '';
+  position: absolute;
+  inset: -40% -10%;
+  background-image:
+    radial-gradient(38% 60% at 22% 50%, rgba(255, 255, 255, 0.5), transparent 62%),
+    radial-gradient(32% 55% at 62% 50%, rgba(255, 236, 190, 0.5), transparent 62%),
+    radial-gradient(30% 50% at 88% 50%, rgba(255, 255, 255, 0.3), transparent 60%);
+  mix-blend-mode: screen;
+  animation: tikki-plasma-blob 3.4s ease-in-out infinite alternate;
+}
+
+/* Доход в час — золото градиентом. `background-image`, НЕ шорткат `background`:
+   шорткат сбрасывает `background-clip` на `border-box`, и строка красится
+   сплошным прямоугольником с невидимым текстом (@see AGENTS.md, Wordmark). */
+@utility tikki-gold-text {
+  background-image: linear-gradient(180deg, #ffe6a3 0%, #f8bd3e 55%, #d08a1c 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  filter: drop-shadow(0 0 10px rgba(248, 189, 62, 0.35));
+}
+
+/* Волосяная линия под счётом: гаснет к краям, поэтому не читается как рамка. */
+@utility tikki-rule {
+  height: 1px;
+  background-image: linear-gradient(to right, transparent, rgba(248, 189, 62, 0.4), transparent);
+}
+
+/* Полный кликер: персонаж покачивается и светится золотом — «зайди и забери». */
+@keyframes tikki-ready-bob {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-7px);
+  }
+}
+
+@utility animate-tikki-ready {
+  animation: tikki-ready-bob 1.5s ease-in-out infinite;
+  filter: drop-shadow(0 0 16px rgba(248, 189, 62, 0.45));
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .tikki-plasma,
+  .animate-tikki-ready {
+    animation: none !important;
+  }
+}

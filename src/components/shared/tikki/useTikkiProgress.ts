@@ -28,7 +28,7 @@ export interface TikkiProgress {
 }
 
 const STORAGE_KEY = 'tikki-clicker-v2';
-const SAVE_DEBOUNCE_MS = 1_500;
+const SAVE_THROTTLE_MS = 1_500;
 
 /** Первый бронзовый бесплатный — иначе в фичу нечем войти. */
 const firstProgress = (now: number): TikkiProgress => {
@@ -158,17 +158,25 @@ export function useTikkiProgress() {
     return () => clearInterval(id);
   }, [ready]);
 
-  // Запись отложена: состояние двигается каждую секунду, а localStorage
-  // синхронный — писать в него по разу на тик значит дёргать главный поток
-  // ровно там, где идёт анимация тапа.
+  /**
+   * Запись НЕ на каждый тик: состояние двигается раз в секунду, а localStorage
+   * синхронный — писать в него по разу на тик значит дёргать главный поток
+   * ровно там, где идёт анимация тапа.
+   *
+   * 🪤 И не debounce, каким это было сначала: состояние меняется чаще, чем
+   * длится задержка (секунда против полутора), поэтому таймер снимался и
+   * ставился заново БЕСКОНЕЧНО и не срабатывал НИ РАЗУ. Прогресс держался
+   * только тем, что дописывался на выходе, — то есть терялся весь целиком,
+   * стоило приложению закрыться иначе. Здесь throttle: первый же тик заводит
+   * таймер, и дальше он не сдвигается, пока не отработает.
+   */
   useEffect(() => {
     latest.current = progress;
-    if (!ready) return;
-    if (saveTimer.current) clearTimeout(saveTimer.current);
-    saveTimer.current = setTimeout(save, SAVE_DEBOUNCE_MS);
-    return () => {
-      if (saveTimer.current) clearTimeout(saveTimer.current);
-    };
+    if (!ready || saveTimer.current) return;
+    saveTimer.current = setTimeout(() => {
+      saveTimer.current = null;
+      save();
+    }, SAVE_THROTTLE_MS);
   }, [progress, ready]);
 
   // Отложенная запись теряла последние полторы секунды: уйти со сцены сразу
@@ -181,6 +189,8 @@ export function useTikkiProgress() {
     window.addEventListener('pagehide', flush);
     return () => {
       window.removeEventListener('pagehide', flush);
+      if (saveTimer.current) clearTimeout(saveTimer.current);
+      saveTimer.current = null;
       flush();
     };
   }, [ready]);
