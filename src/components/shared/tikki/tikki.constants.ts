@@ -1,13 +1,21 @@
 import { TicketsEnum } from '@/types/enums/ticket.enums';
 
 /**
- * Рабочие числа страницы Тикки.
+ * Числа Тикки. Решены целиком 02.09.2026 в макете и перенесены сюда как есть —
+ * ни одно из них не назначено «на глаз».
  *
- * 🔴 Это ЧЕРНОВИК, а не экономика. Страница ничего не пишет в баланс и не ходит
- * на бэкенд: прогресс лежит в localStorage этого устройства. Прежде чем сажать
- * механику на настоящие LC, числа должны пройти через `DOCS/DOCS.md` и админку,
- * как остальная экономика — тут они выставлены только чтобы кликер было на чём
- * щупать.
+ * Правило, из которого выведены все цены:
+ *
+ *     цена = прирост дохода в день × срок окупаемости
+ *
+ * Срок назначается, цена вытекает. Уровни и бусты окупаются за год, покупка
+ * Тикки и сплав — за 395 дней. Единственные два места, где цена стоит руками, —
+ * час окна («час стоит месяц того, что он спасает») и тап (дохода он не
+ * печатает вовсе, он экономит нажатия).
+ *
+ * 🔴 Множителей в игре нет ни одного. Всё растёт ПРИБАВКОЙ шага тира. Ровно
+ * один процент во всей механике — надбавка за сплав, и живёт он одну секунду:
+ * в момент сплава превращается в обычное стартовое число.
  */
 export const tikkiTiers = [
   TicketsEnum.BRONZE,
@@ -19,41 +27,109 @@ export const tikkiTiers = [
 
 export type TikkiTier = (typeof tikkiTiers)[number];
 
-interface TikkiTierRates {
-  /** LC за один тап на первом уровне. */
-  tap: number;
-  /** LC в час на первом уровне. */
-  perHour: number;
-  /** Цена первого апгрейда; дальше растёт на `upgradeStep`. */
-  upgradeBase: number;
-  /** Сколько стоит открыть тир. Бронза открыта сразу. */
-  unlock: number;
-}
-
-export const tikkiRates: Record<TikkiTier, TikkiTierRates> = {
-  [TicketsEnum.BRONZE]: { tap: 1, perHour: 30, upgradeBase: 500, unlock: 0 },
-  [TicketsEnum.SILVER]: { tap: 3, perHour: 90, upgradeBase: 2_000, unlock: 5_000 },
-  [TicketsEnum.GOLD]: { tap: 8, perHour: 240, upgradeBase: 8_000, unlock: 25_000 },
-  [TicketsEnum.PLATINUM]: { tap: 20, perHour: 600, upgradeBase: 30_000, unlock: 120_000 },
-  [TicketsEnum.DIAMOND]: { tap: 50, perHour: 1_500, upgradeBase: 100_000, unlock: 500_000 },
+/**
+ * Ступень тира — вчетверо. И доход, и шаг уровня, и все цены. Окупаемость от
+ * этого не меняется: она и на бронзе, и на алмазе одна.
+ */
+export const tikkiTierMultiplier: Record<TikkiTier, number> = {
+  [TicketsEnum.BRONZE]: 1,
+  [TicketsEnum.SILVER]: 4,
+  [TicketsEnum.GOLD]: 16,
+  [TicketsEnum.PLATINUM]: 64,
+  [TicketsEnum.DIAMOND]: 256,
 };
 
-/** Во сколько раз дорожает каждый следующий уровень. */
-export const upgradeStep = 1.55;
+/**
+ * Надбавка за сплав — ПРОЦЕНТ ТОЙ СТУПЕНИ, НА КОТОРУЮ ПОДНИМАЕШЬСЯ, а не тех,
+ * кого кладёшь. У бронзы поэтому ноль: в бронзу не сплавляются, её покупают.
+ * Процент идёт на ПОЛНЫЙ результат (сумма + база нового тира), один раз, сколько
+ * бы карточек ни положили.
+ */
+export const tikkiMergeStepUp: Record<TikkiTier, number> = {
+  [TicketsEnum.BRONZE]: 0,
+  [TicketsEnum.SILVER]: 1,
+  [TicketsEnum.GOLD]: 2,
+  [TicketsEnum.PLATINUM]: 3,
+  [TicketsEnum.DIAMOND]: 4,
+};
 
-export const maxLevel = 20;
+/** Сколько бронзовый даёт в час на первом уровне — и в кликер, и пассивом. */
+export const tikkiBaseRate = 25;
+
+/** Стартовое окно кликера: за сколько часов он наполняется доверху. */
+export const tikkiStartHours = 4;
 
 /**
- * Сколько часов копится доход, пока игрока нет. Потолок обязателен: без него
- * достаточно не заходить неделю, и кликер платит больше, чем игра за неделю.
+ * Потолок окна. Обрезан с суток до двенадцати часов 02.09.2026: в наборе
+ * привычек (`tikkiVisitHours`) самый долгий перерыв — двенадцать часов, и окно
+ * шире просто некому наполнять. Двенадцать ступеней уходили в пустоту.
  */
-export const idleCapHours = 8;
+export const tikkiMaxHours = 12;
 
-export const tapPerLevel = (tier: TikkiTier, level: number) =>
-  Math.round(tikkiRates[tier].tap * level);
+/**
+ * Размах, по которому считается цена часа. Он остался старым (сутки), хотя
+ * лестница кончается на двенадцати: обрезав окно, мы уронили цену вшестеро, и
+ * она возвращена к прежним числам прямой командой.
+ */
+export const tikkiWindowPriceSpan = 24;
 
-export const perHourPerLevel = (tier: TikkiTier, level: number) =>
-  Math.round(tikkiRates[tier].perHour * level);
+/** Потолок обоих уровней — кликера и пассива. Первый куплен вместе с Тикки. */
+export const tikkiMaxLevel = 100;
 
-export const upgradeCost = (tier: TikkiTier, level: number) =>
-  Math.round(tikkiRates[tier].upgradeBase * Math.pow(upgradeStep, level - 1));
+/** Сколько одинаковых нужно, чтобы сплав открылся. Больше — выгоднее. */
+export const tikkiMergeSize = 4;
+
+/**
+ * 🔴 «Забрать всё» одним нажатием не бывает никогда. Нажатие уносит не больше
+ * десятой части кликера, сколько бы тап ни был прокачан. Заодно это связывает
+ * бусты: пока не поднял уровень и окно, дальше десятой ступени тап качать
+ * бессмысленно.
+ */
+export const tikkiTapMinPresses = 10;
+
+/**
+ * Как люди правда заходят — часы между заходами. Один сценарий нечестен: при
+ * заходах раз в восемь часов уровень не даёт ничего, при ежечасных — не даёт
+ * ничего окно. Ценность усредняется по всем пяти привычкам.
+ */
+export const tikkiVisitHours = [1, 2, 4, 8, 12] as const;
+
+/** Пассивный доход идёт на счёт сам и держится столько дней без захода. */
+export const tikkiAwayDays = 7;
+
+/** Окупаемость ступени уровня и бустов. */
+export const tikkiLevelPaybackDays = 365;
+
+/** Окупаемость покупки Тикки и сплава. */
+export const tikkiBuyPaybackDays = 395;
+
+/**
+ * Один Тикки. Кликер и пассив — ДВА НЕЗАВИСИМЫХ ПОТОКА: у каждого своя база,
+ * свой уровень и своя цена, прокачка одного на другой не влияет никак. Общего
+ * «уровня Тикки» нет.
+ *
+ * У купленного `base === passiveBase === 25 × ступень тира`. У сплавленного они
+ * расходятся: кликер собирается из кликеров, пассив — из пассивов.
+ */
+export interface TikkiUnit {
+  id: string;
+  tier: TikkiTier;
+  /** Уровень кликера, 1…100. */
+  level: number;
+  /** Кликер в час на первом уровне без бустов. */
+  base: number;
+  /** Уровень пассива, 1…100. */
+  passiveLevel: number;
+  /** Пассив в час на первом уровне. */
+  passiveBase: number;
+  /** Буст тапа, 1…100. */
+  tapLevel: number;
+  /** Буст окна: 1 — стартовые четыре часа, дальше по часу. */
+  windowLevel: number;
+  /** Сколько LC лежит в кликере и ждёт нажатий. */
+  fill: number;
+  /** Когда кликер досчитывали в прошлый раз. */
+  filledAt: number;
+  /** Когда пассив зачисляли на счёт в прошлый раз. */
+  paidAt: number;
+}

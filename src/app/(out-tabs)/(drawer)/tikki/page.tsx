@@ -3,7 +3,7 @@ import { TikkiContainer } from '@/components/pages/out-tabs/drawer/tikki/TikkiCo
 
 export default function TikkiPage() {
   return (
-    <ArrivalShine id="tikki" scroll={false}>
+    <ArrivalShine id="tikki" scroll={false} className="flex min-h-full flex-col">
       <TikkiContainer />
     </ArrivalShine>
   );
