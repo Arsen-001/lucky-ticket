@@ -5,7 +5,7 @@ import { twMerge } from 'tailwind-merge';
 import { CoinIcon } from '@/components/shared/icons/CoinIcon';
 import { tikkiImages } from './tikki.images';
 import { tikkiBuyPaybackDays, type TikkiTier } from './tikki.constants';
-import { tikkiBuyCost, tikkiTierBase } from './tikki.utils';
+import { tikkiTierBase } from './tikki.utils';
 import { tierAccentColors } from '@/constants/tier-colors';
 import { useAppTranslations } from '@/hooks/useAppTranslations';
 import { formatCompact, formatNumber } from '@/utils/global/number.utils';
@@ -13,6 +13,8 @@ import { formatCompact, formatNumber } from '@/utils/global/number.utils';
 export interface TikkiBuyRowProps {
   tier: TikkiTier;
   balance: number;
+  /** Цена с сервера: та самая, по которой он и спишет. */
+  price: number;
   onBuy: () => void;
   className?: string;
   style?: React.CSSProperties;
@@ -25,9 +27,8 @@ export interface TikkiBuyRowProps {
  * не выгоднее младшего, он просто крупнее. Без этой строки лестница читается
  * как «копи на алмаз», хотя копить на него ровно так же долго.
  */
-export function TikkiBuyRow({ tier, balance, onBuy, className, style }: TikkiBuyRowProps) {
+export function TikkiBuyRow({ tier, balance, price, onBuy, className, style }: TikkiBuyRowProps) {
   const t = useAppTranslations();
-  const price = tikkiBuyCost(tier);
   const affordable = balance >= price;
 
   return (

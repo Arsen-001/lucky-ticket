@@ -159,6 +159,10 @@ export const tikkiMergeGift = (tier: TikkiTier) => {
   return to ? tikkiTierBase(to) : 0;
 };
 
+/** Вся лестница надбавок разом — для того, что рисует правила целиком. */
+export const tikkiMergeStepUpPercentByTier = (): Record<string, number> =>
+  Object.fromEntries(tikkiTiers.map(tier => [tier, tikkiMergeStepUp[tier]]));
+
 /** Процент ступени, на которую поднимаешься: 1 · 2 · 3 · 4. */
 export const tikkiMergePercent = (tier: TikkiTier) => {
   const to = nextTikkiTier(tier);
@@ -221,6 +225,45 @@ export const mergeTikkiUnits = (
   };
 };
 
+/**
+ * Что получится из отмеченных — ДЛЯ ПОКАЗА, пока игрок ещё выбирает.
+ *
+ * Считается ровно теми числами, что прислал сервер (доход каждого, база тира,
+ * процент ступени, цена), а не своей копией экономики: своя копия однажды
+ * разошлась бы с той, по которой списывают. Сервер пересчитает всё заново, и
+ * если экран врал — это станет видно в первый же сплав.
+ */
+export const tikkiMergePreview = (
+  units: readonly { tier: string; clickerPerHour: number; passivePerHour: number }[],
+  tierBase: Record<string, number>,
+  stepUpPercent: Record<string, number>,
+  costByTier: Record<string, number>
+) => {
+  const from = units[0]?.tier as TikkiTier | undefined;
+  const to = from ? nextTikkiTier(from) : null;
+  if (!from || !to) return null;
+
+  const gift = tierBase[to] ?? 0;
+  const percent = stepUpPercent[to] ?? 0;
+  const scale = 1 + percent / 100;
+  const clickerSum = units.reduce((sum, u) => sum + u.clickerPerHour, 0);
+  const passiveSum = units.reduce((sum, u) => sum + u.passivePerHour, 0);
+
+  return {
+    from,
+    to,
+    gift,
+    percent,
+    clickerSum,
+    passiveSum,
+    /** Столько даёт обычный купленный — с ним и сравнивают результат. */
+    plain: gift,
+    base: Math.round((clickerSum + gift) * scale),
+    passiveBase: Math.round((passiveSum + gift) * scale),
+    cost: costByTier[from] ?? 0,
+  };
+};
+
 // ── время ─────────────────────────────────────────────────────────────────────
 
 /** Сколько лежит в кликере к моменту `now`. Дальше окна не растёт. */
@@ -236,17 +279,4 @@ export const tikkiFillAt = (unit: TikkiUnit, now: number) => {
 export const tikkiPassiveEarned = (unit: TikkiUnit, now: number) => {
   const hours = Math.min(Math.max(0, (now - unit.paidAt) / HOUR_MS), tikkiAwayDays * 24);
   return tikkiPassiveRate(unit) * hours;
-};
-
-/**
- * Через сколько миллисекунд кликер наполнится доверху.
- *
- * Считается от того, что в Тикки уже лежит: `useTikkiProgress` догоняет время
- * раз в секунду, поэтому `fill` всегда свежий, и второй проекции вперёд тут не
- * нужно — она бы разошлась с полосой, которая рисуется по тому же числу.
- */
-export const tikkiTimeToFullMs = (unit: TikkiUnit) => {
-  const left = tikkiCapacity(unit) - unit.fill;
-  if (left <= 0) return 0;
-  return (left / tikkiClickerRate(unit)) * HOUR_MS;
 };

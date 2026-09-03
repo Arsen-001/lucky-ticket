@@ -1,4 +1,5 @@
 import {
+  MousePointerClick,
   ArrowDownUp,
   Ban,
   Clapperboard,
@@ -126,6 +127,18 @@ export const LC_TYPE_META: Record<LcTransactionType, LcTypeMeta> = {
     Icon: Ban,
     iconClass: 'text-error',
     iconBg: 'bg-error/15',
+  },
+  // Заработано Тикки — палец: и нажатия, и пассив приходят от одного и того же
+  // персонажа, и разводить их на две иконки значило бы обещать две механики.
+  [LcTransactionType.TIKKI_INCOME]: {
+    Icon: MousePointerClick,
+    iconClass: 'text-gold',
+    iconBg: 'bg-gold/15',
+  },
+  [LcTransactionType.TIKKI_SPEND]: {
+    Icon: MousePointerClick,
+    iconClass: 'text-electric-purple',
+    iconBg: 'bg-electric-purple/15',
   },
 };
 

@@ -1633,7 +1633,6 @@
   "merge": "Сплав",
   "tikki is full": "Кликер полон",
   "passive": "Пассив",
-  "tikki stand note": "Тестовый стенд: счёт лежит только на этом устройстве и настоящего баланса не касается.",
   "in hour, plain one gives {amount}": "в час · у купленного {amount}",
   "vs bought": "к купленному",
   "merge formula": "({sum} суммой + {gift} база тира) и {percent}% на всё → {total}",

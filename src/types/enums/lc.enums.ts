@@ -43,6 +43,17 @@ export enum LcTransactionType {
    * has to be answerable from the player's own history.
    */
   BOT_BLOCK_RESET = 'bot_block_reset',
+  /**
+   * Заработано Тикки: нажатия и пассивный доход. Своя причина, а не
+   * `TASK_REWARD`: это отдельная эмиссия, и отчёт по экономике обязан уметь
+   * назвать её отдельно от заданий и турниров.
+   */
+  TIKKI_INCOME = 'tikki_income',
+  /**
+   * Потрачено на Тикки: покупка, уровни, бусты, сплав. Единственный сток
+   * механики, поэтому тоже своей строкой.
+   */
+  TIKKI_SPEND = 'tikki_spend',
 }
 
 export enum LcTransactionDirection {

@@ -2,26 +2,18 @@
 
 import { CoinIcon } from '@/components/shared/icons/CoinIcon';
 import { ConfirmModal } from '@/components/shared/modals/ConfirmModal';
-import type { TikkiUnit } from './tikki.constants';
-import { tikkiMaxHours } from './tikki.constants';
-import {
-  tikkiCapacity,
-  tikkiClickerRate,
-  tikkiPassiveRate,
-  tikkiTapPresses,
-  tikkiTapValue,
-  tikkiWindowHours,
-} from './tikki.utils';
-import { applyUpgrade, upgradeCost, type TikkiUpgrade } from './useTikkiProgress';
 import { useAppTranslations } from '@/hooks/useAppTranslations';
 import { formatNumber } from '@/utils/global/number.utils';
+import type { TikkiUnit, TikkiUpgradeKind } from '@/types/interfaces/tikki.interfaces';
 import { TikkiChangeRow } from './TikkiChangeRow';
 
 export interface TikkiUpgradeModalProps {
   open: boolean;
   unit: TikkiUnit | null;
-  kind: TikkiUpgrade;
+  kind: TikkiUpgradeKind;
   balance: number;
+  /** Потолок окна из конфига — его двигает админка, не код. */
+  maxHours: number;
   onClose: () => void;
   onConfirm: () => void;
 }
@@ -29,15 +21,19 @@ export interface TikkiUpgradeModalProps {
 /**
  * Окно покупки: что покупаешь, что от этого изменится и сколько это стоит.
  *
+ * Все числа — и цена, и «станет» — приехали с сервера. Клиент их не считает: он
+ * и списывать не он, и вторая копия экономики на экране однажды разошлась бы с
+ * той, по которой снимают деньги.
+ *
  * Денег не хватает — окно всё равно открывается и называет, сколько не хватает.
- * Молча неактивная кнопка на сцене не объясняет ничего, а цена здесь зависит от
- * прокачки и меняется под руками.
+ * Молча неактивная кнопка на сцене не объясняет ничего.
  */
 export function TikkiUpgradeModal({
   open,
   unit,
   kind,
   balance,
+  maxHours,
   onClose,
   onConfirm,
 }: TikkiUpgradeModalProps) {
@@ -45,77 +41,76 @@ export function TikkiUpgradeModal({
 
   if (!unit) return null;
 
-  const next = applyUpgrade(unit, kind);
-  const price = upgradeCost(unit, kind);
+  const price = unit.cost[kind];
   // Лестница кончилась: ступени больше нет, а не «нет денег».
-  const maxed = !Number.isFinite(price);
+  const maxed = price === null;
   const affordable = !maxed && balance >= price;
   const short = maxed ? 0 : Math.max(0, Math.round(price - balance));
 
-  const titles: Record<TikkiUpgrade, string> = {
+  const titles: Record<TikkiUpgradeKind, string> = {
     clicker: t('clicker level'),
     passive: t('passive level'),
     window: t('window'),
     tap: t('per tap'),
   };
 
-  const rows: Record<TikkiUpgrade, React.ReactNode> = {
+  const rows: Record<TikkiUpgradeKind, React.ReactNode> = {
     clicker: (
       <>
         <TikkiChangeRow
           label={t('clicker per hour')}
-          from={formatNumber(tikkiClickerRate(unit))}
-          to={formatNumber(tikkiClickerRate(next))}
+          from={formatNumber(unit.clickerPerHour)}
+          to={formatNumber(unit.next.clickerPerHour)}
         />
         <TikkiChangeRow
           label={t('holds')}
-          from={formatNumber(tikkiCapacity(unit))}
-          to={formatNumber(tikkiCapacity(next))}
+          from={formatNumber(unit.capacity)}
+          to={formatNumber(unit.next.clickerCapacity)}
         />
-        <TikkiChangeRow label={t('level')} from={unit.level} to={next.level} />
+        <TikkiChangeRow label={t('level')} from={unit.level} to={unit.level + 1} />
       </>
     ),
     passive: (
       <>
         <TikkiChangeRow
           label={t('passive per hour')}
-          from={formatNumber(tikkiPassiveRate(unit))}
-          to={formatNumber(tikkiPassiveRate(next))}
+          from={formatNumber(unit.passivePerHour)}
+          to={formatNumber(unit.next.passivePerHour)}
         />
         <TikkiChangeRow
           label={t('passive per day')}
-          from={formatNumber(tikkiPassiveRate(unit) * 24)}
-          to={formatNumber(tikkiPassiveRate(next) * 24)}
+          from={formatNumber(unit.passivePerHour * 24)}
+          to={formatNumber(unit.next.passivePerHour * 24)}
         />
-        <TikkiChangeRow label={t('level')} from={unit.passiveLevel} to={next.passiveLevel} />
+        <TikkiChangeRow label={t('level')} from={unit.passiveLevel} to={unit.passiveLevel + 1} />
       </>
     ),
     window: (
       <>
         <TikkiChangeRow
           label={t('window')}
-          from={`${tikkiWindowHours(unit)} ${t('hour short')}`}
-          to={`${tikkiWindowHours(next)} ${t('hour short')}`}
+          from={`${unit.windowHours} ${t('hour short')}`}
+          to={`${unit.next.windowHours} ${t('hour short')}`}
         />
         <TikkiChangeRow
           label={t('holds')}
-          from={formatNumber(tikkiCapacity(unit))}
-          to={formatNumber(tikkiCapacity(next))}
+          from={formatNumber(unit.capacity)}
+          to={formatNumber(unit.next.windowCapacity)}
         />
-        <TikkiChangeRow label={t('window ceiling')} from={`${tikkiMaxHours} ${t('hour short')}`} />
+        <TikkiChangeRow label={t('window ceiling')} from={`${maxHours} ${t('hour short')}`} />
       </>
     ),
     tap: (
       <>
         <TikkiChangeRow
           label={t('per tap')}
-          from={formatNumber(tikkiTapValue(unit))}
-          to={formatNumber(tikkiTapValue(next))}
+          from={formatNumber(unit.tapValue)}
+          to={formatNumber(unit.next.tapValue)}
         />
         <TikkiChangeRow
           label={t('taps to empty')}
-          from={formatNumber(tikkiTapPresses(unit))}
-          to={formatNumber(tikkiTapPresses(next))}
+          from={formatNumber(unit.tapPresses)}
+          to={formatNumber(unit.next.tapPresses)}
         />
       </>
     ),

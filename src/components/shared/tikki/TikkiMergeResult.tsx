@@ -4,8 +4,8 @@ import Image from 'next/image';
 import { Button } from '@/components/shared/buttons/Button';
 import { CoinIcon } from '@/components/shared/icons/CoinIcon';
 import { tikkiImages } from './tikki.images';
-import type { TikkiUnit } from './tikki.constants';
-import { tikkiMergeResult, tikkiTierBase } from './tikki.utils';
+import type { TikkiState, TikkiUnit } from '@/types/interfaces/tikki.interfaces';
+import { tikkiMergePreview } from './tikki.utils';
 import { tierAccentColors } from '@/constants/tier-colors';
 import { useAppTranslations } from '@/hooks/useAppTranslations';
 import { formatCompact, formatNumber } from '@/utils/global/number.utils';
@@ -14,6 +14,9 @@ export interface TikkiMergeResultProps {
   /** Что отмечено прямо сейчас — панель считается от этого набора. */
   selected: readonly TikkiUnit[];
   balance: number;
+  /** Числа сплава — те же, что прислал сервер. Своих экран не выдумывает. */
+  config: TikkiState['config'];
+  costByTier: Record<string, number>;
   onMerge: () => void;
 }
 
@@ -24,13 +27,19 @@ export interface TikkiMergeResultProps {
  * больше четверых всегда выгоднее, и увидеть это можно только на числах — пятая
  * карточка цену не двигает, а базу двигает.
  */
-export function TikkiMergeResult({ selected, balance, onMerge }: TikkiMergeResultProps) {
+export function TikkiMergeResult({
+  selected,
+  balance,
+  config,
+  costByTier,
+  onMerge,
+}: TikkiMergeResultProps) {
   const t = useAppTranslations();
-  const result = tikkiMergeResult(selected);
+  const result = tikkiMergePreview(selected, config.tierBase, config.stepUpPercent, costByTier);
 
   if (!result) return null;
 
-  const plain = tikkiTierBase(result.to);
+  const plain = result.plain;
   const accent = tierAccentColors[result.to];
   const affordable = balance >= result.cost;
   const short = Math.max(0, Math.round(result.cost - balance));

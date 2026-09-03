@@ -9,6 +9,8 @@ import { TikkiBuyRow } from './TikkiBuyRow';
 export interface TikkiBuyModalProps {
   open: boolean;
   balance: number;
+  /** Цены присылает сервер — экран их не считает. */
+  buyCost: Record<string, number>;
   onClose: () => void;
   onBuy: (tier: TikkiTier) => void;
 }
@@ -18,7 +20,7 @@ export interface TikkiBuyModalProps {
  * младшим, у него просто своя цена. Потолка у коллекции нет: держать можно
  * сколько угодно, и это нарочно — на сплав нужно собирать по четыре и больше.
  */
-export function TikkiBuyModal({ open, balance, onClose, onBuy }: TikkiBuyModalProps) {
+export function TikkiBuyModal({ open, balance, buyCost, onClose, onBuy }: TikkiBuyModalProps) {
   const t = useAppTranslations();
 
   return (
@@ -35,6 +37,7 @@ export function TikkiBuyModal({ open, balance, onClose, onBuy }: TikkiBuyModalPr
               key={tier}
               tier={tier}
               balance={balance}
+              price={buyCost[tier] ?? 0}
               onBuy={() => onBuy(tier)}
               className="animate-slide-in-bottom"
               style={staggerStyle(index, 50)}

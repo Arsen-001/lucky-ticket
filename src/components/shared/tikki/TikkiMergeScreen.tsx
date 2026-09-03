@@ -3,8 +3,9 @@
 import { useState } from 'react';
 import { ChevronLeft } from 'lucide-react';
 import { twMerge } from 'tailwind-merge';
-import { tikkiMergeSize, tikkiTiers, type TikkiTier, type TikkiUnit } from './tikki.constants';
-import { nextTikkiTier, tikkiClickerRate } from './tikki.utils';
+import { tikkiTiers, type TikkiTier } from './tikki.constants';
+import { nextTikkiTier } from './tikki.utils';
+import type { TikkiState, TikkiUnit } from '@/types/interfaces/tikki.interfaces';
 import { useAppTranslations } from '@/hooks/useAppTranslations';
 import { staggerStyle } from '@/utils/global/animation.utils';
 import { TikkiMergeCard } from './TikkiMergeCard';
@@ -13,18 +14,21 @@ import { TikkiMergeResult } from './TikkiMergeResult';
 export interface TikkiMergeScreenProps {
   units: readonly TikkiUnit[];
   balance: number;
+  /** Всё, чем считается сплав, приезжает с сервера — вместе с ценами. */
+  config: TikkiState['config'];
+  costByTier: Record<string, number>;
   onBack: () => void;
   onMerge: (ids: string[]) => void;
   className?: string;
 }
 
 /** Слабейшие первыми — «4 младших» отдаёт именно их. */
-const byRate = (a: TikkiUnit, b: TikkiUnit) => tikkiClickerRate(a) - tikkiClickerRate(b);
+const byRate = (a: TikkiUnit, b: TikkiUnit) => a.clickerPerHour - b.clickerPerHour;
 
 /** Тир, с которого экран открывается: первый, где уже набралось на сплав. */
-const firstReadyTier = (units: readonly TikkiUnit[]): TikkiTier =>
+const firstReadyTier = (units: readonly TikkiUnit[], mergeSize: number): TikkiTier =>
   tikkiTiers.find(
-    tier => nextTikkiTier(tier) && units.filter(unit => unit.tier === tier).length >= tikkiMergeSize
+    tier => nextTikkiTier(tier) && units.filter(unit => unit.tier === tier).length >= mergeSize
   ) ?? tikkiTiers[0];
 
 /**
@@ -37,23 +41,26 @@ const firstReadyTier = (units: readonly TikkiUnit[]): TikkiTier =>
 export function TikkiMergeScreen({
   units,
   balance,
+  config,
+  costByTier,
   onBack,
   onMerge,
   className,
 }: TikkiMergeScreenProps) {
+  const mergeSize = config.mergeSize;
   const t = useAppTranslations();
-  const [tier, setTier] = useState<TikkiTier>(() => firstReadyTier(units));
+  const [tier, setTier] = useState<TikkiTier>(() => firstReadyTier(units, config.mergeSize));
   const [picked, setPicked] = useState<string[]>(() =>
     units
-      .filter(unit => unit.tier === firstReadyTier(units))
+      .filter(unit => unit.tier === firstReadyTier(units, config.mergeSize))
       .sort(byRate)
-      .slice(0, tikkiMergeSize)
+      .slice(0, config.mergeSize)
       .map(unit => unit.id)
   );
 
-  const list = units.filter(unit => unit.tier === tier).sort(byRate);
+  const list = [...units].filter(unit => unit.tier === tier).sort(byRate);
   const selected = list.filter(unit => picked.includes(unit.id));
-  const enough = selected.length >= tikkiMergeSize;
+  const enough = selected.length >= mergeSize;
 
   const openTier = (next: TikkiTier) => {
     setTier(next);
@@ -61,7 +68,7 @@ export function TikkiMergeScreen({
       units
         .filter(unit => unit.tier === next)
         .sort(byRate)
-        .slice(0, tikkiMergeSize)
+        .slice(0, mergeSize)
         .map(unit => unit.id)
     );
   };
@@ -93,7 +100,7 @@ export function TikkiMergeScreen({
         {tikkiTiers.map(item => {
           const count = units.filter(unit => unit.tier === item).length;
           if (!count) return null;
-          const ready = count >= tikkiMergeSize && !!nextTikkiTier(item);
+          const ready = count >= mergeSize && !!nextTikkiTier(item);
 
           return (
             <button
@@ -118,17 +125,17 @@ export function TikkiMergeScreen({
 
       <p className="text-muted text-xs leading-snug">
         {enough
-          ? t('merge hint', { count: tikkiMergeSize })
-          : t('merge needs more', { count: tikkiMergeSize - selected.length })}
+          ? t('merge hint', { count: mergeSize })
+          : t('merge needs more', { count: mergeSize - selected.length })}
       </p>
 
       <div className="flex gap-2">
         <button
           type="button"
           className={quick}
-          onClick={() => setPicked(list.slice(0, tikkiMergeSize).map(unit => unit.id))}
+          onClick={() => setPicked(list.slice(0, mergeSize).map(unit => unit.id))}
         >
-          {t('youngest {count}', { count: tikkiMergeSize })}
+          {t('youngest {count}', { count: mergeSize })}
         </button>
         <button
           type="button"
@@ -160,6 +167,8 @@ export function TikkiMergeScreen({
         <TikkiMergeResult
           selected={selected}
           balance={balance}
+          config={config}
+          costByTier={costByTier}
           onMerge={() => onMerge(selected.map(unit => unit.id))}
         />
       )}

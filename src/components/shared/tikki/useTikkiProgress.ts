@@ -1,281 +1,174 @@
 'use client';
 
 import { useCallback, useEffect, useRef, useState } from 'react';
-import { TicketsEnum } from '@/types/enums/ticket.enums';
-import { tikkiMaxLevel, tikkiMergeSize, type TikkiTier, type TikkiUnit } from './tikki.constants';
 import {
-  buyTikkiUnit,
-  mergeTikkiUnits,
-  tikkiBuyCost,
-  tikkiClickerLevelCost,
-  tikkiFillAt,
-  tikkiMergeCost,
-  tikkiPassiveEarned,
-  tikkiPassiveLevelCost,
-  tikkiTapCost,
-  tikkiTapValue,
-  tikkiWindowCost,
-} from './tikki.utils';
+  useBuyTikkiMutation,
+  useGetTikkiQuery,
+  useMergeTikkiMutation,
+  useSelectTikkiMutation,
+  useTapTikkiMutation,
+  useUpgradeTikkiMutation,
+} from '@/api/tikki.api';
+import type { TikkiState, TikkiUnit, TikkiUpgradeKind } from '@/types/interfaces/tikki.interfaces';
+import type { TicketType } from '@/types/types/ticket.types';
 
-export type TikkiUpgrade = 'clicker' | 'passive' | 'window' | 'tap';
-
-export interface TikkiProgress {
-  balance: number;
-  units: TikkiUnit[];
-  selectedId: string;
-  /** Из чего берутся id новых Тикки — растёт и не переиспользуется. */
-  seq: number;
-}
-
-const STORAGE_KEY = 'tikki-clicker-v2';
-const SAVE_THROTTLE_MS = 1_500;
-
-/** Первый бронзовый бесплатный — иначе в фичу нечем войти. */
-const firstProgress = (now: number): TikkiProgress => {
-  const first = buyTikkiUnit(TicketsEnum.BRONZE, 'tikki-1', now);
-  return { balance: 0, units: [first], selectedId: first.id, seq: 1 };
-};
+/** Старое имя буста — экраны знают его под ним. */
+export type TikkiUpgrade = TikkiUpgradeKind;
 
 /**
- * Догнать время: кликер наполнить, пассив зачислить на счёт.
+ * Как часто нажатия уходят на сервер.
  *
- * Обе величины считаются от собственной метки Тикки, а не от общего «когда
- * заходили». Пассив держится `tikkiAwayDays` без захода и дальше стоит — иначе
- * достаточно не открывать игру месяц, чтобы вернуться богаче любого, кто играл.
+ * Не на каждое: тап повторяют десятками подряд, и запрос на каждый стоил бы
+ * дороже самого нажатия. Полсекунды — столько, сколько игрок не замечает, и
+ * достаточно, чтобы пачка выходила осмысленной.
  */
-const settleAt = (progress: TikkiProgress, now: number): TikkiProgress => {
-  let earned = 0;
+const TAP_FLUSH_MS = 500;
 
-  const units = progress.units.map(unit => {
-    earned += tikkiPassiveEarned(unit, now);
-    return { ...unit, fill: tikkiFillAt(unit, now), filledAt: now, paidAt: now };
-  });
-
-  return { ...progress, balance: progress.balance + earned, units };
-};
-
-/** Числа могли приехать из прошлой версии или из чужих рук — чиним форму. */
-const reviveUnit = (raw: Partial<TikkiUnit> | undefined, index: number): TikkiUnit | null => {
-  const tier = raw?.tier;
-  if (!tier) return null;
-
-  const seed = buyTikkiUnit(tier as TikkiTier, raw?.id || `tikki-${index + 1}`, Date.now());
-  const num = (value: unknown, fallback: number) =>
-    Number.isFinite(Number(value)) ? Number(value) : fallback;
-
-  return {
-    ...seed,
-    base: num(raw?.base, seed.base),
-    passiveBase: num(raw?.passiveBase, seed.passiveBase),
-    level: Math.min(tikkiMaxLevel, Math.max(1, num(raw?.level, 1))),
-    passiveLevel: Math.min(tikkiMaxLevel, Math.max(1, num(raw?.passiveLevel, 1))),
-    tapLevel: Math.min(tikkiMaxLevel, Math.max(1, num(raw?.tapLevel, 1))),
-    windowLevel: Math.max(1, num(raw?.windowLevel, 1)),
-    fill: Math.max(0, num(raw?.fill, 0)),
-    filledAt: num(raw?.filledAt, Date.now()),
-    paidAt: num(raw?.paidAt, Date.now()),
-  };
-};
-
-/** Цена одной покупки — в одном месте, чтобы экран и хук не разошлись. */
-export const upgradeCost = (unit: TikkiUnit, kind: TikkiUpgrade) => {
-  if (kind === 'clicker') return tikkiClickerLevelCost(unit);
-  if (kind === 'passive') return tikkiPassiveLevelCost(unit);
-  if (kind === 'window') return tikkiWindowCost(unit);
-  return tikkiTapCost(unit);
-};
-
-/** Что покупка меняет в самом Тикки. */
-export const applyUpgrade = (unit: TikkiUnit, kind: TikkiUpgrade): TikkiUnit => {
-  if (kind === 'clicker') return { ...unit, level: unit.level + 1 };
-  if (kind === 'passive') return { ...unit, passiveLevel: unit.passiveLevel + 1 };
-  if (kind === 'window') return { ...unit, windowLevel: unit.windowLevel + 1 };
-  return { ...unit, tapLevel: unit.tapLevel + 1 };
-};
+/** Как часто состояние перечитывается, пока экран открыт. */
+const POLL_MS = 30_000;
 
 /**
  * Прогресс Тикки.
  *
- * 🔴 Живёт в localStorage ЭТОГО устройства и настоящего баланса не касается.
- * Механика перенесена сюда целиком, чтобы тестировщики видели её всю; когда она
- * поедет на настоящие LC, считать обязан сервер — иначе доход накручивается из
- * консоли за секунду. Отсюда останется форма данных и формулы, не хранилище.
+ * 🔴 Считает СЕРВЕР. Клиент рисует отдачу сразу — иначе тап ощущался бы через
+ * сеть, — но всё, что стоит денег, приезжает готовым: цены, доход, вместимость,
+ * сила нажатия. До 03.09.2026 механика жила целиком в браузере, в localStorage
+ * устройства, и накрутить доход можно было из консоли за секунду.
+ *
+ * Между ответами кликер досчитывается ЛОКАЛЬНО и только для показа: полоса
+ * должна ползти, а не дёргаться раз в тридцать секунд. Настоящее число всё
+ * равно приходит с сервера и перетирает нарисованное.
  */
 export function useTikkiProgress() {
-  const [progress, setProgress] = useState<TikkiProgress>(() => firstProgress(Date.now()));
-  const [ready, setReady] = useState(false);
-  const saveTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
-  // Последнее состояние — чтобы дописать его на выходе, когда `progress` из
-  // замыкания эффекта уже устарел.
-  const latest = useRef(progress);
+  const { data, isLoading, isError, refetch } = useGetTikkiQuery(undefined, {
+    pollingInterval: POLL_MS,
+    skipPollingIfUnfocused: true,
+    refetchOnFocus: true,
+  });
 
-  const save = useCallback(() => {
-    try {
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(latest.current));
-    } catch {
-      // Не смогли сохранить — прогресс живёт до перезагрузки, экран работает.
-    }
-  }, []);
+  const [tapTikki] = useTapTikkiMutation();
+  const [selectTikki] = useSelectTikkiMutation();
+  const [upgradeTikki] = useUpgradeTikkiMutation();
+  const [buyTikki] = useBuyTikkiMutation();
+  const [mergeTikki] = useMergeTikkiMutation();
 
+  /** Что игрок уже нажал, но сервер ещё не подтвердил — рисуем это сразу. */
+  const [pending, setPending] = useState({ id: '', taken: 0 });
+  const [tick, setTick] = useState(0);
+  const flushTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const queued = useRef({ id: '', count: 0 });
+
+  // Когда состояние в последний раз пришло с сервера — от этой точки кликер и
+  // досчитывается вперёд. Идентичность `data` меняется на каждый ответ.
+  // Состоянием, а не ссылкой: читать ref в теле рендера React Compiler не
+  // разрешает, а нарисовать полосу без этой метки нечем. Ноль до первого
+  // ответа — досчитывать тогда ещё нечего.
+  const [syncedAt, setSyncedAt] = useState(0);
   useEffect(() => {
-    const now = Date.now();
-    try {
-      const raw = localStorage.getItem(STORAGE_KEY);
-      if (raw) {
-        const saved = JSON.parse(raw) as Partial<TikkiProgress>;
-        const units = (Array.isArray(saved.units) ? saved.units : [])
-          .map((unit, index) => reviveUnit(unit, index))
-          .filter((unit): unit is TikkiUnit => unit !== null);
+    setSyncedAt(Date.now());
+  }, [data]);
 
-        if (units.length) {
-          const selected = units.some(unit => unit.id === saved.selectedId)
-            ? String(saved.selectedId)
-            : units[0].id;
-          setProgress(
-            settleAt(
-              {
-                balance: Math.max(0, Number(saved.balance) || 0),
-                units,
-                selectedId: selected,
-                seq: Math.max(units.length, Number(saved.seq) || 0),
-              },
-              now
-            )
-          );
-        }
-      }
-    } catch {
-      // Приватное окно или запрет на хранилище — играем с чистого листа.
-    }
-    setReady(true);
-  }, []);
-
-  // Кликер наполняется, пассив капает — обе цифры на экране должны идти сами,
-  // поэтому время догоняется в состоянии, а не пересчитывается в каждом месте.
+  // Полоса кликера ползёт сама: доход капает непрерывно, и ждать следующего
+  // ответа сервера, чтобы её сдвинуть, значит рисовать рывками.
   useEffect(() => {
-    if (!ready) return;
-    const id = setInterval(() => setProgress(prev => settleAt(prev, Date.now())), 1000);
+    const id = setInterval(() => setTick(Date.now()), 1000);
     return () => clearInterval(id);
-  }, [ready]);
+  }, []);
 
-  /**
-   * Запись НЕ на каждый тик: состояние двигается раз в секунду, а localStorage
-   * синхронный — писать в него по разу на тик значит дёргать главный поток
-   * ровно там, где идёт анимация тапа.
-   *
-   * 🪤 И не debounce, каким это было сначала: состояние меняется чаще, чем
-   * длится задержка (секунда против полутора), поэтому таймер снимался и
-   * ставился заново БЕСКОНЕЧНО и не срабатывал НИ РАЗУ. Прогресс держался
-   * только тем, что дописывался на выходе, — то есть терялся весь целиком,
-   * стоило приложению закрыться иначе. Здесь throttle: первый же тик заводит
-   * таймер, и дальше он не сдвигается, пока не отработает.
-   */
-  useEffect(() => {
-    latest.current = progress;
-    if (!ready || saveTimer.current) return;
-    saveTimer.current = setTimeout(() => {
-      saveTimer.current = null;
-      save();
-    }, SAVE_THROTTLE_MS);
-  }, [progress, ready]);
+  const flush = useCallback(() => {
+    const { id, count } = queued.current;
+    queued.current = { id: '', count: 0 };
+    flushTimer.current = null;
+    if (!id || count <= 0) return;
+    void tapTikki({ unitId: id, count })
+      .unwrap()
+      .catch(() => {
+        // Отказ (не хватило, слишком часто) — экран перерисуется следующим
+        // ответом; своего счёта у него нет, врать ему нечем.
+      })
+      .finally(() => setPending({ id: '', taken: 0 }));
+  }, [tapTikki]);
 
-  // Отложенная запись теряла последние полторы секунды: уйти со сцены сразу
-  // после пяти нажатий значило не сохранить ни одного — таймер снимался
-  // размонтированием. Копится доход от МЕТОК времени, поэтому пропущенные
-  // секунды догоняются сами, а вот тапы — нет: их надо дописать на выходе.
+  // Уходя с экрана, дописываем то, что не успело уехать: пять нажатий и сразу
+  // переход на другой экран иначе теряли бы все пять.
   useEffect(() => {
-    if (!ready) return;
-    const flush = () => save();
-    window.addEventListener('pagehide', flush);
+    const onHide = () => flush();
+    window.addEventListener('pagehide', onHide);
     return () => {
-      window.removeEventListener('pagehide', flush);
-      if (saveTimer.current) clearTimeout(saveTimer.current);
-      saveTimer.current = null;
+      window.removeEventListener('pagehide', onHide);
+      if (flushTimer.current) clearTimeout(flushTimer.current);
       flush();
     };
-  }, [ready]);
+  }, [flush]);
 
-  const select = useCallback((id: string) => {
-    setProgress(prev =>
-      prev.units.some(unit => unit.id === id) ? { ...prev, selectedId: id } : prev
-    );
-  }, []);
+  const tap = useCallback(
+    (unitId: string, value: number) => {
+      queued.current =
+        queued.current.id === unitId
+          ? { id: unitId, count: queued.current.count + 1 }
+          : { id: unitId, count: 1 };
+      setPending(p =>
+        p.id === unitId ? { id: unitId, taken: p.taken + value } : { id: unitId, taken: value }
+      );
+      if (!flushTimer.current) flushTimer.current = setTimeout(flush, TAP_FLUSH_MS);
+    },
+    [flush]
+  );
 
-  /** Нажатие: уносит из кликера столько, сколько стоит тап, и ни LC больше. */
-  const tap = useCallback((id: string) => {
-    setProgress(prev => {
-      const unit = prev.units.find(item => item.id === id);
-      if (!unit) return prev;
+  const select = useCallback(
+    (unitId: string) => {
+      selectTikki({ unitId })
+        .unwrap()
+        .catch(() => {
+          /* выбор не сохранился — состояние придёт следующим ответом */
+        });
+    },
+    [selectTikki]
+  );
 
-      const taken = Math.min(tikkiTapValue(unit), Math.floor(unit.fill));
-      if (taken <= 0) return prev;
+  const upgrade = useCallback(
+    (unitId: string, kind: TikkiUpgradeKind) => upgradeTikki({ unitId, kind }).unwrap(),
+    [upgradeTikki]
+  );
 
-      return {
-        ...prev,
-        balance: prev.balance + taken,
-        units: prev.units.map(item =>
-          item.id === id ? { ...item, fill: item.fill - taken } : item
-        ),
-      };
-    });
-  }, []);
+  const buy = useCallback((tier: TicketType) => buyTikki({ tier }).unwrap(), [buyTikki]);
 
-  const buy = useCallback((tier: TikkiTier) => {
-    setProgress(prev => {
-      const price = tikkiBuyCost(tier);
-      if (prev.balance < price) return prev;
+  const merge = useCallback((unitIds: string[]) => mergeTikki({ unitIds }).unwrap(), [mergeTikki]);
 
-      const seq = prev.seq + 1;
-      const bought = buyTikkiUnit(tier, `tikki-${seq}`, Date.now());
-      return {
-        balance: prev.balance - price,
-        units: [...prev.units, bought],
-        selectedId: bought.id,
-        seq,
-      };
-    });
-  }, []);
-
-  const upgrade = useCallback((id: string, kind: TikkiUpgrade) => {
-    setProgress(prev => {
-      const unit = prev.units.find(item => item.id === id);
-      if (!unit) return prev;
-
-      const price = upgradeCost(unit, kind);
-      if (!Number.isFinite(price) || prev.balance < price) return prev;
-
-      return {
-        ...prev,
-        balance: prev.balance - price,
-        units: prev.units.map(item => (item.id === id ? applyUpgrade(item, kind) : item)),
-      };
-    });
-  }, []);
-
-  /** Сплав мгновенный: отмеченные исчезают, на их месте один следующего тира. */
-  const merge = useCallback((ids: readonly string[]) => {
-    setProgress(prev => {
-      const chosen = prev.units.filter(unit => ids.includes(unit.id));
-      if (chosen.length < tikkiMergeSize) return prev;
-      if (chosen.some(unit => unit.tier !== chosen[0].tier)) return prev;
-
-      const price = tikkiMergeCost(chosen[0].tier);
-      if (!price || prev.balance < price) return prev;
-
-      const seq = prev.seq + 1;
-      const merged = mergeTikkiUnits(chosen, `tikki-${seq}`, Date.now());
-      if (!merged) return prev;
-
-      return {
-        balance: prev.balance - price,
-        units: [...prev.units.filter(unit => !ids.includes(unit.id)), merged],
-        selectedId: merged.id,
-        seq,
-      };
-    });
-  }, []);
-
-  const reset = useCallback(() => setProgress(firstProgress(Date.now())), []);
-
-  return { progress, ready, select, tap, buy, upgrade, merge, reset };
+  return {
+    state: data ? projected(data, pending, tick, syncedAt) : undefined,
+    isLoading,
+    isError,
+    refetch,
+    tap,
+    select,
+    upgrade,
+    buy,
+    merge,
+  };
 }
+
+/**
+ * Состояние, каким его надо НАРИСОВАТЬ: серверное плюс то, что уже произошло на
+ * экране и ещё не подтверждено.
+ *
+ * Две поправки, обе только для показа. Кликер досчитывается вперёд от того, что
+ * прислал сервер, — полоса должна ползти. Неподтверждённые нажатия сразу сняты
+ * с кликера и добавлены к счёту: иначе цифра под пальцем отставала бы на
+ * полсекунды, а это ровно то, ради чего в такую игру и заходят.
+ */
+const projected = (
+  state: TikkiState,
+  pending: { id: string; taken: number },
+  now: number,
+  syncedAt: number
+): TikkiState => {
+  // Пока эффект не проставил метку (первый кадр) — досчитывать нечего.
+  const hours = syncedAt > 0 && now > 0 ? Math.max(0, now - syncedAt) / 3_600_000 : 0;
+  const units = state.units.map((u): TikkiUnit => {
+    const grown = Math.min(u.capacity, u.fill + u.clickerPerHour * hours);
+    const mine = u.id === pending.id ? pending.taken : 0;
+    return { ...u, fill: Math.max(0, Math.min(u.capacity, grown - mine)) };
+  });
+  return { ...state, balance: state.balance + pending.taken, units };
+};

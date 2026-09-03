@@ -4,7 +4,7 @@ import Image from 'next/image';
 import { twMerge } from 'tailwind-merge';
 import { tierAccentColors } from '@/constants/tier-colors';
 import { useAppTranslations } from '@/hooks/useAppTranslations';
-import type { TikkiUnit } from './tikki.constants';
+import type { TikkiUnit } from '@/types/interfaces/tikki.interfaces';
 import { tikkiImages } from './tikki.images';
 
 export interface TikkiCollectionItemProps {

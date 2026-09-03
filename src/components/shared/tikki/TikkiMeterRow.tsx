@@ -3,8 +3,7 @@
 import { twMerge } from 'tailwind-merge';
 import { useAppTranslations } from '@/hooks/useAppTranslations';
 import { formatCompact } from '@/utils/global/number.utils';
-import { tikkiMaxHours, tikkiMaxLevel, type TikkiUnit } from './tikki.constants';
-import { tikkiCapacity, tikkiTimeToFullMs, tikkiWindowHours } from './tikki.utils';
+import type { TikkiUnit } from '@/types/interfaces/tikki.interfaces';
 import { TikkiFillBar } from './TikkiFillBar';
 
 export interface TikkiMeterRowProps {
@@ -34,10 +33,16 @@ export function TikkiMeterRow({
   className,
 }: TikkiMeterRowProps) {
   const t = useAppTranslations();
-  const capacity = tikkiCapacity(unit);
-  const left = tikkiTimeToFullMs(unit);
-  const windowMaxed = tikkiWindowHours(unit) >= tikkiMaxHours;
-  const levelMaxed = unit.level >= tikkiMaxLevel;
+  const capacity = unit.capacity;
+  // До полной — по тому же числу, которым нарисована полоса, иначе цифра и
+  // полоса расходятся на глазах.
+  const left =
+    unit.clickerPerHour > 0
+      ? (Math.max(0, capacity - unit.fill) / unit.clickerPerHour) * 3_600_000
+      : 0;
+  // `null` в цене значит «лестница кончилась», а не «нет денег»: стрелки нет.
+  const windowMaxed = unit.cost.window === null;
+  const levelMaxed = unit.cost.clicker === null;
 
   const hours = Math.floor(left / 3_600_000);
   const minutes = Math.floor((left % 3_600_000) / 60_000);

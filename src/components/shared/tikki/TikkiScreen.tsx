@@ -2,20 +2,15 @@
 
 import { useEffect, useState, type ReactNode } from 'react';
 import { twMerge } from 'tailwind-merge';
-import { RotateCcw } from 'lucide-react';
-import { Button } from '@/components/shared/buttons/Button';
 import { CoinIcon } from '@/components/shared/icons/CoinIcon';
+import { QueryErrorState } from '@/components/shared/error/QueryErrorState';
 import { useAppTranslations } from '@/hooks/useAppTranslations';
+import { useToast } from '@/hooks/useToast';
 import { formatCompact } from '@/utils/global/number.utils';
-import { tikkiMaxLevel, tikkiMergeSize, type TikkiTier } from './tikki.constants';
-import {
-  nextTikkiTier,
-  tikkiCapacity,
-  tikkiPassiveRate,
-  tikkiTapMaxed,
-  tikkiTapValue,
-} from './tikki.utils';
-import { upgradeCost, useTikkiProgress, type TikkiUpgrade } from './useTikkiProgress';
+import type { TicketType } from '@/types/types/ticket.types';
+import type { TikkiUpgradeKind } from '@/types/interfaces/tikki.interfaces';
+import type { TikkiTier } from './tikki.constants';
+import { useTikkiProgress } from './useTikkiProgress';
 import { TikkiBalanceRow } from './TikkiBalanceRow';
 import { TikkiBoostChip } from './TikkiBoostChip';
 import { TikkiBuyModal } from './TikkiBuyModal';
@@ -29,15 +24,9 @@ export interface TikkiScreenProps {
   /** Что дорисовать под лентой коллекции — на главной это пилюли перехода. */
   footer?: ReactNode;
   /**
-   * Показать пометку стенда и кнопку сброса. Живёт ВНУТРИ экрана, а не слотом
-   * снаружи: сброс должен дёргать тот же самый `useTikkiProgress`, что и сцена,
-   * иначе он обнулит чужую копию состояния, а экран останется как был.
-   */
-  stand?: boolean;
-  /**
    * Какой Тикки сейчас на сцене. Нужен главной: её пилюля «Движки» рисует
    * двигатель того же тира. Отдаём колбэком, а не вторым `useTikkiProgress` у
-   * родителя — две копии хука тикали бы врозь и писали бы в одно хранилище.
+   * родителя — две копии хука опрашивали бы сервер врозь.
    */
   onTierChange?: (tier: TikkiTier) => void;
   className?: string;
@@ -52,64 +41,71 @@ export interface TikkiScreenProps {
  * что игрок в этот момент видит — доход в час, вместимость, силу нажатия, — и
  * цифра обязана стоять рядом с тем, что она описывает.
  *
- * 🔴 Счёт здесь — не настоящие LC: прогресс лежит в localStorage этого
- * устройства. Механика перенесена целиком, чтобы тестировщики видели её всю;
- * когда она поедет на настоящий баланс, считать будет сервер.
+ * 🔴 Все числа считает СЕРВЕР. Экран рисует отдачу тапа сразу, чтобы она не
+ * шла через сеть, но цены, доход и вместимость приезжают готовыми, и деньги
+ * двигает только он.
  */
-export function TikkiScreen({ footer, stand = false, onTierChange, className }: TikkiScreenProps) {
+export function TikkiScreen({ footer, onTierChange, className }: TikkiScreenProps) {
   const t = useAppTranslations();
-  const { progress, ready, select, tap, buy, upgrade, merge, reset } = useTikkiProgress();
+  const toast = useToast();
+  const { state, isLoading, isError, refetch, tap, select, upgrade, buy, merge } =
+    useTikkiProgress();
+
   // Что покупаем и открыто ли окно — двумя состояниями нарочно: закрываясь,
   // модалка живёт ещё 200 мс анимации, и обнули мы `kind` вместе с ней —
   // заголовок на прощание менялся бы на «уровень кликера».
-  const [upgrading, setUpgrading] = useState<TikkiUpgrade | null>(null);
-  const [upgradeKind, setUpgradeKind] = useState<TikkiUpgrade>('clicker');
+  const [upgrading, setUpgrading] = useState<TikkiUpgradeKind | null>(null);
+  const [upgradeKind, setUpgradeKind] = useState<TikkiUpgradeKind>('clicker');
   const [buying, setBuying] = useState(false);
   const [merging, setMerging] = useState(false);
 
-  const selected =
-    progress.units.find(unit => unit.id === progress.selectedId) ?? progress.units[0];
+  const selected = state?.units.find(unit => unit.selected) ?? state?.units[0];
 
   const selectedTier = selected?.tier;
   useEffect(() => {
-    if (selectedTier) onTierChange?.(selectedTier);
+    if (selectedTier) onTierChange?.(selectedTier as TikkiTier);
     // `onTierChange` каждый раз новая стрелка у вызывающего — в зависимостях ей
     // не место, иначе эффект бегал бы на каждый тик секундного таймера.
   }, [selectedTier]);
 
-  if (!ready || !selected) return null;
+  // Отказ сервера показывает экран, который запросом владеет: пустая сцена без
+  // объяснения читается как «игра сломалась», а не «данные не приехали».
+  if (isError) return <QueryErrorState onRetry={() => refetch()} />;
+  if (isLoading || !state || !selected) return null;
 
-  const passivePerHour = progress.units.reduce((sum, unit) => sum + tikkiPassiveRate(unit), 0);
-  const mergeReady = progress.units.some(
-    unit =>
-      nextTikkiTier(unit.tier) &&
-      progress.units.filter(item => item.tier === unit.tier).length >= tikkiMergeSize
-  );
+  const passivePerHour = state.units.reduce((sum, unit) => sum + unit.passivePerHour, 0);
+  const mergeReady = state.merge.ready.length > 0;
+  const poor = (kind: TikkiUpgradeKind) => {
+    const price = selected.cost[kind];
+    return price !== null && state.balance < price;
+  };
 
-  const poor = (kind: TikkiUpgrade) => progress.balance < upgradeCost(selected, kind);
-
-  const openUpgrade = (kind: TikkiUpgrade) => {
+  const openUpgrade = (kind: TikkiUpgradeKind) => {
     setUpgradeKind(kind);
     setUpgrading(kind);
   };
 
-  const handleBuy = (tier: TikkiTier) => {
-    buy(tier);
-    setBuying(false);
-  };
-
-  const handleMerge = (ids: string[]) => {
-    merge(ids);
-    setMerging(false);
+  /** Отказ сервера — всегда словами: молчаливый no-op читается как поломка. */
+  const guard = async (action: () => Promise<unknown>) => {
+    try {
+      await action();
+    } catch {
+      toast.error(t('action failed'));
+    }
   };
 
   if (merging) {
     return (
       <TikkiMergeScreen
-        units={progress.units}
-        balance={progress.balance}
+        units={state.units}
+        balance={state.balance}
+        config={state.config}
+        costByTier={state.merge.costByTier}
         onBack={() => setMerging(false)}
-        onMerge={handleMerge}
+        onMerge={ids => {
+          setMerging(false);
+          void guard(() => merge(ids));
+        }}
         className={className}
       />
     );
@@ -117,7 +113,7 @@ export function TikkiScreen({ footer, stand = false, onTierChange, className }: 
 
   return (
     <div className={twMerge('flex flex-available flex-col px-[14px] pt-2.5', className)}>
-      <TikkiBalanceRow balance={progress.balance} perHour={passivePerHour} />
+      <TikkiBalanceRow balance={state.balance} perHour={passivePerHour} />
 
       {/* Персонаж занимает всё, что осталось между счётом и нижним рядом. Чипы
           лежат ПОВЕРХ него по нижним углам — так в макете: он крупный ровно
@@ -126,11 +122,11 @@ export function TikkiScreen({ footer, stand = false, onTierChange, className }: 
           садится во внешний угол, к краю экрана. */}
       <div className="relative flex flex-available items-end justify-center">
         <TikkiHero
-          tier={selected.tier}
-          tapValue={tikkiTapValue(selected)}
+          tier={selected.tier as TikkiTier}
+          tapValue={selected.tapValue}
           empty={selected.fill < 1}
-          full={selected.fill >= tikkiCapacity(selected)}
-          onTap={() => tap(selected.id)}
+          full={selected.fill >= selected.capacity}
+          onTap={() => tap(selected.id, selected.tapValue)}
           // Ногами персонаж заходит на 28 px ниже чипов — ровно как в макете.
           // Оттуда и его размер: он крупный потому, что уходит ЗА них.
           className="translate-y-7"
@@ -140,12 +136,12 @@ export function TikkiScreen({ footer, stand = false, onTierChange, className }: 
           className="absolute bottom-0 -start-1.5"
           label={t('passive')}
           side="left"
-          maxed={selected.passiveLevel >= tikkiMaxLevel}
+          maxed={selected.cost.passive === null}
           poor={poor('passive')}
           value={
             <>
               <CoinIcon size={13} className="me-1" />
-              {formatCompact(tikkiPassiveRate(selected))}
+              {formatCompact(selected.passivePerHour)}
             </>
           }
           onClick={() => openUpgrade('passive')}
@@ -155,8 +151,8 @@ export function TikkiScreen({ footer, stand = false, onTierChange, className }: 
           label={t('per tap')}
           side="right"
           poor={poor('tap')}
-          maxed={tikkiTapMaxed(selected)}
-          value={formatCompact(tikkiTapValue(selected))}
+          maxed={selected.cost.tap === null}
+          value={formatCompact(selected.tapValue)}
           onClick={() => openUpgrade('tap')}
         />
       </div>
@@ -169,7 +165,7 @@ export function TikkiScreen({ footer, stand = false, onTierChange, className }: 
       />
 
       <TikkiCollection
-        units={progress.units}
+        units={state.units}
         selectedId={selected.id}
         mergeReady={mergeReady}
         onSelect={select}
@@ -177,42 +173,31 @@ export function TikkiScreen({ footer, stand = false, onTierChange, className }: 
         onMerge={() => setMerging(true)}
       />
 
-      {stand && (
-        <footer className="mt-2 flex items-center justify-between gap-2">
-          <p className="text-faint flex-available text-[10px] leading-snug">
-            {t('tikki stand note')}
-          </p>
-          <Button
-            variant="transparent"
-            className="text-muted flex-none px-2 py-1 text-[10px]"
-            icon={<RotateCcw size={12} />}
-            iconSize={12}
-            onClick={reset}
-          >
-            {t('reset')}
-          </Button>
-        </footer>
-      )}
-
       <div className="mt-1.5">{footer}</div>
 
       <TikkiUpgradeModal
         open={upgrading !== null}
         unit={selected}
         kind={upgradeKind}
-        balance={progress.balance}
+        balance={state.balance}
+        maxHours={state.config.maxHours}
         onClose={() => setUpgrading(null)}
         onConfirm={() => {
-          if (upgrading) upgrade(selected.id, upgrading);
+          const kind = upgrading;
           setUpgrading(null);
+          if (kind) void guard(() => upgrade(selected.id, kind));
         }}
       />
 
       <TikkiBuyModal
         open={buying}
-        balance={progress.balance}
+        balance={state.balance}
+        buyCost={state.buyCost}
         onClose={() => setBuying(false)}
-        onBuy={handleBuy}
+        onBuy={(tier: TicketType) => {
+          setBuying(false);
+          void guard(() => buy(tier));
+        }}
       />
     </div>
   );

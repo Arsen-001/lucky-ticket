@@ -17,6 +17,7 @@ export const rtkTags = {
   marketSavings: 'MarketSavings',
   giftShop: 'GiftShop',
   stakes: 'Stakes',
+  tikki: 'Tikki',
   wallet: 'Wallet',
   walletTransactions: 'WalletTransactions',
   starsPackages: 'StarsPackages',

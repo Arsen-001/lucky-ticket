@@ -4,8 +4,7 @@ import Image from 'next/image';
 import { twMerge } from 'tailwind-merge';
 import { CoinIcon } from '@/components/shared/icons/CoinIcon';
 import { tikkiImages } from './tikki.images';
-import type { TikkiUnit } from './tikki.constants';
-import { tikkiClickerRate } from './tikki.utils';
+import type { TikkiUnit } from '@/types/interfaces/tikki.interfaces';
 import { tierAccentColors } from '@/constants/tier-colors';
 import { useAppTranslations } from '@/hooks/useAppTranslations';
 import { formatNumber } from '@/utils/global/number.utils';
@@ -63,7 +62,7 @@ export function TikkiMergeCard({
       </span>
       <span className="flex items-center gap-1 text-[11px] font-extrabold tabular-nums leading-none">
         <CoinIcon size={12} />
-        {formatNumber(tikkiClickerRate(unit))}
+        {formatNumber(unit.clickerPerHour)}
       </span>
 
       {checked && (

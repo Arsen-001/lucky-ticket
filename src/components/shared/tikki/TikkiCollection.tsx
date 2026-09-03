@@ -4,8 +4,7 @@ import { FlaskConical, Plus } from 'lucide-react';
 import { twMerge } from 'tailwind-merge';
 import { staggerStyle } from '@/utils/global/animation.utils';
 import { useAppTranslations } from '@/hooks/useAppTranslations';
-import type { TikkiUnit } from './tikki.constants';
-import { tikkiCapacity } from './tikki.utils';
+import type { TikkiUnit } from '@/types/interfaces/tikki.interfaces';
 import { TikkiCollectionItem } from './TikkiCollectionItem';
 
 export interface TikkiCollectionProps {
@@ -54,7 +53,7 @@ export function TikkiCollection({
             key={unit.id}
             unit={unit}
             active={unit.id === selectedId}
-            full={unit.fill >= tikkiCapacity(unit)}
+            full={unit.fill >= unit.capacity}
             onSelect={() => onSelect(unit.id)}
             className="animate-slide-in-bottom"
             style={staggerStyle(index, 50)}

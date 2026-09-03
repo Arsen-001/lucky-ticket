@@ -16,6 +16,7 @@ import { duelMock } from '@/mock/duel.mock';
 import { marketMock, marketSavingsMock } from '@/mock/market.mock';
 import { giftsMock } from '@/mock/gifts.mock';
 import { stakesMock } from '@/mock/stakes.mock';
+import { tikkiMock } from '@/mock/tikki.mock';
 import { walletMock } from '@/mock/wallet.mock';
 import { lcMock } from '@/mock/lc.mock';
 import { starsMock } from '@/mock/stars.mock';
@@ -159,6 +160,7 @@ export const mockData = {
   ...marketMutationHandlers,
   ...giftsMock,
   ...stakesMock,
+  ...tikkiMock,
   ...walletMock,
   ...lcMock,
   ...starsMock,
