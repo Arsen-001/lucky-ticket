@@ -1660,5 +1660,16 @@
   "passive per day": "درآمد غیرفعال روزانه",
   "window ceiling": "سقف",
   "taps to empty": "تعداد تپ برای برداشت کامل",
-  "engines short": "موتورها"
+  "engines short": "موتورها",
+  "next goal": "Next goal",
+  "merge ready": "Ready to merge",
+  "{tier} tikki": "{tier} Tikki",
+  "merge into {tier}": "Merge into {tier}",
+  "{count} of {size} to merge": "{count} of {size} to merge",
+  "merge is open": "Merge is open",
+  "tikki says full": "I'm full — tap me!",
+  "tikki says empty": "All taken. Full again in {time}",
+  "tikki says lonely": "{count} more like me and I turn {next}",
+  "tikki says merge": "{count} of us — merge us!",
+  "tikki says tap": "Tap me!"
 }

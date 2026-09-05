@@ -10,12 +10,16 @@ import { formatCompact } from '@/utils/global/number.utils';
 import type { TicketType } from '@/types/types/ticket.types';
 import type { TikkiUpgradeKind } from '@/types/interfaces/tikki.interfaces';
 import type { TikkiTier } from './tikki.constants';
+import { formatTikkiCountdown, tikkiMsToFull } from './tikki.countdown';
+import { tikkiGoal, tikkiSpeech, type TikkiSpeech } from './tikki.goal';
 import { tikkiTapTake } from './tikki.taps';
 import { useTikkiProgress } from './useTikkiProgress';
 import { TikkiBalanceRow } from './TikkiBalanceRow';
 import { TikkiBoostChip } from './TikkiBoostChip';
 import { TikkiBuyModal } from './TikkiBuyModal';
 import { TikkiCollection } from './TikkiCollection';
+import { TikkiGoalCard } from './TikkiGoalCard';
+import { TikkiGoalNote } from './TikkiGoalNote';
 import { TikkiHero } from './TikkiHero';
 import { TikkiMergeScreen } from './TikkiMergeScreen';
 import { TikkiMeterRow } from './TikkiMeterRow';
@@ -78,7 +82,26 @@ export function TikkiScreen({ footer, onTierChange, className }: TikkiScreenProp
   // Что нажатие унесёт прямо сейчас — по НАРИСОВАННОМУ кликеру, из которого
   // уже вычтены неподтверждённые нажатия. Ноль — Тикки пуст, и герой это знает.
   const take = tikkiTapTake(selected.fill, selected.tapValue);
+  const full = selected.fill >= selected.capacity;
   const mergeReady = state.merge.ready.length > 0;
+
+  // Ближайшая цель выбранного тира — одна запись на карточку под счётом,
+  // призраки в ленте и реплику над головой. У алмаза цели нет: сплавлять
+  // некуда, и сцена остаётся как была.
+  const goal = tikkiGoal(state, selected.tier as TikkiTier);
+  const speak = (line: TikkiSpeech) => {
+    switch (line.key) {
+      case 'tikki says empty':
+        return t(line.key, { time: formatTikkiCountdown(tikkiMsToFull(selected), t) });
+      case 'tikki says lonely':
+        return t(line.key, { count: line.count, next: t(line.next) });
+      case 'tikki says merge':
+        return t(line.key, { count: line.count });
+      default:
+        return t(line.key);
+    }
+  };
+  const speech = speak(tikkiSpeech({ full, empty: take === 0, goal }));
   const poor = (kind: TikkiUpgradeKind) => {
     const price = selected.cost[kind];
     return price !== null && state.balance < price;
@@ -119,17 +142,33 @@ export function TikkiScreen({ footer, onTierChange, className }: TikkiScreenProp
     <div className={twMerge('flex flex-available flex-col px-[14px] pt-2.5', className)}>
       <TikkiBalanceRow balance={state.balance} perHour={passivePerHour} />
 
+      {goal && (
+        <TikkiGoalCard
+          goal={goal}
+          balance={state.balance}
+          onBuy={() => setBuying(true)}
+          onMerge={() => setMerging(true)}
+          className="mt-1.5"
+        />
+      )}
+
       {/* Персонаж занимает всё, что осталось между счётом и нижним рядом. Чипы
           лежат ПОВЕРХ него по нижним углам — так в макете: он крупный ровно
           потому, что уходит за них, а не жмётся между ними. Уводим их на 6 px
           за колонку (в макете left/right 8 px при поле 14), и стрелка каждого
-          садится во внешний угол, к краю экрана. */}
-      <div className="relative flex flex-available items-end justify-center">
+          садится во внешний угол, к краю экрана.
+
+          `tikki-stage` + `min-h` — сцена меряет себя сама: облако над головой
+          показывается только там, где ему есть место (контейнерный запрос в
+          `tikki.css`). Минимум — рост персонажа, чтобы контейнер по высоте
+          не дал сцене ужаться под него на коротком экране. */}
+      <div className="tikki-stage relative flex min-h-[356px] flex-available items-end justify-center">
         <TikkiHero
           tier={selected.tier as TikkiTier}
           tapValue={take}
           empty={take === 0}
-          full={selected.fill >= selected.capacity}
+          full={full}
+          speech={speech}
           onTap={() => tap(selected.id, take)}
           // Ногами персонаж заходит на 28 px ниже чипов — ровно как в макете.
           // Оттуда и его размер: он крупный потому, что уходит ЗА них.
@@ -176,12 +215,15 @@ export function TikkiScreen({ footer, onTierChange, className }: TikkiScreenProp
         units={state.units}
         selectedId={selected.id}
         mergeReady={mergeReady}
+        ghosts={goal?.ghosts ?? 0}
+        ghostTier={goal?.tier}
         onSelect={select}
         onBuy={() => setBuying(true)}
         onMerge={() => setMerging(true)}
       />
 
-      <div className="mt-1.5">{footer}</div>
+      {/* Низ: главная ставит сюда пилюли, `/tikki` — подпись к призракам. */}
+      <div className="mt-1.5">{footer ?? (goal && <TikkiGoalNote goal={goal} />)}</div>
 
       <TikkiUpgradeModal
         open={upgrading !== null}

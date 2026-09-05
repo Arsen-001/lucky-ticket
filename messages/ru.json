@@ -1660,5 +1660,16 @@
   "passive per day": "Пассив в день",
   "window ceiling": "Потолок",
   "taps to empty": "Нажатий забрать всё",
-  "engines short": "Движки"
+  "engines short": "Движки",
+  "next goal": "Следующая цель",
+  "merge ready": "Можно сплавлять",
+  "{tier} tikki": "Тикки · {tier}",
+  "merge into {tier}": "Сплав → {tier}",
+  "{count} of {size} to merge": "{count} из {size} до сплава",
+  "merge is open": "Сплав открыт",
+  "tikki says full": "Я полон — тапни!",
+  "tikki says empty": "Всё забрал. Снова полон через {time}",
+  "tikki says lonely": "Ещё {count} таких же — и будет {next}!",
+  "tikki says merge": "Нас {count} — сплавляй!",
+  "tikki says tap": "Тапни меня!"
 }

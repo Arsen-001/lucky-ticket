@@ -4,6 +4,7 @@ import Image from 'next/image';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { twMerge } from 'tailwind-merge';
 import { tikkiImages } from './tikki.images';
+import { TikkiSpeech } from './TikkiSpeech';
 import { TikkiTapPop } from './TikkiTapPop';
 import type { TikkiTier } from './tikki.constants';
 import { useAppTranslations } from '@/hooks/useAppTranslations';
@@ -25,6 +26,8 @@ export interface TikkiHeroProps {
   empty: boolean;
   /** Кликер набит доверху: доход встал, и персонаж об этом просит. */
   full?: boolean;
+  /** Реплика над головой — уже переведённая строка; пустая — облака нет. */
+  speech?: string;
   onTap: () => void;
   className?: string;
   /** Картинка отдельно: на главной Тикки стоит в карточке, а не на сцене. */
@@ -47,6 +50,7 @@ export function TikkiHero({
   tapValue,
   empty,
   full = false,
+  speech,
   onTap,
   className,
   classNames,
@@ -140,6 +144,8 @@ export function TikkiHero({
           classNames?.image
         )}
       />
+      {/* `key` — чтобы смена строки заново проигрывала появление. */}
+      {speech && <TikkiSpeech key={speech} text={speech} />}
       {pops.map(pop => (
         <TikkiTapPop key={pop.id} x={pop.x} y={pop.y} amount={pop.amount} />
       ))}

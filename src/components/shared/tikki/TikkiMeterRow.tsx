@@ -4,6 +4,7 @@ import { twMerge } from 'tailwind-merge';
 import { useAppTranslations } from '@/hooks/useAppTranslations';
 import { formatCompact } from '@/utils/global/number.utils';
 import type { TikkiUnit } from '@/types/interfaces/tikki.interfaces';
+import { formatTikkiCountdown, tikkiMsToFull } from './tikki.countdown';
 import { TikkiFillBar } from './TikkiFillBar';
 
 export interface TikkiMeterRowProps {
@@ -35,23 +36,11 @@ export function TikkiMeterRow({
   const t = useAppTranslations();
   const capacity = unit.capacity;
   // До полной — по тому же числу, которым нарисована полоса, иначе цифра и
-  // полоса расходятся на глазах.
-  const left =
-    unit.clickerPerHour > 0
-      ? (Math.max(0, capacity - unit.fill) / unit.clickerPerHour) * 3_600_000
-      : 0;
+  // полоса расходятся на глазах. Формат общий с репликой Тикки.
+  const countdown = formatTikkiCountdown(tikkiMsToFull(unit), t);
   // `null` в цене значит «лестница кончилась», а не «нет денег»: стрелки нет.
   const windowMaxed = unit.cost.window === null;
   const levelMaxed = unit.cost.clicker === null;
-
-  const hours = Math.floor(left / 3_600_000);
-  const minutes = Math.floor((left % 3_600_000) / 60_000);
-  const countdown =
-    left <= 0
-      ? t('full')
-      : hours > 0
-        ? `${hours}${t('hour short')} ${String(minutes).padStart(2, '0')}${t('minute short')}`
-        : `${minutes}${t('minute short')}`;
 
   return (
     <div className={twMerge('flex items-center gap-2', className)}>

@@ -5,13 +5,19 @@ import { twMerge } from 'tailwind-merge';
 import { staggerStyle } from '@/utils/global/animation.utils';
 import { useAppTranslations } from '@/hooks/useAppTranslations';
 import type { TikkiUnit } from '@/types/interfaces/tikki.interfaces';
+import type { TikkiTier } from './tikki.constants';
 import { TikkiCollectionItem } from './TikkiCollectionItem';
+import { TikkiGhostSlot } from './TikkiGhostSlot';
 
 export interface TikkiCollectionProps {
   units: readonly TikkiUnit[];
   selectedId: string;
   /** Где-то набралось четыре одинаковых — сплав открыт, чип светится розовым. */
   mergeReady: boolean;
+  /** Сколько пустых мест дорисовать после настоящих — до четырёх выбранного тира. */
+  ghosts?: number;
+  /** Чей силуэт стоит в пустых местах. Без тира призраков нет. */
+  ghostTier?: TikkiTier;
   onSelect: (id: string) => void;
   onBuy: () => void;
   onMerge: () => void;
@@ -38,6 +44,8 @@ export function TikkiCollection({
   units,
   selectedId,
   mergeReady,
+  ghosts = 0,
+  ghostTier,
   onSelect,
   onBuy,
   onMerge,
@@ -59,6 +67,16 @@ export function TikkiCollection({
             style={staggerStyle(index, 50)}
           />
         ))}
+        {ghostTier &&
+          Array.from({ length: ghosts }, (_, index) => (
+            <TikkiGhostSlot
+              key={`ghost-${index}`}
+              tier={ghostTier}
+              onClick={onBuy}
+              className="animate-slide-in-bottom"
+              style={staggerStyle(units.length + index, 50)}
+            />
+          ))}
       </div>
 
       <div className="flex flex-none gap-[7px] pb-0.5 pt-2">
