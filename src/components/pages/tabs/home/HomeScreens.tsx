@@ -1,24 +1,25 @@
 'use client';
 
 import { useState } from 'react';
-import { Gamepad2 } from 'lucide-react';
 import { EngineIcon } from '@/components/shared/icons/EngineIcon';
 import { TikkiScreen } from '@/components/shared/tikki/TikkiScreen';
 import { TicketsEnum } from '@/types/enums/ticket.enums';
 import type { TikkiTier } from '@/components/shared/tikki/tikki.constants';
-import { routes } from '@/constants/routes';
 import { useAppTranslations } from '@/hooks/useAppTranslations';
 import { useBackDismiss } from '@/hooks/useBackDismiss';
 import { useFeature } from '@/hooks/useFeature';
 import { HomeEnginesScreen } from './HomeEnginesScreen';
+import { HomeGamesPill } from './HomeGamesPill';
 import { HomeScreenPill } from './HomeScreenPill';
+import { HomeScreenPillRow } from './HomeScreenPillRow';
 
 /**
  * Главная — это ДВА экрана, и первый из них Тикки.
  *
  * Движки, турниры и джекпот никуда не делись: они стали вторым экраном, и
  * попасть туда — одна пилюля справа. Слева зеркальная ведёт в «Игры», потому
- * что за играми иначе надо лезть через меню.
+ * что за играми иначе надо лезть через меню. Тот же ряд стоит и на втором
+ * экране — только справа там пилюля возврата к Тикки.
  *
  * Пока `GET /me` не ответил, `useFeature` честно отвечает «нет», и главная
  * рисуется прежней. Тестировщик видит, как она один раз сменится на Тикки —
@@ -41,18 +42,14 @@ export function HomeScreens() {
     <TikkiScreen
       onTierChange={setTier}
       footer={
-        <div className="flex items-center justify-between gap-2">
-          <HomeScreenPill
-            label={t('games')}
-            href={routes.games.index}
-            icon={<Gamepad2 size={17} aria-hidden />}
-          />
+        <HomeScreenPillRow>
+          <HomeGamesPill />
           <HomeScreenPill
             label={t('engines short')}
             onClick={() => setEngines(true)}
             icon={<EngineIcon tier={tier} size={22} />}
           />
-        </div>
+        </HomeScreenPillRow>
       }
     />
   );

@@ -1,12 +1,14 @@
 'use client';
 
 import Image from 'next/image';
+import { twMerge } from 'tailwind-merge';
 import { HomeEnginesSlider } from '@/components/pages/tabs/home/HomeEnginesSlider';
 import { HomeUpcomingTournaments } from '@/components/pages/tabs/home/HomeUpcomingTournaments';
 import { HomeJackpotBanner } from '@/components/pages/tabs/home/HomeJackpotBanner';
 import { HomeTestQuestCard } from '@/components/pages/tabs/home/HomeTestQuestCard';
-import { HomeGamesChip } from '@/components/pages/tabs/home/HomeGamesChip';
+import { HomeGamesPill } from '@/components/pages/tabs/home/HomeGamesPill';
 import { HomeScreenPill } from '@/components/pages/tabs/home/HomeScreenPill';
+import { HomeScreenPillRow } from '@/components/pages/tabs/home/HomeScreenPillRow';
 import { tikkiImages } from '@/components/shared/tikki/tikki.images';
 import type { TikkiTier } from '@/components/shared/tikki/tikki.constants';
 import { useAppTranslations } from '@/hooks/useAppTranslations';
@@ -15,7 +17,7 @@ import { TicketsEnum } from '@/types/enums/ticket.enums';
 export interface HomeEnginesScreenProps {
   /**
    * Вернуться к Тикки. Передаётся, только когда Тикки открыт игроку: без него
-   * это обычная главная, какой она и была, и лишней пилюли на ней нет.
+   * это обычная главная, какой она и была, и нижнего ряда пилюль на ней нет.
    */
   onBack?: () => void;
   /** Тир того Тикки, что стоит на первом экране — пилюля показывает его же. */
@@ -26,9 +28,16 @@ export interface HomeEnginesScreenProps {
  * Второй экран главной: джекпот, турниры и движки — всё, что было главной до
  * того, как на неё встал Тикки.
  *
- * Пилюля возврата ЗАКРЕПЛЕНА, а не стоит в конце потока: экран длинный, и
- * дойти до конца, чтобы вернуться, — не выход. `start`/`end` от
- * `--app-gutter`, иначе на широком экране она уедет из колонки приложения.
+ * Внизу — тот же ряд пилюль, что у Тикки: «Игры» слева, «Тикки» справа,
+ * вплотную к таб-бару. Ряд ЛИПКИЙ (`sticky`), а не `fixed`, и это не вкус.
+ * Список экранов входит с анимацией, чьё конечное состояние оставляет на
+ * прокручиваемом контейнере `transform`, а `fixed` внутри такого контейнера
+ * отсчитывает низ от него, а не от окна. До 05.09.2026 пилюля «Тикки» из-за
+ * этого висела на 85 px выше таб-бара (замер на 390×844: низ 679 при кромке
+ * 764) — при том, что в коде стояло «5 px над ним». Липкий ряд стоит в конце
+ * самого списка: липнет к низу прокрутки, а её низ и есть верх таб-бара;
+ * инсет Telegram и ширина колонки на планшете учитываются сами. Ряд не
+ * прячется, пока экран прокручивают, — как и раньше, контент едет под ним.
  */
 export function HomeEnginesScreen({
   onBack,
@@ -37,15 +46,14 @@ export function HomeEnginesScreen({
   const t = useAppTranslations();
 
   return (
-    <div className="flex flex-col gap-5 pb-6 pt-3">
-      {/* Поля и зазор тут уже, чем на остальной странице (10 px по бокам,
-          6 px между плашками): третья плашка помещается в строку только так.
-          Замер на 390: до поджатия заголовок тест-квеста терял 19 px и уходил
-          в многоточие, после — читается целиком. */}
-      <section className="flex items-stretch gap-1.5 px-2.5">
+    // `flex-available` + `mt-auto` у ряда: на экране, где контент короче
+    // прокрутки, пилюли всё равно стоят у таб-бара, а не под последней
+    // карточкой. Нижнее поле нужно только старой главной без ряда — с рядом
+    // последняя строка и есть он сам.
+    <div className={twMerge('flex flex-available flex-col gap-5 pt-3', !onBack && 'pb-6')}>
+      <section className="flex items-stretch gap-3 px-4">
         <HomeJackpotBanner />
         <HomeTestQuestCard />
-        <HomeGamesChip />
       </section>
 
       {/* Pulled tight against its neighbours: the strip is 88px of card and the
@@ -57,7 +65,8 @@ export function HomeEnginesScreen({
       </section>
 
       {onBack && (
-        <div className="end-[calc(var(--app-gutter)+0.625rem)] fixed bottom-[calc(5rem+var(--tg-inset-bottom)+5px)] z-40">
+        <HomeScreenPillRow className="sticky bottom-0 z-40 mt-auto px-[14px]">
+          <HomeGamesPill />
           <HomeScreenPill
             label={t('tikki')}
             onClick={onBack}
@@ -71,7 +80,7 @@ export function HomeEnginesScreen({
               />
             }
           />
-        </div>
+        </HomeScreenPillRow>
       )}
     </div>
   );
