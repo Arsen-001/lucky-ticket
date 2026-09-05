@@ -23,6 +23,14 @@ export interface SpendFailureReport {
    * the shortfall without pretending to a number it does not have.
    */
   required?: number;
+  /**
+   * The balance the screen is looking at, when it is fresher than `/me`. Tikki
+   * polls its own state every second and moves LC with every tap, while `/me`
+   * refreshes only on invalidation — quoting `/me` there would name a figure
+   * the player can see is wrong on the very same screen. Honoured by `show`
+   * only: `report` refetches `/me` itself and trusts that.
+   */
+  current?: number;
 }
 
 export interface UseSpendFailure {
@@ -59,10 +67,12 @@ export function useSpendFailure(): UseSpendFailure {
   const { data: me, refetch: refetchMe } = useGetMeQuery();
   const [failure, setFailure] = useState<SpendFailure | null>(null);
   const [required, setRequired] = useState<number | undefined>(undefined);
+  const [current, setCurrent] = useState<number | undefined>(undefined);
 
   const report = async (error: unknown, options?: SpendFailureReport) => {
     const resolved = spendFailure(error, t);
     setRequired(options?.required);
+    setCurrent(undefined);
     if (resolved.kind !== 'message' && resolved.kind !== 'session') {
       // The screen let the tap through, so it believed the balance covered
       // this — which makes the number it is holding the stale one. Awaited,
@@ -76,6 +86,7 @@ export function useSpendFailure(): UseSpendFailure {
 
   const show = (kind: SpendShortfallKind, options?: SpendFailureReport) => {
     setRequired(options?.required);
+    setCurrent(options?.current);
     setFailure({ kind });
   };
 
@@ -88,7 +99,7 @@ export function useSpendFailure(): UseSpendFailure {
         open={kind === 'coins'}
         onClose={close}
         required={required}
-        current={me?.coins ?? 0}
+        current={current ?? me?.coins ?? 0}
       />
 
       <StarsTopUpFlow

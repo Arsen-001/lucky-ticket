@@ -5,7 +5,7 @@ import { twMerge } from 'tailwind-merge';
 import { CoinIcon } from '@/components/shared/icons/CoinIcon';
 import { QueryErrorState } from '@/components/shared/error/QueryErrorState';
 import { useAppTranslations } from '@/hooks/useAppTranslations';
-import { useToast } from '@/hooks/useToast';
+import { useSpendFailure } from '@/hooks/useSpendFailure';
 import { formatCompact } from '@/utils/global/number.utils';
 import type { TicketType } from '@/types/types/ticket.types';
 import type { TikkiUpgradeKind } from '@/types/interfaces/tikki.interfaces';
@@ -52,7 +52,7 @@ export interface TikkiScreenProps {
  */
 export function TikkiScreen({ footer, onTierChange, className }: TikkiScreenProps) {
   const t = useAppTranslations();
-  const toast = useToast();
+  const spend = useSpendFailure();
   const { state, isLoading, isError, refetch, tap, select, upgrade, buy, merge } =
     useTikkiProgress();
 
@@ -112,12 +112,17 @@ export function TikkiScreen({ footer, onTierChange, className }: TikkiScreenProp
     setUpgrading(kind);
   };
 
-  /** Отказ сервера — всегда словами: молчаливый no-op читается как поломка. */
-  const guard = async (action: () => Promise<unknown>) => {
+  /**
+   * Отказ сервера — всегда словами, и не тостом: нехватка LC открывает ту же
+   * модалку «Недостаточно LC», что в маркете и на стейках, остальное — окно с
+   * причиной. `required` — цена, если экран её знает: с ней модалка называет
+   * недостачу числом, без неё говорит о нехватке без цифры.
+   */
+  const guard = async (action: () => Promise<unknown>, required?: number) => {
     try {
       await action();
-    } catch {
-      toast.error(t('action failed'));
+    } catch (error) {
+      await spend.report(error, { required });
     }
   };
 
@@ -243,7 +248,7 @@ export function TikkiScreen({ footer, onTierChange, className }: TikkiScreenProp
         onConfirm={() => {
           const kind = upgrading;
           setUpgrading(null);
-          if (kind) void guard(() => upgrade(selected.id, kind));
+          if (kind) void guard(() => upgrade(selected.id, kind), selected.cost[kind] ?? undefined);
         }}
       />
 
@@ -254,10 +259,22 @@ export function TikkiScreen({ footer, onTierChange, className }: TikkiScreenProp
         tierBase={state.config.tierBase}
         onClose={() => setBuying(false)}
         onBuy={(tier: TicketType) => {
+          // Список закрывается первым, чтобы «Недостаточно LC» не ложилась
+          // поверх него — как в маркете.
           setBuying(false);
-          void guard(() => buy(tier));
+          const price = state.buyCost[tier] ?? 0;
+          if (state.balance < price) {
+            // Проверка ДО запроса: строка тира живая при любом счёте, и тап по
+            // дорогому тиру обязан назвать недостачу и показать, где взять.
+            // Счёт — из состояния Тикки: оно свежее `/me` на величину тапов.
+            spend.show('coins', { required: price, current: state.balance });
+            return;
+          }
+          void guard(() => buy(tier), price);
         }}
       />
+
+      {spend.modals}
     </div>
   );
 }
