@@ -13,6 +13,7 @@ import type {
 import { mockDb } from '@/mock/backend/db';
 import {
   tikkiAwayDays,
+  tikkiBuyPaybackDays,
   tikkiMaxHours,
   tikkiMaxLevel,
   tikkiMergeSize,
@@ -149,6 +150,7 @@ const state = (): TikkiState => {
       mergeSize: tikkiMergeSize,
       stepUpPercent: tikkiMergeStepUpPercentByTier(),
       tierBase: Object.fromEntries(tikkiTiers.map(t => [t, tikkiTierBase(t)])),
+      buyPaybackDays: tikkiBuyPaybackDays,
     },
   };
 };

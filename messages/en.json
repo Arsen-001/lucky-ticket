@@ -1531,6 +1531,7 @@
   "duel league bronze": "bronze",
   "games": "Games",
   "games duel blurb": "One on one, tickets on the line",
+  "games tikki blurb": "Tap for coins — he earns without you",
   "duel tables open": "{count, plural, one {# table open} other {# tables open}}",
   "games next title": "Bracket tournament",
   "games next blurb": "Knockout rounds for a shared prize pool",

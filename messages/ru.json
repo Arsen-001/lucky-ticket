@@ -1531,6 +1531,7 @@
   "duel league bronze": "бронза",
   "games": "Игры",
   "games duel blurb": "Один на один, ставка билетами",
+  "games tikki blurb": "Тапай ради монет — копит и без тебя",
   "duel tables open": "{count, plural, one {# стол открыт} few {# стола открыто} many {# столов открыто} other {# стола открыто}}",
   "games next title": "Турнирная сетка",
   "games next blurb": "Навылет, до общего призового фонда",

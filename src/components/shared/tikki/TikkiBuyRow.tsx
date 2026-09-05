@@ -4,8 +4,7 @@ import Image from 'next/image';
 import { twMerge } from 'tailwind-merge';
 import { CoinIcon } from '@/components/shared/icons/CoinIcon';
 import { tikkiImages } from './tikki.images';
-import { tikkiBuyPaybackDays, type TikkiTier } from './tikki.constants';
-import { tikkiTierBase } from './tikki.utils';
+import type { TikkiTier } from './tikki.constants';
 import { tierAccentColors } from '@/constants/tier-colors';
 import { useAppTranslations } from '@/hooks/useAppTranslations';
 import { formatCompact, formatNumber } from '@/utils/global/number.utils';
@@ -15,6 +14,9 @@ export interface TikkiBuyRowProps {
   balance: number;
   /** Цена с сервера: та самая, по которой он и спишет. */
   price: number;
+  /** Доход тира в час и срок окупаемости — тоже с сервера, не из констант. */
+  perHour: number;
+  paybackDays: number;
   onBuy: () => void;
   className?: string;
   style?: React.CSSProperties;
@@ -26,8 +28,22 @@ export interface TikkiBuyRowProps {
  * Срок окупаемости написан у каждого, и он у всех пяти одинаковый: старший тир
  * не выгоднее младшего, он просто крупнее. Без этой строки лестница читается
  * как «копи на алмаз», хотя копить на него ровно так же долго.
+ *
+ * 🔴 Ни одно число здесь не считается на месте. Доход в час и срок приезжают
+ * тем же ответом, что и цена: и база тира, и окупаемость — ручки в панели, а
+ * подпись, посчитанная константой, разошлась бы с ценой в ту же минуту, как их
+ * подвинут.
  */
-export function TikkiBuyRow({ tier, balance, price, onBuy, className, style }: TikkiBuyRowProps) {
+export function TikkiBuyRow({
+  tier,
+  balance,
+  price,
+  perHour,
+  paybackDays,
+  onBuy,
+  className,
+  style,
+}: TikkiBuyRowProps) {
   const t = useAppTranslations();
   const affordable = balance >= price;
 
@@ -58,8 +74,8 @@ export function TikkiBuyRow({ tier, balance, price, onBuy, className, style }: T
         </span>
         <span className="text-muted text-[11px] leading-tight">
           {t('{amount} per hour, pays back in {days} days', {
-            amount: formatNumber(tikkiTierBase(tier)),
-            days: tikkiBuyPaybackDays,
+            amount: formatNumber(perHour),
+            days: paybackDays,
           })}
         </span>
       </span>

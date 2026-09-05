@@ -73,6 +73,8 @@ export interface TikkiState {
     stepUpPercent: Record<string, number>;
     /** База каждого тира — из неё экран считает ПОКАЗ результата сплава. */
     tierBase: Record<string, number>;
+    /** Срок окупаемости покупки — его пишет строка каждого тира. */
+    buyPaybackDays: number;
   };
 }
 

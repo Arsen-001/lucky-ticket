@@ -92,6 +92,22 @@ export function TikkiHero({
     [empty, tapValue, onTap]
   );
 
+  // Поза говорит состояние прямее, чем фильтр поверх обычного кадра: пустой
+  // кликер — расстроенный Тикки, полный — он же с разведёнными руками. Все
+  // кадры сняты с одного рига, поэтому подмена не двигает ни пикселя вокруг.
+  const poses = tikkiImages[tier];
+
+  // Кадры смены поз греются заранее. Иначе первый раз, когда кликер пустеет
+  // или наполняется, картинка запрашивается прямо в этот момент — и вместо
+  // смены выражения игрок видит пустое место на треть секунды.
+  useEffect(() => {
+    for (const src of [poses.happy.src, poses.jump.src, poses.sad.src]) {
+      const img = new window.Image();
+      img.src = src;
+    }
+  }, [poses]);
+  const pose = squash ? poses.happy : full ? poses.jump : empty ? poses.sad : poses.idle;
+
   return (
     <button
       type="button"
@@ -104,7 +120,7 @@ export function TikkiHero({
       )}
     >
       <Image
-        src={squash ? tikkiImages[tier].happy : tikkiImages[tier].idle}
+        src={pose}
         alt=""
         width={348}
         height={356}
@@ -116,7 +132,6 @@ export function TikkiHero({
           // 348×356 — размер из макета; на узком телефоне ужимается по ширине.
           'mx-auto h-auto max-h-full w-[348px] max-w-full object-contain',
           squash ? 'animate-tikki-squash' : full ? 'animate-tikki-ready' : 'animate-tikki-breathe',
-          empty && 'saturate-[0.75] brightness-[0.82]',
           classNames?.image
         )}
       />

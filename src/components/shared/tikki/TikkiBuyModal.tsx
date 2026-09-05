@@ -11,6 +11,9 @@ export interface TikkiBuyModalProps {
   balance: number;
   /** Цены присылает сервер — экран их не считает. */
   buyCost: Record<string, number>;
+  /** Доход тира в час и срок окупаемости — оттуда же. */
+  tierBase: Record<string, number>;
+  buyPaybackDays: number;
   onClose: () => void;
   onBuy: (tier: TikkiTier) => void;
 }
@@ -20,7 +23,15 @@ export interface TikkiBuyModalProps {
  * младшим, у него просто своя цена. Потолка у коллекции нет: держать можно
  * сколько угодно, и это нарочно — на сплав нужно собирать по четыре и больше.
  */
-export function TikkiBuyModal({ open, balance, buyCost, onClose, onBuy }: TikkiBuyModalProps) {
+export function TikkiBuyModal({
+  open,
+  balance,
+  buyCost,
+  tierBase,
+  buyPaybackDays,
+  onClose,
+  onBuy,
+}: TikkiBuyModalProps) {
   const t = useAppTranslations();
 
   return (
@@ -38,6 +49,8 @@ export function TikkiBuyModal({ open, balance, buyCost, onClose, onBuy }: TikkiB
               tier={tier}
               balance={balance}
               price={buyCost[tier] ?? 0}
+              perHour={tierBase[tier] ?? 0}
+              paybackDays={buyPaybackDays}
               onBuy={() => onBuy(tier)}
               className="animate-slide-in-bottom"
               style={staggerStyle(index, 50)}
