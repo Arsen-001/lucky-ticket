@@ -83,7 +83,13 @@ test('серия тапов: приседание на каждом, обе ру
   // Посреди серии: обе руки вверх и покачивание полного кликера.
   await expect(body, 'покачивание во время серии').toHaveClass(/animate-tikki-ready/);
   await expect(img, 'кадр с обеими руками во время серии').toHaveAttribute('src', /-jump\./);
-  expect(await page.evaluate(() => window.__squashStarts), 'приседаний за серию').toBe(TAPS);
+  // Не ровно TAPS: на медленном раннере два тапа ложатся в один кадр, и у
+  // отменённого до кадра перезапуска `animationstart` не бывает — CI насчитал
+  // 5 из 8 (06.09.2026). Регрессия, от которой страж, даёт РОВНО одно
+  // приседание на любую серию, поэтому граница — «больше одного».
+  expect(await page.evaluate(() => window.__squashStarts), 'приседаний за серию').toBeGreaterThan(
+    1
+  );
   expect(await page.evaluate(() => window.__bubbleStarts), 'перезапусков облака за серию').toBe(0);
   await expect(bubble, 'облако не погасло под пальцем').toHaveCSS('opacity', '1');
 

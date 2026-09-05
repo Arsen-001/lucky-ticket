@@ -42,7 +42,10 @@ test('ступень кликера списывает свою цену', async
   const before = toNumber(await balance.innerText());
   expect(before, 'на моке у игрока есть деньги').toBeGreaterThan(0);
 
-  await page.getByRole('button', { name: /clicker level/i }).click();
+  // Событие прямо в узел, как у кнопки подтверждения ниже: сцена перерисовывает
+  // кликер раз в секунду, и проверка «stable» у обычного клика крутилась до
+  // таймаута — на CI это валило тест на каждом прогоне (06.09.2026).
+  await page.getByRole('button', { name: /clicker level/i }).dispatchEvent('click');
 
   // Окно называет цену — с неё и сверяется списание. Своей арифметики у теста
   // нет нарочно: он проверяет, что экран и списание говорят одно и то же.

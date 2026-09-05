@@ -74,7 +74,11 @@ function readBackendDefaults(): Record<string, unknown> {
 }
 
 describe.skipIf(!hasBackend)('Тикки: числа фронта и бэкенда — одни и те же', () => {
-  const backend = readBackendDefaults();
+  // Тело describe Vitest выполняет при сборе тестов и для ПРОПУЩЕННОГО набора
+  // тоже — только сами `it` не запускает. Читать файл здесь без проверки нельзя:
+  // на CI бэкенда рядом нет, и ENOENT при сборе валил весь джоб юнит-тестов
+  // (06.09.2026), хотя набор формально был пропущен.
+  const backend = hasBackend ? readBackendDefaults() : {};
 
   const SCALARS: [string, number][] = [
     ['baseRatePerHour', tikkiBaseRate],
