@@ -35,7 +35,11 @@ const fit = (page: Page) =>
     return {
       overflow: box.scrollHeight - box.clientHeight,
       stage: Math.round(stage.getBoundingClientRect().height),
-      image: Math.round(img.getBoundingClientRect().height),
+      // Рост из раскладки, а не из `getBoundingClientRect`: прямоугольник берёт
+      // в себя `transform`, а персонаж дышит (масштаб до 1,012) — 356 читались бы
+      // как 360. До 06.09.2026 это не всплывало: на моке кликер полный, и
+      // покачивание полного стояло ВМЕСТО дыхания; теперь они на разных узлах.
+      image: (img as HTMLElement).offsetHeight,
       rowGap: Math.round(row.getBoundingClientRect().bottom) - edge,
     };
   });
