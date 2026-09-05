@@ -1,5 +1,5 @@
 import { expect, test, type Page } from '@playwright/test';
-import { appDialogs } from './helpers';
+import { appDialogs, dismissAutoDialogs } from './helpers';
 
 /**
  * The market's product picture must never be clipped by the box that holds it.
@@ -17,24 +17,6 @@ import { appDialogs } from './helpers';
 
 /** Decorative glows are positioned outside their box ON PURPOSE — that is what the clip is for. */
 const DECORATION = /pointer-events-none|blur-|absolute -/;
-
-const clearGreetingDialogs = async (page: Page) => {
-  for (let round = 0; round < 8; round += 1) {
-    const dialogs = appDialogs(page);
-    if (!(await dialogs.count())) return;
-    const buttons = dialogs.last().locator('button');
-    const count = await buttons.count();
-    if (count) {
-      await buttons
-        .nth(count - 1)
-        .click({ force: true, timeout: 2000 })
-        .catch(() => {});
-    } else {
-      await page.keyboard.press('Escape');
-    }
-    await page.waitForTimeout(700);
-  }
-};
 
 /** Every element painting outside a clipping ancestor, decorations excluded. */
 const overflowingParts = (page: Page) =>
@@ -88,7 +70,11 @@ for (const item of ITEMS) {
     await page.goto('/market', { waitUntil: 'domcontentloaded' });
     await expect(page.getByTestId('app-shell')).toBeAttached({ timeout: 15_000 });
     await page.waitForTimeout(2500);
-    await clearGreetingDialogs(page);
+    // The shared walker picks the CLOSING button by meaning. The old local one
+    // pressed the last button of every dialog — on the tournament result that is
+    // "Full standings", which left the market and spent 90s waiting for a card
+    // on the wrong screen (CI, 06.09.2026).
+    await dismissAutoDialogs(page);
 
     // Scoped to the grid on purpose. The showcase rail above sells items out of
     // the same catalogue, so it carries the same names — and Swiper's `loop`

@@ -1,6 +1,6 @@
 import { expect, test, type Page } from '@playwright/test';
 import { STATIC_ROUTES } from './routes';
-import { appDialogs } from './helpers';
+import { appDialogs, dismissAutoDialogs, openEnginesScreen } from './helpers';
 
 /**
  * Engine-agnostic layout invariants — the net that catches a rendering engine
@@ -59,6 +59,8 @@ const CUBE_TEST_TIMEOUT = 180_000;
 async function openHome(page: Page) {
   await page.goto('/', { waitUntil: 'domcontentloaded' });
   await page.getByTestId('app-shell').waitFor({ timeout: SLOW });
+  // Since 03.09.2026 Home opens on Tikki; the cube lives on the second screen.
+  await openEnginesScreen(page);
   await page.locator('.engine-cube-scaled').first().waitFor({ timeout: CUBE_WAIT });
   // Let the slider settle on its active slide before measuring.
   await page.waitForTimeout(800);
@@ -337,10 +339,10 @@ test.describe('ad rail lens', () => {
     // The daily-gift sheet rides in on its own query, i.e. AFTER the rail is
     // already on screen — dismissing once at load finds nothing and then a
     // fixed overlay silently eats the drag. Keep sweeping for a few seconds.
-    for (let i = 0; i < 6; i++) {
-      await page.waitForTimeout(500);
-      if (await appDialogs(page).count()) await page.keyboard.press('Escape');
-    }
+    // Six Escapes over three seconds were not enough on CI: the queue there is
+    // deeper and slower (06.09.2026). The shared walker stops on consecutive
+    // empty looks, not on a fixed count.
+    await dismissAutoDialogs(page);
     expect(await appDialogs(page).count(), 'a modal is covering the ad rail').toBe(0);
 
     await track.scrollIntoViewIfNeeded();

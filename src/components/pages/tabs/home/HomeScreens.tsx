@@ -46,6 +46,7 @@ export function HomeScreens() {
           <HomeGamesPill />
           <HomeScreenPill
             label={t('engines short')}
+            testId="home-pill-engines"
             onClick={() => setEngines(true)}
             icon={<EngineIcon tier={tier} size={22} />}
           />

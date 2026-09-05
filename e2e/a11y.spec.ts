@@ -1,6 +1,6 @@
 import { test, expect, type Page } from '@playwright/test';
 import { STATIC_ROUTES } from './routes';
-import { appDialogs } from './helpers';
+import { dismissAutoDialogs } from './helpers';
 
 /**
  * Two things that are invisible in review and invisible on screen, so they only
@@ -18,106 +18,6 @@ import { appDialogs } from './helpers';
  *    how the profile banner collage was eating the preview/share buttons). Both
  *    leave the markup looking correct.
  */
-
-/**
- * A fresh mock account greets several screens with an auto-surfaced dialog
- * (tournament result, reward claim). Its backdrop owns every point on the
- * screen, so any hit test taken through it measures the backdrop instead.
- *
- * They arrive as a QUEUE, not one at a time — `/tasks` opens four in a row:
- * tournament win, place result, "better luck next time", daily gift. Between
- * two of them there is a gap where none is on screen, and the first version of
- * this returned on that gap: the remaining dialogs then opened AFTER dismissal
- * finished and every measurement went through their backdrop. `/tasks` failed
- * deterministically once anything on it wore `tap-target`, which is how the gap
- * was found (13.08.2026) — before that, nothing measured there, so a screen the
- * suite could not see at all was passing.
- *
- * So an empty screen is not the end condition: two consecutive empty looks are.
- */
-async function dismissAutoDialogs(page: Page) {
-  // Polled in short steps rather than slept in long ones: the queue is four
-  // deep, and a fixed 600ms per look cost the suite ~35% of its runtime waiting
-  // on nothing. A dialog either appears within the settle window or there is
-  // none coming.
-  const SETTLE_MS = 900;
-  const STEP_MS = 100;
-
-  /**
-   * Верхний диалог, а не первый.
-   *
-   * На главной их встаёт трое разом — подарки, итог турнира и вызов на дуэль,
-   * — и вызов лежит в DOM ПЕРВЫМ, а рисуется под остальными. Цикл честно брал
-   * `.first()`, восемь раз подряд пытался нажать его «Не сейчас», ловил таймаут
-   * о перекрывающую модалку и уходил ни с чем: экран оставался закрытым, и все
-   * тап-зоны на нём отчитывались проглоченными. Последний портал в DOM — верхний
-   * на экране, и именно он нажимается.
-   */
-  const nextDialog = async () => {
-    for (let waited = 0; waited < SETTLE_MS; waited += STEP_MS) {
-      const dialog = appDialogs(page).last();
-      if (await dialog.isVisible().catch(() => false)) return dialog;
-      await page.waitForTimeout(STEP_MS);
-    }
-    return null;
-  };
-
-  // Куда мы пришли мерить. Последняя кнопка модалки — не всегда «закрыть»: у
-  // итога турнира это «Все результаты», и она уводит со страницы. Дальше цикл
-  // честно разбирал очередь, но уже на ЧУЖОМ экране, а тест потом мерил его же.
-  const measuring = page.url();
-
-  // Очередь глубже, чем кажется: язык → подарки → четыре шага тура → два итога
-  // турнира → вызов на дуэль. Восьми проходов на неё не хватало, и тест мерил
-  // экран, на котором ещё висели модалки.
-  // Условие выхода — ДВА пустых взгляда подряд, как и написано выше: очередь
-  // асинхронная, и следующая модалка встаёт уже после того, как предыдущая
-  // ушла. Код выходил по первому же пустому взгляду и оставлял хвост очереди
-  // на экране — тест мерил его как «зоны проглочены».
-  // Модалка подарков закрывается единственной кнопкой «Забрать», а та уводит
-  // на главную; онбординг в моке не запоминается, и возврат поднимает очередь
-  // заново. Поэтому возврат разрешён дважды, и на весь разбор — бюджет: без
-  // него цикл честно крутился до 90-секундного таймаута теста.
-  const DEADLINE = Date.now() + 12_000;
-  let returns = 0;
-  let empty = 0;
-  for (let i = 0; i < 16 && Date.now() < DEADLINE; i++) {
-    const dialog = await nextDialog();
-    if (!dialog) {
-      if (++empty >= 2) break;
-      continue;
-    }
-    empty = 0;
-    const buttons = dialog.locator('button');
-    const count = await buttons.count();
-    if (count === 0) {
-      await page.keyboard.press('Escape');
-    } else {
-      /**
-       * Кнопку выбираем по смыслу, а не по месту в ряду.
-       *
-       * Ни «первая», ни «последняя» не работают на всех: у выбора языка
-       * закрывает ПОСЛЕДНЯЯ («Продолжить»), а первые двадцать — сами языки;
-       * у итога турнира закрывает ПЕРВАЯ («Продолжить»), а последняя уводит
-       * на полную таблицу. И вернуться назад нельзя: онбординг в моке не
-       * запоминается, любая навигация поднимает всю очередь заново, и цикл
-       * не сходится никогда.
-       */
-      const closer = dialog.getByRole('button', {
-        name: /^(continue|claim|not now|close|ok|got it|done|продолжить|забрать|не сейчас|закрыть|понятно)/i,
-      });
-      const target = (await closer.count()) > 0 ? closer.first() : buttons.nth(count - 1);
-      await target.click({ timeout: 5000 }).catch(() => {});
-    }
-    // Let the dismissal animation finish before looking for the next one.
-    await page.waitForTimeout(250);
-    if (page.url() !== measuring) {
-      if (++returns > 2) break;
-      await page.goto(measuring, { waitUntil: 'domcontentloaded' });
-      await page.waitForTimeout(400);
-    }
-  }
-}
 
 /**
  * Что делать с модалками, которые не закрываются.
@@ -153,6 +53,16 @@ async function openScreen(page: Page, route: string) {
   await page.waitForTimeout(1500);
   await dismissAutoDialogs(page);
   await hideStuckDialogs(page);
+  // Страховка от закрытого на месте ящика: если разбор очереди всё же уронил
+  // Escape на маршрут `(out-tabs)`, ящик стоит закрытым с `inert` на всём
+  // содержимом, URL при этом не меняется — и любой замер ниже потерял бы все
+  // точки у каждого контроля. Открываем экран заново, один раз.
+  if (await page.evaluate(() => !!document.querySelector('[inert] .tap-target'))) {
+    await page.goto(route, { waitUntil: 'domcontentloaded' });
+    await expect(page.getByTestId('app-shell')).toBeAttached({ timeout: 20_000 });
+    await page.waitForTimeout(1500);
+    await hideStuckDialogs(page);
+  }
 }
 
 for (const route of STATIC_ROUTES) {
@@ -197,7 +107,17 @@ for (const route of STATIC_ROUTES) {
         // An ancestor swallowing the point is NOT the control owning it.
         !!hit && (hit === el || el.contains(hit));
 
-      const results: Array<{ who: string; missed: number }> = [];
+      // Кто именно проглотил точку — без этого падение на CI нечитаемо: «5 из 5
+      // потеряно» у каждого контроля экрана говорит о слое сверху или об
+      // `inert` на предке, а не о зоне, и отличить их можно только по узлу,
+      // который вернул `elementFromPoint`.
+      const describe = (hit: Element | null) => {
+        if (!hit) return 'nothing — the point is outside the viewport';
+        const inert = hit.closest('[inert]') ? ' [inside inert]' : '';
+        const id = hit.getAttribute('data-testid');
+        return `<${hit.tagName.toLowerCase()}${id ? ` data-testid=${id}` : ''} class="${String(hit.className).slice(0, 60)}">${inert}`;
+      };
+      const results: Array<{ who: string; missed: number; by: string }> = [];
 
       for (const el of document.querySelectorAll('.tap-target')) {
         /**
@@ -251,16 +171,19 @@ for (const route of STATIC_ROUTES) {
           [cx, cy - REACH],
           [cx, cy + REACH],
         ];
-        const missed = points.filter(([x, y]) => !owns(el, document.elementFromPoint(x, y)));
+        const lost = points
+          .map(([x, y]) => document.elementFromPoint(x, y))
+          .filter(hit => !owns(el, hit));
         results.push({
           who: el.getAttribute('aria-label') ?? (el.textContent ?? '').trim().slice(0, 20),
-          missed: missed.length,
+          missed: lost.length,
+          by: lost.length ? describe(lost[0]) : '',
         });
       }
 
       return results
         .filter(result => result.missed > 0)
-        .map(result => `${result.who} (${result.missed} of 5 sample points lost)`);
+        .map(result => `${result.who} (${result.missed} of 5 sample points lost to ${result.by})`);
     });
 
     expect(short, `tap-target hit zones swallowed on ${route}`).toEqual([]);

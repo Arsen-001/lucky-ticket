@@ -23,6 +23,7 @@ const TELEGRAM_STUB = (initData: string) => {
     press: null as null | (() => void),
     closed: false,
     closingConfirmed: false,
+    expanded: false,
   };
   const backButton = {
     get isVisible() {
@@ -54,7 +55,9 @@ const TELEGRAM_STUB = (initData: string) => {
     platform: 'unknown',
     isExpanded: true,
     ready: () => {},
-    expand: () => {},
+    expand: () => {
+      state.expanded = true;
+    },
     close: () => {
       state.closed = true;
     },
@@ -94,6 +97,7 @@ declare global {
       press: null | (() => void);
       closed: boolean;
       closingConfirmed: boolean;
+      expanded: boolean;
     };
   }
 }
@@ -256,12 +260,15 @@ test.beforeAll(async ({ browser }) => {
   }
 });
 
-test('the arrow stays up on every screen, the root included', async ({ page }) => {
+test('the arrow is hidden at the root and up on every other screen', async ({ page }) => {
   await installTelegram(page);
-  // A hidden arrow is what the client reads as "this press is mine" — and what
-  // it does with it is close the app on one build, fold it away on the next.
-  await page.goto('/');
-  await expect.poll(() => arrowVisible(page)).toBe(true);
+  // Since 30.08.2026 (da2c01fc) leaving is one press again: at Home with nothing
+  // open the arrow is hidden and the press is the client's own — it closes the
+  // app. The arrow exists to step back INSIDE the app, so anywhere else it is up.
+  // `openHome` walks the first run and the popups; while one of them is open the
+  // arrow is legitimately up (a press must close the overlay, not the game).
+  await openHome(page);
+  await expect.poll(() => arrowVisible(page), { timeout: 20_000 }).toBe(false);
 
   await page.goto('/faq');
   await expect.poll(() => arrowVisible(page)).toBe(true);
@@ -313,7 +320,9 @@ test('an open sheet swallows the press instead of navigating', async ({ page }) 
   // A reload re-opens the welcome flow (mock `me` never records the choice),
   // and it stacks over the wallet — walk it, but without Escape.
   await completeFirstRun(page, { escape: false });
-  await buyMore.click();
+  // Dispatched rather than clicked: the button rides in with an entry animation,
+  // and the mouse click's stability check spun to the timeout on CI (06.09.2026).
+  await buyMore.dispatchEvent('click');
   const sheet = page.getByRole('heading', { name: /stars|звёзды/i });
   await expect(sheet).toBeVisible();
 
@@ -324,13 +333,15 @@ test('an open sheet swallows the press instead of navigating', async ({ page }) 
   await expect(page).toHaveURL(/\/wallet$/);
 });
 
-test('at the end of the road the app asks instead of vanishing', async ({ page }) => {
+test("at the root with nothing open the press is the client's: no arrow, no dialog", async ({
+  page,
+}) => {
   await installTelegram(page);
   await openHome(page);
 
-  // Presses until the ask appears rather than exactly once: an auto-surfaced
-  // popup legitimately consumes a press, and which of them is on screen at this
-  // moment is not something the test gets to decide.
+  // Drain what the auto-surface queue still holds, until the root is bare: no
+  // dialog, and therefore no arrow. Which popup is on screen at this moment is
+  // not something the test gets to decide, so this polls rather than presses once.
   await expect
     .poll(
       async () => {
@@ -339,38 +350,36 @@ test('at the end of the road the app asks instead of vanishing', async ({ page }
           await page.waitForTimeout(300);
           return 'popup';
         }
-        await pressBack(page);
-        await page.waitForTimeout(300);
-        return (await exitDialog(page).isVisible()) ? 'asked' : 'nothing';
+        return (await arrowVisible(page)) ? 'arrow' : 'bare';
       },
-      { timeout: 20_000, message: 'the root press never raised the exit dialog' }
+      { timeout: 20_000, message: 'the root never went bare: a dialog or the arrow stayed' }
     )
-    .toBe('asked');
+    .toBe('bare');
 
-  // Asked, not acted on: the press alone must never end the session.
+  // The SDK keeps the handler it was given, so a press can still be simulated —
+  // and at the bare root it must do nothing: no "leave the game?" ask (retired
+  // on 30.08.2026 with da2c01fc), no navigation, and no `close()` from the app.
+  // Leaving is Telegram's own gesture now.
+  await pressBack(page);
+  await page.waitForTimeout(500);
+  expect(await exitDialog(page).count(), 'the retired exit dialog came back').toBe(0);
+  await expect(page).toHaveURL(/\/$/);
   expect(await page.evaluate(() => window.__tgBack.closed)).toBe(false);
-
-  // Dispatched rather than clicked, and scoped to this dialog: a popup from the
-  // auto-surface queue can still mount ON TOP of the ask a moment later, and its
-  // full-screen layer then swallows every real click — which is how this timed
-  // out in CI (a ticket-reward modal was over it). What is under test here is
-  // that the confirm is wired to `close()`, not that the panel wins a hit test;
-  // hit-testing of overlays is modal-close-collision.spec's job.
-  const dialog = page.locator(':light([role="dialog"])', { has: exitDialog(page) });
-  const leave = dialog.getByRole('button', { name: /^leave$/i });
-  await expect(leave).toBeVisible();
-  await leave.dispatchEvent('click');
-  await expect.poll(() => page.evaluate(() => window.__tgBack.closed)).toBe(true);
 });
 
-test('the client is asked to confirm before it closes the game', async ({ page }) => {
-  // Covers the ways out the client still owns on its own (the ✕, the swipe).
-  // Needs a Telegram boot (`initData`) — the browser path skips the whole
-  // chrome block, confirmation included.
+test('the client is not asked to confirm before it closes the game', async ({ page }) => {
+  // Covers the ways out the client owns on its own (the ✕, the swipe). Needs a
+  // Telegram boot (`initData`) — the browser path skips the whole chrome block.
+  // `enableClosingConfirmation()` was retired on 30.08.2026 (da2c01fc): it
+  // charged every intentional exit an extra tap, and leaving is the far more
+  // common press. The stub records `expand()` as proof that the chrome block
+  // ran at all — otherwise "not confirmed" would also be true of an app that
+  // never booted.
   await installTelegram(page, 'query_id=stub&auth_date=0&hash=stub');
   await page.goto('/');
 
   // Deliberately not waiting for the app: the sign-in behind this stub is not
   // expected to succeed, and the chrome is set up before it is even attempted.
-  await expect.poll(() => page.evaluate(() => window.__tgBack.closingConfirmed)).toBe(true);
+  await expect.poll(() => page.evaluate(() => window.__tgBack.expanded)).toBe(true);
+  expect(await page.evaluate(() => window.__tgBack.closingConfirmed)).toBe(false);
 });

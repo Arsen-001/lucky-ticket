@@ -69,6 +69,7 @@ export function HomeEnginesScreen({
           <HomeGamesPill />
           <HomeScreenPill
             label={t('tikki')}
+            testId="home-pill-tikki"
             onClick={onBack}
             icon={
               <Image

@@ -14,6 +14,12 @@ export interface HomeScreenPillProps {
   /** Слева иконка мельче, поэтому и поле слева больше — как в макете. */
   side?: 'left' | 'right';
   className?: string;
+  /**
+   * Метка для e2e. У пилюли нет ни своего адреса, ни постоянного текста —
+   * подпись переведена на 20 языков, — а тесты главной должны уметь перейти
+   * на второй экран, где стоят куб и лента турниров.
+   */
+  testId?: string;
 }
 
 /**
@@ -30,6 +36,7 @@ export function HomeScreenPill({
   onClick,
   side = 'right',
   className,
+  testId,
 }: HomeScreenPillProps) {
   const shape = twMerge(
     'flex h-[34px] items-center gap-1.5 rounded-full',
@@ -42,7 +49,7 @@ export function HomeScreenPill({
 
   if (href) {
     return (
-      <Link href={href} className={shape}>
+      <Link href={href} className={shape} data-testid={testId}>
         {icon}
         {label}
       </Link>
@@ -50,7 +57,7 @@ export function HomeScreenPill({
   }
 
   return (
-    <button type="button" onClick={onClick} className={shape}>
+    <button type="button" onClick={onClick} className={shape} data-testid={testId}>
       {icon}
       {label}
     </button>

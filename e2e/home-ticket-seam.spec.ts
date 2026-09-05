@@ -1,4 +1,5 @@
 import { expect, test } from '@playwright/test';
+import { openEnginesScreen } from './helpers';
 
 /**
  * Home's tournament card is a ticket that is CUT, not drawn: the two notches on
@@ -105,6 +106,8 @@ for (const locale of ['en', 'ar'] as const) {
       await page.emulateMedia({ reducedMotion: 'reduce' });
       await page.goto('/', { waitUntil: 'domcontentloaded' });
       await page.getByTestId('app-shell').waitFor({ timeout: SLOW });
+      // Since 03.09.2026 Home opens on Tikki; the strip lives on the second screen.
+      await openEnginesScreen(page);
       await page.locator('.home-tournament-ticket').first().waitFor({ timeout: SLOW });
 
       // Hold the screen still: no modal over the strip, no autoplay, no entry
