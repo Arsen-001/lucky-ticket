@@ -138,8 +138,13 @@ export function TikkiHero({
         loading="eager"
         fetchPriority="high"
         className={twMerge(
-          // 348×356 — размер из макета; на узком телефоне ужимается по ширине.
-          'mx-auto h-auto max-h-full w-[348px] max-w-full object-contain',
+          // 348×356 — размер из макета; на узком телефоне ужимается по ширине,
+          // на коротком — по высоте сцены. `100cqh` — рост сцены (она
+          // size-контейнер), а не кнопки: у кнопки высота от содержимого, и
+          // `max-h-full` от неё молча равнялся «без потолка». Коробка при
+          // этом остаётся 348 в ширину — `object-contain` рисует персонажа по
+          // центру, поля прозрачные.
+          'mx-auto h-auto max-h-[100cqh] w-[348px] max-w-full object-contain',
           squash ? 'animate-tikki-squash' : full ? 'animate-tikki-ready' : 'animate-tikki-breathe',
           classNames?.image
         )}
