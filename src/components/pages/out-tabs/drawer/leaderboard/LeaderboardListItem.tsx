@@ -93,7 +93,9 @@ export function LeaderboardListItem({
       <RankBadge entry={entry} loading={loading} />
 
       {isMe ? (
-        <Link href={routes.profile.index} className={avatarClass}>
+        // Имя ссылке обязано быть своё: картинка внутри с `alt`, но на загрузке там
+        // скелет, и ссылка стоит безымянной — a11y-страж это и поймал (06.09.2026).
+        <Link href={routes.profile.index} className={avatarClass} aria-label={t('view profile')}>
           {avatarInner}
         </Link>
       ) : (

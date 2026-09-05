@@ -171,7 +171,13 @@ for (const route of STATIC_ROUTES) {
           [cx, cy - REACH],
           [cx, cy + REACH],
         ];
-        const lost = points
+        // Точка за краем окна ничего не говорит о зоне: `elementFromPoint` там
+        // отвечает null всегда. Так «Назад» на /games/duel, стоящая у самого
+        // верха, теряла точку cy−21 и роняла тест, хотя все свои 44×44 держит.
+        const inside = points.filter(
+          ([x, y]) => x >= 0 && y >= 0 && x < window.innerWidth && y < window.innerHeight
+        );
+        const lost = inside
           .map(([x, y]) => document.elementFromPoint(x, y))
           .filter(hit => !owns(el, hit));
         results.push({
@@ -183,7 +189,7 @@ for (const route of STATIC_ROUTES) {
 
       return results
         .filter(result => result.missed > 0)
-        .map(result => `${result.who} (${result.missed} of 5 sample points lost to ${result.by})`);
+        .map(result => `${result.who} (${result.missed} sample points lost to ${result.by})`);
     });
 
     expect(short, `tap-target hit zones swallowed on ${route}`).toEqual([]);
