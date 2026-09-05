@@ -54,6 +54,12 @@ export enum LcTransactionType {
    * механики, поэтому тоже своей строкой.
    */
   TIKKI_SPEND = 'tikki_spend',
+  /**
+   * Ежедневный подарок игроку БЕЗ подписки (DOCS §7.2a). Отдельно от
+   * `LP_DAILY_GIFT`: лестница одна, но одну строку оплачивает подписка, а
+   * другая — чистая эмиссия на всю базу.
+   */
+  DAILY_GIFT = 'daily_gift',
 }
 
 export enum LcTransactionDirection {

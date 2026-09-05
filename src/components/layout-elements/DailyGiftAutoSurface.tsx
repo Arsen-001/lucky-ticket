@@ -7,7 +7,7 @@ import {
   useMarkDailyGiftPromoSeenMutation,
 } from '@/api/statusGift.api';
 import { useGetMeQuery } from '@/api/me.api';
-import { LuckyPlayerDailyGiftModal } from '@/components/pages/tabs/home/LuckyPlayerDailyGiftModal';
+import { DailyGiftModal } from '@/components/pages/tabs/home/DailyGiftModal';
 import { useAutoSurfaceSlot } from '@/hooks/useAutoSurfaceSlot';
 import { useAppTranslations } from '@/hooks/useAppTranslations';
 import { useToast } from '@/hooks/useToast';
@@ -99,7 +99,7 @@ export function DailyGiftAutoSurface() {
   if (!gift) return null;
 
   return (
-    <LuckyPlayerDailyGiftModal
+    <DailyGiftModal
       open={canShow}
       gift={gift}
       claiming={claiming}

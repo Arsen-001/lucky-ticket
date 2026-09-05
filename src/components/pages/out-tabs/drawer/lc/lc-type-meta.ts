@@ -115,6 +115,14 @@ export const LC_TYPE_META: Record<LcTransactionType, LcTypeMeta> = {
     iconClass: 'text-pink',
     iconBg: 'bg-pink/15',
   },
+  // Та же лестница, что и у подписчика, — и в истории она обязана выглядеть
+  // так же. Разные причины нужны отчёту по экономике, а не игроку: он видит
+  // подарок, а не то, чем этот подарок оплачен.
+  [LcTransactionType.DAILY_GIFT]: {
+    Icon: Gift,
+    iconClass: 'text-pink',
+    iconBg: 'bg-pink/15',
+  },
   [LcTransactionType.ADMIN_ADJUST]: {
     Icon: SlidersHorizontal,
     iconClass: 'text-white/70',

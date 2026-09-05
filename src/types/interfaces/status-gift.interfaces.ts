@@ -11,9 +11,27 @@ export type DailyGiftSurfaceReason = 'gift' | 'promo';
  * after a cleared storage, because all three reset local state while the
  * subscription and the claim stamp live on the account.
  */
+/** Одна ступень серии, уже посчитанная под этого игрока. */
+export interface DailyGiftStep {
+  /** Номер дня подряд, с единицы. */
+  day: number;
+  tickets: number;
+  lc: number;
+}
+
 export interface DailyGiftState {
   enabled: boolean;
   isLuckyPlayer: boolean;
+  /** Подарок открыт всем, а не только подписке. */
+  openToAll: boolean;
+  /** Ступень, которая на столе сегодня. */
+  day: number;
+  /** Длина лестницы — после неё круг начинается заново. */
+  cycleDays: number;
+  /** Вся лестница по ставке этого игрока: клиент не считает ничего. */
+  steps: DailyGiftStep[];
+  /** Она же так, как её платит подписка, — это и есть промо-строка. */
+  lpSteps: DailyGiftStep[];
   lc: number;
   ticketTier: TicketType;
   ticketCount: number;
@@ -25,6 +43,9 @@ export interface DailyGiftState {
 
 export interface ClaimDailyGiftResponse {
   ok: true;
+  /** Какую ступень только что забрали. */
+  day: number;
+  cycleDays: number;
   lc: number;
   ticketTier: TicketType;
   ticketCount: number;

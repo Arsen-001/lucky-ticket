@@ -12,12 +12,39 @@ import type { DailyGiftStateResponse } from '@/types/interfaces/status-gift.inte
  * image and no caption for a week. A fixture that is easier to read than the
  * wire validates nothing.
  */
+/** Лестница по умолчанию — та же, что стоит на бэкенде. */
+const LADDER = [
+  { tickets: 3, lc: 0 },
+  { tickets: 3, lc: 100 },
+  { tickets: 3, lc: 200 },
+  { tickets: 6, lc: 0 },
+  { tickets: 6, lc: 400 },
+  { tickets: 6, lc: 600 },
+  { tickets: 9, lc: 2_000 },
+];
+
+/** Подписка умножает ступень, а не открывает её. */
+const ladder = (lp: boolean) =>
+  LADDER.map((s, i) => ({
+    day: i + 1,
+    tickets: s.tickets * (lp ? 2 : 1),
+    lc: s.lc * (lp ? 3 : 1),
+  }));
+
+/** Третий день подряд — на нём видно и забранное, и то, что впереди. */
+const DAY = 3;
+
 const state: DailyGiftStateResponse = {
   enabled: true,
   isLuckyPlayer: true,
-  lc: 25_000,
+  openToAll: false,
+  day: DAY,
+  cycleDays: LADDER.length,
+  steps: ladder(true),
+  lpSteps: ladder(true),
+  lc: ladder(true)[DAY - 1].lc,
   ticketTier: 'BRONZE',
-  ticketCount: 1,
+  ticketCount: ladder(true)[DAY - 1].tickets,
   canClaim: true,
   lastClaimedAt: null,
   shouldSurface: true,
@@ -33,6 +60,8 @@ export const statusGiftMock = {
     state.lastClaimedAt = new Date().toISOString();
     return {
       ok: true as const,
+      day: state.day,
+      cycleDays: state.cycleDays,
       lc: state.lc,
       ticketTier: state.ticketTier,
       ticketCount: state.ticketCount,
