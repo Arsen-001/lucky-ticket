@@ -11,9 +11,8 @@ export interface TikkiBuyModalProps {
   balance: number;
   /** Цены присылает сервер — экран их не считает. */
   buyCost: Record<string, number>;
-  /** Доход тира в час и срок окупаемости — оттуда же. */
+  /** Доход тира в час — оттуда же. */
   tierBase: Record<string, number>;
-  buyPaybackDays: number;
   onClose: () => void;
   onBuy: (tier: TikkiTier) => void;
 }
@@ -22,13 +21,15 @@ export interface TikkiBuyModalProps {
  * Покупка нового Тикки. Доступны все пять тиров сразу — старший не «открывается»
  * младшим, у него просто своя цена. Потолка у коллекции нет: держать можно
  * сколько угодно, и это нарочно — на сплав нужно собирать по четыре и больше.
+ *
+ * Под заголовком ничего нет. До 05.09.2026 здесь стояла подпись «окупаемость у
+ * всех тиров одна» — снята: срок окупаемости игроку не показывается нигде.
  */
 export function TikkiBuyModal({
   open,
   balance,
   buyCost,
   tierBase,
-  buyPaybackDays,
   onClose,
   onBuy,
 }: TikkiBuyModalProps) {
@@ -37,10 +38,7 @@ export function TikkiBuyModal({
   return (
     <Modal open={open} onClose={onClose} label={t('buy tikki')}>
       <div className="bg-background flex w-full flex-col gap-3 rounded-2xl border border-white/10 p-5">
-        <div className="flex flex-col gap-1 pr-7">
-          <h3 className="text-lg font-bold text-white">{t('buy tikki')}</h3>
-          <p className="text-muted text-xs leading-snug">{t('buy tikki note')}</p>
-        </div>
+        <h3 className="pr-7 text-lg font-bold text-white">{t('buy tikki')}</h3>
 
         <div className="flex flex-col gap-2">
           {tikkiTiers.map((tier, index) => (
@@ -50,7 +48,6 @@ export function TikkiBuyModal({
               balance={balance}
               price={buyCost[tier] ?? 0}
               perHour={tierBase[tier] ?? 0}
-              paybackDays={buyPaybackDays}
               onBuy={() => onBuy(tier)}
               className="animate-slide-in-bottom"
               style={staggerStyle(index, 50)}

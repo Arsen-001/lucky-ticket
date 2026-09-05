@@ -252,7 +252,6 @@ export function TikkiScreen({ footer, onTierChange, className }: TikkiScreenProp
         balance={state.balance}
         buyCost={state.buyCost}
         tierBase={state.config.tierBase}
-        buyPaybackDays={state.config.buyPaybackDays}
         onClose={() => setBuying(false)}
         onBuy={(tier: TicketType) => {
           setBuying(false);
