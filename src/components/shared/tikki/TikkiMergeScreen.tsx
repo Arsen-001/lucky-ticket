@@ -10,6 +10,7 @@ import { useAppTranslations } from '@/hooks/useAppTranslations';
 import { staggerStyle } from '@/utils/global/animation.utils';
 import { TikkiMergeCard } from './TikkiMergeCard';
 import { TikkiMergeResult } from './TikkiMergeResult';
+import { TikkiMergeWaiting } from './TikkiMergeWaiting';
 
 export interface TikkiMergeScreenProps {
   units: readonly TikkiUnit[];
@@ -123,11 +124,9 @@ export function TikkiMergeScreen({
         })}
       </div>
 
-      <p className="text-muted text-xs leading-snug">
-        {enough
-          ? t('merge hint', { count: mergeSize })
-          : t('merge needs more', { count: mergeSize - selected.length })}
-      </p>
+      {enough && (
+        <p className="text-muted text-xs leading-snug">{t('merge hint', { count: mergeSize })}</p>
+      )}
 
       <div className="flex gap-2">
         <button
@@ -163,13 +162,19 @@ export function TikkiMergeScreen({
         ))}
       </div>
 
-      {enough && (
+      {enough ? (
         <TikkiMergeResult
           selected={selected}
           balance={balance}
           config={config}
           costByTier={costByTier}
           onMerge={() => onMerge(selected.map(unit => unit.id))}
+        />
+      ) : (
+        <TikkiMergeWaiting
+          tier={tier}
+          missing={mergeSize - selected.length}
+          mergeSize={mergeSize}
         />
       )}
     </div>

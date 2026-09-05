@@ -157,11 +157,15 @@ export function TikkiScreen({ footer, onTierChange, className }: TikkiScreenProp
         />
       </div>
 
+      {/* 🪤 `relative z-10` — не украшение. Персонаж съезжает на 28 px вниз и
+          своей КОРОБКОЙ (348×356, снизу прозрачной) накрывает обе пилюли этого
+          ряда: без подъёма тап по «0/100 ↑» попадал в Тикки, а не в прокачку.
+          Нашёл это e2e, а не глаз — на экране всё выглядит правильно. */}
       <TikkiMeterRow
         unit={selected}
         onUpgradeClicker={() => openUpgrade('clicker')}
         onUpgradeWindow={() => openUpgrade('window')}
-        className="mb-2 mt-0.5"
+        className="relative z-10 mb-2 mt-0.5"
       />
 
       <TikkiCollection

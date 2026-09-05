@@ -33,6 +33,9 @@ export function TikkiBalanceRow({ balance, perHour }: TikkiBalanceRowProps) {
     <div>
       <div className="flex items-baseline justify-center gap-[11px] whitespace-nowrap">
         <span
+          // Единственная зацепка для e2e на этом экране: «тапнул — стало
+          // больше» нечем проверить, если число не найти.
+          data-testid="tikki-balance"
           className={`flex items-baseline font-extrabold leading-none tracking-[-0.02em] tabular-nums ${size}`}
         >
           <CoinIcon size={18} className="me-[0.26em] self-center" />
