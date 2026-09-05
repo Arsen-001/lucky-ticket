@@ -9,8 +9,9 @@ import {
   useTapTikkiMutation,
   useUpgradeTikkiMutation,
 } from '@/api/tikki.api';
-import type { TikkiState, TikkiUnit, TikkiUpgradeKind } from '@/types/interfaces/tikki.interfaces';
+import type { TikkiUpgradeKind } from '@/types/interfaces/tikki.interfaces';
 import type { TicketType } from '@/types/types/ticket.types';
+import { noPending, projectTikki, tikkiAfterBatch, type TikkiPending } from './tikki.taps';
 
 /** Старое имя буста — экраны знают его под ним. */
 export type TikkiUpgrade = TikkiUpgradeKind;
@@ -27,6 +28,15 @@ const TAP_FLUSH_MS = 500;
 /** Как часто состояние перечитывается, пока экран открыт. */
 const POLL_MS = 30_000;
 
+/** Пачка, которая ещё не уехала: сколько раз нажали и на сколько LC. */
+interface Batch {
+  id: string;
+  count: number;
+  taken: number;
+}
+
+const noBatch: Batch = { id: '', count: 0, taken: 0 };
+
 /**
  * Прогресс Тикки.
  *
@@ -37,7 +47,8 @@ const POLL_MS = 30_000;
  *
  * Между ответами кликер досчитывается ЛОКАЛЬНО и только для показа: полоса
  * должна ползти, а не дёргаться раз в тридцать секунд. Настоящее число всё
- * равно приходит с сервера и перетирает нарисованное.
+ * равно приходит с сервера и перетирает нарисованное. Арифметика очереди
+ * нажатий — в `tikki.taps.ts`, там же и почему она такая.
  */
 export function useTikkiProgress() {
   const { data, isLoading, isError, refetch } = useGetTikkiQuery(undefined, {
@@ -52,11 +63,11 @@ export function useTikkiProgress() {
   const [buyTikki] = useBuyTikkiMutation();
   const [mergeTikki] = useMergeTikkiMutation();
 
-  /** Что игрок уже нажал, но сервер ещё не подтвердил — рисуем это сразу. */
-  const [pending, setPending] = useState({ id: '', taken: 0 });
+  /** Что игрок уже нажал, а сервер ещё не подтвердил — рисуем это сразу. */
+  const [pending, setPending] = useState<TikkiPending>(noPending);
   const [tick, setTick] = useState(0);
   const flushTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
-  const queued = useRef({ id: '', count: 0 });
+  const queued = useRef<Batch>(noBatch);
 
   // Когда состояние в последний раз пришло с сервера — от этой точки кликер и
   // досчитывается вперёд. Идентичность `data` меняется на каждый ответ.
@@ -76,17 +87,20 @@ export function useTikkiProgress() {
   }, []);
 
   const flush = useCallback(() => {
-    const { id, count } = queued.current;
-    queued.current = { id: '', count: 0 };
+    const sent = queued.current;
+    queued.current = noBatch;
+    if (flushTimer.current) clearTimeout(flushTimer.current);
     flushTimer.current = null;
-    if (!id || count <= 0) return;
-    void tapTikki({ unitId: id, count })
+    if (!sent.id || sent.count <= 0) return;
+    void tapTikki({ unitId: sent.id, count: sent.count })
       .unwrap()
       .catch(() => {
         // Отказ (не хватило, слишком часто) — экран перерисуется следующим
         // ответом; своего счёта у него нет, врать ему нечем.
       })
-      .finally(() => setPending({ id: '', taken: 0 }));
+      // Из ожидаемого вычитается ровно эта пачка, а не всё: нажатия, сделанные
+      // пока она летела, в ответе ещё не учтены — см. tikkiAfterBatch.
+      .finally(() => setPending(p => tikkiAfterBatch(p, sent)));
   }, [tapTikki]);
 
   // Уходя с экрана, дописываем то, что не успело уехать: пять нажатий и сразу
@@ -96,17 +110,21 @@ export function useTikkiProgress() {
     window.addEventListener('pagehide', onHide);
     return () => {
       window.removeEventListener('pagehide', onHide);
-      if (flushTimer.current) clearTimeout(flushTimer.current);
       flush();
     };
   }, [flush]);
 
   const tap = useCallback(
     (unitId: string, value: number) => {
-      queued.current =
-        queued.current.id === unitId
-          ? { id: unitId, count: queued.current.count + 1 }
-          : { id: unitId, count: 1 };
+      // Брать нечего — нет ни цифры, ни запроса. Иначе пустой Тикки рисовал бы
+      // «+1», которое сервер тут же отнимал, а каждое нажатие шло в минутный
+      // потолок сервера.
+      if (value <= 0) return;
+      // Сменили персонажа с неотправленной пачкой — она уезжает сейчас, иначе
+      // нажатия по прежнему пропали бы вместе с очередью.
+      if (queued.current.id && queued.current.id !== unitId) flush();
+      const q = queued.current.id === unitId ? queued.current : noBatch;
+      queued.current = { id: unitId, count: q.count + 1, taken: q.taken + value };
       setPending(p =>
         p.id === unitId ? { id: unitId, taken: p.taken + value } : { id: unitId, taken: value }
       );
@@ -136,7 +154,7 @@ export function useTikkiProgress() {
   const merge = useCallback((unitIds: string[]) => mergeTikki({ unitIds }).unwrap(), [mergeTikki]);
 
   return {
-    state: data ? projected(data, pending, tick, syncedAt) : undefined,
+    state: data ? projectTikki(data, pending, tick, syncedAt) : undefined,
     isLoading,
     isError,
     refetch,
@@ -147,28 +165,3 @@ export function useTikkiProgress() {
     merge,
   };
 }
-
-/**
- * Состояние, каким его надо НАРИСОВАТЬ: серверное плюс то, что уже произошло на
- * экране и ещё не подтверждено.
- *
- * Две поправки, обе только для показа. Кликер досчитывается вперёд от того, что
- * прислал сервер, — полоса должна ползти. Неподтверждённые нажатия сразу сняты
- * с кликера и добавлены к счёту: иначе цифра под пальцем отставала бы на
- * полсекунды, а это ровно то, ради чего в такую игру и заходят.
- */
-const projected = (
-  state: TikkiState,
-  pending: { id: string; taken: number },
-  now: number,
-  syncedAt: number
-): TikkiState => {
-  // Пока эффект не проставил метку (первый кадр) — досчитывать нечего.
-  const hours = syncedAt > 0 && now > 0 ? Math.max(0, now - syncedAt) / 3_600_000 : 0;
-  const units = state.units.map((u): TikkiUnit => {
-    const grown = Math.min(u.capacity, u.fill + u.clickerPerHour * hours);
-    const mine = u.id === pending.id ? pending.taken : 0;
-    return { ...u, fill: Math.max(0, Math.min(u.capacity, grown - mine)) };
-  });
-  return { ...state, balance: state.balance + pending.taken, units };
-};

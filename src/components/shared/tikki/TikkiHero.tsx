@@ -66,26 +66,30 @@ export function TikkiHero({
 
   const handleTap = useCallback(
     (event: React.PointerEvent<HTMLButtonElement>) => {
-      const box = event.currentTarget.getBoundingClientRect();
-      const id = ++popId.current;
-
-      if (!empty) {
-        triggerHaptic('light');
-        setPops(prev => [
-          ...prev.slice(-MAX_POPS),
-          {
-            id,
-            x: ((event.clientX - box.left) / box.width) * 100,
-            y: ((event.clientY - box.top) / box.height) * 100,
-            amount: tapValue,
-          },
-        ]);
-        setTimeout(() => setPops(prev => prev.filter(pop => pop.id !== id)), 800);
-      }
-
+      // Приседает на любое нажатие — иначе кнопка кажется мёртвой.
       setSquash(true);
       if (squashTimer.current) clearTimeout(squashTimer.current);
       squashTimer.current = setTimeout(() => setSquash(false), 320);
+
+      // Брать нечего: ни цифры, ни отклика, ни запроса. До 06.09.2026 нажатие
+      // по пустому Тикки всё равно уходило в хук — на экране мелькало «+1»,
+      // которое сервер тут же отнимал, а каждое такое нажатие шло в минутный
+      // потолок сервера, откуда потом отказывали и настоящим.
+      if (empty) return;
+
+      const box = event.currentTarget.getBoundingClientRect();
+      const id = ++popId.current;
+      triggerHaptic('light');
+      setPops(prev => [
+        ...prev.slice(-MAX_POPS),
+        {
+          id,
+          x: ((event.clientX - box.left) / box.width) * 100,
+          y: ((event.clientY - box.top) / box.height) * 100,
+          amount: tapValue,
+        },
+      ]);
+      setTimeout(() => setPops(prev => prev.filter(pop => pop.id !== id)), 800);
 
       onTap();
     },
@@ -113,6 +117,7 @@ export function TikkiHero({
       type="button"
       onPointerDown={handleTap}
       aria-label={t('tap tikki')}
+      data-testid="tikki-hero"
       className={twMerge(
         'relative mx-auto block touch-manipulation select-none rounded-3xl',
         'focus-visible:outline-teal focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4',

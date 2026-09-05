@@ -10,6 +10,7 @@ import { formatCompact } from '@/utils/global/number.utils';
 import type { TicketType } from '@/types/types/ticket.types';
 import type { TikkiUpgradeKind } from '@/types/interfaces/tikki.interfaces';
 import type { TikkiTier } from './tikki.constants';
+import { tikkiTapTake } from './tikki.taps';
 import { useTikkiProgress } from './useTikkiProgress';
 import { TikkiBalanceRow } from './TikkiBalanceRow';
 import { TikkiBoostChip } from './TikkiBoostChip';
@@ -74,6 +75,9 @@ export function TikkiScreen({ footer, onTierChange, className }: TikkiScreenProp
   if (isLoading || !state || !selected) return null;
 
   const passivePerHour = state.units.reduce((sum, unit) => sum + unit.passivePerHour, 0);
+  // Что нажатие унесёт прямо сейчас — по НАРИСОВАННОМУ кликеру, из которого
+  // уже вычтены неподтверждённые нажатия. Ноль — Тикки пуст, и герой это знает.
+  const take = tikkiTapTake(selected.fill, selected.tapValue);
   const mergeReady = state.merge.ready.length > 0;
   const poor = (kind: TikkiUpgradeKind) => {
     const price = selected.cost[kind];
@@ -123,10 +127,10 @@ export function TikkiScreen({ footer, onTierChange, className }: TikkiScreenProp
       <div className="relative flex flex-available items-end justify-center">
         <TikkiHero
           tier={selected.tier as TikkiTier}
-          tapValue={selected.tapValue}
-          empty={selected.fill < 1}
+          tapValue={take}
+          empty={take === 0}
           full={selected.fill >= selected.capacity}
-          onTap={() => tap(selected.id, selected.tapValue)}
+          onTap={() => tap(selected.id, take)}
           // Ногами персонаж заходит на 28 px ниже чипов — ровно как в макете.
           // Оттуда и его размер: он крупный потому, что уходит ЗА них.
           className="translate-y-7"

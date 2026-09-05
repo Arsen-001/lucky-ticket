@@ -64,8 +64,12 @@ const units: MockUnit[] = [];
 
 const seed = () => {
   if (units.length) return;
-  const first = buyTikkiUnit(TicketsEnum.BRONZE, `tikki-${++seq}`, Date.now());
-  units.push({ ...first, selected: true });
+  const now = Date.now();
+  const first = buyTikkiUnit(TicketsEnum.BRONZE, `tikki-${++seq}`, now);
+  // Кликер выдаётся ПОЛНЫМ: на моке экран смотрят и тапают сразу, а не через
+  // четыре часа; e2e на тап без этого нечего проверять. Пассив при этом не
+  // «накапал» — `paidAt` остаётся сейчас, и счёт от первого запроса не едет.
+  units.push({ ...first, filledAt: now - tikkiStartHours * 3_600_000, selected: true });
 };
 
 /** Догнать время: пассив — на счёт, кликер — в себя, до потолка окна. */
