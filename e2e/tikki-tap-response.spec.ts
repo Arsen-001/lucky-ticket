@@ -27,6 +27,7 @@ const TAP_GAP_MS = 120;
 declare global {
   interface Window {
     __squashStarts?: number;
+    __bubbleStarts?: number;
   }
 }
 
@@ -55,6 +56,18 @@ test('серия тапов: приседание на каждом, обе ру
       }
     });
   });
+  // Облако реплики за серию не должно проигрывать появление ни разу. До
+  // 06.09.2026 контейнерный запрос прятал его через `display: none`, и в
+  // Chromium это перезапускало `fade-in` на каждом перерисовывании — облако
+  // моргало раз в секунду в покое и было невидимо всю серию тапов.
+  const bubble = hero.locator('.tikki-speech');
+  await expect(bubble, 'реплика над головой есть').toHaveCount(1);
+  await bubble.evaluate(el => {
+    window.__bubbleStarts = 0;
+    el.addEventListener('animationstart', () => {
+      window.__bubbleStarts = (window.__bubbleStarts ?? 0) + 1;
+    });
+  });
 
   for (let i = 0; i < TAPS; i += 1) {
     await hero.dispatchEvent('pointerdown', {
@@ -71,6 +84,8 @@ test('серия тапов: приседание на каждом, обе ру
   await expect(body, 'покачивание во время серии').toHaveClass(/animate-tikki-ready/);
   await expect(img, 'кадр с обеими руками во время серии').toHaveAttribute('src', /-jump\./);
   expect(await page.evaluate(() => window.__squashStarts), 'приседаний за серию').toBe(TAPS);
+  expect(await page.evaluate(() => window.__bubbleStarts), 'перезапусков облака за серию').toBe(0);
+  await expect(bubble, 'облако не погасло под пальцем').toHaveCSS('opacity', '1');
 
   // Круг покачивания после последнего нажатия — и Тикки снова спокоен.
   await expect(body, 'успокоился после серии').not.toHaveClass(/animate-tikki-ready/, {
