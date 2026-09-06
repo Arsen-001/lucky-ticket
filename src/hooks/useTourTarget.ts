@@ -15,8 +15,22 @@ export interface TourTargetState {
   phase: TourTargetPhase;
 }
 
-/** How long to wait for a step's anchor to mount before falling back to a centered card. */
-const ANCHOR_WAIT_MS = 2500;
+/**
+ * How long to wait for a step's anchor to mount before falling back to a centered card.
+ *
+ * Число измерено, а не выбрано. Шаг про двигатель приходит на экран, который
+ * ещё ничего не знает: тур переходит по адресу, экран запрашивает движки, а
+ * новичку прямо перед этим выдали стартовый набор — это два обмена с сервером
+ * подряд, и наш зритель сидит в Telegram через VPN. На прод-сборке с каналом
+ * 400 кбит/с и задержкой 400 мс якорь «двигатель» встал через **5290 мс**
+ * (быстрый канал — 1317 мс). Прежние 2,5 с укладывались только в мок с его
+ * 400–1200 мс: на телефоне шаг снова остался бы без подсветки — ровно та
+ * поломка, которую чинили.
+ *
+ * Цена ожидания — затемнённый экран без карточки, и платится она только там,
+ * где якоря действительно нет; поэтому взят запас, а не впритык к замеру.
+ */
+const ANCHOR_WAIT_MS = 8000;
 
 /** Smallest box containing both rects — used to spotlight a step's two anchors at once. */
 const unionRect = (a: DOMRect, b: DOMRect): DOMRect => {
