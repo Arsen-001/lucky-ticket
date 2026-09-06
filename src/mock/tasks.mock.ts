@@ -1628,15 +1628,10 @@ const ACHIEVEMENTS = buildCategory({
       progress: { current: 0, target: 1 },
       rarity: TaskRarity.SILVER,
     },
-    {
-      id: 't-451',
-      deeplink: '/wallet',
-      title: 'Stars → LC swap',
-      subtitle: 'Convert Stars into LC.',
-      rewards: [lc(5), tickets(3), stars(1), ap(3)],
-      progress: { current: 0, target: 1 },
-      rarity: TaskRarity.BRONZE,
-    },
+    // STARS → LC OFF (06.09.2026) — снята и с прода, и отсюда: обмена звёзд на
+    // LC в игре нет (`CONVERT_FROM_STARS` не пишет ни один путь кода), поэтому
+    // карточка была невыполнимой. Дев не должен показывать то, чего нет у
+    // игрока. @see milestones.data.ts в бэкенде, «STARS → LC OFF».
 
     // ─── Engagement (time-gated) ───
     {
