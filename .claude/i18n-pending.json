@@ -1,15 +1,3 @@
 {
-  "keys": [
-    "merge into {tier}",
-    "merge is open",
-    "merge ready",
-    "next goal",
-    "tikki says empty",
-    "tikki says full",
-    "tikki says lonely",
-    "tikki says merge",
-    "tikki says tap",
-    "{count} of {size} to merge",
-    "{tier} tikki"
-  ]
+  "keys": []
 }
