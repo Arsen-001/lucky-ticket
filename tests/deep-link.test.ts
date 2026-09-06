@@ -21,6 +21,15 @@ describe('deep-link start_param parser', () => {
     expect(resolveStartParamRoute('faq-a-b-c')).toBe('/faq/a-b-c');
   });
 
+  it('sends the engine reminder to the engines screen, not to Home', () => {
+    // Письмо «двигатель готов» несёт именно этот параметр; на главной Тикки,
+    // а двигатель с кнопкой «Забрать» — на втором экране.
+    expect(resolveStartParamRoute('screen-engines')).toBe(routes.homeEngines);
+    expect(resolveStartParamRoute('screen_engines')).toBe('/?screen=engines');
+    // Имя экрана, которого мы не знаем, всё равно открывает игру.
+    expect(resolveStartParamRoute('screen-atlantis')).toBe(routes.home);
+  });
+
   it('round-trips build → resolve', () => {
     expect(resolveStartParamRoute(buildDeepLinkParam('faq', '9'))).toBe('/faq/9');
   });

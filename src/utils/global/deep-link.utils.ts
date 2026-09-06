@@ -17,6 +17,12 @@ const DEEP_LINK_ROUTES: Record<string, (id: string) => Route> = {
   // Приглашение на дуэль ведёт в КОНКРЕТНОЕ лобби, а не в список: человек
   // нажал «принять вызов», значит он идёт играть с тем, кто позвал.
   duel: id => routes.games.getDuelLobby(id),
+  // Экран, у которого нет своей строки в таб-баре. Пока такой один — второй
+  // экран главной, где стоят двигатели: напоминание бота «двигатель готов»
+  // обязано приводить к двигателю, а не на главную, где с 05.09.2026 Тикки.
+  // Незнакомое имя экрана ведёт на главную: ссылка из старого письма должна
+  // открыть игру, а не упереться в пустоту.
+  screen: id => (id.toLowerCase() === 'engines' ? routes.homeEngines : routes.home),
   // Add more as needed, e.g.:
   // tournament: id => routes.tournaments.getById(id),
   // stake: id => routes.stakes.getById(id),
