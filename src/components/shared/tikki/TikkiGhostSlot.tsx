@@ -5,6 +5,7 @@ import { twMerge } from 'tailwind-merge';
 import { useAppTranslations } from '@/hooks/useAppTranslations';
 import type { TikkiTier } from './tikki.constants';
 import { tikkiImages } from './tikki.images';
+import { LongPressShield } from '@/components/shared/content-protection/LongPressShield';
 
 export interface TikkiGhostSlotProps {
   tier: TikkiTier;
@@ -51,6 +52,7 @@ export function TikkiGhostSlot({ tier, onClick, className, style }: TikkiGhostSl
       >
         +
       </span>
+      <LongPressShield />
     </button>
   );
 }

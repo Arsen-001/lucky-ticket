@@ -4,6 +4,7 @@ import Image from 'next/image';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { twMerge } from 'tailwind-merge';
 import { tikkiImages } from './tikki.images';
+import { LongPressShield } from '@/components/shared/content-protection/LongPressShield';
 import { TikkiSpeech } from './TikkiSpeech';
 import { TikkiTapPop } from './TikkiTapPop';
 import type { TikkiTier } from './tikki.constants';
@@ -218,6 +219,9 @@ export function TikkiHero({
       {pops.map(pop => (
         <TikkiTapPop key={pop.id} x={pop.x} y={pop.y} amount={pop.amount} />
       ))}
+      {/* Последним ребёнком — чтобы накрыть и персонажа, и всё, что над ним.
+          По нему держат палец, когда хотят «сохранить картинку». */}
+      <LongPressShield />
     </button>
   );
 }

@@ -7,6 +7,7 @@ import { useAppTranslations } from '@/hooks/useAppTranslations';
 import { formatCompact } from '@/utils/global/number.utils';
 import type { TikkiGoal } from './tikki.goal';
 import { tikkiImages } from './tikki.images';
+import { LongPressShield } from '@/components/shared/content-protection/LongPressShield';
 import { TikkiGoalSlots } from './TikkiGoalSlots';
 
 export interface TikkiGoalCardProps {
@@ -42,7 +43,8 @@ export function TikkiGoalCard({ goal, balance, onBuy, onMerge, className }: Tikk
       aria-label={goal.ready ? t('merge') : t('buy tikki')}
       data-testid="tikki-goal"
       className={twMerge(
-        'grid h-[72px] w-full grid-cols-[auto_1fr_auto] items-center gap-2.5 rounded-2xl pe-3 ps-2.5 text-start',
+        // `relative` — под накладку от долгого нажатия, больше ни под что.
+        'relative grid h-[72px] w-full grid-cols-[auto_1fr_auto] items-center gap-2.5 rounded-2xl pe-3 ps-2.5 text-start',
         'bg-[rgba(20,18,36,0.62)] shadow-[inset_0_0_0_1px_rgba(255,255,255,0.08)] backdrop-blur-[2px]',
         'focus-visible:outline-teal focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2',
         className
@@ -87,6 +89,7 @@ export function TikkiGoalCard({ goal, balance, onBuy, onMerge, className }: Tikk
           {goal.ready ? t('merge') : t('buy')}
         </span>
       </span>
+      <LongPressShield />
     </button>
   );
 }
