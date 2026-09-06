@@ -145,6 +145,12 @@ for (const locale of ['en', 'ar'] as const) {
           // mounts again — so it is hidden by a RULE, which re-mounting cannot
           // undo. This test measured the modal's own scrim twice before that.
           'div.fixed:has([role="dialog"]),[role="dialog"]{display:none !important;}' +
+          // Ряд пилюль внизу экрана движков — `sticky bottom-0 z-40`. Когда
+          // лента останавливается низко, он накрывает НИЗ карточки, и проба
+          // «снаружи нижней прорези» читает пилюлю, а не билет. На ноуте карта
+          // ложится выше и это не видно; на CI тест падал этим дважды подряд
+          // 06.09.2026 — (108,100,83) и (57,40,47) вместо красного.
+          '[data-testid="home-pill-row"]{display:none !important;}' +
           '.home-tournament-ticket{background:#0000ff !important;}' +
           '.swiper-slide-active .home-tournament-ticket{background:#ff0000 !important;}' +
           '.home-tournament-ticket *{opacity:0 !important;}',
@@ -247,7 +253,11 @@ for (const locale of ['en', 'ar'] as const) {
 
       expect(
         apart(painted.outsideBottom),
-        `card is not one colour end to end (${painted.outsideBottom} vs ${solid})`
+        // Геометрия в сообщении — чтобы следующее падение объясняло себя само:
+        // «не один цвет» бывает и когда камера поймала не карточку.
+        `card is not one colour end to end (${painted.outsideBottom} vs ${solid}); ` +
+          `card ${card.width}×${card.height} at ${card.x},${card.y}, notch ${card.notch}, ` +
+          `stub ${card.stub}, rtl ${card.rtl}`
       ).toBeLessThan(25);
 
       expect(
