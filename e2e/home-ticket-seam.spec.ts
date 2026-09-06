@@ -45,6 +45,9 @@ const SLOW_TEST_TIMEOUT = 180_000;
 type Card = {
   x: number;
   y: number;
+  /** Viewport-relative left edge and the viewport itself — see the centring check. */
+  vx: number;
+  viewport: number;
   width: number;
   height: number;
   stub: number;
@@ -69,6 +72,8 @@ const CENTRED_CARD = () => {
     // from the card and sampled the backdrop instead.
     x: Math.round(rect.x + window.scrollX),
     y: Math.round(rect.y + window.scrollY),
+    vx: Math.round(rect.x),
+    viewport: window.innerWidth,
     width: Math.round(rect.width),
     height: Math.round(rect.height),
     stub: parseFloat(style.getPropertyValue('--home-ticket-stub')),
@@ -121,9 +126,25 @@ for (const locale of ['en', 'ar'] as const) {
       const clearTheScreen = () =>
         page.evaluate(() => {
           document.querySelectorAll('.swiper').forEach(el => {
-            const swiper = (el as HTMLElement & { swiper?: { autoplay?: { stop(): void } } })
-              .swiper;
+            const swiper = (
+              el as HTMLElement & {
+                swiper?: {
+                  autoplay?: { stop(): void };
+                  update?(): void;
+                  slideToLoop?(index: number, speed: number): void;
+                  realIndex?: number;
+                };
+              }
+            ).swiper;
             swiper?.autoplay?.stop();
+            // Лента может инициализироваться раньше, чем встала раскладка, и
+            // тогда «активный» слайд остаётся уехавшим за край: автоплей
+            // выключён и вернуть его уже некому. На CI (webkit, ar) карточка
+            // так и стояла на x=-152 все пятнадцать попыток. Ставим её на
+            // место сами и мгновенно — это то же «не двигайся», что и стоп
+            // автоплея, только про положение.
+            swiper?.update?.();
+            swiper?.slideToLoop?.(swiper.realIndex ?? 0, 0);
           });
         });
       await clearTheScreen();
@@ -158,6 +179,8 @@ for (const locale of ['en', 'ar'] as const) {
 
       let card: Card | null = null;
       let painted: Record<string, number[]> | null = null;
+      /** Последняя увиденная карточка — чтобы падение объясняло, чего ждали. */
+      let lastSeen: Card | null = null;
 
       // Locate, shoot, then check the shot actually caught the card.
       //
@@ -172,6 +195,15 @@ for (const locale of ['en', 'ar'] as const) {
         await clearTheScreen();
         const before = (await page.evaluate(CENTRED_CARD)) as Card | null;
         if (!before) continue;
+        lastSeen = before;
+
+        // Мерить можно только карточку, которая стоит В ЦЕНТРЕ и целиком в
+        // кадре. Класс `swiper-slide-active` этого не обещает: рельса гасит
+        // всё, что ушло от центра, и уехавшая карточка снимается блёклой —
+        // «красная» на глаз проверки, но неровная по краям. Именно так тест и
+        // упал на CI 06.09.2026: (109,43,41) вместо (255,0,0).
+        const offCentre = Math.abs(before.vx + before.width / 2 - before.viewport / 2);
+        if (before.vx < 0 || before.vx + before.width > before.viewport || offCentre > 8) continue;
 
         // The strip can put the card outside the viewport between two frames, and
         // a clip that lands off-screen throws rather than returning a bad image.
@@ -237,7 +269,10 @@ for (const locale of ['en', 'ar'] as const) {
 
       expect(
         card,
-        'the home strip never held still long enough to read the centred ticket'
+        'the home strip never held still long enough to read the centred ticket' +
+          (lastSeen
+            ? ` — last seen ${lastSeen.width}×${lastSeen.height} at x=${lastSeen.vx} of ${lastSeen.viewport}, rtl ${lastSeen.rtl}`
+            : ' — no centred ticket was ever on screen')
       ).not.toBeNull();
       expect(painted, 'no pixels read from the ticket').not.toBeNull();
       if (!card || !painted) return;
