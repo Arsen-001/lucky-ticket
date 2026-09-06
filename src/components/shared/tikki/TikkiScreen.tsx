@@ -173,7 +173,10 @@ export function TikkiScreen({ footer, onTierChange, className }: TikkiScreenProp
           это 360×640, самый короткий из живых Android; ниже него лучше
           прокрутка, чем персонаж-с-ноготь. Без явного `min-h` size-контейнер
           дал бы сцене ужаться в ноль. */}
-      <div className="tikki-stage relative flex min-h-[216px] flex-available items-end justify-center">
+      <div
+        data-tour="tikki"
+        className="tikki-stage relative flex min-h-[216px] flex-available items-end justify-center"
+      >
         <TikkiHero
           tier={selected.tier as TikkiTier}
           tapValue={take}

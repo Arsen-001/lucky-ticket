@@ -962,6 +962,8 @@
   "reach {tier} tier": "მიაღწიე {tier} საფეხურს",
   "tournament locked": "{tier} ტურნირები ჩაკეტილია",
   "stake level locked": "{tier} სტეიკები ჩაკეტილია",
+  "tour tikki title": "Tikki",
+  "tour tikki body": "შეეხე Tikki-ს — ის LC-ს მოაქვს და შენს გარეშეც აგროვებს. გახსენი ახლები და შერწყი ისინი უფრო მაღალ საფეხურად.",
   "tour engine title": "შენი ძრავი",
   "tour engine body": "შენი უფასო ბრინჯაოს ძრავი ბილეთებს თავად ამზადებს — შეხება არ სჭირდება.",
   "tour lc title": "Lucky Coin (LC)",

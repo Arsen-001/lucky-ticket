@@ -1,6 +1,11 @@
 export const routes = {
   // tab routes
   home: '/',
+  // Второй экран главной — движки. У него свой адрес, потому что попасть туда
+  // должен уметь не только палец: тур ходит по адресам, и пока экран жил одним
+  // `useState`, два его шага — «твой двигатель» и «забери первый билет» — не
+  // находили цели с того дня, как главную занял Тикки.
+  homeEngines: '/?screen=engines',
   tournaments: {
     index: '/tournaments',
     getById: function (tournamentId: string) {

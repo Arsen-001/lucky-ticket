@@ -962,6 +962,8 @@
   "reach {tier} tier": "{tier} dərəcəsinə çat",
   "tournament locked": "{tier} turnirləri kilidlidir",
   "stake level locked": "{tier} stake-ləri kilidlidir",
+  "tour tikki title": "Tikki",
+  "tour tikki body": "Tikki-yə toxun: LC gətirir və sən yox ikən də qazanır. Yenilərini aç və onları daha yüksək dərəcədə birləşdir.",
   "tour engine title": "Mühərrikin",
   "tour engine body": "Pulsuz bürünc mühərrikin biletləri öz-özünə istehsal edir — toxunmağa ehtiyac yoxdur.",
   "tour lc title": "Lucky Coin (LC)",

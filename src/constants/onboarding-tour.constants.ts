@@ -14,6 +14,10 @@ import type { MessageIds } from '@/types/types/i18n.types';
  * generically — there is no per-step branching anywhere else. `realAction:
  * true` makes the user's tap fire the target's real `onClick` (used only for
  * the final "claim your first ticket" step); every other step just advances.
+ *
+ * A step's `route` may carry a query (`routes.homeEngines` — the engines side
+ * of Home). A step whose screen only exists behind a rollout stage declares
+ * that stage in `feature`, and is dropped for players who don't have it.
  * ──────────────────────────────────────────────────────────────────────────
  */
 
@@ -41,14 +45,29 @@ export interface TourStep {
   readonly realAction?: boolean;
   /** i18n hint under the bubble on a `realAction` step (defaults to a generic "tap the highlighted area"). */
   readonly actionHintKey?: MessageIds;
+  /**
+   * Стадия выката, без которой шага нет. Экран, закрытый фичей, не существует
+   * для игрока — а шаг, чью цель никогда не найти, показывает карточку без
+   * подсветки и молча ничего не нажимает.
+   */
+  readonly feature?: string;
   /** Delay (ms) before auto-advancing — lets a `realAction` settle (e.g. the claim flight animation finishing and the ticket minting) before the next step navigates away. */
   readonly advanceAfterMs?: number;
 }
 
 export const TOUR_STEPS: readonly TourStep[] = [
   {
-    id: 'engine',
+    id: 'tikki',
     route: routes.home,
+    anchor: 'tikki',
+    titleKey: 'tour tikki title',
+    bodyKey: 'tour tikki body',
+    placement: 'bottom',
+    feature: 'tikkiClicker',
+  },
+  {
+    id: 'engine',
+    route: routes.homeEngines,
     anchor: 'engine',
     titleKey: 'tour engine title',
     bodyKey: 'tour engine body',
@@ -56,7 +75,7 @@ export const TOUR_STEPS: readonly TourStep[] = [
   },
   {
     id: 'lc',
-    route: routes.home,
+    route: routes.homeEngines,
     anchor: 'lc',
     titleKey: 'tour lc title',
     bodyKey: 'tour lc body',
@@ -113,7 +132,7 @@ export const TOUR_STEPS: readonly TourStep[] = [
   },
   {
     id: 'claim',
-    route: routes.home,
+    route: routes.homeEngines,
     anchor: 'claim-cta',
     titleKey: 'tour claim title',
     bodyKey: 'tour claim body',

@@ -54,10 +54,17 @@ export function useTourTarget(step: TourStep | null, active: boolean): TourTarge
     return secondary ? unionRect(primary, secondary.getBoundingClientRect()) : primary;
   };
 
-  // Navigate to the step's screen when we're not already there.
+  // Navigate to the step's screen when we're not already there. A step's route
+  // may carry a query — `/?screen=engines` is the engines side of Home, and the
+  // pathname alone cannot tell the two screens apart — so the whole address is
+  // compared. `location.search` rather than `useSearchParams`: this hook hangs
+  // off the tour, which is mounted in the root layout, and that hook would
+  // force every statically rendered page behind a Suspense boundary. It is read
+  // inside the effect, where the client address is already the current one.
   useEffect(() => {
     if (!active || !step) return;
-    if (pathname !== step.route) router.push(step.route);
+    const here = pathname + window.location.search;
+    if (here !== step.route) router.push(step.route);
   }, [active, stepId, pathname]);
 
   // Locate + measure the anchor on the current screen.

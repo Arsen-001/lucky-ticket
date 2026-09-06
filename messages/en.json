@@ -962,6 +962,8 @@
   "reach {tier} tier": "Reach {tier} tier",
   "tournament locked": "{tier} tournaments are locked",
   "stake level locked": "{tier} stakes are locked",
+  "tour tikki title": "Tikki",
+  "tour tikki body": "Tap Tikki — he mints LC and keeps earning while you're away. Open more of them and merge them into a higher tier.",
   "tour engine title": "Your engine",
   "tour engine body": "Your free Bronze engine mints tickets on its own — no taps needed.",
   "tour lc title": "Lucky Coin (LC)",

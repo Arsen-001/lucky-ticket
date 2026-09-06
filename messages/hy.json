@@ -962,6 +962,8 @@
   "reach {tier} tier": "Հասիր {tier} կարգին",
   "tournament locked": "{tier} մրցաշարերը փակ են",
   "stake level locked": "{tier} ստեյքերը փակ են",
+  "tour tikki title": "Tikki",
+  "tour tikki body": "Հպի՛ր Tikki-ին՝ նա LC է բերում և վաստակում է նույնիսկ առանց քեզ։ Բացի՛ր նորերին և միաձուլի՛ր դրանք ավելի բարձր աստիճանի։",
   "tour engine title": "Քո շարժիչը",
   "tour engine body": "Քո անվճար բրոնզե շարժիչն ինքն է տոմսեր արտադրում — հպումներ պետք չեն։",
   "tour lc title": "Lucky Coin (LC)",

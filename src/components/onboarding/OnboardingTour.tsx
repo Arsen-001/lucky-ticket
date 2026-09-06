@@ -3,6 +3,7 @@
 import { useEffect, useRef } from 'react';
 import { useGetMeQuery, useUpdateMeMutation } from '@/api/me.api';
 import { TOUR_STEPS } from '@/constants/onboarding-tour.constants';
+import { useFeature } from '@/hooks/useFeature';
 import { useTourTarget } from '@/hooks/useTourTarget';
 import { useAppDispatch, useAppSelector } from '@/lib/rtk/hooks';
 import {
@@ -23,6 +24,11 @@ export function OnboardingTour() {
   const dispatch = useAppDispatch();
   const running = useAppSelector(selectTourRunning);
   const stepIndex = useAppSelector(selectTourStepIndex);
+  // Шаг про экран, закрытый стадией выката, из тура выпадает: цели на экране
+  // нет, и он показал бы карточку без подсветки. Флаг один, поэтому и проверка
+  // одна — новая фича добавляет сюда строку, а не ветку в движок.
+  const tikkiOpen = useFeature('tikkiClicker');
+  const steps = TOUR_STEPS.filter(s => s.feature !== 'tikkiClicker' || tikkiOpen);
   const { data: me } = useGetMeQuery();
   const [updateMe] = useUpdateMeMutation();
 
@@ -52,12 +58,12 @@ export function OnboardingTour() {
     return () => window.removeEventListener('keydown', onKey);
   }, [running, dispatch]);
 
-  const step = running ? (TOUR_STEPS[stepIndex] ?? null) : null;
+  const step = running ? (steps[stepIndex] ?? null) : null;
   const { rect, targetEl, phase } = useTourTarget(step, running);
 
   if (!running || !step) return null;
 
-  const isLast = stepIndex === TOUR_STEPS.length - 1;
+  const isLast = stepIndex === steps.length - 1;
 
   const advance = () => {
     if (advanceLockRef.current) return;
@@ -79,7 +85,7 @@ export function OnboardingTour() {
     <OnboardingTourOverlay
       step={step}
       stepIndex={stepIndex}
-      total={TOUR_STEPS.length}
+      total={steps.length}
       rect={rect}
       phase={phase}
       isLast={isLast}

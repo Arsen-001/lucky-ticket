@@ -962,6 +962,8 @@
   "reach {tier} tier": "{tier} kademesine ulaş",
   "tournament locked": "{tier} turnuvaları kilitli",
   "stake level locked": "{tier} stake'leri kilitli",
+  "tour tikki title": "Tikki",
+  "tour tikki body": "Tikki’ye dokun: LC kazandırır, sen yokken de kazanmaya devam eder. Yenilerini aç ve onları daha üst bir kademede birleştir.",
   "tour engine title": "Motorun",
   "tour engine body": "Ücretsiz bronz motorun biletleri kendi başına üretiyor — dokunmana gerek yok.",
   "tour lc title": "Lucky Coin (LC)",

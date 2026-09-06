@@ -7,6 +7,9 @@
 /** Every param-less screen, derived from `src/constants/routes.ts`. */
 export const STATIC_ROUTES = [
   '/',
+  // Второй экран главной — движки. У него свой адрес (`routes.homeEngines`),
+  // и раз адрес есть, его обходят те же проверки, что и все остальные экраны.
+  '/?screen=engines',
   '/tournaments',
   '/market',
   '/tasks',

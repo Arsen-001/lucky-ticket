@@ -962,6 +962,8 @@
   "reach {tier} tier": "{tier} 티어 도달",
   "tournament locked": "{tier} 토너먼트는 잠겨 있습니다",
   "stake level locked": "{tier} 스테이크는 잠겨 있습니다",
+  "tour tikki title": "Tikki",
+  "tour tikki body": "Tikki를 탭하면 LC를 얻고, 자리를 비워도 계속 법니다. 더 많이 열어 상위 등급으로 합성하세요.",
   "tour engine title": "내 엔진",
   "tour engine body": "무료 브론즈 엔진은 알아서 티켓을 만듭니다. 탭할 필요가 없습니다.",
   "tour lc title": "Lucky Coin (LC)",

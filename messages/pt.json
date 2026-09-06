@@ -962,6 +962,8 @@
   "reach {tier} tier": "Chegue ao patamar {tier}",
   "tournament locked": "Os torneios {tier} estão bloqueados",
   "stake level locked": "Os stakes {tier} estão bloqueados",
+  "tour tikki title": "Tikki",
+  "tour tikki body": "Toque no Tikki: ele rende LC e continua rendendo enquanto você não está. Abra mais e funda-os em um nível superior.",
   "tour engine title": "Seu motor",
   "tour engine body": "Seu motor de bronze gratuito fabrica tickets sozinho — sem precisar tocar em nada.",
   "tour lc title": "Lucky Coin (LC)",

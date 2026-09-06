@@ -962,6 +962,8 @@
   "reach {tier} tier": "{tier}ティアに到達",
   "tournament locked": "{tier}のトーナメントはロック中です",
   "stake level locked": "{tier}のステークはロック中です",
+  "tour tikki title": "Tikki",
+  "tour tikki body": "Tikki をタップすると LC がもらえ、離れていても稼いでくれます。もっと開けて、上位ティアに合成しましょう。",
   "tour engine title": "あなたのエンジン",
   "tour engine body": "無料のブロンズエンジンは自動でチケットを作ります。タップは不要です。",
   "tour lc title": "Lucky Coin（LC）",

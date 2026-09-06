@@ -962,6 +962,8 @@
   "reach {tier} tier": "{tier} тепкичине жет",
   "tournament locked": "{tier} турнирлери бөгөлгөн",
   "stake level locked": "{tier} стейктери бөгөлгөн",
+  "tour tikki title": "Тикки",
+  "tour tikki body": "Тиккини бас: ал LC алып келет жана сенсиз да чогултат. Жаңыларын ач жана аларды жогорку деңгээлге бириктир.",
   "tour engine title": "Сенин кыймылдаткычың",
   "tour engine body": "Акысыз коло кыймылдаткычың билеттерди өзү чыгарат — эч нерсе басуунун кереги жок.",
   "tour lc title": "Lucky Coin (LC)",

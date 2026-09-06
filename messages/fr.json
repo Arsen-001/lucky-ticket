@@ -962,6 +962,8 @@
   "reach {tier} tier": "Atteins le palier {tier}",
   "tournament locked": "Les tournois {tier} sont verrouillés",
   "stake level locked": "Les stakes {tier} sont verrouillés",
+  "tour tikki title": "Tikki",
+  "tour tikki body": "Tape sur Tikki : il rapporte des LC et continue de gagner sans toi. Ouvre-en d’autres et fusionne-les en un rang supérieur.",
   "tour engine title": "Ton moteur",
   "tour engine body": "Ton moteur bronze gratuit fabrique des tickets tout seul — aucun appui nécessaire.",
   "tour lc title": "Lucky Coin (LC)",

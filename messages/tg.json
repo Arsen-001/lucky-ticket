@@ -962,6 +962,8 @@
   "reach {tier} tier": "Ба зинаи {tier} рас",
   "tournament locked": "Мусобиқаҳои {tier} баста ҳастанд",
   "stake level locked": "Стейкҳои {tier} баста ҳастанд",
+  "tour tikki title": "Тикки",
+  "tour tikki body": "Тиккиро пахш кун: ӯ LC меорад ва бе ту ҳам ҷамъ мекунад. Наверо кушо ва онҳоро ба дараҷаи болотар гудоз.",
   "tour engine title": "Муҳаррики ту",
   "tour engine body": "Муҳаррики ройгони биринҷии ту чиптаҳоро худаш мебарорад — чизе пахш кардан лозим нест.",
   "tour lc title": "Lucky Coin (LC)",

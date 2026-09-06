@@ -128,7 +128,8 @@ export const testQuestStepHref: Partial<Record<TestQuestStepKind, Route>> = {
   ads: routes.tasks,
   share: routes.inviteFriends,
   referral: routes.inviteFriends,
-  engine: routes.home,
+  // Не на главную: там теперь Тикки, а движок стоит на её втором экране.
+  engine: routes.homeEngines,
   market: routes.market(),
   chip: routes.inventory,
   wallet: routes.wallet,

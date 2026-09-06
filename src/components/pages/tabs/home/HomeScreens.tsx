@@ -1,8 +1,10 @@
 'use client';
 
 import { useState } from 'react';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { EngineIcon } from '@/components/shared/icons/EngineIcon';
 import { TikkiScreen } from '@/components/shared/tikki/TikkiScreen';
+import { routes } from '@/constants/routes';
 import { TicketsEnum } from '@/types/enums/ticket.enums';
 import type { TikkiTier } from '@/components/shared/tikki/tikki.constants';
 import { useAppTranslations } from '@/hooks/useAppTranslations';
@@ -13,6 +15,10 @@ import { HomeGamesPill } from './HomeGamesPill';
 import { HomeScreenPill } from './HomeScreenPill';
 import { HomeScreenPillRow } from './HomeScreenPillRow';
 
+/** Какой из двух экранов главной открыт — записано в адресе, см. ниже. */
+const SCREEN_PARAM = 'screen';
+const ENGINES_SCREEN = 'engines';
+
 /**
  * Главная — это ДВА экрана, и первый из них Тикки.
  *
@@ -21,22 +27,36 @@ import { HomeScreenPillRow } from './HomeScreenPillRow';
  * что за играми иначе надо лезть через меню. Тот же ряд стоит и на втором
  * экране — только справа там пилюля возврата к Тикки.
  *
+ * Какой экран открыт, держит АДРЕС (`/?screen=engines`), а не `useState`.
+ * Разница не косметическая: состояние внутри компонента умеет переключать
+ * только палец, а на второй экран должен уметь перейти и тур — он ходит по
+ * адресам. Пока экран жил состоянием, шаги «твой двигатель» и «забери первый
+ * билет» показывали карточку без подсветки и не нажимали ничего, потому что
+ * куб с кнопкой «Забрать» уехал сюда, а тур остался ждать его на первом
+ * экране. `replace`, а не `push`: переключение экранов — не шаг назад, а
+ * кнопку «назад» Telegram и без того ловит `useBackDismiss`.
+ *
  * Пока `GET /me` не ответил, `useFeature` честно отвечает «нет», и главная
  * рисуется прежней. Тестировщик видит, как она один раз сменится на Тикки —
  * это лучше, чем пустой экран у всех остальных, кому фича не открыта.
  */
 export function HomeScreens() {
   const t = useAppTranslations();
+  const router = useRouter();
+  const searchParams = useSearchParams();
   const tikkiOpen = useFeature('tikkiClicker');
   const [tier, setTier] = useState<TikkiTier>(TicketsEnum.BRONZE);
-  const [engines, setEngines] = useState(false);
+
+  const engines = searchParams.get(SCREEN_PARAM) === ENGINES_SCREEN;
+  const showEngines = (next: boolean) =>
+    router.replace(next ? routes.homeEngines : routes.home, { scroll: false });
 
   // Кнопка «назад» Telegram возвращает к Тикки, а не выкидывает из приложения.
-  useBackDismiss(tikkiOpen && engines, () => setEngines(false));
+  useBackDismiss(tikkiOpen && engines, () => showEngines(false));
 
   if (!tikkiOpen) return <HomeEnginesScreen />;
 
-  if (engines) return <HomeEnginesScreen onBack={() => setEngines(false)} backTier={tier} />;
+  if (engines) return <HomeEnginesScreen onBack={() => showEngines(false)} backTier={tier} />;
 
   return (
     <TikkiScreen
@@ -47,7 +67,7 @@ export function HomeScreens() {
           <HomeScreenPill
             label={t('engines short')}
             testId="home-pill-engines"
-            onClick={() => setEngines(true)}
+            onClick={() => showEngines(true)}
             icon={<EngineIcon tier={tier} size={22} />}
           />
         </HomeScreenPillRow>

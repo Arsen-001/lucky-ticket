@@ -962,6 +962,8 @@
   "reach {tier} tier": "达到 {tier} 档位",
   "tournament locked": "{tier} 比赛已锁定",
   "stake level locked": "{tier} 质押已锁定",
+  "tour tikki title": "Tikki",
+  "tour tikki body": "点一下 Tikki 就有 LC，你不在他也在赚。多开几个，把它们融合成更高等级。",
   "tour engine title": "你的引擎",
   "tour engine body": "免费的青铜引擎会自己产出门票，无需你点按。",
   "tour lc title": "Lucky Coin（LC）",
