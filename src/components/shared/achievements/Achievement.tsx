@@ -46,6 +46,7 @@ import {
 } from 'lucide-react';
 
 import { twMerge } from 'tailwind-merge';
+import { LongPressShield } from '@/components/shared/content-protection/LongPressShield';
 import { AchievementCategory, AchievementRarity } from '@/types/enums/achievement.enums';
 import type { Achievement as AchievementType } from '@/types/interfaces/achievement.interfaces';
 import '@/styles/components/achievement.css';
@@ -228,6 +229,9 @@ export function Achievement({
           {overlay}
         </div>
       )}
+      {/* Бейдж — 120×120, самая крупная картинка витрины достижений.
+          `z-[2]` — потому что сама картинка лежит на `z-1`. */}
+      <LongPressShield className="z-[2]" />
     </div>
   );
 }

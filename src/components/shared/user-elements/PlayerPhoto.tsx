@@ -2,6 +2,7 @@
 import Image from 'next/image';
 import { useState } from 'react';
 import { twMerge } from 'tailwind-merge';
+import { LongPressShield } from '@/components/shared/content-protection/LongPressShield';
 import { isOptimizableImage } from '@/config/images.config';
 import { Skeleton } from '@/components/shared/seleketons/Skeleton';
 
@@ -99,6 +100,11 @@ export function PlayerPhoto({ src, alt, size, className, eager = false }: Player
           fetchPriority={eager ? 'high' : 'auto'}
         />
       )}
+
+      {/* Аватар — самая крупная картинка профиля и всей доски лидеров.
+          Глобальное `img { pointer-events: none }` уже уводит от неё
+          длинный тап, накладка держит то же самое узлом. */}
+      <LongPressShield />
     </span>
   );
 }
