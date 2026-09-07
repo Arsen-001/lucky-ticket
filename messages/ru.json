@@ -872,6 +872,8 @@
   "staking ready description": "Когда стейк готов забрать",
   "engine ready": "Двигатель готов",
   "engine ready description": "Когда двигатель наполнился и билеты ждут",
+  "tikki full": "Кликер Тикки полон",
+  "tikki full description": "Когда кликер набит доверху и больше ничего не печатает",
   "gift": "Подарок",
   "gifts": "Подарки",
   "gifts description": "Когда тебе присылают билеты",

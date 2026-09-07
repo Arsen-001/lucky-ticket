@@ -872,6 +872,8 @@
   "staking ready description": "عندما يصبح رهنك جاهزًا للاستلام",
   "engine ready": "المحرك جاهز",
   "engine ready description": "عندما يمتلئ المحرك وتكون التذاكر بانتظارك",
+  "tikki full": "Tikki's clicker is full",
+  "tikki full description": "When the clicker fills up and stops earning until you collect",
   "gift": "هدية",
   "gifts": "الهدايا",
   "gifts description": "عندما يرسل لك أحدهم تذاكر",

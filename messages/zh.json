@@ -872,6 +872,8 @@
   "staking ready description": "当你的质押可以领取时",
   "engine ready": "引擎已就绪",
   "engine ready description": "当引擎装满、门票在等你时",
+  "tikki full": "Tikki's clicker is full",
+  "tikki full description": "When the clicker fills up and stops earning until you collect",
   "gift": "礼物",
   "gifts": "礼物",
   "gifts description": "当有人给你赠送门票时",

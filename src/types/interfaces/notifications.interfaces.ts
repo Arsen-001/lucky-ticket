@@ -54,6 +54,8 @@ export type NotificationPreferenceKey =
   | 'invites'
   | 'stake'
   | 'engines'
+  /** Кликер Тикки набит доверху и больше ничего не печатает. */
+  | 'tikki'
   | 'gifts'
   | 'friends'
   | 'achievements'

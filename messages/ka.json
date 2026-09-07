@@ -872,6 +872,8 @@
   "staking ready description": "როცა შენი სტეიკი ასაღებად მზადაა",
   "engine ready": "ძრავი მზადაა",
   "engine ready description": "როცა ძრავი ივსება და ბილეთები გელოდება",
+  "tikki full": "Tikki's clicker is full",
+  "tikki full description": "When the clicker fills up and stops earning until you collect",
   "gift": "საჩუქარი",
   "gifts": "საჩუქრები",
   "gifts description": "როცა ვინმე ბილეთებს გამოგიგზავნის",

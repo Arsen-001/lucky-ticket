@@ -872,6 +872,8 @@
   "staking ready description": "Вақте ки стейки ту барои гирифтан тайёр аст",
   "engine ready": "Муҳаррик тайёр аст",
   "engine ready description": "Вақте ки муҳаррик пур мешавад ва чиптаҳо интизоранд",
+  "tikki full": "Tikki's clicker is full",
+  "tikki full description": "When the clicker fills up and stops earning until you collect",
   "gift": "Тӯҳфа",
   "gifts": "Тӯҳфаҳо",
   "gifts description": "Вақте ки касе ба ту чипта мефиристад",

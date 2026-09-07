@@ -872,6 +872,8 @@
   "staking ready description": "Երբ ստեյքդ պատրաստ է ստանալու",
   "engine ready": "Շարժիչը պատրաստ է",
   "engine ready description": "Երբ շարժիչը լցվում է, և տոմսերը սպասում են",
+  "tikki full": "Tikki's clicker is full",
+  "tikki full description": "When the clicker fills up and stops earning until you collect",
   "gift": "Նվեր",
   "gifts": "Նվերներ",
   "gifts description": "Երբ ինչ-որ մեկը քեզ տոմսեր է ուղարկում",

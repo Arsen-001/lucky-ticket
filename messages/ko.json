@@ -872,6 +872,8 @@
   "staking ready description": "스테이크를 받을 수 있게 되었을 때",
   "engine ready": "엔진 준비 완료",
   "engine ready description": "엔진이 가득 차고 티켓이 기다리고 있을 때",
+  "tikki full": "Tikki's clicker is full",
+  "tikki full description": "When the clicker fills up and stops earning until you collect",
   "gift": "선물",
   "gifts": "선물",
   "gifts description": "누군가 티켓을 보냈을 때",

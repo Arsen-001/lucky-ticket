@@ -872,6 +872,8 @@
   "staking ready description": "وقتی سپرده‌ات آمادهٔ دریافت شد",
   "engine ready": "موتور آماده است",
   "engine ready description": "وقتی موتور پر می‌شود و بلیت‌ها منتظرند",
+  "tikki full": "Tikki's clicker is full",
+  "tikki full description": "When the clicker fills up and stops earning until you collect",
   "gift": "هدیه",
   "gifts": "هدیه‌ها",
   "gifts description": "وقتی کسی برایت بلیت می‌فرستد",

@@ -872,6 +872,8 @@
   "staking ready description": "Stake'in alınmaya hazır olduğunda",
   "engine ready": "Motor hazır",
   "engine ready description": "Motor dolduğunda ve biletler beklediğinde",
+  "tikki full": "Tikki's clicker is full",
+  "tikki full description": "When the clicker fills up and stops earning until you collect",
   "gift": "Hediye",
   "gifts": "Hediyeler",
   "gifts description": "Biri sana bilet gönderdiğinde",

@@ -872,6 +872,8 @@
   "staking ready description": "When your stake is ready to claim",
   "engine ready": "Engine ready",
   "engine ready description": "When an engine fills up and tickets are waiting",
+  "tikki full": "Tikki's clicker is full",
+  "tikki full description": "When the clicker fills up and stops earning until you collect",
   "gift": "Gift",
   "gifts": "Gifts",
   "gifts description": "When someone sends you tickets",

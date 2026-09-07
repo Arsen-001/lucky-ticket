@@ -10,6 +10,7 @@ import {
   // EMAIL OFF (2026-08-17) — `Mail` iconed the email channel tab.
   // Mail,
   Megaphone,
+  MousePointerClick,
   Swords,
   TrophyIcon,
   UserPlus,
@@ -94,6 +95,17 @@ const CATEGORIES: CategoryDef[] = [
     accent: 'purple',
     labelKey: 'engine ready',
     descriptionKey: 'engine ready description',
+  },
+  {
+    // Кликер Тикки набит доверху и больше ничего не печатает. Свой тумблер, а
+    // не общий с двигателями: письма разные, и глушить их по одному — то же
+    // право, что у остальных категорий.
+    key: 'tikki',
+    icon: MousePointerClick,
+    fg: 'text-gold',
+    accent: 'gold',
+    labelKey: 'tikki full',
+    descriptionKey: 'tikki full description',
   },
   {
     key: 'gifts',
