@@ -30,6 +30,15 @@ describe('deep-link start_param parser', () => {
     expect(resolveStartParamRoute('screen-atlantis')).toBe(routes.home);
   });
 
+  it('sends the full-clicker letter straight to Tikki', () => {
+    // Рассылка «кликер полон» просит один тап. Ссылка на главную стоила бы
+    // ещё одного — найти Тикки в таб-баре, — и это ровно тот тап, который до
+    // экрана не доходит.
+    expect(resolveStartParamRoute('screen-tikki')).toBe(routes.tikki);
+    expect(resolveStartParamRoute('screen_tikki')).toBe('/tikki');
+    expect(resolveStartParamRoute('SCREEN-Tikki')).toBe('/tikki');
+  });
+
   it('round-trips build → resolve', () => {
     expect(resolveStartParamRoute(buildDeepLinkParam('faq', '9'))).toBe('/faq/9');
   });

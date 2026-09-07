@@ -12,17 +12,24 @@ import { routes, type Route } from '@/constants/routes';
  * To add a new deep-link target: register one entry in `DEEP_LINK_ROUTES` and
  * build the param with `buildDeepLinkParam(type, id)` at the share site.
  */
+/** Экраны, на которые умеет вести `screen-<имя>`. @see DEEP_LINK_ROUTES */
+const SCREENS: Record<string, Route> = {
+  engines: routes.homeEngines,
+  tikki: routes.tikki,
+};
+
 const DEEP_LINK_ROUTES: Record<string, (id: string) => Route> = {
   faq: id => routes.faq.getById(id),
   // Приглашение на дуэль ведёт в КОНКРЕТНОЕ лобби, а не в список: человек
   // нажал «принять вызов», значит он идёт играть с тем, кто позвал.
   duel: id => routes.games.getDuelLobby(id),
-  // Экран, у которого нет своей строки в таб-баре. Пока такой один — второй
-  // экран главной, где стоят двигатели: напоминание бота «двигатель готов»
-  // обязано приводить к двигателю, а не на главную, где с 05.09.2026 Тикки.
+  // Экраны, к которым письмо бота обязано приводить прямо, а не «в игру».
+  // Двигатели — второй экран главной (на первом с 05.09.2026 Тикки), Тикки —
+  // своя страница: рассылка «кликер полон» просит один тап, и лишний тап на
+  // поиск экрана в таб-баре — это ровно тот тап, который до него не доходит.
   // Незнакомое имя экрана ведёт на главную: ссылка из старого письма должна
   // открыть игру, а не упереться в пустоту.
-  screen: id => (id.toLowerCase() === 'engines' ? routes.homeEngines : routes.home),
+  screen: id => SCREENS[id.toLowerCase()] ?? routes.home,
   // Add more as needed, e.g.:
   // tournament: id => routes.tournaments.getById(id),
   // stake: id => routes.stakes.getById(id),
