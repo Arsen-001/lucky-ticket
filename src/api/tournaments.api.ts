@@ -1,6 +1,5 @@
 import { api } from '@/api/index.api';
 import { tasksApi } from '@/api/tasks.api';
-import { refetchTestQuestProgress } from '@/api/testQuest.api';
 import { rtkTags } from '@/constants/rtk-tags';
 import type { AppDispatch } from '@/lib/rtk/store';
 import type {
@@ -52,8 +51,7 @@ const patchTournamentCaches = (
  *
  * Entering advances real state the client can't derive: the backend bumps every
  * TOURNAMENTS-category task on a first entry (`earn.onTournamentJoin`), and the
- * counter-driven ones — including the test-quest card pinned to the same Tasks
- * screen, which sums entered tickets — recompute on every entry. Nothing on the
+ * counter-driven ones recompute on every entry. Nothing on the
  * client refetched either, so the tasks screen kept its pre-join numbers until
  * the app was restarted: the player entered a tournament and the task still
  * read "0/4".
@@ -70,8 +68,6 @@ const refetchTournamentProgress = (dispatch: AppDispatch) => {
   dispatch(
     tasksApi.endpoints.getTasks.initiate(undefined, { subscribe: false, forceRefetch: true })
   );
-  // Entering spends tickets, and «потрать N билетов» counts them.
-  refetchTestQuestProgress(dispatch);
 };
 
 export const tournamentsApi = api.injectEndpoints({

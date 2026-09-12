@@ -38,7 +38,6 @@ const CATEGORY_DESTINATION: Partial<Record<TaskCategory, Route>> = {
   [TaskCategory.STARS]: routes.wallet,
   [TaskCategory.PROFILE_STATUS]: routes.market('status'),
   [TaskCategory.PARTNERS]: routes.partners.index,
-  [TaskCategory.TEST_QUEST]: routes.testQuest,
 };
 
 /**
@@ -72,7 +71,6 @@ const KNOWN_SEGMENTS = new Set([
   'faq',
   'privacy',
   'terms-of-use',
-  'test-quest',
   'settings',
   'languages',
   'login',

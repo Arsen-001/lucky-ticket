@@ -14,7 +14,6 @@ import {
   isMultiplierBoost,
   multiplierSpeedBoostSources,
 } from '@/utils/global/engine-boosts.utils';
-import { TEST_BADGE_CAPACITY_TICKETS } from '@/utils/global/testQuest.utils';
 import {
   CHIP_MAX_LEVEL,
   chipCapacityTickets,
@@ -26,9 +25,9 @@ import {
  * Every lever on an engine must MOVE something.
  *
  * An engine has ten of them — three paid ladders (engine level, speed
- * sub-level, capacity sub-level), two chips, two boosters, the premium status,
- * the Test-Quest badge and the equipped avatar — and each one is sold, earned
- * or subscribed to on the promise that it makes the engine better. This file
+ * sub-level, capacity sub-level), two chips, two boosters, the premium status
+ * and the equipped avatar — and each one is sold, earned or subscribed to on
+ * the promise that it makes the engine better. This file
  * asserts that promise directly, per lever, at every stage of a real engine's
  * life, on every tier.
  *
@@ -140,7 +139,6 @@ const SPEED_LEVERS: { name: string; apply: (o: BoostOptions) => BoostOptions }[]
       perks: { engineSpeedBoostPct: 0, engineSpeedMultiplierPct: 30 },
     }),
   },
-  { name: 'test badge (+5%)', apply: o => ({ ...o, badgeBoostPct: 5 }) },
   { name: 'avatar (+8%)', apply: o => ({ ...o, avatarBoostPct: 8 }) },
 ];
 
@@ -251,7 +249,6 @@ describe('engine levers — every upgrade must move the engine', () => {
         isVip: true,
         isLuckyPlayer: true,
         perks: { engineSpeedBoostPct: 20, engineSpeedMultiplierPct: 30 },
-        badgeBoostPct: 5,
         avatarBoostPct: 8,
       };
       const stacked = measure(engine, everything);
@@ -439,48 +436,5 @@ describe('engine levers — every upgrade must move the engine', () => {
         );
       }
     }
-  });
-});
-
-/**
- * The test quest's grand prize — the only PERMANENT capacity layer in the game,
- * and the only one with a tier gate.
- *
- * BRONZE only, decided 17.08.2026 on a measurement rather than a preference:
- * capacity buys unattended runtime (an engine stops the moment it fills), and a
- * tier whose cycle already outlasts a day has none to buy. On a fresh diamond
- * engine +3 moved the daily take by 0.0 tickets and stretched one collect from
- * 27.8h to 111.3h; on a fresh bronze one it takes a once-a-day player from 1
- * ticket to 4. The gate lives inside `engineCapacity`, not at its call sites, so
- * this suite is what proves the call sites cannot re-open it. Server half:
- * `test-quest.levels.spec.ts`.
- */
-describe('test-quest crown — permanent capacity, bronze only', () => {
-  const withPrize = { badgeCapacityTickets: TEST_BADGE_CAPACITY_TICKETS };
-
-  describe.each(STAGES)('$name', stage => {
-    it('bronze gains exactly the prize', () => {
-      const engine = engineOf('bronze', stage.engine);
-      const before = measure(engine);
-      const after = measure(engine, withPrize);
-      expect(after.batch).toBe(before.batch + TEST_BADGE_CAPACITY_TICKETS);
-      // Bigger AND rarer — one ticket still costs one tier cycle.
-      expect(after.cycle).toBeGreaterThan(before.cycle);
-      notWorseThan(after.perHour, before.perHour);
-    });
-
-    it.each(TIERS.filter(t => t !== 'bronze'))('%s is untouched', tier => {
-      const engine = engineOf(tier, stage.engine);
-      const before = measure(engine);
-      const after = measure(engine, withPrize);
-      expect(after.batch).toBe(before.batch);
-      expect(after.cycle).toBe(before.cycle);
-    });
-  });
-
-  it('an engine that never said its tier gets nothing (older payload)', () => {
-    const engine = engineOf('bronze', {});
-    delete (engine as { tier?: unknown }).tier;
-    expect(measure(engine, withPrize).batch).toBe(measure(engine).batch);
   });
 });

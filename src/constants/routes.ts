@@ -18,7 +18,6 @@ export const routes = {
   // dutifully declared it.
   market: (tab?: string) => `/market${tab ? `?tab=${tab}` : ''}` as `/market${string}`,
   tasks: '/tasks',
-  testQuest: '/test-quest',
 
   // auth routes
   login: '/login',

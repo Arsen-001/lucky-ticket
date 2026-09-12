@@ -12,7 +12,6 @@ export enum TaskCategory {
   STARS = 'stars',
   PROFILE_STATUS = 'profile-status',
   ACHIEVEMENTS = 'achievements',
-  TEST_QUEST = 'test-quest',
   PARTNERS = 'partners',
 }
 

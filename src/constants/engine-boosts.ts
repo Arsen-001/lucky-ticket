@@ -1,4 +1,4 @@
-import { BadgeCheck, Cpu, Crown, Layers, Rocket, Sparkles, UserRound, Zap } from 'lucide-react';
+import { Cpu, Crown, Layers, Rocket, Sparkles, UserRound, Zap } from 'lucide-react';
 import type { LucideIcon } from 'lucide-react';
 import type { MessageIds } from '@/types/types/i18n.types';
 import type { EngineSpeedBoostKey } from '@/utils/global/engine-boosts.utils';
@@ -10,7 +10,6 @@ export const ENGINE_BOOST_LABEL_KEY: Record<EngineSpeedBoostKey, MessageIds> = {
   vip: 'vip',
   booster: 'booster',
   avatar: 'avatar',
-  badge: 'tester badge',
   chip: 'chip',
   luckyPlayer: 'lucky player',
 };
@@ -28,7 +27,6 @@ export const ENGINE_BOOST_COLOR: Record<EngineSpeedBoostKey, string> = {
   vip: 'var(--color-gold)',
   booster: 'var(--color-orange)',
   avatar: 'var(--color-silver)',
-  badge: 'var(--color-success)',
   chip: 'var(--color-teal)',
   luckyPlayer: 'var(--color-pink)',
 };
@@ -39,7 +37,6 @@ export const ENGINE_BOOST_ICON: Record<EngineSpeedBoostKey, LucideIcon> = {
   vip: Crown,
   booster: Rocket,
   avatar: UserRound,
-  badge: BadgeCheck,
   chip: Cpu,
   luckyPlayer: Sparkles,
 };

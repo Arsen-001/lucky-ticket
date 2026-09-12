@@ -16,8 +16,8 @@ export enum StarsTransactionType {
   ADMIN_ADJUST = 'admin_adjust',
   /**
    * Paid a chip slot — a move onto another engine, or an unequip. Split off
-   * ENGINE_UPGRADE on 17.08.2026: the Test-Quest counts engine-upgrade rows, so
-   * a chip shuffled between engines ticked off «прокачай двигатель N раз».
+   * ENGINE_UPGRADE on 17.08.2026, so a chip shuffled between engines is not
+   * counted as an upgrade of the engine itself.
    */
   CHIP_SLOT = 'chip_slot',
   /**

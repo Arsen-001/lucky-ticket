@@ -39,8 +39,6 @@ import { useInFlightLock } from '@/hooks/useInFlightLock';
 import { useSpendFailure } from '@/hooks/useSpendFailure';
 import { isConflictError, isNotReadyError } from '@/utils/global/spend-failure.utils';
 import { useEngineSpeedAvatarBoostPct } from '@/hooks/useEngineSpeedAvatarBoostPct';
-import { useTestBadgeCapacityTickets } from '@/hooks/useTestBadgeCapacityTickets';
-import { useTestBadgeSpeedBoostPct } from '@/hooks/useTestBadgeSpeedBoostPct';
 import { findTicketFlightOrigin, useTicketFlight } from '@/hooks/useTicketFlight';
 import { chipSlotStarsCost, chipUnequipStarsCost } from '@/utils/global/inventory.utils';
 import type { InventoryBooster, InventoryChip } from '@/types/interfaces/inventory.interfaces';
@@ -231,8 +229,6 @@ export function HomeEnginesSlider({ className }: ClassNameProps) {
   const isLp = me?.isLuckyPlayer ?? false;
   const isVip = me?.isVIP ?? false;
   const avatarSpeedPct = useEngineSpeedAvatarBoostPct();
-  const badgeSpeedPct = useTestBadgeSpeedBoostPct();
-  const badgeCapacity = useTestBadgeCapacityTickets();
   const { tables, upgrade } = useEngineConfig();
 
   const requireStars = (cost: number, onPaid: () => void) => {
@@ -269,8 +265,6 @@ export function HomeEnginesSlider({ className }: ClassNameProps) {
           isVip,
           perks: me?.statusPerks,
           avatarBoostPct: avatarSpeedPct,
-          badgeBoostPct: badgeSpeedPct,
-          badgeCapacityTickets: badgeCapacity,
           tables,
         });
         if (engine.pendingCount > 0) {
@@ -286,7 +280,6 @@ export function HomeEnginesSlider({ className }: ClassNameProps) {
           readyCapacity[engine.id] = engineCapacity(engine, {
             capacityChip,
             capacityBooster,
-            badgeCapacityTickets: badgeCapacity,
             tables,
           });
         }
@@ -331,7 +324,7 @@ export function HomeEnginesSlider({ className }: ClassNameProps) {
     // boost, or have `GET /config` land after the engines did, and every
     // countdown on this screen goes on counting to the wrong number until
     // something unrelated happens to change `items`.
-  }, [items, inventory, isLp, isVip, avatarSpeedPct, badgeSpeedPct, tables, completeEngineCycle]);
+  }, [items, inventory, isLp, isVip, avatarSpeedPct, tables, completeEngineCycle]);
 
   const recomputeActive = useCallback(() => {
     const scroller = scrollerRef.current;
@@ -442,8 +435,6 @@ export function HomeEnginesSlider({ className }: ClassNameProps) {
       isVip,
       perks: me?.statusPerks,
       avatarBoostPct: avatarSpeedPct,
-      badgeBoostPct: badgeSpeedPct,
-      badgeCapacityTickets: badgeCapacity,
       tables,
     });
     const elapsed = elapsedByEngine[engine.id] ?? engineElapsedAligned(engine, cycle);
@@ -474,7 +465,6 @@ export function HomeEnginesSlider({ className }: ClassNameProps) {
         : engineCapacity(engine, {
             capacityChip: findEquippedChip(inventory?.chips, engineId, 'capacity'),
             capacityBooster: findActiveBooster(inventory?.boosters, engineId, 'capacity'),
-            badgeCapacityTickets: badgeCapacity,
             tables,
           })
     );

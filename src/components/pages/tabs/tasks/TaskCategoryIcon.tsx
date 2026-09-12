@@ -5,7 +5,6 @@ import {
   Cog,
   Eye,
   Flag,
-  FlaskConical,
   Gem,
   Handshake,
   type LucideIcon,
@@ -42,7 +41,6 @@ const ICON_MAP: Record<TaskCategory, LucideIcon> = {
   [TaskCategory.STARS]: Star,
   [TaskCategory.PROFILE_STATUS]: Crown,
   [TaskCategory.ACHIEVEMENTS]: Mountain,
-  [TaskCategory.TEST_QUEST]: FlaskConical,
   [TaskCategory.PARTNERS]: Handshake,
 };
 
@@ -60,7 +58,6 @@ const GRADIENT_MAP: Record<TaskCategory, string> = {
   [TaskCategory.STARS]: 'from-warning to-gold',
   [TaskCategory.PROFILE_STATUS]: 'from-gold to-platinum',
   [TaskCategory.ACHIEVEMENTS]: 'from-diamond to-electric-purple',
-  [TaskCategory.TEST_QUEST]: 'from-electric-pink to-electric-purple',
   [TaskCategory.PARTNERS]: 'from-electric-purple to-diamond',
 };
 

@@ -12,12 +12,15 @@ import { routes } from '@/constants/routes';
 import '@/styles/components/jackpot.css';
 
 /**
- * Compact jackpot chip at the top of Home — a sibling of the Test-Quest card in
- * the app's own card language (rounded-3xl, electric-purple→pink gradient,
- * electric-pink hairline border). The gold LC coin is the only gold accent, per
- * the design rule. A small JACKPOT caption sits over the live pot number, which
- * ticks up as the server value grows (with a "+X" pop). Shrink-to-content, so
- * it stays small beside the wider Test-Quest card, and links to the jackpot page.
+ * Jackpot plate at the top of Home, in the app's own card language (rounded-3xl,
+ * electric-purple→pink gradient, electric-pink hairline border). The gold LC
+ * coin is the only gold accent, per the design rule. A small JACKPOT caption
+ * sits over the live pot number, which ticks up as the server value grows (with
+ * a "+X" pop), and the plate links to the jackpot page.
+ *
+ * It fills its row. Until 12.09.2026 it was a shrink-to-content chip beside the
+ * wider Test-Quest card; that quest is gone, and a content-width pill alone on
+ * the row left the top of Home visibly half-empty.
  * The pot only grows when a tournament finishes (its 10% skim), so there is NO
  * fake creep: the query polls and the number moves only when the server value
  * actually increased. Never rolls backwards.
@@ -68,7 +71,7 @@ export function HomeJackpotBanner() {
       // `bg-gradient-*` land in the same tailwind-merge group, so the merge drops
       // one of the two.
       style={{ backgroundColor: 'var(--color-background)' }}
-      className="relative flex shrink-0 flex-col items-center justify-center gap-1 overflow-hidden rounded-3xl border border-electric-pink/50 bg-gradient-to-br from-electric-purple/20 to-electric-pink/10 px-3.5 py-2 transition-transform active:scale-[0.98]"
+      className="relative flex flex-1 flex-col items-center justify-center gap-1 overflow-hidden rounded-3xl border border-electric-pink/50 bg-gradient-to-br from-electric-purple/20 to-electric-pink/10 px-3.5 py-2 transition-transform active:scale-[0.98]"
     >
       <span className="text-[8px] font-black uppercase leading-none tracking-[0.16em] text-white/60">
         {t('jackpot')}

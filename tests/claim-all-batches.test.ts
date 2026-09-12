@@ -13,8 +13,8 @@ const read = (path: string) => readFileSync(resolve(process.cwd(), path), 'utf8'
  * They ran their claims in an `await` loop, so ten of anything meant ten
  * sequential round-trips with the button spinning through all of them. And each
  * claim invalidated its whole tag set — the friends list, the header pill, the
- * LC ledger; for stakes also the task chain, the Stars group and a forced
- * test-quest refetch — so those ten POSTs dragged dozens of GETs behind them,
+ * LC ledger; for stakes also the task chain and the Stars group — so those ten
+ * POSTs dragged dozens of GETs behind them,
  * every answer superseded by the next claim.
  *
  * Neither half shows up in a screenshot, and both are one careless edit away.

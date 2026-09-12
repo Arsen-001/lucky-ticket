@@ -1,6 +1,5 @@
 import { api } from '@/api/index.api';
 import { balanceTags } from '@/api/balance-tags';
-import { refetchTestQuestProgress } from '@/api/testQuest.api';
 import { rtkTags } from '@/constants/rtk-tags';
 import type { AppDispatch } from '@/lib/rtk/store';
 import type {
@@ -77,18 +76,6 @@ export const referralApi = api.injectEndpoints({
         body: { confirmed },
       }),
       invalidatesTags: [rtkTags.referral],
-      async onQueryStarted(_arg, { dispatch, queryFulfilled }) {
-        // The test-quest's «поделиться с друзьями» step counts these very
-        // shares. A forced refetch, not a tag: invalidation would evict the
-        // quest cache and make the screen open into skeletons
-        // (@see refetchTestQuestProgress).
-        try {
-          await queryFulfilled;
-          refetchTestQuestProgress(dispatch);
-        } catch {
-          /* the share was not recorded — nothing to refresh */
-        }
-      },
     }),
     /**
      * Collect one friend's accrued reward.

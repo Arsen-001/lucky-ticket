@@ -40,11 +40,10 @@ export interface TicketEngine {
   id: string;
   /**
    * The engine's own tier. Redundant with the ticket it is grouped under on most
-   * screens, and carried here for the one rule that has to be decided from the
-   * engine alone: the Test-Quest crown's permanent capacity applies to BRONZE
-   * engines only (@see engineCapacity). Optional so an older payload — or a
-   * fixture written before 17.08.2026 — simply misses the prize instead of
-   * inventing tickets the server never mints.
+   * screens, and carried here for the rules that have to be decided from the
+   * engine alone — which chips may be equipped on it, and the accent it is
+   * drawn in. Optional, so an older payload simply misses those rather than
+   * guessing a tier.
    */
   tier?: TicketType;
   cycleSeconds: number;

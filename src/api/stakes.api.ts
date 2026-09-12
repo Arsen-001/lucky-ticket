@@ -2,7 +2,6 @@ import { api } from '@/api/index.api';
 import { balanceTags } from '@/api/balance-tags';
 import { rtkTags } from '@/constants/rtk-tags';
 import type { AppDispatch } from '@/lib/rtk/store';
-import { refetchTestQuestProgress } from '@/api/testQuest.api';
 import type {
   CancelStakeResult,
   ClaimStakeResult,
@@ -35,35 +34,11 @@ export const stakesApi = api.injectEndpoints({
       // Locks LC *and* charges a star fee (which writes a STAKE_FEE row on the
       // Stars ledger) → both currency groups, not just the header.
       invalidatesTags: [rtkTags.stakes, rtkTags.tasks, ...balanceTags.lc, ...balanceTags.stars],
-      async onQueryStarted(_arg, { dispatch, queryFulfilled }) {
-        try {
-          await queryFulfilled;
-          // Stakes are counted twice by the 31-day checklist — «make your first
-          // stake» (lifetime) and «hold N active stakes» (live) — and by the
-          // stake task chain. Opening, cancelling and claiming all move one of
-          // them, so all three refresh both surfaces at the moment of the act.
-          refetchTestQuestProgress(dispatch);
-        } catch {
-          // Refused: nothing moved.
-        }
-      },
     }),
     cancelStake: builder.mutation<CancelStakeResult, StakeIdBody>({
       query: body => ({ url: 'stakes/cancel', method: 'POST', body }),
       // Returns the LC principal and charges a star cancel fee → same two groups.
       invalidatesTags: [rtkTags.stakes, rtkTags.tasks, ...balanceTags.lc, ...balanceTags.stars],
-      async onQueryStarted(_arg, { dispatch, queryFulfilled }) {
-        try {
-          await queryFulfilled;
-          // Stakes are counted twice by the 31-day checklist — «make your first
-          // stake» (lifetime) and «hold N active stakes» (live) — and by the
-          // stake task chain. Opening, cancelling and claiming all move one of
-          // them, so all three refresh both surfaces at the moment of the act.
-          refetchTestQuestProgress(dispatch);
-        } catch {
-          // Refused: nothing moved.
-        }
-      },
     }),
     /**
      * Collect one matured stake.
@@ -71,7 +46,7 @@ export const stakesApi = api.injectEndpoints({
      * `silent` suppresses this claim's cache work, and exists for «Забрать все
      * готовые»: there is no bulk endpoint, so that button is one of these PER
      * STAKE. Each carries the heaviest tag set in the app — stakes, tasks, both
-     * currency groups — plus a forced test-quest refetch, so ten ready stakes
+     * currency groups — so ten ready stakes
      * meant ten POSTs dragging some forty GETs behind them, every answer
      * superseded by the next claim. The batch does that work once, at the end.
      * @see refreshAfterStakeClaims
@@ -82,18 +57,6 @@ export const stakesApi = api.injectEndpoints({
       query: ({ silent: _silent, ...body }) => ({ url: 'stakes/claim', method: 'POST', body }),
       // Pays the LC yield and the completion stars, with a ledger row on each.
       invalidatesTags: (_result, _error, { silent }) => (silent ? [] : stakeClaimTags),
-      async onQueryStarted({ silent }, { dispatch, queryFulfilled }) {
-        try {
-          await queryFulfilled;
-          // Stakes are counted twice by the 31-day checklist — «make your first
-          // stake» (lifetime) and «hold N active stakes» (live) — and by the
-          // stake task chain. Opening, cancelling and claiming all move one of
-          // them, so all three refresh both surfaces at the moment of the act.
-          if (!silent) refetchTestQuestProgress(dispatch);
-        } catch {
-          // Refused: nothing moved.
-        }
-      },
     }),
   }),
 });
@@ -108,7 +71,6 @@ export const stakesApi = api.injectEndpoints({
  */
 export const refreshAfterStakeClaims = (dispatch: AppDispatch) => {
   dispatch(api.util.invalidateTags(stakeClaimTags));
-  refetchTestQuestProgress(dispatch);
 };
 
 export const {

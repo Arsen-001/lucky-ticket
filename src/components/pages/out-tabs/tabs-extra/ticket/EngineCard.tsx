@@ -4,8 +4,6 @@ import { twMerge } from 'tailwind-merge';
 import { useGetInventoryQuery } from '@/api/inventory.api';
 import { useGetMeQuery } from '@/api/me.api';
 import { useEngineSpeedAvatarBoostPct } from '@/hooks/useEngineSpeedAvatarBoostPct';
-import { useTestBadgeCapacityTickets } from '@/hooks/useTestBadgeCapacityTickets';
-import { useTestBadgeSpeedBoostPct } from '@/hooks/useTestBadgeSpeedBoostPct';
 import { useEngineConfig } from '@/hooks/useEngineConfig';
 import { EngineCardStatsHeader } from '@/components/pages/out-tabs/tabs-extra/ticket/EngineCardStatsHeader';
 import { EngineCardCycleRow } from '@/components/pages/out-tabs/tabs-extra/ticket/EngineCardCycleRow';
@@ -90,8 +88,6 @@ export function EngineCard({
     }),
   });
   const avatarSpeedPct = useEngineSpeedAvatarBoostPct();
-  const badgeSpeedPct = useTestBadgeSpeedBoostPct();
-  const badgeCapacity = useTestBadgeCapacityTickets();
   const { tables, upgrade } = useEngineConfig();
   const speedChip = findEquippedChip(inventory?.chips, engine.id, 'speed');
   const speedBooster = findActiveBooster(inventory?.boosters, engine.id, 'speed');
@@ -106,14 +102,11 @@ export function EngineCard({
     isVip,
     perks: statusPerks,
     avatarBoostPct: avatarSpeedPct,
-    badgeBoostPct: badgeSpeedPct,
-    badgeCapacityTickets: badgeCapacity,
     tables,
   });
   const capacity = engineCapacity(engine, {
     capacityChip,
     capacityBooster,
-    badgeCapacityTickets: badgeCapacity,
     tables,
   });
   const pending = engine.pendingCount > 0;

@@ -128,9 +128,9 @@ describe('effect dependencies that are easy to get wrong', () => {
 
   it('the engine tickers depend on everything the cycle is computed from', () => {
     // With `[items]` alone the tick measured against the boosts and config table
-    // captured when it last ran: equip a chip, gain a badge boost, or let
-    // GET /config land after the engines did, and every countdown counts to the
-    // wrong number until something unrelated changes the engine list.
+    // captured when it last ran: equip a chip, or let GET /config land after the
+    // engines did, and every countdown counts to the wrong number until
+    // something unrelated changes the engine list.
     for (const file of [
       'src/components/pages/tabs/home/HomeEnginesSlider.tsx',
       'src/components/pages/tabs/tickets/TicketsTabsView.tsx',
@@ -141,14 +141,7 @@ describe('effect dependencies that are easy to get wrong', () => {
       // dependencies being checked, so leaving them in let the test pass with
       // the deps deleted — a guardrail satisfied by its own explanation.
       const deps = tail.slice(0, tail.indexOf(']);') + 1).replace(/\/\/[^\n]*/g, '');
-      for (const dep of [
-        'inventory',
-        'isLp',
-        'isVip',
-        'avatarSpeedPct',
-        'badgeSpeedPct',
-        'tables',
-      ]) {
+      for (const dep of ['inventory', 'isLp', 'isVip', 'avatarSpeedPct', 'tables']) {
         expect(deps, `${file} misses ${dep}`).toContain(dep);
       }
     }

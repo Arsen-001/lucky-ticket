@@ -6,7 +6,6 @@ import { inventoryApi } from '@/api/inventory.api';
 import { meApi } from '@/api/me.api';
 import { ticketsApi } from '@/api/tickets.api';
 import { rtkTags } from '@/constants/rtk-tags';
-import { refetchTestQuestProgress } from '@/api/testQuest.api';
 import { MarketPriceType } from '@/types/enums/market.enums';
 import type { InventoryChipType } from '@/types/interfaces/inventory.interfaces';
 import type {
@@ -59,7 +58,6 @@ export const marketApi = api.injectEndpoints({
       // A market purchase moves three quest/task counters (tickets bought,
       // shards bought, engines owned) and several task counters with them, so
       // both surfaces refresh at the moment of the buy rather than on the next
-      // visit. @see refetchTestQuestProgress
       invalidatesTags: [
         rtkTags.tasks,
         rtkTags.marketSavings,
@@ -68,14 +66,6 @@ export const marketApi = api.injectEndpoints({
         ...balanceTags.lc,
         ...balanceTags.stars,
       ],
-      async onQueryStarted(_arg, { dispatch, queryFulfilled }) {
-        try {
-          await queryFulfilled;
-          refetchTestQuestProgress(dispatch);
-        } catch {
-          // A refused purchase moved nothing.
-        }
-      },
     }),
 
     buyStatus: builder.mutation<void, { statusId: string; priceType: MarketPriceType }>({
@@ -93,7 +83,6 @@ export const marketApi = api.injectEndpoints({
       // A market purchase moves three quest/task counters (tickets bought,
       // shards bought, engines owned) and several task counters with them, so
       // both surfaces refresh at the moment of the buy rather than on the next
-      // visit. @see refetchTestQuestProgress
       invalidatesTags: [
         rtkTags.tasks,
         rtkTags.marketSavings,
@@ -117,7 +106,6 @@ export const marketApi = api.injectEndpoints({
       // A market purchase moves three quest/task counters (tickets bought,
       // shards bought, engines owned) and several task counters with them, so
       // both surfaces refresh at the moment of the buy rather than on the next
-      // visit. @see refetchTestQuestProgress
       invalidatesTags: [
         rtkTags.tasks,
         rtkTags.marketSavings,
@@ -149,7 +137,6 @@ export const marketApi = api.injectEndpoints({
         );
         try {
           await queryFulfilled;
-          refetchTestQuestProgress(dispatch);
         } catch {
           mePatch.undo();
           ticketsPatch.undo();
@@ -178,7 +165,6 @@ export const marketApi = api.injectEndpoints({
       // A market purchase moves three quest/task counters (tickets bought,
       // shards bought, engines owned) and several task counters with them, so
       // both surfaces refresh at the moment of the buy rather than on the next
-      // visit. @see refetchTestQuestProgress
       invalidatesTags: [
         rtkTags.tasks,
         rtkTags.marketSavings,
@@ -201,7 +187,6 @@ export const marketApi = api.injectEndpoints({
         );
         try {
           await queryFulfilled;
-          refetchTestQuestProgress(dispatch);
         } catch {
           mePatch.undo();
           inventoryPatch.undo();
@@ -218,7 +203,6 @@ export const marketApi = api.injectEndpoints({
       // A market purchase moves three quest/task counters (tickets bought,
       // shards bought, engines owned) and several task counters with them, so
       // both surfaces refresh at the moment of the buy rather than on the next
-      // visit. @see refetchTestQuestProgress
       invalidatesTags: [
         rtkTags.tasks,
         rtkTags.marketSavings,

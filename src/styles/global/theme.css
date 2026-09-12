@@ -50,8 +50,8 @@
   --color-purple-secondary: rgba(114, 103, 164, 1);
 
   --color-success: rgba(4, 120, 87, 1);
-  /* Same story as --color-error-text, found on the Test-Quest checklist: a
-     completed step's "108/108" badge is this green on a near-black card and
+  /* Same story as --color-error-text: a completed step's "108/108" badge is
+     this green on a near-black card and
      measures 3.0:1 — under the 4.5:1 floor for text this small, so the numbers
      the player is actually checking are the hardest thing on the screen to
      read. Fills and borders keep --color-success (bg-success/15 is doing its

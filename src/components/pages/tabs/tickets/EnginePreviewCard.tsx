@@ -10,8 +10,6 @@ import { ButtonSpinner } from '@/components/shared/loaders/ButtonSpinner';
 import { EngineLevelBadge } from '@/components/pages/out-tabs/tabs-extra/ticket/EngineLevelBadge';
 import { useAppTranslations } from '@/hooks/useAppTranslations';
 import { useEngineSpeedAvatarBoostPct } from '@/hooks/useEngineSpeedAvatarBoostPct';
-import { useTestBadgeCapacityTickets } from '@/hooks/useTestBadgeCapacityTickets';
-import { useTestBadgeSpeedBoostPct } from '@/hooks/useTestBadgeSpeedBoostPct';
 import { useEngineConfig } from '@/hooks/useEngineConfig';
 import { routes } from '@/constants/routes';
 import { findActiveBooster, findEquippedChip } from '@/utils/global/inventory.utils';
@@ -53,8 +51,6 @@ export function EnginePreviewCard({
   const { data: inventory } = useGetInventoryQuery();
   const { data: me } = useGetMeQuery();
   const avatarSpeedPct = useEngineSpeedAvatarBoostPct();
-  const badgeSpeedPct = useTestBadgeSpeedBoostPct();
-  const badgeCapacity = useTestBadgeCapacityTickets();
   const { tables } = useEngineConfig();
   const speedChip = findEquippedChip(inventory?.chips, engine.id, 'speed');
   const speedBooster = findActiveBooster(inventory?.boosters, engine.id, 'speed');
@@ -74,14 +70,11 @@ export function EnginePreviewCard({
     perks: me?.statusPerks,
     isVip: me?.isVIP ?? false,
     avatarBoostPct: avatarSpeedPct,
-    badgeBoostPct: badgeSpeedPct,
-    badgeCapacityTickets: badgeCapacity,
     tables,
   });
   const capacity = engineCapacity(engine, {
     capacityChip,
     capacityBooster,
-    badgeCapacityTickets: badgeCapacity,
     tables,
   });
   const pending = engine.pendingCount > 0;

@@ -9,8 +9,6 @@ import {
 import { useGetInventoryQuery } from '@/api/inventory.api';
 import { useGetMeQuery } from '@/api/me.api';
 import { useEngineSpeedAvatarBoostPct } from '@/hooks/useEngineSpeedAvatarBoostPct';
-import { useTestBadgeCapacityTickets } from '@/hooks/useTestBadgeCapacityTickets';
-import { useTestBadgeSpeedBoostPct } from '@/hooks/useTestBadgeSpeedBoostPct';
 import { useEngineConfig } from '@/hooks/useEngineConfig';
 import {
   baselineCycleSeconds,
@@ -101,8 +99,6 @@ function EngineCardCubeImpl(props: EngineCardCubeProps) {
   const lifetimeProduced = engine.lifetimeProduced ?? 0;
 
   const avatarSpeedPct = useEngineSpeedAvatarBoostPct();
-  const badgeSpeedPct = useTestBadgeSpeedBoostPct();
-  const badgeCapacity = useTestBadgeCapacityTickets();
   const { tables } = useEngineConfig();
 
   // The starting point the reactor face divides down from — the batch-normalised
@@ -111,7 +107,6 @@ function EngineCardCubeImpl(props: EngineCardCubeProps) {
   const baseCycleSeconds = baselineCycleSeconds(engine, {
     capacityChip: equippedCapacityChip,
     capacityBooster: activeCapacityBooster,
-    badgeCapacityTickets: badgeCapacity,
     tables,
   });
 
@@ -127,14 +122,11 @@ function EngineCardCubeImpl(props: EngineCardCubeProps) {
     isVip,
     perks: statusPerks,
     avatarBoostPct: avatarSpeedPct,
-    badgeBoostPct: badgeSpeedPct,
-    badgeCapacityTickets: badgeCapacity,
     tables,
   });
   const liveCapacity = engineCapacity(engine, {
     capacityChip: equippedCapacityChip,
     capacityBooster: activeCapacityBooster,
-    badgeCapacityTickets: badgeCapacity,
     tables,
   });
   const ticketsPerHour = liveCycleSeconds > 0 ? (3600 / liveCycleSeconds) * liveCapacity : 0;
@@ -147,7 +139,6 @@ function EngineCardCubeImpl(props: EngineCardCubeProps) {
     isVip,
     perks: statusPerks,
     avatarBoostPct: avatarSpeedPct,
-    badgeBoostPct: badgeSpeedPct,
     tables,
   });
   // What the stats face prints under the VIP / LP badge — the two status rows of
@@ -159,7 +150,6 @@ function EngineCardCubeImpl(props: EngineCardCubeProps) {
   const capacitySources = engineCapacitySources(engine, {
     capacityChip: equippedCapacityChip,
     capacityBooster: activeCapacityBooster,
-    badgeCapacityTickets: badgeCapacity,
     tables,
   });
   // Premium status — surfaced on the stats face (its speed-boost row) and as the

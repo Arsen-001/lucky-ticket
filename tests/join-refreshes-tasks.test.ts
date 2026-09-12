@@ -1,7 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { makeStore } from '@/lib/rtk/store';
 import { tasksApi } from '@/api/tasks.api';
-import { testQuestApi } from '@/api/testQuest.api';
 import { tournamentsApi } from '@/api/tournaments.api';
 import { tournamentsMock } from '@/mock/tournaments.mock';
 
@@ -10,9 +9,8 @@ import { tournamentsMock } from '@/mock/tournaments.mock';
  * Tasks screen admitted it happened.
  *
  * The server does the work on entry — `earn.onTournamentJoin` advances every
- * TOURNAMENTS-category task, and the counter-driven ones (the test-quest card
- * pinned to the same screen counts entered tickets) recompute from live stats.
- * The client just never asked again: `joinTournament` invalidated only `me` and
+ * TOURNAMENTS-category task, and the counter-driven ones recompute from live
+ * stats. The client just never asked again: `joinTournament` invalidated only `me` and
  * `tickets`, so "Join 4 Bronze tournaments" sat at its pre-join number for the
  * rest of the session.
  *
@@ -34,18 +32,15 @@ const settled = async (read: () => { status: string; fulfilledTimeStamp?: number
 };
 
 describe('entering a tournament refreshes the screens that count entries', () => {
-  it('refetches getTasks and getTestQuest after the join lands', async () => {
+  it('refetches getTasks after the join lands', async () => {
     const store = makeStore();
 
     const tasks = () => tasksApi.endpoints.getTasks.select()(store.getState());
-    const quest = () => testQuestApi.endpoints.getTestQuest.select()(store.getState());
 
-    // Warm both caches the way the app does — the tab bar subscribes to
-    // getTasks on every screen, the home card to getTestQuest.
+    // Warm the cache the way the app does — the tab bar subscribes to getTasks
+    // on every screen.
     store.dispatch(tasksApi.endpoints.getTasks.initiate());
-    store.dispatch(testQuestApi.endpoints.getTestQuest.initiate());
     const tasksBefore = (await settled(tasks)).fulfilledTimeStamp!;
-    const questBefore = (await settled(quest)).fulfilledTimeStamp!;
 
     const target = (tournamentsMock['GET tournaments']() as { id: string; status: string }[]).find(
       tournament => tournament.status === 'upcoming'
@@ -63,6 +58,5 @@ describe('entering a tournament refreshes the screens that count entries', () =>
 
     // The whole point: no remount, no reload, no manual refetch in between.
     await settled(tasks, tasksBefore);
-    await settled(quest, questBefore);
   }, 30_000);
 });

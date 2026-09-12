@@ -102,9 +102,9 @@ const TYPE_META: Record<StarsTransactionType, TypeMeta> = {
     iconClass: 'text-pink-secondary',
     iconBg: 'bg-white/5',
   },
-  // Teal Cpu is the chip's colour everywhere else it appears (the test-quest
-  // checklist, the inventory filters) — the purple Cpu above stays the engine's,
-  // so the two charges are told apart at a glance in the same list.
+  // Teal Cpu is the chip's colour everywhere else it appears (the inventory
+  // filters) — the purple Cpu above stays the engine's, so the two charges are
+  // told apart at a glance in the same list.
   [StarsTransactionType.CHIP_SLOT]: {
     Icon: Cpu,
     iconClass: 'text-teal',

@@ -26,8 +26,6 @@ import { useToast } from '@/hooks/useToast';
 import { isConflictError, isNotReadyError } from '@/utils/global/spend-failure.utils';
 import { useAppTranslations } from '@/hooks/useAppTranslations';
 import { useEngineSpeedAvatarBoostPct } from '@/hooks/useEngineSpeedAvatarBoostPct';
-import { useTestBadgeCapacityTickets } from '@/hooks/useTestBadgeCapacityTickets';
-import { useTestBadgeSpeedBoostPct } from '@/hooks/useTestBadgeSpeedBoostPct';
 import { useEngineConfig } from '@/hooks/useEngineConfig';
 import { TicketsEnum } from '@/types/enums/ticket.enums';
 import { findActiveBooster, findEquippedChip } from '@/utils/global/inventory.utils';
@@ -51,8 +49,6 @@ export function TicketsTabsView() {
   // without statusPerks → LP-only, matching the historical hardcoded gate.
   const canBulkClaim = me?.statusPerks ? me.statusPerks.bulkClaimEnabled : isLp;
   const avatarSpeedPct = useEngineSpeedAvatarBoostPct();
-  const badgeSpeedPct = useTestBadgeSpeedBoostPct();
-  const badgeCapacity = useTestBadgeCapacityTickets();
   const { tables } = useEngineConfig();
   const [claimEngine] = useClaimEngineMutation();
   const [claimEnginesForTier] = useClaimEnginesForTierMutation();
@@ -114,8 +110,6 @@ export function TicketsTabsView() {
           isVip,
           perks: me?.statusPerks,
           avatarBoostPct: avatarSpeedPct,
-          badgeBoostPct: badgeSpeedPct,
-          badgeCapacityTickets: badgeCapacity,
           tables,
         });
         // Held to the server's own countdown, not just this device's clock —
@@ -142,8 +136,8 @@ export function TicketsTabsView() {
     tick();
     const intervalId = window.setInterval(tick, 1000);
     return () => window.clearInterval(intervalId);
-    // `avatarSpeedPct`, `badgeSpeedPct` and `tables` feed the same cycle
-    // computation as the rest — see HomeEnginesSlider.
+    // `avatarSpeedPct` and `tables` feed the same cycle computation as the
+    // rest — see HomeEnginesSlider.
   }, [
     enginesByTier,
     inventory,
@@ -151,7 +145,6 @@ export function TicketsTabsView() {
     isVip,
     me?.statusPerks,
     avatarSpeedPct,
-    badgeSpeedPct,
     tables,
     completeEngineCycle,
   ]);

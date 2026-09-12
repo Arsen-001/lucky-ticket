@@ -1,5 +1,4 @@
 import { api } from '@/api/index.api';
-import { refetchTestQuestProgress } from '@/api/testQuest.api';
 import { rtkTags } from '@/constants/rtk-tags';
 import type { AppDispatch } from '@/lib/rtk/store';
 import type {
@@ -82,12 +81,6 @@ export const duelApi = api.injectEndpoints({
         body: { move },
       }),
       invalidatesTags: (_r, _e, { id }) => [{ type: rtkTags.duelState, id }, rtkTags.tickets],
-      async onQueryStarted(_arg, { dispatch, queryFulfilled }) {
-        const { data } = await queryFulfilled;
-        // Победа кладёт на баланс обе ставки, поражение уносит свою — билеты
-        // считает чек-лист тест-квеста, и он должен узнать об этом сразу.
-        if (data.status === 'FINISHED') refetchTestQuestProgress(dispatch);
-      },
     }),
 
     /** Кого можно позвать — с пометкой, дойдёт ли до человека сообщение. */

@@ -25,12 +25,6 @@ const REQUIRED_KEYS = [
   'speedBooster',
   'capacityChip',
   'capacityBooster',
-  // The badge's two halves. The cycle is `capacity × base ÷ speed`, so the
-  // crown's permanent capacity tickets lengthen it exactly as much as they
-  // enlarge the batch — a call site that passes the speed half alone prints a
-  // countdown three tickets shorter than the one the server is running.
-  'badgeBoostPct',
-  'badgeCapacityTickets',
   'isLuckyPlayer',
   'isVip',
   'perks',
@@ -95,21 +89,11 @@ describe('effectiveCycleSeconds call sites', () => {
 });
 
 /**
- * The batch has the same problem, and one input that the cycle's list cannot
- * cover: `badgeCapacityTickets`.
- *
- * Every other capacity input belongs to the ENGINE and is looked up from
- * inventory by engine id — forget it and one card is wrong. The Test-Quest
- * crown's permanent tickets belong to the PLAYER: they apply to every engine at
- * once and arrive from a hook, so a screen that never calls that hook silently
- * shows the crown holder a batch three tickets smaller than the one the server
- * mints, on every engine, with no local symptom to notice.
- *
- * `engineCapacity` is also called on its own (the optimistic claim paths predict
- * a batch without computing a cycle), so those calls are not reached by the
- * suite above.
+ * The batch has the same problem, and `engineCapacity` is also called on its own
+ * (the optimistic claim paths predict a batch without computing a cycle), so
+ * those calls are not reached by the suite above.
  */
-const CAPACITY_KEYS = ['capacityChip', 'capacityBooster', 'badgeCapacityTickets'] as const;
+const CAPACITY_KEYS = ['capacityChip', 'capacityBooster'] as const;
 
 /**
  * `baselineCycleSeconds` is the same batch by another name — the reactor face

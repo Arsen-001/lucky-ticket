@@ -5,7 +5,6 @@ import { twMerge } from 'tailwind-merge';
 import { HomeEnginesSlider } from '@/components/pages/tabs/home/HomeEnginesSlider';
 import { HomeUpcomingTournaments } from '@/components/pages/tabs/home/HomeUpcomingTournaments';
 import { HomeJackpotBanner } from '@/components/pages/tabs/home/HomeJackpotBanner';
-import { HomeTestQuestCard } from '@/components/pages/tabs/home/HomeTestQuestCard';
 import { HomeGamesPill } from '@/components/pages/tabs/home/HomeGamesPill';
 import { HomeScreenPill } from '@/components/pages/tabs/home/HomeScreenPill';
 import { HomeScreenPillRow } from '@/components/pages/tabs/home/HomeScreenPillRow';
@@ -53,7 +52,6 @@ export function HomeEnginesScreen({
     <div className={twMerge('flex flex-available flex-col gap-5 pt-3', !onBack && 'pb-6')}>
       <section className="flex items-stretch gap-3 px-4">
         <HomeJackpotBanner />
-        <HomeTestQuestCard />
       </section>
 
       {/* Pulled tight against its neighbours: the strip is 88px of card and the

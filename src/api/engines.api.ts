@@ -3,7 +3,6 @@ import { api } from '@/api/index.api';
 import { balanceTags } from '@/api/balance-tags';
 import { configApi } from '@/api/config.api';
 import { meApi } from '@/api/me.api';
-import { refetchTestQuestProgress } from '@/api/testQuest.api';
 import { ticketsApi } from '@/api/tickets.api';
 import { rtkTags } from '@/constants/rtk-tags';
 import { appConfig } from '@/config/app.config';
@@ -23,10 +22,8 @@ import {
 import { findActiveBooster, findEquippedChip } from '@/utils/global/inventory.utils';
 // AVATARS OFF (2026-08-09) — see the `avatarSpeedPct` note below.
 // import { equippedAvatarEngineSpeedPct } from '@/utils/global/avatar.utils';
-import { testBadgeCapacityTickets, testBadgeSpeedBoostPct } from '@/utils/global/testQuest.utils';
 import { inventoryApi } from '@/api/inventory.api';
 // AVATARS OFF — import { avatarsApi } from '@/api/avatars.api';
-import { testQuestApi } from '@/api/testQuest.api';
 import type { EngineSync, TicketEngine } from '@/types/interfaces/ticket.interfaces';
 import type { Ticket, TicketType } from '@/types/types/ticket.types';
 
@@ -179,8 +176,6 @@ export const enginesApi = api.injectEndpoints({
           // Collecting is what «забери билеты с двигателя» counts
           // (`Profile.ticketsEarned`), and it is the FIRST step of day 1 — so the
           // checklist learns about it at the moment of the tap, not on the next
-          // visit. @see refetchTestQuestProgress
-          refetchTestQuestProgress(dispatch);
           // Settle the prediction against the server's own count. Nothing else
           // will: these mutations skip the `tickets` invalidation on purpose, so
           // an over-predicted inventory number would otherwise just stay on
@@ -263,8 +258,6 @@ export const enginesApi = api.injectEndpoints({
           // Collecting is what «забери билеты с двигателя» counts
           // (`Profile.ticketsEarned`), and it is the FIRST step of day 1 — so the
           // checklist learns about it at the moment of the tap, not on the next
-          // visit. @see refetchTestQuestProgress
-          refetchTestQuestProgress(dispatch);
           // See claimEngine: without this the tier's inventory keeps whatever the
           // prediction guessed, forever.
           const delta = resolveClaimedCount(data, predicted) - predicted;
@@ -335,18 +328,12 @@ export const enginesApi = api.injectEndpoints({
           getState() as Parameters<ReturnType<typeof inventoryApi.endpoints.getInventory.select>>[0]
         ).data;
         const tables = levelTablesFromState(getState());
-        // The Test-Quest finisher's permanent capacity tickets are part of that
-        // batch on the server, so they are part of it here too.
-        const quest = testQuestApi.endpoints.getTestQuest.select()(
-          getState() as Parameters<ReturnType<typeof testQuestApi.endpoints.getTestQuest.select>>[0]
-        ).data;
-        const badgeCapacity = testBadgeCapacityTickets(quest?.badgeLevel, quest?.climbed);
         // The boldest prediction of the three claim paths: with nothing pending
         // it invents a whole batch from `engineCapacity` — client-side math over
-        // chips, boosters, the badge prize and admin-tunable tables — instead of
-        // summing counts the server already sent. Most likely of the three to
-        // need the reconciliation below, and it is a PAID action, so a wrong
-        // ticket count sits next to a real star charge.
+        // chips, boosters and admin-tunable tables — instead of summing counts
+        // the server already sent. Most likely of the three to need the
+        // reconciliation below, and it is a PAID action, so a wrong ticket count
+        // sits next to a real star charge.
         let predicted = 0;
         const ticketsPatch = dispatch(
           ticketsApi.util.updateQueryData('getTickets', undefined, draft => {
@@ -361,7 +348,6 @@ export const enginesApi = api.injectEndpoints({
                   : engineCapacity(engine, {
                       capacityChip,
                       capacityBooster,
-                      badgeCapacityTickets: badgeCapacity,
                       tables,
                     });
               predicted = claimAmount;
@@ -382,8 +368,6 @@ export const enginesApi = api.injectEndpoints({
           // Collecting is what «забери билеты с двигателя» counts
           // (`Profile.ticketsEarned`), and it is the FIRST step of day 1 — so the
           // checklist learns about it at the moment of the tap, not on the next
-          // visit. @see refetchTestQuestProgress
-          refetchTestQuestProgress(dispatch);
           // See claimEngine. Stars need no such pass — `me` is invalidated above,
           // so the real balance arrives with the refetch; only the tickets cache
           // is left to the prediction.
@@ -439,9 +423,6 @@ export const enginesApi = api.injectEndpoints({
         );
         try {
           await queryFulfilled;
-          // Writes an ENGINE_UPGRADE Stars row, which is what the test-quest's
-          // «прокачай двигатель N раз» step counts.
-          refetchTestQuestProgress(dispatch);
         } catch (reason) {
           ticketsPatch.undo();
           mePatch.undo();
@@ -478,8 +459,6 @@ export const enginesApi = api.injectEndpoints({
         );
         try {
           await queryFulfilled;
-          // See upgrade-speed: the same ENGINE_UPGRADE row, the same quest step.
-          refetchTestQuestProgress(dispatch);
         } catch (reason) {
           ticketsPatch.undo();
           mePatch.undo();
@@ -526,18 +505,6 @@ export const enginesApi = api.injectEndpoints({
         //   >[0]
         // ).data;
         // const avatarSpeedPct = equippedAvatarEngineSpeedPct(avatars, me?.avatarId);
-        // The frozen Test-Quest badge's engine-speed boost is permanent too, and
-        // the backend applies it to the real cycle (computeEngineState) — so the
-        // optimistic completion math must match, or a badge holder's engine shows
-        // a longer cycle than the server mints and skip/instant costs drift.
-        const testQuest = testQuestApi.endpoints.getTestQuest.select()(
-          getState() as Parameters<ReturnType<typeof testQuestApi.endpoints.getTestQuest.select>>[0]
-        ).data;
-        const badgeSpeedPct = testBadgeSpeedBoostPct(testQuest?.badgeLevel);
-        // Its capacity half travels with it: a finisher's permanent tickets grow
-        // the batch the server mints, and — one ticket costing one tier cycle —
-        // the cycle this loop is deciding against.
-        const badgeCapacity = testBadgeCapacityTickets(testQuest?.badgeLevel, testQuest?.climbed);
         const tables = levelTablesFromState(getState());
         const patch = dispatch(
           ticketsApi.util.updateQueryData('getTickets', undefined, draft => {
@@ -557,8 +524,6 @@ export const enginesApi = api.injectEndpoints({
                 perks: me?.statusPerks,
                 isVip: me?.isVIP ?? false,
                 avatarBoostPct: avatarSpeedPct,
-                badgeBoostPct: badgeSpeedPct,
-                badgeCapacityTickets: badgeCapacity,
                 tables,
               });
               // Same floor the screens use: predicting a finished batch the
@@ -568,7 +533,6 @@ export const enginesApi = api.injectEndpoints({
                 engine.pendingCount = engineCapacity(engine, {
                   capacityChip,
                   capacityBooster,
-                  badgeCapacityTickets: badgeCapacity,
                   tables,
                 });
               }

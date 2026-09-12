@@ -1,7 +1,6 @@
 import { api } from '@/api/index.api';
 import { balanceTags } from '@/api/balance-tags';
 import { rtkTags } from '@/constants/rtk-tags';
-import { refetchTestQuestProgress } from '@/api/testQuest.api';
 import type {
   InventoryBooster,
   InventoryChip,
@@ -33,33 +32,11 @@ export const inventoryApi = api.injectEndpoints({
     equipChip: builder.mutation<InventorySnapshot, { chipId: string; engineId: string }>({
       query: body => ({ url: 'inventory/chip/equip', method: 'POST', body }),
       invalidatesTags: [rtkTags.inventory, rtkTags.tickets, ...balanceTags.stars],
-      async onQueryStarted(_arg, { dispatch, queryFulfilled }) {
-        try {
-          await queryFulfilled;
-          // «Mint a chip» and «put the chip on an engine» are checklist steps
-          // counted off the inventory itself, so they move the moment this
-          // succeeds — and unequipping moves the second one back.
-          refetchTestQuestProgress(dispatch);
-        } catch {
-          // Refused: nothing moved.
-        }
-      },
     }),
 
     unequipChip: builder.mutation<InventorySnapshot, { chipId: string }>({
       query: body => ({ url: 'inventory/chip/unequip', method: 'POST', body }),
       invalidatesTags: [rtkTags.inventory, rtkTags.tickets, ...balanceTags.stars],
-      async onQueryStarted(_arg, { dispatch, queryFulfilled }) {
-        try {
-          await queryFulfilled;
-          // «Mint a chip» and «put the chip on an engine» are checklist steps
-          // counted off the inventory itself, so they move the moment this
-          // succeeds — and unequipping moves the second one back.
-          refetchTestQuestProgress(dispatch);
-        } catch {
-          // Refused: nothing moved.
-        }
-      },
     }),
 
     levelUpChip: builder.mutation<InventorySnapshot, { chipId: string }>({
@@ -71,17 +48,6 @@ export const inventoryApi = api.injectEndpoints({
       {
         query: body => ({ url: 'inventory/chip/mint', method: 'POST', body }),
         invalidatesTags: [rtkTags.inventory],
-        async onQueryStarted(_arg, { dispatch, queryFulfilled }) {
-          try {
-            await queryFulfilled;
-            // «Mint a chip» and «put the chip on an engine» are checklist steps
-            // counted off the inventory itself, so they move the moment this
-            // succeeds — and unequipping moves the second one back.
-            refetchTestQuestProgress(dispatch);
-          } catch {
-            // Refused: nothing moved.
-          }
-        },
       }
     ),
 

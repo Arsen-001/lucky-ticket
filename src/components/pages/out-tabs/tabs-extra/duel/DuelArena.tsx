@@ -21,7 +21,6 @@ import { useInFlightLock } from '@/hooks/useInFlightLock';
 import { useToast } from '@/hooks/useToast';
 import { useAppDispatch } from '@/lib/rtk/hooks';
 import { rtkTags } from '@/constants/rtk-tags';
-import { refetchTestQuestProgress } from '@/api/testQuest.api';
 import {
   duelApi,
   useCancelDuelMutation,
@@ -144,9 +143,6 @@ export function DuelArena({
     if (status === 'PLAYING' || status === 'FINISHED' || status === 'CANCELLED') {
       dispatch(duelApi.util.invalidateTags([rtkTags.duelLobbies, rtkTags.tickets]));
     }
-    // Проигравший узнаёт о списании из опроса, а не из своего хода — чек-лист
-    // тест-квеста считает билеты и должен увидеть это у обеих сторон.
-    if (status === 'FINISHED') refetchTestQuestProgress(dispatch);
   }, [data?.status]);
 
   // «Оба сходили, ждём картинку» — единственная фаза, где задержка заметна.

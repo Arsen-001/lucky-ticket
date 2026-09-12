@@ -36,7 +36,6 @@ export const rtkTags = {
   partnerStats: 'PartnerStats',
   platformConfig: 'PlatformConfig',
   emailReward: 'EmailReward',
-  testQuest: 'TestQuest',
   duelLobbies: 'DuelLobbies',
   duelInvites: 'DuelInvites',
   duelState: 'DuelState',

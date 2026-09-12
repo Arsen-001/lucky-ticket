@@ -1,6 +1,5 @@
 import { api } from '@/api/index.api';
 import { balanceTags } from '@/api/balance-tags';
-import { refetchTestQuestProgress } from '@/api/testQuest.api';
 import { rtkTags } from '@/constants/rtk-tags';
 import type {
   AdsExtraQuote,
@@ -91,9 +90,6 @@ export const tasksApi = api.injectEndpoints({
       // histories and from the ticket balance.
       invalidatesTags: [rtkTags.tasks, rtkTags.tickets, ...balanceTags.lc, ...balanceTags.stars],
       async onQueryStarted(arg, { dispatch, queryFulfilled }) {
-        // A paid view moves `lifetimeWatched`, which is what the test-quest's
-        // «посмотри N реклам» step counts. Only after the server confirms — a
-        // refused claim moves nothing.
         try {
           await queryFulfilled;
           // Spend the view in the cache too. The invalidation below refetches
@@ -105,7 +101,6 @@ export const tasksApi = api.injectEndpoints({
               markAdViewSpent(draft.ads, { adId: arg.adId, skipped: arg.skipped });
             })
           );
-          refetchTestQuestProgress(dispatch);
         } catch {
           /* the caller surfaces the failure; nothing was counted */
         }

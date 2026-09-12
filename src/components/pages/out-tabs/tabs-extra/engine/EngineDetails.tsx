@@ -26,8 +26,6 @@ import { isConflictError, isNotReadyError } from '@/utils/global/spend-failure.u
 import { useToast } from '@/hooks/useToast';
 import { useSpendFailure } from '@/hooks/useSpendFailure';
 import { useEngineSpeedAvatarBoostPct } from '@/hooks/useEngineSpeedAvatarBoostPct';
-import { useTestBadgeCapacityTickets } from '@/hooks/useTestBadgeCapacityTickets';
-import { useTestBadgeSpeedBoostPct } from '@/hooks/useTestBadgeSpeedBoostPct';
 import { useEngineConfig } from '@/hooks/useEngineConfig';
 import { findTicketFlightOrigin, useTicketFlight } from '@/hooks/useTicketFlight';
 import {
@@ -68,8 +66,6 @@ export function EngineDetails({ id }: EngineDetailsProps) {
   const isLp = me?.isLuckyPlayer ?? false;
   const isVip = me?.isVIP ?? false;
   const avatarSpeedPct = useEngineSpeedAvatarBoostPct();
-  const badgeSpeedPct = useTestBadgeSpeedBoostPct();
-  const badgeCapacity = useTestBadgeCapacityTickets();
   const { tables, upgrade } = useEngineConfig();
 
   const [equipChipMutation] = useEquipChipMutation();
@@ -131,8 +127,6 @@ export function EngineDetails({ id }: EngineDetailsProps) {
         isVip,
         perks: me?.statusPerks,
         avatarBoostPct: avatarSpeedPct,
-        badgeBoostPct: badgeSpeedPct,
-        badgeCapacityTickets: badgeCapacity,
         tables,
       });
       // Never ahead of the server's own countdown (@see engineElapsedAligned):
@@ -161,7 +155,6 @@ export function EngineDetails({ id }: EngineDetailsProps) {
     isLp,
     isVip,
     avatarSpeedPct,
-    badgeSpeedPct,
     tables,
     completeEngineCycle,
   ]);
@@ -205,8 +198,6 @@ export function EngineDetails({ id }: EngineDetailsProps) {
     isVip,
     perks: me?.statusPerks,
     avatarBoostPct: avatarSpeedPct,
-    badgeBoostPct: badgeSpeedPct,
-    badgeCapacityTickets: badgeCapacity,
     tables,
   });
   // What the engine is doing RIGHT NOW — batch and rate off the live cycle, so
@@ -216,7 +207,6 @@ export function EngineDetails({ id }: EngineDetailsProps) {
   const liveCapacity = engineCapacity(engine, {
     capacityChip,
     capacityBooster,
-    badgeCapacityTickets: badgeCapacity,
     tables,
   });
   const liveTicketsPerHour = cycle > 0 ? (3600 / cycle) * liveCapacity : 0;
@@ -230,7 +220,6 @@ export function EngineDetails({ id }: EngineDetailsProps) {
     isVip,
     perks: me?.statusPerks,
     avatarBoostPct: avatarSpeedPct,
-    badgeBoostPct: badgeSpeedPct,
     tables,
   });
   const speedLevel = engine.speedLevel ?? 0;
@@ -365,7 +354,6 @@ export function EngineDetails({ id }: EngineDetailsProps) {
         baseCycleSeconds={baselineCycleSeconds(engine, {
           capacityChip,
           capacityBooster,
-          badgeCapacityTickets: badgeCapacity,
           tables,
         })}
         lifetimeProduced={lifetimeProduced}

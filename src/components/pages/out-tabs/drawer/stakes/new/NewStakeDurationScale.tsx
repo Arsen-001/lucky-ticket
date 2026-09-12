@@ -29,8 +29,7 @@ const FISHEYE_MAX = 1.5;
  * actually says something (it shows what a longer lock buys), so the range
  * input is gone and the chart took over the gesture: press anywhere on it and
  * drag left/right, the month under the finger follows, and it stays where the
- * finger lifts. Same interaction as the test-quest rail (`TestQuestRewardRail`),
- * rotated to the horizontal.
+ * finger lifts.
  *
  * `touch-action: none` keeps the drag inside the scale instead of scrolling the
  * sheet underneath it, a plain tap is a zero-length drag so it still selects,

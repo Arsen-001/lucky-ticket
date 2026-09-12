@@ -64,7 +64,7 @@ export interface AdRewardRailProps {
  * The strip answered "how far into the day am I" and "which views pay more" for
  * free, but the reward itself still needed a tap it had no way to accept.
  *
- * So it **scrubs**, the way the test-quest rail does: press and drag along it,
+ * So it **scrubs**: press and drag along it,
  * the bars swell around the finger, the view under it is repeated full size in
  * {@link AdRailLens} with its whole reward, and lifting the finger simply ends
  * the preview — the watch button never moves off the view that is actually
