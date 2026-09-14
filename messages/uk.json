@@ -1646,5 +1646,6 @@
   "withdraw needs {num} more ton": "Withdrawals open from 0.05 TON — {num} TON to go.",
   "withdraw needs {num} more friends": "To withdraw, invite {num} more friends through your link.",
   "first withdrawal has no fee": "Your first withdrawal has no fee. Only the first one.",
-  "withdrawals open soon": "Withdrawals open for 24 hours soon — watch the channel. Your first one has no fee."
+  "withdrawals open soon": "Withdrawals open for 24 hours soon — watch the channel. Your first one has no fee.",
+  "withdraw goes to connected wallet only": "TON goes only to the wallet connected to this account."
 }

@@ -51,6 +51,12 @@ interface WithdrawTonModalProps {
    * хотя API его принимал.
    */
   withdrawFeeTon?: number;
+  /**
+   * Адрес привязанного кошелька — ЕДИНСТВЕННЫЙ, куда сервер отправит TON.
+   * Вписать другой нельзя: опечатка в адресе — это валидный адрес, перевод
+   * проходит, и деньги не вернуть ничем.
+   */
+  boundAddress?: string;
   /** Whether this account is still on the cheaper first-withdrawal minimum. */
   firstWithdrawal?: boolean;
   /** What the minimum becomes once this withdrawal is done. */
@@ -69,6 +75,7 @@ export function WithdrawTonModal({
   currentReferrals = 0,
   minWithdrawTon: accountMinWithdrawTon,
   withdrawFeeTon: accountWithdrawFeeTon,
+  boundAddress,
   firstWithdrawal = false,
   nextWithdrawMinTon,
 }: WithdrawTonModalProps) {
@@ -76,7 +83,9 @@ export function WithdrawTonModal({
   const toast = useToast();
   const [withdraw, { isLoading, data: result }] = useWithdrawTonMutation();
   const [step, setStep] = useState<Step>('form');
-  const [toAddress, setToAddress] = useState('');
+  // Адрес не вводится: он всегда равен привязанному. Состояние осталось, чтобы
+  // не переписывать валидацию и отправку, но заполняется только сервером.
+  const toAddress = boundAddress ?? '';
   const [amount, setAmount] = useState('');
   // The gate as the server reported it at submit time — the count can move
   // between the screen's load and the request, so `gated` is not the last word.
@@ -136,7 +145,6 @@ export function WithdrawTonModal({
 
   const handleClose = () => {
     setStep('form');
-    setToAddress('');
     setAmount('');
     setLateGate(null);
     setLateDisabled(false);
@@ -247,12 +255,12 @@ export function WithdrawTonModal({
               <label className="text-pink-secondary px-1 text-[11px] font-bold uppercase tracking-wider">
                 {t('recipient address')}
               </label>
-              <Input
-                value={toAddress}
-                onChange={e => setToAddress(e.target.value)}
-                placeholder="EQ..."
-                classNames={{ input: 'font-mono text-[12px]' }}
-              />
+              <div className="bg-background-overlay flex flex-col gap-1 rounded-xl border border-white/10 px-3 py-2.5">
+                <span className="text-white font-mono text-[12px] break-all">{toAddress}</span>
+                <span className="text-pink-secondary text-[10px] leading-snug">
+                  {t('withdraw goes to connected wallet only')}
+                </span>
+              </div>
             </div>
 
             <div className="flex flex-col gap-1.5">
