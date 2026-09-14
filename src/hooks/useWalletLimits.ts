@@ -10,6 +10,11 @@ export interface WalletLimits {
    * way IN (binding, deposits) is open, only this way OUT is shut.
    */
   withdrawalsEnabled: boolean;
+  /**
+   * When the window shuts (ISO) or null. Display only — `withdrawalsEnabled`
+   * above already carries the server's verdict on this date.
+   */
+  withdrawalsUntil: string | null;
   /** Flat fee charged ON TOP of a withdrawal — the recipient gets the amount. */
   withdrawFeeTon: number;
   /** Minimum for an account that has withdrawn before. */
@@ -41,6 +46,7 @@ export function useWalletLimits(): WalletLimits {
     // against a backend old enough not to publish the flag — locking the screen
     // would hide a working feature, and the 403 still refuses anything real.
     withdrawalsEnabled: data?.wallet?.withdrawalsEnabled ?? true,
+    withdrawalsUntil: data?.wallet?.withdrawalsUntil ?? null,
     withdrawFeeTon: data?.wallet?.withdrawFeeTon ?? walletConstants.TON_NETWORK_FEE,
     minWithdrawTon: data?.wallet?.minWithdrawTon ?? walletConstants.TON_MIN_WITHDRAW,
     firstWithdrawMinTon:

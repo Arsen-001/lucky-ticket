@@ -1649,5 +1649,7 @@
   "withdrawals open soon": "Yechib olish tez orada bir kunga ochiladi — kanalni kuzat. Birinchisi komissiyasiz.",
   "withdraw goes to connected wallet only": "TON faqat shu akkauntga bog‘langan hamyonga boradi.",
   "first withdrawal is free": "Birinchi yechib olishing bepul",
-  "first withdrawal free note": "{n} TON dan boshlab yechib olishing mumkin. Keyingisidan minimal summa {next} TON, komissiya {fee} TON."
+  "first withdrawal free note": "{n} TON dan boshlab yechib olishing mumkin. Keyingisidan minimal summa {next} TON, komissiya {fee} TON.",
+  "withdrawals open until {date}": "Yechib olish {date} gacha ochiq",
+  "closes in {time}": "{time} dan keyin yopiladi"
 }

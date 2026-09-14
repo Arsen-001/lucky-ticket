@@ -1649,5 +1649,7 @@
   "withdrawals open soon": "برداشت به‌زودی برای ۲۴ ساعت باز می‌شود — کانال را دنبال کن. اولی بدون کارمزد است.",
   "withdraw goes to connected wallet only": "TON فقط به کیف پولی می‌رود که به این حساب وصل است.",
   "first withdrawal is free": "اولین برداشتت رایگان است",
-  "first withdrawal free note": "از {n} TON می‌توانی برداشت کنی. از برداشت بعدی حداقل {next} TON و کارمزد {fee} TON می‌شود."
+  "first withdrawal free note": "از {n} TON می‌توانی برداشت کنی. از برداشت بعدی حداقل {next} TON و کارمزد {fee} TON می‌شود.",
+  "withdrawals open until {date}": "برداشت تا {date} باز است",
+  "closes in {time}": "تا {time} دیگر بسته می‌شود"
 }

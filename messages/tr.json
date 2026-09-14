@@ -1649,5 +1649,7 @@
   "withdrawals open soon": "Çekimler yakında 24 saatliğine açılıyor — kanalı takip et. İlki komisyonsuz.",
   "withdraw goes to connected wallet only": "TON yalnızca bu hesaba bağlı cüzdana gider.",
   "first withdrawal is free": "İlk çekimin ücretsiz",
-  "first withdrawal free note": "{n} TON’dan itibaren çekebilirsin. Sonrakinden itibaren alt sınır {next} TON, komisyon {fee} TON."
+  "first withdrawal free note": "{n} TON’dan itibaren çekebilirsin. Sonrakinden itibaren alt sınır {next} TON, komisyon {fee} TON.",
+  "withdrawals open until {date}": "Çekimler {date} tarihine kadar açık",
+  "closes in {time}": "{time} içinde kapanıyor"
 }

@@ -140,6 +140,14 @@ export interface PublicConfig {
      * treat it as open and let the server's 403 be the last word.
      */
     withdrawalsEnabled?: boolean;
+    /**
+     * When the exit window closes (ISO), or null for no deadline. The flag
+     * above is already ANDed with this date SERVER-side, so this one is for the
+     * line that says WHEN — never for deciding whether the form opens. A phone
+     * running slow can then only show a stale date beside a locked button, not
+     * a live button past a deadline the treasury has stopped honouring.
+     */
+    withdrawalsUntil?: string | null;
     /** Flat fee charged ON TOP of a withdrawal — the recipient gets the amount. */
     withdrawFeeTon: number;
     /** Minimum once the account has cashed out before. */

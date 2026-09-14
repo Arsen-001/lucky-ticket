@@ -18,6 +18,9 @@ const getPublicConfig = (): PublicConfig => ({
   lsTonExchangeUsdRate: appConfig.wallet.lsTonExchangeUsdRate,
   wallet: {
     withdrawalsEnabled: appConfig.wallet.withdrawalsEnabled,
+    // A live exit window in dev, for the same reason the promo above has one:
+    // the note draws nothing without a deadline, and nothing cannot be reviewed.
+    withdrawalsUntil: withdrawalsUntil,
     withdrawFeeTon: appConfig.wallet.withdrawFeeTon,
     minWithdrawTon: walletConstants.TON_MIN_WITHDRAW,
     firstWithdrawMinTon: walletConstants.TON_FIRST_MIN_WITHDRAW,
@@ -91,6 +94,9 @@ const getPublicConfig = (): PublicConfig => ({
  * section disappear, and a typed amount stops earning a bonus.
  */
 const promoEndsAt = new Date(Date.now() + 62 * 3600_000).toISOString();
+// Deliberately under a day: the countdown's «days» branch is the easy one, and
+// the hours/minutes branch is what an actual 24-hour window shows.
+const withdrawalsUntil = new Date(Date.now() + 26 * 3600_000).toISOString();
 
 export const configMock = {
   config: getPublicConfig,

@@ -1649,5 +1649,7 @@
   "withdrawals open soon": "Баровардан ба зудӣ ба муддати як шабонарӯз кушода мешавад — канро пайгирӣ кун. Аввалинаш бе комиссия.",
   "withdraw goes to connected wallet only": "TON танҳо ба ҳамёне меравад, ки ба ин ҳисоб пайваст аст.",
   "first withdrawal is free": "Бароварди аввалинат ройгон аст",
-  "first withdrawal free note": "Аз {n} TON бароварда метавонӣ. Аз навбатӣ ҳадди ақал {next} TON ва комиссия {fee} TON мешавад."
+  "first withdrawal free note": "Аз {n} TON бароварда метавонӣ. Аз навбатӣ ҳадди ақал {next} TON ва комиссия {fee} TON мешавад.",
+  "withdrawals open until {date}": "Бароварӣ то {date} кушода аст",
+  "closes in {time}": "Пас аз {time} баста мешавад"
 }

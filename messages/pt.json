@@ -1649,5 +1649,7 @@
   "withdrawals open soon": "Os saques abrem em breve por 24 horas — acompanha o canal. O primeiro é sem taxa.",
   "withdraw goes to connected wallet only": "O TON vai apenas para a carteira ligada a esta conta.",
   "first withdrawal is free": "O teu primeiro saque é grátis",
-  "first withdrawal free note": "Podes sacar a partir de {n} TON. A partir do próximo, o mínimo é {next} TON e a taxa {fee} TON."
+  "first withdrawal free note": "Podes sacar a partir de {n} TON. A partir do próximo, o mínimo é {next} TON e a taxa {fee} TON.",
+  "withdrawals open until {date}": "Saques abertos até {date}",
+  "closes in {time}": "Fecha em {time}"
 }

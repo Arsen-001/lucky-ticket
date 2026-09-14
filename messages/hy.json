@@ -1649,5 +1649,7 @@
   "withdrawals open soon": "Դուրսբերումը շուտով կբացվի մեկ օրով — հետևիր ալիքին։ Առաջինն առանց միջնորդավճարի է։",
   "withdraw goes to connected wallet only": "TON-ը գնում է միայն այս հաշվին կապված դրամապանակ։",
   "first withdrawal is free": "Քո առաջին դուրսբերումն անվճար է",
-  "first withdrawal free note": "Կարող ես դուրս բերել {n} TON-ից։ Հաջորդից նվազագույնը {next} TON է, միջնորդավճարը՝ {fee} TON։"
+  "first withdrawal free note": "Կարող ես դուրս բերել {n} TON-ից։ Հաջորդից նվազագույնը {next} TON է, միջնորդավճարը՝ {fee} TON։",
+  "withdrawals open until {date}": "Դուրսբերումը բաց է մինչև {date}",
+  "closes in {time}": "Կփակվի {time}-ից"
 }

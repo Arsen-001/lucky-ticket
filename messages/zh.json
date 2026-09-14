@@ -1649,5 +1649,7 @@
   "withdrawals open soon": "提现很快将开放 24 小时 — 请关注频道。首次提现免手续费。",
   "withdraw goes to connected wallet only": "TON 只会发送到与此账号绑定的钱包。",
   "first withdrawal is free": "首次提现免费",
-  "first withdrawal free note": "{n} TON 起即可提现。从下一次起，最低 {next} TON，手续费 {fee} TON。"
+  "first withdrawal free note": "{n} TON 起即可提现。从下一次起，最低 {next} TON，手续费 {fee} TON。",
+  "withdrawals open until {date}": "提现开放至{date}",
+  "closes in {time}": "{time}后关闭"
 }

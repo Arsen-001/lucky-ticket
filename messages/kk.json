@@ -1649,5 +1649,7 @@
   "withdrawals open soon": "Шығару жақында тәулікке ашылады — арнаны қадағала. Біріншісі комиссиясыз.",
   "withdraw goes to connected wallet only": "TON тек осы аккаунтқа байланған әмиянға ғана барады.",
   "first withdrawal is free": "Бірінші шығаруың тегін",
-  "first withdrawal free note": "{n} TON-нан бастап шығара аласың. Келесісінен ең төменгі сома {next} TON, комиссия {fee} TON."
+  "first withdrawal free note": "{n} TON-нан бастап шығара аласың. Келесісінен ең төменгі сома {next} TON, комиссия {fee} TON.",
+  "withdrawals open until {date}": "Шығару {date} дейін ашық",
+  "closes in {time}": "{time} кейін жабылады"
 }

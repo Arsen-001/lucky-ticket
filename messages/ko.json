@@ -1649,5 +1649,7 @@
   "withdrawals open soon": "곧 24시간 동안 출금이 열려요 — 채널을 지켜보세요. 첫 출금은 수수료가 없어요.",
   "withdraw goes to connected wallet only": "TON은 이 계정에 연결된 지갑으로만 전송돼요.",
   "first withdrawal is free": "첫 출금은 무료예요",
-  "first withdrawal free note": "{n} TON부터 출금할 수 있어요. 다음 출금부터는 최소 {next} TON, 수수료 {fee} TON이에요."
+  "first withdrawal free note": "{n} TON부터 출금할 수 있어요. 다음 출금부터는 최소 {next} TON, 수수료 {fee} TON이에요.",
+  "withdrawals open until {date}": "출금은 {date}까지 가능합니다",
+  "closes in {time}": "{time} 후 마감"
 }

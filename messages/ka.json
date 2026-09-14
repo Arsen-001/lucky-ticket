@@ -1649,5 +1649,7 @@
   "withdrawals open soon": "გატანა მალე გაიხსნება ერთი დღით — თვალი ადევნე არხს. პირველი უსაკომისიოა.",
   "withdraw goes to connected wallet only": "TON მიდის მხოლოდ ამ ანგარიშზე მიბმულ საფულეში.",
   "first withdrawal is free": "შენი პირველი გატანა უფასოა",
-  "first withdrawal free note": "გატანა შეგიძლია {n} TON-იდან. შემდეგიდან მინიმუმი {next} TON-ია, საკომისიო კი {fee} TON."
+  "first withdrawal free note": "გატანა შეგიძლია {n} TON-იდან. შემდეგიდან მინიმუმი {next} TON-ია, საკომისიო კი {fee} TON.",
+  "withdrawals open until {date}": "გატანა ღიაა {date}-მდე",
+  "closes in {time}": "დაიხურება {time}-ში"
 }

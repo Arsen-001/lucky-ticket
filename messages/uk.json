@@ -1649,5 +1649,7 @@
   "withdrawals open soon": "Виведення відкриється на добу — стеж за каналом. Перше буде без комісії.",
   "withdraw goes to connected wallet only": "TON іде лише на гаманець, прив’язаний до цього акаунта.",
   "first withdrawal is free": "Перше виведення — без комісії",
-  "first withdrawal free note": "Вивести можна від {n} TON. З наступного мінімум {next} TON і комісія {fee} TON."
+  "first withdrawal free note": "Вивести можна від {n} TON. З наступного мінімум {next} TON і комісія {fee} TON.",
+  "withdrawals open until {date}": "Виведення відкрите до {date}",
+  "closes in {time}": "Закриється через {time}"
 }

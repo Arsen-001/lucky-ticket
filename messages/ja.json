@@ -1649,5 +1649,7 @@
   "withdrawals open soon": "出金がまもなく24時間だけ開きます — チャンネルを見ていてください。最初の一回は手数料なしです。",
   "withdraw goes to connected wallet only": "TON はこのアカウントに接続されたウォレットにのみ送られます。",
   "first withdrawal is free": "最初の出金は無料",
-  "first withdrawal free note": "{n} TON から出金できます。次回から下限は {next} TON、手数料は {fee} TON になります。"
+  "first withdrawal free note": "{n} TON から出金できます。次回から下限は {next} TON、手数料は {fee} TON になります。",
+  "withdrawals open until {date}": "出金は{date}まで可能です",
+  "closes in {time}": "あと{time}で終了"
 }

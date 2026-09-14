@@ -1649,5 +1649,7 @@
   "withdrawals open soon": "Вывод откроется на сутки — следи за каналом. Первый вывод будет без комиссии.",
   "withdraw goes to connected wallet only": "TON уходит только на кошелёк, привязанный к этому аккаунту.",
   "first withdrawal is free": "Первый вывод — без комиссии",
-  "first withdrawal free note": "Вывести можно от {n} TON. Со следующего минимум {next} TON и комиссия {fee} TON."
+  "first withdrawal free note": "Вывести можно от {n} TON. Со следующего минимум {next} TON и комиссия {fee} TON.",
+  "withdrawals open until {date}": "Вывод открыт до {date}",
+  "closes in {time}": "Закроется через {time}"
 }

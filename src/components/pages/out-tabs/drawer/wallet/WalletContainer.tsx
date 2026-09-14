@@ -10,6 +10,7 @@ import { useTonWalletConnect } from '@/hooks/useTonWalletConnect';
 import { useWalletLimits } from '@/hooks/useWalletLimits';
 import { TonWalletHero } from './TonWalletHero';
 import { WalletActionButtons } from './WalletActionButtons';
+import { WalletWithdrawWindowNote } from './WalletWithdrawWindowNote';
 import { StarsBalanceCard } from './StarsBalanceCard';
 import { WalletLcCard } from './WalletLcCard';
 import { WalletTransactionHistory } from './WalletTransactionHistory';
@@ -177,6 +178,14 @@ export function WalletContainer() {
           onExchange={() => requireConnected('exchange')}
         />
       )}
+
+      {/*
+        The deadline sits between the two things it governs — the withdraw
+        button above, the LC→TON card below — because it is one window over
+        both, not a property of either. It draws nothing on an ordinary day:
+        see the component.
+      */}
+      <WalletWithdrawWindowNote />
 
       <StarsBalanceCard
         balance={state?.starsBalance}
