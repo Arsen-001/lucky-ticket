@@ -1,21 +1,3 @@
 {
-  "keys": [
-    "claim {num}",
-    "credited",
-    "first withdrawal free note",
-    "first withdrawal has no fee",
-    "first withdrawal is free",
-    "for everything since the start",
-    "now on your in game balance",
-    "reward does not expire",
-    "reward for your activity",
-    "tikki full",
-    "tikki full description",
-    "withdraw goes to connected wallet only",
-    "withdraw needs {num} more friends",
-    "withdraw needs {num} more ton",
-    "withdrawals open soon",
-    "your play has been counted",
-    "your reward"
-  ]
+  "keys": []
 }
