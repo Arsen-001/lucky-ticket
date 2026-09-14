@@ -1,0 +1,18 @@
+/* Сумма награды золотом.
+
+   `background-image`, а НЕ сокращение `background`: сокращение сбрасывает
+   `background-clip` обратно в `border-box`, и число красится сплошным
+   прямоугольником с невидимыми цифрами. Вычисленные стили при этом выглядят
+   правильно — ловится только снимком экрана. Та же грабля, что в wordmark.css,
+   и тест `tests/wordmark.test.ts` её стережёт. */
+.airdrop-amount {
+  background-image: var(--gradient-gold);
+  background-clip: text;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  color: transparent;
+  /* Золотой градиент обрезается по строчным выносным элементам, если не дать
+     ему воздуха: цифры без нижних выносных, но «TON» рядом их имеет. */
+  padding-block: 0.12em;
+  margin-block: -0.12em;
+}

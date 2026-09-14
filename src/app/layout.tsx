@@ -8,6 +8,7 @@ import { ContentProtectionProvider } from '@/providers/ContentProtectionProvider
 import { Onboarding } from '@/components/onboarding/Onboarding';
 import { TournamentResultWatcher } from '@/components/pages/tabs/tournaments/TournamentResultWatcher';
 import { WipeNoticeWatcher } from '@/components/shared/modals/WipeNoticeWatcher';
+import { AirdropRewardWatcher } from '@/components/shared/modals/AirdropRewardWatcher';
 import { TicketFlightViewport } from '@/components/shared/ticket-flight/TicketFlightViewport';
 import { DuelInviteAutoSurface } from '@/components/layout-elements/DuelInviteAutoSurface';
 import { ToastViewport } from '@/components/shared/toast/ToastViewport';
@@ -219,6 +220,12 @@ export default async function RootLayout({ children }: ChildrenProps) {
                             the screen they open first is rarely the one that
                             explains it. @see WipeNoticeWatcher */}
                         <WipeNoticeWatcher />
+                        {/* Ретро-награда за всё, что игрок успел сделать до
+                            айдропа. В корне по той же причине, что и соседнее
+                            окно: начислено за турниры, рекламу, покупки и
+                            друзей сразу, и ни один экран не объясняет это сам.
+                            @see AirdropRewardWatcher */}
+                        <AirdropRewardWatcher />
                       </TelegramProvider>
                       <FullscreenBrandBar />
                       <TicketFlightViewport />

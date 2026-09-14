@@ -39,4 +39,5 @@ export const rtkTags = {
   duelLobbies: 'DuelLobbies',
   duelInvites: 'DuelInvites',
   duelState: 'DuelState',
+  airdrop: 'Airdrop',
 } as const;

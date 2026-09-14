@@ -1634,5 +1634,16 @@
   "tikki says empty": "Tudo recolhido. Cheio de novo em {time}",
   "tikki says lonely": "Mais {count} como eu e eu viro {next}!",
   "tikki says merge": "Somos {count} — hora da fusão!",
-  "tikki says tap": "Toque em mim!"
+  "tikki says tap": "Toque em mim!",
+  "your reward": "Your reward",
+  "reward for your activity": "Reward for your activity",
+  "your play has been counted": "Your play has been counted",
+  "for everything since the start": "For everything you've done since the start",
+  "credited": "Credited",
+  "now on your in game balance": "Now on your in-game balance",
+  "claim {num}": "Claim {num}",
+  "reward does not expire": "Lands on your in-game balance. It doesn't expire.",
+  "withdraw needs {num} more ton": "Withdrawals open from 0.05 TON — {num} TON to go.",
+  "withdraw needs {num} more friends": "To withdraw, invite {num} more friends through your link.",
+  "first withdrawal has no fee": "Your first withdrawal has no fee. Only the first one."
 }

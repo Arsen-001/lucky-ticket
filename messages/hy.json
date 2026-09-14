@@ -1634,5 +1634,16 @@
   "tikki says empty": "Ամենը վերցված է։ Նորից լիքն եմ {time}-ից",
   "tikki says lonely": "Եւս {count} ինձ նման — և կդառնամ {next}",
   "tikki says merge": "Մենք {count}-ն ենք — միաձուլի՜ր մեզ",
-  "tikki says tap": "Հպի՜ր ինձ"
+  "tikki says tap": "Հպի՜ր ինձ",
+  "your reward": "Your reward",
+  "reward for your activity": "Reward for your activity",
+  "your play has been counted": "Your play has been counted",
+  "for everything since the start": "For everything you've done since the start",
+  "credited": "Credited",
+  "now on your in game balance": "Now on your in-game balance",
+  "claim {num}": "Claim {num}",
+  "reward does not expire": "Lands on your in-game balance. It doesn't expire.",
+  "withdraw needs {num} more ton": "Withdrawals open from 0.05 TON — {num} TON to go.",
+  "withdraw needs {num} more friends": "To withdraw, invite {num} more friends through your link.",
+  "first withdrawal has no fee": "Your first withdrawal has no fee. Only the first one."
 }

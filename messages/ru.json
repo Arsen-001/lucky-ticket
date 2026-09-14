@@ -1634,5 +1634,16 @@
   "tikki says empty": "Всё забрал. Снова полон через {time}",
   "tikki says lonely": "Ещё {count} таких же — и будет {next}!",
   "tikki says merge": "Нас {count} — сплавляй!",
-  "tikki says tap": "Тапни меня!"
+  "tikki says tap": "Тапни меня!",
+  "your reward": "Твоя награда",
+  "reward for your activity": "Награда за активность",
+  "your play has been counted": "Твоя игра посчитана",
+  "for everything since the start": "За всё, что ты сделал с самого начала",
+  "credited": "Зачислено",
+  "now on your in game balance": "Теперь это на твоём игровом балансе",
+  "claim {num}": "Забрать {num}",
+  "reward does not expire": "Придёт на игровой баланс. Награда не сгорает.",
+  "withdraw needs {num} more ton": "Вывод открывается с 0.05 TON — не хватает {num} TON.",
+  "withdraw needs {num} more friends": "Чтобы вывести, позови ещё {num} друзей по своей ссылке.",
+  "first withdrawal has no fee": "Первый вывод — без комиссии. Он один такой."
 }

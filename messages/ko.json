@@ -1634,5 +1634,16 @@
   "tikki says empty": "다 가져갔네요. {time} 뒤에 다시 가득 차요",
   "tikki says lonely": "{count}개만 더 모이면 {next} Tikki가 돼요!",
   "tikki says merge": "{count}개 모였어요, 합성해 주세요!",
-  "tikki says tap": "탭해 주세요!"
+  "tikki says tap": "탭해 주세요!",
+  "your reward": "Your reward",
+  "reward for your activity": "Reward for your activity",
+  "your play has been counted": "Your play has been counted",
+  "for everything since the start": "For everything you've done since the start",
+  "credited": "Credited",
+  "now on your in game balance": "Now on your in-game balance",
+  "claim {num}": "Claim {num}",
+  "reward does not expire": "Lands on your in-game balance. It doesn't expire.",
+  "withdraw needs {num} more ton": "Withdrawals open from 0.05 TON — {num} TON to go.",
+  "withdraw needs {num} more friends": "To withdraw, invite {num} more friends through your link.",
+  "first withdrawal has no fee": "Your first withdrawal has no fee. Only the first one."
 }
