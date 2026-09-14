@@ -5,6 +5,7 @@ import { useClaimAirdropMutation, useGetAirdropQuery } from '@/api/airdrop.api';
 import { useGetWalletStateQuery } from '@/api/wallet.api';
 import { AirdropRewardModal } from '@/components/shared/modals/AirdropRewardModal';
 import { useAppTranslations } from '@/hooks/useAppTranslations';
+import { useWalletLimits } from '@/hooks/useWalletLimits';
 import { useToast } from '@/hooks/useToast';
 
 /**
@@ -24,6 +25,7 @@ export function AirdropRewardWatcher() {
   const toast = useToast();
   const { data: airdrop } = useGetAirdropQuery();
   const { data: wallet } = useGetWalletStateQuery();
+  const { withdrawalsEnabled } = useWalletLimits();
   const [claim, { isLoading: claiming }] = useClaimAirdropMutation();
   const [open, setOpen] = useState(false);
   const [claimed, setClaimed] = useState(false);
@@ -80,7 +82,7 @@ export function AirdropRewardWatcher() {
       claimed={claimed}
       claiming={claiming}
       onClaim={handleClaim}
-      blocker={resolveBlocker(amountTon, wallet)}
+      blocker={resolveBlocker(amountTon, wallet, withdrawalsEnabled)}
     />
   );
 }
@@ -92,6 +94,13 @@ export function AirdropRewardWatcher() {
  * сказать им «позови трёх друзей» — значит отправить человека звать людей ради
  * вывода, который всё равно не откроется: он вернётся и упрётся во вторую
  * стену, о которой ему не сказали. Сначала сумма, потом друзья.
+ *
+ * Общий выключатель идёт ПОСЛЕ них и только для тех, кто прошёл оба: пока он
+ * выключен, кнопка вывода закрыта у всех, но человеку, которому и так не
+ * хватает суммы, знать про окно выдачи незачем — его держит другое. А тому, кто
+ * готов, нельзя обещать вывод: он нажмёт и упрётся в закрытую кассу. Поймано на
+ * живом проде через 6 минут после запуска: двое забрали награду и увидели
+ * «первый вывод без комиссии» при выключенном withdrawalsEnabled.
  */
 function resolveBlocker(
   amountTon: number,
@@ -100,8 +109,13 @@ function resolveBlocker(
     minWithdrawTon?: number;
     withdrawMinReferrals?: number;
     referralsCount?: number;
-  }
-): { kind: 'amount'; lackTon: number } | { kind: 'friends'; need: number } | { kind: 'none' } {
+  },
+  withdrawalsEnabled = true
+):
+  | { kind: 'amount'; lackTon: number }
+  | { kind: 'friends'; need: number }
+  | { kind: 'closed' }
+  | { kind: 'none' } {
   // Баланс на момент показа ещё без награды, поэтому её надо прибавить руками:
   // инвалидация кошелька прилетит позже, а текст нужен сразу.
   const balance = (wallet?.tonBalance ?? 0) + amountTon;
@@ -111,5 +125,6 @@ function resolveBlocker(
   const need = (wallet?.withdrawMinReferrals ?? 0) - (wallet?.referralsCount ?? 0);
   if (need > 0) return { kind: 'friends', need };
 
+  if (!withdrawalsEnabled) return { kind: 'closed' };
   return { kind: 'none' };
 }

@@ -19,6 +19,7 @@ export interface AirdropRewardModalProps {
   blocker:
     | { kind: 'amount'; lackTon: number }
     | { kind: 'friends'; need: number }
+    | { kind: 'closed' }
     | { kind: 'none' };
 }
 
@@ -85,6 +86,7 @@ export function AirdropRewardModal({
                 t('withdraw needs {num} more ton', { num: formatTon(blocker.lackTon) })}
               {blocker.kind === 'friends' &&
                 t('withdraw needs {num} more friends', { num: blocker.need })}
+              {blocker.kind === 'closed' && t('withdrawals open soon')}
               {blocker.kind === 'none' && t('first withdrawal has no fee')}
             </p>
           </div>
