@@ -57,6 +57,8 @@ interface WithdrawTonModalProps {
    * проходит, и деньги не вернуть ничем.
    */
   boundAddress?: string;
+  /** Во что комиссия превратится со следующего вывода. */
+  nextWithdrawFeeTon?: number;
   /** Whether this account is still on the cheaper first-withdrawal minimum. */
   firstWithdrawal?: boolean;
   /** What the minimum becomes once this withdrawal is done. */
@@ -76,6 +78,7 @@ export function WithdrawTonModal({
   minWithdrawTon: accountMinWithdrawTon,
   withdrawFeeTon: accountWithdrawFeeTon,
   boundAddress,
+  nextWithdrawFeeTon: nextWithdrawFee,
   firstWithdrawal = false,
   nextWithdrawMinTon,
 }: WithdrawTonModalProps) {
@@ -251,6 +254,26 @@ export function WithdrawTonModal({
               </p>
             </div>
 
+            {/* Два факта, ради которых человек вообще пришёл, — крупно и до
+                формы. В столбце строк ниже они тоже есть, но «0.0000 TON» не
+                читается как «бесплатно», а минимум теряется среди трёх других
+                ограничителей. Плашка живёт, только пока вывод и правда первый
+                и правда без комиссии: обещать бесплатность второму — обман. */}
+            {firstWithdrawal && fee === 0 && (
+              <div className="bg-success/12 border-success/35 flex flex-col gap-1 rounded-xl border px-3 py-2.5">
+                <span className="text-success-text text-[13px] font-bold">
+                  {t('first withdrawal is free')}
+                </span>
+                <span className="text-pink-secondary text-[11px] leading-snug">
+                  {t('first withdrawal free note', {
+                    n: formatTon(minWithdrawTon, 4),
+                    next: formatTon(nextWithdrawMinTon ?? minWithdrawTon, 4),
+                    fee: formatTon(nextWithdrawFee ?? 0, 4),
+                  })}
+                </span>
+              </div>
+            )}
+
             <div className="flex flex-col gap-1.5">
               <label className="text-pink-secondary px-1 text-[11px] font-bold uppercase tracking-wider">
                 {t('recipient address')}
@@ -295,7 +318,10 @@ export function WithdrawTonModal({
                 value={`${formatTon(numericAmount, 4)} TON`}
                 emphasis
               />
-              <WithdrawSummaryRow label={t('network fee')} value={`${formatTon(fee, 4)} TON`} />
+              <WithdrawSummaryRow
+                label={t('network fee')}
+                value={fee === 0 ? t('free') : `${formatTon(fee, 4)} TON`}
+              />
               <WithdrawSummaryRow
                 label={t('total debited')}
                 value={`${formatTon(totalDebited, 4)} TON`}
@@ -321,14 +347,21 @@ export function WithdrawTonModal({
             {/* The minimum above is this account's, and for a first cash-out it
                 is the lower of two. Say so here rather than let the next
                 withdrawal's rejection be where the player learns it changed. */}
-            {firstWithdrawal && !!nextWithdrawMinTon && nextWithdrawMinTon > minWithdrawTon && (
-              <p className="text-pink-secondary text-center text-[11px]">
-                {t('first withdrawal is smaller {first} {next}', {
-                  first: formatTon(minWithdrawTon, 4),
-                  next: formatTon(nextWithdrawMinTon, 4),
-                })}
-              </p>
-            )}
+            {/* Плашка вверху уже говорит и про минимум, и про то, во что он
+                превратится. Эта строка остаётся для случая, когда плашки нет:
+                первый вывод почему-то платный. Два одинаковых предложения на
+                одном экране читаются как сбой, а не как забота. */}
+            {!(firstWithdrawal && fee === 0) &&
+              firstWithdrawal &&
+              !!nextWithdrawMinTon &&
+              nextWithdrawMinTon > minWithdrawTon && (
+                <p className="text-pink-secondary text-center text-[11px]">
+                  {t('first withdrawal is smaller {first} {next}', {
+                    first: formatTon(minWithdrawTon, 4),
+                    next: formatTon(nextWithdrawMinTon, 4),
+                  })}
+                </p>
+              )}
 
             {error && <p className="text-error-text text-[11px] font-semibold">{error}</p>}
 

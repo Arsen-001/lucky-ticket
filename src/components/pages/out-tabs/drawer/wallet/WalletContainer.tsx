@@ -232,6 +232,7 @@ export function WalletContainer() {
         minWithdrawTon={state?.minWithdrawTon}
         withdrawFeeTon={state?.withdrawFeeTon}
         boundAddress={state?.address}
+        nextWithdrawFeeTon={state?.nextWithdrawFeeTon}
         firstWithdrawal={state?.firstWithdrawal}
         nextWithdrawMinTon={state?.nextWithdrawMinTon}
       />

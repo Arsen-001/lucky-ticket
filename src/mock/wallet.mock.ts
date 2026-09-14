@@ -43,6 +43,11 @@ const getWalletState = (): WalletState => ({
     ? walletConstants.TON_MIN_WITHDRAW
     : walletConstants.TON_FIRST_MIN_WITHDRAW,
   firstWithdrawal: !hasWithdrawnBefore(),
+  // Комиссия ИМЕННО этого вывода: первый бесплатный, как и на сервере. Без
+  // этого мок показывал бы плоскую ставку и скрывал бы ровно тот экран, ради
+  // которого всё и делалось.
+  withdrawFeeTon: hasWithdrawnBefore() ? appConfig.wallet.withdrawFeeTon : 0,
+  nextWithdrawFeeTon: appConfig.wallet.withdrawFeeTon,
   nextWithdrawMinTon: walletConstants.TON_MIN_WITHDRAW,
 });
 
