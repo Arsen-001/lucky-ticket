@@ -230,6 +230,7 @@ export function WalletContainer() {
         requiredReferrals={state?.withdrawMinReferrals ?? 0}
         currentReferrals={state?.referralsCount ?? 0}
         minWithdrawTon={state?.minWithdrawTon}
+        withdrawFeeTon={state?.withdrawFeeTon}
         firstWithdrawal={state?.firstWithdrawal}
         nextWithdrawMinTon={state?.nextWithdrawMinTon}
       />

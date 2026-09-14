@@ -60,6 +60,10 @@ export interface WalletState {
    */
   minWithdrawTon?: number;
   /** True while the account is still on the cheaper first-withdrawal minimum. */
+  /** Комиссия ИМЕННО этого вывода: у первого она своя (обычно 0). */
+  withdrawFeeTon?: number;
+  /** Во что она превратится со следующего вывода. */
+  nextWithdrawFeeTon?: number;
   firstWithdrawal?: boolean;
   /** What the minimum becomes after the first withdrawal — stated up front. */
   nextWithdrawMinTon?: number;

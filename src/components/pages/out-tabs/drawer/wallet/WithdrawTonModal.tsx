@@ -42,6 +42,15 @@ interface WithdrawTonModalProps {
    * older backend, and the form then falls back to the config's repeat value.
    */
   minWithdrawTon?: number;
+  /**
+   * Комиссия, которую сервер возьмёт с ЭТОГО вывода (`GET /wallet`). Первый
+   * вывод аккаунта бесплатный, все следующие платят полную. Читать её из
+   * `GET /config` нельзя: там лежит только плоская ставка для повторных, и
+   * форма требовала бы 0.5 TON сверху у человека, с которого сервер не взял бы
+   * ничего — вывод при балансе меньше 0.55 становился невозможным на экране,
+   * хотя API его принимал.
+   */
+  withdrawFeeTon?: number;
   /** Whether this account is still on the cheaper first-withdrawal minimum. */
   firstWithdrawal?: boolean;
   /** What the minimum becomes once this withdrawal is done. */
@@ -59,6 +68,7 @@ export function WithdrawTonModal({
   requiredReferrals = 0,
   currentReferrals = 0,
   minWithdrawTon: accountMinWithdrawTon,
+  withdrawFeeTon: accountWithdrawFeeTon,
   firstWithdrawal = false,
   nextWithdrawMinTon,
 }: WithdrawTonModalProps) {
@@ -82,7 +92,7 @@ export function WithdrawTonModal({
   // Fee and limits come from the server, which enforces exactly these.
   const {
     withdrawalsEnabled,
-    withdrawFeeTon: fee,
+    withdrawFeeTon: configFee,
     minWithdrawTon: configMinWithdrawTon,
     maxWithdrawTon,
     withdrawDailyCapTon,
@@ -91,6 +101,8 @@ export function WithdrawTonModal({
   // thresholds, and which one applies depends on whether this player has cashed
   // out before — a question only the server can answer.
   const minWithdrawTon = accountMinWithdrawTon ?? configMinWithdrawTon;
+  // Та же логика для комиссии: личная ставка сервера перекрывает общую.
+  const fee = accountWithdrawFeeTon ?? configFee;
   const totalDebited = numericAmount > 0 ? numericAmount + fee : 0;
 
   const error = useMemo<string | null>(() => {
